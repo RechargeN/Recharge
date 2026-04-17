@@ -1,0 +1,41 @@
+name: codegen-check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve app directory
+        id: appdir
+        shell: bash
+        run: |
+          if [ -f "apps/mobile/pubspec.yaml" ]; then
+            echo "dir=apps/mobile" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        working-directory: ${{ steps.appdir.outputs.dir }}
+        run: flutter pub get
+
+      - name: Run codegen if configured
+        working-directory: ${{ steps.appdir.outputs.dir }}
+        shell: bash
+        run: |
+          if grep -q "build_runner" pubspec.yaml; then
+            flutter pub run build_runner build --delete-conflicting-outputs
+            git diff --exit-code
+          else
+            echo "build_runner is not configured; skipping codegen check."
+          fi

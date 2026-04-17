@@ -1,0 +1,43 @@
+name: mobile-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve app directory
+        id: appdir
+        shell: bash
+        run: |
+          if [ -f "apps/mobile/pubspec.yaml" ]; then
+            echo "dir=apps/mobile" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        working-directory: ${{ steps.appdir.outputs.dir }}
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: ${{ steps.appdir.outputs.dir }}
+        run: flutter analyze
+
+  boundaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run boundaries check
+        shell: pwsh
+        run: ./tools/scripts/check-boundaries.ps1

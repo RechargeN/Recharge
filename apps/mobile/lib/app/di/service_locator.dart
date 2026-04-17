@@ -1,0 +1,38 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../core/telemetry/analytics_service.dart';
+import '../../features/auth/data/datasources/auth_local_datasource.dart';
+import '../../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
+import '../../features/auth/domain/usecases/restore_session_usecase.dart';
+import '../../features/auth/domain/usecases/sign_in_usecase.dart';
+import '../../features/auth/domain/usecases/sign_out_usecase.dart';
+
+final GetIt sl = GetIt.instance;
+
+Future<void> setupDependencies() async {
+  if (sl.isRegistered<AnalyticsService>()) {
+    return;
+  }
+
+  sl
+    ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
+    ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
+    ..registerLazySingleton<AuthRemoteDataSource>(MockAuthRemoteDataSource.new)
+    ..registerLazySingleton<AuthLocalDataSource>(
+      () => AuthLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
+        remoteDataSource: sl(),
+        localDataSource: sl(),
+      ),
+    )
+    ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))
+    ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))
+    ..registerFactory<SignOutUseCase>(() => SignOutUseCase(sl()))
+    ..registerFactory<GetCurrentUserUseCase>(() => GetCurrentUserUseCase(sl()));
+}
