@@ -6,6 +6,7 @@ import '../../../../app/router/route_names.dart';
 import '../../application/auth_providers.dart';
 import '../../application/controllers/auth_controller.dart';
 import '../widgets/auth_gate_sheet.dart';
+import '../../../discover/presentation/widgets/discover_feed_section.dart';
 
 class DiscoverHubPage extends ConsumerStatefulWidget {
   const DiscoverHubPage({
@@ -73,6 +74,14 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
             authState.isAuthenticated
                 ? 'Привет, ${authState.user?.email}'
                 : 'Вы в режиме гостя',
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Discover Feed',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -155,6 +164,12 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
               );
             },
             child: const Text('Перейти в create'),
+          ),
+          const SizedBox(height: 20),
+          DiscoverFeedSection(
+            onOpenDetails: (String itemId) {
+              context.push('${RouteNames.discoverDetails}/$itemId');
+            },
           ),
           if (authState.message != null) ...<Widget>[
             const SizedBox(height: 16),

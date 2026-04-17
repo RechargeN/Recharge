@@ -1,13 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/telemetry/analytics_service.dart';
+import 'di/service_locator.dart';
+import 'observers/app_lifecycle_observer.dart';
 import 'router/app_router.dart';
 
-class RechargeApp extends ConsumerWidget {
+class RechargeApp extends ConsumerStatefulWidget {
   const RechargeApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RechargeApp> createState() => _RechargeAppState();
+}
+
+class _RechargeAppState extends ConsumerState<RechargeApp> {
+  late final AppLifecycleObserver _lifecycleObserver;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleObserver = AppLifecycleObserver(
+      analyticsService: sl<AnalyticsService>(),
+    );
+    _lifecycleObserver.attach();
+  }
+
+  @override
+  void dispose() {
+    _lifecycleObserver.detach();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'Recharge',
