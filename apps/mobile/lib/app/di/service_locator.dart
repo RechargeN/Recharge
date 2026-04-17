@@ -18,6 +18,13 @@ import '../../features/discover/domain/repositories/discover_preferences_reposit
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/usecases/get_discover_details_usecase.dart';
 import '../../features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import '../../features/explore/data/datasources/explore_local_datasource.dart';
+import '../../features/explore/data/repositories/explore_repository_impl.dart';
+import '../../features/explore/domain/repositories/explore_repository.dart';
+import '../../features/explore/domain/usecases/load_profile_editable_usecase.dart';
+import '../../features/explore/domain/usecases/load_settings_usecase.dart';
+import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
+import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
@@ -61,6 +68,12 @@ Future<void> setupDependencies() async {
         localDataSource: sl(),
       ),
     )
+    ..registerLazySingleton<ExploreLocalDataSource>(
+      () => ExploreLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<ExploreRepository>(
+      () => ExploreRepositoryImpl(localDataSource: sl()),
+    )
     ..registerLazySingleton<FavoritesLocalDataSource>(
       () => FavoritesLocalDataSource(sl()),
     )
@@ -75,6 +88,14 @@ Future<void> setupDependencies() async {
     ..registerFactory<GetDiscoverDetailsUseCase>(
       () => GetDiscoverDetailsUseCase(sl()),
     )
+    ..registerFactory<LoadProfileEditableUseCase>(
+      () => LoadProfileEditableUseCase(sl()),
+    )
+    ..registerFactory<SaveProfileEditableUseCase>(
+      () => SaveProfileEditableUseCase(sl()),
+    )
+    ..registerFactory<LoadSettingsUseCase>(() => LoadSettingsUseCase(sl()))
+    ..registerFactory<SaveSettingsUseCase>(() => SaveSettingsUseCase(sl()))
     ..registerFactory<GetFavoritesUseCase>(() => GetFavoritesUseCase(sl()))
     ..registerFactory<AddFavoriteUseCase>(() => AddFavoriteUseCase(sl()))
     ..registerFactory<RemoveFavoriteUseCase>(() => RemoveFavoriteUseCase(sl()));
