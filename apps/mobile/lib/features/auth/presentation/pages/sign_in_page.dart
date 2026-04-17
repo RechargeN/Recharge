@@ -189,7 +189,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     switch (authController.pendingAction) {
       case ProtectedAction.favorite:
         authController.clearPendingTarget();
-        context.go('${RouteNames.discover}?favoriteApplied=1');
+        context.go(
+          _routeWithFavoriteApplied(normalizedOrigin ?? RouteNames.discover),
+        );
+        break;
+      case ProtectedAction.favorites:
+        authController.clearPendingTarget();
+        context.go(normalizedOrigin ?? RouteNames.favorites);
         break;
       case ProtectedAction.create:
       case ProtectedAction.profile:
@@ -207,6 +213,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     switch (value) {
       case 'favorite':
         return ProtectedAction.favorite;
+      case 'favorites':
+        return ProtectedAction.favorites;
       case 'create':
         return ProtectedAction.create;
       case 'profile':
@@ -214,6 +222,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       default:
         return ProtectedAction.none;
     }
+  }
+
+  String _routeWithFavoriteApplied(String route) {
+    final Uri uri = Uri.parse(route);
+    final Map<String, String> query = Map<String, String>.from(uri.queryParameters)
+      ..['favoriteApplied'] = '1';
+    return uri.replace(queryParameters: query).toString();
   }
 
   String? _normalizeOriginRoute(String? route) {

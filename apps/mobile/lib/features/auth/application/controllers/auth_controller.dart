@@ -12,6 +12,7 @@ import '../state/auth_state.dart';
 enum ProtectedAction {
   none,
   favorite,
+  favorites,
   profile,
   create,
 }

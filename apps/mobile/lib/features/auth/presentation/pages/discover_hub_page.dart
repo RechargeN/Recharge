@@ -21,7 +21,6 @@ class DiscoverHubPage extends ConsumerStatefulWidget {
 }
 
 class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
-  bool _isFavorite = false;
   bool _snackShown = false;
 
   @override
@@ -29,7 +28,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
     super.didChangeDependencies();
     if (widget.favoriteApplied && !_snackShown) {
       _snackShown = true;
-      _isFavorite = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,29 +91,29 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
           FilledButton.icon(
             onPressed: () async {
               if (authState.isAuthenticated) {
-                setState(() => _isFavorite = !_isFavorite);
+                context.push(RouteNames.favorites);
                 return;
               }
               authController.trackAuthGateViewed(
                 sourceScreen: 'discover',
-                sourceAction: 'favorite_tap',
+                sourceAction: 'open_favorites',
               );
               await showAuthGateSheet(
                 context,
-                action: ProtectedAction.favorite,
+                action: ProtectedAction.favorites,
                 sourceScreen: 'discover',
-                sourceAction: 'favorite_tap',
-                originRoute: RouteNames.discover,
+                sourceAction: 'open_favorites',
+                originRoute: RouteNames.favorites,
                 onContinueAsGuest: () {
                   authController.trackGuestContinueClicked(
                     sourceScreen: 'discover',
-                    sourceAction: 'favorite_tap',
+                    sourceAction: 'open_favorites',
                   );
                 },
               );
             },
-            icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
-            label: Text(_isFavorite ? 'В избранном' : 'Добавить в избранное'),
+            icon: const Icon(Icons.favorite_outline),
+            label: const Text('Открыть избранное'),
           ),
           const SizedBox(height: 12),
           OutlinedButton(

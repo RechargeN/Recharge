@@ -18,6 +18,12 @@ import '../../features/discover/domain/repositories/discover_preferences_reposit
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/usecases/get_discover_details_usecase.dart';
 import '../../features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
+import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
+import '../../features/favorites/domain/repositories/favorites_repository.dart';
+import '../../features/favorites/domain/usecases/add_favorite_usecase.dart';
+import '../../features/favorites/domain/usecases/get_favorites_usecase.dart';
+import '../../features/favorites/domain/usecases/remove_favorite_usecase.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -55,6 +61,12 @@ Future<void> setupDependencies() async {
         localDataSource: sl(),
       ),
     )
+    ..registerLazySingleton<FavoritesLocalDataSource>(
+      () => FavoritesLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<FavoritesRepository>(
+      () => FavoritesRepositoryImpl(localDataSource: sl()),
+    )
     ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))
     ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))
     ..registerFactory<SignOutUseCase>(() => SignOutUseCase(sl()))
@@ -62,5 +74,8 @@ Future<void> setupDependencies() async {
     ..registerFactory<GetDiscoverFeedUseCase>(() => GetDiscoverFeedUseCase(sl()))
     ..registerFactory<GetDiscoverDetailsUseCase>(
       () => GetDiscoverDetailsUseCase(sl()),
-    );
+    )
+    ..registerFactory<GetFavoritesUseCase>(() => GetFavoritesUseCase(sl()))
+    ..registerFactory<AddFavoriteUseCase>(() => AddFavoriteUseCase(sl()))
+    ..registerFactory<RemoveFavoriteUseCase>(() => RemoveFavoriteUseCase(sl()));
 }

@@ -4,6 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../auth/application/auth_providers.dart';
+import '../../../auth/application/controllers/auth_controller.dart';
+import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
+import '../../../favorites/application/controllers/favorites_controller.dart';
+import '../../../favorites/application/favorites_providers.dart';
+import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/discover_feed_state.dart';
@@ -27,6 +33,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     _searchController = TextEditingController(text: state.appliedQuery.queryText);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(discoverFeedControllerProvider).ensureLoaded();
+      ref.read(favoritesControllerProvider).ensureLoaded();
     });
   }
 
@@ -42,6 +49,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     final DiscoverFeedController controller =
         ref.watch(discoverFeedControllerProvider);
     final DiscoverFeedState state = controller.state;
+    final authController = ref.watch(authControllerProvider);
+    final isAuthenticated = authController.state.isAuthenticated;
+    final favoritesController = ref.watch(favoritesControllerProvider);
     final LatLng center = LatLng(
       state.draftQuery.centerLat,
       state.draftQuery.centerLng,
@@ -279,6 +289,13 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                     bottom: 12,
                     child: _PreviewCard(
                       item: state.selectedItem!,
+                      isSaved: favoritesController.isFavorite(state.selectedItem!.id),
+                      onToggleSave: () => _onMapSaveTap(
+                        item: state.selectedItem!,
+                        isAuthenticated: isAuthenticated,
+                        authController: authController,
+                        favoritesController: favoritesController,
+                      ),
                       onOpenDetails: () =>
                           context.push('${RouteNames.discoverDetails}/${state.selectedItem!.id}'),
                       onOpenList: () => context.push(RouteNames.discoverResults),
@@ -332,6 +349,54 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         )
         .toSet();
   }
+
+  Future<void> _onMapSaveTap({
+    required DiscoverItemEntity item,
+    required bool isAuthenticated,
+    required AuthController authController,
+    required FavoritesController favoritesController,
+  }) async {
+    if (!isAuthenticated) {
+      authController.trackAuthGateViewed(
+        sourceScreen: 'discover_map',
+        sourceAction: 'favorite_tap',
+      );
+      await showAuthGateSheet(
+        context,
+        action: ProtectedAction.favorite,
+        sourceScreen: 'discover_map',
+        sourceAction: 'favorite_tap',
+        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        onContinueAsGuest: () {
+          authController.trackGuestContinueClicked(
+            sourceScreen: 'discover_map',
+            sourceAction: 'favorite_tap',
+          );
+        },
+      );
+      return;
+    }
+
+    await favoritesController.toggleFavorite(
+      _toFavorite(item),
+      sourceScreen: 'discover_map',
+    );
+  }
+
+  FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
+    return FavoriteItemEntity(
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      city: item.city,
+      category: item.category,
+      startsAtUtc: item.startsAtUtc,
+      distanceKm: item.distanceKm,
+      priceAmount: item.priceAmount,
+      isFree: item.isFree,
+      savedAtUtc: DateTime.now().toUtc(),
+    );
+  }
 }
 
 class _OverlayState extends StatelessWidget {
@@ -378,11 +443,15 @@ class _OverlayState extends StatelessWidget {
 class _PreviewCard extends StatelessWidget {
   const _PreviewCard({
     required this.item,
+    required this.isSaved,
+    required this.onToggleSave,
     required this.onOpenDetails,
     required this.onOpenList,
   });
 
   final DiscoverItemEntity item;
+  final bool isSaved;
+  final VoidCallback onToggleSave;
   final VoidCallback onOpenDetails;
   final VoidCallback onOpenList;
 
@@ -417,8 +486,10 @@ class _PreviewCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   tooltip: 'Save',
-                  onPressed: () {},
-                  icon: const Icon(Icons.favorite_border),
+                  onPressed: onToggleSave,
+                  icon: Icon(
+                    isSaved ? Icons.favorite : Icons.favorite_border,
+                  ),
                 ),
                 IconButton(
                   tooltip: 'Open list',

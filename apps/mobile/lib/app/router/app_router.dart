@@ -14,6 +14,7 @@ import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
+import '../../features/favorites/presentation/pages/favorites_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -44,6 +45,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '${RouteNames.discoverDetails}/:itemId',
         builder: (context, state) => DiscoverDetailsPage(
           itemId: state.pathParameters['itemId'] ?? '',
+          favoriteApplied: state.uri.queryParameters['favoriteApplied'] == '1',
         ),
       ),
       GoRoute(
@@ -55,6 +57,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'discover_results',
         path: RouteNames.discoverResults,
         builder: (context, state) => const DiscoverResultsPage(),
+      ),
+      GoRoute(
+        name: 'favorites',
+        path: RouteNames.favorites,
+        builder: (context, state) => const FavoritesPage(),
       ),
       GoRoute(
         name: 'sign_in',
@@ -79,7 +86,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final isProtected = state.matchedLocation == RouteNames.profile ||
-          state.matchedLocation == RouteNames.create;
+          state.matchedLocation == RouteNames.create ||
+          state.matchedLocation == RouteNames.favorites;
 
       if (isProtected && !authController.state.isAuthenticated) {
         final encodedOrigin = Uri.encodeComponent(state.matchedLocation);
