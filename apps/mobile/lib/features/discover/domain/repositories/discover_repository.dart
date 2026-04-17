@@ -1,7 +1,8 @@
 import '../entities/discover_item_entity.dart';
+import '../../application/queries/discover_query.dart';
 
 abstract class DiscoverRepository {
-  Future<List<DiscoverItemEntity>> getFeed();
+  Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query);
   Future<DiscoverItemEntity> getDetails(String itemId);
 }
 
@@ -14,4 +15,3 @@ class DiscoverException implements Exception {
   final String code;
   final String message;
 }
-

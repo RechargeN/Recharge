@@ -36,6 +36,7 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
     switch (state.status) {
       case DiscoverFeedStatus.initial:
       case DiscoverFeedStatus.loading:
+      case DiscoverFeedStatus.selectingArea:
         return const Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Center(
@@ -61,8 +62,16 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
           actionLabel: 'Повторить',
           onAction: controller.loadFeed,
         );
-      case DiscoverFeedStatus.success:
+      case DiscoverFeedStatus.permissionDenied:
+        return _StateCard(
+          message: state.message ?? 'Нет доступа к геопозиции',
+          actionLabel: 'Открыть настройки',
+          onAction: () async {},
+        );
+      case DiscoverFeedStatus.ready:
+      case DiscoverFeedStatus.denseCluster:
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: state.items
               .map(
                 (DiscoverItemEntity item) => Padding(
@@ -144,4 +153,3 @@ class _StateCard extends StatelessWidget {
     );
   }
 }
-

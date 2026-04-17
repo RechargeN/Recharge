@@ -26,7 +26,7 @@ Owner: Recharge team (execution tracking by Codex)
 | S1-AUTH-01 | Sprint 1 | Done | 2026-04-17 | `flutter test .\test\widget\sign_in_page_test.dart` (pass), `flutter test .\test\unit\auth_controller_test.dart` (pass), `dart analyze test\widget\sign_in_page_test.dart` (no issues) |
 | S1-DISC-01 | Sprint 1 | Done | 2026-04-17 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\discover_feed_controller_test.dart` (pass `+3`), `flutter test .\test\widget\discover_feed_section_test.dart` (pass `+1`), `flutter test` (pass `+8`) |
 | S1-CORE-01 | Sprint 1 | Done | 2026-04-17 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\discover_feed_controller_test.dart` (pass `+3`), `flutter test .\test\widget\discover_feed_section_test.dart` (pass `+1`), `flutter test` (pass `+8`) |
-| S2-DISC-02 | Sprint 2 | Planned | 2026-04-17 | - |
+| S2-DISC-02 | Sprint 2 | Done | 2026-04-18 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\discover_feed_controller_test.dart` (pass `+4`), `flutter test .\test\widget\discover_feed_section_test.dart` (pass `+1`), `flutter test` (pass `+9`) |
 | S2-EXP-01 | Sprint 2 | Planned | 2026-04-17 | - |
 | S2-FAV-01 | Sprint 2 | Planned | 2026-04-17 | - |
 | S3-CRT-01 | Sprint 3 | Planned | 2026-04-17 | - |
@@ -45,6 +45,8 @@ Owner: Recharge team (execution tracking by Codex)
 
 Use this section as a running log (newest first).
 
+- 2026-04-18: Slice `S2-DISC-02` fixed as Done checkpoint. Verification passed: analyze clean, unit map/discover test (`+4`), widget discover test (`+1`), full test suite (`+9`).
+- 2026-04-18: Slice `S2-DISC-02` moved to In progress. Map spec fixed (`S2_DISC_02_MAP_SPEC.md`) and implementation started with unified `DiscoverQuery`, map area draft/apply flow, and list-sync.
 - 2026-04-17: Slice `S1-CORE-01` fixed as Done checkpoint. Verification passed: analyze clean and discover/core smoke tests green.
 - 2026-04-17: Slice `S1-DISC-01` fixed as Done checkpoint. Verification passed: analyze clean, unit discover test (`+3`), widget discover test (`+1`), full test suite (`+8`).
 - 2026-04-17: Slice `S1-AUTH-01` fixed as Done checkpoint. Verification passed: widget auth test (`+1`), unit auth controller test (`+3`), widget test analyzer clean.

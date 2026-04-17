@@ -12,6 +12,8 @@ import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
+import '../../features/discover/presentation/pages/discover_map_page.dart';
+import '../../features/discover/presentation/pages/discover_results_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -43,6 +45,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => DiscoverDetailsPage(
           itemId: state.pathParameters['itemId'] ?? '',
         ),
+      ),
+      GoRoute(
+        name: 'discover_map',
+        path: RouteNames.discoverMap,
+        builder: (context, state) => const DiscoverMapPage(),
+      ),
+      GoRoute(
+        name: 'discover_results',
+        path: RouteNames.discoverResults,
+        builder: (context, state) => const DiscoverResultsPage(),
       ),
       GoRoute(
         name: 'sign_in',

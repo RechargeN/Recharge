@@ -11,7 +11,10 @@ import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
+import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
+import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_repository_impl.dart';
+import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/usecases/get_discover_details_usecase.dart';
 import '../../features/discover/domain/usecases/get_discover_feed_usecase.dart';
@@ -39,9 +42,17 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
     )
+    ..registerLazySingleton<DiscoverPreferencesLocalDataSource>(
+      () => DiscoverPreferencesLocalDataSource(sl()),
+    )
     ..registerLazySingleton<DiscoverRepository>(
       () => DiscoverRepositoryImpl(
         remoteDataSource: sl(),
+      ),
+    )
+    ..registerLazySingleton<DiscoverPreferencesRepository>(
+      () => DiscoverPreferencesRepositoryImpl(
+        localDataSource: sl(),
       ),
     )
     ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))

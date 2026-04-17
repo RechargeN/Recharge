@@ -85,6 +85,12 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
+            onPressed: () => context.push(RouteNames.discoverMap),
+            icon: const Icon(Icons.map_outlined),
+            label: const Text('Открыть карту'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
             onPressed: () async {
               if (authState.isAuthenticated) {
                 setState(() => _isFavorite = !_isFavorite);
