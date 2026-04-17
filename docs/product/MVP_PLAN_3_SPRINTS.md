@@ -24,7 +24,7 @@ Goal: reach releasable MVP with core user value and controlled risk.
 | S1-CORE-01 | Sprint 1 | Core App Shell + Telemetry Wiring | P0 | Done (checkpoint 2026-04-17) | Recharge team |
 | S2-DISC-02 | Sprint 2 | Discover Search + Filters + Map Radius | P0 | Done (checkpoint 2026-04-18) | Recharge team |
 | S2-EXP-01 | Sprint 2 | Profile + Settings Basic | P1 | Planned | TBD |
-| S2-FAV-01 | Sprint 2 | Favorites Basic | P1 | Planned | TBD |
+| S2-FAV-01 | Sprint 2 | Favorites Basic | P1 | Done (checkpoint 2026-04-18) | Recharge team |
 | S3-CRT-01 | Sprint 3 | Create Draft + Publish Happy Path | P0 | Planned | TBD |
 | S3-NOTIF-01 | Sprint 3 | Notifications List + Mark Read | P1 | Planned | TBD |
 | S3-REL-01 | Sprint 3 | Hardening + Release Readiness | P0 | Planned | TBD |
