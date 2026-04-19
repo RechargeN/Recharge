@@ -6,10 +6,11 @@ import '../../core/telemetry/analytics_service.dart';
 import '../di/service_locator.dart';
 import '../observers/app_route_observer.dart';
 import '../../features/auth/application/auth_providers.dart';
-import '../../features/auth/presentation/pages/create_page.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/create/presentation/pages/create_page.dart';
+import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
@@ -89,12 +90,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.settings,
         builder: (context, state) => const SettingsPage(),
       ),
+      GoRoute(
+        name: 'create_success',
+        path: RouteNames.createSuccess,
+        builder: (context, state) => const CreateSuccessPage(),
+      ),
     ],
     redirect: (context, state) {
       final isProtected = state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.create ||
           state.matchedLocation == RouteNames.favorites ||
-          state.matchedLocation == RouteNames.settings;
+          state.matchedLocation == RouteNames.settings ||
+          state.matchedLocation == RouteNames.createSuccess;
 
       if (isProtected && !authController.state.isAuthenticated) {
         final encodedOrigin = Uri.encodeComponent(state.matchedLocation);

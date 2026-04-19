@@ -29,7 +29,7 @@ Owner: Recharge team (execution tracking by Codex)
 | S2-DISC-02 | Sprint 2 | Done | 2026-04-18 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\discover_feed_controller_test.dart` (pass `+4`), `flutter test .\test\widget\discover_feed_section_test.dart` (pass `+1`), `flutter test` (pass `+9`) |
 | S2-EXP-01 | Sprint 2 | Done | 2026-04-18 | `dart analyze lib\features\explore\application\controllers\explore_controller.dart` (no issues), `dart analyze lib\features\explore\presentation\pages\profile_page.dart` (no issues), `dart analyze lib\features\explore\presentation\pages\settings_page.dart` (no issues), `dart analyze lib\app\router\app_router.dart` (no issues), `dart analyze lib\app\di\service_locator.dart` (no issues), `flutter test .\test\unit\explore_controller_test.dart` (pass `+3`), `flutter test .\test\widget\settings_page_test.dart` (pass `+1`) |
 | S2-FAV-01 | Sprint 2 | Done | 2026-04-18 | `dart analyze lib\features\favorites` (no issues), `dart analyze lib\features\discover\presentation\pages\discover_details_page.dart` (no issues), `dart analyze lib\features\discover\presentation\pages\discover_map_page.dart` (no issues), `dart analyze lib\features\auth\presentation\pages\sign_in_page.dart` (no issues), `dart analyze lib\app\router` (no issues), `flutter test .\test\unit\favorites_controller_test.dart` (pass `+3`), `flutter test .\test\widget\favorites_page_test.dart` (pass `+2`) |
-| S3-CRT-01 | Sprint 3 | Planned | 2026-04-17 | - |
+| S3-CRT-01 | Sprint 3 | Done | 2026-04-20 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\create_controller_test.dart` (pass `+3`), `flutter test .\test\widget\create_page_test.dart` (pass `+1`), `flutter test` (pass `+22`) |
 | S3-NOTIF-01 | Sprint 3 | Planned | 2026-04-17 | - |
 | S3-REL-01 | Sprint 3 | Planned | 2026-04-17 | - |
 
@@ -45,6 +45,8 @@ Owner: Recharge team (execution tracking by Codex)
 
 Use this section as a running log (newest first).
 
+- 2026-04-19: Slice `S3-CRT-01` moved to In progress. Create spec fixed (`S3_CRT_01_CREATE_SPEC.md`) for `event + place`, required `coverImage`, and publish happy path to `pending_review`.
+- 2026-04-20: Slice `S3-CRT-01` fixed as Done checkpoint. Implemented create draft + publish happy path for `event/place`, required `coverImage` validation, success route, and create controller/unit+widget coverage. Verification passed (analyze clean, targeted tests green, full suite `+22`).
 - 2026-04-18: Slice `S2-EXP-01` fixed as Done checkpoint. Implemented local profile/settings module (`explore`) with editable profile fields, settings controls, protected routes (`/profile`, `/settings`), and unit/widget tests. Verification passed on touched analyze scopes and tests.
 - 2026-04-18: Slice `S2-EXP-01` moved to In progress. Baseline spec fixed (`S2_EXP_01_PROFILE_SETTINGS_SPEC.md`) with agreed profile/settings scope, auth-gate behavior, and storage model.
 - 2026-04-18: Slice `S2-FAV-01` fixed as Done checkpoint. Implemented favorites module (domain/data/application/presentation), discover details/map favorite actions (with auth-gate + post-login auto-apply), protected `/favorites` route, and added unit/widget tests. Verification passed (analyze clean on touched areas, favorites tests green).

@@ -9,4 +9,5 @@ class RouteNames {
   static const String signIn = '/auth/sign-in';
   static const String profile = '/profile';
   static const String create = '/create';
+  static const String createSuccess = '/create/success';
 }

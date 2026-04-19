@@ -10,6 +10,12 @@ import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
+import '../../features/create/data/datasources/create_local_datasource.dart';
+import '../../features/create/data/repositories/create_repository_impl.dart';
+import '../../features/create/domain/repositories/create_repository.dart';
+import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
+import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
+import '../../features/create/domain/usecases/save_create_draft_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
 import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
@@ -55,6 +61,12 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
     )
+    ..registerLazySingleton<CreateLocalDataSource>(
+      () => CreateLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<CreateRepository>(
+      () => CreateRepositoryImpl(localDataSource: sl()),
+    )
     ..registerLazySingleton<DiscoverPreferencesLocalDataSource>(
       () => DiscoverPreferencesLocalDataSource(sl()),
     )
@@ -84,6 +96,15 @@ Future<void> setupDependencies() async {
     ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))
     ..registerFactory<SignOutUseCase>(() => SignOutUseCase(sl()))
     ..registerFactory<GetCurrentUserUseCase>(() => GetCurrentUserUseCase(sl()))
+    ..registerFactory<LoadCreateDraftUseCase>(
+      () => LoadCreateDraftUseCase(sl()),
+    )
+    ..registerFactory<SaveCreateDraftUseCase>(
+      () => SaveCreateDraftUseCase(sl()),
+    )
+    ..registerFactory<PublishCreateDraftUseCase>(
+      () => PublishCreateDraftUseCase(sl()),
+    )
     ..registerFactory<GetDiscoverFeedUseCase>(() => GetDiscoverFeedUseCase(sl()))
     ..registerFactory<GetDiscoverDetailsUseCase>(
       () => GetDiscoverDetailsUseCase(sl()),
