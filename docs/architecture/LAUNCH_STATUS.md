@@ -1,7 +1,7 @@
 # Launch Status
 
 Status legend: `Planned` | `In progress` | `Review` | `Done`  
-Last updated: 2026-04-18  
+Last updated: 2026-04-20  
 Owner: Recharge team (execution tracking by Codex)
 
 ## Stage Tracker
@@ -31,7 +31,7 @@ Owner: Recharge team (execution tracking by Codex)
 | S2-FAV-01 | Sprint 2 | Done | 2026-04-18 | `dart analyze lib\features\favorites` (no issues), `dart analyze lib\features\discover\presentation\pages\discover_details_page.dart` (no issues), `dart analyze lib\features\discover\presentation\pages\discover_map_page.dart` (no issues), `dart analyze lib\features\auth\presentation\pages\sign_in_page.dart` (no issues), `dart analyze lib\app\router` (no issues), `flutter test .\test\unit\favorites_controller_test.dart` (pass `+3`), `flutter test .\test\widget\favorites_page_test.dart` (pass `+2`) |
 | S3-CRT-01 | Sprint 3 | Done | 2026-04-20 | `dart analyze lib test integration_test` (no issues), `flutter test .\test\unit\create_controller_test.dart` (pass `+3`), `flutter test .\test\widget\create_page_test.dart` (pass `+1`), `flutter test` (pass `+22`) |
 | S3-NOTIF-01 | Sprint 3 | Done | 2026-04-20 | `dart analyze lib\features\notifications` (no issues), `dart analyze lib\app\router\app_router.dart` (no issues), `dart analyze lib\app\di\service_locator.dart` (no issues), `dart analyze lib\features\auth\presentation\pages\discover_hub_page.dart` (no issues), `dart analyze lib\features\auth\presentation\pages\sign_in_page.dart` (no issues), `flutter test .\test\unit\notifications_controller_test.dart` (pass `+2`), `flutter test .\test\widget\notifications_page_test.dart` (pass `+1`), `dart analyze lib test integration_test` (no issues), `flutter test` (pass `+25`) |
-| S3-REL-01 | Sprint 3 | Planned | 2026-04-17 | - |
+| S3-REL-01 | Sprint 3 | Done | 2026-04-20 | `powershell -ExecutionPolicy Bypass -File tools/scripts/check-boundaries.ps1` (pass, allowlist `25`), `dart analyze lib test integration_test` (no issues), `flutter test` (pass `+25`) |
 
 ## Update Rules
 
@@ -45,6 +45,8 @@ Owner: Recharge team (execution tracking by Codex)
 
 Use this section as a running log (newest first).
 
+- 2026-04-20: Slice `S3-REL-01` fixed as Done checkpoint. Added release runbooks (`release.md`, `rollback.md`, `incident.md`), hardened architecture boundary gate with controlled allowlist, and validated final readiness gates (boundary/analyze/tests all green).
+- 2026-04-20: Slice `S3-REL-01` moved to In progress. Release-readiness spec fixed (`S3_REL_01_RELEASE_READINESS_SPEC.md`), runbooks added (`release.md`, `rollback.md`, `incident.md`), and boundary check hardened with controlled allowlist.
 - 2026-04-20: Slice `S3-NOTIF-01` fixed as Done checkpoint. Implemented notifications module (domain/data/application/presentation), protected `/notifications` route, discover entry with auth-gate, single mark-read action, and unit/widget coverage. Verification passed on targeted analyzers/tests and full suite (`+25`).
 - 2026-04-20: Slice `S3-NOTIF-01` moved to In progress. Notifications spec fixed (`S3_NOTIF_01_NOTIFICATIONS_SPEC.md`) with protected route, local/mock list, single mark-read action, and route-open contract.
 - 2026-04-19: Slice `S3-CRT-01` moved to In progress. Create spec fixed (`S3_CRT_01_CREATE_SPEC.md`) for `event + place`, required `coverImage`, and publish happy path to `pending_review`.

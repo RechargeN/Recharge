@@ -9,6 +9,11 @@ The following checks are required before merge:
 3. Code generation consistency check
 4. Architecture boundary check
 
+Boundary gate note:
+
+- Legacy exceptions are permitted only via `tools/scripts/boundaries-allowlist.txt`.
+- New violations must fail CI unless approved through RFC+ADR process.
+
 ## Override Policy (Temporary Only)
 
 Override is allowed only for production-impacting incidents and only when all conditions are met:

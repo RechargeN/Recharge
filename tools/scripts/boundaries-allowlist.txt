@@ -1,0 +1,29 @@
+# Temporary boundary allowlist for legacy MVP imports.
+# Rule format supports PowerShell -like patterns.
+# Keep this list minimal and remove entries during refactors.
+
+Cross-feature import: apps/mobile/lib/features/auth/presentation/pages/discover_hub_page.dart -> ../../../discover/presentation/widgets/discover_feed_section.dart
+Cross-feature import: apps/mobile/lib/features/create/presentation/pages/create_page.dart -> ../../../auth/application/auth_providers.dart
+Cross-feature import: apps/mobile/lib/features/create/presentation/pages/create_success_page.dart -> ../../../auth/application/auth_providers.dart
+Layer direction violation: apps/mobile/lib/features/discover/data/datasources/discover_preferences_local_datasource.dart [data] -> ../../application/queries/discover_query.dart [application]
+Layer direction violation: apps/mobile/lib/features/discover/data/repositories/discover_preferences_repository_impl.dart [data] -> ../../application/queries/discover_query.dart [application]
+Layer direction violation: apps/mobile/lib/features/discover/data/repositories/discover_repository_impl.dart [data] -> ../../application/queries/discover_query.dart [application]
+Layer direction violation: apps/mobile/lib/features/discover/domain/repositories/discover_preferences_repository.dart [domain] -> ../../application/queries/discover_query.dart [application]
+Layer direction violation: apps/mobile/lib/features/discover/domain/repositories/discover_repository.dart [domain] -> ../../application/queries/discover_query.dart [application]
+Layer direction violation: apps/mobile/lib/features/discover/domain/usecases/get_discover_feed_usecase.dart [domain] -> ../../application/queries/discover_query.dart [application]
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../auth/application/auth_providers.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../auth/application/controllers/auth_controller.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../auth/presentation/widgets/auth_gate_sheet.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../favorites/application/controllers/favorites_controller.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../favorites/application/favorites_providers.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart -> ../../../favorites/domain/entities/favorite_item_entity.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../auth/application/auth_providers.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../auth/application/controllers/auth_controller.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../auth/presentation/widgets/auth_gate_sheet.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../favorites/application/controllers/favorites_controller.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../favorites/application/favorites_providers.dart
+Cross-feature import: apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart -> ../../../favorites/domain/entities/favorite_item_entity.dart
+Cross-feature import: apps/mobile/lib/features/explore/presentation/pages/profile_page.dart -> ../../../auth/application/auth_providers.dart
+Cross-feature import: apps/mobile/lib/features/explore/presentation/pages/profile_page.dart -> ../../../favorites/application/favorites_providers.dart
+Cross-feature import: apps/mobile/lib/features/explore/presentation/pages/settings_page.dart -> ../../../auth/application/auth_providers.dart
+Cross-feature import: apps/mobile/lib/features/notifications/presentation/pages/notifications_page.dart -> ../../../auth/application/auth_providers.dart

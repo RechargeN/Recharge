@@ -59,3 +59,14 @@ If an exception is needed, follow:
 4. temporary scope and expiry date.
 
 Reference: [CHANGE_POLICY.md](./CHANGE_POLICY.md)
+
+## 6) Legacy Allowlist (MVP Transition)
+
+For current MVP baseline, a temporary allowlist is used:
+
+- file: `tools/scripts/boundaries-allowlist.txt`
+- enforced by: `tools/scripts/check-boundaries.ps1`
+- policy:
+  - only legacy known violations may stay in allowlist;
+  - adding new entries requires mini-RFC + approval + ADR update;
+  - release goal is gradual reduction of allowlist size to zero.

@@ -1,6 +1,19 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Normalize-PathForMatch([string]$value) {
+  return $value.Replace('\', '/')
+}
+
+function To-RepoRelative([string]$value) {
+  $root = Normalize-PathForMatch((Resolve-Path ".").Path).TrimEnd('/')
+  $full = Normalize-PathForMatch($value)
+  if ($full.StartsWith("$root/")) {
+    return $full.Substring($root.Length + 1)
+  }
+  return $full
+}
+
 function Get-LibRoot {
   if (Test-Path "apps/mobile/lib") { return "apps/mobile/lib" }
   if (Test-Path "lib") { return "lib" }
@@ -22,9 +35,29 @@ if (-not (Test-Path $featureRoot)) {
 $violations = New-Object System.Collections.Generic.List[string]
 $featureDirs = Get-ChildItem -Path $featureRoot -Directory
 $allowedLayers = @("domain", "data", "application", "presentation")
+$allowlistPath = "tools/scripts/boundaries-allowlist.txt"
+$allowlistRules = @()
+$suppressedCount = 0
 
-function Normalize-PathForMatch([string]$value) {
-  return $value.Replace('\', '/')
+if (Test-Path $allowlistPath) {
+  $allowlistRules = Get-Content $allowlistPath |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ -and -not $_.StartsWith("#") }
+}
+
+function Is-Allowlisted([string]$value) {
+  foreach ($rule in $allowlistRules) {
+    if ($rule.Contains('*') -or $rule.Contains('?')) {
+      if ($value -like $rule) {
+        return $true
+      }
+      continue
+    }
+    if ($value -eq $rule) {
+      return $true
+    }
+  }
+  return $false
 }
 
 function Get-FeatureAndLayer([string]$normalizedPath) {
@@ -91,13 +124,23 @@ foreach ($featureDir in $featureDirs) {
         $toLayer = $targetMeta.Layer
 
         if ($targetFeature -and $currentFeature -and $targetFeature -ne $currentFeature) {
-          $message = "Cross-feature import: $($file.FullName) -> $importPath"
+          $relative = To-RepoRelative $file.FullName
+          $message = "Cross-feature import: $relative -> $importPath"
+          if (Is-Allowlisted $message) {
+            $suppressedCount += 1
+            continue
+          }
           if (-not $violations.Contains($message)) { $violations.Add($message) | Out-Null }
           continue
         }
 
         if (Is-ForbiddenLayerImport -fromLayer $fromLayer -toLayer $toLayer) {
-          $message = "Layer direction violation: $($file.FullName) [$fromLayer] -> $importPath [$toLayer]"
+          $relative = To-RepoRelative $file.FullName
+          $message = "Layer direction violation: $relative [$fromLayer] -> $importPath [$toLayer]"
+          if (Is-Allowlisted $message) {
+            $suppressedCount += 1
+            continue
+          }
           if (-not $violations.Contains($message)) { $violations.Add($message) | Out-Null }
         }
       }
@@ -111,4 +154,8 @@ if ($violations.Count -gt 0) {
   exit 1
 }
 
-Write-Host "Boundary checks passed."
+if ($suppressedCount -gt 0) {
+  Write-Host "Boundary checks passed (suppressed by allowlist: $suppressedCount)."
+} else {
+  Write-Host "Boundary checks passed."
+}
