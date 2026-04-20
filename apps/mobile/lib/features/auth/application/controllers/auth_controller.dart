@@ -13,6 +13,7 @@ enum ProtectedAction {
   none,
   favorite,
   favorites,
+  notifications,
   profile,
   create,
 }

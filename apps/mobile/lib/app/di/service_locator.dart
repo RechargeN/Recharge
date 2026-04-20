@@ -37,6 +37,11 @@ import '../../features/favorites/domain/repositories/favorites_repository.dart';
 import '../../features/favorites/domain/usecases/add_favorite_usecase.dart';
 import '../../features/favorites/domain/usecases/get_favorites_usecase.dart';
 import '../../features/favorites/domain/usecases/remove_favorite_usecase.dart';
+import '../../features/notifications/data/datasources/notifications_local_datasource.dart';
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
+import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/usecases/get_notifications_usecase.dart';
+import '../../features/notifications/domain/usecases/mark_notification_read_usecase.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -92,6 +97,12 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<FavoritesRepository>(
       () => FavoritesRepositoryImpl(localDataSource: sl()),
     )
+    ..registerLazySingleton<NotificationsLocalDataSource>(
+      () => NotificationsLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<NotificationsRepository>(
+      () => NotificationsRepositoryImpl(localDataSource: sl()),
+    )
     ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))
     ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))
     ..registerFactory<SignOutUseCase>(() => SignOutUseCase(sl()))
@@ -119,5 +130,11 @@ Future<void> setupDependencies() async {
     ..registerFactory<SaveSettingsUseCase>(() => SaveSettingsUseCase(sl()))
     ..registerFactory<GetFavoritesUseCase>(() => GetFavoritesUseCase(sl()))
     ..registerFactory<AddFavoriteUseCase>(() => AddFavoriteUseCase(sl()))
-    ..registerFactory<RemoveFavoriteUseCase>(() => RemoveFavoriteUseCase(sl()));
+    ..registerFactory<RemoveFavoriteUseCase>(() => RemoveFavoriteUseCase(sl()))
+    ..registerFactory<GetNotificationsUseCase>(
+      () => GetNotificationsUseCase(sl()),
+    )
+    ..registerFactory<MarkNotificationReadUseCase>(
+      () => MarkNotificationReadUseCase(sl()),
+    );
 }

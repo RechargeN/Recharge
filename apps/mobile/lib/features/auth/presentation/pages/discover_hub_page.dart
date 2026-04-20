@@ -116,6 +116,34 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
             label: const Text('Открыть избранное'),
           ),
           const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              if (authState.isAuthenticated) {
+                context.push(RouteNames.notifications);
+                return;
+              }
+              authController.trackAuthGateViewed(
+                sourceScreen: 'discover',
+                sourceAction: 'open_notifications',
+              );
+              await showAuthGateSheet(
+                context,
+                action: ProtectedAction.notifications,
+                sourceScreen: 'discover',
+                sourceAction: 'open_notifications',
+                originRoute: RouteNames.notifications,
+                onContinueAsGuest: () {
+                  authController.trackGuestContinueClicked(
+                    sourceScreen: 'discover',
+                    sourceAction: 'open_notifications',
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.notifications_outlined),
+            label: const Text('Открыть уведомления'),
+          ),
+          const SizedBox(height: 12),
           OutlinedButton(
             onPressed: () async {
               if (authState.isAuthenticated) {

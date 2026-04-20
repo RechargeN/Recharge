@@ -26,7 +26,7 @@ Goal: reach releasable MVP with core user value and controlled risk.
 | S2-EXP-01 | Sprint 2 | Profile + Settings Basic | P1 | Done (checkpoint 2026-04-18) | Recharge team |
 | S2-FAV-01 | Sprint 2 | Favorites Basic | P1 | Done (checkpoint 2026-04-18) | Recharge team |
 | S3-CRT-01 | Sprint 3 | Create Draft + Publish Happy Path | P0 | Done (checkpoint 2026-04-20) | Recharge team |
-| S3-NOTIF-01 | Sprint 3 | Notifications List + Mark Read | P1 | Planned | TBD |
+| S3-NOTIF-01 | Sprint 3 | Notifications List + Mark Read | P1 | Done (checkpoint 2026-04-20) | Recharge team |
 | S3-REL-01 | Sprint 3 | Hardening + Release Readiness | P0 | Planned | TBD |
 
 ## 3) Sprint 1 (MVP Alpha Internal)

@@ -197,6 +197,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         authController.clearPendingTarget();
         context.go(normalizedOrigin ?? RouteNames.favorites);
         break;
+      case ProtectedAction.notifications:
+        authController.clearPendingTarget();
+        context.go(normalizedOrigin ?? RouteNames.notifications);
+        break;
       case ProtectedAction.create:
       case ProtectedAction.profile:
         authController.clearPendingTarget();
@@ -215,6 +219,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         return ProtectedAction.favorite;
       case 'favorites':
         return ProtectedAction.favorites;
+      case 'notifications':
+        return ProtectedAction.notifications;
       case 'create':
         return ProtectedAction.create;
       case 'profile':

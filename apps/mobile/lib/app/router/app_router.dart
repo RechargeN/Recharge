@@ -17,6 +17,7 @@ import '../../features/discover/presentation/pages/discover_results_page.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -66,6 +67,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const FavoritesPage(),
       ),
       GoRoute(
+        name: 'notifications',
+        path: RouteNames.notifications,
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
         name: 'sign_in',
         path: RouteNames.signIn,
         builder: (context, state) => SignInPage(
@@ -100,6 +106,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isProtected = state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.create ||
           state.matchedLocation == RouteNames.favorites ||
+          state.matchedLocation == RouteNames.notifications ||
           state.matchedLocation == RouteNames.settings ||
           state.matchedLocation == RouteNames.createSuccess;
 
