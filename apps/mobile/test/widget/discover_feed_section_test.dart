@@ -6,6 +6,8 @@ import 'package:recharge/features/discover/application/controllers/discover_feed
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/application/queries/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
+import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_preferences_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
@@ -92,4 +94,26 @@ class _FakeDiscoverPreferencesRepository implements DiscoverPreferencesRepositor
 
   @override
   Future<void> saveLastQuery(DiscoverQuery query) async {}
+
+  @override
+  Future<List<SavedSearchEntity>> loadSavedSearches() async {
+    return const <SavedSearchEntity>[];
+  }
+
+  @override
+  Future<void> saveSavedSearch(SavedSearchEntity search) async {}
+
+  @override
+  Future<void> deleteSavedSearch(String id) async {}
+
+  @override
+  Future<List<SmartSearchHistoryEntity>> loadSmartSearchHistory() async {
+    return const <SmartSearchHistoryEntity>[];
+  }
+
+  @override
+  Future<void> saveSmartSearchPrompt(SmartSearchHistoryEntity item) async {}
+
+  @override
+  Future<void> deleteSmartSearchPrompt(String id) async {}
 }

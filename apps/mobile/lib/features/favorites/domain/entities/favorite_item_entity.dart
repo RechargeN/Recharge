@@ -10,6 +10,7 @@ class FavoriteItemEntity {
     required this.priceAmount,
     required this.isFree,
     required this.savedAtUtc,
+    required this.targetRoute,
   });
 
   final String id;
@@ -22,9 +23,12 @@ class FavoriteItemEntity {
   final double priceAmount;
   final bool isFree;
   final DateTime savedAtUtc;
+  final String? targetRoute;
 
   FavoriteItemEntity copyWith({
     DateTime? savedAtUtc,
+    String? targetRoute,
+    bool clearTargetRoute = false,
   }) {
     return FavoriteItemEntity(
       id: id,
@@ -37,6 +41,7 @@ class FavoriteItemEntity {
       priceAmount: priceAmount,
       isFree: isFree,
       savedAtUtc: savedAtUtc ?? this.savedAtUtc,
+      targetRoute: clearTargetRoute ? null : (targetRoute ?? this.targetRoute),
     );
   }
 }

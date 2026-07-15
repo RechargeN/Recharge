@@ -61,6 +61,7 @@ FavoriteItemEntity _favorite(String id) {
     priceAmount: 0,
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
+    targetRoute: null,
   );
 }
 

@@ -39,6 +39,18 @@ void main() {
       isTrue,
     );
   });
+
+  test('markAllAsRead clears all unread notifications', () async {
+    await controller.ensureLoaded(userId: 'u1');
+
+    await controller.markAllAsRead();
+
+    expect(controller.state.unreadCount, 0);
+    expect(
+      controller.state.items.every((NotificationItemEntity item) => item.isRead),
+      isTrue,
+    );
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

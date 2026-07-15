@@ -14,6 +14,16 @@ class DiscoverItemModel extends DiscoverItemEntity {
     required super.distanceKm,
     required super.isFree,
     required super.relevanceScore,
+    super.coverImageUrl,
+    super.organizerName,
+    super.organizerHandle,
+    super.venueName,
+    super.addressLine,
+    super.participantsCount,
+    super.capacity,
+    super.durationMinutes,
+    super.ctaLabel,
+    super.highlights,
   });
 
   factory DiscoverItemModel.fromMap(Map<String, Object?> map) {
@@ -30,6 +40,17 @@ class DiscoverItemModel extends DiscoverItemEntity {
       distanceKm: (map['distance_km']! as num).toDouble(),
       isFree: map['is_free']! as bool,
       relevanceScore: (map['relevance_score'] as num?)?.toDouble() ?? 0,
+      coverImageUrl: map['cover_image_url'] as String? ?? '',
+      organizerName: map['organizer_name'] as String? ?? '',
+      organizerHandle: map['organizer_handle'] as String? ?? '',
+      venueName: map['venue_name'] as String? ?? '',
+      addressLine: map['address_line'] as String? ?? '',
+      participantsCount: (map['participants_count'] as num?)?.toInt() ?? 0,
+      capacity: (map['capacity'] as num?)?.toInt() ?? 0,
+      durationMinutes: (map['duration_minutes'] as num?)?.toInt() ?? 0,
+      ctaLabel: map['cta_label'] as String? ?? '',
+      highlights:
+          (map['highlights'] as List<dynamic>? ?? <dynamic>[]).cast<String>(),
     );
   }
 }

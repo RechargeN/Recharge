@@ -1,1 +1,1 @@
-// Expose public API here when components and tokens are implemented.
+export 'src/recharge_theme.dart';

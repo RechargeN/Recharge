@@ -39,6 +39,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'wellness',
         'price_amount': 0.0,
         'is_free': true,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1506126613408-eca07ce68773'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Recharge Wellness',
+        'organizer_handle': '@recharge_wellness',
+        'venue_name': 'Central Park Lawn',
+        'address_line': 'Atbrivosanas aleja 93, Rezekne',
+        'participants_count': 18,
+        'capacity': 32,
+        'duration_minutes': 75,
+        'cta_label': 'Join session',
+        'highlights': <String>[
+          'Beginner-friendly breathing practice',
+          'Bring a mat or towel',
+          'Small group with a local instructor',
+        ],
       },
       <String, Object?>{
         'title': 'Кофе и арт-скетч',
@@ -47,6 +63,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'art',
         'price_amount': 8.0,
         'is_free': false,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1513364776144-60967b0f800f'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Local Sketch Club',
+        'organizer_handle': '@sketch_rezekne',
+        'venue_name': 'Mols Coffee Studio',
+        'address_line': 'Latgales iela 21, Rezekne',
+        'participants_count': 9,
+        'capacity': 14,
+        'duration_minutes': 120,
+        'cta_label': 'Reserve spot',
+        'highlights': <String>[
+          'Coffee included in the ticket',
+          'All sketch materials provided',
+          'Meet local artists and travelers',
+        ],
       },
       <String, Object?>{
         'title': 'Прогулка у озера',
@@ -55,6 +87,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'outdoor',
         'price_amount': 0.0,
         'is_free': true,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Rezekne Walks',
+        'organizer_handle': '@rezekne_walks',
+        'venue_name': 'Lake Trail Start',
+        'address_line': 'Ezermalas taka, Rezekne',
+        'participants_count': 24,
+        'capacity': 40,
+        'duration_minutes': 90,
+        'cta_label': 'Start route',
+        'highlights': <String>[
+          'Easy 5 km walking route',
+          'Photo stops by the water',
+          'Works well for families and friends',
+        ],
       },
       <String, Object?>{
         'title': 'Вечерняя музыка',
@@ -63,6 +111,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'music',
         'price_amount': 12.0,
         'is_free': false,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1501386761578-eac5c94b800a'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Evenbrite Local',
+        'organizer_handle': '@evenbrite_local',
+        'venue_name': 'Old Town Stage',
+        'address_line': 'Pils iela 4, Rezekne',
+        'participants_count': 46,
+        'capacity': 80,
+        'duration_minutes': 150,
+        'cta_label': 'Book ticket',
+        'highlights': <String>[
+          'Two local performers',
+          'Standing and seated areas',
+          'Nearby cafes open after the show',
+        ],
       },
       <String, Object?>{
         'title': 'Семейный пикник',
@@ -71,6 +135,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'family',
         'price_amount': 5.0,
         'is_free': false,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Family Recharge',
+        'organizer_handle': '@family_recharge',
+        'venue_name': 'Meadow Picnic Area',
+        'address_line': 'Stacijas parks, Rezekne',
+        'participants_count': 21,
+        'capacity': 50,
+        'duration_minutes': 180,
+        'cta_label': 'Join picnic',
+        'highlights': <String>[
+          'Games for children and adults',
+          'Picnic blankets available',
+          'Light snacks included',
+        ],
       },
       <String, Object?>{
         'title': 'Наблюдение за закатом',
@@ -79,6 +159,22 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'category': 'outdoor',
         'price_amount': 0.0,
         'is_free': true,
+        'cover_image_url':
+            'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429'
+            '?auto=format&fit=crop&w=1200&q=80',
+        'organizer_name': 'Sunset Routes',
+        'organizer_handle': '@sunset_routes',
+        'venue_name': 'Hill Viewpoint',
+        'address_line': 'Pilskalna taka, Rezekne',
+        'participants_count': 16,
+        'capacity': 28,
+        'duration_minutes': 60,
+        'cta_label': 'Save route',
+        'highlights': <String>[
+          'Best viewpoint near the city',
+          'Short walk from public transport',
+          'Ideal for photos and quiet time',
+        ],
       },
     ];
 
@@ -103,10 +199,20 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
           'distance_km': 0.0,
           'is_free': template['is_free'],
           'relevance_score': 0.0,
+          'cover_image_url': template['cover_image_url'],
+          'organizer_name': template['organizer_name'],
+          'organizer_handle': template['organizer_handle'],
+          'venue_name': template['venue_name'],
+          'address_line': template['address_line'],
+          'participants_count':
+              (template['participants_count']! as int) + (i % 5),
+          'capacity': template['capacity'],
+          'duration_minutes': template['duration_minutes'],
+          'cta_label': template['cta_label'],
+          'highlights': template['highlights'],
         },
       );
     }
     return result;
   }
 }
-

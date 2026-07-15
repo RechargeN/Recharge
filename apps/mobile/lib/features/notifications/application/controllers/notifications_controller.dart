@@ -130,6 +130,53 @@ class NotificationsController extends ChangeNotifier {
     );
   }
 
+  Future<void> markAllAsRead() async {
+    final String? userId = _loadedUserId;
+    if (userId == null) return;
+
+    final List<String> unreadIds = _state.items
+        .where((NotificationItemEntity item) => !item.isRead)
+        .map((NotificationItemEntity item) => item.id)
+        .toList(growable: false);
+    if (unreadIds.isEmpty) return;
+
+    _analyticsService.track(
+      'notifications_mark_all_read_started',
+      params: <String, Object?>{
+        'unread_count': unreadIds.length,
+      },
+    );
+
+    for (final String notificationId in unreadIds) {
+      await _markNotificationReadUseCase(
+        userId: userId,
+        notificationId: notificationId,
+      );
+    }
+
+    final Set<String> unreadIdSet = unreadIds.toSet();
+    final List<NotificationItemEntity> updated =
+        _state.items.map((NotificationItemEntity item) {
+      if (unreadIdSet.contains(item.id)) {
+        return item.copyWith(isRead: true);
+      }
+      return item;
+    }).toList(growable: false);
+
+    _setState(
+      _state.copyWith(
+        status: NotificationsStatus.ready,
+        items: updated,
+      ),
+    );
+    _analyticsService.track(
+      'notifications_mark_all_read_succeeded',
+      params: <String, Object?>{
+        'marked_count': unreadIds.length,
+      },
+    );
+  }
+
   void _setState(NotificationsState state) {
     _state = state;
     notifyListeners();

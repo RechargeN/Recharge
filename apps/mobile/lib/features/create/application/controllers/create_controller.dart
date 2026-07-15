@@ -100,6 +100,19 @@ class CreateController extends ChangeNotifier {
         ),
       );
 
+  void applyTaxonomySelection({
+    required String mainCategory,
+    required String subcategory,
+  }) {
+    _updateDraft(
+      _state.draft.copyWith(
+        mainCategory: mainCategory.trim(),
+        subcategory: subcategory.trim(),
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
   void updateShortDescription(String value) => _updateDraft(
         _state.draft.copyWith(
           shortDescription: value.trim(),

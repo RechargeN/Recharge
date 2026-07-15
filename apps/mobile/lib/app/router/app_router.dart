@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../di/service_locator.dart';
 import '../observers/app_route_observer.dart';
+import '../presentation/recharge_app_shell.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
@@ -18,6 +19,7 @@ import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -36,12 +38,64 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.splash,
         builder: (context, state) => const SplashPage(),
       ),
-      GoRoute(
-        name: 'discover',
-        path: RouteNames.discover,
-        builder: (context, state) => DiscoverHubPage(
-          favoriteApplied: state.uri.queryParameters['favoriteApplied'] == '1',
+      ShellRoute(
+        builder: (context, state, child) => RechargeAppShell(
+          currentLocation: state.uri.path,
+          child: child,
         ),
+        routes: <RouteBase>[
+          GoRoute(
+            name: 'discover',
+            path: RouteNames.discover,
+            builder: (context, state) => DiscoverHubPage(
+              favoriteApplied:
+                  state.uri.queryParameters['favoriteApplied'] == '1',
+            ),
+          ),
+          GoRoute(
+            name: 'search',
+            path: RouteNames.search,
+            builder: (context, state) => DiscoverResultsPage(
+              seedParameters: state.uri.queryParameters,
+            ),
+          ),
+          GoRoute(
+            name: 'discover_map',
+            path: RouteNames.discoverMap,
+            builder: (context, state) => DiscoverMapPage(
+              seedParameters: state.uri.queryParameters,
+            ),
+          ),
+          GoRoute(
+            name: 'discover_results',
+            path: RouteNames.discoverResults,
+            builder: (context, state) => DiscoverResultsPage(
+              seedParameters: state.uri.queryParameters,
+            ),
+          ),
+          GoRoute(
+            name: 'scenario_builder',
+            path: RouteNames.scenarioBuilder,
+            builder: (context, state) => ScenarioBuilderPage(
+              seedParameters: state.uri.queryParameters,
+            ),
+          ),
+          GoRoute(
+            name: 'favorites',
+            path: RouteNames.favorites,
+            builder: (context, state) => const FavoritesPage(),
+          ),
+          GoRoute(
+            name: 'notifications',
+            path: RouteNames.notifications,
+            builder: (context, state) => const NotificationsPage(),
+          ),
+          GoRoute(
+            name: 'profile',
+            path: RouteNames.profile,
+            builder: (context, state) => const ProfilePage(),
+          ),
+        ],
       ),
       GoRoute(
         name: 'discover_details',
@@ -50,26 +104,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           itemId: state.pathParameters['itemId'] ?? '',
           favoriteApplied: state.uri.queryParameters['favoriteApplied'] == '1',
         ),
-      ),
-      GoRoute(
-        name: 'discover_map',
-        path: RouteNames.discoverMap,
-        builder: (context, state) => const DiscoverMapPage(),
-      ),
-      GoRoute(
-        name: 'discover_results',
-        path: RouteNames.discoverResults,
-        builder: (context, state) => const DiscoverResultsPage(),
-      ),
-      GoRoute(
-        name: 'favorites',
-        path: RouteNames.favorites,
-        builder: (context, state) => const FavoritesPage(),
-      ),
-      GoRoute(
-        name: 'notifications',
-        path: RouteNames.notifications,
-        builder: (context, state) => const NotificationsPage(),
       ),
       GoRoute(
         name: 'sign_in',
@@ -82,14 +116,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        name: 'profile',
-        path: RouteNames.profile,
-        builder: (context, state) => const ProfilePage(),
-      ),
-      GoRoute(
         name: 'create',
         path: RouteNames.create,
-        builder: (context, state) => const CreatePage(),
+        builder: (context, state) => CreatePage(
+          seedParameters: state.uri.queryParameters,
+        ),
       ),
       GoRoute(
         name: 'settings',

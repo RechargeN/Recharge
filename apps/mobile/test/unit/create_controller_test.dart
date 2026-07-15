@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_taxonomy.dart';
 import 'package:recharge/features/create/application/state/create_state.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
@@ -54,6 +55,45 @@ void main() {
     final stored = await repository.loadDraft('u1');
     expect(stored, isNotNull);
     expect(stored!.title, 'My Draft');
+  });
+
+  test('applyTaxonomySelection updates category fields together', () async {
+    await controller.ensureLoaded(
+      userId: 'u1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+
+    controller.applyTaxonomySelection(
+      mainCategory: ' sport ',
+      subcategory: ' tennis ',
+    );
+
+    expect(controller.state.draft.mainCategory, 'sport');
+    expect(controller.state.draft.subcategory, 'tennis');
+  });
+
+  test('create taxonomy exposes source-of-truth ids for event and place', () {
+    final eventCategories = createTaxonomyForObjectType(CreateObjectType.event);
+    final placeCategories = createTaxonomyForObjectType(CreateObjectType.place);
+    final sportCategory = createTaxonomyCategoryById('sport');
+
+    expect(eventCategories.map((category) => category.id), contains('sport'));
+    expect(
+      placeCategories.map((category) => category.id),
+      contains('wellness_recharge'),
+    );
+    expect(sportCategory, isNotNull);
+    expect(
+      sportCategory!.subcategories.map((subcategory) => subcategory.id),
+      contains('tennis'),
+    );
+    expect(sportCategory.defaultParticipationMode, 'play');
+    expect(createTaxonomyLabelForPath('food_drinks.coffee'), 'Coffee');
+    expect(
+      createTaxonomyLabelForPath('music_nightlife.afterwork_drinks'),
+      'Afterwork drinks',
+    );
   });
 
   test('publish success sets pending_review status', () async {

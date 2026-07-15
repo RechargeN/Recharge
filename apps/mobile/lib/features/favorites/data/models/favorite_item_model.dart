@@ -12,6 +12,7 @@ class FavoriteItemModel {
     required this.priceAmount,
     required this.isFree,
     required this.savedAtUtcIso,
+    required this.targetRoute,
   });
 
   final String id;
@@ -24,6 +25,7 @@ class FavoriteItemModel {
   final double priceAmount;
   final bool isFree;
   final String savedAtUtcIso;
+  final String? targetRoute;
 
   factory FavoriteItemModel.fromJson(Map<String, dynamic> json) {
     return FavoriteItemModel(
@@ -37,6 +39,7 @@ class FavoriteItemModel {
       priceAmount: (json['priceAmount'] as num).toDouble(),
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
+      targetRoute: json['targetRoute'] as String?,
     );
   }
 
@@ -52,6 +55,7 @@ class FavoriteItemModel {
       'priceAmount': priceAmount,
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
+      'targetRoute': targetRoute,
     };
   }
 
@@ -67,6 +71,7 @@ class FavoriteItemModel {
       priceAmount: entity.priceAmount,
       isFree: entity.isFree,
       savedAtUtcIso: entity.savedAtUtc.toUtc().toIso8601String(),
+      targetRoute: entity.targetRoute,
     );
   }
 
@@ -82,6 +87,7 @@ class FavoriteItemModel {
       priceAmount: priceAmount,
       isFree: isFree,
       savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
+      targetRoute: targetRoute,
     );
   }
 }

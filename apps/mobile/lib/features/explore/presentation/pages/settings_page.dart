@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../app/config/legal_links.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/explore_controller.dart';
 import '../../application/explore_providers.dart';
@@ -94,7 +95,7 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _showLinkDialog(
                   context,
                   title: 'Support / Help',
-                  url: 'https://example.com/support',
+                  url: LegalLinks.support,
                 ),
               ),
               ListTile(
@@ -103,7 +104,7 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _showLinkDialog(
                   context,
                   title: 'Privacy Policy',
-                  url: 'https://example.com/privacy',
+                  url: LegalLinks.privacyPolicy,
                 ),
               ),
               ListTile(
@@ -112,7 +113,7 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _showLinkDialog(
                   context,
                   title: 'Terms of Service',
-                  url: 'https://example.com/terms',
+                  url: LegalLinks.termsOfService,
                 ),
               ),
               const SizedBox(height: 12),

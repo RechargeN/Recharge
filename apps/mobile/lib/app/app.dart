@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,10 +37,7 @@ class _RechargeAppState extends ConsumerState<RechargeApp> {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'Recharge',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1C9C74)),
-        useMaterial3: true,
-      ),
+      theme: RechargeTheme.light(),
       routerConfig: router,
     );
   }

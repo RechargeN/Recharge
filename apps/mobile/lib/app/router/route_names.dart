@@ -1,9 +1,11 @@
 class RouteNames {
   static const String splash = '/splash';
   static const String discover = '/discover';
+  static const String search = '/search';
   static const String discoverDetails = '/discover/details';
   static const String discoverMap = '/discover/map';
   static const String discoverResults = '/discover/results';
+  static const String scenarioBuilder = '/scenario-builder';
   static const String favorites = '/favorites';
   static const String notifications = '/notifications';
   static const String settings = '/settings';
