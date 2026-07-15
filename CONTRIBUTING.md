@@ -9,6 +9,8 @@ This document defines the default development process and merge governance for t
 - Fixes: `fix/<short-scope>`.
 - Chores/infra/docs: `chore/<short-scope>`, `docs/<short-scope>`.
 - Keep branches short-lived; rebase on `main` before requesting review.
+- Slice workflow default: one slice = one feature branch (example: `feature/s2-disc-02`, `feature/s2-fav-01`).
+- Direct push to `main` is not used in normal flow; merge goes through PR only.
 
 ## 2) Commit Conventions
 
@@ -53,6 +55,7 @@ Before requesting merge, PR must include:
 - completed architecture/test checklist;
 - green required CI checks;
 - migration/rollback note when relevant.
+- no test/build artifacts in commit set (for example `**/build/**`, cache outputs).
 
 ## 7) Temporary Exceptions
 

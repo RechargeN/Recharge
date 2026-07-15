@@ -8,6 +8,8 @@ Date: 2026-04-20
 - Create flow supports both `event` and `place`.
 - Local draft persistence.
 - Publish happy path with status `pending_review`.
+- Post-MVP create taxonomy source of truth is defined in
+  `docs/product/RECHARGE_CREATE_TAXONOMY_V1.md`.
 
 ## Approved Decisions
 
