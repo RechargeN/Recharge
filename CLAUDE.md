@@ -1,4 +1,16 @@
-# Recharge repository instructions
+# CLAUDE.md
 
-The canonical coding-agent instructions for this repository are in
-[`AGENTS.md`](AGENTS.md). Read and follow that file before making changes.
+Канонические инструкции репозитория — в **AGENTS.md** (корень).
+Прочитай его полностью перед любой работой. Приоритет документов,
+структура monorepo, разрешённые конфликты, текущий slice, статусы
+фич и правила разработки — всё там.
+
+Кратко, что важно помнить:
+- Приоритет: Accepted ADR → spec текущего slice → LAUNCH_STATUS →
+  product vision. Код против ADR — прав ADR.
+- Monorepo: рабочая директория Flutter-команд — `apps/mobile/`
+  (или Melos из корня).
+- Текущий slice: СТАБИЛИЗАЦИЯ. Новые фичи не начинать, пока не
+  выполнены критерии приёмки из AGENTS.md.
+- Перед крупным куском — план файлов без кода, ждать подтверждения.
+- Slice не Done без зелёных `flutter analyze` и `flutter test`.
