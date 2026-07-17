@@ -42,7 +42,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResultEntity?> restoreSession() async {
     final cachedSession = await _localDataSource.readSession();
     if (cachedSession == null) {
-      return null;
+      final result = _demoFullAccessResult();
+      await _persistResult(result);
+      return result.toEntity();
     }
 
     try {
@@ -84,5 +86,21 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _persistResult(AuthResultModel result) async {
     await _localDataSource.saveSession(result.session);
     await _localDataSource.saveUser(result.user);
+  }
+
+  AuthResultModel _demoFullAccessResult() {
+    return AuthResultModel.fromLoginJson(<String, dynamic>{
+      'access_token': 'acc_demo_full_access',
+      'refresh_token': 'ref_demo_full_access',
+      'session_id': 'sess_demo_full_access',
+      'expires_in': 86400,
+      'user': <String, dynamic>{
+        'id': MockAuthRemoteDataSource.demoUserId,
+        'email': MockAuthRemoteDataSource.demoEmail,
+        'role': 'creator',
+        'capabilities': MockAuthRemoteDataSource.demoCapabilities,
+        'profile_status': 'active',
+      },
+    });
   }
 }

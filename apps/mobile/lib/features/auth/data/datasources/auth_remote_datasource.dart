@@ -37,6 +37,28 @@ abstract class AuthRemoteDataSource {
 class MockAuthRemoteDataSource implements AuthRemoteDataSource {
   static const String _allowedEmail = 'user@example.com';
   static const String _allowedPassword = 'password123';
+  static const String demoUserId = 'demo_full_access';
+  static const String demoEmail = 'demo@recharge.local';
+  static const List<String> demoCapabilities = <String>[
+    'discover.read',
+    'favorites.write',
+    'profile.read',
+    'profile.update',
+    'create.event',
+    'create.quick_plan',
+    'create.social_request',
+    'create.private_plan',
+    'create.route',
+    'create.place',
+    'create.venue',
+    'create.bookable_slot',
+    'create.offer',
+    'create.announcement',
+    'scenario.generate',
+    'manage_page',
+    'view_insights',
+    'manage_bookings',
+  ];
 
   final Map<String, String> _sessionToUser = <String, String>{};
 
@@ -58,7 +80,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     }
 
     final sessionId = 'sess_${Random().nextInt(999999)}';
-    _sessionToUser[sessionId] = 'usr_123';
+    _sessionToUser[sessionId] = demoUserId;
 
     return AuthResultModel.fromLoginJson(<String, dynamic>{
       'access_token': 'acc_${DateTime.now().millisecondsSinceEpoch}',
@@ -66,15 +88,10 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
       'session_id': sessionId,
       'expires_in': 3600,
       'user': <String, dynamic>{
-        'id': 'usr_123',
+        'id': demoUserId,
         'email': _allowedEmail,
-        'role': 'user',
-        'capabilities': <String>[
-          'discover.read',
-          'favorites.write',
-          'profile.read',
-          'profile.update',
-        ],
+        'role': 'creator',
+        'capabilities': demoCapabilities,
         'profile_status': 'active',
       },
     });
@@ -87,12 +104,13 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 180));
 
-    if (!_sessionToUser.containsKey(sessionId) || !refreshToken.startsWith('ref_')) {
+    if (!refreshToken.startsWith('ref_')) {
       throw const AuthRemoteException(
         'AUTH_REFRESH_INVALID',
         'Refresh token invalid',
       );
     }
+    _sessionToUser[sessionId] = demoUserId;
 
     return AuthSessionModel.fromJson(<String, dynamic>{
       'access_token': 'acc_${DateTime.now().millisecondsSinceEpoch}',
@@ -118,15 +136,10 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
       );
     }
     return AuthUserModel.fromJson(<String, dynamic>{
-      'id': 'usr_123',
-      'email': _allowedEmail,
-      'role': 'user',
-      'capabilities': <String>[
-        'discover.read',
-        'favorites.write',
-        'profile.read',
-        'profile.update',
-      ],
+      'id': demoUserId,
+      'email': demoEmail,
+      'role': 'creator',
+      'capabilities': demoCapabilities,
       'profile_status': 'active',
     });
   }

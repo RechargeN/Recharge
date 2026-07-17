@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -61,11 +63,45 @@ void main() {
     expect(controller.state.status, AuthStatus.guest);
     expect(controller.state.message, contains('Сессия истекла'));
   });
+
+  test('restoreSession reuses in-flight restore request', () async {
+    repository.restoreCompleter = Completer<AuthResultEntity?>();
+
+    final firstRestore = controller.restoreSession();
+    final secondRestore = controller.restoreSession();
+
+    expect(repository.restoreCalls, 1);
+
+    repository.restoreCompleter!.complete(_demoAuthResult());
+    await Future.wait(<Future<void>>[firstRestore, secondRestore]);
+
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.user?.id, 'demo_full_access');
+  });
+
+  test('signOut keeps restored demo session when repository provides it', () async {
+    await controller.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'submit',
+    );
+    repository.restoreDemoWhenEmpty = true;
+
+    await controller.signOut();
+
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.user?.id, 'demo_full_access');
+    expect(controller.state.user?.role, 'creator');
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {
   bool shouldFailLogin = false;
   bool shouldFailRestore = false;
+  bool restoreDemoWhenEmpty = false;
+  int restoreCalls = 0;
+  Completer<AuthResultEntity?>? restoreCompleter;
   AuthResultEntity? _cachedResult;
 
   @override
@@ -75,11 +111,19 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<AuthResultEntity?> restoreSession() async {
+    restoreCalls += 1;
+    final completer = restoreCompleter;
+    if (completer != null) {
+      return completer.future;
+    }
     if (shouldFailRestore) {
       throw const AuthException(
         code: 'AUTH_REFRESH_EXPIRED',
         message: 'expired',
       );
+    }
+    if (_cachedResult == null && restoreDemoWhenEmpty) {
+      _cachedResult = _demoAuthResult();
     }
     return _cachedResult;
   }
@@ -121,6 +165,30 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> signOut() async {
     _cachedResult = null;
   }
+}
+
+AuthResultEntity _demoAuthResult() {
+  return AuthResultEntity(
+    session: AuthSessionEntity(
+      accessToken: 'acc_demo',
+      refreshToken: 'ref_demo',
+      sessionId: 'sess_demo',
+      expiresAtUtc: DateTime.now().toUtc().add(const Duration(hours: 1)),
+    ),
+    user: const AuthUserEntity(
+      id: 'demo_full_access',
+      email: 'demo@recharge.local',
+      role: 'creator',
+      capabilities: <String>[
+        'discover.read',
+        'favorites.write',
+        'create.event',
+        'create.place',
+        'scenario.generate',
+      ],
+      profileStatus: 'active',
+    ),
+  );
 }
 
 class _FakeAnalyticsService implements AnalyticsService {

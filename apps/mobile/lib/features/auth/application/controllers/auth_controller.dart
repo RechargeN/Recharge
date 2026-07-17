@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/telemetry/analytics_service.dart';
@@ -39,6 +41,8 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
+
+  Future<void>? _restoreSessionFuture;
 
   ProtectedAction _pendingAction = ProtectedAction.none;
   String? _pendingOriginRoute;
@@ -166,7 +170,39 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<void> restoreSession() async {
+  Future<void> restoreSession() {
+    final pendingRestore = _restoreSessionFuture;
+    if (pendingRestore != null) {
+      return pendingRestore;
+    }
+
+    final restoreCompleter = Completer<void>();
+    final restoreFuture = restoreCompleter.future;
+    _restoreSessionFuture = restoreFuture;
+
+    unawaited(
+      _restoreSession()
+          .then<void>((_) {
+            if (!restoreCompleter.isCompleted) {
+              restoreCompleter.complete();
+            }
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            if (!restoreCompleter.isCompleted) {
+              restoreCompleter.completeError(error, stackTrace);
+            }
+          })
+          .whenComplete(() {
+            if (identical(_restoreSessionFuture, restoreFuture)) {
+              _restoreSessionFuture = null;
+            }
+          }),
+    );
+
+    return restoreFuture;
+  }
+
+  Future<void> _restoreSession() async {
     _analyticsService.track(
       'auth_session_restore_started',
       params: <String, Object?>{
@@ -220,7 +256,12 @@ class AuthController extends ChangeNotifier {
     );
     try {
       await _signOutUseCase();
-      _setState(const AuthState.guest());
+      final restored = await _restoreSessionUseCase();
+      if (restored == null) {
+        _setState(const AuthState.guest());
+      } else {
+        _consumeAuthResult(restored);
+      }
       clearPendingTarget();
       _analyticsService.track(
         'auth_sign_out_succeeded',
