@@ -10,7 +10,7 @@ import '../../../create/application/create_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../../create/domain/entities/create_draft_entity.dart';
 import '../../../discover/application/discover_providers.dart';
-import '../../../discover/application/queries/discover_query.dart';
+import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
 import '../../../discover/domain/entities/saved_search_entity.dart';
 import '../../../discover/domain/entities/smart_search_history_entity.dart';

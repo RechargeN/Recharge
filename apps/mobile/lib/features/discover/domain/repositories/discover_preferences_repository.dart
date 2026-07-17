@@ -1,4 +1,4 @@
-import '../../application/queries/discover_query.dart';
+import '../entities/discover_query.dart';
 import '../entities/saved_search_entity.dart';
 import '../entities/smart_search_history_entity.dart';
 

@@ -3,9 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/create_availability.dart';
 import '../../domain/usecases/load_create_draft_usecase.dart';
 import '../../domain/usecases/publish_create_draft_usecase.dart';
 import '../../domain/usecases/save_create_draft_usecase.dart';
+import '../../domain/usecases/validate_create_availability_usecase.dart';
+import '../create_runtime_defaults.dart';
 import '../create_taxonomy.dart';
 import '../state/create_state.dart';
 
@@ -15,15 +18,28 @@ class CreateController extends ChangeNotifier {
     required SaveCreateDraftUseCase saveCreateDraftUseCase,
     required PublishCreateDraftUseCase publishCreateDraftUseCase,
     required AnalyticsService analyticsService,
+    CreateRuntimeDefaults runtimeDefaults = const CreateRuntimeDefaults(
+      marketCityId: '',
+      timezone: 'UTC',
+      country: '',
+      city: '',
+      currency: '',
+    ),
+    ValidateCreateAvailabilityUseCase validateCreateAvailability =
+        const ValidateCreateAvailabilityUseCase(),
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
        _publishCreateDraftUseCase = publishCreateDraftUseCase,
-       _analyticsService = analyticsService;
+       _analyticsService = analyticsService,
+       _runtimeDefaults = runtimeDefaults,
+       _validateCreateAvailability = validateCreateAvailability;
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
   final SaveCreateDraftUseCase _saveCreateDraftUseCase;
   final PublishCreateDraftUseCase _publishCreateDraftUseCase;
   final AnalyticsService _analyticsService;
+  final CreateRuntimeDefaults _runtimeDefaults;
+  final ValidateCreateAvailabilityUseCase _validateCreateAvailability;
 
   CreateState _state = CreateState.initial();
   CreateState get state => _state;
@@ -53,6 +69,11 @@ class CreateController extends ChangeNotifier {
           organizerId: userId,
           organizerEmail: organizerEmail,
           organizerName: organizerName,
+          marketCityId: _runtimeDefaults.marketCityId,
+          timezone: _runtimeDefaults.timezone,
+          country: _runtimeDefaults.country,
+          city: _runtimeDefaults.city,
+          currency: _runtimeDefaults.currency,
         );
 
     _setState(
@@ -81,6 +102,9 @@ class CreateController extends ChangeNotifier {
     _updateDraft(
       _state.draft.copyWith(
         objectType: type,
+        availabilityKind: _availabilityKindFor(type),
+        scheduleSlots: const <CreateTimeSlotDraft>[],
+        openingHours: const <CreateOpeningHoursDraftRule>[],
         mainCategory: keepTaxonomy
             ? _state.draft.mainCategory
             : config.defaultCategoryId,
@@ -273,10 +297,161 @@ class CreateController extends ChangeNotifier {
 
   void updateStartDateTime(String value) {
     final DateTime? parsed = DateTime.tryParse(value.trim())?.toUtc();
+    final List<CreateTimeSlotDraft> slots =
+        parsed != null &&
+            _state.draft.availabilityKind ==
+                CreateAvailabilityKind.eventSlots &&
+            _state.draft.scheduleSlots.isEmpty
+        ? <CreateTimeSlotDraft>[
+            CreateTimeSlotDraft(
+              localId: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
+              startAtUtc: parsed,
+              endAtUtc: parsed.add(
+                Duration(minutes: _state.draft.durationMinutes ?? 60),
+              ),
+            ),
+          ]
+        : _state.draft.scheduleSlots;
     _updateDraft(
       _state.draft.copyWith(
         startDateTimeUtc: parsed,
         clearStartDateTimeUtc: parsed == null,
+        scheduleSlots: slots,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updateDurationMinutes(String value) {
+    final int? minutes = int.tryParse(value.trim());
+    _updateDraft(
+      _state.draft.copyWith(
+        durationMinutes: minutes != null && minutes > 0 ? minutes : null,
+        clearDurationMinutes: minutes == null || minutes <= 0,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updateAvailabilityKind(CreateAvailabilityKind kind) {
+    _updateDraft(
+      _state.draft.copyWith(
+        availabilityKind: kind,
+        scheduleSlots: kind == CreateAvailabilityKind.eventSlots
+            ? _state.draft.scheduleSlots
+            : const <CreateTimeSlotDraft>[],
+        openingHours: kind == CreateAvailabilityKind.openingHours
+            ? _state.draft.openingHours
+            : const <CreateOpeningHoursDraftRule>[],
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void addScheduleSlot({
+    required DateTime startAtUtc,
+    required DateTime endAtUtc,
+  }) {
+    if (!startAtUtc.isBefore(endAtUtc)) return;
+    final CreateTimeSlotDraft slot = CreateTimeSlotDraft(
+      localId: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
+      startAtUtc: startAtUtc.toUtc(),
+      endAtUtc: endAtUtc.toUtc(),
+    );
+    _updateDraft(
+      _state.draft.copyWith(
+        availabilityKind: CreateAvailabilityKind.eventSlots,
+        scheduleSlots: <CreateTimeSlotDraft>[
+          ..._state.draft.scheduleSlots,
+          slot,
+        ],
+        openingHours: const <CreateOpeningHoursDraftRule>[],
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void removeScheduleSlot(String localId) {
+    _updateDraft(
+      _state.draft.copyWith(
+        scheduleSlots: _state.draft.scheduleSlots
+            .where((CreateTimeSlotDraft slot) => slot.localId != localId)
+            .toList(growable: false),
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void setOpeningRule(CreateOpeningHoursDraftRule rule) {
+    final List<CreateOpeningHoursDraftRule> next =
+        _state.draft.openingHours
+            .where(
+              (CreateOpeningHoursDraftRule current) =>
+                  current.dayOfWeek != rule.dayOfWeek ||
+                  current.exceptionDateIso != rule.exceptionDateIso,
+            )
+            .toList()
+          ..add(rule);
+    _updateDraft(
+      _state.draft.copyWith(
+        availabilityKind: CreateAvailabilityKind.openingHours,
+        scheduleSlots: const <CreateTimeSlotDraft>[],
+        openingHours: next,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void removeOpeningRule(CreateOpeningHoursDraftRule rule) {
+    _updateDraft(
+      _state.draft.copyWith(
+        openingHours: _state.draft.openingHours
+            .where((CreateOpeningHoursDraftRule current) => current != rule)
+            .toList(growable: false),
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updatePartialAttendance(bool enabled) {
+    _updateDraft(
+      _state.draft.copyWith(
+        allowsPartialAttendance: enabled,
+        clearMinimumVisitDurationMinutes: !enabled,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updateMinimumVisitDuration(String value) {
+    final int? minutes = int.tryParse(value.trim());
+    _updateDraft(
+      _state.draft.copyWith(
+        minimumVisitDurationMinutes: minutes != null && minutes > 0
+            ? minutes
+            : null,
+        clearMinimumVisitDurationMinutes: minutes == null || minutes <= 0,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updateAvailabilityBuffers({required int before, required int after}) {
+    _updateDraft(
+      _state.draft.copyWith(
+        bufferBeforeMinutes: before < 0 ? 0 : before,
+        bufferAfterMinutes: after < 0 ? 0 : after,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  void updateCapacity({required int? maximum, required int current}) {
+    _updateDraft(
+      _state.draft.copyWith(
+        maxParticipants: maximum != null && maximum > 0 ? maximum : null,
+        clearMaxParticipants: maximum == null || maximum <= 0,
+        currentParticipants: current < 0 ? 0 : current,
         updatedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -352,6 +527,11 @@ class CreateController extends ChangeNotifier {
       organizerId: organizerId,
       organizerEmail: organizerEmail,
       organizerName: organizerName,
+      marketCityId: _runtimeDefaults.marketCityId,
+      timezone: _runtimeDefaults.timezone,
+      country: _runtimeDefaults.country,
+      city: _runtimeDefaults.city,
+      currency: _runtimeDefaults.currency,
     );
     _setState(
       _state.copyWith(
@@ -365,7 +545,9 @@ class CreateController extends ChangeNotifier {
   }
 
   Map<String, String> _validate(CreateDraftEntity draft) {
-    final Map<String, String> errors = <String, String>{};
+    final Map<String, String> errors = <String, String>{
+      ..._validateCreateAvailability(draft),
+    };
     if (draft.title.trim().isEmpty) {
       errors['title'] = 'Введите title';
     }
@@ -383,6 +565,19 @@ class CreateController extends ChangeNotifier {
       errors['startDateTimeUtc'] = 'Для ${config.title} укажите start datetime';
     }
     return errors;
+  }
+
+  CreateAvailabilityKind _availabilityKindFor(CreateObjectType type) {
+    return switch (type) {
+      CreateObjectType.event ||
+      CreateObjectType.activity ||
+      CreateObjectType.session ||
+      CreateObjectType.classWorkshop ||
+      CreateObjectType.findPeople => CreateAvailabilityKind.eventSlots,
+      CreateObjectType.place ||
+      CreateObjectType.rental => CreateAvailabilityKind.openingHours,
+      _ => CreateAvailabilityKind.none,
+    };
   }
 
   void _updateDraft(CreateDraftEntity next) {

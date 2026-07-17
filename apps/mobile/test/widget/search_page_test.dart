@@ -6,7 +6,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
@@ -52,6 +52,28 @@ void main() {
     expect(find.text('Results destination'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('regular_search'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('regular search exposes time-fit and travel controls', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('regular-search-filters')));
+    await tester.pumpAndSettle();
+    expect(find.text('Time fit'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Exact'));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Include return trip'),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('walking'), findsOneWidget);
+    expect(find.text('Current location'), findsOneWidget);
+    expect(find.text('Include return trip'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders search controls and results', (tester) async {

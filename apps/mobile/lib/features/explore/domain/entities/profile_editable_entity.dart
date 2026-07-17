@@ -30,7 +30,7 @@ class ProfileEditableEntity {
     return ProfileEditableEntity(
       displayName: name.isEmpty ? 'User' : name,
       about: '',
-      city: 'Rezekne',
+      city: 'Riga',
       avatar: '',
     );
   }

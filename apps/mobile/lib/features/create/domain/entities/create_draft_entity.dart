@@ -1,3 +1,5 @@
+import 'create_availability.dart';
+
 enum CreateObjectType {
   event,
   activity,
@@ -94,6 +96,14 @@ class CreateDraftEntity {
     required this.endDateTimeUtc,
     required this.durationMinutes,
     required this.timezone,
+    this.marketCityId = '',
+    this.availabilityKind = CreateAvailabilityKind.none,
+    this.scheduleSlots = const <CreateTimeSlotDraft>[],
+    this.openingHours = const <CreateOpeningHoursDraftRule>[],
+    this.allowsPartialAttendance = false,
+    this.minimumVisitDurationMinutes,
+    this.bufferBeforeMinutes = 0,
+    this.bufferAfterMinutes = 0,
     required this.registrationDeadlineUtc,
     required this.format,
     required this.country,
@@ -152,6 +162,14 @@ class CreateDraftEntity {
   final DateTime? endDateTimeUtc;
   final int? durationMinutes;
   final String timezone;
+  final String marketCityId;
+  final CreateAvailabilityKind availabilityKind;
+  final List<CreateTimeSlotDraft> scheduleSlots;
+  final List<CreateOpeningHoursDraftRule> openingHours;
+  final bool allowsPartialAttendance;
+  final int? minimumVisitDurationMinutes;
+  final int bufferBeforeMinutes;
+  final int bufferAfterMinutes;
   final DateTime? registrationDeadlineUtc;
 
   final String format;
@@ -204,6 +222,11 @@ class CreateDraftEntity {
     required String organizerId,
     required String organizerEmail,
     required String organizerName,
+    String marketCityId = '',
+    String timezone = 'UTC',
+    String country = '',
+    String city = '',
+    String currency = '',
   }) {
     final DateTime now = DateTime.now().toUtc();
     return CreateDraftEntity(
@@ -220,11 +243,19 @@ class CreateDraftEntity {
       startDateTimeUtc: null,
       endDateTimeUtc: null,
       durationMinutes: null,
-      timezone: 'Europe/Moscow',
+      timezone: timezone,
+      marketCityId: marketCityId,
+      availabilityKind: CreateAvailabilityKind.eventSlots,
+      scheduleSlots: const <CreateTimeSlotDraft>[],
+      openingHours: const <CreateOpeningHoursDraftRule>[],
+      allowsPartialAttendance: false,
+      minimumVisitDurationMinutes: null,
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
       registrationDeadlineUtc: null,
       format: 'offline',
-      country: 'Latvia',
-      city: '',
+      country: country,
+      city: city,
       venueName: '',
       addressLine1: '',
       latitude: null,
@@ -241,7 +272,7 @@ class CreateDraftEntity {
       wheelchairAccessible: false,
       isFree: true,
       basePrice: null,
-      currency: 'EUR',
+      currency: currency,
       pricingModel: 'fixed',
       registrationRequired: true,
       approvalRequired: false,
@@ -281,6 +312,15 @@ class CreateDraftEntity {
     int? durationMinutes,
     bool clearDurationMinutes = false,
     String? timezone,
+    String? marketCityId,
+    CreateAvailabilityKind? availabilityKind,
+    List<CreateTimeSlotDraft>? scheduleSlots,
+    List<CreateOpeningHoursDraftRule>? openingHours,
+    bool? allowsPartialAttendance,
+    int? minimumVisitDurationMinutes,
+    bool clearMinimumVisitDurationMinutes = false,
+    int? bufferBeforeMinutes,
+    int? bufferAfterMinutes,
     DateTime? registrationDeadlineUtc,
     bool clearRegistrationDeadlineUtc = false,
     String? format,
@@ -350,6 +390,17 @@ class CreateDraftEntity {
           ? null
           : (durationMinutes ?? this.durationMinutes),
       timezone: timezone ?? this.timezone,
+      marketCityId: marketCityId ?? this.marketCityId,
+      availabilityKind: availabilityKind ?? this.availabilityKind,
+      scheduleSlots: scheduleSlots ?? this.scheduleSlots,
+      openingHours: openingHours ?? this.openingHours,
+      allowsPartialAttendance:
+          allowsPartialAttendance ?? this.allowsPartialAttendance,
+      minimumVisitDurationMinutes: clearMinimumVisitDurationMinutes
+          ? null
+          : (minimumVisitDurationMinutes ?? this.minimumVisitDurationMinutes),
+      bufferBeforeMinutes: bufferBeforeMinutes ?? this.bufferBeforeMinutes,
+      bufferAfterMinutes: bufferAfterMinutes ?? this.bufferAfterMinutes,
       registrationDeadlineUtc: clearRegistrationDeadlineUtc
           ? null
           : (registrationDeadlineUtc ?? this.registrationDeadlineUtc),

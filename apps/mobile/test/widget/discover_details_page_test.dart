@@ -15,7 +15,7 @@ import 'package:recharge/features/auth/domain/usecases/get_current_user_usecase.
 import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';

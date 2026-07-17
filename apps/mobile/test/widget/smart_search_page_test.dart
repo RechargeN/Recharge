@@ -6,7 +6,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';

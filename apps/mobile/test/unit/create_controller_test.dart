@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/create_taxonomy.dart';
 import 'package:recharge/features/create/application/state/create_state.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/entities/create_availability.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
@@ -20,6 +22,13 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
       analyticsService: _NoopAnalyticsService(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
     );
   });
 
@@ -38,6 +47,52 @@ void main() {
 
     expect(success, isFalse);
     expect(controller.state.validationErrors.containsKey('coverImage'), isTrue);
+  });
+
+  test(
+    'new draft receives Riga defaults and creates local schedule slot',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+
+      expect(controller.state.draft.marketCityId, 'riga');
+      expect(controller.state.draft.timezone, 'Europe/Riga');
+      controller.updateStartDateTime('2026-07-20T10:00:00Z');
+
+      expect(
+        controller.state.draft.availabilityKind,
+        CreateAvailabilityKind.eventSlots,
+      );
+      expect(controller.state.draft.scheduleSlots, hasLength(1));
+      expect(
+        controller.state.draft.scheduleSlots.single.localId,
+        startsWith('loc_'),
+      );
+    },
+  );
+
+  test('partial attendance requires a positive minimum duration', () async {
+    await controller.ensureLoaded(
+      userId: 'u1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+    controller.updateTitle('My Event');
+    controller.updateMainCategory('outdoor_nature_walking');
+    controller.updateCoverImage('cover.jpg');
+    controller.updateStartDateTime('2026-07-20T10:00:00Z');
+    controller.updatePartialAttendance(true);
+
+    final bool success = await controller.publishDraft();
+
+    expect(success, isFalse);
+    expect(
+      controller.state.validationErrors,
+      contains('minimumVisitDurationMinutes'),
+    );
   });
 
   test('saveDraft stores draft in repository', () async {

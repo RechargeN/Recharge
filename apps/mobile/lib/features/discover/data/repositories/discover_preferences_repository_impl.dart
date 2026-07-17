@@ -1,10 +1,11 @@
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/repositories/discover_preferences_repository.dart';
 import '../datasources/discover_preferences_local_datasource.dart';
 
-class DiscoverPreferencesRepositoryImpl implements DiscoverPreferencesRepository {
+class DiscoverPreferencesRepositoryImpl
+    implements DiscoverPreferencesRepository {
   DiscoverPreferencesRepositoryImpl({
     required DiscoverPreferencesLocalDataSource localDataSource,
   }) : _localDataSource = localDataSource;

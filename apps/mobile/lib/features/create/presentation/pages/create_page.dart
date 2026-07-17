@@ -12,6 +12,7 @@ import '../../application/create_taxonomy.dart';
 import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/create_availability.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({super.key, this.seedParameters = const <String, String>{}});
@@ -230,6 +231,44 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 errorText: state.validationErrors['startDateTimeUtc'],
                 onChanged: controller.updateStartDateTime,
               ),
+            const SizedBox(height: 12),
+            _CreateAvailabilitySection(
+              draft: state.draft,
+              validationErrors: state.validationErrors,
+              onKindChanged: controller.updateAvailabilityKind,
+              onAddSlot: () {
+                final DateTime start =
+                    state.draft.startDateTimeUtc ??
+                    DateTime.now().toUtc().add(const Duration(hours: 1));
+                controller.addScheduleSlot(
+                  startAtUtc: start,
+                  endAtUtc: start.add(
+                    Duration(minutes: state.draft.durationMinutes ?? 60),
+                  ),
+                );
+              },
+              onRemoveSlot: controller.removeScheduleSlot,
+              onAddWeek: () {
+                for (int weekday = 1; weekday <= 7; weekday++) {
+                  controller.setOpeningRule(
+                    CreateOpeningHoursDraftRule(
+                      dayOfWeek: weekday,
+                      isClosedAllDay: false,
+                      openMinutesSinceLocalMidnight: 9 * 60,
+                      closeMinutesSinceLocalMidnight: 21 * 60,
+                    ),
+                  );
+                }
+              },
+              onRemoveOpeningRule: controller.removeOpeningRule,
+              onDurationChanged: (int minutes) =>
+                  controller.updateDurationMinutes('$minutes'),
+              onPartialChanged: controller.updatePartialAttendance,
+              onMinimumChanged: (int minutes) =>
+                  controller.updateMinimumVisitDuration('$minutes'),
+              onBuffersChanged: controller.updateAvailabilityBuffers,
+              onCapacityChanged: controller.updateCapacity,
+            ),
             const SizedBox(height: 8),
             Row(
               children: <Widget>[
@@ -1490,6 +1529,277 @@ IconData _iconForCreateBlock(CreateObjectType objectType) {
   };
 }
 
+class _CreateAvailabilitySection extends StatelessWidget {
+  const _CreateAvailabilitySection({
+    required this.draft,
+    required this.validationErrors,
+    required this.onKindChanged,
+    required this.onAddSlot,
+    required this.onRemoveSlot,
+    required this.onAddWeek,
+    required this.onRemoveOpeningRule,
+    required this.onDurationChanged,
+    required this.onPartialChanged,
+    required this.onMinimumChanged,
+    required this.onBuffersChanged,
+    required this.onCapacityChanged,
+  });
+
+  final CreateDraftEntity draft;
+  final Map<String, String> validationErrors;
+  final ValueChanged<CreateAvailabilityKind> onKindChanged;
+  final VoidCallback onAddSlot;
+  final ValueChanged<String> onRemoveSlot;
+  final VoidCallback onAddWeek;
+  final ValueChanged<CreateOpeningHoursDraftRule> onRemoveOpeningRule;
+  final ValueChanged<int> onDurationChanged;
+  final ValueChanged<bool> onPartialChanged;
+  final ValueChanged<int> onMinimumChanged;
+  final void Function({required int before, required int after})
+  onBuffersChanged;
+  final void Function({required int? maximum, required int current})
+  onCapacityChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final Set<CreateAvailabilityKind> allowed = _allowedAvailabilityKinds(
+      draft.objectType,
+    );
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Availability',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text('${draft.marketCityId} · ${draft.timezone}'),
+            const SizedBox(height: 12),
+            SegmentedButton<CreateAvailabilityKind>(
+              segments: <ButtonSegment<CreateAvailabilityKind>>[
+                if (allowed.contains(CreateAvailabilityKind.eventSlots))
+                  const ButtonSegment<CreateAvailabilityKind>(
+                    value: CreateAvailabilityKind.eventSlots,
+                    label: Text('Schedule'),
+                    icon: Icon(Icons.event_outlined),
+                  ),
+                if (allowed.contains(CreateAvailabilityKind.openingHours))
+                  const ButtonSegment<CreateAvailabilityKind>(
+                    value: CreateAvailabilityKind.openingHours,
+                    label: Text('Hours'),
+                    icon: Icon(Icons.schedule_outlined),
+                  ),
+                const ButtonSegment<CreateAvailabilityKind>(
+                  value: CreateAvailabilityKind.none,
+                  label: Text('None'),
+                ),
+              ],
+              selected: <CreateAvailabilityKind>{
+                allowed.contains(draft.availabilityKind)
+                    ? draft.availabilityKind
+                    : CreateAvailabilityKind.none,
+              },
+              onSelectionChanged: (Set<CreateAvailabilityKind> values) =>
+                  onKindChanged(values.first),
+            ),
+            const SizedBox(height: 12),
+            if (draft.availabilityKind ==
+                CreateAvailabilityKind.eventSlots) ...<Widget>[
+              Row(
+                children: <Widget>[
+                  const Expanded(child: Text('Schedule slots')),
+                  TextButton.icon(
+                    onPressed: onAddSlot,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add slot'),
+                  ),
+                ],
+              ),
+              for (final CreateTimeSlotDraft slot in draft.scheduleSlots)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading: const Icon(Icons.event_available_outlined),
+                  title: Text(_availabilityDateTime(slot.startAtUtc)),
+                  subtitle: Text(
+                    'until ${_availabilityDateTime(slot.endAtUtc)}',
+                  ),
+                  trailing: IconButton(
+                    onPressed: () => onRemoveSlot(slot.localId),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ),
+            ],
+            if (draft.availabilityKind ==
+                CreateAvailabilityKind.openingHours) ...<Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      draft.openingHours.isEmpty
+                          ? 'No opening hours yet'
+                          : '${draft.openingHours.length} opening rules',
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: onAddWeek,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add 09:00–21:00'),
+                  ),
+                ],
+              ),
+              for (final CreateOpeningHoursDraftRule rule in draft.openingHours)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: Text(_openingRuleLabel(rule)),
+                  trailing: IconButton(
+                    onPressed: () => onRemoveOpeningRule(rule),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ),
+            ],
+            if (draft.availabilityKind !=
+                CreateAvailabilityKind.none) ...<Widget>[
+              const Divider(height: 24),
+              const Text('Duration'),
+              Wrap(
+                spacing: 8,
+                children: <int>[30, 60, 90, 120]
+                    .map(
+                      (int minutes) => ChoiceChip(
+                        label: Text('$minutes min'),
+                        selected: draft.durationMinutes == minutes,
+                        onSelected: (_) => onDurationChanged(minutes),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Allow partial attendance'),
+                value: draft.allowsPartialAttendance,
+                onChanged: onPartialChanged,
+              ),
+              if (draft.allowsPartialAttendance)
+                Wrap(
+                  spacing: 8,
+                  children: <int>[15, 30, 45, 60]
+                      .map(
+                        (int minutes) => ChoiceChip(
+                          label: Text('Minimum $minutes min'),
+                          selected:
+                              draft.minimumVisitDurationMinutes == minutes,
+                          onSelected: (_) => onMinimumChanged(minutes),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              const SizedBox(height: 8),
+              Text(
+                'Onsite buffers: ${draft.bufferBeforeMinutes} / '
+                '${draft.bufferAfterMinutes} min',
+              ),
+              Wrap(
+                spacing: 8,
+                children: <int>[0, 5, 10, 15]
+                    .map(
+                      (int minutes) => ChoiceChip(
+                        label: Text('$minutes min'),
+                        selected:
+                            draft.bufferBeforeMinutes == minutes &&
+                            draft.bufferAfterMinutes == minutes,
+                        onSelected: (_) =>
+                            onBuffersChanged(before: minutes, after: minutes),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                draft.maxParticipants == null
+                    ? 'Capacity unknown'
+                    : 'Capacity ${draft.currentParticipants}/'
+                          '${draft.maxParticipants}',
+              ),
+              Wrap(
+                spacing: 8,
+                children: <int?>[null, 5, 10, 20, 50]
+                    .map(
+                      (int? maximum) => ChoiceChip(
+                        label: Text(maximum == null ? 'No limit' : '$maximum'),
+                        selected: draft.maxParticipants == maximum,
+                        onSelected: (_) => onCapacityChanged(
+                          maximum: maximum,
+                          current: draft.currentParticipants,
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ],
+            for (final String key in <String>[
+              'scheduleSlots',
+              'openingHours',
+              'minimumVisitDurationMinutes',
+              'availabilityBuffers',
+            ])
+              if (validationErrors[key] case final String error)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    error,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Set<CreateAvailabilityKind> _allowedAvailabilityKinds(CreateObjectType type) {
+  return switch (type) {
+    CreateObjectType.event ||
+    CreateObjectType.activity ||
+    CreateObjectType.session ||
+    CreateObjectType.classWorkshop ||
+    CreateObjectType.findPeople => const <CreateAvailabilityKind>{
+      CreateAvailabilityKind.eventSlots,
+      CreateAvailabilityKind.none,
+    },
+    CreateObjectType.place ||
+    CreateObjectType.rental => const <CreateAvailabilityKind>{
+      CreateAvailabilityKind.openingHours,
+      CreateAvailabilityKind.none,
+    },
+    _ => const <CreateAvailabilityKind>{CreateAvailabilityKind.none},
+  };
+}
+
+String _availabilityDateTime(DateTime value) =>
+    value.toUtc().toIso8601String().replaceFirst('.000Z', 'Z');
+
+String _openingRuleLabel(CreateOpeningHoursDraftRule rule) {
+  if (rule.isClosedAllDay) return 'Closed';
+  final String selector = rule.exceptionDateIso ?? 'weekday ${rule.dayOfWeek}';
+  String time(int? minutes) => minutes == null
+      ? '--:--'
+      : '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
+            '${(minutes % 60).toString().padLeft(2, '0')}';
+  return '$selector · ${time(rule.openMinutesSinceLocalMidnight)}–'
+      '${time(rule.closeMinutesSinceLocalMidnight)}';
+}
+
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
     required this.label,
@@ -1904,7 +2214,7 @@ class _CreateSeed {
       shortDescription: _seedShortDescription(params, prompt, title),
       fullDescription: _seedFullDescription(params, prompt, title),
       city: _seedParam(params, <String>['city', 'location']).isEmpty
-          ? 'Rezekne'
+          ? 'Riga'
           : _seedParam(params, <String>['city', 'location']),
       venueName: _seedVenueName(params, objectType, title),
       addressLine1: _seedAddress(params),
@@ -2266,12 +2576,12 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     objectType: CreateObjectType.activity,
     categoryId: 'wellness_recharge',
     subcategoryId: 'calm_walk',
-    title: 'Calm walk in Rezekne',
+    title: 'Calm walk in Riga',
     shortDescription: 'Low-pressure recharge walk with a quiet finish.',
     fullDescription:
         'A small group walk for people who want a calm reset, light movement, and space to breathe.',
-    city: 'Rezekne',
-    venueName: 'Rezekne city center',
+    city: 'Riga',
+    venueName: 'Riga city center',
     addressLine1: 'Atbrivosanas aleja',
     coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
     isFree: true,
@@ -2285,7 +2595,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Simple coffee plan for a quick recharge today.',
     fullDescription:
         'A lightweight plan for people who want to meet for coffee without heavy scheduling.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Local cafe',
     addressLine1: 'City center',
     coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
@@ -2301,7 +2611,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Find one or two people for a friendly tennis session.',
     fullDescription:
         'A social request for people who want to play a friendly beginner-friendly tennis match.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Public tennis court',
     addressLine1: 'Sports center',
     coverImage: 'https://images.unsplash.com/photo-1517649763962-0c623066013b',
@@ -2316,7 +2626,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Hands-on pottery workshop for a small group.',
     fullDescription:
         'A guided beginner workshop with materials, practical support, and a finished piece to take home.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Creative studio',
     addressLine1: 'City center',
     coverImage: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa',
@@ -2332,7 +2642,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Local route through small places worth noticing.',
     fullDescription:
         'A guided local walk through calm corners, stories, and small recharge points around the city.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Old town meeting point',
     addressLine1: 'Central square',
     coverImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
@@ -2348,7 +2658,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'A calm cafe stop for reading, planning, or recovery.',
     fullDescription:
         'A creator-recommended coffee place with a quiet atmosphere and enough space for solo recharge time.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Local cafe',
     addressLine1: 'City center',
     coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
@@ -2364,7 +2674,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'A collection of calm sessions and recovery places.',
     fullDescription:
         'A curated guide for people looking for calm recharge sessions, nature resets, and quiet recovery spaces.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Recharge studio',
     addressLine1: 'Main street',
     coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
@@ -2379,7 +2689,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Bookable small-group yoga class.',
     fullDescription:
         'A bookable wellness slot with limited places, simple booking, and a beginner-friendly pace.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Recharge studio',
     addressLine1: 'Main street',
     coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773',
@@ -2395,7 +2705,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Comfortable bicycles for a local recharge ride.',
     fullDescription:
         'Hourly bicycle rental with a lock and helmet for independent city routes and nature rides.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Bike pickup point',
     addressLine1: 'City center',
     coverImage: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890',
@@ -2411,7 +2721,7 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     shortDescription: 'Short update from a local creator or venue.',
     fullDescription:
         'An announcement for followers about upcoming recharge ideas, schedule changes, or community updates.',
-    city: 'Rezekne',
+    city: 'Riga',
     venueName: 'Recharge community',
     addressLine1: 'City center',
     coverImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac',

@@ -1,34 +1,63 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
-import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 
 void main() {
-  test('legacy offer draft migrates to session and rental review flag', () {
-    final CreateDraftEntity draft = CreateDraftModel.fromJson(<String, dynamic>{
-      'id': 'legacy-offer',
-      'objectType': 'offer',
-      'mainCategory': 'sport',
-      'subcategory': 'sport_cycling',
-    }).toEntity();
-
-    expect(draft.objectType, CreateObjectType.session);
-    expect(draft.mainCategory, 'sport');
-    expect(draft.subcategory, 'cycling');
-    expect(
-      (draft.sectionData['migration']
-          as Map<String, Object?>)['review_as_rental'],
-      isTrue,
+  test('legacy broken Latvia default migrates to Riga market and timezone', () {
+    final CreateDraftModel model = CreateDraftModel.fromJson(
+      <String, dynamic>{
+        'id': 'draft_1',
+        'objectType': 'event',
+        'country': 'Latvia',
+        'city': '',
+        'timezone': 'Europe/Moscow',
+      },
+      activeMarketCityId: 'riga',
+      activeTimezone: 'Europe/Riga',
+      activeCountry: 'LV',
+      activeCity: 'Riga',
     );
+
+    expect(model.schemaVersion, 2);
+    expect(model.marketCityId, 'riga');
+    expect(model.timezone, 'Europe/Riga');
+    expect(model.toJson()['schemaVersion'], 2);
   });
 
-  test('all legacy create types map to accepted ContentType values', () {
-    expect(
-      createObjectTypeFromId('social_request'),
-      CreateObjectType.findPeople,
+  test('legacy Rezekne remains legacy market with Riga timezone', () {
+    final CreateDraftModel model = CreateDraftModel.fromJson(
+      <String, dynamic>{
+        'id': 'draft_2',
+        'objectType': 'place',
+        'country': 'Latvia',
+        'city': 'Rezekne',
+        'timezone': 'Europe/Moscow',
+      },
+      activeMarketCityId: 'riga',
+      activeTimezone: 'Europe/Riga',
+      activeCountry: 'LV',
+      activeCity: 'Riga',
     );
-    expect(createObjectTypeFromId('private_plan'), CreateObjectType.quickPlan);
-    expect(createObjectTypeFromId('venue'), CreateObjectType.place);
-    expect(createObjectTypeFromId('bookable_slot'), CreateObjectType.session);
-    expect(createObjectTypeFromId('announcement'), CreateObjectType.event);
+
+    expect(model.marketCityId, 'rezekne');
+    expect(model.timezone, 'Europe/Riga');
+  });
+
+  test('unknown legacy location is not overwritten', () {
+    final CreateDraftModel model = CreateDraftModel.fromJson(
+      <String, dynamic>{
+        'id': 'draft_3',
+        'objectType': 'place',
+        'country': 'Estonia',
+        'city': 'Tartu',
+        'timezone': 'Europe/Tallinn',
+      },
+      activeMarketCityId: 'riga',
+      activeTimezone: 'Europe/Riga',
+      activeCountry: 'LV',
+      activeCity: 'Riga',
+    );
+
+    expect(model.marketCityId, isEmpty);
+    expect(model.timezone, 'Europe/Tallinn');
   });
 }

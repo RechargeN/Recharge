@@ -1,8 +1,10 @@
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
+    required this.schemaVersion,
     required this.id,
     required this.objectType,
     required this.title,
@@ -17,6 +19,14 @@ class CreateDraftModel {
     required this.endDateTimeUtcIso,
     required this.durationMinutes,
     required this.timezone,
+    required this.marketCityId,
+    required this.availabilityKind,
+    required this.scheduleSlots,
+    required this.openingHours,
+    required this.allowsPartialAttendance,
+    required this.minimumVisitDurationMinutes,
+    required this.bufferBeforeMinutes,
+    required this.bufferAfterMinutes,
     required this.registrationDeadlineUtcIso,
     required this.format,
     required this.country,
@@ -60,6 +70,7 @@ class CreateDraftModel {
     required this.publishedAtUtcIso,
   });
 
+  final int schemaVersion;
   final String id;
   final String objectType;
   final String title;
@@ -74,6 +85,14 @@ class CreateDraftModel {
   final String? endDateTimeUtcIso;
   final int? durationMinutes;
   final String timezone;
+  final String marketCityId;
+  final String availabilityKind;
+  final List<Map<String, Object?>> scheduleSlots;
+  final List<Map<String, Object?>> openingHours;
+  final bool allowsPartialAttendance;
+  final int? minimumVisitDurationMinutes;
+  final int bufferBeforeMinutes;
+  final int bufferAfterMinutes;
   final String? registrationDeadlineUtcIso;
   final String format;
   final String country;
@@ -118,6 +137,7 @@ class CreateDraftModel {
 
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     return CreateDraftModel(
+      schemaVersion: 2,
       id: entity.id,
       objectType: entity.objectType.taxonomyId,
       title: entity.title,
@@ -132,6 +152,18 @@ class CreateDraftModel {
       endDateTimeUtcIso: entity.endDateTimeUtc?.toIso8601String(),
       durationMinutes: entity.durationMinutes,
       timezone: entity.timezone,
+      marketCityId: entity.marketCityId,
+      availabilityKind: entity.availabilityKind.name,
+      scheduleSlots: entity.scheduleSlots
+          .map((CreateTimeSlotDraft slot) => slot.toMap())
+          .toList(growable: false),
+      openingHours: entity.openingHours
+          .map((CreateOpeningHoursDraftRule rule) => rule.toMap())
+          .toList(growable: false),
+      allowsPartialAttendance: entity.allowsPartialAttendance,
+      minimumVisitDurationMinutes: entity.minimumVisitDurationMinutes,
+      bufferBeforeMinutes: entity.bufferBeforeMinutes,
+      bufferAfterMinutes: entity.bufferAfterMinutes,
       registrationDeadlineUtcIso: entity.registrationDeadlineUtc
           ?.toIso8601String(),
       format: entity.format,
@@ -202,6 +234,21 @@ class CreateDraftModel {
           : DateTime.parse(endDateTimeUtcIso!).toUtc(),
       durationMinutes: durationMinutes,
       timezone: timezone,
+      marketCityId: marketCityId,
+      availabilityKind: CreateAvailabilityKind.values.firstWhere(
+        (CreateAvailabilityKind value) => value.name == availabilityKind,
+        orElse: () => CreateAvailabilityKind.none,
+      ),
+      scheduleSlots: scheduleSlots
+          .map(CreateTimeSlotDraft.fromMap)
+          .toList(growable: false),
+      openingHours: openingHours
+          .map(CreateOpeningHoursDraftRule.fromMap)
+          .toList(growable: false),
+      allowsPartialAttendance: allowsPartialAttendance,
+      minimumVisitDurationMinutes: minimumVisitDurationMinutes,
+      bufferBeforeMinutes: bufferBeforeMinutes,
+      bufferAfterMinutes: bufferAfterMinutes,
       registrationDeadlineUtc: registrationDeadlineUtcIso == null
           ? null
           : DateTime.parse(registrationDeadlineUtcIso!).toUtc(),
@@ -249,8 +296,37 @@ class CreateDraftModel {
     );
   }
 
-  factory CreateDraftModel.fromJson(Map<String, dynamic> json) {
+  factory CreateDraftModel.fromJson(
+    Map<String, dynamic> json, {
+    String activeMarketCityId = '',
+    String activeTimezone = 'UTC',
+    String activeCountry = '',
+    String activeCity = '',
+  }) {
+    final int sourceVersion = (json['schemaVersion'] as num?)?.toInt() ?? 1;
+    final String country = json['country'] as String? ?? '';
+    final String city = json['city'] as String? ?? '';
+    String timezone = json['timezone'] as String? ?? 'UTC';
+    String marketCityId = json['marketCityId'] as String? ?? '';
+    if (sourceVersion < 2 && marketCityId.isEmpty) {
+      final String normalizedCity = city.trim().toLowerCase();
+      final String normalizedCountry = country.trim().toLowerCase();
+      if (normalizedCity == 'rezekne' || normalizedCity == 'rēzekne') {
+        marketCityId = 'rezekne';
+      } else if (normalizedCity == activeCity.trim().toLowerCase()) {
+        marketCityId = activeMarketCityId;
+      } else if ((normalizedCountry == 'latvia' ||
+              normalizedCountry == activeCountry.trim().toLowerCase()) &&
+          normalizedCity.isEmpty &&
+          timezone == 'Europe/Moscow') {
+        marketCityId = activeMarketCityId;
+      }
+      if (marketCityId.isNotEmpty && timezone == 'Europe/Moscow') {
+        timezone = marketCityId == 'rezekne' ? 'Europe/Riga' : activeTimezone;
+      }
+    }
     return CreateDraftModel(
+      schemaVersion: 2,
       id: json['id'] as String,
       objectType: json['objectType'] as String,
       title: json['title'] as String? ?? '',
@@ -269,11 +345,23 @@ class CreateDraftModel {
       startDateTimeUtcIso: json['startDateTimeUtcIso'] as String?,
       endDateTimeUtcIso: json['endDateTimeUtcIso'] as String?,
       durationMinutes: json['durationMinutes'] as int?,
-      timezone: json['timezone'] as String? ?? 'Europe/Moscow',
+      timezone: timezone,
+      marketCityId: marketCityId,
+      availabilityKind:
+          json['availabilityKind'] as String? ??
+          CreateAvailabilityKind.none.name,
+      scheduleSlots: _mapList(json['scheduleSlots']),
+      openingHours: _mapList(json['openingHours']),
+      allowsPartialAttendance:
+          json['allowsPartialAttendance'] as bool? ?? false,
+      minimumVisitDurationMinutes: (json['minimumVisitDurationMinutes'] as num?)
+          ?.toInt(),
+      bufferBeforeMinutes: (json['bufferBeforeMinutes'] as num?)?.toInt() ?? 0,
+      bufferAfterMinutes: (json['bufferAfterMinutes'] as num?)?.toInt() ?? 0,
       registrationDeadlineUtcIso: json['registrationDeadlineUtcIso'] as String?,
       format: json['format'] as String? ?? 'offline',
-      country: json['country'] as String? ?? '',
-      city: json['city'] as String? ?? '',
+      country: country,
+      city: city,
       venueName: json['venueName'] as String? ?? '',
       addressLine1: json['addressLine1'] as String? ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
@@ -322,6 +410,7 @@ class CreateDraftModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'schemaVersion': 2,
       'id': id,
       'objectType': objectType,
       'title': title,
@@ -336,6 +425,14 @@ class CreateDraftModel {
       'endDateTimeUtcIso': endDateTimeUtcIso,
       'durationMinutes': durationMinutes,
       'timezone': timezone,
+      'marketCityId': marketCityId,
+      'availabilityKind': availabilityKind,
+      'scheduleSlots': scheduleSlots,
+      'openingHours': openingHours,
+      'allowsPartialAttendance': allowsPartialAttendance,
+      'minimumVisitDurationMinutes': minimumVisitDurationMinutes,
+      'bufferBeforeMinutes': bufferBeforeMinutes,
+      'bufferAfterMinutes': bufferAfterMinutes,
       'registrationDeadlineUtcIso': registrationDeadlineUtcIso,
       'format': format,
       'country': country,
@@ -382,6 +479,19 @@ class CreateDraftModel {
 
   static CreateObjectType _parseObjectType(String value) {
     return createObjectTypeFromId(value);
+  }
+
+  static List<Map<String, Object?>> _mapList(Object? value) {
+    if (value is! List<dynamic>) return const <Map<String, Object?>>[];
+    return value
+        .whereType<Map<dynamic, dynamic>>()
+        .map((Map<dynamic, dynamic> map) {
+          return map.map(
+            (dynamic key, dynamic nested) =>
+                MapEntry<String, Object?>(key as String, nested as Object?),
+          );
+        })
+        .toList(growable: false);
   }
 
   static Map<String, Object?> _migratedSectionData(

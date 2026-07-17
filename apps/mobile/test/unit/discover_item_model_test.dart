@@ -3,35 +3,30 @@ import 'package:recharge/features/discover/data/models/discover_item_model.dart'
 
 void main() {
   test('fromMap parses details v2 fields', () {
-    final DiscoverItemModel item = DiscoverItemModel.fromMap(
-      <String, Object?>{
-        'id': 'evt_1',
-        'title': 'Sunset Tennis Meetup',
-        'subtitle': 'Friendly tennis at sunset',
-        'city': 'Dubai',
-        'category': 'outdoor',
-        'starts_at_utc': '2026-06-21T18:00:00Z',
-        'latitude': 25.2048,
-        'longitude': 55.2708,
-        'price_amount': 0.0,
-        'distance_km': 1.4,
-        'is_free': true,
-        'relevance_score': 0.9,
-        'cover_image_url': 'https://example.com/cover.jpg',
-        'organizer_name': 'Marine Tennis Club',
-        'organizer_handle': '@marinetennis',
-        'venue_name': 'Marine Tennis Club',
-        'address_line': 'Dubai Marina',
-        'participants_count': 32,
-        'capacity': 48,
-        'duration_minutes': 150,
-        'cta_label': 'Join meetup',
-        'highlights': <String>[
-          'Warm-up games',
-          'Friendly tournament',
-        ],
-      },
-    );
+    final DiscoverItemModel item = DiscoverItemModel.fromMap(<String, Object?>{
+      'id': 'evt_1',
+      'title': 'Sunset Tennis Meetup',
+      'subtitle': 'Friendly tennis at sunset',
+      'city': 'Dubai',
+      'category': 'outdoor',
+      'starts_at_utc': '2026-06-21T18:00:00Z',
+      'latitude': 25.2048,
+      'longitude': 55.2708,
+      'price_amount': 0.0,
+      'distance_km': 1.4,
+      'is_free': true,
+      'relevance_score': 0.9,
+      'cover_image_url': 'https://example.com/cover.jpg',
+      'organizer_name': 'Marine Tennis Club',
+      'organizer_handle': '@marinetennis',
+      'venue_name': 'Marine Tennis Club',
+      'address_line': 'Dubai Marina',
+      'participants_count': 32,
+      'capacity': 48,
+      'duration_minutes': 150,
+      'cta_label': 'Join meetup',
+      'highlights': <String>['Warm-up games', 'Friendly tournament'],
+    });
 
     expect(item.coverImageUrl, 'https://example.com/cover.jpg');
     expect(item.organizerName, 'Marine Tennis Club');
@@ -42,25 +37,23 @@ void main() {
   });
 
   test('copyWith preserves details v2 fields', () {
-    final DiscoverItemModel item = DiscoverItemModel.fromMap(
-      <String, Object?>{
-        'id': 'evt_1',
-        'title': 'Sunset Tennis Meetup',
-        'subtitle': 'Friendly tennis at sunset',
-        'city': 'Dubai',
-        'category': 'outdoor',
-        'starts_at_utc': '2026-06-21T18:00:00Z',
-        'latitude': 25.2048,
-        'longitude': 55.2708,
-        'price_amount': 0.0,
-        'distance_km': 1.4,
-        'is_free': true,
-        'relevance_score': 0.9,
-        'organizer_name': 'Marine Tennis Club',
-        'participants_count': 32,
-        'highlights': <String>['Warm-up games'],
-      },
-    );
+    final DiscoverItemModel item = DiscoverItemModel.fromMap(<String, Object?>{
+      'id': 'evt_1',
+      'title': 'Sunset Tennis Meetup',
+      'subtitle': 'Friendly tennis at sunset',
+      'city': 'Dubai',
+      'category': 'outdoor',
+      'starts_at_utc': '2026-06-21T18:00:00Z',
+      'latitude': 25.2048,
+      'longitude': 55.2708,
+      'price_amount': 0.0,
+      'distance_km': 1.4,
+      'is_free': true,
+      'relevance_score': 0.9,
+      'organizer_name': 'Marine Tennis Club',
+      'participants_count': 32,
+      'highlights': <String>['Warm-up games'],
+    });
 
     final copy = item.copyWith(distanceKm: 2.0, relevanceScore: 0.7);
 
@@ -70,4 +63,37 @@ void main() {
     expect(copy.participantsCount, 32);
     expect(copy.highlights, <String>['Warm-up games']);
   });
+
+  test(
+    'legacy zero values normalize without losing explicit participants zero',
+    () {
+      DiscoverItemModel parse(Map<String, Object?> values) =>
+          DiscoverItemModel.fromMap(<String, Object?>{
+            'id': 'evt_legacy',
+            'title': 'Legacy',
+            'subtitle': 'Legacy item',
+            'city': 'Riga',
+            'category': 'other',
+            'starts_at_utc': '2026-07-20T10:00:00Z',
+            'latitude': 56.9496,
+            'longitude': 24.1052,
+            'price_amount': 0.0,
+            'distance_km': 0.0,
+            'is_free': true,
+            ...values,
+          });
+
+      final DiscoverItemModel explicitZero = parse(<String, Object?>{
+        'duration_minutes': 0,
+        'capacity': 0,
+        'participants_count': 0,
+      });
+      final DiscoverItemModel absent = parse(const <String, Object?>{});
+
+      expect(explicitZero.durationMinutes, isNull);
+      expect(explicitZero.capacity, isNull);
+      expect(explicitZero.participantsCount, 0);
+      expect(absent.participantsCount, isNull);
+    },
+  );
 }

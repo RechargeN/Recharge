@@ -1,4 +1,4 @@
-import '../../application/queries/discover_query.dart';
+import 'discover_query.dart';
 
 class SmartSearchHistoryEntity {
   const SmartSearchHistoryEntity({
@@ -22,7 +22,12 @@ class SmartSearchHistoryEntity {
     };
   }
 
-  factory SmartSearchHistoryEntity.fromMap(Map<String, Object?> map) {
+  factory SmartSearchHistoryEntity.fromMap(
+    Map<String, Object?> map, {
+    required String defaultMarketCityId,
+    required double defaultCenterLat,
+    required double defaultCenterLng,
+  }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
     if (rawQuery is Map<dynamic, dynamic>) {
@@ -37,7 +42,12 @@ class SmartSearchHistoryEntity {
     return SmartSearchHistoryEntity(
       id: (map['id'] as String?) ?? 'smart_legacy',
       prompt: (map['prompt'] as String?) ?? '',
-      query: DiscoverQuery.fromMap(queryMap),
+      query: DiscoverQuery.fromMap(
+        queryMap,
+        defaultMarketCityId: defaultMarketCityId,
+        defaultCenterLat: defaultCenterLat,
+        defaultCenterLng: defaultCenterLng,
+      ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()
           : DateTime.parse(map['created_at_utc']! as String).toUtc(),

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/application/state/discover_feed_state.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
@@ -86,10 +86,9 @@ void main() {
     );
 
     expect(controller.state.appliedQuery.queryText, 'yoga');
-    expect(
-      controller.state.appliedQuery.selectedCategoryIds,
-      <String>['wellness'],
-    );
+    expect(controller.state.appliedQuery.selectedCategoryIds, <String>[
+      'wellness',
+    ]);
     expect(controller.state.appliedQuery.freeOnly, isTrue);
     expect(controller.state.appliedQuery.budgetMax, 10);
     expect(controller.state.appliedQuery.radiusMeters, 20000);
@@ -139,36 +138,39 @@ void main() {
     expect(repository.requestCount, 2);
   });
 
-  test('saved search operations persist, apply, and delete conditions',
-      () async {
-    await controller.applySearchConditions(
-      queryText: ' yoga ',
-      selectedCategoryIds: const <String>['wellness'],
-      freeOnly: true,
-      radiusMeters: 5000,
-    );
+  test(
+    'saved search operations persist, apply, and delete conditions',
+    () async {
+      await controller.applySearchConditions(
+        queryText: ' yoga ',
+        selectedCategoryIds: const <String>['wellness'],
+        freeOnly: true,
+        radiusMeters: 5000,
+      );
 
-    await controller.saveCurrentSearch();
+      await controller.saveCurrentSearch();
 
-    expect(controller.state.savedSearches, hasLength(1));
-    expect(controller.state.savedSearches.first.title, 'Yoga');
+      expect(controller.state.savedSearches, hasLength(1));
+      expect(controller.state.savedSearches.first.title, 'Yoga');
 
-    await controller.resetSearchConditions();
-    expect(controller.state.appliedQuery.queryText, isEmpty);
+      await controller.resetSearchConditions();
+      expect(controller.state.appliedQuery.queryText, isEmpty);
 
-    await controller.applySavedSearch(controller.state.savedSearches.first);
+      await controller.applySavedSearch(controller.state.savedSearches.first);
 
-    expect(controller.state.appliedQuery.queryText, 'yoga');
-    expect(
-      controller.state.appliedQuery.selectedCategoryIds,
-      <String>['wellness'],
-    );
-    expect(controller.state.appliedQuery.freeOnly, isTrue);
+      expect(controller.state.appliedQuery.queryText, 'yoga');
+      expect(controller.state.appliedQuery.selectedCategoryIds, <String>[
+        'wellness',
+      ]);
+      expect(controller.state.appliedQuery.freeOnly, isTrue);
 
-    await controller.deleteSavedSearch(controller.state.savedSearches.first.id);
+      await controller.deleteSavedSearch(
+        controller.state.savedSearches.first.id,
+      );
 
-    expect(controller.state.savedSearches, isEmpty);
-  });
+      expect(controller.state.savedSearches, isEmpty);
+    },
+  );
 
   test('smart search history persists, applies, and deletes prompts', () async {
     final DiscoverQuery query = DiscoverQuery.defaults().copyWith(
@@ -267,7 +269,8 @@ class _FakeDiscoverRepository implements DiscoverRepository {
   }
 }
 
-class _FakeDiscoverPreferencesRepository implements DiscoverPreferencesRepository {
+class _FakeDiscoverPreferencesRepository
+    implements DiscoverPreferencesRepository {
   DiscoverQuery? _saved;
   final List<SavedSearchEntity> _savedSearches = <SavedSearchEntity>[];
   final List<SmartSearchHistoryEntity> _smartSearchHistory =
@@ -288,7 +291,9 @@ class _FakeDiscoverPreferencesRepository implements DiscoverPreferencesRepositor
 
   @override
   Future<void> saveSavedSearch(SavedSearchEntity search) async {
-    _savedSearches.removeWhere((SavedSearchEntity item) => item.id == search.id);
+    _savedSearches.removeWhere(
+      (SavedSearchEntity item) => item.id == search.id,
+    );
     _savedSearches.insert(0, search);
   }
 

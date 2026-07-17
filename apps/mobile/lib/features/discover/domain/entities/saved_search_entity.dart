@@ -1,4 +1,4 @@
-import '../../application/queries/discover_query.dart';
+import 'discover_query.dart';
 
 class SavedSearchEntity {
   const SavedSearchEntity({
@@ -25,7 +25,12 @@ class SavedSearchEntity {
     };
   }
 
-  factory SavedSearchEntity.fromMap(Map<String, Object?> map) {
+  factory SavedSearchEntity.fromMap(
+    Map<String, Object?> map, {
+    required String defaultMarketCityId,
+    required double defaultCenterLat,
+    required double defaultCenterLng,
+  }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
     if (rawQuery is Map<dynamic, dynamic>) {
@@ -41,7 +46,12 @@ class SavedSearchEntity {
       id: (map['id'] as String?) ?? 'search_legacy',
       title: (map['title'] as String?) ?? 'Saved search',
       subtitle: (map['subtitle'] as String?) ?? 'Nearby activities',
-      query: DiscoverQuery.fromMap(queryMap),
+      query: DiscoverQuery.fromMap(
+        queryMap,
+        defaultMarketCityId: defaultMarketCityId,
+        defaultCenterLat: defaultCenterLat,
+        defaultCenterLng: defaultCenterLng,
+      ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()
           : DateTime.parse(map['created_at_utc']! as String).toUtc(),

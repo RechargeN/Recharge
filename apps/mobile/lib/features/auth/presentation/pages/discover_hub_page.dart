@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../discover/application/discover_providers.dart';
-import '../../../discover/application/queries/discover_query.dart';
+import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
 import '../../../discover/application/state/discover_feed_state.dart';
 import '../../../discover/domain/entities/discover_item_entity.dart';
@@ -1150,7 +1150,7 @@ class _HomeActivitySections extends StatelessWidget {
   int _freeRank(DiscoverItemEntity item) => item.isFree ? 1 : 0;
 
   int _quickDurationRank(DiscoverItemEntity item) {
-    final int duration = item.durationMinutes;
+    final int duration = item.durationMinutes ?? 0;
     return duration > 0 && duration <= 90 ? 1 : 0;
   }
 }

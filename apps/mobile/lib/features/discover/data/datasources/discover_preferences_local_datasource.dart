@@ -2,14 +2,24 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 
 class DiscoverPreferencesLocalDataSource {
-  DiscoverPreferencesLocalDataSource(this._secureStorage);
+  DiscoverPreferencesLocalDataSource(
+    this._secureStorage, {
+    required String defaultMarketCityId,
+    required double defaultCenterLat,
+    required double defaultCenterLng,
+  }) : _defaultMarketCityId = defaultMarketCityId,
+       _defaultCenterLat = defaultCenterLat,
+       _defaultCenterLng = defaultCenterLng;
 
   final FlutterSecureStorage _secureStorage;
+  final String _defaultMarketCityId;
+  final double _defaultCenterLat;
+  final double _defaultCenterLng;
   static const String _lastQueryKey = 'discover.last_query';
   static const String _savedSearchesKey = 'discover.saved_searches';
   static const String _smartSearchHistoryKey = 'discover.smart_search_history';
@@ -29,10 +39,15 @@ class DiscoverPreferencesLocalDataSource {
     try {
       final Map<String, Object?> map =
           (jsonDecode(raw) as Map<dynamic, dynamic>).map(
-        (dynamic key, dynamic value) =>
-            MapEntry<String, Object?>(key as String, value as Object?),
+            (dynamic key, dynamic value) =>
+                MapEntry<String, Object?>(key as String, value as Object?),
+          );
+      return DiscoverQuery.fromMap(
+        map,
+        defaultMarketCityId: _defaultMarketCityId,
+        defaultCenterLat: _defaultCenterLat,
+        defaultCenterLng: _defaultCenterLng,
       );
-      return DiscoverQuery.fromMap(map);
     } on FormatException {
       return null;
     }
@@ -53,6 +68,9 @@ class DiscoverPreferencesLocalDataSource {
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
               ),
+              defaultMarketCityId: _defaultMarketCityId,
+              defaultCenterLat: _defaultCenterLat,
+              defaultCenterLng: _defaultCenterLng,
             ),
           )
           .toList(growable: false);
@@ -81,9 +99,7 @@ class DiscoverPreferencesLocalDataSource {
   }
 
   Future<List<SmartSearchHistoryEntity>> loadSmartSearchHistory() async {
-    final String? raw = await _secureStorage.read(
-      key: _smartSearchHistoryKey,
-    );
+    final String? raw = await _secureStorage.read(key: _smartSearchHistoryKey);
     if (raw == null || raw.isEmpty) {
       return const <SmartSearchHistoryEntity>[];
     }
@@ -97,6 +113,9 @@ class DiscoverPreferencesLocalDataSource {
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
               ),
+              defaultMarketCityId: _defaultMarketCityId,
+              defaultCenterLat: _defaultCenterLat,
+              defaultCenterLng: _defaultCenterLng,
             ),
           )
           .where(

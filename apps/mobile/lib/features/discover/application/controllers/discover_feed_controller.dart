@@ -3,28 +3,53 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/discover_query.dart';
+import '../../domain/entities/geo_point.dart';
+import '../../domain/entities/time_window.dart';
+import '../../domain/entities/time_fit_evaluation.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/repositories/discover_preferences_repository.dart';
 import '../../domain/repositories/discover_repository.dart';
 import '../../domain/usecases/get_discover_feed_usecase.dart';
-import '../queries/discover_query.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
+import '../discover_runtime_defaults.dart';
 import '../state/discover_feed_state.dart';
+
+enum TimeFitRelaxation { widenWindow, skipReturnTrip, removeTimeFilter }
 
 class DiscoverFeedController extends ChangeNotifier {
   DiscoverFeedController({
     required GetDiscoverFeedUseCase getDiscoverFeedUseCase,
     required DiscoverPreferencesRepository discoverPreferencesRepository,
     required AnalyticsService analyticsService,
+    DiscoverQuery? initialQuery,
+    BuildTimeWindowUseCase? buildTimeWindow,
+    DiscoverRuntimeDefaults runtimeDefaults = const DiscoverRuntimeDefaults(
+      timezoneId: 'UTC',
+      originLat: 0,
+      originLng: 0,
+    ),
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
-       _analyticsService = analyticsService;
+       _analyticsService = analyticsService,
+       _initialQuery = initialQuery ?? DiscoverQuery.defaults(),
+       _buildTimeWindow = buildTimeWindow,
+       _runtimeDefaults = runtimeDefaults,
+       _state = DiscoverFeedState.initial(
+         initialQuery ?? DiscoverQuery.defaults(),
+       );
 
   final GetDiscoverFeedUseCase _getDiscoverFeedUseCase;
   final DiscoverPreferencesRepository _discoverPreferencesRepository;
   final AnalyticsService _analyticsService;
+  final DiscoverQuery _initialQuery;
+  final BuildTimeWindowUseCase? _buildTimeWindow;
+  final DiscoverRuntimeDefaults _runtimeDefaults;
 
-  DiscoverFeedState _state = DiscoverFeedState.initial();
+  String get marketTimezoneId => _runtimeDefaults.timezoneId;
+
+  DiscoverFeedState _state;
   DiscoverFeedState get state => _state;
 
   bool _requestedOnce = false;
@@ -47,10 +72,16 @@ class DiscoverFeedController extends ChangeNotifier {
     bool clearDateTo = false,
     double? radiusMeters,
     bool? unlimitedRadius,
+    bool? openNow,
+    bool? onlyAvailable,
     int? availableDurationMinutes,
     bool clearAvailableDurationMinutes = false,
     String? mood,
     bool clearMood = false,
+    TimeWindow? timeWindow,
+    bool clearTimeWindow = false,
+    TravelContext? travelContext,
+    bool clearTravelContext = false,
   }) {
     _setState(
       _state.copyWith(
@@ -66,12 +97,130 @@ class DiscoverFeedController extends ChangeNotifier {
           clearDateTo: clearDateTo,
           radiusMeters: radiusMeters,
           unlimitedRadius: unlimitedRadius,
+          openNow: openNow,
+          onlyAvailable: onlyAvailable,
           availableDurationMinutes: availableDurationMinutes,
           clearAvailableDurationMinutes: clearAvailableDurationMinutes,
           mood: mood,
           clearMood: clearMood,
+          timeWindow: timeWindow,
+          clearTimeWindow: clearTimeWindow,
+          travelContext: travelContext,
+          clearTravelContext: clearTravelContext,
         ),
       ),
+    );
+  }
+
+  String? stageTimeWindowSelection({
+    required TimeWindowMode mode,
+    DateTime? startLocal,
+    DateTime? endLocal,
+    required int flexibilityMinutes,
+    required TravelOriginType originType,
+    double? originLat,
+    double? originLng,
+    required TransportMode transportMode,
+    required bool includeReturnTrip,
+  }) {
+    final BuildTimeWindowUseCase? builder = _buildTimeWindow;
+    if (builder == null) return 'Time-window service is unavailable';
+    try {
+      final TimeWindow timeWindow = builder(
+        mode: mode,
+        timezoneId: _runtimeDefaults.timezoneId,
+        nowUtc: DateTime.now().toUtc(),
+        startLocal: startLocal,
+        endLocal: endLocal,
+        flexibilityMinutes: flexibilityMinutes,
+      );
+      final TravelContext travelContext = TravelContext(
+        originType: originType,
+        origin: GeoPoint(
+          latitude: originLat ?? _runtimeDefaults.originLat,
+          longitude: originLng ?? _runtimeDefaults.originLng,
+        ),
+        transportMode: transportMode,
+        includeReturnTrip: includeReturnTrip,
+      );
+      stageSearchConditions(
+        timeWindow: timeWindow,
+        travelContext: travelContext,
+        dateFrom: timeWindow.startAtUtc,
+        dateTo: timeWindow.endAtUtc,
+      );
+      _analyticsService.track(
+        'time_window_applied',
+        params: <String, Object?>{
+          'mode': mode.name,
+          'transport_mode': transportMode.name,
+          'include_return_trip': includeReturnTrip,
+        },
+      );
+      return null;
+    } on TimeWindowValidationException catch (error) {
+      return error.message;
+    } on ArgumentError catch (error) {
+      return error.message?.toString() ?? 'Invalid travel context';
+    }
+  }
+
+  void clearTimeWindowSelection({bool clearLegacyDates = true}) {
+    stageSearchConditions(
+      clearTimeWindow: true,
+      clearTravelContext: true,
+      clearDateFrom: clearLegacyDates,
+      clearDateTo: clearLegacyDates,
+    );
+  }
+
+  Future<void> applyTimeFitRelaxation(TimeFitRelaxation relaxation) async {
+    final DiscoverQuery query = _state.appliedQuery;
+    final TimeWindow? window = query.timeWindow;
+    if (window == null) return;
+
+    DiscoverQuery relaxed;
+    switch (relaxation) {
+      case TimeFitRelaxation.widenWindow:
+        final int flexibility = window.mode == TimeWindowMode.flexible
+            ? (window.flexibilityMinutes + 15).clamp(15, 60)
+            : 30;
+        relaxed = query.copyWith(
+          timeWindow: TimeWindow(
+            startAtUtc: window.startAtUtc,
+            endAtUtc: window.endAtUtc,
+            timezoneId: window.timezoneId,
+            mode: TimeWindowMode.flexible,
+            flexibilityMinutes: flexibility,
+            resolvedAtUtc: DateTime.now().toUtc(),
+          ),
+        );
+      case TimeFitRelaxation.skipReturnTrip:
+        final TravelContext? travel = query.travelContext;
+        if (travel == null || !travel.includeReturnTrip) return;
+        relaxed = query.copyWith(
+          travelContext: TravelContext(
+            originType: travel.originType,
+            origin: travel.origin,
+            transportMode: travel.transportMode,
+            includeReturnTrip: false,
+          ),
+        );
+      case TimeFitRelaxation.removeTimeFilter:
+        relaxed = query.copyWith(
+          clearTimeWindow: true,
+          clearTravelContext: true,
+          clearDateFrom: true,
+          clearDateTo: true,
+        );
+    }
+    _analyticsService.track(
+      'time_fit_relaxation_selected',
+      params: <String, Object?>{'relaxation': relaxation.name},
+    );
+    await _applyGlobalQueryUpdate(
+      relaxed.copyWith(queryVersion: 2, appliedAtUtc: DateTime.now().toUtc()),
+      clearSelectedItem: true,
     );
   }
 
@@ -101,6 +250,41 @@ class DiscoverFeedController extends ChangeNotifier {
       final List<DiscoverItemEntity> items = await _getDiscoverFeedUseCase(
         _state.appliedQuery,
       );
+      if (_state.appliedQuery.timeWindow != null) {
+        final int unknownCount = items
+            .where(
+              (DiscoverItemEntity item) =>
+                  item.timeFitEvaluation?.timeFitStatus ==
+                  TimeFitStatus.unknown,
+            )
+            .length;
+        _analyticsService.track(
+          'time_fit_result_shown',
+          params: <String, Object?>{
+            'item_count': items.length,
+            'unknown_count': unknownCount,
+          },
+        );
+        if (unknownCount > 0) {
+          _analyticsService.track(
+            'time_fit_unknown_shown',
+            params: <String, Object?>{'item_count': unknownCount},
+          );
+        }
+        final int failedTravelCount = items
+            .where(
+              (DiscoverItemEntity item) =>
+                  item.timeFitEvaluation?.quality ==
+                  TravelEstimateQuality.unavailable,
+            )
+            .length;
+        if (failedTravelCount > 0) {
+          _analyticsService.track(
+            'travel_estimate_failed',
+            params: <String, Object?>{'item_count': failedTravelCount},
+          );
+        }
+      }
 
       if (items.isEmpty) {
         _setState(
@@ -182,7 +366,7 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         queryText: text.trim(),
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -195,7 +379,7 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         selectedCategoryIds: categories,
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -205,7 +389,7 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         freeOnly: enabled,
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -221,7 +405,7 @@ class DiscoverFeedController extends ChangeNotifier {
         clearBudgetMin: min == null,
         budgetMax: max,
         clearBudgetMax: max == null,
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -237,7 +421,7 @@ class DiscoverFeedController extends ChangeNotifier {
         clearDateFrom: from == null,
         dateTo: to?.toUtc(),
         clearDateTo: to == null,
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -284,8 +468,9 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> applySavedSearch(SavedSearchEntity search) async {
-    final DiscoverQuery query = search.query.copyWith(
-      queryVersion: _state.appliedQuery.queryVersion + 1,
+    final DiscoverQuery refreshed = _refreshAnytimeToday(search.query);
+    final DiscoverQuery query = refreshed.copyWith(
+      queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     await _applyGlobalQueryUpdate(query, clearSelectedItem: true);
@@ -322,8 +507,9 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> applySmartSearchHistory(SmartSearchHistoryEntity item) async {
-    final DiscoverQuery query = item.query.copyWith(
-      queryVersion: _state.appliedQuery.queryVersion + 1,
+    final DiscoverQuery refreshed = _refreshAnytimeToday(item.query);
+    final DiscoverQuery query = refreshed.copyWith(
+      queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     await _applyGlobalQueryUpdate(query, clearSelectedItem: true);
@@ -362,10 +548,16 @@ class DiscoverFeedController extends ChangeNotifier {
     String? sourceScreen,
     double? radiusMeters,
     bool? unlimitedRadius,
+    bool? openNow,
+    bool? onlyAvailable,
     double? centerLat,
     double? centerLng,
     bool? manualAreaSelected,
     String? selectedItemId,
+    TimeWindow? timeWindow,
+    bool clearTimeWindow = false,
+    TravelContext? travelContext,
+    bool clearTravelContext = false,
   }) async {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
@@ -389,10 +581,16 @@ class DiscoverFeedController extends ChangeNotifier {
         sourceScreen: sourceScreen,
         radiusMeters: radiusMeters,
         unlimitedRadius: unlimitedRadius,
+        openNow: openNow,
+        onlyAvailable: onlyAvailable,
         centerLat: centerLat,
         centerLng: centerLng,
         manualAreaSelected: manualAreaSelected,
-        queryVersion: _state.appliedQuery.queryVersion + 1,
+        timeWindow: timeWindow,
+        clearTimeWindow: clearTimeWindow,
+        travelContext: travelContext,
+        clearTravelContext: clearTravelContext,
+        queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
       selectedItemId: selectedItemId,
@@ -400,12 +598,11 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> resetSearchConditions() async {
-    final DiscoverQuery defaults = DiscoverQuery.defaults();
+    final DiscoverQuery defaults = _initialQuery.copyWith(
+      appliedAtUtc: DateTime.now().toUtc(),
+    );
     await _applyGlobalQueryUpdate(
-      defaults.copyWith(
-        queryVersion: _state.appliedQuery.queryVersion + 1,
-        appliedAtUtc: DateTime.now().toUtc(),
-      ),
+      defaults.copyWith(queryVersion: 2, appliedAtUtc: DateTime.now().toUtc()),
     );
   }
 
@@ -441,7 +638,7 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> applySearchArea() async {
     final DiscoverQuery applied = _state.draftQuery.copyWith(
       searchAreaDirty: false,
-      queryVersion: _state.appliedQuery.queryVersion + 1,
+      queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     _setState(
@@ -456,8 +653,8 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> useCurrentLocation() async {
-    // MVP baseline: mock current location near city center.
-    stageMapCenter(lat: 56.5099, lng: 27.3332);
+    // MVP baseline: mock current location at the active market center.
+    stageMapCenter(lat: _initialQuery.centerLat, lng: _initialQuery.centerLng);
     await applySearchArea();
   }
 
@@ -527,6 +724,27 @@ class DiscoverFeedController extends ChangeNotifier {
   void _setState(DiscoverFeedState state) {
     _state = state;
     notifyListeners();
+  }
+
+  DiscoverQuery _refreshAnytimeToday(DiscoverQuery query) {
+    if (query.timeWindow?.mode != TimeWindowMode.anytimeToday ||
+        _buildTimeWindow == null) {
+      return query;
+    }
+    try {
+      final TimeWindow refreshed = _buildTimeWindow(
+        mode: TimeWindowMode.anytimeToday,
+        timezoneId: query.timeWindow!.timezoneId,
+        nowUtc: DateTime.now().toUtc(),
+      );
+      return query.copyWith(
+        timeWindow: refreshed,
+        dateFrom: refreshed.startAtUtc,
+        dateTo: refreshed.endAtUtc,
+      );
+    } on TimeWindowValidationException {
+      return query;
+    }
   }
 }
 

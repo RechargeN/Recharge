@@ -17,6 +17,7 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/time_fit_evaluation.dart';
 
 class DiscoverDetailsPage extends ConsumerStatefulWidget {
   const DiscoverDetailsPage({
@@ -451,6 +452,25 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (item.timeFitEvaluation case final evaluation?) ...<Widget>[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  _DetailsPill(label: _detailsTimeFitLabel(evaluation)),
+                  _DetailsPill(label: _detailsOpeningLabel(evaluation)),
+                  if (evaluation.travelMinutes != null)
+                    _DetailsPill(
+                      label:
+                          '${evaluation.travelMinutes} min travel'
+                          '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · estimated' : ''}',
+                    ),
+                  if (evaluation.selectedSlotId != null)
+                    _DetailsPill(label: 'Slot ${evaluation.selectedSlotId}'),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -1180,16 +1200,33 @@ String _priceLabel(DiscoverItemEntity item) {
   return '${item.priceAmount.toStringAsFixed(0)} €';
 }
 
+String _detailsTimeFitLabel(TimeFitEvaluation evaluation) =>
+    switch (evaluation.timeFitStatus) {
+      TimeFitStatus.fits => 'Fits your time',
+      TimeFitStatus.partial => 'Partial attendance possible',
+      TimeFitStatus.doesNotFit => 'Does not fit',
+      TimeFitStatus.unknown => 'Time not confirmed',
+    };
+
+String _detailsOpeningLabel(TimeFitEvaluation evaluation) =>
+    switch (evaluation.openingStatus) {
+      OpeningStatus.open => 'Open',
+      OpeningStatus.closed => 'Closed',
+      OpeningStatus.unknown => 'Opening hours unknown',
+    };
+
 String _participantsLabel(DiscoverItemEntity item) {
-  if (item.capacity <= 0) return '${item.participantsCount} joined';
+  if (item.capacity == null) return 'Capacity unknown';
+  if (item.participantsCount == null) return 'Participants unknown';
   return '${item.participantsCount}/${item.capacity}';
 }
 
 String _durationLabel(DiscoverItemEntity item) {
-  if (item.durationMinutes <= 0) return 'Flexible';
-  if (item.durationMinutes < 60) return '${item.durationMinutes} min';
-  final int hours = item.durationMinutes ~/ 60;
-  final int minutes = item.durationMinutes % 60;
+  final int? duration = item.durationMinutes;
+  if (duration == null) return 'Flexible';
+  if (duration < 60) return '$duration min';
+  final int hours = duration ~/ 60;
+  final int minutes = duration % 60;
   if (minutes == 0) return '$hours h';
   return '$hours h $minutes min';
 }
@@ -1230,7 +1267,9 @@ class _DetailsRoutePlan {
 _DetailsRoutePlan _routePlanForDetails(DiscoverItemEntity item) {
   return _DetailsRoutePlan(
     mood: _scenarioMoodForDetails(item),
-    durationMinutes: item.durationMinutes > 120 ? item.durationMinutes : 120,
+    durationMinutes: (item.durationMinutes ?? 0) > 120
+        ? item.durationMinutes!
+        : 120,
     freeOnly: item.isFree,
     walkingOnly: true,
     prompt: '${item.title} · ${item.category} · ${item.city}',

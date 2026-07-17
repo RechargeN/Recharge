@@ -18,12 +18,14 @@ import '../../../scenarios/application/state/scenario_builder_state.dart';
 import '../../../scenarios/domain/entities/scenario_draft_entity.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
+import '../../domain/entities/time_window.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -354,6 +356,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
     final double? itemLng = _doubleFromSeed(seedParameters['itemLng']);
+    final TimeWindow? timeWindow = _mapTimeWindowFromSeed(seedParameters);
+    final TravelContext? travelContext = _mapTravelContextFromSeed(
+      seedParameters,
+    );
     await controller.applySearchConditions(
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
@@ -367,10 +373,16 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       clearDateTo: dateTo == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
+      openNow: seedParameters['openNow'] == '1',
+      onlyAvailable: seedParameters['onlyAvailable'] == '1',
       centerLat: itemLat,
       centerLng: itemLng,
       manualAreaSelected: itemLat != null && itemLng != null,
       selectedItemId: _itemIdFromSeed(seedParameters),
+      timeWindow: timeWindow,
+      clearTimeWindow: timeWindow == null,
+      travelContext: travelContext,
+      clearTravelContext: travelContext == null,
     );
   }
 
@@ -607,7 +619,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       subtitle:
           '${route.stops.length} stops · '
           '${route.totalDurationMinutes} min',
-      city: 'Rezekne',
+      city: 'Riga',
       category: 'scenario',
       startsAtUtc: now,
       distanceKm: route.totalDistanceKm,
@@ -633,6 +645,9 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'itemLat',
     'itemLng',
     'itemId',
+    'timeMode',
+    'openNow',
+    'onlyAvailable',
   ];
   return supportedKeys.any(seedParameters.containsKey);
 }
@@ -830,6 +845,78 @@ Map<String, String> _mapQueryParameters(DiscoverQuery query) {
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
+    ..._mapTimeRouteParameters(query),
+  };
+}
+
+TimeWindow? _mapTimeWindowFromSeed(Map<String, String> values) {
+  final String? mode = values['timeMode'];
+  final String? start = values['timeStart'];
+  final String? end = values['timeEnd'];
+  final String? timezone = values['timezone'];
+  final String? resolvedAt = values['resolvedAt'];
+  if (mode == null ||
+      start == null ||
+      end == null ||
+      timezone == null ||
+      resolvedAt == null) {
+    return null;
+  }
+  try {
+    return TimeWindow(
+      startAtUtc: DateTime.parse(start).toUtc(),
+      endAtUtc: DateTime.parse(end).toUtc(),
+      timezoneId: timezone,
+      mode: TimeWindowMode.values.firstWhere(
+        (TimeWindowMode value) => value.name == mode,
+      ),
+      flexibilityMinutes: int.tryParse(values['flexibility'] ?? '') ?? 0,
+      resolvedAtUtc: DateTime.parse(resolvedAt).toUtc(),
+    );
+  } on Exception {
+    return null;
+  }
+}
+
+TravelContext? _mapTravelContextFromSeed(Map<String, String> values) {
+  if (!values.containsKey('originLat') || !values.containsKey('originLng')) {
+    return null;
+  }
+  try {
+    return TravelContext(
+      originType: TravelOriginType.values.firstWhere(
+        (TravelOriginType value) => value.name == values['originType'],
+      ),
+      origin: GeoPoint(
+        latitude: double.parse(values['originLat']!),
+        longitude: double.parse(values['originLng']!),
+      ),
+      transportMode: TransportMode.values.firstWhere(
+        (TransportMode value) => value.name == values['transport'],
+      ),
+      includeReturnTrip: values['returnTrip'] == '1',
+    );
+  } on Exception {
+    return null;
+  }
+}
+
+Map<String, String> _mapTimeRouteParameters(DiscoverQuery query) {
+  final TimeWindow? window = query.timeWindow;
+  final TravelContext? travel = query.travelContext;
+  if (window == null || travel == null) return const <String, String>{};
+  return <String, String>{
+    'timeMode': window.mode.name,
+    'timeStart': window.startAtUtc.toIso8601String(),
+    'timeEnd': window.endAtUtc.toIso8601String(),
+    'timezone': window.timezoneId,
+    'flexibility': '${window.flexibilityMinutes}',
+    'resolvedAt': window.resolvedAtUtc.toIso8601String(),
+    'originType': travel.originType.name,
+    'originLat': '${travel.origin.latitude}',
+    'originLng': '${travel.origin.longitude}',
+    'transport': travel.transportMode.name,
+    'returnTrip': travel.includeReturnTrip ? '1' : '0',
   };
 }
 
@@ -935,10 +1022,12 @@ String _mapScenarioMoodForQuery(DiscoverQuery query) {
 
 String _mapMarketCityLabel(String marketCityId) {
   switch (marketCityId.toLowerCase()) {
+    case 'riga':
+      return 'Riga';
     case 'rezekne':
       return 'Rezekne';
   }
-  return marketCityId.trim().isEmpty ? 'Rezekne' : marketCityId;
+  return marketCityId.trim().isEmpty ? 'Riga' : _capitalized(marketCityId);
 }
 
 class _MapFilterPanel extends StatelessWidget {

@@ -44,7 +44,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'organizer_name': 'Recharge Wellness',
         'organizer_handle': '@recharge_wellness',
         'venue_name': 'Central Park Lawn',
-        'address_line': 'Atbrivosanas aleja 93, Rezekne',
+        'address_line': 'Brivibas bulvaris 23, Riga',
         'participants_count': 18,
         'capacity': 32,
         'duration_minutes': 75,
@@ -69,7 +69,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'organizer_name': 'Local Sketch Club',
         'organizer_handle': '@sketch_rezekne',
         'venue_name': 'Mols Coffee Studio',
-        'address_line': 'Latgales iela 21, Rezekne',
+        'address_line': 'Kalku iela 11, Riga',
         'participants_count': 9,
         'capacity': 14,
         'duration_minutes': 120,
@@ -91,10 +91,10 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'cover_image_url':
             'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
             '?auto=format&fit=crop&w=1200&q=80',
-        'organizer_name': 'Rezekne Walks',
+        'organizer_name': 'Riga Walks',
         'organizer_handle': '@rezekne_walks',
         'venue_name': 'Lake Trail Start',
-        'address_line': 'Ezermalas taka, Rezekne',
+        'address_line': 'Kisezera taka, Riga',
         'participants_count': 24,
         'capacity': 40,
         'duration_minutes': 90,
@@ -119,7 +119,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'organizer_name': 'Evenbrite Local',
         'organizer_handle': '@evenbrite_local',
         'venue_name': 'Old Town Stage',
-        'address_line': 'Pils iela 4, Rezekne',
+        'address_line': 'Pils iela 4, Riga',
         'participants_count': 46,
         'capacity': 80,
         'duration_minutes': 150,
@@ -144,7 +144,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'organizer_name': 'Family Recharge',
         'organizer_handle': '@family_recharge',
         'venue_name': 'Meadow Picnic Area',
-        'address_line': 'Stacijas parks, Rezekne',
+        'address_line': 'Esplanade, Riga',
         'participants_count': 21,
         'capacity': 50,
         'duration_minutes': 180,
@@ -169,7 +169,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'organizer_name': 'Sunset Routes',
         'organizer_handle': '@sunset_routes',
         'venue_name': 'Hill Viewpoint',
-        'address_line': 'Pilskalna taka, Rezekne',
+        'address_line': 'Bastejkalna taka, Riga',
         'participants_count': 16,
         'capacity': 28,
         'duration_minutes': 60,
@@ -187,15 +187,19 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
 
     for (int i = 0; i < 60; i++) {
       final Map<String, Object?> template = seed[i % seed.length];
-      final double lat = 56.5099 + ((i % 10) - 5) * 0.0075;
-      final double lng = 27.3332 + ((i ~/ 10) - 3) * 0.0105;
+      final double lat = 56.9496 + ((i % 10) - 5) * 0.0075;
+      final double lng = 24.1052 + ((i ~/ 10) - 3) * 0.0105;
+      final DateTime startsAt = base.add(Duration(hours: i % 48));
+      final int durationMinutes = template['duration_minutes']! as int;
+      final bool usesOpeningHours = i.isOdd;
       result.add(<String, Object?>{
-        'id': 'evt_rez_${i.toString().padLeft(3, '0')}',
+        'id': 'evt_rig_${i.toString().padLeft(3, '0')}',
         'title': template['title'],
         'subtitle': template['subtitle'],
-        'city': template['city'],
+        'city': 'Riga',
         'category': template['category'],
-        'starts_at_utc': base.add(Duration(hours: i % 48)).toIso8601String(),
+        'subcategory': template['subcategory'],
+        'starts_at_utc': startsAt.toIso8601String(),
         'latitude': lat,
         'longitude': lng,
         'price_amount': template['price_amount'],
@@ -210,7 +214,46 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'participants_count':
             (template['participants_count']! as int) + (i % 5),
         'capacity': template['capacity'],
-        'duration_minutes': template['duration_minutes'],
+        'duration_minutes': durationMinutes,
+        'duration_confidence': 'exact',
+        'market_city_id': 'riga',
+        'timezone_id': 'Europe/Riga',
+        'availability_kind': usesOpeningHours ? 'openingHours' : 'eventSlots',
+        'schedule_slots': usesOpeningHours
+            ? const <Map<String, Object?>>[]
+            : <Map<String, Object?>>[
+                <String, Object?>{
+                  'slot_id':
+                      '00000000-0000-4000-8000-${i.toString().padLeft(12, '0')}',
+                  'start_at_utc': startsAt.toIso8601String(),
+                  'end_at_utc': startsAt
+                      .add(Duration(minutes: durationMinutes))
+                      .toIso8601String(),
+                },
+              ],
+        'opening_hours': usesOpeningHours
+            ? <Map<String, Object?>>[
+                for (final String day in <String>[
+                  'monday',
+                  'tuesday',
+                  'wednesday',
+                  'thursday',
+                  'friday',
+                  'saturday',
+                  'sunday',
+                ])
+                  <String, Object?>{
+                    'day_of_week': day,
+                    'is_closed_all_day': false,
+                    'open_minutes': 8 * 60,
+                    'close_minutes': 23 * 60,
+                  },
+              ]
+            : const <Map<String, Object?>>[],
+        'allows_partial_attendance': true,
+        'minimum_visit_duration_minutes': 30,
+        'buffer_before_minutes': usesOpeningHours ? 0 : 10,
+        'buffer_after_minutes': usesOpeningHours ? 0 : 10,
         'cta_label': template['cta_label'],
         'highlights': template['highlights'],
       });

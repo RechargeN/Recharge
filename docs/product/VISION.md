@@ -77,8 +77,10 @@ Bottom nav (5): **Home · Избранное · Smart Search (звезда, це
 ### Search (центр выбора условий)
 - Каноническая основа Search / Filters / time-fit flow:
   [SEARCH_FILTERS_TIME_SPEC.md](SEARCH_FILTERS_TIME_SPEC.md). Спецификация
-  утверждена; реализация в приложении ещё не начата и выполняется отдельным
-  slice после ADR по ranking и завершения стабилизации.
+  утверждена и реализована в приложении отдельным slice после ADR по ranking
+  и завершения стабилизации. Текущий mock runtime использует детерминированный
+  travel-time fallback за интерфейсом репозитория; live routing подключается
+  без изменения доменных формул.
 - Отдельная от Smart Search функция и отдельный экран. Вход из Home,
   не из bottom nav. Обычная строка ищет буквальный текст и не
   запускает SmartQueryParser.

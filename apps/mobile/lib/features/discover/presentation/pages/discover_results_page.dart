@@ -6,10 +6,12 @@ import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
+import '../../domain/entities/time_window.dart';
 
 class DiscoverResultsPage extends ConsumerStatefulWidget {
   const DiscoverResultsPage({
@@ -300,6 +302,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
+    final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
+    final TravelContext? travelContext = _travelContextFromSeed(seedParameters);
     await controller.applySearchConditions(
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
@@ -315,11 +319,17 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       clearDateTo: dateTo == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
+      openNow: seedParameters['openNow'] == '1',
+      onlyAvailable: seedParameters['onlyAvailable'] == '1',
       availableDurationMinutes: _intFromSeed(seedParameters['duration']),
       clearAvailableDurationMinutes: !seedParameters.containsKey('duration'),
       mood: seedParameters['mood'],
       clearMood: !seedParameters.containsKey('mood'),
       sourceScreen: seedParameters['source'] ?? 'search_results',
+      timeWindow: timeWindow,
+      clearTimeWindow: timeWindow == null,
+      travelContext: travelContext,
+      clearTravelContext: travelContext == null,
     );
     if (seedParameters['source'] == 'regular_search') {
       await controller.ensureSavedSearchesLoaded();
@@ -586,6 +596,9 @@ String _mapLocationForQuery(DiscoverQuery query) {
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
+    'openNow': query.openNow ? '1' : '0',
+    'onlyAvailable': query.onlyAvailable ? '1' : '0',
+    ..._timeRouteParameters(query),
   };
   return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
@@ -654,6 +667,9 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'people',
     'duration',
     'mood',
+    'timeMode',
+    'openNow',
+    'onlyAvailable',
   ];
   return supportedKeys.any(seedParameters.containsKey);
 }
@@ -686,6 +702,77 @@ int? _intFromSeed(String? value) {
 DateTime? _dateFromSeed(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return DateTime.tryParse(value.trim())?.toUtc();
+}
+
+TimeWindow? _timeWindowFromSeed(Map<String, String> values) {
+  final String? mode = values['timeMode'];
+  final String? start = values['timeStart'];
+  final String? end = values['timeEnd'];
+  final String? timezone = values['timezone'];
+  final String? resolvedAt = values['resolvedAt'];
+  if (mode == null ||
+      start == null ||
+      end == null ||
+      timezone == null ||
+      resolvedAt == null) {
+    return null;
+  }
+  try {
+    return TimeWindow(
+      startAtUtc: DateTime.parse(start).toUtc(),
+      endAtUtc: DateTime.parse(end).toUtc(),
+      timezoneId: timezone,
+      mode: TimeWindowMode.values.firstWhere(
+        (TimeWindowMode value) => value.name == mode,
+      ),
+      flexibilityMinutes: int.tryParse(values['flexibility'] ?? '') ?? 0,
+      resolvedAtUtc: DateTime.parse(resolvedAt).toUtc(),
+    );
+  } on Exception {
+    return null;
+  }
+}
+
+TravelContext? _travelContextFromSeed(Map<String, String> values) {
+  if (!values.containsKey('originLat') || !values.containsKey('originLng')) {
+    return null;
+  }
+  try {
+    return TravelContext(
+      originType: TravelOriginType.values.firstWhere(
+        (TravelOriginType value) => value.name == values['originType'],
+      ),
+      origin: GeoPoint(
+        latitude: double.parse(values['originLat']!),
+        longitude: double.parse(values['originLng']!),
+      ),
+      transportMode: TransportMode.values.firstWhere(
+        (TransportMode value) => value.name == values['transport'],
+      ),
+      includeReturnTrip: values['returnTrip'] == '1',
+    );
+  } on Exception {
+    return null;
+  }
+}
+
+Map<String, String> _timeRouteParameters(DiscoverQuery query) {
+  final TimeWindow? window = query.timeWindow;
+  final TravelContext? travel = query.travelContext;
+  if (window == null || travel == null) return const <String, String>{};
+  return <String, String>{
+    'timeMode': window.mode.name,
+    'timeStart': window.startAtUtc.toIso8601String(),
+    'timeEnd': window.endAtUtc.toIso8601String(),
+    'timezone': window.timezoneId,
+    'flexibility': '${window.flexibilityMinutes}',
+    'resolvedAt': window.resolvedAtUtc.toIso8601String(),
+    'originType': travel.originType.name,
+    'originLat': '${travel.origin.latitude}',
+    'originLng': '${travel.origin.longitude}',
+    'transport': travel.transportMode.name,
+    'returnTrip': travel.includeReturnTrip ? '1' : '0',
+  };
 }
 
 class _SearchField extends StatelessWidget {

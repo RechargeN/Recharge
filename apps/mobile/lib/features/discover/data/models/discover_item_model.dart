@@ -1,4 +1,6 @@
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/opening_hours_rule.dart';
+import '../../domain/entities/time_slot.dart';
 
 class DiscoverItemModel extends DiscoverItemEntity {
   const DiscoverItemModel({
@@ -20,9 +22,19 @@ class DiscoverItemModel extends DiscoverItemEntity {
     super.organizerHandle,
     super.venueName,
     super.addressLine,
+    super.marketCityId,
+    super.timezoneId,
     super.participantsCount,
     super.capacity,
     super.durationMinutes,
+    super.durationConfidence,
+    super.availabilityKind,
+    super.scheduleSlots,
+    super.openingHours,
+    super.allowsPartialAttendance,
+    super.minimumVisitDurationMinutes,
+    super.bufferBeforeMinutes,
+    super.bufferAfterMinutes,
     super.ctaLabel,
     super.highlights,
   });
@@ -47,12 +59,62 @@ class DiscoverItemModel extends DiscoverItemEntity {
       organizerHandle: map['organizer_handle'] as String? ?? '',
       venueName: map['venue_name'] as String? ?? '',
       addressLine: map['address_line'] as String? ?? '',
-      participantsCount: (map['participants_count'] as num?)?.toInt() ?? 0,
-      capacity: (map['capacity'] as num?)?.toInt() ?? 0,
-      durationMinutes: (map['duration_minutes'] as num?)?.toInt() ?? 0,
+      marketCityId: map['market_city_id'] as String? ?? '',
+      timezoneId: map['timezone_id'] as String? ?? '',
+      participantsCount: _participantsOrNull(map['participants_count']),
+      capacity: _positiveIntOrNull(map['capacity']),
+      durationMinutes: _positiveIntOrNull(map['duration_minutes']),
+      durationConfidence: DurationConfidence.values.firstWhere(
+        (DurationConfidence value) => value.name == map['duration_confidence'],
+        orElse: () => _positiveIntOrNull(map['duration_minutes']) == null
+            ? DurationConfidence.unknown
+            : DurationConfidence.estimated,
+      ),
+      availabilityKind: AvailabilityKind.values.firstWhere(
+        (AvailabilityKind value) => value.name == map['availability_kind'],
+        orElse: () => AvailabilityKind.none,
+      ),
+      scheduleSlots: _mapList(
+        map['schedule_slots'],
+      ).map(TimeSlot.fromMap).toList(growable: false),
+      openingHours: _mapList(
+        map['opening_hours'],
+      ).map(OpeningHoursRule.fromMap).toList(growable: false),
+      allowsPartialAttendance:
+          (map['allows_partial_attendance'] as bool?) ?? false,
+      minimumVisitDurationMinutes: _positiveIntOrNull(
+        map['minimum_visit_duration_minutes'],
+      ),
+      bufferBeforeMinutes:
+          ((map['buffer_before_minutes'] as num?)?.toInt() ?? 0).clamp(0, 1440),
+      bufferAfterMinutes: ((map['buffer_after_minutes'] as num?)?.toInt() ?? 0)
+          .clamp(0, 1440),
       ctaLabel: map['cta_label'] as String? ?? '',
       highlights: (map['highlights'] as List<dynamic>? ?? <dynamic>[])
           .cast<String>(),
     );
   }
+}
+
+int? _positiveIntOrNull(Object? value) {
+  final int? parsed = (value as num?)?.toInt();
+  return parsed != null && parsed > 0 ? parsed : null;
+}
+
+int? _participantsOrNull(Object? value) {
+  final int? parsed = (value as num?)?.toInt();
+  return parsed != null && parsed >= 0 ? parsed : null;
+}
+
+List<Map<String, Object?>> _mapList(Object? value) {
+  if (value is! List<dynamic>) return const <Map<String, Object?>>[];
+  return value
+      .whereType<Map<dynamic, dynamic>>()
+      .map((Map<dynamic, dynamic> map) {
+        return map.map(
+          (dynamic key, dynamic nested) =>
+              MapEntry<String, Object?>(key as String, nested as Object?),
+        );
+      })
+      .toList(growable: false);
 }

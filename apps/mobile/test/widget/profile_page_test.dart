@@ -15,6 +15,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/create_providers.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
@@ -23,7 +24,7 @@ import 'package:recharge/features/create/domain/usecases/publish_create_draft_us
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
@@ -1676,10 +1677,10 @@ void main() {
 
     expect(find.text('Creator publications'), findsOneWidget);
     expect(find.text('Incomplete breathwork draft'), findsOneWidget);
-    expect(find.text('3 missing'), findsOneWidget);
+    expect(find.text('2 missing'), findsOneWidget);
     expect(find.text('Creator next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
-    expect(find.text('Missing: city, cover, start time'), findsWidgets);
+    expect(find.text('Missing: cover, start time'), findsWidgets);
 
     await tester.scrollPageUntilVisible(find.text('Finish draft').first, 220);
     await tester.tap(find.text('Finish draft').first);
@@ -1791,6 +1792,13 @@ CreateController _createController({CreateDraftEntity? initialDraft}) {
     saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
     publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const CreateRuntimeDefaults(
+      marketCityId: 'riga',
+      timezone: 'Europe/Riga',
+      country: 'Latvia',
+      city: 'Riga',
+      currency: 'EUR',
+    ),
   );
 }
 

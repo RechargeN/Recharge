@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../application/smart_search_parser.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 

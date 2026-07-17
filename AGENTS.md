@@ -80,8 +80,8 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 
 | Область | Статус |
 |---|---|
-| Discover (search/map/feed/details) | mock-данные |
-| Create Hub: 10 типов | базовый config-driven runtime реализован, на mock |
+| Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract |
+| Create Hub: 10 типов | базовый config-driven runtime и общая availability-секция реализованы, на mock |
 | Category System v1.4.1 | реализовано: 28 категорий / 516 подкатегорий, legacy migration |
 | Auth | mock, целевое: Firebase Google/Apple |
 | Роли/capabilities guards | НЕ реализовано (router проверяет только auth) |
@@ -91,7 +91,7 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 | Route/Scenario Builder | реализовано: локальные маршруты и handoff между Search/Map/Create |
 | Локализация en/ru/lv | не настроена |
 | Бронирование | MVP: редирект на externalBookingUrl; оплата — post-MVP |
-| Геолокация | mock current location |
+| Геолокация | mock current location в центре активного market Riga |
 
 ## Правила разработки
 

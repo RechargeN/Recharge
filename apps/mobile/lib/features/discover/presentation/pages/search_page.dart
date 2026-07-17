@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
+import '../../domain/entities/time_window.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -157,11 +158,37 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       clearDateTo: selection.dateWindow == null,
       radiusMeters: selection.radiusMeters,
       unlimitedRadius: selection.unlimitedRadius,
+      openNow: selection.openNow,
+      onlyAvailable: selection.onlyAvailable,
       availableDurationMinutes: selection.durationMinutes,
       clearAvailableDurationMinutes: selection.durationMinutes == null,
       mood: selection.mood,
       clearMood: selection.mood == null,
     );
+    if (selection.timeWindowMode == null) {
+      controller.clearTimeWindowSelection(clearLegacyDates: false);
+    } else {
+      final String? error = controller.stageTimeWindowSelection(
+        mode: selection.timeWindowMode!,
+        startLocal: selection.startLocal,
+        endLocal: selection.endLocal,
+        flexibilityMinutes: selection.flexibilityMinutes,
+        originType: selection.originType,
+        originLat: selection.originType == TravelOriginType.manualPin
+            ? query.centerLat
+            : null,
+        originLng: selection.originType == TravelOriginType.manualPin
+            ? query.centerLng
+            : null,
+        transportMode: selection.transportMode,
+        includeReturnTrip: selection.includeReturnTrip,
+      );
+      if (error != null && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error)));
+      }
+    }
   }
 
   void _showAllRecent(
@@ -207,6 +234,17 @@ class _SearchConditionChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> chips = <Widget>[
+      if (query.timeWindow != null)
+        Chip(
+          avatar: const Icon(Icons.schedule_outlined, size: 15),
+          label: Text(
+            query.timeWindow!.mode == TimeWindowMode.flexible
+                ? 'Flexible ±${query.timeWindow!.flexibilityMinutes} min'
+                : query.timeWindow!.mode == TimeWindowMode.anytimeToday
+                ? 'Until end of day'
+                : 'Exact time',
+          ),
+        ),
       Chip(
         avatar: const Icon(Icons.calendar_today_outlined, size: 15),
         label: Text(_dateLabel(query)),
@@ -585,9 +623,27 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late double? _budgetMax = widget.query.budgetMax;
   late double _radiusMeters = widget.query.radiusMeters;
   late bool _unlimited = widget.query.unlimitedRadius;
+  late bool _openNow = widget.query.openNow;
+  late bool _onlyAvailable = widget.query.onlyAvailable;
   late int? _duration = widget.query.availableDurationMinutes;
   late String? _mood = widget.query.mood;
   late String _date = _dateChoice(widget.query);
+  late TimeWindowMode? _timeWindowMode = widget.query.timeWindow?.mode;
+  late DateTime _startLocal =
+      widget.query.timeWindow?.startAtUtc.toLocal() ??
+      DateTime.now().add(const Duration(minutes: 30));
+  late DateTime _endLocal =
+      widget.query.timeWindow?.endAtUtc.toLocal() ??
+      DateTime.now().add(const Duration(hours: 2));
+  late int _flexibilityMinutes =
+      widget.query.timeWindow?.flexibilityMinutes ?? 30;
+  late TravelOriginType _originType =
+      widget.query.travelContext?.originType ??
+      TravelOriginType.currentLocation;
+  late TransportMode _transportMode =
+      widget.query.travelContext?.transportMode ?? TransportMode.walking;
+  late bool _includeReturnTrip =
+      widget.query.travelContext?.includeReturnTrip ?? true;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +680,121 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                 selected: <String>{_date},
                 onSelectionChanged: (Set<String> value) =>
                     setState(() => _date = value.first),
+              ),
+              const SizedBox(height: 18),
+              _FilterTitle('Time fit'),
+              Wrap(
+                spacing: 8,
+                children:
+                    <(TimeWindowMode?, String)>[
+                          (null, 'Off'),
+                          (TimeWindowMode.exact, 'Exact'),
+                          (TimeWindowMode.flexible, 'Flexible'),
+                          (TimeWindowMode.anytimeToday, 'Until end of day'),
+                        ]
+                        .map(((TimeWindowMode?, String) option) {
+                          return ChoiceChip(
+                            label: Text(option.$2),
+                            selected: _timeWindowMode == option.$1,
+                            onSelected: (_) =>
+                                setState(() => _timeWindowMode = option.$1),
+                          );
+                        })
+                        .toList(growable: false),
+              ),
+              if (_timeWindowMode == TimeWindowMode.exact ||
+                  _timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.login_rounded),
+                  title: const Text('Start'),
+                  subtitle: Text(_localDateTimeLabel(_startLocal)),
+                  onTap: () async {
+                    final DateTime? picked = await _pickLocalDateTime(
+                      context,
+                      _startLocal,
+                    );
+                    if (picked != null) setState(() => _startLocal = picked);
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.logout_rounded),
+                  title: const Text('End'),
+                  subtitle: Text(_localDateTimeLabel(_endLocal)),
+                  onTap: () async {
+                    final DateTime? picked = await _pickLocalDateTime(
+                      context,
+                      _endLocal,
+                    );
+                    if (picked != null) setState(() => _endLocal = picked);
+                  },
+                ),
+              ],
+              if (_timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
+                Text('Flexibility: ±$_flexibilityMinutes min'),
+                Slider(
+                  min: 15,
+                  max: 60,
+                  divisions: 3,
+                  value: _flexibilityMinutes.toDouble(),
+                  onChanged: (double value) =>
+                      setState(() => _flexibilityMinutes = value.round()),
+                ),
+              ],
+              if (_timeWindowMode != null) ...<Widget>[
+                _FilterTitle('Travel'),
+                Wrap(
+                  spacing: 8,
+                  children: TransportMode.values
+                      .map((TransportMode mode) {
+                        return ChoiceChip(
+                          label: Text(mode.name),
+                          selected: _transportMode == mode,
+                          onSelected: (_) =>
+                              setState(() => _transportMode = mode),
+                        );
+                      })
+                      .toList(growable: false),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<TravelOriginType>(
+                  segments: const <ButtonSegment<TravelOriginType>>[
+                    ButtonSegment<TravelOriginType>(
+                      value: TravelOriginType.currentLocation,
+                      label: Text('Current location'),
+                    ),
+                    ButtonSegment<TravelOriginType>(
+                      value: TravelOriginType.manualPin,
+                      label: Text('Search pin'),
+                    ),
+                  ],
+                  selected: <TravelOriginType>{_originType},
+                  onSelectionChanged: (Set<TravelOriginType> values) =>
+                      setState(() => _originType = values.first),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Include return trip'),
+                  value: _includeReturnTrip,
+                  onChanged: (bool value) =>
+                      setState(() => _includeReturnTrip = value),
+                ),
+              ],
+              const SizedBox(height: 18),
+              _FilterTitle('Availability'),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Open now'),
+                value: _openNow,
+                onChanged: (bool value) => setState(() => _openNow = value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Only available'),
+                value: _onlyAvailable,
+                onChanged: (bool value) =>
+                    setState(() => _onlyAvailable = value),
               ),
               const SizedBox(height: 18),
               _FilterTitle('People'),
@@ -742,8 +913,17 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       dateWindow: window,
       radiusMeters: _radiusMeters,
       unlimitedRadius: _unlimited,
+      openNow: _openNow,
+      onlyAvailable: _onlyAvailable,
       durationMinutes: _duration,
       mood: _mood,
+      timeWindowMode: _timeWindowMode,
+      startLocal: _startLocal,
+      endLocal: _endLocal,
+      flexibilityMinutes: _flexibilityMinutes,
+      originType: _originType,
+      transportMode: _transportMode,
+      includeReturnTrip: _includeReturnTrip,
     );
   }
 
@@ -753,8 +933,14 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     _date = 'any';
     _radiusMeters = 5000;
     _unlimited = false;
+    _openNow = false;
+    _onlyAvailable = false;
     _duration = null;
     _mood = null;
+    _timeWindowMode = null;
+    _originType = TravelOriginType.currentLocation;
+    _transportMode = TransportMode.walking;
+    _includeReturnTrip = true;
   });
 }
 
@@ -777,16 +963,34 @@ class _SearchFilterSelection {
     required this.dateWindow,
     required this.radiusMeters,
     required this.unlimitedRadius,
+    required this.openNow,
+    required this.onlyAvailable,
     required this.durationMinutes,
     required this.mood,
+    required this.timeWindowMode,
+    required this.startLocal,
+    required this.endLocal,
+    required this.flexibilityMinutes,
+    required this.originType,
+    required this.transportMode,
+    required this.includeReturnTrip,
   });
   final int? peopleCount;
   final double? budgetMax;
   final _DateWindow? dateWindow;
   final double radiusMeters;
   final bool unlimitedRadius;
+  final bool openNow;
+  final bool onlyAvailable;
   final int? durationMinutes;
   final String? mood;
+  final TimeWindowMode? timeWindowMode;
+  final DateTime startLocal;
+  final DateTime endLocal;
+  final int flexibilityMinutes;
+  final TravelOriginType originType;
+  final TransportMode transportMode;
+  final bool includeReturnTrip;
 }
 
 class _DateWindow {
@@ -794,6 +998,32 @@ class _DateWindow {
   final DateTime from;
   final DateTime to;
 }
+
+Future<DateTime?> _pickLocalDateTime(
+  BuildContext context,
+  DateTime initial,
+) async {
+  final DateTime? date = await showDatePicker(
+    context: context,
+    initialDate: initial,
+    firstDate: DateTime.now().subtract(const Duration(days: 1)),
+    lastDate: DateTime.now().add(const Duration(days: 365)),
+  );
+  if (date == null || !context.mounted) return null;
+  final TimeOfDay? time = await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.fromDateTime(initial),
+  );
+  if (time == null) return null;
+  return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+}
+
+String _localDateTimeLabel(DateTime value) =>
+    '${value.year.toString().padLeft(4, '0')}-'
+    '${value.month.toString().padLeft(2, '0')}-'
+    '${value.day.toString().padLeft(2, '0')} '
+    '${value.hour.toString().padLeft(2, '0')}:'
+    '${value.minute.toString().padLeft(2, '0')}';
 
 _DateWindow _todayWindow() {
   final DateTime now = DateTime.now();
@@ -855,9 +1085,26 @@ String _resultsLocation(
       if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
       'radius': query.radiusMeters.round().toString(),
       'unlimited': query.unlimitedRadius ? '1' : '0',
+      'openNow': query.openNow ? '1' : '0',
+      'onlyAvailable': query.onlyAvailable ? '1' : '0',
       if (query.availableDurationMinutes != null)
         'duration': '${query.availableDurationMinutes}',
       if (query.mood != null) 'mood': query.mood!,
+      if (query.timeWindow != null) ...<String, String>{
+        'timeMode': query.timeWindow!.mode.name,
+        'timeStart': query.timeWindow!.startAtUtc.toIso8601String(),
+        'timeEnd': query.timeWindow!.endAtUtc.toIso8601String(),
+        'timezone': query.timeWindow!.timezoneId,
+        'flexibility': '${query.timeWindow!.flexibilityMinutes}',
+        'resolvedAt': query.timeWindow!.resolvedAtUtc.toIso8601String(),
+      },
+      if (query.travelContext != null) ...<String, String>{
+        'originType': query.travelContext!.originType.name,
+        'originLat': '${query.travelContext!.origin.latitude}',
+        'originLng': '${query.travelContext!.origin.longitude}',
+        'transport': query.travelContext!.transportMode.name,
+        'returnTrip': query.travelContext!.includeReturnTrip ? '1' : '0',
+      },
     },
   ).toString();
 }

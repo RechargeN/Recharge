@@ -17,7 +17,7 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/auth/presentation/pages/discover_hub_page.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';

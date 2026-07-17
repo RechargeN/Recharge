@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/router/route_names.dart';
-import 'package:recharge/features/discover/application/queries/discover_query.dart';
+import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_map_page.dart';

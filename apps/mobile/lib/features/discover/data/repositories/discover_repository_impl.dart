@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../application/queries/discover_query.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/repositories/discover_repository.dart';
 import '../datasources/discover_remote_datasource.dart';
@@ -100,21 +100,42 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
       return false;
     }
 
-    if (query.dateFrom != null && item.startsAtUtc.isBefore(query.dateFrom!)) {
+    if (query.timeWindow == null &&
+        query.dateFrom != null &&
+        item.startsAtUtc.isBefore(query.dateFrom!)) {
       return false;
     }
-    if (query.dateTo != null && item.startsAtUtc.isAfter(query.dateTo!)) {
+    if (query.timeWindow == null &&
+        query.dateTo != null &&
+        item.startsAtUtc.isAfter(query.dateTo!)) {
       return false;
     }
 
-    if (query.peopleCount != null) {
-      final int remainingCapacity = item.capacity - item.participantsCount;
+    if (query.marketCityId.isNotEmpty &&
+        item.marketCityId.isNotEmpty &&
+        item.marketCityId != query.marketCityId) {
+      return false;
+    }
+
+    if (query.peopleCount != null &&
+        item.capacity != null &&
+        item.participantsCount != null) {
+      final int remainingCapacity = item.capacity! - item.participantsCount!;
       if (remainingCapacity < query.peopleCount!) return false;
     }
 
     if (query.availableDurationMinutes != null &&
-        item.durationMinutes > query.availableDurationMinutes!) {
+        item.durationMinutes != null &&
+        item.durationMinutes! > query.availableDurationMinutes!) {
       return false;
+    }
+
+    if (query.timeWindow == null && query.onlyAvailable) {
+      if (item.capacity == null ||
+          item.participantsCount == null ||
+          item.participantsCount! >= item.capacity!) {
+        return false;
+      }
     }
 
     return true;

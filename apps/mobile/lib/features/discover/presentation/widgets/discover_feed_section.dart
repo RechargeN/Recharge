@@ -6,6 +6,7 @@ import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/time_fit_evaluation.dart';
 
 class DiscoverFeedSection extends ConsumerStatefulWidget {
   const DiscoverFeedSection({super.key, required this.onOpenDetails});
@@ -55,6 +56,30 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
           message: state.message ?? 'Пока в ленте ничего нет',
           actionLabel: 'Обновить',
           onAction: controller.loadFeed,
+          extraActions: state.appliedQuery.timeWindow == null
+              ? const <Widget>[]
+              : <Widget>[
+                  TextButton(
+                    onPressed: () => controller.applyTimeFitRelaxation(
+                      TimeFitRelaxation.widenWindow,
+                    ),
+                    child: const Text('Расширить время'),
+                  ),
+                  if (state.appliedQuery.travelContext?.includeReturnTrip ==
+                      true)
+                    TextButton(
+                      onPressed: () => controller.applyTimeFitRelaxation(
+                        TimeFitRelaxation.skipReturnTrip,
+                      ),
+                      child: const Text('Без обратной дороги'),
+                    ),
+                  TextButton(
+                    onPressed: () => controller.applyTimeFitRelaxation(
+                      TimeFitRelaxation.removeTimeFilter,
+                    ),
+                    child: const Text('Убрать время'),
+                  ),
+                ],
         );
       case DiscoverFeedStatus.error:
         return _StateCard(
@@ -70,19 +95,48 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
         );
       case DiscoverFeedStatus.ready:
       case DiscoverFeedStatus.denseCluster:
+        final bool hasTimeWindow = state.appliedQuery.timeWindow != null;
+        bool unknownHeaderAdded = false;
+        final List<Widget> children = <Widget>[];
+        if (hasTimeWindow) {
+          children.add(
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Matches your time',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          );
+        }
+        for (final DiscoverItemEntity item in state.items) {
+          if (hasTimeWindow &&
+              item.timeFitEvaluation?.timeFitStatus == TimeFitStatus.unknown &&
+              !unknownHeaderAdded) {
+            unknownHeaderAdded = true;
+            children.add(
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0, 12, 0, 8),
+                child: Text(
+                  'Time not confirmed',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            );
+          }
+          children.add(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _DiscoverFeedCard(
+                item: item,
+                onTap: () => widget.onOpenDetails(item.id),
+              ),
+            ),
+          );
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: state.items
-              .map(
-                (DiscoverItemEntity item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _DiscoverFeedCard(
-                    item: item,
-                    onTap: () => widget.onOpenDetails(item.id),
-                  ),
-                ),
-              )
-              .toList(growable: false),
+          children: children,
         );
     }
   }
@@ -137,6 +191,21 @@ class _DiscoverFeedCard extends StatelessWidget {
                       children: <Widget>[
                         _MetaChip(label: rechargeTaxonomyLabel(item.category)),
                         if (item.isFree) const _MetaChip(label: 'Free'),
+                        if (item.timeFitEvaluation
+                            case final evaluation?) ...<Widget>[
+                          _MetaChip(label: _timeFitLabel(evaluation)),
+                          _MetaChip(label: _openingLabel(evaluation)),
+                          if (evaluation.travelMinutes != null)
+                            _MetaChip(
+                              label:
+                                  '${evaluation.travelMinutes} min travel'
+                                  '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · est.' : ''}',
+                            ),
+                          if (evaluation.selectedSlotId != null)
+                            _MetaChip(
+                              label: 'Slot ${evaluation.selectedSlotId}',
+                            ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -207,6 +276,21 @@ class _DiscoverFeedCard extends StatelessWidget {
   }
 }
 
+String _timeFitLabel(TimeFitEvaluation evaluation) =>
+    switch (evaluation.timeFitStatus) {
+      TimeFitStatus.fits => 'Fits',
+      TimeFitStatus.partial => 'Partial fit',
+      TimeFitStatus.doesNotFit => 'Does not fit',
+      TimeFitStatus.unknown => 'Time unknown',
+    };
+
+String _openingLabel(TimeFitEvaluation evaluation) =>
+    switch (evaluation.openingStatus) {
+      OpeningStatus.open => 'Open',
+      OpeningStatus.closed => 'Closed',
+      OpeningStatus.unknown => 'Hours unknown',
+    };
+
 class _MetaChip extends StatelessWidget {
   const _MetaChip({required this.label});
 
@@ -237,11 +321,13 @@ class _StateCard extends StatelessWidget {
     required this.message,
     required this.actionLabel,
     required this.onAction,
+    this.extraActions = const <Widget>[],
   });
 
   final String message;
   final String actionLabel;
   final Future<void> Function() onAction;
+  final List<Widget> extraActions;
 
   @override
   Widget build(BuildContext context) {
@@ -254,6 +340,7 @@ class _StateCard extends StatelessWidget {
             Text(message),
             const SizedBox(height: 10),
             OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
+            ...extraActions,
           ],
         ),
       ),

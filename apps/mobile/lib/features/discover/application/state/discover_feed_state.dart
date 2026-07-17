@@ -1,7 +1,7 @@
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
-import '../queries/discover_query.dart';
 
 enum DiscoverFeedStatus {
   initial,
@@ -28,8 +28,7 @@ class DiscoverFeedState {
     required this.resultCount,
   });
 
-  factory DiscoverFeedState.initial() {
-    final DiscoverQuery query = DiscoverQuery.defaults();
+  factory DiscoverFeedState.initial(DiscoverQuery query) {
     return DiscoverFeedState(
       status: DiscoverFeedStatus.initial,
       items: const <DiscoverItemEntity>[],
@@ -87,8 +86,9 @@ class DiscoverFeedState {
       appliedQuery: appliedQuery ?? this.appliedQuery,
       draftQuery: draftQuery ?? this.draftQuery,
       searchAreaDirty: searchAreaDirty ?? this.searchAreaDirty,
-      selectedItemId:
-          clearSelectedItem ? null : (selectedItemId ?? this.selectedItemId),
+      selectedItemId: clearSelectedItem
+          ? null
+          : (selectedItemId ?? this.selectedItemId),
       savedSearches: savedSearches ?? this.savedSearches,
       smartSearchHistory: smartSearchHistory ?? this.smartSearchHistory,
       resultCount: resultCount ?? this.resultCount,

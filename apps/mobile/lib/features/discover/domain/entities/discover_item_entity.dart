@@ -1,3 +1,11 @@
+import 'opening_hours_rule.dart';
+import 'time_fit_evaluation.dart';
+import 'time_slot.dart';
+
+enum DurationConfidence { exact, estimated, unknown }
+
+enum AvailabilityKind { eventSlots, openingHours, none }
+
 class DiscoverItemEntity {
   const DiscoverItemEntity({
     required this.id,
@@ -18,12 +26,30 @@ class DiscoverItemEntity {
     this.organizerHandle = '',
     this.venueName = '',
     this.addressLine = '',
-    this.participantsCount = 0,
-    this.capacity = 0,
-    this.durationMinutes = 0,
+    this.marketCityId = '',
+    this.timezoneId = '',
+    this.participantsCount,
+    this.capacity,
+    this.durationMinutes,
+    this.durationConfidence = DurationConfidence.unknown,
+    this.availabilityKind = AvailabilityKind.none,
+    this.scheduleSlots = const <TimeSlot>[],
+    this.openingHours = const <OpeningHoursRule>[],
+    this.allowsPartialAttendance = false,
+    this.minimumVisitDurationMinutes,
+    this.bufferBeforeMinutes = 0,
+    this.bufferAfterMinutes = 0,
+    this.timeFitEvaluation,
     this.ctaLabel = '',
     this.highlights = const <String>[],
-  });
+  }) : assert(durationMinutes == null || durationMinutes > 0),
+       assert(capacity == null || capacity > 0),
+       assert(participantsCount == null || participantsCount >= 0),
+       assert(bufferBeforeMinutes >= 0),
+       assert(bufferAfterMinutes >= 0),
+       assert(
+         !allowsPartialAttendance || (minimumVisitDurationMinutes ?? 0) > 0,
+       );
 
   final String id;
   final String title;
@@ -43,9 +69,20 @@ class DiscoverItemEntity {
   final String organizerHandle;
   final String venueName;
   final String addressLine;
-  final int participantsCount;
-  final int capacity;
-  final int durationMinutes;
+  final String marketCityId;
+  final String timezoneId;
+  final int? participantsCount;
+  final int? capacity;
+  final int? durationMinutes;
+  final DurationConfidence durationConfidence;
+  final AvailabilityKind availabilityKind;
+  final List<TimeSlot> scheduleSlots;
+  final List<OpeningHoursRule> openingHours;
+  final bool allowsPartialAttendance;
+  final int? minimumVisitDurationMinutes;
+  final int bufferBeforeMinutes;
+  final int bufferAfterMinutes;
+  final TimeFitEvaluation? timeFitEvaluation;
   final String ctaLabel;
   final List<String> highlights;
 
@@ -57,9 +94,25 @@ class DiscoverItemEntity {
     String? organizerHandle,
     String? venueName,
     String? addressLine,
+    String? marketCityId,
+    String? timezoneId,
     int? participantsCount,
+    bool clearParticipantsCount = false,
     int? capacity,
+    bool clearCapacity = false,
     int? durationMinutes,
+    bool clearDurationMinutes = false,
+    DurationConfidence? durationConfidence,
+    AvailabilityKind? availabilityKind,
+    List<TimeSlot>? scheduleSlots,
+    List<OpeningHoursRule>? openingHours,
+    bool? allowsPartialAttendance,
+    int? minimumVisitDurationMinutes,
+    bool clearMinimumVisitDurationMinutes = false,
+    int? bufferBeforeMinutes,
+    int? bufferAfterMinutes,
+    TimeFitEvaluation? timeFitEvaluation,
+    bool clearTimeFitEvaluation = false,
     String? ctaLabel,
     List<String>? highlights,
   }) {
@@ -82,9 +135,29 @@ class DiscoverItemEntity {
       organizerHandle: organizerHandle ?? this.organizerHandle,
       venueName: venueName ?? this.venueName,
       addressLine: addressLine ?? this.addressLine,
-      participantsCount: participantsCount ?? this.participantsCount,
-      capacity: capacity ?? this.capacity,
-      durationMinutes: durationMinutes ?? this.durationMinutes,
+      marketCityId: marketCityId ?? this.marketCityId,
+      timezoneId: timezoneId ?? this.timezoneId,
+      participantsCount: clearParticipantsCount
+          ? null
+          : (participantsCount ?? this.participantsCount),
+      capacity: clearCapacity ? null : (capacity ?? this.capacity),
+      durationMinutes: clearDurationMinutes
+          ? null
+          : (durationMinutes ?? this.durationMinutes),
+      durationConfidence: durationConfidence ?? this.durationConfidence,
+      availabilityKind: availabilityKind ?? this.availabilityKind,
+      scheduleSlots: scheduleSlots ?? this.scheduleSlots,
+      openingHours: openingHours ?? this.openingHours,
+      allowsPartialAttendance:
+          allowsPartialAttendance ?? this.allowsPartialAttendance,
+      minimumVisitDurationMinutes: clearMinimumVisitDurationMinutes
+          ? null
+          : (minimumVisitDurationMinutes ?? this.minimumVisitDurationMinutes),
+      bufferBeforeMinutes: bufferBeforeMinutes ?? this.bufferBeforeMinutes,
+      bufferAfterMinutes: bufferAfterMinutes ?? this.bufferAfterMinutes,
+      timeFitEvaluation: clearTimeFitEvaluation
+          ? null
+          : (timeFitEvaluation ?? this.timeFitEvaluation),
       ctaLabel: ctaLabel ?? this.ctaLabel,
       highlights: highlights ?? this.highlights,
     );

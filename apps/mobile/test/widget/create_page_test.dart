@@ -16,6 +16,7 @@ import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_providers.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
@@ -50,6 +51,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -236,12 +238,12 @@ void main() {
     expect(createController.state.draft.objectType, CreateObjectType.activity);
     expect(createController.state.draft.mainCategory, 'wellness_recharge');
     expect(createController.state.draft.subcategory, 'calm_walk');
-    expect(createController.state.draft.title, 'Calm walk in Rezekne');
-    expect(createController.state.draft.city, 'Rezekne');
+    expect(createController.state.draft.title, 'Calm walk in Riga');
+    expect(createController.state.draft.city, 'Riga');
     expect(createController.state.draft.media.coverImage, isNotEmpty);
     expect(createController.state.draft.startDateTimeUtc, isNotNull);
 
-    expect(find.text('Calm walk in Rezekne'), findsWidgets);
+    expect(find.text('Calm walk in Riga'), findsWidgets);
     expect(find.text('Publishable'), findsOneWidget);
     expect(find.text('6/6 ready'), findsOneWidget);
   });
@@ -752,6 +754,7 @@ void main() {
         saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: _testCreateDefaults,
       );
       await createController.ensureLoaded(
         userId: 'u',
@@ -873,6 +876,14 @@ void main() {
     },
   );
 }
+
+const CreateRuntimeDefaults _testCreateDefaults = CreateRuntimeDefaults(
+  marketCityId: 'riga',
+  timezone: 'Europe/Riga',
+  country: 'LV',
+  city: 'Riga',
+  currency: 'EUR',
+);
 
 class _NoopAnalyticsService implements AnalyticsService {
   @override
