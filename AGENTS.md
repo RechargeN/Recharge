@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-07-15. Канонический файл инструкций репозитория.
+Версия: 2026-07-17. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -52,9 +52,9 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    Storage). Текущее состояние — mock datasources. Подключение
    Firebase — отдельный slice ПОСЛЕ стабилизации.
 4. **Create Hub** — целевой скоуп 10 типов через единый form engine.
-   Реализовано: Event, Place (Sprint 3). Остальные 8 — по волнам,
-   каждый тип с acceptance criteria. Новых типов вне активного slice
-   не начинать.
+   Базовый runtime всех 10 типов реализован через единый config-driven
+   flow и Category System v1.4.1. Специализированные секции конкретных
+   типов расширять только отдельными acceptance criteria.
 5. **Регион запуска** — Рига/Латвия, EUR. Дефолтные координаты
    в конфиге: 56.9496, 24.1052 (сейчас неверные — задача бэклога).
    Локализация en/ru/lv — целевая, фактически НЕ настроена
@@ -81,8 +81,8 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 | Область | Статус |
 |---|---|
 | Discover (search/map/feed/details) | mock-данные |
-| Create: Event, Place | реализовано (Sprint 3), на mock |
-| Create: остальные 8 типов | запланировано |
+| Create Hub: 10 типов | базовый config-driven runtime реализован, на mock |
+| Category System v1.4.1 | реализовано: 28 категорий / 516 подкатегорий, legacy migration |
 | Auth | mock, целевое: Firebase Google/Apple |
 | Роли/capabilities guards | НЕ реализовано (router проверяет только auth) |
 | Publisher / ManagedPage модель | запланировано |

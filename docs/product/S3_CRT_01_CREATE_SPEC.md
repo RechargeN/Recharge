@@ -1,6 +1,6 @@
 # S3-CRT-01 Create Draft + Publish Spec
 
-Status: Done  
+Status: Done
 Date: 2026-04-20
 
 ## Scope
@@ -8,8 +8,10 @@ Date: 2026-04-20
 - Create flow supports both `event` and `place`.
 - Local draft persistence.
 - Publish happy path with status `pending_review`.
-- Post-MVP create taxonomy source of truth is defined in
-  `docs/product/RECHARGE_CREATE_TAXONOMY_V1.md`.
+- The accepted and implemented category system is defined in
+  `docs/product/CATEGORY_SYSTEM.md`. The former
+  `docs/product/RECHARGE_CREATE_TAXONOMY_V1.md` is retained only as historical
+  context for the compatibility migration.
 
 ## Approved Decisions
 

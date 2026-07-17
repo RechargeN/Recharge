@@ -1,14 +1,20 @@
 # Recharge Create Taxonomy v1
 
-Status: Source of truth  
-Last updated: 2026-05-09  
+Status: Archived historical reference; superseded
+Last updated: 2026-07-17
 Owner: Recharge product and engineering
 
-This document defines the stable create taxonomy used by Recharge for create
-flows, filters, search, recommendations, moderation, and future API contracts.
+The accepted category model and canonical 28/516 registry are defined in
+[`CATEGORY_SYSTEM.md`](CATEGORY_SYSTEM.md). This document is retained only to
+explain historical 22/434 IDs and Create-block contracts handled by the
+compatibility migration.
 
-The taxonomy must be used as the reference before adding a new create block,
-content group, activity category, participation mode, rule, or create preset.
+This document describes the legacy create taxonomy previously used by Recharge
+for create flows, filters, search, recommendations, and moderation.
+
+Do not add new content groups or activity categories here. Category changes
+must follow `CATEGORY_SYSTEM.md`; legacy participation modes and Create-block
+rules remain here only as migration reference.
 
 ## 1. Core Formula
 
@@ -1299,4 +1305,3 @@ const rulesPresets = {
 8. Deprecated categories remain readable for old objects but hidden from new create.
 9. Seasonal categories can be shown or boosted by calendar and locale.
 10. Equipment availability is an option or amenity on `venue`, `place`, or `bookable_slot`.
-
