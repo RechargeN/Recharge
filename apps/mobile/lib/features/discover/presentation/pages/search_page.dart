@@ -712,98 +712,30 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                       ],
                     ),
                     const _FilterSectionDivider(),
-                    const _FilterTitle('Time fit'),
-                    const SizedBox(height: 8),
-                    _FilterPillWrap(
-                      children: <Widget>[
-                        _FilterPill(
-                          label: 'Off',
-                          selected: _timeWindowMode == null,
-                          onTap: () => setState(() => _timeWindowMode = null),
-                        ),
-                        _FilterPill(
-                          label: 'Exact',
-                          selected: _timeWindowMode == TimeWindowMode.exact,
-                          onTap: () => _openTimeWindowEditor(
-                            initialMode: TimeWindowMode.exact,
-                          ),
-                        ),
-                        _FilterPill(
-                          label: 'Flexible',
-                          selected: _timeWindowMode == TimeWindowMode.flexible,
-                          onTap: () => _openTimeWindowEditor(
-                            initialMode: TimeWindowMode.flexible,
-                          ),
-                        ),
-                        _FilterPill(
-                          label: 'Until end of day',
-                          selected:
-                              _timeWindowMode == TimeWindowMode.anytimeToday,
-                          onTap: () => setState(
-                            () => _timeWindowMode = TimeWindowMode.anytimeToday,
-                          ),
-                        ),
-                      ],
+                    _TimeFilterBlock(
+                      mode: _timeWindowMode,
+                      start: _startLocal,
+                      end: _endLocal,
+                      flexibilityMinutes: _flexibilityMinutes,
+                      onModeChanged: (TimeWindowMode? value) =>
+                          setState(() => _timeWindowMode = value),
+                      onStartTap: () => _pickFilterTime(isStart: true),
+                      onEndTap: () => _pickFilterTime(isStart: false),
+                      onFlexibilityChanged: (int value) =>
+                          setState(() => _flexibilityMinutes = value),
                     ),
-                    if (_timeWindowMode == TimeWindowMode.exact ||
-                        _timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
-                      const SizedBox(height: 10),
-                      _TimeWindowNavigationRow(
-                        mode: _timeWindowMode!,
-                        start: _startLocal,
-                        end: _endLocal,
-                        flexibilityMinutes: _flexibilityMinutes,
-                        onTap: () => _openTimeWindowEditor(
-                          initialMode: _timeWindowMode!,
-                        ),
-                      ),
-                    ],
-                    if (_timeWindowMode != null) ...<Widget>[
-                      const _FilterSectionDivider(),
-                      const _FilterTitle('Travel'),
-                      const SizedBox(height: 8),
-                      _FilterPillWrap(
-                        children: <Widget>[
-                          _FilterPill(
-                            label: 'Walking',
-                            icon: Icons.directions_walk_rounded,
-                            selected: _transportMode == TransportMode.walking,
-                            onTap: () => setState(
-                              () => _transportMode = TransportMode.walking,
-                            ),
-                          ),
-                          _FilterPill(
-                            label: 'Driving',
-                            icon: Icons.directions_car_outlined,
-                            selected: _transportMode == TransportMode.driving,
-                            onTap: () => setState(
-                              () => _transportMode = TransportMode.driving,
-                            ),
-                          ),
-                          _FilterPill(
-                            label: 'Transit',
-                            icon: Icons.directions_transit_outlined,
-                            selected: _transportMode == TransportMode.transit,
-                            onTap: () => setState(
-                              () => _transportMode = TransportMode.transit,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      _OriginSegment(
-                        value: _originType,
-                        onChanged: (TravelOriginType value) =>
-                            setState(() => _originType = value),
-                      ),
-                      const SizedBox(height: 2),
-                      _CompactSwitchRow(
-                        label: 'Include return trip',
-                        value: _includeReturnTrip,
-                        onChanged: (bool value) =>
-                            setState(() => _includeReturnTrip = value),
-                      ),
-                    ],
+                    const _FilterSectionDivider(),
+                    _TravelFilterBlock(
+                      originType: _originType,
+                      transportMode: _transportMode,
+                      includeReturnTrip: _includeReturnTrip,
+                      onOriginChanged: (TravelOriginType value) =>
+                          setState(() => _originType = value),
+                      onTransportChanged: (TransportMode value) =>
+                          setState(() => _transportMode = value),
+                      onReturnTripChanged: (bool value) =>
+                          setState(() => _includeReturnTrip = value),
+                    ),
                     const _FilterSectionDivider(),
                     const _FilterTitle('Availability'),
                     const SizedBox(height: 2),
@@ -830,6 +762,14 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                             selected: _peopleCount == value,
                             onTap: () => setState(() => _peopleCount = value),
                           ),
+                        _FilterPill(
+                          key: const Key('people-custom'),
+                          label: _isCustomPeople
+                              ? 'Custom · $_peopleCount'
+                              : 'Custom',
+                          selected: _isCustomPeople,
+                          onTap: _editPeopleCount,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),
@@ -837,12 +777,26 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
-                        for (final double? value in <double?>[null, 10, 20, 40])
+                        for (final double? value in <double?>[
+                          null,
+                          0,
+                          10,
+                          20,
+                          40,
+                        ])
                           _FilterPill(
                             label: value == null ? 'Any' : '€${value.round()}',
                             selected: _budgetMax == value,
                             onTap: () => setState(() => _budgetMax = value),
                           ),
+                        _FilterPill(
+                          key: const Key('budget-custom'),
+                          label: _isCustomBudget
+                              ? 'Custom · €${_budgetMax!.round()}'
+                              : 'Custom',
+                          selected: _isCustomBudget,
+                          onTap: _editBudget,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),
@@ -940,31 +894,82 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     ].join(' · ');
   }
 
-  Future<void> _openTimeWindowEditor({
-    required TimeWindowMode initialMode,
-  }) async {
-    final _TimeWindowDraft? result =
-        await showModalBottomSheet<_TimeWindowDraft>(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          useRootNavigator: true,
-          backgroundColor: Colors.transparent,
-          builder: (BuildContext context) => _TimeWindowEditorSheet(
-            initialMode: initialMode,
-            initialStart: _startLocal,
-            initialEnd: _endLocal,
-            initialFlexibilityMinutes: _flexibilityMinutes,
-          ),
-        );
-    if (result == null || !mounted) return;
+  bool get _isCustomPeople =>
+      _peopleCount != null && !<int>[1, 2, 4].contains(_peopleCount);
+
+  bool get _isCustomBudget =>
+      _budgetMax != null && !<double>[0, 10, 20, 40].contains(_budgetMax);
+
+  Future<void> _pickFilterTime({required bool isStart}) async {
+    final DateTime initial = isStart ? _startLocal : _endLocal;
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (picked == null || !mounted) return;
     setState(() {
-      _timeWindowMode = result.mode;
-      _startLocal = result.start;
-      _endLocal = result.end;
-      _flexibilityMinutes = result.flexibilityMinutes;
+      final DateTime value = DateTime(
+        initial.year,
+        initial.month,
+        initial.day,
+        picked.hour,
+        picked.minute,
+      );
+      if (isStart) {
+        _startLocal = value;
+        if (!_endLocal.isAfter(_startLocal)) {
+          _endLocal = _startLocal.add(const Duration(hours: 1));
+        }
+      } else {
+        _endLocal = value.isAfter(_startLocal)
+            ? value
+            : value.add(const Duration(days: 1));
+      }
     });
   }
+
+  Future<void> _editPeopleCount() async {
+    final int? result = await _showNumberDialog<int>(
+      title: 'Number of people',
+      hint: 'For example, 6',
+      initialValue: _isCustomPeople ? '$_peopleCount' : '',
+      parser: (String value) => int.tryParse(value),
+      isValid: (int value) => value >= 1 && value <= 99,
+      errorMessage: 'Enter a number from 1 to 99',
+    );
+    if (result != null && mounted) setState(() => _peopleCount = result);
+  }
+
+  Future<void> _editBudget() async {
+    final double? result = await _showNumberDialog<double>(
+      title: 'Budget per person',
+      hint: 'Amount in EUR',
+      initialValue: _isCustomBudget ? '${_budgetMax!.round()}' : '',
+      parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
+      isValid: (double value) => value >= 0 && value <= 10000,
+      errorMessage: 'Enter an amount from €0 to €10,000',
+    );
+    if (result != null && mounted) setState(() => _budgetMax = result);
+  }
+
+  Future<T?> _showNumberDialog<T extends num>({
+    required String title,
+    required String hint,
+    required String initialValue,
+    required T? Function(String value) parser,
+    required bool Function(T value) isValid,
+    required String errorMessage,
+  }) => showDialog<T>(
+    context: context,
+    builder: (BuildContext context) => _NumberInputDialog<T>(
+      title: title,
+      hint: hint,
+      initialValue: initialValue,
+      parser: parser,
+      isValid: isValid,
+      errorMessage: errorMessage,
+    ),
+  );
 
   _SearchFilterSelection get _selection {
     final _DateWindow? window = switch (_date) {
@@ -1010,6 +1015,78 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     _transportMode = TransportMode.walking;
     _includeReturnTrip = true;
   });
+}
+
+class _NumberInputDialog<T extends num> extends StatefulWidget {
+  const _NumberInputDialog({
+    required this.title,
+    required this.hint,
+    required this.initialValue,
+    required this.parser,
+    required this.isValid,
+    required this.errorMessage,
+  });
+
+  final String title;
+  final String hint;
+  final String initialValue;
+  final T? Function(String value) parser;
+  final bool Function(T value) isValid;
+  final String errorMessage;
+
+  @override
+  State<_NumberInputDialog<T>> createState() => _NumberInputDialogState<T>();
+}
+
+class _NumberInputDialogState<T extends num>
+    extends State<_NumberInputDialog<T>> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialValue,
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.title),
+    content: TextField(
+      key: const Key('custom-number-input'),
+      controller: _controller,
+      autofocus: true,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        hintText: widget.hint,
+        errorText: _error,
+        border: const OutlineInputBorder(),
+      ),
+      onSubmitted: (_) => _submit(),
+    ),
+    actions: <Widget>[
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        key: const Key('custom-number-save'),
+        onPressed: _submit,
+        child: const Text('Save'),
+      ),
+    ],
+  );
+
+  void _submit() {
+    final T? value = widget.parser(_controller.text.trim());
+    if (value == null || !widget.isValid(value)) {
+      setState(() => _error = widget.errorMessage);
+      return;
+    }
+    Navigator.of(context).pop(value);
+  }
 }
 
 class _FilterTitle extends StatelessWidget {
@@ -1098,16 +1175,15 @@ class _FilterPillWrap extends StatelessWidget {
 
 class _FilterPill extends StatelessWidget {
   const _FilterPill({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
-    this.icon,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1131,9 +1207,6 @@ class _FilterPill extends StatelessWidget {
               children: <Widget>[
                 if (selected) ...<Widget>[
                   Icon(Icons.check_rounded, size: 14, color: colors.primary),
-                  const SizedBox(width: 5),
-                ] else if (icon != null) ...<Widget>[
-                  Icon(icon, size: 15, color: colors.onSurfaceVariant),
                   const SizedBox(width: 5),
                 ],
                 Text(
@@ -1196,82 +1269,334 @@ class _CompactSwitchRow extends StatelessWidget {
   );
 }
 
-class _OriginSegment extends StatelessWidget {
-  const _OriginSegment({required this.value, required this.onChanged});
+class _TimeFilterBlock extends StatelessWidget {
+  const _TimeFilterBlock({
+    required this.mode,
+    required this.start,
+    required this.end,
+    required this.flexibilityMinutes,
+    required this.onModeChanged,
+    required this.onStartTap,
+    required this.onEndTap,
+    required this.onFlexibilityChanged,
+  });
 
-  final TravelOriginType value;
-  final ValueChanged<TravelOriginType> onChanged;
+  final TimeWindowMode? mode;
+  final DateTime start;
+  final DateTime end;
+  final int flexibilityMinutes;
+  final ValueChanged<TimeWindowMode?> onModeChanged;
+  final VoidCallback onStartTap;
+  final VoidCallback onEndTap;
+  final ValueChanged<int> onFlexibilityChanged;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
-    return Container(
-      height: 36,
-      decoration: ShapeDecoration(
-        shape: StadiumBorder(side: BorderSide(color: colors.outlineVariant)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        children: <Widget>[
-          for (final (TravelOriginType, String, IconData) option
-              in <(TravelOriginType, String, IconData)>[
-                (
-                  TravelOriginType.currentLocation,
-                  'Current location',
-                  Icons.near_me_outlined,
+    final bool showsWindow =
+        mode == TimeWindowMode.exact || mode == TimeWindowMode.flexible;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const _ReferenceBlockTitle(
+          icon: Icons.schedule_outlined,
+          label: 'When',
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            _ReferencePill(
+              label: 'Exact',
+              selected: mode == TimeWindowMode.exact,
+              onTap: () => onModeChanged(
+                mode == TimeWindowMode.exact ? null : TimeWindowMode.exact,
+              ),
+            ),
+            _ReferencePill(
+              label: 'Flexible',
+              selected: mode == TimeWindowMode.flexible,
+              onTap: () => onModeChanged(
+                mode == TimeWindowMode.flexible
+                    ? null
+                    : TimeWindowMode.flexible,
+              ),
+            ),
+            _ReferencePill(
+              label: 'Today',
+              selected: mode == TimeWindowMode.anytimeToday,
+              onTap: () => onModeChanged(
+                mode == TimeWindowMode.anytimeToday
+                    ? null
+                    : TimeWindowMode.anytimeToday,
+              ),
+            ),
+          ],
+        ),
+        if (showsWindow) ...<Widget>[
+          const SizedBox(height: 12),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _InlineTimeField(
+                  key: const Key('filter-start-time'),
+                  value: _formatClock(start),
+                  onTap: onStartTap,
                 ),
-                (
-                  TravelOriginType.manualPin,
-                  'Search pin',
-                  Icons.location_on_outlined,
-                ),
-              ])
-            Expanded(
-              child: Material(
-                color: value == option.$1
-                    ? colors.primaryContainer
-                    : colors.surface,
-                child: InkWell(
-                  onTap: () => onChanged(option.$1),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(option.$3, size: 15, color: colors.primary),
-                      const SizedBox(width: 5),
-                      Text(
-                        option.$2,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: colors.primary,
-                              fontWeight: value == option.$1
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                            ),
-                      ),
-                    ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 9),
+                child: Text(
+                  '–',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ),
-            ),
+              Expanded(
+                child: _InlineTimeField(
+                  key: const Key('filter-end-time'),
+                  value: _formatClock(end),
+                  onTap: onEndTap,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Window edge buffer',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              if (mode == TimeWindowMode.flexible)
+                PopupMenuButton<int>(
+                  tooltip: 'Change flexibility',
+                  initialValue: flexibilityMinutes,
+                  onSelected: onFlexibilityChanged,
+                  itemBuilder: (BuildContext context) => <int>[15, 30, 45, 60]
+                      .map(
+                        (int value) => PopupMenuItem<int>(
+                          value: value,
+                          child: Text('±$value min'),
+                        ),
+                      )
+                      .toList(),
+                  child: Text(
+                    '±$flexibilityMinutes min',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  'No buffer',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
         ],
+      ],
+    );
+  }
+}
+
+class _TravelFilterBlock extends StatelessWidget {
+  const _TravelFilterBlock({
+    required this.originType,
+    required this.transportMode,
+    required this.includeReturnTrip,
+    required this.onOriginChanged,
+    required this.onTransportChanged,
+    required this.onReturnTripChanged,
+  });
+
+  final TravelOriginType originType;
+  final TransportMode transportMode;
+  final bool includeReturnTrip;
+  final ValueChanged<TravelOriginType> onOriginChanged;
+  final ValueChanged<TransportMode> onTransportChanged;
+  final ValueChanged<bool> onReturnTripChanged;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      const _ReferenceBlockTitle(
+        icon: Icons.location_on_outlined,
+        label: 'Travel',
+      ),
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: <Widget>[
+          _ReferencePill(
+            icon: Icons.my_location_rounded,
+            label: "I'm here",
+            selected: originType == TravelOriginType.currentLocation,
+            onTap: () => onOriginChanged(TravelOriginType.currentLocation),
+          ),
+          _ReferencePill(
+            icon: Icons.location_on_outlined,
+            label: 'Map point',
+            selected: originType == TravelOriginType.manualPin,
+            onTap: () => onOriginChanged(TravelOriginType.manualPin),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      Row(
+        children: <Widget>[
+          _TransportButton(
+            tooltip: 'Walking',
+            icon: Icons.directions_walk_rounded,
+            selected: transportMode == TransportMode.walking,
+            onTap: () => onTransportChanged(TransportMode.walking),
+          ),
+          const SizedBox(width: 10),
+          _TransportButton(
+            tooltip: 'Driving',
+            icon: Icons.directions_car_outlined,
+            selected: transportMode == TransportMode.driving,
+            onTap: () => onTransportChanged(TransportMode.driving),
+          ),
+          const SizedBox(width: 10),
+          _TransportButton(
+            tooltip: 'Transit',
+            icon: Icons.directions_transit_outlined,
+            selected: transportMode == TransportMode.transit,
+            onTap: () => onTransportChanged(TransportMode.transit),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      InkWell(
+        onTap: () => onReturnTripChanged(!includeReturnTrip),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  key: const Key('include-return-trip'),
+                  value: includeReturnTrip,
+                  onChanged: (bool? value) =>
+                      onReturnTripChanged(value ?? false),
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                Icons.keyboard_return_rounded,
+                size: 17,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Include return trip',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _ReferenceBlockTitle extends StatelessWidget {
+  const _ReferenceBlockTitle({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: <Widget>[
+      Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+      const SizedBox(width: 7),
+      Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    ],
+  );
+}
+
+class _ReferencePill extends StatelessWidget {
+  const _ReferencePill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Material(
+      color: selected ? colors.primaryContainer : colors.surface,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? colors.primaryContainer : colors.outlineVariant,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(99),
+        child: SizedBox(
+          height: 36,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (icon != null) ...<Widget>[
+                  Icon(icon, size: 17, color: colors.primary),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: selected ? colors.primary : colors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-class _TimeWindowNavigationRow extends StatelessWidget {
-  const _TimeWindowNavigationRow({
-    required this.mode,
-    required this.start,
-    required this.end,
-    required this.flexibilityMinutes,
-    required this.onTap,
-  });
+class _InlineTimeField extends StatelessWidget {
+  const _InlineTimeField({super.key, required this.value, required this.onTap});
 
-  final TimeWindowMode mode;
-  final DateTime start;
-  final DateTime end;
-  final int flexibilityMinutes;
+  final String value;
   final VoidCallback onTap;
 
   @override
@@ -1280,45 +1605,69 @@ class _TimeWindowNavigationRow extends StatelessWidget {
     return Material(
       color: colors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: colors.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: SizedBox(
-          height: 52,
+          height: 44,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: <Widget>[
-                Icon(Icons.schedule_rounded, size: 20, color: colors.primary),
-                const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'Set exact time',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Text(
-                        '${mode == TimeWindowMode.flexible ? 'Flexible' : 'Exact'} · '
-                        '${_formatClock(start)}–${_formatClock(end)}'
-                        '${mode == TimeWindowMode.flexible ? ' · ±$flexibilityMinutes min' : ''}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    value,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: colors.primary),
+                Icon(Icons.schedule_outlined, size: 19, color: colors.primary),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TransportButton extends StatelessWidget {
+  const _TransportButton({
+    required this.tooltip,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: selected ? colors.primaryContainer : colors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9),
+          side: BorderSide(
+            color: selected ? colors.primaryContainer : colors.outlineVariant,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(9),
+          child: SizedBox(
+            width: 46,
+            height: 44,
+            child: Icon(icon, size: 21, color: colors.primary),
           ),
         ),
       ),

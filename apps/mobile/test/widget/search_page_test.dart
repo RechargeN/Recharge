@@ -49,13 +49,10 @@ void main() {
     await tester.tap(find.text('Exact'));
     await tester.pumpAndSettle();
     expect(
-      tester.getSize(find.byKey(const Key('time-window-editor'))).width,
-      360,
+      tester.getSize(find.byKey(const Key('filter-start-time'))).height,
+      44,
     );
-    expect(
-      tester.getSize(find.byKey(const Key('time-window-done'))).height,
-      40,
-    );
+    expect(tester.getSize(find.byKey(const Key('filter-end-time'))).height, 44);
     expect(tester.takeException(), isNull);
   });
 
@@ -102,30 +99,53 @@ void main() {
 
     await tester.tap(find.byKey(const Key('regular-search-filters')));
     await tester.pumpAndSettle();
-    expect(find.text('Time fit'), findsOneWidget);
+    expect(find.text('Exact'), findsOneWidget);
     expect(
       tester.getSize(find.byKey(const Key('filter-apply-button'))).height,
       40,
     );
     await tester.tap(find.text('Exact'));
     await tester.pumpAndSettle();
-    expect(find.text('Exact time'), findsOneWidget);
-    expect(find.byKey(const Key('time-window-editor')), findsOneWidget);
-    expect(
-      tester.getSize(find.byKey(const Key('time-window-done'))).height,
-      40,
-    );
-    await tester.tap(find.byKey(const Key('time-window-done')));
-    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('filter-start-time')), findsOneWidget);
+    expect(find.byKey(const Key('filter-end-time')), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Include return trip'),
       250,
       scrollable: find.byType(Scrollable).last,
     );
-    expect(find.text('Walking'), findsOneWidget);
-    expect(find.text('Current location'), findsOneWidget);
+    expect(find.byTooltip('Walking'), findsOneWidget);
+    expect(find.text("I'm here"), findsOneWidget);
     expect(find.text('Include return trip'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('accepts custom people and budget values', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('regular-search-filters')));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('people-custom')),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('people-custom')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('custom-number-input')), '7');
+    await tester.tap(find.byKey(const Key('custom-number-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('Custom · 7'), findsOneWidget);
+
+    expect(find.text('€0'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('budget-custom')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('custom-number-input')), '35');
+    await tester.tap(find.byKey(const Key('custom-number-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('Custom · €35'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders search controls and results', (tester) async {
