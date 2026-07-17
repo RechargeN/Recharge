@@ -8,7 +8,7 @@ void main() {
     );
 
     expect(result.queryText, 'yoga');
-    expect(result.selectedCategoryIds, contains('wellness'));
+    expect(result.selectedCategoryIds, contains('wellness_recharge'));
     expect(result.freeOnly, isTrue);
     expect(result.datePreset, SmartSearchDatePreset.tonight);
     expect(result.radiusMeters, 5000);
@@ -22,7 +22,7 @@ void main() {
     );
 
     expect(result.queryText, 'museum');
-    expect(result.selectedCategoryIds, contains('art'));
+    expect(result.selectedCategoryIds, contains('art_culture_museums'));
     expect(result.budgetMax, 10);
     expect(result.datePreset, SmartSearchDatePreset.today);
   });
@@ -33,7 +33,7 @@ void main() {
     );
 
     expect(result.queryText, 'live music');
-    expect(result.selectedCategoryIds, contains('music'));
+    expect(result.selectedCategoryIds, contains('music_nightlife'));
     expect(result.unlimitedRadius, isTrue);
   });
 
@@ -66,9 +66,9 @@ void main() {
     expect(result.routeIntent, isNotNull);
     expect(result.routeIntent!.mood, 'active');
     expect(result.routeIntent!.durationMinutes, 90);
-    expect(
-      result.routeIntent!.stepCategories,
-      <String>['sport.tennis', 'outdoor_nature_walking.city_walk'],
-    );
+    expect(result.routeIntent!.stepCategories, <String>[
+      'sport.tennis',
+      'outdoor_nature_walking.city_walk',
+    ]);
   });
 }

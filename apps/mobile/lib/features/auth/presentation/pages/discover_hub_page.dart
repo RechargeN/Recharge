@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/application/queries/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
+import '../../../discover/application/state/discover_feed_state.dart';
+import '../../../discover/domain/entities/discover_item_entity.dart';
 import '../../../discover/domain/entities/saved_search_entity.dart';
 import '../../../discover/domain/entities/smart_search_history_entity.dart';
-import '../../../discover/presentation/widgets/discover_feed_section.dart';
 import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/application/state/favorites_state.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
@@ -30,17 +33,40 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   static const List<_HomeCategory> _categories = <_HomeCategory>[
     _HomeCategory(id: null, label: 'All', icon: Icons.grid_view_rounded),
     _HomeCategory(
-      id: 'outdoor',
+      id: 'sport',
       label: 'Sport',
-      icon: Icons.sports_tennis_rounded,
+      icon: Icons.sports_tennis_outlined,
     ),
     _HomeCategory(
-      id: 'wellness',
+      id: 'outdoor_nature_walking',
       label: 'Walks',
-      icon: Icons.directions_walk_rounded,
+      icon: Icons.directions_walk,
     ),
-    _HomeCategory(id: 'art', label: 'Art', icon: Icons.palette_outlined),
-    _HomeCategory(id: 'music', label: 'Music', icon: Icons.music_note_rounded),
+    _HomeCategory(
+      id: 'games_indoor',
+      label: 'Games',
+      icon: Icons.sports_esports_outlined,
+    ),
+    _HomeCategory(
+      id: 'music_nightlife',
+      label: 'Music',
+      icon: Icons.music_note_outlined,
+    ),
+    _HomeCategory(
+      id: 'art_culture_museums',
+      label: 'Art',
+      icon: Icons.palette_outlined,
+    ),
+    _HomeCategory(
+      id: 'food_drinks',
+      label: 'Food',
+      icon: Icons.local_cafe_outlined,
+    ),
+    _HomeCategory(
+      id: 'wellness_recharge',
+      label: 'Wellness',
+      icon: Icons.self_improvement_rounded,
+    ),
   ];
 
   static const List<_ScenarioCardData> _scenarios = <_ScenarioCardData>[
@@ -121,6 +147,7 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       _favoritesRequested = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
+        ref.read(discoverFeedControllerProvider).ensureLoaded();
         ref.read(favoritesControllerProvider).ensureLoaded();
         ref.read(discoverFeedControllerProvider).ensureSavedSearchesLoaded();
         ref
@@ -158,147 +185,136 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
     final SmartSearchHistoryEntity? smartSearch = _latestSmartSearch(
       smartSearchHistory,
     );
-    final String greeting = authState.isAuthenticated
-        ? 'Hi, ${authState.user?.email.split('@').first ?? 'traveler'}'
-        : 'Guest mode';
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F8F5),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            _HomeHero(
-              greeting: greeting,
-              isAuthenticated: authState.isAuthenticated,
-              onSearch: () => context.go(RouteNames.search),
-              onMap: () => context.go(RouteNames.discoverMap),
-              onSignIn: () => context.push(
-                '${RouteNames.signIn}?sourceScreen=home&sourceAction=manual_sign_in',
+      backgroundColor: const Color(0xFF003F32),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              Color(0xFF064936),
+              Color(0xFF003F32),
+              Color(0xFF002C25),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+            children: <Widget>[
+              _HomeHero(
+                onSearch: () => context.go(RouteNames.search),
+                onMap: () => context.go(RouteNames.discoverMap),
               ),
-              onSignOut: () async {
-                await authController.signOut();
-                if (context.mounted) {
-                  context.go(RouteNames.discover);
-                }
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _SectionHeader(
-                    title: 'Categories',
-                    actionLabel: 'View all',
-                    onAction: () => context.go(RouteNames.search),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 96,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (BuildContext context, int index) {
-                        final _HomeCategory category = _categories[index];
-                        return _CategoryPill(
-                          category: category,
-                          onTap: () => _openCategory(category.id),
-                        );
-                      },
-                      separatorBuilder: (_, __) => const SizedBox(width: 10),
-                      itemCount: _categories.length,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  _SectionHeader(
-                    title: 'Quick scenarios',
-                    actionLabel: 'Smart search',
-                    onAction: () => context.go(RouteNames.search),
-                  ),
-                  const SizedBox(height: 12),
-                  Column(
-                    children: _scenarios
-                        .map(
-                          (_ScenarioCardData scenario) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _ScenarioCard(
-                              scenario: scenario,
-                              onTap: () => _openScenario(scenario),
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
-                  ),
-                  const SizedBox(height: 22),
-                  _SectionHeader(
-                    title: 'Route ideas',
-                    actionLabel: 'Builder',
-                    onAction: () => context.go(RouteNames.scenarioBuilder),
-                  ),
-                  const SizedBox(height: 12),
-                  _HomeRouteTemplateRail(
-                    templates: _routeTemplates,
-                    onBuild: _openRouteTemplate,
-                    onMap: _openRouteTemplateMap,
-                    onCreate: _openRouteTemplateCreate,
-                  ),
-                  if (savedScenario != null) ...<Widget>[
-                    const SizedBox(height: 12),
-                    _SavedScenarioPanel(
-                      scenario: savedScenario,
-                      onEdit: () => _openSavedScenario(savedScenario),
-                      onRoute: () => _openSavedScenarioMap(savedScenario),
-                    ),
-                  ],
-                  if (smartSearch != null) ...<Widget>[
-                    const SizedBox(height: 12),
-                    _SmartSearchPanel(
-                      item: smartSearch,
-                      onResume: () => _openSmartSearch(smartSearch),
-                      onMap: () => _openSmartSearchMap(smartSearch),
-                      onRoute: () => _openSmartSearchRoute(smartSearch),
-                      onCreate: () => _openSmartSearchCreate(smartSearch),
-                    ),
-                  ],
-                  if (savedSearch != null) ...<Widget>[
-                    const SizedBox(height: 12),
-                    _SavedSearchPanel(
-                      search: savedSearch,
-                      onResume: () => _openSavedSearch(savedSearch),
-                      onMap: () => _openSavedSearchMap(savedSearch),
-                      onRoute: () => _openSavedSearchRoute(savedSearch),
-                      onCreate: () => _openSavedSearchCreate(savedSearch),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _SectionHeader(
-                    title: 'Nearly',
-                    actionLabel: 'Map',
-                    onAction: () => context.go(RouteNames.discoverMap),
-                  ),
-                  const SizedBox(height: 12),
-                  DiscoverFeedSection(
-                    onOpenDetails: (String itemId) {
-                      context.push('${RouteNames.discoverDetails}/$itemId');
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  _ForYouStrip(
-                    onPopular: () => context.go(RouteNames.search),
-                    onScenario: () => context.go(RouteNames.scenarioBuilder),
-                    onCreate: () => context.push(RouteNames.create),
-                  ),
-                  if (authState.message != null) ...<Widget>[
-                    const SizedBox(height: 16),
-                    Text(
-                      authState.message!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
-                ],
+              const SizedBox(height: 18),
+              _SectionHeader(
+                title: 'Categories',
+                actionLabel: 'View all',
+                onAction: () => context.go(RouteNames.search),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 96,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (BuildContext context, int index) {
+                    final _HomeCategory category = _categories[index];
+                    return _CategoryPill(
+                      category: category,
+                      selected: index == 0,
+                      onTap: () => _openCategory(category.id),
+                    );
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(width: 14),
+                  itemCount: _categories.length,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _HomeActivitySections(
+                state: discoverState,
+                onViewAll: () => context.go(RouteNames.search),
+                onOpenDetails: (DiscoverItemEntity item) {
+                  context.push('${RouteNames.discoverDetails}/${item.id}');
+                },
+              ),
+              const SizedBox(height: 18),
+              _SectionHeader(
+                title: 'Quick scenarios',
+                actionLabel: 'Smart search',
+                onAction: () => context.go(RouteNames.search),
+              ),
+              const SizedBox(height: 10),
+              Column(
+                children: _scenarios
+                    .map(
+                      (_ScenarioCardData scenario) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _ScenarioCard(
+                          scenario: scenario,
+                          onTap: () => _openScenario(scenario),
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+              const SizedBox(height: 18),
+              _SectionHeader(
+                title: 'Route ideas',
+                actionLabel: 'Builder',
+                onAction: () => context.go(RouteNames.scenarioBuilder),
+              ),
+              const SizedBox(height: 10),
+              _HomeRouteTemplateRail(
+                templates: _routeTemplates,
+                onBuild: _openRouteTemplate,
+                onMap: _openRouteTemplateMap,
+                onCreate: _openRouteTemplateCreate,
+              ),
+              if (savedScenario != null) ...<Widget>[
+                const SizedBox(height: 12),
+                _SavedScenarioPanel(
+                  scenario: savedScenario,
+                  onEdit: () => _openSavedScenario(savedScenario),
+                  onRoute: () => _openSavedScenarioMap(savedScenario),
+                ),
+              ],
+              if (smartSearch != null) ...<Widget>[
+                const SizedBox(height: 12),
+                _SmartSearchPanel(
+                  item: smartSearch,
+                  onResume: () => _openSmartSearch(smartSearch),
+                  onMap: () => _openSmartSearchMap(smartSearch),
+                  onRoute: () => _openSmartSearchRoute(smartSearch),
+                  onCreate: () => _openSmartSearchCreate(smartSearch),
+                ),
+              ],
+              if (savedSearch != null) ...<Widget>[
+                const SizedBox(height: 12),
+                _SavedSearchPanel(
+                  search: savedSearch,
+                  onResume: () => _openSavedSearch(savedSearch),
+                  onMap: () => _openSavedSearchMap(savedSearch),
+                  onRoute: () => _openSavedSearchRoute(savedSearch),
+                  onCreate: () => _openSavedSearchCreate(savedSearch),
+                ),
+              ],
+              const SizedBox(height: 14),
+              _ForYouStrip(
+                onPopular: () => context.go(RouteNames.search),
+                onScenario: () => context.go(RouteNames.scenarioBuilder),
+                onCreate: () => context.push(RouteNames.create),
+              ),
+              if (authState.message != null) ...<Widget>[
+                const SizedBox(height: 16),
+                Text(
+                  authState.message!,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -476,6 +492,7 @@ class _SavedScenarioPanel extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: FilledButton.icon(
+                    key: const ValueKey<String>('home-saved-scenario-edit'),
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_location_alt),
                     label: const Text('Edit'),
@@ -484,6 +501,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
+                    key: const ValueKey<String>('home-saved-scenario-route'),
                     onPressed: onRoute,
                     icon: const Icon(Icons.route),
                     label: const Text('Route'),
@@ -811,115 +829,97 @@ class _SmartSearchPanel extends StatelessWidget {
 }
 
 class _HomeHero extends StatelessWidget {
-  const _HomeHero({
-    required this.greeting,
-    required this.isAuthenticated,
-    required this.onSearch,
-    required this.onMap,
-    required this.onSignIn,
-    required this.onSignOut,
-  });
+  const _HomeHero({required this.onSearch, required this.onMap});
 
-  final String greeting;
-  final bool isAuthenticated;
   final VoidCallback onSearch;
   final VoidCallback onMap;
-  final VoidCallback onSignIn;
-  final Future<void> Function() onSignOut;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-      decoration: const BoxDecoration(
-        color: Color(0xFF003F32),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'RECHARGE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'VACATION APP',
-                      style: TextStyle(
-                        color: Color(0xFFD9F2E9),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: isAuthenticated ? 'Выйти' : 'Войти',
-                onPressed: () async {
-                  if (isAuthenticated) {
-                    await onSignOut();
-                    return;
-                  }
-                  onSignIn();
-                },
-                icon: Icon(
-                  isAuthenticated ? Icons.logout_rounded : Icons.login_rounded,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        const Text(
+          'RECHARGE',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
           ),
-          const SizedBox(height: 18),
-          Text(
-            greeting,
-            style: const TextStyle(
-              color: Color(0xFFEAF7F2),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+        ),
+        const SizedBox(height: 3),
+        const Text(
+          'VACATION APP',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.6,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: _HomeActionPill(
+                icon: Icons.search_rounded,
+                label: 'Search',
+                onPressed: onSearch,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: onSearch,
-                  icon: const Icon(Icons.search_rounded),
-                  label: const Text('Search'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF003F32),
-                  ),
-                ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _HomeActionPill(
+                icon: Icons.map_outlined,
+                label: 'Map',
+                onPressed: onMap,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: onMap,
-                  icon: const Icon(Icons.map_outlined),
-                  label: const Text('Map'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF003F32),
-                  ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeActionPill extends StatelessWidget {
+  const _HomeActionPill({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon, size: 18, color: const Color(0xFF064936)),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF073F35),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -944,54 +944,455 @@ class _SectionHeader extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF073F35),
-              fontSize: 22,
+              color: Colors.white,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        TextButton(onPressed: onAction, child: Text(actionLabel)),
+        TextButton(
+          onPressed: onAction,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            visualDensity: VisualDensity.compact,
+          ),
+          child: Text(actionLabel),
+        ),
       ],
     );
   }
 }
 
 class _CategoryPill extends StatelessWidget {
-  const _CategoryPill({required this.category, required this.onTap});
+  const _CategoryPill({
+    required this.category,
+    required this.selected,
+    required this.onTap,
+  });
 
   final _HomeCategory category;
+  final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 74,
+      width: 64,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(28),
         onTap: onTap,
         child: Column(
           children: <Widget>[
             Container(
-              width: 62,
-              height: 62,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFD8E7E1)),
+                color: selected
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.13),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.22),
+                ),
               ),
-              child: Icon(category.icon, color: const Color(0xFF003F32)),
+              child: Icon(
+                category.icon,
+                color: selected ? const Color(0xFF064936) : Colors.white,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 7),
             Text(
               category.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF1D3E37),
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeActivitySections extends StatelessWidget {
+  const _HomeActivitySections({
+    required this.state,
+    required this.onViewAll,
+    required this.onOpenDetails,
+  });
+
+  final DiscoverFeedState state;
+  final VoidCallback onViewAll;
+  final ValueChanged<DiscoverItemEntity> onOpenDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.status == DiscoverFeedStatus.initial ||
+        state.status == DiscoverFeedStatus.loading ||
+        state.status == DiscoverFeedStatus.selectingArea) {
+      return const _HomeLoadingCard();
+    }
+
+    final List<DiscoverItemEntity> items = state.items;
+    if (items.isEmpty) {
+      return _HomeEmptyCard(onViewAll: onViewAll);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: _homeChoiceSections(items)
+          .map(
+            (_HomeChoiceSectionData section) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _HomeContentSection(
+                title: section.title,
+                items: section.items,
+                onViewAll: onViewAll,
+                onOpenDetails: onOpenDetails,
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  List<_HomeChoiceSectionData> _homeChoiceSections(
+    List<DiscoverItemEntity> items,
+  ) {
+    return <_HomeChoiceSectionData>[
+      _HomeChoiceSectionData(
+        title: 'Categories',
+        items: _categoryMixItems(items),
+      ),
+      _HomeChoiceSectionData(title: 'New', items: _newItems(items)),
+      _HomeChoiceSectionData(title: 'For you', items: _forYouItems(items)),
+      _HomeChoiceSectionData(
+        title: 'Quick events',
+        items: _quickEventItems(items),
+      ),
+      _HomeChoiceSectionData(title: 'Nearby', items: _nearbyItems(items)),
+      _HomeChoiceSectionData(title: 'Popular', items: _popularItems(items)),
+    ];
+  }
+
+  List<DiscoverItemEntity> _categoryMixItems(List<DiscoverItemEntity> items) {
+    final Set<String> seenCategories = <String>{};
+    final List<DiscoverItemEntity> mixed = <DiscoverItemEntity>[];
+    for (final DiscoverItemEntity item in items) {
+      if (seenCategories.add(item.category)) {
+        mixed.add(item);
+      }
+      if (mixed.length == 6) break;
+    }
+    if (mixed.length >= 4 || mixed.length == items.length) {
+      return mixed;
+    }
+    for (final DiscoverItemEntity item in items) {
+      if (!mixed.contains(item)) mixed.add(item);
+      if (mixed.length == 6) break;
+    }
+    return mixed;
+  }
+
+  List<DiscoverItemEntity> _newItems(List<DiscoverItemEntity> items) {
+    final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
+      ..sort(
+        (DiscoverItemEntity a, DiscoverItemEntity b) =>
+            a.startsAtUtc.compareTo(b.startsAtUtc),
+      );
+    return sorted.take(6).toList(growable: false);
+  }
+
+  List<DiscoverItemEntity> _popularItems(List<DiscoverItemEntity> items) {
+    final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
+      ..sort(
+        (DiscoverItemEntity a, DiscoverItemEntity b) =>
+            b.relevanceScore.compareTo(a.relevanceScore),
+      );
+    return sorted.take(6).toList(growable: false);
+  }
+
+  List<DiscoverItemEntity> _forYouItems(List<DiscoverItemEntity> items) {
+    if (items.length <= 2) return items;
+    return items.skip(2).take(6).toList(growable: false);
+  }
+
+  List<DiscoverItemEntity> _quickEventItems(List<DiscoverItemEntity> items) {
+    final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
+      ..sort((DiscoverItemEntity a, DiscoverItemEntity b) {
+        final int freeCompare = _freeRank(b).compareTo(_freeRank(a));
+        if (freeCompare != 0) return freeCompare;
+        final int durationCompare = _quickDurationRank(
+          b,
+        ).compareTo(_quickDurationRank(a));
+        if (durationCompare != 0) return durationCompare;
+        return a.startsAtUtc.compareTo(b.startsAtUtc);
+      });
+    return sorted.take(6).toList(growable: false);
+  }
+
+  List<DiscoverItemEntity> _nearbyItems(List<DiscoverItemEntity> items) {
+    final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
+      ..sort(
+        (DiscoverItemEntity a, DiscoverItemEntity b) =>
+            a.distanceKm.compareTo(b.distanceKm),
+      );
+    return sorted.take(6).toList(growable: false);
+  }
+
+  int _freeRank(DiscoverItemEntity item) => item.isFree ? 1 : 0;
+
+  int _quickDurationRank(DiscoverItemEntity item) {
+    final int duration = item.durationMinutes;
+    return duration > 0 && duration <= 90 ? 1 : 0;
+  }
+}
+
+class _HomeChoiceSectionData {
+  const _HomeChoiceSectionData({required this.title, required this.items});
+
+  final String title;
+  final List<DiscoverItemEntity> items;
+}
+
+class _HomeContentSection extends StatelessWidget {
+  const _HomeContentSection({
+    required this.title,
+    required this.items,
+    required this.onViewAll,
+    required this.onOpenDetails,
+  });
+
+  final String title;
+  final List<DiscoverItemEntity> items;
+  final VoidCallback onViewAll;
+  final ValueChanged<DiscoverItemEntity> onOpenDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _SectionHeader(
+          title: title,
+          actionLabel: 'View all',
+          onAction: onViewAll,
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 116,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (BuildContext context, int index) {
+              final DiscoverItemEntity item = items[index];
+              return _HomeFeatureCard(
+                item: item,
+                onTap: () => onOpenDetails(item),
+              );
+            },
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemCount: items.length,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeFeatureCard extends StatelessWidget {
+  const _HomeFeatureCard({required this.item, required this.onTap});
+
+  final DiscoverItemEntity item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 154,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              _HomeFeatureImage(item: item),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      Color(0x22FFFFFF),
+                      Color(0x22000000),
+                      Color(0xBB000000),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: _HomeFeatureTag(label: item.category),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _homeCardMeta(item),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.84),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeFeatureImage extends StatelessWidget {
+  const _HomeFeatureImage({required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    if (item.coverImageUrl.isEmpty) return _HomeFeatureFallback(item: item);
+    return Image.network(
+      item.coverImageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _HomeFeatureFallback(item: item),
+    );
+  }
+}
+
+class _HomeFeatureFallback extends StatelessWidget {
+  const _HomeFeatureFallback({required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color(0xFFE9F0EC),
+            Color(0xFFB8C9C2),
+            Color(0xFF31564C),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          _categoryIconForHome(item.category),
+          color: const Color(0xFF31564C),
+          size: 38,
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeFeatureTag extends StatelessWidget {
+  const _HomeFeatureTag({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF60736D).withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          label.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeLoadingCard extends StatelessWidget {
+  const _HomeLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 116,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Colors.white.withValues(alpha: 0.86),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeEmptyCard extends StatelessWidget {
+  const _HomeEmptyCard({required this.onViewAll});
+
+  final VoidCallback onViewAll;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onViewAll,
+        child: const Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'No activities yet',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+          ),
         ),
       ),
     );
@@ -1012,9 +1413,9 @@ class _ScenarioCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFDDE9E4)),
+          color: RechargeTheme.travelPanel,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: RechargeTheme.travelLine),
         ),
         child: Row(
           children: <Widget>[
@@ -1023,9 +1424,9 @@ class _ScenarioCard extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: const Color(0xFFE8F4EF),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(4),
               ),
-              child: Icon(scenario.icon, color: const Color(0xFF003F32)),
+              child: Icon(scenario.icon, color: RechargeTheme.travelGreenDark),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1110,9 +1511,9 @@ class _HomeRouteTemplateCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFDDE9E4)),
+          color: RechargeTheme.travelPanel,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: RechargeTheme.travelLine),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1124,9 +1525,12 @@ class _HomeRouteTemplateCard extends StatelessWidget {
                   height: 42,
                   decoration: BoxDecoration(
                     color: const Color(0xFFE8F4EF),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Icon(template.icon, color: const Color(0xFF003F32)),
+                  child: Icon(
+                    template.icon,
+                    color: RechargeTheme.travelGreenDark,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1216,8 +1620,8 @@ class _ForYouStrip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF003F32),
-        borderRadius: BorderRadius.circular(8),
+        color: RechargeTheme.travelGreenDark,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1301,6 +1705,34 @@ class _ForYouButton extends StatelessWidget {
   }
 }
 
+IconData _homeCategoryIcon(String categoryId) {
+  return switch (normalizeRechargeContentGroupId(categoryId)) {
+    'music_nightlife' => Icons.music_note,
+    'comedy_theatre_performance' => Icons.theater_comedy,
+    'cinema_screenings' => Icons.movie_outlined,
+    'art_culture_museums' => Icons.palette_outlined,
+    'education_talks' => Icons.school_outlined,
+    'business_networking' => Icons.handshake_outlined,
+    'workshops_masterclasses' => Icons.build_outlined,
+    'language_social_learning' => Icons.translate,
+    'food_drinks' => Icons.restaurant_outlined,
+    'games_indoor' => Icons.casino_outlined,
+    'sport' => Icons.sports_tennis,
+    'dance' => Icons.nightlife_outlined,
+    'outdoor_nature_walking' => Icons.park_outlined,
+    'water_activities' => Icons.kayaking_outlined,
+    'winter_seasonal' => Icons.ac_unit,
+    'travel_tours' => Icons.tour_outlined,
+    'family_kids' => Icons.family_restroom,
+    'pets_animals' => Icons.pets_outlined,
+    'community_charity' => Icons.volunteer_activism_outlined,
+    'markets_fairs' => Icons.storefront_outlined,
+    'holidays_seasonal' => Icons.celebration_outlined,
+    'wellness_recharge' => Icons.self_improvement_rounded,
+    _ => Icons.category_outlined,
+  };
+}
+
 class _HomeCategory {
   const _HomeCategory({
     required this.id,
@@ -1353,6 +1785,21 @@ class _HomeRouteTemplate {
   final bool walkingOnly;
   final String prompt;
   final List<String> steps;
+}
+
+String _homeCardMeta(DiscoverItemEntity item) {
+  final DateTime local = item.startsAtUtc.toLocal();
+  final String hour = local.hour.toString().padLeft(2, '0');
+  final String minute = local.minute.toString().padLeft(2, '0');
+  final String price = item.isFree
+      ? 'Free'
+      : '${item.priceAmount.toStringAsFixed(0)} EUR';
+  final String venue = item.venueName.isEmpty ? item.city : item.venueName;
+  return '$price · $hour:$minute · $venue';
+}
+
+IconData _categoryIconForHome(String category) {
+  return _homeCategoryIcon(category);
 }
 
 FavoriteItemEntity? _latestSavedScenario(List<FavoriteItemEntity> items) {
@@ -1409,7 +1856,10 @@ String _mapRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _searchRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  return _discoverRouteForSavedSearch(RouteNames.search, item.query);
+  return Uri(
+    path: RouteNames.smartSearch,
+    queryParameters: <String, String>{'prompt': item.prompt},
+  ).toString();
 }
 
 String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
@@ -1611,15 +2061,19 @@ String _capitalized(String value) {
 
 String _scenarioMoodForSavedSearch(DiscoverQuery query) {
   final String queryText = query.queryText.toLowerCase();
+  final Set<String> normalizedCategories = query.selectedCategoryIds
+      .map(normalizeRechargeContentGroupId)
+      .toSet();
   if (queryText.contains('run') ||
       queryText.contains('sport') ||
       queryText.contains('tennis') ||
-      query.selectedCategoryIds.contains('outdoor')) {
+      normalizedCategories.contains('sport') ||
+      normalizedCategories.contains('outdoor_nature_walking')) {
     return 'active';
   }
-  if (query.selectedCategoryIds.any((String category) {
-    return category == 'art' || category == 'music' || category == 'family';
-  })) {
+  if (normalizedCategories.contains('art_culture_museums') ||
+      normalizedCategories.contains('music_nightlife') ||
+      normalizedCategories.contains('family_kids')) {
     return 'social';
   }
   return 'calm';

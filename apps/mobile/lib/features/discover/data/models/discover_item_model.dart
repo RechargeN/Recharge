@@ -7,6 +7,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
     required super.subtitle,
     required super.city,
     required super.category,
+    super.subcategory,
     required super.startsAtUtc,
     required super.latitude,
     required super.longitude,
@@ -33,6 +34,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
       subtitle: map['subtitle']! as String,
       city: map['city']! as String,
       category: map['category']! as String,
+      subcategory: map['subcategory'] as String? ?? '',
       startsAtUtc: DateTime.parse(map['starts_at_utc']! as String),
       latitude: (map['latitude']! as num).toDouble(),
       longitude: (map['longitude']! as num).toDouble(),
@@ -49,8 +51,8 @@ class DiscoverItemModel extends DiscoverItemEntity {
       capacity: (map['capacity'] as num?)?.toInt() ?? 0,
       durationMinutes: (map['duration_minutes'] as num?)?.toInt() ?? 0,
       ctaLabel: map['cta_label'] as String? ?? '',
-      highlights:
-          (map['highlights'] as List<dynamic>? ?? <dynamic>[]).cast<String>(),
+      highlights: (map['highlights'] as List<dynamic>? ?? <dynamic>[])
+          .cast<String>(),
     );
   }
 }

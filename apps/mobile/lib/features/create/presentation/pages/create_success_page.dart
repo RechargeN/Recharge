@@ -157,7 +157,10 @@ class _PublishedDraftCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _StatusChip(icon: Icons.layers, label: draft.objectType.name),
+                _StatusChip(
+                  icon: Icons.layers,
+                  label: createBlockConfigFor(draft.objectType).title,
+                ),
                 _StatusChip(
                   icon: Icons.verified_outlined,
                   label: draft.publishStatus.name,
@@ -516,21 +519,7 @@ String _discoverRouteForDraft(String path, CreateDraftEntity draft) {
 }
 
 String _discoverCategoryForDraft(String category) {
-  switch (category) {
-    case 'art_culture_museums':
-      return 'art';
-    case 'outdoor_nature_walking':
-    case 'travel_tours':
-      return 'outdoor';
-    case 'wellness_recharge':
-      return 'wellness';
-    case 'food_drinks':
-      return 'food';
-    case 'family_kids':
-      return 'family';
-    default:
-      return category;
-  }
+  return category;
 }
 
 List<String> _routeStepsFromDraft(CreateDraftEntity draft) {

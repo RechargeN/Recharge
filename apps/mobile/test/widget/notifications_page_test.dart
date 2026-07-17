@@ -64,12 +64,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Новые активности рядом'), findsWidgets);
-    expect(find.byTooltip('Отметить как прочитанное'), findsOneWidget);
+    expect(notificationsController.state.unreadCount, 1);
 
-    await tester.tap(find.byTooltip('Отметить как прочитанное').first);
+    await tester.tap(find.text('Новые активности рядом').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Прочитано'), findsNWidgets(3));
+    expect(notificationsController.state.unreadCount, 0);
+    expect(find.byTooltip('Read all'), findsNothing);
   });
 
   fullPageTestWidgets('mark all read clears unread inbox actions', (
@@ -111,16 +112,16 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Отметить как прочитанное'), findsOneWidget);
+    expect(find.byTooltip('Read all'), findsOneWidget);
 
-    await tester.tap(find.text('Read all'));
+    await tester.tap(find.byTooltip('Read all'));
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Отметить как прочитанное'), findsNothing);
+    expect(find.byTooltip('Read all'), findsNothing);
     expect(notificationsController.state.unreadCount, 0);
   });
 
-  fullPageTestWidgets('groups inbox notifications by priority sections', (
+  fullPageTestWidgets('filters notification feed by status and type', (
     tester,
   ) async {
     final authController = AuthController(
@@ -201,32 +202,37 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Actions 1'), findsOneWidget);
-    expect(find.text('Routes 1'), findsOneWidget);
-    expect(find.text('Creator 1'), findsOneWidget);
-    expect(find.text('Updates 1'), findsOneWidget);
-    expect(find.text('Action needed'), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('New'), findsOneWidget);
+    expect(find.text('Reminders'), findsOneWidget);
+    expect(find.text('Updates'), findsOneWidget);
+    expect(find.text('Готов спокойный маршрут'), findsOneWidget);
+    expect(find.text('Листинг отправлен на модерацию'), findsOneWidget);
+    expect(find.text('Напоминание о событии'), findsOneWidget);
+    expect(find.text('Системное обновление'), findsOneWidget);
 
-    await tester.scrollPageUntilVisible(find.text('Route plans'), 180);
-    expect(find.text('Route plans'), findsOneWidget);
-
-    await tester.scrollPageUntilVisible(find.text('Creator updates'), 180);
-    expect(find.text('Creator updates'), findsOneWidget);
-
-    await tester.scrollPageUntilVisible(find.text('Other updates'), 180);
-    expect(find.text('Other updates'), findsOneWidget);
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Unread'));
+    await tester.tap(find.text('New'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Updates 1'), findsNothing);
-    expect(find.text('Other updates'), findsNothing);
-    expect(find.text('Actions 1'), findsOneWidget);
-    expect(find.text('Routes 1'), findsOneWidget);
-    expect(find.text('Creator 1'), findsOneWidget);
-    expect(find.text('Action needed'), findsOneWidget);
+    expect(find.text('Системное обновление'), findsNothing);
+    expect(find.text('Готов спокойный маршрут'), findsOneWidget);
+    expect(find.text('Листинг отправлен на модерацию'), findsOneWidget);
+    expect(find.text('Напоминание о событии'), findsOneWidget);
+
+    await tester.tap(find.text('Reminders'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Напоминание о событии'), findsOneWidget);
+    expect(find.text('Готов спокойный маршрут'), findsNothing);
+    expect(find.text('Листинг отправлен на модерацию'), findsNothing);
+
+    await tester.tap(find.text('Updates'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Системное обновление'), findsOneWidget);
+    expect(find.text('Готов спокойный маршрут'), findsOneWidget);
+    expect(find.text('Листинг отправлен на модерацию'), findsOneWidget);
+    expect(find.text('Напоминание о событии'), findsNothing);
   });
 
   fullPageTestWidgets('opens route notification action and marks it read', (
@@ -333,12 +339,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Route scenario'), findsOneWidget);
-    expect(find.text('Calm'), findsOneWidget);
-    expect(find.text('90 min'), findsOneWidget);
-    expect(find.text('Free'), findsOneWidget);
-    expect(find.text('Walking'), findsOneWidget);
-    expect(find.text('2 stops'), findsOneWidget);
-    expect(find.text('Coffee · Calm walk'), findsOneWidget);
+    await tester.tap(find.byTooltip('Notification actions').first);
+    await tester.pumpAndSettle();
     expect(find.text('Map route'), findsOneWidget);
     expect(find.text('Create route'), findsOneWidget);
     expect(find.text('Open route'), findsOneWidget);
@@ -357,6 +359,8 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byTooltip('Notification actions').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Create route'));
     await tester.pumpAndSettle();
 
@@ -372,6 +376,8 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byTooltip('Notification actions').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Open route'));
     await tester.pumpAndSettle();
 
@@ -472,10 +478,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Creator profile'), findsOneWidget);
-    expect(find.text('Open profile'), findsOneWidget);
     expect(find.text('Publish status'), findsOneWidget);
-    expect(find.text('Open listing'), findsOneWidget);
 
+    await tester.tap(find.byTooltip('Notification actions').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Open profile'), findsOneWidget);
     await tester.tap(find.text('Open profile'));
     await tester.pumpAndSettle();
     expect(find.text('Profile target'), findsOneWidget);
@@ -483,6 +490,9 @@ void main() {
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Notification actions').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Open listing'), findsOneWidget);
     await tester.tap(find.text('Open listing'));
     await tester.pumpAndSettle();
     expect(find.text('Create target'), findsOneWidget);

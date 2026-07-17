@@ -3,15 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
-import '../../../create/application/create_taxonomy.dart';
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/queries/discover_query.dart';
-import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/saved_search_entity.dart';
-import '../../domain/entities/smart_search_history_entity.dart';
 
 class DiscoverResultsPage extends ConsumerStatefulWidget {
   const DiscoverResultsPage({
@@ -28,19 +26,20 @@ class DiscoverResultsPage extends ConsumerStatefulWidget {
 
 class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
   late final TextEditingController _searchController;
-  SmartSearchParseResult? _lastSmartParse;
+  final GlobalKey _conditionsKey = GlobalKey();
 
-  static const List<_CategoryOption> _categories = <_CategoryOption>[
-    _CategoryOption(id: null, label: 'All', icon: Icons.grid_view_rounded),
-    _CategoryOption(id: 'outdoor', label: 'Outdoor', icon: Icons.park_outlined),
-    _CategoryOption(
-      id: 'wellness',
-      label: 'Wellness',
-      icon: Icons.self_improvement_rounded,
+  static final List<_CategoryOption> _categories = <_CategoryOption>[
+    const _CategoryOption(
+      id: null,
+      label: 'All',
+      icon: Icons.grid_view_rounded,
     ),
-    _CategoryOption(id: 'art', label: 'Art', icon: Icons.palette_outlined),
-    _CategoryOption(id: 'music', label: 'Music', icon: Icons.music_note),
-    _CategoryOption(id: 'family', label: 'Family', icon: Icons.family_restroom),
+    for (final RechargeContentGroup group in rechargeVisibleContentGroups)
+      _CategoryOption(
+        id: group.id,
+        label: group.title,
+        icon: _discoverCategoryIcon(group.id),
+      ),
   ];
 
   @override
@@ -63,7 +62,6 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
         controller.ensureLoaded();
       }
       controller.ensureSavedSearchesLoaded();
-      controller.ensureSmartSearchHistoryLoaded();
     });
   }
 
@@ -106,80 +104,14 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onSubmit: () => controller.applySearchConditions(
               queryText: _searchController.text,
             ),
-            onVoicePrompt: () => _showVoicePromptSheet(controller),
             onClear: () {
               _searchController.clear();
-              setState(() => _lastSmartParse = null);
               controller.applySearchConditions(queryText: '');
             },
+            onFilters: _scrollToConditions,
           ),
-          const SizedBox(height: 12),
-          _SmartSearchPanel(
-            parseResult: _lastSmartParse,
-            onApply: () => _applySmartSearch(controller),
-            onVoicePrompt: () => _showVoicePromptSheet(controller),
-            onBuildScenario: _lastSmartParse == null
-                ? null
-                : () => context.go(_scenarioBuilderLocation(_lastSmartParse!)),
-            onMapSmartRoute: _lastSmartParse?.routeIntent == null
-                ? null
-                : () => context.go(_mapLocationForSmartRoute(_lastSmartParse!)),
-            onCreateSmartRoute: _lastSmartParse?.routeIntent == null
-                ? null
-                : () => context.go(
-                    _createLocationForSmartRoute(_lastSmartParse!),
-                  ),
-            onExample: (String value) {
-              _searchController.text = value;
-              _applySmartSearch(controller);
-            },
-          ),
-          if (state.smartSearchHistory.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 14),
-            _SmartSearchHistoryPanel(
-              history: state.smartSearchHistory,
-              onApply: (SmartSearchHistoryEntity item) {
-                _searchController.text = item.prompt;
-                setState(() => _lastSmartParse = parseSmartSearch(item.prompt));
-                controller.applySmartSearchHistory(item);
-              },
-              onOpenMap: (SmartSearchHistoryEntity item) {
-                context.go(_mapLocationForSmartSearch(item));
-              },
-              onBuildScenario: (SmartSearchHistoryEntity item) {
-                context.go(_scenarioBuilderLocationForSmartSearch(item));
-              },
-              onCreateListing: (SmartSearchHistoryEntity item) {
-                context.go(_createLocationForSmartSearch(item));
-              },
-              onDelete: (SmartSearchHistoryEntity item) {
-                controller.deleteSmartSearchPrompt(item.id);
-              },
-            ),
-          ],
-          const SizedBox(height: 14),
-          _SavedSearchesPanel(
-            savedSearches: state.savedSearches,
-            onSaveCurrent: controller.saveCurrentSearch,
-            onCreateCurrent: () => context.go(_createLocationForQuery(query)),
-            onApply: (SavedSearchEntity search) {
-              _searchController.text = search.query.queryText;
-              setState(() => _lastSmartParse = null);
-              controller.applySavedSearch(search);
-            },
-            onOpenMap: (SavedSearchEntity search) {
-              context.go(_mapLocationForQuery(search.query));
-            },
-            onBuildScenario: (SavedSearchEntity search) {
-              context.go(_scenarioBuilderLocationForQuery(search.query));
-            },
-            onCreateListing: (SavedSearchEntity search) {
-              context.go(_createLocationForSavedSearch(search));
-            },
-            onDelete: (SavedSearchEntity search) {
-              controller.deleteSavedSearch(search.id);
-            },
-          ),
+          const SizedBox(height: 10),
+          _ActiveConditionChips(query: query),
           const SizedBox(height: 14),
           _SectionTitle(
             title: 'Quick scenarios',
@@ -228,13 +160,35 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             },
             onOutdoor: () {
               controller.applySearchConditions(
-                selectedCategoryIds: const <String>['outdoor'],
+                selectedCategoryIds: const <String>['outdoor_nature_walking'],
                 freeOnly: false,
                 clearBudgetMin: true,
                 clearBudgetMax: true,
                 clearDateFrom: true,
                 clearDateTo: true,
               );
+            },
+          ),
+          const SizedBox(height: 18),
+          _SavedSearchesPanel(
+            savedSearches: state.savedSearches,
+            onSaveCurrent: controller.saveCurrentSearch,
+            onCreateCurrent: () => context.go(_createLocationForQuery(query)),
+            onApply: (SavedSearchEntity search) {
+              _searchController.text = search.query.queryText;
+              controller.applySavedSearch(search);
+            },
+            onOpenMap: (SavedSearchEntity search) {
+              context.go(_mapLocationForQuery(search.query));
+            },
+            onBuildScenario: (SavedSearchEntity search) {
+              context.go(_scenarioBuilderLocationForQuery(search.query));
+            },
+            onCreateListing: (SavedSearchEntity search) {
+              context.go(_createLocationForSavedSearch(search));
+            },
+            onDelete: (SavedSearchEntity search) {
+              controller.deleteSavedSearch(search.id);
             },
           ),
           const SizedBox(height: 18),
@@ -248,7 +202,9 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             categories: _categories,
             selectedCategoryId: query.selectedCategoryIds.isEmpty
                 ? null
-                : query.selectedCategoryIds.first,
+                : normalizeRechargeContentGroupId(
+                    query.selectedCategoryIds.first,
+                  ),
             onSelected: (String? categoryId) {
               controller.applySearchConditions(
                 selectedCategoryIds: categoryId == null
@@ -264,6 +220,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           ),
           const SizedBox(height: 10),
           _ConditionPanel(
+            key: _conditionsKey,
             query: query,
             onFreeOnlyChanged: (bool value) {
               controller.applySearchConditions(freeOnly: value);
@@ -324,76 +281,16 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     );
   }
 
-  Future<void> _applySmartSearch(DiscoverFeedController controller) async {
-    final SmartSearchParseResult parsed = parseSmartSearch(
-      _searchController.text,
+  void _scrollToConditions() {
+    final BuildContext? targetContext = _conditionsKey.currentContext;
+    if (targetContext == null) return;
+    FocusScope.of(context).unfocus();
+    Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOut,
+      alignment: 0.12,
     );
-    final _DateWindow? window = switch (parsed.datePreset) {
-      SmartSearchDatePreset.today => _todayWindow(),
-      SmartSearchDatePreset.tonight => _tonightWindow(),
-      null => null,
-    };
-
-    setState(() => _lastSmartParse = parsed);
-    await controller.applySearchConditions(
-      queryText: parsed.queryText,
-      selectedCategoryIds: parsed.selectedCategoryIds,
-      freeOnly: parsed.freeOnly ?? false,
-      budgetMax: parsed.budgetMax,
-      clearBudgetMin: true,
-      clearBudgetMax: parsed.budgetMax == null,
-      dateFrom: window?.from,
-      clearDateFrom: window == null,
-      dateTo: window?.to,
-      clearDateTo: window == null,
-      radiusMeters: parsed.radiusMeters,
-      unlimitedRadius: parsed.unlimitedRadius,
-    );
-    await controller.saveSmartSearchPrompt(
-      prompt: parsed.originalText,
-      query: controller.state.appliedQuery,
-    );
-  }
-
-  Future<void> _showVoicePromptSheet(DiscoverFeedController controller) async {
-    final String? prompt = await showModalBottomSheet<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.mic_none_outlined),
-                  title: const Text('Voice prompt'),
-                  trailing: IconButton(
-                    tooltip: 'Close',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ),
-                for (final String value in const <String>[
-                  'free yoga tonight near 5 km',
-                  'museum today under 10',
-                  'free calm walking route for 2 hours with coffee',
-                  'quiet walk near 3 km',
-                ])
-                  ListTile(
-                    leading: const Icon(Icons.record_voice_over_outlined),
-                    title: Text(value),
-                    onTap: () => Navigator.of(context).pop(value),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (prompt == null || prompt.trim().isEmpty) return;
-    _searchController.text = prompt;
-    await _applySmartSearch(controller);
   }
 
   Future<void> _applySearchSeed(
@@ -416,431 +313,6 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       clearDateTo: dateTo == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
-    );
-  }
-}
-
-class _SmartSearchPanel extends StatelessWidget {
-  const _SmartSearchPanel({
-    required this.parseResult,
-    required this.onApply,
-    required this.onVoicePrompt,
-    required this.onBuildScenario,
-    required this.onMapSmartRoute,
-    required this.onCreateSmartRoute,
-    required this.onExample,
-  });
-
-  final SmartSearchParseResult? parseResult;
-  final Future<void> Function() onApply;
-  final VoidCallback onVoicePrompt;
-  final VoidCallback? onBuildScenario;
-  final VoidCallback? onMapSmartRoute;
-  final VoidCallback? onCreateSmartRoute;
-  final ValueChanged<String> onExample;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.48),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(Icons.auto_awesome, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Smart Search',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                IconButton.filledTonal(
-                  tooltip: 'Voice prompt',
-                  onPressed: onVoicePrompt,
-                  icon: const Icon(Icons.mic_none_outlined),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  onPressed: onApply,
-                  icon: const Icon(Icons.psychology),
-                  label: const Text('Parse'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Try a phrase like free yoga tonight near 5 km under 10.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                ActionChip(
-                  avatar: const Icon(Icons.self_improvement),
-                  label: const Text('free yoga tonight near 5 km'),
-                  onPressed: () => onExample('free yoga tonight near 5 km'),
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.museum),
-                  label: const Text('museum today under 10'),
-                  onPressed: () => onExample('museum today under 10'),
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.route_outlined),
-                  label: const Text('free calm walking route'),
-                  onPressed: () => onExample(
-                    'free calm walking route for 2 hours with coffee',
-                  ),
-                ),
-              ],
-            ),
-            if (parseResult != null) ...<Widget>[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: parseResult!.explanationChips
-                    .map(
-                      (String chip) => Chip(
-                        avatar: const Icon(Icons.check, size: 16),
-                        label: Text(chip),
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
-              const SizedBox(height: 10),
-              if (parseResult!.routeIntent == null)
-                OutlinedButton.icon(
-                  onPressed: onBuildScenario,
-                  icon: const Icon(Icons.route),
-                  label: const Text('Build scenario'),
-                )
-              else
-                _SmartRouteIntentPanel(
-                  parseResult: parseResult!,
-                  onBuildRoute: onBuildScenario,
-                  onMapRoute: onMapSmartRoute,
-                  onCreateRoute: onCreateSmartRoute,
-                ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SmartRouteIntentPanel extends StatelessWidget {
-  const _SmartRouteIntentPanel({
-    required this.parseResult,
-    required this.onBuildRoute,
-    required this.onMapRoute,
-    required this.onCreateRoute,
-  });
-
-  final SmartSearchParseResult parseResult;
-  final VoidCallback? onBuildRoute;
-  final VoidCallback? onMapRoute;
-  final VoidCallback? onCreateRoute;
-
-  @override
-  Widget build(BuildContext context) {
-    final SmartRouteIntent routeIntent = parseResult.routeIntent!;
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Divider(color: colorScheme.primary.withValues(alpha: 0.22)),
-        Row(
-          children: <Widget>[
-            Icon(Icons.route_outlined, color: colorScheme.primary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Smart route',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-            Text(
-              '${routeIntent.stepCategories.length} stops',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: routeIntent.explanationChips
-              .map(
-                (String chip) => Chip(
-                  avatar: const Icon(Icons.auto_awesome, size: 16),
-                  label: Text(chip),
-                ),
-              )
-              .toList(growable: false),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          routeIntent.stepCategories
-              .map(createTaxonomyLabelForPath)
-              .join(' · '),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: onBuildRoute,
-                icon: const Icon(Icons.route),
-                label: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Build route'),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: onMapRoute,
-                icon: const Icon(Icons.map_outlined),
-                label: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Map route'),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton.filledTonal(
-              tooltip: 'Create smart route listing',
-              onPressed: onCreateRoute,
-              icon: const Icon(Icons.add_business_outlined),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SmartSearchHistoryPanel extends StatelessWidget {
-  const _SmartSearchHistoryPanel({
-    required this.history,
-    required this.onApply,
-    required this.onOpenMap,
-    required this.onBuildScenario,
-    required this.onCreateListing,
-    required this.onDelete,
-  });
-
-  final List<SmartSearchHistoryEntity> history;
-  final ValueChanged<SmartSearchHistoryEntity> onApply;
-  final ValueChanged<SmartSearchHistoryEntity> onOpenMap;
-  final ValueChanged<SmartSearchHistoryEntity> onBuildScenario;
-  final ValueChanged<SmartSearchHistoryEntity> onCreateListing;
-  final ValueChanged<SmartSearchHistoryEntity> onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(Icons.history_rounded, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Recent Smart Searches',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: history
-                  .map(
-                    (SmartSearchHistoryEntity item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _SmartSearchHistoryTile(
-                        item: item,
-                        onApply: () => onApply(item),
-                        onOpenMap: () => onOpenMap(item),
-                        onBuildScenario: () => onBuildScenario(item),
-                        onCreateListing: () => onCreateListing(item),
-                        onDelete: () => onDelete(item),
-                      ),
-                    ),
-                  )
-                  .toList(growable: false),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SmartSearchHistoryTile extends StatelessWidget {
-  const _SmartSearchHistoryTile({
-    required this.item,
-    required this.onApply,
-    required this.onOpenMap,
-    required this.onBuildScenario,
-    required this.onCreateListing,
-    required this.onDelete,
-  });
-
-  final SmartSearchHistoryEntity item;
-  final VoidCallback onApply;
-  final VoidCallback onOpenMap;
-  final VoidCallback onBuildScenario;
-  final VoidCallback onCreateListing;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final SmartRouteIntent? routeIntent = parseSmartSearch(
-      item.prompt,
-    ).routeIntent;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.46),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        item.prompt,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _promptForQuery(item.query),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Delete smart search',
-                  onPressed: onDelete,
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            if (routeIntent != null) ...<Widget>[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  const Chip(
-                    avatar: Icon(Icons.route_outlined, size: 16),
-                    label: Text('Smart route'),
-                  ),
-                  Chip(
-                    avatar: const Icon(Icons.timer_outlined, size: 16),
-                    label: Text('${routeIntent.durationMinutes} min'),
-                  ),
-                  Chip(
-                    avatar: const Icon(Icons.flag_outlined, size: 16),
-                    label: Text('${routeIntent.stepCategories.length} stops'),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onApply,
-                    icon: const Icon(Icons.psychology_alt_outlined),
-                    label: const Text('Use'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  tooltip: 'Open smart search on map',
-                  onPressed: onOpenMap,
-                  icon: const Icon(Icons.map_outlined),
-                ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: 'Build route from smart search',
-                  onPressed: onBuildScenario,
-                  icon: const Icon(Icons.route_outlined),
-                ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: 'Create listing from smart search',
-                  onPressed: onCreateListing,
-                  icon: const Icon(Icons.add_circle_outline),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -888,7 +360,7 @@ class _SavedSearchesPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Saved conditions',
+                    'Recent searches',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w800,
@@ -911,7 +383,7 @@ class _SavedSearchesPanel extends StatelessWidget {
             const SizedBox(height: 10),
             if (savedSearches.isEmpty)
               Text(
-                'No saved conditions yet',
+                'No recent searches yet',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -1040,84 +512,6 @@ class _SavedSearchTile extends StatelessWidget {
   }
 }
 
-String _scenarioBuilderLocation(SmartSearchParseResult parseResult) {
-  final SmartRouteIntent? routeIntent = parseResult.routeIntent;
-  final Map<String, String> params = <String, String>{
-    'mood': routeIntent?.mood ?? _scenarioMoodForSmartParse(parseResult),
-    'duration': (routeIntent?.durationMinutes ?? 150).toString(),
-    'walking': routeIntent == null
-        ? (parseResult.unlimitedRadius == true ? '0' : '1')
-        : (routeIntent.walkingOnly ? '1' : '0'),
-    if (parseResult.freeOnly == true || routeIntent?.freeOnly == true)
-      'free': '1',
-    if (parseResult.originalText.trim().isNotEmpty)
-      'prompt': parseResult.originalText.trim(),
-    if (routeIntent != null && routeIntent.stepCategories.isNotEmpty)
-      'steps': routeIntent.stepCategories.join(','),
-  };
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
-  ).toString();
-}
-
-String _mapLocationForSmartRoute(SmartSearchParseResult parseResult) {
-  final SmartRouteIntent routeIntent = parseResult.routeIntent!;
-  return Uri(
-    path: RouteNames.discoverMap,
-    queryParameters: _smartRouteParameters(
-      parseResult,
-      routeIntent,
-      includeMode: true,
-    ),
-  ).toString();
-}
-
-String _mapLocationForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
-  if (parseResult.routeIntent != null) {
-    return _mapLocationForSmartRoute(parseResult);
-  }
-  return _mapLocationForQuery(item.query);
-}
-
-String _createLocationForSmartRoute(SmartSearchParseResult parseResult) {
-  final SmartRouteIntent routeIntent = parseResult.routeIntent!;
-  final String mood = routeIntent.mood;
-  return Uri(
-    path: RouteNames.create,
-    queryParameters: <String, String>{
-      ..._smartRouteParameters(parseResult, routeIntent, includeMode: false),
-      'source': 'scenario',
-      'type': 'event',
-      'title': '${_capitalized(mood)} recharge route',
-      'subtitle':
-          '${routeIntent.stepCategories.length} stops · '
-          '${routeIntent.durationMinutes} min · smart route',
-      'q': parseResult.originalText.trim(),
-      'category': 'scenario',
-    },
-  ).toString();
-}
-
-Map<String, String> _smartRouteParameters(
-  SmartSearchParseResult parseResult,
-  SmartRouteIntent routeIntent, {
-  required bool includeMode,
-}) {
-  return <String, String>{
-    if (includeMode) 'mode': 'scenario',
-    'mood': routeIntent.mood,
-    'duration': routeIntent.durationMinutes.toString(),
-    'free': routeIntent.freeOnly ? '1' : '0',
-    'walking': routeIntent.walkingOnly ? '1' : '0',
-    if (parseResult.originalText.trim().isNotEmpty)
-      'prompt': parseResult.originalText.trim(),
-    if (routeIntent.stepCategories.isNotEmpty)
-      'steps': routeIntent.stepCategories.join(','),
-  };
-}
-
 String _scenarioBuilderLocationForQuery(DiscoverQuery query) {
   final String prompt = _promptForQuery(query);
   final Map<String, String> params = <String, String>{
@@ -1133,35 +527,25 @@ String _scenarioBuilderLocationForQuery(DiscoverQuery query) {
   ).toString();
 }
 
-String _scenarioBuilderLocationForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
-  if (parseResult.routeIntent != null) {
-    return _scenarioBuilderLocation(parseResult);
-  }
-  return _scenarioBuilderLocationForQuery(item.query);
-}
-
-String _scenarioMoodForSmartParse(SmartSearchParseResult parseResult) {
-  return _scenarioMoodForSignals(
-    parseResult.queryText,
-    parseResult.selectedCategoryIds,
-  );
-}
-
 String _scenarioMoodForQuery(DiscoverQuery query) {
   return _scenarioMoodForSignals(query.queryText, query.selectedCategoryIds);
 }
 
 String _scenarioMoodForSignals(String queryText, List<String> categories) {
   final String normalized = queryText.toLowerCase();
+  final Set<String> normalizedCategories = categories
+      .map(normalizeRechargeContentGroupId)
+      .toSet();
   if (normalized.contains('tennis') ||
       normalized.contains('run') ||
-      normalized.contains('sport')) {
+      normalized.contains('sport') ||
+      normalizedCategories.contains('sport') ||
+      normalizedCategories.contains('outdoor_nature_walking')) {
     return 'active';
   }
-  if (categories.any((String category) {
-    return category == 'music' || category == 'art' || category == 'family';
-  })) {
+  if (normalizedCategories.contains('music_nightlife') ||
+      normalizedCategories.contains('art_culture_museums') ||
+      normalizedCategories.contains('family_kids')) {
     return 'social';
   }
   return 'calm';
@@ -1201,19 +585,6 @@ String _createLocationForSavedSearch(SavedSearchEntity search) {
     source: 'saved_search',
     title: search.title,
     subtitle: search.subtitle,
-  );
-}
-
-String _createLocationForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
-  if (parseResult.routeIntent != null) {
-    return _createLocationForSmartRoute(parseResult);
-  }
-  return _createLocationForQuery(
-    item.query,
-    source: 'smart_search',
-    title: _createTitleForQuery(item.query),
-    subtitle: item.prompt,
   );
 }
 
@@ -1283,7 +654,7 @@ List<String>? _categoriesFromSeed(Map<String, String> seedParameters) {
   if (raw == null) return null;
   return raw
       .split(',')
-      .map((String value) => value.trim())
+      .map(normalizeRechargeContentGroupId)
       .where((String value) => value.isNotEmpty)
       .toList(growable: false);
 }
@@ -1302,14 +673,14 @@ class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
     required this.onSubmit,
-    required this.onVoicePrompt,
     required this.onClear,
+    required this.onFilters,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
-  final VoidCallback onVoicePrompt;
   final VoidCallback onClear;
+  final VoidCallback onFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -1318,7 +689,7 @@ class _SearchField extends StatelessWidget {
       textInputAction: TextInputAction.search,
       onSubmitted: (_) => onSubmit(),
       decoration: InputDecoration(
-        hintText: 'Describe what you want',
+        hintText: 'Search activity, place or plan',
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: SizedBox(
           width: 144,
@@ -1331,9 +702,9 @@ class _SearchField extends StatelessWidget {
                 icon: const Icon(Icons.close_rounded),
               ),
               IconButton(
-                tooltip: 'Voice prompt',
-                onPressed: onVoicePrompt,
-                icon: const Icon(Icons.mic_none_outlined),
+                tooltip: 'Search conditions',
+                onPressed: onFilters,
+                icon: const Icon(Icons.tune_rounded),
               ),
               IconButton(
                 tooltip: 'Search',
@@ -1343,6 +714,59 @@ class _SearchField extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ActiveConditionChips extends StatelessWidget {
+  const _ActiveConditionChips({required this.query});
+
+  final DiscoverQuery query;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> chips = <Widget>[
+      if (query.dateFrom != null || query.dateTo != null)
+        const Chip(
+          avatar: Icon(Icons.calendar_today_outlined, size: 16),
+          label: Text('Date set'),
+        ),
+      if (query.peopleCount != null)
+        Chip(
+          avatar: const Icon(Icons.group_outlined, size: 16),
+          label: Text('${query.peopleCount} people'),
+        ),
+      if (query.freeOnly)
+        const Chip(
+          avatar: Icon(Icons.payments_outlined, size: 16),
+          label: Text('Free'),
+        )
+      else if (query.budgetMax != null)
+        Chip(
+          avatar: const Icon(Icons.payments_outlined, size: 16),
+          label: Text('Up to €${query.budgetMax!.toStringAsFixed(0)}'),
+        ),
+      Chip(
+        avatar: const Icon(Icons.near_me_outlined, size: 16),
+        label: Text(
+          query.unlimitedRadius
+              ? 'Any area'
+              : '${(query.radiusMeters / 1000).round()} km',
+        ),
+      ),
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: chips
+            .map(
+              (Widget chip) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: chip,
+              ),
+            )
+            .toList(growable: false),
       ),
     );
   }
@@ -1447,6 +871,7 @@ class _CategoryRail extends StatelessWidget {
     return SizedBox(
       height: 44,
       child: ListView.separated(
+        key: const ValueKey<String>('discover-category-rail'),
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
           final _CategoryOption category = categories[index];
@@ -1467,6 +892,7 @@ class _CategoryRail extends StatelessWidget {
 
 class _ConditionPanel extends StatelessWidget {
   const _ConditionPanel({
+    super.key,
     required this.query,
     required this.onFreeOnlyChanged,
     required this.onBudgetSelected,
@@ -1725,7 +1151,7 @@ class _SearchResultCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${item.city} · ${item.category} · '
+                      '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
                       '${item.distanceKm.toStringAsFixed(1)} км',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
@@ -1778,6 +1204,34 @@ class _StateMessage extends StatelessWidget {
       ),
     );
   }
+}
+
+IconData _discoverCategoryIcon(String categoryId) {
+  return switch (normalizeRechargeContentGroupId(categoryId)) {
+    'music_nightlife' => Icons.music_note,
+    'comedy_theatre_performance' => Icons.theater_comedy,
+    'cinema_screenings' => Icons.movie_outlined,
+    'art_culture_museums' => Icons.palette_outlined,
+    'education_talks' => Icons.school_outlined,
+    'business_networking' => Icons.handshake_outlined,
+    'workshops_masterclasses' => Icons.build_outlined,
+    'language_social_learning' => Icons.translate,
+    'food_drinks' => Icons.restaurant_outlined,
+    'games_indoor' => Icons.casino_outlined,
+    'sport' => Icons.sports_tennis,
+    'dance' => Icons.nightlife_outlined,
+    'outdoor_nature_walking' => Icons.park_outlined,
+    'water_activities' => Icons.kayaking_outlined,
+    'winter_seasonal' => Icons.ac_unit,
+    'travel_tours' => Icons.tour_outlined,
+    'family_kids' => Icons.family_restroom,
+    'pets_animals' => Icons.pets_outlined,
+    'community_charity' => Icons.volunteer_activism_outlined,
+    'markets_fairs' => Icons.storefront_outlined,
+    'holidays_seasonal' => Icons.celebration_outlined,
+    'wellness_recharge' => Icons.self_improvement_rounded,
+    _ => Icons.category_outlined,
+  };
 }
 
 class _CategoryOption {

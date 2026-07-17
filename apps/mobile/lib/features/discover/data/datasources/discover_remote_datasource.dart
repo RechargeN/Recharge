@@ -12,9 +12,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
   @override
   Future<List<DiscoverItemModel>> getFeedCandidates() async {
     await Future<void>.delayed(const Duration(milliseconds: 120));
-    return _mockFeedRaw
-        .map(DiscoverItemModel.fromMap)
-        .toList(growable: false);
+    return _mockFeedRaw.map(DiscoverItemModel.fromMap).toList(growable: false);
   }
 
   @override
@@ -36,7 +34,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Утренняя йога в парке',
         'subtitle': 'Легкая практика и дыхание',
         'city': 'Резекне',
-        'category': 'wellness',
+        'category': 'wellness_recharge',
+        'subcategory': 'yoga',
         'price_amount': 0.0,
         'is_free': true,
         'cover_image_url':
@@ -60,7 +59,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Кофе и арт-скетч',
         'subtitle': 'Небольшая группа и локальные авторы',
         'city': 'Резекне',
-        'category': 'art',
+        'category': 'art_culture_museums',
+        'subcategory': 'creative_meetup',
         'price_amount': 8.0,
         'is_free': false,
         'cover_image_url':
@@ -84,7 +84,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Прогулка у озера',
         'subtitle': 'Маршрут 5 км без спешки',
         'city': 'Резекне',
-        'category': 'outdoor',
+        'category': 'outdoor_nature_walking',
+        'subcategory': 'lake_walk',
         'price_amount': 0.0,
         'is_free': true,
         'cover_image_url':
@@ -108,7 +109,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Вечерняя музыка',
         'subtitle': 'Локальные исполнители',
         'city': 'Резекне',
-        'category': 'music',
+        'category': 'music_nightlife',
+        'subcategory': 'live_music',
         'price_amount': 12.0,
         'is_free': false,
         'cover_image_url':
@@ -132,7 +134,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Семейный пикник',
         'subtitle': 'Активности для друзей и семьи',
         'city': 'Резекне',
-        'category': 'family',
+        'category': 'family_kids',
+        'subcategory': 'family_picnic',
         'price_amount': 5.0,
         'is_free': false,
         'cover_image_url':
@@ -156,7 +159,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'title': 'Наблюдение за закатом',
         'subtitle': 'Красивые точки рядом с городом',
         'city': 'Резекне',
-        'category': 'outdoor',
+        'category': 'outdoor_nature_walking',
+        'subcategory': 'sunset_walk',
         'price_amount': 0.0,
         'is_free': true,
         'cover_image_url':
@@ -185,33 +189,31 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
       final Map<String, Object?> template = seed[i % seed.length];
       final double lat = 56.5099 + ((i % 10) - 5) * 0.0075;
       final double lng = 27.3332 + ((i ~/ 10) - 3) * 0.0105;
-      result.add(
-        <String, Object?>{
-          'id': 'evt_rez_${i.toString().padLeft(3, '0')}',
-          'title': template['title'],
-          'subtitle': template['subtitle'],
-          'city': template['city'],
-          'category': template['category'],
-          'starts_at_utc': base.add(Duration(hours: i % 48)).toIso8601String(),
-          'latitude': lat,
-          'longitude': lng,
-          'price_amount': template['price_amount'],
-          'distance_km': 0.0,
-          'is_free': template['is_free'],
-          'relevance_score': 0.0,
-          'cover_image_url': template['cover_image_url'],
-          'organizer_name': template['organizer_name'],
-          'organizer_handle': template['organizer_handle'],
-          'venue_name': template['venue_name'],
-          'address_line': template['address_line'],
-          'participants_count':
-              (template['participants_count']! as int) + (i % 5),
-          'capacity': template['capacity'],
-          'duration_minutes': template['duration_minutes'],
-          'cta_label': template['cta_label'],
-          'highlights': template['highlights'],
-        },
-      );
+      result.add(<String, Object?>{
+        'id': 'evt_rez_${i.toString().padLeft(3, '0')}',
+        'title': template['title'],
+        'subtitle': template['subtitle'],
+        'city': template['city'],
+        'category': template['category'],
+        'starts_at_utc': base.add(Duration(hours: i % 48)).toIso8601String(),
+        'latitude': lat,
+        'longitude': lng,
+        'price_amount': template['price_amount'],
+        'distance_km': 0.0,
+        'is_free': template['is_free'],
+        'relevance_score': 0.0,
+        'cover_image_url': template['cover_image_url'],
+        'organizer_name': template['organizer_name'],
+        'organizer_handle': template['organizer_handle'],
+        'venue_name': template['venue_name'],
+        'address_line': template['address_line'],
+        'participants_count':
+            (template['participants_count']! as int) + (i % 5),
+        'capacity': template['capacity'],
+        'duration_minutes': template['duration_minutes'],
+        'cta_label': template['cta_label'],
+        'highlights': template['highlights'],
+      });
     }
     return result;
   }

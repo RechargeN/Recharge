@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/service_locator.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
@@ -44,9 +46,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     _analyticsService = sl<AnalyticsService>();
     _analyticsService.track(
       'discover_details_load_started',
-      params: <String, Object?>{
-        'item_id': widget.itemId,
-      },
+      params: <String, Object?>{'item_id': widget.itemId},
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(favoritesControllerProvider).ensureLoaded();
@@ -57,8 +57,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
   Widget build(BuildContext context) {
     final AuthController authController = ref.watch(authControllerProvider);
     final bool isAuthenticated = authController.state.isAuthenticated;
-    final FavoritesController favoritesController =
-        ref.watch(favoritesControllerProvider);
+    final FavoritesController favoritesController = ref.watch(
+      favoritesControllerProvider,
+    );
     final bool isFavorite = favoritesController.isFavorite(widget.itemId);
     final details = ref.watch(discoverDetailsProvider(widget.itemId));
 
@@ -84,9 +85,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                     favoritesController: favoritesController,
                   );
                 },
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                ),
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
               ),
               IconButton(
                 tooltip: 'Share',
@@ -110,7 +109,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
             children: <Widget>[
               _DetailsHero(item: item),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
@@ -155,7 +154,8 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                     const SizedBox(height: 12),
                     _LocationCard(
                       item: item,
-                      onOpenMap: () => context.push(_mapLocationForDetails(item)),
+                      onOpenMap: () =>
+                          context.push(_mapLocationForDetails(item)),
                     ),
                   ],
                 ),
@@ -228,9 +228,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     _errorTracked = true;
     _analyticsService.track(
       'discover_details_load_failed',
-      params: <String, Object?>{
-        'item_id': widget.itemId,
-      },
+      params: <String, Object?>{'item_id': widget.itemId},
     );
   }
 
@@ -250,9 +248,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         sourceScreen: 'discover_details',
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Сохранено в избранное')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Сохранено в избранное')));
     });
   }
 
@@ -319,90 +317,84 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       isFree: item.isFree,
       savedAtUtc: DateTime.now().toUtc(),
       targetRoute: null,
+      coverImageUrl: item.coverImageUrl,
     );
   }
 }
 
 class _DetailsHero extends StatelessWidget {
-  const _DetailsHero({
-    required this.item,
-  });
+  const _DetailsHero({required this.item});
 
   final DiscoverItemEntity item;
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.25,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          if (item.coverImageUrl.isNotEmpty)
-            Image.network(
-              item.coverImageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _CoverFallback(item: item),
-            )
-          else
-            _CoverFallback(item: item),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.72),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AspectRatio(
+          aspectRatio: 1.35,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              if (item.coverImageUrl.isNotEmpty)
+                Image.network(
+                  item.coverImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _CoverFallback(item: item),
+                )
+              else
+                _CoverFallback(item: item),
+              Positioned(
+                left: 12,
+                top: 12,
+                child: _CategoryBadge(
+                  label: rechargeTaxonomyLabel(item.category).toUpperCase(),
+                ),
               ),
-            ),
+            ],
           ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16,
+        ),
+        DecoratedBox(
+          decoration: const BoxDecoration(color: RechargeTheme.travelGreen),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _CategoryBadge(label: item.category.toUpperCase()),
-                const SizedBox(height: 10),
                 Text(
                   item.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  _dateTimeLabel(item.startsAtUtc),
+                  '${_dateTimeLabel(item.startsAtUtc)} · ${_priceLabel(item)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _CoverFallback extends StatelessWidget {
-  const _CoverFallback({
-    required this.item,
-  });
+  const _CoverFallback({required this.item});
 
   final DiscoverItemEntity item;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Color(0xFF003F32),
-      ),
+      decoration: const BoxDecoration(color: RechargeTheme.travelGreenDark),
       child: Center(
         child: Icon(
           _categoryIcon(item.category),
@@ -415,9 +407,7 @@ class _CoverFallback extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.item,
-  });
+  const _SummaryCard({required this.item});
 
   final DiscoverItemEntity item;
 
@@ -431,9 +421,9 @@ class _SummaryCard extends StatelessWidget {
           children: <Widget>[
             Text(
               item.subtitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             Row(
@@ -489,18 +479,18 @@ class _MetricTile extends StatelessWidget {
         Text(
           value,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 2),
         Text(
           label,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -546,15 +536,15 @@ class _DetailsActionHub extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.route, color: colorScheme.primary),
+                const Icon(Icons.route, color: RechargeTheme.travelGreenDark),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Plan this recharge',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 _DetailsPill(label: isFavorite ? 'Saved' : 'Not saved'),
@@ -564,15 +554,15 @@ class _DetailsActionHub extends StatelessWidget {
             Text(
               'Turn this activity into a route, compare similar options, or save it for later.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _DetailsPill(label: item.category),
+                _DetailsPill(label: rechargeTaxonomyLabel(item.category)),
                 _DetailsPill(label: _priceLabel(item)),
                 _DetailsPill(label: _participantsLabel(item)),
               ],
@@ -664,20 +654,19 @@ class _DetailsActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(4),
       child: Ink(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.48),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.14)),
+          color: RechargeTheme.travelPanel,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: RechargeTheme.travelLine),
         ),
         child: Row(
           children: <Widget>[
-            Icon(icon, color: colorScheme.primary),
+            Icon(icon, color: RechargeTheme.travelGreenDark),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -689,8 +678,8 @@ class _DetailsActionTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   Text(
                     subtitle,
@@ -721,12 +710,11 @@ class _DetailsRoutePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.28),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -735,15 +723,18 @@ class _DetailsRoutePreview extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.alt_route, color: colorScheme.primary),
+                const Icon(
+                  Icons.alt_route,
+                  color: RechargeTheme.travelGreenDark,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Route from this',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 _DetailsPill(label: '${plan.stepCategories.length} stops'),
@@ -766,9 +757,9 @@ class _DetailsRoutePreview extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
             Row(
@@ -804,27 +795,25 @@ class _DetailsRoutePreview extends StatelessWidget {
 }
 
 class _DetailsPill extends StatelessWidget {
-  const _DetailsPill({
-    required this.label,
-  });
+  const _DetailsPill({required this.label});
 
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(18),
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -832,9 +821,7 @@ class _DetailsPill extends StatelessWidget {
 }
 
 class _OrganizerCard extends StatelessWidget {
-  const _OrganizerCard({
-    required this.item,
-  });
+  const _OrganizerCard({required this.item});
 
   final DiscoverItemEntity item;
 
@@ -850,11 +837,11 @@ class _OrganizerCard extends StatelessWidget {
           children: <Widget>[
             CircleAvatar(
               radius: 24,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: RechargeTheme.travelPanel,
               child: Text(
                 organizerName[0].toUpperCase(),
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: RechargeTheme.travelGreenDark,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -867,29 +854,31 @@ class _OrganizerCard extends StatelessWidget {
                   Text(
                     'Organizer',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Text(
                     organizerName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   if (item.organizerHandle.isNotEmpty)
                     Text(
                       item.organizerHandle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        color: RechargeTheme.travelGreenDark,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                 ],
               ),
             ),
-            const Icon(Icons.verified_rounded, color: Color(0xFF0E6A57)),
+            const Icon(
+              Icons.verified_rounded,
+              color: RechargeTheme.travelGreen,
+            ),
           ],
         ),
       ),
@@ -898,9 +887,7 @@ class _OrganizerCard extends StatelessWidget {
 }
 
 class _InfoGrid extends StatelessWidget {
-  const _InfoGrid({
-    required this.item,
-  });
+  const _InfoGrid({required this.item});
 
   final DiscoverItemEntity item;
 
@@ -951,7 +938,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Icon(icon, color: Theme.of(context).colorScheme.primary),
+        Icon(icon, color: RechargeTheme.travelGreenDark),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -960,15 +947,15 @@ class _InfoRow extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -979,9 +966,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _HighlightsCard extends StatelessWidget {
-  const _HighlightsCard({
-    required this.item,
-  });
+  const _HighlightsCard({required this.item});
 
   final DiscoverItemEntity item;
 
@@ -1002,9 +987,9 @@ class _HighlightsCard extends StatelessWidget {
           children: <Widget>[
             Text(
               'What awaits you',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
             ...highlights.map(
@@ -1015,7 +1000,7 @@ class _HighlightsCard extends StatelessWidget {
                   children: <Widget>[
                     Icon(
                       Icons.check_circle_rounded,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: RechargeTheme.travelGreen,
                       size: 18,
                     ),
                     const SizedBox(width: 8),
@@ -1032,10 +1017,7 @@ class _HighlightsCard extends StatelessWidget {
 }
 
 class _LocationCard extends StatelessWidget {
-  const _LocationCard({
-    required this.item,
-    required this.onOpenMap,
-  });
+  const _LocationCard({required this.item, required this.onOpenMap});
 
   final DiscoverItemEntity item;
   final VoidCallback onOpenMap;
@@ -1054,12 +1036,13 @@ class _LocationCard extends StatelessWidget {
                 width: 76,
                 height: 76,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  color: RechargeTheme.travelPanel,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: RechargeTheme.travelLine),
                 ),
                 child: Icon(
                   Icons.map_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: RechargeTheme.travelGreenDark,
                   size: 34,
                 ),
               ),
@@ -1071,32 +1054,31 @@ class _LocationCard extends StatelessWidget {
                     Text(
                       item.venueName.isEmpty ? item.city : item.venueName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.addressLine.isEmpty ? item.city : item.addressLine,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Show on map',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        color: RechargeTheme.travelGreenDark,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ],
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.primary,
+                color: RechargeTheme.travelGreenDark,
               ),
             ],
           ),
@@ -1127,9 +1109,7 @@ class _DetailsBottomBar extends StatelessWidget {
       child: DecoratedBox(
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            top: BorderSide(color: Color(0xFFDDE9E4)),
-          ),
+          border: Border(top: BorderSide(color: RechargeTheme.travelLine)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
@@ -1149,9 +1129,7 @@ class _DetailsBottomBar extends StatelessWidget {
                 onPressed: () async {
                   await onFavoriteTap();
                 },
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                ),
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
               ),
             ],
           ),
@@ -1162,9 +1140,7 @@ class _DetailsBottomBar extends StatelessWidget {
 }
 
 class _CategoryBadge extends StatelessWidget {
-  const _CategoryBadge({
-    required this.label,
-  });
+  const _CategoryBadge({required this.label});
 
   final String label;
 
@@ -1173,16 +1149,17 @@ class _CategoryBadge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w900,
-              ),
+            color: RechargeTheme.travelGreenDark,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );
@@ -1264,34 +1241,25 @@ _DetailsRoutePlan _routePlanForDetails(DiscoverItemEntity item) {
 List<String> _routeStepCategoriesForDetails(DiscoverItemEntity item) {
   final String normalizedTitle = item.title.toLowerCase();
   if (normalizedTitle.contains('tennis')) {
-    return const <String>[
-      'sport.tennis',
-      'outdoor_nature_walking.city_walk',
-    ];
+    return const <String>['sport.tennis', 'outdoor_nature_walking.city_walk'];
   }
 
-  switch (item.category) {
-    case 'outdoor':
+  switch (normalizeRechargeContentGroupId(item.category)) {
+    case 'outdoor_nature_walking':
       return const <String>[
         'outdoor_nature_walking.city_walk',
         'food_drinks.coffee',
       ];
-    case 'art':
-      return const <String>[
-        'art_culture_museums.museum',
-        'food_drinks.coffee',
-      ];
-    case 'music':
+    case 'art_culture_museums':
+      return const <String>['art_culture_museums.museum', 'food_drinks.coffee'];
+    case 'music_nightlife':
       return const <String>[
         'music_nightlife.live_music',
         'music_nightlife.afterwork_drinks',
       ];
-    case 'family':
-      return const <String>[
-        'games_indoor.board_games',
-        'food_drinks.brunch',
-      ];
-    case 'wellness':
+    case 'family_kids':
+      return const <String>['games_indoor.board_games', 'food_drinks.brunch'];
+    case 'wellness_recharge':
       return const <String>[
         'wellness_recharge.calm_walk',
         'food_drinks.coffee',
@@ -1393,7 +1361,8 @@ String _createRouteLocationForDetails(DiscoverItemEntity item) {
       'source': 'scenario',
       'type': 'event',
       'title': '${item.title} route',
-      'subtitle': '${plan.stepCategories.length} stops · '
+      'subtitle':
+          '${plan.stepCategories.length} stops · '
           '${plan.durationMinutes} min · from details',
       'q': plan.prompt,
       'category': 'scenario',
@@ -1406,12 +1375,13 @@ String _createRouteLocationForDetails(DiscoverItemEntity item) {
 }
 
 String _scenarioMoodForDetails(DiscoverItemEntity item) {
-  if (item.category == 'outdoor' || item.category == 'sport') {
+  final String category = normalizeRechargeContentGroupId(item.category);
+  if (category == 'outdoor_nature_walking' || category == 'sport') {
     return 'active';
   }
-  if (item.category == 'music' ||
-      item.category == 'art' ||
-      item.category == 'family') {
+  if (category == 'music_nightlife' ||
+      category == 'art_culture_museums' ||
+      category == 'family_kids') {
     return 'social';
   }
   return 'calm';
@@ -1424,16 +1394,16 @@ String _ctaLabel(DiscoverItemEntity item) {
 }
 
 IconData _categoryIcon(String category) {
-  switch (category) {
-    case 'wellness':
+  switch (normalizeRechargeContentGroupId(category)) {
+    case 'wellness_recharge':
       return Icons.self_improvement_rounded;
-    case 'outdoor':
+    case 'outdoor_nature_walking':
       return Icons.park_outlined;
-    case 'art':
+    case 'art_culture_museums':
       return Icons.palette_outlined;
-    case 'music':
+    case 'music_nightlife':
       return Icons.music_note_rounded;
-    case 'family':
+    case 'family_kids':
       return Icons.family_restroom_rounded;
     default:
       return Icons.local_activity_outlined;

@@ -4,18 +4,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../core/config/recharge_category_criteria.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
+import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
-  const CreatePage({
-    super.key,
-    this.seedParameters = const <String, String>{},
-  });
+  const CreatePage({super.key, this.seedParameters = const <String, String>{}});
 
   final Map<String, String> seedParameters;
 
@@ -30,8 +29,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _venueController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _shortDescriptionController = TextEditingController();
-  final TextEditingController _fullDescriptionController = TextEditingController();
+  final TextEditingController _shortDescriptionController =
+      TextEditingController();
+  final TextEditingController _fullDescriptionController =
+      TextEditingController();
   final TextEditingController _coverController = TextEditingController();
   final TextEditingController _galleryInputController = TextEditingController();
   final TextEditingController _startController = TextEditingController();
@@ -65,9 +66,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     final CreateState state = controller.state;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Требуется авторизация')),
-      );
+      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
     }
 
     _scheduleLoad(
@@ -78,240 +77,259 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     _syncControllers(state);
     _scheduleSeedApply(controller, state);
     final _CreateReadiness readiness = _createReadinessFor(state.draft);
-    final _CreateSeedContext? seedContext =
-        _CreateSeedContext.fromParameters(widget.seedParameters);
+    final CreateBlockConfig blockConfig = createBlockConfigFor(
+      state.draft.objectType,
+    );
+    final _CreateSeedContext? seedContext = _CreateSeedContext.fromParameters(
+      widget.seedParameters,
+    );
     final _ScenarioRouteSeedContext? scenarioSeedContext =
         _ScenarioRouteSeedContext.fromParameters(widget.seedParameters);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Hub'),
-      ),
+      appBar: AppBar(title: const Text('Create Hub')),
       body: switch (state.status) {
         CreateStatus.initial || CreateStatus.loading => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: CircularProgressIndicator(),
+        ),
         CreateStatus.error => _CreateStateMessage(
-            text: state.message ?? 'Ошибка create flow',
-          ),
+          text: state.message ?? 'Ошибка create flow',
+        ),
         CreateStatus.ready ||
         CreateStatus.saving ||
         CreateStatus.publishing ||
-        CreateStatus.publishSuccess =>
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: <Widget>[
-              _CreateHubHeader(draft: state.draft),
-              if (seedContext != null)
-                ...<Widget>[
-                  const SizedBox(height: 12),
-                  _CreateSeedBanner(seedContext: seedContext),
-                ],
-              if (scenarioSeedContext != null)
-                ...<Widget>[
-                  const SizedBox(height: 12),
-                  _ScenarioRouteSeedPanel(
-                    seedContext: scenarioSeedContext,
-                    onEditRoute: () => context.go(
-                      scenarioSeedContext.builderLocation,
-                    ),
-                    onMapRoute: () => context.go(
-                      scenarioSeedContext.mapLocation,
-                    ),
-                  ),
-                ],
-              const SizedBox(height: 16),
-              _CreateWorkspace(
-                draft: state.draft,
-                readiness: readiness,
-                onObjectTypeSelected: controller.setObjectType,
-                onPresetSelected: (_CreatePreset preset) {
-                  _applyPreset(controller, preset);
-                },
-              ),
+        CreateStatus.publishSuccess => ListView(
+          padding: const EdgeInsets.all(16),
+          children: <Widget>[
+            _CreateHubHeader(draft: state.draft),
+            if (_needsRentalReview(state.draft)) ...<Widget>[
               const SizedBox(height: 12),
-              _CreateTaxonomyPicker(
-                objectType: state.draft.objectType,
-                selectedCategoryId: state.draft.mainCategory,
-                selectedSubcategoryId: state.draft.subcategory,
-                onCategorySelected: (CreateTaxonomyCategory category) {
-                  controller.applyTaxonomySelection(
-                    mainCategory: category.id,
-                    subcategory: category.subcategories.isEmpty
-                        ? ''
-                        : category.subcategories.first.id,
-                  );
-                },
-                onSubcategorySelected: (
-                  CreateTaxonomyCategory category,
-                  CreateTaxonomySubcategory subcategory,
-                ) {
-                  controller.applyTaxonomySelection(
-                    mainCategory: category.id,
-                    subcategory: subcategory.id,
-                  );
-                },
+              _RentalReviewBanner(
+                onKeepSession: () =>
+                    controller.resolveRentalReview(convertToRental: false),
+                onConvertToRental: () =>
+                    controller.resolveRentalReview(convertToRental: true),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Details',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              _LabeledField(
-                label: 'Title *',
-                controller: _titleController,
-                errorText: state.validationErrors['title'],
-                onChanged: controller.updateTitle,
-              ),
-              _LabeledField(
-                label: 'Main category *',
-                controller: _categoryController,
-                errorText: state.validationErrors['mainCategory'],
-                onChanged: controller.updateMainCategory,
-              ),
-              _LabeledField(
-                label: 'Subcategory',
-                controller: _subcategoryController,
-                onChanged: controller.updateSubcategory,
-              ),
-              _LabeledField(
-                label: 'City *',
-                controller: _cityController,
-                errorText: state.validationErrors['city'],
-                onChanged: controller.updateCity,
-              ),
-              _LabeledField(
-                label: 'Venue',
-                controller: _venueController,
-                onChanged: controller.updateVenueName,
-              ),
-              _LabeledField(
-                label: 'Address',
-                controller: _addressController,
-                onChanged: controller.updateAddress,
-              ),
-              _LabeledField(
-                label: 'Short description',
-                controller: _shortDescriptionController,
-                onChanged: controller.updateShortDescription,
-              ),
-              _LabeledField(
-                label: 'Full description',
-                controller: _fullDescriptionController,
-                maxLines: 4,
-                onChanged: controller.updateFullDescription,
-              ),
-              _LabeledField(
-                label: 'Cover image *',
-                controller: _coverController,
-                errorText: state.validationErrors['coverImage'],
-                onChanged: controller.updateCoverImage,
-              ),
-              if (state.draft.objectType == CreateObjectType.event)
-                _LabeledField(
-                  label: 'Start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
-                  controller: _startController,
-                  errorText: state.validationErrors['startDateTimeUtc'],
-                  onChanged: controller.updateStartDateTime,
-                ),
-              const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _galleryInputController,
-                      decoration: const InputDecoration(
-                        labelText: 'Gallery image URL/path',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: () {
-                      controller.addGalleryImage(_galleryInputController.text);
-                      _galleryInputController.clear();
-                    },
-                    child: const Text('Add'),
-                  ),
-                ],
-              ),
-              if (state.draft.media.gallery.isNotEmpty) ...<Widget>[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: List<Widget>.generate(
-                    state.draft.media.gallery.length,
-                    (int index) => InputChip(
-                      label: Text(state.draft.media.gallery[index]),
-                      onDeleted: () => controller.removeGalleryImageAt(index),
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 12),
-              SwitchListTile(
-                value: state.draft.isFree,
-                onChanged: controller.updateIsFree,
-                title: const Text('Free event/place'),
-              ),
-              if (!state.draft.isFree)
-                _LabeledField(
-                  label: 'Base price',
-                  controller: _priceController,
-                  onChanged: controller.updateBasePrice,
-                ),
-              const SizedBox(height: 12),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: state.status == CreateStatus.saving ||
-                              state.status == CreateStatus.publishing
-                          ? null
-                          : controller.saveDraft,
-                      icon: const Icon(Icons.save_outlined),
-                      label: const Text('Save draft'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: state.status == CreateStatus.saving ||
-                              state.status == CreateStatus.publishing
-                          ? null
-                          : () async {
-                              final bool success = await controller.publishDraft();
-                              if (!success) return;
-                              ref.read(appRouterProvider).go(RouteNames.createSuccess);
-                            },
-                      icon: const Icon(Icons.publish_outlined),
-                      label: Text(
-                        state.status == CreateStatus.publishing
-                            ? 'Publishing...'
-                            : 'Publish',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (state.message != null) ...<Widget>[
-                const SizedBox(height: 10),
-                Text(
-                  state.message!,
-                  style: TextStyle(
-                    color: state.validationErrors.isNotEmpty
-                        ? Colors.red
-                        : Colors.green,
-                  ),
-                ),
-              ],
             ],
-          ),
+            if (seedContext != null) ...<Widget>[
+              const SizedBox(height: 12),
+              _CreateSeedBanner(seedContext: seedContext),
+            ],
+            if (scenarioSeedContext != null) ...<Widget>[
+              const SizedBox(height: 12),
+              _ScenarioRouteSeedPanel(
+                seedContext: scenarioSeedContext,
+                onEditRoute: () =>
+                    context.go(scenarioSeedContext.builderLocation),
+                onMapRoute: () => context.go(scenarioSeedContext.mapLocation),
+              ),
+            ],
+            const SizedBox(height: 16),
+            _CreateWorkspace(
+              draft: state.draft,
+              readiness: readiness,
+              onObjectTypeSelected: controller.setObjectType,
+              onPresetSelected: (_CreatePreset preset) {
+                _applyPreset(controller, preset);
+              },
+            ),
+            const SizedBox(height: 12),
+            _CreateTaxonomyPicker(
+              objectType: state.draft.objectType,
+              selectedCategoryId: state.draft.mainCategory,
+              selectedSubcategoryId: state.draft.subcategory,
+              onCategorySelected: (CreateTaxonomyCategory category) {
+                final CreateTaxonomySubcategory? defaultSubcategory =
+                    createDefaultSubcategoryFor(category);
+                controller.applyTaxonomySelection(
+                  mainCategory: category.id,
+                  subcategory: defaultSubcategory?.id ?? '',
+                );
+              },
+              onSubcategorySelected:
+                  (
+                    CreateTaxonomyCategory category,
+                    CreateTaxonomySubcategory subcategory,
+                  ) {
+                    controller.applyTaxonomySelection(
+                      mainCategory: category.id,
+                      subcategory: subcategory.id,
+                    );
+                  },
+            ),
+            if (state.draft.subcategory.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 16),
+              _DynamicCriteriaSection(
+                draft: state.draft,
+                onChanged: controller.updateCategoryCriterion,
+              ),
+            ],
+            const SizedBox(height: 16),
+            Text(
+              'Details',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            _LabeledField(
+              label: 'Title *',
+              controller: _titleController,
+              errorText: state.validationErrors['title'],
+              onChanged: controller.updateTitle,
+            ),
+            _LabeledField(
+              label: 'Main category *',
+              controller: _categoryController,
+              errorText: state.validationErrors['mainCategory'],
+              onChanged: controller.updateMainCategory,
+            ),
+            _LabeledField(
+              label: 'Subcategory',
+              controller: _subcategoryController,
+              onChanged: controller.updateSubcategory,
+            ),
+            _LabeledField(
+              label: 'City *',
+              controller: _cityController,
+              errorText: state.validationErrors['city'],
+              onChanged: controller.updateCity,
+            ),
+            _LabeledField(
+              label: blockConfig.locationLabel,
+              controller: _venueController,
+              onChanged: controller.updateVenueName,
+            ),
+            _LabeledField(
+              label: 'Address',
+              controller: _addressController,
+              onChanged: controller.updateAddress,
+            ),
+            _LabeledField(
+              label: 'Short description',
+              controller: _shortDescriptionController,
+              onChanged: controller.updateShortDescription,
+            ),
+            _LabeledField(
+              label: 'Full description',
+              controller: _fullDescriptionController,
+              maxLines: 4,
+              onChanged: controller.updateFullDescription,
+            ),
+            _LabeledField(
+              label: 'Cover image *',
+              controller: _coverController,
+              errorText: state.validationErrors['coverImage'],
+              onChanged: controller.updateCoverImage,
+            ),
+            if (blockConfig.requiresStartDateTime)
+              _LabeledField(
+                label:
+                    '${blockConfig.title} start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+                controller: _startController,
+                errorText: state.validationErrors['startDateTimeUtc'],
+                onChanged: controller.updateStartDateTime,
+              ),
+            const SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    controller: _galleryInputController,
+                    decoration: const InputDecoration(
+                      labelText: 'Gallery image URL/path',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    controller.addGalleryImage(_galleryInputController.text);
+                    _galleryInputController.clear();
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            ),
+            if (state.draft.media.gallery.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: List<Widget>.generate(
+                  state.draft.media.gallery.length,
+                  (int index) => InputChip(
+                    label: Text(state.draft.media.gallery[index]),
+                    onDeleted: () => controller.removeGalleryImageAt(index),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            SwitchListTile(
+              value: state.draft.isFree,
+              onChanged: controller.updateIsFree,
+              title: Text('Free ${blockConfig.title.toLowerCase()}'),
+            ),
+            if (!state.draft.isFree)
+              _LabeledField(
+                label: blockConfig.priceLabel,
+                controller: _priceController,
+                onChanged: controller.updateBasePrice,
+              ),
+            const SizedBox(height: 12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        state.status == CreateStatus.saving ||
+                            state.status == CreateStatus.publishing
+                        ? null
+                        : controller.saveDraft,
+                    icon: const Icon(Icons.save_outlined),
+                    label: const Text('Save draft'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed:
+                        state.status == CreateStatus.saving ||
+                            state.status == CreateStatus.publishing
+                        ? null
+                        : () async {
+                            final bool success = await controller
+                                .publishDraft();
+                            if (!success) return;
+                            ref
+                                .read(appRouterProvider)
+                                .go(RouteNames.createSuccess);
+                          },
+                    icon: const Icon(Icons.publish_outlined),
+                    label: Text(
+                      state.status == CreateStatus.publishing
+                          ? 'Publishing...'
+                          : 'Publish',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (state.message != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                state.message!,
+                style: TextStyle(
+                  color: state.validationErrors.isNotEmpty
+                      ? Colors.red
+                      : Colors.green,
+                ),
+              ),
+            ],
+          ],
+        ),
       },
     );
   }
@@ -326,7 +344,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     _loadKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(createControllerProvider).ensureLoaded(
+      ref
+          .read(createControllerProvider)
+          .ensureLoaded(
             userId: userId,
             organizerEmail: organizerEmail,
             organizerName: organizerName,
@@ -349,10 +369,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       _startController,
       state.draft.startDateTimeUtc?.toIso8601String() ?? '',
     );
-    _syncController(
-      _priceController,
-      state.draft.basePrice?.toString() ?? '',
-    );
+    _syncController(_priceController, state.draft.basePrice?.toString() ?? '');
   }
 
   void _syncController(TextEditingController controller, String value) {
@@ -368,9 +385,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     if (!state.isLoaded || widget.seedParameters.isEmpty) return;
     final String seedKey = _seedKeyFor(widget.seedParameters);
     if (_appliedSeedKey == seedKey) return;
-    final _CreateSeed seed = _CreateSeed.fromParameters(
-      widget.seedParameters,
-    );
+    final _CreateSeed seed = _CreateSeed.fromParameters(widget.seedParameters);
     if (!seed.hasValues) return;
     _appliedSeedKey = seedKey;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -396,17 +411,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     if (!seed.isFree && seed.basePrice != null) {
       controller.updateBasePrice(seed.basePrice!.toStringAsFixed(0));
     }
-    if (seed.objectType == CreateObjectType.event) {
+    if (createBlockConfigFor(seed.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(seed.startDateTimeUtc.toIso8601String());
     } else {
       controller.updateStartDateTime('');
     }
   }
 
-  void _applyPreset(
-    CreateController controller,
-    _CreatePreset preset,
-  ) {
+  void _applyPreset(CreateController controller, _CreatePreset preset) {
     controller.setObjectType(preset.objectType);
     controller.applyTaxonomySelection(
       mainCategory: preset.categoryId,
@@ -423,12 +435,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     if (!preset.isFree && preset.basePrice != null) {
       controller.updateBasePrice(preset.basePrice!.toStringAsFixed(0));
     }
-    if (preset.objectType == CreateObjectType.event) {
+    if (createBlockConfigFor(preset.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(
-        DateTime.now()
-            .toUtc()
-            .add(const Duration(days: 3))
-            .toIso8601String(),
+        DateTime.now().toUtc().add(const Duration(days: 3)).toIso8601String(),
       );
     } else {
       controller.updateStartDateTime('');
@@ -437,15 +446,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
 }
 
 class _CreateHubHeader extends StatelessWidget {
-  const _CreateHubHeader({
-    required this.draft,
-  });
+  const _CreateHubHeader({required this.draft});
 
   final CreateDraftEntity draft;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.primary,
@@ -458,39 +466,33 @@ class _CreateHubHeader extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(
-                  Icons.auto_awesome,
-                  color: colorScheme.onPrimary,
-                ),
+                Icon(Icons.auto_awesome, color: colorScheme.onPrimary),
                 const SizedBox(width: 8),
                 Text(
                   'Recharge Create',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
               draft.title.trim().isEmpty
-                  ? 'New ${draft.objectType.name}'
+                  ? 'New ${config.title.toLowerCase()}'
                   : draft.title,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _HeaderChip(
-                  icon: Icons.layers,
-                  label: draft.objectType.name,
-                ),
+                _HeaderChip(icon: Icons.layers, label: config.title),
                 if (draft.mainCategory.isNotEmpty)
                   _HeaderChip(
                     icon: Icons.category,
@@ -513,10 +515,7 @@ class _CreateHubHeader extends StatelessWidget {
 }
 
 class _HeaderChip extends StatelessWidget {
-  const _HeaderChip({
-    required this.icon,
-    required this.label,
-  });
+  const _HeaderChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -539,9 +538,9 @@ class _HeaderChip extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -570,33 +569,29 @@ class _CreateWorkspace extends StatelessWidget {
       children: <Widget>[
         Text(
           'Create type',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _CreateTypeCard(
-                title: 'Event',
-                subtitle: 'Public activity with time and attendees',
-                icon: Icons.event_available,
-                selected: draft.objectType == CreateObjectType.event,
-                onTap: () => onObjectTypeSelected(CreateObjectType.event),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _CreateTypeCard(
-                title: 'Place',
-                subtitle: 'Map point, venue, or recharge spot',
-                icon: Icons.place,
-                selected: draft.objectType == CreateObjectType.place,
-                onTap: () => onObjectTypeSelected(CreateObjectType.place),
-              ),
-            ),
-          ],
+        GridView.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.15,
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          children: rechargeCreateBlockConfigs
+              .map(
+                (CreateBlockConfig config) => _CreateTypeCard(
+                  title: config.title,
+                  subtitle: config.description,
+                  icon: _iconForCreateBlock(config.objectType),
+                  selected: draft.objectType == config.objectType,
+                  onTap: () => onObjectTypeSelected(config.objectType),
+                ),
+              )
+              .toList(growable: false),
         ),
         const SizedBox(height: 14),
         _CreatePresetRail(onPresetSelected: onPresetSelected),
@@ -655,9 +650,9 @@ class _CreateTypeCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
             Text(
@@ -674,9 +669,7 @@ class _CreateTypeCard extends StatelessWidget {
 }
 
 class _CreatePresetRail extends StatelessWidget {
-  const _CreatePresetRail({
-    required this.onPresetSelected,
-  });
+  const _CreatePresetRail({required this.onPresetSelected});
 
   final ValueChanged<_CreatePreset> onPresetSelected;
 
@@ -687,9 +680,9 @@ class _CreatePresetRail extends StatelessWidget {
       children: <Widget>[
         Text(
           'Fast presets',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -713,10 +706,7 @@ class _CreatePresetRail extends StatelessWidget {
 }
 
 class _CreatePresetCard extends StatelessWidget {
-  const _CreatePresetCard({
-    required this.preset,
-    required this.onTap,
-  });
+  const _CreatePresetCard({required this.preset, required this.onTap});
 
   final _CreatePreset preset;
   final VoidCallback onTap;
@@ -745,7 +735,11 @@ class _CreatePresetCard extends StatelessWidget {
                 children: <Widget>[
                   Icon(_iconForCategory(preset.categoryId)),
                   const Spacer(),
-                  _CreatePill(label: preset.objectType.name),
+                  Flexible(
+                    child: _CreatePill(
+                      label: createBlockConfigFor(preset.objectType).title,
+                    ),
+                  ),
                 ],
               ),
               const Spacer(),
@@ -753,9 +747,9 @@ class _CreatePresetCard extends StatelessWidget {
                 preset.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 3),
               Text(
@@ -773,9 +767,7 @@ class _CreatePresetCard extends StatelessWidget {
 }
 
 class _CreateReadinessPanel extends StatelessWidget {
-  const _CreateReadinessPanel({
-    required this.readiness,
-  });
+  const _CreateReadinessPanel({required this.readiness});
 
   final _CreateReadiness readiness;
 
@@ -812,8 +804,8 @@ class _CreateReadinessPanel extends StatelessWidget {
                   child: Text(
                     'Publish readiness',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 _CreatePill(
@@ -825,9 +817,7 @@ class _CreateReadinessPanel extends StatelessWidget {
             const SizedBox(height: 10),
             Column(
               children: readiness.items
-                  .map(
-                    (_CreateReadinessItem item) => _ReadinessRow(item: item),
-                  )
+                  .map((_CreateReadinessItem item) => _ReadinessRow(item: item))
                   .toList(growable: false),
             ),
           ],
@@ -838,9 +828,7 @@ class _CreateReadinessPanel extends StatelessWidget {
 }
 
 class _ReadinessRow extends StatelessWidget {
-  const _ReadinessRow({
-    required this.item,
-  });
+  const _ReadinessRow({required this.item});
 
   final _CreateReadinessItem item;
 
@@ -861,19 +849,18 @@ class _ReadinessRow extends StatelessWidget {
             child: Text(
               item.label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight:
-                        item.required ? FontWeight.w700 : FontWeight.w500,
-                  ),
+                fontWeight: item.required ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
           ),
           Text(
             item.ready ? 'Ready' : item.emptyLabel,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: item.ready
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: item.ready
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -882,10 +869,7 @@ class _ReadinessRow extends StatelessWidget {
 }
 
 class _CreatePreviewCard extends StatelessWidget {
-  const _CreatePreviewCard({
-    required this.draft,
-    required this.readiness,
-  });
+  const _CreatePreviewCard({required this.draft, required this.readiness});
 
   final CreateDraftEntity draft;
   final _CreateReadiness readiness;
@@ -893,8 +877,10 @@ class _CreatePreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final CreateTaxonomyCategory? category =
-        createTaxonomyCategoryById(draft.mainCategory);
+    final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
+    final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
+      draft.mainCategory,
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -930,11 +916,11 @@ class _CreatePreviewCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Listing preview',
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                       ),
                       _CreatePill(
@@ -947,13 +933,13 @@ class _CreatePreviewCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     draft.title.trim().isEmpty
-                        ? 'Untitled ${draft.objectType.name}'
+                        ? 'Untitled ${config.title.toLowerCase()}'
                         : draft.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -966,11 +952,9 @@ class _CreatePreviewCard extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      _CreatePill(label: draft.objectType.name),
+                      _CreatePill(label: config.title),
                       if (category != null)
-                        _CreatePill(
-                          label: category.defaultParticipationMode,
-                        ),
+                        _CreatePill(label: category.defaultParticipationMode),
                       _CreatePill(
                         label: draft.isFree
                             ? 'Free'
@@ -1005,10 +989,66 @@ class _CreatePreviewCard extends StatelessWidget {
   }
 }
 
-class _CreatePill extends StatelessWidget {
-  const _CreatePill({
-    required this.label,
+bool _needsRentalReview(CreateDraftEntity draft) {
+  final Map<String, Object?>? migration =
+      draft.sectionData['migration'] as Map<String, Object?>?;
+  return migration?['review_as_rental'] == true;
+}
+
+class _RentalReviewBanner extends StatelessWidget {
+  const _RentalReviewBanner({
+    required this.onKeepSession,
+    required this.onConvertToRental,
   });
+
+  final VoidCallback onKeepSession;
+  final VoidCallback onConvertToRental;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      key: const ValueKey<String>('rental-review-banner'),
+      color: Theme.of(context).colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Could this be a rental?',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'This legacy offer was migrated safely as a Bookable session. '
+              'Choose Rental only if equipment or transport is being rented.',
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                OutlinedButton(
+                  onPressed: onKeepSession,
+                  child: const Text('Keep session'),
+                ),
+                FilledButton(
+                  onPressed: onConvertToRental,
+                  child: const Text('Convert to rental'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CreatePill extends StatelessWidget {
+  const _CreatePill({required this.label});
 
   final String label;
 
@@ -1024,9 +1064,11 @@ class _CreatePill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -1049,32 +1091,36 @@ class _CreateTaxonomyPicker extends StatelessWidget {
   final void Function(
     CreateTaxonomyCategory category,
     CreateTaxonomySubcategory subcategory,
-  ) onSubcategorySelected;
+  )
+  onSubcategorySelected;
 
   @override
   Widget build(BuildContext context) {
-    final List<CreateTaxonomyCategory> categories =
-        createTaxonomyForObjectType(objectType);
-    final CreateTaxonomyCategory? selectedCategory =
-        createTaxonomyCategoryById(selectedCategoryId);
+    final List<CreateTaxonomyCategory> categories = createTaxonomyForObjectType(
+      objectType,
+    );
+    final CreateTaxonomyCategory? selectedCategory = createTaxonomyCategoryById(
+      selectedCategoryId,
+    );
     final CreateTaxonomyCategory? activeCategory =
         selectedCategory != null && selectedCategory.allows(objectType)
-            ? selectedCategory
-            : null;
+        ? selectedCategory
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           'Scenario taxonomy',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 10),
         SizedBox(
           height: 132,
           child: ListView.separated(
+            key: const ValueKey<String>('create-taxonomy-group-rail'),
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
             separatorBuilder: (_, __) => const SizedBox(width: 10),
@@ -1093,25 +1139,176 @@ class _CreateTaxonomyPicker extends StatelessWidget {
           _SelectedTaxonomySummary(
             category: activeCategory,
             selectedSubcategoryId: selectedSubcategoryId,
+            objectType: objectType,
           ),
           const SizedBox(height: 10),
+          _TaxonomySubcategoryPicker(
+            key: ValueKey<String>(activeCategory.id),
+            category: activeCategory,
+            selectedSubcategoryId: selectedSubcategoryId,
+            onSelected: (CreateTaxonomySubcategory subcategory) {
+              onSubcategorySelected(activeCategory, subcategory);
+            },
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _DynamicCriteriaSection extends StatelessWidget {
+  const _DynamicCriteriaSection({required this.draft, required this.onChanged});
+
+  final CreateDraftEntity draft;
+  final void Function(String fieldId, Object? value) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final CategoryCriteriaResult? result = const GetCategoryCriteriaUseCase()(
+      draft.subcategory,
+    );
+    if (result == null || result.fields.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final Map<String, Object?> values = <String, Object?>{
+      ...?draft.sectionData['criteria'] as Map<String, Object?>?,
+    };
+    return Card(
+      key: const ValueKey<String>('dynamic-criteria-section'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Activity criteria',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Profile: ${result.profile.id.replaceAll('_', ' ')}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            for (final RechargeCriteriaFieldDefinition field
+                in result.fields) ...<Widget>[
+              if (field.type == 'bool')
+                SwitchListTile.adaptive(
+                  key: ValueKey<String>('criteria-${field.id}'),
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(_criteriaLabel(result, field)),
+                  subtitle: field.description.isEmpty
+                      ? null
+                      : Text(field.description),
+                  value: values[field.id] as bool? ?? false,
+                  onChanged: (bool value) => onChanged(field.id, value),
+                )
+              else
+                TextFormField(
+                  key: ValueKey<String>('criteria-${field.id}'),
+                  initialValue: values[field.id]?.toString() ?? '',
+                  keyboardType: field.type == 'number' || field.type == 'range'
+                      ? TextInputType.number
+                      : TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: _criteriaLabel(result, field),
+                    helperText: field.description.isEmpty
+                        ? null
+                        : field.description,
+                  ),
+                  onChanged: (String value) => onChanged(field.id, value),
+                ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _criteriaLabel(
+    CategoryCriteriaResult result,
+    RechargeCriteriaFieldDefinition field,
+  ) {
+    final String label = field.id.replaceAll('_', ' ');
+    return result.profile.requiredFieldIds.contains(field.id)
+        ? '$label *'
+        : label;
+  }
+}
+
+class _TaxonomySubcategoryPicker extends StatefulWidget {
+  const _TaxonomySubcategoryPicker({
+    super.key,
+    required this.category,
+    required this.selectedSubcategoryId,
+    required this.onSelected,
+  });
+
+  final CreateTaxonomyCategory category;
+  final String selectedSubcategoryId;
+  final ValueChanged<CreateTaxonomySubcategory> onSelected;
+
+  @override
+  State<_TaxonomySubcategoryPicker> createState() =>
+      _TaxonomySubcategoryPickerState();
+}
+
+class _TaxonomySubcategoryPickerState
+    extends State<_TaxonomySubcategoryPicker> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final String normalizedQuery = _query.trim().toLowerCase();
+    final List<CreateTaxonomySubcategory> visibleSubcategories = widget
+        .category
+        .subcategories
+        .where((CreateTaxonomySubcategory subcategory) {
+          if (normalizedQuery.isEmpty) return true;
+          return subcategory.title.toLowerCase().contains(normalizedQuery) ||
+              subcategory.id.contains(normalizedQuery) ||
+              subcategory.activityCategory.aliases.any(
+                (String alias) => alias.toLowerCase().contains(normalizedQuery),
+              ) ||
+              subcategory.activityCategory.searchKeywords.any(
+                (String keyword) =>
+                    keyword.toLowerCase().contains(normalizedQuery),
+              );
+        })
+        .toList(growable: false);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        TextField(
+          key: const ValueKey<String>('taxonomy-category-search'),
+          decoration: InputDecoration(
+            labelText:
+                'Search ${widget.category.subcategories.length} categories',
+            prefixIcon: const Icon(Icons.search),
+          ),
+          onChanged: (String value) => setState(() => _query = value),
+        ),
+        const SizedBox(height: 10),
+        if (visibleSubcategories.isEmpty)
+          const Text('No categories match this search.')
+        else
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: activeCategory.subcategories
+            children: visibleSubcategories
                 .map(
                   (CreateTaxonomySubcategory subcategory) => ChoiceChip(
                     label: Text(subcategory.title),
-                    selected: subcategory.id == selectedSubcategoryId,
-                    onSelected: (_) => onSubcategorySelected(
-                      activeCategory,
-                      subcategory,
-                    ),
+                    selected: subcategory.id == widget.selectedSubcategoryId,
+                    onSelected: (_) => widget.onSelected(subcategory),
                   ),
                 )
                 .toList(growable: false),
           ),
-        ],
       ],
     );
   }
@@ -1131,8 +1328,9 @@ class _TaxonomyCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color background =
-        selected ? colorScheme.primaryContainer : colorScheme.surface;
+    final Color background = selected
+        ? colorScheme.primaryContainer
+        : colorScheme.surface;
     final Color border = selected
         ? colorScheme.primary
         : colorScheme.outline.withValues(alpha: 0.32);
@@ -1168,9 +1366,9 @@ class _TaxonomyCategoryCard extends StatelessWidget {
                 category.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 4),
               Text(
@@ -1191,10 +1389,12 @@ class _SelectedTaxonomySummary extends StatelessWidget {
   const _SelectedTaxonomySummary({
     required this.category,
     required this.selectedSubcategoryId,
+    required this.objectType,
   });
 
   final CreateTaxonomyCategory category;
   final String selectedSubcategoryId;
+  final CreateObjectType objectType;
 
   @override
   Widget build(BuildContext context) {
@@ -1202,6 +1402,17 @@ class _SelectedTaxonomySummary extends StatelessWidget {
     final String path = selectedSubcategoryId.isEmpty
         ? category.id
         : '${category.id}.$selectedSubcategoryId';
+    CreateTaxonomySubcategory? selectedSubcategory;
+    for (final CreateTaxonomySubcategory subcategory
+        in category.subcategories) {
+      if (subcategory.id == selectedSubcategoryId) {
+        selectedSubcategory = subcategory;
+        break;
+      }
+    }
+    final String participationMode =
+        selectedSubcategory?.participationModeFor(objectType) ??
+        category.defaultParticipationMode;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.secondaryContainer.withValues(alpha: 0.54),
@@ -1215,12 +1426,12 @@ class _SelectedTaxonomySummary extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '$path · ${category.defaultParticipationMode}',
+                '$path · $participationMode',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -1232,15 +1443,50 @@ class _SelectedTaxonomySummary extends StatelessWidget {
 
 IconData _iconForCategory(String id) {
   return switch (id) {
+    'music_nightlife' => Icons.music_note,
+    'comedy_theatre_performance' => Icons.theater_comedy,
+    'cinema_screenings' => Icons.movie_outlined,
+    'education_talks' => Icons.school_outlined,
+    'business_networking' => Icons.handshake_outlined,
+    'workshops_masterclasses' => Icons.build_outlined,
+    'language_social_learning' => Icons.translate,
     'sport' => Icons.sports_tennis,
     'outdoor_nature_walking' => Icons.park,
+    'water_activities' => Icons.kayaking_outlined,
+    'winter_seasonal' => Icons.ac_unit,
     'wellness_recharge' => Icons.self_improvement,
     'food_drinks' => Icons.local_cafe,
     'art_culture_museums' => Icons.museum,
     'games_indoor' => Icons.casino,
+    'dance' => Icons.nightlife_outlined,
     'travel_tours' => Icons.tour,
     'family_kids' => Icons.family_restroom,
+    'pets_animals' => Icons.pets_outlined,
+    'community_charity' => Icons.volunteer_activism,
+    'markets_fairs' => Icons.storefront_outlined,
+    'holidays_seasonal' => Icons.celebration_outlined,
+    'adrenaline_entertainment' => Icons.bolt,
+    'attractions' => Icons.attractions,
+    'auto_moto' => Icons.directions_car,
+    'geek_tech' => Icons.memory,
+    'dating_singles' => Icons.favorite_outline,
+    'other' => Icons.more_horiz,
     _ => Icons.category,
+  };
+}
+
+IconData _iconForCreateBlock(CreateObjectType objectType) {
+  return switch (objectType) {
+    CreateObjectType.event => Icons.event_available,
+    CreateObjectType.activity => Icons.directions_walk,
+    CreateObjectType.route => Icons.route,
+    CreateObjectType.place => Icons.place,
+    CreateObjectType.session => Icons.calendar_month,
+    CreateObjectType.quickPlan => Icons.flash_on,
+    CreateObjectType.findPeople => Icons.group_add,
+    CreateObjectType.classWorkshop => Icons.school_outlined,
+    CreateObjectType.rental => Icons.inventory_2_outlined,
+    CreateObjectType.collection => Icons.collections_bookmark_outlined,
   };
 }
 
@@ -1279,27 +1525,20 @@ class _LabeledField extends StatelessWidget {
 }
 
 class _CreateStateMessage extends StatelessWidget {
-  const _CreateStateMessage({
-    required this.text,
-  });
+  const _CreateStateMessage({required this.text});
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: Text(text)),
     );
   }
 }
 
 class _CreateSeedBanner extends StatelessWidget {
-  const _CreateSeedBanner({
-    required this.seedContext,
-  });
+  const _CreateSeedBanner({required this.seedContext});
 
   final _CreateSeedContext seedContext;
 
@@ -1310,9 +1549,7 @@ class _CreateSeedBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.tertiaryContainer.withValues(alpha: 0.58),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: colorScheme.tertiary.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -1327,9 +1564,9 @@ class _CreateSeedBanner extends StatelessWidget {
                   child: Text(
                     'Seeded from ${seedContext.sourceLabel}',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.tertiary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: colorScheme.tertiary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -1339,9 +1576,9 @@ class _CreateSeedBanner extends StatelessWidget {
               seedContext.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             if (seedContext.chips.isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
@@ -1393,17 +1630,17 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                   child: Text(
                     'Scenario route seed',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 Text(
                   '${seedContext.stopCount} stops',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -1412,9 +1649,9 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
               seedContext.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             if (seedContext.prompt.isNotEmpty) ...<Widget>[
               const SizedBox(height: 4),
@@ -1439,9 +1676,8 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                 runSpacing: 8,
                 children: seedContext.stepCategories
                     .map(
-                      (String step) => _CreatePill(
-                        label: createTaxonomyLabelForPath(step),
-                      ),
+                      (String step) =>
+                          _CreatePill(label: createTaxonomyLabelForPath(step)),
                     )
                     .toList(growable: false),
               ),
@@ -1499,7 +1735,8 @@ class _CreateSeedContext {
         .split(',')
         .where((String step) => step.trim().isNotEmpty)
         .length;
-    final bool hasContext = source.isNotEmpty ||
+    final bool hasContext =
+        source.isNotEmpty ||
         prompt.isNotEmpty ||
         title.isNotEmpty ||
         category.isNotEmpty;
@@ -1510,8 +1747,8 @@ class _CreateSeedContext {
       title: title.isNotEmpty
           ? title
           : prompt.isNotEmpty
-              ? prompt
-              : 'Recharge idea',
+          ? prompt
+          : 'Recharge idea',
       chips: <String>[
         if (category.isNotEmpty) category,
         if (free == '1' || free.toLowerCase() == 'true') 'Free',
@@ -1637,10 +1874,10 @@ class _CreateSeed {
     final String rawCategory = _firstSeedValue(
       _seedParam(params, <String>['category', 'mainCategory']),
     );
-    final String rawSubcategory = _seedParam(
-      params,
-      <String>['subcategory', 'subCategory'],
-    );
+    final String rawSubcategory = _seedParam(params, <String>[
+      'subcategory',
+      'subCategory',
+    ]);
     final String rawTitle = _seedParam(params, <String>['title', 'name']);
     final String source = _seedParam(params, <String>['source']);
     final _TaxonomySeed taxonomy = _taxonomySeedFor(
@@ -1654,7 +1891,8 @@ class _CreateSeed {
     final bool isFree = _seedIsFree(params, basePrice);
 
     return _CreateSeed(
-      hasValues: prompt.isNotEmpty ||
+      hasValues:
+          prompt.isNotEmpty ||
           rawTitle.isNotEmpty ||
           rawCategory.isNotEmpty ||
           rawSubcategory.isNotEmpty ||
@@ -1694,10 +1932,7 @@ class _CreateSeed {
 }
 
 class _TaxonomySeed {
-  const _TaxonomySeed({
-    required this.categoryId,
-    required this.subcategoryId,
-  });
+  const _TaxonomySeed({required this.categoryId, required this.subcategoryId});
 
   final String categoryId;
   final String subcategoryId;
@@ -1706,11 +1941,9 @@ class _TaxonomySeed {
 String _seedKeyFor(Map<String, String> params) {
   final List<MapEntry<String, String>> entries =
       params.entries.toList(growable: false)
-        ..sort(
-          (MapEntry<String, String> a, MapEntry<String, String> b) {
-            return a.key.compareTo(b.key);
-          },
-        );
+        ..sort((MapEntry<String, String> a, MapEntry<String, String> b) {
+          return a.key.compareTo(b.key);
+        });
   return entries
       .map((MapEntry<String, String> entry) => '${entry.key}=${entry.value}')
       .join('&');
@@ -1733,10 +1966,21 @@ String _firstSeedValue(String value) {
 }
 
 CreateObjectType _seedObjectType(Map<String, String> params) {
-  final String value = _seedParam(params, <String>['type', 'objectType'])
-      .toLowerCase();
-  if (value == 'place') return CreateObjectType.place;
-  return CreateObjectType.event;
+  final String value = _seedParam(params, <String>[
+    'type',
+    'objectType',
+  ]).toLowerCase();
+  final String source = _seedParam(params, <String>['source']).toLowerCase();
+  final String category = _firstSeedValue(
+    _seedParam(params, <String>['category', 'mainCategory']),
+  ).toLowerCase();
+  final bool routeSeed =
+      source == 'scenario' || category == 'scenario' || category == 'route';
+  if (routeSeed && (value.isEmpty || value == 'event' || value == 'route')) {
+    return CreateObjectType.route;
+  }
+  if (value.isEmpty) return CreateObjectType.event;
+  return createObjectTypeFromId(value);
 }
 
 _TaxonomySeed _taxonomySeedFor({
@@ -1745,8 +1989,9 @@ _TaxonomySeed _taxonomySeedFor({
   required String prompt,
 }) {
   final String category = rawCategory.toLowerCase();
-  final CreateTaxonomyCategory? exactCategory =
-      createTaxonomyCategoryById(category);
+  final CreateTaxonomyCategory? exactCategory = createTaxonomyCategoryById(
+    category,
+  );
   if (exactCategory != null) {
     return _taxonomySeedFromCategory(exactCategory, rawSubcategory);
   }
@@ -1800,8 +2045,9 @@ _TaxonomySeed _taxonomySeedFor({
 }
 
 _TaxonomySeed _knownTaxonomySeed(String categoryId, String subcategoryId) {
-  final CreateTaxonomyCategory? category =
-      createTaxonomyCategoryById(categoryId);
+  final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
+    categoryId,
+  );
   if (category == null) {
     return const _TaxonomySeed(
       categoryId: 'wellness_recharge',
@@ -1823,17 +2069,11 @@ _TaxonomySeed _taxonomySeedFromCategory(
     categoryId: category.id,
     subcategoryId: hasSubcategory
         ? subcategory
-        : category.subcategories.isEmpty
-            ? ''
-            : category.subcategories.first.id,
+        : createDefaultSubcategoryFor(category)?.id ?? '',
   );
 }
 
-String _seedTitle(
-  String rawTitle,
-  String prompt,
-  String categoryId,
-) {
+String _seedTitle(String rawTitle, String prompt, String categoryId) {
   if (rawTitle.isNotEmpty) return rawTitle;
   if (prompt.isNotEmpty) return _sentenceTitle(prompt);
   final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
@@ -1856,10 +2096,11 @@ String _seedShortDescription(
   String prompt,
   String title,
 ) {
-  final String subtitle = _seedParam(
-    params,
-    <String>['subtitle', 'shortDescription', 'description'],
-  );
+  final String subtitle = _seedParam(params, <String>[
+    'subtitle',
+    'shortDescription',
+    'description',
+  ]);
   if (subtitle.isNotEmpty) return subtitle;
   final String subject = prompt.isEmpty ? title : prompt;
   return 'Drafted from ${_seedSourceLabel(params)} for $subject.';
@@ -1870,15 +2111,15 @@ String _seedFullDescription(
   String prompt,
   String title,
 ) {
-  final String fullDescription = _seedParam(
-    params,
-    <String>['fullDescription'],
-  );
+  final String fullDescription = _seedParam(params, <String>[
+    'fullDescription',
+  ]);
   if (fullDescription.isNotEmpty) return fullDescription;
   final String subject = prompt.isEmpty ? title : prompt;
   final String routeSteps = _seedParam(params, <String>['steps']);
-  final String routeStepsSentence =
-      routeSteps.isEmpty ? '' : 'Route steps: $routeSteps. ';
+  final String routeStepsSentence = routeSteps.isEmpty
+      ? ''
+      : 'Route steps: $routeSteps. ';
   return 'Seeded from ${_seedSourceLabel(params)}. '
       'Original context: $subject. '
       '$routeStepsSentence'
@@ -1914,25 +2155,32 @@ String _seedVenueName(
 ) {
   final String venue = _seedParam(params, <String>['venue', 'venueName']);
   if (venue.isNotEmpty) return venue;
-  if (objectType == CreateObjectType.place) return title;
+  if (objectType == CreateObjectType.place ||
+      objectType == CreateObjectType.session ||
+      objectType == CreateObjectType.rental) {
+    return title;
+  }
+  if (objectType == CreateObjectType.route) return 'Route start point';
   return 'Meeting point';
 }
 
 String _seedAddress(Map<String, String> params) {
-  final String address = _seedParam(
-    params,
-    <String>['address', 'addressLine', 'addressLine1'],
-  );
+  final String address = _seedParam(params, <String>[
+    'address',
+    'addressLine',
+    'addressLine1',
+  ]);
   if (address.isNotEmpty) return address;
   final String city = _seedParam(params, <String>['city', 'location']);
   return city.isEmpty ? 'City center' : city;
 }
 
 String _seedCoverImage(Map<String, String> params, String categoryId) {
-  final String cover = _seedParam(
-    params,
-    <String>['cover', 'coverImage', 'coverImageUrl'],
-  );
+  final String cover = _seedParam(params, <String>[
+    'cover',
+    'coverImage',
+    'coverImageUrl',
+  ]);
   if (cover.isNotEmpty) return cover;
   switch (categoryId) {
     case 'art_culture_museums':
@@ -1949,19 +2197,21 @@ String _seedCoverImage(Map<String, String> params, String categoryId) {
 }
 
 double? _seedPrice(Map<String, String> params) {
-  final String value = _seedParam(
-    params,
-    <String>['price', 'budgetMax', 'basePrice'],
-  );
+  final String value = _seedParam(params, <String>[
+    'price',
+    'budgetMax',
+    'basePrice',
+  ]);
   if (value.isEmpty) return null;
   return double.tryParse(value.replaceAll(',', '.'));
 }
 
 bool _seedIsFree(Map<String, String> params, double? basePrice) {
-  final String value = _seedParam(
-    params,
-    <String>['free', 'isFree', 'freeOnly'],
-  ).toLowerCase();
+  final String value = _seedParam(params, <String>[
+    'free',
+    'isFree',
+    'freeOnly',
+  ]).toLowerCase();
   if (value == '1' || value == 'true' || value == 'yes') return true;
   if (value == '0' || value == 'false' || value == 'no') return false;
   return basePrice == null || basePrice <= 0;
@@ -2013,7 +2263,7 @@ class _CreatePreset {
 const List<_CreatePreset> _createPresets = <_CreatePreset>[
   _CreatePreset(
     label: 'Calm walk',
-    objectType: CreateObjectType.event,
+    objectType: CreateObjectType.activity,
     categoryId: 'wellness_recharge',
     subcategoryId: 'calm_walk',
     title: 'Calm walk in Rezekne',
@@ -2025,6 +2275,69 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     addressLine1: 'Atbrivosanas aleja',
     coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
     isFree: true,
+  ),
+  _CreatePreset(
+    label: 'Quick coffee',
+    objectType: CreateObjectType.quickPlan,
+    categoryId: 'food_drinks',
+    subcategoryId: 'coffee',
+    title: 'Coffee reset tonight',
+    shortDescription: 'Simple coffee plan for a quick recharge today.',
+    fullDescription:
+        'A lightweight plan for people who want to meet for coffee without heavy scheduling.',
+    city: 'Rezekne',
+    venueName: 'Local cafe',
+    addressLine1: 'City center',
+    coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
+    isFree: false,
+    basePrice: 5,
+  ),
+  _CreatePreset(
+    label: 'Tennis partner',
+    objectType: CreateObjectType.findPeople,
+    categoryId: 'sport',
+    subcategoryId: 'tennis',
+    title: 'Looking for a tennis partner',
+    shortDescription: 'Find one or two people for a friendly tennis session.',
+    fullDescription:
+        'A social request for people who want to play a friendly beginner-friendly tennis match.',
+    city: 'Rezekne',
+    venueName: 'Public tennis court',
+    addressLine1: 'Sports center',
+    coverImage: 'https://images.unsplash.com/photo-1517649763962-0c623066013b',
+    isFree: true,
+  ),
+  _CreatePreset(
+    label: 'Pottery workshop',
+    objectType: CreateObjectType.classWorkshop,
+    categoryId: 'workshops_masterclasses',
+    subcategoryId: 'pottery',
+    title: 'Beginner pottery workshop',
+    shortDescription: 'Hands-on pottery workshop for a small group.',
+    fullDescription:
+        'A guided beginner workshop with materials, practical support, and a finished piece to take home.',
+    city: 'Rezekne',
+    venueName: 'Creative studio',
+    addressLine1: 'City center',
+    coverImage: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa',
+    isFree: false,
+    basePrice: 20,
+  ),
+  _CreatePreset(
+    label: 'Walking route',
+    objectType: CreateObjectType.route,
+    categoryId: 'travel_tours',
+    subcategoryId: 'walking_tour',
+    title: 'Hidden gems walking tour',
+    shortDescription: 'Local route through small places worth noticing.',
+    fullDescription:
+        'A guided local walk through calm corners, stories, and small recharge points around the city.',
+    city: 'Rezekne',
+    venueName: 'Old town meeting point',
+    addressLine1: 'Central square',
+    coverImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
+    isFree: false,
+    basePrice: 12,
   ),
   _CreatePreset(
     label: 'Coffee spot',
@@ -2043,27 +2356,71 @@ const List<_CreatePreset> _createPresets = <_CreatePreset>[
     basePrice: 5,
   ),
   _CreatePreset(
-    label: 'Walking tour',
-    objectType: CreateObjectType.event,
-    categoryId: 'travel_tours',
-    subcategoryId: 'walking_tour',
-    title: 'Hidden gems walking tour',
-    shortDescription: 'Local route through small places worth noticing.',
+    label: 'Wellness guide',
+    objectType: CreateObjectType.collection,
+    categoryId: 'wellness_recharge',
+    subcategoryId: 'nature_reset',
+    title: 'Local wellness guide',
+    shortDescription: 'A collection of calm sessions and recovery places.',
     fullDescription:
-        'A guided local walk through calm corners, stories, and small recharge points around the city.',
+        'A curated guide for people looking for calm recharge sessions, nature resets, and quiet recovery spaces.',
     city: 'Rezekne',
-    venueName: 'Old town meeting point',
-    addressLine1: 'Central square',
-    coverImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
+    venueName: 'Recharge studio',
+    addressLine1: 'Main street',
+    coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
+    isFree: true,
+  ),
+  _CreatePreset(
+    label: 'Yoga slot',
+    objectType: CreateObjectType.session,
+    categoryId: 'sport',
+    subcategoryId: 'yoga',
+    title: 'Morning yoga slot',
+    shortDescription: 'Bookable small-group yoga class.',
+    fullDescription:
+        'A bookable wellness slot with limited places, simple booking, and a beginner-friendly pace.',
+    city: 'Rezekne',
+    venueName: 'Recharge studio',
+    addressLine1: 'Main street',
+    coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773',
     isFree: false,
-    basePrice: 12,
+    basePrice: 10,
+  ),
+  _CreatePreset(
+    label: 'Bike rental',
+    objectType: CreateObjectType.rental,
+    categoryId: 'sport',
+    subcategoryId: 'cycling',
+    title: 'City bike rental',
+    shortDescription: 'Comfortable bicycles for a local recharge ride.',
+    fullDescription:
+        'Hourly bicycle rental with a lock and helmet for independent city routes and nature rides.',
+    city: 'Rezekne',
+    venueName: 'Bike pickup point',
+    addressLine1: 'City center',
+    coverImage: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890',
+    isFree: false,
+    basePrice: 8,
+  ),
+  _CreatePreset(
+    label: 'Community update',
+    objectType: CreateObjectType.event,
+    categoryId: 'community_charity',
+    subcategoryId: 'neighborhood_event',
+    title: 'Weekend recharge update',
+    shortDescription: 'Short update from a local creator or venue.',
+    fullDescription:
+        'An announcement for followers about upcoming recharge ideas, schedule changes, or community updates.',
+    city: 'Rezekne',
+    venueName: 'Recharge community',
+    addressLine1: 'City center',
+    coverImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac',
+    isFree: true,
   ),
 ];
 
 class _CreateReadiness {
-  const _CreateReadiness({
-    required this.items,
-  });
+  const _CreateReadiness({required this.items});
 
   final List<_CreateReadinessItem> items;
 
@@ -2093,6 +2450,7 @@ class _CreateReadinessItem {
 }
 
 _CreateReadiness _createReadinessFor(CreateDraftEntity draft) {
+  final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
   return _CreateReadiness(
     items: <_CreateReadinessItem>[
       _CreateReadinessItem(
@@ -2120,11 +2478,10 @@ _CreateReadiness _createReadinessFor(CreateDraftEntity draft) {
         emptyLabel: 'Missing',
       ),
       _CreateReadinessItem(
-        label: draft.objectType == CreateObjectType.event
-            ? 'Start time added'
-            : 'Place does not need start time',
-        ready: draft.objectType == CreateObjectType.place ||
-            draft.startDateTimeUtc != null,
+        label: config.requiresStartDateTime
+            ? '${config.title} start time added'
+            : '${config.title} does not need start time',
+        ready: !config.requiresStartDateTime || draft.startDateTimeUtc != null,
         required: true,
         emptyLabel: 'Missing',
       ),

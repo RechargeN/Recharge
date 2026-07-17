@@ -11,6 +11,7 @@ class FavoriteItemEntity {
     required this.isFree,
     required this.savedAtUtc,
     required this.targetRoute,
+    this.coverImageUrl = '',
   });
 
   final String id;
@@ -24,10 +25,12 @@ class FavoriteItemEntity {
   final bool isFree;
   final DateTime savedAtUtc;
   final String? targetRoute;
+  final String coverImageUrl;
 
   FavoriteItemEntity copyWith({
     DateTime? savedAtUtc,
     String? targetRoute,
+    String? coverImageUrl,
     bool clearTargetRoute = false,
   }) {
     return FavoriteItemEntity(
@@ -42,6 +45,7 @@ class FavoriteItemEntity {
       isFree: isFree,
       savedAtUtc: savedAtUtc ?? this.savedAtUtc,
       targetRoute: clearTargetRoute ? null : (targetRoute ?? this.targetRoute),
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
     );
   }
 }

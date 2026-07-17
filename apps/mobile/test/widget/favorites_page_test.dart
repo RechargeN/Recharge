@@ -78,13 +78,14 @@ void main() {
     expect(find.text('Утренняя йога'), findsOneWidget);
   });
 
-  fullPageTestWidgets('free filter shows only free saved plans', (
+  fullPageTestWidgets('type filters show only matching saved plans', (
     tester,
   ) async {
     final repository = _FakeFavoritesRepository(
       initial: <FavoriteItemEntity>[
         _favorite('evt_1', 'Утренняя йога'),
-        _favorite('evt_2', 'Вечерний концерт', isFree: false, priceAmount: 20),
+        _favorite('place_1', 'Кофейня', category: 'place'),
+        _favorite('route_1', 'Тихий маршрут', category: 'scenario'),
       ],
     );
     final controller = FavoritesController(
@@ -107,13 +108,22 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Вечерний концерт'), findsOneWidget);
+    expect(find.text('Утренняя йога'), findsOneWidget);
+    expect(find.text('Кофейня'), findsOneWidget);
+    expect(find.text('Тихий маршрут'), findsOneWidget);
 
-    await tester.tap(find.text('Free').first);
+    await tester.tap(find.text('Places').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Утренняя йога'), findsOneWidget);
-    expect(find.text('Вечерний концерт'), findsNothing);
+    expect(find.text('Кофейня'), findsOneWidget);
+    expect(find.text('Утренняя йога'), findsNothing);
+    expect(find.text('Тихий маршрут'), findsNothing);
+
+    await tester.tap(find.text('Routes').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Тихий маршрут'), findsOneWidget);
+    expect(find.text('Кофейня'), findsNothing);
   });
 
   fullPageTestWidgets('opens saved scenario in builder', (tester) async {
@@ -163,9 +173,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Route scenario'), findsOneWidget);
-    expect(find.text('Edit'), findsOneWidget);
+    expect(find.text('ROUTE'), findsOneWidget);
 
+    await tester.tap(find.byTooltip('More actions').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
 
@@ -226,9 +237,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Route scenario'), findsOneWidget);
-    expect(find.text('Route'), findsOneWidget);
+    expect(find.text('ROUTE'), findsOneWidget);
 
+    await tester.tap(find.byTooltip('More actions').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Route'));
     await tester.pumpAndSettle();
 
@@ -332,10 +344,8 @@ void main() {
     await tester.tap(find.text('Resume'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Search page'), findsOneWidget);
-    expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
+    expect(find.text('Smart Search page'), findsOneWidget);
+    expect(find.text('museum today under 10'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -470,6 +480,17 @@ class _FavoritesRouteTestApp extends StatelessWidget {
                     Text(state.uri.queryParameters['category'] ?? ''),
                     Text(state.uri.queryParameters['budgetMax'] ?? ''),
                     Text(state.uri.queryParameters['radius'] ?? ''),
+                  ],
+                ),
+              ),
+            ),
+            GoRoute(
+              path: RouteNames.smartSearch,
+              builder: (context, state) => Scaffold(
+                body: Column(
+                  children: <Widget>[
+                    const Text('Smart Search page'),
+                    Text(state.uri.queryParameters['prompt'] ?? ''),
                   ],
                 ),
               ),

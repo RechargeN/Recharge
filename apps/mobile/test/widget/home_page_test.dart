@@ -41,14 +41,35 @@ void main() {
 
     expect(find.text('RECHARGE'), findsOneWidget);
     expect(find.text('VACATION APP'), findsOneWidget);
-    expect(find.text('Categories'), findsOneWidget);
-    expect(find.text('Quick scenarios'), findsOneWidget);
-    expect(find.text('Free today'), findsOneWidget);
-    expect(find.text('Route ideas'), findsOneWidget);
-    expect(find.text('Coffee reset'), findsOneWidget);
-    expect(find.text('Builder'), findsWidgets);
-    expect(find.text('Nearly'), findsOneWidget);
-    expect(find.text('Утренняя йога в парке'), findsOneWidget);
+    expect(find.text('Categories'), findsWidgets);
+    expect(find.text('All'), findsWidgets);
+    expect(find.text('Sport'), findsOneWidget);
+    expect(find.text('Walks'), findsOneWidget);
+    expect(find.text('New'), findsOneWidget);
+    expect(find.text('For you'), findsWidgets);
+    expect(find.text('Nearly'), findsNothing);
+    expect(find.text('Утренняя йога в парке'), findsWidgets);
+
+    await tester.scrollPageUntilVisible(
+      find.text('Quick events'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Quick events'), findsOneWidget);
+
+    await tester.scrollPageUntilVisible(
+      find.text('Nearby'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Nearby'), findsOneWidget);
+
+    await tester.scrollPageUntilVisible(
+      find.text('Popular').last,
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Popular'), findsWidgets);
   });
 
   fullPageTestWidgets('opens search from hero action', (tester) async {
@@ -69,10 +90,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue your route'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Continue your route'), findsOneWidget);
     expect(find.text('Calm recharge route'), findsOneWidget);
 
-    await tester.tap(find.text('Edit'));
+    await tester.tap(find.byKey(const ValueKey('home-saved-scenario-edit')));
     await tester.pumpAndSettle();
 
     expect(find.text('Builder page'), findsOneWidget);
@@ -87,7 +113,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Route'));
+    await tester.scrollPageUntilVisible(
+      find.text('Continue your route'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('home-saved-scenario-route')));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -161,6 +192,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue saved search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Continue saved search'), findsOneWidget);
     expect(find.text('Museum ideas'), findsOneWidget);
 
@@ -180,6 +216,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue saved search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('home-saved-search-map')));
     await tester.pumpAndSettle();
 
@@ -197,6 +238,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue saved search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Build route from saved search'));
     await tester.pumpAndSettle();
 
@@ -211,6 +257,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue saved search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Create listing from saved search'));
     await tester.pumpAndSettle();
 
@@ -235,20 +286,27 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Continue smart search'), findsOneWidget);
     expect(find.text('museum today under 10'), findsOneWidget);
 
     await tester.tap(find.text('Resume'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Search page'), findsOneWidget);
-    expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
-    expect(find.text('5000'), findsOneWidget);
+    expect(find.text('Smart Search page'), findsOneWidget);
+    expect(find.text('museum today under 10'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('home-smart-search-map')));
     await tester.pumpAndSettle();
 
@@ -259,6 +317,11 @@ void main() {
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Build route from smart search'));
     await tester.pumpAndSettle();
 
@@ -268,6 +331,11 @@ void main() {
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Create listing from smart search'));
     await tester.pumpAndSettle();
 
@@ -295,6 +363,11 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Continue smart search'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
     expect(find.text('Smart route'), findsOneWidget);
@@ -311,6 +384,11 @@ void main() {
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('home-smart-search-map')));
     await tester.pumpAndSettle();
 
@@ -320,6 +398,11 @@ void main() {
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Continue smart search'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Create listing from smart search'));
     await tester.pumpAndSettle();
 
@@ -402,6 +485,17 @@ class _HomeTestApp extends StatelessWidget {
                       Text(state.uri.queryParameters['radius'] ?? ''),
                     ],
                   ),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: RouteNames.smartSearch,
+              builder: (context, state) => Scaffold(
+                body: Column(
+                  children: <Widget>[
+                    const Text('Smart Search page'),
+                    Text(state.uri.queryParameters['prompt'] ?? ''),
+                  ],
                 ),
               ),
             ),

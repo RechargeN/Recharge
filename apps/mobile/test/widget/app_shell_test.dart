@@ -6,46 +6,66 @@ import 'package:recharge/app/router/route_names.dart';
 
 void main() {
   testWidgets('selects home destination for discover', (tester) async {
-    await tester.pumpWidget(
-      _TestApp(initialLocation: RouteNames.discover),
-    );
+    await tester.pumpWidget(_TestApp(initialLocation: RouteNames.discover));
     await tester.pumpAndSettle();
 
     expect(_navigationBar(tester).selectedIndex, 0);
     expect(find.text('Home page'), findsOneWidget);
   });
 
-  testWidgets('treats map as search destination', (tester) async {
-    await tester.pumpWidget(
-      _TestApp(initialLocation: RouteNames.discoverMap),
-    );
+  testWidgets('keeps map outside search destination', (tester) async {
+    await tester.pumpWidget(_TestApp(initialLocation: RouteNames.discoverMap));
     await tester.pumpAndSettle();
 
-    expect(_navigationBar(tester).selectedIndex, 2);
+    expect(_navigationBar(tester).selectedIndex, 0);
     expect(find.text('Map page'), findsOneWidget);
   });
 
-  testWidgets('treats scenario builder as search destination', (tester) async {
+  testWidgets('keeps scenario builder outside search destination', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _TestApp(initialLocation: RouteNames.scenarioBuilder),
     );
     await tester.pumpAndSettle();
 
-    expect(_navigationBar(tester).selectedIndex, 2);
+    expect(_navigationBar(tester).selectedIndex, 0);
     expect(find.text('Builder page'), findsOneWidget);
   });
 
-  testWidgets('moves to search destination from bottom navigation',
-      (tester) async {
-    await tester.pumpWidget(
-      _TestApp(initialLocation: RouteNames.discover),
-    );
+  testWidgets('moves to Smart Search destination from bottom navigation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_TestApp(initialLocation: RouteNames.discover));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Поиск'));
+    await tester.tap(find.text('Smart Search'));
     await tester.pumpAndSettle();
 
     expect(_navigationBar(tester).selectedIndex, 2);
+    expect(find.text('Smart Search page'), findsOneWidget);
+  });
+
+  testWidgets('moves from map to Smart Search with bottom navigation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_TestApp(initialLocation: RouteNames.discoverMap));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Smart Search'));
+    await tester.pumpAndSettle();
+
+    expect(_navigationBar(tester).selectedIndex, 2);
+    expect(find.text('Smart Search page'), findsOneWidget);
+  });
+
+  testWidgets('keeps regular Search outside Smart Search destination', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_TestApp(initialLocation: RouteNames.search));
+    await tester.pumpAndSettle();
+
+    expect(_navigationBar(tester).selectedIndex, 0);
     expect(find.text('Search page'), findsOneWidget);
   });
 }
@@ -55,9 +75,7 @@ NavigationBar _navigationBar(WidgetTester tester) {
 }
 
 class _TestApp extends StatelessWidget {
-  const _TestApp({
-    required this.initialLocation,
-  });
+  const _TestApp({required this.initialLocation});
 
   final String initialLocation;
 
@@ -68,10 +86,8 @@ class _TestApp extends StatelessWidget {
         initialLocation: initialLocation,
         routes: <RouteBase>[
           ShellRoute(
-            builder: (context, state, child) => RechargeAppShell(
-              currentLocation: state.uri.path,
-              child: child,
-            ),
+            builder: (context, state, child) =>
+                RechargeAppShell(currentLocation: state.uri.path, child: child),
             routes: <RouteBase>[
               GoRoute(
                 path: RouteNames.discover,
@@ -80,6 +96,11 @@ class _TestApp extends StatelessWidget {
               GoRoute(
                 path: RouteNames.search,
                 builder: (context, state) => const _ShellBody('Search page'),
+              ),
+              GoRoute(
+                path: RouteNames.smartSearch,
+                builder: (context, state) =>
+                    const _ShellBody('Smart Search page'),
               ),
               GoRoute(
                 path: RouteNames.discoverMap,
@@ -121,10 +142,6 @@ class _ShellBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(label),
-      ),
-    );
+    return Scaffold(body: Center(child: Text(label)));
   }
 }

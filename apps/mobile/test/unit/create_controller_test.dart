@@ -73,11 +73,29 @@ void main() {
     expect(controller.state.draft.subcategory, 'tennis');
   });
 
-  test('create taxonomy exposes source-of-truth ids for event and place', () {
+  test('create taxonomy exposes source-of-truth ids for all create blocks', () {
     final eventCategories = createTaxonomyForObjectType(CreateObjectType.event);
     final placeCategories = createTaxonomyForObjectType(CreateObjectType.place);
     final sportCategory = createTaxonomyCategoryById('sport');
 
+    expect(rechargeCreateBlockConfigs, hasLength(10));
+    expect(rechargeCreateTaxonomy, hasLength(28));
+    expect(
+      rechargeCreateTaxonomy.fold<int>(
+        0,
+        (int count, category) => count + category.subcategories.length,
+      ),
+      516,
+    );
+    expect(CreateObjectType.quickPlan.taxonomyId, 'quick_plan');
+    expect(createObjectTypeFromId('bookable_slot'), CreateObjectType.session);
+    for (final CreateObjectType type in CreateObjectType.values) {
+      expect(
+        rechargeCreateBlockConfigs.map((config) => config.objectType),
+        contains(type),
+      );
+      expect(createTaxonomyForObjectType(type), isNotEmpty);
+    }
     expect(eventCategories.map((category) => category.id), contains('sport'));
     expect(
       placeCategories.map((category) => category.id),
@@ -88,12 +106,41 @@ void main() {
       sportCategory!.subcategories.map((subcategory) => subcategory.id),
       contains('tennis'),
     );
-    expect(sportCategory.defaultParticipationMode, 'play');
+    expect(sportCategory.defaultParticipationMode, 'practice');
     expect(createTaxonomyLabelForPath('food_drinks.coffee'), 'Coffee');
     expect(
       createTaxonomyLabelForPath('music_nightlife.afterwork_drinks'),
       'Afterwork drinks',
     );
+  });
+
+  test('publish validation follows create block config', () async {
+    await controller.ensureLoaded(
+      userId: 'u1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+
+    controller.setObjectType(CreateObjectType.quickPlan);
+    controller.updateTitle('Quick coffee');
+    controller.updateMainCategory('food_drinks');
+    controller.updateCity('Rezekne');
+    controller.updateCoverImage('cover.jpg');
+
+    final missingTimeSuccess = await controller.publishDraft();
+
+    expect(missingTimeSuccess, isFalse);
+    expect(
+      controller.state.validationErrors.containsKey('startDateTimeUtc'),
+      isTrue,
+    );
+
+    controller.setObjectType(CreateObjectType.route);
+
+    final routeSuccess = await controller.publishDraft();
+
+    expect(routeSuccess, isTrue);
+    expect(controller.state.publishedDraft?.objectType, CreateObjectType.route);
   });
 
   test('publish success sets pending_review status', () async {

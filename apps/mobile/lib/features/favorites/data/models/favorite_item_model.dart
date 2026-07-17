@@ -13,6 +13,7 @@ class FavoriteItemModel {
     required this.isFree,
     required this.savedAtUtcIso,
     required this.targetRoute,
+    required this.coverImageUrl,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class FavoriteItemModel {
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
+  final String coverImageUrl;
 
   factory FavoriteItemModel.fromJson(Map<String, dynamic> json) {
     return FavoriteItemModel(
@@ -40,6 +42,7 @@ class FavoriteItemModel {
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
+      coverImageUrl: json['coverImageUrl'] as String? ?? '',
     );
   }
 
@@ -56,6 +59,7 @@ class FavoriteItemModel {
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,
+      'coverImageUrl': coverImageUrl,
     };
   }
 
@@ -72,6 +76,7 @@ class FavoriteItemModel {
       isFree: entity.isFree,
       savedAtUtcIso: entity.savedAtUtc.toUtc().toIso8601String(),
       targetRoute: entity.targetRoute,
+      coverImageUrl: entity.coverImageUrl,
     );
   }
 
@@ -88,6 +93,7 @@ class FavoriteItemModel {
       isFree: isFree,
       savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
       targetRoute: targetRoute,
+      coverImageUrl: coverImageUrl,
     );
   }
 }

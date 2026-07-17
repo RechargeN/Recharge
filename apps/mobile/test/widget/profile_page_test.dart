@@ -104,12 +104,98 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Creator'), findsWidgets);
-    expect(find.text('Role track'), findsOneWidget);
-    expect(find.text('Workspace'), findsOneWidget);
-    expect(find.text('Open Create Hub'), findsOneWidget);
-    expect(find.text('Create event and place drafts'), findsOneWidget);
+    expect(find.text('PROFILE MODE'), findsOneWidget);
+    expect(find.text('PROFILE MENU'), findsOneWidget);
+    expect(find.text('Profile workspace'), findsOneWidget);
+    expect(find.byTooltip('Open Create Hub'), findsOneWidget);
     expect(find.text('Create Hub'), findsOneWidget);
-    expect(find.text('Build route idea'), findsOneWidget);
+    expect(find.text('Role track'), findsNothing);
+    expect(find.text('Workspace'), findsNothing);
+  });
+
+  fullPageTestWidgets('switches between unlocked profile role views', (
+    tester,
+  ) async {
+    final AuthController authController = AuthController(
+      signInUseCase: SignInUseCase(
+        _NoopAuthRepository(
+          email: 'pro@example.com',
+          role: 'pro_generator',
+          capabilities: const <String>[
+            'create.event',
+            'create.place',
+            'scenario.generate',
+            'pro.generator',
+          ],
+        ),
+      ),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'pro@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'seed',
+    );
+
+    final _FakeExploreRepository exploreRepository = _FakeExploreRepository();
+    final ExploreController exploreController = ExploreController(
+      loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
+      saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
+      loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+      saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    final _FakeFavoritesRepository favoritesRepository =
+        _FakeFavoritesRepository();
+    final FavoritesController favoritesController = FavoritesController(
+      getFavoritesUseCase: GetFavoritesUseCase(favoritesRepository),
+      addFavoriteUseCase: AddFavoriteUseCase(favoritesRepository),
+      removeFavoriteUseCase: RemoveFavoriteUseCase(favoritesRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          exploreControllerProvider.overrideWith((ref) => exploreController),
+          favoritesControllerProvider.overrideWith(
+            (ref) => favoritesController,
+          ),
+          createControllerProvider.overrideWith((ref) => _createController()),
+          discoverFeedControllerProvider.overrideWith(
+            (ref) => _discoverController(),
+          ),
+        ],
+        child: const MaterialApp(home: ProfilePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Open Builder'), findsOneWidget);
+    expect(find.text('Profile workspace'), findsOneWidget);
+
+    await tester.tap(find.text('User').first);
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Open Saved'), findsOneWidget);
+    expect(find.text('Saved plans'), findsOneWidget);
+
+    await tester.tap(find.text('Creator').first);
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Open Create Hub'), findsOneWidget);
+    expect(find.text('Create Hub'), findsOneWidget);
+
+    await tester.tap(find.text('Pro').first);
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Open Builder'), findsOneWidget);
+    expect(find.text('Scenario Builder'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens latest pro route from profile workspace', (
@@ -177,11 +263,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.scenarioBuilder,
@@ -253,7 +339,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Pro generator'), findsWidgets);
+    expect(find.text('Pro'), findsOneWidget);
     expect(find.text('Latest route'), findsOneWidget);
     expect(find.text('Calm recharge route'), findsOneWidget);
 
@@ -279,11 +365,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.discoverMap,
@@ -406,11 +492,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.search,
@@ -602,11 +688,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.search,
@@ -618,6 +704,17 @@ void main() {
                       Text(state.uri.queryParameters['category'] ?? ''),
                       Text(state.uri.queryParameters['budgetMax'] ?? ''),
                       Text(state.uri.queryParameters['radius'] ?? ''),
+                    ],
+                  ),
+                ),
+              ),
+              GoRoute(
+                path: RouteNames.smartSearch,
+                builder: (context, state) => Scaffold(
+                  body: Column(
+                    children: <Widget>[
+                      const Text('Smart Search page'),
+                      Text(state.uri.queryParameters['prompt'] ?? ''),
                     ],
                   ),
                 ),
@@ -689,11 +786,8 @@ void main() {
     await tester.tap(find.text('Resume smart').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Search page'), findsOneWidget);
-    expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
-    expect(find.text('5000'), findsOneWidget);
+    expect(find.text('Smart Search page'), findsOneWidget);
+    expect(find.text('museum today under 10'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -797,11 +891,11 @@ void main() {
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: RouteNames.profile,
+              initialLocation: RouteNames.profileWorkspace,
               routes: <RouteBase>[
                 GoRoute(
-                  path: RouteNames.profile,
-                  builder: (context, state) => const ProfilePage(),
+                  path: RouteNames.profileWorkspace,
+                  builder: (context, state) => const ProfileWorkspacePage(),
                 ),
                 GoRoute(
                   path: RouteNames.discoverMap,
@@ -1000,11 +1094,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.create,
@@ -1059,7 +1153,7 @@ void main() {
     expect(find.text('Creator listing'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('pendingReview'), findsOneWidget);
-    expect(find.text('Culture'), findsOneWidget);
+    expect(find.text('Art, culture & museums'), findsOneWidget);
     expect(find.text('Museum'), findsOneWidget);
     expect(find.text('12 EUR'), findsOneWidget);
 
@@ -1078,7 +1172,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
+    expect(find.text('art_culture_museums'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -1091,7 +1185,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Map page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
+    expect(find.text('art_culture_museums'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens published creator route from profile workspace', (
@@ -1168,11 +1262,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.create,
@@ -1369,11 +1463,11 @@ void main() {
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
-              initialLocation: RouteNames.profile,
+              initialLocation: RouteNames.profileWorkspace,
               routes: <RouteBase>[
                 GoRoute(
-                  path: RouteNames.profile,
-                  builder: (context, state) => const ProfilePage(),
+                  path: RouteNames.profileWorkspace,
+                  builder: (context, state) => const ProfileWorkspacePage(),
                 ),
                 GoRoute(
                   path: RouteNames.create,
@@ -1470,7 +1564,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
-      expect(find.text('art'), findsOneWidget);
+      expect(find.text('art_culture_museums'), findsOneWidget);
       expect(find.text('8'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -1552,11 +1646,11 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.profile,
+            initialLocation: RouteNames.profileWorkspace,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
+                path: RouteNames.profileWorkspace,
+                builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
                 path: RouteNames.create,

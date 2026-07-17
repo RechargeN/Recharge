@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 
 class DiscoverFeedSection extends ConsumerStatefulWidget {
-  const DiscoverFeedSection({
-    super.key,
-    required this.onOpenDetails,
-  });
+  const DiscoverFeedSection({super.key, required this.onOpenDetails});
 
   final ValueChanged<String> onOpenDetails;
 
   @override
-  ConsumerState<DiscoverFeedSection> createState() => _DiscoverFeedSectionState();
+  ConsumerState<DiscoverFeedSection> createState() =>
+      _DiscoverFeedSectionState();
 }
 
 class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
@@ -29,8 +28,9 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
 
   @override
   Widget build(BuildContext context) {
-    final DiscoverFeedController controller =
-        ref.watch(discoverFeedControllerProvider);
+    final DiscoverFeedController controller = ref.watch(
+      discoverFeedControllerProvider,
+    );
     final DiscoverFeedState state = controller.state;
 
     switch (state.status) {
@@ -89,10 +89,7 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
 }
 
 class _DiscoverFeedCard extends StatelessWidget {
-  const _DiscoverFeedCard({
-    required this.item,
-    required this.onTap,
-  });
+  const _DiscoverFeedCard({required this.item, required this.onTap});
 
   final DiscoverItemEntity item;
   final VoidCallback onTap;
@@ -104,8 +101,9 @@ class _DiscoverFeedCard extends StatelessWidget {
     final String hour = localStart.hour.toString().padLeft(2, '0');
     final String minute = localStart.minute.toString().padLeft(2, '0');
     final String dateLabel = '$hour:$minute';
-    final String priceLabel =
-        item.isFree ? 'Free' : '${item.priceAmount.toStringAsFixed(0)} €';
+    final String priceLabel = item.isFree
+        ? 'Free'
+        : '${item.priceAmount.toStringAsFixed(0)} €';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -137,7 +135,7 @@ class _DiscoverFeedCard extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 6,
                       children: <Widget>[
-                        _MetaChip(label: item.category),
+                        _MetaChip(label: rechargeTaxonomyLabel(item.category)),
                         if (item.isFree) const _MetaChip(label: 'Free'),
                       ],
                     ),
@@ -145,15 +143,15 @@ class _DiscoverFeedCard extends StatelessWidget {
                     Text(
                       item.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -168,9 +166,7 @@ class _DiscoverFeedCard extends StatelessWidget {
                           child: Text(
                             '${item.city} · $dateLabel',
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
@@ -189,17 +185,17 @@ class _DiscoverFeedCard extends StatelessWidget {
                   Text(
                     '${item.distanceKm.toStringAsFixed(1)} км',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     priceLabel,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
@@ -212,9 +208,7 @@ class _DiscoverFeedCard extends StatelessWidget {
 }
 
 class _MetaChip extends StatelessWidget {
-  const _MetaChip({
-    required this.label,
-  });
+  const _MetaChip({required this.label});
 
   final String label;
 
@@ -230,9 +224,9 @@ class _MetaChip extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSecondaryContainer,
-              fontWeight: FontWeight.w800,
-            ),
+          color: colorScheme.onSecondaryContainer,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -259,10 +253,7 @@ class _StateCard extends StatelessWidget {
           children: <Widget>[
             Text(message),
             const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: onAction,
-              child: Text(actionLabel),
-            ),
+            OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
           ],
         ),
       ),

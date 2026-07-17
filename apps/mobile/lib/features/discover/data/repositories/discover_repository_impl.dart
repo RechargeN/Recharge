@@ -1,20 +1,21 @@
 import 'dart:math' as math;
 
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../application/queries/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/repositories/discover_repository.dart';
 import '../datasources/discover_remote_datasource.dart';
 
 class DiscoverRepositoryImpl implements DiscoverRepository {
-  DiscoverRepositoryImpl({
-    required DiscoverRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+  DiscoverRepositoryImpl({required DiscoverRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
 
   final DiscoverRemoteDataSource _remoteDataSource;
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    final List<DiscoverItemEntity> source = await _remoteDataSource.getFeedCandidates();
+    final List<DiscoverItemEntity> source = await _remoteDataSource
+        .getFeedCandidates();
     final List<DiscoverItemEntity> globallyFiltered = source
         .where((DiscoverItemEntity item) => _passGlobalFilters(item, query))
         .toList(growable: false);
@@ -39,9 +40,8 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
     final DateTime now = DateTime.now().toUtc();
     final List<DiscoverItemEntity> scored = geoFiltered
         .map(
-          (DiscoverItemEntity item) => item.copyWith(
-            relevanceScore: _score(item, now),
-          ),
+          (DiscoverItemEntity item) =>
+              item.copyWith(relevanceScore: _score(item, now)),
         )
         .toList(growable: false);
 
@@ -68,9 +68,27 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
       if (!haystack.contains(text)) return false;
     }
 
-    if (query.selectedCategoryIds.isNotEmpty &&
-        !query.selectedCategoryIds.contains(item.category)) {
-      return false;
+    if (query.selectedCategoryIds.isNotEmpty) {
+      final String itemCategory = normalizeRechargeContentGroupId(
+        item.category,
+      );
+      final bool categoryMatches = query.selectedCategoryIds.any(
+        (String selectedCategory) =>
+            normalizeRechargeContentGroupId(selectedCategory) == itemCategory,
+      );
+      if (!categoryMatches) return false;
+    }
+
+    if (query.selectedSubcategoryIds.isNotEmpty) {
+      final String itemSubcategory = normalizeRechargeLegacySubcategoryId(
+        item.subcategory,
+      );
+      final bool subcategoryMatches = query.selectedSubcategoryIds.any(
+        (String selectedSubcategory) =>
+            normalizeRechargeLegacySubcategoryId(selectedSubcategory) ==
+            itemSubcategory,
+      );
+      if (!subcategoryMatches) return false;
     }
 
     if (query.freeOnly && !item.isFree) return false;
@@ -94,7 +112,8 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
   double _score(DiscoverItemEntity item, DateTime nowUtc) {
     final double distanceScore = (1 - (item.distanceKm / 30)).clamp(0, 1);
-    final double hoursAhead = item.startsAtUtc.difference(nowUtc).inMinutes / 60;
+    final double hoursAhead =
+        item.startsAtUtc.difference(nowUtc).inMinutes / 60;
     final double freshnessScore = (1 - (hoursAhead.abs() / 48)).clamp(0, 1);
     return distanceScore * 0.65 + freshnessScore * 0.35;
   }
@@ -108,7 +127,8 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
     const double earthRadiusKm = 6371.0;
     final double dLat = _toRadians(lat2 - lat1);
     final double dLng = _toRadians(lng2 - lng1);
-    final double a = (math.sin(dLat / 2) * math.sin(dLat / 2)) +
+    final double a =
+        (math.sin(dLat / 2) * math.sin(dLat / 2)) +
         math.cos(_toRadians(lat1)) *
             math.cos(_toRadians(lat2)) *
             (math.sin(dLng / 2) * math.sin(dLng / 2));

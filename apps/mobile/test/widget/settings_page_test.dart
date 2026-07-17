@@ -24,7 +24,9 @@ import 'package:recharge/features/explore/domain/usecases/save_settings_usecase.
 import 'package:recharge/features/explore/presentation/pages/settings_page.dart';
 
 void main() {
-  testWidgets('renders settings controls for authenticated user', (tester) async {
+  testWidgets('renders settings controls for authenticated user', (
+    tester,
+  ) async {
     final authController = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
       restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -60,16 +62,33 @@ void main() {
           authControllerProvider.overrideWith((ref) => authController),
           exploreControllerProvider.overrideWith((ref) => exploreController),
         ],
-        child: const MaterialApp(
-          home: SettingsPage(),
-        ),
+        child: const MaterialApp(home: SettingsPage()),
       ),
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Profile information'), findsOneWidget);
+    expect(find.text('Display name'), findsOneWidget);
+    expect(find.text('About'), findsOneWidget);
+    expect(find.text('City'), findsOneWidget);
+    expect(find.text('Avatar URL/Path'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Currency'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Notifications'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Notifications'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Support / Help'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Support / Help'), findsOneWidget);
     expect(find.text('Privacy Policy'), findsOneWidget);
     expect(find.text('Terms of Service'), findsOneWidget);
@@ -120,7 +139,8 @@ class _NoopAuthRepository implements AuthRepository {
 
 class _FakeExploreRepository implements ExploreRepository {
   @override
-  Future<ProfileEditableEntity?> loadProfileEditable(String userId) async => null;
+  Future<ProfileEditableEntity?> loadProfileEditable(String userId) async =>
+      null;
 
   @override
   Future<SettingsEntity?> loadSettings(String userId) async => null;
@@ -132,8 +152,5 @@ class _FakeExploreRepository implements ExploreRepository {
   ) async {}
 
   @override
-  Future<void> saveSettings(
-    String userId,
-    SettingsEntity settings,
-  ) async {}
+  Future<void> saveSettings(String userId, SettingsEntity settings) async {}
 }

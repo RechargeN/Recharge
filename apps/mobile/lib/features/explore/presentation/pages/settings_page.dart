@@ -9,11 +9,30 @@ import '../../application/controllers/explore_controller.dart';
 import '../../application/explore_providers.dart';
 import '../../application/state/explore_state.dart';
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _aboutController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _avatarController = TextEditingController();
+
+  @override
+  void dispose() {
+    _displayNameController.dispose();
+    _aboutController.dispose();
+    _cityController.dispose();
+    _avatarController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authController = ref.watch(authControllerProvider);
     final user = authController.state.user;
     final ExploreController exploreController = ref.watch(exploreControllerProvider);
@@ -35,6 +54,7 @@ class SettingsPage extends ConsumerWidget {
             );
       });
     }
+    _syncControllers(state);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Настройки')),
@@ -48,6 +68,21 @@ class SettingsPage extends ConsumerWidget {
         ExploreStatus.ready || ExploreStatus.saving => ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
+              _ProfileEditSection(
+                displayNameController: _displayNameController,
+                aboutController: _aboutController,
+                cityController: _cityController,
+                avatarController: _avatarController,
+                onDisplayNameChanged: exploreController.updateDisplayName,
+                onAboutChanged: exploreController.updateAbout,
+                onCityChanged: exploreController.updateCity,
+                onAvatarChanged: exploreController.updateAvatar,
+                onSave: state.status == ExploreStatus.saving
+                    ? null
+                    : exploreController.saveProfile,
+                saving: state.status == ExploreStatus.saving,
+              ),
+              const Divider(height: 28),
               DropdownButtonFormField<String>(
                 value: state.settings.language,
                 decoration: const InputDecoration(
@@ -132,6 +167,23 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
+  void _syncControllers(ExploreState state) {
+    if (!state.isLoaded) return;
+    _syncController(_displayNameController, state.profile.displayName);
+    _syncController(_aboutController, state.profile.about);
+    _syncController(_cityController, state.profile.city);
+    _syncController(_avatarController, state.profile.avatar);
+  }
+
+  void _syncController(TextEditingController controller, String value) {
+    if (controller.text == value) return;
+    controller.value = controller.value.copyWith(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+      composing: TextRange.empty,
+    );
+  }
+
   void _showLinkDialog(
     BuildContext context, {
     required String title,
@@ -148,6 +200,106 @@ class SettingsPage extends ConsumerWidget {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileEditSection extends StatelessWidget {
+  const _ProfileEditSection({
+    required this.displayNameController,
+    required this.aboutController,
+    required this.cityController,
+    required this.avatarController,
+    required this.onDisplayNameChanged,
+    required this.onAboutChanged,
+    required this.onCityChanged,
+    required this.onAvatarChanged,
+    required this.onSave,
+    required this.saving,
+  });
+
+  final TextEditingController displayNameController;
+  final TextEditingController aboutController;
+  final TextEditingController cityController;
+  final TextEditingController avatarController;
+  final ValueChanged<String> onDisplayNameChanged;
+  final ValueChanged<String> onAboutChanged;
+  final ValueChanged<String> onCityChanged;
+  final ValueChanged<String> onAvatarChanged;
+  final Future<void> Function()? onSave;
+  final bool saving;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Profile information',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+        ),
+        const SizedBox(height: 10),
+        _LabeledField(
+          label: 'Display name',
+          controller: displayNameController,
+          onChanged: onDisplayNameChanged,
+        ),
+        _LabeledField(
+          label: 'About',
+          controller: aboutController,
+          onChanged: onAboutChanged,
+          maxLines: 4,
+        ),
+        _LabeledField(
+          label: 'City',
+          controller: cityController,
+          onChanged: onCityChanged,
+        ),
+        _LabeledField(
+          label: 'Avatar URL/Path',
+          controller: avatarController,
+          onChanged: onAvatarChanged,
+        ),
+        const SizedBox(height: 6),
+        FilledButton.icon(
+          onPressed: onSave,
+          icon: const Icon(Icons.save_outlined),
+          label: Text(saving ? 'Сохраняем...' : 'Сохранить профиль'),
+        ),
+      ],
+    );
+  }
+}
+
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({
+    required this.label,
+    required this.controller,
+    required this.onChanged,
+    this.maxLines = 1,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        minLines: maxLines > 1 ? 2 : null,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
       ),
     );
   }

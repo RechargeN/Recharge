@@ -151,15 +151,9 @@ void main() {
       'steps': 'games_indoor.board_games,music_nightlife.afterwork_drinks',
     };
 
-    final Uri builderUri = Uri.parse(
-      mapScenarioBuilderLocationForSeed(seed)!,
-    );
-    final Uri createUri = Uri.parse(
-      mapScenarioCreateLocationForSeed(seed)!,
-    );
-    final Uri searchUri = Uri.parse(
-      mapScenarioSearchLocationForSeed(seed)!,
-    );
+    final Uri builderUri = Uri.parse(mapScenarioBuilderLocationForSeed(seed)!);
+    final Uri createUri = Uri.parse(mapScenarioCreateLocationForSeed(seed)!);
+    final Uri searchUri = Uri.parse(mapScenarioSearchLocationForSeed(seed)!);
 
     expect(builderUri.path, RouteNames.scenarioBuilder);
     expect(builderUri.queryParameters['mode'], isNull);
@@ -185,7 +179,7 @@ void main() {
 
     expect(searchUri.path, RouteNames.search);
     expect(searchUri.queryParameters['q'], 'social evening near me');
-    expect(searchUri.queryParameters['category'], 'music');
+    expect(searchUri.queryParameters['category'], 'music_nightlife');
     expect(searchUri.queryParameters['free'], '0');
     expect(searchUri.queryParameters['radius'], '5000');
   });

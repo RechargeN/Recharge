@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../../discover/application/controllers/discover_feed_controller.dart';
@@ -38,13 +39,15 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ScenarioBuilderController controller =
-        ref.watch(scenarioBuilderControllerProvider);
+    final ScenarioBuilderController controller = ref.watch(
+      scenarioBuilderControllerProvider,
+    );
     final ScenarioBuilderState state = controller.state;
     final ScenarioDraftEntity draft = state.draft;
     final List<ScenarioStepEntity> suggestedSteps = controller.suggestedSteps;
-    final DiscoverFeedController discoverController =
-        ref.watch(discoverFeedControllerProvider);
+    final DiscoverFeedController discoverController = ref.watch(
+      discoverFeedControllerProvider,
+    );
     final List<SavedSearchEntity> savedSearches =
         discoverController.state.savedSearches;
     final List<SmartSearchHistoryEntity> smartSearchHistory =
@@ -80,24 +83,18 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
             _ScenarioSavedIntentPanel(
               savedSearches: savedSearches,
               smartSearchHistory: smartSearchHistory,
-              onApplySaved: (SavedSearchEntity search) => context.go(
-                _scenarioBuilderRouteForSavedSearch(search),
-              ),
-              onMapSaved: (SavedSearchEntity search) => context.go(
-                _mapRouteForSavedSearch(search),
-              ),
-              onCreateSaved: (SavedSearchEntity search) => context.go(
-                _createRouteForSavedSearch(search),
-              ),
-              onApplySmart: (SmartSearchHistoryEntity item) => context.go(
-                _scenarioBuilderRouteForSmartSearch(item),
-              ),
-              onMapSmart: (SmartSearchHistoryEntity item) => context.go(
-                _mapRouteForSmartSearch(item),
-              ),
-              onCreateSmart: (SmartSearchHistoryEntity item) => context.go(
-                _createRouteForSmartSearch(item),
-              ),
+              onApplySaved: (SavedSearchEntity search) =>
+                  context.go(_scenarioBuilderRouteForSavedSearch(search)),
+              onMapSaved: (SavedSearchEntity search) =>
+                  context.go(_mapRouteForSavedSearch(search)),
+              onCreateSaved: (SavedSearchEntity search) =>
+                  context.go(_createRouteForSavedSearch(search)),
+              onApplySmart: (SmartSearchHistoryEntity item) =>
+                  context.go(_scenarioBuilderRouteForSmartSearch(item)),
+              onMapSmart: (SmartSearchHistoryEntity item) =>
+                  context.go(_mapRouteForSmartSearch(item)),
+              onCreateSmart: (SmartSearchHistoryEntity item) =>
+                  context.go(_createRouteForSmartSearch(item)),
             ),
             const SizedBox(height: 16),
           ],
@@ -125,9 +122,9 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
           const SizedBox(height: 16),
           Text(
             'Route steps',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           if (draft.steps.isEmpty)
@@ -163,11 +160,10 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
   void _scheduleSeed() {
     if (widget.seedParameters.isEmpty) return;
     final List<MapEntry<String, String>> entries =
-        widget.seedParameters.entries.toList()
-          ..sort(
-            (MapEntry<String, String> a, MapEntry<String, String> b) =>
-                a.key.compareTo(b.key),
-          );
+        widget.seedParameters.entries.toList()..sort(
+          (MapEntry<String, String> a, MapEntry<String, String> b) =>
+              a.key.compareTo(b.key),
+        );
     final String nextKey = entries
         .map((MapEntry<String, String> entry) => '${entry.key}:${entry.value}')
         .join('|');
@@ -176,7 +172,9 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(scenarioBuilderControllerProvider).applySeed(
+      ref
+          .read(scenarioBuilderControllerProvider)
+          .applySeed(
             mood: _moodFromParam(widget.seedParameters['mood']),
             maxDurationMinutes: int.tryParse(
               widget.seedParameters['duration'] ?? '',
@@ -186,7 +184,7 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
             sourcePrompt: widget.seedParameters['prompt'],
             stepCategories: _stepsFromParam(widget.seedParameters['steps']),
           );
-      });
+    });
   }
 
   void _scheduleIntentLoad() {
@@ -194,8 +192,9 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
     _intentLoadScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final DiscoverFeedController controller =
-          ref.read(discoverFeedControllerProvider);
+      final DiscoverFeedController controller = ref.read(
+        discoverFeedControllerProvider,
+      );
       controller.ensureSavedSearchesLoaded();
       controller.ensureSmartSearchHistoryLoaded();
     });
@@ -213,26 +212,27 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
     }
 
     final FavoriteItemEntity favorite = _favoriteFromScenario(draft);
-    await ref.read(favoritesControllerProvider).addFavorite(
-          favorite,
-          sourceScreen: 'scenario_builder',
-        );
+    await ref
+        .read(favoritesControllerProvider)
+        .addFavorite(favorite, sourceScreen: 'scenario_builder');
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scenario saved')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Scenario saved')));
   }
 
   Future<void> _copyScenario(ScenarioDraftEntity draft) async {
     await Clipboard.setData(ClipboardData(text: _scenarioSummary(draft)));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scenario copied')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Scenario copied')));
   }
 
   void _applyTemplate(_ScenarioRouteTemplate template) {
-    ref.read(scenarioBuilderControllerProvider).applySeed(
+    ref
+        .read(scenarioBuilderControllerProvider)
+        .applySeed(
           mood: template.mood,
           maxDurationMinutes: template.durationMinutes,
           freeOnly: template.freeOnly,
@@ -240,9 +240,9 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
           sourcePrompt: template.prompt,
           stepCategories: template.stepCategories,
         );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${template.title} applied')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${template.title} applied')));
   }
 }
 
@@ -283,9 +283,9 @@ class _ScenarioHero extends StatelessWidget {
                 Text(
                   'Build a recharge route',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -293,9 +293,9 @@ class _ScenarioHero extends StatelessWidget {
             Text(
               '${_moodLabel(draft.mood)} plan with ${draft.steps.length} stops',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 14),
             Wrap(
@@ -393,9 +393,7 @@ class _ScenarioHero extends StatelessWidget {
 }
 
 class _HeroPill extends StatelessWidget {
-  const _HeroPill({
-    required this.label,
-  });
+  const _HeroPill({required this.label});
 
   final String label;
 
@@ -412,9 +410,9 @@ class _HeroPill extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w700,
-              ),
+            color: colorScheme.onPrimary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -446,9 +444,9 @@ class _ScenarioTemplateRail extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Ready route ideas',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),
@@ -517,8 +515,8 @@ class _ScenarioTemplateCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ],
@@ -603,14 +601,16 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Build from saved intent',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),
         const SizedBox(height: 10),
-        for (final SavedSearchEntity search in savedSearches.take(2)) ...<Widget>[
+        for (final SavedSearchEntity search in savedSearches.take(
+          2,
+        )) ...<Widget>[
           _ScenarioIntentCard(
             icon: Icons.bookmark_border,
             typeLabel: 'Saved conditions',
@@ -626,8 +626,9 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
-        for (final SmartSearchHistoryEntity item
-            in smartSearchHistory.take(2)) ...<Widget>[
+        for (final SmartSearchHistoryEntity item in smartSearchHistory.take(
+          2,
+        )) ...<Widget>[
           _ScenarioIntentCard(
             icon: Icons.mic_none,
             typeLabel: 'Smart search',
@@ -699,8 +700,9 @@ class _ScenarioIntentCard extends StatelessWidget {
               children: <Widget>[
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor:
-                      colorScheme.primaryContainer.withValues(alpha: 0.72),
+                  backgroundColor: colorScheme.primaryContainer.withValues(
+                    alpha: 0.72,
+                  ),
                   child: Icon(icon, size: 20, color: colorScheme.primary),
                 ),
                 const SizedBox(width: 10),
@@ -710,7 +712,8 @@ class _ScenarioIntentCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         typeLabel,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.w800,
                             ),
@@ -721,8 +724,8 @@ class _ScenarioIntentCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       if (subtitle.trim().isNotEmpty) ...<Widget>[
                         const SizedBox(height: 3),
@@ -743,10 +746,8 @@ class _ScenarioIntentCard extends StatelessWidget {
               runSpacing: 8,
               children: (chips ?? _intentChips(query))
                   .map(
-                    (_IntentChipData chip) => _MetaChip(
-                      icon: chip.icon,
-                      label: chip.label,
-                    ),
+                    (_IntentChipData chip) =>
+                        _MetaChip(icon: chip.icon, label: chip.label),
                   )
                   .toList(growable: false),
             ),
@@ -801,9 +802,9 @@ class _BuilderControls extends StatelessWidget {
       children: <Widget>[
         Text(
           'Conditions',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         SegmentedButton<ScenarioMood>(
@@ -853,10 +854,7 @@ class _BuilderControls extends StatelessWidget {
 }
 
 class _DurationPicker extends StatelessWidget {
-  const _DurationPicker({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _DurationPicker({required this.selected, required this.onChanged});
 
   final int selected;
   final ValueChanged<int> onChanged;
@@ -916,26 +914,26 @@ class _RouteFitPanel extends StatelessWidget {
                   child: Text(
                     'Route fit',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 Text(
                   '${routeFit.score}%',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               routeFit.label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
             Text(
@@ -950,7 +948,8 @@ class _RouteFitPanel extends StatelessWidget {
               children: <Widget>[
                 _MetaChip(
                   icon: Icons.schedule,
-                  label: '${draft.totalDurationMinutes}/'
+                  label:
+                      '${draft.totalDurationMinutes}/'
                       '${draft.maxDurationMinutes} min',
                 ),
                 _MetaChip(
@@ -962,8 +961,8 @@ class _RouteFitPanel extends StatelessWidget {
                   label: draft.freeOnly
                       ? 'Free only'
                       : draft.totalPriceAmount == 0
-                          ? 'Free'
-                          : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+                      ? 'Free'
+                      : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
                 ),
               ],
             ),
@@ -1052,10 +1051,7 @@ class _ScenarioStepCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            CircleAvatar(
-              radius: 18,
-              child: Text('${index + 1}'),
-            ),
+            CircleAvatar(radius: 18, child: Text('${index + 1}')),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -1064,8 +1060,8 @@ class _ScenarioStepCard extends StatelessWidget {
                   Text(
                     step.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(step.subtitle),
@@ -1127,10 +1123,7 @@ class _ScenarioStepCard extends StatelessWidget {
 }
 
 class _SuggestedStopsSection extends StatelessWidget {
-  const _SuggestedStopsSection({
-    required this.steps,
-    required this.onAdd,
-  });
+  const _SuggestedStopsSection({required this.steps, required this.onAdd});
 
   final List<ScenarioStepEntity> steps;
   final ValueChanged<ScenarioStepEntity> onAdd;
@@ -1142,18 +1135,15 @@ class _SuggestedStopsSection extends StatelessWidget {
       children: <Widget>[
         Text(
           'Suggested stops',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         ...steps.map(
           (ScenarioStepEntity step) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: _SuggestedStopCard(
-              step: step,
-              onAdd: () => onAdd(step),
-            ),
+            child: _SuggestedStopCard(step: step, onAdd: () => onAdd(step)),
           ),
         ),
       ],
@@ -1162,10 +1152,7 @@ class _SuggestedStopsSection extends StatelessWidget {
 }
 
 class _SuggestedStopCard extends StatelessWidget {
-  const _SuggestedStopCard({
-    required this.step,
-    required this.onAdd,
-  });
+  const _SuggestedStopCard({required this.step, required this.onAdd});
 
   final ScenarioStepEntity step;
   final VoidCallback onAdd;
@@ -1192,8 +1179,8 @@ class _SuggestedStopCard extends StatelessWidget {
                   Text(
                     step.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -1219,10 +1206,7 @@ class _SuggestedStopCard extends StatelessWidget {
 }
 
 class _MetaChip extends StatelessWidget {
-  const _MetaChip({
-    required this.icon,
-    required this.label,
-  });
+  const _MetaChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -1244,9 +1228,9 @@ class _MetaChip extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -1256,9 +1240,7 @@ class _MetaChip extends StatelessWidget {
 }
 
 class _EmptyScenario extends StatelessWidget {
-  const _EmptyScenario({
-    required this.onReset,
-  });
+  const _EmptyScenario({required this.onReset});
 
   final VoidCallback onReset;
 
@@ -1284,62 +1266,60 @@ class _EmptyScenario extends StatelessWidget {
 
 const List<_ScenarioRouteTemplate> _scenarioTemplates =
     <_ScenarioRouteTemplate>[
-  _ScenarioRouteTemplate(
-    title: 'Coffee reset',
-    subtitle: 'Start gently, then take a low-pressure city walk.',
-    icon: Icons.local_cafe_outlined,
-    mood: ScenarioMood.calm,
-    durationMinutes: 90,
-    freeOnly: false,
-    walkingOnly: true,
-    prompt: 'coffee reset walk',
-    stepCategories: <String>[
-      'food_drinks.coffee',
-      'wellness_recharge.calm_walk',
-    ],
-  ),
-  _ScenarioRouteTemplate(
-    title: 'Free city reset',
-    subtitle: 'A simple free route for a calm recharge window.',
-    icon: Icons.self_improvement,
-    mood: ScenarioMood.calm,
-    durationMinutes: 90,
-    freeOnly: true,
-    walkingOnly: true,
-    prompt: 'free calm city walk',
-    stepCategories: <String>[
-      'wellness_recharge.calm_walk',
-    ],
-  ),
-  _ScenarioRouteTemplate(
-    title: 'Social evening',
-    subtitle: 'Meet people first, then keep the evening moving nearby.',
-    icon: Icons.groups_outlined,
-    mood: ScenarioMood.social,
-    durationMinutes: 150,
-    freeOnly: false,
-    walkingOnly: true,
-    prompt: 'social evening near me',
-    stepCategories: <String>[
-      'games_indoor.board_games',
-      'music_nightlife.afterwork_drinks',
-    ],
-  ),
-  _ScenarioRouteTemplate(
-    title: 'Active boost',
-    subtitle: 'Move first, cool down outside, then keep energy steady.',
-    icon: Icons.directions_run,
-    mood: ScenarioMood.active,
-    durationMinutes: 120,
-    freeOnly: false,
-    walkingOnly: true,
-    prompt: 'active tennis and walk',
-    stepCategories: <String>[
-      'sport.tennis',
-      'outdoor_nature_walking.city_walk',
-    ],
-  ),
-];
+      _ScenarioRouteTemplate(
+        title: 'Coffee reset',
+        subtitle: 'Start gently, then take a low-pressure city walk.',
+        icon: Icons.local_cafe_outlined,
+        mood: ScenarioMood.calm,
+        durationMinutes: 90,
+        freeOnly: false,
+        walkingOnly: true,
+        prompt: 'coffee reset walk',
+        stepCategories: <String>[
+          'food_drinks.coffee',
+          'wellness_recharge.calm_walk',
+        ],
+      ),
+      _ScenarioRouteTemplate(
+        title: 'Free city reset',
+        subtitle: 'A simple free route for a calm recharge window.',
+        icon: Icons.self_improvement,
+        mood: ScenarioMood.calm,
+        durationMinutes: 90,
+        freeOnly: true,
+        walkingOnly: true,
+        prompt: 'free calm city walk',
+        stepCategories: <String>['wellness_recharge.calm_walk'],
+      ),
+      _ScenarioRouteTemplate(
+        title: 'Social evening',
+        subtitle: 'Meet people first, then keep the evening moving nearby.',
+        icon: Icons.groups_outlined,
+        mood: ScenarioMood.social,
+        durationMinutes: 150,
+        freeOnly: false,
+        walkingOnly: true,
+        prompt: 'social evening near me',
+        stepCategories: <String>[
+          'games_indoor.board_games',
+          'music_nightlife.afterwork_drinks',
+        ],
+      ),
+      _ScenarioRouteTemplate(
+        title: 'Active boost',
+        subtitle: 'Move first, cool down outside, then keep energy steady.',
+        icon: Icons.directions_run,
+        mood: ScenarioMood.active,
+        durationMinutes: 120,
+        freeOnly: false,
+        walkingOnly: true,
+        prompt: 'active tennis and walk',
+        stepCategories: <String>[
+          'sport.tennis',
+          'outdoor_nature_walking.city_walk',
+        ],
+      ),
+    ];
 
 class _ScenarioRouteTemplate {
   const _ScenarioRouteTemplate({
@@ -1493,7 +1473,8 @@ String _createRouteForScenario(ScenarioDraftEntity draft) {
       'source': 'scenario',
       'type': 'event',
       'title': '${_moodLabel(draft.mood)} recharge route',
-      'subtitle': '${draft.steps.length} stops · '
+      'subtitle':
+          '${draft.steps.length} stops · '
           '${draft.totalDurationMinutes} min · '
           '${draft.totalDistanceKm.toStringAsFixed(1)} km',
       'q': prompt,
@@ -1514,15 +1495,13 @@ String _mapRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     return Uri(
       path: RouteNames.discoverMap,
-      queryParameters: _smartRouteParameters(
-        parseResult,
-        includeMode: true,
-      ),
+      queryParameters: _smartRouteParameters(parseResult, includeMode: true),
     ).toString();
   }
   return _discoverRouteForQuery(RouteNames.discoverMap, item.query);
@@ -1538,8 +1517,9 @@ String _createRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     final SmartRouteIntent routeIntent = parseResult.routeIntent!;
     return Uri(
@@ -1549,7 +1529,8 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         'source': 'scenario',
         'type': 'event',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
-        'subtitle': '${routeIntent.stepCategories.length} stops · '
+        'subtitle':
+            '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
         'category': 'scenario',
@@ -1572,15 +1553,13 @@ String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     return Uri(
       path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(
-        parseResult,
-        includeMode: false,
-      ),
+      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
     ).toString();
   }
   final String prompt = item.prompt.trim().isEmpty
@@ -1635,10 +1614,7 @@ String _createRouteForQuery(
     'title': title,
     if (subtitle.trim().isNotEmpty) 'subtitle': subtitle.trim(),
   };
-  return Uri(
-    path: RouteNames.create,
-    queryParameters: params,
-  ).toString();
+  return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
 String _scenarioBuilderRouteForQuery(
@@ -1674,17 +1650,19 @@ Map<String, String> _queryParametersForQuery(DiscoverQuery query) {
 
 String _scenarioMoodForQuery(DiscoverQuery query) {
   final String queryText = query.queryText.toLowerCase();
+  final Set<String> normalizedCategories = query.selectedCategoryIds
+      .map(normalizeRechargeContentGroupId)
+      .toSet();
   if (queryText.contains('run') ||
       queryText.contains('sport') ||
       queryText.contains('tennis') ||
-      query.selectedCategoryIds.contains('outdoor')) {
+      normalizedCategories.contains('sport') ||
+      normalizedCategories.contains('outdoor_nature_walking')) {
     return 'active';
   }
-  if (query.selectedCategoryIds.any(
-    (String category) {
-      return category == 'art' || category == 'music' || category == 'family';
-    },
-  )) {
+  if (normalizedCategories.contains('art_culture_museums') ||
+      normalizedCategories.contains('music_nightlife') ||
+      normalizedCategories.contains('family_kids')) {
     return 'social';
   }
   return 'calm';
@@ -1695,8 +1673,7 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null)
-      'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -1722,8 +1699,9 @@ String _capitalized(String value) {
 }
 
 String _smartSearchIntentSubtitle(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult == null) return _promptForQuery(item.query);
   return parseResult.routeIntent!.stepCategories
       .map(createTaxonomyLabelForPath)
@@ -1731,16 +1709,14 @@ String _smartSearchIntentSubtitle(SmartSearchHistoryEntity item) {
 }
 
 List<_IntentChipData> _smartSearchIntentChips(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   final List<_IntentChipData> queryChips = _intentChips(item.query);
   if (parseResult == null) return queryChips;
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <_IntentChipData>[
-    const _IntentChipData(
-      icon: Icons.route_outlined,
-      label: 'Smart route',
-    ),
+    const _IntentChipData(icon: Icons.route_outlined, label: 'Smart route'),
     _IntentChipData(
       icon: Icons.timer_outlined,
       label: '${routeIntent.durationMinutes} min',
@@ -1766,8 +1742,8 @@ List<_IntentChipData> _intentChips(DiscoverQuery query) {
       label: query.freeOnly
           ? 'Free'
           : query.budgetMax == null
-              ? 'Any price'
-              : 'Under ${query.budgetMax!.toStringAsFixed(0)} EUR',
+          ? 'Any price'
+          : 'Under ${query.budgetMax!.toStringAsFixed(0)} EUR',
     ),
     _IntentChipData(
       icon: Icons.radar,
@@ -1779,10 +1755,7 @@ List<_IntentChipData> _intentChips(DiscoverQuery query) {
 }
 
 class _IntentChipData {
-  const _IntentChipData({
-    required this.icon,
-    required this.label,
-  });
+  const _IntentChipData({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -1797,15 +1770,12 @@ String _scenarioSummary(ScenarioDraftEntity draft) {
         ? 'Free'
         : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
     '',
-    ...List<String>.generate(
-      draft.steps.length,
-      (int index) {
-        final ScenarioStepEntity step = draft.steps[index];
-        return '${index + 1}. ${step.title} - '
-            '${createTaxonomyLabelForPath(step.category)}, '
-            '${step.durationMinutes} min';
-      },
-    ),
+    ...List<String>.generate(draft.steps.length, (int index) {
+      final ScenarioStepEntity step = draft.steps[index];
+      return '${index + 1}. ${step.title} - '
+          '${createTaxonomyLabelForPath(step.category)}, '
+          '${step.durationMinutes} min';
+    }),
   ];
   return lines.join('\n');
 }

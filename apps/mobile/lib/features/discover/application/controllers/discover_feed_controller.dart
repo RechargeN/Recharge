@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/saved_search_entity.dart';
@@ -15,9 +16,9 @@ class DiscoverFeedController extends ChangeNotifier {
     required GetDiscoverFeedUseCase getDiscoverFeedUseCase,
     required DiscoverPreferencesRepository discoverPreferencesRepository,
     required AnalyticsService analyticsService,
-  })  : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
-        _discoverPreferencesRepository = discoverPreferencesRepository,
-        _analyticsService = analyticsService;
+  }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
+       _discoverPreferencesRepository = discoverPreferencesRepository,
+       _analyticsService = analyticsService;
 
   final GetDiscoverFeedUseCase _getDiscoverFeedUseCase;
   final DiscoverPreferencesRepository _discoverPreferencesRepository;
@@ -49,15 +50,13 @@ class DiscoverFeedController extends ChangeNotifier {
     );
 
     _setState(
-      _state.copyWith(
-        status: DiscoverFeedStatus.loading,
-        clearMessage: true,
-      ),
+      _state.copyWith(status: DiscoverFeedStatus.loading, clearMessage: true),
     );
 
     try {
-      final List<DiscoverItemEntity> items =
-          await _getDiscoverFeedUseCase(_state.appliedQuery);
+      final List<DiscoverItemEntity> items = await _getDiscoverFeedUseCase(
+        _state.appliedQuery,
+      );
 
       if (items.isEmpty) {
         _setState(
@@ -72,16 +71,14 @@ class DiscoverFeedController extends ChangeNotifier {
         );
         _analyticsService.track(
           'discover_feed_loaded',
-          params: const <String, Object?>{
-            'result': 'empty',
-            'item_count': 0,
-          },
+          params: const <String, Object?>{'result': 'empty', 'item_count': 0},
         );
         return;
       }
 
-      final DiscoverFeedStatus nextStatus =
-          items.length > 40 ? DiscoverFeedStatus.denseCluster : DiscoverFeedStatus.ready;
+      final DiscoverFeedStatus nextStatus = items.length > 40
+          ? DiscoverFeedStatus.denseCluster
+          : DiscoverFeedStatus.ready;
 
       _setState(
         _state.copyWith(
@@ -148,8 +145,9 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> setCategoryFilter(String? categoryId) async {
-    final List<String> categories =
-        categoryId == null ? <String>[] : <String>[categoryId];
+    final List<String> categories = categoryId == null
+        ? <String>[]
+        : <String>[categoryId];
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         selectedCategoryIds: categories,
@@ -252,8 +250,10 @@ class DiscoverFeedController extends ChangeNotifier {
     required String prompt,
     required DiscoverQuery query,
   }) async {
-    final SmartSearchHistoryEntity? item =
-        _smartSearchHistoryForQuery(prompt, query);
+    final SmartSearchHistoryEntity? item = _smartSearchHistoryForQuery(
+      prompt,
+      query,
+    );
     if (item == null) return;
     await _discoverPreferencesRepository.saveSmartSearchPrompt(item);
     final List<SmartSearchHistoryEntity> next = <SmartSearchHistoryEntity>[
@@ -339,10 +339,7 @@ class DiscoverFeedController extends ChangeNotifier {
     );
   }
 
-  void stageMapCenter({
-    required double lat,
-    required double lng,
-  }) {
+  void stageMapCenter({required double lat, required double lng}) {
     _setState(
       _state.copyWith(
         status: DiscoverFeedStatus.selectingArea,
@@ -357,10 +354,7 @@ class DiscoverFeedController extends ChangeNotifier {
     );
   }
 
-  void stageRadius({
-    required double radiusMeters,
-    required bool unlimited,
-  }) {
+  void stageRadius({required double radiusMeters, required bool unlimited}) {
     _setState(
       _state.copyWith(
         status: DiscoverFeedStatus.selectingArea,
@@ -399,10 +393,7 @@ class DiscoverFeedController extends ChangeNotifier {
 
   void recenterToAppliedArea() {
     _setState(
-      _state.copyWith(
-        draftQuery: _state.appliedQuery,
-        searchAreaDirty: false,
-      ),
+      _state.copyWith(draftQuery: _state.appliedQuery, searchAreaDirty: false),
     );
   }
 
@@ -434,8 +425,8 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> _restoreLastQuery() async {
-    final DiscoverQuery? lastQuery =
-        await _discoverPreferencesRepository.loadLastQuery();
+    final DiscoverQuery? lastQuery = await _discoverPreferencesRepository
+        .loadLastQuery();
     if (lastQuery == null) return;
     _setState(
       _state.copyWith(
@@ -559,8 +550,7 @@ String _savedSearchSubtitleFor(DiscoverQuery query) {
     if (query.selectedCategoryIds.isNotEmpty)
       _categoryLabel(query.selectedCategoryIds.first),
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null)
-      'up to ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null) 'up to ${query.budgetMax!.toStringAsFixed(0)}',
     if (query.dateFrom != null || query.dateTo != null) 'date set',
     query.unlimitedRadius
         ? 'any area'
@@ -575,18 +565,5 @@ String _sentenceCase(String value) {
 }
 
 String _categoryLabel(String categoryId) {
-  switch (categoryId) {
-    case 'outdoor':
-      return 'Outdoor';
-    case 'wellness':
-      return 'Wellness';
-    case 'art':
-      return 'Art';
-    case 'music':
-      return 'Music';
-    case 'family':
-      return 'Family';
-    default:
-      return categoryId;
-  }
+  return rechargeTaxonomyLabel(categoryId);
 }

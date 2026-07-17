@@ -145,13 +145,24 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
-      find.text('Sport'),
+      find.text('Scenario taxonomy'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Sport'));
+    final Finder sportGroup = find.text('Sport');
+    await tester.scrollUntilVisible(
+      sportGroup,
+      300,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey<String>('create-taxonomy-group-rail')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.ensureVisible(sportGroup);
     await tester.pumpAndSettle();
-    expect(find.text('sport.tennis · play'), findsOneWidget);
+    await tester.tap(sportGroup);
+    await tester.pumpAndSettle();
+    expect(find.text('sport.tennis · practice'), findsOneWidget);
 
     await tester.tap(find.text('Yoga'));
     await tester.pumpAndSettle();
@@ -222,7 +233,7 @@ void main() {
     await tester.tap(find.text('Calm walk'));
     await tester.pumpAndSettle();
 
-    expect(createController.state.draft.objectType, CreateObjectType.event);
+    expect(createController.state.draft.objectType, CreateObjectType.activity);
     expect(createController.state.draft.mainCategory, 'wellness_recharge');
     expect(createController.state.draft.subcategory, 'calm_walk');
     expect(createController.state.draft.title, 'Calm walk in Rezekne');
@@ -233,6 +244,75 @@ void main() {
     expect(find.text('Calm walk in Rezekne'), findsWidgets);
     expect(find.text('Publishable'), findsOneWidget);
     expect(find.text('6/6 ready'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('create hub switches all taxonomy create block cards', (
+    tester,
+  ) async {
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'seed',
+    );
+
+    final createRepository = _FakeCreateRepository();
+    final createController = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await createController.ensureLoaded(
+      userId: 'u',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          createControllerProvider.overrideWith((ref) => createController),
+        ],
+        child: const MaterialApp(home: CreatePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    const Map<String, CreateObjectType> expectedTypes =
+        <String, CreateObjectType>{
+          'Event': CreateObjectType.event,
+          'Recharge activity': CreateObjectType.activity,
+          'Route': CreateObjectType.route,
+          'Place': CreateObjectType.place,
+          'Bookable session': CreateObjectType.session,
+          'Quick plan': CreateObjectType.quickPlan,
+          'Find people': CreateObjectType.findPeople,
+          'Class / workshop': CreateObjectType.classWorkshop,
+          'Rental / equipment': CreateObjectType.rental,
+          'Collection / guide': CreateObjectType.collection,
+        };
+
+    for (final MapEntry<String, CreateObjectType> entry
+        in expectedTypes.entries) {
+      await tester.scrollPageUntilVisible(
+        find.text(entry.key).first,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text(entry.key).first);
+      await tester.pumpAndSettle();
+
+      expect(createController.state.draft.objectType, entry.value);
+    }
   });
 
   fullPageTestWidgets('seed parameters prefill a publishable create draft', (
@@ -369,12 +449,12 @@ void main() {
     await tester.pumpAndSettle();
 
     final CreateDraftEntity draft = createController.state.draft;
-    expect(draft.objectType, CreateObjectType.event);
+    expect(draft.objectType, CreateObjectType.route);
     expect(draft.title, 'Calm recharge route');
     expect(draft.mainCategory, 'travel_tours');
     expect(draft.subcategory, 'walking_tour');
     expect(draft.isFree, isTrue);
-    expect(draft.startDateTimeUtc, isNotNull);
+    expect(draft.startDateTimeUtc, isNull);
     expect(draft.shortDescription, '2 stops · 90 min · 1.4 km');
     expect(draft.fullDescription, contains('Route steps:'));
     expect(find.text('Seeded from scenario route'), findsOneWidget);
@@ -761,7 +841,7 @@ void main() {
       expect(find.text('Sent to moderation'), findsOneWidget);
       expect(find.text('Museum evening route'), findsWidgets);
       expect(find.text('pendingReview'), findsWidgets);
-      expect(find.text('Culture'), findsOneWidget);
+      expect(find.text('Art, culture & museums'), findsOneWidget);
       expect(find.text('Museum'), findsOneWidget);
       expect(find.text('12 EUR'), findsOneWidget);
 
@@ -770,7 +850,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art'), findsOneWidget);
+      expect(find.text('art_culture_museums'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -780,7 +860,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Map page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art'), findsOneWidget);
+      expect(find.text('art_culture_museums'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();

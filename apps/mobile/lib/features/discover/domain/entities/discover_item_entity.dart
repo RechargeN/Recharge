@@ -5,6 +5,7 @@ class DiscoverItemEntity {
     required this.subtitle,
     required this.city,
     required this.category,
+    this.subcategory = '',
     required this.startsAtUtc,
     required this.latitude,
     required this.longitude,
@@ -29,6 +30,7 @@ class DiscoverItemEntity {
   final String subtitle;
   final String city;
   final String category;
+  final String subcategory;
   final DateTime startsAtUtc;
   final double latitude;
   final double longitude;
@@ -67,6 +69,7 @@ class DiscoverItemEntity {
       subtitle: subtitle,
       city: city,
       category: category,
+      subcategory: subcategory,
       startsAtUtc: startsAtUtc,
       latitude: latitude,
       longitude: longitude,

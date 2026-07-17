@@ -1,185 +1,258 @@
+import '../../../core/config/recharge_taxonomy.dart';
 import '../domain/entities/create_draft_entity.dart';
 
-class CreateTaxonomySubcategory {
-  const CreateTaxonomySubcategory({
-    required this.id,
+class CreateBlockConfig {
+  const CreateBlockConfig({
+    required this.objectType,
     required this.title,
+    required this.description,
+    required this.defaultCategoryId,
+    required this.defaultSubcategoryId,
+    required this.requiresStartDateTime,
+    required this.locationLabel,
+    required this.priceLabel,
   });
 
-  final String id;
+  final CreateObjectType objectType;
   final String title;
+  final String description;
+  final String defaultCategoryId;
+  final String defaultSubcategoryId;
+  final bool requiresStartDateTime;
+  final String locationLabel;
+  final String priceLabel;
+}
+
+class CreateTaxonomySubcategory {
+  const CreateTaxonomySubcategory(this.activityCategory);
+
+  final RechargeActivityCategory activityCategory;
+
+  String get id => activityCategory.slug;
+  String get title => activityCategory.title;
+  String get fullId => activityCategory.legacyId;
+
+  bool allows(CreateObjectType objectType) {
+    return activityCategory.allowsCreateBlock(objectType.taxonomyId);
+  }
+
+  String participationModeFor(CreateObjectType objectType) {
+    return activityCategory.participationModeFor(objectType.taxonomyId);
+  }
 }
 
 class CreateTaxonomyCategory {
   const CreateTaxonomyCategory({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.allowedObjectTypes,
-    required this.defaultParticipationMode,
+    required this.contentGroup,
     required this.subcategories,
   });
 
-  final String id;
-  final String title;
-  final String description;
-  final Set<CreateObjectType> allowedObjectTypes;
-  final String defaultParticipationMode;
+  final RechargeContentGroup contentGroup;
   final List<CreateTaxonomySubcategory> subcategories;
 
+  String get id => contentGroup.id;
+  String get title => contentGroup.title;
+  String get description => contentGroup.description;
+  String get defaultParticipationMode => contentGroup.defaultParticipationMode;
+  Set<CreateObjectType> get allowedObjectTypes => <CreateObjectType>{
+    ...contentGroup.allowedCreateBlockIds.map(createObjectTypeFromId),
+    for (final CreateTaxonomySubcategory subcategory in subcategories)
+      ...subcategory.activityCategory.allowedCreateBlockIds.map(
+        createObjectTypeFromId,
+      ),
+  };
+
   bool allows(CreateObjectType objectType) {
-    return allowedObjectTypes.contains(objectType);
+    return contentGroup.allowsCreateBlock(objectType.taxonomyId) ||
+        subcategories.any(
+          (CreateTaxonomySubcategory subcategory) =>
+              subcategory.allows(objectType),
+        );
   }
 }
 
-const Set<CreateObjectType> _eventAndPlace = <CreateObjectType>{
-  CreateObjectType.event,
-  CreateObjectType.place,
-};
-
-// Mirrors docs/product/RECHARGE_CREATE_TAXONOMY_V1.md.
-const List<CreateTaxonomyCategory> rechargeCreateTaxonomyV1 =
-    <CreateTaxonomyCategory>[
-  CreateTaxonomyCategory(
-    id: 'sport',
-    title: 'Sport',
-    description: 'Matches, training, courts',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'play',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'tennis', title: 'Tennis'),
-      CreateTaxonomySubcategory(id: 'table_tennis', title: 'Table tennis'),
-      CreateTaxonomySubcategory(id: 'yoga', title: 'Yoga'),
-      CreateTaxonomySubcategory(
-        id: 'amateur_tournament',
-        title: 'Amateur tournament',
-      ),
-    ],
+const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
+  CreateBlockConfig(
+    objectType: CreateObjectType.event,
+    title: 'Event',
+    description: 'Public activity with time, place, and attendees',
+    defaultCategoryId: 'wellness_recharge',
+    defaultSubcategoryId: 'calm_walk',
+    requiresStartDateTime: true,
+    locationLabel: 'Venue',
+    priceLabel: 'Ticket or entry price',
   ),
-  CreateTaxonomyCategory(
-    id: 'outdoor_nature_walking',
-    title: 'Outdoor',
-    description: 'Walks, routes, nature',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'explore',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'city_walk', title: 'City walk'),
-      CreateTaxonomySubcategory(id: 'picnic_walk', title: 'Picnic walk'),
-      CreateTaxonomySubcategory(id: 'water_tour', title: 'Water tour'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.activity,
+    title: 'Recharge activity',
+    description: 'Lightweight activity such as a walk or reset',
+    defaultCategoryId: 'wellness_recharge',
+    defaultSubcategoryId: 'recharge_walk',
+    requiresStartDateTime: true,
+    locationLabel: 'Meeting place',
+    priceLabel: 'Expected spend',
   ),
-  CreateTaxonomyCategory(
-    id: 'wellness_recharge',
-    title: 'Recharge',
-    description: 'Calm, reset, low pressure',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'practice',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'calm_walk', title: 'Calm walk'),
-      CreateTaxonomySubcategory(id: 'coffee_walk', title: 'Coffee walk'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.route,
+    title: 'Route',
+    description: 'Scenario made of one or more points',
+    defaultCategoryId: 'travel_tours',
+    defaultSubcategoryId: 'walking_tour',
+    requiresStartDateTime: false,
+    locationLabel: 'Start point',
+    priceLabel: 'Route budget',
   ),
-  CreateTaxonomyCategory(
-    id: 'food_drinks',
-    title: 'Food & drinks',
-    description: 'Cafes, tastings, brunch',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'eat_drink',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'coffee', title: 'Coffee'),
-      CreateTaxonomySubcategory(id: 'brunch', title: 'Brunch'),
-      CreateTaxonomySubcategory(id: 'picnic', title: 'Picnic'),
-      CreateTaxonomySubcategory(id: 'food_tour', title: 'Food tour'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.place,
+    title: 'Place',
+    description: 'Public spot or map point',
+    defaultCategoryId: 'wellness_recharge',
+    defaultSubcategoryId: 'calm_walk',
+    requiresStartDateTime: false,
+    locationLabel: 'Place name',
+    priceLabel: 'Typical spend',
   ),
-  CreateTaxonomyCategory(
-    id: 'art_culture_museums',
-    title: 'Culture',
-    description: 'Museums, galleries, visits',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'visit',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'museum', title: 'Museum'),
-      CreateTaxonomySubcategory(id: 'museum_night', title: 'Museum night'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.session,
+    title: 'Bookable session',
+    description: 'Time-based service, class, table, court, or session',
+    defaultCategoryId: 'sport',
+    defaultSubcategoryId: 'tennis',
+    requiresStartDateTime: true,
+    locationLabel: 'Bookable venue',
+    priceLabel: 'Booking price',
   ),
-  CreateTaxonomyCategory(
-    id: 'games_indoor',
-    title: 'Indoor games',
-    description: 'Board, table, social games',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'play',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'board_games', title: 'Board games'),
-      CreateTaxonomySubcategory(id: 'mini_golf', title: 'Mini golf'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.quickPlan,
+    title: 'Quick plan',
+    description: 'Lightweight plan for now, today, or tonight',
+    defaultCategoryId: 'food_drinks',
+    defaultSubcategoryId: 'coffee',
+    requiresStartDateTime: true,
+    locationLabel: 'Meeting place',
+    priceLabel: 'Expected spend',
   ),
-  CreateTaxonomyCategory(
-    id: 'travel_tours',
-    title: 'Tours',
-    description: 'Guided and local experiences',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'travel',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'city_tour', title: 'City tour'),
-      CreateTaxonomySubcategory(id: 'walking_tour', title: 'Walking tour'),
-      CreateTaxonomySubcategory(id: 'hidden_gems_tour', title: 'Hidden gems'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.findPeople,
+    title: 'Find people',
+    description: 'Find company for a specific activity',
+    defaultCategoryId: 'sport',
+    defaultSubcategoryId: 'tennis',
+    requiresStartDateTime: true,
+    locationLabel: 'Meeting place',
+    priceLabel: 'Expected spend',
   ),
-  CreateTaxonomyCategory(
-    id: 'family_kids',
-    title: 'Family',
-    description: 'Kids and family activities',
-    allowedObjectTypes: _eventAndPlace,
-    defaultParticipationMode: 'attend',
-    subcategories: <CreateTaxonomySubcategory>[
-      CreateTaxonomySubcategory(id: 'family_activity', title: 'Family activity'),
-      CreateTaxonomySubcategory(id: 'kids_workshop', title: 'Kids workshop'),
-      CreateTaxonomySubcategory(id: 'family_picnic', title: 'Family picnic'),
-    ],
+  CreateBlockConfig(
+    objectType: CreateObjectType.classWorkshop,
+    title: 'Class / workshop',
+    description: 'A guided class, workshop, or hands-on experience',
+    defaultCategoryId: 'workshops_masterclasses',
+    defaultSubcategoryId: 'workshop',
+    requiresStartDateTime: true,
+    locationLabel: 'Class venue',
+    priceLabel: 'Participation price',
+  ),
+  CreateBlockConfig(
+    objectType: CreateObjectType.rental,
+    title: 'Rental / equipment',
+    description: 'Equipment or transport available for rent',
+    defaultCategoryId: 'sport',
+    defaultSubcategoryId: 'cycling',
+    requiresStartDateTime: false,
+    locationLabel: 'Pickup place',
+    priceLabel: 'Rental price',
+  ),
+  CreateBlockConfig(
+    objectType: CreateObjectType.collection,
+    title: 'Collection / guide',
+    description: 'A curated collection of places and ideas',
+    defaultCategoryId: 'travel_tours',
+    defaultSubcategoryId: 'hidden_gems_tour',
+    requiresStartDateTime: false,
+    locationLabel: 'Area',
+    priceLabel: 'Collection budget',
   ),
 ];
+
+CreateBlockConfig createBlockConfigFor(CreateObjectType objectType) {
+  return rechargeCreateBlockConfigs.firstWhere(
+    (CreateBlockConfig config) => config.objectType == objectType,
+    orElse: () => rechargeCreateBlockConfigs.first,
+  );
+}
+
+// Materialized from the accepted docs/product/CATEGORY_SYSTEM.md registry.
+final List<CreateTaxonomyCategory> rechargeCreateTaxonomy =
+    rechargeContentGroups
+        .map((RechargeContentGroup group) {
+          final List<CreateTaxonomySubcategory> subcategories =
+              rechargeActivityCategories
+                  .where(
+                    (RechargeActivityCategory category) =>
+                        category.contentGroupId == group.id,
+                  )
+                  .map(CreateTaxonomySubcategory.new)
+                  .toList(growable: false);
+          return CreateTaxonomyCategory(
+            contentGroup: group,
+            subcategories: subcategories,
+          );
+        })
+        .toList(growable: false);
 
 List<CreateTaxonomyCategory> createTaxonomyForObjectType(
   CreateObjectType objectType,
 ) {
-  return rechargeCreateTaxonomyV1
+  return rechargeCreateTaxonomy
       .where((CreateTaxonomyCategory category) => category.allows(objectType))
+      .map(
+        (CreateTaxonomyCategory category) => CreateTaxonomyCategory(
+          contentGroup: category.contentGroup,
+          subcategories: category.subcategories
+              .where(
+                (CreateTaxonomySubcategory subcategory) =>
+                    subcategory.allows(objectType),
+              )
+              .toList(growable: false),
+        ),
+      )
       .toList(growable: false);
 }
 
 CreateTaxonomyCategory? createTaxonomyCategoryById(String id) {
-  for (final CreateTaxonomyCategory category in rechargeCreateTaxonomyV1) {
-    if (category.id == id) return category;
+  final String normalized = normalizeRechargeContentGroupId(id);
+  for (final CreateTaxonomyCategory category in rechargeCreateTaxonomy) {
+    if (category.id == normalized) return category;
   }
   return null;
 }
 
-String createTaxonomyLabelForPath(String path) {
-  final String trimmed = path.trim();
-  if (trimmed.isEmpty) return trimmed;
+const Map<String, String> _preferredSubcategoryByGroup = <String, String>{
+  'art_culture_museums': 'museum',
+  'community_charity': 'neighborhood_event',
+  'family_kids': 'family_activity',
+  'food_drinks': 'coffee',
+  'games_indoor': 'board_games',
+  'music_nightlife': 'live_music',
+  'outdoor_nature_walking': 'city_walk',
+  'sport': 'tennis',
+  'travel_tours': 'walking_tour',
+  'wellness_recharge': 'calm_walk',
+};
 
-  final List<String> parts = trimmed.split('.');
-  if (parts.length >= 2) {
-    final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
-      parts.first,
-    );
-    if (category != null) {
-      final String subcategoryId = parts.sublist(1).join('.');
-      for (final CreateTaxonomySubcategory subcategory
-          in category.subcategories) {
-        if (subcategory.id == subcategoryId) return subcategory.title;
-      }
+CreateTaxonomySubcategory? createDefaultSubcategoryFor(
+  CreateTaxonomyCategory category,
+) {
+  final String? preferredId = _preferredSubcategoryByGroup[category.id];
+  if (preferredId != null) {
+    for (final CreateTaxonomySubcategory subcategory
+        in category.subcategories) {
+      if (subcategory.id == preferredId) return subcategory;
     }
-    return _humanizeTaxonomyToken(parts.last);
   }
-
-  final CreateTaxonomyCategory? category = createTaxonomyCategoryById(trimmed);
-  return category?.title ?? _humanizeTaxonomyToken(trimmed);
+  return category.subcategories.isEmpty ? null : category.subcategories.first;
 }
 
-String _humanizeTaxonomyToken(String value) {
-  final String normalized = value.replaceAll('_', ' ').trim();
-  if (normalized.isEmpty) return normalized;
-  return normalized[0].toUpperCase() + normalized.substring(1);
+String createTaxonomyLabelForPath(String path) {
+  return rechargeTaxonomyLabel(path);
 }

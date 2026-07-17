@@ -15,6 +15,7 @@ import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
+import '../../features/discover/presentation/pages/smart_search_page.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
@@ -23,7 +24,7 @@ import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authController = ref.watch(authControllerProvider);
+  final authController = ref.read(authControllerProvider);
   final AnalyticsService analyticsService = sl<AnalyticsService>();
 
   return GoRouter(
@@ -39,10 +40,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) => RechargeAppShell(
-          currentLocation: state.uri.path,
-          child: child,
-        ),
+        builder: (context, state, child) =>
+            RechargeAppShell(currentLocation: state.uri.path, child: child),
         routes: <RouteBase>[
           GoRoute(
             name: 'discover',
@@ -55,30 +54,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             name: 'search',
             path: RouteNames.search,
-            builder: (context, state) => DiscoverResultsPage(
-              seedParameters: state.uri.queryParameters,
-            ),
+            builder: (context, state) =>
+                DiscoverResultsPage(seedParameters: state.uri.queryParameters),
+          ),
+          GoRoute(
+            name: 'smart_search',
+            path: RouteNames.smartSearch,
+            builder: (context, state) =>
+                SmartSearchPage(seedParameters: state.uri.queryParameters),
           ),
           GoRoute(
             name: 'discover_map',
             path: RouteNames.discoverMap,
-            builder: (context, state) => DiscoverMapPage(
-              seedParameters: state.uri.queryParameters,
-            ),
+            builder: (context, state) =>
+                DiscoverMapPage(seedParameters: state.uri.queryParameters),
           ),
           GoRoute(
             name: 'discover_results',
             path: RouteNames.discoverResults,
-            builder: (context, state) => DiscoverResultsPage(
-              seedParameters: state.uri.queryParameters,
-            ),
+            builder: (context, state) =>
+                DiscoverResultsPage(seedParameters: state.uri.queryParameters),
           ),
           GoRoute(
             name: 'scenario_builder',
             path: RouteNames.scenarioBuilder,
-            builder: (context, state) => ScenarioBuilderPage(
-              seedParameters: state.uri.queryParameters,
-            ),
+            builder: (context, state) =>
+                ScenarioBuilderPage(seedParameters: state.uri.queryParameters),
           ),
           GoRoute(
             name: 'favorites',
@@ -94,6 +95,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'profile',
             path: RouteNames.profile,
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            name: 'profile_workspace',
+            path: RouteNames.profileWorkspace,
+            builder: (context, state) => const ProfileWorkspacePage(),
           ),
         ],
       ),
@@ -118,9 +124,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: 'create',
         path: RouteNames.create,
-        builder: (context, state) => CreatePage(
-          seedParameters: state.uri.queryParameters,
-        ),
+        builder: (context, state) =>
+            CreatePage(seedParameters: state.uri.queryParameters),
       ),
       GoRoute(
         name: 'settings',
@@ -134,7 +139,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) {
-      final isProtected = state.matchedLocation == RouteNames.profile ||
+      final isProtected =
+          state.matchedLocation == RouteNames.profile ||
+          state.matchedLocation == RouteNames.profileWorkspace ||
           state.matchedLocation == RouteNames.create ||
           state.matchedLocation == RouteNames.favorites ||
           state.matchedLocation == RouteNames.notifications ||

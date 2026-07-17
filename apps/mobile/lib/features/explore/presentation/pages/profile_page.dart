@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/auth_user_entity.dart';
 import '../../../create/application/create_providers.dart';
@@ -28,13 +29,9 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  final TextEditingController _displayNameController = TextEditingController();
-  final TextEditingController _aboutController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _avatarController = TextEditingController();
-
   String? _loadKey;
   String? _createLoadKey;
+  ProfileRoleTier? _selectedRoleTier;
 
   @override
   void initState() {
@@ -47,15 +44,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   @override
-  void dispose() {
-    _displayNameController.dispose();
-    _aboutController.dispose();
-    _cityController.dispose();
-    _avatarController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider).state;
     final favoritesState = ref.watch(favoritesControllerProvider).state;
@@ -63,15 +51,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final discoverState = ref.watch(discoverFeedControllerProvider).state;
     final savedSearches = discoverState.savedSearches;
     final smartSearchHistory = discoverState.smartSearchHistory;
-    final ExploreController exploreController =
-        ref.watch(exploreControllerProvider);
+    final ExploreController exploreController = ref.watch(
+      exploreControllerProvider,
+    );
     final ExploreState state = exploreController.state;
 
     final AuthUserEntity? user = authState.user;
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Требуется авторизация')),
-      );
+      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
     }
 
     _scheduleLoad(
@@ -81,11 +68,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       favoritesCount: favoritesState.items.length,
     );
     _scheduleCreateLoad(user);
-    _syncControllers(state);
-
-    final ProfileRoleSummary roleSummary = profileRoleSummaryFor(
+    final ProfileRoleSummary accessRoleSummary = profileRoleSummaryFor(
       role: user.role,
       capabilities: user.capabilities,
+    );
+    final ProfileRoleTier activeRoleTier = _activeRoleTierFor(
+      selectedTier: _selectedRoleTier,
+      accessSummary: accessRoleSummary,
+    );
+    final ProfileRoleSummary roleSummary = profileRoleSummaryForTier(
+      activeRoleTier,
     );
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       favoritesState.items,
@@ -96,199 +88,126 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F2),
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Community creator profile'),
+        backgroundColor: const Color(0xFFF4F6F2),
+        foregroundColor: const Color(0xFF10231F),
         actions: <Widget>[
-          IconButton(
-            tooltip: 'Настройки',
-            onPressed: () => context.push(RouteNames.settings),
-            icon: const Icon(Icons.settings),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: IconButton.filledTonal(
+              tooltip: 'Настройки',
+              onPressed: () => context.push(RouteNames.settings),
+              icon: const Icon(Icons.settings_outlined),
+            ),
           ),
         ],
       ),
       body: switch (state.status) {
         ExploreStatus.initial || ExploreStatus.loading => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: CircularProgressIndicator(),
+        ),
         ExploreStatus.error => _StateMessage(
-            text: state.message ?? 'Не удалось загрузить профиль',
-            actionLabel: 'Повторить',
-            onTap: () {
-              _loadKey = null;
-              _scheduleLoad(
-                userId: user.id,
-                email: user.email,
-                role: user.role,
-                favoritesCount: favoritesState.items.length,
-                force: true,
-              );
-            },
-          ),
+          text: state.message ?? 'Не удалось загрузить профиль',
+          actionLabel: 'Повторить',
+          onTap: () {
+            _loadKey = null;
+            _scheduleLoad(
+              userId: user.id,
+              email: user.email,
+              role: user.role,
+              favoritesCount: favoritesState.items.length,
+              force: true,
+            );
+          },
+        ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            children: <Widget>[
-              _ProfileHero(
-                displayName: state.profile.displayName,
-                email: state.email,
-                avatar: state.profile.avatar,
-                city: state.profile.city,
-                roleSummary: roleSummary,
-                favoritesCount: workspaceData.savedCount,
-                onPrimaryAction: () => _openPrimaryRoleAction(roleSummary),
-              ),
-              const SizedBox(height: 14),
-              _RoleTrack(roleSummary: roleSummary),
-              const SizedBox(height: 14),
-              _QuickActions(
-                roleSummary: roleSummary,
-                onFavorites: () => context.go(RouteNames.favorites),
-                onCreate: () => context.go(RouteNames.create),
-                onScenario: () => context.go(RouteNames.scenarioBuilder),
-                onSettings: () => context.push(RouteNames.settings),
-              ),
-              const SizedBox(height: 14),
-              _RoleWorkspace(
-                roleSummary: roleSummary,
-                data: workspaceData,
-                onSaved: () => context.go(RouteNames.favorites),
-                onSearch: () => context.go(RouteNames.search),
-                onCreate: () => context.go(RouteNames.create),
-                onScenario: () => context.go(RouteNames.scenarioBuilder),
-                onEditScenario: workspaceData.latestScenario == null
-                    ? null
-                    : () => _openSavedScenario(workspaceData.latestScenario!),
-                onRouteScenario: workspaceData.latestScenario == null
-                    ? null
-                    : () => _openSavedScenarioMap(
-                          workspaceData.latestScenario!,
-                        ),
-                onResumeSearch: workspaceData.latestSearch == null
-                    ? null
-                    : () => _openSavedSearch(workspaceData.latestSearch!),
-                onMapSearch: workspaceData.latestSearch == null
-                    ? null
-                    : () => _openSavedSearchMap(workspaceData.latestSearch!),
-                onRouteSearch: workspaceData.latestSearch == null
-                    ? null
-                    : () => _openSavedSearchRoute(workspaceData.latestSearch!),
-                onCreateFromSearch: workspaceData.latestSearch == null
-                    ? null
-                    : () => _openSavedSearchCreate(workspaceData.latestSearch!),
-                onResumeSmartSearch: workspaceData.latestSmartSearch == null
-                    ? null
-                    : () => _openSmartSearch(workspaceData.latestSmartSearch!),
-                onMapSmartSearch: workspaceData.latestSmartSearch == null
-                    ? null
-                    : () => _openSmartSearchMap(
-                          workspaceData.latestSmartSearch!,
-                        ),
-                onRouteSmartSearch: workspaceData.latestSmartSearch == null
-                    ? null
-                    : () => _openSmartSearchRoute(
-                          workspaceData.latestSmartSearch!,
-                        ),
-                onCreateFromSmartSearch: workspaceData.latestSmartSearch == null
-                    ? null
-                    : () => _openSmartSearchCreate(
-                          workspaceData.latestSmartSearch!,
-                        ),
-                onOpenListing: (_) => context.go(RouteNames.create),
-                onSearchListing: (listing) => context.go(
-                  _searchRouteForCreateListing(listing),
-                ),
-                onMapListing: (listing) => context.go(
-                  _mapRouteForCreateListing(listing),
-                ),
-                onEditListingRoute: (listing) => context.go(
-                  listing.routeContext!.builderLocation,
-                ),
-                onMapListingRoute: (listing) => context.go(
-                  listing.routeContext!.mapLocation,
-                ),
-              ),
-              const SizedBox(height: 18),
-              _ProfileEditSection(
-                displayNameController: _displayNameController,
-                aboutController: _aboutController,
-                cityController: _cityController,
-                avatarController: _avatarController,
-                onDisplayNameChanged: exploreController.updateDisplayName,
-                onAboutChanged: exploreController.updateAbout,
-                onCityChanged: exploreController.updateCity,
-                onAvatarChanged: exploreController.updateAvatar,
-                onSave: state.status == ExploreStatus.saving
-                    ? null
-                    : exploreController.saveProfile,
-                saving: state.status == ExploreStatus.saving,
-              ),
-              if (state.message != null) ...<Widget>[
-                const SizedBox(height: 10),
-                Text(
-                  state.message!,
-                  style: const TextStyle(color: Colors.green),
-                ),
-              ],
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: <Widget>[
+            _ProfileHero(
+              displayName: state.profile.displayName,
+              email: state.email,
+              avatar: state.profile.avatar,
+              city: state.profile.city,
+              roleSummary: roleSummary,
+              onPrimaryAction: () => _openPrimaryRoleAction(roleSummary),
+            ),
+            const SizedBox(height: 14),
+            _ProfileDashboardTabs(
+              roleSummary: roleSummary,
+              onCreated: () => context.push(RouteNames.create),
+              onVisited: () => context.push(RouteNames.favorites),
+              onPhotos: () => context.push(RouteNames.settings),
+            ),
+            const SizedBox(height: 14),
+            _RoleTrack(
+              activeTier: activeRoleTier,
+              accessSummary: accessRoleSummary,
+              onRoleSelected: _selectRoleTier,
+            ),
+            const SizedBox(height: 14),
+            _LatestCreatedEvents(
+              data: workspaceData,
+              onViewAll: () => context.push(RouteNames.create),
+              onOpenListing: (listing) =>
+                  context.push(_searchRouteForCreateListing(listing)),
+              onCreate: () => context.push(RouteNames.create),
+              onCreateRoute: () => context.push(RouteNames.scenarioBuilder),
+              onFindPeople: () => context.push(RouteNames.search),
+            ),
+            const SizedBox(height: 14),
+            _QuickActions(
+              roleSummary: roleSummary,
+              data: workspaceData,
+              onWorkspace: () => context.push(RouteNames.profileWorkspace),
+              onFavorites: () => context.push(RouteNames.favorites),
+              onSearch: () => context.push(RouteNames.search),
+              onNotifications: () => context.push(RouteNames.notifications),
+              onCreate: () => context.push(RouteNames.create),
+              onScenario: () => context.push(RouteNames.scenarioBuilder),
+              onSettings: () => context.push(RouteNames.settings),
+            ),
+            if (state.message != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(state.message!, style: const TextStyle(color: Colors.green)),
             ],
-          ),
+          ],
+        ),
       },
     );
   }
 
   void _openPrimaryRoleAction(ProfileRoleSummary roleSummary) {
     if (roleSummary.isProGenerator) {
-      context.go(RouteNames.scenarioBuilder);
+      context.push(RouteNames.scenarioBuilder);
       return;
     }
     if (roleSummary.isCreator) {
-      context.go(RouteNames.create);
+      context.push(RouteNames.create);
       return;
     }
-    context.go(RouteNames.favorites);
+    context.push(RouteNames.favorites);
   }
 
-  void _openSavedScenario(FavoriteItemEntity scenario) {
-    final String? targetRoute = scenario.targetRoute;
-    if (targetRoute == null || targetRoute.trim().isEmpty) {
-      context.go(RouteNames.scenarioBuilder);
-      return;
+  ProfileRoleTier _activeRoleTierFor({
+    required ProfileRoleTier? selectedTier,
+    required ProfileRoleSummary accessSummary,
+  }) {
+    if (selectedTier != null &&
+        profileRoleTierUnlocked(
+          tier: selectedTier,
+          accessSummary: accessSummary,
+        )) {
+      return selectedTier;
     }
-    context.go(targetRoute);
+    return accessSummary.tier;
   }
 
-  void _openSavedScenarioMap(FavoriteItemEntity scenario) {
-    context.go(_mapRouteForSavedScenario(scenario));
-  }
-
-  void _openSavedSearch(SavedSearchEntity search) {
-    context.go(_searchRouteForSavedSearch(search));
-  }
-
-  void _openSavedSearchMap(SavedSearchEntity search) {
-    context.go(_mapRouteForSavedSearch(search));
-  }
-
-  void _openSavedSearchRoute(SavedSearchEntity search) {
-    context.go(_scenarioBuilderRouteForSavedSearch(search));
-  }
-
-  void _openSavedSearchCreate(SavedSearchEntity search) {
-    context.go(_createRouteForSavedSearch(search));
-  }
-
-  void _openSmartSearch(SmartSearchHistoryEntity item) {
-    context.go(_searchRouteForSmartSearch(item));
-  }
-
-  void _openSmartSearchMap(SmartSearchHistoryEntity item) {
-    context.go(_mapRouteForSmartSearch(item));
-  }
-
-  void _openSmartSearchRoute(SmartSearchHistoryEntity item) {
-    context.go(_scenarioBuilderRouteForSmartSearch(item));
-  }
-
-  void _openSmartSearchCreate(SmartSearchHistoryEntity item) {
-    context.go(_createRouteForSmartSearch(item));
+  void _selectRoleTier(ProfileRoleTier tier) {
+    setState(() {
+      _selectedRoleTier = tier;
+    });
   }
 
   void _scheduleLoad({
@@ -303,7 +222,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _loadKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(exploreControllerProvider).ensureLoaded(
+      ref
+          .read(exploreControllerProvider)
+          .ensureLoaded(
             userId: userId,
             email: email,
             role: role,
@@ -318,29 +239,220 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _createLoadKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(createControllerProvider).ensureLoaded(
+      ref
+          .read(createControllerProvider)
+          .ensureLoaded(
             userId: user.id,
             organizerEmail: user.email,
             organizerName: user.email.split('@').first,
           );
     });
   }
+}
 
-  void _syncControllers(ExploreState state) {
-    if (!state.isLoaded) return;
-    _syncController(_displayNameController, state.profile.displayName);
-    _syncController(_aboutController, state.profile.about);
-    _syncController(_cityController, state.profile.city);
-    _syncController(_avatarController, state.profile.avatar);
+class ProfileWorkspacePage extends ConsumerStatefulWidget {
+  const ProfileWorkspacePage({super.key});
+
+  @override
+  ConsumerState<ProfileWorkspacePage> createState() =>
+      _ProfileWorkspacePageState();
+}
+
+class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
+  String? _createLoadKey;
+  ProfileRoleTier? _selectedRoleTier;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(favoritesControllerProvider).ensureLoaded();
+      ref.read(discoverFeedControllerProvider).ensureSavedSearchesLoaded();
+      ref.read(discoverFeedControllerProvider).ensureSmartSearchHistoryLoaded();
+    });
   }
 
-  void _syncController(TextEditingController controller, String value) {
-    if (controller.text == value) return;
-    controller.value = controller.value.copyWith(
-      text: value,
-      selection: TextSelection.collapsed(offset: value.length),
-      composing: TextRange.empty,
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider).state;
+    final favoritesState = ref.watch(favoritesControllerProvider).state;
+    final createState = ref.watch(createControllerProvider).state;
+    final discoverState = ref.watch(discoverFeedControllerProvider).state;
+    final AuthUserEntity? user = authState.user;
+
+    if (user == null) {
+      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+    }
+
+    _scheduleCreateLoad(user);
+    final ProfileRoleSummary accessRoleSummary = profileRoleSummaryFor(
+      role: user.role,
+      capabilities: user.capabilities,
     );
+    final ProfileRoleTier activeRoleTier = _activeRoleTierFor(
+      selectedTier: _selectedRoleTier,
+      accessSummary: accessRoleSummary,
+    );
+    final ProfileRoleSummary roleSummary = profileRoleSummaryForTier(
+      activeRoleTier,
+    );
+    final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
+      favoritesState.items,
+      discoverState.savedSearches,
+      discoverState.smartSearchHistory,
+      createState.publishedDraft,
+      createState.draft,
+    );
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F2),
+      appBar: AppBar(
+        title: const Text('Profile workspace'),
+        backgroundColor: const Color(0xFFF4F6F2),
+        foregroundColor: const Color(0xFF10231F),
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        children: <Widget>[
+          _RoleTrack(
+            activeTier: activeRoleTier,
+            accessSummary: accessRoleSummary,
+            onRoleSelected: _selectRoleTier,
+          ),
+          const SizedBox(height: 14),
+          _RoleWorkspace(
+            roleSummary: roleSummary,
+            data: workspaceData,
+            onSaved: () => context.push(RouteNames.favorites),
+            onSearch: () => context.push(RouteNames.search),
+            onCreate: () => context.push(RouteNames.create),
+            onScenario: () => context.push(RouteNames.scenarioBuilder),
+            onEditScenario: workspaceData.latestScenario == null
+                ? null
+                : () => _openSavedScenario(workspaceData.latestScenario!),
+            onRouteScenario: workspaceData.latestScenario == null
+                ? null
+                : () => _openSavedScenarioMap(workspaceData.latestScenario!),
+            onResumeSearch: workspaceData.latestSearch == null
+                ? null
+                : () => _openSavedSearch(workspaceData.latestSearch!),
+            onMapSearch: workspaceData.latestSearch == null
+                ? null
+                : () => _openSavedSearchMap(workspaceData.latestSearch!),
+            onRouteSearch: workspaceData.latestSearch == null
+                ? null
+                : () => _openSavedSearchRoute(workspaceData.latestSearch!),
+            onCreateFromSearch: workspaceData.latestSearch == null
+                ? null
+                : () => _openSavedSearchCreate(workspaceData.latestSearch!),
+            onResumeSmartSearch: workspaceData.latestSmartSearch == null
+                ? null
+                : () => _openSmartSearch(workspaceData.latestSmartSearch!),
+            onMapSmartSearch: workspaceData.latestSmartSearch == null
+                ? null
+                : () => _openSmartSearchMap(workspaceData.latestSmartSearch!),
+            onRouteSmartSearch: workspaceData.latestSmartSearch == null
+                ? null
+                : () => _openSmartSearchRoute(workspaceData.latestSmartSearch!),
+            onCreateFromSmartSearch: workspaceData.latestSmartSearch == null
+                ? null
+                : () =>
+                      _openSmartSearchCreate(workspaceData.latestSmartSearch!),
+            onOpenListing: (_) => context.push(RouteNames.create),
+            onSearchListing: (listing) =>
+                context.push(_searchRouteForCreateListing(listing)),
+            onMapListing: (listing) =>
+                context.push(_mapRouteForCreateListing(listing)),
+            onEditListingRoute: (listing) =>
+                context.push(listing.routeContext!.builderLocation),
+            onMapListingRoute: (listing) =>
+                context.push(listing.routeContext!.mapLocation),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ProfileRoleTier _activeRoleTierFor({
+    required ProfileRoleTier? selectedTier,
+    required ProfileRoleSummary accessSummary,
+  }) {
+    if (selectedTier != null &&
+        profileRoleTierUnlocked(
+          tier: selectedTier,
+          accessSummary: accessSummary,
+        )) {
+      return selectedTier;
+    }
+    return accessSummary.tier;
+  }
+
+  void _selectRoleTier(ProfileRoleTier tier) {
+    setState(() {
+      _selectedRoleTier = tier;
+    });
+  }
+
+  void _openSavedScenario(FavoriteItemEntity scenario) {
+    final String? targetRoute = scenario.targetRoute;
+    if (targetRoute == null || targetRoute.trim().isEmpty) {
+      context.push(RouteNames.scenarioBuilder);
+      return;
+    }
+    context.push(targetRoute);
+  }
+
+  void _openSavedScenarioMap(FavoriteItemEntity scenario) {
+    context.push(_mapRouteForSavedScenario(scenario));
+  }
+
+  void _openSavedSearch(SavedSearchEntity search) {
+    context.push(_searchRouteForSavedSearch(search));
+  }
+
+  void _openSavedSearchMap(SavedSearchEntity search) {
+    context.push(_mapRouteForSavedSearch(search));
+  }
+
+  void _openSavedSearchRoute(SavedSearchEntity search) {
+    context.push(_scenarioBuilderRouteForSavedSearch(search));
+  }
+
+  void _openSavedSearchCreate(SavedSearchEntity search) {
+    context.push(_createRouteForSavedSearch(search));
+  }
+
+  void _openSmartSearch(SmartSearchHistoryEntity item) {
+    context.push(_searchRouteForSmartSearch(item));
+  }
+
+  void _openSmartSearchMap(SmartSearchHistoryEntity item) {
+    context.push(_mapRouteForSmartSearch(item));
+  }
+
+  void _openSmartSearchRoute(SmartSearchHistoryEntity item) {
+    context.push(_scenarioBuilderRouteForSmartSearch(item));
+  }
+
+  void _openSmartSearchCreate(SmartSearchHistoryEntity item) {
+    context.push(_createRouteForSmartSearch(item));
+  }
+
+  void _scheduleCreateLoad(AuthUserEntity user) {
+    final String key = user.id;
+    if (_createLoadKey == key) return;
+    _createLoadKey = key;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(createControllerProvider)
+          .ensureLoaded(
+            userId: user.id,
+            organizerEmail: user.email,
+            organizerName: user.email.split('@').first,
+          );
+    });
   }
 }
 
@@ -351,7 +463,6 @@ class _ProfileHero extends StatelessWidget {
     required this.avatar,
     required this.city,
     required this.roleSummary,
-    required this.favoritesCount,
     required this.onPrimaryAction,
   });
 
@@ -360,77 +471,88 @@ class _ProfileHero extends StatelessWidget {
   final String avatar;
   final String city;
   final ProfileRoleSummary roleSummary;
-  final int favoritesCount;
   final VoidCallback onPrimaryAction;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE7ECE6)),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x12003F32),
+            blurRadius: 22,
+            offset: Offset(0, 10),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _Avatar(avatar: avatar, displayName: displayName),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            _Avatar(avatar: avatar, displayName: displayName),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: const Color(0xFF0B3028),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '@${email.split('@').first}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF6C7A73),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
                     children: <Widget>[
-                      Text(
-                        displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.w800,
-                            ),
+                      const Icon(
+                        Icons.place_outlined,
+                        size: 15,
+                        color: Color(0xFF0B3028),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onPrimary,
-                            ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          city.trim().isEmpty ? 'Community · Riga' : city,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: const Color(0xFF0B3028),
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  _HeroPill(label: roleSummary.title.toUpperCase()),
+                ],
+              ),
             ),
-            const SizedBox(height: 14),
-            Text(
-              roleSummary.subtitle,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                _HeroPill(label: roleSummary.title),
-                _HeroPill(label: '$favoritesCount saved'),
-                if (city.trim().isNotEmpty) _HeroPill(label: city),
-              ],
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
+            IconButton(
+              tooltip: roleSummary.primaryActionLabel,
               onPressed: onPrimaryAction,
-              icon: Icon(_primaryIcon(roleSummary)),
-              label: Text(roleSummary.primaryActionLabel),
+              icon: Icon(
+                _primaryIcon(roleSummary),
+                color: const Color(0xFF0B3028),
+              ),
             ),
           ],
         ),
@@ -440,16 +562,388 @@ class _ProfileHero extends StatelessWidget {
 
   IconData _primaryIcon(ProfileRoleSummary roleSummary) {
     if (roleSummary.isProGenerator) return Icons.auto_awesome;
-    if (roleSummary.isCreator) return Icons.add_circle;
-    return Icons.bookmark;
+    if (roleSummary.isCreator) return Icons.add_circle_outline;
+    return Icons.bookmark_border;
+  }
+}
+
+class _ProfileDashboardTabs extends StatelessWidget {
+  const _ProfileDashboardTabs({
+    required this.roleSummary,
+    required this.onCreated,
+    required this.onVisited,
+    required this.onPhotos,
+  });
+
+  final ProfileRoleSummary roleSummary;
+  final VoidCallback onCreated;
+  final VoidCallback onVisited;
+  final VoidCallback onPhotos;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE7ECE6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: <Widget>[
+            _ProfileDashboardTab(
+              icon: Icons.work_outline,
+              label: 'Created',
+              active: roleSummary.isCreator || roleSummary.isProGenerator,
+              onTap: onCreated,
+            ),
+            _ProfileDashboardTab(
+              icon: Icons.place_outlined,
+              label: 'Visited',
+              active: false,
+              onTap: onVisited,
+            ),
+            _ProfileDashboardTab(
+              icon: Icons.image_outlined,
+              label: 'Photos',
+              active: false,
+              onTap: onPhotos,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileDashboardTab extends StatelessWidget {
+  const _ProfileDashboardTab({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: active ? const Color(0xFF0B3028) : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 9),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  icon,
+                  size: 16,
+                  color: active ? Colors.white : const Color(0xFF0B3028),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: active ? Colors.white : const Color(0xFF0B3028),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LatestCreatedEvents extends StatelessWidget {
+  const _LatestCreatedEvents({
+    required this.data,
+    required this.onViewAll,
+    required this.onOpenListing,
+    required this.onCreate,
+    required this.onCreateRoute,
+    required this.onFindPeople,
+  });
+
+  final _ProfileWorkspaceData data;
+  final VoidCallback onViewAll;
+  final ValueChanged<_CreatorListingData> onOpenListing;
+  final VoidCallback onCreate;
+  final VoidCallback onCreateRoute;
+  final VoidCallback onFindPeople;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<_CreatorListingData> listings = <_CreatorListingData>[
+      if (data.publishedListing != null) data.publishedListing!,
+      if (data.draftListing != null) data.draftListing!,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const _ProfileSectionLabel('LATEST CREATED EVENTS'),
+        const SizedBox(height: 8),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE7ECE6)),
+          ),
+          child: Column(
+            children: <Widget>[
+              if (listings.isEmpty)
+                _ProfileActionRow(
+                  icon: Icons.add_box_outlined,
+                  title: 'Create first event',
+                  subtitle: 'Start from Recharge Create Hub',
+                  onTap: onCreate,
+                )
+              else
+                for (final _CreatorListingData listing in listings.take(3))
+                  _CreatedEventRow(
+                    listing: listing,
+                    onTap: () => onOpenListing(listing),
+                  ),
+              const Divider(height: 1),
+              ListTile(
+                dense: true,
+                title: const Center(
+                  child: Text(
+                    'View all events',
+                    style: TextStyle(
+                      color: Color(0xFF0B3028),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right, size: 18),
+                onTap: onViewAll,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        const _ProfileSectionLabel('QUICK ACTIONS'),
+        const SizedBox(height: 8),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE7ECE6)),
+          ),
+          child: Column(
+            children: <Widget>[
+              _ProfileActionRow(
+                icon: Icons.add_box_outlined,
+                title: 'Create recharge activity',
+                onTap: onCreate,
+              ),
+              _ProfileActionRow(
+                icon: Icons.map_outlined,
+                title: 'Create route',
+                subtitle: 'Open route builder on a separate screen',
+                onTap: onCreateRoute,
+              ),
+              _ProfileActionRow(
+                icon: Icons.calendar_today_outlined,
+                title: 'One-time event',
+                onTap: onCreate,
+              ),
+              _ProfileActionRow(
+                icon: Icons.group_outlined,
+                title: 'Find people',
+                subtitle: 'Continue in Search conditions',
+                onTap: onFindPeople,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CreatedEventRow extends StatelessWidget {
+  const _CreatedEventRow({required this.listing, required this.onTap});
+
+  final _CreatorListingData listing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CreateDraftEntity draft = listing.draft;
+    return Column(
+      children: <Widget>[
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 6,
+          ),
+          leading: _CreatedEventThumb(draft: draft),
+          title: Text(
+            draft.title.trim().isEmpty ? 'Untitled activity' : draft.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF10231F),
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                _createdEventMeta(draft),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3),
+              _CreatedEventStatus(label: listing.stageLabel),
+            ],
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onTap,
+        ),
+        const Divider(height: 1, indent: 72),
+      ],
+    );
+  }
+}
+
+class _CreatedEventThumb extends StatelessWidget {
+  const _CreatedEventThumb({required this.draft});
+
+  final CreateDraftEntity draft;
+
+  @override
+  Widget build(BuildContext context) {
+    final String cover = draft.media.coverImage.trim();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: 52,
+        height: 52,
+        child: cover.isEmpty
+            ? const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: <Color>[Color(0xFFDDE8E2), Color(0xFF86A89B)],
+                  ),
+                ),
+                child: Icon(Icons.image_outlined, color: Color(0xFF0B3028)),
+              )
+            : Image.network(
+                cover,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const DecoratedBox(
+                  decoration: BoxDecoration(color: Color(0xFFDDE8E2)),
+                  child: Icon(Icons.image_outlined, color: Color(0xFF0B3028)),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _CreatedEventStatus extends StatelessWidget {
+  const _CreatedEventStatus({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6F5E8),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF1F6F27),
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileActionRow extends StatelessWidget {
+  const _ProfileActionRow({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        ListTile(
+          dense: true,
+          leading: Icon(icon, color: const Color(0xFF0B3028), size: 20),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+          ),
+          subtitle: subtitle == null ? null : Text(subtitle!),
+          trailing: const Icon(Icons.chevron_right, size: 18),
+          onTap: onTap,
+        ),
+        const Divider(height: 1, indent: 48),
+      ],
+    );
+  }
+}
+
+class _ProfileSectionLabel extends StatelessWidget {
+  const _ProfileSectionLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: Color(0xFF7D8983),
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 1,
+      ),
+    );
   }
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({
-    required this.avatar,
-    required this.displayName,
-  });
+  const _Avatar({required this.avatar, required this.displayName});
 
   final String avatar;
   final String displayName;
@@ -463,10 +957,7 @@ class _Avatar extends StatelessWidget {
     if (avatar.trim().isEmpty) {
       return CircleAvatar(
         radius: 32,
-        child: Text(
-          initials,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        child: Text(initials, style: Theme.of(context).textTheme.titleLarge),
       );
     }
     return CircleAvatar(
@@ -477,28 +968,27 @@ class _Avatar extends StatelessWidget {
 }
 
 class _HeroPill extends StatelessWidget {
-  const _HeroPill({
-    required this.label,
-  });
+  const _HeroPill({required this.label});
 
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.onPrimary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
+        color: const Color(0xFFF0F2EF),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w700,
-              ),
+          style: const TextStyle(
+            color: Color(0xFF0B3028),
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
     );
@@ -507,45 +997,71 @@ class _HeroPill extends StatelessWidget {
 
 class _RoleTrack extends StatelessWidget {
   const _RoleTrack({
-    required this.roleSummary,
+    required this.activeTier,
+    required this.accessSummary,
+    required this.onRoleSelected,
   });
 
-  final ProfileRoleSummary roleSummary;
+  final ProfileRoleTier activeTier;
+  final ProfileRoleSummary accessSummary;
+  final ValueChanged<ProfileRoleTier> onRoleSelected;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'Role track',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 10),
-        _RoleCard(
-          title: 'User',
-          description: 'Discover, save, and join activities.',
-          active: roleSummary.tier == ProfileRoleTier.user,
-          unlocked: true,
-          icon: Icons.person,
-        ),
-        const SizedBox(height: 10),
-        _RoleCard(
-          title: 'Creator',
-          description: 'Create events and places for others.',
-          active: roleSummary.tier == ProfileRoleTier.creator,
-          unlocked: roleSummary.canCreate,
-          icon: Icons.edit_calendar,
-        ),
-        const SizedBox(height: 10),
-        _RoleCard(
-          title: 'Pro generator',
-          description: 'Generate scenarios, routes, and smart plans.',
-          active: roleSummary.tier == ProfileRoleTier.proGenerator,
-          unlocked: roleSummary.canGenerate,
-          icon: Icons.auto_awesome,
+        const _ProfileSectionLabel('PROFILE MODE'),
+        const SizedBox(height: 8),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE7ECE6)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: _RoleCard(
+                    title: 'User',
+                    description: 'Discover, save, and join activities.',
+                    active: activeTier == ProfileRoleTier.user,
+                    unlocked: true,
+                    icon: Icons.person_outline,
+                    onTap: () => onRoleSelected(ProfileRoleTier.user),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _RoleCard(
+                    title: 'Creator',
+                    description: 'Create events and places for others.',
+                    active: activeTier == ProfileRoleTier.creator,
+                    unlocked: accessSummary.canCreate,
+                    icon: Icons.edit_calendar_outlined,
+                    onTap: accessSummary.canCreate
+                        ? () => onRoleSelected(ProfileRoleTier.creator)
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _RoleCard(
+                    title: 'Pro',
+                    description: 'Generate scenarios, routes, and smart plans.',
+                    active: activeTier == ProfileRoleTier.proGenerator,
+                    unlocked: accessSummary.canGenerate,
+                    icon: Icons.auto_awesome_outlined,
+                    onTap: accessSummary.canGenerate
+                        ? () => onRoleSelected(ProfileRoleTier.proGenerator)
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -559,6 +1075,7 @@ class _RoleCard extends StatelessWidget {
     required this.active,
     required this.unlocked,
     required this.icon,
+    required this.onTap,
   });
 
   final String title;
@@ -566,46 +1083,47 @@ class _RoleCard extends StatelessWidget {
   final bool active;
   final bool unlocked;
   final IconData icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: active
-            ? colorScheme.primaryContainer
-            : colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: active
-              ? colorScheme.primary
-              : colorScheme.outline.withValues(alpha: 0.18),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: <Widget>[
-            Icon(icon, color: active ? colorScheme.primary : null),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+    final Color foreground = active
+        ? Colors.white
+        : unlocked
+        ? const Color(0xFF0B3028)
+        : const Color(0xFF9AA39E);
+    return Tooltip(
+      message: description,
+      child: InkWell(
+        onTap: unlocked ? onTap : null,
+        borderRadius: BorderRadius.circular(10),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFF0B3028) : const Color(0xFFF3F5F2),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(icon, size: 18, color: foreground),
+                const SizedBox(height: 5),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
                   ),
-                  const SizedBox(height: 3),
-                  Text(description),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                _RoleStatusBadge(active: active, unlocked: unlocked),
+              ],
             ),
-            const SizedBox(width: 10),
-            _RoleStatusBadge(active: active, unlocked: unlocked),
-          ],
+          ),
         ),
       ),
     );
@@ -613,35 +1131,29 @@ class _RoleCard extends StatelessWidget {
 }
 
 class _RoleStatusBadge extends StatelessWidget {
-  const _RoleStatusBadge({
-    required this.active,
-    required this.unlocked,
-  });
+  const _RoleStatusBadge({required this.active, required this.unlocked});
 
   final bool active;
   final bool unlocked;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String label = active ? 'Active' : (unlocked ? 'Unlocked' : 'Locked');
+    final String label = active ? 'Active' : (unlocked ? 'Open' : 'Locked');
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: active
-            ? colorScheme.primary
-            : colorScheme.secondaryContainer.withValues(alpha: 0.58),
-        borderRadius: BorderRadius.circular(18),
+        color: active ? Colors.white.withValues(alpha: 0.18) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: active
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSecondaryContainer,
-                fontWeight: FontWeight.w800,
-              ),
+          maxLines: 1,
+          style: TextStyle(
+            color: active ? Colors.white : const Color(0xFF0B3028),
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );
@@ -651,149 +1163,91 @@ class _RoleStatusBadge extends StatelessWidget {
 class _QuickActions extends StatelessWidget {
   const _QuickActions({
     required this.roleSummary,
+    required this.data,
+    required this.onWorkspace,
     required this.onFavorites,
+    required this.onSearch,
+    required this.onNotifications,
     required this.onCreate,
     required this.onScenario,
     required this.onSettings,
   });
 
   final ProfileRoleSummary roleSummary;
+  final _ProfileWorkspaceData data;
+  final VoidCallback onWorkspace;
   final VoidCallback onFavorites;
+  final VoidCallback onSearch;
+  final VoidCallback onNotifications;
   final VoidCallback onCreate;
   final VoidCallback onScenario;
   final VoidCallback onSettings;
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> rows = <Widget>[
+      _ProfileActionRow(
+        icon: Icons.dashboard_customize_outlined,
+        title: 'Profile workspace',
+        subtitle: 'Roles, publications, routes and saved context',
+        onTap: onWorkspace,
+      ),
+      _ProfileActionRow(
+        icon: Icons.favorite_border,
+        title: 'Saved plans',
+        subtitle: '${data.savedCount} saved ideas',
+        onTap: onFavorites,
+      ),
+      _ProfileActionRow(
+        icon: Icons.search_outlined,
+        title: 'Search and conditions',
+        subtitle: data.latestSmartSearch == null
+            ? '${data.searchCount} saved searches'
+            : data.latestSmartSearch!.prompt,
+        onTap: onSearch,
+      ),
+      if (roleSummary.canCreate)
+        _ProfileActionRow(
+          icon: Icons.add_box_outlined,
+          title: 'Create Hub',
+          subtitle: 'Open taxonomy-based creator flow',
+          onTap: onCreate,
+        ),
+      if (roleSummary.canGenerate)
+        _ProfileActionRow(
+          icon: Icons.auto_awesome_outlined,
+          title: 'Scenario Builder',
+          subtitle: 'Build routes from intent',
+          onTap: onScenario,
+        ),
+      _ProfileActionRow(
+        icon: Icons.notifications_none,
+        title: 'Notifications',
+        subtitle: 'Inbox and route updates',
+        onTap: onNotifications,
+      ),
+      _ProfileActionRow(
+        icon: Icons.settings_outlined,
+        title: 'Settings',
+        subtitle: 'Edit profile, language and links',
+        onTap: onSettings,
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'Role tools',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 10),
-        GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.45,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          children: <Widget>[
-            _ActionTile(
-              icon: Icons.bookmark,
-              label: 'Saved',
-              value: 'Favorites',
-              onTap: onFavorites,
-            ),
-            _ActionTile(
-              icon: Icons.add_circle,
-              label: 'Create',
-              value: roleSummary.canCreate ? 'Enabled' : 'Starter',
-              onTap: onCreate,
-            ),
-            _ActionTile(
-              icon: Icons.auto_awesome,
-              label: 'Generator',
-              value: roleSummary.canGenerate ? 'Enabled' : 'Builder',
-              onTap: onScenario,
-            ),
-            _ActionTile(
-              icon: Icons.settings,
-              label: 'Settings',
-              value: 'Profile',
-              onTap: onSettings,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: roleSummary.capabilities
-              .map(
-                (String capability) => _CapabilityChip(label: capability),
-              )
-              .toList(growable: false),
+        const _ProfileSectionLabel('PROFILE MENU'),
+        const SizedBox(height: 8),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE7ECE6)),
+          ),
+          child: Column(children: rows),
         ),
       ],
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Ink(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.18)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(icon, color: colorScheme.primary),
-            const Spacer(),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
-            const SizedBox(height: 3),
-            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CapabilityChip extends StatelessWidget {
-  const _CapabilityChip({
-    required this.label,
-  });
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.62),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-      ),
     );
   }
 }
@@ -853,9 +1307,9 @@ class _RoleWorkspace extends StatelessWidget {
       children: <Widget>[
         Text(
           'Workspace',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         GridView.count(
@@ -947,9 +1401,7 @@ class _RoleWorkspace extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(
-              children: _workspaceActions(),
-            ),
+            child: Column(children: _workspaceActions()),
           ),
         ),
       ],
@@ -1002,7 +1454,8 @@ class _RoleWorkspace extends StatelessWidget {
         _WorkspaceActionRow(
           icon: Icons.favorite,
           title: 'Review saved plan',
-          subtitle: '${data.activityCount} activities, ${data.scenarioCount} routes',
+          subtitle:
+              '${data.activityCount} activities, ${data.scenarioCount} routes',
           onTap: onSaved,
         ),
       ];
@@ -1021,8 +1474,8 @@ class _RoleWorkspace extends StatelessWidget {
         subtitle: data.latestSmartSearch != null
             ? 'Resume ${data.latestSmartSearch!.prompt}'
             : data.latestSearch == null
-                ? 'Use Search and Map conditions'
-                : 'Resume ${data.latestSearch!.title}',
+            ? 'Use Search and Map conditions'
+            : 'Resume ${data.latestSearch!.title}',
         onTap: onSearch,
       ),
       _WorkspaceDivider(),
@@ -1066,17 +1519,17 @@ class _WorkspaceMetric extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -1117,9 +1570,9 @@ class _LatestScenarioCard extends StatelessWidget {
                   child: Text(
                     'Latest route',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 _WorkspacePill(label: 'Scenario'),
@@ -1130,9 +1583,9 @@ class _LatestScenarioCard extends StatelessWidget {
               scenario.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
             Text(
@@ -1203,9 +1656,9 @@ class _LatestSearchCard extends StatelessWidget {
                   child: Text(
                     'Latest search',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.secondary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: colorScheme.secondary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 _WorkspacePill(label: 'Conditions'),
@@ -1216,16 +1669,12 @@ class _LatestSearchCard extends StatelessWidget {
               search.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
-            Text(
-              search.subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(search.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -1307,8 +1756,9 @@ class _LatestSmartSearchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final SmartRouteIntent? routeIntent =
-        parseSmartSearch(item.prompt).routeIntent;
+    final SmartRouteIntent? routeIntent = parseSmartSearch(
+      item.prompt,
+    ).routeIntent;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer.withValues(alpha: 0.46),
@@ -1327,9 +1777,9 @@ class _LatestSmartSearchCard extends StatelessWidget {
                   child: Text(
                     'Latest smart search',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 _WorkspacePill(label: 'Smart'),
@@ -1340,9 +1790,9 @@ class _LatestSmartSearchCard extends StatelessWidget {
               item.prompt,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -1452,14 +1902,12 @@ class _CreatorPublicationsPanel extends StatelessWidget {
               child: Text(
                 'Creator publications',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
-            _WorkspacePill(
-              label: '${data.creatorPublicationCount} active',
-            ),
+            _WorkspacePill(label: '${data.creatorPublicationCount} active'),
           ],
         ),
         const SizedBox(height: 6),
@@ -1467,9 +1915,9 @@ class _CreatorPublicationsPanel extends StatelessWidget {
           'Manage drafts and published listings from the same workspace.',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
         if (data.draftListing != null) ...<Widget>[
           const SizedBox(height: 10),
@@ -1486,14 +1934,14 @@ class _CreatorPublicationsPanel extends StatelessWidget {
                 : () => onMapListing!(data.draftListing!),
             onEditRoute:
                 data.draftListing!.routeContext == null ||
-                        onEditListingRoute == null
-                    ? null
-                    : () => onEditListingRoute!(data.draftListing!),
+                    onEditListingRoute == null
+                ? null
+                : () => onEditListingRoute!(data.draftListing!),
             onMapRoute:
                 data.draftListing!.routeContext == null ||
-                        onMapListingRoute == null
-                    ? null
-                    : () => onMapListingRoute!(data.draftListing!),
+                    onMapListingRoute == null
+                ? null
+                : () => onMapListingRoute!(data.draftListing!),
           ),
         ],
         if (data.publishedListing != null) ...<Widget>[
@@ -1511,14 +1959,14 @@ class _CreatorPublicationsPanel extends StatelessWidget {
                 : () => onMapListing!(data.publishedListing!),
             onEditRoute:
                 data.publishedListing!.routeContext == null ||
-                        onEditListingRoute == null
-                    ? null
-                    : () => onEditListingRoute!(data.publishedListing!),
+                    onEditListingRoute == null
+                ? null
+                : () => onEditListingRoute!(data.publishedListing!),
             onMapRoute:
                 data.publishedListing!.routeContext == null ||
-                        onMapListingRoute == null
-                    ? null
-                    : () => onMapListingRoute!(data.publishedListing!),
+                    onMapListingRoute == null
+                ? null
+                : () => onMapListingRoute!(data.publishedListing!),
           ),
         ],
         const SizedBox(height: 10),
@@ -1596,9 +2044,9 @@ class _CreatorPublicationCard extends StatelessWidget {
                   child: Text(
                     'Creator listing',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 _WorkspacePill(label: listing.stageLabel),
@@ -1609,9 +2057,9 @@ class _CreatorPublicationCard extends StatelessWidget {
               listing.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
             Text(
@@ -1640,9 +2088,9 @@ class _CreatorPublicationCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
             const SizedBox(height: 10),
@@ -1737,9 +2185,9 @@ class _CreatorNextStepsPanel extends StatelessWidget {
                   child: Text(
                     'Creator next steps',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 _WorkspacePill(label: '${steps.length} actions'),
@@ -1838,9 +2286,7 @@ class _CreatorNextStepData {
 }
 
 class _CreatorNextStepRow extends StatelessWidget {
-  const _CreatorNextStepRow({
-    required this.step,
-  });
+  const _CreatorNextStepRow({required this.step});
 
   final _CreatorNextStepData step;
 
@@ -1863,8 +2309,8 @@ class _CreatorNextStepRow extends StatelessWidget {
                   Text(
                     step.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -1872,8 +2318,8 @@ class _CreatorNextStepRow extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -1911,12 +2357,14 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
               child: Text(
                 'Published route',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: colorScheme.tertiary,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  color: colorScheme.tertiary,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
-            _WorkspacePill(label: '${routeContext.stepCategories.length} stops'),
+            _WorkspacePill(
+              label: '${routeContext.stepCategories.length} stops',
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1924,9 +2372,9 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
           routeContext.prompt,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 10),
         Wrap(
@@ -1945,9 +2393,8 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
           runSpacing: 8,
           children: routeContext.stepCategories
               .map(
-                (String step) => _WorkspacePill(
-                  label: createTaxonomyLabelForPath(step),
-                ),
+                (String step) =>
+                    _WorkspacePill(label: createTaxonomyLabelForPath(step)),
               )
               .toList(growable: false),
         ),
@@ -2014,8 +2461,8 @@ class _WorkspaceActionRow extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -2036,9 +2483,7 @@ class _WorkspaceActionRow extends StatelessWidget {
 }
 
 class _WorkspacePill extends StatelessWidget {
-  const _WorkspacePill({
-    required this.label,
-  });
+  const _WorkspacePill({required this.label});
 
   final String label;
 
@@ -2055,9 +2500,9 @@ class _WorkspacePill extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w800,
-              ),
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );
@@ -2070,106 +2515,6 @@ class _WorkspaceDivider extends StatelessWidget {
     return Divider(
       height: 1,
       color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.14),
-    );
-  }
-}
-
-class _ProfileEditSection extends StatelessWidget {
-  const _ProfileEditSection({
-    required this.displayNameController,
-    required this.aboutController,
-    required this.cityController,
-    required this.avatarController,
-    required this.onDisplayNameChanged,
-    required this.onAboutChanged,
-    required this.onCityChanged,
-    required this.onAvatarChanged,
-    required this.onSave,
-    required this.saving,
-  });
-
-  final TextEditingController displayNameController;
-  final TextEditingController aboutController;
-  final TextEditingController cityController;
-  final TextEditingController avatarController;
-  final ValueChanged<String> onDisplayNameChanged;
-  final ValueChanged<String> onAboutChanged;
-  final ValueChanged<String> onCityChanged;
-  final ValueChanged<String> onAvatarChanged;
-  final Future<void> Function()? onSave;
-  final bool saving;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Edit profile',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 10),
-        _LabeledField(
-          label: 'Display name',
-          controller: displayNameController,
-          onChanged: onDisplayNameChanged,
-        ),
-        _LabeledField(
-          label: 'About',
-          controller: aboutController,
-          onChanged: onAboutChanged,
-          maxLines: 4,
-        ),
-        _LabeledField(
-          label: 'City',
-          controller: cityController,
-          onChanged: onCityChanged,
-        ),
-        _LabeledField(
-          label: 'Avatar URL/Path',
-          controller: avatarController,
-          onChanged: onAvatarChanged,
-        ),
-        const SizedBox(height: 6),
-        FilledButton.icon(
-          onPressed: onSave,
-          icon: const Icon(Icons.save),
-          label: Text(saving ? 'Сохраняем...' : 'Сохранить профиль'),
-        ),
-      ],
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  const _LabeledField({
-    required this.label,
-    required this.controller,
-    required this.onChanged,
-    this.maxLines = 1,
-  });
-
-  final String label;
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final int maxLines;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        minLines: maxLines > 1 ? 2 : null,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-      ),
     );
   }
 }
@@ -2195,10 +2540,7 @@ class _StateMessage extends StatelessWidget {
           children: <Widget>[
             Text(text),
             const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: onTap,
-              child: Text(actionLabel),
-            ),
+            OutlinedButton(onPressed: onTap, child: Text(actionLabel)),
           ],
         ),
       ),
@@ -2235,8 +2577,7 @@ class _ProfileWorkspaceData {
       draftListing != null || publishedListing != null;
 
   int get creatorPublicationCount {
-    return (draftListing == null ? 0 : 1) +
-        (publishedListing == null ? 0 : 1);
+    return (draftListing == null ? 0 : 1) + (publishedListing == null ? 0 : 1);
   }
 }
 
@@ -2317,7 +2658,8 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
           statusLabel: publishedDraft.publishStatus.name,
           isPublished: true,
         );
-  final bool currentMatchesPublished = publishedDraft != null &&
+  final bool currentMatchesPublished =
+      publishedDraft != null &&
       _sameListingContent(currentDraft, publishedDraft);
   final _CreatorListingData? draftListing = currentMatchesPublished
       ? null
@@ -2348,12 +2690,14 @@ _CreatorListingData? _creatorListingDataFor(
   required String statusLabel,
   required bool isPublished,
 }) {
-  final bool hasContent = draft.title.trim().isNotEmpty ||
+  final bool hasContent =
+      draft.title.trim().isNotEmpty ||
       draft.mainCategory.trim().isNotEmpty ||
       draft.media.coverImage.trim().isNotEmpty;
   if (!hasContent) return null;
-  final CreateTaxonomyCategory? category =
-      createTaxonomyCategoryById(draft.mainCategory);
+  final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
+    draft.mainCategory,
+  );
   final List<String> missingFields = _missingPublishFields(draft);
   return _CreatorListingData(
     draft: draft,
@@ -2402,7 +2746,7 @@ List<String> _missingPublishFields(CreateDraftEntity draft) {
     if (draft.mainCategory.trim().isEmpty) 'category',
     if (draft.city.trim().isEmpty) 'city',
     if (draft.media.coverImage.trim().isEmpty) 'cover',
-    if (draft.objectType == CreateObjectType.event &&
+    if (createBlockConfigFor(draft.objectType).requiresStartDateTime &&
         draft.startDateTimeUtc == null)
       'start time',
   ];
@@ -2473,17 +2817,15 @@ String _mapRouteForSavedScenario(FavoriteItemEntity scenario) {
   }
 
   final Uri targetUri = Uri.parse(targetRoute);
-  final Map<String, String> params =
-      Map<String, String>.from(targetUri.queryParameters);
+  final Map<String, String> params = Map<String, String>.from(
+    targetUri.queryParameters,
+  );
   final String? steps = params['steps'];
   if (steps == null || steps.trim().isEmpty) {
     return RouteNames.discoverMap;
   }
   params['mode'] = 'scenario';
-  return Uri(
-    path: RouteNames.discoverMap,
-    queryParameters: params,
-  ).toString();
+  return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
 
 List<String> _routeStepsFromPublishedDraft(CreateDraftEntity draft) {
@@ -2524,8 +2866,9 @@ int _scenarioDurationForDraft(CreateDraftEntity draft) {
   if (draft.durationMinutes != null && draft.durationMinutes! > 0) {
     return draft.durationMinutes!;
   }
-  final RegExpMatch? match =
-      RegExp(r'(\d+)\s*min').firstMatch(draft.shortDescription);
+  final RegExpMatch? match = RegExp(
+    r'(\d+)\s*min',
+  ).firstMatch(draft.shortDescription);
   if (match == null) return 90;
   return int.tryParse(match.group(1) ?? '') ?? 90;
 }
@@ -2539,19 +2882,20 @@ String _mapRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _searchRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  return _discoverRouteForSavedSearch(RouteNames.search, item.query);
+  return Uri(
+    path: RouteNames.smartSearch,
+    queryParameters: <String, String>{'prompt': item.prompt},
+  ).toString();
 }
 
 String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     return Uri(
       path: RouteNames.discoverMap,
-      queryParameters: _smartRouteParameters(
-        parseResult,
-        includeMode: true,
-      ),
+      queryParameters: _smartRouteParameters(parseResult, includeMode: true),
     ).toString();
   }
   return _discoverRouteForSavedSearch(RouteNames.discoverMap, item.query);
@@ -2581,21 +2925,7 @@ String _discoverRouteForCreateListing(String path, CreateDraftEntity draft) {
 }
 
 String _discoverCategoryForCreateListing(String category) {
-  switch (category) {
-    case 'art_culture_museums':
-      return 'art';
-    case 'outdoor_nature_walking':
-    case 'travel_tours':
-      return 'outdoor';
-    case 'wellness_recharge':
-      return 'wellness';
-    case 'food_drinks':
-      return 'food';
-    case 'family_kids':
-      return 'family';
-    default:
-      return category;
-  }
+  return category;
 }
 
 String _createRouteForSavedSearch(SavedSearchEntity search) {
@@ -2606,15 +2936,13 @@ String _createRouteForSavedSearch(SavedSearchEntity search) {
     'title': search.title,
     'subtitle': search.subtitle,
   };
-  return Uri(
-    path: RouteNames.create,
-    queryParameters: params,
-  ).toString();
+  return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
 String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     final SmartRouteIntent routeIntent = parseResult.routeIntent!;
     return Uri(
@@ -2624,7 +2952,8 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         'source': 'scenario',
         'type': 'event',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
-        'subtitle': '${routeIntent.stepCategories.length} stops · '
+        'subtitle':
+            '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
         'category': 'scenario',
@@ -2638,10 +2967,7 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
     'title': _titleForSmartSearch(item.query),
     'subtitle': item.prompt,
   };
-  return Uri(
-    path: RouteNames.create,
-    queryParameters: params,
-  ).toString();
+  return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
 String _discoverRouteForSavedSearch(String path, DiscoverQuery query) {
@@ -2672,15 +2998,13 @@ String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
 }
 
 String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult =
-      _smartRouteParseForSmartSearch(item);
+  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
+    item,
+  );
   if (parseResult != null) {
     return Uri(
       path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(
-        parseResult,
-        includeMode: false,
-      ),
+      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
     ).toString();
   }
   final String prompt = item.prompt.trim().isEmpty
@@ -2751,17 +3075,19 @@ String _capitalized(String value) {
 
 String _scenarioMoodForSavedSearch(DiscoverQuery query) {
   final String queryText = query.queryText.toLowerCase();
+  final Set<String> normalizedCategories = query.selectedCategoryIds
+      .map(normalizeRechargeContentGroupId)
+      .toSet();
   if (queryText.contains('run') ||
       queryText.contains('sport') ||
       queryText.contains('tennis') ||
-      query.selectedCategoryIds.contains('outdoor')) {
+      normalizedCategories.contains('sport') ||
+      normalizedCategories.contains('outdoor_nature_walking')) {
     return 'active';
   }
-  if (query.selectedCategoryIds.any(
-    (String category) {
-      return category == 'art' || category == 'music' || category == 'family';
-    },
-  )) {
+  if (normalizedCategories.contains('art_culture_museums') ||
+      normalizedCategories.contains('music_nightlife') ||
+      normalizedCategories.contains('family_kids')) {
     return 'social';
   }
   return 'calm';
@@ -2772,8 +3098,7 @@ String _promptForSavedSearch(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null)
-      'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -2787,4 +3112,17 @@ String _listingVenueLabel(CreateDraftEntity draft) {
   }
   if (draft.venueName.isNotEmpty) return draft.venueName;
   return draft.city.isEmpty ? 'Draft listing' : draft.city;
+}
+
+String _createdEventMeta(CreateDraftEntity draft) {
+  final DateTime? startsAt = draft.startDateTimeUtc?.toLocal();
+  final String dateLabel;
+  if (startsAt == null) {
+    dateLabel = 'Date to be set';
+  } else {
+    final String hour = startsAt.hour.toString().padLeft(2, '0');
+    final String minute = startsAt.minute.toString().padLeft(2, '0');
+    dateLabel = 'May ${startsAt.day} · $hour:$minute';
+  }
+  return '$dateLabel · ${draft.city.isEmpty ? 'Riga' : draft.city}';
 }

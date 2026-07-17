@@ -1,3 +1,4 @@
+import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
 
 class CreateDraftModel {
@@ -11,6 +12,7 @@ class CreateDraftModel {
     required this.tags,
     required this.shortDescription,
     required this.fullDescription,
+    required this.sectionData,
     required this.startDateTimeUtcIso,
     required this.endDateTimeUtcIso,
     required this.durationMinutes,
@@ -67,6 +69,7 @@ class CreateDraftModel {
   final List<String> tags;
   final String shortDescription;
   final String fullDescription;
+  final Map<String, dynamic> sectionData;
   final String? startDateTimeUtcIso;
   final String? endDateTimeUtcIso;
   final int? durationMinutes;
@@ -116,7 +119,7 @@ class CreateDraftModel {
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     return CreateDraftModel(
       id: entity.id,
-      objectType: entity.objectType.name,
+      objectType: entity.objectType.taxonomyId,
       title: entity.title,
       eventType: entity.eventType,
       mainCategory: entity.mainCategory,
@@ -124,12 +127,13 @@ class CreateDraftModel {
       tags: entity.tags,
       shortDescription: entity.shortDescription,
       fullDescription: entity.fullDescription,
+      sectionData: Map<String, dynamic>.from(entity.sectionData),
       startDateTimeUtcIso: entity.startDateTimeUtc?.toIso8601String(),
       endDateTimeUtcIso: entity.endDateTimeUtc?.toIso8601String(),
       durationMinutes: entity.durationMinutes,
       timezone: entity.timezone,
-      registrationDeadlineUtcIso:
-          entity.registrationDeadlineUtc?.toIso8601String(),
+      registrationDeadlineUtcIso: entity.registrationDeadlineUtc
+          ?.toIso8601String(),
       format: entity.format,
       country: entity.country,
       city: entity.city,
@@ -174,20 +178,28 @@ class CreateDraftModel {
   }
 
   CreateDraftEntity toEntity() {
+    final Map<String, Object?> migratedSectionData = _migratedSectionData(
+      sectionData,
+      legacyObjectType: objectType,
+      contentGroupId: mainCategory,
+    );
     return CreateDraftEntity(
       id: id,
       objectType: _parseObjectType(objectType),
       title: title,
       eventType: eventType,
-      mainCategory: mainCategory,
-      subcategory: subcategory,
+      mainCategory: normalizeRechargeContentGroupId(mainCategory),
+      subcategory: normalizeRechargeLegacySubcategoryId(subcategory),
       tags: tags,
       shortDescription: shortDescription,
       fullDescription: fullDescription,
-      startDateTimeUtc:
-          startDateTimeUtcIso == null ? null : DateTime.parse(startDateTimeUtcIso!).toUtc(),
-      endDateTimeUtc:
-          endDateTimeUtcIso == null ? null : DateTime.parse(endDateTimeUtcIso!).toUtc(),
+      sectionData: migratedSectionData,
+      startDateTimeUtc: startDateTimeUtcIso == null
+          ? null
+          : DateTime.parse(startDateTimeUtcIso!).toUtc(),
+      endDateTimeUtc: endDateTimeUtcIso == null
+          ? null
+          : DateTime.parse(endDateTimeUtcIso!).toUtc(),
       durationMinutes: durationMinutes,
       timezone: timezone,
       registrationDeadlineUtc: registrationDeadlineUtcIso == null
@@ -223,10 +235,7 @@ class CreateDraftModel {
       organizerProfileLink: organizerProfileLink,
       organizerPhone: organizerPhone,
       organizerEmail: organizerEmail,
-      media: MediaEntity(
-        coverImage: coverImage,
-        gallery: gallery,
-      ),
+      media: MediaEntity(coverImage: coverImage, gallery: gallery),
       draftStatus: _parseDraftStatus(draftStatus),
       moderationStatus: _parseModerationStatus(moderationStatus),
       publishStatus: _parsePublishStatus(publishStatus),
@@ -234,8 +243,9 @@ class CreateDraftModel {
       reportCount: reportCount,
       createdAtUtc: DateTime.parse(createdAtUtcIso).toUtc(),
       updatedAtUtc: DateTime.parse(updatedAtUtcIso).toUtc(),
-      publishedAtUtc:
-          publishedAtUtcIso == null ? null : DateTime.parse(publishedAtUtcIso!).toUtc(),
+      publishedAtUtc: publishedAtUtcIso == null
+          ? null
+          : DateTime.parse(publishedAtUtcIso!).toUtc(),
     );
   }
 
@@ -252,6 +262,10 @@ class CreateDraftModel {
           .toList(growable: false),
       shortDescription: json['shortDescription'] as String? ?? '',
       fullDescription: json['fullDescription'] as String? ?? '',
+      sectionData: Map<String, dynamic>.from(
+        json['sectionData'] as Map<dynamic, dynamic>? ??
+            const <dynamic, dynamic>{},
+      ),
       startDateTimeUtcIso: json['startDateTimeUtcIso'] as String?,
       endDateTimeUtcIso: json['endDateTimeUtcIso'] as String?,
       durationMinutes: json['durationMinutes'] as int?,
@@ -297,9 +311,11 @@ class CreateDraftModel {
       visibility: json['visibility'] as String? ?? 'public',
       reportCount: json['reportCount'] as int? ?? 0,
       createdAtUtcIso:
-          json['createdAtUtcIso'] as String? ?? DateTime.now().toUtc().toIso8601String(),
+          json['createdAtUtcIso'] as String? ??
+          DateTime.now().toUtc().toIso8601String(),
       updatedAtUtcIso:
-          json['updatedAtUtcIso'] as String? ?? DateTime.now().toUtc().toIso8601String(),
+          json['updatedAtUtcIso'] as String? ??
+          DateTime.now().toUtc().toIso8601String(),
       publishedAtUtcIso: json['publishedAtUtcIso'] as String?,
     );
   }
@@ -315,6 +331,7 @@ class CreateDraftModel {
       'tags': tags,
       'shortDescription': shortDescription,
       'fullDescription': fullDescription,
+      'sectionData': sectionData,
       'startDateTimeUtcIso': startDateTimeUtcIso,
       'endDateTimeUtcIso': endDateTimeUtcIso,
       'durationMinutes': durationMinutes,
@@ -364,10 +381,25 @@ class CreateDraftModel {
   }
 
   static CreateObjectType _parseObjectType(String value) {
-    return CreateObjectType.values.firstWhere(
-      (CreateObjectType item) => item.name == value,
-      orElse: () => CreateObjectType.event,
-    );
+    return createObjectTypeFromId(value);
+  }
+
+  static Map<String, Object?> _migratedSectionData(
+    Map<String, dynamic> source, {
+    required String legacyObjectType,
+    required String contentGroupId,
+  }) {
+    final Map<String, Object?> result = <String, Object?>{...source};
+    if (legacyObjectType.trim().toLowerCase() != 'offer' ||
+        !legacyOfferNeedsRentalReview(contentGroupId)) {
+      return result;
+    }
+    final Map<String, Object?> migration = <String, Object?>{
+      ...?result['migration'] as Map<String, Object?>?,
+      'review_as_rental': true,
+    };
+    result['migration'] = migration;
+    return result;
   }
 
   static DraftStatus _parseDraftStatus(String value) {

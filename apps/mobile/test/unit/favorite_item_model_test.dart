@@ -20,6 +20,7 @@ void main() {
     );
 
     expect(model.toEntity().targetRoute, isNull);
+    expect(model.toEntity().coverImageUrl, isEmpty);
   });
 
   test('roundtrips targetRoute for saved scenarios', () {
@@ -35,11 +36,13 @@ void main() {
       isFree: true,
       savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
       targetRoute: '/scenario-builder?mood=calm&steps=a,b',
+      coverImageUrl: 'https://images.example/route.jpg',
     );
 
     final FavoriteItemEntity restored =
         FavoriteItemModel.fromEntity(entity).toEntity();
 
     expect(restored.targetRoute, entity.targetRoute);
+    expect(restored.coverImageUrl, entity.coverImageUrl);
   });
 }

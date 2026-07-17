@@ -10,6 +10,11 @@ class RechargeTheme {
   static const Color ink = Color(0xFF10231F);
   static const Color mutedInk = Color(0xFF62756F);
   static const Color lime = Color(0xFFD7F55C);
+  static const Color travelGreen = Color(0xFF2F8F2F);
+  static const Color travelGreenDark = Color(0xFF1F6F27);
+  static const Color travelCanvas = Color(0xFFF1F2EE);
+  static const Color travelPanel = Color(0xFFF7F8F4);
+  static const Color travelLine = Color(0xFFD9DED5);
   static const Color sky = Color(0xFF2F6BFF);
   static const Color warmGold = Color(0xFFE6B84E);
 
@@ -36,7 +41,7 @@ class RechargeTheme {
       onSurface: ink,
       surfaceContainerLowest: Colors.white,
       surfaceContainerLow: Color(0xFFF9FCFA),
-      surfaceContainer: mint50,
+      surfaceContainer: travelCanvas,
       surfaceContainerHigh: Color(0xFFEAF3EF),
       surfaceContainerHighest: Color(0xFFDDE9E4),
       onSurfaceVariant: mutedInk,
@@ -59,16 +64,16 @@ class RechargeTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: mint50,
+      scaffoldBackgroundColor: travelCanvas,
       textTheme: textTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: emerald900,
+        backgroundColor: emerald900,
+        foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          color: emerald900,
+          color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w800,
           letterSpacing: 0,
@@ -80,8 +85,8 @@ class RechargeTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: Color(0xFFDDE9E4)),
+          borderRadius: BorderRadius.circular(4),
+          side: const BorderSide(color: travelLine),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -92,7 +97,7 @@ class RechargeTheme {
           disabledForegroundColor: Colors.white,
           minimumSize: const Size(48, 46),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
           ),
           textStyle: const TextStyle(
             fontSize: 15,
@@ -107,7 +112,7 @@ class RechargeTheme {
           minimumSize: const Size(48, 46),
           side: const BorderSide(color: Color(0xFFB8C9C2)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
           ),
           textStyle: const TextStyle(
             fontSize: 15,
@@ -130,15 +135,15 @@ class RechargeTheme {
         fillColor: Colors.white,
         isDense: true,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: Color(0xFFD8E7E1)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: Color(0xFFD8E7E1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: emerald900, width: 1.4),
         ),
         labelStyle: const TextStyle(color: mutedInk),
@@ -146,7 +151,7 @@ class RechargeTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: mint100,
+        indicatorColor: Colors.transparent,
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
@@ -185,7 +190,7 @@ class RechargeTheme {
         ),
         side: const BorderSide(color: Color(0xFFD8E7E1)),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -193,7 +198,7 @@ class RechargeTheme {
         contentTextStyle: const TextStyle(color: Colors.white),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
       dividerTheme: const DividerThemeData(

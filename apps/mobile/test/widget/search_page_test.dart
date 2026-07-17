@@ -32,37 +32,40 @@ void main() {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Outdoor'));
+    final Finder outdoorChip = find.widgetWithText(
+      ChoiceChip,
+      'Outdoor, nature & walking',
+    );
+    await tester.scrollUntilVisible(
+      outdoorChip,
+      300,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey<String>('discover-category-rail')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.ensureVisible(outdoorChip);
+    await tester.pumpAndSettle();
+    await tester.tap(outdoorChip);
     await tester.pumpAndSettle();
 
     expect(find.text('Прогулка у озера'), findsOneWidget);
     expect(find.text('Утренняя йога'), findsNothing);
   });
 
-  fullPageTestWidgets('smart search parses text into filters', (tester) async {
+  fullPageTestWidgets('keeps Smart Search controls out of regular search', (
+    tester,
+  ) async {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
-    );
-    await tester.tap(find.text('Parse'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Museum today'), findsOneWidget);
-    expect(find.text('Утренняя йога'), findsNothing);
-    expect(find.text('"museum"'), findsOneWidget);
-    expect(find.text('up to 10'), findsOneWidget);
-    expect(find.text('today'), findsOneWidget);
-
-    await tester.tap(find.text('Build scenario'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.text('Smart Search'), findsNothing);
+    expect(find.text('Parse'), findsNothing);
+    expect(find.byTooltip('Voice prompt'), findsNothing);
+    expect(find.byTooltip('Search conditions'), findsOneWidget);
   });
 
-  fullPageTestWidgets('smart search route intent opens builder map and create', (
+  fullPageTestWidgets('regular search treats text as a literal query', (
     tester,
   ) async {
     await tester.pumpWidget(_SearchTestApp());
@@ -70,60 +73,16 @@ void main() {
 
     await tester.enterText(
       find.byType(TextField).first,
-      'build a free calm walking route for 2 hours with coffee and park near 5 km',
+      'museum today under 10',
     );
-    await tester.tap(find.text('Parse'));
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Smart route'), findsWidgets);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120 min'), findsWidgets);
-    expect(find.text('free route'), findsOneWidget);
-    expect(find.text('walking'), findsOneWidget);
-    expect(find.textContaining('Coffee'), findsOneWidget);
-
-    await tester.tap(find.text('Build route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
-
-    await tester.pumpWidget(_SearchTestApp());
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byType(TextField).first,
-      'build a free calm walking route for 2 hours with coffee and park near 5 km',
+    expect(
+      find.textContaining('Applied: "museum today under 10"'),
+      findsOneWidget,
     );
-    await tester.tap(find.text('Parse'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Map route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
-
-    await tester.pumpWidget(_SearchTestApp());
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byType(TextField).first,
-      'build a free calm walking route for 2 hours with coffee and park near 5 km',
-    );
-    await tester.tap(find.text('Parse'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Create smart route listing'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('up to 10'), findsNothing);
   });
 
   fullPageTestWidgets('opens map with applied search conditions', (
@@ -132,11 +91,8 @@ void main() {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
-    );
-    await tester.tap(find.text('Parse'));
+    await tester.enterText(find.byType(TextField).first, 'museum');
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Map'));
@@ -144,9 +100,7 @@ void main() {
 
     expect(find.text('Map page'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
     expect(find.text('5000'), findsOneWidget);
   });
 
@@ -156,11 +110,8 @@ void main() {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
-    );
-    await tester.tap(find.text('Parse'));
+    await tester.enterText(find.byType(TextField).first, 'museum');
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Create from current search'));
@@ -170,97 +121,17 @@ void main() {
     expect(find.text('search'), findsOneWidget);
     expect(find.text('Museum'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
     expect(find.text('event'), findsOneWidget);
   });
 
-  fullPageTestWidgets('stores recent smart search and opens create from it', (
+  fullPageTestWidgets('does not load or render Smart Search history', (
     tester,
   ) async {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
-    );
-    await tester.tap(find.text('Parse'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Recent Smart Searches'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsWidgets);
-
-    await tester.ensureVisible(
-      find.byTooltip('Create listing from smart search'),
-    );
-    await tester.tap(find.byTooltip('Create listing from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('smart_search'), findsOneWidget);
-    expect(find.text('Museum'), findsOneWidget);
-    expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
-  });
-
-  fullPageTestWidgets('keeps smart route intent in recent smart search actions', (
-    tester,
-  ) async {
-    final _SearchTestApp app = _SearchTestApp();
-    const String prompt =
-        'build a free calm walking route for 2 hours with coffee and park near 5 km';
-
-    await tester.pumpWidget(_SearchTestApp(controller: app._controller));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextField).first, prompt);
-    await tester.tap(find.text('Parse'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Recent Smart Searches'), findsOneWidget);
-    expect(find.text('Smart route'), findsWidgets);
-
-    await tester.ensureVisible(
-      find.byTooltip('Build route from smart search').last,
-    );
-    await tester.tap(find.byTooltip('Build route from smart search').last);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text(prompt), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
-
-    await tester.pumpWidget(_SearchTestApp(controller: app._controller));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byTooltip('Open smart search on map').last);
-    await tester.tap(find.byTooltip('Open smart search on map').last);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
-
-    await tester.pumpWidget(_SearchTestApp(controller: app._controller));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byTooltip('Create listing from smart search'),
-    );
-    await tester.tap(find.byTooltip('Create listing from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('Recent Smart Searches'), findsNothing);
+    expect(find.byTooltip('Create listing from smart search'), findsNothing);
   });
 
   fullPageTestWidgets('applies route seed parameters on open', (tester) async {
@@ -275,20 +146,30 @@ void main() {
     expect(find.text('Museum today'), findsWidgets);
     expect(find.text('Утренняя йога'), findsNothing);
     expect(find.text('Прогулка у озера'), findsNothing);
-    expect(find.text('Art'), findsOneWidget);
+    final Finder artChip = find.widgetWithText(
+      ChoiceChip,
+      'Art, culture & museums',
+    );
+    await tester.scrollUntilVisible(
+      artChip,
+      300,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey<String>('discover-category-rail')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(artChip, findsOneWidget);
   });
 
   fullPageTestWidgets('saves applies routes and deletes search conditions', (
     tester,
   ) async {
-    await tester.pumpWidget(_SearchTestApp());
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
+    await tester.pumpWidget(
+      _SearchTestApp(
+        initialLocation:
+            '${RouteNames.search}?q=museum&category=art&budgetMax=10&radius=5000',
+      ),
     );
-    await tester.tap(find.text('Parse'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Save'));
@@ -299,7 +180,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Delete saved conditions'));
     await tester.pumpAndSettle();
-    expect(find.text('No saved conditions yet'), findsOneWidget);
+    expect(find.text('No recent searches yet'), findsOneWidget);
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -312,18 +193,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Map page'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
+    expect(find.text('art_culture_museums'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens scenario builder from saved conditions', (
     tester,
   ) async {
-    await tester.pumpWidget(_SearchTestApp());
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextField).first, 'free yoga near 5 km');
-    await tester.tap(find.text('Parse'));
+    await tester.pumpWidget(
+      _SearchTestApp(
+        initialLocation:
+            '${RouteNames.search}?q=free%20yoga&free=1&radius=5000',
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -338,14 +220,12 @@ void main() {
   });
 
   fullPageTestWidgets('opens create from saved conditions', (tester) async {
-    await tester.pumpWidget(_SearchTestApp());
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.byType(TextField).first,
-      'museum today under 10',
+    await tester.pumpWidget(
+      _SearchTestApp(
+        initialLocation:
+            '${RouteNames.search}?q=museum&category=art&budgetMax=10&radius=5000',
+      ),
     );
-    await tester.tap(find.text('Parse'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -360,7 +240,7 @@ void main() {
     expect(find.text('saved_search'), findsOneWidget);
     expect(find.text('Museum'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
-    expect(find.text('art'), findsOneWidget);
+    expect(find.text('art_culture_museums'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
   });
 }
@@ -484,7 +364,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       title: 'Утренняя йога',
       subtitle: 'Легкая практика',
       city: 'Резекне',
-      category: 'wellness',
+      category: 'wellness_recharge',
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
@@ -498,7 +378,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       title: 'Прогулка у озера',
       subtitle: 'Маршрут 5 км',
       city: 'Резекне',
-      category: 'outdoor',
+      category: 'outdoor_nature_walking',
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
@@ -512,7 +392,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       title: 'Museum today',
       subtitle: 'Guided visit',
       city: 'Резекне',
-      category: 'art',
+      category: 'art_culture_museums',
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,

@@ -2,6 +2,7 @@ class RouteNames {
   static const String splash = '/splash';
   static const String discover = '/discover';
   static const String search = '/search';
+  static const String smartSearch = '/smart-search';
   static const String discoverDetails = '/discover/details';
   static const String discoverMap = '/discover/map';
   static const String discoverResults = '/discover/results';
@@ -11,6 +12,7 @@ class RouteNames {
   static const String settings = '/settings';
   static const String signIn = '/auth/sign-in';
   static const String profile = '/profile';
+  static const String profileWorkspace = '/profile/workspace';
   static const String create = '/create';
   static const String createSuccess = '/create/success';
 }

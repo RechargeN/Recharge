@@ -10,6 +10,14 @@ import '../../application/notifications_providers.dart';
 import '../../application/state/notifications_state.dart';
 import '../../domain/entities/notification_item_entity.dart';
 
+enum _NotificationFeedFilter { all, newItems, reminders, updates }
+
+const Color _notificationsBackground = Color(0xFFF8FAF7);
+const Color _rechargeGreen = Color(0xFF0B3028);
+const Color _notificationFeedCard = Color(0xFF004532);
+const Color _notificationUnreadDot = Color(0xFF86F076);
+const Color _notificationsChip = Color(0xFFEAF0EA);
+
 class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({super.key});
 
@@ -19,7 +27,7 @@ class NotificationsPage extends ConsumerStatefulWidget {
 
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   String? _loadedUserId;
-  bool _unreadOnly = false;
+  _NotificationFeedFilter _filter = _NotificationFeedFilter.all;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +39,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
     if (user == null) {
       return const Scaffold(
+        backgroundColor: _notificationsBackground,
         body: Center(child: Text('Требуется авторизация')),
       );
     }
@@ -44,8 +53,26 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     }
 
     return Scaffold(
+      backgroundColor: _notificationsBackground,
       appBar: AppBar(
-        title: Text('Inbox (${state.unreadCount})'),
+        backgroundColor: _notificationsBackground,
+        foregroundColor: _rechargeGreen,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'RECHARGE',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        actions: <Widget>[
+          if (state.status == NotificationsStatus.ready &&
+              state.unreadCount > 0)
+            IconButton(
+              tooltip: 'Read all',
+              onPressed: controller.markAllAsRead,
+              icon: const Icon(Icons.done_all),
+            ),
+        ],
       ),
       body: switch (state.status) {
         NotificationsStatus.initial || NotificationsStatus.loading =>
@@ -81,53 +108,64 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       );
     }
 
-    final List<NotificationItemEntity> visibleItems = _unreadOnly
-        ? state.items
-            .where((NotificationItemEntity item) => !item.isRead)
-            .toList(growable: false)
-        : state.items;
+    final List<NotificationItemEntity> visibleItems =
+        _filteredItems(state.items);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      children: <Widget>[
-        _NotificationsHero(
-          totalCount: state.items.length,
-          unreadCount: state.unreadCount,
-          latestItem: state.items.first,
-          onRefresh: () => controller.loadNotifications(userId: userId),
-          onMarkAllRead: state.unreadCount == 0
-              ? null
-              : () => controller.markAllAsRead(),
-        ),
-        const SizedBox(height: 14),
-        _NotificationFilterBar(
-          unreadOnly: _unreadOnly,
-          onChanged: (bool next) {
-            setState(() => _unreadOnly = next);
-          },
-        ),
-        const SizedBox(height: 14),
-        if (visibleItems.isEmpty)
-          _FilteredNotificationsEmpty(
-            onShowAll: () => setState(() => _unreadOnly = false),
-          )
-        else
-          ...<Widget>[
-            _NotificationPrioritySummary(items: visibleItems),
-            const SizedBox(height: 14),
-            ..._notificationSectionsFor(visibleItems).map(
-              (_NotificationSectionData section) => _NotificationSectionBlock(
-                section: section,
-                itemBuilder: (NotificationItemEntity item) =>
-                    _notificationCardFor(
+    return RefreshIndicator(
+      color: _rechargeGreen,
+      onRefresh: () => controller.loadNotifications(userId: userId),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
+        children: <Widget>[
+          _NotificationFilterBar(
+            selected: _filter,
+            onChanged: (_NotificationFeedFilter next) {
+              setState(() => _filter = next);
+            },
+          ),
+          const SizedBox(height: 12),
+          if (visibleItems.isEmpty)
+            _FilteredNotificationsEmpty(
+              onShowAll: () =>
+                  setState(() => _filter = _NotificationFeedFilter.all),
+            )
+          else
+            ...visibleItems.map(
+              (NotificationItemEntity item) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _notificationCardFor(
                   item: item,
                   controller: controller,
                 ),
               ),
             ),
-          ],
-      ],
+        ],
+      ),
     );
+  }
+
+  List<NotificationItemEntity> _filteredItems(
+    List<NotificationItemEntity> items,
+  ) {
+    return switch (_filter) {
+      _NotificationFeedFilter.all => items,
+      _NotificationFeedFilter.newItems =>
+        items.where((NotificationItemEntity item) => !item.isRead).toList(
+              growable: false,
+            ),
+      _NotificationFeedFilter.reminders => items
+          .where(
+            (NotificationItemEntity item) =>
+                item.type == NotificationType.reminder,
+          )
+          .toList(growable: false),
+      _NotificationFeedFilter.updates => items
+          .where(
+            (NotificationItemEntity item) =>
+                item.type != NotificationType.reminder,
+          )
+          .toList(growable: false),
+    };
   }
 
   Widget _notificationCardFor({
@@ -136,7 +174,6 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }) {
     return _NotificationCard(
       item: item,
-      onMarkRead: item.isRead ? null : () => controller.markAsRead(item.id),
       onOpen: () => _openNotification(item),
       onOpenLocation: (String location) => _openNotification(
         item,
@@ -157,234 +194,47 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }
 }
 
-class _NotificationsHero extends StatelessWidget {
-  const _NotificationsHero({
-    required this.totalCount,
-    required this.unreadCount,
-    required this.latestItem,
-    required this.onRefresh,
-    required this.onMarkAllRead,
-  });
-
-  final int totalCount;
-  final int unreadCount;
-  final NotificationItemEntity latestItem;
-  final Future<void> Function() onRefresh;
-  final Future<void> Function()? onMarkAllRead;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(Icons.notifications_active, color: colorScheme.onPrimary),
-                const SizedBox(width: 8),
-                Text(
-                  'Recharge inbox',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              latestItem.title,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                _HeroPill(label: '$unreadCount unread'),
-                _HeroPill(label: '$totalCount total'),
-                _HeroPill(label: _formatDate(latestItem.createdAtUtc)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onMarkAllRead,
-                    icon: const Icon(Icons.done_all),
-                    label: const Text('Read all'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                IconButton.outlined(
-                  tooltip: 'Обновить',
-                  onPressed: onRefresh,
-                  icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
-                  style: IconButton.styleFrom(
-                    side: BorderSide(
-                      color: colorScheme.onPrimary.withValues(alpha: 0.48),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroPill extends StatelessWidget {
-  const _HeroPill({
-    required this.label,
-  });
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.onPrimary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-      ),
-    );
-  }
-}
-
 class _NotificationFilterBar extends StatelessWidget {
   const _NotificationFilterBar({
-    required this.unreadOnly,
+    required this.selected,
     required this.onChanged,
   });
 
-  final bool unreadOnly;
-  final ValueChanged<bool> onChanged;
+  final _NotificationFeedFilter selected;
+  final ValueChanged<_NotificationFeedFilter> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<bool>(
-      segments: const <ButtonSegment<bool>>[
-        ButtonSegment<bool>(
-          value: false,
-          icon: Icon(Icons.inbox),
-          label: Text('All'),
-        ),
-        ButtonSegment<bool>(
-          value: true,
-          icon: Icon(Icons.mark_email_unread),
-          label: Text('Unread'),
-        ),
-      ],
-      selected: <bool>{unreadOnly},
-      onSelectionChanged: (Set<bool> values) {
-        onChanged(values.first);
-      },
-    );
-  }
-}
-
-class _NotificationPrioritySummary extends StatelessWidget {
-  const _NotificationPrioritySummary({
-    required this.items,
-  });
-
-  final List<NotificationItemEntity> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<_NotificationSectionData> sections =
-        _notificationSectionsFor(items);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: sections
-          .map(
-            (_NotificationSectionData section) => _NotificationMetaChip(
-              icon: section.icon,
-              label: '${section.shortLabel} ${section.items.length}',
-            ),
-          )
-          .toList(growable: false),
-    );
-  }
-}
-
-class _NotificationSectionBlock extends StatelessWidget {
-  const _NotificationSectionBlock({
-    required this.section,
-    required this.itemBuilder,
-  });
-
-  final _NotificationSectionData section;
-  final Widget Function(NotificationItemEntity item) itemBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: <Widget>[
-                Icon(section.icon, size: 18, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        section.title,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                      ),
-                      Text(
-                        section.subtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                _NotificationCountBadge(count: section.items.length),
-              ],
-            ),
+          _NotificationFilterChip(
+            icon: Icons.apps_rounded,
+            label: 'All',
+            selected: selected == _NotificationFeedFilter.all,
+            onTap: () => onChanged(_NotificationFeedFilter.all),
           ),
-          ...section.items.map(
-            (NotificationItemEntity item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: itemBuilder(item),
-            ),
+          const SizedBox(width: 8),
+          _NotificationFilterChip(
+            icon: Icons.fiber_new_outlined,
+            label: 'New',
+            selected: selected == _NotificationFeedFilter.newItems,
+            onTap: () => onChanged(_NotificationFeedFilter.newItems),
+          ),
+          const SizedBox(width: 8),
+          _NotificationFilterChip(
+            icon: Icons.notifications_none,
+            label: 'Reminders',
+            selected: selected == _NotificationFeedFilter.reminders,
+            onTap: () => onChanged(_NotificationFeedFilter.reminders),
+          ),
+          const SizedBox(width: 8),
+          _NotificationFilterChip(
+            icon: Icons.sync,
+            label: 'Updates',
+            selected: selected == _NotificationFeedFilter.updates,
+            onTap: () => onChanged(_NotificationFeedFilter.updates),
           ),
         ],
       ),
@@ -392,29 +242,49 @@ class _NotificationSectionBlock extends StatelessWidget {
   }
 }
 
-class _NotificationCountBadge extends StatelessWidget {
-  const _NotificationCountBadge({
-    required this.count,
+class _NotificationFilterChip extends StatelessWidget {
+  const _NotificationFilterChip({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
   });
 
-  final int count;
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        child: Text(
-          '$count',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.onPrimaryContainer,
+    final Color background = selected ? _rechargeGreen : _notificationsChip;
+    final Color foreground = selected ? Colors.white : _rechargeGreen;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected ? _rechargeGreen : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon, size: 15, color: foreground),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: foreground,
+                fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
+            ),
+          ],
         ),
       ),
     );
@@ -426,17 +296,14 @@ class _NotificationCard extends StatelessWidget {
     required this.item,
     required this.onOpen,
     required this.onOpenLocation,
-    required this.onMarkRead,
   });
 
   final NotificationItemEntity item;
   final VoidCallback onOpen;
   final Future<void> Function(String location) onOpenLocation;
-  final Future<void> Function()? onMarkRead;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final _NotificationDestination destination =
         _notificationDestinationFor(item.targetRoute);
     final _NotificationRoutePreview? routePreview =
@@ -445,216 +312,200 @@ class _NotificationCard extends StatelessWidget {
         routePreview?.actionTargets ?? const <_NotificationRouteAction>[];
     final bool hasTargetRoute =
         item.targetRoute != null && item.targetRoute!.trim().isNotEmpty;
-    final Color borderColor = item.isRead
-        ? colorScheme.outline.withValues(alpha: 0.16)
-        : colorScheme.primary.withValues(alpha: 0.44);
+    final bool hasMenu = hasTargetRoute || routeActions.isNotEmpty;
     return InkWell(
       onTap: onOpen,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(10),
       child: Ink(
-        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: item.isRead
-              ? colorScheme.surface
-              : colorScheme.primaryContainer.withValues(alpha: 0.46),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: borderColor),
+          color: _notificationFeedCard,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: item.isRead ? 0.08 : 0.18),
+          ),
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Color(0x1A003F32),
+              blurRadius: 16,
+              offset: Offset(0, 8),
+            ),
+          ],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _TypeIcon(type: item.type, isRead: item.isRead),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 72),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _TypeIcon(type: item.type),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                        ),
-                      ),
-                      _ReadBadge(isRead: item.isRead),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.body,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      _NotificationMetaChip(
-                        icon: destination.icon,
-                        label: destination.label,
-                      ),
-                      _NotificationMetaChip(
-                        icon: Icons.schedule,
-                        label: _formatDate(item.createdAtUtc),
-                      ),
-                    ],
-                  ),
-                  if (routePreview != null) ...<Widget>[
-                    const SizedBox(height: 10),
-                    _NotificationRoutePreviewPanel(preview: routePreview),
-                  ],
-                  if (routeActions.isNotEmpty) ...<Widget>[
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: routeActions
-                          .map(
-                            (_NotificationRouteAction action) =>
-                                OutlinedButton.icon(
-                              onPressed: () {
-                                onOpenLocation(action.location);
-                              },
-                              icon: Icon(action.icon, size: 18),
-                              label: Text(action.label),
+                      Text(
+                        item.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
                             ),
-                          )
-                          .toList(growable: false),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Row(
-                    children: <Widget>[
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.82),
+                              height: 1.18,
+                            ),
+                      ),
                       if (hasTargetRoute) ...<Widget>[
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: onOpen,
-                            icon: Icon(destination.icon),
-                            label: Text(destination.actionLabel),
-                          ),
+                        const SizedBox(height: 5),
+                        Text(
+                          destination.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.68),
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
-                        const SizedBox(width: 10),
-                      ] else
-                        const Spacer(),
-                      if (onMarkRead != null)
-                        IconButton(
-                          tooltip: 'Отметить как прочитанное',
-                          icon: const Icon(Icons.mark_email_read),
-                          onPressed: onMarkRead,
-                        )
-                      else
-                        const Text('Прочитано'),
+                      ],
                     ],
                   ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 42,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        _formatTime(item.createdAtUtc),
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.82),
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      if (hasMenu) ...<Widget>[
+                        const SizedBox(height: 6),
+                        _NotificationActionsMenu(
+                          destination: destination,
+                          routeActions: routeActions,
+                          onOpen: onOpen,
+                          onOpenLocation: onOpenLocation,
+                        ),
+                      ] else
+                        const SizedBox(height: 18),
+                      const SizedBox(height: 6),
+                      _UnreadDot(isRead: item.isRead),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationActionsMenu extends StatelessWidget {
+  const _NotificationActionsMenu({
+    required this.destination,
+    required this.routeActions,
+    required this.onOpen,
+    required this.onOpenLocation,
+  });
+
+  final _NotificationDestination destination;
+  final List<_NotificationRouteAction> routeActions;
+  final VoidCallback onOpen;
+  final Future<void> Function(String location) onOpenLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_NotificationMenuAction>(
+      tooltip: 'Notification actions',
+      icon: const Icon(Icons.more_horiz, color: Colors.white, size: 18),
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 38, minHeight: 32),
+      color: Colors.white,
+      onSelected: (_NotificationMenuAction action) {
+        if (action.location == null) {
+          onOpen();
+          return;
+        }
+        onOpenLocation(action.location!);
+      },
+      itemBuilder: (BuildContext context) {
+        return <PopupMenuEntry<_NotificationMenuAction>>[
+          PopupMenuItem<_NotificationMenuAction>(
+            value: _NotificationMenuAction(
+              location: null,
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(destination.icon, size: 18),
+                const SizedBox(width: 8),
+                Text(destination.actionLabel),
+              ],
+            ),
+          ),
+          ...routeActions.map(
+            (_NotificationRouteAction action) =>
+                PopupMenuItem<_NotificationMenuAction>(
+              value: _NotificationMenuAction(
+                location: action.location,
+              ),
+              child: Row(
+                children: <Widget>[
+                  Icon(action.icon, size: 18),
+                  const SizedBox(width: 8),
+                  Text(action.label),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NotificationRoutePreviewPanel extends StatelessWidget {
-  const _NotificationRoutePreviewPanel({
-    required this.preview,
-  });
-
-  final _NotificationRoutePreview preview;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle? labelStyle =
-        Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: <Widget>[
-            if (preview.moodLabel != null)
-              _NotificationMetaChip(
-                icon: Icons.self_improvement,
-                label: preview.moodLabel!,
-              ),
-            if (preview.durationLabel != null)
-              _NotificationMetaChip(
-                icon: Icons.timer_outlined,
-                label: preview.durationLabel!,
-              ),
-            if (preview.freeOnly)
-              const _NotificationMetaChip(
-                icon: Icons.savings_outlined,
-                label: 'Free',
-              ),
-            if (preview.walkingOnly)
-              const _NotificationMetaChip(
-                icon: Icons.directions_walk,
-                label: 'Walking',
-              ),
-            if (preview.stepLabels.isNotEmpty)
-              _NotificationMetaChip(
-                icon: Icons.alt_route,
-                label: '${preview.stepLabels.length} stops',
-              ),
-          ],
-        ),
-        if (preview.stepLabels.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
-          Text(
-            preview.stepLabels.join(' · '),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: labelStyle,
           ),
-        ],
-      ],
+        ];
+      },
     );
   }
 }
 
-class _NotificationMetaChip extends StatelessWidget {
-  const _NotificationMetaChip({
-    required this.icon,
-    required this.label,
+class _NotificationMenuAction {
+  const _NotificationMenuAction({
+    required this.location,
   });
 
-  final IconData icon;
-  final String label;
+  final String? location;
+}
+
+class _UnreadDot extends StatelessWidget {
+  const _UnreadDot({required this.isRead});
+
+  final bool isRead;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.74),
-        borderRadius: BorderRadius.circular(18),
+        color: isRead
+            ? Colors.white.withValues(alpha: 0.22)
+            : _notificationUnreadDot,
+        shape: BoxShape.circle,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: 15, color: colorScheme.primary),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-          ],
-        ),
-      ),
+      child: const SizedBox(width: 8, height: 8),
     );
   }
 }
@@ -707,8 +558,10 @@ class _NotificationRoutePreview {
 
   String get subtitleLabel {
     final List<String> parts = <String>[
-      if (stepCategories.isNotEmpty) '${stepCategories.length} stops',
+      if (stepLabels.isNotEmpty) '${stepLabels.length} stops',
       if (durationLabel != null) durationLabel!,
+      if (freeOnly) 'Free',
+      if (walkingOnly) 'Walking',
     ];
     return parts.isEmpty ? 'Scenario route' : parts.join(' · ');
   }
@@ -835,119 +688,6 @@ class _NotificationRouteAction {
   final IconData icon;
   final String label;
   final String location;
-}
-
-enum _NotificationSectionKind {
-  actionNeeded,
-  routePlans,
-  creatorUpdates,
-  otherUpdates,
-}
-
-class _NotificationSectionData {
-  const _NotificationSectionData({
-    required this.kind,
-    required this.items,
-  });
-
-  final _NotificationSectionKind kind;
-  final List<NotificationItemEntity> items;
-
-  String get title {
-    return switch (kind) {
-      _NotificationSectionKind.actionNeeded => 'Action needed',
-      _NotificationSectionKind.routePlans => 'Route plans',
-      _NotificationSectionKind.creatorUpdates => 'Creator updates',
-      _NotificationSectionKind.otherUpdates => 'Other updates',
-    };
-  }
-
-  String get shortLabel {
-    return switch (kind) {
-      _NotificationSectionKind.actionNeeded => 'Actions',
-      _NotificationSectionKind.routePlans => 'Routes',
-      _NotificationSectionKind.creatorUpdates => 'Creator',
-      _NotificationSectionKind.otherUpdates => 'Updates',
-    };
-  }
-
-  String get subtitle {
-    return switch (kind) {
-      _NotificationSectionKind.actionNeeded =>
-        'Open tasks and reminders that need a next step.',
-      _NotificationSectionKind.routePlans =>
-        'Scenario routes ready to build, map, or publish.',
-      _NotificationSectionKind.creatorUpdates =>
-        'Publishing, moderation, and creator workspace updates.',
-      _NotificationSectionKind.otherUpdates =>
-        'General Recharge news and activity updates.',
-    };
-  }
-
-  IconData get icon {
-    return switch (kind) {
-      _NotificationSectionKind.actionNeeded => Icons.priority_high,
-      _NotificationSectionKind.routePlans => Icons.route,
-      _NotificationSectionKind.creatorUpdates => Icons.storefront_outlined,
-      _NotificationSectionKind.otherUpdates => Icons.info_outline,
-    };
-  }
-}
-
-List<_NotificationSectionData> _notificationSectionsFor(
-  List<NotificationItemEntity> items,
-) {
-  final Map<_NotificationSectionKind, List<NotificationItemEntity>> buckets =
-      <_NotificationSectionKind, List<NotificationItemEntity>>{
-    for (final _NotificationSectionKind kind in _NotificationSectionKind.values)
-      kind: <NotificationItemEntity>[],
-  };
-
-  for (final NotificationItemEntity item in items) {
-    buckets[_notificationSectionKindFor(item)]!.add(item);
-  }
-
-  return _NotificationSectionKind.values
-      .map(
-        (_NotificationSectionKind kind) => _NotificationSectionData(
-          kind: kind,
-          items: List<NotificationItemEntity>.unmodifiable(buckets[kind]!),
-        ),
-      )
-      .where((_NotificationSectionData section) => section.items.isNotEmpty)
-      .toList(growable: false);
-}
-
-_NotificationSectionKind _notificationSectionKindFor(
-  NotificationItemEntity item,
-) {
-  if (_NotificationRoutePreview.fromTargetRoute(item.targetRoute) != null) {
-    return _NotificationSectionKind.routePlans;
-  }
-
-  final String path = _pathForTargetRoute(item.targetRoute);
-  final Map<String, String> query = _queryForTargetRoute(item.targetRoute);
-  if (_isCreatorNotificationTarget(path: path, query: query)) {
-    return _NotificationSectionKind.creatorUpdates;
-  }
-
-  final bool hasTargetRoute =
-      item.targetRoute != null && item.targetRoute!.trim().isNotEmpty;
-  if (!item.isRead &&
-      (hasTargetRoute || item.type == NotificationType.reminder)) {
-    return _NotificationSectionKind.actionNeeded;
-  }
-
-  return _NotificationSectionKind.otherUpdates;
-}
-
-bool _isCreatorNotificationTarget({
-  required String path,
-  required Map<String, String> query,
-}) {
-  if (path == RouteNames.profile) return true;
-  if (path != RouteNames.create) return false;
-  return query['source'] == 'publish' || query['status'] == 'pendingReview';
 }
 
 class _NotificationDestination {
@@ -1082,50 +822,15 @@ String _humanizeQueryLabel(String value) {
   return normalized[0].toUpperCase() + normalized.substring(1);
 }
 
-class _ReadBadge extends StatelessWidget {
-  const _ReadBadge({
-    required this.isRead,
-  });
-
-  final bool isRead;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: isRead
-            ? colorScheme.secondaryContainer.withValues(alpha: 0.52)
-            : colorScheme.primary,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        child: Text(
-          isRead ? 'Read' : 'New',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isRead ? colorScheme.onSecondaryContainer : colorScheme.onPrimary,
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-      ),
-    );
-  }
-}
-
 class _TypeIcon extends StatelessWidget {
   const _TypeIcon({
     required this.type,
-    required this.isRead,
   });
 
   final NotificationType type;
-  final bool isRead;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color color = isRead ? colorScheme.outline : colorScheme.primary;
     final IconData icon = switch (type) {
       NotificationType.system => Icons.info,
       NotificationType.reminder => Icons.alarm,
@@ -1133,12 +838,13 @@ class _TypeIcon extends StatelessWidget {
     };
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.52)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Icon(icon, color: color),
+        padding: const EdgeInsets.all(9),
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }
@@ -1159,7 +865,7 @@ class _FilteredNotificationsEmpty extends StatelessWidget {
         children: <Widget>[
           const Icon(Icons.mark_email_read, size: 36),
           const SizedBox(height: 10),
-          const Text('Непрочитанных уведомлений нет'),
+          const Text('В этом фильтре пока пусто'),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onShowAll,
@@ -1203,11 +909,9 @@ class _StateMessage extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime value) {
+String _formatTime(DateTime value) {
   final DateTime local = value.toLocal();
-  final String day = local.day.toString().padLeft(2, '0');
-  final String month = local.month.toString().padLeft(2, '0');
   final String hour = local.hour.toString().padLeft(2, '0');
   final String minute = local.minute.toString().padLeft(2, '0');
-  return '$day.$month ${local.year}, $hour:$minute';
+  return '$hour:$minute';
 }

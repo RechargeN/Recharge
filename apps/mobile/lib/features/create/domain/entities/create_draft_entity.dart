@@ -1,26 +1,76 @@
-enum CreateObjectType { event, place }
+enum CreateObjectType {
+  event,
+  activity,
+  route,
+  place,
+  session,
+  quickPlan,
+  findPeople,
+  classWorkshop,
+  rental,
+  collection,
+}
+
+extension CreateObjectTypeIds on CreateObjectType {
+  String get taxonomyId {
+    return switch (this) {
+      CreateObjectType.event => 'event',
+      CreateObjectType.activity => 'activity',
+      CreateObjectType.route => 'route',
+      CreateObjectType.place => 'place',
+      CreateObjectType.session => 'session',
+      CreateObjectType.quickPlan => 'quick_plan',
+      CreateObjectType.findPeople => 'find_people',
+      CreateObjectType.classWorkshop => 'class_workshop',
+      CreateObjectType.rental => 'rental',
+      CreateObjectType.collection => 'collection',
+    };
+  }
+}
+
+CreateObjectType createObjectTypeFromId(String value) {
+  final String normalized = value.trim().toLowerCase().replaceAll('-', '_');
+  for (final CreateObjectType type in CreateObjectType.values) {
+    if (type.taxonomyId == normalized ||
+        type.name.toLowerCase() == normalized) {
+      return type;
+    }
+  }
+  return switch (normalized) {
+    'quickplan' => CreateObjectType.quickPlan,
+    'social_request' || 'socialrequest' => CreateObjectType.findPeople,
+    'private_plan' || 'privateplan' => CreateObjectType.quickPlan,
+    'venue' => CreateObjectType.place,
+    'bookable_slot' || 'bookableslot' || 'offer' => CreateObjectType.session,
+    'announcement' => CreateObjectType.event,
+    'findpeople' => CreateObjectType.findPeople,
+    'classworkshop' => CreateObjectType.classWorkshop,
+    _ => CreateObjectType.event,
+  };
+}
 
 enum DraftStatus { draft, pendingReview, published, archived, hidden, deleted }
 
 enum ModerationStatus { none, pending, approved, rejected }
 
-enum PublishStatus { draft, pendingReview, published, archived, hidden, deleted }
+enum PublishStatus {
+  draft,
+  pendingReview,
+  published,
+  archived,
+  hidden,
+  deleted,
+}
 
 enum VisibilityType { public, private, unlisted }
 
 class MediaEntity {
-  const MediaEntity({
-    required this.coverImage,
-    required this.gallery,
-  });
+  const MediaEntity({required this.coverImage, required this.gallery});
 
   final String coverImage;
   final List<String> gallery;
 
-  MediaEntity copyWith({
-    String? coverImage,
-    List<String>? gallery,
-  }) {
+  MediaEntity copyWith({String? coverImage, List<String>? gallery}) {
     return MediaEntity(
       coverImage: coverImage ?? this.coverImage,
       gallery: gallery ?? this.gallery,
@@ -39,6 +89,7 @@ class CreateDraftEntity {
     required this.tags,
     required this.shortDescription,
     required this.fullDescription,
+    required this.sectionData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -95,6 +146,7 @@ class CreateDraftEntity {
   final List<String> tags;
   final String shortDescription;
   final String fullDescription;
+  final Map<String, Object?> sectionData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -164,6 +216,7 @@ class CreateDraftEntity {
       tags: const <String>[],
       shortDescription: '',
       fullDescription: '',
+      sectionData: const <String, Object?>{},
       startDateTimeUtc: null,
       endDateTimeUtc: null,
       durationMinutes: null,
@@ -199,10 +252,7 @@ class CreateDraftEntity {
       organizerProfileLink: '',
       organizerPhone: '',
       organizerEmail: organizerEmail,
-      media: const MediaEntity(
-        coverImage: '',
-        gallery: <String>[],
-      ),
+      media: const MediaEntity(coverImage: '', gallery: <String>[]),
       draftStatus: DraftStatus.draft,
       moderationStatus: ModerationStatus.none,
       publishStatus: PublishStatus.draft,
@@ -223,6 +273,7 @@ class CreateDraftEntity {
     List<String>? tags,
     String? shortDescription,
     String? fullDescription,
+    Map<String, Object?>? sectionData,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -288,11 +339,13 @@ class CreateDraftEntity {
       tags: tags ?? this.tags,
       shortDescription: shortDescription ?? this.shortDescription,
       fullDescription: fullDescription ?? this.fullDescription,
+      sectionData: sectionData ?? this.sectionData,
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),
-      endDateTimeUtc:
-          clearEndDateTimeUtc ? null : (endDateTimeUtc ?? this.endDateTimeUtc),
+      endDateTimeUtc: clearEndDateTimeUtc
+          ? null
+          : (endDateTimeUtc ?? this.endDateTimeUtc),
       durationMinutes: clearDurationMinutes
           ? null
           : (durationMinutes ?? this.durationMinutes),
@@ -308,10 +361,12 @@ class CreateDraftEntity {
       latitude: clearLatitude ? null : (latitude ?? this.latitude),
       longitude: clearLongitude ? null : (longitude ?? this.longitude),
       meetingPoint: meetingPoint ?? this.meetingPoint,
-      minParticipants:
-          clearMinParticipants ? null : (minParticipants ?? this.minParticipants),
-      maxParticipants:
-          clearMaxParticipants ? null : (maxParticipants ?? this.maxParticipants),
+      minParticipants: clearMinParticipants
+          ? null
+          : (minParticipants ?? this.minParticipants),
+      maxParticipants: clearMaxParticipants
+          ? null
+          : (maxParticipants ?? this.maxParticipants),
       currentParticipants: currentParticipants ?? this.currentParticipants,
       ageMin: clearAgeMin ? null : (ageMin ?? this.ageMin),
       ageMax: clearAgeMax ? null : (ageMax ?? this.ageMax),
@@ -340,8 +395,9 @@ class CreateDraftEntity {
       reportCount: reportCount ?? this.reportCount,
       createdAtUtc: createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
-      publishedAtUtc:
-          clearPublishedAtUtc ? null : (publishedAtUtc ?? this.publishedAtUtc),
+      publishedAtUtc: clearPublishedAtUtc
+          ? null
+          : (publishedAtUtc ?? this.publishedAtUtc),
     );
   }
 }

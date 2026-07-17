@@ -15,37 +15,37 @@ class RechargeAppShell extends StatelessWidget {
 
   static const List<_RechargeDestination> _destinations =
       <_RechargeDestination>[
-    _RechargeDestination(
-      label: 'Главная',
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home_rounded,
-      route: RouteNames.discover,
-    ),
-    _RechargeDestination(
-      label: 'Избранное',
-      icon: Icons.favorite_border_rounded,
-      selectedIcon: Icons.favorite_rounded,
-      route: RouteNames.favorites,
-    ),
-    _RechargeDestination(
-      label: 'Поиск',
-      icon: Icons.auto_awesome_outlined,
-      selectedIcon: Icons.auto_awesome,
-      route: RouteNames.search,
-    ),
-    _RechargeDestination(
-      label: 'Уведомления',
-      icon: Icons.notifications_none_rounded,
-      selectedIcon: Icons.notifications_rounded,
-      route: RouteNames.notifications,
-    ),
-    _RechargeDestination(
-      label: 'Профиль',
-      icon: Icons.person_outline_rounded,
-      selectedIcon: Icons.person_rounded,
-      route: RouteNames.profile,
-    ),
-  ];
+        _RechargeDestination(
+          label: 'Главная',
+          icon: Icons.home_outlined,
+          selectedIcon: Icons.home_rounded,
+          route: RouteNames.discover,
+        ),
+        _RechargeDestination(
+          label: 'Избранное',
+          icon: Icons.favorite_border_rounded,
+          selectedIcon: Icons.favorite_rounded,
+          route: RouteNames.favorites,
+        ),
+        _RechargeDestination(
+          label: 'Smart Search',
+          icon: Icons.auto_awesome_outlined,
+          selectedIcon: Icons.auto_awesome,
+          route: RouteNames.smartSearch,
+        ),
+        _RechargeDestination(
+          label: 'Уведомления',
+          icon: Icons.notifications_none_rounded,
+          selectedIcon: Icons.notifications_rounded,
+          route: RouteNames.notifications,
+        ),
+        _RechargeDestination(
+          label: 'Профиль',
+          icon: Icons.person_outline_rounded,
+          selectedIcon: Icons.person_rounded,
+          route: RouteNames.profile,
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class RechargeAppShell extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndexFor(currentLocation),
         backgroundColor: colorScheme.surface,
-        indicatorColor: colorScheme.primaryContainer,
+        indicatorColor: Colors.transparent,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (int index) {
           final String targetRoute = _destinations[index].route;
@@ -80,14 +80,8 @@ class RechargeAppShell extends StatelessWidget {
         location.startsWith('${RouteNames.favorites}/')) {
       return 1;
     }
-    if (location == RouteNames.search ||
-        location == RouteNames.discoverResults ||
-        location == RouteNames.discoverMap ||
-        location == RouteNames.scenarioBuilder ||
-        location.startsWith('${RouteNames.search}/') ||
-        location.startsWith('${RouteNames.discoverResults}/') ||
-        location.startsWith('${RouteNames.discoverMap}/') ||
-        location.startsWith('${RouteNames.scenarioBuilder}/')) {
+    if (location == RouteNames.smartSearch ||
+        location.startsWith('${RouteNames.smartSearch}/')) {
       return 2;
     }
     if (location == RouteNames.notifications ||
@@ -102,11 +96,9 @@ class RechargeAppShell extends StatelessWidget {
   }
 
   static bool _isSameTopLevelRoute(String location, String targetRoute) {
-    if (targetRoute == RouteNames.search) {
-      return location == RouteNames.search ||
-          location == RouteNames.discoverResults ||
-          location == RouteNames.discoverMap ||
-          location == RouteNames.scenarioBuilder;
+    if (targetRoute == RouteNames.smartSearch) {
+      return location == RouteNames.smartSearch ||
+          location.startsWith('${RouteNames.smartSearch}/');
     }
     return location == targetRoute;
   }

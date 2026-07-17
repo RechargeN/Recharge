@@ -1,3 +1,5 @@
+import '../../../core/config/recharge_taxonomy.dart';
+
 class SmartSearchParseResult {
   const SmartSearchParseResult({
     required this.originalText,
@@ -42,10 +44,7 @@ class SmartRouteIntent {
   final List<String> explanationChips;
 }
 
-enum SmartSearchDatePreset {
-  today,
-  tonight,
-}
+enum SmartSearchDatePreset { today, tonight }
 
 SmartSearchParseResult parseSmartSearch(String input) {
   final String normalized = input.trim().toLowerCase();
@@ -162,18 +161,9 @@ SmartSearchParseResult parseSmartSearch(String input) {
     removePhrase('any area');
   }
 
-  final Map<String, List<String>> categoryKeywords = <String, List<String>>{
-    'outdoor': <String>['outdoor', 'walk', 'walking', 'park', 'прогулка'],
-    'wellness': <String>['wellness', 'yoga', 'calm', 'recharge', 'йога'],
-    'art': <String>['art', 'museum', 'gallery', 'culture', 'музей'],
-    'music': <String>['music', 'concert', 'party', 'live', 'музыка'],
-    'family': <String>['family', 'kids', 'children', 'дети', 'семья'],
-  };
-  for (final MapEntry<String, List<String>> entry in categoryKeywords.entries) {
-    if (_containsAny(working, entry.value)) {
-      categories.add(entry.key);
-      chips.add(entry.key);
-    }
+  for (final String groupId in _taxonomyGroupsFor(working)) {
+    categories.add(groupId);
+    chips.add(rechargeContentGroupById(groupId)?.title ?? groupId);
   }
 
   final String queryText = working
@@ -229,18 +219,156 @@ const Set<String> _stopWords = <String>{
   'покажи',
 };
 
+const Map<String, List<String>> _groupIntentSignals = <String, List<String>>{
+  'music_nightlife': <String>[
+    'music',
+    'concert',
+    'party',
+    'nightlife',
+    'музыка',
+    'концерт',
+    'вечеринка',
+  ],
+  'comedy_theatre_performance': <String>[
+    'comedy',
+    'theatre',
+    'standup',
+    'performance',
+  ],
+  'cinema_screenings': <String>['cinema', 'movie', 'film', 'screening'],
+  'art_culture_museums': <String>[
+    'art',
+    'culture',
+    'museum',
+    'gallery',
+    'искусство',
+    'культура',
+    'музей',
+    'галерея',
+  ],
+  'education_talks': <String>['lecture', 'talk', 'education', 'book club'],
+  'business_networking': <String>[
+    'business',
+    'networking',
+    'startup',
+    'conference',
+  ],
+  'workshops_masterclasses': <String>['workshop', 'masterclass', 'craft'],
+  'language_social_learning': <String>[
+    'language',
+    'conversation club',
+    'expats',
+  ],
+  'food_drinks': <String>['food', 'coffee', 'brunch', 'dinner', 'drinks'],
+  'games_indoor': <String>['games', 'quiz', 'chess', 'bowling'],
+  'sport': <String>['sport', 'tennis', 'football', 'running', 'тренировка'],
+  'dance': <String>['dance', 'salsa', 'bachata', 'tango'],
+  'outdoor_nature_walking': <String>[
+    'outdoor',
+    'walk',
+    'hiking',
+    'nature',
+    'прогулка',
+    'парк',
+    'природа',
+    'поход',
+  ],
+  'water_activities': <String>['water activity', 'kayak', 'sup', 'sailing'],
+  'winter_seasonal': <String>['winter', 'skiing', 'snowboard', 'ice skating'],
+  'travel_tours': <String>['travel', 'tour', 'trip', 'excursion'],
+  'family_kids': <String>[
+    'family',
+    'kids',
+    'children',
+    'дети',
+    'семья',
+    'семейный',
+  ],
+  'pets_animals': <String>['pets', 'animals', 'dog', 'cat'],
+  'community_charity': <String>['community', 'charity', 'volunteer', 'cleanup'],
+  'markets_fairs': <String>['market', 'fair', 'flea market'],
+  'holidays_seasonal': <String>[
+    'holiday',
+    'christmas',
+    'new year',
+    'halloween',
+  ],
+  'wellness_recharge': <String>[
+    'wellness',
+    'yoga',
+    'calm',
+    'recharge',
+    'meditation',
+    'йога',
+    'спокойно',
+    'отдых',
+  ],
+};
+
 bool _containsAny(String source, List<String> values) {
   return values.any((String value) => source.contains(value));
 }
 
+Set<String> _taxonomyGroupsFor(String source) {
+  final Set<String> directMatches = <String>{};
+  for (final MapEntry<String, List<String>> entry
+      in _groupIntentSignals.entries) {
+    if (entry.value.any(
+      (String signal) => _containsTaxonomySignal(source, signal),
+    )) {
+      directMatches.add(entry.key);
+    }
+  }
+  if (directMatches.isNotEmpty) return directMatches;
+
+  final Set<String> categoryMatches = <String>{};
+  for (final RechargeContentGroup group in rechargeVisibleContentGroups) {
+    final Iterable<RechargeActivityCategory> groupCategories =
+        rechargeActivityCategories.where(
+          (RechargeActivityCategory category) =>
+              category.contentGroupId == group.id,
+        );
+    final List<String> signals = <String>[
+      group.id,
+      group.title,
+      for (final RechargeActivityCategory category
+          in groupCategories) ...<String>[
+        category.slug,
+        category.title,
+        ...category.aliases,
+        ...category.keywordsEn,
+        ...category.keywordsRu,
+        ...category.keywordsLv,
+      ],
+    ];
+    if (signals.any(
+      (String signal) => _containsTaxonomySignal(source, signal),
+    )) {
+      categoryMatches.add(group.id);
+    }
+  }
+  return categoryMatches;
+}
+
+bool _containsTaxonomySignal(String source, String signal) {
+  final String normalized = signal.trim().toLowerCase().replaceAll('_', ' ');
+  if (normalized.length < 3) return false;
+  return RegExp(
+    '(^|[^a-zа-яё0-9])${RegExp.escape(normalized)}([^a-zа-яё0-9]|\$)',
+    caseSensitive: false,
+  ).hasMatch(source);
+}
+
 double? _parseBudgetMax(String source) {
-  final RegExpMatch? explicit = RegExp(r'(under|до|up to)\s*(\d+)')
-      .firstMatch(source);
+  final RegExpMatch? explicit = RegExp(
+    r'(under|до|up to)\s*(\d+)',
+  ).firstMatch(source);
   if (explicit != null) {
     return double.parse(explicit.group(2)!);
   }
-  final RegExpMatch? currency =
-      RegExp(r'(\d+)\s*(eur|euro)').firstMatch(source);
+  final RegExpMatch? currency = RegExp(
+    r'(\d+)\s*(eur|euro)',
+  ).firstMatch(source);
   if (currency != null) {
     return double.parse(currency.group(1)!);
   }
@@ -357,10 +485,7 @@ List<String> _routeStepsFor(String normalized, String mood) {
 
   switch (mood) {
     case 'active':
-      return const <String>[
-        'sport.tennis',
-        'outdoor_nature_walking.city_walk',
-      ];
+      return const <String>['sport.tennis', 'outdoor_nature_walking.city_walk'];
     case 'social':
       return const <String>[
         'games_indoor.board_games',
