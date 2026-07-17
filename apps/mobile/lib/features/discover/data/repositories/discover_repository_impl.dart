@@ -107,6 +107,16 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
       return false;
     }
 
+    if (query.peopleCount != null) {
+      final int remainingCapacity = item.capacity - item.participantsCount;
+      if (remainingCapacity < query.peopleCount!) return false;
+    }
+
+    if (query.availableDurationMinutes != null &&
+        item.durationMinutes > query.availableDurationMinutes!) {
+      return false;
+    }
+
     return true;
   }
 

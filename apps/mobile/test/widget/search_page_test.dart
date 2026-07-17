@@ -14,10 +14,46 @@ import 'package:recharge/features/discover/domain/repositories/discover_preferen
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_results_page.dart';
+import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('renders the separate regular search landing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search Recharge'), findsOneWidget);
+    expect(find.text('Near me now'), findsOneWidget);
+    expect(find.text('For two'), findsOneWidget);
+    expect(find.text('Recent searches'), findsOneWidget);
+    expect(find.text('Smart Search'), findsNothing);
+
+    await tester.tap(find.text('For two'));
+    await tester.pump();
+    expect(find.text('2 people'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('regular search landing hands conditions to results', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('regular-search-field')),
+      'museum',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Results destination'), findsOneWidget);
+    expect(find.text('museum'), findsOneWidget);
+    expect(find.text('regular_search'), findsOneWidget);
+  });
+
   fullPageTestWidgets('renders search controls and results', (tester) async {
     await tester.pumpWidget(_SearchTestApp());
     await tester.pumpAndSettle();
@@ -243,6 +279,74 @@ void main() {
     expect(find.text('art_culture_museums'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
   });
+
+  fullPageTestWidgets(
+    'records a regular query in recent searches automatically',
+    (tester) async {
+      await tester.pumpWidget(
+        _SearchTestApp(
+          initialLocation:
+              '${RouteNames.search}?source=regular_search&q=museum&radius=5000',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Museum'), findsOneWidget);
+      expect(find.textContaining('5 km'), findsWidgets);
+    },
+  );
+}
+
+class _SearchLandingTestApp extends StatelessWidget {
+  _SearchLandingTestApp()
+    : _controller = DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
+          _FakeDiscoverRepository(),
+        ),
+        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+        analyticsService: _NoopAnalyticsService(),
+      );
+
+  final DiscoverFeedController _controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      overrides: <Override>[
+        discoverFeedControllerProvider.overrideWith((ref) => _controller),
+      ],
+      child: MaterialApp.router(
+        routerConfig: GoRouter(
+          initialLocation: RouteNames.search,
+          routes: <RouteBase>[
+            GoRoute(
+              path: RouteNames.search,
+              builder: (context, state) => const SearchPage(),
+            ),
+            GoRoute(
+              path: RouteNames.discoverResults,
+              builder: (context, state) => Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('Results destination'),
+                      Text(state.uri.queryParameters['q'] ?? ''),
+                      Text(state.uri.queryParameters['source'] ?? ''),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: RouteNames.scenarioBuilder,
+              builder: (context, state) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SearchTestApp extends StatelessWidget {

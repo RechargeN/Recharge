@@ -36,6 +36,13 @@ class ScenarioBuilderPage extends ConsumerStatefulWidget {
 class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
   String? _seedKey;
   bool _intentLoadScheduled = false;
+  late bool _previewMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _previewMode = widget.seedParameters['preview'] == '1';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,103 +64,119 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scenario Builder'),
+        title: Text(_previewMode ? 'My plan' : 'Scenario Builder'),
         actions: <Widget>[
-          IconButton(
-            tooltip: 'Reset',
-            onPressed: controller.reset,
-            icon: const Icon(Icons.restart_alt),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: <Widget>[
-          _ScenarioHero(
-            draft: draft,
-            onMap: () => context.go(_mapRouteForScenario(draft)),
-            onSearch: () => context.go(RouteNames.search),
-            onCreate: () => context.go(_createRouteForScenario(draft)),
-            onSave: () => _saveScenario(draft),
-            onCopy: () => _copyScenario(draft),
-          ),
-          const SizedBox(height: 14),
-          if (savedSearches.isNotEmpty ||
-              smartSearchHistory.isNotEmpty) ...<Widget>[
-            _ScenarioSavedIntentPanel(
-              savedSearches: savedSearches,
-              smartSearchHistory: smartSearchHistory,
-              onApplySaved: (SavedSearchEntity search) =>
-                  context.go(_scenarioBuilderRouteForSavedSearch(search)),
-              onMapSaved: (SavedSearchEntity search) =>
-                  context.go(_mapRouteForSavedSearch(search)),
-              onCreateSaved: (SavedSearchEntity search) =>
-                  context.go(_createRouteForSavedSearch(search)),
-              onApplySmart: (SmartSearchHistoryEntity item) =>
-                  context.go(_scenarioBuilderRouteForSmartSearch(item)),
-              onMapSmart: (SmartSearchHistoryEntity item) =>
-                  context.go(_mapRouteForSmartSearch(item)),
-              onCreateSmart: (SmartSearchHistoryEntity item) =>
-                  context.go(_createRouteForSmartSearch(item)),
-            ),
-            const SizedBox(height: 16),
-          ],
-          _ScenarioTemplateRail(
-            templates: _scenarioTemplates,
-            draft: draft,
-            onApply: _applyTemplate,
-          ),
-          const SizedBox(height: 16),
-          _BuilderControls(
-            draft: draft,
-            onMoodChanged: controller.setMood,
-            onDurationChanged: controller.setMaxDurationMinutes,
-            onFreeOnlyChanged: controller.setFreeOnly,
-            onWalkingOnlyChanged: controller.setWalkingOnly,
-          ),
-          const SizedBox(height: 16),
-          _RouteFitPanel(
-            draft: draft,
-            routeFit: state.routeFit,
-            onOptimize: controller.optimizeRoute,
-            onMap: () => context.go(_mapRouteForScenario(draft)),
-            onCreate: () => context.go(_createRouteForScenario(draft)),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Route steps',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 10),
-          if (draft.steps.isEmpty)
-            _EmptyScenario(onReset: controller.reset)
+          if (_previewMode)
+            TextButton.icon(
+              onPressed: () => setState(() => _previewMode = false),
+              icon: const Icon(Icons.edit_outlined),
+              label: const Text('Edit'),
+            )
           else
-            ...List<Widget>.generate(
-              draft.steps.length,
-              (int index) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _ScenarioStepCard(
-                  index: index,
-                  step: draft.steps[index],
-                  canMoveUp: index > 0,
-                  canMoveDown: index < draft.steps.length - 1,
-                  onMoveUp: () => controller.moveStepUp(index),
-                  onMoveDown: () => controller.moveStepDown(index),
-                  onRemove: () => controller.removeStepAt(index),
-                ),
-              ),
+            IconButton(
+              tooltip: 'Reset',
+              onPressed: controller.reset,
+              icon: const Icon(Icons.restart_alt),
             ),
-          if (suggestedSteps.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            _SuggestedStopsSection(
-              steps: suggestedSteps,
-              onAdd: controller.addSuggestedStep,
-            ),
-          ],
         ],
       ),
+      body: _previewMode
+          ? _ScenarioPreview(
+              title: widget.seedParameters['title'] ?? 'Your recharge plan',
+              draft: draft,
+              routeFit: state.routeFit,
+              onEdit: () => setState(() => _previewMode = false),
+              onMap: () => context.go(_mapRouteForScenario(draft)),
+              onSave: () => _saveScenario(draft),
+            )
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              children: <Widget>[
+                _ScenarioHero(
+                  draft: draft,
+                  onMap: () => context.go(_mapRouteForScenario(draft)),
+                  onSearch: () => context.go(RouteNames.search),
+                  onCreate: () => context.go(_createRouteForScenario(draft)),
+                  onSave: () => _saveScenario(draft),
+                  onCopy: () => _copyScenario(draft),
+                ),
+                const SizedBox(height: 14),
+                if (savedSearches.isNotEmpty ||
+                    smartSearchHistory.isNotEmpty) ...<Widget>[
+                  _ScenarioSavedIntentPanel(
+                    savedSearches: savedSearches,
+                    smartSearchHistory: smartSearchHistory,
+                    onApplySaved: (SavedSearchEntity search) =>
+                        context.go(_scenarioBuilderRouteForSavedSearch(search)),
+                    onMapSaved: (SavedSearchEntity search) =>
+                        context.go(_mapRouteForSavedSearch(search)),
+                    onCreateSaved: (SavedSearchEntity search) =>
+                        context.go(_createRouteForSavedSearch(search)),
+                    onApplySmart: (SmartSearchHistoryEntity item) =>
+                        context.go(_scenarioBuilderRouteForSmartSearch(item)),
+                    onMapSmart: (SmartSearchHistoryEntity item) =>
+                        context.go(_mapRouteForSmartSearch(item)),
+                    onCreateSmart: (SmartSearchHistoryEntity item) =>
+                        context.go(_createRouteForSmartSearch(item)),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                _ScenarioTemplateRail(
+                  templates: _scenarioTemplates,
+                  draft: draft,
+                  onApply: _applyTemplate,
+                ),
+                const SizedBox(height: 16),
+                _BuilderControls(
+                  draft: draft,
+                  onMoodChanged: controller.setMood,
+                  onDurationChanged: controller.setMaxDurationMinutes,
+                  onFreeOnlyChanged: controller.setFreeOnly,
+                  onWalkingOnlyChanged: controller.setWalkingOnly,
+                ),
+                const SizedBox(height: 16),
+                _RouteFitPanel(
+                  draft: draft,
+                  routeFit: state.routeFit,
+                  onOptimize: controller.optimizeRoute,
+                  onMap: () => context.go(_mapRouteForScenario(draft)),
+                  onCreate: () => context.go(_createRouteForScenario(draft)),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Route steps',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                if (draft.steps.isEmpty)
+                  _EmptyScenario(onReset: controller.reset)
+                else
+                  ...List<Widget>.generate(
+                    draft.steps.length,
+                    (int index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ScenarioStepCard(
+                        index: index,
+                        step: draft.steps[index],
+                        canMoveUp: index > 0,
+                        canMoveDown: index < draft.steps.length - 1,
+                        onMoveUp: () => controller.moveStepUp(index),
+                        onMoveDown: () => controller.moveStepDown(index),
+                        onRemove: () => controller.removeStepAt(index),
+                      ),
+                    ),
+                  ),
+                if (suggestedSteps.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 8),
+                  _SuggestedStopsSection(
+                    steps: suggestedSteps,
+                    onAdd: controller.addSuggestedStep,
+                  ),
+                ],
+              ],
+            ),
     );
   }
 
@@ -244,6 +267,394 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
       context,
     ).showSnackBar(SnackBar(content: Text('${template.title} applied')));
   }
+}
+
+class _ScenarioPreview extends StatelessWidget {
+  const _ScenarioPreview({
+    required this.title,
+    required this.draft,
+    required this.routeFit,
+    required this.onEdit,
+    required this.onMap,
+    required this.onSave,
+  });
+
+  final String title;
+  final ScenarioDraftEntity draft;
+  final ScenarioRouteFit routeFit;
+  final VoidCallback onEdit;
+  final VoidCallback onMap;
+  final Future<void> Function() onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+      children: <Widget>[
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.primary,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: colors.onPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.onPrimary.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        routeFit.label,
+                        style: TextStyle(
+                          color: colors.onPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${_moodLabel(draft.mood)} route, ready to follow or adjust.',
+                  style: TextStyle(
+                    color: colors.onPrimary.withValues(alpha: 0.82),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: <Widget>[
+                    _PreviewStat(
+                      icon: Icons.place_outlined,
+                      value: '${draft.steps.length}',
+                      label: 'stops',
+                    ),
+                    _PreviewStat(
+                      icon: Icons.schedule_outlined,
+                      value: _durationLabel(draft.totalDurationMinutes),
+                      label: 'total',
+                    ),
+                    _PreviewStat(
+                      icon: Icons.payments_outlined,
+                      value: draft.totalPriceAmount == 0
+                          ? 'Free'
+                          : '€${draft.totalPriceAmount.toStringAsFixed(0)}',
+                      label: 'budget',
+                    ),
+                    _PreviewStat(
+                      icon: Icons.directions_walk_outlined,
+                      value: '${draft.totalDistanceKm.toStringAsFixed(1)} km',
+                      label: 'route',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _ScenarioMapPreview(steps: draft.steps),
+        const SizedBox(height: 20),
+        Text(
+          'Your route',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 10),
+        if (draft.steps.isEmpty)
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(18),
+              child: Text(
+                'No stops fit these conditions yet. Edit the plan to add one.',
+              ),
+            ),
+          )
+        else
+          for (int index = 0; index < draft.steps.length; index++)
+            _PreviewTimelineStep(
+              index: index,
+              step: draft.steps[index],
+              isLast: index == draft.steps.length - 1,
+            ),
+        const SizedBox(height: 14),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: OutlinedButton.icon(
+                key: const Key('scenario-preview-edit'),
+                onPressed: onEdit,
+                icon: const Icon(Icons.tune_outlined),
+                label: const Text('Edit plan'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton.icon(
+                key: const Key('scenario-preview-map'),
+                onPressed: onMap,
+                icon: const Icon(Icons.map_outlined),
+                label: const Text('Open map'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () => onSave(),
+          icon: const Icon(Icons.bookmark_add_outlined),
+          label: const Text('Save this plan'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PreviewStat extends StatelessWidget {
+  const _PreviewStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color foreground = Theme.of(context).colorScheme.onPrimary;
+    return Expanded(
+      child: Column(
+        children: <Widget>[
+          Icon(icon, size: 18, color: foreground),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 1,
+            style: TextStyle(color: foreground, fontWeight: FontWeight.w800),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: foreground.withValues(alpha: 0.68),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScenarioMapPreview extends StatelessWidget {
+  const _ScenarioMapPreview({required this.steps});
+  final List<ScenarioStepEntity> steps;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Container(
+      height: 176,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: colors.primaryContainer.withValues(alpha: 0.44),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: CustomPaint(painter: _PreviewMapPainter(colors)),
+          ),
+          for (int index = 0; index < steps.length && index < 4; index++)
+            Positioned(
+              left: 34.0 + (index * 82),
+              top: index.isEven ? 38 : 96,
+              child: CircleAvatar(
+                radius: 17,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+          Positioned(
+            right: 12,
+            top: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Route preview',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreviewMapPainter extends CustomPainter {
+  const _PreviewMapPainter(this.colors);
+  final ColorScheme colors;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint street = Paint()
+      ..color = colors.surface.withValues(alpha: 0.72)
+      ..strokeWidth = 9
+      ..style = PaintingStyle.stroke;
+    final Paint route = Paint()
+      ..color = colors.primary
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(
+      Path()
+        ..moveTo(-10, size.height * 0.72)
+        ..quadraticBezierTo(
+          size.width * 0.35,
+          size.height * 0.25,
+          size.width + 12,
+          size.height * 0.5,
+        ),
+      street,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(50, 55)
+        ..cubicTo(100, 126, 178, 72, 292, 112),
+      route,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PreviewMapPainter oldDelegate) => false;
+}
+
+class _PreviewTimelineStep extends StatelessWidget {
+  const _PreviewTimelineStep({
+    required this.index,
+    required this.step,
+    required this.isLast,
+  });
+  final int index;
+  final ScenarioStepEntity step;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            width: 38,
+            child: Column(
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.onPrimary,
+                  child: Text('${index + 1}'),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: colors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    step.title,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    step.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 6,
+                    children: <Widget>[
+                      _TimelinePill('${step.durationMinutes} min'),
+                      _TimelinePill('${step.distanceKm.toStringAsFixed(1)} km'),
+                      _TimelinePill(
+                        step.isFree
+                            ? 'Free'
+                            : '€${step.priceAmount.toStringAsFixed(0)}',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimelinePill extends StatelessWidget {
+  const _TimelinePill(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+  );
+}
+
+String _durationLabel(int minutes) {
+  if (minutes < 60) return '$minutes min';
+  final int hours = minutes ~/ 60;
+  final int rest = minutes % 60;
+  return rest == 0 ? '${hours}h' : '${hours}h ${rest}m';
 }
 
 class _ScenarioHero extends StatelessWidget {

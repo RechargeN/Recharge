@@ -35,6 +35,37 @@ import 'package:recharge/features/scenarios/presentation/pages/scenario_builder_
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('opens a quick plan in preview-first mode', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _scenarioProviderScope(
+        child: const MaterialApp(
+          home: ScenarioBuilderPage(
+            seedParameters: <String, String>{
+              'preview': '1',
+              'title': 'After work',
+              'mood': 'calm',
+              'duration': '120',
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('My plan'), findsOneWidget);
+    expect(find.text('After work'), findsOneWidget);
+    expect(find.text('Your route'), findsOneWidget);
+    expect(find.byKey(const Key('scenario-preview-edit')), findsOneWidget);
+    expect(find.text('Builder controls'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('scenario-preview-edit')));
+    await tester.pumpAndSettle();
+    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Ready route ideas'), findsOneWidget);
+  });
+
   fullPageTestWidgets('renders scenario builder and updates mood', (
     tester,
   ) async {

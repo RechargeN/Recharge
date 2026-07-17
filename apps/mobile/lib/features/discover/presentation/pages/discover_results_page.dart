@@ -304,6 +304,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
       freeOnly: seedParameters['free'] == '1',
+      peopleCount: _intFromSeed(seedParameters['people']),
+      clearPeopleCount: !seedParameters.containsKey('people'),
       budgetMax: budgetMax,
       clearBudgetMin: true,
       clearBudgetMax: budgetMax == null,
@@ -313,7 +315,16 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       clearDateTo: dateTo == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
+      availableDurationMinutes: _intFromSeed(seedParameters['duration']),
+      clearAvailableDurationMinutes: !seedParameters.containsKey('duration'),
+      mood: seedParameters['mood'],
+      clearMood: !seedParameters.containsKey('mood'),
+      sourceScreen: seedParameters['source'] ?? 'search_results',
     );
+    if (seedParameters['source'] == 'regular_search') {
+      await controller.ensureSavedSearchesLoaded();
+      await controller.recordRecentSearch(controller.state.appliedQuery);
+    }
   }
 }
 
@@ -640,6 +651,9 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'dateTo',
     'radius',
     'unlimited',
+    'people',
+    'duration',
+    'mood',
   ];
   return supportedKeys.any(seedParameters.containsKey);
 }
@@ -662,6 +676,11 @@ List<String>? _categoriesFromSeed(Map<String, String> seedParameters) {
 double? _doubleFromSeed(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return double.tryParse(value.trim());
+}
+
+int? _intFromSeed(String? value) {
+  if (value == null || value.trim().isEmpty) return null;
+  return int.tryParse(value.trim());
 }
 
 DateTime? _dateFromSeed(String? value) {
@@ -736,6 +755,16 @@ class _ActiveConditionChips extends StatelessWidget {
         Chip(
           avatar: const Icon(Icons.group_outlined, size: 16),
           label: Text('${query.peopleCount} people'),
+        ),
+      if (query.availableDurationMinutes != null)
+        Chip(
+          avatar: const Icon(Icons.schedule_outlined, size: 16),
+          label: Text('${query.availableDurationMinutes} min'),
+        ),
+      if (query.mood != null)
+        Chip(
+          avatar: const Icon(Icons.nightlight_outlined, size: 16),
+          label: Text(_capitalized(query.mood!)),
         ),
       if (query.freeOnly)
         const Chip(

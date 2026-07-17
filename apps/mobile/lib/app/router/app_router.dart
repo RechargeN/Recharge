@@ -15,6 +15,7 @@ import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
+import '../../features/discover/presentation/pages/search_page.dart';
 import '../../features/discover/presentation/pages/smart_search_page.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
@@ -54,8 +55,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             name: 'search',
             path: RouteNames.search,
-            builder: (context, state) =>
-                DiscoverResultsPage(seedParameters: state.uri.queryParameters),
+            builder: (context, state) => const SearchPage(),
           ),
           GoRoute(
             name: 'smart_search',

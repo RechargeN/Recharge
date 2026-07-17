@@ -1,6 +1,4 @@
-enum DiscoverSortMode {
-  geoFreshness,
-}
+enum DiscoverSortMode { geoFreshness }
 
 class DiscoverQuery {
   const DiscoverQuery({
@@ -10,6 +8,8 @@ class DiscoverQuery {
     required this.dateFrom,
     required this.dateTo,
     required this.peopleCount,
+    this.availableDurationMinutes,
+    this.mood,
     required this.budgetMin,
     required this.budgetMax,
     required this.freeOnly,
@@ -36,6 +36,8 @@ class DiscoverQuery {
       dateFrom: null,
       dateTo: null,
       peopleCount: null,
+      availableDurationMinutes: null,
+      mood: null,
       budgetMin: null,
       budgetMax: null,
       freeOnly: false,
@@ -61,6 +63,8 @@ class DiscoverQuery {
   final DateTime? dateFrom;
   final DateTime? dateTo;
   final int? peopleCount;
+  final int? availableDurationMinutes;
+  final String? mood;
   final double? budgetMin;
   final double? budgetMax;
   final bool freeOnly;
@@ -88,6 +92,10 @@ class DiscoverQuery {
     bool clearDateTo = false,
     int? peopleCount,
     bool clearPeopleCount = false,
+    int? availableDurationMinutes,
+    bool clearAvailableDurationMinutes = false,
+    String? mood,
+    bool clearMood = false,
     double? budgetMin,
     bool clearBudgetMin = false,
     double? budgetMax,
@@ -115,6 +123,10 @@ class DiscoverQuery {
       dateFrom: clearDateFrom ? null : (dateFrom ?? this.dateFrom),
       dateTo: clearDateTo ? null : (dateTo ?? this.dateTo),
       peopleCount: clearPeopleCount ? null : (peopleCount ?? this.peopleCount),
+      availableDurationMinutes: clearAvailableDurationMinutes
+          ? null
+          : (availableDurationMinutes ?? this.availableDurationMinutes),
+      mood: clearMood ? null : (mood ?? this.mood),
       budgetMin: clearBudgetMin ? null : (budgetMin ?? this.budgetMin),
       budgetMax: clearBudgetMax ? null : (budgetMax ?? this.budgetMax),
       freeOnly: freeOnly ?? this.freeOnly,
@@ -142,6 +154,8 @@ class DiscoverQuery {
       'date_from': dateFrom?.toIso8601String(),
       'date_to': dateTo?.toIso8601String(),
       'people_count': peopleCount,
+      'available_duration_minutes': availableDurationMinutes,
+      'mood': mood,
       'budget_min': budgetMin,
       'budget_max': budgetMax,
       'free_only': freeOnly,
@@ -177,6 +191,8 @@ class DiscoverQuery {
           ? null
           : DateTime.parse(map['date_to']! as String),
       peopleCount: map['people_count'] as int?,
+      availableDurationMinutes: map['available_duration_minutes'] as int?,
+      mood: map['mood'] as String?,
       budgetMin: (map['budget_min'] as num?)?.toDouble(),
       budgetMax: (map['budget_max'] as num?)?.toDouble(),
       freeOnly: (map['free_only'] as bool?) ?? false,
@@ -201,4 +217,3 @@ class DiscoverQuery {
     );
   }
 }
-

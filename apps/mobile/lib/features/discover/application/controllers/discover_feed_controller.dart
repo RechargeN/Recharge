@@ -31,6 +31,50 @@ class DiscoverFeedController extends ChangeNotifier {
   bool _savedSearchesRequested = false;
   bool _smartSearchHistoryRequested = false;
 
+  void beginSearchDraft() {
+    _setState(_state.copyWith(draftQuery: _state.appliedQuery));
+  }
+
+  void stageSearchConditions({
+    String? queryText,
+    int? peopleCount,
+    bool clearPeopleCount = false,
+    double? budgetMax,
+    bool clearBudgetMax = false,
+    DateTime? dateFrom,
+    bool clearDateFrom = false,
+    DateTime? dateTo,
+    bool clearDateTo = false,
+    double? radiusMeters,
+    bool? unlimitedRadius,
+    int? availableDurationMinutes,
+    bool clearAvailableDurationMinutes = false,
+    String? mood,
+    bool clearMood = false,
+  }) {
+    _setState(
+      _state.copyWith(
+        draftQuery: _state.draftQuery.copyWith(
+          queryText: queryText?.trim(),
+          peopleCount: peopleCount,
+          clearPeopleCount: clearPeopleCount,
+          budgetMax: budgetMax,
+          clearBudgetMax: clearBudgetMax,
+          dateFrom: dateFrom?.toUtc(),
+          clearDateFrom: clearDateFrom,
+          dateTo: dateTo?.toUtc(),
+          clearDateTo: clearDateTo,
+          radiusMeters: radiusMeters,
+          unlimitedRadius: unlimitedRadius,
+          availableDurationMinutes: availableDurationMinutes,
+          clearAvailableDurationMinutes: clearAvailableDurationMinutes,
+          mood: mood,
+          clearMood: clearMood,
+        ),
+      ),
+    );
+  }
+
   Future<void> ensureLoaded() async {
     if (_requestedOnce) return;
     _requestedOnce = true;
@@ -227,6 +271,18 @@ class DiscoverFeedController extends ChangeNotifier {
     _setState(_state.copyWith(savedSearches: next));
   }
 
+  Future<void> recordRecentSearch(DiscoverQuery query) async {
+    final SavedSearchEntity search = _savedSearchForQuery(query);
+    await _discoverPreferencesRepository.saveSavedSearch(search);
+    final List<SavedSearchEntity> next = <SavedSearchEntity>[
+      search,
+      ..._state.savedSearches.where(
+        (SavedSearchEntity item) => item.id != search.id,
+      ),
+    ].take(8).toList(growable: false);
+    _setState(_state.copyWith(savedSearches: next));
+  }
+
   Future<void> applySavedSearch(SavedSearchEntity search) async {
     final DiscoverQuery query = search.query.copyWith(
       queryVersion: _state.appliedQuery.queryVersion + 1,
@@ -297,6 +353,13 @@ class DiscoverFeedController extends ChangeNotifier {
     bool clearDateFrom = false,
     DateTime? dateTo,
     bool clearDateTo = false,
+    int? peopleCount,
+    bool clearPeopleCount = false,
+    int? availableDurationMinutes,
+    bool clearAvailableDurationMinutes = false,
+    String? mood,
+    bool clearMood = false,
+    String? sourceScreen,
     double? radiusMeters,
     bool? unlimitedRadius,
     double? centerLat,
@@ -317,6 +380,13 @@ class DiscoverFeedController extends ChangeNotifier {
         clearDateFrom: clearDateFrom,
         dateTo: dateTo?.toUtc(),
         clearDateTo: clearDateTo,
+        peopleCount: peopleCount,
+        clearPeopleCount: clearPeopleCount,
+        availableDurationMinutes: availableDurationMinutes,
+        clearAvailableDurationMinutes: clearAvailableDurationMinutes,
+        mood: mood,
+        clearMood: clearMood,
+        sourceScreen: sourceScreen,
         radiusMeters: radiusMeters,
         unlimitedRadius: unlimitedRadius,
         centerLat: centerLat,
