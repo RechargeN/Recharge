@@ -144,6 +144,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           context: context,
           isScrollControlled: true,
           useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
           builder: (BuildContext context) => _SearchFiltersSheet(query: query),
         );
     if (selection == null) return;
@@ -647,258 +649,321 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.76,
-      minChildSize: 0.55,
-      maxChildSize: 0.94,
-      builder: (BuildContext context, ScrollController scrollController) =>
-          ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      initialChildSize: 0.94,
+      minChildSize: 0.68,
+      maxChildSize: 0.97,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return Material(
+          key: const Key('search-filters-sheet'),
+          color: colors.surface,
+          clipBehavior: Clip.antiAlias,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
             children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      'Search filters',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w800),
+              const _SheetDragHandle(),
+              _SheetHeader(
+                title: 'Search filters',
+                actionLabel: 'Reset',
+                onAction: _reset,
+              ),
+              Divider(height: 1, color: colors.outlineVariant),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  children: <Widget>[
+                    const _FilterTitle('When'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        for (final (String, String) option
+                            in <(String, String)>[
+                              ('any', 'Any'),
+                              ('today', 'Today'),
+                              ('tonight', 'Tonight'),
+                            ])
+                          _FilterPill(
+                            label: option.$2,
+                            selected: _date == option.$1,
+                            onTap: () => setState(() => _date = option.$1),
+                          ),
+                      ],
                     ),
-                  ),
-                  TextButton(onPressed: _reset, child: const Text('Reset')),
-                ],
-              ),
-              const SizedBox(height: 14),
-              _FilterTitle('When'),
-              SegmentedButton<String>(
-                segments: const <ButtonSegment<String>>[
-                  ButtonSegment(value: 'any', label: Text('Any')),
-                  ButtonSegment(value: 'today', label: Text('Today')),
-                  ButtonSegment(value: 'tonight', label: Text('Tonight')),
-                ],
-                selected: <String>{_date},
-                onSelectionChanged: (Set<String> value) =>
-                    setState(() => _date = value.first),
-              ),
-              const SizedBox(height: 18),
-              _FilterTitle('Time fit'),
-              Wrap(
-                spacing: 8,
-                children:
-                    <(TimeWindowMode?, String)>[
-                          (null, 'Off'),
-                          (TimeWindowMode.exact, 'Exact'),
-                          (TimeWindowMode.flexible, 'Flexible'),
-                          (TimeWindowMode.anytimeToday, 'Until end of day'),
-                        ]
-                        .map(((TimeWindowMode?, String) option) {
-                          return ChoiceChip(
-                            label: Text(option.$2),
-                            selected: _timeWindowMode == option.$1,
-                            onSelected: (_) =>
-                                setState(() => _timeWindowMode = option.$1),
-                          );
-                        })
-                        .toList(growable: false),
-              ),
-              if (_timeWindowMode == TimeWindowMode.exact ||
-                  _timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.login_rounded),
-                  title: const Text('Start'),
-                  subtitle: Text(_localDateTimeLabel(_startLocal)),
-                  onTap: () async {
-                    final DateTime? picked = await _pickLocalDateTime(
-                      context,
-                      _startLocal,
-                    );
-                    if (picked != null) setState(() => _startLocal = picked);
-                  },
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.logout_rounded),
-                  title: const Text('End'),
-                  subtitle: Text(_localDateTimeLabel(_endLocal)),
-                  onTap: () async {
-                    final DateTime? picked = await _pickLocalDateTime(
-                      context,
-                      _endLocal,
-                    );
-                    if (picked != null) setState(() => _endLocal = picked);
-                  },
-                ),
-              ],
-              if (_timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
-                Text('Flexibility: ±$_flexibilityMinutes min'),
-                Slider(
-                  min: 15,
-                  max: 60,
-                  divisions: 3,
-                  value: _flexibilityMinutes.toDouble(),
-                  onChanged: (double value) =>
-                      setState(() => _flexibilityMinutes = value.round()),
-                ),
-              ],
-              if (_timeWindowMode != null) ...<Widget>[
-                _FilterTitle('Travel'),
-                Wrap(
-                  spacing: 8,
-                  children: TransportMode.values
-                      .map((TransportMode mode) {
-                        return ChoiceChip(
-                          label: Text(mode.name),
-                          selected: _transportMode == mode,
-                          onSelected: (_) =>
-                              setState(() => _transportMode = mode),
-                        );
-                      })
-                      .toList(growable: false),
-                ),
-                const SizedBox(height: 8),
-                SegmentedButton<TravelOriginType>(
-                  segments: const <ButtonSegment<TravelOriginType>>[
-                    ButtonSegment<TravelOriginType>(
-                      value: TravelOriginType.currentLocation,
-                      label: Text('Current location'),
+                    const SizedBox(height: 14),
+                    const _FilterTitle('Time available'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        for (final int? value in <int?>[null, 60, 120, 180])
+                          _FilterPill(
+                            label: value == null
+                                ? 'Any'
+                                : value == 60
+                                ? '1 hour'
+                                : '${value ~/ 60} hours',
+                            selected: _duration == value,
+                            onTap: () => setState(() => _duration = value),
+                          ),
+                      ],
                     ),
-                    ButtonSegment<TravelOriginType>(
-                      value: TravelOriginType.manualPin,
-                      label: Text('Search pin'),
+                    const _FilterSectionDivider(),
+                    const _FilterTitle('Time fit'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        _FilterPill(
+                          label: 'Off',
+                          selected: _timeWindowMode == null,
+                          onTap: () => setState(() => _timeWindowMode = null),
+                        ),
+                        _FilterPill(
+                          label: 'Exact',
+                          selected: _timeWindowMode == TimeWindowMode.exact,
+                          onTap: () => _openTimeWindowEditor(
+                            initialMode: TimeWindowMode.exact,
+                          ),
+                        ),
+                        _FilterPill(
+                          label: 'Flexible',
+                          selected: _timeWindowMode == TimeWindowMode.flexible,
+                          onTap: () => _openTimeWindowEditor(
+                            initialMode: TimeWindowMode.flexible,
+                          ),
+                        ),
+                        _FilterPill(
+                          label: 'Until end of day',
+                          selected:
+                              _timeWindowMode == TimeWindowMode.anytimeToday,
+                          onTap: () => setState(
+                            () => _timeWindowMode = TimeWindowMode.anytimeToday,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_timeWindowMode == TimeWindowMode.exact ||
+                        _timeWindowMode == TimeWindowMode.flexible) ...<Widget>[
+                      const SizedBox(height: 10),
+                      _TimeWindowNavigationRow(
+                        mode: _timeWindowMode!,
+                        start: _startLocal,
+                        end: _endLocal,
+                        flexibilityMinutes: _flexibilityMinutes,
+                        onTap: () => _openTimeWindowEditor(
+                          initialMode: _timeWindowMode!,
+                        ),
+                      ),
+                    ],
+                    if (_timeWindowMode != null) ...<Widget>[
+                      const _FilterSectionDivider(),
+                      const _FilterTitle('Travel'),
+                      const SizedBox(height: 8),
+                      _FilterPillWrap(
+                        children: <Widget>[
+                          _FilterPill(
+                            label: 'Walking',
+                            icon: Icons.directions_walk_rounded,
+                            selected: _transportMode == TransportMode.walking,
+                            onTap: () => setState(
+                              () => _transportMode = TransportMode.walking,
+                            ),
+                          ),
+                          _FilterPill(
+                            label: 'Driving',
+                            icon: Icons.directions_car_outlined,
+                            selected: _transportMode == TransportMode.driving,
+                            onTap: () => setState(
+                              () => _transportMode = TransportMode.driving,
+                            ),
+                          ),
+                          _FilterPill(
+                            label: 'Transit',
+                            icon: Icons.directions_transit_outlined,
+                            selected: _transportMode == TransportMode.transit,
+                            onTap: () => setState(
+                              () => _transportMode = TransportMode.transit,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      _OriginSegment(
+                        value: _originType,
+                        onChanged: (TravelOriginType value) =>
+                            setState(() => _originType = value),
+                      ),
+                      const SizedBox(height: 2),
+                      _CompactSwitchRow(
+                        label: 'Include return trip',
+                        value: _includeReturnTrip,
+                        onChanged: (bool value) =>
+                            setState(() => _includeReturnTrip = value),
+                      ),
+                    ],
+                    const _FilterSectionDivider(),
+                    const _FilterTitle('Availability'),
+                    const SizedBox(height: 2),
+                    _CompactSwitchRow(
+                      label: 'Open now',
+                      value: _openNow,
+                      onChanged: (bool value) =>
+                          setState(() => _openNow = value),
+                    ),
+                    _CompactSwitchRow(
+                      label: 'Only available',
+                      value: _onlyAvailable,
+                      onChanged: (bool value) =>
+                          setState(() => _onlyAvailable = value),
+                    ),
+                    const _FilterSectionDivider(),
+                    const _FilterTitle('People'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        for (final int? value in <int?>[null, 1, 2, 4])
+                          _FilterPill(
+                            label: value == null ? 'Any' : '$value',
+                            selected: _peopleCount == value,
+                            onTap: () => setState(() => _peopleCount = value),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const _FilterTitle('Budget per person'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        for (final double? value in <double?>[null, 10, 20, 40])
+                          _FilterPill(
+                            label: value == null ? 'Any' : '€${value.round()}',
+                            selected: _budgetMax == value,
+                            onTap: () => setState(() => _budgetMax = value),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const _FilterTitle('Mood'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        for (final (String?, String) option
+                            in <(String?, String)>[
+                              (null, 'Any'),
+                              ('calm', 'Calm'),
+                              ('social', 'Social'),
+                              ('active', 'Active'),
+                            ])
+                          _FilterPill(
+                            label: option.$2,
+                            selected: _mood == option.$1,
+                            onTap: () => setState(() => _mood = option.$1),
+                          ),
+                      ],
+                    ),
+                    const _FilterSectionDivider(),
+                    Row(
+                      children: <Widget>[
+                        const _FilterTitle('Distance'),
+                        const Spacer(),
+                        Text(
+                          _unlimited
+                              ? 'Any area'
+                              : '${(_radiusMeters / 1000).round()} km',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 3,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 8,
+                        ),
+                        overlayShape: const RoundSliderOverlayShape(
+                          overlayRadius: 16,
+                        ),
+                      ),
+                      child: Slider(
+                        min: 1,
+                        max: 30,
+                        divisions: 29,
+                        value: (_radiusMeters / 1000).clamp(1, 30),
+                        onChanged: _unlimited
+                            ? null
+                            : (double value) =>
+                                  setState(() => _radiusMeters = value * 1000),
+                      ),
+                    ),
+                    _CompactSwitchRow(
+                      label: 'Any distance',
+                      value: _unlimited,
+                      onChanged: (bool value) =>
+                          setState(() => _unlimited = value),
                     ),
                   ],
-                  selected: <TravelOriginType>{_originType},
-                  onSelectionChanged: (Set<TravelOriginType> values) =>
-                      setState(() => _originType = values.first),
                 ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Include return trip'),
-                  value: _includeReturnTrip,
-                  onChanged: (bool value) =>
-                      setState(() => _includeReturnTrip = value),
-                ),
-              ],
-              const SizedBox(height: 18),
-              _FilterTitle('Availability'),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Open now'),
-                value: _openNow,
-                onChanged: (bool value) => setState(() => _openNow = value),
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Only available'),
-                value: _onlyAvailable,
-                onChanged: (bool value) =>
-                    setState(() => _onlyAvailable = value),
-              ),
-              const SizedBox(height: 18),
-              _FilterTitle('People'),
-              Wrap(
-                spacing: 8,
-                children: <Widget>[
-                  for (final int? value in <int?>[null, 1, 2, 4])
-                    ChoiceChip(
-                      label: Text(value == null ? 'Any' : '$value'),
-                      selected: _peopleCount == value,
-                      onSelected: (_) => setState(() => _peopleCount = value),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _FilterTitle('Budget per person'),
-              Wrap(
-                spacing: 8,
-                children: <Widget>[
-                  for (final double? value in <double?>[null, 10, 20, 40])
-                    ChoiceChip(
-                      label: Text(value == null ? 'Any' : '€${value.round()}'),
-                      selected: _budgetMax == value,
-                      onSelected: (_) => setState(() => _budgetMax = value),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _FilterTitle('Time available'),
-              Wrap(
-                spacing: 8,
-                children: <Widget>[
-                  for (final int? value in <int?>[null, 60, 120, 180])
-                    ChoiceChip(
-                      label: Text(
-                        value == null
-                            ? 'Any'
-                            : value == 60
-                            ? '1 hour'
-                            : '${value ~/ 60} hours',
-                      ),
-                      selected: _duration == value,
-                      onSelected: (_) => setState(() => _duration = value),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _FilterTitle('Mood'),
-              Wrap(
-                spacing: 8,
-                children: <Widget>[
-                  for (final String? value in <String?>[
-                    null,
-                    'calm',
-                    'social',
-                    'active',
-                  ])
-                    ChoiceChip(
-                      label: Text(
-                        value == null
-                            ? 'Any'
-                            : '${value[0].toUpperCase()}${value.substring(1)}',
-                      ),
-                      selected: _mood == value,
-                      onSelected: (_) => setState(() => _mood = value),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: <Widget>[
-                  const _FilterTitle('Distance'),
-                  const Spacer(),
-                  Text(
-                    _unlimited
-                        ? 'Any area'
-                        : '${(_radiusMeters / 1000).round()} km',
-                  ),
-                ],
-              ),
-              Slider(
-                min: 1,
-                max: 30,
-                divisions: 29,
-                value: (_radiusMeters / 1000).clamp(1, 30),
-                onChanged: _unlimited
-                    ? null
-                    : (double value) =>
-                          setState(() => _radiusMeters = value * 1000),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Any distance'),
-                value: _unlimited,
-                onChanged: (bool value) => setState(() => _unlimited = value),
-              ),
-              const SizedBox(height: 14),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(_selection),
-                child: const Text('Apply filters'),
+              _FilterApplyFooter(
+                summary: _summary,
+                onApply: () => Navigator.of(context).pop(_selection),
               ),
             ],
           ),
+        );
+      },
     );
+  }
+
+  String get _summary {
+    final String date = switch (_date) {
+      'today' => 'Today',
+      'tonight' => 'Tonight',
+      _ => 'Any date',
+    };
+    final String duration = _duration == null
+        ? 'Any duration'
+        : _duration == 60
+        ? '1 hour'
+        : '${_duration! ~/ 60} hours';
+    final String radius = _unlimited
+        ? 'Any area'
+        : '${(_radiusMeters / 1000).round()} km';
+    return <String>[
+      date,
+      duration,
+      if (_timeWindowMode != null) _transportMode.name,
+      radius,
+    ].join(' · ');
+  }
+
+  Future<void> _openTimeWindowEditor({
+    required TimeWindowMode initialMode,
+  }) async {
+    final _TimeWindowDraft? result =
+        await showModalBottomSheet<_TimeWindowDraft>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) => _TimeWindowEditorSheet(
+            initialMode: initialMode,
+            initialStart: _startLocal,
+            initialEnd: _endLocal,
+            initialFlexibilityMinutes: _flexibilityMinutes,
+          ),
+        );
+    if (result == null || !mounted) return;
+    setState(() {
+      _timeWindowMode = result.mode;
+      _startLocal = result.start;
+      _endLocal = result.end;
+      _flexibilityMinutes = result.flexibilityMinutes;
+    });
   }
 
   _SearchFilterSelection get _selection {
@@ -938,6 +1003,9 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     _duration = null;
     _mood = null;
     _timeWindowMode = null;
+    _startLocal = DateTime.now().add(const Duration(minutes: 30));
+    _endLocal = DateTime.now().add(const Duration(hours: 2));
+    _flexibilityMinutes = 30;
     _originType = TravelOriginType.currentLocation;
     _transportMode = TransportMode.walking;
     _includeReturnTrip = true;
@@ -952,8 +1020,736 @@ class _FilterTitle extends StatelessWidget {
     label,
     style: Theme.of(
       context,
-    ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+    ).textTheme.labelLarge?.copyWith(fontSize: 13, fontWeight: FontWeight.w800),
   );
+}
+
+class _SheetDragHandle extends StatelessWidget {
+  const _SheetDragHandle();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 8, bottom: 4),
+    child: Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.outline,
+        borderRadius: BorderRadius.circular(99),
+      ),
+    ),
+  );
+}
+
+class _SheetHeader extends StatelessWidget {
+  const _SheetHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onAction,
+    this.leading,
+  });
+
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
+  final Widget? leading;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 48,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: <Widget>[
+          if (leading != null) ...<Widget>[leading!, const SizedBox(width: 8)],
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _FilterPillWrap extends StatelessWidget {
+  const _FilterPillWrap({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) =>
+      Wrap(spacing: 8, runSpacing: 8, children: children);
+}
+
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Material(
+      color: selected ? colors.primaryContainer : colors.surface,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected ? colors.primaryContainer : colors.outlineVariant,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(99),
+        child: SizedBox(
+          height: 30,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (selected) ...<Widget>[
+                  Icon(Icons.check_rounded, size: 14, color: colors.primary),
+                  const SizedBox(width: 5),
+                ] else if (icon != null) ...<Widget>[
+                  Icon(icon, size: 15, color: colors.onSurfaceVariant),
+                  const SizedBox(width: 5),
+                ],
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: selected ? colors.primary : colors.onSurface,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterSectionDivider extends StatelessWidget {
+  const _FilterSectionDivider();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    child: Divider(
+      height: 1,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    ),
+  );
+}
+
+class _CompactSwitchRow extends StatelessWidget {
+  const _CompactSwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 40,
+    child: Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+        ),
+        SizedBox(
+          width: 44,
+          child: Transform.scale(
+            scale: 0.82,
+            child: Switch(value: value, onChanged: onChanged),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _OriginSegment extends StatelessWidget {
+  const _OriginSegment({required this.value, required this.onChanged});
+
+  final TravelOriginType value;
+  final ValueChanged<TravelOriginType> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Container(
+      height: 36,
+      decoration: ShapeDecoration(
+        shape: StadiumBorder(side: BorderSide(color: colors.outlineVariant)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: <Widget>[
+          for (final (TravelOriginType, String, IconData) option
+              in <(TravelOriginType, String, IconData)>[
+                (
+                  TravelOriginType.currentLocation,
+                  'Current location',
+                  Icons.near_me_outlined,
+                ),
+                (
+                  TravelOriginType.manualPin,
+                  'Search pin',
+                  Icons.location_on_outlined,
+                ),
+              ])
+            Expanded(
+              child: Material(
+                color: value == option.$1
+                    ? colors.primaryContainer
+                    : colors.surface,
+                child: InkWell(
+                  onTap: () => onChanged(option.$1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(option.$3, size: 15, color: colors.primary),
+                      const SizedBox(width: 5),
+                      Text(
+                        option.$2,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: colors.primary,
+                              fontWeight: value == option.$1
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeWindowNavigationRow extends StatelessWidget {
+  const _TimeWindowNavigationRow({
+    required this.mode,
+    required this.start,
+    required this.end,
+    required this.flexibilityMinutes,
+    required this.onTap,
+  });
+
+  final TimeWindowMode mode;
+  final DateTime start;
+  final DateTime end;
+  final int flexibilityMinutes;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          height: 52,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: <Widget>[
+                Icon(Icons.schedule_rounded, size: 20, color: colors.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Set exact time',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        '${mode == TimeWindowMode.flexible ? 'Flexible' : 'Exact'} · '
+                        '${_formatClock(start)}–${_formatClock(end)}'
+                        '${mode == TimeWindowMode.flexible ? ' · ±$flexibilityMinutes min' : ''}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: colors.primary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterApplyFooter extends StatelessWidget {
+  const _FilterApplyFooter({required this.summary, required this.onApply});
+
+  final String summary;
+  final VoidCallback onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(top: BorderSide(color: colors.outlineVariant)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              summary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              key: const Key('filter-apply-button'),
+              height: 40,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: onApply,
+                child: const Text('Apply filters'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeWindowDraft {
+  const _TimeWindowDraft({
+    required this.mode,
+    required this.start,
+    required this.end,
+    required this.flexibilityMinutes,
+  });
+
+  final TimeWindowMode mode;
+  final DateTime start;
+  final DateTime end;
+  final int flexibilityMinutes;
+}
+
+class _TimeWindowEditorSheet extends StatefulWidget {
+  const _TimeWindowEditorSheet({
+    required this.initialMode,
+    required this.initialStart,
+    required this.initialEnd,
+    required this.initialFlexibilityMinutes,
+  });
+
+  final TimeWindowMode initialMode;
+  final DateTime initialStart;
+  final DateTime initialEnd;
+  final int initialFlexibilityMinutes;
+
+  @override
+  State<_TimeWindowEditorSheet> createState() => _TimeWindowEditorSheetState();
+}
+
+class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
+  late TimeWindowMode _mode = widget.initialMode == TimeWindowMode.flexible
+      ? TimeWindowMode.flexible
+      : TimeWindowMode.exact;
+  late DateTime _start = widget.initialStart;
+  late DateTime _end = widget.initialEnd;
+  late int _flexibilityMinutes = widget.initialFlexibilityMinutes.clamp(15, 60);
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final int effectiveFlex = _mode == TimeWindowMode.flexible
+        ? _flexibilityMinutes
+        : 0;
+    final DateTime effectiveStart = _start.subtract(
+      Duration(minutes: effectiveFlex),
+    );
+    final DateTime effectiveEnd = _end.add(Duration(minutes: effectiveFlex));
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.82,
+      minChildSize: 0.64,
+      maxChildSize: 0.94,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return Material(
+          key: const Key('time-window-editor'),
+          color: colors.surface,
+          clipBehavior: Clip.antiAlias,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: <Widget>[
+              const _SheetDragHandle(),
+              _SheetHeader(
+                title: 'Exact time',
+                actionLabel: 'Reset',
+                leading: IconButton(
+                  tooltip: 'Back to filters',
+                  onPressed: () => Navigator.of(context).pop(),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                ),
+                onAction: _reset,
+              ),
+              Divider(height: 1, color: colors.outlineVariant),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                  children: <Widget>[
+                    const _FilterTitle('Mode'),
+                    const SizedBox(height: 8),
+                    _FilterPillWrap(
+                      children: <Widget>[
+                        _FilterPill(
+                          label: 'Exact',
+                          selected: _mode == TimeWindowMode.exact,
+                          onTap: () =>
+                              setState(() => _mode = TimeWindowMode.exact),
+                        ),
+                        _FilterPill(
+                          label: 'Flexible',
+                          selected: _mode == TimeWindowMode.flexible,
+                          onTap: () =>
+                              setState(() => _mode = TimeWindowMode.flexible),
+                        ),
+                      ],
+                    ),
+                    const _FilterSectionDivider(),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            _formatLocalDate(_start),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _pickDate,
+                          child: const Text('Change date'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: _CompactTimeInput(
+                            label: 'Start',
+                            value: _formatClock(_start),
+                            onTap: () => _pickTime(isStart: true),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CompactTimeInput(
+                            label: 'End',
+                            value: _formatClock(_end),
+                            onTap: () => _pickTime(isStart: false),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_mode == TimeWindowMode.flexible) ...<Widget>[
+                      const _FilterSectionDivider(),
+                      const _FilterTitle('Buffer on each side'),
+                      const SizedBox(height: 8),
+                      _FilterPillWrap(
+                        children: <Widget>[
+                          for (final int minutes in <int>[15, 30, 45, 60])
+                            _FilterPill(
+                              label: '$minutes min',
+                              selected: _flexibilityMinutes == minutes,
+                              onTap: () =>
+                                  setState(() => _flexibilityMinutes = minutes),
+                            ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colors.primaryContainer.withValues(alpha: 0.62),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: colors.outlineVariant),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.schedule_rounded,
+                                size: 18,
+                                color: colors.primary,
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                'Effective window',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${_formatClock(effectiveStart)}–'
+                            '${_formatClock(effectiveEnd)}',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            effectiveFlex == 0
+                                ? 'Used as entered for time matching.'
+                                : 'Used for matching instead of '
+                                      '${_formatClock(_start)}–${_formatClock(_end)}.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: colors.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  border: Border(top: BorderSide(color: colors.outlineVariant)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                  child: SizedBox(
+                    height: 40,
+                    width: double.infinity,
+                    child: FilledButton(
+                      key: const Key('time-window-done'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: _submit,
+                      child: const Text('Done'),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _start,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _start = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _start.hour,
+        _start.minute,
+      );
+      _end = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _end.hour,
+        _end.minute,
+      );
+      if (!_end.isAfter(_start)) _end = _end.add(const Duration(days: 1));
+    });
+  }
+
+  Future<void> _pickTime({required bool isStart}) async {
+    final DateTime initial = isStart ? _start : _end;
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      final DateTime value = DateTime(
+        initial.year,
+        initial.month,
+        initial.day,
+        picked.hour,
+        picked.minute,
+      );
+      if (isStart) {
+        _start = value;
+        if (!_end.isAfter(_start)) _end = _start.add(const Duration(hours: 1));
+      } else {
+        _end = value.isAfter(_start)
+            ? value
+            : value.add(const Duration(days: 1));
+      }
+    });
+  }
+
+  void _reset() => setState(() {
+    _mode = TimeWindowMode.exact;
+    _start = DateTime.now().add(const Duration(minutes: 30));
+    _end = DateTime.now().add(const Duration(hours: 2));
+    _flexibilityMinutes = 30;
+  });
+
+  void _submit() {
+    Navigator.of(context).pop(
+      _TimeWindowDraft(
+        mode: _mode,
+        start: _start,
+        end: _end,
+        flexibilityMinutes: _mode == TimeWindowMode.flexible
+            ? _flexibilityMinutes
+            : 0,
+      ),
+    );
+  }
+}
+
+class _CompactTimeInput extends StatelessWidget {
+  const _CompactTimeInput({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(label, style: Theme.of(context).textTheme.labelMedium),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 44,
+          child: Align(
+            child: Material(
+              color: colors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: colors.outlineVariant),
+              ),
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  height: 36,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            value,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 18,
+                          color: colors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _SearchFilterSelection {
@@ -999,31 +1795,32 @@ class _DateWindow {
   final DateTime to;
 }
 
-Future<DateTime?> _pickLocalDateTime(
-  BuildContext context,
-  DateTime initial,
-) async {
-  final DateTime? date = await showDatePicker(
-    context: context,
-    initialDate: initial,
-    firstDate: DateTime.now().subtract(const Duration(days: 1)),
-    lastDate: DateTime.now().add(const Duration(days: 365)),
-  );
-  if (date == null || !context.mounted) return null;
-  final TimeOfDay? time = await showTimePicker(
-    context: context,
-    initialTime: TimeOfDay.fromDateTime(initial),
-  );
-  if (time == null) return null;
-  return DateTime(date.year, date.month, date.day, time.hour, time.minute);
-}
-
-String _localDateTimeLabel(DateTime value) =>
-    '${value.year.toString().padLeft(4, '0')}-'
-    '${value.month.toString().padLeft(2, '0')}-'
-    '${value.day.toString().padLeft(2, '0')} '
+String _formatClock(DateTime value) =>
     '${value.hour.toString().padLeft(2, '0')}:'
     '${value.minute.toString().padLeft(2, '0')}';
+
+String _formatLocalDate(DateTime value) {
+  const List<String> months = <String>[
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final DateTime now = DateTime.now();
+  final bool today =
+      value.year == now.year &&
+      value.month == now.month &&
+      value.day == now.day;
+  return '${today ? 'Today, ' : ''}${months[value.month - 1]} ${value.day}';
+}
 
 _DateWindow _todayWindow() {
   final DateTime now = DateTime.now();

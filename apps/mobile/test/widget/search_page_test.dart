@@ -19,6 +19,46 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  testWidgets('filter sheets preserve reference metrics on a 360dp phone', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 720)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('regular-search-filters')));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byKey(const Key('search-filters-sheet'))).width,
+      360,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('filter-apply-button'))).height,
+      40,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Exact'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const Key('time-window-editor'))).width,
+      360,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('time-window-done'))).height,
+      40,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   fullPageTestWidgets('renders the separate regular search landing', (
     tester,
   ) async {
@@ -63,7 +103,19 @@ void main() {
     await tester.tap(find.byKey(const Key('regular-search-filters')));
     await tester.pumpAndSettle();
     expect(find.text('Time fit'), findsOneWidget);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Exact'));
+    expect(
+      tester.getSize(find.byKey(const Key('filter-apply-button'))).height,
+      40,
+    );
+    await tester.tap(find.text('Exact'));
+    await tester.pumpAndSettle();
+    expect(find.text('Exact time'), findsOneWidget);
+    expect(find.byKey(const Key('time-window-editor')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('time-window-done'))).height,
+      40,
+    );
+    await tester.tap(find.byKey(const Key('time-window-done')));
     await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
@@ -71,7 +123,7 @@ void main() {
       250,
       scrollable: find.byType(Scrollable).last,
     );
-    expect(find.text('walking'), findsOneWidget);
+    expect(find.text('Walking'), findsOneWidget);
     expect(find.text('Current location'), findsOneWidget);
     expect(find.text('Include return trip'), findsOneWidget);
   });
