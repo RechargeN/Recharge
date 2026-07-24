@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,8 @@ import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../widgets/map_marker_utils.dart';
+import '../widgets/map_style.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -45,6 +48,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   int? _selectedScenarioStopIndex;
   bool _scenarioRouteActive = false;
   bool _scenarioRouteComplete = false;
+  bool _radiusControlExpanded = false;
+  final Map<String, BitmapDescriptor> _customMarkers =
+      <String, BitmapDescriptor>{};
+  final Set<String> _loadingMarkers = <String>{};
 
   static final List<_MapFilterOption> _categoryFilters = <_MapFilterOption>[
     const _MapFilterOption(
@@ -117,6 +124,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         (state.savedSearches.isNotEmpty || state.smartSearchHistory.isNotEmpty);
 
     _syncSearchController(state.appliedQuery.queryText);
+    _maybeLoadCustomMarkers(state.items);
 
     return Scaffold(
       appBar: AppBar(
@@ -133,10 +141,21 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         children: <Widget>[
           GoogleMap(
             initialCameraPosition: CameraPosition(target: center, zoom: 12),
+            style: rechargeMapStyle,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             onMapCreated: (GoogleMapController mapController) {
               _mapController = mapController;
+            },
+            clusterManagers: <ClusterManager>{
+              ClusterManager(
+                clusterManagerId: const ClusterManagerId('items'),
+                onClusterTap: (Cluster cluster) {
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLngZoom(cluster.position, 14),
+                  );
+                },
+              ),
             },
             circles: <Circle>{
               if (!state.draftQuery.unlimitedRadius)
@@ -167,6 +186,54 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               );
             },
           ),
+          // 1. Radius Control (Floating Pill)
+          Positioned(
+            left: 12,
+            top: showSavedIntents ? 318 : 188,
+            child: _CompactRadiusControl(
+              radiusMeters: state.draftQuery.radiusMeters,
+              unlimited: state.draftQuery.unlimitedRadius,
+              expanded: _radiusControlExpanded,
+              onToggle: () => setState(() => _radiusControlExpanded = !_radiusControlExpanded),
+              onRadiusChanged: (double value) {
+                controller.stageRadius(radiusMeters: value, unlimited: false);
+              },
+              onUnlimitedChanged: (bool value) {
+                controller.stageRadius(
+                  radiusMeters: state.draftQuery.radiusMeters,
+                  unlimited: value,
+                );
+              },
+            ),
+          ),
+          if (state.searchAreaDirty)
+            Positioned(
+              top: showSavedIntents ? 342 : 212,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: FilledButton.icon(
+                      onPressed: controller.applySearchArea,
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            RechargeTheme.emerald900.withValues(alpha: 0.88),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                      icon: const Icon(Icons.travel_explore_rounded),
+                      label: const Text('Search this area'),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           Positioned(
             left: 8,
             right: 8,
@@ -269,70 +336,54 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               ],
             ),
           ),
-          _MapResultsSheet(
-            state: state,
-            favoritesController: favoritesController,
-            onRadiusChanged: (double value) {
-              controller.stageRadius(radiusMeters: value, unlimited: false);
-            },
-            onUnlimitedChanged: (bool value) {
-              controller.stageRadius(
-                radiusMeters: state.draftQuery.radiusMeters,
-                unlimited: value,
-              );
-            },
-            onApplyArea: controller.applySearchArea,
-            onRetry: controller.loadFeed,
-            onSelectItem: (DiscoverItemEntity item) {
-              controller.selectItem(item.id);
-              _mapController?.animateCamera(
-                CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
-              );
-            },
-            onOpenDetails: (DiscoverItemEntity item) {
-              context.push('${RouteNames.discoverDetails}/${item.id}');
-            },
-            onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
-              item: item,
-              isAuthenticated: isAuthenticated,
-              authController: authController,
-              favoritesController: favoritesController,
-            ),
-            scenarioRoute: scenarioRoute,
-            selectedScenarioStopIndex: selectedScenarioStopIndex,
-            routeActive: scenarioRoute != null && _scenarioRouteActive,
-            routeComplete: scenarioRoute != null && _scenarioRouteComplete,
-            onScenarioStopSelected: scenarioRoute == null
-                ? null
-                : (int index) => _selectScenarioStop(scenarioRoute, index),
-            onStartRoute: scenarioRoute == null
-                ? null
-                : () => _startScenarioRoute(scenarioRoute),
-            onNextStop: scenarioRoute == null
-                ? null
-                : () => _advanceScenarioRoute(scenarioRoute),
-            onResetRoute: scenarioRoute == null ? null : _resetScenarioRoute,
-            onSaveCompletedRoute: scenarioRoute == null
-                ? null
-                : () => _onScenarioRouteSaveTap(
-                    route: scenarioRoute,
-                    isAuthenticated: isAuthenticated,
-                    authController: authController,
-                    favoritesController: favoritesController,
+          if (state.selectedItem != null)
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 40,
+              child: _SelectedPreviewCard(
+                item: state.selectedItem!,
+                isSaved: favoritesController.isFavorite(state.selectedItemId!),
+                onClose: () => controller.selectItem(null),
+                onTap: () => context.push(
+                  '${RouteNames.discoverDetails}/${state.selectedItemId}',
+                ),
+                onToggleSave: () => _onMapSaveTap(
+                  item: state.selectedItem!,
+                  isAuthenticated: isAuthenticated,
+                  authController: authController,
+                  favoritesController: favoritesController,
+                ),
+              ),
+            )
+          else
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: FilledButton.icon(
+                      onPressed: () => context.go(RouteNames.discover),
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            RechargeTheme.emerald900.withValues(alpha: 0.88),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                      ),
+                      icon: const Icon(Icons.format_list_bulleted_rounded),
+                      label: const Text('View list'),
+                    ),
                   ),
-            onCopyCompletedRoute: scenarioRoute == null
-                ? null
-                : () => _copyScenarioRoute(scenarioRoute),
-            onOpenBuilder: scenarioRoute == null
-                ? null
-                : () => context.go(scenarioRoute.builderLocation),
-            onSearchScenarioRoute: scenarioRoute == null
-                ? null
-                : () => context.go(scenarioRoute.searchLocation),
-            onCreateScenarioRoute: scenarioRoute == null
-                ? null
-                : () => context.go(scenarioRoute.createLocation),
-          ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -386,6 +437,40 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     );
   }
 
+  void _maybeLoadCustomMarkers(List<DiscoverItemEntity> items) {
+    final List<DiscoverItemEntity> candidates = items
+        .where(
+          (DiscoverItemEntity item) =>
+              item.coverImageUrl.isNotEmpty &&
+              !_customMarkers.containsKey(item.id) &&
+              !_loadingMarkers.contains(item.id),
+        )
+        .take(20)
+        .toList();
+
+    if (candidates.isEmpty) return;
+
+    for (final DiscoverItemEntity item in candidates) {
+      _loadingMarkers.add(item.id);
+      createCustomMarkerFromUrl(item.coverImageUrl).then((
+        BitmapDescriptor descriptor,
+      ) {
+        if (mounted) {
+          setState(() {
+            _customMarkers[item.id] = descriptor;
+            _loadingMarkers.remove(item.id);
+          });
+        }
+      }).catchError((Object e) {
+        if (mounted) {
+          setState(() {
+            _loadingMarkers.remove(item.id);
+          });
+        }
+      });
+    }
+  }
+
   Set<Marker> _buildMarkers({
     required DiscoverFeedState state,
     required _ScenarioMapRoute? scenarioRoute,
@@ -394,18 +479,20 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     required ValueChanged<String?> onTap,
     required ValueChanged<int>? onScenarioStopTap,
   }) {
-    final List<DiscoverItemEntity> items = state.canShowRawMarkers
-        ? state.items
-        : state.items.take(120).toList(growable: false);
+    final List<DiscoverItemEntity> items = state.items;
 
     final Set<Marker> markers = items.map((DiscoverItemEntity item) {
       final bool selected = item.id == selectedItemId;
+      final BitmapDescriptor? customIcon = _customMarkers[item.id];
+
       return Marker(
         markerId: MarkerId(item.id),
+        clusterManagerId: const ClusterManagerId('items'),
         position: LatLng(item.latitude, item.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          selected ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueGreen,
-        ),
+        icon: customIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(
+              selected ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueGreen,
+            ),
         onTap: () => onTap(item.id),
         infoWindow: InfoWindow(
           title: item.title,
@@ -1073,119 +1160,125 @@ class _MapFilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: RechargeTheme.travelLine),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x18003F32),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextField(
-              controller: controller,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => onSubmitSearch(),
-              decoration: InputDecoration(
-                hintText: 'Search on map',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: SizedBox(
-                  width: 96,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      IconButton(
-                        tooltip: 'Clear',
-                        onPressed: onClearSearch,
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                      IconButton(
-                        tooltip: 'Search',
-                        onPressed: onSubmitSearch,
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (BuildContext context, int index) {
-                        final _MapFilterOption filter = filters[index];
-                        return ChoiceChip(
-                          selected: selectedCategoryId == filter.id,
-                          avatar: Icon(filter.icon, size: 18),
-                          label: Text(filter.label),
-                          onSelected: (_) => onCategorySelected(filter.id),
-                        );
-                      },
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemCount: filters.length,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  selected: freeOnly,
-                  avatar: const Icon(Icons.bolt_outlined, size: 18),
-                  label: const Text('Free'),
-                  onSelected: onFreeOnlyChanged,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    '$resultCount places and activities in this area',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: onCreateHere,
-                  icon: const Icon(Icons.add_location_alt_outlined),
-                  label: const Text('Create here'),
-                ),
-              ],
-            ),
-            if (savedSearches.isNotEmpty ||
-                smartSearchHistory.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
-              _MapSavedIntentShelf(
-                savedSearches: savedSearches,
-                smartSearchHistory: smartSearchHistory,
-                onApplySavedSearch: onApplySavedSearch,
-                onCreateSavedSearch: onCreateSavedSearch,
-                onRouteSavedSearch: onRouteSavedSearch,
-                onApplySmartSearch: onApplySmartSearch,
-                onCreateSmartSearch: onCreateSmartSearch,
-                onRouteSmartSearch: onRouteSmartSearch,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.82),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+            boxShadow: const <BoxShadow>[
+              BoxShadow(
+                color: Color(0x12000000),
+                blurRadius: 16,
+                offset: Offset(0, 8),
               ),
             ],
-          ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  controller: controller,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => onSubmitSearch(),
+                  decoration: InputDecoration(
+                    hintText: 'Search on map',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: SizedBox(
+                      width: 96,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          IconButton(
+                            tooltip: 'Clear',
+                            onPressed: onClearSearch,
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                          IconButton(
+                            tooltip: 'Search',
+                            onPressed: onSubmitSearch,
+                            icon: const Icon(Icons.arrow_forward_rounded),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (BuildContext context, int index) {
+                            final _MapFilterOption filter = filters[index];
+                            return ChoiceChip(
+                              selected: selectedCategoryId == filter.id,
+                              avatar: Icon(filter.icon, size: 18),
+                              label: Text(filter.label),
+                              onSelected: (_) => onCategorySelected(filter.id),
+                            );
+                          },
+                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          itemCount: filters.length,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      selected: freeOnly,
+                      avatar: const Icon(Icons.bolt_outlined, size: 18),
+                      label: const Text('Free'),
+                      onSelected: onFreeOnlyChanged,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        '$resultCount places and activities in area',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      onPressed: onCreateHere,
+                      tooltip: 'Create here',
+                      icon: const Icon(Icons.add_location_alt_outlined, size: 20),
+                    ),
+                  ],
+                ),
+                if (savedSearches.isNotEmpty ||
+                    smartSearchHistory.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 8),
+                  _MapSavedIntentShelf(
+                    savedSearches: savedSearches,
+                    smartSearchHistory: smartSearchHistory,
+                    onApplySavedSearch: onApplySavedSearch,
+                    onCreateSavedSearch: onCreateSavedSearch,
+                    onRouteSavedSearch: onRouteSavedSearch,
+                    onApplySmartSearch: onApplySmartSearch,
+                    onCreateSmartSearch: onCreateSmartSearch,
+                    onRouteSmartSearch: onRouteSmartSearch,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1403,1014 +1496,245 @@ class _MapSavedIntentCard extends StatelessWidget {
   }
 }
 
-class _MapResultsSheet extends StatelessWidget {
-  const _MapResultsSheet({
-    required this.state,
-    required this.favoritesController,
-    required this.onRadiusChanged,
-    required this.onUnlimitedChanged,
-    required this.onApplyArea,
-    required this.onRetry,
-    required this.onSelectItem,
-    required this.onOpenDetails,
-    required this.onToggleSave,
-    required this.scenarioRoute,
-    required this.selectedScenarioStopIndex,
-    required this.routeActive,
-    required this.routeComplete,
-    required this.onScenarioStopSelected,
-    required this.onStartRoute,
-    required this.onNextStop,
-    required this.onResetRoute,
-    required this.onSaveCompletedRoute,
-    required this.onCopyCompletedRoute,
-    required this.onOpenBuilder,
-    required this.onSearchScenarioRoute,
-    required this.onCreateScenarioRoute,
-  });
-
-  final DiscoverFeedState state;
-  final FavoritesController favoritesController;
-  final ValueChanged<double> onRadiusChanged;
-  final ValueChanged<bool> onUnlimitedChanged;
-  final Future<void> Function() onApplyArea;
-  final Future<void> Function() onRetry;
-  final ValueChanged<DiscoverItemEntity> onSelectItem;
-  final ValueChanged<DiscoverItemEntity> onOpenDetails;
-  final ValueChanged<DiscoverItemEntity> onToggleSave;
-  final _ScenarioMapRoute? scenarioRoute;
-  final int? selectedScenarioStopIndex;
-  final bool routeActive;
-  final bool routeComplete;
-  final ValueChanged<int>? onScenarioStopSelected;
-  final VoidCallback? onStartRoute;
-  final VoidCallback? onNextStop;
-  final VoidCallback? onResetRoute;
-  final Future<void> Function()? onSaveCompletedRoute;
-  final Future<void> Function()? onCopyCompletedRoute;
-  final VoidCallback? onOpenBuilder;
-  final VoidCallback? onSearchScenarioRoute;
-  final VoidCallback? onCreateScenarioRoute;
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.34,
-      minChildSize: 0.18,
-      maxChildSize: 0.72,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-            border: Border(top: BorderSide(color: RechargeTheme.travelLine)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Color(0x16003F32),
-                blurRadius: 12,
-                offset: Offset(0, -4),
-              ),
-            ],
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: <Widget>[
-              const Center(
-                child: SizedBox(
-                  width: 42,
-                  child: Divider(color: RechargeTheme.travelLine, thickness: 4),
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      'Map results',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${state.resultCount}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: RechargeTheme.travelGreenDark,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _RadiusControl(
-                radiusMeters: state.draftQuery.radiusMeters,
-                unlimited: state.draftQuery.unlimitedRadius,
-                dirty: state.searchAreaDirty,
-                onRadiusChanged: onRadiusChanged,
-                onUnlimitedChanged: onUnlimitedChanged,
-                onApplyArea: onApplyArea,
-              ),
-              if (scenarioRoute != null) ...<Widget>[
-                const SizedBox(height: 12),
-                _ScenarioRouteCard(
-                  route: scenarioRoute!,
-                  selectedStopIndex: selectedScenarioStopIndex,
-                  routeActive: routeActive,
-                  routeComplete: routeComplete,
-                  onStopSelected: onScenarioStopSelected,
-                  onStartRoute: onStartRoute,
-                  onNextStop: onNextStop,
-                  onResetRoute: onResetRoute,
-                  onSaveCompletedRoute: onSaveCompletedRoute,
-                  onCopyCompletedRoute: onCopyCompletedRoute,
-                  onOpenBuilder: onOpenBuilder,
-                  onSearchSimilar: onSearchScenarioRoute,
-                  onCreateRoute: onCreateScenarioRoute,
-                ),
-              ],
-              const SizedBox(height: 12),
-              if (_shouldShowLoading(state))
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (state.status == DiscoverFeedStatus.error)
-                _SheetStateMessage(
-                  message: state.message ?? 'Map search failed',
-                  actionLabel: 'Retry',
-                  onAction: onRetry,
-                )
-              else if (state.items.isEmpty)
-                _SheetStateMessage(
-                  message: state.message ?? 'No activities in this area',
-                  actionLabel: 'Search this area',
-                  onAction: onApplyArea,
-                )
-              else ...<Widget>[
-                if (state.selectedItem != null) ...<Widget>[
-                  _SelectedMapItem(
-                    item: state.selectedItem!,
-                    isSaved: favoritesController.isFavorite(
-                      state.selectedItem!.id,
-                    ),
-                    onToggleSave: () => onToggleSave(state.selectedItem!),
-                    onOpenDetails: () => onOpenDetails(state.selectedItem!),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                ...state.items
-                    .take(30)
-                    .map(
-                      (DiscoverItemEntity item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _MapListItem(
-                          item: item,
-                          selected: item.id == state.selectedItemId,
-                          isSaved: favoritesController.isFavorite(item.id),
-                          onTap: () => onSelectItem(item),
-                          onOpenDetails: () => onOpenDetails(item),
-                          onToggleSave: () => onToggleSave(item),
-                        ),
-                      ),
-                    ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  bool _shouldShowLoading(DiscoverFeedState state) {
-    return state.items.isEmpty &&
-        (state.status == DiscoverFeedStatus.initial ||
-            state.status == DiscoverFeedStatus.loading);
-  }
-}
-
-class _ScenarioRouteCard extends StatelessWidget {
-  const _ScenarioRouteCard({
-    required this.route,
-    required this.selectedStopIndex,
-    required this.routeActive,
-    required this.routeComplete,
-    required this.onStopSelected,
-    required this.onStartRoute,
-    required this.onNextStop,
-    required this.onResetRoute,
-    required this.onSaveCompletedRoute,
-    required this.onCopyCompletedRoute,
-    required this.onOpenBuilder,
-    required this.onSearchSimilar,
-    required this.onCreateRoute,
-  });
-
-  final _ScenarioMapRoute route;
-  final int? selectedStopIndex;
-  final bool routeActive;
-  final bool routeComplete;
-  final ValueChanged<int>? onStopSelected;
-  final VoidCallback? onStartRoute;
-  final VoidCallback? onNextStop;
-  final VoidCallback? onResetRoute;
-  final Future<void> Function()? onSaveCompletedRoute;
-  final Future<void> Function()? onCopyCompletedRoute;
-  final VoidCallback? onOpenBuilder;
-  final VoidCallback? onSearchSimilar;
-  final VoidCallback? onCreateRoute;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final int completedStopCount = _completedStopCount(
-      stopCount: route.stops.length,
-      selectedStopIndex: selectedStopIndex,
-      routeActive: routeActive,
-      routeComplete: routeComplete,
-    );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: RechargeTheme.travelPanel,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: RechargeTheme.travelLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.route, color: RechargeTheme.travelGreenDark),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Scenario route',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: RechargeTheme.travelGreenDark,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${route.stops.length} stops',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: RechargeTheme.travelGreenDark,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${route.moodLabel} · ${route.totalDurationMinutes} min · '
-              '${route.totalDistanceKm.toStringAsFixed(1)} km · '
-              '${route.priceLabel}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            if (route.promptLabel.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 8),
-              _ScenarioIntentBanner(label: route.promptLabel),
-            ],
-            if (selectedStopIndex != null) ...<Widget>[
-              const SizedBox(height: 8),
-              _FocusedStopBanner(
-                step: route.stops[selectedStopIndex!],
-                index: selectedStopIndex!,
-                routeActive: routeActive,
-                routeComplete: routeComplete,
-              ),
-            ],
-            const SizedBox(height: 12),
-            _RouteProgressControls(
-              route: route,
-              selectedStopIndex: selectedStopIndex,
-              routeActive: routeActive,
-              routeComplete: routeComplete,
-              completedStopCount: completedStopCount,
-              onStartRoute: onStartRoute,
-              onNextStop: onNextStop,
-              onResetRoute: onResetRoute,
-            ),
-            const SizedBox(height: 12),
-            ...List<Widget>.generate(route.stops.length, (int index) {
-              final ScenarioStepEntity step = route.stops[index];
-              final bool selected = selectedStopIndex == index;
-              final bool completed = index < completedStopCount;
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: index == route.stops.length - 1 ? 0 : 8,
-                ),
-                child: Material(
-                  color: selected
-                      ? colorScheme.primary.withValues(alpha: 0.12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  child: InkWell(
-                    onTap: onStopSelected == null
-                        ? null
-                        : () => onStopSelected!(index),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          CircleAvatar(
-                            radius: 14,
-                            backgroundColor: completed
-                                ? colorScheme.tertiary
-                                : selected
-                                ? colorScheme.secondary
-                                : colorScheme.primary,
-                            child: completed
-                                ? Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: colorScheme.onTertiary,
-                                  )
-                                : Text(
-                                    '${index + 1}',
-                                    style: TextStyle(
-                                      color: selected
-                                          ? colorScheme.onSecondary
-                                          : colorScheme.onPrimary,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  step.title,
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: completed
-                                            ? colorScheme.tertiary
-                                            : null,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  completed
-                                      ? 'Completed · ${step.durationMinutes} min'
-                                      : '${createTaxonomyLabelForPath(step.category)} · '
-                                            '${step.durationMinutes} min',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            completed
-                                ? Icons.check_circle
-                                : selected
-                                ? Icons.my_location
-                                : Icons.location_searching,
-                            color: completed
-                                ? colorScheme.tertiary
-                                : selected
-                                ? colorScheme.secondary
-                                : colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-            if (routeComplete) ...<Widget>[
-              const SizedBox(height: 10),
-              _RouteCompleteBanner(
-                route: route,
-                onSave: onSaveCompletedRoute,
-                onCopy: onCopyCompletedRoute,
-              ),
-            ],
-            if (onOpenBuilder != null ||
-                onSearchSimilar != null ||
-                onCreateRoute != null) ...<Widget>[
-              const SizedBox(height: 12),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: onOpenBuilder,
-                      icon: const Icon(Icons.edit_location_alt),
-                      label: const Text('Edit route'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.outlined(
-                    tooltip: 'Search similar route',
-                    onPressed: onSearchSimilar,
-                    icon: const Icon(Icons.search),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filledTonal(
-                    tooltip: 'Create route listing',
-                    onPressed: onCreateRoute,
-                    icon: const Icon(Icons.add_business_outlined),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ScenarioIntentBanner extends StatelessWidget {
-  const _ScenarioIntentBanner({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.84),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.16)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.auto_awesome, color: colorScheme.primary, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Intent: $label',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FocusedStopBanner extends StatelessWidget {
-  const _FocusedStopBanner({
-    required this.step,
-    required this.index,
-    required this.routeActive,
-    required this.routeComplete,
-  });
-
-  final ScenarioStepEntity step;
-  final int index;
-  final bool routeActive;
-  final bool routeComplete;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.secondary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.my_location, color: colorScheme.secondary, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                routeComplete
-                    ? 'Completed at stop ${index + 1}: ${step.title}'
-                    : routeActive
-                    ? 'Now: stop ${index + 1} · ${step.title}'
-                    : 'Focused stop ${index + 1}: ${step.title}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.secondary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RouteCompleteBanner extends StatelessWidget {
-  const _RouteCompleteBanner({
-    required this.route,
-    required this.onSave,
-    required this.onCopy,
-  });
-
-  final _ScenarioMapRoute route;
-  final Future<void> Function()? onSave;
-  final Future<void> Function()? onCopy;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.tertiary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(Icons.celebration, color: colorScheme.tertiary, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Route complete · ${route.stops.length} stops · '
-                    '${route.totalDurationMinutes} min',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: colorScheme.tertiary,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onSave == null
-                        ? null
-                        : () async {
-                            await onSave!();
-                          },
-                    icon: const Icon(Icons.bookmark_add),
-                    label: const Text('Save'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onCopy == null
-                        ? null
-                        : () async {
-                            await onCopy!();
-                          },
-                    icon: const Icon(Icons.copy),
-                    label: const Text('Copy'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RouteProgressControls extends StatelessWidget {
-  const _RouteProgressControls({
-    required this.route,
-    required this.selectedStopIndex,
-    required this.routeActive,
-    required this.routeComplete,
-    required this.completedStopCount,
-    required this.onStartRoute,
-    required this.onNextStop,
-    required this.onResetRoute,
-  });
-
-  final _ScenarioMapRoute route;
-  final int? selectedStopIndex;
-  final bool routeActive;
-  final bool routeComplete;
-  final int completedStopCount;
-  final VoidCallback? onStartRoute;
-  final VoidCallback? onNextStop;
-  final VoidCallback? onResetRoute;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final int currentStop = selectedStopIndex == null
-        ? 0
-        : selectedStopIndex! + 1;
-    final bool atLastStop =
-        selectedStopIndex != null &&
-        selectedStopIndex == route.stops.length - 1;
-    final String status = routeComplete
-        ? 'Route complete'
-        : routeActive
-        ? 'Stop $currentStop of ${route.stops.length}'
-        : 'Ready to start';
-    final double progressValue = route.stops.isEmpty
-        ? 0
-        : completedStopCount / route.stops.length;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.18)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(
-                  routeComplete
-                      ? Icons.check_circle
-                      : routeActive
-                      ? Icons.navigation
-                      : Icons.flag,
-                  color: colorScheme.primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    status,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${route.totalDurationMinutes} min',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: progressValue.clamp(0, 1).toDouble(),
-                minHeight: 8,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: routeComplete
-                        ? onStartRoute
-                        : routeActive
-                        ? onNextStop
-                        : onStartRoute,
-                    icon: Icon(
-                      routeComplete
-                          ? Icons.replay
-                          : routeActive
-                          ? atLastStop
-                                ? Icons.check
-                                : Icons.skip_next
-                          : Icons.play_arrow,
-                    ),
-                    label: Text(
-                      routeComplete
-                          ? 'Restart'
-                          : routeActive
-                          ? atLastStop
-                                ? 'Finish'
-                                : 'Next stop'
-                          : 'Start route',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.outlined(
-                  tooltip: 'Reset route progress',
-                  onPressed: routeActive || selectedStopIndex != null
-                      ? onResetRoute
-                      : null,
-                  icon: const Icon(Icons.restart_alt),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-int _completedStopCount({
-  required int stopCount,
-  required int? selectedStopIndex,
-  required bool routeActive,
-  required bool routeComplete,
-}) {
-  if (routeComplete) return stopCount;
-  if (!routeActive || selectedStopIndex == null) return 0;
-  if (selectedStopIndex < 0) return 0;
-  if (selectedStopIndex > stopCount) return stopCount;
-  return selectedStopIndex;
-}
-
-class _RadiusControl extends StatelessWidget {
-  const _RadiusControl({
+class _CompactRadiusControl extends StatelessWidget {
+  const _CompactRadiusControl({
     required this.radiusMeters,
     required this.unlimited,
-    required this.dirty,
+    required this.expanded,
+    required this.onToggle,
     required this.onRadiusChanged,
     required this.onUnlimitedChanged,
-    required this.onApplyArea,
   });
 
   final double radiusMeters;
   final bool unlimited;
-  final bool dirty;
+  final bool expanded;
+  final VoidCallback onToggle;
   final ValueChanged<double> onRadiusChanged;
   final ValueChanged<bool> onUnlimitedChanged;
-  final Future<void> Function() onApplyArea;
 
   @override
   Widget build(BuildContext context) {
     final int radiusKm = (radiusMeters / 1000).round();
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    unlimited ? 'Radius: any area' : 'Radius: $radiusKm km',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Material(
+              color: Colors.white.withValues(alpha: 0.82),
+              child: InkWell(
+                onTap: onToggle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Icon(
+                        Icons.radar_rounded,
+                        size: 18,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        unlimited ? 'Any distance' : '$radiusKm km',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Row(
+              ),
+            ),
+          ),
+        ),
+        if (expanded) ...<Widget>[
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                width: 240,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                ),
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Text('Any'),
-                    Checkbox(
-                      value: unlimited,
-                      onChanged: (bool? value) {
-                        onUnlimitedChanged(value ?? false);
-                      },
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            'Search radius',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        Checkbox(
+                          value: unlimited,
+                          onChanged: (bool? v) => onUnlimitedChanged(v ?? false),
+                        ),
+                        const Text('Any'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Slider(
+                      min: 1000,
+                      max: 100000,
+                      divisions: 20,
+                      value: radiusMeters.clamp(1000, 100000).toDouble(),
+                      onChanged: unlimited ? null : onRadiusChanged,
                     ),
                   ],
                 ),
-              ],
-            ),
-            Slider(
-              min: 1000,
-              max: 200000,
-              divisions: 40,
-              value: radiusMeters.clamp(1000, 200000).toDouble(),
-              onChanged: unlimited ? null : onRadiusChanged,
-            ),
-            if (dirty)
-              FilledButton.icon(
-                onPressed: onApplyArea,
-                icon: const Icon(Icons.travel_explore_rounded),
-                label: const Text('Search this area'),
               ),
-          ],
-        ),
-      ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
 
-class _SelectedMapItem extends StatelessWidget {
-  const _SelectedMapItem({
+class _SelectedPreviewCard extends StatelessWidget {
+  const _SelectedPreviewCard({
     required this.item,
     required this.isSaved,
-    required this.onToggleSave,
-    required this.onOpenDetails,
-  });
-
-  final DiscoverItemEntity item;
-  final bool isSaved;
-  final VoidCallback onToggleSave;
-  final VoidCallback onOpenDetails;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: RechargeTheme.travelPanel,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: RechargeTheme.travelLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: RechargeTheme.travelGreenDark,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _metaLabel(item),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton(
-                    onPressed: onOpenDetails,
-                    child: const Text('Open details'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  tooltip: 'Save',
-                  onPressed: onToggleSave,
-                  icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MapListItem extends StatelessWidget {
-  const _MapListItem({
-    required this.item,
-    required this.selected,
-    required this.isSaved,
+    required this.onClose,
     required this.onTap,
-    required this.onOpenDetails,
     required this.onToggleSave,
   });
 
   final DiscoverItemEntity item;
-  final bool selected;
   final bool isSaved;
+  final VoidCallback onClose;
   final VoidCallback onTap;
-  final VoidCallback onOpenDetails;
   final VoidCallback onToggleSave;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: selected ? RechargeTheme.travelPanel : Colors.white,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: RechargeTheme.travelPanel,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: RechargeTheme.travelLine),
-                ),
-                child: Icon(
-                  Icons.place_outlined,
-                  color: RechargeTheme.travelGreenDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      item.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _metaLabel(item),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Save',
-                onPressed: onToggleSave,
-                icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
-              ),
-              IconButton(
-                tooltip: 'Open details',
-                onPressed: onOpenDetails,
-                icon: const Icon(Icons.chevron_right_rounded),
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
             ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        item.coverImageUrl,
+                        width: 84,
+                        height: 84,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 84,
+                          height: 84,
+                          color: RechargeTheme.travelPanel,
+                          child: const Icon(Icons.image_not_supported_outlined),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  rechargeTaxonomyLabel(item.category),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: onClose,
+                                child: const Icon(
+                                  Icons.close_rounded,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${item.distanceKm.toStringAsFixed(1)} km · '
+                            '${item.isFree ? 'Free' : '${item.priceAmount.toStringAsFixed(0)} €'}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      onPressed: onToggleSave,
+                      icon: Icon(
+                        isSaved ? Icons.favorite : Icons.favorite_border,
+                        size: 20,
+                        color: isSaved ? Colors.red : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-class _SheetStateMessage extends StatelessWidget {
-  const _SheetStateMessage({
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  final String message;
-  final String actionLabel;
-  final Future<void> Function() onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(message),
-            const SizedBox(height: 10),
-            OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-IconData _mapCategoryIcon(String categoryId) {
-  return switch (normalizeRechargeContentGroupId(categoryId)) {
-    'music_nightlife' => Icons.music_note,
-    'comedy_theatre_performance' => Icons.theater_comedy,
-    'cinema_screenings' => Icons.movie_outlined,
-    'art_culture_museums' => Icons.palette_outlined,
-    'education_talks' => Icons.school_outlined,
-    'business_networking' => Icons.handshake_outlined,
-    'workshops_masterclasses' => Icons.build_outlined,
-    'language_social_learning' => Icons.translate,
-    'food_drinks' => Icons.restaurant_outlined,
-    'games_indoor' => Icons.casino_outlined,
-    'sport' => Icons.sports_tennis,
-    'dance' => Icons.nightlife_outlined,
-    'outdoor_nature_walking' => Icons.park_outlined,
-    'water_activities' => Icons.kayaking_outlined,
-    'winter_seasonal' => Icons.ac_unit,
-    'travel_tours' => Icons.tour_outlined,
-    'family_kids' => Icons.family_restroom,
-    'pets_animals' => Icons.pets_outlined,
-    'community_charity' => Icons.volunteer_activism_outlined,
-    'markets_fairs' => Icons.storefront_outlined,
-    'holidays_seasonal' => Icons.celebration_outlined,
-    'wellness_recharge' => Icons.self_improvement_rounded,
-    _ => Icons.category_outlined,
-  };
 }
 
 class _MapFilterOption {
@@ -2625,4 +1949,32 @@ List<String> _stepsFromParam(String? value) {
       .map((String step) => step.trim())
       .where((String step) => step.isNotEmpty)
       .toList(growable: false);
+}
+
+IconData _mapCategoryIcon(String categoryId) {
+  return switch (normalizeRechargeContentGroupId(categoryId)) {
+    'music_nightlife' => Icons.music_note,
+    'comedy_theatre_performance' => Icons.theater_comedy,
+    'cinema_screenings' => Icons.movie_outlined,
+    'art_culture_museums' => Icons.palette_outlined,
+    'education_talks' => Icons.school_outlined,
+    'business_networking' => Icons.handshake_outlined,
+    'workshops_masterclasses' => Icons.build_outlined,
+    'language_social_learning' => Icons.translate,
+    'food_drinks' => Icons.restaurant_outlined,
+    'games_indoor' => Icons.casino_outlined,
+    'sport' => Icons.sports_tennis,
+    'dance' => Icons.nightlife_outlined,
+    'outdoor_nature_walking' => Icons.park_outlined,
+    'water_activities' => Icons.kayaking_outlined,
+    'winter_seasonal' => Icons.ac_unit,
+    'travel_tours' => Icons.tour_outlined,
+    'family_kids' => Icons.family_restroom,
+    'pets_animals' => Icons.pets_outlined,
+    'community_charity' => Icons.volunteer_activism_outlined,
+    'markets_fairs' => Icons.storefront_outlined,
+    'holidays_seasonal' => Icons.celebration_outlined,
+    'wellness_recharge' => Icons.self_improvement_rounded,
+    _ => Icons.category_outlined,
+  };
 }

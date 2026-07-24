@@ -85,7 +85,7 @@ class RechargeTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: travelLine),
         ),
       ),
@@ -96,9 +96,7 @@ class RechargeTheme {
           disabledBackgroundColor: const Color(0xFFB8C9C2),
           disabledForegroundColor: Colors.white,
           minimumSize: const Size(48, 46),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: const StadiumBorder(),
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -111,9 +109,7 @@ class RechargeTheme {
           foregroundColor: emerald900,
           minimumSize: const Size(48, 46),
           side: const BorderSide(color: Color(0xFFB8C9C2)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: const StadiumBorder(),
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -135,19 +131,20 @@ class RechargeTheme {
         fillColor: Colors.white,
         isDense: true,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(28),
           borderSide: const BorderSide(color: Color(0xFFD8E7E1)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(28),
           borderSide: const BorderSide(color: Color(0xFFD8E7E1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(28),
           borderSide: const BorderSide(color: emerald900, width: 1.4),
         ),
         labelStyle: const TextStyle(color: mutedInk),
         hintStyle: const TextStyle(color: mutedInk),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
@@ -189,9 +186,7 @@ class RechargeTheme {
           fontWeight: FontWeight.w700,
         ),
         side: const BorderSide(color: Color(0xFFD8E7E1)),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: const StadiumBorder(),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: emerald900,
