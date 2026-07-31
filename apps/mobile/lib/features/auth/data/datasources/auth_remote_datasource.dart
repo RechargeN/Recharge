@@ -25,13 +25,9 @@ abstract class AuthRemoteDataSource {
     required String sessionId,
   });
 
-  Future<void> logout({
-    required String sessionId,
-  });
+  Future<void> logout({required String sessionId});
 
-  Future<AuthUserModel> me({
-    required String accessToken,
-  });
+  Future<AuthUserModel> me({required String accessToken});
 }
 
 class MockAuthRemoteDataSource implements AuthRemoteDataSource {
@@ -39,6 +35,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
   static const String _allowedPassword = 'password123';
   static const String demoUserId = 'demo_full_access';
   static const String demoEmail = 'demo@recharge.local';
+  static const String demoRole = 'admin';
   static const List<String> demoCapabilities = <String>[
     'discover.read',
     'favorites.write',
@@ -49,15 +46,24 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     'create.social_request',
     'create.private_plan',
     'create.route',
+    'submit.route',
+    'publish.route.direct',
+    'moderate.route',
+    'manage.route',
+    'archive.route',
     'create.place',
     'create.venue',
     'create.bookable_slot',
     'create.offer',
     'create.announcement',
     'scenario.generate',
+    'page.create',
     'manage_page',
     'view_insights',
     'manage_bookings',
+    'admin.tools.view',
+    'admin.experience.preview',
+    'admin.access.manage',
   ];
 
   final Map<String, String> _sessionToUser = <String, String>{};
@@ -90,7 +96,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
       'user': <String, dynamic>{
         'id': demoUserId,
         'email': _allowedEmail,
-        'role': 'creator',
+        'role': demoRole,
         'capabilities': demoCapabilities,
         'profile_status': 'active',
       },
@@ -130,15 +136,12 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
   Future<AuthUserModel> me({required String accessToken}) async {
     await Future<void>.delayed(const Duration(milliseconds: 120));
     if (!accessToken.startsWith('acc_')) {
-      throw const AuthRemoteException(
-        'UNAUTHORIZED',
-        'Access token invalid',
-      );
+      throw const AuthRemoteException('UNAUTHORIZED', 'Access token invalid');
     }
     return AuthUserModel.fromJson(<String, dynamic>{
       'id': demoUserId,
       'email': demoEmail,
-      'role': 'creator',
+      'role': demoRole,
       'capabilities': demoCapabilities,
       'profile_status': 'active',
     });

@@ -10,9 +10,14 @@ import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/create/domain/entities/create_draft_entity.dart';
+import '../../features/create/presentation/pages/create_hub_page.dart';
 import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/create/presentation/pages/create_success_page.dart';
+import '../../features/create/presentation/pages/route_moderation_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
+import '../../features/discover/presentation/pages/categories_page.dart';
+import '../../features/discover/presentation/pages/category_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
 import '../../features/discover/presentation/pages/search_page.dart';
@@ -20,8 +25,11 @@ import '../../features/discover/presentation/pages/smart_search_page.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
+import '../../features/identity/presentation/pages/workspace_switcher_page.dart';
+import '../../features/identity/presentation/pages/professional_page_workspace_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
+import '../../features/visited/presentation/pages/visited_places_page.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -41,8 +49,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) =>
-            RechargeAppShell(currentLocation: state.uri.path, child: child),
+        builder: (context, state, child) => RechargeAppShell(
+          currentLocation: state.uri.path,
+          userId: authController.state.user?.id ?? '',
+          child: child,
+        ),
         routes: <RouteBase>[
           GoRoute(
             name: 'discover',
@@ -50,6 +61,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => DiscoverHubPage(
               favoriteApplied:
                   state.uri.queryParameters['favoriteApplied'] == '1',
+            ),
+          ),
+          GoRoute(
+            name: 'categories',
+            path: RouteNames.categories,
+            builder: (context, state) => const CategoriesPage(),
+          ),
+          GoRoute(
+            name: 'category',
+            path: '${RouteNames.categories}/:categoryId',
+            builder: (context, state) => CategoryPage(
+              categoryId: state.pathParameters['categoryId'] ?? '',
             ),
           ),
           GoRoute(
@@ -101,6 +124,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.profileWorkspace,
             builder: (context, state) => const ProfileWorkspacePage(),
           ),
+          GoRoute(
+            name: 'visited_places',
+            path: RouteNames.visitedPlaces,
+            builder: (context, state) =>
+                VisitedPlacesPage(userId: authController.state.user?.id ?? ''),
+          ),
+          GoRoute(
+            name: 'professional_page',
+            path: RouteNames.professionalPage,
+            builder: (context, state) => const ProfessionalPageWorkspacePage(
+              section: ProfessionalPageSection.overview,
+            ),
+          ),
+          GoRoute(
+            name: 'professional_page_content',
+            path: RouteNames.professionalPageContent,
+            builder: (context, state) => const ProfessionalPageWorkspacePage(
+              section: ProfessionalPageSection.content,
+            ),
+          ),
+          GoRoute(
+            name: 'professional_page_create',
+            path: RouteNames.professionalPageCreate,
+            builder: (context, state) {
+              final user = authController.state.user;
+              return CreateHubPage(
+                isAuthenticated: user != null,
+                capabilities: user?.capabilities ?? const <String>[],
+              );
+            },
+          ),
+          GoRoute(
+            name: 'professional_page_account',
+            path: RouteNames.professionalPageAccount,
+            builder: (context, state) => const ProfessionalPageWorkspacePage(
+              section: ProfessionalPageSection.account,
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -122,10 +183,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        name: 'create_object',
+        path: '${RouteNames.createObject}/:objectTypeId',
+        builder: (context, state) => CreatePage(
+          initialObjectType: createObjectTypeFromId(
+            state.pathParameters['objectTypeId'] ?? '',
+          ),
+          seedParameters: state.uri.queryParameters,
+        ),
+      ),
+      GoRoute(
         name: 'create',
         path: RouteNames.create,
-        builder: (context, state) =>
-            CreatePage(seedParameters: state.uri.queryParameters),
+        builder: (context, state) {
+          if (state.uri.queryParameters.isNotEmpty) {
+            return CreatePage(seedParameters: state.uri.queryParameters);
+          }
+          final user = authController.state.user;
+          return CreateHubPage(
+            isAuthenticated: user != null,
+            capabilities: user?.capabilities ?? const <String>[],
+          );
+        },
       ),
       GoRoute(
         name: 'settings',
@@ -133,20 +212,46 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SettingsPage(),
       ),
       GoRoute(
+        name: 'workspace_switcher',
+        path: RouteNames.workspaceSwitcher,
+        builder: (context, state) =>
+            WorkspaceSwitcherPage(userId: authController.state.user?.id ?? ''),
+      ),
+      GoRoute(
         name: 'create_success',
         path: RouteNames.createSuccess,
         builder: (context, state) => const CreateSuccessPage(),
+      ),
+      GoRoute(
+        name: 'route_moderation',
+        path: RouteNames.routeModeration,
+        builder: (context, state) {
+          final user = authController.state.user;
+          return RouteModerationPage(
+            userId: user?.id ?? '',
+            userEmail: user?.email ?? '',
+            capabilities: user?.capabilities ?? const <String>[],
+          );
+        },
       ),
     ],
     redirect: (context, state) {
       final isProtected =
           state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.profileWorkspace ||
+          state.matchedLocation == RouteNames.visitedPlaces ||
           state.matchedLocation == RouteNames.create ||
+          state.matchedLocation.startsWith('${RouteNames.createObject}/') ||
           state.matchedLocation == RouteNames.favorites ||
           state.matchedLocation == RouteNames.notifications ||
           state.matchedLocation == RouteNames.settings ||
-          state.matchedLocation == RouteNames.createSuccess;
+          state.matchedLocation == RouteNames.workspaceSwitcher ||
+          state.matchedLocation == RouteNames.professionalPage ||
+          state.matchedLocation == RouteNames.professionalPageContent ||
+          state.matchedLocation == RouteNames.professionalPageCreate ||
+          state.matchedLocation == RouteNames.professionalPageAccount ||
+          state.matchedLocation == RouteNames.createSuccess ||
+          state.matchedLocation == RouteNames.routeModeration;
 
       if (isProtected && !authController.state.isAuthenticated) {
         final encodedOrigin = Uri.encodeComponent(state.matchedLocation);

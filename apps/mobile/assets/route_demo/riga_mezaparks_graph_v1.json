@@ -1,0 +1,775 @@
+{
+    "schemaVersion":  1,
+    "manifest":  {
+                     "graphId":  "riga-mezaparks-walking",
+                     "graphVersion":  "riga-mezaparks-20260724-v1",
+                     "dataVersion":  "osm-api-0.6-2026-07-24T11:49:53Z",
+                     "generatedAtUtc":  "2026-07-24T11:49:53Z",
+                     "sourceId":  "openstreetmap",
+                     "sourceUrl":  "https://api.openstreetmap.org/api/0.6/map?bbox=24.1440,56.9995,24.1490,57.0035",
+                     "sourceSnapshotSha256":  "e0634a4dfb40907854c4ac2380511fd17c8efb4c996ade263d4f4a56723b81ca",
+                     "attribution":  "© OpenStreetMap contributors",
+                     "licenseId":  "ODbL-1.0",
+                     "licenseUrl":  "https://opendatacommons.org/licenses/odbl/1-0/",
+                     "copyrightUrl":  "https://www.openstreetmap.org/copyright",
+                     "algorithmVersion":  "dijkstra-distance-v1",
+                     "weightingVersion":  "walking-distance-v1"
+                 },
+    "coverage":  {
+                     "id":  "riga-mezaparks-demo",
+                     "version":  1,
+                     "bounds":  {
+                                    "southwest":  {
+                                                      "latitude":  56.9995,
+                                                      "longitude":  24.144
+                                                  },
+                                    "northeast":  {
+                                                      "latitude":  57.0035,
+                                                      "longitude":  24.149
+                                                  }
+                                },
+                     "maximumSnapDistanceMeters":  60,
+                     "supportedProfiles":  [
+                                               {
+                                                   "id":  "walking",
+                                                   "version":  1
+                                               }
+                                           ]
+                 },
+    "nodes":  [
+                  {
+                      "id":  "osm-node-10766543461",
+                      "position":  {
+                                       "latitude":  57.0008369,
+                                       "longitude":  24.1489255
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684151",
+                      "position":  {
+                                       "latitude":  57.0014267,
+                                       "longitude":  24.1446697
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684157",
+                      "position":  {
+                                       "latitude":  57.0015137,
+                                       "longitude":  24.1447674
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684161",
+                      "position":  {
+                                       "latitude":  57.001964,
+                                       "longitude":  24.1452439
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684163",
+                      "position":  {
+                                       "latitude":  57.0022093,
+                                       "longitude":  24.1456771
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684164",
+                      "position":  {
+                                       "latitude":  57.002388,
+                                       "longitude":  24.1459902
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684165",
+                      "position":  {
+                                       "latitude":  57.0025454,
+                                       "longitude":  24.1462503
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684167",
+                      "position":  {
+                                       "latitude":  57.0026218,
+                                       "longitude":  24.1464257
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1694684170",
+                      "position":  {
+                                       "latitude":  57.0031873,
+                                       "longitude":  24.1474236
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343603",
+                      "position":  {
+                                       "latitude":  56.9997291,
+                                       "longitude":  24.1450782
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343604",
+                      "position":  {
+                                       "latitude":  56.9998863,
+                                       "longitude":  24.14533
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343606",
+                      "position":  {
+                                       "latitude":  57.0007439,
+                                       "longitude":  24.146796
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343607",
+                      "position":  {
+                                       "latitude":  57.0009185,
+                                       "longitude":  24.1471051
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343608",
+                      "position":  {
+                                       "latitude":  57.0009083,
+                                       "longitude":  24.1441293
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343609",
+                      "position":  {
+                                       "latitude":  57.0013846,
+                                       "longitude":  24.1478784
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343610",
+                      "position":  {
+                                       "latitude":  57.0013996,
+                                       "longitude":  24.144994
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343611",
+                      "position":  {
+                                       "latitude":  57.001606,
+                                       "longitude":  24.1455702
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343613",
+                      "position":  {
+                                       "latitude":  57.0019705,
+                                       "longitude":  24.1467757
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712343614",
+                      "position":  {
+                                       "latitude":  57.002444,
+                                       "longitude":  24.1460665
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712570167",
+                      "position":  {
+                                       "latitude":  57.0015188,
+                                       "longitude":  24.1451613
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712570197",
+                      "position":  {
+                                       "latitude":  57.0025057,
+                                       "longitude":  24.1461638
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712570199",
+                      "position":  {
+                                       "latitude":  57.0031415,
+                                       "longitude":  24.1473427
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712570203",
+                      "position":  {
+                                       "latitude":  57.0033282,
+                                       "longitude":  24.1471847
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1712570205",
+                      "position":  {
+                                       "latitude":  57.0034031,
+                                       "longitude":  24.1471412
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1818788539",
+                      "position":  {
+                                       "latitude":  57.002174,
+                                       "longitude":  24.1475164
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-1818789092",
+                      "position":  {
+                                       "latitude":  57.0007992,
+                                       "longitude":  24.1489947
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-266808240",
+                      "position":  {
+                                       "latitude":  57.0028143,
+                                       "longitude":  24.1447466
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-266808241",
+                      "position":  {
+                                       "latitude":  57.003276,
+                                       "longitude":  24.1446821
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-309317150",
+                      "position":  {
+                                       "latitude":  57.0017416,
+                                       "longitude":  24.1454388
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-309317152",
+                      "position":  {
+                                       "latitude":  57.0010183,
+                                       "longitude":  24.1463061
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-309317154",
+                      "position":  {
+                                       "latitude":  57.0001237,
+                                       "longitude":  24.1479838
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-309317155",
+                      "position":  {
+                                       "latitude":  57.0018779,
+                                       "longitude":  24.1469499
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-309317156",
+                      "position":  {
+                                       "latitude":  57.0026683,
+                                       "longitude":  24.1484653
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-3678924088",
+                      "position":  {
+                                       "latitude":  57.0010522,
+                                       "longitude":  24.1442551
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-3678924089",
+                      "position":  {
+                                       "latitude":  57.0012801,
+                                       "longitude":  24.1459213
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-3678924095",
+                      "position":  {
+                                       "latitude":  57.0022567,
+                                       "longitude":  24.1450105
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-3678924097",
+                      "position":  {
+                                       "latitude":  57.003012,
+                                       "longitude":  24.1446975
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-3678924098",
+                      "position":  {
+                                       "latitude":  57.003428,
+                                       "longitude":  24.1446938
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-5752692124",
+                      "position":  {
+                                       "latitude":  57.0001736,
+                                       "longitude":  24.1478882
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-811049496",
+                      "position":  {
+                                       "latitude":  57.0020857,
+                                       "longitude":  24.1473593
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-811049497",
+                      "position":  {
+                                       "latitude":  57.002926,
+                                       "longitude":  24.1449781
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-9885566839",
+                      "position":  {
+                                       "latitude":  57.0002256,
+                                       "longitude":  24.1477883
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-9885566843",
+                      "position":  {
+                                       "latitude":  57.000373,
+                                       "longitude":  24.1475064
+                                   }
+                  },
+                  {
+                      "id":  "osm-node-9885566844",
+                      "position":  {
+                                       "latitude":  57.0001873,
+                                       "longitude":  24.1478619
+                                   }
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "osm-way-1078271223-segment-0",
+                      "fromNodeId":  "osm-node-9885566843",
+                      "toNodeId":  "osm-node-9885566839",
+                      "bidirectional":  true,
+                      "highway":  "service",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-1078271223-segment-1",
+                      "fromNodeId":  "osm-node-9885566839",
+                      "toNodeId":  "osm-node-9885566844",
+                      "bidirectional":  true,
+                      "highway":  "service",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-1078271223-segment-2",
+                      "fromNodeId":  "osm-node-9885566844",
+                      "toNodeId":  "osm-node-5752692124",
+                      "bidirectional":  true,
+                      "highway":  "service",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-1078271223-segment-3",
+                      "fromNodeId":  "osm-node-5752692124",
+                      "toNodeId":  "osm-node-309317154",
+                      "bidirectional":  true,
+                      "highway":  "service",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-1156115247-segment-0",
+                      "fromNodeId":  "osm-node-1712343608",
+                      "toNodeId":  "osm-node-1712343610",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-1156115247-segment-1",
+                      "fromNodeId":  "osm-node-1712343610",
+                      "toNodeId":  "osm-node-1712570167",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-1157714033-segment-0",
+                      "fromNodeId":  "osm-node-1818789092",
+                      "toNodeId":  "osm-node-10766543461",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-0",
+                      "fromNodeId":  "osm-node-1694684151",
+                      "toNodeId":  "osm-node-1694684157",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-1",
+                      "fromNodeId":  "osm-node-1694684157",
+                      "toNodeId":  "osm-node-1694684161",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-2",
+                      "fromNodeId":  "osm-node-1694684161",
+                      "toNodeId":  "osm-node-1694684163",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-3",
+                      "fromNodeId":  "osm-node-1694684163",
+                      "toNodeId":  "osm-node-1694684164",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-4",
+                      "fromNodeId":  "osm-node-1694684164",
+                      "toNodeId":  "osm-node-1712343614",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-5",
+                      "fromNodeId":  "osm-node-1712343614",
+                      "toNodeId":  "osm-node-1712570197",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-6",
+                      "fromNodeId":  "osm-node-1712570197",
+                      "toNodeId":  "osm-node-1694684165",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-7",
+                      "fromNodeId":  "osm-node-1694684165",
+                      "toNodeId":  "osm-node-1694684167",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-8",
+                      "fromNodeId":  "osm-node-1694684167",
+                      "toNodeId":  "osm-node-1712570199",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260207-segment-9",
+                      "fromNodeId":  "osm-node-1712570199",
+                      "toNodeId":  "osm-node-1694684170",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260209-segment-0",
+                      "fromNodeId":  "osm-node-1712343603",
+                      "toNodeId":  "osm-node-1712343604",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260209-segment-1",
+                      "fromNodeId":  "osm-node-1712343604",
+                      "toNodeId":  "osm-node-1712343606",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260209-segment-2",
+                      "fromNodeId":  "osm-node-1712343606",
+                      "toNodeId":  "osm-node-1712343607",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-157260209-segment-3",
+                      "fromNodeId":  "osm-node-1712343607",
+                      "toNodeId":  "osm-node-1712343609",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-159156437-segment-11",
+                      "fromNodeId":  "osm-node-1712570205",
+                      "toNodeId":  "osm-node-1712570203",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-159156437-segment-12",
+                      "fromNodeId":  "osm-node-1712570203",
+                      "toNodeId":  "osm-node-1712570199",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730039-segment-5",
+                      "fromNodeId":  "osm-node-1694684151",
+                      "toNodeId":  "osm-node-1712570167",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730039-segment-6",
+                      "fromNodeId":  "osm-node-1712570167",
+                      "toNodeId":  "osm-node-1712343611",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730039-segment-7",
+                      "fromNodeId":  "osm-node-1712343611",
+                      "toNodeId":  "osm-node-1712343613",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730039-segment-8",
+                      "fromNodeId":  "osm-node-1712343613",
+                      "toNodeId":  "osm-node-1818788539",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730105-segment-0",
+                      "fromNodeId":  "osm-node-10766543461",
+                      "toNodeId":  "osm-node-1712343609",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730105-segment-1",
+                      "fromNodeId":  "osm-node-1712343609",
+                      "toNodeId":  "osm-node-309317155",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730105-segment-2",
+                      "fromNodeId":  "osm-node-309317155",
+                      "toNodeId":  "osm-node-1712343613",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730105-segment-3",
+                      "fromNodeId":  "osm-node-1712343613",
+                      "toNodeId":  "osm-node-1694684164",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-170730105-segment-4",
+                      "fromNodeId":  "osm-node-1694684164",
+                      "toNodeId":  "osm-node-811049497",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-10",
+                      "fromNodeId":  "osm-node-266808240",
+                      "toNodeId":  "osm-node-3678924095",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-11",
+                      "fromNodeId":  "osm-node-3678924095",
+                      "toNodeId":  "osm-node-1694684161",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-12",
+                      "fromNodeId":  "osm-node-1694684161",
+                      "toNodeId":  "osm-node-309317150",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-13",
+                      "fromNodeId":  "osm-node-309317150",
+                      "toNodeId":  "osm-node-1712343611",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-14",
+                      "fromNodeId":  "osm-node-1712343611",
+                      "toNodeId":  "osm-node-3678924089",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-15",
+                      "fromNodeId":  "osm-node-3678924089",
+                      "toNodeId":  "osm-node-309317152",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-16",
+                      "fromNodeId":  "osm-node-309317152",
+                      "toNodeId":  "osm-node-1712343606",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-17",
+                      "fromNodeId":  "osm-node-1712343606",
+                      "toNodeId":  "osm-node-9885566843",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-7",
+                      "fromNodeId":  "osm-node-3678924098",
+                      "toNodeId":  "osm-node-266808241",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-8",
+                      "fromNodeId":  "osm-node-266808241",
+                      "toNodeId":  "osm-node-3678924097",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-24537281-segment-9",
+                      "fromNodeId":  "osm-node-3678924097",
+                      "toNodeId":  "osm-node-266808240",
+                      "bidirectional":  true,
+                      "highway":  "living_street",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-28161350-segment-0",
+                      "fromNodeId":  "osm-node-309317152",
+                      "toNodeId":  "osm-node-309317155",
+                      "bidirectional":  true,
+                      "highway":  "track",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-28161350-segment-1",
+                      "fromNodeId":  "osm-node-309317155",
+                      "toNodeId":  "osm-node-811049496",
+                      "bidirectional":  true,
+                      "highway":  "track",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-28161350-segment-2",
+                      "fromNodeId":  "osm-node-811049496",
+                      "toNodeId":  "osm-node-1818788539",
+                      "bidirectional":  true,
+                      "highway":  "track",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-28161350-segment-3",
+                      "fromNodeId":  "osm-node-1818788539",
+                      "toNodeId":  "osm-node-309317156",
+                      "bidirectional":  true,
+                      "highway":  "track",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-363759016-segment-0",
+                      "fromNodeId":  "osm-node-1694684151",
+                      "toNodeId":  "osm-node-3678924088",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-363759016-segment-1",
+                      "fromNodeId":  "osm-node-3678924088",
+                      "toNodeId":  "osm-node-1712343608",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-41872039-segment-0",
+                      "fromNodeId":  "osm-node-309317156",
+                      "toNodeId":  "osm-node-1694684170",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-41872039-segment-1",
+                      "fromNodeId":  "osm-node-1694684170",
+                      "toNodeId":  "osm-node-1712570203",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  },
+                  {
+                      "id":  "osm-way-606849448-segment-3",
+                      "fromNodeId":  "osm-node-1818789092",
+                      "toNodeId":  "osm-node-5752692124",
+                      "bidirectional":  true,
+                      "highway":  "footway",
+                      "surface":  "asphalt"
+                  },
+                  {
+                      "id":  "osm-way-81012497-segment-6",
+                      "fromNodeId":  "osm-node-811049497",
+                      "toNodeId":  "osm-node-266808240",
+                      "bidirectional":  true,
+                      "highway":  "path",
+                      "surface":  "ground"
+                  }
+              ]
+}

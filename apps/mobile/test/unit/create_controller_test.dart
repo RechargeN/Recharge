@@ -1,15 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/application/create_taxonomy.dart';
 import 'package:recharge/features/create/application/state/create_state.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/create_availability.dart';
+import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
+import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+
+import '../support/event_create_test_support.dart';
 
 void main() {
   late _FakeCreateRepository repository;
@@ -22,6 +28,10 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      scenarioCreateCoordinator: ScenarioCreateCoordinator(
+        idGenerator: _SequentialIdGenerator(),
+      ),
       runtimeDefaults: const CreateRuntimeDefaults(
         marketCityId: 'riga',
         timezone: 'Europe/Riga',
@@ -30,6 +40,10 @@ void main() {
         currency: 'EUR',
       ),
     );
+  });
+
+  tearDown(() {
+    controller.dispose();
   });
 
   test('publish fails when coverImage is empty', () async {
@@ -80,6 +94,7 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
+    controller.setObjectType(CreateObjectType.activity);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCoverImage('cover.jpg');
@@ -140,21 +155,35 @@ void main() {
         0,
         (int count, category) => count + category.subcategories.length,
       ),
-      516,
+      530,
     );
     expect(CreateObjectType.quickPlan.taxonomyId, 'quick_plan');
+    expect(CreateObjectType.scenario.taxonomyId, 'scenario');
     expect(createObjectTypeFromId('bookable_slot'), CreateObjectType.session);
-    for (final CreateObjectType type in CreateObjectType.values) {
+    final Set<CreateObjectType> visibleTypes = rechargeCreateBlockConfigs
+        .map((config) => config.objectType)
+        .toSet();
+    expect(visibleTypes, contains(CreateObjectType.scenario));
+    expect(visibleTypes, isNot(contains(CreateObjectType.quickPlan)));
+    for (final CreateObjectType type in visibleTypes) {
       expect(
         rechargeCreateBlockConfigs.map((config) => config.objectType),
         contains(type),
       );
-      expect(createTaxonomyForObjectType(type), isNotEmpty);
+      if (type != CreateObjectType.scenario) {
+        expect(createTaxonomyForObjectType(type), isNotEmpty);
+      }
     }
     expect(eventCategories.map((category) => category.id), contains('sport'));
     expect(
       placeCategories.map((category) => category.id),
       contains('wellness_recharge'),
+    );
+    expect(
+      placeCategories
+          .expand((category) => category.subcategories)
+          .map((subcategory) => subcategory.id),
+      containsAll(<String>['monument', 'park', 'public_square']),
     );
     expect(sportCategory, isNotNull);
     expect(
@@ -174,10 +203,11 @@ void main() {
       userId: 'u1',
       organizerEmail: 'user@example.com',
       organizerName: 'user',
+      capabilities: const <String>['create.route'],
     );
 
-    controller.setObjectType(CreateObjectType.quickPlan);
-    controller.updateTitle('Quick coffee');
+    controller.setObjectType(CreateObjectType.activity);
+    controller.updateTitle('Recharge walk');
     controller.updateMainCategory('food_drinks');
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
@@ -194,8 +224,33 @@ void main() {
 
     final routeSuccess = await controller.publishDraft();
 
-    expect(routeSuccess, isTrue);
-    expect(controller.state.publishedDraft?.objectType, CreateObjectType.route);
+    expect(routeSuccess, isFalse);
+    expect(controller.state.publishedDraft, isNull);
+    expect(controller.state.message, contains('Сервис публикации Route'));
+  });
+
+  test('Route selection requires create.route capability', () async {
+    await controller.ensureLoaded(
+      userId: 'u1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+
+    controller.setObjectType(CreateObjectType.route);
+
+    expect(controller.state.draft.objectType, isNot(CreateObjectType.route));
+    expect(controller.state.message, contains('create.route'));
+
+    await controller.ensureLoaded(
+      userId: 'u1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+      capabilities: const <String>['create.route'],
+    );
+    controller.setObjectType(CreateObjectType.route);
+
+    expect(controller.state.draft.objectType, CreateObjectType.route);
+    expect(controller.state.draft.routeData, isNotNull);
   });
 
   test('publish success sets pending_review status', () async {
@@ -204,6 +259,7 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
+    controller.setObjectType(CreateObjectType.activity);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor');
     controller.updateCity('Rezekne');
@@ -219,11 +275,139 @@ void main() {
       PublishStatus.pendingReview,
     );
   });
+
+  test(
+    'Scenario personal save supports undo and blocks public publish',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.scenario);
+      controller.updateTitle('Riga evening');
+      controller.addScenarioTimeBlock(title: 'Coffee', durationMinutes: 45);
+      controller.addScenarioTimeBlock(title: 'Cinema', durationMinutes: 120);
+
+      expect(controller.state.draft.scenarioData!.items, hasLength(2));
+      expect(controller.scenarioReadiness!.canSaveToMyScenarios, isTrue);
+
+      controller.undoScenario();
+      expect(controller.state.draft.scenarioData!.items, hasLength(1));
+      expect(controller.canRedoScenario, isTrue);
+      controller.redoScenario();
+
+      expect(await controller.saveScenarioToMyScenarios(), isTrue);
+      expect(repository._stored?.objectType, CreateObjectType.scenario);
+      expect(repository._stored?.visibility, VisibilityType.private);
+      expect(await controller.publishDraft(), isFalse);
+      expect(controller.state.draft.publishStatus, PublishStatus.draft);
+
+      final CreateDraftEntity converted = controller.state.draft.copyWith(
+        id: 'converted-scenario-id',
+      );
+      controller.setObjectType(CreateObjectType.event);
+      expect(controller.applyConvertedScenario(converted), isTrue);
+      expect(controller.state.draft.id, 'converted-scenario-id');
+      expect(controller.state.draft.objectType, CreateObjectType.scenario);
+      final CreateDraftEntity wrongOwner =
+          CreateDraftEntity.defaults(
+            organizerId: 'different-user',
+            organizerEmail: 'other@example.com',
+            organizerName: 'other',
+          ).copyWith(
+            id: 'wrong-owner-scenario',
+            objectType: CreateObjectType.scenario,
+            scenarioData: converted.scenarioData,
+            clearEventData: true,
+          );
+      expect(controller.applyConvertedScenario(wrongOwner), isFalse);
+    },
+  );
+
+  test(
+    'Place flow autosaves, requires warning confirmation, and publishes',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+        capabilities: const <String>['create.place'],
+      );
+      controller.setObjectType(CreateObjectType.place);
+      controller.updateTitle('Quiet Riga Coffee House');
+      controller.updateShortDescription(
+        'A calm coffee place with comfortable seating for a short city break.',
+      );
+      controller.updatePlaceKind(PlaceKind.managedVenue);
+      controller.updatePlaceRelationship(PlaceRelationship.owner);
+      controller.applyTaxonomySelection(
+        mainCategory: 'food_drinks',
+        subcategory: 'coffee',
+      );
+      controller.updatePlaceAddress('Brivibas iela 1');
+      controller.updatePlaceCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.confirmPlacePin();
+      controller.updatePlaceHoursMode(PlaceHoursMode.alwaysOpen);
+      controller.updatePlaceEntryType(PlaceEntryType.notApplicable);
+      controller.updateCoverImage('local://cover.jpg');
+
+      expect(await controller.goToPlaceStep(1), isTrue);
+      expect(await controller.goToPlaceStep(2), isTrue);
+      expect(await controller.goToPlaceStep(3), isTrue);
+      expect(repository._stored?.placeData?.revision, greaterThan(0));
+
+      expect(await controller.publishDraft(), isFalse);
+      final List<PlaceValidationIssue> warnings = controller
+          .state
+          .placeValidationIssues
+          .where(
+            (PlaceValidationIssue issue) =>
+                issue.severity == PlaceValidationSeverity.warning,
+          )
+          .toList(growable: false);
+      expect(warnings, isNotEmpty);
+
+      controller.acceptPlaceWarnings(
+        warnings.map((PlaceValidationIssue issue) => issue.code),
+      );
+      expect(await controller.publishDraft(), isTrue);
+      expect(controller.state.draft.publishStatus, PublishStatus.pendingReview);
+    },
+  );
+
+  test(
+    'Place gallery rejects the thirteenth image without data loss',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+        capabilities: const <String>['create.place'],
+      );
+      controller.setObjectType(CreateObjectType.place);
+
+      for (int index = 1; index <= 13; index++) {
+        controller.addGalleryImage('local://image-$index.jpg');
+      }
+
+      expect(controller.state.draft.media.gallery, hasLength(12));
+      expect(controller.state.draft.media.gallery.first, 'local://image-1.jpg');
+      expect(controller.state.draft.media.gallery.last, 'local://image-12.jpg');
+    },
+  );
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+class _SequentialIdGenerator implements IdGenerator {
+  int _value = 0;
+
+  @override
+  String generate() => 'scenario-id-${_value++}';
 }
 
 class _FakeCreateRepository implements CreateRepository {

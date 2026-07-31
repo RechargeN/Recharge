@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/app/application/planning_conversion_providers.dart';
+import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
+import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -30,11 +33,161 @@ import 'package:recharge/features/favorites/domain/repositories/favorites_reposi
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/application/quick_plan_conversion_coordinator.dart';
+import 'package:recharge/features/create/application/scenario_conversion_handoff_store.dart';
+import 'package:recharge/features/create/data/datasources/quick_plan_conversion_memory_datasource.dart';
+import 'package:recharge/features/create/domain/usecases/expand_quick_plan_to_scenario_usecase.dart';
 import 'package:recharge/features/scenarios/presentation/pages/scenario_builder_page.dart';
 
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('previews one-way Expand to Scenario losses', (
+    tester,
+  ) async {
+    final AuthController authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'expand',
+    );
+    await tester.pumpWidget(
+      _scenarioProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+        ],
+        child: const MaterialApp(
+          home: ScenarioBuilderPage(
+            seedParameters: <String, String>{'preview': '1'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.byKey(const Key('quick-plan-expand-to-scenario')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('quick-plan-expand-to-scenario')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Expand to Scenario'), findsWidgets);
+    expect(find.textContaining('new independent Scenario'), findsOneWidget);
+    expect(find.textContaining('private custom locations'), findsOneWidget);
+    expect(find.byKey(const Key('confirm-expand-to-scenario')), findsOneWidget);
+  });
+
+  fullPageTestWidgets('expands Quick Plan through an id-only Create handoff', (
+    tester,
+  ) async {
+    final AuthController authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'expand-flow',
+    );
+    final InMemoryQuickPlanConversionSource source =
+        InMemoryQuickPlanConversionSource();
+    final _TestIdGenerator ids = _TestIdGenerator();
+    final ScenarioConversionHandoffStore handoff =
+        ScenarioConversionHandoffStore();
+    final QuickPlanConversionCoordinator coordinator =
+        QuickPlanConversionCoordinator(
+          expand: ExpandQuickPlanToScenarioUseCase(
+            source: source,
+            idGenerator: ids,
+          ),
+          idGenerator: ids,
+          runtimeDefaults: const CreateRuntimeDefaults(
+            marketCityId: 'riga',
+            timezone: 'Europe/Riga',
+            country: 'LV',
+            city: 'Riga',
+            currency: 'EUR',
+          ),
+        );
+    await tester.pumpWidget(
+      _scenarioProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          quickPlanConversionSourceProvider.overrideWithValue(source),
+          legacyQuickPlanConversionAdapterProvider.overrideWithValue(
+            const LegacyQuickPlanConversionAdapter(),
+          ),
+          quickPlanConversionCoordinatorProvider.overrideWithValue(coordinator),
+          scenarioConversionHandoffStoreProvider.overrideWithValue(handoff),
+          planningCreateRuntimeDefaultsProvider.overrideWithValue(
+            const CreateRuntimeDefaults(
+              marketCityId: 'riga',
+              timezone: 'Europe/Riga',
+              country: 'LV',
+              city: 'Riga',
+              currency: 'EUR',
+            ),
+          ),
+        ],
+        child: MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: '${RouteNames.scenarioBuilder}?preview=1',
+            routes: <RouteBase>[
+              GoRoute(
+                path: RouteNames.scenarioBuilder,
+                builder: (context, state) => ScenarioBuilderPage(
+                  seedParameters: state.uri.queryParameters,
+                ),
+              ),
+              GoRoute(
+                path: RouteNames.create,
+                builder: (context, state) => Scaffold(
+                  body: Column(
+                    children: <Widget>[
+                      const Text('Converted Create page'),
+                      Text(
+                        state.uri.queryParameters['scenarioHandoffId'] ?? '',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.byKey(const Key('quick-plan-expand-to-scenario')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('quick-plan-expand-to-scenario')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-expand-to-scenario')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Converted Create page'), findsOneWidget);
+    final Finder handoffText = find.textContaining('flow-id-');
+    expect(handoffText, findsOneWidget);
+    final String handoffId = tester.widget<Text>(handoffText).data!;
+    expect(handoff.contains(handoffId), isTrue);
+  });
+
   fullPageTestWidgets('opens a quick plan in preview-first mode', (
     tester,
   ) async {
@@ -916,6 +1069,13 @@ class _NoopAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+}
+
+class _TestIdGenerator implements IdGenerator {
+  int _value = 0;
+
+  @override
+  String generate() => 'flow-id-${_value++}';
 }
 
 class _FakeFavoritesRepository implements FavoritesRepository {

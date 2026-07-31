@@ -26,14 +26,22 @@ class NotificationsPage extends ConsumerStatefulWidget {
 }
 
 class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  final TextEditingController _searchController = TextEditingController();
   String? _loadedUserId;
   _NotificationFeedFilter _filter = _NotificationFeedFilter.all;
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider).state;
-    final NotificationsController controller =
-        ref.watch(notificationsControllerProvider);
+    final NotificationsController controller = ref.watch(
+      notificationsControllerProvider,
+    );
     final NotificationsState state = controller.state;
     final user = authState.user;
 
@@ -76,20 +84,18 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       ),
       body: switch (state.status) {
         NotificationsStatus.initial || NotificationsStatus.loading =>
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
+          const Center(child: CircularProgressIndicator()),
         NotificationsStatus.error => _StateMessage(
-            message: state.message ?? 'Не удалось загрузить уведомления',
-            actionLabel: 'Повторить',
-            onAction: () => controller.loadNotifications(userId: user.id),
-          ),
+          message: state.message ?? 'Не удалось загрузить уведомления',
+          actionLabel: 'Повторить',
+          onAction: () => controller.loadNotifications(userId: user.id),
+        ),
         NotificationsStatus.ready => _buildReadyState(
-            context: context,
-            controller: controller,
-            userId: user.id,
-            state: state,
-          ),
+          context: context,
+          controller: controller,
+          userId: user.id,
+          state: state,
+        ),
       },
     );
   }
@@ -108,8 +114,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       );
     }
 
-    final List<NotificationItemEntity> visibleItems =
-        _filteredItems(state.items);
+    final List<NotificationItemEntity> visibleItems = _filteredItems(
+      state.searchResults,
+    );
 
     return RefreshIndicator(
       color: _rechargeGreen,
@@ -117,6 +124,33 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
         children: <Widget>[
+          TextField(
+            key: const Key('notifications-search'),
+            controller: _searchController,
+            textInputAction: TextInputAction.search,
+            onChanged: controller.updateSearchQuery,
+            decoration: InputDecoration(
+              hintText: 'Search notifications',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: state.searchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: 'Clear search',
+                      onPressed: () {
+                        _searchController.clear();
+                        controller.clearSearch();
+                      },
+                      icon: const Icon(Icons.close),
+                    ),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           _NotificationFilterBar(
             selected: _filter,
             onChanged: (_NotificationFeedFilter next) {
@@ -126,17 +160,18 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           const SizedBox(height: 12),
           if (visibleItems.isEmpty)
             _FilteredNotificationsEmpty(
-              onShowAll: () =>
-                  setState(() => _filter = _NotificationFeedFilter.all),
+              hasSearchQuery: state.searchQuery.isNotEmpty,
+              onShowAll: () {
+                _searchController.clear();
+                controller.clearSearch();
+                setState(() => _filter = _NotificationFeedFilter.all);
+              },
             )
           else
             ...visibleItems.map(
               (NotificationItemEntity item) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: _notificationCardFor(
-                  item: item,
-                  controller: controller,
-                ),
+                child: _notificationCardFor(item: item, controller: controller),
               ),
             ),
         ],
@@ -150,21 +185,23 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     return switch (_filter) {
       _NotificationFeedFilter.all => items,
       _NotificationFeedFilter.newItems =>
-        items.where((NotificationItemEntity item) => !item.isRead).toList(
-              growable: false,
-            ),
-      _NotificationFeedFilter.reminders => items
-          .where(
-            (NotificationItemEntity item) =>
-                item.type == NotificationType.reminder,
-          )
-          .toList(growable: false),
-      _NotificationFeedFilter.updates => items
-          .where(
-            (NotificationItemEntity item) =>
-                item.type != NotificationType.reminder,
-          )
-          .toList(growable: false),
+        items
+            .where((NotificationItemEntity item) => !item.isRead)
+            .toList(growable: false),
+      _NotificationFeedFilter.reminders =>
+        items
+            .where(
+              (NotificationItemEntity item) =>
+                  item.type == NotificationType.reminder,
+            )
+            .toList(growable: false),
+      _NotificationFeedFilter.updates =>
+        items
+            .where(
+              (NotificationItemEntity item) =>
+                  item.type != NotificationType.reminder,
+            )
+            .toList(growable: false),
     };
   }
 
@@ -175,10 +212,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     return _NotificationCard(
       item: item,
       onOpen: () => _openNotification(item),
-      onOpenLocation: (String location) => _openNotification(
-        item,
-        targetRoute: location,
-      ),
+      onOpenLocation: (String location) =>
+          _openNotification(item, targetRoute: location),
     );
   }
 
@@ -304,8 +339,9 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _NotificationDestination destination =
-        _notificationDestinationFor(item.targetRoute);
+    final _NotificationDestination destination = _notificationDestinationFor(
+      item.targetRoute,
+    );
     final _NotificationRoutePreview? routePreview =
         _NotificationRoutePreview.fromTargetRoute(item.targetRoute);
     final List<_NotificationRouteAction> routeActions =
@@ -349,11 +385,10 @@ class _NotificationCard extends StatelessWidget {
                         item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -361,9 +396,9 @@ class _NotificationCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.82),
-                              height: 1.18,
-                            ),
+                          color: Colors.white.withValues(alpha: 0.82),
+                          height: 1.18,
+                        ),
                       ),
                       if (hasTargetRoute) ...<Widget>[
                         const SizedBox(height: 5),
@@ -390,11 +425,10 @@ class _NotificationCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         _formatTime(item.createdAtUtc),
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.82),
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       if (hasMenu) ...<Widget>[
                         const SizedBox(height: 6),
@@ -451,9 +485,7 @@ class _NotificationActionsMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) {
         return <PopupMenuEntry<_NotificationMenuAction>>[
           PopupMenuItem<_NotificationMenuAction>(
-            value: _NotificationMenuAction(
-              location: null,
-            ),
+            value: _NotificationMenuAction(location: null),
             child: Row(
               children: <Widget>[
                 Icon(destination.icon, size: 18),
@@ -465,17 +497,15 @@ class _NotificationActionsMenu extends StatelessWidget {
           ...routeActions.map(
             (_NotificationRouteAction action) =>
                 PopupMenuItem<_NotificationMenuAction>(
-              value: _NotificationMenuAction(
-                location: action.location,
-              ),
-              child: Row(
-                children: <Widget>[
-                  Icon(action.icon, size: 18),
-                  const SizedBox(width: 8),
-                  Text(action.label),
-                ],
-              ),
-            ),
+                  value: _NotificationMenuAction(location: action.location),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(action.icon, size: 18),
+                      const SizedBox(width: 8),
+                      Text(action.label),
+                    ],
+                  ),
+                ),
           ),
         ];
       },
@@ -484,9 +514,7 @@ class _NotificationActionsMenu extends StatelessWidget {
 }
 
 class _NotificationMenuAction {
-  const _NotificationMenuAction({
-    required this.location,
-  });
+  const _NotificationMenuAction({required this.location});
 
   final String? location;
 }
@@ -632,7 +660,8 @@ class _NotificationRoutePreview {
   static _NotificationRoutePreview? fromTargetRoute(String? targetRoute) {
     final String path = _pathForTargetRoute(targetRoute);
     final Map<String, String> query = _queryForTargetRoute(targetRoute);
-    final bool isRouteTarget = path == RouteNames.scenarioBuilder ||
+    final bool isRouteTarget =
+        path == RouteNames.scenarioBuilder ||
         (path == RouteNames.discoverMap && query['mode'] == 'scenario');
     if (!isRouteTarget) return null;
 
@@ -650,7 +679,9 @@ class _NotificationRoutePreview {
     final String? duration = _optionalQueryValue(
       query['duration'] ?? query['durationMinutes'],
     );
-    final String? free = _boolParamFromQuery(query['free'] ?? query['freeOnly']);
+    final String? free = _boolParamFromQuery(
+      query['free'] ?? query['freeOnly'],
+    );
     final String? walking = _boolParamFromQuery(
       query['walking'] ?? query['walkingOnly'],
     );
@@ -823,9 +854,7 @@ String _humanizeQueryLabel(String value) {
 }
 
 class _TypeIcon extends StatelessWidget {
-  const _TypeIcon({
-    required this.type,
-  });
+  const _TypeIcon({required this.type});
 
   final NotificationType type;
 
@@ -852,9 +881,11 @@ class _TypeIcon extends StatelessWidget {
 
 class _FilteredNotificationsEmpty extends StatelessWidget {
   const _FilteredNotificationsEmpty({
+    required this.hasSearchQuery,
     required this.onShowAll,
   });
 
+  final bool hasSearchQuery;
   final VoidCallback onShowAll;
 
   @override
@@ -865,7 +896,11 @@ class _FilteredNotificationsEmpty extends StatelessWidget {
         children: <Widget>[
           const Icon(Icons.mark_email_read, size: 36),
           const SizedBox(height: 10),
-          const Text('В этом фильтре пока пусто'),
+          Text(
+            hasSearchQuery
+                ? 'По вашему запросу ничего не найдено'
+                : 'В этом фильтре пока пусто',
+          ),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onShowAll,
@@ -898,10 +933,7 @@ class _StateMessage extends StatelessWidget {
           children: <Widget>[
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: onAction,
-              child: Text(actionLabel),
-            ),
+            OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
           ],
         ),
       ),

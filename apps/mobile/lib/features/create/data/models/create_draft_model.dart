@@ -1,11 +1,23 @@
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/event_draft_data.dart';
+import '../../domain/entities/find_people_draft_data.dart';
+import '../../domain/entities/place_draft_data.dart';
+import '../../domain/entities/route_draft_data.dart';
+import '../../domain/entities/scenario_draft_data.dart';
+import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
+import 'find_people_draft_mapper.dart';
+import 'event_draft_mapper.dart';
+import 'place_draft_mapper.dart';
+import 'route_draft_mapper.dart';
+import 'scenario_draft_mapper.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
     required this.schemaVersion,
     required this.id,
+    this.basedOnPublishedVersionId,
     required this.objectType,
     required this.title,
     required this.eventType,
@@ -72,6 +84,7 @@ class CreateDraftModel {
 
   final int schemaVersion;
   final String id;
+  final String? basedOnPublishedVersionId;
   final String objectType;
   final String title;
   final String eventType;
@@ -135,10 +148,46 @@ class CreateDraftModel {
   final String updatedAtUtcIso;
   final String? publishedAtUtcIso;
 
+  int? get routeRevision {
+    final Object? payload = sectionData['route_details'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
+    final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
+      entity.sectionData,
+    );
+    if (entity.eventData != null) {
+      serializedSections['event_details'] = EventDraftMapper.toJson(
+        entity.eventData!,
+      );
+    }
+    if (entity.placeData != null) {
+      serializedSections['place_details'] = PlaceDraftMapper.toJson(
+        entity.placeData!,
+      );
+    }
+    if (entity.findPeopleData != null) {
+      serializedSections['find_people_details'] = FindPeopleDraftMapper.toJson(
+        entity.findPeopleData!,
+      );
+    }
+    if (entity.scenarioData != null) {
+      serializedSections['scenario'] = ScenarioDraftMapper.toJson(
+        entity.scenarioData!,
+      );
+    }
+    if (entity.routeData != null) {
+      serializedSections['route_details'] = RouteDraftMapper.toJson(
+        entity.routeData!,
+      );
+    }
     return CreateDraftModel(
-      schemaVersion: 2,
+      schemaVersion: 8,
       id: entity.id,
+      basedOnPublishedVersionId: entity.basedOnPublishedVersionId,
       objectType: entity.objectType.taxonomyId,
       title: entity.title,
       eventType: entity.eventType,
@@ -147,7 +196,7 @@ class CreateDraftModel {
       tags: entity.tags,
       shortDescription: entity.shortDescription,
       fullDescription: entity.fullDescription,
-      sectionData: Map<String, dynamic>.from(entity.sectionData),
+      sectionData: serializedSections,
       startDateTimeUtcIso: entity.startDateTimeUtc?.toIso8601String(),
       endDateTimeUtcIso: entity.endDateTimeUtc?.toIso8601String(),
       durationMinutes: entity.durationMinutes,
@@ -215,9 +264,144 @@ class CreateDraftModel {
       legacyObjectType: objectType,
       contentGroupId: mainCategory,
     );
+    final CreateObjectType parsedObjectType = _parseObjectType(
+      objectType,
+      migratedSectionData,
+    );
+    final EventDraftData eventDefaults =
+        EventDraftData.defaults(
+          marketCityId: marketCityId,
+          countryCode: country,
+          city: city,
+          timezoneId: timezone,
+          currencyCode: currency,
+        ).copyWith(
+          format: EventFormat.values.firstWhere(
+            (EventFormat value) => value.name == format,
+            orElse: () => EventFormat.offline,
+          ),
+          localStartDate:
+              startDateTimeUtcIso != null && startDateTimeUtcIso!.length >= 10
+              ? startDateTimeUtcIso!.substring(0, 10)
+              : null,
+          durationMinutes: durationMinutes ?? 120,
+          pricingMode: isFree ? EventPricingMode.free : EventPricingMode.fixed,
+          paymentCollectionMode: isFree
+              ? EventPaymentCollectionMode.none
+              : EventPaymentCollectionMode.onsite,
+          price: isFree || basePrice == null
+              ? null
+              : EventMoneyDraft(
+                  amountMinor: (basePrice! * 100).round(),
+                  currencyCode: currency,
+                ),
+          capacityMode: maxParticipants == null
+              ? EventCapacityMode.unknown
+              : EventCapacityMode.known,
+          capacity: maxParticipants,
+          registrationMode: bookingLink.trim().isEmpty
+              ? EventRegistrationMode.none
+              : EventRegistrationMode.external,
+          externalBookingUrl: bookingLink.trim().isEmpty ? null : bookingLink,
+          mediaMetadata: const EventMediaMetadataDraft(),
+        );
+    final EventDraftData? eventData = parsedObjectType == CreateObjectType.event
+        ? EventDraftMapper.fromJson(
+            migratedSectionData['event_details'] is Map
+                ? Map<String, Object?>.from(
+                    migratedSectionData['event_details']! as Map,
+                  )
+                : const <String, Object?>{},
+            defaults: eventDefaults,
+          )
+        : null;
+    final PlaceDraftData legacyPlaceDefaults =
+        PlaceDraftData.defaults(
+          userId: organizerId,
+          marketCityId: marketCityId,
+          countryCode: country,
+          city: city,
+          timezoneId: timezone,
+          currencyCode: currency,
+        ).copyWith(
+          location:
+              PlaceDraftData.defaults(
+                userId: organizerId,
+                marketCityId: marketCityId,
+                countryCode: country,
+                city: city,
+                timezoneId: timezone,
+                currencyCode: currency,
+              ).location.copyWith(
+                formattedAddress: addressLine1.isEmpty ? null : addressLine1,
+                latitude: latitude,
+                longitude: longitude,
+                accuracy: PlaceLocationAccuracy.manual,
+                pinConfirmed: latitude != null && longitude != null,
+              ),
+          pricing: PlacePricingDraft(
+            currencyCode: currency,
+            entryType: isFree ? PlaceEntryType.free : PlaceEntryType.paid,
+            entryPriceFrom: isFree ? null : basePrice,
+          ),
+          contacts: PlaceContactsDraft(
+            phone: organizerPhone.isEmpty ? null : organizerPhone,
+            email: organizerEmail.isEmpty ? null : organizerEmail,
+            bookingUrl: bookingLink.isEmpty ? null : bookingLink,
+          ),
+        );
+    final PlaceDraftData? placeData = parsedObjectType == CreateObjectType.place
+        ? PlaceDraftMapper.fromJson(
+            migratedSectionData['place_details'],
+            defaults: legacyPlaceDefaults,
+          )
+        : null;
+    final FindPeopleDraftData? findPeopleData =
+        parsedObjectType == CreateObjectType.findPeople
+        ? FindPeopleDraftMapper.fromJson(
+            migratedSectionData['find_people_details'],
+            defaults: FindPeopleDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+            ),
+          )
+        : null;
+    final Object? scenarioPayload =
+        migratedSectionData['scenario'] ??
+        migratedSectionData['scenario_details'];
+    final ScenarioDraftData? scenarioData =
+        parsedObjectType == CreateObjectType.scenario
+        ? ScenarioDraftMapper.fromJson(
+            scenarioPayload is Map
+                ? Map<String, Object?>.from(scenarioPayload)
+                : const <String, Object?>{},
+            defaults: ScenarioDraftData.defaults(
+              timezoneId: timezone,
+              currencyCode: currency,
+            ),
+          )
+        : null;
+    final Object? routePayload = migratedSectionData['route_details'];
+    RouteDraftData? routeData;
+    final Map<String, Object?> runtimeSectionData = Map<String, Object?>.from(
+      migratedSectionData,
+    );
+    if (parsedObjectType == CreateObjectType.route && routePayload is Map) {
+      try {
+        routeData = RouteDraftMapper.fromJson(
+          Map<String, Object?>.from(routePayload),
+        );
+        runtimeSectionData.remove('route_details');
+      } on UnsupportedRouteSchemaException {
+        routeData = null;
+      } on RouteDraftFormatException {
+        routeData = null;
+      }
+    }
     return CreateDraftEntity(
       id: id,
-      objectType: _parseObjectType(objectType),
+      basedOnPublishedVersionId: basedOnPublishedVersionId,
+      objectType: parsedObjectType,
       title: title,
       eventType: eventType,
       mainCategory: normalizeRechargeContentGroupId(mainCategory),
@@ -225,7 +409,12 @@ class CreateDraftModel {
       tags: tags,
       shortDescription: shortDescription,
       fullDescription: fullDescription,
-      sectionData: migratedSectionData,
+      sectionData: runtimeSectionData,
+      eventData: eventData,
+      placeData: placeData,
+      findPeopleData: findPeopleData,
+      routeData: routeData,
+      scenarioData: scenarioData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),
@@ -326,8 +515,9 @@ class CreateDraftModel {
       }
     }
     return CreateDraftModel(
-      schemaVersion: 2,
+      schemaVersion: 8,
       id: json['id'] as String,
+      basedOnPublishedVersionId: json['basedOnPublishedVersionId'] as String?,
       objectType: json['objectType'] as String,
       title: json['title'] as String? ?? '',
       eventType: json['eventType'] as String? ?? '',
@@ -410,8 +600,9 @@ class CreateDraftModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'schemaVersion': 2,
+      'schemaVersion': 8,
       'id': id,
+      'basedOnPublishedVersionId': basedOnPublishedVersionId,
       'objectType': objectType,
       'title': title,
       'eventType': eventType,
@@ -477,7 +668,21 @@ class CreateDraftModel {
     };
   }
 
-  static CreateObjectType _parseObjectType(String value) {
+  static CreateObjectType _parseObjectType(
+    String value,
+    Map<String, Object?> sectionData,
+  ) {
+    final String normalized = value.trim().toLowerCase().replaceAll('-', '_');
+    if (normalized == 'quick_plan' || normalized == 'quickplan') {
+      final LegacyPlanningClassification classification =
+          const ClassifyLegacyPlanningDraftUseCase()(<String, Object?>{
+            'objectType': value,
+            'sectionData': sectionData,
+          });
+      if (classification.target == LegacyPlanningTarget.scenario) {
+        return CreateObjectType.scenario;
+      }
+    }
     return createObjectTypeFromId(value);
   }
 
@@ -500,7 +705,20 @@ class CreateDraftModel {
     required String contentGroupId,
   }) {
     final Map<String, Object?> result = <String, Object?>{...source};
-    if (legacyObjectType.trim().toLowerCase() != 'offer' ||
+    final String normalizedType = legacyObjectType.trim().toLowerCase();
+    if (normalizedType == 'social_request' ||
+        normalizedType == 'socialrequest') {
+      final Object? legacyDetails = result.remove('social_request_details');
+      if (legacyDetails != null && !result.containsKey('find_people_details')) {
+        result['find_people_details'] = legacyDetails;
+      }
+      result['migration'] = <String, Object?>{
+        ...?result['migration'] as Map<String, Object?>?,
+        'source_type': 'social_request',
+        'target_type': 'find_people',
+      };
+    }
+    if (normalizedType != 'offer' ||
         !legacyOfferNeedsRentalReview(contentGroupId)) {
       return result;
     }

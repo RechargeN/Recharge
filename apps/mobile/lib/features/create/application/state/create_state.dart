@@ -1,4 +1,15 @@
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/event_validation_issue.dart';
+import '../../domain/entities/find_people_validation_issue.dart';
+import '../../domain/entities/place_validation_issue.dart';
+import '../../domain/entities/place_duplicate_candidate.dart';
+import '../../domain/entities/place_enrichment_proposal.dart';
+import '../../domain/entities/route_publication_data.dart';
+import '../../domain/entities/scenario_draft_data.dart';
+import '../../domain/repositories/catalog_object_picker_port.dart';
+import '../scenario_generation_coordinator.dart';
+
+enum CreateSaveStatus { saved, saving, unsaved, failed }
 
 enum CreateStatus {
   initial,
@@ -18,6 +29,30 @@ class CreateState {
     required this.message,
     required this.validationErrors,
     required this.publishedDraft,
+    required this.saveStatus,
+    required this.eventStep,
+    required this.eventValidationIssues,
+    required this.placeStep,
+    required this.findPeopleStep,
+    required this.findPeopleValidationIssues,
+    required this.placeValidationIssues,
+    required this.placeDuplicateMatches,
+    required this.duplicateOverrideConfirmed,
+    required this.placeEnrichmentLoading,
+    required this.placeEnrichmentProposal,
+    required this.placeEnrichmentError,
+    required this.scenarioStep,
+    required this.scenarioUndoStack,
+    required this.scenarioRedoStack,
+    required this.scenarioCatalogCandidates,
+    required this.scenarioCatalogLoading,
+    required this.scenarioGenerationPrompt,
+    required this.scenarioGenerationLoading,
+    required this.scenarioGenerationPreview,
+    required this.scenarioGenerationError,
+    required this.routeStep,
+    required this.routePublishReceipt,
+    required this.routeModerationRequests,
   });
 
   factory CreateState.initial() {
@@ -32,6 +67,30 @@ class CreateState {
       message: null,
       validationErrors: const <String, String>{},
       publishedDraft: null,
+      saveStatus: CreateSaveStatus.saved,
+      eventStep: 0,
+      eventValidationIssues: const <EventValidationIssue>[],
+      placeStep: 0,
+      findPeopleStep: 0,
+      findPeopleValidationIssues: const <FindPeopleValidationIssue>[],
+      placeValidationIssues: const <PlaceValidationIssue>[],
+      placeDuplicateMatches: const <PlaceDuplicateMatch>[],
+      duplicateOverrideConfirmed: false,
+      placeEnrichmentLoading: false,
+      placeEnrichmentProposal: null,
+      placeEnrichmentError: null,
+      scenarioStep: 0,
+      scenarioUndoStack: const <ScenarioDraftData>[],
+      scenarioRedoStack: const <ScenarioDraftData>[],
+      scenarioCatalogCandidates: const <ScenarioCatalogObjectCandidate>[],
+      scenarioCatalogLoading: false,
+      scenarioGenerationPrompt: '',
+      scenarioGenerationLoading: false,
+      scenarioGenerationPreview: null,
+      scenarioGenerationError: null,
+      routeStep: 0,
+      routePublishReceipt: null,
+      routeModerationRequests: const <RouteModerationRequest>[],
     );
   }
 
@@ -41,6 +100,30 @@ class CreateState {
   final String? message;
   final Map<String, String> validationErrors;
   final CreateDraftEntity? publishedDraft;
+  final CreateSaveStatus saveStatus;
+  final int eventStep;
+  final List<EventValidationIssue> eventValidationIssues;
+  final int placeStep;
+  final int findPeopleStep;
+  final List<FindPeopleValidationIssue> findPeopleValidationIssues;
+  final List<PlaceValidationIssue> placeValidationIssues;
+  final List<PlaceDuplicateMatch> placeDuplicateMatches;
+  final bool duplicateOverrideConfirmed;
+  final bool placeEnrichmentLoading;
+  final PlaceEnrichmentProposal? placeEnrichmentProposal;
+  final String? placeEnrichmentError;
+  final int scenarioStep;
+  final List<ScenarioDraftData> scenarioUndoStack;
+  final List<ScenarioDraftData> scenarioRedoStack;
+  final List<ScenarioCatalogObjectCandidate> scenarioCatalogCandidates;
+  final bool scenarioCatalogLoading;
+  final String scenarioGenerationPrompt;
+  final bool scenarioGenerationLoading;
+  final ScenarioGenerationPreview? scenarioGenerationPreview;
+  final String? scenarioGenerationError;
+  final int routeStep;
+  final RoutePublishReceipt? routePublishReceipt;
+  final List<RouteModerationRequest> routeModerationRequests;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -58,6 +141,43 @@ class CreateState {
     bool clearValidationErrors = false,
     CreateDraftEntity? publishedDraft,
     bool clearPublishedDraft = false,
+    CreateSaveStatus? saveStatus,
+    int? eventStep,
+    List<EventValidationIssue>? eventValidationIssues,
+    bool clearEventValidationIssues = false,
+    int? placeStep,
+    int? findPeopleStep,
+    List<FindPeopleValidationIssue>? findPeopleValidationIssues,
+    bool clearFindPeopleValidationIssues = false,
+    List<PlaceValidationIssue>? placeValidationIssues,
+    bool clearPlaceValidationIssues = false,
+    List<PlaceDuplicateMatch>? placeDuplicateMatches,
+    bool clearPlaceDuplicateMatches = false,
+    bool? duplicateOverrideConfirmed,
+    bool? placeEnrichmentLoading,
+    PlaceEnrichmentProposal? placeEnrichmentProposal,
+    bool clearPlaceEnrichmentProposal = false,
+    String? placeEnrichmentError,
+    bool clearPlaceEnrichmentError = false,
+    int? scenarioStep,
+    List<ScenarioDraftData>? scenarioUndoStack,
+    bool clearScenarioUndoStack = false,
+    List<ScenarioDraftData>? scenarioRedoStack,
+    bool clearScenarioRedoStack = false,
+    List<ScenarioCatalogObjectCandidate>? scenarioCatalogCandidates,
+    bool clearScenarioCatalogCandidates = false,
+    bool? scenarioCatalogLoading,
+    String? scenarioGenerationPrompt,
+    bool? scenarioGenerationLoading,
+    ScenarioGenerationPreview? scenarioGenerationPreview,
+    bool clearScenarioGenerationPreview = false,
+    String? scenarioGenerationError,
+    bool clearScenarioGenerationError = false,
+    int? routeStep,
+    RoutePublishReceipt? routePublishReceipt,
+    bool clearRoutePublishReceipt = false,
+    List<RouteModerationRequest>? routeModerationRequests,
+    bool clearRouteModerationRequests = false,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -70,6 +190,61 @@ class CreateState {
       publishedDraft: clearPublishedDraft
           ? null
           : (publishedDraft ?? this.publishedDraft),
+      saveStatus: saveStatus ?? this.saveStatus,
+      eventStep: eventStep ?? this.eventStep,
+      eventValidationIssues: clearEventValidationIssues
+          ? const <EventValidationIssue>[]
+          : (eventValidationIssues ?? this.eventValidationIssues),
+      placeStep: placeStep ?? this.placeStep,
+      findPeopleStep: findPeopleStep ?? this.findPeopleStep,
+      findPeopleValidationIssues: clearFindPeopleValidationIssues
+          ? const <FindPeopleValidationIssue>[]
+          : (findPeopleValidationIssues ?? this.findPeopleValidationIssues),
+      placeValidationIssues: clearPlaceValidationIssues
+          ? const <PlaceValidationIssue>[]
+          : (placeValidationIssues ?? this.placeValidationIssues),
+      placeDuplicateMatches: clearPlaceDuplicateMatches
+          ? const <PlaceDuplicateMatch>[]
+          : (placeDuplicateMatches ?? this.placeDuplicateMatches),
+      duplicateOverrideConfirmed:
+          duplicateOverrideConfirmed ?? this.duplicateOverrideConfirmed,
+      placeEnrichmentLoading:
+          placeEnrichmentLoading ?? this.placeEnrichmentLoading,
+      placeEnrichmentProposal: clearPlaceEnrichmentProposal
+          ? null
+          : (placeEnrichmentProposal ?? this.placeEnrichmentProposal),
+      placeEnrichmentError: clearPlaceEnrichmentError
+          ? null
+          : (placeEnrichmentError ?? this.placeEnrichmentError),
+      scenarioStep: scenarioStep ?? this.scenarioStep,
+      scenarioUndoStack: clearScenarioUndoStack
+          ? const <ScenarioDraftData>[]
+          : (scenarioUndoStack ?? this.scenarioUndoStack),
+      scenarioRedoStack: clearScenarioRedoStack
+          ? const <ScenarioDraftData>[]
+          : (scenarioRedoStack ?? this.scenarioRedoStack),
+      scenarioCatalogCandidates: clearScenarioCatalogCandidates
+          ? const <ScenarioCatalogObjectCandidate>[]
+          : (scenarioCatalogCandidates ?? this.scenarioCatalogCandidates),
+      scenarioCatalogLoading:
+          scenarioCatalogLoading ?? this.scenarioCatalogLoading,
+      scenarioGenerationPrompt:
+          scenarioGenerationPrompt ?? this.scenarioGenerationPrompt,
+      scenarioGenerationLoading:
+          scenarioGenerationLoading ?? this.scenarioGenerationLoading,
+      scenarioGenerationPreview: clearScenarioGenerationPreview
+          ? null
+          : (scenarioGenerationPreview ?? this.scenarioGenerationPreview),
+      scenarioGenerationError: clearScenarioGenerationError
+          ? null
+          : (scenarioGenerationError ?? this.scenarioGenerationError),
+      routeStep: routeStep ?? this.routeStep,
+      routePublishReceipt: clearRoutePublishReceipt
+          ? null
+          : (routePublishReceipt ?? this.routePublishReceipt),
+      routeModerationRequests: clearRouteModerationRequests
+          ? const <RouteModerationRequest>[]
+          : (routeModerationRequests ?? this.routeModerationRequests),
     );
   }
 }

@@ -24,6 +24,8 @@ import 'package:recharge/features/discover/domain/entities/smart_search_history_
 import 'package:recharge/features/discover/domain/repositories/discover_preferences_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import 'package:recharge/features/discover/presentation/pages/categories_page.dart';
+import 'package:recharge/features/discover/presentation/pages/category_page.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
 import 'package:recharge/features/favorites/application/favorites_providers.dart';
 import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
@@ -41,14 +43,45 @@ void main() {
 
     expect(find.text('RECHARGE'), findsOneWidget);
     expect(find.text('VACATION APP'), findsOneWidget);
+    expect(find.byKey(const Key('home-screen')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('home-search-action'))).height,
+      48,
+    );
+    expect(tester.getSize(find.byKey(const Key('home-map-action'))).height, 48);
     expect(find.text('Categories'), findsWidgets);
     expect(find.text('All'), findsWidgets);
     expect(find.text('Sport'), findsOneWidget);
     expect(find.text('Walks'), findsOneWidget);
+    expect(find.text('Games'), findsOneWidget);
     expect(find.text('New'), findsOneWidget);
     expect(find.text('For you'), findsWidgets);
     expect(find.text('Nearly'), findsNothing);
     expect(find.text('Утренняя йога в парке'), findsWidgets);
+
+    final List<Finder> scenarioFeeds = <Finder>[
+      find.byKey(const Key('home-feed-Categories')),
+      find.byKey(const Key('home-feed-New')),
+      find.byKey(const Key('home-feed-For you')),
+      find.byKey(const Key('home-feed-Quick events')),
+      find.byKey(const Key('home-feed-Nearby')),
+      find.byKey(const Key('home-feed-Popular')),
+    ];
+    for (final Finder feed in scenarioFeeds) {
+      expect(feed, findsOneWidget);
+    }
+    for (int index = 1; index < scenarioFeeds.length; index += 1) {
+      expect(
+        tester.getTopLeft(scenarioFeeds[index]).dy,
+        greaterThan(tester.getTopLeft(scenarioFeeds[index - 1]).dy),
+      );
+    }
+    expect(
+      tester
+          .getSize(find.byKey(const Key('home-card-Categories-evt_1')))
+          .height,
+      116,
+    );
 
     await tester.scrollPageUntilVisible(
       find.text('Quick events'),
@@ -80,6 +113,113 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Search page'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('opens the category catalog from View all', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_HomeTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View all').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Categories'), findsOneWidget);
+    expect(find.byKey(const Key('categories-search-field')), findsOneWidget);
+    expect(find.text('Sport'), findsOneWidget);
+    expect(find.text('Music & nightlife'), findsOneWidget);
+  });
+
+  testWidgets('category row fits a long title at 360dp', (tester) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(_HomeTestApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('home-category-all')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('categories-search-field')),
+      'workshops',
+    );
+    await tester.pumpAndSettle();
+
+    final Finder row = find.byKey(
+      const Key('category-row-workshops_masterclasses'),
+    );
+    expect(row, findsOneWidget);
+    expect(tester.getSize(row).height, 64);
+    expect(
+      tester.getSize(
+        find.byKey(const Key('category-icon-workshops_masterclasses')),
+      ),
+      const Size(42, 42),
+    );
+    final Text title = tester.widget<Text>(
+      find.text('Workshops & masterclasses'),
+    );
+    expect(title.maxLines, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  fullPageTestWidgets('opens category and filters its subcategories', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_HomeTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home-category-all')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('categories-search-field')),
+      'sport',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sport'), findsOneWidget);
+    expect(find.text('Music & nightlife'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('category-row-sport')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Subcategories'), findsOneWidget);
+    expect(find.byKey(const Key('subcategory-all')), findsOneWidget);
+    expect(find.byKey(const Key('subcategory-football')), findsOneWidget);
+    expect(find.text('Community football'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('subcategory-basketball')));
+    await tester.pumpAndSettle();
+    expect(find.text('Community football'), findsNothing);
+    expect(find.text('0 found'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('subcategory-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('Community football'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('home category opens its canonical category page', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_HomeTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('home-category-family_kids')),
+      280,
+      scrollable: find.byType(Scrollable).at(1),
+    );
+    await tester.tap(find.byKey(const Key('home-category-family_kids')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Family & kids'), findsWidgets);
+    expect(find.text('Subcategories'), findsOneWidget);
+    expect(find.byKey(const Key('subcategory-all')), findsOneWidget);
   });
 
   fullPageTestWidgets('opens saved scenario from home continue panel', (
@@ -473,6 +613,21 @@ class _HomeTestApp extends StatelessWidget {
                   const DiscoverHubPage(favoriteApplied: false),
             ),
             GoRoute(
+              path: RouteNames.categories,
+              builder: (context, state) => const CategoriesPage(),
+            ),
+            GoRoute(
+              path: '${RouteNames.categories}/:categoryId',
+              builder: (context, state) => CategoryPage(
+                categoryId: state.pathParameters['categoryId'] ?? '',
+              ),
+            ),
+            GoRoute(
+              path: '${RouteNames.discoverDetails}/:itemId',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Details page'))),
+            ),
+            GoRoute(
               path: RouteNames.search,
               builder: (context, state) => Scaffold(
                 body: Center(
@@ -626,13 +781,14 @@ class _FakeDiscoverRepository implements DiscoverRepository {
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    return <DiscoverItemEntity>[
+    final List<DiscoverItemEntity> items = <DiscoverItemEntity>[
       DiscoverItemEntity(
         id: 'evt_1',
         title: 'Утренняя йога в парке',
         subtitle: 'Легкая практика',
         city: 'Rezekne',
-        category: 'wellness',
+        category: 'wellness_recharge',
+        subcategory: 'yoga',
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
@@ -641,7 +797,35 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         isFree: true,
         relevanceScore: 0.8,
       ),
+      DiscoverItemEntity(
+        id: 'evt_sport_1',
+        title: 'Community football',
+        subtitle: 'Friendly outdoor match',
+        city: 'Rezekne',
+        category: 'sport',
+        subcategory: 'football',
+        startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
+        latitude: query.centerLat,
+        longitude: query.centerLng,
+        priceAmount: 0,
+        distanceKm: 2.1,
+        isFree: true,
+        relevanceScore: 0.75,
+      ),
     ];
+    return items
+        .where((DiscoverItemEntity item) {
+          if (query.selectedCategoryIds.isNotEmpty &&
+              !query.selectedCategoryIds.contains(item.category)) {
+            return false;
+          }
+          if (query.selectedSubcategoryIds.isNotEmpty &&
+              !query.selectedSubcategoryIds.contains(item.subcategory)) {
+            return false;
+          }
+          return true;
+        })
+        .toList(growable: false);
   }
 }
 

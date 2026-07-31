@@ -19,6 +19,39 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  testWidgets('matches the compact white search landing visual contract', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 720)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+
+    final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+
+    expect(scaffold.backgroundColor, const Color(0xFFFFFFFF));
+    expect(appBar.backgroundColor, const Color(0xFFFFFFFF));
+    expect(appBar.centerTitle, isFalse);
+    expect(
+      tester.getSize(find.byKey(const Key('regular-search-field'))),
+      const Size(328, 42),
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('quick-plan-rail'))).height,
+      126,
+    );
+    expect(find.byType(Image), findsAtLeastNWidgets(3));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('filter sheets preserve reference metrics on a 360dp phone', (
     tester,
   ) async {
@@ -83,12 +116,54 @@ void main() {
       find.byKey(const Key('regular-search-field')),
       'museum',
     );
+    await tester.tap(find.byKey(const Key('regular-search-field')));
     await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pumpAndSettle();
 
     expect(find.text('Results destination'), findsOneWidget);
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('regular_search'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('top condition chips select real search values', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_SearchLandingTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('search-date-chip')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('quick-date-custom')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tomorrow'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('search-people-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quick-people-3')));
+    await tester.pumpAndSettle();
+    expect(find.text('3 people'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('search-budget-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quick-budget-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Free'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('search-radius-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quick-radius-10')));
+    await tester.tap(find.byKey(const Key('quick-radius-apply')));
+    await tester.pumpAndSettle();
+    expect(find.text('10 km'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('regular-search-field')));
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(find.text('people:3'), findsOneWidget);
+    expect(find.text('budget:0'), findsOneWidget);
+    expect(find.text('radius:10000'), findsOneWidget);
+    expect(find.text('date:true'), findsOneWidget);
   });
 
   fullPageTestWidgets('regular search exposes time-fit and travel controls', (
@@ -427,6 +502,18 @@ class _SearchLandingTestApp extends StatelessWidget {
                       const Text('Results destination'),
                       Text(state.uri.queryParameters['q'] ?? ''),
                       Text(state.uri.queryParameters['source'] ?? ''),
+                      Text(
+                        'people:${state.uri.queryParameters['people'] ?? ''}',
+                      ),
+                      Text(
+                        'budget:${state.uri.queryParameters['budgetMax'] ?? ''}',
+                      ),
+                      Text(
+                        'radius:${state.uri.queryParameters['radius'] ?? ''}',
+                      ),
+                      Text(
+                        'date:${state.uri.queryParameters.containsKey('dateFrom')}',
+                      ),
                     ],
                   ),
                 ),

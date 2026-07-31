@@ -3,6 +3,26 @@ import 'package:recharge/features/scenarios/application/controllers/scenario_bui
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
 
 void main() {
+  test('legacy Quick Plan runtime has stable identity and revision', () {
+    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final String initialId = controller.state.draft.id;
+    final List<String> initialStepIds = controller.state.draft.steps
+        .map((step) => step.id)
+        .toList(growable: false);
+
+    expect(initialId, isNotEmpty);
+    expect(initialStepIds, everyElement(isNotEmpty));
+    expect(initialStepIds.toSet(), hasLength(initialStepIds.length));
+    expect(controller.state.draft.revision, 0);
+
+    controller.setFreeOnly(true);
+    expect(controller.state.draft.id, initialId);
+    expect(controller.state.draft.revision, 1);
+    controller.reset();
+    expect(controller.state.draft.id, isNot(initialId));
+    expect(controller.state.draft.revision, 0);
+  });
+
   test('initial scenario has calculated calm route totals', () {
     final ScenarioBuilderController controller = ScenarioBuilderController();
 
@@ -17,8 +37,7 @@ void main() {
 
     expect(
       controller.state.draft.steps.every(
-        (ScenarioStepEntity step) =>
-            step.latitude > 56 && step.longitude > 27,
+        (ScenarioStepEntity step) => step.latitude > 56 && step.longitude > 27,
       ),
       isTrue,
     );
@@ -135,10 +154,7 @@ void main() {
 
     expect(controller.state.routeFit.score, lessThan(85));
     expect(controller.state.routeFit.label, isNot('Ready'));
-    expect(
-      controller.state.routeFit.insights,
-      contains('Trim about 35 min'),
-    );
+    expect(controller.state.routeFit.insights, contains('Trim about 35 min'));
     expect(
       controller.state.routeFit.insights,
       contains('Remove paid stops for free-only mode'),

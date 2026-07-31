@@ -1,6 +1,6 @@
 # RECHARGE — CATEGORY SYSTEM (полная спецификация)
 
-Версия: v1.4.1 (2026-07-17). Статус: Accepted (канонический).
+Версия: v1.4.3 (2026-07-31). Статус: Accepted (канонический).
 История правок: v1.1 — явный счёт категорий, профиль volunteer_action,
 согласование ContentType с 10 Create-блоками; v1.2 — устранён дубль
 animal_volunteering, уточнён счётчик aliases, seasonality добавлена
@@ -8,9 +8,11 @@ animal_volunteering, уточнён счётчик aliases, seasonality доба
 v1.3 — добиты остаточные 517→516, bookableSlot в маппинге, принято
 решение offer → session (с флагом review_as_rental); v1.4 — уточнён
 учёт cooking_class и зафиксировано хранение review_as_rental; v1.4.1 —
-implementation-аудит уточнил 36 field ID и 5 категорий с impliedFacets.
+implementation-аудит уточнил 36 field ID и 5 категорий с impliedFacets;
+v1.4.2 — `route` закреплён только за непрерывным Route, без Scenario;
+v1.4.3 — добавлены 14 place-only подкатегорий для адаптивного Place Create.
 Состав: **27 пользовательских категорий + 1 служебная (`other`) = 28**;
-516 подкатегорий.
+530 подкатегорий.
 Заменяет собой: CATEGORY_CATALOG.md + CATEGORY_CATALOG_ADDITIONS.md
 (их содержимое влито сюда как канонический реестр).
 Приоритет: уровень slice spec. Продуктовые принципы — VISION.md.
@@ -48,7 +50,7 @@ implementation-аудит уточнил 36 field ID и 5 категорий с 
 4. **Категория ≠ фасет.** Оси «с кем», «когда», «сезон» — фильтры.
    Подкатегории-сценарии, пересекающиеся с фасетами, декларируют
    `impliedFacets` и не создают параллельный механизм (§9).
-5. **Профили вместо пер-категорийных форм.** 516 подкатегорий
+5. **Профили вместо пер-категорийных форм.** 530 подкатегорий
    ссылаются на ~20 criteria-профилей (§6). Новая подкатегория
    почти никогда не требует нового профиля.
 6. **l10n-ключи, не строки.** Все названия — ключи en/ru/lv.
@@ -98,7 +100,7 @@ Enum взаимно однозначно отображается на create-т
 |---|---|---|
 | `event` | Event | да (E) |
 | `activity` | Recharge Activity | да (A) |
-| `route` | Route / Scenario | да (R) |
+| `route` | Route | да (R) |
 | `place` | Place / Business | да (P) |
 | `session` | Bookable Session | да (S) |
 | `classWorkshop` | Class / Workshop / Experience | да (C) |
@@ -130,7 +132,7 @@ Enum взаимно однозначно отображается на create-т
 выявила одну коллизию: `cooking_class` (workshops + food_drinks).
 Решение: канонический дом — `workshops_masterclasses`
 (это класс → профиль hands_on_class); в food_drinks — alias.
-После разрешения коллизии все 516 канонических slug'ов уникальны;
+После разрешения коллизии все 530 канонических slug'ов уникальны;
 миграция однозначна.
 
 ---
@@ -232,7 +234,7 @@ Enum взаимно однозначно отображается на create-т
 
 ---
 
-## §7. Канонический реестр (27 пользовательских + 1 служебная категория / 516 подкатегорий)
+## §7. Канонический реестр (27 пользовательских + 1 служебная категория / 530 подкатегорий)
 
 Формат каждой категории:
 - метаданные: default profile, default types
@@ -282,14 +284,14 @@ movie_discussion, premiere, independent_film, cinema_club
 | cinema | exhibition_visit | [P, E] |
 | film_festival | market_fair | |
 
-### 7.4 `art_culture_museums` — Art, culture & museums (19)
+### 7.4 `art_culture_museums` — Art, culture & museums (23)
 default: `exhibition_visit` · types: [E, P]
 
 exhibition, gallery, museum, museum_night, gallery_walk, artist_talk,
 art_walk, photography_exhibition, street_art, architecture,
-cultural_heritage, literature_evening, book_reading, history_walk,
-design_event, craft_exhibition, public_art, creative_meetup,
-fashion_event
+cultural_heritage, monument, memorial, sculpture, historic_landmark,
+literature_evening, book_reading, history_walk, design_event,
+craft_exhibition, public_art, creative_meetup, fashion_event
 
 | исключение | profile | types |
 |---|---|---|
@@ -297,6 +299,7 @@ fashion_event
 | gallery_walk, art_walk, history_walk | guided_tour | [E, R] |
 | creative_meetup | networking_social | [E] |
 | fashion_event | performance_show | [E] |
+| monument, memorial, sculpture, historic_landmark | exhibition_visit | [P] |
 
 ### 7.5 `education_talks` — Education & talks (19)
 default: `talk_lecture` · types: [E]
@@ -416,20 +419,22 @@ dance_practice, dance_show
 | dance_battle | competition | [E] |
 | dance_show | performance_show | [E] |
 
-### 7.13 `outdoor_nature_walking` — Outdoor, nature & walking (25)
+### 7.13 `outdoor_nature_walking` — Outdoor, nature & walking (34)
 default: `outdoor_activity` · types: [E, A, R]
 
 hiking, nature_walk, city_walk, historical_walk, sunset_walk,
 sunrise_walk, forest_walk, lake_walk, river_walk, architecture_walk,
 hidden_gems_walk, photography_walk, birdwatching, mushroom_picking,
 berry_picking, picnic_walk, park_walk, beach_walk, promenade_walk,
-outdoor_workout, nature_escape, slow_walk, stargazing,
+park, beach, promenade, viewpoint, forest, lake, waterfall, cave,
+natural_landmark, outdoor_workout, nature_escape, slow_walk, stargazing,
 northern_lights_watch, meteor_shower_watch
 
 | исключение | profile |
 |---|---|
 | historical_walk, architecture_walk, hidden_gems_walk | guided_tour |
 | outdoor_workout | physical_activity |
+| park, beach, promenade, viewpoint, forest, lake, waterfall, cave, natural_landmark | outdoor_activity · [P] |
 
 impliedFacets: sunset_walk → timeOfDay=evening;
 sunrise_walk → timeOfDay=morning (§9).
@@ -517,20 +522,21 @@ pet_care_talk, animal_therapy
 | horse_riding, pony_riding | adrenaline_activity | [E, S] |
 | pet_photo_session | pet_event | [E, S] |
 
-### 7.19 `community_charity` — Community & charity (17)
+### 7.19 `community_charity` — Community & charity (18)
 default: `volunteer_action` · types: [E]
 
 charity_event, volunteer_activity, community_cleanup, donation_event,
 neighborhood_event, fundraising_dinner, charity_run,
 animal_shelter_volunteering, food_bank_volunteering, tree_planting,
 beach_cleanup, park_cleanup, community_garden, local_community_meetup,
-mutual_aid, social_impact_event, environmental_action
+public_square, mutual_aid, social_impact_event, environmental_action
 
 | исключение | profile |
 |---|---|
 | fundraising_dinner | food_gathering |
 | charity_run | competition |
 | local_community_meetup | networking_social |
+| community_garden, public_square | volunteer_action · [P] |
 
 `animal_shelter_volunteering` — канонический дом здесь;
 `animal_volunteering` (7.18) — alias на него (§8).
@@ -663,7 +669,7 @@ alias влияет на: поиск внутри категории X, keywords,
 | cinema_screenings | drive_in_cinema → auto_moto: drive_in_cinema |
 | pets_animals | animal_volunteering → community_charity: animal_shelter_volunteering |
 
-Alias НЕ является подкатегорией и не входит в счёт 516; он влияет
+Alias НЕ является подкатегорией и не входит в счёт 530; он влияет
 только на поиск/браузинг внутри своей категории и на keywords.
 
 ### Родственные связи и примечания (НЕ aliases, 2)
@@ -807,7 +813,7 @@ keywords. Правила заполнения:
 |---|---|
 | Категорий (пользовательских) | 27 |
 | Категорий (служебных) | 1 (`other`) — итого 28 |
-| Подкатегорий | 516 (включая other_event; канонический cooking_class учтён один раз в workshops_masterclasses; food_drinks:cooking_class и pets_animals:animal_volunteering — контекстные aliases и отдельно не считаются) |
+| Подкатегорий | 530 (включая other_event и 14 place-only типов v1.4.3; канонический cooking_class учтён один раз в workshops_masterclasses; food_drinks:cooking_class и pets_animals:animal_volunteering — контекстные aliases и отдельно не считаются) |
 | Criteria-профилей | 21 + fallback (`open_event`) |
 | Полей в словаре | 36 (35 строк; players_min / players_max — два ID) |
 | Категорий с impliedFacets | 5 (outdoor, wellness, winter, family_kids, dating) |
@@ -822,7 +828,7 @@ keywords. Правила заполнения:
 
 ## §13. Открытые вопросы (сознательно отложено)
 
-1. Полное наполнение keywords 516 × 3 языка — отдельная задача
+1. Полное наполнение keywords 530 × 3 языка — отдельная задача
    после утверждения этого документа (можно генерировать пакетно
    и ревьюить).
 2. Справочники genres / music_genres / topics — при наполнении seed.

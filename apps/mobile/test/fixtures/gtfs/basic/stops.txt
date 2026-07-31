@@ -1,0 +1,5 @@
+stop_id,stop_name,stop_lat,stop_lon,parent_station
+station_a,Rīga Central,56.9460,24.1140,
+platform_a,"Rīga Central, platform 1",56.9461,24.1141,station_a
+stop_b,Cēsis,57.3119,25.2746,
+stop_c,Valmiera,57.5385,25.4264,

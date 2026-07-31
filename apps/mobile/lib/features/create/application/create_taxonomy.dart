@@ -95,7 +95,7 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
   CreateBlockConfig(
     objectType: CreateObjectType.route,
     title: 'Route',
-    description: 'Scenario made of one or more points',
+    description: 'Continuous track with anchors, segments and route details',
     defaultCategoryId: 'travel_tours',
     defaultSubcategoryId: 'walking_tour',
     requiresStartDateTime: false,
@@ -105,9 +105,9 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
   CreateBlockConfig(
     objectType: CreateObjectType.place,
     title: 'Place',
-    description: 'Public spot or map point',
-    defaultCategoryId: 'wellness_recharge',
-    defaultSubcategoryId: 'calm_walk',
+    description: 'A permanent physical place, venue, public space or landmark',
+    defaultCategoryId: '',
+    defaultSubcategoryId: '',
     requiresStartDateTime: false,
     locationLabel: 'Place name',
     priceLabel: 'Typical spend',
@@ -123,14 +123,14 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
     priceLabel: 'Booking price',
   ),
   CreateBlockConfig(
-    objectType: CreateObjectType.quickPlan,
-    title: 'Quick plan',
-    description: 'Lightweight plan for now, today, or tonight',
+    objectType: CreateObjectType.scenario,
+    title: 'Scenario',
+    description: 'City, day, weekend or trip plan made of independent stops',
     defaultCategoryId: 'food_drinks',
     defaultSubcategoryId: 'coffee',
-    requiresStartDateTime: true,
-    locationLabel: 'Meeting place',
-    priceLabel: 'Expected spend',
+    requiresStartDateTime: false,
+    locationLabel: 'Area or city',
+    priceLabel: 'Scenario budget',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.findPeople,
@@ -175,6 +175,18 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
 ];
 
 CreateBlockConfig createBlockConfigFor(CreateObjectType objectType) {
+  if (objectType == CreateObjectType.quickPlan) {
+    return const CreateBlockConfig(
+      objectType: CreateObjectType.quickPlan,
+      title: 'Legacy Quick Plan',
+      description: 'Personal lightweight plan kept for read compatibility',
+      defaultCategoryId: 'food_drinks',
+      defaultSubcategoryId: 'coffee',
+      requiresStartDateTime: false,
+      locationLabel: 'Meeting place',
+      priceLabel: 'Expected spend',
+    );
+  }
   return rechargeCreateBlockConfigs.firstWhere(
     (CreateBlockConfig config) => config.objectType == objectType,
     orElse: () => rechargeCreateBlockConfigs.first,
@@ -203,6 +215,9 @@ final List<CreateTaxonomyCategory> rechargeCreateTaxonomy =
 List<CreateTaxonomyCategory> createTaxonomyForObjectType(
   CreateObjectType objectType,
 ) {
+  if (objectType == CreateObjectType.findPeople) {
+    return rechargeCreateTaxonomy;
+  }
   return rechargeCreateTaxonomy
       .where((CreateTaxonomyCategory category) => category.allows(objectType))
       .map(

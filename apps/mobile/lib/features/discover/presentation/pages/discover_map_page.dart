@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/geo/geometry_encoding.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -159,7 +160,11 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                   ? null
                   : (int index) => _selectScenarioStop(scenarioRoute, index),
             ),
-            polylines: _buildPolylines(context, scenarioRoute),
+            polylines: _buildPolylines(
+              context,
+              scenarioRoute,
+              state.selectedItem,
+            ),
             onCameraMove: (CameraPosition position) {
               controller.stageMapCenter(
                 lat: position.target.latitude,
@@ -184,21 +189,29 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               onSubmitSearch: () {
                 controller.applySearchConditions(
                   queryText: _searchController.text,
+                  sourceScreen: 'map_search',
                 );
               },
               onClearSearch: () {
                 _searchController.clear();
-                controller.applySearchConditions(queryText: '');
+                controller.applySearchConditions(
+                  queryText: '',
+                  sourceScreen: 'map_search',
+                );
               },
               onCategorySelected: (String? value) {
                 controller.applySearchConditions(
                   selectedCategoryIds: value == null
                       ? const <String>[]
                       : <String>[value],
+                  sourceScreen: 'map_search',
                 );
               },
               onFreeOnlyChanged: (bool value) {
-                controller.applySearchConditions(freeOnly: value);
+                controller.applySearchConditions(
+                  freeOnly: value,
+                  sourceScreen: 'map_search',
+                );
               },
               onCreateHere: () {
                 final DiscoverQuery query = state.draftQuery.copyWith(
@@ -383,6 +396,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       clearTimeWindow: timeWindow == null,
       travelContext: travelContext,
       clearTravelContext: travelContext == null,
+      sourceScreen: 'map_search',
     );
   }
 
@@ -404,12 +418,18 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         markerId: MarkerId(item.id),
         position: LatLng(item.latitude, item.longitude),
         icon: BitmapDescriptor.defaultMarkerWithHue(
-          selected ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueGreen,
+          selected
+              ? BitmapDescriptor.hueYellow
+              : item.isPublishedRoute
+              ? BitmapDescriptor.hueAzure
+              : BitmapDescriptor.hueGreen,
         ),
         onTap: () => onTap(item.id),
         infoWindow: InfoWindow(
           title: item.title,
-          snippet: item.isFree
+          snippet: item.isPublishedRoute
+              ? _publishedRouteMapMetric(item)
+              : item.isFree
               ? 'Free'
               : '${item.priceAmount.toStringAsFixed(0)} €',
         ),
@@ -441,23 +461,61 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   Set<Polyline> _buildPolylines(
     BuildContext context,
     _ScenarioMapRoute? scenarioRoute,
+    DiscoverItemEntity? selectedItem,
   ) {
-    if (scenarioRoute == null || scenarioRoute.stops.length < 2) {
-      return const <Polyline>{};
+    final Set<Polyline> polylines = <Polyline>{};
+    final publishedRoute = selectedItem?.publishedRoute;
+    if (publishedRoute != null && publishedRoute.isCoherent) {
+      try {
+        final points = GeometryEncoding.decode(
+          publishedRoute.fullEncodedPolyline,
+          policy: GeometryEncodingPolicy(
+            precision: publishedRoute.encodingPrecision,
+          ),
+        );
+        if (points.length >= 2) {
+          polylines.add(
+            Polyline(
+              polylineId: PolylineId(
+                'published_route_${publishedRoute.routeId}_'
+                '${publishedRoute.versionId}',
+              ),
+              points: points
+                  .map(
+                    (point) =>
+                        LatLng(point.latitude, point.longitude),
+                  )
+                  .toList(growable: false),
+              color: RechargeTheme.travelGreen,
+              width: 6,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+        }
+      } on FormatException {
+        // A malformed snapshot is ignored instead of triggering rerouting.
+      } on RangeError {
+        // Unsupported precision is treated as an unreadable snapshot.
+      }
     }
-    return <Polyline>{
-      Polyline(
-        polylineId: const PolylineId('scenario_route'),
-        points: scenarioRoute.stops
-            .map(
-              (ScenarioStepEntity step) =>
-                  LatLng(step.latitude, step.longitude),
-            )
-            .toList(growable: false),
-        color: Theme.of(context).colorScheme.primary,
-        width: 5,
-      ),
-    };
+    if (scenarioRoute != null && scenarioRoute.stops.length >= 2) {
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('scenario_route'),
+          points: scenarioRoute.stops
+              .map(
+                (ScenarioStepEntity step) =>
+                    LatLng(step.latitude, step.longitude),
+              )
+              .toList(growable: false),
+          color: Theme.of(context).colorScheme.primary,
+          width: 5,
+        ),
+      );
+    }
+    return polylines;
   }
 
   int? _validScenarioStopIndex(_ScenarioMapRoute? scenarioRoute) {
@@ -629,6 +687,15 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       targetRoute: route.builderLocation,
     );
   }
+}
+
+String _publishedRouteMapMetric(DiscoverItemEntity item) {
+  final route = item.publishedRoute;
+  if (route == null) return 'Route';
+  final String distance =
+      '${(route.distanceMeters / 1000).toStringAsFixed(1)} км';
+  final int minutes = (route.durationSeconds / 60).round();
+  return '$distance · $minutes min';
 }
 
 bool _hasSearchSeed(Map<String, String> seedParameters) {
@@ -2312,7 +2379,9 @@ class _MapListItem extends StatelessWidget {
                   border: Border.all(color: RechargeTheme.travelLine),
                 ),
                 child: Icon(
-                  Icons.place_outlined,
+                  item.isPublishedRoute
+                      ? Icons.route_outlined
+                      : Icons.place_outlined,
                   color: RechargeTheme.travelGreenDark,
                 ),
               ),
@@ -2594,6 +2663,12 @@ String? _searchCategoryForScenarioRoute(_ScenarioMapRoute route) {
 }
 
 String _metaLabel(DiscoverItemEntity item) {
+  final route = item.publishedRoute;
+  if (route != null) {
+    return '${item.city} · Route · '
+        '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
+        '${(route.durationSeconds / 60).round()} min';
+  }
   final String price = item.isFree
       ? 'Free'
       : '${item.priceAmount.toStringAsFixed(0)} €';

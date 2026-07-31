@@ -44,7 +44,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(authControllerProvider).trackAuthScreenViewed(
+      ref
+          .read(authControllerProvider)
+          .trackAuthScreenViewed(
             sourceScreen: widget.sourceScreen,
             sourceAction: widget.sourceAction,
           );
@@ -57,9 +59,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final state = authController.state;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Войти'),
-      ),
+      appBar: AppBar(title: const Text('Войти')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -69,10 +69,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             children: <Widget>[
               const Text(
                 'Войдите, чтобы сохранить и управлять',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -101,9 +98,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: _isSubmitting ? null : _onSubmit,
-                child: Text(
-                  _isSubmitting ? 'Входим в аккаунт...' : 'Войти',
-                ),
+                child: Text(_isSubmitting ? 'Входим в аккаунт...' : 'Войти'),
               ),
               const SizedBox(height: 8),
               TextButton(
@@ -114,17 +109,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
               if (_inlineError != null) ...<Widget>[
                 const SizedBox(height: 12),
-                Text(
-                  _inlineError!,
-                  style: const TextStyle(color: Colors.red),
-                ),
+                Text(_inlineError!, style: const TextStyle(color: Colors.red)),
               ],
-              if (!_isSubmitting && _inlineError == null && state.message != null) ...<Widget>[
+              if (!_isSubmitting &&
+                  _inlineError == null &&
+                  state.message != null) ...<Widget>[
                 const SizedBox(height: 12),
-                Text(
-                  state.message!,
-                  style: const TextStyle(color: Colors.red),
-                ),
+                Text(state.message!, style: const TextStyle(color: Colors.red)),
               ],
             ],
           ),
@@ -155,17 +146,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     }
 
     final action = _actionFromString(widget.originAction);
-    ref.read(authControllerProvider).setPendingTarget(
-          action: action,
-          originRoute: widget.originRoute,
-        );
+    ref
+        .read(authControllerProvider)
+        .setPendingTarget(action: action, originRoute: widget.originRoute);
 
     setState(() {
       _isSubmitting = true;
       _inlineError = null;
     });
 
-    final success = await ref.read(authControllerProvider).signIn(
+    final success = await ref
+        .read(authControllerProvider)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
           sourceScreen: widget.sourceScreen,
@@ -203,6 +195,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         break;
       case ProtectedAction.create:
       case ProtectedAction.profile:
+      case ProtectedAction.report:
+      case ProtectedAction.visit:
         authController.clearPendingTarget();
         context.go(normalizedOrigin ?? RouteNames.discover);
         break;
@@ -225,6 +219,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         return ProtectedAction.create;
       case 'profile':
         return ProtectedAction.profile;
+      case 'report':
+        return ProtectedAction.report;
+      case 'visit':
+        return ProtectedAction.visit;
       default:
         return ProtectedAction.none;
     }
@@ -232,8 +230,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   String _routeWithFavoriteApplied(String route) {
     final Uri uri = Uri.parse(route);
-    final Map<String, String> query = Map<String, String>.from(uri.queryParameters)
-      ..['favoriteApplied'] = '1';
+    final Map<String, String> query = Map<String, String>.from(
+      uri.queryParameters,
+    )..['favoriteApplied'] = '1';
     return uri.replace(queryParameters: query).toString();
   }
 

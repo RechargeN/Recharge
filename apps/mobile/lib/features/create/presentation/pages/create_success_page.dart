@@ -7,13 +7,16 @@ import '../../../auth/application/auth_providers.dart';
 import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/route_publication_data.dart';
 
 class CreateSuccessPage extends ConsumerWidget {
   const CreateSuccessPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final draft = ref.watch(createControllerProvider).state.publishedDraft;
+    final controller = ref.watch(createControllerProvider);
+    final draft = controller.state.publishedDraft;
+    final routeReceipt = controller.state.routePublishReceipt;
     final user = ref.watch(authControllerProvider).state.user;
     final _PublishedScenarioRouteContext? routeContext = draft == null
         ? null
@@ -24,10 +27,42 @@ class CreateSuccessPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: <Widget>[
-          _PublishStatusHero(draft: draft),
+          _PublishStatusHero(draft: draft, routeReceipt: routeReceipt),
           const SizedBox(height: 14),
           if (draft != null) ...<Widget>[
             _PublishedDraftCard(draft: draft),
+            const SizedBox(height: 14),
+          ],
+          if (routeReceipt != null) ...<Widget>[
+            _RoutePublicationCard(
+              receipt: routeReceipt,
+              canManage: controller.canManageRoute,
+              canArchive: controller.canArchiveRoute,
+              onCreateRevision: () async {
+                final started = await controller.startRouteRevision(
+                  routeReceipt.versionId,
+                );
+                if (started && context.mounted) {
+                  context.go(RouteNames.create);
+                }
+              },
+              onArchive: () async {
+                await controller.archiveRoute(routeReceipt.routeId);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(controller.state.message ?? 'Done')),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 14),
+          ],
+          if (controller.canModerateRoute) ...<Widget>[
+            OutlinedButton.icon(
+              onPressed: () => context.go(RouteNames.routeModeration),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: const Text('Open Route moderation queue'),
+            ),
             const SizedBox(height: 14),
           ],
           if (routeContext != null) ...<Widget>[
@@ -42,22 +77,41 @@ class CreateSuccessPage extends ConsumerWidget {
             draft: draft,
             onHome: () => context.go(RouteNames.discover),
             onProfile: () => context.go(RouteNames.profile),
-            onSearch: draft == null
+            onSearch:
+                draft == null ||
+                    (routeReceipt != null && !routeReceipt.isPublished)
                 ? null
                 : () => context.go(_searchRouteForDraft(draft)),
-            onMap: draft == null
+            onMap:
+                draft == null ||
+                    (routeReceipt != null && !routeReceipt.isPublished)
                 ? null
                 : () => context.go(_mapRouteForDraft(draft)),
+            createAnotherLabel:
+                draft?.objectType == CreateObjectType.event &&
+                    controller.lastEventTemplate != null
+                ? 'Create another from ${controller.lastEventTemplate!.name}'
+                : draft?.objectType == CreateObjectType.event
+                ? 'Create another Event'
+                : 'Create another',
             onCreateAnother: user == null
                 ? null
-                : () {
-                    ref
-                        .read(createControllerProvider)
-                        .resetToFreshDraft(
-                          organizerId: user.id,
-                          organizerEmail: user.email,
-                          organizerName: user.email.split('@').first,
-                        );
+                : () async {
+                    final createController = ref.read(createControllerProvider);
+                    if (draft?.objectType == CreateObjectType.event) {
+                      await createController.startAnotherEvent(
+                        organizerId: user.id,
+                        organizerEmail: user.email,
+                        organizerName: user.email.split('@').first,
+                      );
+                    } else {
+                      createController.resetToFreshDraft(
+                        organizerId: user.id,
+                        organizerEmail: user.email,
+                        organizerName: user.email.split('@').first,
+                      );
+                    }
+                    if (!context.mounted) return;
                     context.go(RouteNames.create);
                   },
           ),
@@ -68,9 +122,10 @@ class CreateSuccessPage extends ConsumerWidget {
 }
 
 class _PublishStatusHero extends StatelessWidget {
-  const _PublishStatusHero({required this.draft});
+  const _PublishStatusHero({required this.draft, required this.routeReceipt});
 
   final CreateDraftEntity? draft;
+  final RoutePublishReceipt? routeReceipt;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +148,11 @@ class _PublishStatusHero extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              draft == null ? 'Publish processed' : 'Sent to moderation',
+              routeReceipt?.isPublished == true
+                  ? 'Route published'
+                  : draft == null
+                  ? 'Publish processed'
+                  : 'Sent to moderation',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w800,
@@ -114,6 +173,101 @@ class _PublishStatusHero extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RoutePublicationCard extends StatelessWidget {
+  const _RoutePublicationCard({
+    required this.receipt,
+    required this.canManage,
+    required this.canArchive,
+    required this.onCreateRevision,
+    required this.onArchive,
+  });
+
+  final RoutePublishReceipt receipt;
+  final bool canManage;
+  final bool canArchive;
+  final VoidCallback onCreateRevision;
+  final VoidCallback onArchive;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.primaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              receipt.isPublished
+                  ? 'Active immutable Route version'
+                  : 'Immutable version awaiting approval',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            _TechnicalValue(label: 'Route ID', value: receipt.routeId),
+            _TechnicalValue(label: 'Version ID', value: receipt.versionId),
+            _TechnicalValue(
+              label: 'Geometry hash',
+              value: receipt.geometryHash,
+            ),
+            if (receipt.requestId != null)
+              _TechnicalValue(
+                label: 'Review request',
+                value: receipt.requestId!,
+              ),
+            if (receipt.isPublished && (canManage || canArchive)) ...<Widget>[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  if (canManage)
+                    FilledButton.tonalIcon(
+                      onPressed: onCreateRevision,
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('Create new version'),
+                    ),
+                  if (canArchive)
+                    OutlinedButton.icon(
+                      onPressed: onArchive,
+                      icon: const Icon(Icons.archive_outlined),
+                      label: const Text('Archive'),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TechnicalValue extends StatelessWidget {
+  const _TechnicalValue({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      '$label: $value',
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.bodySmall,
+    ),
+  );
 }
 
 class _PublishedDraftCard extends StatelessWidget {
@@ -312,6 +466,7 @@ class _NextActionsCard extends StatelessWidget {
     required this.onProfile,
     required this.onSearch,
     required this.onMap,
+    required this.createAnotherLabel,
     required this.onCreateAnother,
   });
 
@@ -320,6 +475,7 @@ class _NextActionsCard extends StatelessWidget {
   final VoidCallback onProfile;
   final VoidCallback? onSearch;
   final VoidCallback? onMap;
+  final String createAnotherLabel;
   final VoidCallback? onCreateAnother;
 
   @override
@@ -385,7 +541,7 @@ class _NextActionsCard extends StatelessWidget {
             FilledButton.icon(
               onPressed: onCreateAnother,
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Create another'),
+              label: Text(createAnotherLabel),
             ),
             if (draft == null) ...<Widget>[
               const SizedBox(height: 8),
@@ -447,6 +603,9 @@ class _PublishedScenarioRouteContext {
   });
 
   static _PublishedScenarioRouteContext? fromDraft(CreateDraftEntity draft) {
+    if (draft.objectType == CreateObjectType.route || draft.routeData != null) {
+      return null;
+    }
     if (draft.mainCategory != 'travel_tours' ||
         draft.subcategory != 'walking_tour') {
       return null;

@@ -95,6 +95,23 @@ class DiscoverQuery {
   final TimeWindow? timeWindow;
   final TravelContext? travelContext;
 
+  bool get requestsPublishedRoutes {
+    final source = sourceScreen.trim().toLowerCase();
+    return queryText.trim().isNotEmpty ||
+        selectedCategoryIds.isNotEmpty ||
+        selectedSubcategoryIds.isNotEmpty ||
+        freeOnly ||
+        budgetMin != null ||
+        budgetMax != null ||
+        availableDurationMinutes != null ||
+        manualAreaSelected ||
+        source == 'regular_search' ||
+        source == 'smart_search' ||
+        source == 'search_results' ||
+        source == 'map_search' ||
+        source == 'route_details';
+  }
+
   DiscoverQuery copyWith({
     String? queryText,
     List<String>? selectedCategoryIds,

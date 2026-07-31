@@ -5,6 +5,8 @@ class MarketConfig {
     required this.cityName,
     required this.timezoneId,
     required this.currencyCode,
+    required this.defaultLocaleCode,
+    required this.supportedLocaleCodes,
     required this.centerLat,
     required this.centerLng,
   });
@@ -14,6 +16,8 @@ class MarketConfig {
   final String cityName;
   final String timezoneId;
   final String currencyCode;
+  final String defaultLocaleCode;
+  final List<String> supportedLocaleCodes;
   final double centerLat;
   final double centerLng;
 
@@ -23,6 +27,8 @@ class MarketConfig {
     cityName: 'Riga',
     timezoneId: 'Europe/Riga',
     currencyCode: 'EUR',
+    defaultLocaleCode: 'en',
+    supportedLocaleCodes: <String>['en', 'lv', 'ru'],
     centerLat: 56.9496,
     centerLng: 24.1052,
   );
@@ -33,6 +39,8 @@ class MarketConfig {
     cityName: 'Rezekne',
     timezoneId: 'Europe/Riga',
     currencyCode: 'EUR',
+    defaultLocaleCode: 'en',
+    supportedLocaleCodes: <String>['en', 'lv', 'ru'],
     centerLat: 56.5099,
     centerLng: 27.3332,
   );

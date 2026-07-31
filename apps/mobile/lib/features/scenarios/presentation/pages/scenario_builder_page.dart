@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../../app/application/planning_conversion_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../../discover/application/controllers/discover_feed_controller.dart';
 import '../../../discover/application/discover_providers.dart';
@@ -88,6 +89,7 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
               onEdit: () => setState(() => _previewMode = false),
               onMap: () => context.go(_mapRouteForScenario(draft)),
               onSave: () => _saveScenario(draft),
+              onExpand: () => _expandToScenario(draft),
             )
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -99,6 +101,13 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
                   onCreate: () => context.go(_createRouteForScenario(draft)),
                   onSave: () => _saveScenario(draft),
                   onCopy: () => _copyScenario(draft),
+                ),
+                const SizedBox(height: 12),
+                _ExpandToScenarioCard(
+                  stopCount: draft.steps.length,
+                  onExpand: draft.steps.isEmpty
+                      ? null
+                      : () => _expandToScenario(draft),
                 ),
                 const SizedBox(height: 14),
                 if (savedSearches.isNotEmpty ||
@@ -252,6 +261,71 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
     ).showSnackBar(const SnackBar(content: Text('Scenario copied')));
   }
 
+  Future<void> _expandToScenario(ScenarioDraftEntity draft) async {
+    final authState = ref.read(authControllerProvider).state;
+    final user = authState.user;
+    if (user == null) {
+      final String origin = Uri.encodeComponent(RouteNames.scenarioBuilder);
+      context.go('${RouteNames.signIn}?origin=$origin');
+      return;
+    }
+    final _ExpandQuickPlanSelection? selection =
+        await _showExpandQuickPlanDialog(context, draft);
+    if (selection == null || !mounted) return;
+
+    final String title =
+        widget.seedParameters['title']?.trim().isNotEmpty == true
+        ? widget.seedParameters['title']!.trim()
+        : 'Expanded Quick Plan';
+    PlanningConversionOutcome outcome = await ref
+        .read(planningConversionFacadeProvider)
+        .expand(
+          ExpandLegacyQuickPlanRequest(
+            draft: draft,
+            selectedStopIds: selection.selectedStopIds,
+            copyPrivateNotes: selection.copyPrivateNotes,
+            requesterId: user.id,
+            requesterEmail: user.email,
+            requesterName: user.email.split('@').first,
+            scenarioTitle: title,
+          ),
+        );
+    if (!mounted) return;
+    if (outcome.requiresRevisionConfirmation) {
+      final bool continueWithLatest =
+          await _confirmLatestQuickPlanRevision(context) ?? false;
+      if (!continueWithLatest || !mounted) return;
+      outcome = await ref
+          .read(planningConversionFacadeProvider)
+          .expand(
+            ExpandLegacyQuickPlanRequest(
+              draft: draft,
+              selectedStopIds: selection.selectedStopIds,
+              copyPrivateNotes: selection.copyPrivateNotes,
+              requesterId: user.id,
+              requesterEmail: user.email,
+              requesterName: user.email.split('@').first,
+              scenarioTitle: title,
+              continueWithLatestSnapshot: true,
+            ),
+          );
+    }
+    if (!mounted) return;
+    final String? handoffId = outcome.handoffId;
+    if (handoffId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not expand this Quick Plan')),
+      );
+      return;
+    }
+    context.go(
+      Uri(
+        path: RouteNames.create,
+        queryParameters: <String, String>{'scenarioHandoffId': handoffId},
+      ).toString(),
+    );
+  }
+
   void _applyTemplate(_ScenarioRouteTemplate template) {
     ref
         .read(scenarioBuilderControllerProvider)
@@ -277,6 +351,7 @@ class _ScenarioPreview extends StatelessWidget {
     required this.onEdit,
     required this.onMap,
     required this.onSave,
+    required this.onExpand,
   });
 
   final String title;
@@ -285,6 +360,7 @@ class _ScenarioPreview extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onMap;
   final Future<void> Function() onSave;
+  final Future<void> Function() onExpand;
 
   @override
   Widget build(BuildContext context) {
@@ -425,9 +501,172 @@ class _ScenarioPreview extends StatelessWidget {
           icon: const Icon(Icons.bookmark_add_outlined),
           label: const Text('Save this plan'),
         ),
+        const SizedBox(height: 4),
+        FilledButton.tonalIcon(
+          key: const Key('quick-plan-expand-to-scenario'),
+          onPressed: draft.steps.isEmpty ? null : () => onExpand(),
+          icon: const Icon(Icons.account_tree_outlined),
+          label: const Text('Expand to Scenario'),
+        ),
       ],
     );
   }
+}
+
+class _ExpandToScenarioCard extends StatelessWidget {
+  const _ExpandToScenarioCard({
+    required this.stopCount,
+    required this.onExpand,
+  });
+
+  final int stopCount;
+  final Future<void> Function()? onExpand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card.outlined(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              'Need a larger city or trip plan?',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Copy selected stops into a new independent Scenario. '
+              'This Quick Plan stays unchanged.',
+            ),
+            const SizedBox(height: 10),
+            FilledButton.tonalIcon(
+              key: const Key('quick-plan-expand-to-scenario'),
+              onPressed: onExpand == null ? null : () => onExpand!(),
+              icon: const Icon(Icons.account_tree_outlined),
+              label: Text('Expand $stopCount stops to Scenario'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpandQuickPlanSelection {
+  const _ExpandQuickPlanSelection({
+    required this.selectedStopIds,
+    required this.copyPrivateNotes,
+  });
+
+  final Set<String> selectedStopIds;
+  final bool copyPrivateNotes;
+}
+
+Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
+  BuildContext context,
+  ScenarioDraftEntity draft,
+) {
+  final Set<String> selected = draft.steps
+      .map((ScenarioStepEntity step) => step.id)
+      .toSet();
+  var copyPrivateNotes = false;
+  return showDialog<_ExpandQuickPlanSelection>(
+    context: context,
+    builder: (BuildContext context) => StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) => AlertDialog(
+        title: const Text('Expand to Scenario'),
+        content: SizedBox(
+          width: 420,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'A new independent Scenario will be created. Later changes '
+                  'will not sync in either direction.',
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Legacy stops have no catalog object IDs, so selected stops '
+                  'will enter Scenario as private custom locations.',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                for (final ScenarioStepEntity step in draft.steps)
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: selected.contains(step.id),
+                    title: Text(step.title),
+                    subtitle: Text('${step.durationMinutes} min'),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        value == true
+                            ? selected.add(step.id)
+                            : selected.remove(step.id);
+                      });
+                    },
+                  ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: copyPrivateNotes,
+                  title: const Text('Copy my private notes'),
+                  subtitle: const Text(
+                    'Only your own notes are eligible; this legacy plan has none.',
+                  ),
+                  onChanged: null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirm-expand-to-scenario'),
+            onPressed: selected.isEmpty
+                ? null
+                : () => Navigator.pop(
+                    context,
+                    _ExpandQuickPlanSelection(
+                      selectedStopIds: Set<String>.unmodifiable(selected),
+                      copyPrivateNotes: copyPrivateNotes,
+                    ),
+                  ),
+            child: const Text('Create independent Scenario'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<bool?> _confirmLatestQuickPlanRevision(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: const Text('Quick Plan changed'),
+      content: const Text(
+        'Refresh the preview or continue with the latest available snapshot.',
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Refresh'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Continue with snapshot'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _PreviewStat extends StatelessWidget {

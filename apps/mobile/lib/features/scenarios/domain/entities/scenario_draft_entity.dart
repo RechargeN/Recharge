@@ -1,11 +1,8 @@
-enum ScenarioMood {
-  calm,
-  social,
-  active,
-}
+enum ScenarioMood { calm, social, active }
 
 class ScenarioStepEntity {
   const ScenarioStepEntity({
+    this.id = '',
     required this.title,
     required this.subtitle,
     required this.category,
@@ -17,6 +14,7 @@ class ScenarioStepEntity {
     required this.longitude,
   });
 
+  final String id;
   final String title;
   final String subtitle;
   final String category;
@@ -26,10 +24,27 @@ class ScenarioStepEntity {
   final bool isFree;
   final double latitude;
   final double longitude;
+
+  ScenarioStepEntity copyWith({String? id}) {
+    return ScenarioStepEntity(
+      id: id ?? this.id,
+      title: title,
+      subtitle: subtitle,
+      category: category,
+      durationMinutes: durationMinutes,
+      distanceKm: distanceKm,
+      priceAmount: priceAmount,
+      isFree: isFree,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
 }
 
 class ScenarioDraftEntity {
   const ScenarioDraftEntity({
+    required this.id,
+    required this.revision,
     required this.mood,
     required this.maxDurationMinutes,
     required this.freeOnly,
@@ -38,6 +53,8 @@ class ScenarioDraftEntity {
     required this.steps,
   });
 
+  final String id;
+  final int revision;
   final ScenarioMood mood;
   final int maxDurationMinutes;
   final bool freeOnly;
@@ -67,6 +84,8 @@ class ScenarioDraftEntity {
   }
 
   ScenarioDraftEntity copyWith({
+    String? id,
+    int? revision,
     ScenarioMood? mood,
     int? maxDurationMinutes,
     bool? freeOnly,
@@ -75,6 +94,8 @@ class ScenarioDraftEntity {
     List<ScenarioStepEntity>? steps,
   }) {
     return ScenarioDraftEntity(
+      id: id ?? this.id,
+      revision: revision ?? this.revision,
       mood: mood ?? this.mood,
       maxDurationMinutes: maxDurationMinutes ?? this.maxDurationMinutes,
       freeOnly: freeOnly ?? this.freeOnly,

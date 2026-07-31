@@ -1,4 +1,9 @@
 import 'create_availability.dart';
+import 'event_draft_data.dart';
+import 'find_people_draft_data.dart';
+import 'place_draft_data.dart';
+import 'route_draft_data.dart';
+import 'scenario_draft_data.dart';
 
 enum CreateObjectType {
   event,
@@ -6,6 +11,7 @@ enum CreateObjectType {
   route,
   place,
   session,
+  scenario,
   quickPlan,
   findPeople,
   classWorkshop,
@@ -21,6 +27,7 @@ extension CreateObjectTypeIds on CreateObjectType {
       CreateObjectType.route => 'route',
       CreateObjectType.place => 'place',
       CreateObjectType.session => 'session',
+      CreateObjectType.scenario => 'scenario',
       CreateObjectType.quickPlan => 'quick_plan',
       CreateObjectType.findPeople => 'find_people',
       CreateObjectType.classWorkshop => 'class_workshop',
@@ -83,6 +90,7 @@ class MediaEntity {
 class CreateDraftEntity {
   const CreateDraftEntity({
     required this.id,
+    this.basedOnPublishedVersionId,
     required this.objectType,
     required this.title,
     required this.eventType,
@@ -92,6 +100,11 @@ class CreateDraftEntity {
     required this.shortDescription,
     required this.fullDescription,
     required this.sectionData,
+    this.eventData,
+    this.placeData,
+    this.findPeopleData,
+    this.routeData,
+    this.scenarioData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -147,6 +160,7 @@ class CreateDraftEntity {
   });
 
   final String id;
+  final String? basedOnPublishedVersionId;
   final CreateObjectType objectType;
 
   final String title;
@@ -157,6 +171,11 @@ class CreateDraftEntity {
   final String shortDescription;
   final String fullDescription;
   final Map<String, Object?> sectionData;
+  final EventDraftData? eventData;
+  final PlaceDraftData? placeData;
+  final FindPeopleDraftData? findPeopleData;
+  final RouteDraftData? routeData;
+  final ScenarioDraftData? scenarioData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -230,7 +249,8 @@ class CreateDraftEntity {
   }) {
     final DateTime now = DateTime.now().toUtc();
     return CreateDraftEntity(
-      id: 'draft_${now.microsecondsSinceEpoch}',
+      id: 'loc_${now.microsecondsSinceEpoch}',
+      basedOnPublishedVersionId: null,
       objectType: CreateObjectType.event,
       title: '',
       eventType: 'standard',
@@ -240,6 +260,17 @@ class CreateDraftEntity {
       shortDescription: '',
       fullDescription: '',
       sectionData: const <String, Object?>{},
+      eventData: EventDraftData.defaults(
+        marketCityId: marketCityId,
+        countryCode: country,
+        city: city,
+        timezoneId: timezone,
+        currencyCode: currency,
+      ),
+      placeData: null,
+      findPeopleData: null,
+      routeData: null,
+      scenarioData: null,
       startDateTimeUtc: null,
       endDateTimeUtc: null,
       durationMinutes: null,
@@ -296,6 +327,9 @@ class CreateDraftEntity {
   }
 
   CreateDraftEntity copyWith({
+    String? id,
+    String? basedOnPublishedVersionId,
+    bool clearBasedOnPublishedVersionId = false,
     CreateObjectType? objectType,
     String? title,
     String? eventType,
@@ -305,6 +339,16 @@ class CreateDraftEntity {
     String? shortDescription,
     String? fullDescription,
     Map<String, Object?>? sectionData,
+    EventDraftData? eventData,
+    bool clearEventData = false,
+    PlaceDraftData? placeData,
+    bool clearPlaceData = false,
+    FindPeopleDraftData? findPeopleData,
+    bool clearFindPeopleData = false,
+    RouteDraftData? routeData,
+    bool clearRouteData = false,
+    ScenarioDraftData? scenarioData,
+    bool clearScenarioData = false,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -355,6 +399,7 @@ class CreateDraftEntity {
     bool? approvalRequired,
     String? bookingLink,
     bool? waitlistEnabled,
+    String? organizerId,
     String? organizerName,
     String? organizerProfileLink,
     String? organizerPhone,
@@ -365,12 +410,16 @@ class CreateDraftEntity {
     PublishStatus? publishStatus,
     VisibilityType? visibility,
     int? reportCount,
+    DateTime? createdAtUtc,
     DateTime? updatedAtUtc,
     DateTime? publishedAtUtc,
     bool clearPublishedAtUtc = false,
   }) {
     return CreateDraftEntity(
-      id: id,
+      id: id ?? this.id,
+      basedOnPublishedVersionId: clearBasedOnPublishedVersionId
+          ? null
+          : (basedOnPublishedVersionId ?? this.basedOnPublishedVersionId),
       objectType: objectType ?? this.objectType,
       title: title ?? this.title,
       eventType: eventType ?? this.eventType,
@@ -380,6 +429,15 @@ class CreateDraftEntity {
       shortDescription: shortDescription ?? this.shortDescription,
       fullDescription: fullDescription ?? this.fullDescription,
       sectionData: sectionData ?? this.sectionData,
+      eventData: clearEventData ? null : (eventData ?? this.eventData),
+      placeData: clearPlaceData ? null : (placeData ?? this.placeData),
+      findPeopleData: clearFindPeopleData
+          ? null
+          : (findPeopleData ?? this.findPeopleData),
+      routeData: clearRouteData ? null : (routeData ?? this.routeData),
+      scenarioData: clearScenarioData
+          ? null
+          : (scenarioData ?? this.scenarioData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),
@@ -433,7 +491,7 @@ class CreateDraftEntity {
       approvalRequired: approvalRequired ?? this.approvalRequired,
       bookingLink: bookingLink ?? this.bookingLink,
       waitlistEnabled: waitlistEnabled ?? this.waitlistEnabled,
-      organizerId: organizerId,
+      organizerId: organizerId ?? this.organizerId,
       organizerName: organizerName ?? this.organizerName,
       organizerProfileLink: organizerProfileLink ?? this.organizerProfileLink,
       organizerPhone: organizerPhone ?? this.organizerPhone,
@@ -444,7 +502,7 @@ class CreateDraftEntity {
       publishStatus: publishStatus ?? this.publishStatus,
       visibility: visibility ?? this.visibility,
       reportCount: reportCount ?? this.reportCount,
-      createdAtUtc: createdAtUtc,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
       publishedAtUtc: clearPublishedAtUtc
           ? null

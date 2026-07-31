@@ -124,6 +124,10 @@ const List<RechargeGroupSeedData> rechargeGroupSeeds = <RechargeGroupSeedData>[
       'street_art',
       'architecture',
       'cultural_heritage',
+      'monument',
+      'memorial',
+      'sculpture',
+      'historic_landmark',
       'literature_evening',
       'book_reading',
       'history_walk',
@@ -396,6 +400,15 @@ const List<RechargeGroupSeedData> rechargeGroupSeeds = <RechargeGroupSeedData>[
       'park_walk',
       'beach_walk',
       'promenade_walk',
+      'park',
+      'beach',
+      'promenade',
+      'viewpoint',
+      'forest',
+      'lake',
+      'waterfall',
+      'cave',
+      'natural_landmark',
       'outdoor_workout',
       'nature_escape',
       'slow_walk',
@@ -565,6 +578,7 @@ const List<RechargeGroupSeedData> rechargeGroupSeeds = <RechargeGroupSeedData>[
       'beach_cleanup',
       'park_cleanup',
       'community_garden',
+      'public_square',
       'local_community_meetup',
       'mutual_aid',
       'social_impact_event',
@@ -784,6 +798,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'competition',
     applicableTypeIds: <String>['event'],
   ),
+  'beach': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'animal_shelter_visit': RechargeSubcategoryOverrideData(
     profileId: 'volunteer_action',
   ),
@@ -829,6 +846,7 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'venue_game',
     applicableTypeIds: <String>['event', 'place'],
   ),
+  'cave': RechargeSubcategoryOverrideData(applicableTypeIds: <String>['place']),
   'boat_trip': RechargeSubcategoryOverrideData(
     profileId: 'guided_tour',
     applicableTypeIds: <String>['event', 'session'],
@@ -884,6 +902,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   ),
   'comic_con': RechargeSubcategoryOverrideData(profileId: 'market_fair'),
   'conference': RechargeSubcategoryOverrideData(profileId: 'talk_lecture'),
+  'community_garden': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'creative_meetup': RechargeSubcategoryOverrideData(
     profileId: 'networking_social',
     applicableTypeIds: <String>['event'],
@@ -933,6 +954,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'performance_show',
     applicableTypeIds: <String>['event'],
   ),
+  'forest': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'film_festival': RechargeSubcategoryOverrideData(profileId: 'market_fair'),
   'fitness_challenge': RechargeSubcategoryOverrideData(
     profileId: 'competition',
@@ -969,6 +993,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   'happy_hour': RechargeSubcategoryOverrideData(profileId: 'tasting'),
   'hidden_gems_walk': RechargeSubcategoryOverrideData(profileId: 'guided_tour'),
   'historical_walk': RechargeSubcategoryOverrideData(profileId: 'guided_tour'),
+  'historic_landmark': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'history_walk': RechargeSubcategoryOverrideData(
     profileId: 'guided_tour',
     applicableTypeIds: <String>['event', 'route'],
@@ -997,6 +1024,7 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'guided_tour',
     applicableTypeIds: <String>['event', 'activity'],
   ),
+  'lake': RechargeSubcategoryOverrideData(applicableTypeIds: <String>['place']),
   'late_night_social': RechargeSubcategoryOverrideData(
     profileId: 'networking_social',
   ),
@@ -1022,6 +1050,12 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   'mini_golf': RechargeSubcategoryOverrideData(
     profileId: 'venue_game',
     applicableTypeIds: <String>['event', 'place'],
+  ),
+  'memorial': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
+  'monument': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
   ),
   'motorcycle_ride': RechargeSubcategoryOverrideData(
     profileId: 'outdoor_activity',
@@ -1053,6 +1087,7 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'pet_event',
     applicableTypeIds: <String>['place', 'event'],
   ),
+  'park': RechargeSubcategoryOverrideData(applicableTypeIds: <String>['place']),
   'pet_photo_session': RechargeSubcategoryOverrideData(
     profileId: 'pet_event',
     applicableTypeIds: <String>['event', 'session'],
@@ -1073,6 +1108,12 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   'product_launch': RechargeSubcategoryOverrideData(profileId: 'talk_lecture'),
   'product_presentation': RechargeSubcategoryOverrideData(
     profileId: 'talk_lecture',
+  ),
+  'promenade': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
+  'public_square': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
   ),
   'pub_crawl': RechargeSubcategoryOverrideData(profileId: 'tasting'),
   'quiet_social': RechargeSubcategoryOverrideData(
@@ -1104,6 +1145,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
     profileId: 'wellness_session',
     applicableTypeIds: <String>['event', 'session'],
   ),
+  'sculpture': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'skiing': RechargeSubcategoryOverrideData(
     profileId: 'physical_activity',
     applicableTypeIds: <String>['event', 'activity', 'session'],
@@ -1132,6 +1176,9 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   'trampoline_park': RechargeSubcategoryOverrideData(
     applicableTypeIds: <String>['event', 'place', 'session'],
   ),
+  'viewpoint': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
   'treasure_hunt': RechargeSubcategoryOverrideData(
     profileId: 'outdoor_activity',
     applicableTypeIds: <String>['event', 'route'],
@@ -1147,6 +1194,12 @@ rechargeSubcategoryOverrides = <String, RechargeSubcategoryOverrideData>{
   'water_tour': RechargeSubcategoryOverrideData(
     profileId: 'guided_tour',
     applicableTypeIds: <String>['event', 'session'],
+  ),
+  'waterfall': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
+  ),
+  'natural_landmark': RechargeSubcategoryOverrideData(
+    applicableTypeIds: <String>['place'],
   ),
   'wine_tasting': RechargeSubcategoryOverrideData(profileId: 'tasting'),
   'winter_festival': RechargeSubcategoryOverrideData(

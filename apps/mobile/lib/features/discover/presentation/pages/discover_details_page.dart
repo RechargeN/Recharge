@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/service_locator.dart';
+import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
@@ -18,6 +19,7 @@ import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
+import '../../domain/repositories/route_safety_reporting_port.dart';
 
 class DiscoverDetailsPage extends ConsumerStatefulWidget {
   const DiscoverDetailsPage({
@@ -115,6 +117,16 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     _SummaryCard(item: item),
+                    if (item.isPublishedRoute) ...<Widget>[
+                      const SizedBox(height: 12),
+                      _PublishedRouteCard(
+                        item: item,
+                        onReport: () => _reportRoute(
+                          item: item,
+                          authController: authController,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     _DetailsActionHub(
                       item: item,
@@ -144,6 +156,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                       onCreateRoute: () {
                         context.push(_createRouteLocationForDetails(item));
                       },
+                      onMarkVisited: () => _onMarkVisited(
+                        item: item,
+                        authController: authController,
+                      ),
                       onCtaTap: () => _onCtaTap(item),
                     ),
                     const SizedBox(height: 12),
@@ -288,6 +304,70 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     );
   }
 
+  Future<void> _reportRoute({
+    required DiscoverItemEntity item,
+    required AuthController authController,
+  }) async {
+    final user = authController.state.user;
+    if (user == null) {
+      authController.trackAuthGateViewed(
+        sourceScreen: 'discover_details',
+        sourceAction: 'route_safety_report',
+      );
+      await showAuthGateSheet(
+        context,
+        action: ProtectedAction.report,
+        sourceScreen: 'discover_details',
+        sourceAction: 'route_safety_report',
+        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        onContinueAsGuest: () {
+          authController.trackGuestContinueClicked(
+            sourceScreen: 'discover_details',
+            sourceAction: 'route_safety_report',
+          );
+        },
+      );
+      return;
+    }
+
+    final input = await showDialog<_RouteSafetyReportInput>(
+      context: context,
+      builder: (context) => const _RouteSafetyReportDialog(),
+    );
+    if (input == null || !mounted) return;
+
+    try {
+      await ref.read(submitRouteSafetyReportProvider)(
+        routeId: item.id,
+        reporterId: user.id,
+        reasonCode: input.reasonCode,
+        severity: input.severity,
+        safeNote: input.safeNote,
+      );
+      _analyticsService.track(
+        'route_safety_report_submitted',
+        params: <String, Object?>{
+          'route_id': item.id,
+          'reason_code': input.reasonCode,
+          'severity': input.severity.name,
+        },
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Спасибо. Сообщение передано на проверку.'),
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Не удалось отправить сообщение. Попробуйте ещё раз.'),
+        ),
+      );
+    }
+  }
+
   void _onCtaTap(DiscoverItemEntity item) {
     setState(() {
       _ctaSubmitted = true;
@@ -303,6 +383,69 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${_ctaLabel(item)}: заявка отправлена')),
     );
+  }
+
+  Future<void> _onMarkVisited({
+    required DiscoverItemEntity item,
+    required AuthController authController,
+  }) async {
+    final user = authController.state.user;
+    if (user == null) {
+      authController.trackAuthGateViewed(
+        sourceScreen: 'discover_details',
+        sourceAction: 'mark_visited',
+      );
+      await showAuthGateSheet(
+        context,
+        action: ProtectedAction.visit,
+        sourceScreen: 'discover_details',
+        sourceAction: 'mark_visited',
+        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        onContinueAsGuest: () {
+          authController.trackGuestContinueClicked(
+            sourceScreen: 'discover_details',
+            sourceAction: 'mark_visited',
+          );
+        },
+      );
+      return;
+    }
+
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime? selected = await showDatePicker(
+      context: context,
+      initialDate: today,
+      firstDate: DateTime(1900),
+      lastDate: today,
+      helpText: 'When did you visit?',
+    );
+    if (selected == null || !mounted) return;
+
+    try {
+      await ref
+          .read(visitHistoryFacadeProvider)
+          .recordSelfReported(
+            userId: user.id,
+            item: item,
+            visitedOn: selected,
+            today: today,
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Added to Visit history · '
+            '${MaterialLocalizations.of(context).formatMediumDate(selected)}',
+          ),
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not update Visit history')),
+      );
+    }
   }
 
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
@@ -414,6 +557,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final route = item.publishedRoute;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -431,16 +575,24 @@ class _SummaryCard extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: _MetricTile(
-                    icon: Icons.payments_outlined,
-                    label: 'Price',
-                    value: _priceLabel(item),
+                    icon: route == null
+                        ? Icons.payments_outlined
+                        : Icons.route_outlined,
+                    label: route == null ? 'Price' : 'Length',
+                    value: route == null
+                        ? _priceLabel(item)
+                        : '${(route.distanceMeters / 1000).toStringAsFixed(1)} км',
                   ),
                 ),
                 Expanded(
                   child: _MetricTile(
-                    icon: Icons.group_outlined,
-                    label: 'People',
-                    value: _participantsLabel(item),
+                    icon: route == null
+                        ? Icons.group_outlined
+                        : Icons.directions_walk_outlined,
+                    label: route == null ? 'People' : 'Profile',
+                    value: route == null
+                        ? _participantsLabel(item)
+                        : _routeProfileLabel(route.routingProfileId),
                   ),
                 ),
                 Expanded(
@@ -474,6 +626,228 @@ class _SummaryCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PublishedRouteCard extends StatelessWidget {
+  const _PublishedRouteCard({required this.item, required this.onReport});
+
+  final DiscoverItemEntity item;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = item.publishedRoute!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              'Published Route',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                _DetailsPill(label: _routeProfileLabel(route.routingProfileId)),
+                _DetailsPill(label: _routeDifficultyLabel(route.difficultyId)),
+                if (route.recommendedDifficultyId.isNotEmpty &&
+                    route.recommendedDifficultyId != route.difficultyId)
+                  _DetailsPill(
+                    label:
+                        'Recommended '
+                        '${_routeDifficultyLabel(route.recommendedDifficultyId)}',
+                  ),
+                if (route.ascentMeters != null)
+                  _DetailsPill(label: '+${route.ascentMeters!.round()} m'),
+                if (route.descentMeters != null)
+                  _DetailsPill(label: '-${route.descentMeters!.round()} m'),
+                _DetailsPill(label: '${route.waypointCount} POI'),
+                if (route.fieldVerifiedAtUtc != null)
+                  const _DetailsPill(label: 'Field verified'),
+                _DetailsPill(label: 'Version ${route.versionId}'),
+                if (route.demoOnly) const _DetailsPill(label: 'Demo data'),
+              ],
+            ),
+            if (route.attributions.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                route.attributions.join(' · '),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (route.elevationAvailability != 'complete') ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                route.elevationAvailability == 'partial'
+                    ? 'Elevation data is partial; ascent and descent are not '
+                          'presented as complete.'
+                    : 'Elevation data is unavailable and is not shown as zero.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (route.unknownSurfaceDistanceMeters > 0) ...<Widget>[
+              const SizedBox(height: 6),
+              Text(
+                '${route.unknownSurfaceDistanceMeters.round()} m of surface '
+                'data is unknown.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onReport,
+                icon: const Icon(Icons.report_outlined),
+                label: const Text('Сообщить о проблеме на маршруте'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RouteSafetyReportInput {
+  const _RouteSafetyReportInput({
+    required this.reasonCode,
+    required this.severity,
+    this.safeNote,
+  });
+
+  final String reasonCode;
+  final DiscoverRouteSafetySeverity severity;
+  final String? safeNote;
+}
+
+class _RouteSafetyReportDialog extends StatefulWidget {
+  const _RouteSafetyReportDialog();
+
+  @override
+  State<_RouteSafetyReportDialog> createState() =>
+      _RouteSafetyReportDialogState();
+}
+
+class _RouteSafetyReportDialogState extends State<_RouteSafetyReportDialog> {
+  final TextEditingController _noteController = TextEditingController();
+  String _reasonCode = 'trail_closed';
+  DiscoverRouteSafetySeverity _severity = DiscoverRouteSafetySeverity.warning;
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Проблема на маршруте'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            DropdownButtonFormField<String>(
+              value: _reasonCode,
+              decoration: const InputDecoration(labelText: 'Что произошло'),
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem(
+                  value: 'trail_closed',
+                  child: Text('Тропа закрыта'),
+                ),
+                DropdownMenuItem(
+                  value: 'dangerous_surface',
+                  child: Text('Опасное покрытие'),
+                ),
+                DropdownMenuItem(
+                  value: 'obstruction',
+                  child: Text('Препятствие'),
+                ),
+                DropdownMenuItem(
+                  value: 'incorrect_geometry',
+                  child: Text('Неверная линия маршрута'),
+                ),
+                DropdownMenuItem(value: 'other', child: Text('Другое')),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _reasonCode = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<DiscoverRouteSafetySeverity>(
+              value: _severity,
+              decoration: const InputDecoration(labelText: 'Серьёзность'),
+              items: const <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.information,
+                  child: Text('Информация'),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.warning,
+                  child: Text('Требует внимания'),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.high,
+                  child: Text('Опасно'),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.critical,
+                  child: Text('Критическая опасность'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _severity = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _noteController,
+              maxLength: 500,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Комментарий (необязательно)',
+                hintText: 'Опишите проблему без личных данных',
+              ),
+            ),
+            if (_severity == DiscoverRouteSafetySeverity.critical)
+              const Text(
+                'Критическую опасность выбирайте только при непосредственном '
+                'риске для людей.',
+              ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Отмена'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final note = _noteController.text.trim();
+            Navigator.of(context).pop(
+              _RouteSafetyReportInput(
+                reasonCode: _reasonCode,
+                severity: _severity,
+                safeNote: note.isEmpty ? null : note,
+              ),
+            );
+          },
+          child: const Text('Отправить'),
+        ),
+      ],
     );
   }
 }
@@ -529,6 +903,7 @@ class _DetailsActionHub extends StatelessWidget {
     required this.onSearch,
     required this.onCreateSimilar,
     required this.onCreateRoute,
+    required this.onMarkVisited,
     required this.onCtaTap,
   });
 
@@ -542,6 +917,7 @@ class _DetailsActionHub extends StatelessWidget {
   final VoidCallback onSearch;
   final VoidCallback onCreateSimilar;
   final VoidCallback onCreateRoute;
+  final VoidCallback onMarkVisited;
   final VoidCallback onCtaTap;
 
   @override
@@ -650,6 +1026,13 @@ class _DetailsActionHub extends StatelessWidget {
                   subtitle: 'Open Create Hub',
                   onTap: onCreateSimilar,
                 ),
+                if (item.objectKind == DiscoverObjectKind.place)
+                  _DetailsActionTile(
+                    icon: Icons.history_toggle_off,
+                    title: 'Mark as visited',
+                    subtitle: 'Add to private history',
+                    onTap: onMarkVisited,
+                  ),
               ],
             ),
           ],
@@ -913,16 +1296,26 @@ class _InfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final route = item.publishedRoute;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           children: <Widget>[
-            _InfoRow(
-              icon: Icons.calendar_month_outlined,
-              label: 'Date and time',
-              value: _dateTimeLabel(item.startsAtUtc),
-            ),
+            if (route == null)
+              _InfoRow(
+                icon: Icons.calendar_month_outlined,
+                label: 'Date and time',
+                value: _dateTimeLabel(item.startsAtUtc),
+              )
+            else
+              _InfoRow(
+                icon: Icons.route_outlined,
+                label: 'Route geometry',
+                value:
+                    '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
+                    '${_durationFromSeconds(route.durationSeconds)}',
+              ),
             const Divider(height: 20),
             _InfoRow(
               icon: Icons.place_outlined,
@@ -933,7 +1326,9 @@ class _InfoGrid extends StatelessWidget {
             _InfoRow(
               icon: Icons.near_me_outlined,
               label: 'Distance',
-              value: '${item.distanceKm.toStringAsFixed(1)} км from you',
+              value: route == null
+                  ? '${item.distanceKm.toStringAsFixed(1)} км from you'
+                  : 'Start point · ${item.distanceKm.toStringAsFixed(1)} км away',
             ),
           ],
         ),
@@ -1195,6 +1590,33 @@ String _dateTimeLabel(DateTime value) {
   return '$day.$month.${local.year} · $hour:$minute';
 }
 
+String _durationFromSeconds(int seconds) {
+  final int minutes = (seconds / 60).round();
+  if (minutes < 60) return '$minutes min';
+  final int hours = minutes ~/ 60;
+  final int remainder = minutes % 60;
+  return remainder == 0 ? '$hours h' : '$hours h $remainder min';
+}
+
+String _routeProfileLabel(String profileId) {
+  return switch (profileId.trim().toLowerCase()) {
+    'walking' || 'foot' || 'hiking' => 'Walking',
+    'cycling' || 'bike' => 'Cycling',
+    'car' || 'driving' => 'Driving',
+    _ => profileId.isEmpty ? 'Route' : profileId,
+  };
+}
+
+String _routeDifficultyLabel(String difficultyId) {
+  final String normalized = difficultyId.trim().toLowerCase().split('.').first;
+  return switch (normalized) {
+    'easy' => 'Easy',
+    'moderate' || 'medium' => 'Moderate',
+    'hard' || 'difficult' => 'Hard',
+    _ => difficultyId.isEmpty ? 'Difficulty not set' : difficultyId,
+  };
+}
+
 String _priceLabel(DiscoverItemEntity item) {
   if (item.isFree) return 'Free';
   return '${item.priceAmount.toStringAsFixed(0)} €';
@@ -1339,6 +1761,7 @@ String _mapLocationForDetails(DiscoverItemEntity item) {
       'itemId': item.id,
       'itemLat': item.latitude.toStringAsFixed(6),
       'itemLng': item.longitude.toStringAsFixed(6),
+      'source': 'route_details',
     },
   ).toString();
 }

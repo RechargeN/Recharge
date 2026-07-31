@@ -1,10 +1,13 @@
 import 'opening_hours_rule.dart';
+import 'published_route_discovery_entity.dart';
 import 'time_fit_evaluation.dart';
 import 'time_slot.dart';
 
 enum DurationConfidence { exact, estimated, unknown }
 
 enum AvailabilityKind { eventSlots, openingHours, none }
+
+enum DiscoverObjectKind { place, event, route, activity }
 
 class DiscoverItemEntity {
   const DiscoverItemEntity({
@@ -20,6 +23,7 @@ class DiscoverItemEntity {
     required this.priceAmount,
     required this.distanceKm,
     required this.isFree,
+    this.objectKind = DiscoverObjectKind.activity,
     this.relevanceScore = 0,
     this.coverImageUrl = '',
     this.organizerName = '',
@@ -42,6 +46,7 @@ class DiscoverItemEntity {
     this.timeFitEvaluation,
     this.ctaLabel = '',
     this.highlights = const <String>[],
+    this.publishedRoute,
   }) : assert(durationMinutes == null || durationMinutes > 0),
        assert(capacity == null || capacity > 0),
        assert(participantsCount == null || participantsCount >= 0),
@@ -63,6 +68,7 @@ class DiscoverItemEntity {
   final double priceAmount;
   final double distanceKm;
   final bool isFree;
+  final DiscoverObjectKind objectKind;
   final double relevanceScore;
   final String coverImageUrl;
   final String organizerName;
@@ -85,8 +91,12 @@ class DiscoverItemEntity {
   final TimeFitEvaluation? timeFitEvaluation;
   final String ctaLabel;
   final List<String> highlights;
+  final PublishedRouteDiscoveryEntity? publishedRoute;
+
+  bool get isPublishedRoute => publishedRoute != null;
 
   DiscoverItemEntity copyWith({
+    DiscoverObjectKind? objectKind,
     double? distanceKm,
     double? relevanceScore,
     String? coverImageUrl,
@@ -115,6 +125,8 @@ class DiscoverItemEntity {
     bool clearTimeFitEvaluation = false,
     String? ctaLabel,
     List<String>? highlights,
+    PublishedRouteDiscoveryEntity? publishedRoute,
+    bool clearPublishedRoute = false,
   }) {
     return DiscoverItemEntity(
       id: id,
@@ -129,6 +141,7 @@ class DiscoverItemEntity {
       priceAmount: priceAmount,
       distanceKm: distanceKm ?? this.distanceKm,
       isFree: isFree,
+      objectKind: objectKind ?? this.objectKind,
       relevanceScore: relevanceScore ?? this.relevanceScore,
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       organizerName: organizerName ?? this.organizerName,
@@ -160,6 +173,9 @@ class DiscoverItemEntity {
           : (timeFitEvaluation ?? this.timeFitEvaluation),
       ctaLabel: ctaLabel ?? this.ctaLabel,
       highlights: highlights ?? this.highlights,
+      publishedRoute: clearPublishedRoute
+          ? null
+          : (publishedRoute ?? this.publishedRoute),
     );
   }
 }

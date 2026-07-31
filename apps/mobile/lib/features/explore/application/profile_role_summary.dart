@@ -1,8 +1,4 @@
-enum ProfileRoleTier {
-  user,
-  creator,
-  proGenerator,
-}
+enum ProfileRoleTier { user, creator, proGenerator }
 
 class ProfileRoleSummary {
   const ProfileRoleSummary({
@@ -37,17 +33,19 @@ ProfileRoleSummary profileRoleSummaryFor({
       .map((String capability) => capability.trim().toLowerCase())
       .where((String capability) => capability.isNotEmpty)
       .toSet();
-  final bool canCreate = normalizedRole == 'creator' ||
+  final bool isCreatorRole =
+      normalizedRole == 'creator' ||
       normalizedRole == 'pro_generator' ||
-      normalizedRole == 'pro' ||
-      capabilitySet.any((String capability) => capability.startsWith('create.'));
-  final bool canGenerate = normalizedRole == 'pro_generator' ||
-      normalizedRole == 'pro' ||
-      normalizedRole == 'generator' ||
-      capabilitySet.contains('pro.generator') ||
-      capabilitySet.contains('scenario.generate') ||
-      capabilitySet.contains('route.generate') ||
-      capabilitySet.contains('ai.generate.scenarios');
+      normalizedRole == 'pro';
+  final bool canCreate = isCreatorRole;
+  final bool canGenerate =
+      isCreatorRole &&
+      (normalizedRole == 'pro_generator' ||
+          normalizedRole == 'pro' ||
+          capabilitySet.contains('pro.generator') ||
+          capabilitySet.contains('scenario.generate') ||
+          capabilitySet.contains('route.generate') ||
+          capabilitySet.contains('ai.generate.scenarios'));
 
   if (canGenerate) {
     return profileRoleSummaryForTier(ProfileRoleTier.proGenerator);

@@ -1230,7 +1230,9 @@ class _SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String priceLabel = item.isFree
+    final String trailingLabel = item.isPublishedRoute
+        ? _routeDurationLabel(item.durationMinutes)
+        : item.isFree
         ? 'Free'
         : '${item.priceAmount.toStringAsFixed(0)} €';
 
@@ -1250,7 +1252,9 @@ class _SearchResultCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.local_activity_outlined,
+                  item.isPublishedRoute
+                      ? Icons.route_outlined
+                      : Icons.local_activity_outlined,
                   color: colorScheme.primary,
                 ),
               ),
@@ -1267,8 +1271,12 @@ class _SearchResultCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
-                      '${item.distanceKm.toStringAsFixed(1)} км',
+                      item.isPublishedRoute
+                          ? '${item.city} · Route · '
+                                '${_routeDistanceLabel(item)}'
+                          : '${item.city} · '
+                                '${rechargeTaxonomyLabel(item.category)} · '
+                                '${item.distanceKm.toStringAsFixed(1)} км',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -1279,7 +1287,7 @@ class _SearchResultCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                priceLabel,
+                trailingLabel,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w800,
@@ -1291,6 +1299,20 @@ class _SearchResultCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _routeDistanceLabel(DiscoverItemEntity item) {
+  final double? meters = item.publishedRoute?.distanceMeters;
+  if (meters == null) return '${item.distanceKm.toStringAsFixed(1)} км';
+  return '${(meters / 1000).toStringAsFixed(1)} км';
+}
+
+String _routeDurationLabel(int? durationMinutes) {
+  if (durationMinutes == null) return 'Route';
+  if (durationMinutes < 60) return '$durationMinutes min';
+  final int hours = durationMinutes ~/ 60;
+  final int minutes = durationMinutes % 60;
+  return minutes == 0 ? '$hours h' : '$hours h $minutes min';
 }
 
 class _StateMessage extends StatelessWidget {

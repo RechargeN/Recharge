@@ -67,13 +67,27 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('ACCOUNT AND WORKSPACE'), findsOneWidget);
+    expect(find.text('Switch workspace'), findsOneWidget);
+    expect(
+      find.text('Personal profile, Professional Pages and Admin access'),
+      findsOneWidget,
+    );
     expect(find.text('Profile information'), findsOneWidget);
     expect(find.text('Display name'), findsOneWidget);
     expect(find.text('About'), findsOneWidget);
     expect(find.text('City'), findsOneWidget);
     expect(find.text('Avatar URL/Path'), findsOneWidget);
-    expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Currency'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('CONTENT & ACTIVITY'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('CONTENT & ACTIVITY'), findsOneWidget);
+    expect(find.text('Saved plans'), findsOneWidget);
+    expect(find.text('Search and conditions'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Notifications'),
@@ -82,6 +96,18 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Inbox and route updates'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Notification preferences'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('PREFERENCES'), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('Currency'), findsOneWidget);
+    expect(find.text('Notification preferences'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Support / Help'),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -17,17 +18,88 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_providers.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/application/scenario_conversion_handoff_store.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
 
+import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets(
+    'accepts converted Scenario handoff without seed rewrite',
+    (tester) async {
+      final authController = AuthController(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await authController.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'handoff',
+      );
+      final createRepository = _FakeCreateRepository();
+      final createController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: _testCreateDefaults,
+      );
+      await createController.ensureLoaded(
+        userId: 'u',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      createController.setObjectType(CreateObjectType.scenario);
+      final converted = createController.state.draft.copyWith(
+        id: 'converted-scenario-1',
+        title: 'Expanded evening',
+      );
+      createController.setObjectType(CreateObjectType.event);
+      final ScenarioConversionHandoffStore handoff =
+          ScenarioConversionHandoffStore();
+      handoff.put(converted);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            createControllerProvider.overrideWith((ref) => createController),
+            scenarioConversionHandoffStoreProvider.overrideWithValue(handoff),
+          ],
+          child: const MaterialApp(
+            home: CreatePage(
+              seedParameters: <String, String>{
+                'scenarioHandoffId': 'converted-scenario-1',
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(createController.state.draft.id, 'converted-scenario-1');
+      expect(
+        createController.state.draft.objectType,
+        CreateObjectType.scenario,
+      );
+      expect(find.text('Scenario Builder'), findsOneWidget);
+      expect(handoff.contains('converted-scenario-1'), isFalse);
+    },
+  );
+
   fullPageTestWidgets('shows cover validation error on publish', (
     tester,
   ) async {
@@ -51,6 +123,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
       runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
@@ -58,6 +131,7 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
+    createController.setObjectType(CreateObjectType.activity);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -128,12 +202,14 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
+    createController.setObjectType(CreateObjectType.activity);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -187,7 +263,7 @@ void main() {
     expect(createController.state.draft.subcategory, 'yoga');
   });
 
-  fullPageTestWidgets('fast preset fills draft preview and readiness', (
+  fullPageTestWidgets('generic visual clutter is absent from Create forms', (
     tester,
   ) async {
     final authController = AuthController(
@@ -210,6 +286,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -228,27 +305,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Fast presets'), findsOneWidget);
-    expect(find.text('Publish readiness'), findsOneWidget);
-    expect(find.text('Listing preview'), findsOneWidget);
-
-    await tester.tap(find.text('Calm walk'));
-    await tester.pumpAndSettle();
-
-    expect(createController.state.draft.objectType, CreateObjectType.activity);
-    expect(createController.state.draft.mainCategory, 'wellness_recharge');
-    expect(createController.state.draft.subcategory, 'calm_walk');
-    expect(createController.state.draft.title, 'Calm walk in Riga');
-    expect(createController.state.draft.city, 'Riga');
-    expect(createController.state.draft.media.coverImage, isNotEmpty);
-    expect(createController.state.draft.startDateTimeUtc, isNotNull);
-
-    expect(find.text('Calm walk in Riga'), findsWidgets);
-    expect(find.text('Publishable'), findsOneWidget);
-    expect(find.text('6/6 ready'), findsOneWidget);
+    expect(find.text('Fast presets'), findsNothing);
+    expect(find.text('Publish readiness'), findsNothing);
+    expect(find.text('Listing preview'), findsNothing);
   });
 
-  fullPageTestWidgets('create hub switches all taxonomy create block cards', (
+  fullPageTestWidgets('create hub exposes all blocks and opens object page', (
     tester,
   ) async {
     final authController = AuthController(
@@ -271,6 +333,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -278,13 +341,37 @@ void main() {
       organizerName: 'user',
     );
 
+    final GoRouter router = GoRouter(
+      initialLocation: RouteNames.create,
+      routes: <RouteBase>[
+        GoRoute(
+          name: 'create_object',
+          path: '${RouteNames.createObject}/:objectTypeId',
+          builder: (_, GoRouterState state) => CreatePage(
+            initialObjectType: createObjectTypeFromId(
+              state.pathParameters['objectTypeId'] ?? '',
+            ),
+          ),
+        ),
+        GoRoute(
+          path: RouteNames.create,
+          builder: (_, __) => CreateHubPage(
+            isAuthenticated: authController.state.isAuthenticated,
+            capabilities:
+                authController.state.user?.capabilities ?? const <String>[],
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
-        child: const MaterialApp(home: CreatePage()),
+        child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -296,7 +383,7 @@ void main() {
           'Route': CreateObjectType.route,
           'Place': CreateObjectType.place,
           'Bookable session': CreateObjectType.session,
-          'Quick plan': CreateObjectType.quickPlan,
+          'Scenario': CreateObjectType.scenario,
           'Find people': CreateObjectType.findPeople,
           'Class / workshop': CreateObjectType.classWorkshop,
           'Rental / equipment': CreateObjectType.rental,
@@ -305,16 +392,27 @@ void main() {
 
     for (final MapEntry<String, CreateObjectType> entry
         in expectedTypes.entries) {
-      await tester.scrollPageUntilVisible(
-        find.text(entry.key).first,
-        300,
-        scrollable: find.byType(Scrollable).first,
+      expect(
+        find.byKey(ValueKey<String>('create-hub-${entry.value.taxonomyId}')),
+        findsOneWidget,
       );
-      await tester.tap(find.text(entry.key).first);
-      await tester.pumpAndSettle();
-
-      expect(createController.state.draft.objectType, entry.value);
+      expect(
+        RouteNames.createObjectFor(entry.value.taxonomyId),
+        '/create/new/${entry.value.taxonomyId}',
+      );
     }
+
+    await tester.tap(find.byKey(const ValueKey<String>('create-hub-scenario')));
+    await tester.pumpAndSettle();
+
+    expect(createController.state.draft.objectType, CreateObjectType.scenario);
+    expect(find.text('Create Scenario'), findsOneWidget);
+    expect(find.text('Create Hub'), findsNothing);
+    expect(router.routerDelegate.canPop(), isTrue);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Create Hub'), findsOneWidget);
   });
 
   fullPageTestWidgets('seed parameters prefill a publishable create draft', (
@@ -340,6 +438,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -416,6 +515,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -491,6 +591,7 @@ void main() {
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -596,139 +697,28 @@ void main() {
     );
   });
 
-  fullPageTestWidgets('success hub opens published scenario route actions', (
-    tester,
-  ) async {
-    final authController = AuthController(
-      signInUseCase: SignInUseCase(_NoopAuthRepository()),
-      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
-      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
-      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
-      analyticsService: _NoopAnalyticsService(),
-    );
-    await authController.signIn(
-      email: 'user@example.com',
-      password: 'password123',
-      sourceScreen: 'test',
-      sourceAction: 'seed',
-    );
-
+  test('Route publish fails safely without its publication service', () async {
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
     );
     await createController.ensureLoaded(
       userId: 'u',
       organizerEmail: 'user@example.com',
       organizerName: 'user',
+      capabilities: const <String>['create.route'],
     );
-    createController.updateTitle('Calm recharge route');
-    createController.applyTaxonomySelection(
-      mainCategory: 'travel_tours',
-      subcategory: 'walking_tour',
-    );
-    createController.updateCity('Rezekne');
-    createController.updateVenueName('Old town');
-    createController.updateShortDescription('2 stops · 90 min · 1.4 km');
-    createController.updateFullDescription(
-      'Seeded from scenario route. Original context: Calm route with 2 stops. '
-      'Route steps: food_drinks.coffee,wellness_recharge.calm_walk. '
-      'Review capacity, schedule, booking, and moderation details before publishing.',
-    );
-    createController.updateCoverImage(
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    );
-    createController.updateIsFree(true);
-    createController.updateStartDateTime('2026-04-18T18:00:00Z');
-    await createController.publishDraft();
+    createController.setObjectType(CreateObjectType.route);
+    final published = await createController.publishDraft();
 
-    Widget app() {
-      return ProviderScope(
-        overrides: <Override>[
-          authControllerProvider.overrideWith((ref) => authController),
-          createControllerProvider.overrideWith((ref) => createController),
-        ],
-        child: MaterialApp.router(
-          routerConfig: GoRouter(
-            initialLocation: RouteNames.createSuccess,
-            routes: <RouteBase>[
-              GoRoute(
-                path: RouteNames.createSuccess,
-                builder: (context, state) => const CreateSuccessPage(),
-              ),
-              GoRoute(
-                path: RouteNames.scenarioBuilder,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Builder page'),
-                      Text(state.uri.queryParameters['mode'] ?? 'no-mode'),
-                      Text(state.uri.queryParameters['mood'] ?? ''),
-                      Text(state.uri.queryParameters['duration'] ?? ''),
-                      Text(state.uri.queryParameters['prompt'] ?? ''),
-                      Text(state.uri.queryParameters['steps'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.discoverMap,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Map page'),
-                      Text(state.uri.queryParameters['mode'] ?? ''),
-                      Text(state.uri.queryParameters['mood'] ?? ''),
-                      Text(state.uri.queryParameters['duration'] ?? ''),
-                      Text(state.uri.queryParameters['prompt'] ?? ''),
-                      Text(state.uri.queryParameters['steps'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Published route'), findsOneWidget);
-    expect(find.text('Coffee'), findsOneWidget);
-    expect(find.text('Calm walk'), findsOneWidget);
-
-    await tester.tap(find.text('Edit route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('no-mode'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('90'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Route map'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('90'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
+    expect(published, isFalse);
+    expect(createController.state.publishedDraft, isNull);
+    expect(createController.state.message, contains('Сервис публикации Route'));
+    createController.dispose();
   });
 
   fullPageTestWidgets(
@@ -754,6 +744,7 @@ void main() {
         saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
         analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
         runtimeDefaults: _testCreateDefaults,
       );
       await createController.ensureLoaded(
@@ -761,6 +752,7 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
+      createController.setObjectType(CreateObjectType.activity);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',
@@ -916,7 +908,7 @@ class _NoopAuthRepository implements AuthRepository {
         id: 'u',
         email: 'user@example.com',
         role: 'creator',
-        capabilities: <String>['create.event', 'create.place'],
+        capabilities: <String>['create.event', 'create.place', 'create.route'],
         profileStatus: 'active',
       ),
     );
