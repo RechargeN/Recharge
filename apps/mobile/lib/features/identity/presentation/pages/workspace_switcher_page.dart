@@ -478,7 +478,7 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
           const SizedBox(height: 12),
           DropdownButtonFormField<ManagedPageKind>(
             key: const ValueKey<String>('professional-page-kind'),
-            value: _kind,
+            initialValue: _kind,
             decoration: const InputDecoration(labelText: 'Page type'),
             items: ManagedPageKind.values
                 .map(

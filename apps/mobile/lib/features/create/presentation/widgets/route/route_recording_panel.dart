@@ -418,7 +418,7 @@ class _GapDecision extends StatelessWidget {
     BuildContext context,
   ) => DropdownButtonFormField<RouteRecordingGapResolution>(
     key: ValueKey<String>('route-gps-gap-${gap.id}'),
-    value: value,
+    initialValue: value,
     decoration: InputDecoration(
       labelText:
           'Gap ${index + 1}: ${gap.distanceMeters.round()} m, ${gap.elapsedSeconds} s',

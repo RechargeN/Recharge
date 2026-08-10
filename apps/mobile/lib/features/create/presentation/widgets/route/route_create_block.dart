@@ -404,7 +404,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             'The bundled Mežaparks graph currently validates walking routes locally.',
         child: DropdownButtonFormField<String>(
           key: const ValueKey<String>('route-profile'),
-          value: state.route.profile.id,
+          initialValue: state.route.profile.id,
           decoration: const InputDecoration(labelText: 'Profile'),
           items: runtime.supportedProfiles
               .map(
@@ -529,7 +529,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             children: <Widget>[
               DropdownButtonFormField<String>(
                 key: const ValueKey<String>('route-category'),
-                value: category.id,
+                initialValue: category.id,
                 decoration: const InputDecoration(labelText: 'Category'),
                 items: rechargeCreateTaxonomy
                     .where((item) => item.allows(CreateObjectType.route))
@@ -555,7 +555,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 key: ValueKey<String>('route-subcategory-${category.id}'),
-                value:
+                initialValue:
                     category.subcategories.any(
                       (item) => item.id == draft.subcategory,
                     )
@@ -590,7 +590,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             children: <Widget>[
               DropdownButtonFormField<String>(
                 key: const ValueKey<String>('route-difficulty'),
-                value: state.route.conditions.difficultyId,
+                initialValue: state.route.conditions.difficultyId,
                 decoration: const InputDecoration(labelText: 'Difficulty'),
                 items: const <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
@@ -874,26 +874,33 @@ class _GpxPreviewCard extends StatelessWidget {
               'Choose one track',
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            ...inspection.candidates.map(
-              (candidate) => RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                value: candidate.selectionKey,
-                groupValue: controller.selectedCandidateKey,
-                onChanged: controller.isBusy
-                    ? null
-                    : (value) {
-                        if (value != null) controller.selectCandidate(value);
-                      },
-                title: Text(
-                  candidate.name?.trim().isNotEmpty == true
-                      ? candidate.name!
-                      : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
-                ),
-                subtitle: Text(
-                  '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
-                  '${candidate.pointCount} points · '
-                  '${candidate.segmentCount} segment(s)',
-                ),
+            RadioGroup<String>(
+              groupValue: controller.selectedCandidateKey,
+              onChanged: (value) {
+                if (!controller.isBusy && value != null) {
+                  controller.selectCandidate(value);
+                }
+              },
+              child: Column(
+                children: inspection.candidates
+                    .map(
+                      (candidate) => RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        value: candidate.selectionKey,
+                        enabled: !controller.isBusy,
+                        title: Text(
+                          candidate.name?.trim().isNotEmpty == true
+                              ? candidate.name!
+                              : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
+                        ),
+                        subtitle: Text(
+                          '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
+                          '${candidate.pointCount} points · '
+                          '${candidate.segmentCount} segment(s)',
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
               ),
             ),
             if (selected != null && selected.gapCount > 0)
@@ -1043,24 +1050,27 @@ class _SectionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          if (subtitle != null) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(subtitle!),
+    child: Material(
+      type: MaterialType.transparency,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            if (subtitle != null) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(subtitle!),
+            ],
+            const SizedBox(height: 14),
+            child,
           ],
-          const SizedBox(height: 14),
-          child,
-        ],
+        ),
       ),
     ),
   );

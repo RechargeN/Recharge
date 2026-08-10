@@ -80,7 +80,7 @@ class EventClassificationSection extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<EventArchetype>(
             key: const Key('event-archetype'),
-            value: value?.archetype,
+            initialValue: value?.archetype,
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Event mechanics *',
@@ -118,7 +118,7 @@ class EventClassificationSection extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<ParticipationMode>(
             key: const Key('event-primary-participation'),
-            value: value?.primaryParticipationMode,
+            initialValue: value?.primaryParticipationMode,
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Primary attendee role *',

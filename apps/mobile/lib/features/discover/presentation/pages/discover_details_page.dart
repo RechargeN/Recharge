@@ -794,7 +794,7 @@ class _RouteSafetyReportDialogState extends State<_RouteSafetyReportDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             DropdownButtonFormField<String>(
-              value: _reasonCode,
+              initialValue: _reasonCode,
               decoration: const InputDecoration(labelText: 'Что произошло'),
               items: const <DropdownMenuItem<String>>[
                 DropdownMenuItem(
@@ -821,7 +821,7 @@ class _RouteSafetyReportDialogState extends State<_RouteSafetyReportDialog> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<DiscoverRouteSafetySeverity>(
-              value: _severity,
+              initialValue: _severity,
               decoration: const InputDecoration(labelText: 'Серьёзность'),
               items: const <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
                 DropdownMenuItem(

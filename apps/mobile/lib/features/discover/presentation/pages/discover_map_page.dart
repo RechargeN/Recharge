@@ -421,131 +421,79 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               ],
             ),
           ),
-          if (scenarioRoute != null || selection.active)
-            _MapResultsSheet(
-              state: state,
-              favoritesController: favoritesController,
-              onRadiusChanged: (double value) {
-                controller.stageRadius(radiusMeters: value, unlimited: false);
-              },
-              onUnlimitedChanged: (bool value) {
-                controller.stageRadius(
-                  radiusMeters: state.draftQuery.radiusMeters,
-                  unlimited: value,
+          _MapResultsSheet(
+            state: state,
+            favoritesController: favoritesController,
+            onRadiusChanged: (double value) {
+              controller.stageRadius(radiusMeters: value, unlimited: false);
+            },
+            onUnlimitedChanged: (bool value) {
+              controller.stageRadius(
+                radiusMeters: state.draftQuery.radiusMeters,
+                unlimited: value,
+              );
+            },
+            onApplyArea: controller.applySearchArea,
+            onRetry: controller.loadFeed,
+            onSelectItem: (DiscoverItemEntity item) {
+              if (selection.active) {
+                _scenarioSelectionController.toggle(item);
+              } else {
+                controller.selectItem(item.id);
+                _mapController?.animateCamera(
+                  CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
                 );
-              },
-              onApplyArea: controller.applySearchArea,
-              onRetry: controller.loadFeed,
-              onSelectItem: (DiscoverItemEntity item) {
-                if (selection.active) {
-                  _scenarioSelectionController.toggle(item);
-                } else {
-                  controller.selectItem(item.id);
-                  _mapController?.animateCamera(
-                    CameraUpdate.newLatLng(
-                      LatLng(item.latitude, item.longitude),
-                    ),
-                  );
-                }
-              },
-              onOpenDetails: (DiscoverItemEntity item) {
-                context.push('${RouteNames.discoverDetails}/${item.id}');
-              },
-              onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
-                item: item,
-                isAuthenticated: isAuthenticated,
-                authController: authController,
-                favoritesController: favoritesController,
-              ),
-              scenarioSelection: selection,
-              onToggleScenarioSelection: _scenarioSelectionController.toggle,
-              onAddToScenario: intakeEnabled
-                  ? (item) => _openScenarioIntake(<DiscoverItemEntity>[item])
-                  : null,
-              scenarioRoute: scenarioRoute,
-              selectedScenarioStopIndex: selectedScenarioStopIndex,
-              routeActive: scenarioRoute != null && _scenarioRouteActive,
-              routeComplete: scenarioRoute != null && _scenarioRouteComplete,
-              onScenarioStopSelected: scenarioRoute == null
-                  ? null
-                  : (int index) => _selectScenarioStop(scenarioRoute, index),
-              onStartRoute: scenarioRoute == null
-                  ? null
-                  : () => _startScenarioRoute(scenarioRoute),
-              onNextStop: scenarioRoute == null
-                  ? null
-                  : () => _advanceScenarioRoute(scenarioRoute),
-              onResetRoute: scenarioRoute == null ? null : _resetScenarioRoute,
-              onSaveCompletedRoute: scenarioRoute == null
-                  ? null
-                  : () => _onScenarioRouteSaveTap(
-                      route: scenarioRoute,
-                      isAuthenticated: isAuthenticated,
-                      authController: authController,
-                      favoritesController: favoritesController,
-                    ),
-              onCopyCompletedRoute: scenarioRoute == null
-                  ? null
-                  : () => _copyScenarioRoute(scenarioRoute),
-              onOpenBuilder: scenarioRoute == null
-                  ? null
-                  : () => context.go(scenarioRoute.builderLocation),
-              onSearchScenarioRoute: scenarioRoute == null
-                  ? null
-                  : () => context.go(scenarioRoute.searchLocation),
-              onCreateScenarioRoute: scenarioRoute == null
-                  ? null
-                  : () => context.go(scenarioRoute.createLocation),
-            )
-          else if (state.selectedItem != null)
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 40,
-              child: _SelectedPreviewCard(
-                item: state.selectedItem!,
-                isSaved: favoritesController.isFavorite(state.selectedItemId!),
-                onClose: () => controller.selectItem(null),
-                onTap: () => context.push(
-                  '${RouteNames.discoverDetails}/${state.selectedItemId}',
-                ),
-                onToggleSave: () => _onMapSaveTap(
-                  item: state.selectedItem!,
-                  isAuthenticated: isAuthenticated,
-                  authController: authController,
-                  favoritesController: favoritesController,
-                ),
-              ),
-            )
-          else
-            Positioned(
-              bottom: 40,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: FilledButton.icon(
-                      onPressed: () => context.go(RouteNames.discover),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: RechargeTheme.emerald900.withValues(
-                          alpha: 0.88,
-                        ),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                      ),
-                      icon: const Icon(Icons.format_list_bulleted_rounded),
-                      label: const Text('View list'),
-                    ),
-                  ),
-                ),
-              ),
+              }
+            },
+            onOpenDetails: (DiscoverItemEntity item) {
+              context.push('${RouteNames.discoverDetails}/${item.id}');
+            },
+            onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
+              item: item,
+              isAuthenticated: isAuthenticated,
+              authController: authController,
+              favoritesController: favoritesController,
             ),
+            scenarioSelection: selection,
+            onToggleScenarioSelection: _scenarioSelectionController.toggle,
+            onAddToScenario: intakeEnabled
+                ? (item) => _openScenarioIntake(<DiscoverItemEntity>[item])
+                : null,
+            scenarioRoute: scenarioRoute,
+            selectedScenarioStopIndex: selectedScenarioStopIndex,
+            routeActive: scenarioRoute != null && _scenarioRouteActive,
+            routeComplete: scenarioRoute != null && _scenarioRouteComplete,
+            onScenarioStopSelected: scenarioRoute == null
+                ? null
+                : (int index) => _selectScenarioStop(scenarioRoute, index),
+            onStartRoute: scenarioRoute == null
+                ? null
+                : () => _startScenarioRoute(scenarioRoute),
+            onNextStop: scenarioRoute == null
+                ? null
+                : () => _advanceScenarioRoute(scenarioRoute),
+            onResetRoute: scenarioRoute == null ? null : _resetScenarioRoute,
+            onSaveCompletedRoute: scenarioRoute == null
+                ? null
+                : () => _onScenarioRouteSaveTap(
+                    route: scenarioRoute,
+                    isAuthenticated: isAuthenticated,
+                    authController: authController,
+                    favoritesController: favoritesController,
+                  ),
+            onCopyCompletedRoute: scenarioRoute == null
+                ? null
+                : () => _copyScenarioRoute(scenarioRoute),
+            onOpenBuilder: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.builderLocation),
+            onSearchScenarioRoute: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.searchLocation),
+            onCreateScenarioRoute: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.createLocation),
+          ),
         ],
       ),
     );
@@ -2922,134 +2870,6 @@ class _MapListItem extends StatelessWidget {
                 ),
               ],
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectedPreviewCard extends StatelessWidget {
-  const _SelectedPreviewCard({
-    required this.item,
-    required this.isSaved,
-    required this.onClose,
-    required this.onTap,
-    required this.onToggleSave,
-  });
-
-  final DiscoverItemEntity item;
-  final bool isSaved;
-  final VoidCallback onClose;
-  final VoidCallback onTap;
-  final VoidCallback onToggleSave;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        item.coverImageUrl,
-                        width: 84,
-                        height: 84,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 84,
-                          height: 84,
-                          color: RechargeTheme.travelPanel,
-                          child: const Icon(Icons.image_not_supported_outlined),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  rechargeTaxonomyLabel(item.category),
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: onClose,
-                                child: const Icon(
-                                  Icons.close_rounded,
-                                  size: 18,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${item.distanceKm.toStringAsFixed(1)} km · '
-                            '${item.isFree ? 'Free' : '${item.priceAmount.toStringAsFixed(0)} €'}',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: onToggleSave,
-                      icon: Icon(
-                        isSaved ? Icons.favorite : Icons.favorite_border,
-                        size: 20,
-                        color: isSaved ? Colors.red : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ),
         ),
       ),

@@ -354,7 +354,7 @@ class _ProviderAndCache extends StatelessWidget {
       children: <Widget>[
         DropdownButtonFormField<String>(
           key: const ValueKey<String>('scenario-transit-provider'),
-          value: state.selectedProviderCode,
+          initialValue: state.selectedProviderCode,
           decoration: const InputDecoration(
             labelText: 'Schedule provider',
             border: OutlineInputBorder(),

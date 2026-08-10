@@ -393,7 +393,7 @@ class _EnumField<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: DropdownButtonFormField<T>(
-      value: values.contains(value) ? value : null,
+      initialValue: values.contains(value) ? value : null,
       isExpanded: true,
       decoration: InputDecoration(labelText: label, errorText: error),
       items: values

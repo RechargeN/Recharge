@@ -350,27 +350,34 @@ class _TargetStep extends StatelessWidget {
             icon: Icons.inbox_outlined,
             text: 'No saved Scenario yet. Create one below.',
           ),
-        for (final target in state.targets)
-          RadioListTile<String>(
-            value: target.id,
+        if (state.targets.isNotEmpty)
+          RadioGroup<String>(
             groupValue: state.newTargetSelected ? null : state.selectedTargetId,
             onChanged: (value) {
               if (value != null) controller.selectTarget(value);
             },
-            title: Text(
-              target.title.trim().isEmpty ? 'Untitled' : target.title,
+            child: Column(
+              children: <Widget>[
+                for (final target in state.targets)
+                  RadioListTile<String>(
+                    value: target.id,
+                    title: Text(
+                      target.title.trim().isEmpty ? 'Untitled' : target.title,
+                    ),
+                    subtitle: Text(_targetSummary(target)),
+                  ),
+              ],
             ),
-            subtitle: Text(_targetSummary(target)),
           ),
         if (controller.canCreateNewTarget) ...<Widget>[
           const Divider(),
-          RadioListTile<bool>(
-            value: true,
+          RadioGroup<bool>(
             groupValue: state.newTargetSelected ? true : null,
             onChanged: (_) => controller.selectNewTarget(),
-            title: const Text('Create new Scenario'),
-            subtitle: const Text(
-              'Private · one Day 1 · saved only with the stop',
+            child: const RadioListTile<bool>(
+              value: true,
+              title: Text('Create new Scenario'),
+              subtitle: Text('Private · one Day 1 · saved only with the stop'),
             ),
           ),
         ],
@@ -411,7 +418,7 @@ class _PlacementStep extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: state.selectedDayId ?? '__unscheduled__',
+          initialValue: state.selectedDayId ?? '__unscheduled__',
           decoration: const InputDecoration(labelText: 'Day'),
           items: <DropdownMenuItem<String>>[
             for (final day in state.days)
@@ -432,7 +439,7 @@ class _PlacementStep extends StatelessWidget {
         if (state.selectedDayId != null) ...<Widget>[
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: state.afterItemId ?? '__end__',
+            initialValue: state.afterItemId ?? '__end__',
             decoration: const InputDecoration(labelText: 'Insert'),
             items: <DropdownMenuItem<String>>[
               const DropdownMenuItem<String>(

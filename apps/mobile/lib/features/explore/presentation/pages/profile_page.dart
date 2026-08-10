@@ -1106,7 +1106,7 @@ class _ProfileSurfacePanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(RechargeTheme.profileCardRadius),
         border: Border.all(color: RechargeTheme.profileBorder),
       ),
-      child: child,
+      child: Material(type: MaterialType.transparency, child: child),
     );
   }
 }
@@ -1174,38 +1174,41 @@ class _LatestCreatedEvents extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE7ECE6)),
           ),
-          child: Column(
-            children: <Widget>[
-              if (listings.isEmpty)
-                _ProfileActionRow(
-                  icon: Icons.add_box_outlined,
-                  title: 'Create first event',
-                  subtitle: 'Start from Recharge Create Hub',
-                  onTap: onCreate,
-                )
-              else
-                for (final _CreatorListingData listing in listings.take(3))
-                  _CreatedEventRow(
-                    listing: listing,
-                    onTap: () => onOpenListing(listing),
-                  ),
-              const Divider(height: 1),
-              ListTile(
-                dense: true,
-                title: const Center(
-                  child: Text(
-                    'View all events',
-                    style: TextStyle(
-                      color: Color(0xFF0B3028),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: <Widget>[
+                if (listings.isEmpty)
+                  _ProfileActionRow(
+                    icon: Icons.add_box_outlined,
+                    title: 'Create first event',
+                    subtitle: 'Start from Recharge Create Hub',
+                    onTap: onCreate,
+                  )
+                else
+                  for (final _CreatorListingData listing in listings.take(3))
+                    _CreatedEventRow(
+                      listing: listing,
+                      onTap: () => onOpenListing(listing),
+                    ),
+                const Divider(height: 1),
+                ListTile(
+                  dense: true,
+                  title: const Center(
+                    child: Text(
+                      'View all events',
+                      style: TextStyle(
+                        color: Color(0xFF0B3028),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: onViewAll,
                 ),
-                trailing: const Icon(Icons.chevron_right, size: 18),
-                onTap: onViewAll,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 14),
@@ -1217,38 +1220,41 @@ class _LatestCreatedEvents extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE7ECE6)),
           ),
-          child: Column(
-            children: <Widget>[
-              _ProfileActionRow(
-                icon: Icons.add_box_outlined,
-                title: 'Create Hub',
-                subtitle: 'Open taxonomy-based creator flow',
-                onTap: onCreate,
-              ),
-              _ProfileActionRow(
-                icon: Icons.route_outlined,
-                title: 'Create route',
-                subtitle: 'Open the Route block in Create Hub',
-                onTap: onCreateRoute,
-              ),
-              _ProfileActionRow(
-                icon: Icons.auto_awesome_outlined,
-                title: 'Scenario Builder',
-                subtitle: 'Build a personal plan from intent',
-                onTap: onScenario,
-              ),
-              _ProfileActionRow(
-                icon: Icons.calendar_today_outlined,
-                title: 'One-time event',
-                onTap: onCreate,
-              ),
-              _ProfileActionRow(
-                icon: Icons.group_outlined,
-                title: 'Find people',
-                subtitle: 'Continue in Search conditions',
-                onTap: onFindPeople,
-              ),
-            ],
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: <Widget>[
+                _ProfileActionRow(
+                  icon: Icons.add_box_outlined,
+                  title: 'Create Hub',
+                  subtitle: 'Open taxonomy-based creator flow',
+                  onTap: onCreate,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.route_outlined,
+                  title: 'Create route',
+                  subtitle: 'Open the Route block in Create Hub',
+                  onTap: onCreateRoute,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.auto_awesome_outlined,
+                  title: 'Scenario Builder',
+                  subtitle: 'Build a personal plan from intent',
+                  onTap: onScenario,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.calendar_today_outlined,
+                  title: 'One-time event',
+                  onTap: onCreate,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.group_outlined,
+                  title: 'Find people',
+                  subtitle: 'Continue in Search conditions',
+                  onTap: onFindPeople,
+                ),
+              ],
+            ),
           ),
         ),
       ],

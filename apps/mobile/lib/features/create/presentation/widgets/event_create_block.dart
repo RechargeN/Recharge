@@ -1095,7 +1095,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 10),
     child: DropdownButtonFormField<T>(
       key: Key(id),
-      value: values.contains(value) ? value : null,
+      initialValue: values.contains(value) ? value : null,
       decoration: InputDecoration(
         labelText: label,
         errorText: error,

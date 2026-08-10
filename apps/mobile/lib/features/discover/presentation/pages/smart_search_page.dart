@@ -161,26 +161,29 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: colorScheme.outlineVariant),
             ),
-            child: Column(
-              children: <Widget>[
-                for (
-                  int index = 0;
-                  index < _popularPrompts.length;
-                  index++
-                ) ...<Widget>[
-                  ListTile(
-                    leading: Icon(
-                      _popularPrompts[index].icon,
-                      color: colorScheme.primary,
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                children: <Widget>[
+                  for (
+                    int index = 0;
+                    index < _popularPrompts.length;
+                    index++
+                  ) ...<Widget>[
+                    ListTile(
+                      leading: Icon(
+                        _popularPrompts[index].icon,
+                        color: colorScheme.primary,
+                      ),
+                      title: Text(_popularPrompts[index].label),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => _usePrompt(_popularPrompts[index].label),
                     ),
-                    title: Text(_popularPrompts[index].label),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => _usePrompt(_popularPrompts[index].label),
-                  ),
-                  if (index != _popularPrompts.length - 1)
-                    const Divider(height: 1),
+                    if (index != _popularPrompts.length - 1)
+                      const Divider(height: 1),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
           if (history.isNotEmpty) ...<Widget>[

@@ -104,7 +104,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         children: <Widget>[
           DropdownButtonFormField<String>(
             key: const ValueKey<String>('find-people-category'),
-            value: category.id,
+            initialValue: category.id,
             decoration: _decoration('Category *'),
             items: categories
                 .map(
@@ -129,7 +129,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             key: ValueKey<String>('find-people-subcategory-${category.id}'),
-            value:
+            initialValue:
                 subcategories.any(
                   (CreateTaxonomySubcategory item) =>
                       item.id == draft.subcategory,
@@ -185,7 +185,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 4),
           DropdownButtonFormField<FindPeopleSkillLevel>(
-            value: data.skillLevel,
+            initialValue: data.skillLevel,
             decoration: _decoration('Skill level *'),
             items: FindPeopleSkillLevel.values
                 .map(
@@ -202,7 +202,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<FindPeopleParticipationGoal>(
-            value: data.participationGoal,
+            initialValue: data.participationGoal,
             decoration: _decoration('Participation goal *'),
             items: FindPeopleParticipationGoal.values
                 .map(
@@ -334,7 +334,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         children: <Widget>[
           DropdownButtonFormField<FindPeopleScheduleMode>(
             key: const ValueKey<String>('find-people-schedule-mode'),
-            value: data.scheduleMode,
+            initialValue: data.scheduleMode,
             decoration: _decoration('Schedule mode *'),
             items: FindPeopleScheduleMode.values
                 .map(
@@ -502,7 +502,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         children: <Widget>[
           DropdownButtonFormField<FindPeopleMeetingMode>(
             key: const ValueKey<String>('find-people-meeting-mode'),
-            value: data.meetingMode,
+            initialValue: data.meetingMode,
             decoration: _decoration('Meeting mode *'),
             items: FindPeopleMeetingMode.values
                 .map(
@@ -710,7 +710,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 _update(data.copyWith(hostSeatCount: value)),
           ),
           DropdownButtonFormField<FindPeopleApprovalMode>(
-            value: data.approvalMode,
+            initialValue: data.approvalMode,
             decoration: _decoration('Approval mode *'),
             items: FindPeopleApprovalMode.values
                 .map(
@@ -754,7 +754,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                   _update(data.copyWith(maxSeatsPerApplication: value)),
             ),
           DropdownButtonFormField<FindPeopleVerificationLevel>(
-            value: data.verificationRequirement,
+            initialValue: data.verificationRequirement,
             decoration: _decoration('Verification requirement *'),
             items: FindPeopleVerificationLevel.values
                 .map(
@@ -780,7 +780,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (data.waitlistEnabled) ...<Widget>[
             DropdownButtonFormField<FindPeopleWaitlistPolicy>(
-              value: data.waitlistPolicy,
+              initialValue: data.waitlistPolicy,
               decoration: _decoration('Waitlist policy'),
               items: FindPeopleWaitlistPolicy.values
                   .map(
@@ -799,7 +799,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<FindPeopleSeatFitPolicy>(
-              value: data.waitlistSeatFitPolicy,
+              initialValue: data.waitlistSeatFitPolicy,
               decoration: _decoration('Seat-fit policy'),
               items: FindPeopleSeatFitPolicy.values
                   .map(
@@ -870,7 +870,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const Divider(height: 28),
           DropdownButtonFormField<FindPeopleCostType>(
-            value: data.costType,
+            initialValue: data.costType,
             decoration: _decoration('Expected cost *'),
             items: FindPeopleCostType.values
                 .map(
@@ -926,7 +926,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           DropdownButtonFormField<FindPeopleExpenseSplitMode>(
-            value: data.expenseSplitMode,
+            initialValue: data.expenseSplitMode,
             decoration: _decoration('Expense split mode *'),
             items: FindPeopleExpenseSplitMode.values
                 .map(
@@ -1010,7 +1010,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           DropdownButtonFormField<FindPeoplePublisherType>(
-            value: data.publisherType,
+            initialValue: data.publisherType,
             decoration: _decoration('Publish as *'),
             items: FindPeoplePublisherType.values
                 .map(
@@ -1087,7 +1087,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const Divider(height: 28),
           DropdownButtonFormField<FindPeopleVisibility>(
-            value: data.visibility,
+            initialValue: data.visibility,
             decoration: _decoration('Visibility *'),
             items: FindPeopleVisibility.values
                 .map(
@@ -1113,7 +1113,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<FindPeopleConversationPolicy>(
-            value: data.conversationPolicy,
+            initialValue: data.conversationPolicy,
             decoration: _decoration('Conversation policy *'),
             items: FindPeopleConversationPolicy.values
                 .map(
