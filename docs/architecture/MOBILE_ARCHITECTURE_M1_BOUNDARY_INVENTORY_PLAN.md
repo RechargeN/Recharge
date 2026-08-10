@@ -496,7 +496,7 @@ JSON registry по отдельности не является Done.
 - fixtures cover import/export, multiline, deferred, conditional directives,
   comments/strings, every enforced rule and report-format parity;
 - Dart analyzer для checker — 0 issues;
-- repository scan — 378 Dart files, 106 findings, 106 exact suppressions,
+- repository scan — 380 Dart files, 106 findings, 106 exact suppressions,
   0 unsuppressed, 0 stale, 0 expired, budget 106/106;
 - generated Markdown inventory drift check — pass;
 - Windows PowerShell wrapper parity — pass с теми же 106 findings;

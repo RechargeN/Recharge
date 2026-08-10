@@ -122,7 +122,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const Divider(height: 28),
             const _SettingsSectionTitle('PREFERENCES'),
             DropdownButtonFormField<String>(
-              value: state.settings.language,
+              initialValue: state.settings.language,
               decoration: const InputDecoration(
                 labelText: 'Language',
                 border: OutlineInputBorder(),
@@ -140,7 +140,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: state.settings.currency,
+              initialValue: state.settings.currency,
               decoration: const InputDecoration(
                 labelText: 'Currency',
                 border: OutlineInputBorder(),

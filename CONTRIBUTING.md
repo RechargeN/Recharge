@@ -1,4 +1,5 @@
 # Contributing To Recharge
+Check
 
 This document defines the default development process and merge governance for the repository.
 
