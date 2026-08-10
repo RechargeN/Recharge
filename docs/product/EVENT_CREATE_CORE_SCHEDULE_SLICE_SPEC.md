@@ -4,7 +4,15 @@
 - Версия: 1.0
 - Дата: 2026-07-19
 - Parent product spec: [EVENT_CREATE_SPEC.md](EVENT_CREATE_SPEC.md)
+- Canonical target: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md)
 - Runtime: local/mock, capability scope C0 + schedule subset C1
+
+EVT-CRT-01 является действующим реализованным C0 + schedule-C1 подмножеством
+принятой Event Classification v2.2.3. Этот slice остаётся валидным baseline и
+не объявляется устаревшим, но не означает реализацию полного canonical
+контракта. Остальные classification/admission/inventory/provider возможности
+добавляются только последующими Approved ECL slices без параллельного Event
+flow или молчаливого изменения принятых инвариантов.
 
 ## 1. Цель
 

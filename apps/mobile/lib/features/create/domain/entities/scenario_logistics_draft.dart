@@ -10,43 +10,18 @@ enum ScenarioLegStatus { ready, loading, stale, failed, unavailable }
 class ScenarioVehicleProfileDraft {
   const ScenarioVehicleProfileDraft({
     required this.enabled,
-    required this.includeFuelInBudget,
     this.label,
-    this.litresPer100Km,
-    this.fuelPricePerLitre,
     this.passengerSeats,
   });
 
   const ScenarioVehicleProfileDraft.disabled()
     : enabled = false,
-      includeFuelInBudget = false,
       label = null,
-      litresPer100Km = null,
-      fuelPricePerLitre = null,
       passengerSeats = null;
 
   final bool enabled;
-  final bool includeFuelInBudget;
   final String? label;
-  final double? litresPer100Km;
-  final ScenarioMoneyDraft? fuelPricePerLitre;
   final int? passengerSeats;
-
-  int? fuelCostMinorUnits(double? distanceM) {
-    if (!enabled ||
-        !includeFuelInBudget ||
-        distanceM == null ||
-        distanceM < 0 ||
-        litresPer100Km == null ||
-        litresPer100Km! <= 0 ||
-        fuelPricePerLitre == null ||
-        !fuelPricePerLitre!.isStructurallyValid) {
-      return null;
-    }
-    final double distanceKm = distanceM / 1000;
-    return (distanceKm / 100 * litresPer100Km! * fuelPricePerLitre!.minorUnits)
-        .round();
-  }
 }
 
 class ScenarioLegDraft {

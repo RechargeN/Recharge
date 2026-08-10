@@ -155,6 +155,13 @@ class CreateDraftModel {
     return value is num && value.isFinite ? value.toInt() : null;
   }
 
+  int? get scenarioRevision {
+    final Object? payload = sectionData['scenario'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
       entity.sectionData,

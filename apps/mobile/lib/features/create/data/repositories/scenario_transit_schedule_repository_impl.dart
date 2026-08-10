@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+
 import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/repositories/scenario_transit_schedule_repository.dart';
 import '../datasources/gtfs_cache_datasource.dart';
@@ -34,6 +39,20 @@ class ScenarioTransitScheduleRepositoryImpl
       <String, Future<ScenarioTransitFeedManifest>>{};
 
   @override
+  List<ScenarioTransitProviderDescriptor> get providers =>
+      List<ScenarioTransitProviderDescriptor>.unmodifiable(
+        _registry.providers.map(
+          (provider) => ScenarioTransitProviderDescriptor(
+            code: provider.code,
+            displayName: provider.displayName,
+            licenseName: provider.licenseName,
+            sourceUrl: provider.sourceUrl,
+            refreshEnabled: _registry.networkRefreshEnabled && provider.enabled,
+          ),
+        ),
+      );
+
+  @override
   Future<ScenarioTransitFeedManifest> refreshProvider(String providerCode) {
     final existing = _refreshes[providerCode];
     if (existing != null) return existing;
@@ -52,58 +71,140 @@ class ScenarioTransitScheduleRepositoryImpl
   ) async {
     final provider = _provider(providerCode);
     if (!_registry.networkRefreshEnabled || !provider.enabled) {
-      throw StateError('GTFS network refresh is disabled for $providerCode.');
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.networkDisabled,
+        providerCode: providerCode,
+      );
     }
-    final downloaded = await _remoteDataSource.download(provider);
-    final index = await _parserExecutor.parse(
-      archiveBytes: downloaded.bytes,
-      providerCode: provider.code,
-      providerDisplayName: provider.displayName,
-      licenseName: provider.licenseName,
-      sourceUrl: downloaded.sourceUrl,
-      retrievedAtUtc: downloaded.retrievedAtUtc,
-      freshnessMaxAge: provider.freshnessMaxAge,
-      nowUtc: _nowUtc(),
-    );
-    await _cacheDataSource.write(
-      CachedGtfsArchive(
+    late final DownloadedGtfsArchive downloaded;
+    try {
+      downloaded = await _remoteDataSource.download(provider);
+    } on TimeoutException {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.offline,
+        providerCode: providerCode,
+      );
+    } on SocketException {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.offline,
+        providerCode: providerCode,
+      );
+    } on http.ClientException {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.offline,
+        providerCode: providerCode,
+      );
+    } on Object {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.downloadFailed,
+        providerCode: providerCode,
+      );
+    }
+    late final GtfsScheduleIndex index;
+    try {
+      index = await _parserExecutor.parse(
+        archiveBytes: downloaded.bytes,
         providerCode: provider.code,
+        providerDisplayName: provider.displayName,
+        licenseName: provider.licenseName,
         sourceUrl: downloaded.sourceUrl,
         retrievedAtUtc: downloaded.retrievedAtUtc,
-        sha256: index.manifest.sha256,
-        bytes: downloaded.bytes,
-      ),
-    );
+        freshnessMaxAge: provider.freshnessMaxAge,
+        nowUtc: _nowUtc(),
+      );
+    } on FormatException {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.invalidFeed,
+        providerCode: providerCode,
+      );
+    } on Object {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.invalidFeed,
+        providerCode: providerCode,
+      );
+    }
+    try {
+      await _cacheDataSource.write(
+        CachedGtfsArchive(
+          providerCode: provider.code,
+          sourceUrl: downloaded.sourceUrl,
+          retrievedAtUtc: downloaded.retrievedAtUtc,
+          sha256: index.manifest.sha256,
+          bytes: downloaded.bytes,
+        ),
+      );
+    } on Object {
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.cacheWriteFailed,
+        providerCode: providerCode,
+      );
+    }
     _indexes[provider.code] = index;
     return index.manifest;
   }
 
   @override
-  Future<ScenarioTransitFeedManifest?> loadLastKnownGood(
+  Future<ScenarioTransitCacheInspection> inspectCache(
     String providerCode,
   ) async {
-    final existing = _indexes[providerCode];
-    if (existing != null) return existing.manifest;
     final provider = _provider(providerCode);
-    final cached = await _cacheDataSource.read(providerCode);
-    if (cached == null) return null;
+    final existing = _indexes[providerCode];
+    if (existing != null) {
+      return _inspection(existing.manifest);
+    }
+    late final GtfsCacheReadResult cached;
     try {
+      cached = await _cacheDataSource.inspect(providerCode);
+    } on Object {
+      return ScenarioTransitCacheInspection(
+        providerCode: providerCode,
+        status: ScenarioTransitCacheStatus.failed,
+      );
+    }
+    if (cached.status == GtfsCacheReadStatus.missing) {
+      return ScenarioTransitCacheInspection(
+        providerCode: providerCode,
+        status: ScenarioTransitCacheStatus.missing,
+      );
+    }
+    if (cached.status == GtfsCacheReadStatus.corrupt ||
+        cached.archive == null) {
+      return ScenarioTransitCacheInspection(
+        providerCode: providerCode,
+        status: ScenarioTransitCacheStatus.corrupt,
+      );
+    }
+    try {
+      final archive = cached.archive!;
       final index = await _parserExecutor.parse(
-        archiveBytes: cached.bytes,
+        archiveBytes: archive.bytes,
         providerCode: provider.code,
         providerDisplayName: provider.displayName,
         licenseName: provider.licenseName,
-        sourceUrl: cached.sourceUrl,
-        retrievedAtUtc: cached.retrievedAtUtc,
+        sourceUrl: archive.sourceUrl,
+        retrievedAtUtc: archive.retrievedAtUtc,
         freshnessMaxAge: provider.freshnessMaxAge,
         nowUtc: _nowUtc(),
       );
       _indexes[provider.code] = index;
-      return index.manifest;
+      return _inspection(index.manifest);
     } on FormatException {
-      return null;
+      return ScenarioTransitCacheInspection(
+        providerCode: providerCode,
+        status: ScenarioTransitCacheStatus.corrupt,
+      );
+    } on Object {
+      return ScenarioTransitCacheInspection(
+        providerCode: providerCode,
+        status: ScenarioTransitCacheStatus.failed,
+      );
     }
   }
+
+  @override
+  Future<ScenarioTransitFeedManifest?> loadLastKnownGood(
+    String providerCode,
+  ) async => (await inspectCache(providerCode)).manifest;
 
   @override
   Future<List<ScenarioTransitStop>> searchStops({
@@ -179,10 +280,28 @@ class ScenarioTransitScheduleRepositoryImpl
   LatviaGtfsProviderConfig _provider(String code) {
     final provider = _registry.byCode(code);
     if (provider == null) {
-      throw ArgumentError.value(code, 'providerCode', 'Unknown provider.');
+      throw ScenarioTransitScheduleException(
+        code: ScenarioTransitScheduleFailureCode.unknownProvider,
+        providerCode: code,
+      );
     }
     return provider;
   }
+
+  ScenarioTransitCacheInspection _inspection(
+    ScenarioTransitFeedManifest manifest,
+  ) => ScenarioTransitCacheInspection(
+    providerCode: manifest.providerCode,
+    status: switch (manifest.freshness) {
+      ScenarioTransitFreshness.current => ScenarioTransitCacheStatus.current,
+      ScenarioTransitFreshness.stale => ScenarioTransitCacheStatus.stale,
+      ScenarioTransitFreshness.unknown => ScenarioTransitCacheStatus.unknown,
+      ScenarioTransitFreshness.unavailable => ScenarioTransitCacheStatus.failed,
+    },
+    manifest: manifest.freshness == ScenarioTransitFreshness.unavailable
+        ? null
+        : manifest,
+  );
 
   Set<String> _selectedCodes(Set<String> requested) {
     final codes = requested.isEmpty

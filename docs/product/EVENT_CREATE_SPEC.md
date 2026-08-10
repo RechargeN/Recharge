@@ -1,8 +1,8 @@
 # EVENT CREATE — полная логика создания события
 
-- Статус: **Ready for approval — production specification**
-- Версия: 1.3
-- Дата: 2026-07-19
+- Статус: **Review — reconciled with Accepted Event Classification v2.2.3**
+- Версия: 1.4
+- Дата: 2026-08-05
 - Область: целевая логика блока `Event` в едином Create Hub
 
 > Этот документ описывает конечное production-поведение Event Create, а не
@@ -14,11 +14,21 @@
 Связанные источники истины:
 
 - [VISION.md](VISION.md) — продуктовая модель Create Hub и пятишаговый Event flow;
+- [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md) — **Accepted
+  canonical contract** для Event classification, admission, inventory,
+  availability, provenance и границ со смежными aggregates;
 - [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — категории, подкатегории и dynamic criteria;
 - [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — текущий baseline черновика и публикации;
 - [ADR 0013](../adr/0013-domain-policy-baseline.md) — ownership, capabilities,
   lifecycle, ULID, время, бронирование, offline/conflict и moderation;
 - [SEARCH_FILTERS_TIME_SPEC.md](SEARCH_FILTERS_TIME_SPEC.md) — event slots и time-fit.
+
+Граница ответственности: этот документ описывает Creator UX, пятишаговый form
+flow и production-намерение Event Create. `EVENT_CLASSIFICATION_SPEC.md`
+является каноническим источником доменных осей и их инвариантов. При
+расхождении по classification, admission, inventory, availability, provenance
+или границе со смежным aggregate действует Accepted Event Classification.
+Ни один последующий slice не должен создавать параллельную Event-модель.
 
 ---
 
@@ -47,17 +57,17 @@
 
 | Область | Уже есть в приложении | Целевое расширение по этой спецификации |
 |---|---|---|
-| Create type | Config `event` внутри общего Create Hub | Пятишаговый Event config без отдельного flow |
+| Create type | Config `event` и специализированный пятишаговый Event block внутри общего Create Hub | Декларативные typed section configs/state без отдельного flow и без archetype-ветвления в widget |
 | Access | Mock full-access session; router проверяет в основном auth | Creator/capability и Publisher-scoped guards |
-| Draft | Локальная загрузка/сохранение одного draft | Autosave, прогресс шага, conflict/recovery UX, список drafts |
-| Taxonomy | Category/subcategory и dynamic criteria | Полные step-level правила и безопасная смена категории |
-| Time | UTC start и общий `eventSlots` availability | Local time UI, all-day/multi-day, recurring/multi-date, DST и occurrence overrides |
-| Location | City, venue, address и geo-поля в entity | Условная offline/online/hybrid секция и подтверждение точки |
-| Media | Cover/gallery как ссылки; cover required | Production processing, moderation, rights metadata и required alt text |
-| Price/booking | Free/base price и поле booking link | Tickets, inventory, internal/external booking, waitlist, payments и refunds |
-| Publisher | Organizer-поля текущего draft | Канонический Publisher `{type, id}` и capability checks |
-| Visibility | Enum существует, UI фактически public-only | Public/unlisted/private access policies и secret handling |
-| Publish | Mock publish → `pending_review` | Idempotency, ULID mapping, readiness и полный error mapping |
+| Draft | Typed Event schema v1, local autosave/restore и пользовательские templates; template materialization создаёт независимый draft | Conflict/recovery UX, список drafts и additive ECL schema migration |
+| Classification/taxonomy | Category System v1.4.3 materialized 28/530; archetype и participation modes отсутствуют | 34 archetype, primary + secondary participation, canonical ID validation и explicit legacy confirmation |
+| Time | Local input → UTC occurrences; one-time/all-day/multi-day/multi-date/recurrence, DST policies и persisted overrides | Override editor, typed admission windows, material revisions и Discover projection |
+| Location | Offline/online/hybrid, city/address/meeting point, coordinates и confirmed pin | Typed location kind, Place/venue/Route refs, area/disclosure policies |
+| Media | Cover/gallery metadata, required alt text и rights confirmation на local/mock | Production processing, moderation, source/licence and retention pipeline |
+| Price/admission | Free/fixed Money; none/onsite/external payment; none/external registration; internal/future modes fail closed | Independent admission/confirmation policies, inventory authority/pools, Booking, provider sync, tickets, payments and refunds |
+| Publisher | Legacy organizer-поля; Event typed PublisherRef отсутствует | Один shared PublisherRef `{type, id}`, new-draft workspace default и server-side capability checks |
+| Visibility | Public/unlisted; private fail closed | Private access policies и protected secret references |
+| Publish | Idempotent local/mock publish → `pending_review`; permanent Event/occurrence IDs | Backend authority, material revision/moderation, Discover eligibility и полный error mapping |
 | Post-publish | Базовый success state | Risk-based moderation, revisions, occurrence/series cancel, check-in и refunds |
 
 Этот документ не переводит перечисленные целевые пункты в статус Done и сам по
@@ -106,11 +116,13 @@ Creator должен иметь возможность создать публи
 должна покрывать:
 
 - описание и медиа;
+- одну основную механику `eventArchetype` и роль посетителя;
 - категорию и категорийные критерии;
 - физическую, онлайн- или гибридную локацию;
 - одноразовое или повторяющееся расписание;
 - возможности площадки и требования к участникам;
 - стоимость, вместимость, регистрацию и внешнее бронирование;
+- независимые admission, confirmation, eligibility и inventory настройки;
 - публикацию от имени пользователя или ManagedPage;
 - восстановление после закрытия приложения, offline-режим и понятные ошибки.
 
@@ -132,6 +144,9 @@ Create blocks получают собственные production configs/specs �
 - one-time, all-day, multi-day, multi-date и recurring series;
 - daily/weekly/monthly/yearly recurrence, custom intervals и exceptions;
 - occurrence-specific overrides времени, локации, capacity и ticket inventory;
+- один обязательный archetype и primary/secondary participation modes;
+- независимые admission, registration, confirmation, eligibility, guest,
+  interest, waitlist и attendance policies;
 - offline/local draft, multi-device sync, version conflict recovery;
 - production media pipeline для cover, gallery, video и accessibility metadata;
 - бесплатные события, платные билеты, donation/pay-what-you-want и price tiers;
@@ -140,6 +155,8 @@ Create blocks получают собственные production configs/specs �
 - PSP payment, payout readiness, fees/taxes disclosure, cancellation/refund policy;
 - public, unlisted и private access policies;
 - capacity, attendee requirements, QR/check-in configuration;
+- честную availability projection с `unknown/stale`, channel-bound hybrid
+  inventory и provider source/freshness disclosure;
 - preview;
 - moderation, publish, revisions и resubmission;
 - архивирование, cancellation occurrence/series и attendee notifications.
@@ -204,12 +221,17 @@ slices: Event slice не должен незаметно поглощать их
 | Event | Публикуемая сущность события. |
 | Draft | Изменяемый локальный или синхронизированный черновик Event. |
 | Publisher | Субъект, от имени которого публикуется Event: `user` или `page`. |
+| Event archetype | Ровно одна основная механика из 34 значений канонического реестра; не тема и не Create-тип. |
+| Participation mode | Что делает посетитель; один primary и до трёх дополнительных режимов. |
 | Series | Повторяющееся событие с одним правилом recurrence. |
 | Occurrence | Конкретное проведение Event с собственными start/end в UTC. |
 | Event slot | Интервал одной occurrence, используемый availability и time-fit. |
 | Occurrence override | Изменение конкретной occurrence без разрушения series rule. |
 | Capability | Явное разрешение на действие, например `create.event` или `publish.event`. |
 | Booking | Резервирование участия/билета на конкретную occurrence или Event. |
+| Admission mode | Основная механика входа: open entry, RSVP, booking, application, ticket или team registration. |
+| Inventory authority | Единственный источник истины inventory: none, Recharge или external provider. |
+| Availability projection | Производное состояние occurrence/inventory/windows/freshness; не lifecycle Event. |
 | Ticket type | Тариф/квота с ценой, inventory, sales window и правилами возврата. |
 | Payment | Финансовая операция PSP, связанная с Booking, но не хранящая card data в Recharge. |
 | Access policy | Правило видимости и входа: public, unlisted или private. |
@@ -243,6 +265,24 @@ slices: Event slice не должен незаметно поглощать их
 12. Booking inventory изменяется только транзакционно/idempotently; UI никогда
     не вычисляет остаток мест локально как источник истины.
 13. Raw payment credentials не проходят через Event domain, logs или analytics.
+14. Каждый новый публикуемый Event имеет ровно один `eventArchetype`, один
+    `PublisherRef` и хотя бы одну определённую будущую occurrence.
+15. Archetype, Category System, participation, format, admission, pricing,
+    payment и inventory являются независимыми осями. UI preset может заполнить
+    несколько осей, но сохраняет их раздельно.
+16. `unknown` и `stale` никогда не отображаются как `free`, `0` или
+    `available`; `soldOut` и `discoverEligible` являются projections, а не
+    Event lifecycle states.
+17. `currentParticipants` не вводится Creator и выводится только из
+    подтверждённых Booking либо verified provider sync.
+18. Event не поглощает Place, Route, Scenario, Quick Plan, Bookable Session или
+    Find People. Пограничные случаи разрешаются нормативной таблицей §1.2
+    Event Classification; связи — только по stable ID.
+19. `EventCreateBlock` только отображает typed view state и вызывает controller
+    commands. Validation, inventory calculations, Booking lifecycle, provider
+    sync, migration и persistence находятся вне presentation.
+20. Новое поле в enum/schema не включает capability: unsupported combinations
+    остаются fail closed до собственного Approved ECL slice и kill switch.
 
 ## 5. Доступ и Publisher
 
@@ -321,10 +361,10 @@ Entry
 
 | Шаг | Пользователь решает | Основные секции | Условие перехода вперёд |
 |---|---|---|---|
-| 1. Основное и медиа | Кто публикует и что это за событие | Publisher, Name/Description, Category, Criteria, Media | Идентичность Event, taxonomy path и обязательные criteria валидны |
+| 1. Основное и медиа | Кто публикует, что происходит и что делает посетитель | Publisher, Archetype, Participation, Name/Description, Category, Criteria, Media | Publisher, archetype, participation, taxonomy path и обязательные criteria валидны |
 | 2. Локация и расписание | Где и когда проходит | Format, Location, Schedule/Recurrence | Есть валидная условная локация и минимум одна будущая occurrence |
 | 3. Возможности | Что доступно и кому подходит | Amenities, Accessibility, Audience, Requirements | Заполнены обязательные category-dependent требования |
-| 4. Цена и участники | Сколько стоит и как записаться | Pricing, Tickets, Capacity, Booking, Payments, Access | Цена, inventory, booking и access policy согласованы |
+| 4. Цена и участники | Как попасть, сколько стоит и кто контролирует места | Admission preset/axes, Pricing, Capacity, Inventory, Booking/Provider, Access | Admission, price/payment, authority/pools, availability и access policy согласованы |
 | 5. Preview и Publish | Как Event увидит посетитель | Readiness, Details preview, Legal confirmations | Полная проверка не содержит blocking errors |
 
 ### 6.2 Назад, закрыть и продолжить позже
@@ -481,8 +521,9 @@ validation error формы. Creator publish velocity limit из ADR приме�
 
 ## 9. Seed/prefill
 
-Seed использует source-aware allowlist. Search/Home/Map могут передать Event
-type, category/subcategory, город/координаты, free/price и стартовое время.
+Seed использует source-aware allowlist. Search/Home/Map могут передать
+необязательную archetype suggestion с reason, category/subcategory,
+город/координаты, price knowledge и стартовое время.
 Details другого Publisher может передать taxonomy/format/location context, но
 не копирует дословно title, descriptions, media или booking URL. Полное
 копирование собственного Event выполняется через Duplicate, а не через seed.
@@ -504,25 +545,31 @@ Details другого Publisher может передать taxonomy/format/loc
    private access data.
 9. Cover/media можно перенести только из собственного draft/Event при
    подтверждённом праве повторного использования asset.
+10. Archetype suggestion не записывается как подтверждённый archetype до
+    явного выбора Creator и не меняет category/admission/pricing.
 
 ## 10. Шаг 1 — Основное и медиа
 
 ### 10.1 Порядок секций
 
 1. `Publish as` — если Publisher больше одного.
-2. `NameDescriptionSection`.
-3. `CategorySection`.
-4. `DynamicCriteriaSection`.
-5. `MediaSection`.
+2. `EventClassificationSection` — archetype и participation.
+3. `NameDescriptionSection`.
+4. `CategorySection`.
+5. `DynamicCriteriaSection`.
+6. `MediaSection`.
 
 ### 10.2 Поля
 
 | Поле | Обязательность | Правило |
 |---|---:|---|
 | Publisher | Да | Существующий `user/page` id с правом создания; право Publish повторно проверяется на шаге 5. |
+| Event archetype | Да для новой publication/material revision | Ровно одно из 34 канонических значений; `other` требует reason и moderation. |
+| Primary participation | Да | Одно значение из канонического participation dictionary. |
+| Additional participation | Нет | До трёх уникальных значений, отличных от primary. |
 | Title | Да | После trim 3–100 символов. |
 | Main category | Да | Только id из актуального реестра. |
-| Subcategory | Да | Разрешена для `event` и принадлежит main category. |
+| Subcategory | Да | Канонический id, принадлежащий main category; тема сама не выбирает aggregate/Create type. |
 | Short description | Да | 20–240 символов; используется в карточках. |
 | Full description | Да | 50–20 000 символов; structured rich text из allowlist-блоков, без произвольного HTML. |
 | Criteria | Условно | Required-поля профиля выбранной subcategory обязательны. |
@@ -534,7 +581,9 @@ Details другого Publisher может передать taxonomy/format/loc
 ### 10.3 Категория и dynamic criteria
 
 1. Пользователь выбирает main category.
-2. UI показывает только subcategory, разрешённые для `event`.
+2. UI использует канонический реестр Category System. Все 27 предметных групп
+   и service `other` доступны при occurrence-инварианте; theme-only фильтр не
+   может молча перенести объект в другой aggregate.
 3. Выбранная subcategory определяет `profileId`.
 4. `GetCategoryCriteriaUseCase` возвращает поля профиля.
 5. Значения записываются в `sectionData['criteria']` по стабильным field id.
@@ -545,6 +594,25 @@ Details другого Publisher может передать taxonomy/format/loc
    - пользователь получает предупреждение перед окончательным удалением;
    - новые обязательные критерии подсвечиваются.
 7. Fallback `open_event` не добавляет динамических полей.
+8. Category не выбирает archetype, admission, pricing или aggregate.
+9. Все 27 предметных групп и сервисная `other` применимы к Event только при
+   выполнении occurrence-инварианта; доступность конкретной подкатегории
+   проверяется по каноническому реестру и его compatibility aliases.
+
+### 10.3a Archetype и participation
+
+- Creator сначала выбирает понятную механику происходящего; UI может
+  предлагать archetype по legacy subcategory, но показывает suggestion как
+  неподтверждённую.
+- Archetype selector строится из versioned domain catalog, а не из 34
+  `if/switch` веток в `EventCreateBlock`.
+- Выбор archetype активирует только declarative section visibility/default
+  suggestions. Requiredness и cross-validation возвращают domain/application
+  rules.
+- Participation влияет на copy/filter/ranking metadata, но не выдаёт
+  capability и не меняет access policy.
+- Смена archetype сохраняет независимые поля и показывает impact preview для
+  полей, которые становятся нерелевантными; silent deletion запрещён.
 
 ### 10.4 Медиа
 
@@ -759,6 +827,12 @@ top-level `startDateTimeUtc/endDateTimeUtc` у one-time Event совпадают
 model вычисляет `nextOccurrenceAtUtc` из будущих slots и не перезаписывает
 историю series при каждом наступившем событии.
 
+Published Event без будущих non-cancelled occurrences получает
+`discoverEligible=false` и исключается из Search/Map/Feed, но его lifecycle не
+меняется. Прямая ссылка продолжает показывать completed/cancelled state.
+Добавление, перенос или замена occurrence является material revision; возврат
+в Discover возможен только после применимой revision/moderation policy.
+
 До публикации occurrence использует локальный `loc_*` id. Во время Publish все
 materialized occurrences получают постоянные ULID вместе с Event. Rule-level
 исключения используют `LocalDate` в timezone series; overrides, Booking и
@@ -876,6 +950,19 @@ connector и provider остаётся source of truth. Регистрацион
 оплаты могут совпадать физически, но имеют разные семантические назначения и не
 должны неявно перезаписывать друг друга.
 
+Для manual/internal Event Creator выбирает pricing mode явно. Для external
+provider record цена моделируется независимо:
+
+```text
+priceKnowledge: known | unknown
+priceDisplay: exact | from | range | providerConfirmedAtCheckout
+externalPricePolicy: informational | providerSynced
+```
+
+`priceKnowledge=unknown` не создаёт `pricingMode=free`, нулевую Money или
+обещание цены. Provider-owned price доступна Creator только для чтения вместе
+с source/freshness disclosure.
+
 Для `free`: `isFree = true`, canonical `price = null` и
 `pricingModel = null`; legacy `basePrice <= 0` нормализуется в `null`.
 
@@ -945,9 +1032,70 @@ snapshot. UI не передаёт итог как доверенное знач
 - `players_min/max` из профиля `game_session` не заменяет capacity: это состав
   игры, а capacity — лимит записи.
 
+#### 13.2.1 Inventory authority, shapes и availability
+
+Capacity не определяет, кто имеет право менять остаток. Creator настраивает
+provider-neutral configuration, а authority выбирается явно:
+
+```text
+inventoryAuthority: none | recharge | externalProvider
+inventoryShapes: generalCapacity | sharedTicketPool | separateTicketPools |
+                 zones | assignedSeating | teamSlots | participantRoles |
+                 roleBalancedSlots | tableInventory | timeSlotInventory
+inventoryPools[]
+  id
+  shape
+  channel: onsite | online | any
+  capacityMode
+  capacity?
+```
+
+- `externalProvider` — authority, а не shape; provider-owned pools, prices,
+  holds и availability редактировать в Recharge нельзя.
+- Hybrid Event с конечной физической capacity требует отдельный bounded
+  `onsite` pool. `any`/shared entitlement не может быть единственным physical
+  capacity guard; online и onsite availability проецируются раздельно.
+- Assigned seating интерактивна только при authoritative hold API; иначе UI
+  предлагает честный external handoff.
+- Auxiliary press/volunteer/vendor pools находятся в том же атомарном ledger,
+  если потребляют venue capacity, но не входят в основной admission UI или
+  public participant count.
+- Availability имеет значения `available`, `lowAvailability`, `soldOut`,
+  `waitlistAvailable`, `registrationClosed`, `cancelled`, `unknown`, `stale`.
+  Это projection, не Event lifecycle и не ручное поле формы.
+
 ### 13.3 Регистрация и booking
 
-Production содержит три режима:
+Creator сначала выбирает admission preset, который нормализуется в независимые
+поля и остаётся редактируемым:
+
+```text
+admissionMode: openEntry | rsvp | booking | application | ticket |
+               teamRegistration
+registrationMode: none | external | internal
+confirmationMode: none | instant | manualApproval | lottery |
+                  providerManaged
+eligibilityRules[]
+guestPolicy?
+waitlistPolicy?
+onsiteAdmissionPolicy?
+interestPolicy?
+attendancePolicy?
+```
+
+`confirmationMode=none` допустим только для open entry. Lottery требует
+application window и auditable result. Provider-managed confirmation нельзя
+показывать без verified callback/lookup. Eligibility, visibility, pricing и
+participation не заменяют друг друга.
+
+При `openEntry` разрешён optional interest/reminder RSVP, но он имеет
+`createsBooking=false`, `reservesInventory=false` и не попадает в My Bookings.
+Если пользователю гарантируется конечное место, используется rsvp/booking с
+inventory. Бесплатный internal finite-capacity Event может требовать
+reconfirmation и атомарно release Booking при пропуске deadline; это не
+создаёт reliability score и реализуется только ECL-03.
+
+`registrationMode` содержит три режима:
 
 1. `No registration` — attendance booking CTA отсутствует; остаются подходящие
    действия вроде Directions, Add to calendar или Public online link.
@@ -1001,8 +1149,10 @@ Offline check-in использует подписанный непрозрач�
 
 Approval и waitlist правила:
 
-- `approvalRequired` допустим только для internal booking;
-- `waitlistEnabled` требует конечный inventory/capacity;
+- legacy `approvalRequired` является compatibility input; канонический режим —
+  `confirmationMode=manualApproval`;
+- legacy `waitlistEnabled` является compatibility input; канонический
+  `waitlistPolicy` требует конечный inventory/capacity;
 - promotion из waitlist создаёт ограниченный по времени hold;
 - при платном Event promoted attendee получает payment deadline;
 - истёкший hold возвращает место следующему кандидату idempotently.
@@ -1087,9 +1237,12 @@ Event, если дополнительная policy не задана.
 
 ### 13.5 Матрица совместимости режимов
 
-Publish валидирует три независимые оси: `pricingMode`, `registrationMode` и
-`paymentCollectionMode`. Несовместимая комбинация блокирует Publish и указывает
-все конфликтующие поля.
+Publish валидирует как минимум независимые `admissionMode`,
+`registrationMode`, `confirmationMode`, `pricingMode`,
+`paymentCollectionMode`, `inventoryAuthority`, shapes/pools, eligibility и
+visibility. Несовместимая комбинация блокирует Publish и указывает все
+конфликтующие поля. Таблица ниже покрывает price/payment subset и не заменяет
+полную cross-validation matrix §19 Accepted Event Classification.
 
 | Pricing | Допустимый payment collection | Обязательные условия |
 |---|---|---|
@@ -1112,6 +1265,12 @@ Publish валидирует три независимые оси: `pricingMode`
 - `onlineAccessMode = externalRegistration` требует external registration;
 - approval, waitlist, Recharge inventory и check-in допустимы только для
   internal registration;
+- `openEntry` требует registration none; optional RSVP остаётся только
+  interest/reminder intent;
+- waitlist/reconfirmation требуют конечный inventory и authoritative
+  lifecycle;
+- external provider fields read-only и всегда имеют freshness;
+- unknown/stale price или availability не проецируются как free/available;
 - external registration/payment URLs проходят §13.3 URL validation независимо.
 
 ## 14. Шаг 5 — Preview и публикация
@@ -1122,6 +1281,7 @@ Preview использует тот же presentation model, что Event Detail
 
 - cover/gallery;
 - title, Publisher и moderation-independent badges;
+- archetype и primary/additional participation modes;
 - category/subcategory и criteria;
 - local date/time/timezone;
 - recurrence summary и ближайшие occurrences;
@@ -1129,7 +1289,9 @@ Preview использует тот же presentation model, что Event Detail
 - description;
 - amenities/accessibility;
 - price/ticket types, fees/taxes и sales windows;
-- capacity/availability, registration/booking CTA;
+- admission/confirmation disclosure, capacity/channel availability,
+  registration/booking/external-provider CTA;
+- inventory/provider source, freshness и explicit unknown/stale states;
 - cancellation/refund policy;
 - visibility/access summary;
 - online access disclosure без показа secret join data;
@@ -1169,25 +1331,33 @@ Publish выполняет проверки в фиксированном пор
 1. Draft существует и не архивирован.
 2. Сессия действительна.
 3. Capability `publish.event` доступна для Publisher.
-4. Обязательные общие поля заполнены.
-5. Category/subcategory активны и разрешены для Event.
-6. Required dynamic criteria заполнены и типизированы.
-7. Format, location и online access согласованы.
-8. Availability имеет kind `eventSlots`, непустые slots, пустые opening hours и
+4. PublisherRef валиден, не изменился от workspace switch и является
+   единственным Publisher Event.
+5. Обязательные общие поля, ровно один archetype и participation заполнены.
+6. Category/subcategory активны и разрешены для Event; category не выбирала
+   aggregate/archetype/admission автоматически.
+7. Required dynamic criteria заполнены и типизированы.
+8. Format, location и online access согласованы.
+9. Availability имеет kind `eventSlots`, непустые slots, пустые opening hours и
    неотрицательные buffers.
-9. Schedule/recurrence/partial-attendance rules валидны и имеют будущую
+10. Schedule/recurrence/partial-attendance rules валидны и имеют будущую
    occurrence.
-10. Amenities/requirements не противоречат category rules.
-11. Pricing, payment collection, ticket types, inventory и capacity согласованы.
-12. Registration mode, approval/waitlist и deadline rules валидны.
-13. Pricing/registration/payment combination разрешена матрицей §13.5;
+11. Amenities/requirements не противоречат category rules.
+12. Admission/registration/confirmation/eligibility/interest/guest/waitlist/
+    attendance policies согласованы.
+13. Pricing, price knowledge, payment collection, inventory authority,
+    shapes/pools/channel, capacity и provider freshness согласованы.
+14. Registration, confirmation/waitlist и deadline rules валидны.
+15. Pricing/admission/registration/payment combination разрешена матрицей
+    §13.5 и канонической §19;
     необходимые external URLs либо internal Booking/Payment config готовы.
-14. Для internal paid Event Publisher payout/KYC, tax/fee и refund policy готовы.
-15. Visibility/access policy валидна, private secrets не попали в projection.
-16. Cover/media полностью обработаны, промодерированы и имеют rights metadata.
-17. Нет незавершённого conflict resolution.
-18. Пройдены client-side duplicate/spam checks, доступные без backend.
-19. Подтверждены legal assertions.
+16. Для internal paid Event Publisher payout/KYC, tax/fee и refund policy готовы.
+17. Visibility/access policy валидна, private secrets не попали в projection.
+18. Provider-owned поля не были изменены Recharge overlay.
+19. Cover/media полностью обработаны, промодерированы и имеют rights metadata.
+20. Нет незавершённого conflict resolution/migration suggestion.
+21. Пройдены duplicate/spam checks без silent fuzzy merge.
+22. Подтверждены legal assertions.
 
 Repository/backend повторяет все критичные проверки независимо от клиента,
 применяет baseline publish velocity limit `100/day` на Creator и запускает
@@ -1446,7 +1616,11 @@ id и не содержать секретов.
 EventDraft
   id: ULID | loc_*
   objectType: event
-  publisher: { type: user | page, id: ULID }
+  publisherRef: { type: user | page, id: ULID }
+
+  eventArchetype: EventArchetype
+  primaryParticipationMode: ParticipationMode
+  additionalParticipationModes: Set<ParticipationMode> // max 3
 
   title
   mainCategoryId
@@ -1473,6 +1647,7 @@ EventDraft
   bufferBeforeMinutes
   bufferAfterMinutes
   registrationDeadlineRule?
+  admissionWindows[]
 
   marketCityId
   countryCode
@@ -1493,9 +1668,24 @@ EventDraft
   inventoryPools[]
   capacityMode: known | unknown | unlimited
   capacity: int?
+  inventoryAuthority: none | recharge | externalProvider
+  inventoryShapes[]
+  inventoryPools[]
+  admissionMode: openEntry | rsvp | booking | application | ticket |
+                 teamRegistration
   registrationMode: none | external | internal
+  confirmationMode: none | instant | manualApproval | lottery |
+                    providerManaged
+  eligibilityRules[]
+  guestPolicy?
+  waitlistPolicy?
+  onsiteAdmissionPolicy?
+  interestPolicy?
+  attendancePolicy?
   externalBookingUrl?
   paymentCollectionMode: none | onsite | external | internal
+  priceKnowledge: known | unknown
+  priceDisplay?
   externalPaymentUrl?
   externalPricePolicy?: informational | providerSynced
   bookingPolicy?
@@ -1511,6 +1701,13 @@ EventDraft
   moderationStatus
   visibility: public | unlisted | private
   accessPolicy?
+  eventRelations[]
+  unlinkedCredits[]
+  routeRef?
+  programItemRefs[]
+  sourceRecords[]
+  fieldAuthority?
+  freshness?
   schemaVersion
   revisionVersion
   createdAtUtc
@@ -1527,6 +1724,8 @@ participants/audience, price, booking, organizer, media и statuses.
 Перед реализацией нужно выполнить следующие контрактные миграции:
 
 - заменить organizer-only ownership на канонический Publisher;
+- добавить typed archetype/participation и explicit legacy suggestion без
+  silent write;
 - выделить typed recurrence model;
 - добавить multi-date и typed occurrence overrides;
 - заменить одиночный deadline на typed one-time/recurring deadline rule;
@@ -1544,6 +1743,8 @@ participants/audience, price, booking, organizer, media и statuses.
   ноль при external registration: без источника Discover получает `null`;
 - расширить API/Discover projection явным `capacityMode`, не меняя принятую
   семантику `capacity = null` как unknown в legacy contract;
+- добавить `discoverEligible`, channel availability, source/freshness и
+  nullable participants projection без смешения с lifecycle;
 - хранить permanent ULID вместо текущего временного `draft_*` при публикации;
 - добавить schema version и migration для новых draft fields.
 
@@ -1567,6 +1768,7 @@ references. Реальные Booking, Attendance, Payment, Refund и payout ledg
 CreateTypeConfig(event)
   steps:
     1. BasicsAndMedia
+       EventClassificationSection(archetypeRequired, participationRequired)
        NameDescriptionSection(required)
        CategorySection(required)
        DynamicCriteriaSection(dynamic)
@@ -1585,11 +1787,17 @@ CreateTypeConfig(event)
        AudienceRequirementsSection(dynamic)
 
     4. PriceAndParticipants
+       AdmissionPresetSection(required, normalizedToIndependentAxes)
+       AdmissionPolicySection(dynamic)
        PricingSection(required)
        TicketTypesSection(whenTicketed)
-       InventoryPoolsSection(whenInternal)
+       InventoryAuthoritySection(requiredWhenFiniteOrProvider)
+       InventoryPoolsSection(whenFiniteOrTicketed)
+       ChannelInventorySection(whenHybridAndFinite)
        CapacitySection(optional)
-       RegistrationSection(required)
+       RegistrationConfirmationSection(required)
+       InterestPolicySection(whenOpenEntryOptionalRsvp)
+       AttendancePolicySection(whenInternalFinite)
        BookingPolicySection(whenInternal)
        PaymentReadinessSection(whenInternalPaid)
        RefundPolicySection(whenInternal)
@@ -1604,16 +1812,27 @@ CreateTypeConfig(event)
 ```
 
 Порядок, видимость и required rules задаёт config/usecases. Event page не должен
-содержать длинный набор `if (objectType == event)` для всех бизнес-правил.
+содержать длинный набор `if (objectType == event)` или 34 archetype-ветки для
+всех бизнес-правил. `EventCreateBlock` читает typed view state/config и только
+вызывает controller commands; domain rules остаются в value objects/usecases.
 
 ## 25. Acceptance criteria
+
+Этот раздел проверяет Creator flow и production Event Create behavior.
+Дополнительно и без дублирования обязательны все 43 acceptance criteria
+Accepted `EVENT_CLASSIFICATION_SPEC.md` §24. Статус каждого ECL slice ведётся
+кумулятивно как `canonical AC -> automated test/manual gate -> layer -> status`.
+Наличие похожего legacy field или enum не считается выполнением канонического
+AC.
 
 ### AC-01 — Новый draft
 
 - **Given:** авторизованный пользователь с `create.event`.
 - **When:** он выбирает Event в Create Hub.
-- **Then:** создаётся `loc_*` draft типа Event с market defaults и открывается
-  шаг 1.
+- **Then:** создаётся `loc_*` draft типа Event с new-draft PublisherRef default
+  из active workspace, пустым обязательным archetype и market defaults; draft
+  открывается на шаге 1.
+- **And:** последующий workspace switch этот PublisherRef не переписывает.
 
 ### AC-02 — Нет capability
 
@@ -1633,6 +1852,7 @@ CreateTypeConfig(event)
 - **When:** она имеет criteria profile.
 - **Then:** форма показывает только поля профиля и блокирует переход при пустых
   required criteria.
+- **And:** category не выбирает archetype, aggregate, admission или pricing.
 
 ### AC-05 — Безопасная смена категории
 
@@ -1737,6 +1957,8 @@ CreateTypeConfig(event)
 - **When:** запускается полная валидация.
 - **Then:** `availabilityKind = eventSlots`, slots непусты, opening hours пусты,
   slot ids допустимы и onsite buffers неотрицательны.
+- **And:** это schedule/time-fit contract, а не доказательство authoritative
+  inventory availability.
 
 ### AC-20 — Неизвестная capacity
 
@@ -1772,6 +1994,11 @@ CreateTypeConfig(event)
 - **When:** attendee бронирует последнее место.
 - **Then:** inventory изменяется транзакционно, Booking получает корректный
   lifecycle status, oversell невозможен.
+- **And:** uniform concurrency cap проверяется в той же транзакции до inventory
+  mutation; отказ не создаёт Booking/hold и остаётся идемпотентным.
+- **And:** если включена reconfirmation, пропущенный deadline атомарно
+  освобождает Booking с reason `missedReconfirmation` и запускает waitlist без
+  персонального reliability score.
 
 ### AC-25 — Internal paid booking
 
@@ -1829,6 +2056,8 @@ CreateTypeConfig(event)
 `flutter test` — пройти без новых skip. Нужны unit-тесты usecases/controller,
 widget-тесты пяти шагов, contract tests Booking/Payments/webhooks и integration
 paths draft → pending_review, internal booking/payment/refund и series edits.
+Каждый изменённый Event UI проходит 360 dp при 150% text scale и не кодирует
+ошибку/availability только цветом.
 
 ### AC-33 — Draft conflict
 
@@ -1898,6 +2127,9 @@ paths draft → pending_review, internal booking/payment/refund и series edits.
 - **Then:** до подтверждения показан impact preview, создаётся immutable
   revision, запускаются нужные re-moderation и notifications, а существующие
   Booking сохраняют применимый terms/price snapshot.
+- **And:** Event не возвращается в Discover до применимой moderation policy;
+  отсутствие будущих non-cancelled occurrences меняет только
+  `discoverEligible`, не lifecycle.
 
 ### AC-41 — Series edit/cancel scope
 
@@ -1938,35 +2170,35 @@ paths draft → pending_review, internal booking/payment/refund и series edits.
 
 ## 26. Предлагаемое разбиение будущей реализации
 
-Это только ориентир после утверждения документа:
+Каноническая последовательность задаётся Event Classification и не может быть
+заменена одним «полным Event» implementation slice:
 
-1. Event config + step navigation + draft progress.
-2. Basics/Media и category-driven validation.
-3. Location + one-time/all-day/multi-day schedule.
-4. Multi-date, typed recurrence, rolling projection и occurrence overrides.
-5. Amenities/requirements.
-6. Pricing/capacity/ticket types и external registration.
-7. Internal Booking, approval, waitlist, inventory и check-in.
-8. Payments/PSP, payout readiness, taxes/fees и refunds после принятия ADR.
-9. Visibility/access policy и protected online access.
-10. Preview/readiness/publish/moderation pipeline.
-11. Revision/edit/cancel occurrence/series.
-12. Notifications, analytics и production backend integrations.
+| Slice | Результат | Жёсткая граница |
+|---|---|---|
+| ECL-00 | Canonical reconciliation, coverage matrix и docs alignment | Без runtime/schema/API changes |
+| ECL-01 | Local archetype, participation, migration suggestions, typed validation и declarative form section | Без backend/provider/payment; shared PublisherRef dependency |
+| ECL-02 | Local admission/inventory configuration и честная mock availability | Без real Booking/inventory mutation |
+| ECL-03 | Internal free registration/Booking, atomic ledger, waitlist, reconfirmation и uniform concurrency cap | Отдельный Approved backend slice; без Payments |
+| ECL-04 | External provider handoff | Provider ADR, legal/commercial contract, backend secrets и safe-link disclosure |
+| ECL-05 | Verified provider availability/Booking mirror | Webhooks/polling, idempotency, freshness и reconciliation |
+| ECL-06 | Program Items | Stable room/stage refs и child entity boundary |
+| ECL-07 | Internal paid tickets | Payments/KYC/KYB/PSP/refund/payout gates |
+| ECL-08 | Assigned seating presentation | Только authoritative provider hold API; без seating editor |
 
-Каждый slice должен сохранять единый form engine и заканчиваться зелёными
-`flutter analyze` и `flutter test`.
-
-Соответствие capability levels §2.1: slices 1–3, 5, 6 и mock-часть slice 10 —
-C0; slice 4, `unlisted` из slice 9 и часть slice 11 — C1; slice 7 — C2;
-slice 8 и `private/protected access` из slice 9 — C3. Slice 12 сопровождает
-каждый включаемый level. Это план декомпозиции, а не автоматическое разрешение:
-каждый фактический slice получает собственный Approved spec и acceptance scope.
+EVT-CRT-01 остаётся реализованным local/mock C0 + schedule-C1 baseline.
+CRT-TPL-01 остаётся local-first template extension. Каждый следующий slice
+сохраняет единый form engine, получает собственную Approved spec и проходит
+analyzer, full tests, boundary, diff/migration и применимые accessibility/
+concurrency/security gates. Документальное упоминание capability не разрешает
+её runtime.
 
 ## 27. Обязательные production gates
 
-Функциональных открытых вопросов в этой версии нет: recurrence modes,
-occurrence edit scopes, alt text, revision behavior, visibility, Booking,
-ticketing и Payments зафиксированы выше. До production rollout обязательны:
+Canonical Event contract фиксирует текущие решения, но не разрешает deferred
+product scope: Announcement без occurrence (`EVT-ANN-01`), персональный
+Trust/Risk scoring (`EVT-TRUST-01`) и денежный deposit/authorization hold
+(`EVT-PAY-01`) требуют собственных обязательных артефактов. До production
+rollout также обязательны:
 
 1. Новый Booking/Payments ADR, расширяющий принятый MVP baseline ADR 0013.
 2. Выбор PSP, KYC/KYB/payout model и PCI scope review.
@@ -1978,6 +2210,10 @@ ticketing и Payments зафиксированы выше. До production rollo
 6. Provider reconciliation, webhook retry/dead-letter и financial audit SLO.
 7. Risk-based moderation policy для новых Events и material revisions.
 8. Remote-config rollout/rollback plan и staged release по market/Publisher.
+9. Provider ADR, source-authority/freshness contract и commercial/legal
+   approval до ECL-04/05/08.
+10. Versioned Event/Booking/inventory DTO в `packages/api_contracts` до любой
+    production integration.
 
 Gate блокирует включение соответствующей capability, но не удаляет её из
 целевого продукта и не требует упрощать общий form/data contract.
@@ -1992,6 +2228,8 @@ Gate блокирует включение соответствующей capabi
 | 6. Reconciliation/webhooks/audit SLO | C3 и provider connector, который синхронизирует Booking/Payment state. |
 | 7. Moderation policy | Любой production Publish, начиная с C0; material revision rules — C1+. |
 | 8. Rollout/rollback plan | Любой production rollout, начиная с C0. |
+| 9. Provider authority | ECL-04/05/08 и любой provider-owned operational field. |
+| 10. API contracts | Любой production Event/Booking/provider backend boundary. |
 
 R0 mock/local не считается production rollout и не может обходить gates под
 названием C0. Gate применяется по реально включаемой capability и данным, а не
@@ -2060,8 +2298,9 @@ network class и capability; среднее значение не может с�
 
 Capability считается готовой только когда одновременно выполнено следующее:
 
-1. Все применимые acceptance criteria из раздела 25 имеют автоматизированное
-   доказательство или формально утверждённый manual test protocol.
+1. Все применимые acceptance criteria из раздела 25 и все 43 канонических AC
+   Event Classification имеют автоматизированное доказательство или формально
+   утверждённый manual test protocol.
 2. Domain/application/data/presentation boundaries соблюдены; Event Create
    остаётся config-driven и не создаёт отдельный flow вне form engine.
 3. Schema migration, backward/forward compatibility, seed/duplicate и rollback
@@ -2082,6 +2321,7 @@ Capability считается готовой только когда однов�
 
 | Версия | Дата | Изменения |
 |---|---|---|
+| 1.4 | 2026-08-05 | ECL-00 reconciliation с Accepted Event Classification v2.2.3: добавлены archetype/participation UX, независимые admission axes, price knowledge, inventory authority/shapes/channel, availability/Discover projections, shared PublisherRef и provider authority; target schema/form config и roadmap согласованы с ECL-01–08; `EventCreateBlock` закреплён presentation-only. Runtime этим обновлением не меняется. |
 | 0.1 | 2026-07-18 | Первоначальная полная логика Event create flow. |
 | 0.2 | 2026-07-18 | Повторный аудит по ADR/VISION/runtime: добавлена карта текущего и целевого состояния; MVP booking ограничен `externalBookingUrl`; разделены lifecycle/moderation/visibility; уточнены online access, Publisher permissions, recurrence ids/deadlines, Money model, analytics taxonomy, feature flags и acceptance criteria. |
 | 0.3 | 2026-07-18 | Финальный двойной аудит: deadline перенесён в Registration; capacity согласована с Accepted time-fit contract; добавлены availability invariants, безопасный seed/duplicate, deterministic recurrence/DST, persisted publish attempt и crash recovery; устранены дубли полей semantic contract. |

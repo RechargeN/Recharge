@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/application/scenario_object_intake_providers.dart';
+import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../application/controllers/scenario_intake_selection_controller.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
+import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../widgets/scenario_intake_selection_tray.dart';
 
 class DiscoverResultsPage extends ConsumerStatefulWidget {
   const DiscoverResultsPage({
@@ -28,6 +33,7 @@ class DiscoverResultsPage extends ConsumerStatefulWidget {
 
 class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
   late final TextEditingController _searchController;
+  late final ScenarioIntakeSelectionController _scenarioSelectionController;
   final GlobalKey _conditionsKey = GlobalKey();
 
   static final List<_CategoryOption> _categories = <_CategoryOption>[
@@ -47,6 +53,12 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
   @override
   void initState() {
     super.initState();
+    _scenarioSelectionController = ScenarioIntakeSelectionController(
+      supportIssue: ref
+          .read(discoverScenarioIntakeAdapterProvider)
+          .supportIssue,
+      maxSelection: ref.read(scenarioObjectIntakeConfigProvider).maxBatchSize,
+    )..addListener(_onScenarioSelectionChanged);
     final DiscoverQuery query = ref
         .read(discoverFeedControllerProvider)
         .state
@@ -69,6 +81,9 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
 
   @override
   void dispose() {
+    _scenarioSelectionController
+      ..removeListener(_onScenarioSelectionChanged)
+      ..dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -79,25 +94,63 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       discoverFeedControllerProvider,
     );
     final DiscoverFeedState state = controller.state;
+    final ScenarioIntakeSelectionState selection =
+        _scenarioSelectionController.state;
     final DiscoverQuery query = state.appliedQuery;
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.search,
+    );
+    final multiSelectEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.search,
+      multiSelect: true,
+    );
     _syncSearchController(query.queryText);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Recharge'),
+        title: Text(
+          selection.active ? 'Select for Scenario' : 'Search Recharge',
+        ),
         actions: <Widget>[
-          IconButton(
-            tooltip: 'Map',
-            onPressed: () => context.go(_mapLocationForQuery(query)),
-            icon: const Icon(Icons.map_outlined),
-          ),
-          IconButton(
-            tooltip: 'Create from current search',
-            onPressed: () => context.go(_createLocationForQuery(query)),
-            icon: const Icon(Icons.add_circle_outline),
-          ),
+          if (selection.active)
+            IconButton(
+              tooltip: 'Cancel Scenario selection',
+              onPressed: _scenarioSelectionController.cancel,
+              icon: const Icon(Icons.close),
+            )
+          else ...<Widget>[
+            if (multiSelectEnabled)
+              IconButton(
+                tooltip: 'Select for Scenario',
+                onPressed: _startScenarioSelection,
+                icon: const Icon(Icons.playlist_add_outlined),
+              ),
+            IconButton(
+              tooltip: 'Map',
+              onPressed: () => context.go(_mapLocationForQuery(query)),
+              icon: const Icon(Icons.map_outlined),
+            ),
+            IconButton(
+              tooltip: 'Create from current search',
+              onPressed: () => context.go(_createLocationForQuery(query)),
+              icon: const Icon(Icons.add_circle_outline),
+            ),
+          ],
         ],
       ),
+      bottomNavigationBar: selection.active
+          ? ScenarioIntakeSelectionTray(
+              selectedItems: selection.selectedItems,
+              message: selection.message,
+              onRemove: _scenarioSelectionController.remove,
+              onCancel: _scenarioSelectionController.cancel,
+              onReview: selection.canReview
+                  ? () => _openScenarioIntake(selection.selectedItems)
+                  : null,
+            )
+          : null,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: <Widget>[
@@ -260,6 +313,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           const SizedBox(height: 18),
           _ResultsList(
             state: state,
+            selection: selection,
             onRetry: controller.loadFeed,
             onReset: () {
               _searchController.clear();
@@ -268,6 +322,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onOpenDetails: (String itemId) {
               context.push('${RouteNames.discoverDetails}/$itemId');
             },
+            onToggleScenarioSelection: _scenarioSelectionController.toggle,
+            onAddToScenario: intakeEnabled
+                ? (item) => _openScenarioIntake(<DiscoverItemEntity>[item])
+                : null,
           ),
         ],
       ),
@@ -292,6 +350,53 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOut,
       alignment: 0.12,
+    );
+  }
+
+  void _onScenarioSelectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _startScenarioSelection() async {
+    if (!await _requireScenarioAuth()) return;
+    _scenarioSelectionController.start();
+  }
+
+  Future<bool> _requireScenarioAuth() async {
+    return requireScenarioObjectIntakeAuth(
+      context: context,
+      ref: ref,
+      sourceScreen: 'discover_results',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.search,
+    );
+  }
+
+  Future<void> _openScenarioIntake(List<DiscoverItemEntity> items) async {
+    final result = await launchScenarioObjectIntake(
+      context: context,
+      ref: ref,
+      items: items,
+      sourceSurface: ScenarioObjectIntakeSurface.search,
+      sourceScreen: 'discover_results',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.search,
+    );
+    if (result == null || !mounted) return;
+    _scenarioSelectionController.cancel();
+    if (result.openScenario) {
+      final uri = Uri(
+        path: '${RouteNames.createObject}/scenario',
+        queryParameters: <String, String>{
+          'scenarioDraftId': result.targetDraftId,
+        },
+      );
+      await context.push(uri.toString());
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${result.itemCount} to Scenario')),
     );
   }
 
@@ -1169,15 +1274,21 @@ class _AppliedSummary extends StatelessWidget {
 class _ResultsList extends StatelessWidget {
   const _ResultsList({
     required this.state,
+    required this.selection,
     required this.onRetry,
     required this.onReset,
     required this.onOpenDetails,
+    required this.onToggleScenarioSelection,
+    required this.onAddToScenario,
   });
 
   final DiscoverFeedState state;
+  final ScenarioIntakeSelectionState selection;
   final Future<void> Function() onRetry;
   final Future<void> Function() onReset;
   final ValueChanged<String> onOpenDetails;
+  final ValueChanged<DiscoverItemEntity> onToggleScenarioSelection;
+  final ValueChanged<DiscoverItemEntity>? onAddToScenario;
 
   @override
   Widget build(BuildContext context) {
@@ -1211,7 +1322,14 @@ class _ResultsList extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: _SearchResultCard(
                     item: item,
-                    onTap: () => onOpenDetails(item.id),
+                    selectionMode: selection.active,
+                    selectionOrder: selection.orderOf(item.id),
+                    onTap: selection.active
+                        ? () => onToggleScenarioSelection(item)
+                        : () => onOpenDetails(item.id),
+                    onAddToScenario: onAddToScenario == null
+                        ? null
+                        : () => onAddToScenario!(item),
                   ),
                 ),
               )
@@ -1222,10 +1340,19 @@ class _ResultsList extends StatelessWidget {
 }
 
 class _SearchResultCard extends StatelessWidget {
-  const _SearchResultCard({required this.item, required this.onTap});
+  const _SearchResultCard({
+    required this.item,
+    required this.selectionMode,
+    required this.selectionOrder,
+    required this.onTap,
+    required this.onAddToScenario,
+  });
 
   final DiscoverItemEntity item;
+  final bool selectionMode;
+  final int? selectionOrder;
   final VoidCallback onTap;
+  final VoidCallback? onAddToScenario;
 
   @override
   Widget build(BuildContext context) {
@@ -1248,15 +1375,30 @@ class _SearchResultCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
+                  color: selectionOrder == null
+                      ? colorScheme.primaryContainer
+                      : colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  item.isPublishedRoute
-                      ? Icons.route_outlined
-                      : Icons.local_activity_outlined,
-                  color: colorScheme.primary,
-                ),
+                alignment: Alignment.center,
+                child: selectionOrder == null
+                    ? Icon(
+                        item.isPublishedRoute
+                            ? Icons.route_outlined
+                            : selectionMode
+                            ? Icons.add
+                            : Icons.local_activity_outlined,
+                        color: colorScheme.primary,
+                      )
+                    : Center(
+                        child: Text(
+                          '$selectionOrder',
+                          style: TextStyle(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1286,13 +1428,29 @@ class _SearchResultCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                trailingLabel,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w800,
+              if (selectionMode)
+                Checkbox(
+                  value: selectionOrder != null,
+                  onChanged: (_) => onTap(),
+                )
+              else
+                Column(
+                  children: <Widget>[
+                    Text(
+                      trailingLabel,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (onAddToScenario != null)
+                      IconButton(
+                        tooltip: 'Add ${item.title} to Scenario',
+                        onPressed: onAddToScenario,
+                        icon: const Icon(Icons.playlist_add_outlined),
+                      ),
+                  ],
                 ),
-              ),
             ],
           ),
         ),

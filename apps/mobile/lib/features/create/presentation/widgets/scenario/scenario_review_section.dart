@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../application/controllers/create_controller.dart';
+import '../../../application/scenario_transit_disclosure.dart';
 import '../../../application/state/create_state.dart';
 import '../../../domain/entities/scenario_draft_data.dart';
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_validation_issue.dart';
 import '../../../domain/usecases/evaluate_scenario_readiness_usecase.dart';
+import 'scenario_transit_disclosure_card.dart';
 
 class ScenarioReviewSection extends StatelessWidget {
   const ScenarioReviewSection({
@@ -24,15 +26,10 @@ class ScenarioReviewSection extends StatelessWidget {
       return const Text('Scenario data is unavailable.');
     }
     final ScenarioDraftData data = state.draft.scenarioData!;
-    final List<ScenarioPlannedTransportSourceDraft> plannedTransport = data
-        .items
+    final List<ScenarioItemDraft> plannedTransport = data.items
         .where(
           (ScenarioItemDraft item) =>
               item.source is ScenarioPlannedTransportSourceDraft,
-        )
-        .map(
-          (ScenarioItemDraft item) =>
-              item.source as ScenarioPlannedTransportSourceDraft,
         )
         .toList(growable: false);
     final blocking = readiness.validation.issues
@@ -119,15 +116,13 @@ class ScenarioReviewSection extends StatelessWidget {
               ),
             ),
           ),
-          ...plannedTransport.map(
-            (ScenarioPlannedTransportSourceDraft source) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.directions_transit_outlined),
-              title: Text(source.publicServiceLabel ?? 'Planned transport'),
-              subtitle: Text(_scheduleSummary(source.scheduleSnapshot)),
-            ),
-          ),
+          ...plannedTransport.map((ScenarioItemDraft item) {
+            final source = item.source as ScenarioPlannedTransportSourceDraft;
+            return ScenarioTransitDisclosureCard(
+              key: ValueKey<String>('scenario-transit-review-${item.id}'),
+              disclosure: const BuildScenarioTransitDisclosure()(source),
+            );
+          }),
         ],
         if (blocking.isNotEmpty)
           ...blocking
@@ -158,20 +153,6 @@ class ScenarioReviewSection extends StatelessWidget {
       ],
     );
   }
-}
-
-String _scheduleSummary(ScenarioScheduleSnapshotDraft? snapshot) {
-  if (snapshot == null) {
-    return 'Schedule details not entered';
-  }
-  final String departure = snapshot.plannedDeparture?.hhmm ?? 'time unknown';
-  final String freshness = switch (snapshot.freshness) {
-    ScenarioScheduleFreshness.current => 'current plan snapshot',
-    ScenarioScheduleFreshness.stale => 'stale — recheck required',
-    ScenarioScheduleFreshness.unknown => 'freshness unknown',
-    ScenarioScheduleFreshness.notApplicable => 'not applicable',
-  };
-  return '$departure · $freshness';
 }
 
 class _Metric extends StatelessWidget {

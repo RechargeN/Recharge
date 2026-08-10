@@ -70,6 +70,9 @@ class GtfsScheduleIndex {
     final options = <ScenarioTransitServiceOption>[];
 
     for (final trip in _trips.values) {
+      if (query.exactTripId != null && trip.id != query.exactTripId) {
+        continue;
+      }
       final calendar = _calendars[trip.serviceId];
       if (calendar == null || !calendar.runsOn(query.serviceDate)) {
         continue;
@@ -107,6 +110,7 @@ class GtfsScheduleIndex {
           options.add(
             ScenarioTransitServiceOption(
               providerCode: manifest.providerCode,
+              serviceDate: query.serviceDate,
               tripId: trip.id,
               routeId: route.id,
               serviceId: trip.serviceId,

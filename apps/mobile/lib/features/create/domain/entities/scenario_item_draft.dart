@@ -145,6 +145,14 @@ class ScenarioScheduleSnapshotDraft {
   const ScenarioScheduleSnapshotDraft({
     required this.freshness,
     this.providerCode,
+    this.providerDisplayName,
+    this.licenseName,
+    this.tripId,
+    this.routeId,
+    this.serviceId,
+    this.originStopId,
+    this.destinationStopId,
+    this.feedSha256,
     this.serviceDate,
     this.feedUpdatedAtUtc,
     this.retrievedAtUtc,
@@ -154,11 +162,24 @@ class ScenarioScheduleSnapshotDraft {
     this.destinationLabel,
     this.plannedDeparture,
     this.plannedArrival,
+    this.departureSecondsFromServiceDay,
+    this.arrivalSecondsFromServiceDay,
+    this.departureDayOffset,
+    this.arrivalDayOffset,
     this.sourceUrl,
+    this.unknownFields = const <String, Object?>{},
   });
 
   final ScenarioScheduleFreshness freshness;
   final String? providerCode;
+  final String? providerDisplayName;
+  final String? licenseName;
+  final String? tripId;
+  final String? routeId;
+  final String? serviceId;
+  final String? originStopId;
+  final String? destinationStopId;
+  final String? feedSha256;
   final ScenarioLocalDateDraft? serviceDate;
   final DateTime? feedUpdatedAtUtc;
   final DateTime? retrievedAtUtc;
@@ -168,7 +189,12 @@ class ScenarioScheduleSnapshotDraft {
   final String? destinationLabel;
   final ScenarioLocalTimeDraft? plannedDeparture;
   final ScenarioLocalTimeDraft? plannedArrival;
+  final int? departureSecondsFromServiceDay;
+  final int? arrivalSecondsFromServiceDay;
+  final int? departureDayOffset;
+  final int? arrivalDayOffset;
   final String? sourceUrl;
+  final Map<String, Object?> unknownFields;
 }
 
 class ScenarioPlannedTransportSourceDraft extends ScenarioItemSourceDraft {

@@ -5,14 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../app/application/planning_conversion_providers.dart';
+import '../../../../app/application/active_create_publisher_provider.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_providers.dart';
+import '../../application/scenario_transit_picker_config.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/create_availability.dart';
 import '../widgets/event_create_block.dart';
 import '../widgets/find_people_create_block.dart';
@@ -53,6 +56,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
   String? _loadKey;
   String? _appliedSeedKey;
   String? _appliedScenarioHandoffId;
+  String? _appliedScenarioDraftId;
   CreateObjectType? _appliedInitialObjectType;
 
   @override
@@ -76,6 +80,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider).state;
     final user = authState.user;
+    final PublisherRef activePublisher =
+        ref.watch(activeCreatePublisherProvider) ??
+        PublisherRef(type: PublisherType.user, id: user?.id ?? '');
     final CreateController controller = ref.watch(createControllerProvider);
     final CreateState state = controller.state;
 
@@ -88,8 +95,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
       capabilities: user.capabilities,
+      publisherRef: activePublisher,
     );
     _syncControllers(state);
+    _scheduleExactScenarioDraft(controller, state, user.id);
     _scheduleScenarioHandoff(controller, state);
     _scheduleSeedApply(controller, state);
     _scheduleInitialObjectTypeApply(controller, state);
@@ -214,7 +223,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             ] else if (state.draft.objectType ==
                 CreateObjectType.scenario) ...<Widget>[
               const SizedBox(height: 12),
-              ScenarioCreateBlock(controller: controller, state: state),
+              ScenarioCreateBlock(
+                controller: controller,
+                state: state,
+                transitPickerController:
+                    scenarioTransitPickerConfig.pickerEnabled
+                    ? ref.watch(scenarioTransitPickerControllerProvider)
+                    : null,
+              ),
             ] else ...<Widget>[
               const SizedBox(height: 12),
               _CreateTaxonomyPicker(
@@ -461,8 +477,11 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     required String organizerEmail,
     required String organizerName,
     required List<String> capabilities,
+    required PublisherRef publisherRef,
   }) {
-    final String key = '$userId:$organizerEmail:${capabilities.join(',')}';
+    final String key =
+        '$userId:$organizerEmail:${capabilities.join(',')}:'
+        '${publisherRef.type.wireName}:${publisherRef.id}';
     if (_loadKey == key) return;
     _loadKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -474,6 +493,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             organizerEmail: organizerEmail,
             organizerName: organizerName,
             capabilities: capabilities,
+            activePublisherRef: publisherRef,
           );
     });
   }
@@ -554,6 +574,21 @@ class _CreatePageState extends ConsumerState<CreatePage> {
           .take(scenarioId);
       if (converted == null) return;
       controller.applyConvertedScenario(converted);
+    });
+  }
+
+  void _scheduleExactScenarioDraft(
+    CreateController controller,
+    CreateState state,
+    String userId,
+  ) {
+    if (!state.isLoaded) return;
+    final draftId = widget.seedParameters['scenarioDraftId']?.trim() ?? '';
+    if (draftId.isEmpty || _appliedScenarioDraftId == draftId) return;
+    _appliedScenarioDraftId = draftId;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await controller.openScenarioDraftById(userId: userId, draftId: draftId);
     });
   }
 

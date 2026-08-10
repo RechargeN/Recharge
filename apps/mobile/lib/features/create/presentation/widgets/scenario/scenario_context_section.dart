@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../application/controllers/create_controller.dart';
 import '../../../application/state/create_state.dart';
-import '../../../domain/entities/scenario_budget_draft.dart';
 import '../../../domain/entities/scenario_draft_data.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
 
@@ -177,31 +176,6 @@ class _TransportPreferences extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScenarioConstraintsDraft constraints = data.constraints;
-    final ScenarioVehicleProfileDraft vehicle = constraints.vehicleProfile;
-
-    void updateVehicle({
-      bool? includeFuelInBudget,
-      String? label,
-      double? litresPer100Km,
-      ScenarioMoneyDraft? fuelPricePerLitre,
-      int? passengerSeats,
-    }) {
-      controller.updateScenarioTransport(
-        primaryTravelMode: constraints.primaryTravelMode,
-        allowedTravelModes: constraints.allowedTravelModes,
-        vehicleProfile: ScenarioVehicleProfileDraft(
-          enabled: constraints.allowedTravelModes.contains(
-            ScenarioTravelMode.car,
-          ),
-          includeFuelInBudget:
-              includeFuelInBudget ?? vehicle.includeFuelInBudget,
-          label: label ?? vehicle.label,
-          litresPer100Km: litresPer100Km ?? vehicle.litresPer100Km,
-          fuelPricePerLitre: fuelPricePerLitre ?? vehicle.fuelPricePerLitre,
-          passengerSeats: passengerSeats ?? vehicle.passengerSeats,
-        ),
-      );
-    }
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -281,83 +255,6 @@ class _TransportPreferences extends StatelessWidget {
                   })
                   .toList(growable: false),
             ),
-            if (constraints.allowedTravelModes.contains(
-              ScenarioTravelMode.car,
-            )) ...<Widget>[
-              const Divider(height: 24),
-              Text(
-                'Own car profile',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      key: ValueKey<String>(
-                        'vehicle-consumption-${vehicle.litresPer100Km}',
-                      ),
-                      initialValue: vehicle.litresPer100Km?.toString(),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Consumption',
-                        suffixText: 'L/100 km',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (String value) {
-                        final double? parsed = _number(value);
-                        if (parsed != null && parsed >= 0) {
-                          updateVehicle(litresPer100Km: parsed);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      key: ValueKey<String>(
-                        'vehicle-fuel-${vehicle.fuelPricePerLitre?.minorUnits}',
-                      ),
-                      initialValue: vehicle.fuelPricePerLitre == null
-                          ? null
-                          : (vehicle.fuelPricePerLitre!.minorUnits / 100)
-                                .toStringAsFixed(2),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Fuel price',
-                        suffixText: '${data.displayCurrencyCode}/L',
-                        border: const OutlineInputBorder(),
-                      ),
-                      onChanged: (String value) {
-                        final double? parsed = _number(value);
-                        if (parsed != null && parsed >= 0) {
-                          updateVehicle(
-                            fuelPricePerLitre: ScenarioMoneyDraft(
-                              minorUnits: (parsed * 100).round(),
-                              currencyCode: data.displayCurrencyCode,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Include estimated fuel in budget'),
-                subtitle: const Text(
-                  'Only calculated when distance, consumption and fuel price are known.',
-                ),
-                value: vehicle.includeFuelInBudget,
-                onChanged: (bool value) =>
-                    updateVehicle(includeFuelInBudget: value),
-              ),
-            ],
           ],
         ),
       ),
@@ -373,11 +270,6 @@ String _travelModeLabel(ScenarioTravelMode mode) => switch (mode) {
   ScenarioTravelMode.transit => 'Public transport',
   ScenarioTravelMode.other => 'Other',
 };
-
-double? _number(String value) {
-  final String normalized = value.trim().replaceAll(',', '.');
-  return normalized.isEmpty ? null : double.tryParse(normalized);
-}
 
 String _label(String value) => value
     .replaceAllMapped(

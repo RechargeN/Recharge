@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../app/application/scenario_object_intake_providers.dart';
+import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/geo/geometry_encoding.dart';
@@ -18,15 +22,19 @@ import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../../scenarios/application/state/scenario_builder_state.dart';
 import '../../../scenarios/domain/entities/scenario_draft_entity.dart';
 import '../../application/controllers/discover_feed_controller.dart';
+import '../../application/controllers/scenario_intake_selection_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
+import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../widgets/scenario_intake_marker_icon_factory.dart';
+import '../widgets/scenario_intake_selection_tray.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -42,7 +50,11 @@ class DiscoverMapPage extends ConsumerStatefulWidget {
 
 class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   late final TextEditingController _searchController;
+  late final ScenarioIntakeSelectionController _scenarioSelectionController;
   GoogleMapController? _mapController;
+  Map<int, BitmapDescriptor> _scenarioSelectionMarkerIcons =
+      const <int, BitmapDescriptor>{};
+  bool _selectionMarkerIconsLoading = false;
   int? _selectedScenarioStopIndex;
   bool _scenarioRouteActive = false;
   bool _scenarioRouteComplete = false;
@@ -64,6 +76,12 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   @override
   void initState() {
     super.initState();
+    _scenarioSelectionController = ScenarioIntakeSelectionController(
+      supportIssue: ref
+          .read(discoverScenarioIntakeAdapterProvider)
+          .supportIssue,
+      maxSelection: ref.read(scenarioObjectIntakeConfigProvider).maxBatchSize,
+    )..addListener(_onScenarioSelectionChanged);
     final DiscoverFeedState state = ref
         .read(discoverFeedControllerProvider)
         .state;
@@ -87,6 +105,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
   @override
   void dispose() {
+    _scenarioSelectionController
+      ..removeListener(_onScenarioSelectionChanged)
+      ..dispose();
     _searchController.dispose();
     _mapController?.dispose();
     super.dispose();
@@ -98,11 +119,22 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       discoverFeedControllerProvider,
     );
     final DiscoverFeedState state = controller.state;
+    final ScenarioIntakeSelectionState selection =
+        _scenarioSelectionController.state;
     final authController = ref.watch(authControllerProvider);
     final FavoritesController favoritesController = ref.watch(
       favoritesControllerProvider,
     );
     final bool isAuthenticated = authController.state.isAuthenticated;
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.map,
+    );
+    final multiSelectEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.map,
+      multiSelect: true,
+    );
     final _ScenarioMapRoute? scenarioRoute = _ScenarioMapRoute.fromSeed(
       widget.seedParameters,
     );
@@ -121,8 +153,20 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Map'),
+        title: Text(selection.active ? 'Select for Scenario' : 'Map'),
         actions: <Widget>[
+          if (scenarioRoute == null && multiSelectEnabled)
+            IconButton(
+              tooltip: selection.active
+                  ? 'Cancel Scenario selection'
+                  : 'Select for Scenario',
+              onPressed: selection.active
+                  ? _scenarioSelectionController.cancel
+                  : () => _startScenarioSelection(authController),
+              icon: Icon(
+                selection.active ? Icons.close : Icons.playlist_add_outlined,
+              ),
+            ),
           IconButton(
             tooltip: 'Search',
             onPressed: () => context.go(RouteNames.search),
@@ -130,6 +174,17 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
           ),
         ],
       ),
+      bottomNavigationBar: selection.active
+          ? ScenarioIntakeSelectionTray(
+              selectedItems: selection.selectedItems,
+              message: selection.message,
+              onRemove: _scenarioSelectionController.remove,
+              onCancel: _scenarioSelectionController.cancel,
+              onReview: selection.canReview
+                  ? () => _openScenarioIntake(selection.selectedItems)
+                  : null,
+            )
+          : null,
       body: Stack(
         children: <Widget>[
           GoogleMap(
@@ -155,7 +210,19 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               scenarioRoute: scenarioRoute,
               selectedScenarioStopIndex: selectedScenarioStopIndex,
               selectedItemId: state.selectedItemId,
-              onTap: controller.selectItem,
+              scenarioSelection: selection,
+              scenarioSelectionIcons: _scenarioSelectionMarkerIcons,
+              onTap: selection.active
+                  ? (itemId) {
+                      if (itemId == null) return;
+                      final matches = state.items.where(
+                        (item) => item.id == itemId,
+                      );
+                      if (matches.length == 1) {
+                        _scenarioSelectionController.toggle(matches.single);
+                      }
+                    }
+                  : controller.selectItem,
               onScenarioStopTap: scenarioRoute == null
                   ? null
                   : (int index) => _selectScenarioStop(scenarioRoute, index),
@@ -297,10 +364,14 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
             onApplyArea: controller.applySearchArea,
             onRetry: controller.loadFeed,
             onSelectItem: (DiscoverItemEntity item) {
-              controller.selectItem(item.id);
-              _mapController?.animateCamera(
-                CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
-              );
+              if (selection.active) {
+                _scenarioSelectionController.toggle(item);
+              } else {
+                controller.selectItem(item.id);
+                _mapController?.animateCamera(
+                  CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
+                );
+              }
             },
             onOpenDetails: (DiscoverItemEntity item) {
               context.push('${RouteNames.discoverDetails}/${item.id}');
@@ -311,6 +382,11 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               authController: authController,
               favoritesController: favoritesController,
             ),
+            scenarioSelection: selection,
+            onToggleScenarioSelection: _scenarioSelectionController.toggle,
+            onAddToScenario: intakeEnabled
+                ? (item) => _openScenarioIntake(<DiscoverItemEntity>[item])
+                : null,
             scenarioRoute: scenarioRoute,
             selectedScenarioStopIndex: selectedScenarioStopIndex,
             routeActive: scenarioRoute != null && _scenarioRouteActive,
@@ -360,6 +436,79 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     );
   }
 
+  void _onScenarioSelectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _loadScenarioSelectionMarkerIcons() async {
+    try {
+      final icons = await buildScenarioIntakeMarkerIcons(
+        color: RechargeTheme.travelGreenDark,
+        devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+      );
+      if (!mounted) return;
+      setState(() => _scenarioSelectionMarkerIcons = icons);
+    } on Object {
+      // Default orange markers and numbered tray remain a safe fallback.
+    }
+  }
+
+  Future<void> _startScenarioSelection(AuthController authController) async {
+    if (!await _requireScenarioAuth(authController)) return;
+    _scenarioSelectionController.start();
+    if (!_selectionMarkerIconsLoading &&
+        _scenarioSelectionMarkerIcons.isEmpty) {
+      _selectionMarkerIconsLoading = true;
+      unawaited(_loadScenarioSelectionMarkerIcons());
+    }
+  }
+
+  Future<bool> _requireScenarioAuth(AuthController authController) async {
+    if (authController.state.user != null) return true;
+    authController.trackAuthGateViewed(
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+    );
+    await showAuthGateSheet(
+      context,
+      action: ProtectedAction.create,
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.discoverMap,
+      allowGuest: false,
+      onContinueAsGuest: () {},
+    );
+    return false;
+  }
+
+  Future<void> _openScenarioIntake(List<DiscoverItemEntity> items) async {
+    final result = await launchScenarioObjectIntake(
+      context: context,
+      ref: ref,
+      items: items,
+      sourceSurface: ScenarioObjectIntakeSurface.map,
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.discoverMap,
+    );
+    if (result == null || !mounted) return;
+    _scenarioSelectionController.cancel();
+    if (result.openScenario) {
+      final uri = Uri(
+        path: '${RouteNames.createObject}/scenario',
+        queryParameters: <String, String>{
+          'scenarioDraftId': result.targetDraftId,
+        },
+      );
+      await context.push(uri.toString());
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${result.itemCount} to Scenario')),
+    );
+  }
+
   Future<void> _applySearchSeed(
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
@@ -405,6 +554,8 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     required _ScenarioMapRoute? scenarioRoute,
     required int? selectedScenarioStopIndex,
     required String? selectedItemId,
+    required ScenarioIntakeSelectionState scenarioSelection,
+    required Map<int, BitmapDescriptor> scenarioSelectionIcons,
     required ValueChanged<String?> onTap,
     required ValueChanged<int>? onScenarioStopTap,
   }) {
@@ -414,19 +565,26 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     final Set<Marker> markers = items.map((DiscoverItemEntity item) {
       final bool selected = item.id == selectedItemId;
+      final int? scenarioOrder = scenarioSelection.orderOf(item.id);
       return Marker(
         markerId: MarkerId(item.id),
         position: LatLng(item.latitude, item.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          selected
-              ? BitmapDescriptor.hueYellow
-              : item.isPublishedRoute
-              ? BitmapDescriptor.hueAzure
-              : BitmapDescriptor.hueGreen,
-        ),
+        icon:
+            scenarioSelectionIcons[scenarioOrder] ??
+            BitmapDescriptor.defaultMarkerWithHue(
+              scenarioOrder != null
+                  ? BitmapDescriptor.hueOrange
+                  : selected
+                  ? BitmapDescriptor.hueYellow
+                  : item.isPublishedRoute
+                  ? BitmapDescriptor.hueAzure
+                  : BitmapDescriptor.hueGreen,
+            ),
         onTap: () => onTap(item.id),
         infoWindow: InfoWindow(
-          title: item.title,
+          title: scenarioOrder == null
+              ? item.title
+              : '$scenarioOrder. ${item.title}',
           snippet: item.isPublishedRoute
               ? _publishedRouteMapMetric(item)
               : item.isFree
@@ -481,10 +639,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 '${publishedRoute.versionId}',
               ),
               points: points
-                  .map(
-                    (point) =>
-                        LatLng(point.latitude, point.longitude),
-                  )
+                  .map((point) => LatLng(point.latitude, point.longitude))
                   .toList(growable: false),
               color: RechargeTheme.travelGreen,
               width: 6,
@@ -1481,6 +1636,9 @@ class _MapResultsSheet extends StatelessWidget {
     required this.onSelectItem,
     required this.onOpenDetails,
     required this.onToggleSave,
+    required this.scenarioSelection,
+    required this.onToggleScenarioSelection,
+    required this.onAddToScenario,
     required this.scenarioRoute,
     required this.selectedScenarioStopIndex,
     required this.routeActive,
@@ -1505,6 +1663,9 @@ class _MapResultsSheet extends StatelessWidget {
   final ValueChanged<DiscoverItemEntity> onSelectItem;
   final ValueChanged<DiscoverItemEntity> onOpenDetails;
   final ValueChanged<DiscoverItemEntity> onToggleSave;
+  final ScenarioIntakeSelectionState scenarioSelection;
+  final ValueChanged<DiscoverItemEntity> onToggleScenarioSelection;
+  final ValueChanged<DiscoverItemEntity>? onAddToScenario;
   final _ScenarioMapRoute? scenarioRoute;
   final int? selectedScenarioStopIndex;
   final bool routeActive;
@@ -1617,9 +1778,18 @@ class _MapResultsSheet extends StatelessWidget {
                 if (state.selectedItem != null) ...<Widget>[
                   _SelectedMapItem(
                     item: state.selectedItem!,
+                    selectionMode: scenarioSelection.active,
+                    selectionOrder: scenarioSelection.orderOf(
+                      state.selectedItem!.id,
+                    ),
                     isSaved: favoritesController.isFavorite(
                       state.selectedItem!.id,
                     ),
+                    onToggleScenarioSelection: () =>
+                        onToggleScenarioSelection(state.selectedItem!),
+                    onAddToScenario: onAddToScenario == null
+                        ? null
+                        : () => onAddToScenario!(state.selectedItem!),
                     onToggleSave: () => onToggleSave(state.selectedItem!),
                     onOpenDetails: () => onOpenDetails(state.selectedItem!),
                   ),
@@ -1633,6 +1803,8 @@ class _MapResultsSheet extends StatelessWidget {
                         child: _MapListItem(
                           item: item,
                           selected: item.id == state.selectedItemId,
+                          selectionMode: scenarioSelection.active,
+                          selectionOrder: scenarioSelection.orderOf(item.id),
                           isSaved: favoritesController.isFavorite(item.id),
                           onTap: () => onSelectItem(item),
                           onOpenDetails: () => onOpenDetails(item),
@@ -2280,13 +2452,21 @@ class _RadiusControl extends StatelessWidget {
 class _SelectedMapItem extends StatelessWidget {
   const _SelectedMapItem({
     required this.item,
+    required this.selectionMode,
+    required this.selectionOrder,
     required this.isSaved,
+    required this.onToggleScenarioSelection,
+    required this.onAddToScenario,
     required this.onToggleSave,
     required this.onOpenDetails,
   });
 
   final DiscoverItemEntity item;
+  final bool selectionMode;
+  final int? selectionOrder;
   final bool isSaved;
+  final VoidCallback onToggleScenarioSelection;
+  final VoidCallback? onAddToScenario;
   final VoidCallback onToggleSave;
   final VoidCallback onOpenDetails;
 
@@ -2335,6 +2515,25 @@ class _SelectedMapItem extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            if (selectionMode || onAddToScenario != null)
+              OutlinedButton.icon(
+                onPressed: selectionMode
+                    ? onToggleScenarioSelection
+                    : onAddToScenario,
+                icon: Icon(
+                  selectionMode && selectionOrder != null
+                      ? Icons.remove_circle_outline
+                      : Icons.playlist_add_outlined,
+                ),
+                label: Text(
+                  selectionMode
+                      ? selectionOrder == null
+                            ? 'Select for Scenario'
+                            : 'Remove #$selectionOrder from selection'
+                      : 'Add to Scenario',
+                ),
+              ),
           ],
         ),
       ),
@@ -2346,6 +2545,8 @@ class _MapListItem extends StatelessWidget {
   const _MapListItem({
     required this.item,
     required this.selected,
+    required this.selectionMode,
+    required this.selectionOrder,
     required this.isSaved,
     required this.onTap,
     required this.onOpenDetails,
@@ -2354,6 +2555,8 @@ class _MapListItem extends StatelessWidget {
 
   final DiscoverItemEntity item;
   final bool selected;
+  final bool selectionMode;
+  final int? selectionOrder;
   final bool isSaved;
   final VoidCallback onTap;
   final VoidCallback onOpenDetails;
@@ -2378,12 +2581,19 @@ class _MapListItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: RechargeTheme.travelLine),
                 ),
-                child: Icon(
-                  item.isPublishedRoute
-                      ? Icons.route_outlined
-                      : Icons.place_outlined,
-                  color: RechargeTheme.travelGreenDark,
-                ),
+                alignment: Alignment.center,
+                child: selectionOrder == null
+                    ? Icon(
+                        item.isPublishedRoute
+                            ? Icons.route_outlined
+                            : Icons.place_outlined,
+                        color: RechargeTheme.travelGreenDark,
+                      )
+                    : CircleAvatar(
+                        backgroundColor: RechargeTheme.travelGreenDark,
+                        foregroundColor: Colors.white,
+                        child: Text('$selectionOrder'),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -2407,16 +2617,23 @@ class _MapListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: 'Save',
-                onPressed: onToggleSave,
-                icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
-              ),
-              IconButton(
-                tooltip: 'Open details',
-                onPressed: onOpenDetails,
-                icon: const Icon(Icons.chevron_right_rounded),
-              ),
+              if (selectionMode)
+                Checkbox(
+                  value: selectionOrder != null,
+                  onChanged: (_) => onTap(),
+                )
+              else ...<Widget>[
+                IconButton(
+                  tooltip: 'Save',
+                  onPressed: onToggleSave,
+                  icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
+                ),
+                IconButton(
+                  tooltip: 'Open details',
+                  onPressed: onOpenDetails,
+                  icon: const Icon(Icons.chevron_right_rounded),
+                ),
+              ],
             ],
           ),
         ),

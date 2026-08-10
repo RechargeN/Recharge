@@ -2,6 +2,9 @@ import '../../../../core/id/id_generator.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/create_template_entity.dart';
 import '../entities/event_draft_data.dart';
+import '../entities/event_admission.dart';
+import '../entities/event_inventory.dart';
+import '../entities/publisher_ref.dart';
 
 class ManageCreateTemplateUseCase {
   const ManageCreateTemplateUseCase(this._idGenerator);
@@ -81,6 +84,7 @@ class ManageCreateTemplateUseCase {
     required String country,
     required String city,
     required String currency,
+    PublisherRef? publisherRef,
     DateTime? nowUtc,
   }) {
     _verifyOwnership(template, userId);
@@ -100,9 +104,24 @@ class ManageCreateTemplateUseCase {
     final CreateDraftEntity source = template.snapshot;
     final EventDraftData freshEvent = fresh.eventData!;
     final EventDraftData sourceEvent = source.eventData!;
+    final EventAdmissionDraft? admission = _templateAdmission(
+      sourceEvent.admission,
+      renewIds: true,
+    );
+    final EventInventoryConfiguration? inventory = _templateInventory(
+      sourceEvent.inventory,
+      renewIds: true,
+    );
     final EventDraftData event = sourceEvent.copyWith(
-      schemaVersion: EventDraftData.currentSchemaVersion,
+      schemaVersion: admission != null || inventory != null
+          ? EventDraftData.accessSchemaVersion
+          : EventDraftData.classificationSchemaVersion,
       revision: 0,
+      publisherRef: publisherRef ?? freshEvent.publisherRef,
+      admission: admission,
+      clearAdmission: admission == null,
+      inventory: inventory,
+      clearInventory: inventory == null,
       timezoneId: timezone,
       localStartDate: freshEvent.localStartDate,
       occurrences: const [],
@@ -120,6 +139,7 @@ class ManageCreateTemplateUseCase {
       mediaMetadata: const EventMediaMetadataDraft(),
       acceptedWarningCodes: const {},
       unknownFields: const {},
+      unsupportedFieldIds: const {},
     );
     final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
     return fresh.copyWith(
@@ -196,8 +216,24 @@ class ManageCreateTemplateUseCase {
   }
 
   CreateDraftEntity _sanitizeSnapshot(CreateDraftEntity draft) {
+    final EventAdmissionDraft? admission = _templateAdmission(
+      draft.eventData!.admission,
+      renewIds: true,
+    );
+    final EventInventoryConfiguration? inventory = _templateInventory(
+      draft.eventData!.inventory,
+      renewIds: true,
+    );
     final EventDraftData event = draft.eventData!.copyWith(
+      schemaVersion: admission != null || inventory != null
+          ? EventDraftData.accessSchemaVersion
+          : EventDraftData.classificationSchemaVersion,
       revision: 0,
+      clearPublisherRef: true,
+      admission: admission,
+      clearAdmission: admission == null,
+      inventory: inventory,
+      clearInventory: inventory == null,
       occurrences: const [],
       occurrenceOverrides: const {},
       clearPublicOnlineUrl: true,
@@ -205,6 +241,7 @@ class ManageCreateTemplateUseCase {
       mediaMetadata: const EventMediaMetadataDraft(),
       acceptedWarningCodes: const {},
       unknownFields: const {},
+      unsupportedFieldIds: const {},
     );
     return draft.copyWith(
       eventData: event,
@@ -228,6 +265,57 @@ class ManageCreateTemplateUseCase {
       sectionData: _reusableSectionData(draft.sectionData),
     );
   }
+
+  EventAdmissionDraft? _templateAdmission(
+    EventAdmissionDraft? value, {
+    required bool renewIds,
+  }) {
+    if (value == null) return null;
+    return value.copyWith(
+      eligibilityRules: value.eligibilityRules
+          .map(
+            (rule) => EligibilityRule(
+              id: renewIds ? _newLocalId() : rule.id,
+              kind: rule.kind,
+              publicExplanation: rule.publicExplanation,
+            ),
+          )
+          .toList(growable: false),
+      waitlistPolicy: value.waitlistPolicy?.copyWith(
+        enabled: false,
+        clearOfferTtlMinutes: true,
+        clearPaymentDeadlineMinutes: true,
+      ),
+    );
+  }
+
+  EventInventoryConfiguration? _templateInventory(
+    EventInventoryConfiguration? value, {
+    required bool renewIds,
+  }) {
+    if (value == null) return null;
+    return EventInventoryConfiguration(
+      authority: InventoryAuthority.none,
+      primaryShape: value.primaryShape,
+      additionalShapes: <InventoryShape>{...value.additionalShapes},
+      pools: value.pools
+          .map(
+            (pool) => EventInventoryPoolDraft(
+              id: renewIds ? _newLocalId() : pool.id,
+              label: pool.label,
+              shape: pool.shape,
+              channel: pool.channel,
+              capacityMode: pool.capacityMode,
+              capacity: pool.capacity,
+              roleIds: List<String>.from(pool.roleIds),
+              zoneRef: pool.zoneRef,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  String _newLocalId() => 'loc_${_idGenerator.generate()}';
 
   Map<String, Object?> _reusableSectionData(Map<String, Object?> source) {
     final Object? criteria = source['criteria'];

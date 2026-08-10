@@ -8,6 +8,9 @@ import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
 import 'scenario_create_coordinator.dart';
 import 'scenario_generation_coordinator.dart';
+import 'scenario_transit_schedule_coordinator.dart';
+import 'scenario_transit_picker_config.dart';
+import 'scenario_transit_telemetry.dart';
 import 'place_enrichment_coordinator.dart';
 import 'route_create_runtime.dart';
 import 'route_publication_coordinator.dart';
@@ -22,6 +25,7 @@ import 'controllers/create_controller.dart';
 import 'controllers/route_gpx_transfer_controller.dart';
 import 'controllers/route_recording_controller.dart';
 import 'controllers/route_quality_admin_controller.dart';
+import 'controllers/scenario_transit_picker_controller.dart';
 import '../domain/repositories/route_gpx_file_picker_port.dart';
 import '../domain/repositories/route_gpx_repository.dart';
 import '../domain/usecases/export_route_gpx_usecase.dart';
@@ -33,11 +37,14 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
 ) {
   return CreateController(
     loadCreateDraftUseCase: sl<LoadCreateDraftUseCase>(),
+    loadCreateDraftByIdUseCase: sl(),
     saveCreateDraftUseCase: sl<SaveCreateDraftUseCase>(),
     publishCreateDraftUseCase: sl<PublishCreateDraftUseCase>(),
     analyticsService: sl<AnalyticsService>(),
     runtimeDefaults: sl<CreateRuntimeDefaults>(),
     eventCreateCoordinator: sl<EventCreateCoordinator>(),
+    eventAdmissionConfigurationEnabled: true,
+    eventMockAvailabilityEnabled: true,
     createTemplateRepository: sl<CreateTemplateRepository>(),
     manageCreateTemplate: sl<ManageCreateTemplateUseCase>(),
     routePublicationCoordinator: sl<RoutePublicationCoordinator>(),
@@ -76,4 +83,18 @@ final routeRecordingControllerProvider =
 final routeQualityAdminControllerProvider =
     ChangeNotifierProvider.autoDispose<RouteQualityAdminController>((ref) {
       return RouteQualityAdminController(sl<RouteQualityWorkflowCoordinator>());
+    });
+
+final scenarioTransitPickerControllerProvider =
+    Provider.autoDispose<ScenarioTransitPickerController?>((ref) {
+      if (!scenarioTransitPickerConfig.pickerEnabled ||
+          !sl.isRegistered<ScenarioTransitScheduleCoordinator>()) {
+        return null;
+      }
+      final controller = ScenarioTransitPickerController(
+        coordinator: sl<ScenarioTransitScheduleCoordinator>(),
+        telemetry: ScenarioTransitTelemetry(sl<AnalyticsService>()),
+      );
+      ref.onDispose(controller.dispose);
+      return controller;
     });

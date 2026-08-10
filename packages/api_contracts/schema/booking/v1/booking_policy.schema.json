@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_policy.schema.json",
+  "title": "Recharge Booking concurrency policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "policyVersion": { "type": "integer", "const": 1 },
+    "maxConcurrentFiniteAllocations": { "type": "integer", "const": 5 },
+    "countingRule": { "type": "string", "const": "onePerBookingOrActiveHold" },
+    "unlimitedBookingCounts": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "maxConcurrentFiniteAllocations",
+    "countingRule",
+    "unlimitedBookingCounts"
+  ]
+}

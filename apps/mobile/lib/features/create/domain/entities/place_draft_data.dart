@@ -1,8 +1,10 @@
+import 'publisher_ref.dart';
+
+export 'publisher_ref.dart';
+
 enum PlaceKind { managedVenue, publicSpace, pointOfInterest }
 
 enum PlaceRelationship { owner, staff, visitor, curator }
-
-enum PublisherType { user, page }
 
 enum PlaceLocationAccuracy { rooftop, interpolated, approximate, manual }
 
@@ -15,15 +17,6 @@ enum PlaceEntryType { free, paid, mixed, notApplicable, unknown }
 enum OpeningExceptionKind { closedAllDay, customHours }
 
 enum PlaceSourceType { creatorSubmission, ownerSubmission, staffSubmission }
-
-class PublisherRef {
-  const PublisherRef({required this.type, required this.id});
-
-  final PublisherType type;
-  final String id;
-
-  bool get isValid => id.trim().isNotEmpty;
-}
 
 class PlaceLocationDraft {
   const PlaceLocationDraft({

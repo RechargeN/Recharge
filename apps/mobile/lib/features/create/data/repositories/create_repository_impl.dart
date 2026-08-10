@@ -3,13 +3,18 @@ import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/route_draft_save_result.dart';
+import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/repositories/create_repository.dart';
+import '../../domain/repositories/create_draft_collection_repository.dart';
 import '../../domain/repositories/route_draft_persistence_repository.dart';
 import '../datasources/create_local_datasource.dart';
 import '../models/create_draft_model.dart';
 
 class CreateRepositoryImpl
-    implements CreateRepository, RouteDraftPersistenceRepository {
+    implements
+        CreateRepository,
+        RouteDraftPersistenceRepository,
+        CreateDraftCollectionRepository {
   CreateRepositoryImpl({
     required CreateLocalDataSource localDataSource,
     required IdGenerator idGenerator,
@@ -36,6 +41,100 @@ class CreateRepositoryImpl
     return _localDataSource.saveDraft(
       userId,
       CreateDraftModel.fromEntity(stored),
+    );
+  }
+
+  @override
+  Future<List<CreateDraftSummary>> listDrafts({
+    required String ownerId,
+    required CreateObjectType type,
+  }) async {
+    final models = await _localDataSource.listCollectionDrafts(
+      ownerId: ownerId,
+      objectType: type.taxonomyId,
+    );
+    return models
+        .map((model) {
+          final entity = model.toEntity();
+          final scenario = entity.scenarioData;
+          final dates = scenario?.days
+              .map((day) => day.localDate)
+              .whereType<ScenarioLocalDateDraft>()
+              .toList(growable: false);
+          return CreateDraftSummary(
+            id: model.id,
+            objectType: createObjectTypeFromId(model.objectType),
+            title: model.title,
+            updatedAtUtc: DateTime.parse(model.updatedAtUtcIso).toUtc(),
+            scenarioRevision: model.scenarioRevision,
+            scenarioFormat: scenario?.format,
+            scenarioDateMode: scenario?.dateMode,
+            scenarioDayCount: scenario?.days.length,
+            scenarioActiveItemCount: scenario?.activeScheduledItems.length,
+            scenarioFirstDate: dates == null || dates.isEmpty
+                ? null
+                : dates.first,
+            scenarioLastDate: dates == null || dates.isEmpty
+                ? null
+                : dates.last,
+          );
+        })
+        .toList(growable: false);
+  }
+
+  @override
+  Future<CreateDraftEntity?> loadDraftById({
+    required String ownerId,
+    required String draftId,
+  }) async {
+    final model = await _localDataSource.loadCollectionDraft(
+      ownerId: ownerId,
+      draftId: draftId,
+    );
+    return model?.toEntity();
+  }
+
+  @override
+  Future<CreateDraftCollectionSaveResult> saveIfRevision({
+    required String ownerId,
+    required CreateDraftEntity draft,
+    required int expectedScenarioRevision,
+    required String idempotencyKey,
+  }) async {
+    final scenario = draft.scenarioData;
+    if (draft.objectType != CreateObjectType.scenario ||
+        scenario == null ||
+        draft.organizerId != ownerId ||
+        scenario.revision != expectedScenarioRevision + 1) {
+      return const CreateDraftCollectionSaveResult(
+        status: CreateDraftCollectionSaveStatus.invalidDraft,
+      );
+    }
+    final stored = draft.copyWith(
+      draftStatus: DraftStatus.draft,
+      publishStatus: PublishStatus.draft,
+      clearPublishedAtUtc: true,
+    );
+    final result = await _localDataSource.saveCollectionDraftIfCurrent(
+      ownerId: ownerId,
+      model: CreateDraftModel.fromEntity(stored),
+      expectedScenarioRevision: expectedScenarioRevision,
+      idempotencyKey: idempotencyKey,
+    );
+    return CreateDraftCollectionSaveResult(
+      status: switch (result.status) {
+        CreateCollectionConditionalSaveStatus.saved =>
+          CreateDraftCollectionSaveStatus.saved,
+        CreateCollectionConditionalSaveStatus.replayed =>
+          CreateDraftCollectionSaveStatus.replayed,
+        CreateCollectionConditionalSaveStatus.conflict =>
+          CreateDraftCollectionSaveStatus.conflict,
+        CreateCollectionConditionalSaveStatus.invalidDraft =>
+          CreateDraftCollectionSaveStatus.invalidDraft,
+        CreateCollectionConditionalSaveStatus.invalidExistingData =>
+          CreateDraftCollectionSaveStatus.invalidExistingData,
+      },
+      persistedRevision: result.persistedRevision,
     );
   }
 
@@ -123,6 +222,12 @@ class CreateRepositoryImpl
         .toList(growable: false);
     final EventDraftData? sourceEventData = draft.eventData;
     final EventDraftData? publishedEventData = sourceEventData?.copyWith(
+      admission: sourceEventData.admission?.replaceLocalIds(
+        _idGenerator.generate,
+      ),
+      inventory: sourceEventData.inventory?.replaceLocalIds(
+        _idGenerator.generate,
+      ),
       occurrences: sourceEventData.occurrences
           .map(
             (EventOccurrenceDraft occurrence) => occurrence.copyWith(

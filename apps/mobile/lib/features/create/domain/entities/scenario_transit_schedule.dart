@@ -2,6 +2,74 @@ enum ScenarioTransitMode { bus, train, tram, trolleybus, other }
 
 enum ScenarioTransitFreshness { current, stale, unknown, unavailable }
 
+enum ScenarioTransitCacheStatus {
+  current,
+  stale,
+  unknown,
+  missing,
+  corrupt,
+  failed,
+}
+
+enum ScenarioTransitScheduleFailureCode {
+  unknownProvider,
+  networkDisabled,
+  offline,
+  downloadFailed,
+  invalidFeed,
+  cacheReadFailed,
+  cacheWriteFailed,
+}
+
+class ScenarioTransitScheduleException implements Exception {
+  const ScenarioTransitScheduleException({
+    required this.code,
+    this.providerCode,
+  });
+
+  final ScenarioTransitScheduleFailureCode code;
+  final String? providerCode;
+
+  @override
+  String toString() =>
+      'ScenarioTransitScheduleException(${code.name}, provider: '
+      '${providerCode ?? 'unknown'})';
+}
+
+class ScenarioTransitProviderDescriptor {
+  const ScenarioTransitProviderDescriptor({
+    required this.code,
+    required this.displayName,
+    required this.licenseName,
+    required this.sourceUrl,
+    required this.refreshEnabled,
+  });
+
+  final String code;
+  final String displayName;
+  final String licenseName;
+  final String sourceUrl;
+  final bool refreshEnabled;
+}
+
+class ScenarioTransitCacheInspection {
+  const ScenarioTransitCacheInspection({
+    required this.providerCode,
+    required this.status,
+    this.manifest,
+  });
+
+  final String providerCode;
+  final ScenarioTransitCacheStatus status;
+  final ScenarioTransitFeedManifest? manifest;
+
+  bool get isUsable =>
+      manifest != null &&
+      (status == ScenarioTransitCacheStatus.current ||
+          status == ScenarioTransitCacheStatus.stale ||
+          status == ScenarioTransitCacheStatus.unknown);
+}
+
 class ScenarioTransitLocalDate implements Comparable<ScenarioTransitLocalDate> {
   const ScenarioTransitLocalDate(this.year, this.month, this.day);
 
@@ -129,6 +197,7 @@ class ScenarioTransitStop {
 class ScenarioTransitServiceOption {
   const ScenarioTransitServiceOption({
     required this.providerCode,
+    required this.serviceDate,
     required this.tripId,
     required this.routeId,
     required this.serviceId,
@@ -144,6 +213,7 @@ class ScenarioTransitServiceOption {
   });
 
   final String providerCode;
+  final ScenarioTransitLocalDate serviceDate;
   final String tripId;
   final String routeId;
   final String serviceId;
@@ -157,8 +227,11 @@ class ScenarioTransitServiceOption {
   final String? routeLabel;
   final String? headsign;
 
+  int get durationSeconds =>
+      arrival.secondsFromServiceDay - departure.secondsFromServiceDay;
+
   int get durationMinutes =>
-      (arrival.secondsFromServiceDay - departure.secondsFromServiceDay) ~/ 60;
+      durationSeconds <= 0 ? 0 : (durationSeconds + 59) ~/ 60;
 }
 
 class ScenarioTransitSearchQuery {
@@ -169,6 +242,7 @@ class ScenarioTransitSearchQuery {
     this.departAfter = const ScenarioTransitTime(0),
     this.providerCodes = const <String>{},
     this.allowedModes = const <ScenarioTransitMode>{},
+    this.exactTripId,
     this.limit = 20,
   });
 
@@ -178,6 +252,7 @@ class ScenarioTransitSearchQuery {
   final ScenarioTransitTime departAfter;
   final Set<String> providerCodes;
   final Set<ScenarioTransitMode> allowedModes;
+  final String? exactTripId;
   final int limit;
 }
 

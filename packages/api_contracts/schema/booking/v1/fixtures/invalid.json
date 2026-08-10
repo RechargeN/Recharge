@@ -1,0 +1,94 @@
+{
+  "cases": [
+    {
+      "target": "booking",
+      "reason": "unsupported state fails closed",
+      "value": {
+        "schemaVersion": 1,
+        "id": "booking-1",
+        "revision": 0,
+        "userId": "user-1",
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "approved",
+        "participantUnits": 1,
+        "reconfirmationState": "notRequired",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "updatedAt": "2026-08-09T08:00:00.000Z"
+      }
+    },
+    {
+      "target": "booking",
+      "reason": "pool and channel are paired",
+      "value": {
+        "schemaVersion": 1,
+        "id": "booking-2",
+        "revision": 0,
+        "userId": "user-1",
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "inventoryPoolId": "pool-1",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "confirmed",
+        "participantUnits": 1,
+        "reconfirmationState": "notRequired",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "updatedAt": "2026-08-09T08:00:00.000Z"
+      }
+    },
+    {
+      "target": "hold",
+      "reason": "resolved hold needs resolvedAt",
+      "value": {
+        "schemaVersion": 1,
+        "id": "hold-1",
+        "bookingId": "booking-1",
+        "userId": "user-1",
+        "occurrenceId": "occurrence-1",
+        "inventoryPoolId": "pool-1",
+        "units": 1,
+        "kind": "waitlistOffer",
+        "state": "expired",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "expiresAt": "2026-08-09T09:00:00.000Z",
+        "revision": 1
+      }
+    },
+    {
+      "target": "policy",
+      "reason": "policy v1 cap is fixed",
+      "value": {
+        "schemaVersion": 1,
+        "policyVersion": 1,
+        "maxConcurrentFiniteAllocations": 6,
+        "countingRule": "onePerBookingOrActiveHold",
+        "unlimitedBookingCounts": false
+      }
+    },
+    {
+      "target": "command",
+      "reason": "actor authority is forbidden",
+      "value": {
+        "schemaVersion": 1,
+        "commandType": "cancelBooking",
+        "requestId": "request-1",
+        "idempotencyKey": "idempotency-1",
+        "payload": { "bookingId": "booking-1", "actorId": "admin-1" }
+      }
+    },
+    {
+      "target": "error",
+      "reason": "PII details are forbidden",
+      "value": {
+        "schemaVersion": 1,
+        "code": "forbidden",
+        "retryable": false,
+        "correlationId": "correlation-1",
+        "details": { "email": "private@example.invalid" }
+      }
+    }
+  ]
+}

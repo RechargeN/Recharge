@@ -4,6 +4,7 @@ import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/entities/event_classification.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
@@ -71,6 +72,8 @@ void main() {
       mainCategory: 'entertainment',
       subcategory: 'community_event',
     );
+    controller.selectEventArchetype(EventArchetype.socialMeetup);
+    controller.selectEventPrimaryParticipation(ParticipationMode.meetPeople);
     await tester.enterText(
       find.byKey(const Key('event-title')),
       'Riga community evening',

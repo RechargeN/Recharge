@@ -1,14 +1,27 @@
 import '../entities/create_draft_entity.dart';
 import '../entities/event_draft_data.dart';
 import '../entities/event_validation_issue.dart';
+import 'validate_event_classification_usecase.dart';
+import 'validate_event_access_configuration_usecase.dart';
 
 class ValidateEventDraftUseCase {
-  const ValidateEventDraftUseCase();
+  const ValidateEventDraftUseCase({
+    ValidateEventClassificationUseCase validateClassification =
+        const ValidateEventClassificationUseCase(),
+    ValidateEventAccessConfigurationUseCase validateAccess =
+        const ValidateEventAccessConfigurationUseCase(),
+  }) : _validateClassification = validateClassification,
+       _validateAccess = validateAccess;
+
+  final ValidateEventClassificationUseCase _validateClassification;
+  final ValidateEventAccessConfigurationUseCase _validateAccess;
 
   List<EventValidationIssue> call(
     CreateDraftEntity draft, {
     int? throughStep,
     DateTime? nowUtc,
+    bool includeClassification = true,
+    bool includeAccessConfiguration = false,
   }) {
     final EventDraftData? event = draft.eventData;
     if (draft.objectType != CreateObjectType.event || event == null) {
@@ -32,6 +45,42 @@ class ValidateEventDraftUseCase {
             message: message,
           ),
         );
+      }
+    }
+
+    if (event.schemaVersion > EventDraftData.currentSchemaVersion) {
+      blocking(
+        0,
+        'event_schema_unsupported',
+        'eventData',
+        'This Event draft was created by a newer app version.',
+      );
+    }
+    if (includeClassification && (throughStep == null || throughStep >= 0)) {
+      if (event.unsupportedFieldIds.contains('publisherRef')) {
+        blocking(
+          0,
+          'event_publisher_unsupported',
+          'publisherRef',
+          'This Event uses an unsupported publisher contract.',
+        );
+      } else if (event.publisherRef?.isValid != true) {
+        blocking(
+          0,
+          'event_publisher_required',
+          'publisherRef',
+          'Choose who publishes this Event.',
+        );
+      }
+      if (event.unsupportedFieldIds.contains('classification')) {
+        blocking(
+          0,
+          'event_classification_unsupported',
+          'eventArchetype',
+          'This Event uses a classification from a newer app version.',
+        );
+      } else {
+        issues.addAll(_validateClassification(event.classification));
       }
     }
 
@@ -147,7 +196,8 @@ class ValidateEventDraftUseCase {
     }
     if (needsOnline &&
         event.onlineAccessMode == EventOnlineAccessMode.externalRegistration &&
-        event.registrationMode != EventRegistrationMode.external) {
+        (event.admission?.registrationMode ?? event.registrationMode) !=
+            EventRegistrationMode.external) {
       blocking(
         3,
         'online_access_registration_conflict',
@@ -352,25 +402,56 @@ class ValidateEventDraftUseCase {
         'Ticket types and donations require a later capability slice.',
       );
     }
-    if (event.capacityMode == EventCapacityMode.known &&
-        (event.capacity ?? 0) <= 0) {
+    if (event.unsupportedFieldIds.contains('admission')) {
       blocking(
         3,
-        'capacity_required',
-        'capacity',
-        'Enter a positive capacity.',
+        'event_admission_unsupported',
+        'admission',
+        'This Event uses a newer or unsupported admission contract.',
       );
     }
-    if (event.capacityMode != EventCapacityMode.known &&
-        event.capacity != null) {
+    if (event.unsupportedFieldIds.contains('inventory')) {
       blocking(
         3,
-        'capacity_mode_conflict',
-        'capacity',
-        'Only known capacity stores a numeric limit.',
+        'event_inventory_unsupported',
+        'inventory',
+        'This Event uses a newer or unsupported inventory contract.',
       );
     }
-    if (event.registrationMode == EventRegistrationMode.external &&
+    if (includeAccessConfiguration && event.admission == null) {
+      blocking(
+        3,
+        'event_admission_required',
+        'admission',
+        'Confirm the Event admission configuration.',
+      );
+    }
+    if (includeAccessConfiguration && event.inventory == null) {
+      blocking(
+        3,
+        'event_inventory_authority_required',
+        'inventoryAuthority',
+        'Confirm who, if anyone, owns Event inventory.',
+      );
+    }
+    if (!event.unsupportedFieldIds.contains('admission') &&
+        !event.unsupportedFieldIds.contains('inventory') &&
+        (throughStep == null || throughStep >= 3)) {
+      issues.addAll(
+        _validateAccess(
+          admission: event.admission,
+          inventory: event.inventory,
+          capacityMode: event.capacityMode,
+          capacity: event.capacity,
+          format: event.format,
+          scheduleMode: event.scheduleMode,
+          occurrences: event.occurrences,
+          externalRegistrationUrl: event.externalBookingUrl,
+        ),
+      );
+    }
+    if (event.admission == null &&
+        event.registrationMode == EventRegistrationMode.external &&
         !_isSafeHttps(event.externalBookingUrl)) {
       blocking(
         3,
@@ -379,7 +460,8 @@ class ValidateEventDraftUseCase {
         'Use a valid HTTPS registration URL.',
       );
     }
-    if (event.registrationMode == EventRegistrationMode.internal) {
+    if (event.admission == null &&
+        event.registrationMode == EventRegistrationMode.internal) {
       blocking(
         3,
         'internal_booking_unavailable',

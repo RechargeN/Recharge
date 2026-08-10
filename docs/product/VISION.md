@@ -328,7 +328,9 @@ personal/pre-verification authoring без Submit/Publish; остальные д
    (серии на неделю/месяц) · 1–8 ч · 1–500+
    Поток создания (5 шагов): 1) Основное + Медиа · 2) Локация +
    Расписание · 3) Возможности (Amenities) · 4) Цена + Участники ·
-   5) Превью + Публикация
+   5) Превью + Публикация. Канонические classification, admission, inventory,
+   availability и provider boundaries:
+   [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md).
 2. **Recharge Activity** — лёгкая активность: прогулка, coffee walk,
    sunset walk · 30 мин–4 ч · 1–10
 3. **Route** — непрерывный маршрут по местности: трек, GPX, elevation,

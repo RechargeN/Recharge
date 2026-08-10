@@ -12,6 +12,14 @@ import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../core/id/id_generator.dart';
 import '../../core/notifications/app_notification_sink.dart';
+import '../../features/ai_assist/application/ai_assist_coordinator.dart';
+import '../../features/ai_assist/application/ai_assist_runtime_config.dart';
+import '../../features/ai_assist/data/datasources/local_ai_assist_gateway.dart';
+import '../../features/ai_assist/data/datasources/local_ai_prompt_registry.dart';
+import '../../features/ai_assist/domain/repositories/ai_assist_gateway.dart';
+import '../../features/ai_assist/domain/repositories/ai_prompt_registry.dart';
+import '../../features/ai_assist/domain/usecases/execute_ai_assist_usecase.dart';
+import '../../features/ai_assist/domain/usecases/sanitize_ai_input_usecase.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -22,6 +30,8 @@ import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
 import '../../features/create/data/datasources/create_local_datasource.dart';
 import '../../features/create/data/datasources/create_template_local_datasource.dart';
+import '../../features/create/data/datasources/event_mock_inventory_datasource.dart';
+import '../../features/create/data/datasources/scenario_object_intake_local_datasource.dart';
 import '../../features/create/data/datasources/place_duplicate_mock_datasource.dart';
 import '../../features/create/data/datasources/place_enrichment_mock_datasource.dart';
 import '../../features/create/data/datasources/catalog_object_picker_mock_datasource.dart';
@@ -49,8 +59,10 @@ import '../../features/create/data/gpx/route_gpx_importer.dart';
 import '../../features/create/data/gpx/route_gpx_exporter.dart';
 import '../../features/create/data/policies/demo_route_authoring_policy.dart';
 import '../../features/create/data/repositories/event_timezone_repository_impl.dart';
+import '../../features/create/data/repositories/event_inventory_snapshot_repository_impl.dart';
 import '../../features/create/data/repositories/create_repository_impl.dart';
 import '../../features/create/data/repositories/create_template_repository_impl.dart';
+import '../../features/create/data/repositories/scenario_object_intake_repository_impl.dart';
 import '../../features/create/data/repositories/route_publication_repository_impl.dart';
 import '../../features/create/data/repositories/route_quality_workflow_repository_impl.dart';
 import '../../features/create/data/repositories/route_gpx_repository_impl.dart';
@@ -59,7 +71,9 @@ import '../../features/create/data/repositories/scenario_transit_schedule_reposi
 import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
+import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
+import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
 import '../../features/create/domain/repositories/route_authoring_policy.dart';
 import '../../features/create/domain/repositories/route_publication_index_sink.dart';
@@ -74,12 +88,14 @@ import '../../features/create/domain/repositories/scenario_transit_schedule_repo
 import '../../features/create/application/controllers/route_recording_controller.dart';
 import '../../core/map/map_scene.dart';
 import '../../features/create/domain/repositories/event_timezone_repository.dart';
+import '../../features/create/domain/repositories/event_inventory_snapshot_repository.dart';
 import '../../features/create/domain/repositories/catalog_object_picker_port.dart';
 import '../../features/create/domain/repositories/scenario_proposal_generator_port.dart';
 import '../../features/create/domain/repositories/place_enrichment_port.dart';
 import '../../features/create/domain/usecases/generate_scenario_proposal_usecase.dart';
 import '../../features/create/domain/usecases/generate_place_enrichment_proposal_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
+import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
@@ -157,6 +173,27 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<MarketConfig>(() => sl<MarketRegistry>().active)
     ..registerLazySingleton<TravelPolicyConfig>(TravelPolicyConfig.new)
     ..registerLazySingleton<IdGenerator>(UuidV4IdGenerator.new)
+    ..registerLazySingleton<AiAssistRuntimeConfig>(AiAssistRuntimeConfig.new)
+    ..registerLazySingleton<AiPromptRegistry>(LocalAiPromptRegistry.new)
+    ..registerLazySingleton<AiAssistQuotaStore>(InMemoryAiAssistQuotaStore.new)
+    ..registerLazySingleton<AiAssistGateway>(LocalAiAssistGateway.new)
+    ..registerFactory<SanitizeAiInputUseCase>(SanitizeAiInputUseCase.new)
+    ..registerFactory<ExecuteAiAssistUseCase>(
+      () => ExecuteAiAssistUseCase(
+        promptRegistry: sl(),
+        gateway: sl(),
+        quotaStore: sl(),
+        sanitizer: sl(),
+      ),
+    )
+    ..registerFactory<AiAssistCoordinator>(
+      () => AiAssistCoordinator(
+        executeAiAssist: sl(),
+        promptRegistry: sl(),
+        idGenerator: sl(),
+        config: sl(),
+      ),
+    )
     ..registerLazySingleton<DiscoverQuery>(
       () => DiscoverQuery.defaults(
         marketCityId: sl<MarketConfig>().marketCityId,
@@ -242,11 +279,26 @@ Future<void> setupDependencies() async {
         activeCity: sl<CreateRuntimeDefaults>().city,
       ),
     )
+    ..registerLazySingleton<ScenarioObjectIntakeLocalDataSource>(
+      () => ScenarioObjectIntakeLocalDataSource(sl()),
+    )
     ..registerLazySingleton<CreateRepository>(
       () => CreateRepositoryImpl(localDataSource: sl(), idGenerator: sl()),
     )
+    ..registerLazySingleton<CreateDraftCollectionRepository>(() {
+      final repository = sl<CreateRepository>();
+      if (repository is! CreateDraftCollectionRepository) {
+        throw StateError(
+          'Create repository must support draft collection persistence.',
+        );
+      }
+      return repository as CreateDraftCollectionRepository;
+    })
     ..registerLazySingleton<CreateTemplateRepository>(
       () => CreateTemplateRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<ScenarioObjectIntakeIntentRepository>(
+      () => ScenarioObjectIntakeRepositoryImpl(sl()),
     )
     ..registerFactory<ManageCreateTemplateUseCase>(
       () => ManageCreateTemplateUseCase(sl()),
@@ -373,11 +425,20 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<EventTimezoneRepository>(
       EventTimezoneRepositoryImpl.new,
     )
+    ..registerLazySingleton<EventMockInventoryDataSource>(
+      EventMockInventoryDataSource.new,
+    )
+    ..registerLazySingleton<EventInventorySnapshotRepository>(
+      () => EventInventorySnapshotRepositoryImpl(sl()),
+    )
     ..registerFactory<MaterializeEventScheduleUseCase>(
       () => MaterializeEventScheduleUseCase(sl()),
     )
     ..registerFactory<EventCreateCoordinator>(
-      () => EventCreateCoordinator(materializeSchedule: sl()),
+      () => EventCreateCoordinator(
+        materializeSchedule: sl(),
+        inventorySnapshotRepository: sl(),
+      ),
     )
     ..registerLazySingleton<CatalogObjectPickerPort>(
       MockCatalogObjectPickerDataSource.new,
@@ -501,6 +562,9 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory<LoadCreateDraftUseCase>(
       () => LoadCreateDraftUseCase(sl()),
+    )
+    ..registerFactory<LoadCreateDraftByIdUseCase>(
+      () => LoadCreateDraftByIdUseCase(sl()),
     )
     ..registerFactory<SaveCreateDraftUseCase>(
       () => SaveCreateDraftUseCase(sl()),

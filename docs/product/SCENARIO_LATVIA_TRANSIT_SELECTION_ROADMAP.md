@@ -1,16 +1,18 @@
 # RECHARGE — Scenario Latvia Transit Selection Roadmap
 
-Версия: v1.0 (2026-07-31).
+Версия: v1.5 (2026-08-03).
 
-Статус: **Planned execution roadmap**.
+Статус: **Done implementation record**.
+
+Этапы `SCN-LV-DATA-02A–02E` и родительский milestone
+`SCN-LV-DATA-02` — **Done**.
 
 Родительский slice: **SCN-LV-DATA-02**.
 
 Документ определяет порядок реализации пользовательского выбора официального
-планового рейса и его сохранения в Scenario. Он не включает runtime-изменения
-и не означает, что перечисленные задачи уже выполнены. До начала кода
-соответствующий раздел `02A–02E` должен быть явно принят как slice spec либо
-вынесен в отдельную Approved slice spec без расширения описанных границ.
+планового рейса и его сохранения в Scenario. Статусы и evidence ниже отражают
+фактическое состояние runtime. Новое развитие за границами `02A–02E` требует
+отдельной Approved slice spec.
 
 Источники истины:
 
@@ -75,17 +77,17 @@
 ```text
 SCN-LV-DATA-01  Official static GTFS foundation                 Done
        ↓
-SCN-LV-DATA-02A Snapshot contract and persistence               Planned
+SCN-LV-DATA-02A Snapshot contract and persistence               Done
        ↓
-SCN-LV-DATA-02B Search workflow and transient application state Planned
+SCN-LV-DATA-02B Search workflow and transient application state Done
        ↓
-SCN-LV-DATA-02C Create UI: official schedule picker             Planned
+SCN-LV-DATA-02C Create UI: official schedule picker             Done
        ↓
-SCN-LV-DATA-02D Atomic Apply, Recheck and Replace                Planned
+SCN-LV-DATA-02D Atomic Apply, Recheck and Replace                Done
        ↓
-SCN-LV-DATA-02E Review, quality and release gate                Planned
+SCN-LV-DATA-02E Review, quality and release gate                Done
        ↓
-SCN-LV-DATA-02  Direct official schedule selection milestone
+SCN-LV-DATA-02  Direct official schedule selection milestone   Done
 ```
 
 Подзадачи выполняются последовательно. Родительский slice получает `Done`
@@ -106,6 +108,7 @@ Scenario schema способен без потери смысла хранить
   - provider route id и trip id;
   - origin и destination stop ids;
   - SHA-256 выбранного feed;
+  - точные departure/arrival seconds from service day;
   - departure/arrival service-day offsets;
 - добавить service date в выбранный service option;
 - создать один domain/application mapper из GTFS result в Scenario snapshot;
@@ -134,6 +137,23 @@ Scenario schema способен без потери смысла хранить
 6. Mapper не импортирует Flutter, HTTP или filesystem.
 7. Malformed provider result отклоняется типизированной ошибкой до draft
    mutation.
+
+### Фактическая проверка 2026-08-03
+
+- service option получил точную service date и duration с округлением вверх;
+- autonomous Scenario snapshot сохраняет provider display/licence,
+  trip/route/service/stop ids, feed SHA-256, точные seconds from service day и
+  day offsets;
+- pure use case валидирует provider relations, chronology, HTTPS provenance,
+  SHA-256 и unavailable freshness до создания результата;
+- mapper сохраняет новые additive optional-поля и неизвестные будущие поля;
+- прежний manual snapshot читается без migration write;
+- профильный набор — 16 tests passed;
+- полный `flutter analyze --no-pub` — no issues;
+- полный последовательный `flutter test --no-pub --concurrency=1` — 491 tests
+  passed;
+- boundary gate — passed, 59 существующих allowlist suppressions;
+- `git diff --check` — passed, только line-ending warnings.
 
 ### Rollback
 
@@ -178,6 +198,30 @@ Scenario schema способен без потери смысла хранить
 6. Empty, offline, stale cache и corrupt cache имеют разные честные состояния.
 7. Ни query, ни пользовательский текст поиска не сохраняются в Scenario draft.
 
+### Фактическая проверка 2026-08-03
+
+- добавлен отдельный immutable picker state и auto-dispose application
+  controller без зависимости от Create draft;
+- feature config независимо управляет picker, network refresh, debounce и
+  лимитами результатов;
+- provider-neutral contract перечисляет источники и возвращает typed cache
+  inspection/failure вместо data-layer исключений;
+- cache различает current/stale/unknown/missing/corrupt/failed и сохраняет
+  last-known-good backup behavior;
+- initialize читает только cache и никогда не запускает download;
+- explicit refresh, Retry, Use cached и Manual entry сохраняют ручной fallback;
+- origin/destination закреплены за одним provider; stop search debounced;
+- operation ids и fingerprints блокируют late stop/service results, dispose
+  безопасно игнорирует завершение in-flight operation;
+- service query переносит точные provider/date/depart-after и bounded limits;
+- Riverpod wiring использует отдельный auto-dispose provider;
+- профильный Scenario/GTFS набор — 34 tests passed;
+- полный `flutter analyze --no-pub` — no issues;
+- полный последовательный `flutter test --no-pub --concurrency=1` — 503 tests
+  passed;
+- boundary gate — passed, 59 существующих allowlist suppressions;
+- `git diff --check` — passed, только line-ending warnings.
+
 ### Rollback
 
 Отключение picker flag убирает официальный поиск. Data foundation и manual
@@ -220,6 +264,34 @@ Scenario продолжают работать без удаления cache и�
 5. UI не показывает fare, available seats, delay или transfer guarantee.
 6. 360×800 и text scale 1.5 не имеют overflow.
 7. Back/close не изменяют draft.
+
+### Фактическая проверка 2026-08-03
+
+- в существующий Scenario Composer добавлен выбор `Manual` / `Official`
+  без нового create flow или параллельного состояния;
+- sheet показывает provider, cache/freshness, дату, depart-after, origin,
+  destination, прямые рейсы и provenance выбранного snapshot preview;
+- initialize читает cache без автоматического network refresh; Download,
+  Update, Retry, Use cached и Manual остаются явными действиями;
+- stop search заблокирован без пригодного cache с понятным объяснением;
+- dated Scenario фиксирует заполненную дату day, но незаполненная дата не
+  создаёт тупик; template требует явного выбора даты;
+- результаты, preview и transient Composer card явно сообщают
+  `Planned schedule · not live`; fare, seats, delays и transfer guarantee не
+  обещаются;
+- выбранный service остаётся transient controller preview: close, Back и
+  `Keep selection for preview` не изменяют Scenario draft, revision, undo или
+  autosave;
+- в границах `02C` rollout flag оставался выключенным; он включён только после
+  реализации и зелёных gates атомарного Apply в `02D`; fail-closed DI и
+  прежний manual flow сохранены;
+- 3 новых widget-теста покрывают 360×800 с text scale 1.5, полный direct-trip
+  flow и stale-cache/offline fallback;
+- полный `flutter analyze --no-pub` — no issues;
+- полный последовательный `flutter test --no-pub --concurrency=1` — 506 tests
+  passed;
+- boundary gate — passed, 59 существующих allowlist suppressions;
+- `git diff --check` — passed, только line-ending warnings.
 
 ### Rollback
 
@@ -265,6 +337,41 @@ undo/redo/autosave и может быть явно перепроверен ли
 7. Исчезнувший из нового feed рейс не удаляет старый snapshot.
 8. Перезапуск приложения восстанавливает применённый snapshot без GTFS cache.
 
+### Фактическая проверка 2026-08-03
+
+- добавлена pure revision-safe mutation-команда с typed outcomes для Apply и
+  Replace; conflict, malformed selection, missing target и manual target
+  отклоняются до draft mutation;
+- Apply создаёт official planned-transport item и две Scenario location с
+  постоянными client-generated ids; отсутствие валидных stop coordinates
+  блокирует Apply fail-closed и объясняется в UI;
+- exact GTFS recheck использует provider/date/stops и обязательный `tripId`,
+  поэтому другой похожий прямой рейс никогда не подменяет сохранённый;
+- Recheck возвращает только immutable `unchanged`, `changed`, `notFound`,
+  `unavailable` или `invalidSnapshot`; старый snapshot не меняется;
+- changed outcome показывает field-level diff и требует явного подтверждения
+  `Replace saved schedule`; not-found/unavailable сохраняют старые данные;
+- Replace сохраняет item id, day/order, role, selection, locks, public note и
+  пользовательский cost; shared locations не перезаписываются;
+- Apply и Replace проходят через единственный существующий `_applyScenario`
+  command pipeline: ровно одна undo entry и один 700 ms autosave на принятую
+  mutation; Undo/Redo восстанавливают точные object snapshots;
+- cross-midnight `25:00 → 26:00` сохраняет GTFS service-day offsets и не
+  добавляет ложный второй день к локальному окну;
+- mapper round trip восстанавливает применённый autonomous snapshot и
+  постоянные locations без GTFS repository/cache;
+- rollout flag включён; provider остаётся fail-closed, если transit DI не
+  зарегистрирован, а manual flow продолжает работать;
+- новые тесты покрывают atomic add/replace, conflict, invalid coordinates,
+  author-field preservation, exact-trip recheck, changed/not-found/offline,
+  restart round trip, cross-midnight и полный widget flow
+  `Apply → Undo/Redo → Recheck → diff → Replace`;
+- полный `flutter analyze --no-pub` — no issues;
+- полный последовательный `flutter test --no-pub --concurrency=1` — 517 tests
+  passed;
+- boundary gate — passed, 59 существующих allowlist suppressions;
+- `git diff --check` — passed, только line-ending warnings.
+
 ### Rollback
 
 Отключение Apply action оставляет draft читаемым и редактируемым вручную.
@@ -301,6 +408,35 @@ undo/redo/autosave и может быть явно перепроверен ли
 8. Boundary check и `git diff --check` — green.
 9. Parent `SCN-LV-DATA-02` переводится в `Done` только с фактическими
    результатами проверок в `LAUNCH_STATUS.md`.
+
+### Фактическая проверка 2026-08-03
+
+- единый application disclosure contract используется в Composer и Review для
+  manual и official snapshots без дублирования freshness-логики в UI;
+- official card показывает provider, service date, planned times, stops,
+  licence, retrieved-at и полный SHA-256; неполная provenance честно получает
+  `unavailable`, а сохранённые данные не удаляются;
+- `current` описывает только свежесть feed на момент сохранения и явно не
+  подтверждает выполнение рейса, задержки или пунктуальность;
+- stale, unknown, unavailable и manual имеют разные статусы; fare, tickets,
+  seats, availability, delays и cancellations остаются `unknown`, никогда
+  zero/free;
+- manual flow остаётся основным fallback при отсутствующем picker DI; global
+  picker flag fail-closed и не обращается к repository;
+- ошибка personal Scenario save оставляет тот же draft и Scenario object в
+  форме, показывает failure и допускает успешный Retry после восстановления
+  repository;
+- privacy-safe `scenario_transit_action` отправляет только enum-коды `action`,
+  `result` и optional `freshness`; stop queries, ids, даты, время, notes, URL и
+  feed digest запрещены контрактом и тестом;
+- widget coverage проверяет полный Review disclosure после Apply/Replace,
+  manual Review и unavailable card на 360 dp при text scale 1.5;
+- целевой quality-набор — 30 tests passed;
+- полный `flutter analyze --no-pub` — no issues;
+- полный последовательный `flutter test --no-pub --concurrency=1` — 525 tests
+  passed;
+- boundary gate — passed, 59 существующих allowlist suppressions;
+- `git diff --check` — passed, только line-ending warnings.
 
 ### Rollback
 
@@ -348,3 +484,7 @@ roadmap.
 5. Нет платных/network-зависимостей для базового чтения сохранённого Scenario.
 6. Все repository gates зелёные.
 7. `LAUNCH_STATUS.md` отражает фактическое, а не запланированное состояние.
+
+Все семь условий выполнены 2026-08-03. Это завершает прямой выбор официального
+статического расписания, но не расширяет milestone до realtime, пересадок,
+fares/booking или public/unlisted публикации.

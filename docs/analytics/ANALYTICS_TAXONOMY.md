@@ -23,6 +23,8 @@ Examples:
 - `discover_filter_applied`
 - `create_draft_saved`
 - `create_publish_completed`
+- `scenario_transit_action`
+- `scenario_object_intake_action`
 
 ## 2) Required Common Parameters
 
@@ -61,6 +63,19 @@ Ownership is registered in `EVENT_CATALOG.md`.
 - Do not send direct PII (email, phone, full name, exact address, message content).
 - Use stable internal IDs instead of personal fields.
 - If aggregation can replace raw detail, prefer aggregation.
+- Scenario transit telemetry is enum-only: `scenario_transit_action` may carry
+  only `action`, `result`, and optional `freshness`. Never emit stop queries or
+  names, trip/item/user ids, service dates/times, personal notes, source URLs or
+  feed digests.
+- Event classification telemetry is enum/status-only. Never emit Event titles,
+  descriptions, free-text `otherReason`, category labels, organizer/publisher
+  ids or draft ids in `event_classification_*` events.
+- Scenario object intake telemetry is enum/bucket-only:
+  `scenario_object_intake_action` may carry only `source_surface`, `action`,
+  `result`, `batch_size_bucket`, optional `target_kind`, optional `placement`
+  and optional aggregate `source_status`. Never emit object/Scenario/intent/
+  user ids, titles, notes, queries, prompts, dates/times, coordinates,
+  addresses, categories, URLs, publisher names or revision numbers.
 
 ## 5) Event Lifecycle Policy
 

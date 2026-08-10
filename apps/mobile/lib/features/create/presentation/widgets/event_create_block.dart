@@ -7,6 +7,9 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/event_validation_issue.dart';
 import 'event_template_panel.dart';
+import 'event_admission_section.dart';
+import 'event_classification_section.dart';
+import 'event_inventory_section.dart';
 
 class EventCreateBlock extends StatelessWidget {
   const EventCreateBlock({
@@ -70,6 +73,18 @@ class EventCreateBlock extends StatelessWidget {
       children: <Widget>[
         taxonomySection,
         const SizedBox(height: 12),
+        EventClassificationSection(
+          state: controller.eventClassificationState,
+          onArchetypeChanged: controller.selectEventArchetype,
+          onPrimaryParticipationChanged:
+              controller.selectEventPrimaryParticipation,
+          onAdditionalParticipationChanged:
+              controller.setEventAdditionalParticipation,
+          onOtherReasonChanged: controller.updateEventArchetypeOtherReason,
+          onConfirmSuggestion: controller.confirmEventClassificationSuggestion,
+          onClear: controller.clearEventClassification,
+        ),
+        if (controller.eventClassificationEnabled) const SizedBox(height: 12),
         _TextField(
           id: 'event-title',
           label: 'Event title *',
@@ -602,49 +617,61 @@ class EventCreateBlock extends StatelessWidget {
                 ),
           ),
         ],
-        _EnumDropdown<EventCapacityMode>(
-          id: 'event-capacity-mode',
-          label: 'Capacity',
-          value: event.capacityMode,
-          values: EventCapacityMode.values,
-          onChanged: (EventCapacityMode value) =>
-              controller.updateEventCapacity(value, capacity: event.capacity),
-        ),
-        if (event.capacityMode == EventCapacityMode.known)
-          _TextField(
-            id: 'event-capacity',
-            label: 'Maximum participants',
-            value: event.capacity?.toString() ?? '',
-            error: _error('capacity'),
-            keyboardType: TextInputType.number,
-            onChanged: (String value) => controller.updateEventCapacity(
-              EventCapacityMode.known,
-              capacity: int.tryParse(value),
-            ),
+        if (controller.eventAdmissionConfigurationEnabled) ...<Widget>[
+          EventAdmissionSection(
+            state: controller.eventAdmissionState,
+            controller: controller,
+            externalRegistrationUrl: event.externalBookingUrl,
           ),
-        _EnumDropdown<EventRegistrationMode>(
-          id: 'event-registration-mode',
-          label: 'Registration',
-          value: event.registrationMode,
-          values: const <EventRegistrationMode>[
-            EventRegistrationMode.none,
-            EventRegistrationMode.external,
-          ],
-          error: _error('registrationMode'),
-          onChanged: (EventRegistrationMode value) =>
-              controller.updateEventRegistration(mode: value),
-        ),
-        if (event.registrationMode == EventRegistrationMode.external)
-          _TextField(
-            id: 'event-booking-url',
-            label: 'External HTTPS registration URL',
-            value: event.externalBookingUrl ?? '',
-            error: _error('externalBookingUrl'),
-            onChanged: (String value) => controller.updateEventRegistration(
-              mode: EventRegistrationMode.external,
-              externalBookingUrl: value,
-            ),
+          EventInventorySection(
+            state: controller.eventInventoryState,
+            controller: controller,
           ),
+        ] else ...<Widget>[
+          _EnumDropdown<EventCapacityMode>(
+            id: 'event-capacity-mode',
+            label: 'Capacity',
+            value: event.capacityMode,
+            values: EventCapacityMode.values,
+            onChanged: (EventCapacityMode value) =>
+                controller.updateEventCapacity(value, capacity: event.capacity),
+          ),
+          if (event.capacityMode == EventCapacityMode.known)
+            _TextField(
+              id: 'event-capacity',
+              label: 'Maximum participants',
+              value: event.capacity?.toString() ?? '',
+              error: _error('capacity'),
+              keyboardType: TextInputType.number,
+              onChanged: (String value) => controller.updateEventCapacity(
+                EventCapacityMode.known,
+                capacity: int.tryParse(value),
+              ),
+            ),
+          _EnumDropdown<EventRegistrationMode>(
+            id: 'event-registration-mode',
+            label: 'Registration',
+            value: event.registrationMode,
+            values: const <EventRegistrationMode>[
+              EventRegistrationMode.none,
+              EventRegistrationMode.external,
+            ],
+            error: _error('registrationMode'),
+            onChanged: (EventRegistrationMode value) =>
+                controller.updateEventRegistration(mode: value),
+          ),
+          if (event.registrationMode == EventRegistrationMode.external)
+            _TextField(
+              id: 'event-booking-url',
+              label: 'External HTTPS registration URL',
+              value: event.externalBookingUrl ?? '',
+              error: _error('externalBookingUrl'),
+              onChanged: (String value) => controller.updateEventRegistration(
+                mode: EventRegistrationMode.external,
+                externalBookingUrl: value,
+              ),
+            ),
+        ],
         _EnumDropdown<EventVisibility>(
           id: 'event-visibility',
           label: 'Visibility',
@@ -689,7 +716,11 @@ class EventCreateBlock extends StatelessWidget {
                 ? 'Free'
                 : '${event.price?.amountMinor ?? 0} minor ${event.currencyCode}',
           ),
-          Text('Registration: ${event.registrationMode.name}'),
+          Text(
+            'Admission: '
+            '${event.admission?.admissionMode?.name ?? 'legacy'} · '
+            '${event.admission?.registrationMode?.name ?? event.registrationMode.name}',
+          ),
           Text('Visibility: ${event.visibility.name}'),
           const SizedBox(height: 12),
           Text(

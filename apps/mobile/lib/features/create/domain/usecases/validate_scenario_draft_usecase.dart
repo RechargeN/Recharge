@@ -419,14 +419,11 @@ class ValidateScenarioDraftUseCase {
     }
     final ScenarioVehicleProfileDraft vehicle =
         draft.constraints.vehicleProfile;
-    if ((vehicle.litresPer100Km ?? 0) < 0 ||
-        (vehicle.passengerSeats ?? 0) < 0 ||
-        (vehicle.fuelPricePerLitre != null &&
-            !vehicle.fuelPricePerLitre!.isStructurallyValid)) {
+    if ((vehicle.passengerSeats ?? 0) < 0) {
       issue(
         code: 'vehicle_profile_invalid',
         path: 'constraints.vehicleProfile',
-        message: 'Vehicle consumption, fuel price and seats must be valid',
+        message: 'Vehicle passenger seats must be valid',
         severity: ScenarioValidationSeverity.error,
       );
     }

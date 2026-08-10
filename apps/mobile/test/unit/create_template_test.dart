@@ -5,7 +5,11 @@ import 'package:recharge/features/create/data/datasources/create_template_local_
 import 'package:recharge/features/create/data/repositories/create_template_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/create_template_entity.dart';
+import 'package:recharge/features/create/domain/entities/event_classification.dart';
+import 'package:recharge/features/create/domain/entities/event_admission.dart';
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
+import 'package:recharge/features/create/domain/entities/event_inventory.dart';
+import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/create/domain/usecases/manage_create_template_usecase.dart';
 
 void main() {
@@ -29,6 +33,14 @@ void main() {
       publishStatus: PublishStatus.pendingReview,
       publishedAtUtc: DateTime.utc(2026, 7, 20),
       eventData: _eventDraft().eventData!.copyWith(
+        publisherRef: const PublisherRef(
+          type: PublisherType.page,
+          id: 'page-source',
+        ),
+        classification: EventClassificationDraft(
+          archetype: EventArchetype.socialMeetup,
+          primaryParticipationMode: ParticipationMode.meetPeople,
+        ),
         publicOnlineUrl: 'https://live.example.test/event',
         externalBookingUrl: 'https://booking.example.test/event',
         occurrences: <EventOccurrenceDraft>[
@@ -64,14 +76,29 @@ void main() {
       country: 'LV',
       city: 'Riga',
       currency: 'EUR',
+      publisherRef: const PublisherRef(
+        type: PublisherType.page,
+        id: 'page-active',
+      ),
       nowUtc: DateTime.utc(2026, 8, 2),
     );
 
     expect(template.name, 'Friday meetup');
+    expect(template.snapshot.eventData!.publisherRef, isNull);
+    expect(
+      template.snapshot.eventData!.classification!.archetype,
+      EventArchetype.socialMeetup,
+    );
     expect(materialized.id, startsWith('loc_'));
     expect(materialized.id, isNot(source.id));
     expect(materialized.organizerId, 'user-1');
     expect(materialized.organizerEmail, 'new@example.com');
+    expect(materialized.eventData!.publisherRef!.type, PublisherType.page);
+    expect(materialized.eventData!.publisherRef!.id, 'page-active');
+    expect(
+      materialized.eventData!.classification!.archetype,
+      EventArchetype.socialMeetup,
+    );
     expect(materialized.eventData!.occurrences, isEmpty);
     expect(materialized.eventData!.occurrenceOverrides, isEmpty);
     expect(materialized.eventData!.publicOnlineUrl, isNull);
@@ -82,6 +109,84 @@ void main() {
     expect(materialized.publishStatus, PublishStatus.draft);
     expect(materialized.moderationStatus, ModerationStatus.none);
     expect(materialized.publishedAtUtc, isNull);
+  });
+
+  test('ECL-02 template strips authority and secrets and renews local ids', () {
+    final CreateDraftEntity source = _eventDraft().copyWith(
+      eventData: _eventDraft().eventData!.copyWith(
+        schemaVersion: 3,
+        admission: const EventAdmissionDraft(
+          admissionMode: AdmissionMode.application,
+          registrationMode: EventRegistrationMode.external,
+          confirmationMode: ConfirmationMode.manualApproval,
+          eligibilityRules: <EligibilityRule>[
+            EligibilityRule(
+              id: 'loc_rule_source',
+              kind: EligibilityRuleKind.membership,
+              publicExplanation: 'Members only',
+              policyRef: 'private_fixture',
+            ),
+          ],
+          waitlistPolicy: WaitlistConfiguration(
+            enabled: true,
+            promotionMode: WaitlistPromotionMode.fifoAutomatic,
+            offerTtlMinutes: 10,
+          ),
+        ),
+        inventory: const EventInventoryConfiguration(
+          authority: InventoryAuthority.externalProvider,
+          primaryShape: InventoryShape.generalCapacity,
+          pools: <EventInventoryPoolDraft>[
+            EventInventoryPoolDraft(
+              id: 'loc_pool_source',
+              label: 'Main',
+              shape: InventoryShape.generalCapacity,
+              channel: InventoryChannel.onsite,
+              capacityMode: EventCapacityMode.known,
+              capacity: 20,
+              providerPoolRef: 'provider-secret',
+            ),
+          ],
+        ),
+        externalBookingUrl: 'https://provider.example/register',
+      ),
+    );
+    final CreateTemplateEntity template = useCase.create(
+      userId: 'user-1',
+      name: 'Access template',
+      draft: source,
+    );
+    final EventDraftData stored = template.snapshot.eventData!;
+    expect(stored.admission!.eligibilityRules.single.policyRef, isNull);
+    expect(stored.admission!.waitlistPolicy!.enabled, isFalse);
+    expect(stored.inventory!.authority, InventoryAuthority.none);
+    expect(stored.inventory!.pools.single.providerPoolRef, isNull);
+    expect(stored.externalBookingUrl, isNull);
+    expect(
+      stored.admission!.eligibilityRules.single.id,
+      isNot('loc_rule_source'),
+    );
+    expect(stored.inventory!.pools.single.id, isNot('loc_pool_source'));
+
+    final CreateDraftEntity materialized = useCase.materializeEvent(
+      template: template,
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Host',
+      marketCityId: 'riga',
+      timezone: 'Europe/Riga',
+      country: 'LV',
+      city: 'Riga',
+      currency: 'EUR',
+    );
+    expect(
+      materialized.eventData!.admission!.eligibilityRules.single.id,
+      isNot(stored.admission!.eligibilityRules.single.id),
+    );
+    expect(
+      materialized.eventData!.inventory!.pools.single.id,
+      isNot(stored.inventory!.pools.single.id),
+    );
   });
 
   test(

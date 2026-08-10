@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/service_locator.dart';
 import '../../../../app/application/visit_history_providers.dart';
+import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
@@ -65,6 +66,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     );
     final bool isFavorite = favoritesController.isFavorite(widget.itemId);
     final details = ref.watch(discoverDetailsProvider(widget.itemId));
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.details,
+    );
 
     return details.when(
       data: (DiscoverItemEntity item) {
@@ -147,6 +152,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                       onScenario: () {
                         context.push(_scenarioLocationForDetails(item));
                       },
+                      onAddToScenario: intakeEnabled
+                          ? () => _onAddToScenario(item: item)
+                          : null,
                       onSearch: () {
                         context.push(_searchLocationForDetails(item));
                       },
@@ -446,6 +454,32 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         const SnackBar(content: Text('Could not update Visit history')),
       );
     }
+  }
+
+  Future<void> _onAddToScenario({required DiscoverItemEntity item}) async {
+    final result = await launchScenarioObjectIntake(
+      context: context,
+      ref: ref,
+      items: <DiscoverItemEntity>[item],
+      sourceSurface: ScenarioObjectIntakeSurface.details,
+      sourceScreen: 'discover_details',
+      sourceAction: 'add_to_scenario',
+      originRoute: '${RouteNames.discoverDetails}/${item.id}',
+    );
+    if (result == null || !mounted) return;
+    if (result.openScenario) {
+      final uri = Uri(
+        path: '${RouteNames.createObject}/scenario',
+        queryParameters: <String, String>{
+          'scenarioDraftId': result.targetDraftId,
+        },
+      );
+      await context.push(uri.toString());
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${result.itemCount} item to Scenario')),
+    );
   }
 
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
@@ -900,6 +934,7 @@ class _DetailsActionHub extends StatelessWidget {
     required this.onMap,
     required this.onRouteMap,
     required this.onScenario,
+    required this.onAddToScenario,
     required this.onSearch,
     required this.onCreateSimilar,
     required this.onCreateRoute,
@@ -914,6 +949,7 @@ class _DetailsActionHub extends StatelessWidget {
   final VoidCallback onMap;
   final VoidCallback onRouteMap;
   final VoidCallback onScenario;
+  final VoidCallback? onAddToScenario;
   final VoidCallback onSearch;
   final VoidCallback onCreateSimilar;
   final VoidCallback onCreateRoute;
@@ -1008,6 +1044,13 @@ class _DetailsActionHub extends StatelessWidget {
                   subtitle: 'Open nearby context',
                   onTap: onMap,
                 ),
+                if (onAddToScenario != null)
+                  _DetailsActionTile(
+                    icon: Icons.playlist_add,
+                    title: 'Add to Scenario',
+                    subtitle: 'Add this stop to a personal plan',
+                    onTap: onAddToScenario!,
+                  ),
                 _DetailsActionTile(
                   icon: Icons.auto_awesome,
                   title: 'Build route',
