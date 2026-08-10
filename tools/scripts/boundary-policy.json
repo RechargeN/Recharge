@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "sourceRoots": [
+    "apps/mobile/lib/features"
+  ],
+  "packageRoots": {
+    "recharge": "apps/mobile/lib"
+  },
+  "knownLayers": [
+    "domain",
+    "data",
+    "application",
+    "presentation"
+  ],
+  "excludedGeneratedRoots": [
+    "apps/mobile/lib/generated",
+    "packages/api_contracts/lib/src/generated"
+  ],
+  "excludedFileSuffixes": [
+    ".g.dart",
+    ".freezed.dart"
+  ],
+  "frameworkPackages": [
+    "flutter",
+    "flutter_riverpod",
+    "riverpod",
+    "get_it",
+    "http",
+    "shared_preferences",
+    "flutter_secure_storage",
+    "geolocator",
+    "google_maps_flutter",
+    "file_picker",
+    "archive"
+  ],
+  "blockingRules": [
+    "cross_feature_import",
+    "domain_to_non_domain_layer",
+    "application_to_data_or_presentation",
+    "data_to_application_or_presentation",
+    "presentation_to_data",
+    "domain_framework_dependency",
+    "domain_infrastructure_dependency",
+    "feature_to_app_di_or_app_presentation"
+  ],
+  "exceptionBudget": 106
+}

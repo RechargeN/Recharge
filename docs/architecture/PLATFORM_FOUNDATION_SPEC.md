@@ -556,7 +556,8 @@ candidate version и diff:
 - Search/favorites facades;
 - composition-root wiring;
 - удаление UI-to-UI imports;
-- монотонное сокращение `boundaries-allowlist.txt`.
+- монотонное сокращение structured registry
+  `tools/scripts/boundary-exceptions.json` без увеличения exception budget.
 
 Новый package создаётся только через ADR. Money и geo не помещаются внутрь
 product catalog.
