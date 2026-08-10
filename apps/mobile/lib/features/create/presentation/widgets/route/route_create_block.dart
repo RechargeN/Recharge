@@ -610,11 +610,14 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                   if (value != null) _changeDifficulty(state.route, value);
                 },
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Marked trail'),
-                value: state.route.conditions.isMarked ?? false,
-                onChanged: (bool value) => _changeMarked(state.route, value),
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Marked trail'),
+                  value: state.route.conditions.isMarked ?? false,
+                  onChanged: (bool value) => _changeMarked(state.route, value),
+                ),
               ),
             ],
           ),
@@ -805,20 +808,23 @@ class _MethodTile extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     selected: selected,
     button: true,
-    child: ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: selected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outlineVariant,
+    child: Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: selected ? const Icon(Icons.check_circle) : null,
+        onTap: onTap,
       ),
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: selected ? const Icon(Icons.check_circle) : null,
-      onTap: onTap,
     ),
   );
 }
@@ -884,19 +890,22 @@ class _GpxPreviewCard extends StatelessWidget {
               child: Column(
                 children: inspection.candidates
                     .map(
-                      (candidate) => RadioListTile<String>(
-                        contentPadding: EdgeInsets.zero,
-                        value: candidate.selectionKey,
-                        enabled: !controller.isBusy,
-                        title: Text(
-                          candidate.name?.trim().isNotEmpty == true
-                              ? candidate.name!
-                              : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
-                        ),
-                        subtitle: Text(
-                          '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
-                          '${candidate.pointCount} points · '
-                          '${candidate.segmentCount} segment(s)',
+                      (candidate) => Material(
+                        type: MaterialType.transparency,
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          value: candidate.selectionKey,
+                          enabled: !controller.isBusy,
+                          title: Text(
+                            candidate.name?.trim().isNotEmpty == true
+                                ? candidate.name!
+                                : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
+                          ),
+                          subtitle: Text(
+                            '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
+                            '${candidate.pointCount} points · '
+                            '${candidate.segmentCount} segment(s)',
+                          ),
                         ),
                       ),
                     )
@@ -904,32 +913,38 @@ class _GpxPreviewCard extends StatelessWidget {
               ),
             ),
             if (selected != null && selected.gapCount > 0)
-              CheckboxListTile(
-                key: const ValueKey<String>('route-gpx-confirm-gaps'),
-                contentPadding: EdgeInsets.zero,
-                value: controller.connectGapsConfirmed,
-                onChanged: controller.isBusy
-                    ? null
-                    : (value) =>
-                          controller.setConnectGapsConfirmed(value ?? false),
-                title: Text(
-                  'Connect ${selected.gapCount} gap(s) with straight lines',
-                ),
-                subtitle: const Text(
-                  'Review these connectors on the map before publishing.',
+              Material(
+                type: MaterialType.transparency,
+                child: CheckboxListTile(
+                  key: const ValueKey<String>('route-gpx-confirm-gaps'),
+                  contentPadding: EdgeInsets.zero,
+                  value: controller.connectGapsConfirmed,
+                  onChanged: controller.isBusy
+                      ? null
+                      : (value) =>
+                            controller.setConnectGapsConfirmed(value ?? false),
+                  title: Text(
+                    'Connect ${selected.gapCount} gap(s) with straight lines',
+                  ),
+                  subtitle: const Text(
+                    'Review these connectors on the map before publishing.',
+                  ),
                 ),
               ),
             if (inspection.waypoints.isNotEmpty)
-              SwitchListTile(
-                key: const ValueKey<String>('route-gpx-import-waypoints'),
-                contentPadding: EdgeInsets.zero,
-                value: controller.importWaypoints,
-                onChanged: controller.isBusy
-                    ? null
-                    : controller.setImportWaypoints,
-                title: Text('Import ${inspection.waypointCount} POI'),
-                subtitle: const Text(
-                  'They remain off-track until reviewed and positioned.',
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  key: const ValueKey<String>('route-gpx-import-waypoints'),
+                  contentPadding: EdgeInsets.zero,
+                  value: controller.importWaypoints,
+                  onChanged: controller.isBusy
+                      ? null
+                      : controller.setImportWaypoints,
+                  title: Text('Import ${inspection.waypointCount} POI'),
+                  subtitle: const Text(
+                    'They remain off-track until reviewed and positioned.',
+                  ),
                 ),
               ),
             const SizedBox(height: 8),
@@ -997,11 +1012,14 @@ class _PreferenceSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) => SwitchListTile(
-    contentPadding: EdgeInsets.zero,
-    title: Text(title),
-    value: value,
-    onChanged: onChanged,
+  Widget build(BuildContext context) => Material(
+    type: MaterialType.transparency,
+    child: SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(title),
+      value: value,
+      onChanged: onChanged,
+    ),
   );
 }
 
@@ -1050,27 +1068,24 @@ class _SectionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
-    child: Material(
-      type: MaterialType.transparency,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            if (subtitle != null) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(subtitle!),
-            ],
-            const SizedBox(height: 14),
-            child,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          if (subtitle != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(subtitle!),
           ],
-        ),
+          const SizedBox(height: 14),
+          child,
+        ],
       ),
     ),
   );

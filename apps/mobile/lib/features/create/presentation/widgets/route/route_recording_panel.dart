@@ -90,14 +90,17 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
   List<Widget> _controls(RouteRecordingState state) => switch (state.status) {
     RouteRecordingStatus.idle ||
     RouteRecordingStatus.failed when state.journal == null => <Widget>[
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: const Text('Continue while screen is locked'),
-        subtitle: const Text(
-          'Requires background location permission and shows a system indicator.',
+      Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Continue while screen is locked'),
+          subtitle: const Text(
+            'Requires background location permission and shows a system indicator.',
+          ),
+          value: _recordInBackground,
+          onChanged: (value) => setState(() => _recordInBackground = value),
         ),
-        value: _recordInBackground,
-        onChanged: (value) => setState(() => _recordInBackground = value),
       ),
       FilledButton.icon(
         key: const ValueKey<String>('route-gps-start'),
