@@ -84,7 +84,8 @@ class _CountingIdGenerator implements IdGenerator {
 }
 
 class _MemoryDataSource extends CreateLocalDataSource {
-  _MemoryDataSource() : super(const FlutterSecureStorage());
+  _MemoryDataSource()
+    : super(const FlutterSecureStorage(), activeCurrency: 'EUR');
 
   CreateDraftModel? saved;
 

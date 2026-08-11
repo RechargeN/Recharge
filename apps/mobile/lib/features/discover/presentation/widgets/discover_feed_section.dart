@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -157,7 +159,7 @@ class _DiscoverFeedCard extends StatelessWidget {
     final String dateLabel = '$hour:$minute';
     final String priceLabel = item.isFree
         ? 'Free'
-        : '${item.priceAmount.toStringAsFixed(0)} €';
+        : MoneyFormatter.format(item.price);
 
     return Card(
       clipBehavior: Clip.antiAlias,

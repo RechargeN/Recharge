@@ -4,20 +4,23 @@ import 'package:recharge/app/config/travel_policy_config.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
-  test('active market is Riga and query defaults are v2', () {
+  test('active market is Riga and query defaults are v3', () {
     const MarketConfig market = MarketConfig.riga;
     final DiscoverQuery query = DiscoverQuery.defaults(
       marketCityId: market.marketCityId,
       centerLat: market.centerLat,
       centerLng: market.centerLng,
+      currency: CurrencyCode.parse(market.currencyCode),
     );
 
     expect(query.marketCityId, 'riga');
     expect(query.centerLat, 56.9496);
     expect(query.centerLng, 24.1052);
-    expect(query.queryVersion, 2);
+    expect(query.queryVersion, 3);
   });
 
   test(
@@ -35,16 +38,18 @@ void main() {
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
+        defaultCurrency: CurrencyCode.eur,
       );
       final DiscoverQuery manual = DiscoverQuery.fromMap(
         <String, Object?>{...legacy, 'manual_area_selected': true},
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
+        defaultCurrency: CurrencyCode.eur,
       );
 
       expect(migrated.marketCityId, 'riga');
-      expect(migrated.queryVersion, 2);
+      expect(migrated.queryVersion, 3);
       expect(migrated.timeWindow, isNull);
       expect(manual.marketCityId, 'rezekne');
       expect(manual.centerLat, 56.5099);
@@ -65,13 +70,17 @@ void main() {
     );
   });
 
-  test('query v2 round-trip preserves time and travel contracts', () {
+  test('query v3 round-trip preserves time and travel contracts', () {
     final DiscoverQuery source =
         DiscoverQuery.defaults(
           marketCityId: 'riga',
           centerLat: 56.9496,
           centerLng: 24.1052,
         ).copyWith(
+          budgetMax: const Money(
+            minorUnits: 1234,
+            currency: CurrencyCode.eur,
+          ),
           timeWindow: TimeWindow(
             startAtUtc: DateTime.utc(2026, 7, 20, 10),
             endAtUtc: DateTime.utc(2026, 7, 20, 12),
@@ -88,14 +97,31 @@ void main() {
           ),
         );
 
+    final Map<String, Object?> encoded = source.toMap();
     final DiscoverQuery restored = DiscoverQuery.fromMap(
-      source.toMap(),
+      encoded,
       defaultMarketCityId: 'riga',
       defaultCenterLat: 56.9496,
       defaultCenterLng: 24.1052,
+      defaultCurrency: CurrencyCode.eur,
     );
 
-    expect(restored.queryVersion, 2);
+    expect(restored.queryVersion, 3);
+    expect(encoded['budget_max_minor_units'], 1234);
+    expect(encoded, isNot(contains('budget_max')));
+    expect(
+      () => DiscoverQuery.fromMap(
+        <String, Object?>{
+          ...encoded,
+          'budget_max_minor_units': 12.5,
+        },
+        defaultMarketCityId: 'riga',
+        defaultCenterLat: 56.9496,
+        defaultCenterLng: 24.1052,
+        defaultCurrency: CurrencyCode.eur,
+      ),
+      throwsFormatException,
+    );
     expect(restored.timeWindow!.mode, TimeWindowMode.flexible);
     expect(
       restored.timeWindow!.effectiveStartAtUtc,

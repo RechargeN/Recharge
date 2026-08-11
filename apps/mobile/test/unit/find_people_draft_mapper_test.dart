@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
+import 'package:recharge/features/create/data/models/find_people_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/find_people_draft_data.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('Find People typed draft survives current schema round-trip', () {
@@ -40,9 +43,10 @@ void main() {
     ).toJson();
     final CreateDraftEntity restored = CreateDraftModel.fromJson(
       json,
+      activeCurrency: 'EUR',
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.objectType, CreateObjectType.findPeople);
     expect(restored.findPeopleData, isNotNull);
     expect(
@@ -84,6 +88,7 @@ void main() {
 
     final CreateDraftEntity migrated = CreateDraftModel.fromJson(
       legacy,
+      activeCurrency: 'EUR',
     ).toEntity();
 
     expect(migrated.objectType, CreateObjectType.findPeople);
@@ -95,4 +100,44 @@ void main() {
       'social_request',
     );
   });
+
+  test(
+    'writes canonical expense amounts and rejects fractional minor units',
+    () {
+      final FindPeopleDraftData defaults = FindPeopleDraftData.defaults(
+        userId: 'user-1',
+        currencyCode: 'EUR',
+      );
+      final FindPeopleDraftData priced = defaults.copyWith(
+      costType: FindPeopleCostType.estimated,
+        expectedSpendAmount: const Money(
+          minorUnits: 2500,
+          currency: CurrencyCode.eur,
+        ),
+        plannedExpenseItems: const <FindPeopleExpenseItemDraft>[
+          FindPeopleExpenseItemDraft(
+            id: 'expense-1',
+            category: 'court',
+            amount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
+            payerNote: '',
+          ),
+        ],
+      );
+      final Map<String, Object?> encoded = FindPeopleDraftMapper.toJson(priced);
+
+      expect(encoded['expectedSpendAmountMinorUnits'], 2500);
+      expect(encoded, isNot(contains('expectedSpendAmount')));
+      expect(
+        (encoded['plannedExpenseItems']! as List<Object?>).single,
+        containsPair('amountMinorUnits', 1200),
+      );
+      expect(
+        () => FindPeopleDraftMapper.fromJson(const <String, Object?>{
+          'currencyCode': 'EUR',
+          'expectedSpendAmountMinorUnits': 12.5,
+        }, defaults: defaults),
+        throwsFormatException,
+      );
+    },
+  );
 }

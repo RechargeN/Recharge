@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/money_test_values.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -772,7 +774,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      price: testZeroEur,
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -792,7 +794,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        price: testZeroEur,
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -807,7 +809,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        price: testZeroEur,
         distanceKm: 2.1,
         isFree: true,
         relevanceScore: 0.75,
@@ -901,7 +903,7 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    price: testZeroEur,
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
@@ -917,7 +919,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: testTenEur,
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -932,7 +934,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: testTenEur,
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

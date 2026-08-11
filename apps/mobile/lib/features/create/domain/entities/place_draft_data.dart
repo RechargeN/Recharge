@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 import 'publisher_ref.dart';
 
 export 'publisher_ref.dart';
@@ -266,7 +269,7 @@ class PlaceVisitPlanningDraft {
 
 class PlacePricingDraft {
   const PlacePricingDraft({
-    required this.currencyCode,
+    required this.currency,
     this.entryType,
     this.entryPriceFrom,
     this.entryPriceTo,
@@ -277,26 +280,28 @@ class PlacePricingDraft {
   });
 
   final PlaceEntryType? entryType;
-  final double? entryPriceFrom;
-  final double? entryPriceTo;
-  final double? typicalSpendFrom;
-  final double? typicalSpendTo;
-  final String currencyCode;
+  final Money? entryPriceFrom;
+  final Money? entryPriceTo;
+  final Money? typicalSpendFrom;
+  final Money? typicalSpendTo;
+  final CurrencyCode currency;
   final String? pricingNote;
   final String? officialPricingUrl;
+
+  String get currencyCode => currency.value;
 
   PlacePricingDraft copyWith({
     PlaceEntryType? entryType,
     bool clearEntryType = false,
-    double? entryPriceFrom,
+    Money? entryPriceFrom,
     bool clearEntryPriceFrom = false,
-    double? entryPriceTo,
+    Money? entryPriceTo,
     bool clearEntryPriceTo = false,
-    double? typicalSpendFrom,
+    Money? typicalSpendFrom,
     bool clearTypicalSpendFrom = false,
-    double? typicalSpendTo,
+    Money? typicalSpendTo,
     bool clearTypicalSpendTo = false,
-    String? currencyCode,
+    CurrencyCode? currency,
     String? pricingNote,
     bool clearPricingNote = false,
     String? officialPricingUrl,
@@ -323,7 +328,7 @@ class PlacePricingDraft {
       typicalSpendTo: clearTypicalSpendTo
           ? null
           : (typicalSpendTo ?? this.typicalSpendTo),
-      currencyCode: currencyCode ?? this.currencyCode,
+      currency: currency ?? this.currency,
       pricingNote: clearPricingNote ? null : (pricingNote ?? this.pricingNote),
       officialPricingUrl: clearOfficialPricingUrl
           ? null
@@ -411,7 +416,7 @@ class PlaceDraftData {
     this.unknownFields = const <String, Object?>{},
   });
 
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
 
   final int schemaVersion;
   final int revision;
@@ -457,7 +462,7 @@ class PlaceDraftData {
       hours: const PlaceHoursDraft(),
       operationalStatus: const PlaceOperationalStatusDraft(),
       visitPlanning: const PlaceVisitPlanningDraft(),
-      pricing: PlacePricingDraft(currencyCode: currencyCode),
+      pricing: PlacePricingDraft(currency: CurrencyCode.parse(currencyCode)),
       contacts: const PlaceContactsDraft(),
       provenance: PlaceDataProvenance(
         sourceType: PlaceSourceType.creatorSubmission,

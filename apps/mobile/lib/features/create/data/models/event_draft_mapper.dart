@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+
 import '../../domain/entities/event_admission.dart';
 import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -351,7 +353,7 @@ class EventDraftMapper {
       'price': value.price == null
           ? null
           : <String, Object?>{
-              'amountMinor': value.price!.amountMinor,
+              'minorUnits': value.price!.money.minorUnits,
               'currencyCode': value.price!.currencyCode,
             },
       'capacityMode': value.capacityMode.name,
@@ -898,12 +900,15 @@ class EventDraftMapper {
 
   static EventMoneyDraft? _money(Object? raw, String fallbackCurrency) {
     final Map<String, Object?> json = _map(raw);
-    final int? amount = _int(json['amountMinor']);
-    if (amount == null) return null;
-    return EventMoneyDraft(
-      amountMinor: amount,
-      currencyCode: _string(json['currencyCode'], fallbackCurrency),
-    );
+    if (json.isEmpty) return null;
+    final Object? amount = json.containsKey('minorUnits')
+        ? json['minorUnits']
+        : json['amountMinor'];
+    final String currencyCode = _string(json['currencyCode'], fallbackCurrency);
+    if (amount is! int || CurrencyCode.tryParse(currencyCode) == null) {
+      throw const FormatException('Event money payload is invalid.');
+    }
+    return EventMoneyDraft(amountMinor: amount, currencyCode: currencyCode);
   }
 
   static T? _enumValue<T extends Enum>(List<T> values, Object? raw) {

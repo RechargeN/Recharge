@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/money_test_values.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -189,7 +191,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3, 12),
   latitude: 56.94 + index / 100,
   longitude: 24.10 + index / 100,
-  priceAmount: 0,
+  price: testZeroEur,
   distanceKm: index.toDouble(),
   isFree: true,
 );

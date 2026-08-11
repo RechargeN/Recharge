@@ -9,7 +9,7 @@ import 'package:recharge/features/create/domain/entities/scenario_item_draft.dar
 import 'package:recharge/features/create/domain/entities/scenario_logistics_draft.dart';
 
 void main() {
-  test('Scenario persists through Create draft schema v8', () {
+  test('Scenario persists through Create draft schema v9', () {
     final ScenarioCreateCoordinator coordinator = ScenarioCreateCoordinator(
       idGenerator: _SequentialIdGenerator(),
     );
@@ -47,9 +47,10 @@ void main() {
     ).toJson();
     final CreateDraftEntity restored = CreateDraftModel.fromJson(
       json,
+      activeCurrency: 'EUR',
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(json['objectType'], 'scenario');
     expect(restored.objectType, CreateObjectType.scenario);
     expect(restored.scenarioData!.items, hasLength(2));
@@ -79,11 +80,17 @@ void main() {
     };
 
     expect(
-      CreateDraftModel.fromJson(lightweight).toEntity().objectType,
+      CreateDraftModel.fromJson(
+        lightweight,
+        activeCurrency: 'EUR',
+      ).toEntity().objectType,
       CreateObjectType.quickPlan,
     );
     expect(
-      CreateDraftModel.fromJson(scenarioShaped).toEntity().objectType,
+      CreateDraftModel.fromJson(
+        scenarioShaped,
+        activeCurrency: 'EUR',
+      ).toEntity().objectType,
       CreateObjectType.scenario,
     );
   });

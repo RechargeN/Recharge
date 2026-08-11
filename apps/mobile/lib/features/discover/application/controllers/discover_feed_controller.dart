@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/geo_point.dart';
@@ -64,7 +66,7 @@ class DiscoverFeedController extends ChangeNotifier {
     String? queryText,
     int? peopleCount,
     bool clearPeopleCount = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -219,7 +221,7 @@ class DiscoverFeedController extends ChangeNotifier {
       params: <String, Object?>{'relaxation': relaxation.name},
     );
     await _applyGlobalQueryUpdate(
-      relaxed.copyWith(queryVersion: 2, appliedAtUtc: DateTime.now().toUtc()),
+      relaxed.copyWith(queryVersion: 3, appliedAtUtc: DateTime.now().toUtc()),
       clearSelectedItem: true,
     );
   }
@@ -366,7 +368,7 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         queryText: text.trim(),
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -380,7 +382,7 @@ class DiscoverFeedController extends ChangeNotifier {
       _state.appliedQuery.copyWith(
         selectedCategoryIds: categories,
         selectedSubcategoryIds: const <String>[],
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -407,15 +409,15 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         freeOnly: enabled,
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
   }
 
   Future<void> setBudgetRange({
-    required double? min,
-    required double? max,
+    required Money? min,
+    required Money? max,
   }) async {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
@@ -423,7 +425,7 @@ class DiscoverFeedController extends ChangeNotifier {
         clearBudgetMin: min == null,
         budgetMax: max,
         clearBudgetMax: max == null,
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -439,7 +441,7 @@ class DiscoverFeedController extends ChangeNotifier {
         clearDateFrom: from == null,
         dateTo: to?.toUtc(),
         clearDateTo: to == null,
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -488,7 +490,7 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> applySavedSearch(SavedSearchEntity search) async {
     final DiscoverQuery refreshed = _refreshAnytimeToday(search.query);
     final DiscoverQuery query = refreshed.copyWith(
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     await _applyGlobalQueryUpdate(query, clearSelectedItem: true);
@@ -527,7 +529,7 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> applySmartSearchHistory(SmartSearchHistoryEntity item) async {
     final DiscoverQuery refreshed = _refreshAnytimeToday(item.query);
     final DiscoverQuery query = refreshed.copyWith(
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     await _applyGlobalQueryUpdate(query, clearSelectedItem: true);
@@ -550,9 +552,9 @@ class DiscoverFeedController extends ChangeNotifier {
     List<String>? selectedCategoryIds,
     List<String>? selectedSubcategoryIds,
     bool? freeOnly,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -610,7 +612,7 @@ class DiscoverFeedController extends ChangeNotifier {
         clearTimeWindow: clearTimeWindow,
         travelContext: travelContext,
         clearTravelContext: clearTravelContext,
-        queryVersion: 2,
+        queryVersion: 3,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
       selectedItemId: selectedItemId,
@@ -622,7 +624,7 @@ class DiscoverFeedController extends ChangeNotifier {
       appliedAtUtc: DateTime.now().toUtc(),
     );
     await _applyGlobalQueryUpdate(
-      defaults.copyWith(queryVersion: 2, appliedAtUtc: DateTime.now().toUtc()),
+      defaults.copyWith(queryVersion: 3, appliedAtUtc: DateTime.now().toUtc()),
     );
   }
 
@@ -659,7 +661,7 @@ class DiscoverFeedController extends ChangeNotifier {
     final DiscoverQuery applied = _state.draftQuery.copyWith(
       searchAreaDirty: false,
       sourceScreen: 'map_search',
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc: DateTime.now().toUtc(),
     );
     _setState(
@@ -785,7 +787,9 @@ String _savedSearchIdFor(DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : MoneyFormatter.decimal(query.budgetMax!),
     query.dateFrom?.toIso8601String() ?? 'any_date',
     query.dateTo?.toIso8601String() ?? 'any_date_to',
     query.radiusMeters.round().toString(),
@@ -826,7 +830,9 @@ String _smartSearchHistoryIdFor(String prompt, DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : MoneyFormatter.decimal(query.budgetMax!),
     query.radiusMeters.round().toString(),
     query.unlimitedRadius ? 'any_area' : 'radius',
   ].join('_');
@@ -859,7 +865,8 @@ String _savedSearchSubtitleFor(DiscoverQuery query) {
     if (query.selectedCategoryIds.isNotEmpty)
       _categoryLabel(query.selectedCategoryIds.first),
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'up to ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'up to ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     if (query.dateFrom != null || query.dateTo != null) 'date set',
     query.unlimitedRadius
         ? 'any area'

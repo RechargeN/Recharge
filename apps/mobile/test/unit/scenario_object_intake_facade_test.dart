@@ -27,7 +27,7 @@ void main() {
     now = DateTime.utc(2026, 8, 3, 12);
     ids = _Ids(<String>['day-new', 'scenario-new', 'item-new', 'location-new']);
     collection = CreateRepositoryImpl(
-      localDataSource: CreateLocalDataSource(storage),
+      localDataSource: CreateLocalDataSource(storage, activeCurrency: 'EUR'),
       idGenerator: ids,
     );
     intents = ScenarioObjectIntakeRepositoryImpl(
@@ -171,13 +171,13 @@ void main() {
       );
 
       expect(outcome.status, ScenarioObjectIntakeApplyStatus.rejected);
-    expect(
-      await collection.listDrafts(
-        ownerId: 'user-1',
-        type: CreateObjectType.scenario,
-      ),
-      isEmpty,
-    );
+      expect(
+        await collection.listDrafts(
+          ownerId: 'user-1',
+          type: CreateObjectType.scenario,
+        ),
+        isEmpty,
+      );
       expect(
         (await intents.load(
           ownerId: 'user-1',

@@ -10,6 +10,7 @@ import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/published_route_discovery_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/published_route_discovery_port.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 
 void main() {
   setUp(() {
@@ -49,38 +50,39 @@ void main() {
     expect(restored.single.geometryHash, 'geometry-2');
   });
 
-  test('Route is absent from default feed and appears after explicit search',
-      () async {
-    final repository = DiscoverRepositoryImpl(
-      remoteDataSource: _EmptyRemoteDataSource(),
-      publishedRoutes: _RoutePort(_route()),
-    );
-    final defaults = DiscoverQuery.defaults(
-      marketCityId: 'riga',
-      centerLat: 56.9496,
-      centerLng: 24.1052,
-      nowUtc: DateTime.utc(2026, 7, 25),
-    );
+  test(
+    'Route is absent from default feed and appears after explicit search',
+    () async {
+      final repository = DiscoverRepositoryImpl(
+        remoteDataSource: _EmptyRemoteDataSource(),
+        publishedRoutes: _RoutePort(_route()),
+        currency: CurrencyCode.eur,
+      );
+      final defaults = DiscoverQuery.defaults(
+        marketCityId: 'riga',
+        centerLat: 56.9496,
+        centerLng: 24.1052,
+        nowUtc: DateTime.utc(2026, 7, 25),
+      );
 
-    expect(await repository.getFeed(defaults), isEmpty);
+      expect(await repository.getFeed(defaults), isEmpty);
 
-    final results = await repository.getFeed(
-      defaults.copyWith(
-        queryText: 'forest',
-        sourceScreen: 'regular_search',
-      ),
-    );
+      final results = await repository.getFeed(
+        defaults.copyWith(queryText: 'forest', sourceScreen: 'regular_search'),
+      );
 
-    expect(results, hasLength(1));
-    expect(results.single.isPublishedRoute, isTrue);
-    expect(results.single.publishedRoute?.versionId, 'version-1');
-    expect(results.single.ctaLabel, 'Open Route');
-  });
+      expect(results, hasLength(1));
+      expect(results.single.isPublishedRoute, isTrue);
+      expect(results.single.publishedRoute?.versionId, 'version-1');
+      expect(results.single.ctaLabel, 'Open Route');
+    },
+  );
 
   test('Route participates in category, radius and duration filters', () async {
     final repository = DiscoverRepositoryImpl(
       remoteDataSource: _EmptyRemoteDataSource(),
       publishedRoutes: _RoutePort(_route()),
+      currency: CurrencyCode.eur,
     );
     final query = DiscoverQuery.defaults(
       marketCityId: 'riga',
@@ -124,6 +126,7 @@ void main() {
     final repository = DiscoverRepositoryImpl(
       remoteDataSource: _EmptyRemoteDataSource(),
       publishedRoutes: _RoutePort(_route()),
+      currency: CurrencyCode.eur,
     );
 
     final details = await repository.getDetails('route-1');

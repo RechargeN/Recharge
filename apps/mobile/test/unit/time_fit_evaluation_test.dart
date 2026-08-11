@@ -7,6 +7,8 @@ import 'package:recharge/features/discover/domain/entities/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/opening_hours_rule.dart';
 import 'package:recharge/features/discover/domain/entities/time_fit_evaluation.dart';
 import 'package:recharge/features/discover/domain/entities/time_slot.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
 import 'package:recharge/features/discover/domain/repositories/travel_time_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/apply_time_window_usecase.dart';
@@ -248,7 +250,7 @@ DiscoverItemEntity _item({
   startsAtUtc: DateTime.utc(2026, 7, 20, 10),
   latitude: 56.9496,
   longitude: 24.1052,
-  priceAmount: 0,
+  price: const Money.zero(CurrencyCode.eur),
   distanceKm: 0,
   isFree: true,
   marketCityId: 'riga',

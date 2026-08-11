@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 enum ScenarioMood { calm, social, active }
 
 class ScenarioStepEntity {
@@ -8,7 +11,7 @@ class ScenarioStepEntity {
     required this.category,
     required this.durationMinutes,
     required this.distanceKm,
-    required this.priceAmount,
+    required this.price,
     required this.isFree,
     required this.latitude,
     required this.longitude,
@@ -20,7 +23,7 @@ class ScenarioStepEntity {
   final String category;
   final int durationMinutes;
   final double distanceKm;
-  final double priceAmount;
+  final Money price;
   final bool isFree;
   final double latitude;
   final double longitude;
@@ -33,7 +36,7 @@ class ScenarioStepEntity {
       category: category,
       durationMinutes: durationMinutes,
       distanceKm: distanceKm,
-      priceAmount: priceAmount,
+      price: price,
       isFree: isFree,
       latitude: latitude,
       longitude: longitude,
@@ -51,6 +54,7 @@ class ScenarioDraftEntity {
     required this.walkingOnly,
     required this.sourcePrompt,
     required this.steps,
+    this.currency = CurrencyCode.eur,
   });
 
   final String id;
@@ -61,6 +65,7 @@ class ScenarioDraftEntity {
   final bool walkingOnly;
   final String sourcePrompt;
   final List<ScenarioStepEntity> steps;
+  final CurrencyCode currency;
 
   int get totalDurationMinutes {
     return steps.fold<int>(
@@ -76,10 +81,10 @@ class ScenarioDraftEntity {
     );
   }
 
-  double get totalPriceAmount {
-    return steps.fold<double>(
-      0,
-      (double total, ScenarioStepEntity step) => total + step.priceAmount,
+  Money get totalPrice {
+    return steps.fold<Money>(
+      Money.zero(currency),
+      (Money total, ScenarioStepEntity step) => total + step.price,
     );
   }
 
@@ -92,6 +97,7 @@ class ScenarioDraftEntity {
     bool? walkingOnly,
     String? sourcePrompt,
     List<ScenarioStepEntity>? steps,
+    CurrencyCode? currency,
   }) {
     return ScenarioDraftEntity(
       id: id ?? this.id,
@@ -102,6 +108,7 @@ class ScenarioDraftEntity {
       walkingOnly: walkingOnly ?? this.walkingOnly,
       sourcePrompt: sourcePrompt ?? this.sourcePrompt,
       steps: steps ?? this.steps,
+      currency: currency ?? this.currency,
     );
   }
 }

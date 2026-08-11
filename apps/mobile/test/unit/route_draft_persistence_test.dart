@@ -16,7 +16,10 @@ void main() {
 
   setUp(() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
-    dataSource = CreateLocalDataSource(const FlutterSecureStorage());
+    dataSource = CreateLocalDataSource(
+      const FlutterSecureStorage(),
+      activeCurrency: 'EUR',
+    );
     repository = CreateRepositoryImpl(
       localDataSource: dataSource,
       idGenerator: const _FixedIdGenerator(),
@@ -113,7 +116,10 @@ void main() {
         'objectType': 'route',
       }),
     });
-    dataSource = CreateLocalDataSource(const FlutterSecureStorage());
+    dataSource = CreateLocalDataSource(
+      const FlutterSecureStorage(),
+      activeCurrency: 'EUR',
+    );
     repository = CreateRepositoryImpl(
       localDataSource: dataSource,
       idGenerator: const _FixedIdGenerator(),

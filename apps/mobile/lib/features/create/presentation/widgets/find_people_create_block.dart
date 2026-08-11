@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -896,21 +898,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           if (data.costType == FindPeopleCostType.estimated)
             _DraftTextField(
               label: 'Expected spend per person (${data.currencyCode}) *',
-              value: data.expectedSpendAmount?.toString() ?? '',
+              value: _moneyInput(data.expectedSpendAmount),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              onChanged: (String value) {
-                final double? amount = double.tryParse(
-                  value.replaceAll(',', '.'),
-                );
-                _update(
-                  data.copyWith(
-                    expectedSpendAmount: amount,
-                    clearExpectedSpendAmount: amount == null,
-                  ),
-                );
-              },
+              onChanged: widget.controller.updateFindPeopleExpectedSpend,
             ),
           _DraftTextField(
             label: 'Cost note',
@@ -977,7 +969,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(item.category),
                 subtitle: Text(
-                  '${item.amount.toStringAsFixed(2)} ${data.currencyCode} • ${item.payerNote}',
+                  '${_moneyInput(item.amount)} ${data.currencyCode} • ${item.payerNote}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -1460,23 +1452,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   void _addExpense(FindPeopleDraftData data) {
     final String? category = _text(_expenseCategory.text);
-    final double? amount = double.tryParse(
-      _expenseAmount.text.replaceAll(',', '.'),
-    );
-    if (category == null || amount == null || amount <= 0) return;
-    _update(
-      data.copyWith(
-        plannedExpenseItems: <FindPeopleExpenseItemDraft>[
-          ...data.plannedExpenseItems,
-          FindPeopleExpenseItemDraft(
-            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
-            category: category,
-            amount: amount,
-            payerNote: 'shared',
-          ),
-        ],
-      ),
-    );
+    if (category == null ||
+        !widget.controller.addFindPeopleExpense(
+          category: category,
+          amountInput: _expenseAmount.text,
+        )) {
+      return;
+    }
     _expenseCategory.clear();
     _expenseAmount.clear();
   }
@@ -1509,6 +1491,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   void _update(FindPeopleDraftData data) =>
       widget.controller.updateFindPeopleData(data);
 }
+
+String _moneyInput(Money? value) =>
+    value == null ? '' : MoneyFormatter.format(value, includeCurrency: false);
 
 class _StepHeader extends StatelessWidget {
   const _StepHeader({

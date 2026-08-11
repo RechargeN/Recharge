@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/money_test_values.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
@@ -799,7 +801,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      price: testZeroEur,
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.8,
@@ -813,7 +815,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 0,
+      price: testZeroEur,
       distanceKm: 1.8,
       isFree: true,
       relevanceScore: 0.7,
@@ -827,7 +829,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 8,
+      price: testEightEur,
       distanceKm: 1.4,
       isFree: false,
       relevanceScore: 0.75,
@@ -854,7 +856,8 @@ class _FakeDiscoverRepository implements DiscoverRepository {
             return false;
           }
           if (query.freeOnly && !item.isFree) return false;
-          if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+          if (query.budgetMax != null &&
+              item.price.compareTo(query.budgetMax!) > 0) {
             return false;
           }
           return true;

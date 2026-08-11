@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 import 'create_availability.dart';
 import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
@@ -211,7 +213,7 @@ class CreateDraftEntity {
   final bool wheelchairAccessible;
 
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
 
@@ -266,10 +268,7 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
-        publisherRef: PublisherRef(
-          type: PublisherType.user,
-          id: organizerId,
-        ),
+        publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,
       findPeopleData: null,
@@ -395,7 +394,7 @@ class CreateDraftEntity {
     bool? petFriendly,
     bool? wheelchairAccessible,
     bool? isFree,
-    double? basePrice,
+    Money? basePrice,
     bool clearBasePrice = false,
     String? currency,
     String? pricingModel,

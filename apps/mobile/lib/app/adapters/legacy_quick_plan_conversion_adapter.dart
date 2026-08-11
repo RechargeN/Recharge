@@ -1,3 +1,6 @@
+import '../../shared/primitives/money/currency_code.dart';
+import '../../shared/primitives/money/money.dart';
+
 import '../../features/create/domain/entities/quick_plan_conversion.dart';
 import '../../features/scenarios/domain/entities/scenario_draft_entity.dart';
 
@@ -11,13 +14,14 @@ class LegacyQuickPlanConversionAdapter {
     required String timezoneId,
     required String currencyCode,
   }) {
+    final CurrencyCode currency = CurrencyCode.parse(currencyCode);
     return QuickPlanConversionSnapshot(
       id: draft.id,
       revision: draft.revision,
       ownerId: ownerId,
       title: title.trim().isEmpty ? 'Quick Plan' : title.trim(),
       timezoneId: timezoneId,
-      currencyCode: currencyCode,
+      currency: currency,
       stops: draft.steps
           .map(
             (ScenarioStepEntity step) => QuickPlanConversionStopSnapshot(
@@ -29,9 +33,7 @@ class LegacyQuickPlanConversionAdapter {
               latitude: step.latitude,
               longitude: step.longitude,
               isFree: step.isFree,
-              priceMinorUnits: step.isFree
-                  ? 0
-                  : (step.priceAmount * 100).round(),
+              price: step.isFree ? Money.zero(currency) : step.price,
               available: true,
             ),
           )

@@ -49,7 +49,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Понятые параметры'), findsOneWidget);
-    expect(find.text('up to 10'), findsOneWidget);
+    expect(find.text('up to 10.00'), findsOneWidget);
     expect(find.text('today'), findsOneWidget);
     expect(find.text('5 km'), findsOneWidget);
 

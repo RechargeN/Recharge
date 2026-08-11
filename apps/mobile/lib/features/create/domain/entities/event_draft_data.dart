@@ -2,6 +2,8 @@ import 'event_admission.dart';
 import 'event_inventory.dart';
 import 'event_classification.dart';
 import 'publisher_ref.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 export 'event_admission.dart' show EventRegistrationMode;
 export 'event_inventory.dart' show EventCapacityMode;
@@ -34,8 +36,18 @@ class EventMoneyDraft {
     required this.currencyCode,
   });
 
+  factory EventMoneyDraft.fromMoney(Money money) => EventMoneyDraft(
+    amountMinor: money.minorUnits,
+    currencyCode: money.currency.value,
+  );
+
   final int amountMinor;
   final String currencyCode;
+
+  Money get money => Money(
+    minorUnits: amountMinor,
+    currency: CurrencyCode.parse(currencyCode),
+  );
 
   EventMoneyDraft copyWith({int? amountMinor, String? currencyCode}) =>
       EventMoneyDraft(

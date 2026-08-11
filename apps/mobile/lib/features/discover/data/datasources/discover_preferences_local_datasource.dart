@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
@@ -12,14 +13,17 @@ class DiscoverPreferencesLocalDataSource {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required CurrencyCode defaultCurrency,
   }) : _defaultMarketCityId = defaultMarketCityId,
        _defaultCenterLat = defaultCenterLat,
-       _defaultCenterLng = defaultCenterLng;
+       _defaultCenterLng = defaultCenterLng,
+       _defaultCurrency = defaultCurrency;
 
   final FlutterSecureStorage _secureStorage;
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
   final double _defaultCenterLng;
+  final CurrencyCode _defaultCurrency;
   static const String _lastQueryKey = 'discover.last_query';
   static const String _savedSearchesKey = 'discover.saved_searches';
   static const String _smartSearchHistoryKey = 'discover.smart_search_history';
@@ -47,6 +51,7 @@ class DiscoverPreferencesLocalDataSource {
         defaultMarketCityId: _defaultMarketCityId,
         defaultCenterLat: _defaultCenterLat,
         defaultCenterLng: _defaultCenterLng,
+        defaultCurrency: _defaultCurrency,
       );
     } on FormatException {
       return null;
@@ -71,6 +76,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              defaultCurrency: _defaultCurrency,
             ),
           )
           .toList(growable: false);
@@ -116,6 +122,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              defaultCurrency: _defaultCurrency,
             ),
           )
           .where(

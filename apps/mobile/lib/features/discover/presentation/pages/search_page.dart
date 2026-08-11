@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -17,6 +22,16 @@ abstract final class _SearchLandingStyle {
   static const Color softSurface = Color(0xFFF5F8F5);
   static const Color chipSurface = Color(0xFFEDF4EF);
   static const Color line = Color(0xFFE1E8E3);
+}
+
+Money? _moneyFromMajorUnits(double? value, CurrencyCode currency) {
+  if (value == null) return null;
+  final MoneyParseResult result = MoneyParser.parse(
+    value.toString(),
+    currency: currency,
+  );
+  if (result is MoneyParseSuccess) return result.money;
+  throw const FormatException('Budget input is invalid or ambiguous.');
 }
 
 class SearchPage extends ConsumerStatefulWidget {
@@ -163,7 +178,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               );
             },
             onForTwo: () => controller.stageSearchConditions(peopleCount: 2),
-            onLowBudget: () => controller.stageSearchConditions(budgetMax: 10),
+            onLowBudget: () => controller.stageSearchConditions(
+              budgetMax: _moneyFromMajorUnits(10, query.currency),
+            ),
             onOneHour: () =>
                 controller.stageSearchConditions(availableDurationMinutes: 60),
             onCalmEvening: () {
@@ -264,12 +281,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useSafeArea: true,
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (BuildContext context) =>
-              _QuickBudgetSheet(selected: query.budgetMax),
+          builder: (BuildContext context) => _QuickBudgetSheet(
+            selected: query.budgetMax == null
+                ? null
+                : MoneyFormatter.majorUnitsForUi(query.budgetMax!),
+          ),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
-      budgetMax: selection.budgetMax,
+      budgetMax: _moneyFromMajorUnits(selection.budgetMax, query.currency),
       clearBudgetMax: selection.budgetMax == null,
     );
   }
@@ -310,7 +330,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
-      budgetMax: selection.budgetMax,
+      budgetMax: _moneyFromMajorUnits(selection.budgetMax, query.currency),
       clearBudgetMax: selection.budgetMax == null,
       dateFrom: selection.dateWindow?.from,
       clearDateFrom: selection.dateWindow == null,
@@ -432,9 +452,9 @@ class _SearchConditionChips extends StatelessWidget {
         icon: Icons.payments_outlined,
         label: query.budgetMax == null
             ? 'Any budget'
-            : query.budgetMax == 0
+            : query.budgetMax!.isZero
             ? 'Free'
-            : '€${query.budgetMax!.round()}',
+            : MoneyFormatter.format(query.budgetMax!),
         onTap: onBudget,
       ),
       _SearchConditionChip(
@@ -1381,7 +1401,9 @@ class _SearchFiltersSheet extends StatefulWidget {
 
 class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late int? _peopleCount = widget.query.peopleCount;
-  late double? _budgetMax = widget.query.budgetMax;
+  late double? _budgetMax = widget.query.budgetMax == null
+      ? null
+      : MoneyFormatter.majorUnitsForUi(widget.query.budgetMax!);
   late double _radiusMeters = widget.query.radiusMeters;
   late bool _unlimited = widget.query.unlimitedRadius;
   late bool _openNow = widget.query.openNow;
@@ -3028,7 +3050,7 @@ String _resultsLocation(
       'free': query.freeOnly ? '1' : '0',
       if (query.peopleCount != null) 'people': '${query.peopleCount}',
       if (query.budgetMax != null)
-        'budgetMax': query.budgetMax!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
       if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
       if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
       'radius': query.radiusMeters.round().toString(),

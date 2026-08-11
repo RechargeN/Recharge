@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../../shared/primitives/money/money.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/place_creation_policy.dart';
 import '../entities/place_draft_data.dart';
@@ -256,18 +257,21 @@ class ValidatePlaceDraftUseCase {
     if (policy.admission.isVisible && type == PlaceEntryType.unknown) {
       warning('entry_type_unknown', 'pricing', 'entryType');
     }
-    final Iterable<double?> activeAmounts = <double?>[
-      if (policy.admission.isVisible) ...<double?>[
+    final Iterable<Money?> activeAmounts = <Money?>[
+      if (policy.admission.isVisible) ...<Money?>[
         pricing.entryPriceFrom,
         pricing.entryPriceTo,
       ],
-      if (policy.typicalSpend.isVisible) ...<double?>[
+      if (policy.typicalSpend.isVisible) ...<Money?>[
         pricing.typicalSpendFrom,
         pricing.typicalSpendTo,
       ],
     ];
-    for (final double? amount in activeAmounts) {
-      if (amount != null && amount < 0) {
+    for (final Money? amount in activeAmounts) {
+      if (amount != null && amount.currency != pricing.currency) {
+        error('price_currency_mismatch', 'pricing', 'currencyCode');
+      }
+      if (amount != null && amount.minorUnits < 0) {
         error('price_negative', 'pricing', 'entryPriceFrom');
       }
     }
@@ -422,8 +426,10 @@ class ValidatePlaceDraftUseCase {
 
   static bool _blank(String? value) => value == null || value.trim().isEmpty;
 
-  static bool _rangeInvalid(double? from, double? to) {
-    return from != null && to != null && from > to;
+  static bool _rangeInvalid(Money? from, Money? to) {
+    return from != null &&
+        to != null &&
+        (from.currency != to.currency || from.minorUnits > to.minorUnits);
   }
 
   static double _distanceKm(

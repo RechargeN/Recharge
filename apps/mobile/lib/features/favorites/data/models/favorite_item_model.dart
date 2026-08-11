@@ -1,3 +1,8 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+
 import '../../domain/entities/favorite_item_entity.dart';
 
 class FavoriteItemModel {
@@ -9,7 +14,7 @@ class FavoriteItemModel {
     required this.category,
     required this.startsAtUtcIso,
     required this.distanceKm,
-    required this.priceAmount,
+    required this.price,
     required this.isFree,
     required this.savedAtUtcIso,
     required this.targetRoute,
@@ -23,13 +28,20 @@ class FavoriteItemModel {
   final String category;
   final String startsAtUtcIso;
   final double distanceKm;
-  final double priceAmount;
+  final Money price;
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
   final String coverImageUrl;
 
-  factory FavoriteItemModel.fromJson(Map<String, dynamic> json) {
+  factory FavoriteItemModel.fromJson(
+    Map<String, dynamic> json, {
+    required CurrencyCode legacyCurrency,
+  }) {
+    final CurrencyCode currency = json.containsKey('currencyCode')
+        ? CurrencyCode.parse(json['currencyCode']?.toString() ?? '')
+        : legacyCurrency;
+    final Money price = _readPrice(json, currency: currency);
     return FavoriteItemModel(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -38,7 +50,7 @@ class FavoriteItemModel {
       category: json['category'] as String,
       startsAtUtcIso: json['startsAtUtcIso'] as String,
       distanceKm: (json['distanceKm'] as num).toDouble(),
-      priceAmount: (json['priceAmount'] as num).toDouble(),
+      price: price,
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
@@ -55,7 +67,8 @@ class FavoriteItemModel {
       'category': category,
       'startsAtUtcIso': startsAtUtcIso,
       'distanceKm': distanceKm,
-      'priceAmount': priceAmount,
+      'priceMinorUnits': price.minorUnits,
+      'currencyCode': price.currency.value,
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,
@@ -72,7 +85,7 @@ class FavoriteItemModel {
       category: entity.category,
       startsAtUtcIso: entity.startsAtUtc.toUtc().toIso8601String(),
       distanceKm: entity.distanceKm,
-      priceAmount: entity.priceAmount,
+      price: entity.price,
       isFree: entity.isFree,
       savedAtUtcIso: entity.savedAtUtc.toUtc().toIso8601String(),
       targetRoute: entity.targetRoute,
@@ -89,11 +102,32 @@ class FavoriteItemModel {
       category: category,
       startsAtUtc: DateTime.parse(startsAtUtcIso).toUtc(),
       distanceKm: distanceKm,
-      priceAmount: priceAmount,
+      price: price,
       isFree: isFree,
       savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
       targetRoute: targetRoute,
       coverImageUrl: coverImageUrl,
     );
   }
+}
+
+Money _readPrice(Map<String, dynamic> json, {required CurrencyCode currency}) {
+  final Object? canonical = json['priceMinorUnits'];
+  if (canonical != null) {
+    if (canonical is! int) {
+      throw const FormatException(
+        'Favorite price minor units must be an integer.',
+      );
+    }
+    return Money(minorUnits: canonical, currency: currency);
+  }
+  final Object? legacy = json['priceAmount'];
+  if (legacy is num) {
+    final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+      legacy,
+      currency: currency,
+    );
+    if (result is MoneyParseSuccess) return result.money;
+  }
+  throw const FormatException('Favorite price is invalid or ambiguous.');
 }

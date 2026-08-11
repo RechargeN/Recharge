@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/currency_code.dart';
 import 'discover_query.dart';
 
 class SmartSearchHistoryEntity {
@@ -27,6 +28,7 @@ class SmartSearchHistoryEntity {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required CurrencyCode defaultCurrency,
   }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
@@ -47,6 +49,7 @@ class SmartSearchHistoryEntity {
         defaultMarketCityId: defaultMarketCityId,
         defaultCenterLat: defaultCenterLat,
         defaultCenterLng: defaultCenterLng,
+        defaultCurrency: defaultCurrency,
       ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()

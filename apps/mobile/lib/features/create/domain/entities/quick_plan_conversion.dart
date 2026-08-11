@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 import 'scenario_draft_data.dart';
 
 enum QuickPlanConversionIssueSeverity { warning, error }
@@ -34,7 +37,7 @@ class QuickPlanConversionStopSnapshot {
     required this.latitude,
     required this.longitude,
     required this.isFree,
-    required this.priceMinorUnits,
+    required this.price,
     required this.available,
     this.requesterPrivateNote,
   });
@@ -45,7 +48,7 @@ class QuickPlanConversionStopSnapshot {
   final double latitude;
   final double longitude;
   final bool isFree;
-  final int? priceMinorUnits;
+  final Money? price;
   final bool available;
   final String? requesterPrivateNote;
 }
@@ -57,7 +60,7 @@ class QuickPlanConversionSnapshot {
     required this.ownerId,
     required this.title,
     required this.timezoneId,
-    required this.currencyCode,
+    required this.currency,
     required this.stops,
     required this.readableByUserIds,
   });
@@ -67,9 +70,11 @@ class QuickPlanConversionSnapshot {
   final String ownerId;
   final String title;
   final String timezoneId;
-  final String currencyCode;
+  final CurrencyCode currency;
   final List<QuickPlanConversionStopSnapshot> stops;
   final Set<String> readableByUserIds;
+
+  String get currencyCode => currency.value;
 }
 
 class ExpandQuickPlanToScenarioRequest {

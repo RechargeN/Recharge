@@ -1,3 +1,8 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+
 import '../../domain/entities/place_draft_data.dart';
 
 class PlaceDraftMapper {
@@ -132,10 +137,11 @@ class PlaceDraftMapper {
       'amenityUnknownIds': value.amenityUnknownIds.toList(growable: false),
       'pricing': <String, Object?>{
         'entryType': value.pricing.entryType?.name,
-        'entryPriceFrom': value.pricing.entryPriceFrom,
-        'entryPriceTo': value.pricing.entryPriceTo,
-        'typicalSpendFrom': value.pricing.typicalSpendFrom,
-        'typicalSpendTo': value.pricing.typicalSpendTo,
+        'entryPriceFromMinorUnits': value.pricing.entryPriceFrom?.minorUnits,
+        'entryPriceToMinorUnits': value.pricing.entryPriceTo?.minorUnits,
+        'typicalSpendFromMinorUnits':
+            value.pricing.typicalSpendFrom?.minorUnits,
+        'typicalSpendToMinorUnits': value.pricing.typicalSpendTo?.minorUnits,
         'currencyCode': value.pricing.currencyCode,
         'pricingNote': value.pricing.pricingNote,
         'officialPricingUrl': value.pricing.officialPricingUrl,
@@ -286,16 +292,64 @@ class PlaceDraftMapper {
 
   static PlacePricingDraft _pricing(Object? raw, String defaultCurrency) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
+    final CurrencyCode currency = json.containsKey('currencyCode')
+        ? CurrencyCode.parse(json['currencyCode']?.toString() ?? '')
+        : CurrencyCode.parse(defaultCurrency);
     return PlacePricingDraft(
       entryType: _enumValue(PlaceEntryType.values, json['entryType']),
-      entryPriceFrom: _double(json['entryPriceFrom']),
-      entryPriceTo: _double(json['entryPriceTo']),
-      typicalSpendFrom: _double(json['typicalSpendFrom']),
-      typicalSpendTo: _double(json['typicalSpendTo']),
-      currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      entryPriceFrom: _money(
+        json,
+        canonicalKey: 'entryPriceFromMinorUnits',
+        legacyKey: 'entryPriceFrom',
+        currency: currency,
+      ),
+      entryPriceTo: _money(
+        json,
+        canonicalKey: 'entryPriceToMinorUnits',
+        legacyKey: 'entryPriceTo',
+        currency: currency,
+      ),
+      typicalSpendFrom: _money(
+        json,
+        canonicalKey: 'typicalSpendFromMinorUnits',
+        legacyKey: 'typicalSpendFrom',
+        currency: currency,
+      ),
+      typicalSpendTo: _money(
+        json,
+        canonicalKey: 'typicalSpendToMinorUnits',
+        legacyKey: 'typicalSpendTo',
+        currency: currency,
+      ),
+      currency: currency,
       pricingNote: _string(json['pricingNote']),
       officialPricingUrl: _string(json['officialPricingUrl']),
     );
+  }
+
+  static Money? _money(
+    Map<String, Object?> json, {
+    required String canonicalKey,
+    required String legacyKey,
+    required CurrencyCode currency,
+  }) {
+    final Object? canonical = json[canonicalKey];
+    if (canonical != null) {
+      if (canonical is! int) {
+        throw FormatException('$canonicalKey must be an integer.');
+      }
+      return Money(minorUnits: canonical, currency: currency);
+    }
+    final Object? legacy = json[legacyKey];
+    if (legacy is! num) {
+      return null;
+    }
+    final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+      legacy,
+      currency: currency,
+    );
+    if (result is MoneyParseSuccess) return result.money;
+    throw FormatException('$legacyKey is invalid or ambiguous.');
   }
 
   static PlaceContactsDraft _contacts(Object? raw) {

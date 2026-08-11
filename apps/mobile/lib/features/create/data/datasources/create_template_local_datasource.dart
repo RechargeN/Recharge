@@ -11,6 +11,7 @@ class CreateTemplateLocalDataSource {
     required this.activeTimezone,
     required this.activeCountry,
     required this.activeCity,
+    required this.activeCurrency,
   });
 
   final FlutterSecureStorage _storage;
@@ -18,6 +19,7 @@ class CreateTemplateLocalDataSource {
   final String activeTimezone;
   final String activeCountry;
   final String activeCity;
+  final String activeCurrency;
 
   String _key(String userId) => 'create_templates_v1_$userId';
 
@@ -42,6 +44,7 @@ class CreateTemplateLocalDataSource {
               activeTimezone: activeTimezone,
               activeCountry: activeCountry,
               activeCity: activeCity,
+              activeCurrency: activeCurrency,
             ),
           );
         } on Object {

@@ -1,4 +1,9 @@
 import '../../../core/config/recharge_taxonomy.dart';
+import '../../../shared/primitives/money/currency_code.dart';
+import '../../../shared/primitives/money/money.dart';
+import '../../../shared/primitives/money/money_formatter.dart';
+import '../../../shared/primitives/money/money_parse_result.dart';
+import '../../../shared/primitives/money/money_parser.dart';
 
 class SmartSearchParseResult {
   const SmartSearchParseResult({
@@ -18,7 +23,7 @@ class SmartSearchParseResult {
   final String queryText;
   final List<String> selectedCategoryIds;
   final bool? freeOnly;
-  final double? budgetMax;
+  final Money? budgetMax;
   final SmartSearchDatePreset? datePreset;
   final double? radiusMeters;
   final bool? unlimitedRadius;
@@ -46,7 +51,10 @@ class SmartRouteIntent {
 
 enum SmartSearchDatePreset { today, tonight }
 
-SmartSearchParseResult parseSmartSearch(String input) {
+SmartSearchParseResult parseSmartSearch(
+  String input, {
+  required CurrencyCode currency,
+}) {
   final String normalized = input.trim().toLowerCase();
   final List<String> chips = <String>[];
   final Set<String> categories = <String>{};
@@ -103,9 +111,11 @@ SmartSearchParseResult parseSmartSearch(String input) {
     }
   }
 
-  double? budgetMax = _parseBudgetMax(working);
+  final Money? budgetMax = _parseBudgetMax(working, currency);
   if (budgetMax != null) {
-    chips.add('up to ${budgetMax.toStringAsFixed(0)}');
+    chips.add(
+      'up to ${MoneyFormatter.format(budgetMax, includeCurrency: false)}',
+    );
     working = working.replaceAll(RegExp(r'(under|до|up to)\s*\d+'), ' ');
     working = working.replaceAll(RegExp(r'\d+\s*(eur|euro)'), ' ');
   }
@@ -359,20 +369,30 @@ bool _containsTaxonomySignal(String source, String signal) {
   ).hasMatch(source);
 }
 
-double? _parseBudgetMax(String source) {
+Money? _parseBudgetMax(String source, CurrencyCode currency) {
+  final RegExpMatch? currencyMatch = RegExp(
+    r'(\d+)\s*([a-z]{3}|euro)\b',
+  ).firstMatch(source);
+  if (currencyMatch != null) {
+    final String rawCode = currencyMatch.group(2)!;
+    final CurrencyCode? taggedCurrency = rawCode == 'euro'
+        ? CurrencyCode.eur
+        : CurrencyCode.tryParse(rawCode);
+    if (taggedCurrency != currency) return null;
+    return _parseWholeMoney(currencyMatch.group(1)!, currency);
+  }
   final RegExpMatch? explicit = RegExp(
     r'(under|до|up to)\s*(\d+)',
   ).firstMatch(source);
   if (explicit != null) {
-    return double.parse(explicit.group(2)!);
-  }
-  final RegExpMatch? currency = RegExp(
-    r'(\d+)\s*(eur|euro)',
-  ).firstMatch(source);
-  if (currency != null) {
-    return double.parse(currency.group(1)!);
+    return _parseWholeMoney(explicit.group(2)!, currency);
   }
   return null;
+}
+
+Money? _parseWholeMoney(String input, CurrencyCode currency) {
+  final MoneyParseResult result = MoneyParser.parse(input, currency: currency);
+  return result is MoneyParseSuccess ? result.money : null;
 }
 
 int? _parseRouteDurationMinutes(String source) {

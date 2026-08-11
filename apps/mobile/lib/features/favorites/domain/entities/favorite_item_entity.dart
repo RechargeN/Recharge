@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 class FavoriteItemEntity {
   const FavoriteItemEntity({
     required this.id,
@@ -7,7 +9,7 @@ class FavoriteItemEntity {
     required this.category,
     required this.startsAtUtc,
     required this.distanceKm,
-    required this.priceAmount,
+    required this.price,
     required this.isFree,
     required this.savedAtUtc,
     required this.targetRoute,
@@ -21,7 +23,7 @@ class FavoriteItemEntity {
   final String category;
   final DateTime startsAtUtc;
   final double distanceKm;
-  final double priceAmount;
+  final Money price;
   final bool isFree;
   final DateTime savedAtUtc;
   final String? targetRoute;
@@ -41,7 +43,7 @@ class FavoriteItemEntity {
       category: category,
       startsAtUtc: startsAtUtc,
       distanceKm: distanceKm,
-      priceAmount: priceAmount,
+      price: price,
       isFree: isFree,
       savedAtUtc: savedAtUtc ?? this.savedAtUtc,
       targetRoute: clearTargetRoute ? null : (targetRoute ?? this.targetRoute),

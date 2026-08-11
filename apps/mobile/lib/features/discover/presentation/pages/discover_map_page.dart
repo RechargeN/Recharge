@@ -1,6 +1,12 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +43,13 @@ import '../widgets/scenario_intake_marker_icon_factory.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/map_marker_utils.dart';
 import '../widgets/map_style.dart';
+
+Money? _mapMoneyFromInput(String? input, CurrencyCode currency) {
+  if (input == null || input.trim().isEmpty) return null;
+  final MoneyParseResult result = MoneyParser.parse(input, currency: currency);
+  if (result is MoneyParseSuccess) return result.money;
+  throw const FormatException('Budget input is invalid or ambiguous.');
+}
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -585,7 +598,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final Money? budgetMax = _mapMoneyFromInput(
+      seedParameters['budgetMax'],
+      controller.state.appliedQuery.currency,
+    );
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
@@ -696,7 +712,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               ? _publishedRouteMapMetric(item)
               : item.isFree
               ? 'Free'
-              : '${item.priceAmount.toStringAsFixed(0)} €',
+              : MoneyFormatter.format(item.price),
         ),
       );
     }).toSet();
@@ -920,7 +936,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       category: item.category,
       startsAtUtc: item.startsAtUtc,
       distanceKm: item.distanceKm,
-      priceAmount: item.priceAmount,
+      price: item.price,
       isFree: item.isFree,
       savedAtUtc: DateTime.now().toUtc(),
       targetRoute: null,
@@ -943,8 +959,8 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       category: 'scenario',
       startsAtUtc: now,
       distanceKm: route.totalDistanceKm,
-      priceAmount: route.totalPriceAmount,
-      isFree: route.totalPriceAmount == 0,
+      price: route.totalPrice,
+      isFree: route.totalPrice.isZero,
       savedAtUtc: now,
       targetRoute: route.builderLocation,
     );
@@ -1023,7 +1039,7 @@ String mapCreateLocationForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -1128,7 +1144,10 @@ String mapScenarioBuilderLocationForQuery(
 SmartSearchParseResult? _mapSmartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: item.query.currency,
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -1169,7 +1188,7 @@ Map<String, String> _mapQueryParameters(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -1282,7 +1301,8 @@ String _mapCreateSubtitleForQuery(DiscoverQuery query) {
     'Map area',
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     query.unlimitedRadius
         ? 'any area'
         : '${(query.radiusMeters / 1000).round()} km',
@@ -1295,7 +1315,8 @@ String _mapPromptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -2952,10 +2973,10 @@ class _ScenarioMapRoute {
     );
   }
 
-  double get totalPriceAmount {
-    return stops.fold<double>(
-      0,
-      (double total, ScenarioStepEntity step) => total + step.priceAmount,
+  Money get totalPrice {
+    return stops.fold<Money>(
+      Money.zero(stops.first.price.currency),
+      (Money total, ScenarioStepEntity step) => total + step.price,
     );
   }
 
@@ -2976,8 +2997,8 @@ class _ScenarioMapRoute {
   }
 
   String get priceLabel {
-    if (totalPriceAmount == 0) return 'Free';
-    return '${totalPriceAmount.toStringAsFixed(0)} €';
+    if (totalPrice.isZero) return 'Free';
+    return MoneyFormatter.format(totalPrice);
   }
 
   String get moodLabel {
@@ -3029,7 +3050,7 @@ class _ScenarioMapRoute {
     final Map<String, String> params = <String, String>{
       'q': promptLabel,
       if (category != null) 'category': category,
-      'free': totalPriceAmount == 0 ? '1' : '0',
+      'free': totalPrice.isZero ? '1' : '0',
       'radius': '5000',
       'unlimited': '0',
     };
@@ -3093,9 +3114,7 @@ String _metaLabel(DiscoverItemEntity item) {
         '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
         '${(route.durationSeconds / 60).round()} min';
   }
-  final String price = item.isFree
-      ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} €';
+  final String price = item.isFree ? 'Free' : MoneyFormatter.format(item.price);
   return '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
       '${item.distanceKm.toStringAsFixed(1)} км · $price';
 }

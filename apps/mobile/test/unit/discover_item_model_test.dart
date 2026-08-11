@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/models/discover_item_model.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('fromMap parses details v2 fields', () {
@@ -28,7 +30,7 @@ void main() {
       'duration_minutes': 150,
       'cta_label': 'Join meetup',
       'highlights': <String>['Warm-up games', 'Friendly tournament'],
-    });
+    }, legacyCurrency: CurrencyCode.eur);
 
     expect(item.coverImageUrl, 'https://example.com/cover.jpg');
     expect(item.objectKind, DiscoverObjectKind.place);
@@ -57,7 +59,7 @@ void main() {
       'organizer_name': 'Marine Tennis Club',
       'participants_count': 32,
       'highlights': <String>['Warm-up games'],
-    });
+    }, legacyCurrency: CurrencyCode.eur);
 
     final copy = item.copyWith(distanceKm: 2.0, relevanceScore: 0.7);
 
@@ -86,7 +88,7 @@ void main() {
             'distance_km': 0.0,
             'is_free': true,
             ...values,
-          });
+          }, legacyCurrency: CurrencyCode.eur);
 
       final DiscoverItemModel explicitZero = parse(<String, Object?>{
         'duration_minutes': 0,
@@ -102,4 +104,33 @@ void main() {
       expect(absent.objectKind, DiscoverObjectKind.activity);
     },
   );
+
+  test('canonical price is exact and fractional minor units fail closed', () {
+    final Map<String, Object?> map = <String, Object?>{
+      'id': 'evt_money',
+      'title': 'Money fixture',
+      'subtitle': 'Canonical',
+      'city': 'Riga',
+      'category': 'other',
+      'starts_at_utc': '2026-07-20T10:00:00Z',
+      'latitude': 56.9496,
+      'longitude': 24.1052,
+      'price_minor_units': 1234,
+      'currency_code': 'EUR',
+      'distance_km': 1.0,
+      'is_free': false,
+    };
+
+    expect(
+      DiscoverItemModel.fromMap(map, legacyCurrency: CurrencyCode.usd).price,
+      const Money(minorUnits: 1234, currency: CurrencyCode.eur),
+    );
+    expect(
+      () => DiscoverItemModel.fromMap(<String, Object?>{
+        ...map,
+        'price_minor_units': 12.5,
+      }, legacyCurrency: CurrencyCode.eur),
+      throwsFormatException,
+    );
+  });
 }

@@ -3,11 +3,11 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B–M2-E not started
+**Статус:** Approved — M2-A Done; M2-B Review; M2-C–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
-**Runtime effect:** M2-A architecture-only refactor; product behavior unchanged
+**Runtime effect:** M2-A architecture refactor; M2-B local Money normalization
 **Backend/Firebase effect:** none
 
 ## 0. Решение
@@ -265,6 +265,7 @@ Formatter/parser не импортируют Flutter. UI locale передаёт
 
 ```text
 apps/mobile/lib/features/create/domain/entities/event_draft_data.dart
+apps/mobile/lib/features/create/domain/entities/create_draft_entity.dart
 apps/mobile/lib/features/create/domain/entities/scenario_budget_draft.dart
 apps/mobile/lib/features/create/domain/entities/quick_plan_conversion.dart
 apps/mobile/lib/features/create/domain/entities/place_draft_data.dart
@@ -286,7 +287,11 @@ apps/mobile/lib/features/create/data/models/event_draft_mapper.dart
 apps/mobile/lib/features/create/data/models/find_people_draft_mapper.dart
 apps/mobile/lib/features/create/data/models/place_draft_mapper.dart
 apps/mobile/lib/features/create/data/models/scenario_draft_mapper.dart
+apps/mobile/lib/features/create/data/datasources/create_local_datasource.dart
+apps/mobile/lib/features/create/data/datasources/create_template_local_datasource.dart
+apps/mobile/lib/features/create/data/models/create_template_model.dart
 apps/mobile/lib/features/create/application/controllers/create_controller.dart
+apps/mobile/lib/features/create/application/event_create_coordinator.dart
 apps/mobile/lib/features/create/application/scenario_create_coordinator.dart
 apps/mobile/lib/features/create/domain/usecases/evaluate_scenario_readiness_usecase.dart
 apps/mobile/lib/features/create/domain/usecases/expand_quick_plan_to_scenario_usecase.dart
@@ -295,10 +300,14 @@ apps/mobile/lib/features/create/domain/usecases/validate_scenario_draft_usecase.
 apps/mobile/lib/features/discover/application/controllers/discover_feed_controller.dart
 apps/mobile/lib/features/discover/application/smart_search_parser.dart
 apps/mobile/lib/features/discover/data/models/discover_item_model.dart
+apps/mobile/lib/features/discover/data/datasources/discover_preferences_local_datasource.dart
+apps/mobile/lib/features/discover/data/datasources/discover_remote_datasource.dart
 apps/mobile/lib/features/discover/data/repositories/discover_repository_impl.dart
 apps/mobile/lib/features/favorites/data/models/favorite_item_model.dart
+apps/mobile/lib/features/favorites/data/datasources/favorites_local_datasource.dart
 apps/mobile/lib/features/scenarios/application/state/scenario_builder_state.dart
 apps/mobile/lib/app/adapters/legacy_quick_plan_conversion_adapter.dart
+apps/mobile/lib/app/di/service_locator.dart
 ```
 
 ### 5.4 Presentation boundary
@@ -532,3 +541,40 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 
 Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
 M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
+
+## 15. M2-B implementation evidence
+
+M2-B реализован в отдельной ветке `agent/mobile-architecture-m2b` и находится
+в Review до прохождения GitHub Actions на Flutter 3.44.9:
+
+- добавлены pure `CurrencyCode`, metadata, `Money`, typed parse result, exact
+  parser и formatter без Flutter/infrastructure imports;
+- `Money` использует integer minor units в JSON-safe range, арифметика
+  запрещает смешение валют, а input/legacy conversion не проходит через
+  binary floating-point;
+- Create/Event/Scenario/Place/Find People, Discover, Favorites и Quick Plan
+  adapters переведены на shared Money; Event/Scenario wrappers сохранены до
+  M2-D и получили lossless adapters;
+- local writers создают только canonical integer fields + currency code;
+  legacy numeric fields остаются read-only compatibility path;
+- canonical fractional minor units, invalid explicit currency, ambiguous
+  legacy precision и overflow fail closed; mapper не подставляет валюту при
+  наличии невалидного persisted currency field;
+- Create envelope обновлён с schema v8 до v9, Place nested schema — с v1 до
+  v2, Discover query — с v2 до v3; compatibility read не запускает rewrite;
+- free остаётся отдельным product state, а mixed-currency Scenario total без
+  exchange-rate snapshot остаётся unavailable;
+- локально прошли 541/541 unit tests, дополнительные Money/DiscoverQuery
+  regression tests и 14/14 затронутых widget tests;
+- boundary scan: 380 tracked Dart files / 71 findings / 71 suppressions /
+  0 violations / 0 stale / 0 expired / budget 71; self-test и diff check
+  прошли, registry не менялся;
+- analyzer на установленном Flutter 3.8 воспроизводит ровно 60 известных
+  baseline-ошибок отсутствующего Flutter 3.44 API
+  (`DropdownButtonFormField.initialValue`, `RadioGroup`) и не находит новых
+  M2-B issues; полный local widget gate по той же причине inconclusive,
+  authoritative CI evidence ещё не получено.
+
+M2-B не добавляет backend, Firebase, network/remote writes, Payments,
+provider integration, M2-C time/locale/market primitives или M2-D cleanup.
+До зелёного GitHub Actions этот раздел не переводит M2-B в Done.

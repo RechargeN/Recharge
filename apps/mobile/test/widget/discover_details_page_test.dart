@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/money_test_values.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
@@ -466,7 +468,7 @@ DiscoverItemEntity _detailsItem({
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: 0,
+    price: testZeroEur,
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,

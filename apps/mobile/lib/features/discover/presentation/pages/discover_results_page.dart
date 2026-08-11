@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,6 +23,13 @@ import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
+
+Money? _moneyFromInput(String? input, CurrencyCode currency) {
+  if (input == null || input.trim().isEmpty) return null;
+  final MoneyParseResult result = MoneyParser.parse(input, currency: currency);
+  if (result is MoneyParseSuccess) return result.money;
+  throw const FormatException('Budget input is invalid or ambiguous.');
+}
 
 class DiscoverResultsPage extends ConsumerStatefulWidget {
   const DiscoverResultsPage({
@@ -208,7 +221,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               controller.applySearchConditions(
                 freeOnly: false,
                 clearBudgetMin: true,
-                budgetMax: 10,
+                budgetMax: _moneyFromInput('10', query.currency),
                 clearDateFrom: true,
                 clearDateTo: true,
               );
@@ -283,7 +296,9 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onBudgetSelected: (double? value) {
               controller.applySearchConditions(
                 freeOnly: false,
-                budgetMax: value,
+                budgetMax: value == null
+                    ? null
+                    : _moneyFromInput(value.toString(), query.currency),
                 clearBudgetMin: true,
                 clearBudgetMax: value == null,
               );
@@ -404,7 +419,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final Money? budgetMax = _moneyFromInput(
+      seedParameters['budgetMax'],
+      controller.state.appliedQuery.currency,
+    );
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
@@ -682,7 +700,8 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -696,7 +715,7 @@ String _mapLocationForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -733,7 +752,7 @@ String _createLocationForQuery(
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -966,7 +985,7 @@ class _ActiveConditionChips extends StatelessWidget {
       else if (query.budgetMax != null)
         Chip(
           avatar: const Icon(Icons.payments_outlined, size: 16),
-          label: Text('Up to €${query.budgetMax!.toStringAsFixed(0)}'),
+          label: Text('Up to ${MoneyFormatter.format(query.budgetMax!)}'),
         ),
       Chip(
         avatar: const Icon(Icons.near_me_outlined, size: 16),
@@ -1153,12 +1172,16 @@ class _ConditionPanel extends StatelessWidget {
                 ),
                 ChoiceChip(
                   label: const Text('Under 10'),
-                  selected: query.budgetMax == 10,
+                  selected:
+                      query.budgetMax != null &&
+                      MoneyFormatter.majorUnitsForUi(query.budgetMax!) == 10,
                   onSelected: (_) => onBudgetSelected(10),
                 ),
                 ChoiceChip(
                   label: const Text('Under 15'),
-                  selected: query.budgetMax == 15,
+                  selected:
+                      query.budgetMax != null &&
+                      MoneyFormatter.majorUnitsForUi(query.budgetMax!) == 15,
                   onSelected: (_) => onBudgetSelected(15),
                 ),
               ],
@@ -1252,7 +1275,7 @@ class _AppliedSummary extends StatelessWidget {
       if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
       if (query.freeOnly) 'free',
       if (query.budgetMax != null)
-        'up to ${query.budgetMax!.toStringAsFixed(0)}',
+        'up to ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
       if (query.dateFrom != null || query.dateTo != null) 'date set',
       query.unlimitedRadius
           ? 'any area'
@@ -1361,7 +1384,7 @@ class _SearchResultCard extends StatelessWidget {
         ? _routeDurationLabel(item.durationMinutes)
         : item.isFree
         ? 'Free'
-        : '${item.priceAmount.toStringAsFixed(0)} €';
+        : MoneyFormatter.format(item.price);
 
     return Card(
       clipBehavior: Clip.antiAlias,

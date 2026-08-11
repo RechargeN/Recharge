@@ -7,6 +7,7 @@ import '../../../../app/router/route_names.dart';
 import '../../../../app/application/planning_conversion_providers.dart';
 import '../../../../app/application/active_create_publisher_provider.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_providers.dart';
@@ -513,7 +514,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       _startController,
       state.draft.startDateTimeUtc?.toIso8601String() ?? '',
     );
-    _syncController(_priceController, state.draft.basePrice?.toString() ?? '');
+    _syncController(
+      _priceController,
+      state.draft.basePrice == null
+          ? ''
+          : MoneyFormatter.format(
+              state.draft.basePrice!,
+              includeCurrency: false,
+            ),
+    );
   }
 
   void _syncController(TextEditingController controller, String value) {
@@ -606,8 +615,8 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     controller.updateAddress(seed.addressLine1);
     controller.updateCoverImage(seed.coverImage);
     controller.updateIsFree(seed.isFree);
-    if (!seed.isFree && seed.basePrice != null) {
-      controller.updateBasePrice(seed.basePrice!.toStringAsFixed(0));
+    if (!seed.isFree && seed.basePriceInput != null) {
+      controller.updateBasePrice(seed.basePriceInput!);
     }
     if (createBlockConfigFor(seed.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(seed.startDateTimeUtc.toIso8601String());
@@ -1890,7 +1899,7 @@ class _CreateSeed {
     required this.coverImage,
     required this.isFree,
     required this.startDateTimeUtc,
-    this.basePrice,
+    this.basePriceInput,
   });
 
   factory _CreateSeed.fromParameters(Map<String, String> params) {
@@ -1911,8 +1920,8 @@ class _CreateSeed {
     );
     final String title = _seedTitle(rawTitle, prompt, taxonomy.categoryId);
     final CreateObjectType objectType = _seedObjectType(params);
-    final double? basePrice = _seedPrice(params);
-    final bool isFree = _seedIsFree(params, basePrice);
+    final String? basePriceInput = _seedPriceInput(params);
+    final bool isFree = _seedIsFree(params, basePriceInput);
 
     return _CreateSeed(
       hasValues:
@@ -1934,7 +1943,7 @@ class _CreateSeed {
       addressLine1: _seedAddress(params),
       coverImage: _seedCoverImage(params, taxonomy.categoryId),
       isFree: isFree,
-      basePrice: basePrice,
+      basePriceInput: basePriceInput,
       startDateTimeUtc: _seedStartDateTime(params),
     );
   }
@@ -1951,7 +1960,7 @@ class _CreateSeed {
   final String addressLine1;
   final String coverImage;
   final bool isFree;
-  final double? basePrice;
+  final String? basePriceInput;
   final DateTime startDateTimeUtc;
 }
 
@@ -2220,17 +2229,16 @@ String _seedCoverImage(Map<String, String> params, String categoryId) {
   }
 }
 
-double? _seedPrice(Map<String, String> params) {
+String? _seedPriceInput(Map<String, String> params) {
   final String value = _seedParam(params, <String>[
     'price',
     'budgetMax',
     'basePrice',
   ]);
-  if (value.isEmpty) return null;
-  return double.tryParse(value.replaceAll(',', '.'));
+  return value.isEmpty ? null : value;
 }
 
-bool _seedIsFree(Map<String, String> params, double? basePrice) {
+bool _seedIsFree(Map<String, String> params, String? basePriceInput) {
   final String value = _seedParam(params, <String>[
     'free',
     'isFree',
@@ -2238,7 +2246,9 @@ bool _seedIsFree(Map<String, String> params, double? basePrice) {
   ]).toLowerCase();
   if (value == '1' || value == 'true' || value == 'yes') return true;
   if (value == '0' || value == 'false' || value == 'no') return false;
-  return basePrice == null || basePrice <= 0;
+  if (basePriceInput == null) return true;
+  final String normalized = basePriceInput.trim().replaceAll(',', '.');
+  return RegExp(r'^\+?0+(?:\.0+)?$').hasMatch(normalized);
 }
 
 DateTime _seedStartDateTime(Map<String, String> params) {

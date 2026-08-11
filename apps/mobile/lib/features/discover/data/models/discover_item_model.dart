@@ -1,3 +1,7 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/opening_hours_rule.dart';
 import '../../domain/entities/time_slot.dart';
@@ -13,7 +17,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
     required super.startsAtUtc,
     required super.latitude,
     required super.longitude,
-    required super.priceAmount,
+    required super.price,
     required super.distanceKm,
     required super.isFree,
     super.objectKind,
@@ -40,7 +44,13 @@ class DiscoverItemModel extends DiscoverItemEntity {
     super.highlights,
   });
 
-  factory DiscoverItemModel.fromMap(Map<String, Object?> map) {
+  factory DiscoverItemModel.fromMap(
+    Map<String, Object?> map, {
+    required CurrencyCode legacyCurrency,
+  }) {
+    final CurrencyCode currency = map.containsKey('currency_code')
+        ? CurrencyCode.parse(map['currency_code']?.toString() ?? '')
+        : legacyCurrency;
     return DiscoverItemModel(
       id: map['id']! as String,
       title: map['title']! as String,
@@ -51,7 +61,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
       startsAtUtc: DateTime.parse(map['starts_at_utc']! as String),
       latitude: (map['latitude']! as num).toDouble(),
       longitude: (map['longitude']! as num).toDouble(),
-      priceAmount: (map['price_amount']! as num).toDouble(),
+      price: _moneyFromMap(map, currency),
       distanceKm: (map['distance_km']! as num).toDouble(),
       isFree: map['is_free']! as bool,
       objectKind: DiscoverObjectKind.values.firstWhere(
@@ -99,6 +109,27 @@ class DiscoverItemModel extends DiscoverItemEntity {
           .cast<String>(),
     );
   }
+}
+
+Money _moneyFromMap(Map<String, Object?> map, CurrencyCode currency) {
+  final Object? canonical = map['price_minor_units'];
+  if (canonical != null) {
+    if (canonical is! int) {
+      throw const FormatException(
+        'Discover price minor units must be an integer.',
+      );
+    }
+    return Money(minorUnits: canonical, currency: currency);
+  }
+  final Object? legacy = map['price_amount'];
+  if (legacy is num) {
+    final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+      legacy,
+      currency: currency,
+    );
+    if (result is MoneyParseSuccess) return result.money;
+  }
+  throw const FormatException('Discover price is invalid or ambiguous.');
 }
 
 int? _positiveIntOrNull(Object? value) {
