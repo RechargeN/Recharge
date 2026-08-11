@@ -439,6 +439,7 @@ void main() {
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -479,7 +480,8 @@ void main() {
     expect(draft.subcategory, 'museum');
     expect(draft.city, 'Rezekne');
     expect(draft.isFree, isFalse);
-    expect(draft.basePrice, 10);
+    expect(draft.basePrice?.minorUnits, 1000);
+    expect(draft.basePrice?.currency.value, 'EUR');
     expect(draft.media.coverImage, isNotEmpty);
     expect(
       draft.startDateTimeUtc?.toIso8601String(),
@@ -838,7 +840,7 @@ void main() {
       expect(find.text('pendingReview'), findsWidgets);
       expect(find.text('Art, culture & museums'), findsOneWidget);
       expect(find.text('Museum'), findsOneWidget);
-      expect(find.text('12 EUR'), findsOneWidget);
+      expect(find.text('€12.00'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Search similar'));
       await tester.tap(find.text('Search similar'));

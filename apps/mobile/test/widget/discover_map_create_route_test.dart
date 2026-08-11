@@ -27,7 +27,10 @@ void main() {
     expect(uri.queryParameters['source'], 'map');
     expect(uri.queryParameters['type'], 'event');
     expect(uri.queryParameters['title'], 'Museum idea');
-    expect(uri.queryParameters['subtitle'], 'Map area · art · under 10 · 8 km');
+    expect(
+      uri.queryParameters['subtitle'],
+      'Map area · art · under 10.00 · 8 km',
+    );
     expect(uri.queryParameters['q'], 'museum');
     expect(uri.queryParameters['category'], 'art');
     expect(uri.queryParameters['free'], '0');
