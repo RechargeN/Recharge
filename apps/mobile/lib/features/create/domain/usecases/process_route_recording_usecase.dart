@@ -1,5 +1,5 @@
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_recording_data.dart';
 

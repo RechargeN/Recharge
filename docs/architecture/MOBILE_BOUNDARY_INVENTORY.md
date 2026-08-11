@@ -5,8 +5,8 @@
 - Tool version: `1.0.0`
 - Policy version: `1.0.0`
 - Scanned Dart files: 380
-- Active exceptions: 106
-- Exception budget: 106
+- Active exceptions: 71
+- Exception budget: 71
 - Unsuppressed violations: 0
 - Stale exceptions: 0
 - Expired exceptions: 0
@@ -16,28 +16,26 @@
 | Rule | Count |
 |---|---:|
 | `cross_feature_import` | 59 |
-| `domain_infrastructure_dependency` | 35 |
 | `feature_to_app_di_or_app_presentation` | 12 |
 
 ## By source feature
 
 | Source | Count |
 |---|---:|
-| `create` | 31 |
-| `discover` | 24 |
+| `discover` | 21 |
 | `explore` | 14 |
 | `auth` | 11 |
 | `scenarios` | 10 |
 | `favorites` | 7 |
-| `identity` | 4 |
+| `create` | 3 |
 | `notifications` | 3 |
-| `visited` | 2 |
+| `identity` | 1 |
+| `visited` | 1 |
 
 ## By target group
 
 | Target | Count |
 |---|---:|
-| `core` | 35 |
 | `discover` | 24 |
 | `auth` | 13 |
 | `favorites` | 13 |
@@ -50,7 +48,6 @@
 
 | Pair | Count |
 |---|---:|
-| `create → core` | 28 |
 | `auth → discover` | 7 |
 | `discover → auth` | 6 |
 | `discover → favorites` | 6 |
@@ -59,10 +56,8 @@
 | `explore → discover` | 5 |
 | `auth → favorites` | 3 |
 | `discover → app/presentation` | 3 |
-| `discover → core` | 3 |
 | `explore → auth` | 3 |
 | `explore → create` | 3 |
-| `identity → core` | 3 |
 | `create → auth` | 2 |
 | `discover → app/di` | 2 |
 | `discover → create` | 2 |
@@ -80,4 +75,3 @@
 | `scenarios → auth` | 1 |
 | `scenarios → create` | 1 |
 | `visited → app/di` | 1 |
-| `visited → core` | 1 |

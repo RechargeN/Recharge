@@ -1,5 +1,5 @@
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import 'create_draft_entity.dart';
 import 'route_draft_data.dart';
 import 'route_quality_data.dart';

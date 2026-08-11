@@ -774,6 +774,12 @@ adapters/deprecation path; мигрировать consumers; удалить dupl
 zero-reference proof. Money migration из normalized `double` в minor units
 обязана завершиться до M8 и до подключения remote write contracts.
 
+M2-A завершён отдельным architecture-only refactor: Geo и domain-facing ID
+contract получили shared ownership, identity mapping перенесён в application,
+35 exact suppressions удалены и boundary budget снижен 106 → 71. Target CI на
+Flutter 3.44.9 прошёл 664 tests и все architecture gates. Compatibility exports
+остаются до M2-D; Money, time/locale/market и M2-B–M2-E не начаты.
+
 ### M3 — Application consistency
 
 Найти прямые presentation→data вызовы; перенести orchestration в controllers и

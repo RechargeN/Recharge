@@ -1,4 +1,4 @@
-import '../../../../core/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_validation_issue.dart';
 
