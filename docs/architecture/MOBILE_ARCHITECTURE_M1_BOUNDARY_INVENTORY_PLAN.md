@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M1-P
 **Версия:** 1.1
 **Дата:** 2026-08-10
-**Статус:** Review — implementation complete, Linux CI evidence pending
+**Статус:** Done — local and GitHub Actions Linux evidence passed
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Нормативные AC:** MOB-ARCH-AC-03–06, AC-56–57, AC-61–62, AC-75
 **Runtime effect:** none
@@ -490,7 +490,7 @@ JSON registry по отдельности не является Done.
 
 ## 13. Implementation evidence
 
-Локальная реализация завершена 2026-08-10:
+Реализация и обязательная проверка завершены 2026-08-10:
 
 - canonical Dart checker self-test — pass;
 - fixtures cover import/export, multiline, deferred, conditional directives,
@@ -504,8 +504,12 @@ JSON registry по отдельности не является Done.
 - `flutter analyze --no-pub` — 0 issues;
 - полный `flutter test --no-pub` — 659 passed;
 - `git diff --check` — pass;
-- application, packages, backend и ADR не изменялись этим slice.
+- application, packages, backend и ADR не изменялись этим slice;
+- GitHub Actions на Linux с Flutter 3.44.9 — `boundaries`, `codegen`, `lint` и
+  полный `tests` job (659 tests) завершились со статусом `success` для commit
+  `248e2b2573b9cce6b1e34ca624b65f1c86e3e2ed` в draft PR #1.
 
-Оставшийся gate: первый фактический запуск обновлённого `boundaries` job на
-GitHub Actions Linux. До его `success` MOB-ARCH-M1 остаётся `Review`, а не
-`Done`; timeout/cancelled/missing runtime не считаются pass.
+Первый фактический запуск обновлённого `boundaries` job на GitHub Actions Linux
+успешен. Обязательный внешний gate закрыт; MOB-ARCH-M1 имеет статус `Done`.
+Draft-статус PR не меняет технический результат и не означает merge или
+разрешение следующих runtime slices.

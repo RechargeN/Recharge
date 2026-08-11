@@ -756,14 +756,16 @@ boundary-правил запрещены. Отсутствующий runtime, ti
 Revision 3.1 проверена против ADR/baseline, принята владельцем продукта и
 связана из `ARCHITECTURE_BASELINE.md`. Runtime/status claims не изменялись.
 
-### M1 — Boundary inventory — Review
+### M1 — Boundary inventory — Done
 
 Approved tooling/docs slice реализован по
 [точному плану](MOBILE_ARCHITECTURE_M1_BOUNDARY_INVENTORY_PLAN.md): prohibited
 imports автоматизированы одним Dart engine, 106 exact suppressions имеют owner
 и remediation slice, inventory детерминирован, локальные gates зелёные.
-Статус остаётся Review до первого успешного запуска обновлённого boundary job
-на GitHub Actions Linux; product/runtime behavior не менялся.
+GitHub Actions Linux на Flutter 3.44.9 подтвердил `boundaries`, `codegen`,
+`lint` и 659 tests; repository scan: 380 Dart files / 106 findings / 106 exact
+suppressions / 0 unsuppressed / 0 stale / 0 expired. Product/runtime behavior
+не менялся; draft PR сам по себе не разрешает M2 или backend runtime.
 
 ### M2 — Primitive reconciliation
 
