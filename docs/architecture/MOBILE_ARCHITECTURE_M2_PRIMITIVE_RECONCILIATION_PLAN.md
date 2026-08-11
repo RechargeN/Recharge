@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B Review; M2-C–M2-E not started
+**Статус:** Approved — M2-A–M2-B Done; M2-C–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -539,13 +539,13 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 - GitHub Actions на Flutter 3.44.9 для draft PR #3: `boundaries`, `codegen`,
   `lint` и полный suite из 664 tests прошли.
 
-Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
-M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
+Это закрыло только M2-A. На момент его завершения compatibility exports
+оставались осознанным долгом M2-D, а M2-B–M2-E и весь M2 — незавершёнными.
 
 ## 15. M2-B implementation evidence
 
-M2-B реализован в отдельной ветке `agent/mobile-architecture-m2b` и находится
-в Review до прохождения GitHub Actions на Flutter 3.44.9:
+M2-B завершён в отдельной ветке `agent/mobile-architecture-m2b`, final
+implementation head `c55a6f6fec608931be864d7a0ddc8623c43537dc`, draft PR #4:
 
 - добавлены pure `CurrencyCode`, metadata, `Money`, typed parse result, exact
   parser и formatter без Flutter/infrastructure imports;
@@ -572,9 +572,14 @@ M2-B реализован в отдельной ветке `agent/mobile-archite
 - analyzer на установленном Flutter 3.8 воспроизводит ровно 60 известных
   baseline-ошибок отсутствующего Flutter 3.44 API
   (`DropdownButtonFormField.initialValue`, `RadioGroup`) и не находит новых
-  M2-B issues; полный local widget gate по той же причине inconclusive,
-  authoritative CI evidence ещё не получено.
+  M2-B issues; полный local widget gate по той же причине inconclusive;
+- authoritative GitHub Actions на pinned Flutter 3.44.9 прошёл `boundaries`,
+  `codegen`, `lint` и полный suite из 686 tests; первый CI review выявил и
+  исправил stale Money expectations, отсутствующий EUR runtime default в
+  test harness и один URL adapter, который ошибочно использовал display
+  formatting вместо canonical `MoneyFormatter.decimal`.
 
 M2-B не добавляет backend, Firebase, network/remote writes, Payments,
 provider integration, M2-C time/locale/market primitives или M2-D cleanup.
-До зелёного GitHub Actions этот раздел не переводит M2-B в Done.
+Эти evidence закрывают только M2-B. M2-C–M2-E и весь M2 остаются
+незавершёнными.
