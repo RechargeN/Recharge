@@ -1,8 +1,27 @@
 # Recharge Architecture Baseline
 
-Status: Frozen baseline  
-Effective date: 2026-04-17  
+Status: Frozen baseline, expanded by Accepted ADR 0019
+Effective date: 2026-08-08
 Owner: Recharge team
+Related expansion: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
+Backend delivery coordination: [BCK-02 v2.4](../product/RECHARGE_BACKEND_DELIVERY_MAP.md)
+— Approved canonical registry/ownership/waves/gates baseline; documentation only.
+Accepted mobile target supplement:
+[Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
+— Accepted 2026-08-10, documentation only.
+Current bounded migration slice:
+[MOB-ARCH-M1](MOBILE_ARCHITECTURE_M1_BOUNDARY_INVENTORY_PLAN.md) — approved
+tooling/docs implementation is locally complete and remains Review until the
+updated GitHub Actions Linux boundary job succeeds; no runtime claim.
+
+BCK-02 orders future backend specifications and gated implementation slices. It
+does not change this frozen architecture, supersede Accepted ADR or authorize
+`apps/backend`, Firebase provisioning, deployment or production data processing.
+
+Mobile Architecture v3.1 elaborates the target mobile structure, boundaries,
+market expansion and staged migration. It does not supersede this frozen
+baseline or Accepted ADR, and its acceptance does not authorize runtime work.
+Every implementation change still requires an Approved bounded slice.
 
 ## 1) Canonical Project Tree
 
@@ -23,6 +42,11 @@ recharge/
 │     └─ task.md
 │
 ├─ apps/
+│  ├─ backend/                 # Accepted target; created only by Approved ECL-03 stage
+│  │  ├─ firebase.json
+│  │  ├─ firestore.rules
+│  │  ├─ firestore.indexes.json
+│  │  └─ functions/{src/,test/}
 │  └─ mobile/
 │     ├─ pubspec.yaml
 │     ├─ analysis_options.yaml
@@ -91,6 +115,15 @@ recharge/
 8. Mock/seed assets and mock datasources are excluded from production flavors.
 9. CI gates are required before merge: lint, tests, codegen check, boundaries check.
 10. Any architecture change to this baseline requires a new ADR with status `Accepted`.
+11. Authoritative Booking, hold, inventory, idempotency and related operational
+    writes cross a trusted backend command boundary; mobile clients never write
+    their authoritative collections directly.
+12. The accepted `apps/backend` target does not itself authorize directory
+    creation, Firebase deployment or production data processing. Each physical
+    implementation is bounded by an Approved ECL-03 stage and its gates.
+13. Mobile target slices must cite the applicable Mobile Architecture v3.1
+    acceptance criteria by document version and stable AC ID. Any conflict with
+    this baseline requires an Accepted ADR rather than a silent reinterpretation.
 
 ## 3) Definition Of Done (Architecture Compliance)
 
@@ -99,3 +132,6 @@ recharge/
 - Tests are added according to change scope (`unit`/`widget`/`integration`).
 - No manual edits in generated code.
 - PR checklist is fully completed.
+- Backend slices additionally pass contract compatibility, emulator Rules,
+  transaction contention/idempotency and rollback/reconciliation gates before
+  production activation.

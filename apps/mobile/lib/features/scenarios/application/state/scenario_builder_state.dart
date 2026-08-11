@@ -1,30 +1,35 @@
 import '../../domain/entities/scenario_draft_entity.dart';
 
-enum ScenarioBuilderStatus {
-  ready,
-}
+enum ScenarioBuilderStatus { ready }
 
 class ScenarioBuilderState {
-  const ScenarioBuilderState({
-    required this.status,
-    required this.draft,
-  });
+  const ScenarioBuilderState({required this.status, required this.draft});
 
-  factory ScenarioBuilderState.initial() {
+  factory ScenarioBuilderState.initial({
+    required String draftId,
+    required String Function() generateId,
+  }) {
     return ScenarioBuilderState(
       status: ScenarioBuilderStatus.ready,
       draft: ScenarioDraftEntity(
+        id: draftId,
+        revision: 0,
         mood: ScenarioMood.calm,
         maxDurationMinutes: 150,
         freeOnly: false,
         walkingOnly: true,
         sourcePrompt: '',
-        steps: scenarioStepsFor(
-          mood: ScenarioMood.calm,
-          maxDurationMinutes: 150,
-          freeOnly: false,
-          walkingOnly: true,
-        ),
+        steps:
+            scenarioStepsFor(
+                  mood: ScenarioMood.calm,
+                  maxDurationMinutes: 150,
+                  freeOnly: false,
+                  walkingOnly: true,
+                )
+                .map(
+                  (ScenarioStepEntity step) => step.copyWith(id: generateId()),
+                )
+                .toList(growable: false),
       ),
     );
   }
@@ -75,10 +80,12 @@ ScenarioRouteFit scenarioRouteFitFor(ScenarioDraftEntity draft) {
       draft.totalDurationMinutes - draft.maxDurationMinutes;
   final int durationUnder =
       (draft.maxDurationMinutes * 0.45).round() - draft.totalDurationMinutes;
-  final bool hasPaidStep =
-      draft.steps.any((ScenarioStepEntity step) => !step.isFree);
-  final bool hasLongTransfer =
-      draft.steps.any((ScenarioStepEntity step) => step.distanceKm > 2.2);
+  final bool hasPaidStep = draft.steps.any(
+    (ScenarioStepEntity step) => !step.isFree,
+  );
+  final bool hasLongTransfer = draft.steps.any(
+    (ScenarioStepEntity step) => step.distanceKm > 2.2,
+  );
 
   if (durationOver > 0) {
     score -= durationOver >= 45 ? 32 : 22;
@@ -112,13 +119,13 @@ ScenarioRouteFit scenarioRouteFitFor(ScenarioDraftEntity draft) {
   final String label = boundedScore >= 85
       ? 'Ready'
       : boundedScore >= 65
-          ? 'Good with tweaks'
-          : 'Needs tuning';
+      ? 'Good with tweaks'
+      : 'Needs tuning';
   final String summary = boundedScore >= 85
       ? 'This route is ready for map or publishing.'
       : boundedScore >= 65
-          ? 'A small optimization can make this route easier to follow.'
-          : 'Optimize the route before sending it to Map or Create.';
+      ? 'A small optimization can make this route easier to follow.'
+      : 'Optimize the route before sending it to Map or Create.';
   return ScenarioRouteFit(
     score: boundedScore,
     label: label,
@@ -139,13 +146,13 @@ List<ScenarioStepEntity> scenarioStepsFor({
     ScenarioMood.active => _activeSteps,
   };
 
-  final List<ScenarioStepEntity> filtered = source.where(
-    (ScenarioStepEntity step) {
-      if (freeOnly && !step.isFree) return false;
-      if (walkingOnly && step.distanceKm > 2.2) return false;
-      return true;
-    },
-  ).toList(growable: false);
+  final List<ScenarioStepEntity> filtered = source
+      .where((ScenarioStepEntity step) {
+        if (freeOnly && !step.isFree) return false;
+        if (walkingOnly && step.distanceKm > 2.2) return false;
+        return true;
+      })
+      .toList(growable: false);
 
   final List<ScenarioStepEntity> selected = <ScenarioStepEntity>[];
   var totalMinutes = 0;
@@ -167,25 +174,28 @@ List<ScenarioStepEntity> scenarioSuggestionsFor(ScenarioDraftEntity draft) {
   final int remainingMinutes =
       draft.maxDurationMinutes - draft.totalDurationMinutes;
 
-  return _allSteps.where((ScenarioStepEntity step) {
-    if (selectedCategories.contains(step.category)) return false;
-    if (draft.freeOnly && !step.isFree) return false;
-    if (draft.walkingOnly && step.distanceKm > 2.2) return false;
-    if (remainingMinutes > 0 && step.durationMinutes > remainingMinutes) {
-      return false;
-    }
-    return true;
-  }).take(4).toList(growable: false);
+  return _allSteps
+      .where((ScenarioStepEntity step) {
+        if (selectedCategories.contains(step.category)) return false;
+        if (draft.freeOnly && !step.isFree) return false;
+        if (draft.walkingOnly && step.distanceKm > 2.2) return false;
+        if (remainingMinutes > 0 && step.durationMinutes > remainingMinutes) {
+          return false;
+        }
+        return true;
+      })
+      .take(4)
+      .toList(growable: false);
 }
 
 List<ScenarioStepEntity> optimizedScenarioStepsFor(ScenarioDraftEntity draft) {
-  List<ScenarioStepEntity> selected = draft.steps.where(
-    (ScenarioStepEntity step) {
-      if (draft.freeOnly && !step.isFree) return false;
-      if (draft.walkingOnly && step.distanceKm > 2.2) return false;
-      return true;
-    },
-  ).toList(growable: true);
+  List<ScenarioStepEntity> selected = draft.steps
+      .where((ScenarioStepEntity step) {
+        if (draft.freeOnly && !step.isFree) return false;
+        if (draft.walkingOnly && step.distanceKm > 2.2) return false;
+        return true;
+      })
+      .toList(growable: true);
 
   if (selected.isEmpty) {
     selected = scenarioStepsFor(
@@ -211,8 +221,9 @@ List<ScenarioStepEntity> optimizedScenarioStepsFor(ScenarioDraftEntity draft) {
   var optimizedDraft = draft.copyWith(steps: selected);
   while (optimizedDraft.totalDurationMinutes <
       (optimizedDraft.maxDurationMinutes * 0.55).round()) {
-    final List<ScenarioStepEntity> suggestions =
-        scenarioSuggestionsFor(optimizedDraft);
+    final List<ScenarioStepEntity> suggestions = scenarioSuggestionsFor(
+      optimizedDraft,
+    );
     if (suggestions.isEmpty) break;
     selected = <ScenarioStepEntity>[...selected, suggestions.first];
     optimizedDraft = optimizedDraft.copyWith(steps: selected);

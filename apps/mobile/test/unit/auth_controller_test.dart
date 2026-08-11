@@ -79,21 +79,24 @@ void main() {
     expect(controller.state.user?.id, 'demo_full_access');
   });
 
-  test('signOut keeps restored demo session when repository provides it', () async {
-    await controller.signIn(
-      email: 'user@example.com',
-      password: 'password123',
-      sourceScreen: 'test',
-      sourceAction: 'submit',
-    );
-    repository.restoreDemoWhenEmpty = true;
+  test(
+    'signOut keeps restored demo session when repository provides it',
+    () async {
+      await controller.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'submit',
+      );
+      repository.restoreDemoWhenEmpty = true;
 
-    await controller.signOut();
+      await controller.signOut();
 
-    expect(controller.state.status, AuthStatus.authenticated);
-    expect(controller.state.user?.id, 'demo_full_access');
-    expect(controller.state.user?.role, 'creator');
-  });
+      expect(controller.state.status, AuthStatus.authenticated);
+      expect(controller.state.user?.id, 'demo_full_access');
+      expect(controller.state.user?.role, 'admin');
+    },
+  );
 }
 
 class _FakeAuthRepository implements AuthRepository {
@@ -178,13 +181,14 @@ AuthResultEntity _demoAuthResult() {
     user: const AuthUserEntity(
       id: 'demo_full_access',
       email: 'demo@recharge.local',
-      role: 'creator',
+      role: 'admin',
       capabilities: <String>[
         'discover.read',
         'favorites.write',
         'create.event',
         'create.place',
         'scenario.generate',
+        'admin.tools.view',
       ],
       profileStatus: 'active',
     ),

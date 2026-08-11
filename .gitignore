@@ -34,7 +34,9 @@ migrate_working_dir/
 .pub/
 /build/
 **/build/
+**/coverage/
 tmp/
+workspace.xml
 
 # Symbolication related
 app.*.symbols

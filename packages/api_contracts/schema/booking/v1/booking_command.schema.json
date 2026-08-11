@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_command.schema.json",
+  "title": "Recharge Booking command envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "commandType": {
+      "type": "string",
+      "enum": [
+        "createBooking",
+        "cancelBooking",
+        "approveApplication",
+        "rejectApplication",
+        "joinWaitlist",
+        "leaveWaitlist",
+        "acceptWaitlistHold",
+        "declineWaitlistHold",
+        "reconfirmBooking"
+      ]
+    },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "idempotencyKey": { "$ref": "common.schema.json#/$defs/id" },
+    "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+    "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "common.schema.json#/$defs/id" },
+        "holdId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "inventoryPoolId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "participantUnits": { "$ref": "common.schema.json#/$defs/positiveUnits" },
+        "auxiliaryTrackId": { "$ref": "common.schema.json#/$defs/id" },
+        "namedGuests": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "$ref": "common.schema.json#/$defs/namedGuest" }
+        },
+        "applicationFields": { "type": "object" },
+        "reasonCode": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    }
+  },
+  "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "payload"]
+}

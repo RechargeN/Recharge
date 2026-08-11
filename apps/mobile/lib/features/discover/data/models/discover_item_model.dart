@@ -16,6 +16,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
     required super.priceAmount,
     required super.distanceKm,
     required super.isFree,
+    super.objectKind,
     required super.relevanceScore,
     super.coverImageUrl,
     super.organizerName,
@@ -53,6 +54,10 @@ class DiscoverItemModel extends DiscoverItemEntity {
       priceAmount: (map['price_amount']! as num).toDouble(),
       distanceKm: (map['distance_km']! as num).toDouble(),
       isFree: map['is_free']! as bool,
+      objectKind: DiscoverObjectKind.values.firstWhere(
+        (DiscoverObjectKind value) => value.name == map['object_kind'],
+        orElse: () => DiscoverObjectKind.activity,
+      ),
       relevanceScore: (map['relevance_score'] as num?)?.toDouble() ?? 0,
       coverImageUrl: map['cover_image_url'] as String? ?? '',
       organizerName: map['organizer_name'] as String? ?? '',

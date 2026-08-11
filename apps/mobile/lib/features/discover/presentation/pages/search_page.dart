@@ -9,6 +9,16 @@ import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 
+abstract final class _SearchLandingStyle {
+  static const Color ink = Color(0xFF10231F);
+  static const Color mutedInk = Color(0xFF687771);
+  static const Color accent = Color(0xFF0B4A3C);
+  static const Color canvas = Color(0xFFFFFFFF);
+  static const Color softSurface = Color(0xFFF5F8F5);
+  static const Color chipSurface = Color(0xFFEDF4EF);
+  static const Color line = Color(0xFFE1E8E3);
+}
+
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
@@ -53,29 +63,95 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final List<SavedSearchEntity> recent = controller.state.savedSearches;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Search Recharge')),
+      backgroundColor: _SearchLandingStyle.canvas,
+      appBar: AppBar(
+        toolbarHeight: 50,
+        backgroundColor: _SearchLandingStyle.canvas,
+        foregroundColor: _SearchLandingStyle.ink,
+        centerTitle: false,
+        titleSpacing: 16,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: const Text(
+          'Search Recharge',
+          style: TextStyle(
+            color: _SearchLandingStyle.ink,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        key: const Key('search-landing-body'),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: <Widget>[
-          TextField(
-            key: const Key('regular-search-field'),
-            controller: _searchController,
-            textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _openResults(controller),
-            decoration: InputDecoration(
-              hintText: 'Search activity, place or plan',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: IconButton(
-                key: const Key('regular-search-filters'),
-                tooltip: 'Search filters',
-                onPressed: () => _openFilters(controller, query),
-                icon: const Icon(Icons.tune_rounded),
+          SizedBox(
+            height: 42,
+            child: TextField(
+              key: const Key('regular-search-field'),
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => _openResults(controller),
+              style: const TextStyle(
+                color: _SearchLandingStyle.ink,
+                fontSize: 13,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search activity, place or plan',
+                hintStyle: const TextStyle(
+                  color: _SearchLandingStyle.mutedInk,
+                  fontSize: 12,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: _SearchLandingStyle.mutedInk,
+                  size: 18,
+                ),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 38,
+                  minHeight: 38,
+                ),
+                suffixIcon: IconButton(
+                  key: const Key('regular-search-filters'),
+                  tooltip: 'Search filters',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _openFilters(controller, query),
+                  icon: const Icon(
+                    Icons.tune_rounded,
+                    color: _SearchLandingStyle.mutedInk,
+                    size: 18,
+                  ),
+                ),
+                filled: true,
+                fillColor: _SearchLandingStyle.canvas,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(22),
+                  borderSide: const BorderSide(color: _SearchLandingStyle.line),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(22),
+                  borderSide: const BorderSide(color: _SearchLandingStyle.line),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(22),
+                  borderSide: const BorderSide(
+                    color: _SearchLandingStyle.accent,
+                    width: 1.2,
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          _SearchConditionChips(query: query),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
+          _SearchConditionChips(
+            query: query,
+            onDate: () => _openDatePicker(controller, query),
+            onPeople: () => _openPeoplePicker(controller, query),
+            onBudget: () => _openBudgetPicker(controller, query),
+            onRadius: () => _openRadiusPicker(controller, query),
+          ),
+          const SizedBox(height: 12),
           _QuickSearchActions(
             onNearNow: () {
               final _DateWindow today = _todayWindow();
@@ -99,7 +175,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               );
             },
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           _SectionHeader(
             title: 'Recent searches',
             action: recent.length > 3 ? 'See all' : null,
@@ -107,7 +183,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ? () => _showAllRecent(controller, recent)
                 : null,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _RecentSearches(
             searches: recent.take(3).toList(growable: false),
             onOpen: (SavedSearchEntity search) =>
@@ -115,14 +191,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             onDelete: (SavedSearchEntity search) =>
                 controller.deleteSavedSearch(search.id),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           _SectionHeader(
             title: 'Quick plans',
             action: 'See all',
             onAction: () =>
                 context.go('${RouteNames.scenarioBuilder}?preview=1'),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           _QuickPlanRail(onOpen: (String location) => context.go(location)),
         ],
       ),
@@ -133,6 +209,88 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     FocusScope.of(context).unfocus();
     controller.stageSearchConditions(queryText: _searchController.text);
     context.go(_resultsLocation(controller.state.draftQuery));
+  }
+
+  Future<void> _openDatePicker(
+    DiscoverFeedController controller,
+    DiscoverQuery query,
+  ) async {
+    final _QuickDateSelection? selection =
+        await showModalBottomSheet<_QuickDateSelection>(
+          context: context,
+          useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) => _QuickDateSheet(query: query),
+        );
+    if (selection == null) return;
+    controller.stageSearchConditions(
+      dateFrom: selection.window?.from,
+      clearDateFrom: selection.window == null,
+      dateTo: selection.window?.to,
+      clearDateTo: selection.window == null,
+      clearTimeWindow: true,
+      clearTravelContext: true,
+    );
+  }
+
+  Future<void> _openPeoplePicker(
+    DiscoverFeedController controller,
+    DiscoverQuery query,
+  ) async {
+    final _QuickPeopleSelection? selection =
+        await showModalBottomSheet<_QuickPeopleSelection>(
+          context: context,
+          useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) =>
+              _QuickPeopleSheet(selected: query.peopleCount),
+        );
+    if (selection == null) return;
+    controller.stageSearchConditions(
+      peopleCount: selection.peopleCount,
+      clearPeopleCount: selection.peopleCount == null,
+    );
+  }
+
+  Future<void> _openBudgetPicker(
+    DiscoverFeedController controller,
+    DiscoverQuery query,
+  ) async {
+    final _QuickBudgetSelection? selection =
+        await showModalBottomSheet<_QuickBudgetSelection>(
+          context: context,
+          useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) =>
+              _QuickBudgetSheet(selected: query.budgetMax),
+        );
+    if (selection == null) return;
+    controller.stageSearchConditions(
+      budgetMax: selection.budgetMax,
+      clearBudgetMax: selection.budgetMax == null,
+    );
+  }
+
+  Future<void> _openRadiusPicker(
+    DiscoverFeedController controller,
+    DiscoverQuery query,
+  ) async {
+    final _QuickRadiusSelection? selection =
+        await showModalBottomSheet<_QuickRadiusSelection>(
+          context: context,
+          useSafeArea: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) => _QuickRadiusSheet(query: query),
+        );
+    if (selection == null) return;
+    controller.stageSearchConditions(
+      radiusMeters: selection.radiusMeters,
+      unlimitedRadius: selection.unlimited,
+    );
   }
 
   Future<void> _openFilters(
@@ -229,68 +387,466 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 }
 
 class _SearchConditionChips extends StatelessWidget {
-  const _SearchConditionChips({required this.query});
+  const _SearchConditionChips({
+    required this.query,
+    required this.onDate,
+    required this.onPeople,
+    required this.onBudget,
+    required this.onRadius,
+  });
 
   final DiscoverQuery query;
+  final VoidCallback onDate;
+  final VoidCallback onPeople;
+  final VoidCallback onBudget;
+  final VoidCallback onRadius;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> chips = <Widget>[
       if (query.timeWindow != null)
-        Chip(
-          avatar: const Icon(Icons.schedule_outlined, size: 15),
-          label: Text(
-            query.timeWindow!.mode == TimeWindowMode.flexible
-                ? 'Flexible ±${query.timeWindow!.flexibilityMinutes} min'
-                : query.timeWindow!.mode == TimeWindowMode.anytimeToday
-                ? 'Until end of day'
-                : 'Exact time',
-          ),
+        _SearchConditionChip(
+          icon: Icons.schedule_outlined,
+          label: query.timeWindow!.mode == TimeWindowMode.flexible
+              ? 'Flexible ±${query.timeWindow!.flexibilityMinutes} min'
+              : query.timeWindow!.mode == TimeWindowMode.anytimeToday
+              ? 'Until end of day'
+              : 'Exact time',
         ),
-      Chip(
-        avatar: const Icon(Icons.calendar_today_outlined, size: 15),
-        label: Text(_dateLabel(query)),
+      _SearchConditionChip(
+        key: const Key('search-date-chip'),
+        icon: Icons.calendar_today_outlined,
+        label: _dateLabel(query),
+        onTap: onDate,
       ),
-      Chip(
-        avatar: const Icon(Icons.group_outlined, size: 15),
-        label: Text(
-          query.peopleCount == null
-              ? 'Any group'
-              : '${query.peopleCount} people',
-        ),
+      _SearchConditionChip(
+        key: const Key('search-people-chip'),
+        icon: Icons.group_outlined,
+        label: query.peopleCount == null
+            ? 'Any group'
+            : '${query.peopleCount} people',
+        onTap: onPeople,
       ),
-      Chip(
-        avatar: const Icon(Icons.payments_outlined, size: 15),
-        label: Text(
-          query.budgetMax == null
-              ? 'Any budget'
-              : '€${query.budgetMax!.round()}',
-        ),
+      _SearchConditionChip(
+        key: const Key('search-budget-chip'),
+        icon: Icons.payments_outlined,
+        label: query.budgetMax == null
+            ? 'Any budget'
+            : query.budgetMax == 0
+            ? 'Free'
+            : '€${query.budgetMax!.round()}',
+        onTap: onBudget,
       ),
-      Chip(
-        avatar: const Icon(Icons.near_me_outlined, size: 15),
-        label: Text(
-          query.unlimitedRadius
-              ? 'Any area'
-              : '${(query.radiusMeters / 1000).round()} km',
-        ),
+      _SearchConditionChip(
+        key: const Key('search-radius-chip'),
+        icon: Icons.location_on_outlined,
+        label: query.unlimitedRadius
+            ? 'Any area'
+            : '${(query.radiusMeters / 1000).round()} km',
+        onTap: onRadius,
       ),
       if (query.availableDurationMinutes != null)
-        Chip(
-          avatar: const Icon(Icons.schedule_outlined, size: 15),
-          label: Text('${query.availableDurationMinutes} min'),
+        _SearchConditionChip(
+          icon: Icons.schedule_outlined,
+          label: '${query.availableDurationMinutes} min',
         ),
       if (query.mood != null)
-        Chip(
-          avatar: const Icon(Icons.nightlight_outlined, size: 15),
-          label: Text(
-            '${query.mood![0].toUpperCase()}${query.mood!.substring(1)}',
-          ),
+        _SearchConditionChip(
+          icon: Icons.nightlight_outlined,
+          label: '${query.mood![0].toUpperCase()}${query.mood!.substring(1)}',
         ),
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(spacing: 6, children: chips),
+    );
+  }
+}
+
+class _SearchConditionChip extends StatelessWidget {
+  const _SearchConditionChip({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: _SearchLandingStyle.chipSurface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 32),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(icon, size: 14, color: _SearchLandingStyle.accent),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: _SearchLandingStyle.ink,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickDateSelection {
+  const _QuickDateSelection(this.window);
+
+  final _DateWindow? window;
+}
+
+class _QuickPeopleSelection {
+  const _QuickPeopleSelection(this.peopleCount);
+
+  final int? peopleCount;
+}
+
+class _QuickBudgetSelection {
+  const _QuickBudgetSelection(this.budgetMax);
+
+  final double? budgetMax;
+}
+
+class _QuickRadiusSelection {
+  const _QuickRadiusSelection({
+    required this.radiusMeters,
+    required this.unlimited,
+  });
+
+  final double radiusMeters;
+  final bool unlimited;
+}
+
+class _QuickDateSheet extends StatelessWidget {
+  const _QuickDateSheet({required this.query});
+
+  final DiscoverQuery query;
+
+  @override
+  Widget build(BuildContext context) {
+    final _DateWindow today = _todayWindow();
+    final _DateWindow tomorrow = _tomorrowWindow();
+    final _DateWindow weekend = _weekendWindow();
+    return _QuickPickerSurface(
+      key: const Key('search-date-sheet'),
+      title: 'Choose date',
+      onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
+      child: _FilterPillWrap(
+        children: <Widget>[
+          _FilterPill(
+            label: 'Any date',
+            selected: query.dateFrom == null && query.dateTo == null,
+            onTap: () =>
+                Navigator.of(context).pop(const _QuickDateSelection(null)),
+          ),
+          _FilterPill(
+            key: const Key('quick-date-today'),
+            label: 'Today',
+            selected: _sameLocalDay(query.dateFrom, today.from),
+            onTap: () => Navigator.of(context).pop(_QuickDateSelection(today)),
+          ),
+          _FilterPill(
+            key: const Key('quick-date-tomorrow'),
+            label: 'Tomorrow',
+            selected: _sameLocalDay(query.dateFrom, tomorrow.from),
+            onTap: () =>
+                Navigator.of(context).pop(_QuickDateSelection(tomorrow)),
+          ),
+          _FilterPill(
+            key: const Key('quick-date-weekend'),
+            label: 'This weekend',
+            selected:
+                _sameLocalDay(query.dateFrom, weekend.from) &&
+                _sameLocalDay(query.dateTo, weekend.to),
+            onTap: () =>
+                Navigator.of(context).pop(_QuickDateSelection(weekend)),
+          ),
+          _FilterPill(
+            key: const Key('quick-date-custom'),
+            label: 'Choose dates',
+            selected: false,
+            onTap: () => _pickCustomRange(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickCustomRange(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime firstDate = DateTime(now.year, now.month, now.day);
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: firstDate.add(const Duration(days: 730)),
+      helpText: 'Choose search dates',
+    );
+    if (picked == null || !context.mounted) return;
+    final DateTime from = DateTime(
+      picked.start.year,
+      picked.start.month,
+      picked.start.day,
+    );
+    final DateTime to = DateTime(
+      picked.end.year,
+      picked.end.month,
+      picked.end.day,
+      23,
+      59,
+      59,
+    );
+    Navigator.of(context).pop(_QuickDateSelection(_DateWindow(from, to)));
+  }
+}
+
+class _QuickPeopleSheet extends StatelessWidget {
+  const _QuickPeopleSheet({required this.selected});
+
+  final int? selected;
+
+  @override
+  Widget build(BuildContext context) => _QuickPickerSurface(
+    key: const Key('search-people-sheet'),
+    title: 'Group size',
+    onReset: () => Navigator.of(context).pop(const _QuickPeopleSelection(null)),
+    child: _FilterPillWrap(
+      children: <Widget>[
+        for (final int? value in <int?>[null, 1, 2, 3, 4, 5])
+          _FilterPill(
+            key: value == null ? null : Key('quick-people-$value'),
+            label: value == null
+                ? 'Any group'
+                : value == 1
+                ? 'Just me'
+                : value == 5
+                ? '5+'
+                : '$value people',
+            selected: selected == value,
+            onTap: () =>
+                Navigator.of(context).pop(_QuickPeopleSelection(value)),
+          ),
+        _FilterPill(
+          key: const Key('quick-people-custom'),
+          label: selected != null && selected! > 5
+              ? 'Custom · $selected'
+              : 'Custom',
+          selected: selected != null && selected! > 5,
+          onTap: () => _editCustom(context),
+        ),
+      ],
+    ),
+  );
+
+  Future<void> _editCustom(BuildContext context) async {
+    final int? result = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) => _NumberInputDialog<int>(
+        title: 'Number of people',
+        hint: 'For example, 8',
+        initialValue: selected != null && selected! > 5 ? '$selected' : '',
+        parser: (String value) => int.tryParse(value),
+        isValid: (int value) => value >= 1 && value <= 99,
+        errorMessage: 'Enter a number from 1 to 99',
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    Navigator.of(context).pop(_QuickPeopleSelection(result));
+  }
+}
+
+class _QuickBudgetSheet extends StatelessWidget {
+  const _QuickBudgetSheet({required this.selected});
+
+  final double? selected;
+
+  @override
+  Widget build(BuildContext context) => _QuickPickerSurface(
+    key: const Key('search-budget-sheet'),
+    title: 'Budget per person',
+    onReset: () => Navigator.of(context).pop(const _QuickBudgetSelection(null)),
+    child: _FilterPillWrap(
+      children: <Widget>[
+        for (final double? value in <double?>[null, 0, 10, 20, 50])
+          _FilterPill(
+            key: value == null ? null : Key('quick-budget-${value.round()}'),
+            label: value == null
+                ? 'Any budget'
+                : value == 0
+                ? 'Free'
+                : 'Up to €${value.round()}',
+            selected: selected == value,
+            onTap: () =>
+                Navigator.of(context).pop(_QuickBudgetSelection(value)),
+          ),
+        _FilterPill(
+          key: const Key('quick-budget-custom'),
+          label: _isCustom ? 'Custom · €${selected!.round()}' : 'Custom',
+          selected: _isCustom,
+          onTap: () => _editCustom(context),
+        ),
+      ],
+    ),
+  );
+
+  bool get _isCustom =>
+      selected != null && !<double>[0, 10, 20, 50].contains(selected);
+
+  Future<void> _editCustom(BuildContext context) async {
+    final double? result = await showDialog<double>(
+      context: context,
+      builder: (BuildContext context) => _NumberInputDialog<double>(
+        title: 'Budget per person',
+        hint: 'Amount in EUR',
+        initialValue: _isCustom ? '${selected!.round()}' : '',
+        parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
+        isValid: (double value) => value >= 0 && value <= 10000,
+        errorMessage: 'Enter an amount from €0 to €10,000',
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    Navigator.of(context).pop(_QuickBudgetSelection(result));
+  }
+}
+
+class _QuickRadiusSheet extends StatefulWidget {
+  const _QuickRadiusSheet({required this.query});
+
+  final DiscoverQuery query;
+
+  @override
+  State<_QuickRadiusSheet> createState() => _QuickRadiusSheetState();
+}
+
+class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
+  late double _radiusKm = (widget.query.radiusMeters / 1000).clamp(1, 50);
+  late bool _unlimited = widget.query.unlimitedRadius;
+
+  @override
+  Widget build(BuildContext context) => _QuickPickerSurface(
+    key: const Key('search-radius-sheet'),
+    title: 'Search radius',
+    onReset: () => Navigator.of(
+      context,
+    ).pop(const _QuickRadiusSelection(radiusMeters: 5000, unlimited: false)),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _FilterPillWrap(
+          children: <Widget>[
+            for (final int value in <int>[1, 3, 5, 10, 20, 50])
+              _FilterPill(
+                key: Key('quick-radius-$value'),
+                label: '$value km',
+                selected: !_unlimited && _radiusKm.round() == value,
+                onTap: () => setState(() {
+                  _radiusKm = value.toDouble();
+                  _unlimited = false;
+                }),
+              ),
+            _FilterPill(
+              key: const Key('quick-radius-any'),
+              label: 'Any distance',
+              selected: _unlimited,
+              onTap: () => setState(() => _unlimited = true),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Row(
+          children: <Widget>[
+            const Text('Custom radius'),
+            const Spacer(),
+            Text(_unlimited ? 'Any distance' : '${_radiusKm.round()} km'),
+          ],
+        ),
+        Slider(
+          key: const Key('quick-radius-slider'),
+          min: 1,
+          max: 50,
+          divisions: 49,
+          value: _radiusKm,
+          onChanged: (double value) => setState(() {
+            _radiusKm = value;
+            _unlimited = false;
+          }),
+        ),
+        const SizedBox(height: 8),
+        FilledButton(
+          key: const Key('quick-radius-apply'),
+          onPressed: () => Navigator.of(context).pop(
+            _QuickRadiusSelection(
+              radiusMeters: _radiusKm * 1000,
+              unlimited: _unlimited,
+            ),
+          ),
+          child: const Text('Apply radius'),
+        ),
+      ],
+    ),
+  );
+}
+
+class _QuickPickerSurface extends StatelessWidget {
+  const _QuickPickerSurface({
+    super.key,
+    required this.title,
+    required this.onReset,
+    required this.child,
+  });
+
+  final String title;
+  final VoidCallback onReset;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const _SheetDragHandle(),
+              _SheetHeader(
+                title: title,
+                actionLabel: 'Reset',
+                onAction: onReset,
+              ),
+              const SizedBox(height: 12),
+              child,
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -329,33 +885,39 @@ class _QuickSearchActions extends StatelessWidget {
           .map(
             (_QuickActionData action) => Expanded(
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 onTap: action.onTap,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 2,
-                    vertical: 4,
+                    horizontal: 1,
+                    vertical: 3,
                   ),
                   child: Column(
                     children: <Widget>[
-                      DecoratedBox(
+                      Container(
+                        width: 42,
+                        height: 42,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
+                          color: _SearchLandingStyle.canvas,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
+                          border: Border.all(color: _SearchLandingStyle.line),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(11),
-                          child: Icon(action.icon, size: 20),
+                        child: Icon(
+                          action.icon,
+                          size: 18,
+                          color: _SearchLandingStyle.ink,
                         ),
                       ),
-                      const SizedBox(height: 7),
+                      const SizedBox(height: 5),
                       Text(
                         action.label,
                         maxLines: 2,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        style: const TextStyle(
+                          color: _SearchLandingStyle.ink,
+                          fontSize: 9.5,
+                          height: 1.05,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -390,13 +952,28 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            style: const TextStyle(
+              color: _SearchLandingStyle.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
         if (action != null)
-          TextButton(onPressed: onAction, child: Text(action!)),
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: _SearchLandingStyle.accent,
+              textStyle: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            child: Text(action!),
+          ),
       ],
     );
   }
@@ -416,48 +993,169 @@ class _RecentSearches extends StatelessWidget {
   Widget build(BuildContext context) {
     if (searches.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(18),
+        key: const Key('recent-searches-empty'),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(14),
+          color: _SearchLandingStyle.softSurface,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: const Text(
           'Your regular searches will appear here automatically.',
+          style: TextStyle(color: _SearchLandingStyle.mutedInk, fontSize: 12),
         ),
       );
     }
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: <Widget>[
-          for (int index = 0; index < searches.length; index++) ...<Widget>[
-            ListTile(
-              dense: true,
-              leading: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: Icon(_recentIcon(searches[index]), size: 19),
-              ),
-              title: Text(
-                searches[index].title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                searches[index].subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => onOpen(searches[index]),
-              onLongPress: () => onDelete(searches[index]),
-            ),
-            if (index < searches.length - 1)
-              const Divider(height: 1, indent: 64),
-          ],
+    return Column(
+      children: <Widget>[
+        for (int index = 0; index < searches.length; index++) ...<Widget>[
+          _RecentSearchTile(
+            search: searches[index],
+            tone: index,
+            onOpen: () => onOpen(searches[index]),
+            onDelete: () => onDelete(searches[index]),
+          ),
+          if (index < searches.length - 1) const SizedBox(height: 6),
         ],
+      ],
+    );
+  }
+}
+
+class _RecentSearchTile extends StatelessWidget {
+  const _RecentSearchTile({
+    required this.search,
+    required this.tone,
+    required this.onOpen,
+    required this.onDelete,
+  });
+
+  final SavedSearchEntity search;
+  final int tone;
+  final VoidCallback onOpen;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> details = search.subtitle
+        .split(' · ')
+        .where((String value) => value.trim().isNotEmpty)
+        .take(3)
+        .toList(growable: false);
+    final Color iconSurface = switch (tone % 3) {
+      1 => const Color(0xFFF0E8FF),
+      2 => const Color(0xFFE8F5E9),
+      _ => const Color(0xFFE5F2E8),
+    };
+    final Color iconColor = switch (tone % 3) {
+      1 => const Color(0xFF7250A6),
+      2 => const Color(0xFF4E7D4B),
+      _ => _SearchLandingStyle.accent,
+    };
+
+    return Material(
+      color: _SearchLandingStyle.canvas,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: _SearchLandingStyle.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onOpen,
+        onLongPress: onDelete,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: iconSurface,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(_recentIcon(search), size: 18, color: iconColor),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      search.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _SearchLandingStyle.ink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    if (details.isEmpty)
+                      Text(
+                        search.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _SearchLandingStyle.mutedInk,
+                          fontSize: 9.5,
+                        ),
+                      )
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: <Widget>[
+                            for (
+                              int index = 0;
+                              index < details.length;
+                              index++
+                            ) ...<Widget>[
+                              _RecentDetailPill(label: details[index]),
+                              if (index < details.length - 1)
+                                const SizedBox(width: 4),
+                            ],
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: _SearchLandingStyle.mutedInk,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentDetailPill extends StatelessWidget {
+  const _RecentDetailPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: _SearchLandingStyle.softSurface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: _SearchLandingStyle.mutedInk,
+          fontSize: 8.5,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -475,6 +1173,8 @@ class _QuickPlanRail extends StatelessWidget {
         '~ 1 hour',
         Icons.local_cafe_outlined,
         0,
+        'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085'
+            '?auto=format&fit=crop&w=600&q=80',
         'calm',
         60,
         'food_drinks.coffee,wellness_recharge.calm_walk',
@@ -484,6 +1184,8 @@ class _QuickPlanRail extends StatelessWidget {
         '1–2 hours',
         Icons.wb_twilight_outlined,
         1,
+        'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429'
+            '?auto=format&fit=crop&w=600&q=80',
         'calm',
         120,
         'wellness_recharge.calm_walk,art_culture_museums.museum',
@@ -493,6 +1195,8 @@ class _QuickPlanRail extends StatelessWidget {
         '2–3 hours',
         Icons.directions_run_outlined,
         2,
+        'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
+            '?auto=format&fit=crop&w=600&q=80',
         'active',
         150,
         'outdoor_nature_walking.city_walk,sport.tennis',
@@ -502,17 +1206,20 @@ class _QuickPlanRail extends StatelessWidget {
         '2–3 hours',
         Icons.celebration_outlined,
         3,
+        'https://images.unsplash.com/photo-1501386761578-eac5c94b800a'
+            '?auto=format&fit=crop&w=600&q=80',
         'social',
         180,
         'games_indoor.board_games,music_nightlife.afterwork_drinks',
       ),
     ];
     return SizedBox(
-      height: 146,
+      key: const Key('quick-plan-rail'),
+      height: 126,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: plans.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (BuildContext context, int index) {
           final _QuickPlanData plan = plans[index];
           final Color planColor = _quickPlanColor(
@@ -520,33 +1227,26 @@ class _QuickPlanRail extends StatelessWidget {
             plan.tone,
           );
           return SizedBox(
-            width: 132,
+            width: 112,
             child: InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(10),
               onTap: () => onOpen(plan.location),
-              child: Card(
-                margin: EdgeInsets.zero,
+              child: Material(
+                color: _SearchLandingStyle.canvas,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: _SearchLandingStyle.line),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Expanded(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: <Color>[
-                              planColor.withValues(alpha: 0.62),
-                              planColor,
-                            ],
-                          ),
-                        ),
-                        child: Icon(plan.icon, color: Colors.white, size: 34),
-                      ),
+                    SizedBox(
+                      height: 76,
+                      child: _QuickPlanImage(plan: plan, fallback: planColor),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      padding: const EdgeInsets.fromLTRB(7, 6, 7, 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -554,11 +1254,18 @@ class _QuickPlanRail extends StatelessWidget {
                             plan.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(
+                              color: _SearchLandingStyle.ink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           Text(
                             plan.duration,
-                            style: Theme.of(context).textTheme.labelSmall,
+                            style: const TextStyle(
+                              color: _SearchLandingStyle.mutedInk,
+                              fontSize: 9,
+                            ),
                           ),
                         ],
                       ),
@@ -580,6 +1287,7 @@ class _QuickPlanData {
     this.duration,
     this.icon,
     this.tone,
+    this.imageUrl,
     this.mood,
     this.minutes,
     this.steps,
@@ -588,6 +1296,7 @@ class _QuickPlanData {
   final String duration;
   final IconData icon;
   final int tone;
+  final String imageUrl;
   final String mood;
   final int minutes;
   final String steps;
@@ -603,6 +1312,56 @@ class _QuickPlanData {
       'steps': steps,
     },
   ).toString();
+}
+
+class _QuickPlanImage extends StatelessWidget {
+  const _QuickPlanImage({required this.plan, required this.fallback});
+
+  final _QuickPlanData plan;
+  final Color fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget placeholder = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[fallback.withValues(alpha: 0.58), fallback],
+        ),
+      ),
+      child: Center(child: Icon(plan.icon, color: Colors.white, size: 28)),
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        Image.network(
+          plan.imageUrl,
+          fit: BoxFit.cover,
+          frameBuilder:
+              (
+                BuildContext context,
+                Widget child,
+                int? frame,
+                bool wasSynchronouslyLoaded,
+              ) {
+                if (wasSynchronouslyLoaded || frame != null) return child;
+                return placeholder;
+              },
+          errorBuilder: (_, __, ___) => placeholder,
+        ),
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[Colors.transparent, Color(0x33000000)],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 Color _quickPlanColor(ColorScheme colors, int tone) => switch (tone) {
@@ -2176,6 +2935,31 @@ _DateWindow _todayWindow() {
   return _DateWindow(now, DateTime(now.year, now.month, now.day, 23, 59, 59));
 }
 
+_DateWindow _tomorrowWindow() {
+  final DateTime now = DateTime.now();
+  final DateTime tomorrow = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).add(const Duration(days: 1));
+  return _DateWindow(
+    tomorrow,
+    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59),
+  );
+}
+
+_DateWindow _weekendWindow() {
+  final DateTime now = DateTime.now();
+  final DateTime today = DateTime(now.year, now.month, now.day);
+  final int daysUntilSaturday = (DateTime.saturday - today.weekday) % 7;
+  final DateTime saturday = today.add(Duration(days: daysUntilSaturday));
+  final DateTime sunday = saturday.add(const Duration(days: 1));
+  return _DateWindow(
+    saturday,
+    DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59),
+  );
+}
+
 _DateWindow _tonightWindow() {
   final DateTime now = DateTime.now();
   final DateTime from = DateTime(now.year, now.month, now.day, 18);
@@ -2189,13 +2973,31 @@ String _dateLabel(DiscoverQuery query) {
   if (query.dateFrom == null && query.dateTo == null) return 'Any date';
   final DateTime now = DateTime.now();
   final DateTime? from = query.dateFrom?.toLocal();
-  if (from?.year == now.year &&
-      from?.month == now.month &&
-      from?.day == now.day) {
+  final DateTime? to = query.dateTo?.toLocal();
+  if (_sameLocalDay(from, now)) {
     return 'Today';
   }
-  return 'Date set';
+  if (_sameLocalDay(from, now.add(const Duration(days: 1)))) {
+    return 'Tomorrow';
+  }
+  if (from == null) return 'Date set';
+  final String fromLabel = _numericDate(from);
+  if (to == null || _sameLocalDay(from, to)) return fromLabel;
+  return '$fromLabel–${_numericDate(to)}';
 }
+
+bool _sameLocalDay(DateTime? first, DateTime? second) {
+  if (first == null || second == null) return false;
+  final DateTime firstLocal = first.toLocal();
+  final DateTime secondLocal = second.toLocal();
+  return firstLocal.year == secondLocal.year &&
+      firstLocal.month == secondLocal.month &&
+      firstLocal.day == secondLocal.day;
+}
+
+String _numericDate(DateTime value) =>
+    '${value.day.toString().padLeft(2, '0')}.'
+    '${value.month.toString().padLeft(2, '0')}';
 
 String _dateChoice(DiscoverQuery query) {
   if (query.dateFrom == null && query.dateTo == null) return 'any';

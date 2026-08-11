@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "file": "valid/domain_to_domain.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/domain/usecases/example.dart",
+      "expectedRules": []
+    },
+    {
+      "file": "valid/presentation_to_application.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/presentation/pages/example.dart",
+      "expectedRules": []
+    },
+    {
+      "file": "valid/comments_and_strings.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/domain/entities/example.dart",
+      "expectedRules": []
+    },
+    {
+      "file": "valid/app_shell_composition.dart",
+      "sourcePath": "apps/mobile/lib/app/presentation/app_shell.dart",
+      "expectedRules": []
+    },
+    {
+      "file": "invalid/cross_feature.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/presentation/pages/example.dart",
+      "expectedRules": ["cross_feature_import"]
+    },
+    {
+      "file": "invalid/domain_to_data.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/domain/usecases/example.dart",
+      "expectedRules": ["domain_to_non_domain_layer"]
+    },
+    {
+      "file": "invalid/domain_framework.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/domain/entities/example.dart",
+      "expectedRules": ["domain_framework_dependency"]
+    },
+    {
+      "file": "invalid/application_to_data.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/application/example.dart",
+      "expectedRules": ["application_to_data_or_presentation"]
+    },
+    {
+      "file": "invalid/data_to_application.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/data/example.dart",
+      "expectedRules": ["data_to_application_or_presentation"]
+    },
+    {
+      "file": "invalid/presentation_to_data.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/presentation/example.dart",
+      "expectedRules": ["presentation_to_data"]
+    },
+    {
+      "file": "invalid/feature_to_app_di.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/application/example.dart",
+      "expectedRules": ["feature_to_app_di_or_app_presentation"]
+    },
+    {
+      "file": "invalid/conditional_import.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/domain/entities/example.dart",
+      "expectedRules": ["domain_framework_dependency"]
+    },
+    {
+      "file": "invalid/multiline_deferred.dart",
+      "sourcePath": "apps/mobile/lib/features/alpha/presentation/pages/example.dart",
+      "expectedRules": ["cross_feature_import"]
+    }
+  ]
+}

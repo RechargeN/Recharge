@@ -35,18 +35,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     final authController = ref.watch(authControllerProvider);
     final user = authController.state.user;
-    final ExploreController exploreController = ref.watch(exploreControllerProvider);
+    final ExploreController exploreController = ref.watch(
+      exploreControllerProvider,
+    );
     final ExploreState state = exploreController.state;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Требуется авторизация')),
-      );
+      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
     }
 
     if (!state.isLoaded || state.userId != user.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(exploreControllerProvider).ensureLoaded(
+        ref
+            .read(exploreControllerProvider)
+            .ensureLoaded(
               userId: user.id,
               email: user.email,
               role: user.role,
@@ -60,109 +62,145 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       appBar: AppBar(title: const Text('Настройки')),
       body: switch (state.status) {
         ExploreStatus.initial || ExploreStatus.loading => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: CircularProgressIndicator(),
+        ),
         ExploreStatus.error => const Center(
-            child: Text('Не удалось загрузить настройки'),
-          ),
+          child: Text('Не удалось загрузить настройки'),
+        ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-            padding: const EdgeInsets.all(16),
-            children: <Widget>[
-              _ProfileEditSection(
-                displayNameController: _displayNameController,
-                aboutController: _aboutController,
-                cityController: _cityController,
-                avatarController: _avatarController,
-                onDisplayNameChanged: exploreController.updateDisplayName,
-                onAboutChanged: exploreController.updateAbout,
-                onCityChanged: exploreController.updateCity,
-                onAvatarChanged: exploreController.updateAvatar,
-                onSave: state.status == ExploreStatus.saving
-                    ? null
-                    : exploreController.saveProfile,
-                saving: state.status == ExploreStatus.saving,
+          padding: const EdgeInsets.all(16),
+          children: <Widget>[
+            const _SettingsSectionTitle('ACCOUNT AND WORKSPACE'),
+            ListTile(
+              key: const ValueKey<String>('settings-switch-workspace'),
+              leading: const Icon(Icons.switch_account_outlined),
+              title: const Text('Switch workspace'),
+              subtitle: const Text(
+                'Personal profile, Professional Pages and Admin access',
               ),
-              const Divider(height: 28),
-              DropdownButtonFormField<String>(
-                initialValue: state.settings.language,
-                decoration: const InputDecoration(
-                  labelText: 'Language',
-                  border: OutlineInputBorder(),
-                ),
-                items: const <DropdownMenuItem<String>>[
-                  DropdownMenuItem(value: 'ru', child: Text('Русский')),
-                  DropdownMenuItem(value: 'en', child: Text('English')),
-                  DropdownMenuItem(value: 'lv', child: Text('Latviešu')),
-                ],
-                onChanged: (String? value) {
-                  if (value != null) {
-                    exploreController.updateLanguage(value);
-                  }
-                },
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(RouteNames.workspaceSwitcher),
+            ),
+            const Divider(height: 28),
+            _ProfileEditSection(
+              displayNameController: _displayNameController,
+              aboutController: _aboutController,
+              cityController: _cityController,
+              avatarController: _avatarController,
+              onDisplayNameChanged: exploreController.updateDisplayName,
+              onAboutChanged: exploreController.updateAbout,
+              onCityChanged: exploreController.updateCity,
+              onAvatarChanged: exploreController.updateAvatar,
+              onSave: state.status == ExploreStatus.saving
+                  ? null
+                  : exploreController.saveProfile,
+              saving: state.status == ExploreStatus.saving,
+            ),
+            const Divider(height: 28),
+            const _SettingsSectionTitle('CONTENT & ACTIVITY'),
+            ListTile(
+              leading: const Icon(Icons.favorite_border),
+              title: const Text('Saved plans'),
+              subtitle: const Text('Saved ideas and personal plans'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(RouteNames.favorites),
+            ),
+            ListTile(
+              leading: const Icon(Icons.search_outlined),
+              title: const Text('Search and conditions'),
+              subtitle: const Text('Saved searches and discovery filters'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(RouteNames.search),
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_none),
+              title: const Text('Notifications'),
+              subtitle: const Text('Inbox and route updates'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(RouteNames.notifications),
+            ),
+            const Divider(height: 28),
+            const _SettingsSectionTitle('PREFERENCES'),
+            DropdownButtonFormField<String>(
+              initialValue: state.settings.language,
+              decoration: const InputDecoration(
+                labelText: 'Language',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: state.settings.currency,
-                decoration: const InputDecoration(
-                  labelText: 'Currency',
-                  border: OutlineInputBorder(),
-                ),
-                items: const <DropdownMenuItem<String>>[
-                  DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                  DropdownMenuItem(value: 'USD', child: Text('USD')),
-                ],
-                onChanged: (String? value) {
-                  if (value != null) {
-                    exploreController.updateCurrency(value);
-                  }
-                },
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem(value: 'ru', child: Text('Русский')),
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'lv', child: Text('Latviešu')),
+              ],
+              onChanged: (String? value) {
+                if (value != null) {
+                  exploreController.updateLanguage(value);
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: state.settings.currency,
+              decoration: const InputDecoration(
+                labelText: 'Currency',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                title: const Text('Notifications'),
-                value: state.settings.notificationsEnabled,
-                onChanged: exploreController.updateNotifications,
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem(value: 'EUR', child: Text('EUR')),
+                DropdownMenuItem(value: 'USD', child: Text('USD')),
+              ],
+              onChanged: (String? value) {
+                if (value != null) {
+                  exploreController.updateCurrency(value);
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              title: const Text('Notification preferences'),
+              value: state.settings.notificationsEnabled,
+              onChanged: exploreController.updateNotifications,
+            ),
+            const Divider(height: 28),
+            ListTile(
+              title: const Text('Support / Help'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => _showLinkDialog(
+                context,
+                title: 'Support / Help',
+                url: LegalLinks.support,
               ),
-              const Divider(height: 28),
-              ListTile(
-                title: const Text('Support / Help'),
-                trailing: const Icon(Icons.open_in_new),
-                onTap: () => _showLinkDialog(
-                  context,
-                  title: 'Support / Help',
-                  url: LegalLinks.support,
-                ),
+            ),
+            ListTile(
+              title: const Text('Privacy Policy'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => _showLinkDialog(
+                context,
+                title: 'Privacy Policy',
+                url: LegalLinks.privacyPolicy,
               ),
-              ListTile(
-                title: const Text('Privacy Policy'),
-                trailing: const Icon(Icons.open_in_new),
-                onTap: () => _showLinkDialog(
-                  context,
-                  title: 'Privacy Policy',
-                  url: LegalLinks.privacyPolicy,
-                ),
+            ),
+            ListTile(
+              title: const Text('Terms of Service'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => _showLinkDialog(
+                context,
+                title: 'Terms of Service',
+                url: LegalLinks.termsOfService,
               ),
-              ListTile(
-                title: const Text('Terms of Service'),
-                trailing: const Icon(Icons.open_in_new),
-                onTap: () => _showLinkDialog(
-                  context,
-                  title: 'Terms of Service',
-                  url: LegalLinks.termsOfService,
-                ),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.tonal(
-                onPressed: () async {
-                  await authController.signOut();
-                  if (context.mounted) {
-                    context.go(RouteNames.discover);
-                  }
-                },
-                child: const Text('Выйти'),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.tonal(
+              onPressed: () async {
+                await authController.signOut();
+                if (context.mounted) {
+                  context.go(RouteNames.discover);
+                }
+              },
+              child: const Text('Выйти'),
+            ),
+          ],
+        ),
       },
     );
   }
@@ -205,6 +243,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 }
 
+class _SettingsSectionTitle extends StatelessWidget {
+  const _SettingsSectionTitle(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: const Color(0xFF5E6F68),
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfileEditSection extends StatelessWidget {
   const _ProfileEditSection({
     required this.displayNameController,
@@ -237,9 +296,9 @@ class _ProfileEditSection extends StatelessWidget {
       children: <Widget>[
         Text(
           'Profile information',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
         _LabeledField(

@@ -4,19 +4,33 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../app/application/planning_conversion_providers.dart';
+import '../../../../app/application/active_create_publisher_provider.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_providers.dart';
+import '../../application/scenario_transit_picker_config.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/create_availability.dart';
+import '../widgets/event_create_block.dart';
+import '../widgets/find_people_create_block.dart';
+import '../widgets/place_create_block.dart';
+import '../widgets/route/route_create_block.dart';
+import '../widgets/scenario/scenario_create_block.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
-  const CreatePage({super.key, this.seedParameters = const <String, String>{}});
+  const CreatePage({
+    super.key,
+    this.initialObjectType,
+    this.seedParameters = const <String, String>{},
+  });
 
+  final CreateObjectType? initialObjectType;
   final Map<String, String> seedParameters;
 
   @override
@@ -41,6 +55,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
 
   String? _loadKey;
   String? _appliedSeedKey;
+  String? _appliedScenarioHandoffId;
+  String? _appliedScenarioDraftId;
+  CreateObjectType? _appliedInitialObjectType;
 
   @override
   void dispose() {
@@ -63,6 +80,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider).state;
     final user = authState.user;
+    final PublisherRef activePublisher =
+        ref.watch(activeCreatePublisherProvider) ??
+        PublisherRef(type: PublisherType.user, id: user?.id ?? '');
     final CreateController controller = ref.watch(createControllerProvider);
     final CreateState state = controller.state;
 
@@ -74,10 +94,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       userId: user.id,
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
+      capabilities: user.capabilities,
+      publisherRef: activePublisher,
     );
     _syncControllers(state);
+    _scheduleExactScenarioDraft(controller, state, user.id);
+    _scheduleScenarioHandoff(controller, state);
     _scheduleSeedApply(controller, state);
-    final _CreateReadiness readiness = _createReadinessFor(state.draft);
+    _scheduleInitialObjectTypeApply(controller, state);
     final CreateBlockConfig blockConfig = createBlockConfigFor(
       state.draft.objectType,
     );
@@ -88,7 +112,20 @@ class _CreatePageState extends ConsumerState<CreatePage> {
         _ScenarioRouteSeedContext.fromParameters(widget.seedParameters);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Hub')),
+      appBar: AppBar(
+        leading: widget.initialObjectType == null
+            ? null
+            : BackButton(
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(RouteNames.create);
+                  }
+                },
+              ),
+        title: Text('Create ${blockConfig.title}'),
+      ),
       body: switch (state.status) {
         CreateStatus.initial || CreateStatus.loading => const Center(
           child: CircularProgressIndicator(),
@@ -126,246 +163,308 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               ),
             ],
             const SizedBox(height: 16),
-            _CreateWorkspace(
-              draft: state.draft,
-              readiness: readiness,
-              onObjectTypeSelected: controller.setObjectType,
-              onPresetSelected: (_CreatePreset preset) {
-                _applyPreset(controller, preset);
-              },
-            ),
-            const SizedBox(height: 12),
-            _CreateTaxonomyPicker(
-              objectType: state.draft.objectType,
-              selectedCategoryId: state.draft.mainCategory,
-              selectedSubcategoryId: state.draft.subcategory,
-              onCategorySelected: (CreateTaxonomyCategory category) {
-                final CreateTaxonomySubcategory? defaultSubcategory =
-                    createDefaultSubcategoryFor(category);
-                controller.applyTaxonomySelection(
-                  mainCategory: category.id,
-                  subcategory: defaultSubcategory?.id ?? '',
-                );
-              },
-              onSubcategorySelected:
-                  (
-                    CreateTaxonomyCategory category,
-                    CreateTaxonomySubcategory subcategory,
-                  ) {
+            if (state.draft.objectType == CreateObjectType.event) ...<Widget>[
+              const SizedBox(height: 12),
+              EventCreateBlock(
+                controller: controller,
+                state: state,
+                taxonomySection: _EventTaxonomySection(
+                  draft: state.draft,
+                  onCategorySelected: (CreateTaxonomyCategory category) {
+                    final CreateTaxonomySubcategory? defaultSubcategory =
+                        createDefaultSubcategoryFor(category);
                     controller.applyTaxonomySelection(
                       mainCategory: category.id,
-                      subcategory: subcategory.id,
+                      subcategory: defaultSubcategory?.id ?? '',
                     );
                   },
-            ),
-            if (state.draft.subcategory.isNotEmpty) ...<Widget>[
+                  onSubcategorySelected:
+                      (
+                        CreateTaxonomyCategory category,
+                        CreateTaxonomySubcategory subcategory,
+                      ) {
+                        controller.applyTaxonomySelection(
+                          mainCategory: category.id,
+                          subcategory: subcategory.id,
+                        );
+                      },
+                  onCriterionChanged: controller.updateCategoryCriterion,
+                ),
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.place) ...<Widget>[
+              const SizedBox(height: 12),
+              PlaceCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.findPeople) ...<Widget>[
+              const SizedBox(height: 12),
+              FindPeopleCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.route) ...<Widget>[
+              const SizedBox(height: 12),
+              RouteCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.scenario) ...<Widget>[
+              const SizedBox(height: 12),
+              ScenarioCreateBlock(
+                controller: controller,
+                state: state,
+                transitPickerController:
+                    scenarioTransitPickerConfig.pickerEnabled
+                    ? ref.watch(scenarioTransitPickerControllerProvider)
+                    : null,
+              ),
+            ] else ...<Widget>[
+              const SizedBox(height: 12),
+              _CreateTaxonomyPicker(
+                objectType: state.draft.objectType,
+                selectedCategoryId: state.draft.mainCategory,
+                selectedSubcategoryId: state.draft.subcategory,
+                onCategorySelected: (CreateTaxonomyCategory category) {
+                  final CreateTaxonomySubcategory? defaultSubcategory =
+                      createDefaultSubcategoryFor(category);
+                  controller.applyTaxonomySelection(
+                    mainCategory: category.id,
+                    subcategory: defaultSubcategory?.id ?? '',
+                  );
+                },
+                onSubcategorySelected:
+                    (
+                      CreateTaxonomyCategory category,
+                      CreateTaxonomySubcategory subcategory,
+                    ) {
+                      controller.applyTaxonomySelection(
+                        mainCategory: category.id,
+                        subcategory: subcategory.id,
+                      );
+                    },
+              ),
+              if (state.draft.subcategory.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 16),
+                _DynamicCriteriaSection(
+                  draft: state.draft,
+                  onChanged: controller.updateCategoryCriterion,
+                ),
+              ],
               const SizedBox(height: 16),
-              _DynamicCriteriaSection(
-                draft: state.draft,
-                onChanged: controller.updateCategoryCriterion,
+              Text(
+                'Details',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
-            ],
-            const SizedBox(height: 16),
-            Text(
-              'Details',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 10),
-            _LabeledField(
-              label: 'Title *',
-              controller: _titleController,
-              errorText: state.validationErrors['title'],
-              onChanged: controller.updateTitle,
-            ),
-            _LabeledField(
-              label: 'Main category *',
-              controller: _categoryController,
-              errorText: state.validationErrors['mainCategory'],
-              onChanged: controller.updateMainCategory,
-            ),
-            _LabeledField(
-              label: 'Subcategory',
-              controller: _subcategoryController,
-              onChanged: controller.updateSubcategory,
-            ),
-            _LabeledField(
-              label: 'City *',
-              controller: _cityController,
-              errorText: state.validationErrors['city'],
-              onChanged: controller.updateCity,
-            ),
-            _LabeledField(
-              label: blockConfig.locationLabel,
-              controller: _venueController,
-              onChanged: controller.updateVenueName,
-            ),
-            _LabeledField(
-              label: 'Address',
-              controller: _addressController,
-              onChanged: controller.updateAddress,
-            ),
-            _LabeledField(
-              label: 'Short description',
-              controller: _shortDescriptionController,
-              onChanged: controller.updateShortDescription,
-            ),
-            _LabeledField(
-              label: 'Full description',
-              controller: _fullDescriptionController,
-              maxLines: 4,
-              onChanged: controller.updateFullDescription,
-            ),
-            _LabeledField(
-              label: 'Cover image *',
-              controller: _coverController,
-              errorText: state.validationErrors['coverImage'],
-              onChanged: controller.updateCoverImage,
-            ),
-            if (blockConfig.requiresStartDateTime)
+              const SizedBox(height: 10),
               _LabeledField(
-                label:
-                    '${blockConfig.title} start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
-                controller: _startController,
-                errorText: state.validationErrors['startDateTimeUtc'],
-                onChanged: controller.updateStartDateTime,
+                label: 'Title *',
+                controller: _titleController,
+                errorText: state.validationErrors['title'],
+                onChanged: controller.updateTitle,
               ),
-            const SizedBox(height: 12),
-            _CreateAvailabilitySection(
-              draft: state.draft,
-              validationErrors: state.validationErrors,
-              onKindChanged: controller.updateAvailabilityKind,
-              onAddSlot: () {
-                final DateTime start =
-                    state.draft.startDateTimeUtc ??
-                    DateTime.now().toUtc().add(const Duration(hours: 1));
-                controller.addScheduleSlot(
-                  startAtUtc: start,
-                  endAtUtc: start.add(
-                    Duration(minutes: state.draft.durationMinutes ?? 60),
-                  ),
-                );
-              },
-              onRemoveSlot: controller.removeScheduleSlot,
-              onAddWeek: () {
-                for (int weekday = 1; weekday <= 7; weekday++) {
-                  controller.setOpeningRule(
-                    CreateOpeningHoursDraftRule(
-                      dayOfWeek: weekday,
-                      isClosedAllDay: false,
-                      openMinutesSinceLocalMidnight: 9 * 60,
-                      closeMinutesSinceLocalMidnight: 21 * 60,
+              _LabeledField(
+                label: 'Main category *',
+                controller: _categoryController,
+                errorText: state.validationErrors['mainCategory'],
+                onChanged: controller.updateMainCategory,
+              ),
+              _LabeledField(
+                label: 'Subcategory',
+                controller: _subcategoryController,
+                onChanged: controller.updateSubcategory,
+              ),
+              _LabeledField(
+                label: 'City *',
+                controller: _cityController,
+                errorText: state.validationErrors['city'],
+                onChanged: controller.updateCity,
+              ),
+              _LabeledField(
+                label: blockConfig.locationLabel,
+                controller: _venueController,
+                onChanged: controller.updateVenueName,
+              ),
+              _LabeledField(
+                label: 'Address',
+                controller: _addressController,
+                onChanged: controller.updateAddress,
+              ),
+              _LabeledField(
+                label: 'Short description',
+                controller: _shortDescriptionController,
+                onChanged: controller.updateShortDescription,
+              ),
+              _LabeledField(
+                label: 'Full description',
+                controller: _fullDescriptionController,
+                maxLines: 4,
+                onChanged: controller.updateFullDescription,
+              ),
+              _LabeledField(
+                label: 'Cover image *',
+                controller: _coverController,
+                errorText: state.validationErrors['coverImage'],
+                onChanged: controller.updateCoverImage,
+              ),
+              if (blockConfig.requiresStartDateTime)
+                _LabeledField(
+                  label:
+                      '${blockConfig.title} start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+                  controller: _startController,
+                  errorText: state.validationErrors['startDateTimeUtc'],
+                  onChanged: controller.updateStartDateTime,
+                ),
+              const SizedBox(height: 12),
+              _CreateAvailabilitySection(
+                draft: state.draft,
+                validationErrors: state.validationErrors,
+                onKindChanged: controller.updateAvailabilityKind,
+                onAddSlot: () {
+                  final DateTime start =
+                      state.draft.startDateTimeUtc ??
+                      DateTime.now().toUtc().add(const Duration(hours: 1));
+                  controller.addScheduleSlot(
+                    startAtUtc: start,
+                    endAtUtc: start.add(
+                      Duration(minutes: state.draft.durationMinutes ?? 60),
                     ),
                   );
-                }
-              },
-              onRemoveOpeningRule: controller.removeOpeningRule,
-              onDurationChanged: (int minutes) =>
-                  controller.updateDurationMinutes('$minutes'),
-              onPartialChanged: controller.updatePartialAttendance,
-              onMinimumChanged: (int minutes) =>
-                  controller.updateMinimumVisitDuration('$minutes'),
-              onBuffersChanged: controller.updateAvailabilityBuffers,
-              onCapacityChanged: controller.updateCapacity,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _galleryInputController,
-                    decoration: const InputDecoration(
-                      labelText: 'Gallery image URL/path',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: () {
-                    controller.addGalleryImage(_galleryInputController.text);
-                    _galleryInputController.clear();
-                  },
-                  child: const Text('Add'),
-                ),
-              ],
-            ),
-            if (state.draft.media.gallery.isNotEmpty) ...<Widget>[
+                },
+                onRemoveSlot: controller.removeScheduleSlot,
+                onAddWeek: () {
+                  for (int weekday = 1; weekday <= 7; weekday++) {
+                    controller.setOpeningRule(
+                      CreateOpeningHoursDraftRule(
+                        dayOfWeek: weekday,
+                        isClosedAllDay: false,
+                        openMinutesSinceLocalMidnight: 9 * 60,
+                        closeMinutesSinceLocalMidnight: 21 * 60,
+                      ),
+                    );
+                  }
+                },
+                onRemoveOpeningRule: controller.removeOpeningRule,
+                onDurationChanged: (int minutes) =>
+                    controller.updateDurationMinutes('$minutes'),
+                onPartialChanged: controller.updatePartialAttendance,
+                onMinimumChanged: (int minutes) =>
+                    controller.updateMinimumVisitDuration('$minutes'),
+                onBuffersChanged: controller.updateAvailabilityBuffers,
+                onCapacityChanged: controller.updateCapacity,
+              ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: List<Widget>.generate(
-                  state.draft.media.gallery.length,
-                  (int index) => InputChip(
-                    label: Text(state.draft.media.gallery[index]),
-                    onDeleted: () => controller.removeGalleryImageAt(index),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _galleryInputController,
+                      decoration: const InputDecoration(
+                        labelText: 'Gallery image URL/path',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            SwitchListTile(
-              value: state.draft.isFree,
-              onChanged: controller.updateIsFree,
-              title: Text('Free ${blockConfig.title.toLowerCase()}'),
-            ),
-            if (!state.draft.isFree)
-              _LabeledField(
-                label: blockConfig.priceLabel,
-                controller: _priceController,
-                onChanged: controller.updateBasePrice,
-              ),
-            const SizedBox(height: 12),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed:
-                        state.status == CreateStatus.saving ||
-                            state.status == CreateStatus.publishing
-                        ? null
-                        : controller.saveDraft,
-                    icon: const Icon(Icons.save_outlined),
-                    label: const Text('Save draft'),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    onPressed: () {
+                      controller.addGalleryImage(_galleryInputController.text);
+                      _galleryInputController.clear();
+                    },
+                    child: const Text('Add'),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed:
-                        state.status == CreateStatus.saving ||
-                            state.status == CreateStatus.publishing
-                        ? null
-                        : () async {
-                            final bool success = await controller
-                                .publishDraft();
-                            if (!success) return;
-                            ref
-                                .read(appRouterProvider)
-                                .go(RouteNames.createSuccess);
-                          },
-                    icon: const Icon(Icons.publish_outlined),
-                    label: Text(
-                      state.status == CreateStatus.publishing
-                          ? 'Publishing...'
-                          : 'Publish',
+                ],
+              ),
+              if (state.draft.media.gallery.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List<Widget>.generate(
+                    state.draft.media.gallery.length,
+                    (int index) => InputChip(
+                      label: Text(state.draft.media.gallery[index]),
+                      onDeleted: () => controller.removeGalleryImageAt(index),
                     ),
                   ),
                 ),
               ],
-            ),
-            if (state.message != null) ...<Widget>[
-              const SizedBox(height: 10),
-              Text(
-                state.message!,
-                style: TextStyle(
-                  color: state.validationErrors.isNotEmpty
-                      ? Colors.red
-                      : Colors.green,
-                ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                value: state.draft.isFree,
+                onChanged: controller.updateIsFree,
+                title: Text('Free ${blockConfig.title.toLowerCase()}'),
               ),
+              if (!state.draft.isFree)
+                _LabeledField(
+                  label: blockConfig.priceLabel,
+                  controller: _priceController,
+                  onChanged: controller.updateBasePrice,
+                ),
+              const SizedBox(height: 12),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          state.status == CreateStatus.saving ||
+                              state.status == CreateStatus.publishing
+                          ? null
+                          : controller.saveDraft,
+                      icon: const Icon(Icons.save_outlined),
+                      label: const Text('Save draft'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed:
+                          state.status == CreateStatus.saving ||
+                              state.status == CreateStatus.publishing
+                          ? null
+                          : () async {
+                              final bool success = await controller
+                                  .publishDraft();
+                              if (!success) return;
+                              ref
+                                  .read(appRouterProvider)
+                                  .go(RouteNames.createSuccess);
+                            },
+                      icon: const Icon(Icons.publish_outlined),
+                      label: Text(
+                        state.status == CreateStatus.publishing
+                            ? 'Publishing...'
+                            : 'Publish',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (state.message != null) ...<Widget>[
+                const SizedBox(height: 10),
+                Text(
+                  state.message!,
+                  style: TextStyle(
+                    color: state.validationErrors.isNotEmpty
+                        ? Colors.red
+                        : Colors.green,
+                  ),
+                ),
+              ],
             ],
           ],
         ),
@@ -377,8 +476,12 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     required String userId,
     required String organizerEmail,
     required String organizerName,
+    required List<String> capabilities,
+    required PublisherRef publisherRef,
   }) {
-    final String key = '$userId:$organizerEmail';
+    final String key =
+        '$userId:$organizerEmail:${capabilities.join(',')}:'
+        '${publisherRef.type.wireName}:${publisherRef.id}';
     if (_loadKey == key) return;
     _loadKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -389,6 +492,8 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             userId: userId,
             organizerEmail: organizerEmail,
             organizerName: organizerName,
+            capabilities: capabilities,
+            activePublisherRef: publisherRef,
           );
     });
   }
@@ -422,6 +527,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
 
   void _scheduleSeedApply(CreateController controller, CreateState state) {
     if (!state.isLoaded || widget.seedParameters.isEmpty) return;
+    if ((widget.seedParameters['scenarioHandoffId'] ?? '').trim().isNotEmpty) {
+      return;
+    }
     final String seedKey = _seedKeyFor(widget.seedParameters);
     if (_appliedSeedKey == seedKey) return;
     final _CreateSeed seed = _CreateSeed.fromParameters(widget.seedParameters);
@@ -430,6 +538,57 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _applySeed(controller, seed);
+    });
+  }
+
+  void _scheduleInitialObjectTypeApply(
+    CreateController controller,
+    CreateState state,
+  ) {
+    final CreateObjectType? objectType = widget.initialObjectType;
+    if (!state.isLoaded ||
+        objectType == null ||
+        _appliedInitialObjectType == objectType) {
+      return;
+    }
+    _appliedInitialObjectType = objectType;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      controller.setObjectType(objectType);
+    });
+  }
+
+  void _scheduleScenarioHandoff(
+    CreateController controller,
+    CreateState state,
+  ) {
+    if (!state.isLoaded) return;
+    final String scenarioId =
+        widget.seedParameters['scenarioHandoffId']?.trim() ?? '';
+    if (scenarioId.isEmpty || _appliedScenarioHandoffId == scenarioId) return;
+    _appliedScenarioHandoffId = scenarioId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final converted = ref
+          .read(scenarioConversionHandoffStoreProvider)
+          .take(scenarioId);
+      if (converted == null) return;
+      controller.applyConvertedScenario(converted);
+    });
+  }
+
+  void _scheduleExactScenarioDraft(
+    CreateController controller,
+    CreateState state,
+    String userId,
+  ) {
+    if (!state.isLoaded) return;
+    final draftId = widget.seedParameters['scenarioDraftId']?.trim() ?? '';
+    if (draftId.isEmpty || _appliedScenarioDraftId == draftId) return;
+    _appliedScenarioDraftId = draftId;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await controller.openScenarioDraftById(userId: userId, draftId: draftId);
     });
   }
 
@@ -452,32 +611,6 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     }
     if (createBlockConfigFor(seed.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(seed.startDateTimeUtc.toIso8601String());
-    } else {
-      controller.updateStartDateTime('');
-    }
-  }
-
-  void _applyPreset(CreateController controller, _CreatePreset preset) {
-    controller.setObjectType(preset.objectType);
-    controller.applyTaxonomySelection(
-      mainCategory: preset.categoryId,
-      subcategory: preset.subcategoryId,
-    );
-    controller.updateTitle(preset.title);
-    controller.updateShortDescription(preset.shortDescription);
-    controller.updateFullDescription(preset.fullDescription);
-    controller.updateCity(preset.city);
-    controller.updateVenueName(preset.venueName);
-    controller.updateAddress(preset.addressLine1);
-    controller.updateCoverImage(preset.coverImage);
-    controller.updateIsFree(preset.isFree);
-    if (!preset.isFree && preset.basePrice != null) {
-      controller.updateBasePrice(preset.basePrice!.toStringAsFixed(0));
-    }
-    if (createBlockConfigFor(preset.objectType).requiresStartDateTime) {
-      controller.updateStartDateTime(
-        DateTime.now().toUtc().add(const Duration(days: 3)).toIso8601String(),
-      );
     } else {
       controller.updateStartDateTime('');
     }
@@ -588,446 +721,6 @@ class _HeaderChip extends StatelessWidget {
   }
 }
 
-class _CreateWorkspace extends StatelessWidget {
-  const _CreateWorkspace({
-    required this.draft,
-    required this.readiness,
-    required this.onObjectTypeSelected,
-    required this.onPresetSelected,
-  });
-
-  final CreateDraftEntity draft;
-  final _CreateReadiness readiness;
-  final ValueChanged<CreateObjectType> onObjectTypeSelected;
-  final ValueChanged<_CreatePreset> onPresetSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Create type',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 10),
-        GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.15,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          children: rechargeCreateBlockConfigs
-              .map(
-                (CreateBlockConfig config) => _CreateTypeCard(
-                  title: config.title,
-                  subtitle: config.description,
-                  icon: _iconForCreateBlock(config.objectType),
-                  selected: draft.objectType == config.objectType,
-                  onTap: () => onObjectTypeSelected(config.objectType),
-                ),
-              )
-              .toList(growable: false),
-        ),
-        const SizedBox(height: 14),
-        _CreatePresetRail(onPresetSelected: onPresetSelected),
-        const SizedBox(height: 14),
-        _CreateReadinessPanel(readiness: readiness),
-        const SizedBox(height: 14),
-        _CreatePreviewCard(draft: draft, readiness: readiness),
-      ],
-    );
-  }
-}
-
-class _CreateTypeCard extends StatelessWidget {
-  const _CreateTypeCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Ink(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: selected ? colorScheme.primaryContainer : colorScheme.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: selected
-                ? colorScheme.primary
-                : colorScheme.outline.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(icon, color: colorScheme.primary),
-                const Spacer(),
-                if (selected)
-                  Icon(Icons.check_circle, color: colorScheme.primary),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CreatePresetRail extends StatelessWidget {
-  const _CreatePresetRail({required this.onPresetSelected});
-
-  final ValueChanged<_CreatePreset> onPresetSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Fast presets',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 128,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: _createPresets.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (BuildContext context, int index) {
-              final _CreatePreset preset = _createPresets[index];
-              return _CreatePresetCard(
-                preset: preset,
-                onTap: () => onPresetSelected(preset),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CreatePresetCard extends StatelessWidget {
-  const _CreatePresetCard({required this.preset, required this.onTap});
-
-  final _CreatePreset preset;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 210,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Ink(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: colorScheme.outline.withValues(alpha: 0.18),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Icon(_iconForCategory(preset.categoryId)),
-                  const Spacer(),
-                  Flexible(
-                    child: _CreatePill(
-                      label: createBlockConfigFor(preset.objectType).title,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                preset.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                preset.pathLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CreateReadinessPanel extends StatelessWidget {
-  const _CreateReadinessPanel({required this.readiness});
-
-  final _CreateReadiness readiness;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: readiness.requiredReady
-            ? colorScheme.primaryContainer.withValues(alpha: 0.46)
-            : colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: readiness.requiredReady
-              ? colorScheme.primary.withValues(alpha: 0.38)
-              : colorScheme.outline.withValues(alpha: 0.18),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Icon(
-                  readiness.requiredReady
-                      ? Icons.verified
-                      : Icons.fact_check_outlined,
-                  color: colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Publish readiness',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                _CreatePill(
-                  label:
-                      '${readiness.readyCount}/${readiness.items.length} ready',
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: readiness.items
-                  .map((_CreateReadinessItem item) => _ReadinessRow(item: item))
-                  .toList(growable: false),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReadinessRow extends StatelessWidget {
-  const _ReadinessRow({required this.item});
-
-  final _CreateReadinessItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            item.ready ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: item.ready ? colorScheme.primary : colorScheme.outline,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              item.label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: item.required ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            item.ready ? 'Ready' : item.emptyLabel,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: item.ready
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CreatePreviewCard extends StatelessWidget {
-  const _CreatePreviewCard({required this.draft, required this.readiness});
-
-  final CreateDraftEntity draft;
-  final _CreateReadiness readiness;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
-    final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
-      draft.mainCategory,
-    );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.18)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                draft.media.coverImage.trim().isEmpty
-                    ? Icons.image
-                    : Icons.image_outlined,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          'Listing preview',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                      ),
-                      _CreatePill(
-                        label: readiness.requiredReady
-                            ? 'Publishable'
-                            : 'Draft',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    draft.title.trim().isEmpty
-                        ? 'Untitled ${config.title.toLowerCase()}'
-                        : draft.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _previewSubtitle(draft, category),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      _CreatePill(label: config.title),
-                      if (category != null)
-                        _CreatePill(label: category.defaultParticipationMode),
-                      _CreatePill(
-                        label: draft.isFree
-                            ? 'Free'
-                            : '${draft.basePrice?.toStringAsFixed(0) ?? '?'} ${draft.currency}',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _previewSubtitle(
-    CreateDraftEntity draft,
-    CreateTaxonomyCategory? category,
-  ) {
-    final List<String> parts = <String>[
-      if (category != null) category.title,
-      if (draft.subcategory.trim().isNotEmpty) draft.subcategory,
-      if (draft.city.trim().isNotEmpty) draft.city,
-    ];
-    if (parts.isEmpty) {
-      return draft.shortDescription.trim().isEmpty
-          ? 'Choose taxonomy and add details'
-          : draft.shortDescription;
-    }
-    return parts.join(' · ');
-  }
-}
-
 bool _needsRentalReview(CreateDraftEntity draft) {
   final Map<String, Object?>? migration =
       draft.sectionData['migration'] as Map<String, Object?>?;
@@ -1112,6 +805,42 @@ class _CreatePill extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EventTaxonomySection extends StatelessWidget {
+  const _EventTaxonomySection({
+    required this.draft,
+    required this.onCategorySelected,
+    required this.onSubcategorySelected,
+    required this.onCriterionChanged,
+  });
+
+  final CreateDraftEntity draft;
+  final ValueChanged<CreateTaxonomyCategory> onCategorySelected;
+  final void Function(
+    CreateTaxonomyCategory category,
+    CreateTaxonomySubcategory subcategory,
+  )
+  onSubcategorySelected;
+  final void Function(String criterionId, Object? value) onCriterionChanged;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: <Widget>[
+      _CreateTaxonomyPicker(
+        objectType: CreateObjectType.event,
+        selectedCategoryId: draft.mainCategory,
+        selectedSubcategoryId: draft.subcategory,
+        onCategorySelected: onCategorySelected,
+        onSubcategorySelected: onSubcategorySelected,
+      ),
+      if (draft.subcategory.isNotEmpty) ...<Widget>[
+        const SizedBox(height: 12),
+        _DynamicCriteriaSection(draft: draft, onChanged: onCriterionChanged),
+      ],
+    ],
+  );
 }
 
 class _CreateTaxonomyPicker extends StatelessWidget {
@@ -1511,21 +1240,6 @@ IconData _iconForCategory(String id) {
     'dating_singles' => Icons.favorite_outline,
     'other' => Icons.more_horiz,
     _ => Icons.category,
-  };
-}
-
-IconData _iconForCreateBlock(CreateObjectType objectType) {
-  return switch (objectType) {
-    CreateObjectType.event => Icons.event_available,
-    CreateObjectType.activity => Icons.directions_walk,
-    CreateObjectType.route => Icons.route,
-    CreateObjectType.place => Icons.place,
-    CreateObjectType.session => Icons.calendar_month,
-    CreateObjectType.quickPlan => Icons.flash_on,
-    CreateObjectType.findPeople => Icons.group_add,
-    CreateObjectType.classWorkshop => Icons.school_outlined,
-    CreateObjectType.rental => Icons.inventory_2_outlined,
-    CreateObjectType.collection => Icons.collections_bookmark_outlined,
   };
 }
 
@@ -2534,273 +2248,4 @@ DateTime _seedStartDateTime(Map<String, String> params) {
     if (parsed != null) return parsed;
   }
   return DateTime.now().toUtc().add(const Duration(days: 3));
-}
-
-class _CreatePreset {
-  const _CreatePreset({
-    required this.label,
-    required this.objectType,
-    required this.categoryId,
-    required this.subcategoryId,
-    required this.title,
-    required this.shortDescription,
-    required this.fullDescription,
-    required this.city,
-    required this.venueName,
-    required this.addressLine1,
-    required this.coverImage,
-    required this.isFree,
-    this.basePrice,
-  });
-
-  final String label;
-  final CreateObjectType objectType;
-  final String categoryId;
-  final String subcategoryId;
-  final String title;
-  final String shortDescription;
-  final String fullDescription;
-  final String city;
-  final String venueName;
-  final String addressLine1;
-  final String coverImage;
-  final bool isFree;
-  final double? basePrice;
-
-  String get pathLabel => '$categoryId.$subcategoryId';
-}
-
-const List<_CreatePreset> _createPresets = <_CreatePreset>[
-  _CreatePreset(
-    label: 'Calm walk',
-    objectType: CreateObjectType.activity,
-    categoryId: 'wellness_recharge',
-    subcategoryId: 'calm_walk',
-    title: 'Calm walk in Riga',
-    shortDescription: 'Low-pressure recharge walk with a quiet finish.',
-    fullDescription:
-        'A small group walk for people who want a calm reset, light movement, and space to breathe.',
-    city: 'Riga',
-    venueName: 'Riga city center',
-    addressLine1: 'Atbrivosanas aleja',
-    coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    isFree: true,
-  ),
-  _CreatePreset(
-    label: 'Quick coffee',
-    objectType: CreateObjectType.quickPlan,
-    categoryId: 'food_drinks',
-    subcategoryId: 'coffee',
-    title: 'Coffee reset tonight',
-    shortDescription: 'Simple coffee plan for a quick recharge today.',
-    fullDescription:
-        'A lightweight plan for people who want to meet for coffee without heavy scheduling.',
-    city: 'Riga',
-    venueName: 'Local cafe',
-    addressLine1: 'City center',
-    coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
-    isFree: false,
-    basePrice: 5,
-  ),
-  _CreatePreset(
-    label: 'Tennis partner',
-    objectType: CreateObjectType.findPeople,
-    categoryId: 'sport',
-    subcategoryId: 'tennis',
-    title: 'Looking for a tennis partner',
-    shortDescription: 'Find one or two people for a friendly tennis session.',
-    fullDescription:
-        'A social request for people who want to play a friendly beginner-friendly tennis match.',
-    city: 'Riga',
-    venueName: 'Public tennis court',
-    addressLine1: 'Sports center',
-    coverImage: 'https://images.unsplash.com/photo-1517649763962-0c623066013b',
-    isFree: true,
-  ),
-  _CreatePreset(
-    label: 'Pottery workshop',
-    objectType: CreateObjectType.classWorkshop,
-    categoryId: 'workshops_masterclasses',
-    subcategoryId: 'pottery',
-    title: 'Beginner pottery workshop',
-    shortDescription: 'Hands-on pottery workshop for a small group.',
-    fullDescription:
-        'A guided beginner workshop with materials, practical support, and a finished piece to take home.',
-    city: 'Riga',
-    venueName: 'Creative studio',
-    addressLine1: 'City center',
-    coverImage: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa',
-    isFree: false,
-    basePrice: 20,
-  ),
-  _CreatePreset(
-    label: 'Walking route',
-    objectType: CreateObjectType.route,
-    categoryId: 'travel_tours',
-    subcategoryId: 'walking_tour',
-    title: 'Hidden gems walking tour',
-    shortDescription: 'Local route through small places worth noticing.',
-    fullDescription:
-        'A guided local walk through calm corners, stories, and small recharge points around the city.',
-    city: 'Riga',
-    venueName: 'Old town meeting point',
-    addressLine1: 'Central square',
-    coverImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
-    isFree: false,
-    basePrice: 12,
-  ),
-  _CreatePreset(
-    label: 'Coffee spot',
-    objectType: CreateObjectType.place,
-    categoryId: 'food_drinks',
-    subcategoryId: 'coffee',
-    title: 'Quiet coffee recharge spot',
-    shortDescription: 'A calm cafe stop for reading, planning, or recovery.',
-    fullDescription:
-        'A creator-recommended coffee place with a quiet atmosphere and enough space for solo recharge time.',
-    city: 'Riga',
-    venueName: 'Local cafe',
-    addressLine1: 'City center',
-    coverImage: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085',
-    isFree: false,
-    basePrice: 5,
-  ),
-  _CreatePreset(
-    label: 'Wellness guide',
-    objectType: CreateObjectType.collection,
-    categoryId: 'wellness_recharge',
-    subcategoryId: 'nature_reset',
-    title: 'Local wellness guide',
-    shortDescription: 'A collection of calm sessions and recovery places.',
-    fullDescription:
-        'A curated guide for people looking for calm recharge sessions, nature resets, and quiet recovery spaces.',
-    city: 'Riga',
-    venueName: 'Recharge studio',
-    addressLine1: 'Main street',
-    coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    isFree: true,
-  ),
-  _CreatePreset(
-    label: 'Yoga slot',
-    objectType: CreateObjectType.session,
-    categoryId: 'sport',
-    subcategoryId: 'yoga',
-    title: 'Morning yoga slot',
-    shortDescription: 'Bookable small-group yoga class.',
-    fullDescription:
-        'A bookable wellness slot with limited places, simple booking, and a beginner-friendly pace.',
-    city: 'Riga',
-    venueName: 'Recharge studio',
-    addressLine1: 'Main street',
-    coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773',
-    isFree: false,
-    basePrice: 10,
-  ),
-  _CreatePreset(
-    label: 'Bike rental',
-    objectType: CreateObjectType.rental,
-    categoryId: 'sport',
-    subcategoryId: 'cycling',
-    title: 'City bike rental',
-    shortDescription: 'Comfortable bicycles for a local recharge ride.',
-    fullDescription:
-        'Hourly bicycle rental with a lock and helmet for independent city routes and nature rides.',
-    city: 'Riga',
-    venueName: 'Bike pickup point',
-    addressLine1: 'City center',
-    coverImage: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890',
-    isFree: false,
-    basePrice: 8,
-  ),
-  _CreatePreset(
-    label: 'Community update',
-    objectType: CreateObjectType.event,
-    categoryId: 'community_charity',
-    subcategoryId: 'neighborhood_event',
-    title: 'Weekend recharge update',
-    shortDescription: 'Short update from a local creator or venue.',
-    fullDescription:
-        'An announcement for followers about upcoming recharge ideas, schedule changes, or community updates.',
-    city: 'Riga',
-    venueName: 'Recharge community',
-    addressLine1: 'City center',
-    coverImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac',
-    isFree: true,
-  ),
-];
-
-class _CreateReadiness {
-  const _CreateReadiness({required this.items});
-
-  final List<_CreateReadinessItem> items;
-
-  int get readyCount {
-    return items.where((_CreateReadinessItem item) => item.ready).length;
-  }
-
-  bool get requiredReady {
-    return items
-        .where((_CreateReadinessItem item) => item.required)
-        .every((_CreateReadinessItem item) => item.ready);
-  }
-}
-
-class _CreateReadinessItem {
-  const _CreateReadinessItem({
-    required this.label,
-    required this.ready,
-    required this.required,
-    required this.emptyLabel,
-  });
-
-  final String label;
-  final bool ready;
-  final bool required;
-  final String emptyLabel;
-}
-
-_CreateReadiness _createReadinessFor(CreateDraftEntity draft) {
-  final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
-  return _CreateReadiness(
-    items: <_CreateReadinessItem>[
-      _CreateReadinessItem(
-        label: 'Taxonomy selected',
-        ready: draft.mainCategory.trim().isNotEmpty,
-        required: true,
-        emptyLabel: 'Choose',
-      ),
-      _CreateReadinessItem(
-        label: 'Title added',
-        ready: draft.title.trim().isNotEmpty,
-        required: true,
-        emptyLabel: 'Missing',
-      ),
-      _CreateReadinessItem(
-        label: 'City added',
-        ready: draft.city.trim().isNotEmpty,
-        required: true,
-        emptyLabel: 'Missing',
-      ),
-      _CreateReadinessItem(
-        label: 'Cover image added',
-        ready: draft.media.coverImage.trim().isNotEmpty,
-        required: true,
-        emptyLabel: 'Missing',
-      ),
-      _CreateReadinessItem(
-        label: config.requiresStartDateTime
-            ? '${config.title} start time added'
-            : '${config.title} does not need start time',
-        ready: !config.requiresStartDateTime || draft.startDateTimeUtc != null,
-        required: true,
-        emptyLabel: 'Missing',
-      ),
-      _CreateReadinessItem(
-        label: 'Pricing clear',
-        ready: draft.isFree || draft.basePrice != null,
-        required: false,
-        emptyLabel: 'Optional',
-      ),
-    ],
-  );
 }

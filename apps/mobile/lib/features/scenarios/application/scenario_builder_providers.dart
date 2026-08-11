@@ -4,5 +4,5 @@ import 'controllers/scenario_builder_controller.dart';
 
 final scenarioBuilderControllerProvider =
     ChangeNotifierProvider<ScenarioBuilderController>((ref) {
-  return ScenarioBuilderController();
-});
+      return ScenarioBuilderController();
+    });

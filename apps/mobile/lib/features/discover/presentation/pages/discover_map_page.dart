@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:design_system/design_system.dart';
@@ -6,8 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../app/application/scenario_object_intake_providers.dart';
+import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/geo/geometry_encoding.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -18,15 +22,19 @@ import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../../scenarios/application/state/scenario_builder_state.dart';
 import '../../../scenarios/domain/entities/scenario_draft_entity.dart';
 import '../../application/controllers/discover_feed_controller.dart';
+import '../../application/controllers/scenario_intake_selection_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
+import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../widgets/scenario_intake_marker_icon_factory.dart';
+import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/map_marker_utils.dart';
 import '../widgets/map_style.dart';
 
@@ -44,7 +52,11 @@ class DiscoverMapPage extends ConsumerStatefulWidget {
 
 class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   late final TextEditingController _searchController;
+  late final ScenarioIntakeSelectionController _scenarioSelectionController;
   GoogleMapController? _mapController;
+  Map<int, BitmapDescriptor> _scenarioSelectionMarkerIcons =
+      const <int, BitmapDescriptor>{};
+  bool _selectionMarkerIconsLoading = false;
   int? _selectedScenarioStopIndex;
   bool _scenarioRouteActive = false;
   bool _scenarioRouteComplete = false;
@@ -70,6 +82,12 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   @override
   void initState() {
     super.initState();
+    _scenarioSelectionController = ScenarioIntakeSelectionController(
+      supportIssue: ref
+          .read(discoverScenarioIntakeAdapterProvider)
+          .supportIssue,
+      maxSelection: ref.read(scenarioObjectIntakeConfigProvider).maxBatchSize,
+    )..addListener(_onScenarioSelectionChanged);
     final DiscoverFeedState state = ref
         .read(discoverFeedControllerProvider)
         .state;
@@ -93,6 +111,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
   @override
   void dispose() {
+    _scenarioSelectionController
+      ..removeListener(_onScenarioSelectionChanged)
+      ..dispose();
     _searchController.dispose();
     _mapController?.dispose();
     super.dispose();
@@ -104,11 +125,22 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       discoverFeedControllerProvider,
     );
     final DiscoverFeedState state = controller.state;
+    final ScenarioIntakeSelectionState selection =
+        _scenarioSelectionController.state;
     final authController = ref.watch(authControllerProvider);
     final FavoritesController favoritesController = ref.watch(
       favoritesControllerProvider,
     );
     final bool isAuthenticated = authController.state.isAuthenticated;
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.map,
+    );
+    final multiSelectEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.map,
+      multiSelect: true,
+    );
     final _ScenarioMapRoute? scenarioRoute = _ScenarioMapRoute.fromSeed(
       widget.seedParameters,
     );
@@ -128,8 +160,20 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Map'),
+        title: Text(selection.active ? 'Select for Scenario' : 'Map'),
         actions: <Widget>[
+          if (scenarioRoute == null && multiSelectEnabled)
+            IconButton(
+              tooltip: selection.active
+                  ? 'Cancel Scenario selection'
+                  : 'Select for Scenario',
+              onPressed: selection.active
+                  ? _scenarioSelectionController.cancel
+                  : () => _startScenarioSelection(authController),
+              icon: Icon(
+                selection.active ? Icons.close : Icons.playlist_add_outlined,
+              ),
+            ),
           IconButton(
             tooltip: 'Search',
             onPressed: () => context.go(RouteNames.search),
@@ -137,6 +181,17 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
           ),
         ],
       ),
+      bottomNavigationBar: selection.active
+          ? ScenarioIntakeSelectionTray(
+              selectedItems: selection.selectedItems,
+              message: selection.message,
+              onRemove: _scenarioSelectionController.remove,
+              onCancel: _scenarioSelectionController.cancel,
+              onReview: selection.canReview
+                  ? () => _openScenarioIntake(selection.selectedItems)
+                  : null,
+            )
+          : null,
       body: Stack(
         children: <Widget>[
           GoogleMap(
@@ -173,12 +228,28 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               scenarioRoute: scenarioRoute,
               selectedScenarioStopIndex: selectedScenarioStopIndex,
               selectedItemId: state.selectedItemId,
-              onTap: controller.selectItem,
+              scenarioSelection: selection,
+              scenarioSelectionIcons: _scenarioSelectionMarkerIcons,
+              onTap: selection.active
+                  ? (itemId) {
+                      if (itemId == null) return;
+                      final matches = state.items.where(
+                        (item) => item.id == itemId,
+                      );
+                      if (matches.length == 1) {
+                        _scenarioSelectionController.toggle(matches.single);
+                      }
+                    }
+                  : controller.selectItem,
               onScenarioStopTap: scenarioRoute == null
                   ? null
                   : (int index) => _selectScenarioStop(scenarioRoute, index),
             ),
-            polylines: _buildPolylines(context, scenarioRoute),
+            polylines: _buildPolylines(
+              context,
+              scenarioRoute,
+              state.selectedItem,
+            ),
             onCameraMove: (CameraPosition position) {
               controller.stageMapCenter(
                 lat: position.target.latitude,
@@ -187,26 +258,31 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
             },
           ),
           // 1. Radius Control (Floating Pill)
-          Positioned(
-            left: 12,
-            top: showSavedIntents ? 318 : 188,
-            child: _CompactRadiusControl(
-              radiusMeters: state.draftQuery.radiusMeters,
-              unlimited: state.draftQuery.unlimitedRadius,
-              expanded: _radiusControlExpanded,
-              onToggle: () => setState(() => _radiusControlExpanded = !_radiusControlExpanded),
-              onRadiusChanged: (double value) {
-                controller.stageRadius(radiusMeters: value, unlimited: false);
-              },
-              onUnlimitedChanged: (bool value) {
-                controller.stageRadius(
-                  radiusMeters: state.draftQuery.radiusMeters,
-                  unlimited: value,
-                );
-              },
+          if (scenarioRoute == null && !selection.active)
+            Positioned(
+              left: 12,
+              top: showSavedIntents ? 318 : 188,
+              child: _CompactRadiusControl(
+                radiusMeters: state.draftQuery.radiusMeters,
+                unlimited: state.draftQuery.unlimitedRadius,
+                expanded: _radiusControlExpanded,
+                onToggle: () => setState(
+                  () => _radiusControlExpanded = !_radiusControlExpanded,
+                ),
+                onRadiusChanged: (double value) {
+                  controller.stageRadius(radiusMeters: value, unlimited: false);
+                },
+                onUnlimitedChanged: (bool value) {
+                  controller.stageRadius(
+                    radiusMeters: state.draftQuery.radiusMeters,
+                    unlimited: value,
+                  );
+                },
+              ),
             ),
-          ),
-          if (state.searchAreaDirty)
+          if (state.searchAreaDirty &&
+              scenarioRoute == null &&
+              !selection.active)
             Positioned(
               top: showSavedIntents ? 342 : 212,
               left: 0,
@@ -219,8 +295,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                     child: FilledButton.icon(
                       onPressed: controller.applySearchArea,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            RechargeTheme.emerald900.withValues(alpha: 0.88),
+                        backgroundColor: RechargeTheme.emerald900.withValues(
+                          alpha: 0.88,
+                        ),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
@@ -251,21 +328,29 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               onSubmitSearch: () {
                 controller.applySearchConditions(
                   queryText: _searchController.text,
+                  sourceScreen: 'map_search',
                 );
               },
               onClearSearch: () {
                 _searchController.clear();
-                controller.applySearchConditions(queryText: '');
+                controller.applySearchConditions(
+                  queryText: '',
+                  sourceScreen: 'map_search',
+                );
               },
               onCategorySelected: (String? value) {
                 controller.applySearchConditions(
                   selectedCategoryIds: value == null
                       ? const <String>[]
                       : <String>[value],
+                  sourceScreen: 'map_search',
                 );
               },
               onFreeOnlyChanged: (bool value) {
-                controller.applySearchConditions(freeOnly: value);
+                controller.applySearchConditions(
+                  freeOnly: value,
+                  sourceScreen: 'map_search',
+                );
               },
               onCreateHere: () {
                 final DiscoverQuery query = state.draftQuery.copyWith(
@@ -336,54 +421,79 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               ],
             ),
           ),
-          if (state.selectedItem != null)
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 40,
-              child: _SelectedPreviewCard(
-                item: state.selectedItem!,
-                isSaved: favoritesController.isFavorite(state.selectedItemId!),
-                onClose: () => controller.selectItem(null),
-                onTap: () => context.push(
-                  '${RouteNames.discoverDetails}/${state.selectedItemId}',
-                ),
-                onToggleSave: () => _onMapSaveTap(
-                  item: state.selectedItem!,
-                  isAuthenticated: isAuthenticated,
-                  authController: authController,
-                  favoritesController: favoritesController,
-                ),
-              ),
-            )
-          else
-            Positioned(
-              bottom: 40,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: FilledButton.icon(
-                      onPressed: () => context.go(RouteNames.discover),
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            RechargeTheme.emerald900.withValues(alpha: 0.88),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                      ),
-                      icon: const Icon(Icons.format_list_bulleted_rounded),
-                      label: const Text('View list'),
-                    ),
-                  ),
-                ),
-              ),
+          _MapResultsSheet(
+            state: state,
+            favoritesController: favoritesController,
+            onRadiusChanged: (double value) {
+              controller.stageRadius(radiusMeters: value, unlimited: false);
+            },
+            onUnlimitedChanged: (bool value) {
+              controller.stageRadius(
+                radiusMeters: state.draftQuery.radiusMeters,
+                unlimited: value,
+              );
+            },
+            onApplyArea: controller.applySearchArea,
+            onRetry: controller.loadFeed,
+            onSelectItem: (DiscoverItemEntity item) {
+              if (selection.active) {
+                _scenarioSelectionController.toggle(item);
+              } else {
+                controller.selectItem(item.id);
+                _mapController?.animateCamera(
+                  CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
+                );
+              }
+            },
+            onOpenDetails: (DiscoverItemEntity item) {
+              context.push('${RouteNames.discoverDetails}/${item.id}');
+            },
+            onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
+              item: item,
+              isAuthenticated: isAuthenticated,
+              authController: authController,
+              favoritesController: favoritesController,
             ),
+            scenarioSelection: selection,
+            onToggleScenarioSelection: _scenarioSelectionController.toggle,
+            onAddToScenario: intakeEnabled
+                ? (item) => _openScenarioIntake(<DiscoverItemEntity>[item])
+                : null,
+            scenarioRoute: scenarioRoute,
+            selectedScenarioStopIndex: selectedScenarioStopIndex,
+            routeActive: scenarioRoute != null && _scenarioRouteActive,
+            routeComplete: scenarioRoute != null && _scenarioRouteComplete,
+            onScenarioStopSelected: scenarioRoute == null
+                ? null
+                : (int index) => _selectScenarioStop(scenarioRoute, index),
+            onStartRoute: scenarioRoute == null
+                ? null
+                : () => _startScenarioRoute(scenarioRoute),
+            onNextStop: scenarioRoute == null
+                ? null
+                : () => _advanceScenarioRoute(scenarioRoute),
+            onResetRoute: scenarioRoute == null ? null : _resetScenarioRoute,
+            onSaveCompletedRoute: scenarioRoute == null
+                ? null
+                : () => _onScenarioRouteSaveTap(
+                    route: scenarioRoute,
+                    isAuthenticated: isAuthenticated,
+                    authController: authController,
+                    favoritesController: favoritesController,
+                  ),
+            onCopyCompletedRoute: scenarioRoute == null
+                ? null
+                : () => _copyScenarioRoute(scenarioRoute),
+            onOpenBuilder: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.builderLocation),
+            onSearchScenarioRoute: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.searchLocation),
+            onCreateScenarioRoute: scenarioRoute == null
+                ? null
+                : () => context.go(scenarioRoute.createLocation),
+          ),
         ],
       ),
     );
@@ -395,6 +505,79 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       text: queryText,
       selection: TextSelection.collapsed(offset: queryText.length),
       composing: TextRange.empty,
+    );
+  }
+
+  void _onScenarioSelectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _loadScenarioSelectionMarkerIcons() async {
+    try {
+      final icons = await buildScenarioIntakeMarkerIcons(
+        color: RechargeTheme.travelGreenDark,
+        devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+      );
+      if (!mounted) return;
+      setState(() => _scenarioSelectionMarkerIcons = icons);
+    } on Object {
+      // Default orange markers and numbered tray remain a safe fallback.
+    }
+  }
+
+  Future<void> _startScenarioSelection(AuthController authController) async {
+    if (!await _requireScenarioAuth(authController)) return;
+    _scenarioSelectionController.start();
+    if (!_selectionMarkerIconsLoading &&
+        _scenarioSelectionMarkerIcons.isEmpty) {
+      _selectionMarkerIconsLoading = true;
+      unawaited(_loadScenarioSelectionMarkerIcons());
+    }
+  }
+
+  Future<bool> _requireScenarioAuth(AuthController authController) async {
+    if (authController.state.user != null) return true;
+    authController.trackAuthGateViewed(
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+    );
+    await showAuthGateSheet(
+      context,
+      action: ProtectedAction.create,
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.discoverMap,
+      allowGuest: false,
+      onContinueAsGuest: () {},
+    );
+    return false;
+  }
+
+  Future<void> _openScenarioIntake(List<DiscoverItemEntity> items) async {
+    final result = await launchScenarioObjectIntake(
+      context: context,
+      ref: ref,
+      items: items,
+      sourceSurface: ScenarioObjectIntakeSurface.map,
+      sourceScreen: 'discover_map',
+      sourceAction: 'add_to_scenario',
+      originRoute: RouteNames.discoverMap,
+    );
+    if (result == null || !mounted) return;
+    _scenarioSelectionController.cancel();
+    if (result.openScenario) {
+      final uri = Uri(
+        path: '${RouteNames.createObject}/scenario',
+        queryParameters: <String, String>{
+          'scenarioDraftId': result.targetDraftId,
+        },
+      );
+      await context.push(uri.toString());
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${result.itemCount} to Scenario')),
     );
   }
 
@@ -434,6 +617,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       clearTimeWindow: timeWindow == null,
       travelContext: travelContext,
       clearTravelContext: travelContext == null,
+      sourceScreen: 'map_search',
     );
   }
 
@@ -452,22 +636,22 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     for (final DiscoverItemEntity item in candidates) {
       _loadingMarkers.add(item.id);
-      createCustomMarkerFromUrl(item.coverImageUrl).then((
-        BitmapDescriptor descriptor,
-      ) {
-        if (mounted) {
-          setState(() {
-            _customMarkers[item.id] = descriptor;
-            _loadingMarkers.remove(item.id);
+      createCustomMarkerFromUrl(item.coverImageUrl)
+          .then((BitmapDescriptor descriptor) {
+            if (mounted) {
+              setState(() {
+                _customMarkers[item.id] = descriptor;
+                _loadingMarkers.remove(item.id);
+              });
+            }
+          })
+          .catchError((Object e) {
+            if (mounted) {
+              setState(() {
+                _loadingMarkers.remove(item.id);
+              });
+            }
           });
-        }
-      }).catchError((Object e) {
-        if (mounted) {
-          setState(() {
-            _loadingMarkers.remove(item.id);
-          });
-        }
-      });
     }
   }
 
@@ -476,6 +660,8 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     required _ScenarioMapRoute? scenarioRoute,
     required int? selectedScenarioStopIndex,
     required String? selectedItemId,
+    required ScenarioIntakeSelectionState scenarioSelection,
+    required Map<int, BitmapDescriptor> scenarioSelectionIcons,
     required ValueChanged<String?> onTap,
     required ValueChanged<int>? onScenarioStopTap,
   }) {
@@ -483,20 +669,32 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     final Set<Marker> markers = items.map((DiscoverItemEntity item) {
       final bool selected = item.id == selectedItemId;
+      final int? scenarioOrder = scenarioSelection.orderOf(item.id);
       final BitmapDescriptor? customIcon = _customMarkers[item.id];
-
       return Marker(
         markerId: MarkerId(item.id),
         clusterManagerId: const ClusterManagerId('items'),
         position: LatLng(item.latitude, item.longitude),
-        icon: customIcon ??
+        icon:
+            scenarioSelectionIcons[scenarioOrder] ??
+            (scenarioOrder == null ? customIcon : null) ??
             BitmapDescriptor.defaultMarkerWithHue(
-              selected ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueGreen,
+              scenarioOrder != null
+                  ? BitmapDescriptor.hueOrange
+                  : selected
+                  ? BitmapDescriptor.hueYellow
+                  : item.isPublishedRoute
+                  ? BitmapDescriptor.hueAzure
+                  : BitmapDescriptor.hueGreen,
             ),
         onTap: () => onTap(item.id),
         infoWindow: InfoWindow(
-          title: item.title,
-          snippet: item.isFree
+          title: scenarioOrder == null
+              ? item.title
+              : '$scenarioOrder. ${item.title}',
+          snippet: item.isPublishedRoute
+              ? _publishedRouteMapMetric(item)
+              : item.isFree
               ? 'Free'
               : '${item.priceAmount.toStringAsFixed(0)} €',
         ),
@@ -528,23 +726,58 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   Set<Polyline> _buildPolylines(
     BuildContext context,
     _ScenarioMapRoute? scenarioRoute,
+    DiscoverItemEntity? selectedItem,
   ) {
-    if (scenarioRoute == null || scenarioRoute.stops.length < 2) {
-      return const <Polyline>{};
+    final Set<Polyline> polylines = <Polyline>{};
+    final publishedRoute = selectedItem?.publishedRoute;
+    if (publishedRoute != null && publishedRoute.isCoherent) {
+      try {
+        final points = GeometryEncoding.decode(
+          publishedRoute.fullEncodedPolyline,
+          policy: GeometryEncodingPolicy(
+            precision: publishedRoute.encodingPrecision,
+          ),
+        );
+        if (points.length >= 2) {
+          polylines.add(
+            Polyline(
+              polylineId: PolylineId(
+                'published_route_${publishedRoute.routeId}_'
+                '${publishedRoute.versionId}',
+              ),
+              points: points
+                  .map((point) => LatLng(point.latitude, point.longitude))
+                  .toList(growable: false),
+              color: RechargeTheme.travelGreen,
+              width: 6,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+              jointType: JointType.round,
+            ),
+          );
+        }
+      } on FormatException {
+        // A malformed snapshot is ignored instead of triggering rerouting.
+      } on RangeError {
+        // Unsupported precision is treated as an unreadable snapshot.
+      }
     }
-    return <Polyline>{
-      Polyline(
-        polylineId: const PolylineId('scenario_route'),
-        points: scenarioRoute.stops
-            .map(
-              (ScenarioStepEntity step) =>
-                  LatLng(step.latitude, step.longitude),
-            )
-            .toList(growable: false),
-        color: Theme.of(context).colorScheme.primary,
-        width: 5,
-      ),
-    };
+    if (scenarioRoute != null && scenarioRoute.stops.length >= 2) {
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('scenario_route'),
+          points: scenarioRoute.stops
+              .map(
+                (ScenarioStepEntity step) =>
+                    LatLng(step.latitude, step.longitude),
+              )
+              .toList(growable: false),
+          color: Theme.of(context).colorScheme.primary,
+          width: 5,
+        ),
+      );
+    }
+    return polylines;
   }
 
   int? _validScenarioStopIndex(_ScenarioMapRoute? scenarioRoute) {
@@ -716,6 +949,15 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       targetRoute: route.builderLocation,
     );
   }
+}
+
+String _publishedRouteMapMetric(DiscoverItemEntity item) {
+  final route = item.publishedRoute;
+  if (route == null) return 'Route';
+  final String distance =
+      '${(route.distanceMeters / 1000).toStringAsFixed(1)} км';
+  final int minutes = (route.durationSeconds / 60).round();
+  return '$distance · $minutes min';
 }
 
 bool _hasSearchSeed(Map<String, String> seedParameters) {
@@ -1248,17 +1490,23 @@ class _MapFilterPanel extends StatelessWidget {
                         '$resultCount places and activities in area',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: onCreateHere,
                       tooltip: 'Create here',
-                      icon: const Icon(Icons.add_location_alt_outlined, size: 20),
+                      icon: const Icon(
+                        Icons.add_location_alt_outlined,
+                        size: 20,
+                      ),
                     ),
                   ],
                 ),
@@ -1496,6 +1744,830 @@ class _MapSavedIntentCard extends StatelessWidget {
   }
 }
 
+class _MapResultsSheet extends StatelessWidget {
+  const _MapResultsSheet({
+    required this.state,
+    required this.favoritesController,
+    required this.onRadiusChanged,
+    required this.onUnlimitedChanged,
+    required this.onApplyArea,
+    required this.onRetry,
+    required this.onSelectItem,
+    required this.onOpenDetails,
+    required this.onToggleSave,
+    required this.scenarioSelection,
+    required this.onToggleScenarioSelection,
+    required this.onAddToScenario,
+    required this.scenarioRoute,
+    required this.selectedScenarioStopIndex,
+    required this.routeActive,
+    required this.routeComplete,
+    required this.onScenarioStopSelected,
+    required this.onStartRoute,
+    required this.onNextStop,
+    required this.onResetRoute,
+    required this.onSaveCompletedRoute,
+    required this.onCopyCompletedRoute,
+    required this.onOpenBuilder,
+    required this.onSearchScenarioRoute,
+    required this.onCreateScenarioRoute,
+  });
+
+  final DiscoverFeedState state;
+  final FavoritesController favoritesController;
+  final ValueChanged<double> onRadiusChanged;
+  final ValueChanged<bool> onUnlimitedChanged;
+  final Future<void> Function() onApplyArea;
+  final Future<void> Function() onRetry;
+  final ValueChanged<DiscoverItemEntity> onSelectItem;
+  final ValueChanged<DiscoverItemEntity> onOpenDetails;
+  final ValueChanged<DiscoverItemEntity> onToggleSave;
+  final ScenarioIntakeSelectionState scenarioSelection;
+  final ValueChanged<DiscoverItemEntity> onToggleScenarioSelection;
+  final ValueChanged<DiscoverItemEntity>? onAddToScenario;
+  final _ScenarioMapRoute? scenarioRoute;
+  final int? selectedScenarioStopIndex;
+  final bool routeActive;
+  final bool routeComplete;
+  final ValueChanged<int>? onScenarioStopSelected;
+  final VoidCallback? onStartRoute;
+  final VoidCallback? onNextStop;
+  final VoidCallback? onResetRoute;
+  final Future<void> Function()? onSaveCompletedRoute;
+  final Future<void> Function()? onCopyCompletedRoute;
+  final VoidCallback? onOpenBuilder;
+  final VoidCallback? onSearchScenarioRoute;
+  final VoidCallback? onCreateScenarioRoute;
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.34,
+      minChildSize: 0.18,
+      maxChildSize: 0.72,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+            border: Border(top: BorderSide(color: RechargeTheme.travelLine)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Color(0x16003F32),
+                blurRadius: 12,
+                offset: Offset(0, -4),
+              ),
+            ],
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            children: <Widget>[
+              const Center(
+                child: SizedBox(
+                  width: 42,
+                  child: Divider(color: RechargeTheme.travelLine, thickness: 4),
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Map results',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${state.resultCount}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _RadiusControl(
+                radiusMeters: state.draftQuery.radiusMeters,
+                unlimited: state.draftQuery.unlimitedRadius,
+                dirty: state.searchAreaDirty,
+                onRadiusChanged: onRadiusChanged,
+                onUnlimitedChanged: onUnlimitedChanged,
+                onApplyArea: onApplyArea,
+              ),
+              if (scenarioRoute != null) ...<Widget>[
+                const SizedBox(height: 12),
+                _ScenarioRouteCard(
+                  route: scenarioRoute!,
+                  selectedStopIndex: selectedScenarioStopIndex,
+                  routeActive: routeActive,
+                  routeComplete: routeComplete,
+                  onStopSelected: onScenarioStopSelected,
+                  onStartRoute: onStartRoute,
+                  onNextStop: onNextStop,
+                  onResetRoute: onResetRoute,
+                  onSaveCompletedRoute: onSaveCompletedRoute,
+                  onCopyCompletedRoute: onCopyCompletedRoute,
+                  onOpenBuilder: onOpenBuilder,
+                  onSearchSimilar: onSearchScenarioRoute,
+                  onCreateRoute: onCreateScenarioRoute,
+                ),
+              ],
+              const SizedBox(height: 12),
+              if (_shouldShowLoading(state))
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (state.status == DiscoverFeedStatus.error)
+                _SheetStateMessage(
+                  message: state.message ?? 'Map search failed',
+                  actionLabel: 'Retry',
+                  onAction: onRetry,
+                )
+              else if (state.items.isEmpty)
+                _SheetStateMessage(
+                  message: state.message ?? 'No activities in this area',
+                  actionLabel: 'Search this area',
+                  onAction: onApplyArea,
+                )
+              else ...<Widget>[
+                if (state.selectedItem != null) ...<Widget>[
+                  _SelectedMapItem(
+                    item: state.selectedItem!,
+                    selectionMode: scenarioSelection.active,
+                    selectionOrder: scenarioSelection.orderOf(
+                      state.selectedItem!.id,
+                    ),
+                    isSaved: favoritesController.isFavorite(
+                      state.selectedItem!.id,
+                    ),
+                    onToggleScenarioSelection: () =>
+                        onToggleScenarioSelection(state.selectedItem!),
+                    onAddToScenario: onAddToScenario == null
+                        ? null
+                        : () => onAddToScenario!(state.selectedItem!),
+                    onToggleSave: () => onToggleSave(state.selectedItem!),
+                    onOpenDetails: () => onOpenDetails(state.selectedItem!),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                ...state.items
+                    .take(30)
+                    .map(
+                      (DiscoverItemEntity item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _MapListItem(
+                          item: item,
+                          selected: item.id == state.selectedItemId,
+                          selectionMode: scenarioSelection.active,
+                          selectionOrder: scenarioSelection.orderOf(item.id),
+                          isSaved: favoritesController.isFavorite(item.id),
+                          onTap: () => onSelectItem(item),
+                          onOpenDetails: () => onOpenDetails(item),
+                          onToggleSave: () => onToggleSave(item),
+                        ),
+                      ),
+                    ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  bool _shouldShowLoading(DiscoverFeedState state) {
+    return state.items.isEmpty &&
+        (state.status == DiscoverFeedStatus.initial ||
+            state.status == DiscoverFeedStatus.loading);
+  }
+}
+
+class _ScenarioRouteCard extends StatelessWidget {
+  const _ScenarioRouteCard({
+    required this.route,
+    required this.selectedStopIndex,
+    required this.routeActive,
+    required this.routeComplete,
+    required this.onStopSelected,
+    required this.onStartRoute,
+    required this.onNextStop,
+    required this.onResetRoute,
+    required this.onSaveCompletedRoute,
+    required this.onCopyCompletedRoute,
+    required this.onOpenBuilder,
+    required this.onSearchSimilar,
+    required this.onCreateRoute,
+  });
+
+  final _ScenarioMapRoute route;
+  final int? selectedStopIndex;
+  final bool routeActive;
+  final bool routeComplete;
+  final ValueChanged<int>? onStopSelected;
+  final VoidCallback? onStartRoute;
+  final VoidCallback? onNextStop;
+  final VoidCallback? onResetRoute;
+  final Future<void> Function()? onSaveCompletedRoute;
+  final Future<void> Function()? onCopyCompletedRoute;
+  final VoidCallback? onOpenBuilder;
+  final VoidCallback? onSearchSimilar;
+  final VoidCallback? onCreateRoute;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final int completedStopCount = _completedStopCount(
+      stopCount: route.stops.length,
+      selectedStopIndex: selectedStopIndex,
+      routeActive: routeActive,
+      routeComplete: routeComplete,
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                const Icon(Icons.route, color: RechargeTheme.travelGreenDark),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Scenario route',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${route.stops.length} stops',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: RechargeTheme.travelGreenDark,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${route.moodLabel} · ${route.totalDurationMinutes} min · '
+              '${route.totalDistanceKm.toStringAsFixed(1)} km · '
+              '${route.priceLabel}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            if (route.promptLabel.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              _ScenarioIntentBanner(label: route.promptLabel),
+            ],
+            if (selectedStopIndex != null) ...<Widget>[
+              const SizedBox(height: 8),
+              _FocusedStopBanner(
+                step: route.stops[selectedStopIndex!],
+                index: selectedStopIndex!,
+                routeActive: routeActive,
+                routeComplete: routeComplete,
+              ),
+            ],
+            const SizedBox(height: 12),
+            _RouteProgressControls(
+              route: route,
+              selectedStopIndex: selectedStopIndex,
+              routeActive: routeActive,
+              routeComplete: routeComplete,
+              completedStopCount: completedStopCount,
+              onStartRoute: onStartRoute,
+              onNextStop: onNextStop,
+              onResetRoute: onResetRoute,
+            ),
+            const SizedBox(height: 12),
+            ...List<Widget>.generate(route.stops.length, (int index) {
+              final ScenarioStepEntity step = route.stops[index];
+              final bool selected = selectedStopIndex == index;
+              final bool completed = index < completedStopCount;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == route.stops.length - 1 ? 0 : 8,
+                ),
+                child: Material(
+                  color: selected
+                      ? colorScheme.primary.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    onTap: onStopSelected == null
+                        ? null
+                        : () => onStopSelected!(index),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor: completed
+                                ? colorScheme.tertiary
+                                : selected
+                                ? colorScheme.secondary
+                                : colorScheme.primary,
+                            child: completed
+                                ? Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: colorScheme.onTertiary,
+                                  )
+                                : Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      color: selected
+                                          ? colorScheme.onSecondary
+                                          : colorScheme.onPrimary,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  step.title,
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: completed
+                                            ? colorScheme.tertiary
+                                            : null,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  completed
+                                      ? 'Completed · ${step.durationMinutes} min'
+                                      : '${createTaxonomyLabelForPath(step.category)} · '
+                                            '${step.durationMinutes} min',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            completed
+                                ? Icons.check_circle
+                                : selected
+                                ? Icons.my_location
+                                : Icons.location_searching,
+                            color: completed
+                                ? colorScheme.tertiary
+                                : selected
+                                ? colorScheme.secondary
+                                : colorScheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+            if (routeComplete) ...<Widget>[
+              const SizedBox(height: 10),
+              _RouteCompleteBanner(
+                route: route,
+                onSave: onSaveCompletedRoute,
+                onCopy: onCopyCompletedRoute,
+              ),
+            ],
+            if (onOpenBuilder != null ||
+                onSearchSimilar != null ||
+                onCreateRoute != null) ...<Widget>[
+              const SizedBox(height: 12),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onOpenBuilder,
+                      icon: const Icon(Icons.edit_location_alt),
+                      label: const Text('Edit route'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    tooltip: 'Search similar route',
+                    onPressed: onSearchSimilar,
+                    icon: const Icon(Icons.search),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filledTonal(
+                    tooltip: 'Create route listing',
+                    onPressed: onCreateRoute,
+                    icon: const Icon(Icons.add_business_outlined),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScenarioIntentBanner extends StatelessWidget {
+  const _ScenarioIntentBanner({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.84),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.16)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.auto_awesome, color: colorScheme.primary, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Intent: $label',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FocusedStopBanner extends StatelessWidget {
+  const _FocusedStopBanner({
+    required this.step,
+    required this.index,
+    required this.routeActive,
+    required this.routeComplete,
+  });
+
+  final ScenarioStepEntity step;
+  final int index;
+  final bool routeActive;
+  final bool routeComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.secondary.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.my_location, color: colorScheme.secondary, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                routeComplete
+                    ? 'Completed at stop ${index + 1}: ${step.title}'
+                    : routeActive
+                    ? 'Now: stop ${index + 1} · ${step.title}'
+                    : 'Focused stop ${index + 1}: ${step.title}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.secondary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RouteCompleteBanner extends StatelessWidget {
+  const _RouteCompleteBanner({
+    required this.route,
+    required this.onSave,
+    required this.onCopy,
+  });
+
+  final _ScenarioMapRoute route;
+  final Future<void> Function()? onSave;
+  final Future<void> Function()? onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.tertiary.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.celebration, color: colorScheme.tertiary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Route complete · ${route.stops.length} stops · '
+                    '${route.totalDurationMinutes} min',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: colorScheme.tertiary,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onSave == null
+                        ? null
+                        : () async {
+                            await onSave!();
+                          },
+                    icon: const Icon(Icons.bookmark_add),
+                    label: const Text('Save'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onCopy == null
+                        ? null
+                        : () async {
+                            await onCopy!();
+                          },
+                    icon: const Icon(Icons.copy),
+                    label: const Text('Copy'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RouteProgressControls extends StatelessWidget {
+  const _RouteProgressControls({
+    required this.route,
+    required this.selectedStopIndex,
+    required this.routeActive,
+    required this.routeComplete,
+    required this.completedStopCount,
+    required this.onStartRoute,
+    required this.onNextStop,
+    required this.onResetRoute,
+  });
+
+  final _ScenarioMapRoute route;
+  final int? selectedStopIndex;
+  final bool routeActive;
+  final bool routeComplete;
+  final int completedStopCount;
+  final VoidCallback? onStartRoute;
+  final VoidCallback? onNextStop;
+  final VoidCallback? onResetRoute;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final int currentStop = selectedStopIndex == null
+        ? 0
+        : selectedStopIndex! + 1;
+    final bool atLastStop =
+        selectedStopIndex != null &&
+        selectedStopIndex == route.stops.length - 1;
+    final String status = routeComplete
+        ? 'Route complete'
+        : routeActive
+        ? 'Stop $currentStop of ${route.stops.length}'
+        : 'Ready to start';
+    final double progressValue = route.stops.isEmpty
+        ? 0
+        : completedStopCount / route.stops.length;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.18)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  routeComplete
+                      ? Icons.check_circle
+                      : routeActive
+                      ? Icons.navigation
+                      : Icons.flag,
+                  color: colorScheme.primary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    status,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${route.totalDurationMinutes} min',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progressValue.clamp(0, 1).toDouble(),
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: routeComplete
+                        ? onStartRoute
+                        : routeActive
+                        ? onNextStop
+                        : onStartRoute,
+                    icon: Icon(
+                      routeComplete
+                          ? Icons.replay
+                          : routeActive
+                          ? atLastStop
+                                ? Icons.check
+                                : Icons.skip_next
+                          : Icons.play_arrow,
+                    ),
+                    label: Text(
+                      routeComplete
+                          ? 'Restart'
+                          : routeActive
+                          ? atLastStop
+                                ? 'Finish'
+                                : 'Next stop'
+                          : 'Start route',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.outlined(
+                  tooltip: 'Reset route progress',
+                  onPressed: routeActive || selectedStopIndex != null
+                      ? onResetRoute
+                      : null,
+                  icon: const Icon(Icons.restart_alt),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+int _completedStopCount({
+  required int stopCount,
+  required int? selectedStopIndex,
+  required bool routeActive,
+  required bool routeComplete,
+}) {
+  if (routeComplete) return stopCount;
+  if (!routeActive || selectedStopIndex == null) return 0;
+  if (selectedStopIndex < 0) return 0;
+  if (selectedStopIndex > stopCount) return stopCount;
+  return selectedStopIndex;
+}
+
+class _RadiusControl extends StatelessWidget {
+  const _RadiusControl({
+    required this.radiusMeters,
+    required this.unlimited,
+    required this.dirty,
+    required this.onRadiusChanged,
+    required this.onUnlimitedChanged,
+    required this.onApplyArea,
+  });
+
+  final double radiusMeters;
+  final bool unlimited;
+  final bool dirty;
+  final ValueChanged<double> onRadiusChanged;
+  final ValueChanged<bool> onUnlimitedChanged;
+  final Future<void> Function() onApplyArea;
+
+  @override
+  Widget build(BuildContext context) {
+    final int radiusKm = (radiusMeters / 1000).round();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    unlimited ? 'Radius: any area' : 'Radius: $radiusKm km',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text('Any'),
+                    Checkbox(
+                      value: unlimited,
+                      onChanged: (bool? value) {
+                        onUnlimitedChanged(value ?? false);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Slider(
+              min: 1000,
+              max: 200000,
+              divisions: 40,
+              value: radiusMeters.clamp(1000, 200000).toDouble(),
+              onChanged: unlimited ? null : onRadiusChanged,
+            ),
+            if (dirty)
+              FilledButton.icon(
+                onPressed: onApplyArea,
+                icon: const Icon(Icons.travel_explore_rounded),
+                label: const Text('Search this area'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CompactRadiusControl extends StatelessWidget {
   const _CompactRadiusControl({
     required this.radiusMeters,
@@ -1569,7 +2641,9 @@ class _CompactRadiusControl extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1585,7 +2659,8 @@ class _CompactRadiusControl extends StatelessWidget {
                         ),
                         Checkbox(
                           value: unlimited,
-                          onChanged: (bool? v) => onUnlimitedChanged(v ?? false),
+                          onChanged: (bool? v) =>
+                              onUnlimitedChanged(v ?? false),
                         ),
                         const Text('Any'),
                       ],
@@ -1609,128 +2684,222 @@ class _CompactRadiusControl extends StatelessWidget {
   }
 }
 
-class _SelectedPreviewCard extends StatelessWidget {
-  const _SelectedPreviewCard({
+class _SelectedMapItem extends StatelessWidget {
+  const _SelectedMapItem({
     required this.item,
+    required this.selectionMode,
+    required this.selectionOrder,
     required this.isSaved,
-    required this.onClose,
+    required this.onToggleScenarioSelection,
+    required this.onAddToScenario,
+    required this.onToggleSave,
+    required this.onOpenDetails,
+  });
+
+  final DiscoverItemEntity item;
+  final bool selectionMode;
+  final int? selectionOrder;
+  final bool isSaved;
+  final VoidCallback onToggleScenarioSelection;
+  final VoidCallback? onAddToScenario;
+  final VoidCallback onToggleSave;
+  final VoidCallback onOpenDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              item.title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: RechargeTheme.travelGreenDark,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _metaLabel(item),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: FilledButton(
+                    onPressed: onOpenDetails,
+                    child: const Text('Open details'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: 'Save',
+                  onPressed: onToggleSave,
+                  icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (selectionMode || onAddToScenario != null)
+              OutlinedButton.icon(
+                onPressed: selectionMode
+                    ? onToggleScenarioSelection
+                    : onAddToScenario,
+                icon: Icon(
+                  selectionMode && selectionOrder != null
+                      ? Icons.remove_circle_outline
+                      : Icons.playlist_add_outlined,
+                ),
+                label: Text(
+                  selectionMode
+                      ? selectionOrder == null
+                            ? 'Select for Scenario'
+                            : 'Remove #$selectionOrder from selection'
+                      : 'Add to Scenario',
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MapListItem extends StatelessWidget {
+  const _MapListItem({
+    required this.item,
+    required this.selected,
+    required this.selectionMode,
+    required this.selectionOrder,
+    required this.isSaved,
     required this.onTap,
+    required this.onOpenDetails,
     required this.onToggleSave,
   });
 
   final DiscoverItemEntity item;
+  final bool selected;
+  final bool selectionMode;
+  final int? selectionOrder;
   final bool isSaved;
-  final VoidCallback onClose;
   final VoidCallback onTap;
+  final VoidCallback onOpenDetails;
   final VoidCallback onToggleSave;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
+    return Card(
+      color: selected ? RechargeTheme.travelPanel : Colors.white,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: RechargeTheme.travelPanel,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: RechargeTheme.travelLine),
+                ),
+                alignment: Alignment.center,
+                child: selectionOrder == null
+                    ? Icon(
+                        item.isPublishedRoute
+                            ? Icons.route_outlined
+                            : Icons.place_outlined,
+                        color: RechargeTheme.travelGreenDark,
+                      )
+                    : CircleAvatar(
+                        backgroundColor: RechargeTheme.travelGreenDark,
+                        foregroundColor: Colors.white,
+                        child: Text('$selectionOrder'),
+                      ),
               ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        item.coverImageUrl,
-                        width: 84,
-                        height: 84,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 84,
-                          height: 84,
-                          color: RechargeTheme.travelPanel,
-                          child: const Icon(Icons.image_not_supported_outlined),
-                        ),
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  rechargeTaxonomyLabel(item.category),
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: onClose,
-                                child: const Icon(
-                                  Icons.close_rounded,
-                                  size: 18,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${item.distanceKm.toStringAsFixed(1)} km · '
-                            '${item.isFree ? 'Free' : '${item.priceAmount.toStringAsFixed(0)} €'}',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: onToggleSave,
-                      icon: Icon(
-                        isSaved ? Icons.favorite : Icons.favorite_border,
-                        size: 20,
-                        color: isSaved ? Colors.red : null,
+                    const SizedBox(height: 4),
+                    Text(
+                      _metaLabel(item),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+              if (selectionMode)
+                Checkbox(
+                  value: selectionOrder != null,
+                  onChanged: (_) => onTap(),
+                )
+              else ...<Widget>[
+                IconButton(
+                  tooltip: 'Save',
+                  onPressed: onToggleSave,
+                  icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
+                ),
+                IconButton(
+                  tooltip: 'Open details',
+                  onPressed: onOpenDetails,
+                  icon: const Icon(Icons.chevron_right_rounded),
+                ),
+              ],
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetStateMessage extends StatelessWidget {
+  const _SheetStateMessage({
+    required this.message,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  final String message;
+  final String actionLabel;
+  final Future<void> Function() onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(message),
+            const SizedBox(height: 10),
+            OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
+          ],
         ),
       ),
     );
@@ -1918,6 +3087,12 @@ String? _searchCategoryForScenarioRoute(_ScenarioMapRoute route) {
 }
 
 String _metaLabel(DiscoverItemEntity item) {
+  final route = item.publishedRoute;
+  if (route != null) {
+    return '${item.city} · Route · '
+        '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
+        '${(route.durationSeconds / 60).round()} min';
+  }
   final String price = item.isFree
       ? 'Free'
       : '${item.priceAmount.toStringAsFixed(0)} €';

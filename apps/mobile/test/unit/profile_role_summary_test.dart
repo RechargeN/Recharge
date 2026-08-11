@@ -14,16 +14,16 @@ void main() {
     expect(summary.primaryActionLabel, 'Open Saved');
   });
 
-  test('maps create capabilities to Creator tier', () {
+  test('does not promote a user from create capabilities alone', () {
     final ProfileRoleSummary summary = profileRoleSummaryFor(
       role: 'user',
       capabilities: const <String>['create.event', 'create.place'],
     );
 
-    expect(summary.tier, ProfileRoleTier.creator);
-    expect(summary.canCreate, isTrue);
+    expect(summary.tier, ProfileRoleTier.user);
+    expect(summary.canCreate, isFalse);
     expect(summary.canGenerate, isFalse);
-    expect(summary.primaryActionLabel, 'Open Create Hub');
+    expect(summary.primaryActionLabel, 'Open Saved');
   });
 
   test('maps generator capabilities to Pro generator tier', () {

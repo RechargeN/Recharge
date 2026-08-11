@@ -3,19 +3,32 @@ import 'dart:math' as math;
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/published_route_discovery_entity.dart';
 import '../../domain/repositories/discover_repository.dart';
+import '../../domain/repositories/published_route_discovery_port.dart';
 import '../datasources/discover_remote_datasource.dart';
 
 class DiscoverRepositoryImpl implements DiscoverRepository {
-  DiscoverRepositoryImpl({required DiscoverRemoteDataSource remoteDataSource})
-    : _remoteDataSource = remoteDataSource;
+  DiscoverRepositoryImpl({
+    required DiscoverRemoteDataSource remoteDataSource,
+    PublishedRouteDiscoveryPort? publishedRoutes,
+  }) : _remoteDataSource = remoteDataSource,
+       _publishedRoutes = publishedRoutes;
 
   final DiscoverRemoteDataSource _remoteDataSource;
+  final PublishedRouteDiscoveryPort? _publishedRoutes;
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    final List<DiscoverItemEntity> source = await _remoteDataSource
-        .getFeedCandidates();
+    final remote = await _remoteDataSource.getFeedCandidates();
+    final published = query.requestsPublishedRoutes
+        ? await _publishedRoutes?.loadActiveRoutes() ??
+              const <PublishedRouteDiscoveryEntity>[]
+        : const <PublishedRouteDiscoveryEntity>[];
+    final List<DiscoverItemEntity> source = <DiscoverItemEntity>[
+      ...remote,
+      ...published.where((route) => route.isCoherent).map(_routeItem),
+    ];
     final List<DiscoverItemEntity> globallyFiltered = source
         .where((DiscoverItemEntity item) => _passGlobalFilters(item, query))
         .toList(growable: false);
@@ -55,15 +68,20 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   @override
-  Future<DiscoverItemEntity> getDetails(String itemId) {
+  Future<DiscoverItemEntity> getDetails(String itemId) async {
+    final route = await _publishedRoutes?.getActiveRoute(itemId);
+    if (route != null && route.isCoherent) return _routeItem(route);
     return _remoteDataSource.getDetails(itemId);
   }
 
   bool _passGlobalFilters(DiscoverItemEntity item, DiscoverQuery query) {
     final String text = query.queryText.trim().toLowerCase();
     if (text.isNotEmpty) {
+      final String routeTokens =
+          item.publishedRoute?.searchTokens.join(' ') ?? '';
       final String haystack =
-          '${item.title} ${item.subtitle} ${item.category} ${item.city}'
+          '${item.title} ${item.subtitle} ${item.category} '
+                  '${item.subcategory} ${item.city} $routeTokens'
               .toLowerCase();
       if (!haystack.contains(text)) return false;
     }
@@ -100,12 +118,14 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
       return false;
     }
 
-    if (query.timeWindow == null &&
+    if (!item.isPublishedRoute &&
+        query.timeWindow == null &&
         query.dateFrom != null &&
         item.startsAtUtc.isBefore(query.dateFrom!)) {
       return false;
     }
-    if (query.timeWindow == null &&
+    if (!item.isPublishedRoute &&
+        query.timeWindow == null &&
         query.dateTo != null &&
         item.startsAtUtc.isAfter(query.dateTo!)) {
       return false;
@@ -168,4 +188,34 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   }
 
   double _toRadians(double degree) => degree * (math.pi / 180);
+
+  static DiscoverItemEntity _routeItem(PublishedRouteDiscoveryEntity route) =>
+      DiscoverItemEntity(
+        id: route.routeId,
+        title: route.title,
+        subtitle: route.subtitle,
+        city: route.city,
+        category: route.categoryId,
+        subcategory: route.subcategoryId,
+        startsAtUtc: route.publishedAtUtc,
+        latitude: route.startPoint.latitude,
+        longitude: route.startPoint.longitude,
+        priceAmount: 0,
+        distanceKm: 0,
+        isFree: true,
+        coverImageUrl: route.coverImage,
+        organizerName: route.publisherName,
+        venueName: 'Route start',
+        marketCityId: route.marketCityId,
+        timezoneId: route.timezoneId,
+        durationMinutes: (route.durationSeconds / 60).ceil(),
+        durationConfidence: DurationConfidence.exact,
+        ctaLabel: 'Open Route',
+        highlights: <String>[
+          '${(route.distanceMeters / 1000).toStringAsFixed(1)} km',
+          route.routingProfileId,
+          route.difficultyId,
+        ],
+        publishedRoute: route,
+      );
 }

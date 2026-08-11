@@ -24,8 +24,31 @@ void main() {
     await controller.ensureLoaded(userId: 'u1');
 
     expect(controller.state.status, NotificationsStatus.ready);
-    expect(controller.state.items, hasLength(2));
+    expect(controller.state.items, hasLength(3));
     expect(controller.state.unreadCount, 1);
+  });
+
+  test('searches title, body, type, time, and tolerates typos', () async {
+    await controller.ensureLoaded(userId: 'u1');
+
+    controller.updateSearchQuery('бронированеи');
+    expect(controller.state.searchResults.single.id, 'n3');
+
+    controller.updateSearchQuery('15:00');
+    expect(controller.state.searchResults.single.id, 'n3');
+
+    controller.updateSearchQuery('бронирование подтверждено');
+    expect(controller.state.searchResults.single.id, 'n3');
+
+    controller.updateSearchQuery('напоминание');
+    expect(controller.state.searchResults.single.id, 'n1');
+
+    controller.updateSearchQuery('несуществующее');
+    expect(controller.state.searchResults, isEmpty);
+
+    controller.clearSearch();
+    expect(controller.state.searchResults, hasLength(3));
+    expect(controller.state.searchQuery, isEmpty);
   });
 
   test('markAsRead updates unread count', () async {
@@ -35,7 +58,9 @@ void main() {
 
     expect(controller.state.unreadCount, 0);
     expect(
-      controller.state.items.firstWhere((NotificationItemEntity item) => item.id == 'n1').isRead,
+      controller.state.items
+          .firstWhere((NotificationItemEntity item) => item.id == 'n1')
+          .isRead,
       isTrue,
     );
   });
@@ -47,7 +72,9 @@ void main() {
 
     expect(controller.state.unreadCount, 0);
     expect(
-      controller.state.items.every((NotificationItemEntity item) => item.isRead),
+      controller.state.items.every(
+        (NotificationItemEntity item) => item.isRead,
+      ),
       isTrue,
     );
   });
@@ -77,6 +104,15 @@ class _FakeNotificationsRepository implements NotificationsRepository {
       createdAtUtc: DateTime.parse('2026-04-20T09:00:00Z'),
       isRead: true,
       targetRoute: null,
+    ),
+    NotificationItemEntity(
+      id: 'n3',
+      title: 'Ваше бронирование подтверждено',
+      body: 'Ждем в 15: 00.',
+      type: NotificationType.activity,
+      createdAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
+      isRead: true,
+      targetRoute: '/discover',
     ),
   ];
 

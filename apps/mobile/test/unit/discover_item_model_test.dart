@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/models/discover_item_model.dart';
+import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 
 void main() {
   test('fromMap parses details v2 fields', () {
@@ -15,6 +16,7 @@ void main() {
       'price_amount': 0.0,
       'distance_km': 1.4,
       'is_free': true,
+      'object_kind': 'place',
       'relevance_score': 0.9,
       'cover_image_url': 'https://example.com/cover.jpg',
       'organizer_name': 'Marine Tennis Club',
@@ -29,6 +31,7 @@ void main() {
     });
 
     expect(item.coverImageUrl, 'https://example.com/cover.jpg');
+    expect(item.objectKind, DiscoverObjectKind.place);
     expect(item.organizerName, 'Marine Tennis Club');
     expect(item.participantsCount, 32);
     expect(item.capacity, 48);
@@ -49,6 +52,7 @@ void main() {
       'price_amount': 0.0,
       'distance_km': 1.4,
       'is_free': true,
+      'object_kind': 'event',
       'relevance_score': 0.9,
       'organizer_name': 'Marine Tennis Club',
       'participants_count': 32,
@@ -60,6 +64,7 @@ void main() {
     expect(copy.distanceKm, 2.0);
     expect(copy.relevanceScore, 0.7);
     expect(copy.organizerName, 'Marine Tennis Club');
+    expect(copy.objectKind, DiscoverObjectKind.event);
     expect(copy.participantsCount, 32);
     expect(copy.highlights, <String>['Warm-up games']);
   });
@@ -94,6 +99,7 @@ void main() {
       expect(explicitZero.capacity, isNull);
       expect(explicitZero.participantsCount, 0);
       expect(absent.participantsCount, isNull);
+      expect(absent.objectKind, DiscoverObjectKind.activity);
     },
   );
 }

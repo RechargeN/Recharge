@@ -211,6 +211,36 @@ void main() {
     expect(find.text('Напоминание о событии'), findsOneWidget);
     expect(find.text('Системное обновление'), findsOneWidget);
 
+    await tester.enterText(
+      find.byKey(const Key('notifications-search')),
+      'кофе прогулка',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Готов спокойный маршрут'), findsOneWidget);
+    expect(find.text('Листинг отправлен на модерацию'), findsNothing);
+    expect(find.text('Напоминание о событии'), findsNothing);
+    expect(find.text('Системное обновление'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('notifications-search')),
+      'маршурт',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Готов спокойный маршрут'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('notifications-search')),
+      'авиабилет',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('По вашему запросу ничего не найдено'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Clear search'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('New'));
     await tester.pumpAndSettle();
 

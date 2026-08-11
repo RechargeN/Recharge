@@ -1,13 +1,17 @@
 # Recharge Create Taxonomy v1
 
 Status: Archived historical reference; superseded
-Last updated: 2026-07-17
+Last updated: 2026-07-18
 Owner: Recharge product and engineering
 
-The accepted category model and canonical 28/516 registry are defined in
+The accepted category model and canonical 28/530 registry are defined in
 [`CATEGORY_SYSTEM.md`](CATEGORY_SYSTEM.md). This document is retained only to
 explain historical 22/434 IDs and Create-block contracts handled by the
 compatibility migration.
+
+Current domain clarification: `route` means only a continuous Route track.
+Scenario/plan data belongs to Quick Plan compatibility paths and must not be
+interpreted as Route. Historical ambiguity in this document is not normative.
 
 This document describes the legacy create taxonomy previously used by Recharge
 for create flows, filters, search, recommendations, and moderation.
@@ -55,7 +59,7 @@ Definitions:
 | `quick_plan` | Lightweight plan for now, today, tonight, or the next few hours. |
 | `social_request` | Request to find people for a specific activity. |
 | `private_plan` | Invite-only plan for friends, couples, family, team, or closed group. |
-| `route` | Path or scenario made of one or more points. |
+| `route` | Continuous path by geometry; never a Scenario or independent-stop plan. |
 | `place` | Public spot or map point. |
 | `venue` | Business, creator, studio, club, cafe, bar, museum, or activity venue page. |
 | `bookable_slot` | Time-based service, court, class, table, tour, session, or availability slot. |
@@ -1218,7 +1222,8 @@ const categoryOverrides = {
 
 Details are examples and user-editable text, not category IDs.
 
-Use details to describe level, group size, time, mood, route shape, or scenario.
+Use details to describe level, group size, time and mood. Route shape applies
+only to continuous Route content; Scenario intent belongs to a plan block.
 
 ```text
 sport.tennis:

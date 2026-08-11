@@ -1,0 +1,157 @@
+{
+  "bookings": [
+    {
+      "schemaVersion": 1,
+      "id": "01JBOOKING0000000000000001",
+      "revision": 3,
+      "userId": "01JUSER000000000000000001",
+      "eventId": "01JEVENT00000000000000001",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "channel": "onsite",
+      "admissionMode": "booking",
+      "confirmationMode": "instant",
+      "state": "confirmed",
+      "participantUnits": 2,
+      "namedGuests": [{ "displayName": "Guest" }],
+      "reconfirmationState": "notRequired",
+      "createdAt": "2026-08-09T08:00:00.000Z",
+      "updatedAt": "2026-08-09T08:01:00.000Z",
+      "confirmedAt": "2026-08-09T08:01:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "01JBOOKING0000000000000002",
+      "revision": 1,
+      "userId": "01JUSER000000000000000002",
+      "eventId": "01JEVENT00000000000000001",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "channel": "onsite",
+      "admissionMode": "application",
+      "confirmationMode": "manualApproval",
+      "state": "waitlisted",
+      "participantUnits": 1,
+      "activeHoldId": "01JHOLD000000000000000001",
+      "reconfirmationState": "notOpen",
+      "createdAt": "2026-08-09T08:00:00.000Z",
+      "updatedAt": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "holds": [
+    {
+      "schemaVersion": 1,
+      "id": "01JHOLD000000000000000001",
+      "bookingId": "01JBOOKING0000000000000002",
+      "userId": "01JUSER000000000000000002",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "units": 1,
+      "kind": "waitlistOffer",
+      "state": "active",
+      "createdAt": "2026-08-09T09:00:00.000Z",
+      "expiresAt": "2026-08-09T10:00:00.000Z",
+      "revision": 0
+    },
+    {
+      "schemaVersion": 1,
+      "id": "01JHOLD000000000000000002",
+      "bookingId": "01JBOOKING0000000000000003",
+      "userId": "01JUSER000000000000000003",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "units": 1,
+      "kind": "waitlistOffer",
+      "state": "expired",
+      "createdAt": "2026-08-09T07:00:00.000Z",
+      "expiresAt": "2026-08-09T08:00:00.000Z",
+      "resolvedAt": "2026-08-09T08:00:01.000Z",
+      "revision": 1
+    }
+  ],
+  "policies": [
+    {
+      "schemaVersion": 1,
+      "policyVersion": 1,
+      "maxConcurrentFiniteAllocations": 5,
+      "countingRule": "onePerBookingOrActiveHold",
+      "unlimitedBookingCounts": false
+    }
+  ],
+  "commands": [
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "01JREQUEST0000000000000001",
+      "idempotencyKey": "01JIDEMPOTENCY000000000001",
+      "occurredAgainstEventRevision": 4,
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "inventoryPoolId": "01JPOOL000000000000000001",
+        "channel": "onsite",
+        "participantUnits": 2,
+        "namedGuests": [{ "displayName": "Guest" }]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "acceptWaitlistHold",
+      "requestId": "01JREQUEST0000000000000002",
+      "idempotencyKey": "01JIDEMPOTENCY000000000002",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "holdId": "01JHOLD000000000000000001"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "schemaVersion": 1,
+      "code": "concurrency_cap_reached",
+      "retryable": false,
+      "correlationId": "01JCORRELATION000000000001",
+      "details": { "limit": 5, "policyVersion": 1 }
+    }
+  ],
+  "results": [
+    {
+      "schemaVersion": 1,
+      "kind": "succeeded",
+      "requestId": "01JREQUEST0000000000000001",
+      "correlationId": "01JCORRELATION000000000002",
+      "serverTime": "2026-08-09T08:01:00.000Z",
+      "booking": {
+        "schemaVersion": 1,
+        "id": "01JBOOKING0000000000000001",
+        "revision": 3,
+        "userId": "01JUSER000000000000000001",
+        "eventId": "01JEVENT00000000000000001",
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "inventoryPoolId": "01JPOOL000000000000000001",
+        "channel": "onsite",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "confirmed",
+        "participantUnits": 2,
+        "reconfirmationState": "notRequired",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "updatedAt": "2026-08-09T08:01:00.000Z",
+        "confirmedAt": "2026-08-09T08:01:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "rejected",
+      "requestId": "01JREQUEST0000000000000003",
+      "correlationId": "01JCORRELATION000000000003",
+      "serverTime": "2026-08-09T08:02:00.000Z",
+      "error": {
+        "schemaVersion": 1,
+        "code": "sold_out",
+        "retryable": false,
+        "correlationId": "01JCORRELATION000000000003"
+      }
+    }
+  ]
+}

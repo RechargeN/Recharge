@@ -9,8 +9,8 @@ class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required AuthLocalDataSource localDataSource,
-  })  : _remoteDataSource = remoteDataSource,
-        _localDataSource = localDataSource;
+  }) : _remoteDataSource = remoteDataSource,
+       _localDataSource = localDataSource;
 
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
@@ -97,7 +97,7 @@ class AuthRepositoryImpl implements AuthRepository {
       'user': <String, dynamic>{
         'id': MockAuthRemoteDataSource.demoUserId,
         'email': MockAuthRemoteDataSource.demoEmail,
-        'role': 'creator',
+        'role': MockAuthRemoteDataSource.demoRole,
         'capabilities': MockAuthRemoteDataSource.demoCapabilities,
         'profile_status': 'active',
       },

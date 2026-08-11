@@ -3,15 +3,15 @@ import 'package:recharge/core/config/recharge_category_criteria.dart';
 import 'package:recharge/core/config/recharge_taxonomy.dart';
 
 void main() {
-  test('accepted taxonomy materializes 28/516 with valid invariants', () {
+  test('accepted taxonomy materializes 28/530 with valid invariants', () {
     expect(rechargeContentGroups, hasLength(28));
     expect(rechargeVisibleContentGroups, hasLength(27));
-    expect(rechargeActivityCategories, hasLength(516));
+    expect(rechargeActivityCategories, hasLength(530));
     expect(
       rechargeActivityCategories
           .map((RechargeActivityCategory category) => category.id)
           .toSet(),
-      hasLength(516),
+      hasLength(530),
     );
     expect(rechargeCriteriaFields, hasLength(36));
     expect(rechargeCriteriaProfiles, hasLength(22));
@@ -86,6 +86,33 @@ void main() {
     expect(cycling.allowsCreateBlock('rental'), isTrue);
     expect(cycling.allowsCreateBlock('social_request'), isTrue);
     expect(rechargeContentGroupById('other')?.isHidden, isTrue);
+  });
+
+  test('adaptive Place types are canonical and place-only', () {
+    const Set<String> adaptivePlaceIds = <String>{
+      'monument',
+      'memorial',
+      'sculpture',
+      'historic_landmark',
+      'park',
+      'beach',
+      'promenade',
+      'viewpoint',
+      'forest',
+      'lake',
+      'waterfall',
+      'cave',
+      'natural_landmark',
+      'public_square',
+    };
+
+    for (final String id in adaptivePlaceIds) {
+      final RechargeActivityCategory category = rechargeActivityCategoryById(
+        id,
+      )!;
+      expect(category.allowsCreateBlock('place'), isTrue, reason: id);
+      expect(category.allowsCreateBlock('event'), isFalse, reason: id);
+    }
   });
 
   test('seasonality and implied facets remain separate metadata', () {

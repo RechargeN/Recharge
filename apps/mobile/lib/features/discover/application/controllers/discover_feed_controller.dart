@@ -379,10 +379,28 @@ class DiscoverFeedController extends ChangeNotifier {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
         selectedCategoryIds: categories,
+        selectedSubcategoryIds: const <String>[],
         queryVersion: 2,
         appliedAtUtc: DateTime.now().toUtc(),
       ),
     );
+  }
+
+  Future<Map<String, int>> loadCategoryResultCounts() async {
+    await ensureLoaded();
+    final DiscoverQuery countQuery = _state.appliedQuery.copyWith(
+      selectedCategoryIds: const <String>[],
+      selectedSubcategoryIds: const <String>[],
+    );
+    final List<DiscoverItemEntity> items = await _getDiscoverFeedUseCase(
+      countQuery,
+    );
+    final Map<String, int> counts = <String, int>{};
+    for (final DiscoverItemEntity item in items) {
+      final String categoryId = normalizeRechargeContentGroupId(item.category);
+      counts[categoryId] = (counts[categoryId] ?? 0) + 1;
+    }
+    return counts;
   }
 
   Future<void> setFreeOnly(bool enabled) async {
@@ -530,6 +548,7 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> applySearchConditions({
     String? queryText,
     List<String>? selectedCategoryIds,
+    List<String>? selectedSubcategoryIds,
     bool? freeOnly,
     double? budgetMin,
     bool clearBudgetMin = false,
@@ -563,6 +582,7 @@ class DiscoverFeedController extends ChangeNotifier {
       _state.appliedQuery.copyWith(
         queryText: queryText?.trim(),
         selectedCategoryIds: selectedCategoryIds,
+        selectedSubcategoryIds: selectedSubcategoryIds,
         freeOnly: freeOnly,
         budgetMin: budgetMin,
         clearBudgetMin: clearBudgetMin,
@@ -638,6 +658,7 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> applySearchArea() async {
     final DiscoverQuery applied = _state.draftQuery.copyWith(
       searchAreaDirty: false,
+      sourceScreen: 'map_search',
       queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );

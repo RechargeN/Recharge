@@ -30,43 +30,33 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   bool _snackShown = false;
   bool _favoritesRequested = false;
 
-  static const List<_HomeCategory> _categories = <_HomeCategory>[
-    _HomeCategory(id: null, label: 'All', icon: Icons.grid_view_rounded),
-    _HomeCategory(
-      id: 'sport',
-      label: 'Sport',
-      icon: Icons.sports_tennis_outlined,
-    ),
-    _HomeCategory(
-      id: 'outdoor_nature_walking',
-      label: 'Walks',
-      icon: Icons.directions_walk,
-    ),
-    _HomeCategory(
-      id: 'games_indoor',
-      label: 'Games',
-      icon: Icons.sports_esports_outlined,
-    ),
-    _HomeCategory(
-      id: 'music_nightlife',
-      label: 'Music',
-      icon: Icons.music_note_outlined,
-    ),
-    _HomeCategory(
-      id: 'art_culture_museums',
-      label: 'Art',
-      icon: Icons.palette_outlined,
-    ),
-    _HomeCategory(
-      id: 'food_drinks',
-      label: 'Food',
-      icon: Icons.local_cafe_outlined,
-    ),
-    _HomeCategory(
-      id: 'wellness_recharge',
-      label: 'Wellness',
-      icon: Icons.self_improvement_rounded,
-    ),
+  static const List<String> _homeCategoryPriority = <String>[
+    'sport',
+    'outdoor_nature_walking',
+    'games_indoor',
+    'dance',
+    'music_nightlife',
+    'art_culture_museums',
+    'food_drinks',
+    'wellness_recharge',
+  ];
+
+  static final List<_HomeCategory> _categories = <_HomeCategory>[
+    const _HomeCategory(id: null, label: 'All', icon: Icons.grid_view_rounded),
+    for (final String categoryId in _homeCategoryPriority)
+      if (rechargeContentGroupById(categoryId) case final group?)
+        _HomeCategory(
+          id: group.id,
+          label: _homeCategoryLabel(group.id, group.title),
+          icon: _homeCategoryIcon(group.id),
+        ),
+    for (final RechargeContentGroup group in rechargeVisibleContentGroups)
+      if (!_homeCategoryPriority.contains(group.id))
+        _HomeCategory(
+          id: group.id,
+          label: group.title,
+          icon: _homeCategoryIcon(group.id),
+        ),
   ];
 
   static const List<_ScenarioCardData> _scenarios = <_ScenarioCardData>[
@@ -186,23 +176,24 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       smartSearchHistory,
     );
     return Scaffold(
-      backgroundColor: const Color(0xFF003F32),
+      backgroundColor: RechargeTheme.homeBackground,
       body: DecoratedBox(
+        key: const Key('home-screen'),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: <Color>[
-              Color(0xFF064936),
-              Color(0xFF003F32),
-              Color(0xFF002C25),
+              RechargeTheme.homeBackgroundTop,
+              RechargeTheme.homeBackground,
+              RechargeTheme.homeBackgroundBottom,
             ],
           ),
         ),
         child: SafeArea(
           bottom: false,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 28),
             children: <Widget>[
               _HomeHero(
                 onSearch: () => context.go(RouteNames.search),
@@ -212,7 +203,7 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
               _SectionHeader(
                 title: 'Categories',
                 actionLabel: 'View all',
-                onAction: () => context.go(RouteNames.search),
+                onAction: () => context.push(RouteNames.categories),
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -222,6 +213,7 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                   itemBuilder: (BuildContext context, int index) {
                     final _HomeCategory category = _categories[index];
                     return _CategoryPill(
+                      key: Key('home-category-${category.id ?? 'all'}'),
                       category: category,
                       selected: index == 0,
                       onTap: () => _openCategory(category.id),
@@ -320,12 +312,12 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
     );
   }
 
-  Future<void> _openCategory(String? categoryId) async {
-    await ref
-        .read(discoverFeedControllerProvider)
-        .setCategoryFilter(categoryId);
-    if (!mounted) return;
-    context.go(RouteNames.search);
+  void _openCategory(String? categoryId) {
+    if (categoryId == null) {
+      context.push(RouteNames.categories);
+      return;
+    }
+    context.push('${RouteNames.categories}/$categoryId');
   }
 
   void _openSavedScenario(FavoriteItemEntity scenario) {
@@ -844,18 +836,18 @@ class _HomeHero extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
           ),
         ),
         const SizedBox(height: 3),
         const Text(
           'VACATION APP',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.6,
+            color: RechargeTheme.homeMuted,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.4,
           ),
         ),
         const SizedBox(height: 18),
@@ -863,6 +855,7 @@ class _HomeHero extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _HomeActionPill(
+                key: const Key('home-search-action'),
                 icon: Icons.search_rounded,
                 label: 'Search',
                 onPressed: onSearch,
@@ -871,6 +864,7 @@ class _HomeHero extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _HomeActionPill(
+                key: const Key('home-map-action'),
                 icon: Icons.map_outlined,
                 label: 'Map',
                 onPressed: onMap,
@@ -885,6 +879,7 @@ class _HomeHero extends StatelessWidget {
 
 class _HomeActionPill extends StatelessWidget {
   const _HomeActionPill({
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
@@ -898,23 +893,23 @@ class _HomeActionPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(RechargeTheme.homePillRadius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(RechargeTheme.homePillRadius),
         onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+        child: SizedBox(
+          height: 48,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(icon, size: 18, color: const Color(0xFF064936)),
+              Icon(icon, size: 18, color: RechargeTheme.homeBackground),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: const TextStyle(
                   color: Color(0xFF073F35),
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -953,8 +948,9 @@ class _SectionHeader extends StatelessWidget {
         TextButton(
           onPressed: onAction,
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+            foregroundColor: RechargeTheme.homeMuted,
             visualDensity: VisualDensity.compact,
+            textStyle: const TextStyle(fontSize: 11),
           ),
           child: Text(actionLabel),
         ),
@@ -965,6 +961,7 @@ class _SectionHeader extends StatelessWidget {
 
 class _CategoryPill extends StatelessWidget {
   const _CategoryPill({
+    super.key,
     required this.category,
     required this.selected,
     required this.onTap,
@@ -979,7 +976,7 @@ class _CategoryPill extends StatelessWidget {
     return SizedBox(
       width: 64,
       child: InkWell(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(RechargeTheme.homePillRadius),
         onTap: onTap,
         child: Column(
           children: <Widget>[
@@ -989,12 +986,12 @@ class _CategoryPill extends StatelessWidget {
               decoration: BoxDecoration(
                 color: selected
                     ? Colors.white
-                    : Colors.white.withValues(alpha: 0.13),
+                    : RechargeTheme.homeCategorySurface,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected
                       ? Colors.white
-                      : Colors.white.withValues(alpha: 0.22),
+                      : RechargeTheme.homeMuted.withValues(alpha: 0.32),
                 ),
               ),
               child: Icon(
@@ -1008,8 +1005,8 @@ class _CategoryPill extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: selected ? Colors.white : RechargeTheme.homeMuted,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
@@ -1052,6 +1049,7 @@ class _HomeActivitySections extends StatelessWidget {
             (_HomeChoiceSectionData section) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _HomeContentSection(
+                key: ValueKey<String>('home-feed-${section.title}'),
                 title: section.title,
                 items: section.items,
                 onViewAll: onViewAll,
@@ -1164,6 +1162,7 @@ class _HomeChoiceSectionData {
 
 class _HomeContentSection extends StatelessWidget {
   const _HomeContentSection({
+    super.key,
     required this.title,
     required this.items,
     required this.onViewAll,
@@ -1193,6 +1192,7 @@ class _HomeContentSection extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) {
               final DiscoverItemEntity item = items[index];
               return _HomeFeatureCard(
+                key: ValueKey<String>('home-card-$title-${item.id}'),
                 item: item,
                 onTap: () => onOpenDetails(item),
               );
@@ -1207,7 +1207,7 @@ class _HomeContentSection extends StatelessWidget {
 }
 
 class _HomeFeatureCard extends StatelessWidget {
-  const _HomeFeatureCard({required this.item, required this.onTap});
+  const _HomeFeatureCard({super.key, required this.item, required this.onTap});
 
   final DiscoverItemEntity item;
   final VoidCallback onTap;
@@ -1218,7 +1218,7 @@ class _HomeFeatureCard extends StatelessWidget {
       width: 154,
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RechargeTheme.homeCardRadius),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -1338,7 +1338,7 @@ class _HomeFeatureTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFF60736D).withValues(alpha: 0.88),
+        color: RechargeTheme.homeTag.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Padding(
@@ -1730,6 +1730,20 @@ IconData _homeCategoryIcon(String categoryId) {
     'holidays_seasonal' => Icons.celebration_outlined,
     'wellness_recharge' => Icons.self_improvement_rounded,
     _ => Icons.category_outlined,
+  };
+}
+
+String _homeCategoryLabel(String categoryId, String fallback) {
+  return switch (normalizeRechargeContentGroupId(categoryId)) {
+    'sport' => 'Sport',
+    'outdoor_nature_walking' => 'Walks',
+    'games_indoor' => 'Games',
+    'dance' => 'Dance',
+    'music_nightlife' => 'Music',
+    'art_culture_museums' => 'Art',
+    'food_drinks' => 'Food',
+    'wellness_recharge' => 'Wellness',
+    _ => fallback,
   };
 }
 

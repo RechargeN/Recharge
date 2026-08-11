@@ -14,10 +14,12 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
     final Completer<ImageInfo> completer = Completer<ImageInfo>();
     final NetworkImage image = NetworkImage(imageUrl);
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
-    
-    stream.addListener(ImageStreamListener((ImageInfo info, bool _) {
-      if (!completer.isCompleted) completer.complete(info);
-    }));
+
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        if (!completer.isCompleted) completer.complete(info);
+      }),
+    );
 
     final ImageInfo imageInfo = await completer.future;
     final ui.Image rawImage = imageInfo.image;
@@ -35,7 +37,11 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
     final Paint shadowPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.4)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6 * pixelRatio);
-    canvas.drawCircle(Offset(radius, radius + 2 * pixelRatio), radius - 4 * pixelRatio, shadowPaint);
+    canvas.drawCircle(
+      Offset(radius, radius + 2 * pixelRatio),
+      radius - 4 * pixelRatio,
+      shadowPaint,
+    );
 
     // 2. White Border Circle
     final Paint borderPaint = Paint()
@@ -45,13 +51,15 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
 
     // 3. Image Clip
     final Path clipPath = Path()
-      ..addOval(Rect.fromLTWH(
-        renderBorderWidth,
-        renderBorderWidth,
-        renderSize - renderBorderWidth * 2,
-        renderSize - renderBorderWidth * 2,
-      ));
-    
+      ..addOval(
+        Rect.fromLTWH(
+          renderBorderWidth,
+          renderBorderWidth,
+          renderSize - renderBorderWidth * 2,
+          renderSize - renderBorderWidth * 2,
+        ),
+      );
+
     canvas.save();
     canvas.clipPath(clipPath);
 
@@ -61,9 +69,11 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
       renderSize - renderBorderWidth * 2,
       renderSize - renderBorderWidth * 2,
     );
-    
+
     // Smooth image fitting
-    final double imgScale = renderSize / (rawImage.width > rawImage.height ? rawImage.height : rawImage.width);
+    final double imgScale =
+        renderSize /
+        (rawImage.width > rawImage.height ? rawImage.height : rawImage.width);
     final Rect srcRect = Rect.fromLTWH(
       (rawImage.width - renderSize / imgScale) / 2,
       (rawImage.height - renderSize / imgScale) / 2,
@@ -71,14 +81,27 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
       renderSize / imgScale,
     );
 
-    canvas.drawImageRect(rawImage, srcRect, dstRect, Paint()..filterQuality = ui.FilterQuality.high);
+    canvas.drawImageRect(
+      rawImage,
+      srcRect,
+      dstRect,
+      Paint()..filterQuality = ui.FilterQuality.high,
+    );
     canvas.restore();
 
-    final ui.Image finalImage = await recorder.endRecording().toImage(renderSize, renderSize);
-    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final ui.Image finalImage = await recorder.endRecording().toImage(
+      renderSize,
+      renderSize,
+    );
+    final ByteData? byteData = await finalImage.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
 
     if (byteData == null) return BitmapDescriptor.defaultMarker;
-    return BitmapDescriptor.bytes(byteData.buffer.asUint8List(), imagePixelRatio: pixelRatio);
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: pixelRatio,
+    );
   } catch (e) {
     if (kDebugMode) print('Error creating HD marker: $e');
     return BitmapDescriptor.defaultMarker;

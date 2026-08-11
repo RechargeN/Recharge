@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_error.schema.json",
+  "title": "Recharge Booking error v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "code": {
+      "type": "string",
+      "enum": [
+        "not_authenticated",
+        "not_authorized",
+        "feature_disabled",
+        "event_unavailable",
+        "occurrence_cancelled",
+        "registration_not_open",
+        "registration_closed",
+        "eligibility_not_satisfied",
+        "invalid_guest_count",
+        "pool_required",
+        "pool_unavailable",
+        "sold_out",
+        "already_active",
+        "concurrency_cap_reached",
+        "revision_conflict",
+        "hold_expired",
+        "cancellation_deadline_passed",
+        "idempotency_conflict",
+        "contention",
+        "forbidden",
+        "unsupported_schema",
+        "temporarily_unavailable",
+        "invalid_contract"
+      ]
+    },
+    "retryable": { "type": "boolean" },
+    "correlationId": { "$ref": "common.schema.json#/$defs/id" },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": { "type": "string" },
+        "retryAfterSeconds": { "type": "integer", "minimum": 0 },
+        "limit": { "type": "integer", "minimum": 0 },
+        "policyVersion": { "type": "integer", "minimum": 0 },
+        "currentRevision": { "type": "integer", "minimum": 0 },
+        "reasonCode": { "type": "string" }
+      }
+    }
+  },
+  "required": ["schemaVersion", "code", "retryable", "correlationId"]
+}

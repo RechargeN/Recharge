@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
+import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 
 void main() {
   test('legacy broken Latvia default migrates to Riga market and timezone', () {
@@ -17,10 +18,10 @@ void main() {
       activeCity: 'Riga',
     );
 
-    expect(model.schemaVersion, 2);
+    expect(model.schemaVersion, 8);
     expect(model.marketCityId, 'riga');
     expect(model.timezone, 'Europe/Riga');
-    expect(model.toJson()['schemaVersion'], 2);
+    expect(model.toJson()['schemaVersion'], 8);
   });
 
   test('legacy Rezekne remains legacy market with Riga timezone', () {
@@ -59,5 +60,19 @@ void main() {
 
     expect(model.marketCityId, isEmpty);
     expect(model.timezone, 'Europe/Tallinn');
+  });
+
+  test('schema v8 preserves published Route version lineage', () {
+    final draft = CreateDraftEntity.defaults(
+      organizerId: 'creator-1',
+      organizerEmail: 'creator@example.com',
+      organizerName: 'Creator',
+    ).copyWith(basedOnPublishedVersionId: 'version-42');
+
+    final restored = CreateDraftModel.fromJson(
+      CreateDraftModel.fromEntity(draft).toJson(),
+    ).toEntity();
+
+    expect(restored.basedOnPublishedVersionId, 'version-42');
   });
 }

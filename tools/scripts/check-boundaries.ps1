@@ -1,161 +1,28 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Normalize-PathForMatch([string]$value) {
-  return $value.Replace('\', '/')
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+$checkerPath = Join-Path $PSScriptRoot "check_boundaries.dart"
+$dartCommand = Get-Command dart -ErrorAction SilentlyContinue
+
+if (-not $dartCommand) {
+  Write-Error "Dart runtime is required for the boundary gate."
+  exit 2
 }
 
-function To-RepoRelative([string]$value) {
-  $root = Normalize-PathForMatch((Resolve-Path ".").Path).TrimEnd('/')
-  $full = Normalize-PathForMatch($value)
-  if ($full.StartsWith("$root/")) {
-    return $full.Substring($root.Length + 1)
-  }
-  return $full
+if (-not (Test-Path -LiteralPath $checkerPath)) {
+  Write-Error "Canonical boundary checker is missing: $checkerPath"
+  exit 2
 }
 
-function Get-LibRoot {
-  if (Test-Path "apps/mobile/lib") { return "apps/mobile/lib" }
-  if (Test-Path "lib") { return "lib" }
-  return $null
-}
-
-$libRoot = Get-LibRoot
-if (-not $libRoot) {
-  Write-Host "No lib root found. Skipping boundaries check."
-  exit 0
-}
-
-$featureRoot = Join-Path $libRoot "features"
-if (-not (Test-Path $featureRoot)) {
-  Write-Host "No features directory found. Skipping boundaries check."
-  exit 0
-}
-
-$violations = New-Object System.Collections.Generic.List[string]
-$featureDirs = Get-ChildItem -Path $featureRoot -Directory
-$allowedLayers = @("domain", "data", "application", "presentation")
-$allowlistPath = "tools/scripts/boundaries-allowlist.txt"
-$allowlistRules = @()
-$suppressedCount = 0
-
-if (Test-Path $allowlistPath) {
-  $allowlistRules = Get-Content $allowlistPath |
-    ForEach-Object { $_.Trim() } |
-    Where-Object { $_ -and -not $_.StartsWith("#") }
-}
-
-function Is-Allowlisted([string]$value) {
-  foreach ($rule in $allowlistRules) {
-    if ($rule.Contains('*') -or $rule.Contains('?')) {
-      if ($value -like $rule) {
-        return $true
-      }
-      continue
-    }
-    if ($value -eq $rule) {
-      return $true
-    }
-  }
-  return $false
-}
-
-function Get-FeatureAndLayer([string]$normalizedPath) {
-  if ($normalizedPath -notmatch "/features/([a-zA-Z0-9_]+)/") { return $null }
-  $featureName = $Matches[1]
-  $layerName = $null
-
-  foreach ($layer in $allowedLayers) {
-    if ($normalizedPath -match "/features/$featureName/$layer/") {
-      $layerName = $layer
-      break
-    }
-  }
-
-  return @{
-    Feature = $featureName
-    Layer   = $layerName
+$dartExecutable = $dartCommand.Source
+if ([System.IO.Path]::GetExtension($dartExecutable) -eq ".bat") {
+  $flutterBin = Split-Path -Parent $dartExecutable
+  $flutterDart = Join-Path $flutterBin "cache/dart-sdk/bin/dart.exe"
+  if (Test-Path -LiteralPath $flutterDart) {
+    $dartExecutable = $flutterDart
   }
 }
 
-function Resolve-ImportTarget([string]$importPath, [string]$currentDir) {
-  if ($importPath.StartsWith("dart:")) { return $null }
-
-  if ($importPath.StartsWith("package:")) {
-    return Get-FeatureAndLayer -normalizedPath (Normalize-PathForMatch $importPath)
-  }
-
-  if ($importPath.StartsWith(".")) {
-    $resolvedPath = [System.IO.Path]::GetFullPath((Join-Path $currentDir $importPath))
-    return Get-FeatureAndLayer -normalizedPath (Normalize-PathForMatch $resolvedPath)
-  }
-
-  return $null
-}
-
-function Is-ForbiddenLayerImport([string]$fromLayer, [string]$toLayer) {
-  if (-not $fromLayer -or -not $toLayer) { return $false }
-
-  switch ($fromLayer) {
-    "domain" { return $toLayer -ne "domain" }
-    "application" { return @("data", "presentation") -contains $toLayer }
-    "data" { return @("application", "presentation") -contains $toLayer }
-    "presentation" { return $toLayer -eq "data" }
-    default { return $false }
-  }
-}
-
-foreach ($featureDir in $featureDirs) {
-  $dartFiles = Get-ChildItem -Path $featureDir.FullName -Recurse -Filter *.dart -File
-
-  foreach ($file in $dartFiles) {
-    $currentMeta = Get-FeatureAndLayer -normalizedPath (Normalize-PathForMatch $file.FullName)
-    $currentFeature = $currentMeta.Feature
-    $fromLayer = $currentMeta.Layer
-    $lines = Get-Content $file.FullName
-
-    foreach ($line in $lines) {
-      if ($line -match "^\s*(import|export)\s+['""]([^'""]+)['""]") {
-        $importPath = $Matches[2]
-        $targetMeta = Resolve-ImportTarget -importPath $importPath -currentDir $file.DirectoryName
-        if (-not $targetMeta) { continue }
-
-        $targetFeature = $targetMeta.Feature
-        $toLayer = $targetMeta.Layer
-
-        if ($targetFeature -and $currentFeature -and $targetFeature -ne $currentFeature) {
-          $relative = To-RepoRelative $file.FullName
-          $message = "Cross-feature import: $relative -> $importPath"
-          if (Is-Allowlisted $message) {
-            $suppressedCount += 1
-            continue
-          }
-          if (-not $violations.Contains($message)) { $violations.Add($message) | Out-Null }
-          continue
-        }
-
-        if (Is-ForbiddenLayerImport -fromLayer $fromLayer -toLayer $toLayer) {
-          $relative = To-RepoRelative $file.FullName
-          $message = "Layer direction violation: $relative [$fromLayer] -> $importPath [$toLayer]"
-          if (Is-Allowlisted $message) {
-            $suppressedCount += 1
-            continue
-          }
-          if (-not $violations.Contains($message)) { $violations.Add($message) | Out-Null }
-        }
-      }
-    }
-  }
-}
-
-if ($violations.Count -gt 0) {
-  Write-Host "Boundary violations found:"
-  $violations | ForEach-Object { Write-Host " - $_" }
-  exit 1
-}
-
-if ($suppressedCount -gt 0) {
-  Write-Host "Boundary checks passed (suppressed by allowlist: $suppressedCount)."
-} else {
-  Write-Host "Boundary checks passed."
-}
+& $dartExecutable $checkerPath --repo-root $repoRoot --format text
+exit [int]$LASTEXITCODE

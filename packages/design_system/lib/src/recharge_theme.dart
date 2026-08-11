@@ -3,6 +3,15 @@ import 'package:flutter/material.dart';
 class RechargeTheme {
   const RechargeTheme._();
 
+  static const Color homeBackgroundTop = Color(0xFF064936);
+  static const Color homeBackground = Color(0xFF003F32);
+  static const Color homeBackgroundBottom = Color(0xFF002C25);
+  static const Color homeMuted = Color(0xFFAFC3BC);
+  static const Color homeCategorySurface = Color(0xFF255246);
+  static const Color homeTag = Color(0xFF60736D);
+  static const double homeCardRadius = 12;
+  static const double homePillRadius = 28;
+
   static const Color emerald900 = Color(0xFF003F32);
   static const Color emerald700 = Color(0xFF0E6A57);
   static const Color mint100 = Color(0xFFDDF3EB);
@@ -17,6 +26,13 @@ class RechargeTheme {
   static const Color travelLine = Color(0xFFD9DED5);
   static const Color sky = Color(0xFF2F6BFF);
   static const Color warmGold = Color(0xFFE6B84E);
+  static const Color profileBackground = Color(0xFFF6F8F5);
+  static const Color profileSurface = Colors.white;
+  static const Color profileBorder = Color(0xFFE4EAE5);
+  static const Color profileMuted = Color(0xFF6A7771);
+  static const Color profileAccent = emerald900;
+  static const double profileCardRadius = 16;
+  static const double profileCompactRadius = 12;
 
   static ThemeData light() {
     const ColorScheme colorScheme = ColorScheme(

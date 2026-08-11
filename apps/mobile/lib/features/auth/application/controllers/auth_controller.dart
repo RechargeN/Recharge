@@ -18,6 +18,8 @@ enum ProtectedAction {
   notifications,
   profile,
   create,
+  report,
+  visit,
 }
 
 class AuthController extends ChangeNotifier {
@@ -27,11 +29,11 @@ class AuthController extends ChangeNotifier {
     required SignOutUseCase signOutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required AnalyticsService analyticsService,
-  })  : _signInUseCase = signInUseCase,
-        _restoreSessionUseCase = restoreSessionUseCase,
-        _signOutUseCase = signOutUseCase,
-        _getCurrentUserUseCase = getCurrentUserUseCase,
-        _analyticsService = analyticsService;
+  }) : _signInUseCase = signInUseCase,
+       _restoreSessionUseCase = restoreSessionUseCase,
+       _signOutUseCase = signOutUseCase,
+       _getCurrentUserUseCase = getCurrentUserUseCase,
+       _analyticsService = analyticsService;
 
   final SignInUseCase _signInUseCase;
   final RestoreSessionUseCase _restoreSessionUseCase;
@@ -242,9 +244,7 @@ class AuthController extends ChangeNotifier {
       );
       _analyticsService.track(
         'auth_session_expired_shown',
-        params: <String, Object?>{
-          'source_screen': 'splash',
-        },
+        params: <String, Object?>{'source_screen': 'splash'},
       );
     }
   }
@@ -282,12 +282,7 @@ class AuthController extends ChangeNotifier {
   }
 
   void _consumeAuthResult(AuthResultEntity result) {
-    _setState(
-      AuthState(
-        status: AuthStatus.authenticated,
-        user: result.user,
-      ),
-    );
+    _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
   void _setState(AuthState state) {

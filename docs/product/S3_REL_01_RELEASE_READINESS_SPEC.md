@@ -3,6 +3,11 @@
 Status: Done  
 Date: 2026-04-20
 
+Historical note (2026-08-10): перечисленные ниже plain-text allowlist и
+PowerShell policy engine описывают состояние на момент завершения S3-REL-01.
+MOB-ARCH-M1 заменил их каноническим Dart engine и structured exception
+registry; исторический evidence этого slice не переписывается задним числом.
+
 ## Scope
 
 - Final release runbooks for MVP:

@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/di/service_locator.dart';
+import 'package:recharge/app/application/scenario_object_intake_config.dart';
+import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -27,11 +30,19 @@ import 'package:recharge/features/favorites/domain/repositories/favorites_reposi
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
+import 'package:recharge/features/visited/application/controllers/visited_places_controller.dart';
+import 'package:recharge/features/visited/application/visited_places_providers.dart';
+import 'package:recharge/features/visited/domain/entities/visited_place_entity.dart';
+import 'package:recharge/features/visited/domain/repositories/visited_places_repository.dart';
+import 'package:recharge/features/visited/domain/usecases/get_visited_places_usecase.dart';
+import 'package:recharge/features/visited/domain/usecases/record_place_visit_usecase.dart';
+import 'package:recharge/features/visited/domain/usecases/remove_visit_usecase.dart';
 
 import 'widget_test_viewport.dart';
 
 void main() {
   setUp(() async {
+    _detailsKindForTest = DiscoverObjectKind.activity;
     await sl.reset();
     sl.registerSingleton<AnalyticsService>(_NoopAnalyticsService());
     sl.registerFactory<GetDiscoverDetailsUseCase>(
@@ -41,6 +52,30 @@ void main() {
 
   tearDown(() async {
     await sl.reset();
+  });
+
+  fullPageTestWidgets('details intake flag hides its action only', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      await _detailsApp(
+        additionalOverrides: <Override>[
+          scenarioObjectIntakeConfigProvider.overrideWithValue(
+            const ScenarioObjectIntakeConfig(detailsEnabled: false),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Plan this recharge'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(find.text('Add to Scenario'), findsNothing);
+    expect(find.text('Build route'), findsOneWidget);
+    expect(find.text('Find similar'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders action hub and opens contextual map', (
@@ -56,6 +91,8 @@ void main() {
     );
     expect(find.text('Plan this recharge'), findsOneWidget);
     expect(find.text('Build route'), findsOneWidget);
+    expect(find.text('Add to Scenario'), findsOneWidget);
+    expect(find.text('Add this stop to a personal plan'), findsOneWidget);
     expect(find.text('Find similar'), findsOneWidget);
     expect(find.text('Create similar'), findsOneWidget);
     expect(find.text('Route from this'), findsOneWidget);
@@ -170,9 +207,58 @@ void main() {
       findsOneWidget,
     );
   });
+
+  fullPageTestWidgets('non-place details hide visit history action', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await _detailsApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Mark as visited'), findsNothing);
+  });
+
+  fullPageTestWidgets('an explicit place can be marked as visited', (
+    tester,
+  ) async {
+    _detailsKindForTest = DiscoverObjectKind.place;
+    final repository = _FakeVisitedPlacesRepository();
+    final visitedController = VisitedPlacesController(
+      getVisitedPlacesUseCase: GetVisitedPlacesUseCase(repository),
+      recordPlaceVisitUseCase: RecordPlaceVisitUseCase(
+        repository: repository,
+        idGenerator: _FixedIdGenerator(),
+      ),
+      removeVisitUseCase: RemoveVisitUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await tester.pumpWidget(
+      await _detailsApp(visitedController: visitedController),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Mark as visited'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    await tester.tap(find.text('Mark as visited'));
+    await tester.pumpAndSettle();
+    expect(find.text('When did you visit?'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(repository.items, hasLength(1));
+    expect(repository.items.single.placeId, 'evt_1');
+    expect(repository.items.single.evidence, VisitEvidence.selfReported);
+    expect(find.textContaining('Added to Visit history'), findsOneWidget);
+  });
 }
 
-Future<Widget> _detailsApp() async {
+DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;
+
+Future<Widget> _detailsApp({
+  VisitedPlacesController? visitedController,
+  List<Override> additionalOverrides = const <Override>[],
+}) async {
   final AuthController authController = AuthController(
     signInUseCase: SignInUseCase(_NoopAuthRepository()),
     restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -195,12 +281,25 @@ Future<Widget> _detailsApp() async {
     removeFavoriteUseCase: RemoveFavoriteUseCase(favoritesRepository),
     analyticsService: _NoopAnalyticsService(),
   );
+  final VisitedPlacesController effectiveVisitedController =
+      visitedController ??
+      VisitedPlacesController(
+        getVisitedPlacesUseCase: GetVisitedPlacesUseCase(
+          _FakeVisitedPlacesRepository(),
+        ),
+        analyticsService: _NoopAnalyticsService(),
+      );
 
+  final List<Override> overrides = <Override>[
+    authControllerProvider.overrideWith((ref) => authController),
+    favoritesControllerProvider.overrideWith((ref) => favoritesController),
+    visitedPlacesControllerProvider.overrideWith(
+      (ref) => effectiveVisitedController,
+    ),
+    ...additionalOverrides,
+  ];
   return ProviderScope(
-    overrides: <Override>[
-      authControllerProvider.overrideWith((ref) => authController),
-      favoritesControllerProvider.overrideWith((ref) => favoritesController),
-    ],
+    overrides: overrides,
     child: MaterialApp.router(
       routerConfig: GoRouter(
         initialLocation: '${RouteNames.discoverDetails}/evt_1',
@@ -327,12 +426,12 @@ class _NoopAuthRepository implements AuthRepository {
 class _FakeDiscoverRepository implements DiscoverRepository {
   @override
   Future<DiscoverItemEntity> getDetails(String itemId) async {
-    return _detailsItem();
+    return _detailsItem(objectKind: _detailsKindForTest);
   }
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    return <DiscoverItemEntity>[_detailsItem()];
+    return <DiscoverItemEntity>[_detailsItem(objectKind: _detailsKindForTest)];
   }
 }
 
@@ -355,7 +454,9 @@ class _FakeFavoritesRepository implements FavoritesRepository {
   }
 }
 
-DiscoverItemEntity _detailsItem() {
+DiscoverItemEntity _detailsItem({
+  DiscoverObjectKind objectKind = DiscoverObjectKind.activity,
+}) {
   return DiscoverItemEntity(
     id: 'evt_1',
     title: 'Morning yoga',
@@ -368,6 +469,7 @@ DiscoverItemEntity _detailsItem() {
     priceAmount: 0,
     distanceKm: 1.2,
     isFree: true,
+    objectKind: objectKind,
     organizerName: 'Recharge Studio',
     organizerHandle: '@recharge',
     venueName: 'Green studio',
@@ -378,4 +480,40 @@ DiscoverItemEntity _detailsItem() {
     ctaLabel: 'Join activity',
     highlights: const <String>['Beginner friendly', 'Calm group pace'],
   );
+}
+
+class _FakeVisitedPlacesRepository implements VisitedPlacesRepository {
+  final List<VisitedPlaceEntity> items = <VisitedPlaceEntity>[];
+
+  @override
+  Future<List<VisitedPlaceEntity>> getVisitedPlaces({
+    required String userId,
+  }) async {
+    return List<VisitedPlaceEntity>.from(items);
+  }
+
+  @override
+  Future<VisitedPlaceEntity> recordVisit(VisitedPlaceEntity visit) async {
+    for (final VisitedPlaceEntity existing in items) {
+      if (existing.placeId == visit.placeId &&
+          existing.localDayKey == visit.localDayKey) {
+        return existing;
+      }
+    }
+    items.add(visit);
+    return visit;
+  }
+
+  @override
+  Future<void> removeVisit({
+    required String userId,
+    required String visitId,
+  }) async {
+    items.removeWhere((VisitedPlaceEntity item) => item.id == visitId);
+  }
+}
+
+class _FixedIdGenerator implements IdGenerator {
+  @override
+  String generate() => 'visit-1';
 }

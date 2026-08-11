@@ -40,8 +40,31 @@ Every event entry must include:
 | create_draft_saved | 1 | active | create | draft save succeeded/failed | `draft_type,result,error_code?` | TBD | TBD | - | - |
 | create_publish_submitted | 1 | active | create | publish request started | `entity_type,source` | TBD | TBD | - | - |
 | create_publish_completed | 1 | active | create | publish response completed | `entity_type,result,error_code?` | TBD | TBD | - | - |
+| event_classification_archetype_selected | 1 | active | event_create | creator explicitly selects or confirms an archetype | `archetype,source,suggestion_reason?,suggestion_confidence?` | TBD | TBD | - | - |
+| event_classification_primary_participation_selected | 1 | active | event_create | creator selects the primary attendee role | `mode` | TBD | TBD | - | - |
+| event_classification_additional_participation_changed | 1 | active | event_create | creator adds or removes an additional attendee role | `mode,selected,count` | TBD | TBD | - | - |
+| event_classification_cleared | 1 | active | event_create | creator explicitly clears classification | `status` | TBD | TBD | - | - |
+| scenario_transit_action | 1 | active | scenario | official transit Apply/Replace is accepted or rejected, or Recheck completes | `action,result,freshness?` | TBD | TBD | - | - |
+| scenario_object_intake_action | 1 | active | scenario | external Add to Scenario flow opens, previews, applies, cancels, retries or opens its target | `source_surface,action,result,batch_size_bucket,target_kind?,placement?,source_status?` | TBD | TBD | - | - |
 | explore_settings_updated | 1 | active | explore | settings update action | `setting_key,result,error_code?` | TBD | TBD | - | - |
 | explore_role_switched | 1 | active | explore | role switch action | `from_role,to_role,result,error_code?` | TBD | TBD | - | - |
+
+`scenario_transit_action` is deliberately enum-only. Its payload allowlist is
+`action`, `result`, and optional `freshness`; stop queries/names, trip/item/user
+ids, dates, times, notes, URLs, digests and other Scenario content are forbidden.
+
+`scenario_object_intake_action` is also deliberately enum/bucket-only. Its
+payload allowlist is `source_surface`, `action`, `result`,
+`batch_size_bucket`, optional `target_kind`, optional `placement`, and optional
+aggregate `source_status`. Object/Scenario/intent/user ids, titles, notes,
+queries, prompts, dates/times, coordinates, addresses, categories, URLs,
+publisher names and revision numbers are forbidden.
+
+All `event_classification_*` events are enum/status-only. Archetype and
+participation values use the canonical closed enums; suggestion reason and
+confidence use the application allowlist. Titles, descriptions, free-text
+`otherReason`, category labels, organizer/publisher ids and draft ids are
+forbidden.
 
 ## Update Checklist For New Event
 

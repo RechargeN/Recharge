@@ -7,23 +7,27 @@ import 'package:recharge/features/auth/data/models/auth_user_model.dart';
 import 'package:recharge/features/auth/data/repositories/auth_repository_impl.dart';
 
 void main() {
-  test('restoreSession creates demo full-access session without cache', () async {
-    final localDataSource = _MemoryAuthLocalDataSource();
-    final repository = AuthRepositoryImpl(
-      remoteDataSource: MockAuthRemoteDataSource(),
-      localDataSource: localDataSource,
-    );
+  test(
+    'restoreSession creates demo full-access session without cache',
+    () async {
+      final localDataSource = _MemoryAuthLocalDataSource();
+      final repository = AuthRepositoryImpl(
+        remoteDataSource: MockAuthRemoteDataSource(),
+        localDataSource: localDataSource,
+      );
 
-    final result = await repository.restoreSession();
+      final result = await repository.restoreSession();
 
-    expect(result, isNotNull);
-    expect(result!.user.id, MockAuthRemoteDataSource.demoUserId);
-    expect(result.user.role, 'creator');
-    expect(result.user.capabilities, contains('create.event'));
-    expect(result.user.capabilities, contains('scenario.generate'));
-    expect(await localDataSource.readSession(), isNotNull);
-    expect(await localDataSource.readUser(), isNotNull);
-  });
+      expect(result, isNotNull);
+      expect(result!.user.id, MockAuthRemoteDataSource.demoUserId);
+      expect(result.user.role, 'admin');
+      expect(result.user.capabilities, contains('create.event'));
+      expect(result.user.capabilities, contains('scenario.generate'));
+      expect(result.user.capabilities, contains('admin.tools.view'));
+      expect(await localDataSource.readSession(), isNotNull);
+      expect(await localDataSource.readUser(), isNotNull);
+    },
+  );
 }
 
 class _MemoryAuthLocalDataSource extends AuthLocalDataSource {

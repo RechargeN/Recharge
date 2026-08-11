@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:design_system/design_system.dart';
 
+import '../../../../app/application/visit_history_facade.dart';
+import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/identity/account_experience.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/auth_user_entity.dart';
 import '../../../create/application/create_providers.dart';
@@ -21,6 +25,8 @@ import '../../application/explore_providers.dart';
 import '../../application/profile_role_summary.dart';
 import '../../application/state/explore_state.dart';
 
+enum _ProfileDashboardSection { page, created, visited }
+
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -31,7 +37,8 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   String? _loadKey;
   String? _createLoadKey;
-  ProfileRoleTier? _selectedRoleTier;
+  String? _visitedLoadKey;
+  _ProfileDashboardSection? _selectedDashboardSection;
 
   @override
   void initState() {
@@ -72,13 +79,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       role: user.role,
       capabilities: user.capabilities,
     );
-    final ProfileRoleTier activeRoleTier = _activeRoleTierFor(
-      selectedTier: _selectedRoleTier,
-      accessSummary: accessRoleSummary,
+    final ProfileRoleSummary roleSummary = _profilePresentationSummary(
+      context,
+      accessRoleSummary,
     );
-    final ProfileRoleSummary roleSummary = profileRoleSummaryForTier(
-      activeRoleTier,
-    );
+    final _ProfileDashboardSection dashboardSection =
+        _selectedDashboardSection ??
+        (roleSummary.isProGenerator
+            ? _ProfileDashboardSection.page
+            : roleSummary.isCreator
+            ? _ProfileDashboardSection.created
+            : _ProfileDashboardSection.visited);
+    final VisitHistorySummary? visitedState = roleSummary.isUser
+        ? ref.watch(visitHistorySummaryProvider)
+        : null;
+    if (roleSummary.isUser) {
+      _scheduleVisitedLoad(user.id);
+    }
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       favoritesState.items,
       savedSearches,
@@ -88,11 +105,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F2),
+      backgroundColor: RechargeTheme.profileBackground,
       appBar: AppBar(
-        title: const Text('Community creator profile'),
-        backgroundColor: const Color(0xFFF4F6F2),
-        foregroundColor: const Color(0xFF10231F),
+        title: Text(_profilePageTitle(roleSummary)),
+        backgroundColor: RechargeTheme.profileBackground,
+        foregroundColor: RechargeTheme.ink,
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -131,43 +150,61 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               avatar: state.profile.avatar,
               city: state.profile.city,
               roleSummary: roleSummary,
-              onPrimaryAction: () => _openPrimaryRoleAction(roleSummary),
             ),
             const SizedBox(height: 14),
             _ProfileDashboardTabs(
               roleSummary: roleSummary,
-              onCreated: () => context.push(RouteNames.create),
-              onVisited: () => context.push(RouteNames.favorites),
+              selectedSection: dashboardSection,
+              onPage: () =>
+                  _selectDashboardSection(_ProfileDashboardSection.page),
+              onCreated: () =>
+                  _selectDashboardSection(_ProfileDashboardSection.created),
+              onVisited: () => context.push(RouteNames.visitedPlaces),
+              onInsights: () => context.push(RouteNames.profileWorkspace),
               onPhotos: () => context.push(RouteNames.settings),
             ),
             const SizedBox(height: 14),
-            _RoleTrack(
-              activeTier: activeRoleTier,
-              accessSummary: accessRoleSummary,
-              onRoleSelected: _selectRoleTier,
-            ),
-            const SizedBox(height: 14),
-            _LatestCreatedEvents(
-              data: workspaceData,
-              onViewAll: () => context.push(RouteNames.create),
-              onOpenListing: (listing) =>
-                  context.push(_searchRouteForCreateListing(listing)),
-              onCreate: () => context.push(RouteNames.create),
-              onCreateRoute: () => context.push(RouteNames.scenarioBuilder),
-              onFindPeople: () => context.push(RouteNames.search),
-            ),
-            const SizedBox(height: 14),
-            _QuickActions(
-              roleSummary: roleSummary,
-              data: workspaceData,
-              onWorkspace: () => context.push(RouteNames.profileWorkspace),
-              onFavorites: () => context.push(RouteNames.favorites),
-              onSearch: () => context.push(RouteNames.search),
-              onNotifications: () => context.push(RouteNames.notifications),
-              onCreate: () => context.push(RouteNames.create),
-              onScenario: () => context.push(RouteNames.scenarioBuilder),
-              onSettings: () => context.push(RouteNames.settings),
-            ),
+            if (roleSummary.isUser)
+              _ViewerProfileBody(
+                state: visitedState!,
+                onOpenVisit: (VisitHistoryItem item) => context.push(
+                  '${RouteNames.discoverDetails}/${item.placeId}',
+                ),
+                onViewAllVisits: () => context.push(RouteNames.visitedPlaces),
+                onSavedList: () => context.push(RouteNames.favorites),
+                onUpgrade: () => context.push(RouteNames.settings),
+              )
+            else if (roleSummary.isCreator ||
+                dashboardSection == _ProfileDashboardSection.created)
+              _LatestCreatedEvents(
+                data: workspaceData,
+                onViewAll: () =>
+                    _selectDashboardSection(_ProfileDashboardSection.created),
+                onOpenListing: (listing) =>
+                    context.push(_searchRouteForCreateListing(listing)),
+                onCreate: () => context.push(RouteNames.create),
+                onCreateRoute: () => context.push(
+                  Uri(
+                    path: RouteNames.create,
+                    queryParameters: const <String, String>{'type': 'route'},
+                  ).toString(),
+                ),
+                onScenario: () => context.push(RouteNames.scenarioBuilder),
+                onFindPeople: () => context.push(RouteNames.search),
+              )
+            else
+              _ProGeneratorProfileBody(
+                displayName: state.profile.displayName,
+                city: state.profile.city,
+                avatar: state.profile.avatar,
+                data: workspaceData,
+                onManagePage: () =>
+                    _selectDashboardSection(_ProfileDashboardSection.page),
+                onCreatedEvents: () =>
+                    _selectDashboardSection(_ProfileDashboardSection.created),
+                onInsights: () => context.push(RouteNames.profileWorkspace),
+                onBookings: () => context.push(RouteNames.notifications),
+              ),
             if (state.message != null) ...<Widget>[
               const SizedBox(height: 10),
               Text(state.message!, style: const TextStyle(color: Colors.green)),
@@ -178,36 +215,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  void _openPrimaryRoleAction(ProfileRoleSummary roleSummary) {
-    if (roleSummary.isProGenerator) {
-      context.push(RouteNames.scenarioBuilder);
-      return;
-    }
-    if (roleSummary.isCreator) {
-      context.push(RouteNames.create);
-      return;
-    }
-    context.push(RouteNames.favorites);
-  }
-
-  ProfileRoleTier _activeRoleTierFor({
-    required ProfileRoleTier? selectedTier,
-    required ProfileRoleSummary accessSummary,
-  }) {
-    if (selectedTier != null &&
-        profileRoleTierUnlocked(
-          tier: selectedTier,
-          accessSummary: accessSummary,
-        )) {
-      return selectedTier;
-    }
-    return accessSummary.tier;
-  }
-
-  void _selectRoleTier(ProfileRoleTier tier) {
-    setState(() {
-      _selectedRoleTier = tier;
-    });
+  void _selectDashboardSection(_ProfileDashboardSection section) {
+    if (_selectedDashboardSection == section) return;
+    setState(() => _selectedDashboardSection = section);
   }
 
   void _scheduleLoad({
@@ -248,6 +258,54 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           );
     });
   }
+
+  void _scheduleVisitedLoad(String userId) {
+    if (_visitedLoadKey == userId) return;
+    _visitedLoadKey = userId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(visitHistoryFacadeProvider).ensureLoaded(userId: userId);
+    });
+  }
+}
+
+ProfileRoleSummary _profilePresentationSummary(
+  BuildContext context,
+  ProfileRoleSummary accessSummary,
+) {
+  final AccountExperienceScope? scope = AccountExperienceScope.maybeOf(context);
+  if (scope == null) return accessSummary;
+  return switch (scope.experience) {
+    AccountExperience.viewer => profileRoleSummaryForTier(ProfileRoleTier.user),
+    AccountExperience.creator => profileRoleSummaryForTier(
+      ProfileRoleTier.creator,
+    ),
+    AccountExperience.professionalPage => profileRoleSummaryForTier(
+      ProfileRoleTier.creator,
+    ),
+  };
+}
+
+String _profilePageTitle(ProfileRoleSummary roleSummary) {
+  if (roleSummary.isProGenerator) return 'Pro generator profile';
+  if (roleSummary.isCreator) return 'Community creator profile';
+  return 'Viewer profile';
+}
+
+String _profileBadgeLabel(ProfileRoleSummary roleSummary) {
+  if (roleSummary.isProGenerator) return 'PRO GENERATOR';
+  if (roleSummary.isCreator) return 'CREATOR LIGHT';
+  return 'VIEWER';
+}
+
+String _profileContextLine(ProfileRoleSummary roleSummary, String city) {
+  final String location = city.trim().isEmpty ? 'Riga' : city.trim();
+  final String contextLabel = roleSummary.isProGenerator
+      ? 'Organizer'
+      : roleSummary.isCreator
+      ? 'Community'
+      : 'Explorer';
+  return '$contextLabel · $location';
 }
 
 class ProfileWorkspacePage extends ConsumerStatefulWidget {
@@ -289,13 +347,15 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
       role: user.role,
       capabilities: user.capabilities,
     );
+    final AccountExperienceScope? experienceScope =
+        AccountExperienceScope.maybeOf(context);
     final ProfileRoleTier activeRoleTier = _activeRoleTierFor(
       selectedTier: _selectedRoleTier,
       accessSummary: accessRoleSummary,
     );
-    final ProfileRoleSummary roleSummary = profileRoleSummaryForTier(
-      activeRoleTier,
-    );
+    final ProfileRoleSummary roleSummary = experienceScope == null
+        ? profileRoleSummaryForTier(activeRoleTier)
+        : _profilePresentationSummary(context, accessRoleSummary);
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       favoritesState.items,
       discoverState.savedSearches,
@@ -315,12 +375,14 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: <Widget>[
-          _RoleTrack(
-            activeTier: activeRoleTier,
-            accessSummary: accessRoleSummary,
-            onRoleSelected: _selectRoleTier,
-          ),
-          const SizedBox(height: 14),
+          if (experienceScope == null) ...<Widget>[
+            _RoleTrack(
+              activeTier: activeRoleTier,
+              accessSummary: accessRoleSummary,
+              onRoleSelected: _selectRoleTier,
+            ),
+            const SizedBox(height: 14),
+          ],
           _RoleWorkspace(
             roleSummary: roleSummary,
             data: workspaceData,
@@ -463,7 +525,6 @@ class _ProfileHero extends StatelessWidget {
     required this.avatar,
     required this.city,
     required this.roleSummary,
-    required this.onPrimaryAction,
   });
 
   final String displayName;
@@ -471,15 +532,14 @@ class _ProfileHero extends StatelessWidget {
   final String avatar;
   final String city;
   final ProfileRoleSummary roleSummary;
-  final VoidCallback onPrimaryAction;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE7ECE6)),
+        color: RechargeTheme.profileSurface,
+        borderRadius: BorderRadius.circular(RechargeTheme.profileCardRadius),
+        border: Border.all(color: RechargeTheme.profileBorder),
         boxShadow: const <BoxShadow>[
           BoxShadow(
             color: Color(0x12003F32),
@@ -529,7 +589,7 @@ class _ProfileHero extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          city.trim().isEmpty ? 'Community · Riga' : city,
+                          _profileContextLine(roleSummary, city),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
@@ -542,16 +602,8 @@ class _ProfileHero extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _HeroPill(label: roleSummary.title.toUpperCase()),
+                  _HeroPill(label: _profileBadgeLabel(roleSummary)),
                 ],
-              ),
-            ),
-            IconButton(
-              tooltip: roleSummary.primaryActionLabel,
-              onPressed: onPrimaryAction,
-              icon: Icon(
-                _primaryIcon(roleSummary),
-                color: const Color(0xFF0B3028),
               ),
             ),
           ],
@@ -559,25 +611,25 @@ class _ProfileHero extends StatelessWidget {
       ),
     );
   }
-
-  IconData _primaryIcon(ProfileRoleSummary roleSummary) {
-    if (roleSummary.isProGenerator) return Icons.auto_awesome;
-    if (roleSummary.isCreator) return Icons.add_circle_outline;
-    return Icons.bookmark_border;
-  }
 }
 
 class _ProfileDashboardTabs extends StatelessWidget {
   const _ProfileDashboardTabs({
     required this.roleSummary,
+    required this.selectedSection,
+    required this.onPage,
     required this.onCreated,
     required this.onVisited,
+    required this.onInsights,
     required this.onPhotos,
   });
 
   final ProfileRoleSummary roleSummary;
+  final _ProfileDashboardSection selectedSection;
+  final VoidCallback onPage;
   final VoidCallback onCreated;
   final VoidCallback onVisited;
+  final VoidCallback onInsights;
   final VoidCallback onPhotos;
 
   @override
@@ -585,32 +637,61 @@ class _ProfileDashboardTabs extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE7ECE6)),
+        borderRadius: BorderRadius.circular(RechargeTheme.profileCompactRadius),
+        border: Border.all(color: RechargeTheme.profileBorder),
       ),
       child: Padding(
         padding: const EdgeInsets.all(4),
         child: Row(
-          children: <Widget>[
-            _ProfileDashboardTab(
-              icon: Icons.work_outline,
-              label: 'Created',
-              active: roleSummary.isCreator || roleSummary.isProGenerator,
-              onTap: onCreated,
-            ),
-            _ProfileDashboardTab(
-              icon: Icons.place_outlined,
-              label: 'Visited',
-              active: false,
-              onTap: onVisited,
-            ),
-            _ProfileDashboardTab(
-              icon: Icons.image_outlined,
-              label: 'Photos',
-              active: false,
-              onTap: onPhotos,
-            ),
-          ],
+          children: roleSummary.isProGenerator
+              ? <Widget>[
+                  _ProfileDashboardTab(
+                    icon: Icons.storefront_outlined,
+                    label: 'Page',
+                    active: selectedSection == _ProfileDashboardSection.page,
+                    onTap: onPage,
+                  ),
+                  _ProfileDashboardTab(
+                    icon: Icons.work_outline,
+                    label: 'Created',
+                    active: selectedSection == _ProfileDashboardSection.created,
+                    onTap: onCreated,
+                  ),
+                  _ProfileDashboardTab(
+                    icon: Icons.insights_outlined,
+                    label: 'Insights',
+                    active: false,
+                    onTap: onInsights,
+                  ),
+                  _ProfileDashboardTab(
+                    icon: Icons.image_outlined,
+                    label: 'Photos',
+                    active: false,
+                    onTap: onPhotos,
+                  ),
+                ]
+              : <Widget>[
+                  if (roleSummary.isCreator)
+                    _ProfileDashboardTab(
+                      icon: Icons.work_outline,
+                      label: 'Created',
+                      active:
+                          selectedSection == _ProfileDashboardSection.created,
+                      onTap: onCreated,
+                    ),
+                  _ProfileDashboardTab(
+                    icon: Icons.place_outlined,
+                    label: 'Visited',
+                    active: roleSummary.isUser,
+                    onTap: onVisited,
+                  ),
+                  _ProfileDashboardTab(
+                    icon: Icons.image_outlined,
+                    label: 'Photos',
+                    active: false,
+                    onTap: onPhotos,
+                  ),
+                ],
         ),
       ),
     );
@@ -628,7 +709,7 @@ class _ProfileDashboardTab extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -670,6 +751,393 @@ class _ProfileDashboardTab extends StatelessWidget {
   }
 }
 
+class _ViewerProfileBody extends StatelessWidget {
+  const _ViewerProfileBody({
+    required this.state,
+    required this.onOpenVisit,
+    required this.onViewAllVisits,
+    required this.onSavedList,
+    required this.onUpgrade,
+  });
+
+  final VisitHistorySummary state;
+  final ValueChanged<VisitHistoryItem> onOpenVisit;
+  final VoidCallback onViewAllVisits;
+  final VoidCallback onSavedList;
+  final VoidCallback onUpgrade;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<VisitHistoryItem> visits = state.items
+        .take(3)
+        .toList(growable: false);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const _ProfileSectionLabel('VISITED PLACES'),
+        const SizedBox(height: 8),
+        _ProfileSurfacePanel(
+          child: switch (state.status) {
+            VisitHistoryLoadStatus.initial ||
+            VisitHistoryLoadStatus.loading => const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            VisitHistoryLoadStatus.error => _ProfileActionRow(
+              icon: Icons.refresh,
+              title: 'Could not load visits',
+              subtitle: 'Open visit history to try again',
+              onTap: onViewAllVisits,
+            ),
+            VisitHistoryLoadStatus.ready when visits.isEmpty =>
+              _ProfileActionRow(
+                icon: Icons.place_outlined,
+                title: 'No visits yet',
+                subtitle: 'Places you visit will appear here',
+                onTap: onViewAllVisits,
+              ),
+            VisitHistoryLoadStatus.ready => Column(
+              children: <Widget>[
+                for (final VisitHistoryItem visit in visits)
+                  _VisitedProfileRow(
+                    item: visit,
+                    onTap: () => onOpenVisit(visit),
+                  ),
+                if (state.items.length > visits.length)
+                  ListTile(
+                    dense: true,
+                    title: const Center(
+                      child: Text(
+                        'View all visits',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right, size: 18),
+                    onTap: onViewAllVisits,
+                  ),
+              ],
+            ),
+          },
+        ),
+        const SizedBox(height: 14),
+        const _ProfileSectionLabel('ACTIONS'),
+        const SizedBox(height: 8),
+        _ProfileSurfacePanel(
+          child: Column(
+            children: <Widget>[
+              _ProfileActionRow(
+                icon: Icons.bookmark_border,
+                title: 'Saved list',
+                onTap: onSavedList,
+              ),
+              _ViewerUpgradeRow(onTap: onUpgrade),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _VisitedProfileRow extends StatelessWidget {
+  const _VisitedProfileRow({required this.item, required this.onTap});
+
+  final VisitHistoryItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final String visitedDate = MaterialLocalizations.of(
+      context,
+    ).formatMediumDate(item.visitedOn);
+    return Column(
+      children: <Widget>[
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 4,
+          ),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(
+              RechargeTheme.profileCompactRadius,
+            ),
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child: item.coverImageUrl.isEmpty
+                  ? const ColoredBox(
+                      color: RechargeTheme.mint100,
+                      child: Icon(
+                        Icons.place_outlined,
+                        color: RechargeTheme.profileAccent,
+                      ),
+                    )
+                  : Image.network(
+                      item.coverImageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const ColoredBox(
+                        color: RechargeTheme.mint100,
+                        child: Icon(
+                          Icons.place_outlined,
+                          color: RechargeTheme.profileAccent,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          title: Text(
+            item.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          subtitle: Text(
+            '${item.city} · Self-reported $visitedDate',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onTap,
+        ),
+        const Divider(height: 1, indent: 72),
+      ],
+    );
+  }
+}
+
+class _ViewerUpgradeRow extends StatelessWidget {
+  const _ViewerUpgradeRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 3, 6, 6),
+      child: Material(
+        color: RechargeTheme.profileAccent,
+        borderRadius: BorderRadius.circular(RechargeTheme.profileCompactRadius),
+        child: ListTile(
+          dense: true,
+          leading: const Icon(Icons.workspace_premium_outlined),
+          iconColor: Colors.white,
+          textColor: Colors.white,
+          title: const Text(
+            'Upgrade account',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.white),
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProGeneratorProfileBody extends StatelessWidget {
+  const _ProGeneratorProfileBody({
+    required this.displayName,
+    required this.city,
+    required this.avatar,
+    required this.data,
+    required this.onManagePage,
+    required this.onCreatedEvents,
+    required this.onInsights,
+    required this.onBookings,
+  });
+
+  final String displayName;
+  final String city;
+  final String avatar;
+  final _ProfileWorkspaceData data;
+  final VoidCallback onManagePage;
+  final VoidCallback onCreatedEvents;
+  final VoidCallback onInsights;
+  final VoidCallback onBookings;
+
+  @override
+  Widget build(BuildContext context) {
+    final _CreatorListingData? listing =
+        data.publishedListing ?? data.draftListing;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const _ProfileSectionLabel('MANAGED PAGE'),
+        const SizedBox(height: 8),
+        _ManagedPageCard(
+          title: listing?.title ?? displayName,
+          subtitle:
+              'Organizer page · ${city.trim().isEmpty ? 'Riga' : city.trim()}',
+          status: listing?.stageLabel ?? 'Active',
+          coverImageUrl: listing?.draft.media.coverImage ?? avatar,
+          onTap: onManagePage,
+        ),
+        const SizedBox(height: 14),
+        const _ProfileSectionLabel('CONTROL CENTER'),
+        const SizedBox(height: 8),
+        _ProfileSurfacePanel(
+          child: Column(
+            children: <Widget>[
+              _ProfileActionRow(
+                icon: Icons.edit_square,
+                title: 'Manage page',
+                onTap: onManagePage,
+              ),
+              _ProfileActionRow(
+                icon: Icons.event_note_outlined,
+                title: 'Created events',
+                onTap: onCreatedEvents,
+              ),
+              _ProfileActionRow(
+                icon: Icons.insights_outlined,
+                title: 'Event insights',
+                onTap: onInsights,
+              ),
+              _ProfileActionRow(
+                icon: Icons.group_outlined,
+                title: 'Bookings & requests',
+                onTap: onBookings,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ManagedPageCard extends StatelessWidget {
+  const _ManagedPageCard({
+    required this.title,
+    required this.subtitle,
+    required this.status,
+    required this.coverImageUrl,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final String status;
+  final String coverImageUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ProfileSurfacePanel(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(RechargeTheme.profileCardRadius),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  RechargeTheme.profileCompactRadius,
+                ),
+                child: SizedBox(
+                  width: 78,
+                  height: 78,
+                  child: coverImageUrl.trim().isEmpty
+                      ? const ColoredBox(
+                          color: RechargeTheme.mint100,
+                          child: Icon(
+                            Icons.storefront_outlined,
+                            color: RechargeTheme.profileAccent,
+                          ),
+                        )
+                      : Image.network(
+                          coverImageUrl.trim(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const ColoredBox(
+                            color: RechargeTheme.mint100,
+                            child: Icon(
+                              Icons.storefront_outlined,
+                              color: RechargeTheme.profileAccent,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: RechargeTheme.profileMuted),
+                    ),
+                    const SizedBox(height: 8),
+                    _ProfileStatusPill(label: status),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileSurfacePanel extends StatelessWidget {
+  const _ProfileSurfacePanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.profileSurface,
+        borderRadius: BorderRadius.circular(RechargeTheme.profileCardRadius),
+        border: Border.all(color: RechargeTheme.profileBorder),
+      ),
+      child: Material(type: MaterialType.transparency, child: child),
+    );
+  }
+}
+
+class _ProfileStatusPill extends StatelessWidget {
+  const _ProfileStatusPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.mint100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: RechargeTheme.profileAccent,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LatestCreatedEvents extends StatelessWidget {
   const _LatestCreatedEvents({
     required this.data,
@@ -677,6 +1145,7 @@ class _LatestCreatedEvents extends StatelessWidget {
     required this.onOpenListing,
     required this.onCreate,
     required this.onCreateRoute,
+    required this.onScenario,
     required this.onFindPeople,
   });
 
@@ -685,6 +1154,7 @@ class _LatestCreatedEvents extends StatelessWidget {
   final ValueChanged<_CreatorListingData> onOpenListing;
   final VoidCallback onCreate;
   final VoidCallback onCreateRoute;
+  final VoidCallback onScenario;
   final VoidCallback onFindPeople;
 
   @override
@@ -704,38 +1174,41 @@ class _LatestCreatedEvents extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE7ECE6)),
           ),
-          child: Column(
-            children: <Widget>[
-              if (listings.isEmpty)
-                _ProfileActionRow(
-                  icon: Icons.add_box_outlined,
-                  title: 'Create first event',
-                  subtitle: 'Start from Recharge Create Hub',
-                  onTap: onCreate,
-                )
-              else
-                for (final _CreatorListingData listing in listings.take(3))
-                  _CreatedEventRow(
-                    listing: listing,
-                    onTap: () => onOpenListing(listing),
-                  ),
-              const Divider(height: 1),
-              ListTile(
-                dense: true,
-                title: const Center(
-                  child: Text(
-                    'View all events',
-                    style: TextStyle(
-                      color: Color(0xFF0B3028),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: <Widget>[
+                if (listings.isEmpty)
+                  _ProfileActionRow(
+                    icon: Icons.add_box_outlined,
+                    title: 'Create first event',
+                    subtitle: 'Start from Recharge Create Hub',
+                    onTap: onCreate,
+                  )
+                else
+                  for (final _CreatorListingData listing in listings.take(3))
+                    _CreatedEventRow(
+                      listing: listing,
+                      onTap: () => onOpenListing(listing),
+                    ),
+                const Divider(height: 1),
+                ListTile(
+                  dense: true,
+                  title: const Center(
+                    child: Text(
+                      'View all events',
+                      style: TextStyle(
+                        color: Color(0xFF0B3028),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
+                  trailing: const Icon(Icons.chevron_right, size: 18),
+                  onTap: onViewAll,
                 ),
-                trailing: const Icon(Icons.chevron_right, size: 18),
-                onTap: onViewAll,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 14),
@@ -747,31 +1220,41 @@ class _LatestCreatedEvents extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE7ECE6)),
           ),
-          child: Column(
-            children: <Widget>[
-              _ProfileActionRow(
-                icon: Icons.add_box_outlined,
-                title: 'Create recharge activity',
-                onTap: onCreate,
-              ),
-              _ProfileActionRow(
-                icon: Icons.map_outlined,
-                title: 'Create route',
-                subtitle: 'Open route builder on a separate screen',
-                onTap: onCreateRoute,
-              ),
-              _ProfileActionRow(
-                icon: Icons.calendar_today_outlined,
-                title: 'One-time event',
-                onTap: onCreate,
-              ),
-              _ProfileActionRow(
-                icon: Icons.group_outlined,
-                title: 'Find people',
-                subtitle: 'Continue in Search conditions',
-                onTap: onFindPeople,
-              ),
-            ],
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: <Widget>[
+                _ProfileActionRow(
+                  icon: Icons.add_box_outlined,
+                  title: 'Create Hub',
+                  subtitle: 'Open taxonomy-based creator flow',
+                  onTap: onCreate,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.route_outlined,
+                  title: 'Create route',
+                  subtitle: 'Open the Route block in Create Hub',
+                  onTap: onCreateRoute,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.auto_awesome_outlined,
+                  title: 'Scenario Builder',
+                  subtitle: 'Build a personal plan from intent',
+                  onTap: onScenario,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.calendar_today_outlined,
+                  title: 'One-time event',
+                  onTap: onCreate,
+                ),
+                _ProfileActionRow(
+                  icon: Icons.group_outlined,
+                  title: 'Find people',
+                  subtitle: 'Continue in Search conditions',
+                  onTap: onFindPeople,
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -1156,98 +1639,6 @@ class _RoleStatusBadge extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _QuickActions extends StatelessWidget {
-  const _QuickActions({
-    required this.roleSummary,
-    required this.data,
-    required this.onWorkspace,
-    required this.onFavorites,
-    required this.onSearch,
-    required this.onNotifications,
-    required this.onCreate,
-    required this.onScenario,
-    required this.onSettings,
-  });
-
-  final ProfileRoleSummary roleSummary;
-  final _ProfileWorkspaceData data;
-  final VoidCallback onWorkspace;
-  final VoidCallback onFavorites;
-  final VoidCallback onSearch;
-  final VoidCallback onNotifications;
-  final VoidCallback onCreate;
-  final VoidCallback onScenario;
-  final VoidCallback onSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> rows = <Widget>[
-      _ProfileActionRow(
-        icon: Icons.dashboard_customize_outlined,
-        title: 'Profile workspace',
-        subtitle: 'Roles, publications, routes and saved context',
-        onTap: onWorkspace,
-      ),
-      _ProfileActionRow(
-        icon: Icons.favorite_border,
-        title: 'Saved plans',
-        subtitle: '${data.savedCount} saved ideas',
-        onTap: onFavorites,
-      ),
-      _ProfileActionRow(
-        icon: Icons.search_outlined,
-        title: 'Search and conditions',
-        subtitle: data.latestSmartSearch == null
-            ? '${data.searchCount} saved searches'
-            : data.latestSmartSearch!.prompt,
-        onTap: onSearch,
-      ),
-      if (roleSummary.canCreate)
-        _ProfileActionRow(
-          icon: Icons.add_box_outlined,
-          title: 'Create Hub',
-          subtitle: 'Open taxonomy-based creator flow',
-          onTap: onCreate,
-        ),
-      if (roleSummary.canGenerate)
-        _ProfileActionRow(
-          icon: Icons.auto_awesome_outlined,
-          title: 'Scenario Builder',
-          subtitle: 'Build routes from intent',
-          onTap: onScenario,
-        ),
-      _ProfileActionRow(
-        icon: Icons.notifications_none,
-        title: 'Notifications',
-        subtitle: 'Inbox and route updates',
-        onTap: onNotifications,
-      ),
-      _ProfileActionRow(
-        icon: Icons.settings_outlined,
-        title: 'Settings',
-        subtitle: 'Edit profile, language and links',
-        onTap: onSettings,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const _ProfileSectionLabel('PROFILE MENU'),
-        const SizedBox(height: 8),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE7ECE6)),
-          ),
-          child: Column(children: rows),
-        ),
-      ],
     );
   }
 }

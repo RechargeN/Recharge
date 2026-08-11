@@ -517,8 +517,8 @@ List<String> validateRechargeTaxonomy() {
   if (rechargeVisibleContentGroups.length != 27) {
     errors.add('Expected 27 visible categories');
   }
-  if (rechargeActivityCategories.length != 516) {
-    errors.add('Expected 516 subcategories');
+  if (rechargeActivityCategories.length != 530) {
+    errors.add('Expected 530 subcategories');
   }
   if (_categoriesById.length != rechargeActivityCategories.length) {
     errors.add('Subcategory ids must be globally unique');
