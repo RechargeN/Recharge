@@ -3,11 +3,11 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A implementation in Review
+**Статус:** Approved — M2-A Done; M2-B–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
-**Runtime effect:** none
+**Runtime effect:** M2-A architecture-only refactor; product behavior unchanged
 **Backend/Firebase effect:** none
 
 ## 0. Решение
@@ -167,6 +167,8 @@ CurrencyMetadata
 - unknown newer schema остаётся fail closed.
 
 ## 4. Slice M2-A — Boundary-safe Geo, ID и identity mapping
+
+**Статус:** Done — commit `6f00b2f`, draft PR #3, target CI green.
 
 ### 4.1 Новые файлы
 
@@ -508,3 +510,25 @@ backend, Firebase, Payments, provider integrations или M8 remote adapters.
 2026-08-11 после публикации и принятия полного M2-плана. Это разрешение
 охватывает только последовательные mobile slices M2-A–M2-E в указанном scope;
 каждый slice остаётся отдельным reviewed diff и не разрешает backend/Firebase.
+
+## 14. M2-A implementation evidence
+
+M2-A реализован отдельным обратимым commit `6f00b2f` без Money,
+time/locale/market, backend, Firebase или продуктовых UI-изменений:
+
+- Geo implementation ownership перенесён в `shared/primitives/geo`, а старые
+  `core/geo` paths оставлены forwarding exports до M2-D;
+- dependency-free `IdGenerator` перенесён в `shared/primitives/id`, UUID v4
+  implementation остался composition dependency в `core/id`;
+- identity preview mapping перенесён из domain в application state;
+- domain больше не импортирует `core/geo`, `core/id` или `core/identity`;
+- удалены ровно BND-LEGACY-0060–0094, budget уменьшен 106 → 71;
+- repository scan: 380 Dart files / 71 finding / 71 suppression /
+  0 violation / 0 stale / 0 expired / budget 71;
+- локально прошли boundary self-test, inventory drift, diff check и 26
+  targeted Geo/ID/identity tests;
+- GitHub Actions на Flutter 3.44.9 для draft PR #3: `boundaries`, `codegen`,
+  `lint` и полный suite из 664 tests прошли.
+
+Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
+M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
