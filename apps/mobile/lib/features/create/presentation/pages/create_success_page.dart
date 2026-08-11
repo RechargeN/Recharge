@@ -672,10 +672,7 @@ String _discoverRouteForDraft(String path, CreateDraftEntity draft) {
       'category': _discoverCategoryForDraft(draft.mainCategory),
       'free': draft.isFree ? '1' : '0',
       if (!draft.isFree && draft.basePrice != null)
-        'budgetMax': MoneyFormatter.format(
-          draft.basePrice!,
-          includeCurrency: false,
-        ),
+        'budgetMax': MoneyFormatter.decimal(draft.basePrice!),
       'radius': '5000',
       'unlimited': '0',
     },
