@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Proposed — documentation complete, runtime authorization pending
+**Статус:** Approved — M2-A implementation in Review
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -233,6 +233,7 @@ Identity correction не создаёт общий identity primitive: extension
 
 ```text
 tools/scripts/boundary-exceptions.json
+tools/scripts/boundary-policy.json
 docs/architecture/MOBILE_BOUNDARY_INVENTORY.md
 ```
 
@@ -500,3 +501,10 @@ Actions зелёный, а `LAUNCH_STATUS` содержит проверяемо
 
 Принятие этого документа само по себе не изменяет приложение и не разрешает
 backend, Firebase, Payments, provider integrations или M8 remote adapters.
+
+## 13. Acceptance record
+
+Владелец продукта разрешил переход к реализации сообщением «идем дальше»
+2026-08-11 после публикации и принятия полного M2-плана. Это разрешение
+охватывает только последовательные mobile slices M2-A–M2-E в указанном scope;
+каждый slice остаётся отдельным reviewed diff и не разрешает backend/Firebase.

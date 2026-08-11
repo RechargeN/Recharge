@@ -1,4 +1,4 @@
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/page_limit_increase_request_entity.dart';
 import '../repositories/identity_workspace_repository.dart';
 import 'create_professional_page_usecase.dart';

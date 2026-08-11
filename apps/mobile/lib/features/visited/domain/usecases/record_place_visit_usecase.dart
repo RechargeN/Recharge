@@ -1,4 +1,4 @@
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/visited_place_entity.dart';
 import '../repositories/visited_places_repository.dart';
 

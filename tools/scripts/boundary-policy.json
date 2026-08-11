@@ -44,5 +44,5 @@
     "domain_infrastructure_dependency",
     "feature_to_app_di_or_app_presentation"
   ],
-  "exceptionBudget": 106
+  "exceptionBudget": 71
 }

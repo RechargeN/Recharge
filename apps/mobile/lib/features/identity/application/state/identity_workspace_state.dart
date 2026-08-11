@@ -94,3 +94,12 @@ class IdentityWorkspaceState {
     );
   }
 }
+
+extension on AdminExperiencePreview {
+  AccountExperience get experience => switch (this) {
+    AdminExperiencePreview.viewer => AccountExperience.viewer,
+    AdminExperiencePreview.creator => AccountExperience.creator,
+    AdminExperiencePreview.professionalPage =>
+      AccountExperience.professionalPage,
+  };
+}

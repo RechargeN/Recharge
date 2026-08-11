@@ -1,8 +1,8 @@
 import 'package:uuid/uuid.dart';
 
-abstract class IdGenerator {
-  String generate();
-}
+import '../../shared/primitives/id/id_generator.dart';
+
+export '../../shared/primitives/id/id_generator.dart';
 
 class UuidV4IdGenerator implements IdGenerator {
   UuidV4IdGenerator({Uuid? uuid}) : _uuid = uuid ?? const Uuid();
