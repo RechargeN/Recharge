@@ -1,15 +1,28 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4
-- Дата: 2026-08-10
+- Версия: 2.4.1
+- Дата: 2026-08-15
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
+- Registry amendment: **2026-08-15, Product owner instruction; status-only,
+  semantics/gates/checksum unchanged**
 - Назначение: единая распределительная карта backend-работ Recharge
 - Заменяет в плане отдельный `BACKEND_CAPABILITY_OWNERSHIP_MATRIX.md`
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.1.** Factual registry reconciliation без изменения v2.4 semantics:
+
+- BCK-01 обновлён с `Planned` до `Draft v0.3 — Present`; runtime остаётся
+  `Absent`;
+- BCK-03 создан как `Draft v0.1 — Present`; runtime остаётся `Absent`, переход
+  в Review заблокирован до Review BCK-01 и выполнения собственного DoR;
+- реестр по-прежнему содержит 22 BCK-specs и 6 runbooks; G0 остаётся Passed,
+  G1–G7 и любой runtime не разрешены;
+- downstream semantic references to v2.4 остаются валидными: v2.4.1 изменяет
+  только factual registry и не меняет coordination semantics/checksum.
 
 **v2.4.** Финальный reconciliation-аудит v2.3:
 
@@ -77,7 +90,8 @@ Recharge. Она определяет:
 Карта не заменяет Accepted ADR или domain-spec. Она распределяет работу между
 ними и запрещает скрытые параллельные модели.
 
-После утверждения v2.4 этот файл является канонической coordination-основой
+После утверждения v2.4 и status-only amendment v2.4.1 этот файл является
+канонической coordination-основой
 для реестра BCK/RUN, ownership, sequencing, open decisions, risks и gates.
 Нижестоящие документы обязаны ссылаться на BCK-02 и проходить reconciliation,
 но при конфликте по-прежнему применяется приоритет §3.
@@ -179,13 +193,13 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4)
+## 5. Реестр проектных документов — 22 (v2.4.1)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
-| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Planned | Absent |
-| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4 | N/A |
-| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Planned | Absent |
+| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Draft v0.3 — Present | Absent |
+| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.1 | N/A |
+| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.1 — Present | Absent |
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Planned | Absent |
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Planned | Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Planned | Absent |
@@ -223,7 +237,7 @@ wave, migration impact и новой ревизии BCK-02.
 (BCK-21); `TRUST_SAFETY_BACKEND_SPEC.md` →
 `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` (BCK-22).
 
-## 6. Production runbooks — 6 (v2.4)
+## 6. Production runbooks — 6 (v2.4.1)
 
 | ID | Файл | Accountable owner | Основан на | Обязателен и проверяется |
 |---|---|---|---|---|
@@ -412,7 +426,7 @@ domain commands, но BCK-19 не зависит от runbook.
 
 | Wave | Entry | Документы / допустимый параллелизм | Exit evidence |
 |---|---|---|---|
-| D0 Coordination | Current repo facts and Accepted anchors read fully | BCK-02 only | v2.4 registry/ownership/dependencies/risks accepted; runtime none |
+| D0 Coordination | Current repo facts and Accepted anchors read fully | BCK-02 only | v2.4.1 registry/ownership/dependencies/risks accepted; runtime none |
 | D1 Platform | D0 accepted | BCK-01 first; затем BCK-03, BCK-04, BCK-05 и BCK-20 parallel | Approved platform set; OD-07 и OD-10 Accepted; OD-09 и OD-11 минимум Proposed; conflicts logged |
 | D2 Authority/client/content | D1 Approved | BCK-06, затем BCK-18; BCK-07 и BCK-08 после applicable contracts | Approved authority/import/content/catalog specs; OD-01, OD-03, OD-04 и OD-08 Accepted; OD-11-gated functions явно disabled до решения |
 | D3 User actions/safety | Applicable D1/D2 contracts Approved | BCK-13, BCK-14, BCK-19 и BCK-21 parallel; BCK-09 reconciliation; BCK-12; затем BCK-22 integration | Каждый spec Approved независимо; OD-02, OD-05, OD-06 и OD-09 Accepted перед соответствующим runtime; OD-11 Accepted перед age-sensitive paths |
@@ -711,7 +725,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 
 ## 19. Acceptance criteria этой карты
 
-1. Ревизия v2.4 содержит 22 BCK-specs и 6 runbooks.
+1. Ревизия v2.4.1 содержит 22 BCK-specs и 6 runbooks.
 2. Count является versioned checksum, а не вечным fixed-count invariant.
 3. Каждый BCK/RUN/OD/RSK имеет уникальный ID и accountable owner.
 4. Spec status отделён от runtime status.
@@ -802,7 +816,7 @@ Firestore/Storage resources, production schemas, credentials или deployments.
 Следующий review package содержит только:
 
 1. BCK-01 Draft с traceability к §3;
-2. BCK-02 v2.4 traceability/checksum;
+2. BCK-02 v2.4.1 traceability/checksum;
 3. owners и initial proposals для OD-07/09/10/11;
 4. список конфликтов, реально блокирующих BCK-03, BCK-04, BCK-05 и BCK-20;
 5. доказательство отсутствия runtime changes.
