@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/common.schema.json",
+  "title": "Recharge Booking v1 common definitions",
+  "$defs": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "positiveUnits": { "type": "integer", "minimum": 1, "maximum": 21 },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "admissionMode": {
+      "type": "string",
+      "enum": ["rsvp", "booking", "application"]
+    },
+    "confirmationMode": {
+      "type": "string",
+      "enum": ["instant", "manualApproval"]
+    },
+    "bookingState": {
+      "type": "string",
+      "enum": ["pending", "confirmed", "cancelled", "expired", "waitlisted"]
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["onsite", "online", "any"]
+    },
+    "reconfirmationState": {
+      "type": "string",
+      "enum": ["notRequired", "notOpen", "required", "confirmed", "missed"]
+    },
+    "terminalReason": {
+      "type": "string",
+      "enum": [
+        "userCancelled",
+        "organizerCancelled",
+        "applicationRejected",
+        "occurrenceCancelled",
+        "eventCancelled",
+        "missedReconfirmation",
+        "waitlistOfferDeclined",
+        "waitlistOfferExpired",
+        "duplicateResolved",
+        "policyInvalidated"
+      ]
+    },
+    "namedGuest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 120 }
+      },
+      "required": ["displayName"]
+    }
+  }
+}

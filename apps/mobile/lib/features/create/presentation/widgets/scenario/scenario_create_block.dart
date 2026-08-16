@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../application/controllers/create_controller.dart';
+import '../../../application/controllers/scenario_transit_picker_controller.dart';
 import '../../../application/scenario_create_config.dart';
 import '../../../application/state/create_state.dart';
 import 'scenario_composer_section.dart';
@@ -12,11 +13,13 @@ class ScenarioCreateBlock extends StatelessWidget {
   const ScenarioCreateBlock({
     required this.controller,
     required this.state,
+    this.transitPickerController,
     super.key,
   });
 
   final CreateController controller;
   final CreateState state;
+  final ScenarioTransitPickerController? transitPickerController;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,7 @@ class ScenarioCreateBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Scenario Builder',
+              'Scenario plan',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -89,6 +92,7 @@ class ScenarioCreateBlock extends StatelessWidget {
               1 => ScenarioComposerSection(
                 controller: controller,
                 state: state,
+                transitPickerController: transitPickerController,
               ),
               _ => ScenarioReviewSection(controller: controller, state: state),
             },

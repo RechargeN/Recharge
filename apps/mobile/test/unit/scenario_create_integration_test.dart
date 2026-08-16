@@ -5,7 +5,6 @@ import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/models/scenario_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
-import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_logistics_draft.dart';
 
@@ -156,7 +155,7 @@ void main() {
     expect(scenario.capabilities.liveLogistics, isFalse);
   });
 
-  test('manual car leg calculates fuel only from known user values', () {
+  test('manual car leg never infers fuel and keeps explicit extra cost', () {
     final ScenarioCreateCoordinator coordinator = ScenarioCreateCoordinator(
       idGenerator: _SequentialIdGenerator(),
     );
@@ -178,23 +177,6 @@ void main() {
       latitude: 57.1537,
       longitude: 24.8595,
     );
-    scenario = coordinator.updateTransportPreferences(
-      scenario,
-      primaryTravelMode: ScenarioTravelMode.car,
-      allowedTravelModes: const <ScenarioTravelMode>{
-        ScenarioTravelMode.car,
-        ScenarioTravelMode.walking,
-      },
-      vehicleProfile: const ScenarioVehicleProfileDraft(
-        enabled: true,
-        includeFuelInBudget: true,
-        litresPer100Km: 8,
-        fuelPricePerLitre: ScenarioMoneyDraft(
-          minorUnits: 180,
-          currencyCode: 'EUR',
-        ),
-      ),
-    );
     scenario = coordinator.upsertManualLeg(
       scenario,
       fromItemId: scenario.items.first.id,
@@ -209,9 +191,24 @@ void main() {
     expect(leg.lockedByUser, isTrue);
     expect(leg.durationMinutes, 45);
     expect(leg.distanceM, 50000);
-    expect(leg.cost.components.single.componentCode, 'fuel');
-    expect(leg.cost.components.single.amount?.minorUnits, 720);
+    expect(leg.cost.components, isEmpty);
     expect(coordinator.evaluate(scenario).totals.localTravelMinutes, 45);
+
+    scenario = coordinator.upsertManualLeg(
+      scenario,
+      fromItemId: scenario.items.first.id,
+      toItemId: scenario.items.last.id,
+      mode: ScenarioTravelMode.car,
+      durationMinutes: 45,
+      distanceKm: 50,
+      otherCostMinorUnits: 900,
+    );
+    expect(scenario.legs.single.cost.components, hasLength(1));
+    expect(
+      scenario.legs.single.cost.components.single.componentCode,
+      'travel_extra',
+    );
+    expect(scenario.legs.single.cost.components.single.amount?.minorUnits, 900);
   });
 
   test('planned transport persists a non-live schedule snapshot', () {

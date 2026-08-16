@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/di/service_locator.dart';
+import 'package:recharge/app/application/scenario_object_intake_config.dart';
+import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -52,6 +54,30 @@ void main() {
     await sl.reset();
   });
 
+  fullPageTestWidgets('details intake flag hides its action only', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      await _detailsApp(
+        additionalOverrides: <Override>[
+          scenarioObjectIntakeConfigProvider.overrideWithValue(
+            const ScenarioObjectIntakeConfig(detailsEnabled: false),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Plan this recharge'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(find.text('Add to Scenario'), findsNothing);
+    expect(find.text('Build route'), findsNothing);
+    expect(find.text('Find similar'), findsOneWidget);
+  });
+
   fullPageTestWidgets('renders action hub and opens contextual map', (
     tester,
   ) async {
@@ -64,7 +90,9 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Plan this recharge'), findsOneWidget);
-    expect(find.text('Build route'), findsOneWidget);
+    expect(find.text('Build route'), findsNothing);
+    expect(find.text('Add to Scenario'), findsNothing);
+    expect(find.text('Add this stop to a personal plan'), findsNothing);
     expect(find.text('Find similar'), findsOneWidget);
     expect(find.text('Create similar'), findsOneWidget);
     expect(find.text('Route from this'), findsOneWidget);
@@ -81,30 +109,7 @@ void main() {
     expect(find.text('27.333200'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario search and create actions', (
-    tester,
-  ) async {
-    await tester.pumpWidget(await _detailsApp());
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.text('Build route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Build route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('Morning yoga'), findsOneWidget);
-    expect(
-      find.text('wellness_recharge.calm_walk,food_drinks.coffee'),
-      findsOneWidget,
-    );
-
+  fullPageTestWidgets('opens Route, search and create actions', (tester) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
@@ -117,7 +122,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
     expect(
@@ -170,7 +175,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Morning yoga route'), findsOneWidget);
     expect(find.textContaining('Morning yoga'), findsWidgets);
     expect(find.text('120'), findsOneWidget);
@@ -227,7 +232,10 @@ void main() {
 
 DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;
 
-Future<Widget> _detailsApp({VisitedPlacesController? visitedController}) async {
+Future<Widget> _detailsApp({
+  VisitedPlacesController? visitedController,
+  List<Override> additionalOverrides = const <Override>[],
+}) async {
   final AuthController authController = AuthController(
     signInUseCase: SignInUseCase(_NoopAuthRepository()),
     restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -265,6 +273,7 @@ Future<Widget> _detailsApp({VisitedPlacesController? visitedController}) async {
     visitedPlacesControllerProvider.overrideWith(
       (ref) => effectiveVisitedController,
     ),
+    ...additionalOverrides,
   ];
   return ProviderScope(
     overrides: overrides,
@@ -299,7 +308,7 @@ Future<Widget> _detailsApp({VisitedPlacesController? visitedController}) async {
             ),
           ),
           GoRoute(
-            path: RouteNames.scenarioBuilder,
+            path: RouteNames.legacyScenarioBuilder,
             builder: (context, state) => Scaffold(
               body: Column(
                 children: <Widget>[

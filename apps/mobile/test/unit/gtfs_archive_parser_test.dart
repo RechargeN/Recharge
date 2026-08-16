@@ -49,6 +49,8 @@ void main() {
     expect(result.single.departure.hhmm, '23:55');
     expect(result.single.arrival.hhmm, '24:50');
     expect(result.single.arrival.dayOffset, 1);
+    expect(result.single.serviceDate.iso8601, '2026-07-30');
+    expect(result.single.durationMinutes, 55);
     expect(result.single.agencyName, 'Latvia, Test Transit');
     expect(result.single.manifest.freshness, ScenarioTransitFreshness.current);
   });
@@ -91,6 +93,29 @@ void main() {
       ),
     );
     expect(result, isEmpty);
+  });
+
+  test('exact trip filter never substitutes another direct service', () async {
+    final index = await parseFixture();
+    final exact = index.searchServices(
+      const ScenarioTransitSearchQuery(
+        originStopId: 'station_a',
+        destinationStopId: 'stop_c',
+        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        exactTripId: 'trip_late',
+      ),
+    );
+    final missing = index.searchServices(
+      const ScenarioTransitSearchQuery(
+        originStopId: 'station_a',
+        destinationStopId: 'stop_c',
+        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        exactTripId: 'trip_missing',
+      ),
+    );
+
+    expect(exact.single.tripId, 'trip_late');
+    expect(missing, isEmpty);
   });
 
   test('rejects missing required GTFS headers', () async {

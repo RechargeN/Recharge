@@ -1,7 +1,11 @@
 import '../entities/scenario_transit_schedule.dart';
 
 abstract class ScenarioTransitScheduleRepository {
+  List<ScenarioTransitProviderDescriptor> get providers;
+
   Future<ScenarioTransitFeedManifest> refreshProvider(String providerCode);
+
+  Future<ScenarioTransitCacheInspection> inspectCache(String providerCode);
 
   Future<ScenarioTransitFeedManifest?> loadLastKnownGood(String providerCode);
 

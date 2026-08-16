@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_result.schema.json",
+  "title": "Recharge Booking command result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "kind": {
+      "type": "string",
+      "enum": ["succeeded", "rejected", "retryableFailure", "unsupportedContract"]
+    },
+    "requestId": { "$ref": "common.schema.json#/$defs/id" },
+    "correlationId": { "$ref": "common.schema.json#/$defs/id" },
+    "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "booking": { "$ref": "booking.schema.json" },
+    "hold": { "$ref": "booking_hold.schema.json" },
+    "policy": { "$ref": "booking_policy.schema.json" },
+    "error": { "$ref": "booking_error.schema.json" },
+    "unsupportedPayload": { "type": "object" }
+  },
+  "required": ["schemaVersion", "kind", "requestId", "correlationId", "serverTime"]
+}

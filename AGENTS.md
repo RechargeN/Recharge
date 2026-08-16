@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-07-31. Канонический файл инструкций репозитория.
+Версия: 2026-08-09. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -19,6 +19,7 @@ Accepted ADR — прав ADR; исправление кода оформляе�
 
 ```
 apps/mobile/               # Flutter-приложение
+apps/backend/              # Accepted ADR 0019 target; физически ещё не создан
 packages/design_system/    # дизайн-токены, общие UI-компоненты
 packages/api_contracts/    # контракты данных
 docs/adr/                  # ADR (источник истины по решениям)
@@ -58,8 +59,11 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    заменяться постоянным ULID при публикации. Все связи между
    сущностями — только по id, без ссылок по имени.
 3. **Firebase** — целевой бэкенд (Auth: Google/Apple, Firestore,
-   Storage). Текущее состояние — mock datasources. Подключение
-   Firebase — отдельный slice ПОСЛЕ стабилизации.
+   Storage). Текущее состояние — mock datasources. Accepted ADR 0019
+   разрешает целевую архитектуру authoritative Booking backend и staged
+   contracts/domain work; физическое подключение Firebase, deployment и
+   production data processing — только отдельными Approved ECL-03 slices
+   после стабилизации и всех Identity/Privacy/Platform gates.
 4. **Create Hub** — целевой скоуп 10 типов через единый form engine.
    Базовый runtime всех 10 типов реализован через единый config-driven
    flow и Category System v1.4.3. Специализированные секции конкретных
@@ -74,6 +78,14 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    отдельный пользовательский utility-flow вне Create Hub и каталога; он
    не считается одиннадцатым Create-типом. `quickPlan` сохраняется внутри
    Create taxonomy только как скрытый read-compatibility тип для legacy drafts.
+   Для Event принят канонический продуктовый/доменный контракт
+   `docs/product/EVENT_CLASSIFICATION_SPEC.md` v2.2.3. Все будущие Event,
+   Booking, admission, inventory, availability и provider slices обязаны
+   расширять его, а не создавать параллельную модель. Реализованный
+   EVT-CRT-01 остаётся совместимым C0 + schedule-C1 подмножеством и не означает
+   готовность полного контракта. Изменение инвариантов требует явной новой
+   ревизии/ADR; принятие спецификации само по себе не разрешает Firebase,
+   production backend, Payments или provider integration.
 5. **Регион запуска** — Рига/Латвия, EUR. Дефолтные координаты
    в конфиге: 56.9496, 24.1052 (сейчас неверные — задача бэклога).
    Локализация en/ru/lv — целевая, фактически НЕ настроена
@@ -147,15 +159,17 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 |---|---|
 | Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract |
 | Create Hub: 10 типов | config-driven runtime; Place / Business, Event, Find People и Scenario имеют типизированные Create-блоки на mock; Place получил PLC-ADP-01: трёхшаговую адаптивную форму по профилю места, релевантные часы/вход/расходы/контакты и explicit local-demo Creator Assist без автоматической публикации; Event получил local-first пользовательские templates CRT-TPL-01 (несколько шаблонов, выбор, управление и новый независимый draft из последнего шаблона); видимый planning-slot занимает Scenario, `quickPlan` скрыт как legacy read-compatibility type |
+| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа, полное покрытие Category System v1.4.3 и provider-neutral roadmap. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 spec v1.1 Approved и D01-D10 Accepted. ECL-03B: shared Booking v1 JSON schemas/fixtures, immutable fixture-verified Dart DTOs и независимый pure mobile Booking domain/readiness/transition validation; package analyze 0 и 9 tests, mobile analyzer 0 и полный suite 659 passed, boundary 59 прежних suppressions без новых. ECL-03C-P exact transaction-core plan v1.0 в Review: пять callable surfaces, finite general-capacity/explicit unlimited instant-free paths, atomic ledger/usage/audit/outbox/idempotency, exact file map и 38 AC; runtime effect none. Нет client/network/repository/data/application/presentation/DI/Create/backend/Firebase runtime. Физическая ECL-03C реализация требует explicit plan acceptance, post-stabilization backend authorization и production Identity/Platform prerequisites; provider sync/Payments также не реализованы |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
 | Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only presentation preview Viewer/Creator/Professional Page реализован без смены authority; production shell скрывает legacy manual profile-mode selector; production verification НЕ реализована |
-| Professional Page / Active workspace / PublisherRef | IDP-03A в Review и IDP-04A в Doing: fixture начинается с 0 страниц; пользователь создаёт страницы сам, ownership limit 3, далее pending-заявка модераторам; exact-ID access, локальные уведомления, Settings switcher и page navigation реализованы; default PublisherRef для всех 10 Create типов ещё не реализован, production authority gated |
+| Professional Page / Active workspace / PublisherRef | IDP-03A в Review и IDP-04A в Doing: fixture начинается с 0 страниц; пользователь создаёт страницы сам, ownership limit 3, далее pending-заявка модераторам; exact-ID access, локальные уведомления, Settings switcher и page navigation реализованы. ECL-01 добавил shared PublisherRef и active-workspace default/non-rewrite для Event; остальные 9 Create типов ещё не переведены, production authority gated |
 | Отзывы (Review) | запланировано (в MVP) |
 | Visit History | VIS-HIST-01 local-first Done: только явная self-reported отметка Place с today/past датой, idempotency place/day, несколько дат и удаление; v1 demo-seed игнорируется, v2 начинается пустым; booking/view/favorite/GPS автоматически не считаются посещением |
 | Smart Search | реализовано: rule-based parser, история и route-intent; mock-хранилище |
+| AI assistance platform | AI-PLAT-LOCAL-01 Done: отдельный provider-neutral local/mock foundation с immutable transient contracts, versioned prompt registry, en/ru/lv locale contracts, redaction до gateway, bounded validation, read-tool allowlist, typed failures, kill switches, session quota, explicit deterministic fallback и zero-cost ledger; зарегистрирован в DI, но не подключён к Scenario, Place, Smart Search или UI; production provider/network/secrets/persistence остаются gated |
 | Quick Plan | локальный лёгкий план остановок реализован частично; runtime-черновик получил стабильные id/revision и явный one-way `Expand to Scenario` через SCN-SB-03; остаётся personal/invited utility вне Create Hub/Discover, legacy Scenario/Route naming требует cleanup |
-| Scenario Builder | самостоятельный Latvia-wide city/day/weekend/trip продукт по Accepted Scenario spec v1.5; canonical domain/schema v2/mapper/validation/readiness и conservative legacy classifier реализованы в SCN-SB-01/04; personal Scenario Create runtime, typed persistence, catalog/custom/time-block composer, undo/redo, autosave и readiness review реализованы в SCN-SB-02; explicit one-way Quick Plan conversion с независимыми id, loss preview, revision/access guards и ID-only handoff реализован в SCN-SB-03; SCN-SB-04 добавляет primary own-car mode, vehicle/fuel profile, manual locked legs и planned-transport snapshot с обязательной пометкой `not live`; SCN-AI-01 добавляет optional local-demo catalog-first AI proposal с transient preview, честными unknown/live disclosures, revision guard и atomic undoable Apply без внешних провайдеров; SCN-LV-DATA-01 реализует read-only foundation официальных статических GTFS ATD/Vivi: защищённый parser/index, service calendar, поиск прямых рейсов, offline last-known-good cache и kill switch; следующий bounded milestone SCN-LV-DATA-02 спланирован как последовательность 02A–02E: snapshot contract, transient search workflow, official schedule picker, revision-safe atomic Apply/Recheck/Replace и quality/release gate; все задачи остаются Planned и не являются runtime implementation; public/unlisted publish, external AI/live planning и explicit legacy migration write ещё не реализованы |
+| Scenario Builder | самостоятельный Latvia-wide city/day/weekend/trip продукт по Accepted Scenario spec v1.7; canonical domain/schema v2/mapper/validation/readiness и personal Create runtime с catalog/custom/time-block composer, undo/redo, autosave/readiness реализованы; Quick Plan имеет только explicit one-way conversion; own-car, manual locked legs и official planned-transport snapshots работают с обязательной честной пометкой `not live`; SCN-FUEL-CLEANUP-01 Done удалил fuel consumption/price/budget UI, fuel-поля/вычисление и legacy derived component из normalized runtime, сохранив car, duration/distance и explicit `travel_extra`; SCN-AI-01 остаётся скрытым optional local-demo experiment; SCN-LV-DATA-01 и SCN-LV-DATA-02A–02E Done обеспечивают static GTFS foundation, picker, atomic Apply/Recheck/Replace, offline fallback, telemetry и rollback; SCN-INTAKE-01A–01D и parent Done: Details/Search/Map поддерживают auth-only single/ordered batch Add to Scenario, owner-scoped target/new private target, placement/review, atomic Apply, privacy-safe telemetry, surface kill switches и 360 dp/150% accessibility gate. Transport snapshot остаётся внутренним механизмом, основной UI должен показывать понятные planned/not-live freshness и Recheck states. Public/unlisted publish, external AI/live planning, transfers/fares/booking и explicit legacy migration write ещё не реализованы |
 | Route Builder (creation) | Route-only spec v3.2; RTE-01–07 Done; RTE-08–11 Review. RTE-11 реализует GPS start/pause/resume/finish, foreground/background permissions, crash-safe chunked AES-256-GCM journal с ключом в platform secure storage, восстановление без auto-resume, fail-closed filtering, preview-карту, privacy trim, явные gap decisions и atomic `recordedGps` apply; 22 GPS unit + 1 end-to-end widget test зелёные, targeted analyzer чист. До Done нужны Android/iOS device-проверки и общий stabilization gate. Безопасные GPX inspection/import/apply/export и UI также реализованы локально; production adapters — последующие gates |
 | Локализация en/ru/lv | не настроена |
 | Бронирование | MVP: редирект на externalBookingUrl; оплата — post-MVP |

@@ -71,6 +71,14 @@ void main() {
 
       expect(find.text('How will you travel?'), findsOneWidget);
       expect(find.text('Own car'), findsWidgets);
+      expect(find.text('Own car profile'), findsNothing);
+      expect(find.text('Consumption'), findsNothing);
+      expect(find.text('Fuel price'), findsNothing);
+      expect(find.text('Include estimated fuel in budget'), findsNothing);
+      expect(
+        find.byKey(const ValueKey<String>('vehicle-consumption-null')),
+        findsNothing,
+      );
       expect(
         controller.state.draft.scenarioData!.constraints.primaryTravelMode,
         ScenarioTravelMode.car,
@@ -85,6 +93,14 @@ void main() {
       await tester.tap(addTransport);
       await tester.pumpAndSettle();
 
+      expect(
+        find.byKey(const ValueKey<String>('scenario-transit-choice-official')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('scenario-service-label')),
+        findsOneWidget,
+      );
       expect(
         find.text(
           'Planned schedule · not live. Recheck the service before travel.',
@@ -114,6 +130,12 @@ void main() {
         find.text(
           'Planned schedule · not live. Recheck departures, delays and cancellations before travel.',
         ),
+        findsOneWidget,
+      );
+      expect(find.text('Entered manually · not verified'), findsOneWidget);
+      expect(find.text('Feed SHA-256: unknown'), findsOneWidget);
+      expect(
+        find.textContaining('Fare, tickets, seats, availability'),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

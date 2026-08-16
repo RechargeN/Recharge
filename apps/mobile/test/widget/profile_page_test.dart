@@ -135,7 +135,7 @@ void main() {
     expect(find.text('QUICK ACTIONS'), findsOneWidget);
     expect(find.text('Create Hub'), findsOneWidget);
     expect(find.text('Create route'), findsOneWidget);
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Create Scenario'), findsOneWidget);
     expect(find.text('One-time event'), findsOneWidget);
     expect(find.text('Find people'), findsOneWidget);
 
@@ -323,7 +323,7 @@ void main() {
     expect(find.text('Create Hub'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens latest pro route from profile workspace', (
+  fullPageTestWidgets('ignores legacy favorite Scenario in profile workspace', (
     tester,
   ) async {
     final AuthController authController = AuthController(
@@ -395,7 +395,7 @@ void main() {
                 builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -465,103 +465,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Pro'), findsOneWidget);
-    expect(find.text('Latest route'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-
-    await tester.scrollPageUntilVisible(find.text('Edit route').first, 200);
-    await tester.tap(find.text('Edit route').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: <Override>[
-          authControllerProvider.overrideWith((ref) => authController),
-          exploreControllerProvider.overrideWith((ref) => exploreController),
-          favoritesControllerProvider.overrideWith(
-            (ref) => favoritesController,
-          ),
-          createControllerProvider.overrideWith((ref) => createController),
-          discoverFeedControllerProvider.overrideWith(
-            (ref) => discoverController,
-          ),
-        ],
-        child: MaterialApp.router(
-          routerConfig: GoRouter(
-            initialLocation: RouteNames.profileWorkspace,
-            routes: <RouteBase>[
-              GoRoute(
-                path: RouteNames.profileWorkspace,
-                builder: (context, state) => const ProfileWorkspacePage(),
-              ),
-              GoRoute(
-                path: RouteNames.discoverMap,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Map page'),
-                      Text(state.uri.queryParameters['mode'] ?? ''),
-                      Text(state.uri.queryParameters['steps'] ?? ''),
-                      Text(state.uri.queryParameters['q'] ?? ''),
-                      Text(state.uri.queryParameters['category'] ?? ''),
-                      Text(state.uri.queryParameters['budgetMax'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.scenarioBuilder,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Builder page')),
-              ),
-              GoRoute(
-                path: RouteNames.search,
-                builder: (context, state) => Scaffold(
-                  body: Text(state.uri.queryParameters['q'] ?? 'Search page'),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.create,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Create page'),
-                      Text(state.uri.queryParameters['source'] ?? ''),
-                      Text(state.uri.queryParameters['title'] ?? ''),
-                      Text(state.uri.queryParameters['q'] ?? ''),
-                      Text(state.uri.queryParameters['category'] ?? ''),
-                      Text(state.uri.queryParameters['budgetMax'] ?? ''),
-                      Text(state.uri.queryParameters['type'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.favorites,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Favorites page')),
-              ),
-              GoRoute(
-                path: RouteNames.settings,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Settings page')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(find.text('Map route').first, 200);
-    await tester.tap(find.text('Map route').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('Latest route'), findsNothing);
+    expect(find.text('Calm recharge route'), findsNothing);
   });
 
   fullPageTestWidgets('opens latest saved search from profile workspace', (
@@ -653,7 +558,7 @@ void main() {
                 ),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -738,9 +643,9 @@ void main() {
     await tester.tap(find.byTooltip('Build route from latest search').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.textContaining('museum'), findsOneWidget);
+    expect(find.text('Create page'), findsOneWidget);
+    expect(find.text('saved_search_route_seed'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -858,7 +763,7 @@ void main() {
                 ),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -935,9 +840,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsOneWidget);
+    expect(find.text('Create page'), findsOneWidget);
+    expect(find.text('saved_search_route_seed'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1035,7 +940,7 @@ void main() {
                   ),
                 ),
                 GoRoute(
-                  path: RouteNames.scenarioBuilder,
+                  path: RouteNames.legacyScenarioBuilder,
                   builder: (context, state) => Scaffold(
                     body: Column(
                       children: <Widget>[
@@ -1108,11 +1013,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Builder page'), findsOneWidget);
-      expect(find.text('calm'), findsOneWidget);
-      expect(find.text('120'), findsOneWidget);
-      expect(find.text('1'), findsWidgets);
-      expect(find.text(prompt), findsOneWidget);
+      expect(find.text('Create page'), findsOneWidget);
+      expect(find.text('smart_route_seed'), findsOneWidget);
+      expect(find.text('route'), findsWidgets);
       expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -1122,7 +1025,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Map page'), findsOneWidget);
-      expect(find.text('scenario'), findsOneWidget);
+      expect(find.text('route'), findsOneWidget);
       expect(
         find.textContaining('wellness_recharge.calm_walk'),
         findsOneWidget,
@@ -1140,10 +1043,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Create page'), findsOneWidget);
-      expect(find.text('scenario'), findsWidgets);
+      expect(find.text('route'), findsWidgets);
       expect(find.text('Calm recharge route'), findsOneWidget);
       expect(find.text(prompt), findsOneWidget);
-      expect(find.text('event'), findsOneWidget);
+      expect(find.text('route'), findsWidgets);
       expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
     },
   );
@@ -1401,7 +1304,7 @@ void main() {
                     const Scaffold(body: Text('Create page')),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -1468,19 +1371,7 @@ void main() {
     await tester.tap(find.text('Edit route').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('duration:90'), findsOneWidget);
-    expect(find.text('free:1'), findsOneWidget);
-    expect(find.text('walking:1'), findsOneWidget);
-    expect(find.text('Calm coffee walking route'), findsOneWidget);
-    expect(
-      find.text(
-        'food_drinks.coffee,wellness_recharge.calm_walk,'
-        'outdoor_nature_walking',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Create page'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1489,7 +1380,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('duration:90'), findsOneWidget);
     expect(find.text('Calm coffee walking route'), findsOneWidget);
@@ -1630,7 +1521,7 @@ void main() {
                   ),
                 ),
                 GoRoute(
-                  path: RouteNames.scenarioBuilder,
+                  path: RouteNames.legacyScenarioBuilder,
                   builder: (context, state) => Scaffold(
                     body: Column(
                       children: <Widget>[
@@ -1704,7 +1595,7 @@ void main() {
       await tester.tap(find.text('Open route map').first);
       await tester.pumpAndSettle();
       expect(find.text('Map page'), findsOneWidget);
-      expect(find.text('scenario'), findsOneWidget);
+      expect(find.text('route'), findsOneWidget);
       expect(
         find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
         findsOneWidget,
@@ -2126,7 +2017,7 @@ FavoriteItemEntity _scenarioFavorite() {
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
-        '${RouteNames.scenarioBuilder}?mood=calm&steps=food_drinks.coffee',
+        '${RouteNames.legacyScenarioBuilder}?mood=calm&steps=food_drinks.coffee',
   );
 }
 

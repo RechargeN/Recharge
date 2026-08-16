@@ -16,6 +16,7 @@ enum ScenarioOriginType {
   publicScenario,
   quickPlanConversion,
   collection,
+  details,
   search,
   smartSearch,
   mapSelection,
@@ -142,6 +143,7 @@ class ScenarioDraftData {
     required this.totals,
     required this.capabilities,
     required this.unknownFields,
+    this.updatesEnabled = true,
     this.origin,
   });
 
@@ -164,6 +166,7 @@ class ScenarioDraftData {
   final ScenarioOriginDraft? origin;
   final ScenarioCapabilitiesDraft capabilities;
   final Map<String, Object?> unknownFields;
+  final bool updatesEnabled;
 
   factory ScenarioDraftData.defaults({
     String timezoneId = 'Europe/Riga',
@@ -188,10 +191,7 @@ class ScenarioDraftData {
           ScenarioTravelMode.walking,
           ScenarioTravelMode.transit,
         },
-        vehicleProfile: ScenarioVehicleProfileDraft(
-          enabled: true,
-          includeFuelInBudget: false,
-        ),
+        vehicleProfile: ScenarioVehicleProfileDraft(enabled: true),
         pace: ScenarioPace.balanced,
         interestCategoryIds: <String>{},
         accessibilityRequirementIds: <String>{},
@@ -206,6 +206,7 @@ class ScenarioDraftData {
       origin: const ScenarioOriginDraft(type: ScenarioOriginType.manual),
       capabilities: const ScenarioCapabilitiesDraft(),
       unknownFields: const <String, Object?>{},
+      updatesEnabled: true,
     );
   }
 
@@ -228,6 +229,7 @@ class ScenarioDraftData {
     bool clearOrigin = false,
     ScenarioCapabilitiesDraft? capabilities,
     Map<String, Object?>? unknownFields,
+    bool? updatesEnabled,
   }) {
     return ScenarioDraftData(
       schemaVersion: schemaVersion ?? this.schemaVersion,
@@ -247,6 +249,7 @@ class ScenarioDraftData {
       origin: clearOrigin ? null : (origin ?? this.origin),
       capabilities: capabilities ?? this.capabilities,
       unknownFields: unknownFields ?? this.unknownFields,
+      updatesEnabled: updatesEnabled ?? this.updatesEnabled,
     );
   }
 

@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/service_locator.dart';
+import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/application/visit_history_providers.dart';
+import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
@@ -65,6 +67,19 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     );
     final bool isFavorite = favoritesController.isFavorite(widget.itemId);
     final details = ref.watch(discoverDetailsProvider(widget.itemId));
+    final ownerId = authController.state.user?.id ?? '';
+    final hasTarget =
+        ref
+            .watch(scenarioObjectIntakeAvailabilityProvider(ownerId))
+            .asData
+            ?.value ??
+        false;
+    final intakeEnabled =
+        hasTarget &&
+        isScenarioObjectIntakeSurfaceEnabled(
+          ref,
+          ScenarioObjectIntakeSurface.details,
+        );
 
     return details.when(
       data: (DiscoverItemEntity item) {
@@ -144,9 +159,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                       onRouteMap: () {
                         context.push(_scenarioMapLocationForDetails(item));
                       },
-                      onScenario: () {
-                        context.push(_scenarioLocationForDetails(item));
-                      },
+                      onAddToScenario: intakeEnabled
+                          ? () => _onAddToScenario(item: item)
+                          : null,
                       onSearch: () {
                         context.push(_searchLocationForDetails(item));
                       },
@@ -446,6 +461,32 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         const SnackBar(content: Text('Could not update Visit history')),
       );
     }
+  }
+
+  Future<void> _onAddToScenario({required DiscoverItemEntity item}) async {
+    final result = await launchScenarioObjectIntake(
+      context: context,
+      ref: ref,
+      items: <DiscoverItemEntity>[item],
+      sourceSurface: ScenarioObjectIntakeSurface.details,
+      sourceScreen: 'discover_details',
+      sourceAction: 'add_to_scenario',
+      originRoute: '${RouteNames.discoverDetails}/${item.id}',
+    );
+    if (result == null || !mounted) return;
+    if (result.openScenario) {
+      final uri = Uri(
+        path: '${RouteNames.createObject}/scenario',
+        queryParameters: <String, String>{
+          'scenarioDraftId': result.targetDraftId,
+        },
+      );
+      await context.push(uri.toString());
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${result.itemCount} item to Scenario')),
+    );
   }
 
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
@@ -899,7 +940,7 @@ class _DetailsActionHub extends StatelessWidget {
     required this.onFavoriteTap,
     required this.onMap,
     required this.onRouteMap,
-    required this.onScenario,
+    required this.onAddToScenario,
     required this.onSearch,
     required this.onCreateSimilar,
     required this.onCreateRoute,
@@ -913,7 +954,7 @@ class _DetailsActionHub extends StatelessWidget {
   final Future<void> Function() onFavoriteTap;
   final VoidCallback onMap;
   final VoidCallback onRouteMap;
-  final VoidCallback onScenario;
+  final VoidCallback? onAddToScenario;
   final VoidCallback onSearch;
   final VoidCallback onCreateSimilar;
   final VoidCallback onCreateRoute;
@@ -1008,12 +1049,13 @@ class _DetailsActionHub extends StatelessWidget {
                   subtitle: 'Open nearby context',
                   onTap: onMap,
                 ),
-                _DetailsActionTile(
-                  icon: Icons.auto_awesome,
-                  title: 'Build route',
-                  subtitle: 'Seed Scenario Builder',
-                  onTap: onScenario,
-                ),
+                if (onAddToScenario != null)
+                  _DetailsActionTile(
+                    icon: Icons.playlist_add,
+                    title: 'Add to Scenario',
+                    subtitle: 'Add this stop to a personal plan',
+                    onTap: onAddToScenario!,
+                  ),
                 _DetailsActionTile(
                   icon: Icons.search,
                   title: 'Find similar',
@@ -1739,7 +1781,7 @@ Map<String, String> _routeSeedForDetails(
 }) {
   final _DetailsRoutePlan plan = _routePlanForDetails(item);
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': plan.mood,
     'duration': plan.durationMinutes.toString(),
     'free': plan.freeOnly ? '1' : '0',
@@ -1779,13 +1821,6 @@ String _searchLocationForDetails(DiscoverItemEntity item) {
   ).toString();
 }
 
-String _scenarioLocationForDetails(DiscoverItemEntity item) {
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: _routeSeedForDetails(item, includeMode: false),
-  ).toString();
-}
-
 String _scenarioMapLocationForDetails(DiscoverItemEntity item) {
   return Uri(
     path: RouteNames.discoverMap,
@@ -1820,14 +1855,14 @@ String _createRouteLocationForDetails(DiscoverItemEntity item) {
     path: RouteNames.create,
     queryParameters: <String, String>{
       ..._routeSeedForDetails(item, includeMode: false),
-      'source': 'scenario',
-      'type': 'event',
+      'source': 'details_route_seed',
+      'type': 'route',
       'title': '${item.title} route',
       'subtitle':
           '${plan.stepCategories.length} stops · '
           '${plan.durationMinutes} min · from details',
       'q': plan.prompt,
-      'category': 'scenario',
+      'category': 'route',
       'city': item.city,
       'venue': item.venueName,
       'address': item.addressLine,

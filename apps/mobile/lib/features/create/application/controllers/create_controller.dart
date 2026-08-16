@@ -3,11 +3,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/event_draft_data.dart';
+import '../../domain/entities/event_admission.dart';
+import '../../domain/entities/event_availability_projection.dart';
+import '../../domain/entities/event_classification.dart';
+import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_validation_issue.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
@@ -23,6 +28,8 @@ import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/entities/scenario_generation_proposal.dart';
 import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/entities/scenario_logistics_draft.dart';
+import '../../domain/entities/scenario_transit_mutation.dart';
+import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/entities/scenario_validation_issue.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
 import '../../domain/repositories/create_template_repository.dart';
@@ -31,6 +38,7 @@ import '../../domain/usecases/check_place_duplicates_usecase.dart';
 import '../../domain/usecases/evaluate_scenario_readiness_usecase.dart';
 import '../../domain/usecases/generate_scenario_proposal_usecase.dart';
 import '../../domain/usecases/load_create_draft_usecase.dart';
+import '../../domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../domain/usecases/manage_create_template_usecase.dart';
 import '../../domain/usecases/publish_create_draft_usecase.dart';
 import '../../domain/usecases/save_create_draft_usecase.dart';
@@ -42,6 +50,9 @@ import '../../domain/usecases/build_route_publication_bundle_usecase.dart';
 import '../create_runtime_defaults.dart';
 import '../create_taxonomy.dart';
 import '../event_create_coordinator.dart';
+import '../event_admission_section.dart';
+import '../event_classification_section.dart';
+import '../event_inventory_section.dart';
 import '../place_create_config.dart';
 import '../place_enrichment_coordinator.dart';
 import '../route_create_config.dart';
@@ -49,6 +60,7 @@ import '../route_create_coordinator.dart';
 import '../route_publication_coordinator.dart';
 import '../scenario_create_coordinator.dart';
 import '../scenario_generation_coordinator.dart';
+import '../scenario_transit_telemetry.dart';
 import '../get_category_criteria_usecase.dart';
 import '../state/create_state.dart';
 import '../state/route_create_state.dart';
@@ -56,10 +68,14 @@ import '../state/route_create_state.dart';
 class CreateController extends ChangeNotifier {
   CreateController({
     required LoadCreateDraftUseCase loadCreateDraftUseCase,
+    LoadCreateDraftByIdUseCase? loadCreateDraftByIdUseCase,
     required SaveCreateDraftUseCase saveCreateDraftUseCase,
     required PublishCreateDraftUseCase publishCreateDraftUseCase,
     required AnalyticsService analyticsService,
     required EventCreateCoordinator eventCreateCoordinator,
+    bool eventClassificationEnabled = true,
+    bool eventAdmissionConfigurationEnabled = false,
+    bool eventMockAvailabilityEnabled = false,
     CreateTemplateRepository? createTemplateRepository,
     ManageCreateTemplateUseCase? manageCreateTemplate,
     RoutePublicationCoordinator? routePublicationCoordinator,
@@ -83,10 +99,15 @@ class CreateController extends ChangeNotifier {
     CheckPlaceDuplicatesUseCase checkPlaceDuplicates =
         const CheckPlaceDuplicatesUseCase(),
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
+       _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
        _publishCreateDraftUseCase = publishCreateDraftUseCase,
        _analyticsService = analyticsService,
+       _scenarioTransitTelemetry = ScenarioTransitTelemetry(analyticsService),
        _eventCreateCoordinator = eventCreateCoordinator,
+       _eventClassificationEnabled = eventClassificationEnabled,
+       _eventAdmissionConfigurationEnabled = eventAdmissionConfigurationEnabled,
+       _eventMockAvailabilityEnabled = eventMockAvailabilityEnabled,
        _createTemplateRepository = createTemplateRepository,
        _manageCreateTemplate = manageCreateTemplate,
        _routePublicationCoordinator = routePublicationCoordinator,
@@ -101,10 +122,15 @@ class CreateController extends ChangeNotifier {
        _checkPlaceDuplicates = checkPlaceDuplicates;
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
+  final LoadCreateDraftByIdUseCase? _loadCreateDraftByIdUseCase;
   final SaveCreateDraftUseCase _saveCreateDraftUseCase;
   final PublishCreateDraftUseCase _publishCreateDraftUseCase;
   final AnalyticsService _analyticsService;
+  final ScenarioTransitTelemetry _scenarioTransitTelemetry;
   final EventCreateCoordinator _eventCreateCoordinator;
+  final bool _eventClassificationEnabled;
+  final bool _eventAdmissionConfigurationEnabled;
+  final bool _eventMockAvailabilityEnabled;
   final CreateTemplateRepository? _createTemplateRepository;
   final ManageCreateTemplateUseCase? _manageCreateTemplate;
   final RoutePublicationCoordinator? _routePublicationCoordinator;
@@ -139,13 +165,48 @@ class CreateController extends ChangeNotifier {
   bool get canManageRoute => _capabilities.contains('manage.route');
   bool get canArchiveRoute => _capabilities.contains('archive.route');
   RouteCreateState? get routeCreateState => _routeCoordinator?.state;
+  bool get eventClassificationEnabled => _eventClassificationEnabled;
+  EventClassificationSectionState get eventClassificationState =>
+      _eventCreateCoordinator.classificationState(
+        _state.draft,
+        enabled: _eventClassificationEnabled,
+      );
+  bool get eventAdmissionConfigurationEnabled =>
+      _eventAdmissionConfigurationEnabled;
+  bool get eventMockAvailabilityEnabled => _eventMockAvailabilityEnabled;
+  EventAdmissionSectionState get eventAdmissionState =>
+      _eventCreateCoordinator.admissionState(
+        _state.draft,
+        enabled: _eventAdmissionConfigurationEnabled,
+        selectedPreset: _selectedAdmissionPreset,
+        presetPreview: _admissionPresetPreview,
+        presetIssues: _admissionPresetIssues,
+      );
+  EventInventorySectionState get eventInventoryState =>
+      _eventCreateCoordinator.inventoryState(
+        _state.draft,
+        enabled: _eventAdmissionConfigurationEnabled,
+        mockPreviewEnabled: _eventMockAvailabilityEnabled,
+        availabilityPreview: _eventAvailabilityPreview,
+        refreshingPreview: _refreshingEventAvailability,
+      );
 
   String? _loadedUserId;
   Set<String> _capabilities = const <String>{};
+  PublisherRef? _activePublisherRef;
   Timer? _autosaveTimer;
   int _localIdCounter = 0;
   RouteCreateCoordinator? _routeCoordinator;
   List<CreateTemplateEntity> _eventTemplates = const <CreateTemplateEntity>[];
+  EventAdmissionPreset? _selectedAdmissionPreset;
+  EventAdmissionDraft? _admissionPresetPreview;
+  int? _admissionPresetRevision;
+  List<EventValidationIssue> _admissionPresetIssues =
+      const <EventValidationIssue>[];
+  EventAvailabilityProjection _eventAvailabilityPreview =
+      EventAvailabilityProjection.unknown;
+  bool _refreshingEventAvailability = false;
+  int _eventAvailabilityRequestSerial = 0;
 
   List<CreateTemplateEntity> get eventTemplates =>
       List<CreateTemplateEntity>.unmodifiable(_eventTemplates);
@@ -158,13 +219,19 @@ class CreateController extends ChangeNotifier {
     required String organizerEmail,
     required String organizerName,
     List<String> capabilities = const <String>[],
+    PublisherRef? activePublisherRef,
   }) async {
+    final PublisherRef resolvedPublisher = activePublisherRef?.isValid == true
+        ? activePublisherRef!
+        : PublisherRef(type: PublisherType.user, id: userId);
     if (_loadedUserId == userId && _state.isLoaded) {
       _capabilities = capabilities.toSet();
+      _activePublisherRef = resolvedPublisher;
       return;
     }
     _loadedUserId = userId;
     _capabilities = capabilities.toSet();
+    _activePublisherRef = resolvedPublisher;
 
     _setState(
       _state.copyWith(
@@ -175,6 +242,7 @@ class CreateController extends ChangeNotifier {
     );
 
     final CreateDraftEntity? saved = await _loadCreateDraftUseCase(userId);
+    final bool createsFreshDraft = saved == null;
     CreateDraftEntity draft =
         saved ??
         CreateDraftEntity.defaults(
@@ -187,6 +255,11 @@ class CreateController extends ChangeNotifier {
           city: _runtimeDefaults.city,
           currency: _runtimeDefaults.currency,
         );
+    if (createsFreshDraft && draft.eventData != null) {
+      draft = draft.copyWith(
+        eventData: draft.eventData!.copyWith(publisherRef: resolvedPublisher),
+      );
+    }
     if (draft.objectType == CreateObjectType.place && draft.placeData == null) {
       draft = draft.copyWith(placeData: _placeDefaults(userId));
     }
@@ -331,6 +404,7 @@ class CreateController extends ChangeNotifier {
         country: _runtimeDefaults.country,
         city: _runtimeDefaults.city,
         currency: _runtimeDefaults.currency,
+        publisherRef: _activePublisherRef,
       );
       draft = _eventCreateCoordinator.apply(
         draft,
@@ -787,7 +861,6 @@ class CreateController extends ChangeNotifier {
   void updateScenarioTransport({
     required ScenarioTravelMode primaryTravelMode,
     required Set<ScenarioTravelMode> allowedTravelModes,
-    ScenarioVehicleProfileDraft? vehicleProfile,
   }) {
     final ScenarioCreateCoordinator? coordinator = _scenarioCreateCoordinator;
     final ScenarioDraftData? current = _state.draft.scenarioData;
@@ -797,7 +870,6 @@ class CreateController extends ChangeNotifier {
         current,
         primaryTravelMode: primaryTravelMode,
         allowedTravelModes: allowedTravelModes,
-        vehicleProfile: vehicleProfile,
       ),
     );
   }
@@ -824,6 +896,37 @@ class CreateController extends ChangeNotifier {
         plannedArrival: plannedArrival,
       ),
     );
+  }
+
+  ScenarioTransitMutationResult? applyScenarioTransitSelection({
+    required int expectedRevision,
+    required ScenarioTransitServiceOption option,
+    String? replaceItemId,
+  }) {
+    final coordinator = _scenarioCreateCoordinator;
+    final current = _state.draft.scenarioData;
+    if (coordinator == null || current == null) return null;
+    final result = coordinator.applyTransitSelection(
+      current,
+      expectedRevision: expectedRevision,
+      option: option,
+      replaceItemId: replaceItemId,
+    );
+    _scenarioTransitTelemetry.trackMutation(
+      replacing: replaceItemId != null,
+      mutation: result,
+      freshness: option.manifest.freshness,
+    );
+    if (result.accepted) {
+      _applyScenario(result.draft);
+    } else {
+      _setState(
+        _state.copyWith(
+          message: _transitMutationFailureMessage(result.failure),
+        ),
+      );
+    }
+    return result;
   }
 
   void upsertScenarioManualLeg({
@@ -1024,6 +1127,67 @@ class CreateController extends ChangeNotifier {
     return true;
   }
 
+  Future<bool> openScenarioDraftById({
+    required String userId,
+    required String draftId,
+  }) async {
+    final loadById = _loadCreateDraftByIdUseCase;
+    if (loadById == null || userId != _state.userId || draftId.trim().isEmpty) {
+      return false;
+    }
+    _autosaveTimer?.cancel();
+    _setState(
+      _state.copyWith(
+        status: CreateStatus.loading,
+        clearMessage: true,
+        clearValidationErrors: true,
+      ),
+    );
+    try {
+      final draft = await loadById(ownerId: userId, draftId: draftId);
+      if (draft == null ||
+          draft.id != draftId ||
+          draft.organizerId != userId ||
+          draft.objectType != CreateObjectType.scenario ||
+          draft.scenarioData == null) {
+        _setState(
+          _state.copyWith(
+            status: CreateStatus.ready,
+            message: 'Scenario is no longer available.',
+          ),
+        );
+        return false;
+      }
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.ready,
+          draft: draft,
+          saveStatus: CreateSaveStatus.saved,
+          scenarioStep: 1,
+          clearScenarioUndoStack: true,
+          clearScenarioRedoStack: true,
+          clearScenarioCatalogCandidates: true,
+          scenarioGenerationPrompt: '',
+          scenarioGenerationLoading: false,
+          clearScenarioGenerationPreview: true,
+          clearScenarioGenerationError: true,
+          clearValidationErrors: true,
+          clearMessage: true,
+          clearPublishedDraft: true,
+        ),
+      );
+      return true;
+    } on Object {
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.ready,
+          message: 'Could not open this Scenario.',
+        ),
+      );
+      return false;
+    }
+  }
+
   void updateTitle(String value) {
     _updateDraft(
       _state.draft.copyWith(
@@ -1146,6 +1310,491 @@ class CreateController extends ChangeNotifier {
         updatedAtUtc: DateTime.now().toUtc(),
       ),
     );
+  }
+
+  EventArchetypeChangeImpact eventArchetypeImpact(EventArchetype value) {
+    return _eventCreateCoordinator.archetypeImpact(
+      _state.draft.eventData?.classification,
+      value,
+    );
+  }
+
+  void selectEventArchetype(EventArchetype value) {
+    _selectEventArchetype(value, source: 'manual');
+  }
+
+  void _selectEventArchetype(
+    EventArchetype value, {
+    required String source,
+    String? suggestionReason,
+    String? suggestionConfidence,
+  }) {
+    if (!_eventClassificationEnabled) return;
+    final EventArchetypeChangeImpact impact = eventArchetypeImpact(value);
+    _updateEvent((EventDraftData event) {
+      final EventClassificationDraft current =
+          event.classification ?? EventClassificationDraft();
+      return event.copyWith(
+        schemaVersion:
+            event.schemaVersion < EventDraftData.classificationSchemaVersion
+            ? EventDraftData.classificationSchemaVersion
+            : event.schemaVersion,
+        classification: current.copyWith(
+          archetype: value,
+          clearOtherReason: impact.clearsOtherReason,
+        ),
+      );
+    });
+    _analyticsService.track(
+      'event_classification_archetype_selected',
+      params: <String, Object?>{
+        'archetype': value.wireName,
+        'source': source,
+        if (suggestionReason != null) 'suggestion_reason': suggestionReason,
+        if (suggestionConfidence != null)
+          'suggestion_confidence': suggestionConfidence,
+      },
+    );
+  }
+
+  void selectEventPrimaryParticipation(ParticipationMode value) {
+    if (!_eventClassificationEnabled) return;
+    _updateEvent((EventDraftData event) {
+      final EventClassificationDraft current =
+          event.classification ?? EventClassificationDraft();
+      final Set<ParticipationMode> additional = <ParticipationMode>{
+        ...current.additionalParticipationModes,
+      }..remove(value);
+      return event.copyWith(
+        schemaVersion:
+            event.schemaVersion < EventDraftData.classificationSchemaVersion
+            ? EventDraftData.classificationSchemaVersion
+            : event.schemaVersion,
+        classification: current.copyWith(
+          primaryParticipationMode: value,
+          additionalParticipationModes: additional,
+        ),
+      );
+    });
+    _analyticsService.track(
+      'event_classification_primary_participation_selected',
+      params: <String, Object?>{'mode': value.wireName},
+    );
+  }
+
+  void setEventAdditionalParticipation(ParticipationMode value, bool enabled) {
+    if (!_eventClassificationEnabled) return;
+    final EventClassificationDraft current =
+        _state.draft.eventData?.classification ?? EventClassificationDraft();
+    if (enabled && value == current.primaryParticipationMode) return;
+    final Set<ParticipationMode> additional = <ParticipationMode>{
+      ...current.additionalParticipationModes,
+    };
+    if (enabled && additional.length >= 3 && !additional.contains(value)) {
+      _setState(
+        _state.copyWith(
+          message: 'Можно выбрать не более трёх дополнительных ролей',
+        ),
+      );
+      return;
+    }
+    enabled ? additional.add(value) : additional.remove(value);
+    _updateEvent(
+      (EventDraftData event) => event.copyWith(
+        schemaVersion:
+            event.schemaVersion < EventDraftData.classificationSchemaVersion
+            ? EventDraftData.classificationSchemaVersion
+            : event.schemaVersion,
+        classification: current.copyWith(
+          additionalParticipationModes: additional,
+        ),
+      ),
+    );
+    _analyticsService.track(
+      'event_classification_additional_participation_changed',
+      params: <String, Object?>{
+        'mode': value.wireName,
+        'selected': enabled,
+        'count': additional.length,
+      },
+    );
+  }
+
+  void updateEventArchetypeOtherReason(String value) {
+    if (!_eventClassificationEnabled) return;
+    final EventClassificationDraft? current =
+        _state.draft.eventData?.classification;
+    if (current?.archetype != EventArchetype.other) return;
+    _updateEvent(
+      (EventDraftData event) => event.copyWith(
+        schemaVersion:
+            event.schemaVersion < EventDraftData.classificationSchemaVersion
+            ? EventDraftData.classificationSchemaVersion
+            : event.schemaVersion,
+        classification: current!.copyWith(
+          otherReason: value.trim(),
+          clearOtherReason: value.trim().isEmpty,
+        ),
+      ),
+    );
+  }
+
+  bool confirmEventClassificationSuggestion({int? expectedRevision}) {
+    final int currentRevision = _state.draft.eventData?.revision ?? -1;
+    if (expectedRevision != null && expectedRevision != currentRevision) {
+      _setState(
+        _state.copyWith(
+          message: 'Classification changed. Review the current draft.',
+        ),
+      );
+      return false;
+    }
+    final suggestion = eventClassificationState.suggestion;
+    if (suggestion == null) return false;
+    _selectEventArchetype(
+      suggestion.archetype,
+      source: 'suggestion',
+      suggestionReason: suggestion.reasonCode,
+      suggestionConfidence: suggestion.confidence.name,
+    );
+    return true;
+  }
+
+  void clearEventClassification() {
+    if (!_eventClassificationEnabled) return;
+    _updateEvent(
+      (EventDraftData event) => event.copyWith(
+        schemaVersion:
+            event.schemaVersion < EventDraftData.classificationSchemaVersion
+            ? EventDraftData.classificationSchemaVersion
+            : event.schemaVersion,
+        clearClassification: true,
+      ),
+    );
+    _analyticsService.track(
+      'event_classification_cleared',
+      params: const <String, Object?>{'status': 'cleared'},
+    );
+  }
+
+  void previewEventAdmissionPreset(
+    EventAdmissionPreset preset, {
+    AdmissionMode? admissionMode,
+    EventRegistrationMode? registrationMode,
+    ConfirmationMode? confirmationMode,
+  }) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final result = _eventCreateCoordinator.normalizeAdmissionPreset(
+      preset,
+      admissionMode: admissionMode,
+      registrationMode: registrationMode,
+      confirmationMode: confirmationMode,
+    );
+    _selectedAdmissionPreset = preset;
+    _admissionPresetPreview = result.admission;
+    _admissionPresetIssues = result.issues;
+    _admissionPresetRevision = _state.draft.eventData?.revision;
+    notifyListeners();
+  }
+
+  bool applyEventAdmissionPreset({int? expectedRevision}) {
+    if (!_eventAdmissionConfigurationEnabled) return false;
+    final EventDraftData? event = _state.draft.eventData;
+    final EventAdmissionDraft? preview = _admissionPresetPreview;
+    final int? expected = expectedRevision ?? _admissionPresetRevision;
+    if (event == null ||
+        preview == null ||
+        (expected != null && expected != event.revision)) {
+      _setState(
+        _state.copyWith(
+          message: 'Admission configuration changed. Preview the preset again.',
+        ),
+      );
+      return false;
+    }
+    if (!_applyEventAdmission(preview)) return false;
+    _admissionPresetPreview = null;
+    _admissionPresetIssues = const <EventValidationIssue>[];
+    _admissionPresetRevision = null;
+    return true;
+  }
+
+  bool confirmEventAdmissionLegacySuggestion({int? expectedRevision}) {
+    if (!_eventAdmissionConfigurationEnabled) return false;
+    final EventDraftData? event = _state.draft.eventData;
+    final suggestion = eventAdmissionState.legacySuggestion;
+    if (event == null ||
+        suggestion == null ||
+        !suggestion.canConfirm ||
+        (expectedRevision != null && expectedRevision != event.revision)) {
+      _setState(
+        _state.copyWith(
+          message: 'Legacy admission suggestion must be reviewed again.',
+        ),
+      );
+      return false;
+    }
+    return _applyEventAdmission(suggestion.admission);
+  }
+
+  void updateEventAdmissionAxes({
+    AdmissionMode? admissionMode,
+    EventRegistrationMode? registrationMode,
+    ConfirmationMode? confirmationMode,
+  }) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventAdmissionDraft current =
+        _state.draft.eventData?.admission ??
+        const EventAdmissionDraft(
+          admissionMode: null,
+          registrationMode: null,
+          confirmationMode: null,
+        );
+    _clearAdmissionPresetSelection();
+    _applyEventAdmission(
+      current.copyWith(
+        admissionMode: admissionMode,
+        registrationMode: registrationMode,
+        confirmationMode: confirmationMode,
+      ),
+    );
+  }
+
+  void updateEventEligibilityRules(List<EligibilityRule> rules) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        eligibilityRules: List<EligibilityRule>.unmodifiable(rules),
+      ),
+    );
+  }
+
+  String? addEventEligibilityRule(EligibilityRuleKind kind) {
+    if (!_eventAdmissionConfigurationEnabled) return null;
+    if (!_eventAccessWritable('admission')) return null;
+    final EventAdmissionDraft current =
+        _state.draft.eventData?.admission ??
+        const EventAdmissionDraft(
+          admissionMode: null,
+          registrationMode: null,
+          confirmationMode: null,
+        );
+    final String id = _localId();
+    updateEventEligibilityRules(<EligibilityRule>[
+      ...current.eligibilityRules,
+      EligibilityRule(id: id, kind: kind),
+    ]);
+    return id;
+  }
+
+  void updateEventEligibilityRule(EligibilityRule rule) {
+    final EventAdmissionDraft? current = _state.draft.eventData?.admission;
+    if (current == null ||
+        !current.eligibilityRules.any((item) => item.id == rule.id)) {
+      return;
+    }
+    updateEventEligibilityRules(
+      current.eligibilityRules
+          .map((item) => item.id == rule.id ? rule : item)
+          .toList(growable: false),
+    );
+  }
+
+  void removeEventEligibilityRule(String ruleId) {
+    final EventAdmissionDraft? current = _state.draft.eventData?.admission;
+    if (current == null ||
+        !current.eligibilityRules.any((item) => item.id == ruleId)) {
+      return;
+    }
+    updateEventEligibilityRules(
+      current.eligibilityRules
+          .where((item) => item.id != ruleId)
+          .toList(growable: false),
+    );
+  }
+
+  void updateEventGuestPolicy(GuestPolicy? policy) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        guestPolicy: policy,
+        clearGuestPolicy: policy == null,
+      ),
+    );
+  }
+
+  void updateEventOnsiteAdmissionPolicy(OnsiteAdmissionPolicy? policy) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        onsiteAdmissionPolicy: policy,
+        clearOnsiteAdmissionPolicy: policy == null,
+      ),
+    );
+  }
+
+  void updateEventInterestPolicy(InterestPolicy? policy) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        interestPolicy: policy,
+        clearInterestPolicy: policy == null,
+      ),
+    );
+  }
+
+  void updateEventAccessWindows({
+    EventAccessWindow? registrationWindow,
+    bool clearRegistrationWindow = false,
+    EventAccessWindow? applicationWindow,
+    bool clearApplicationWindow = false,
+  }) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        registrationWindow: registrationWindow,
+        clearRegistrationWindow: clearRegistrationWindow,
+        applicationWindow: applicationWindow,
+        clearApplicationWindow: clearApplicationWindow,
+      ),
+    );
+  }
+
+  void updateEventWaitlistConfiguration(WaitlistConfiguration? policy) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        waitlistPolicy: policy,
+        clearWaitlistPolicy: policy == null,
+      ),
+    );
+  }
+
+  void selectEventInventoryAuthority(InventoryAuthority authority) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventInventoryConfiguration current =
+        _state.draft.eventData?.inventory ??
+        const EventInventoryConfiguration(authority: InventoryAuthority.none);
+    _applyEventInventory(
+      authority == InventoryAuthority.none
+          ? const EventInventoryConfiguration(
+              authority: InventoryAuthority.none,
+            )
+          : current.copyWith(authority: authority),
+    );
+  }
+
+  void selectEventInventoryShapes({
+    required InventoryShape primaryShape,
+    Set<InventoryShape> additionalShapes = const <InventoryShape>{},
+  }) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventInventoryConfiguration current =
+        _state.draft.eventData?.inventory ??
+        const EventInventoryConfiguration(authority: InventoryAuthority.none);
+    final Set<InventoryShape> normalized = <InventoryShape>{...additionalShapes}
+      ..remove(primaryShape);
+    _applyEventInventory(
+      current.copyWith(
+        primaryShape: primaryShape,
+        additionalShapes: normalized,
+      ),
+    );
+  }
+
+  String? addEventInventoryPool({
+    required String label,
+    required InventoryShape shape,
+    required InventoryChannel channel,
+    required EventCapacityMode capacityMode,
+    int? capacity,
+    List<String> roleIds = const <String>[],
+    String? zoneRef,
+  }) {
+    if (!_eventAdmissionConfigurationEnabled) return null;
+    if (!_eventAccessWritable('inventory')) return null;
+    final EventInventoryConfiguration current =
+        _state.draft.eventData?.inventory ??
+        const EventInventoryConfiguration(authority: InventoryAuthority.none);
+    final String id = _localId();
+    final EventInventoryPoolDraft pool = EventInventoryPoolDraft(
+      id: id,
+      label: label.trim(),
+      shape: shape,
+      channel: channel,
+      capacityMode: capacityMode,
+      capacity: capacityMode == EventCapacityMode.known ? capacity : null,
+      roleIds: List<String>.unmodifiable(roleIds),
+      zoneRef: zoneRef?.trim(),
+    );
+    _applyEventInventory(
+      current.copyWith(
+        pools: <EventInventoryPoolDraft>[...current.pools, pool],
+      ),
+    );
+    return id;
+  }
+
+  void updateEventInventoryPool(EventInventoryPoolDraft pool) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventInventoryConfiguration? current =
+        _state.draft.eventData?.inventory;
+    if (current == null || !current.pools.any((item) => item.id == pool.id)) {
+      return;
+    }
+    _applyEventInventory(
+      current.copyWith(
+        pools: current.pools
+            .map((item) => item.id == pool.id ? pool : item)
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  void removeEventInventoryPool(String poolId) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventInventoryConfiguration? current =
+        _state.draft.eventData?.inventory;
+    if (current == null || !current.pools.any((item) => item.id == poolId)) {
+      return;
+    }
+    _applyEventInventory(
+      current.copyWith(
+        pools: current.pools
+            .where((item) => item.id != poolId)
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  void reorderEventInventoryPool(int oldIndex, int newIndex) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventInventoryConfiguration? current =
+        _state.draft.eventData?.inventory;
+    if (current == null ||
+        oldIndex < 0 ||
+        oldIndex >= current.pools.length ||
+        newIndex < 0 ||
+        newIndex >= current.pools.length ||
+        oldIndex == newIndex) {
+      return;
+    }
+    final List<EventInventoryPoolDraft> pools = <EventInventoryPoolDraft>[
+      ...current.pools,
+    ];
+    final EventInventoryPoolDraft moved = pools.removeAt(oldIndex);
+    pools.insert(newIndex, moved);
+    _applyEventInventory(current.copyWith(pools: pools));
+  }
+
+  Future<void> refreshEventMockAvailabilityPreview() async {
+    if (!_eventAdmissionConfigurationEnabled ||
+        !_eventMockAvailabilityEnabled) {
+      return;
+    }
+    final int request = ++_eventAvailabilityRequestSerial;
+    _refreshingEventAvailability = true;
+    notifyListeners();
+    final EventAvailabilityProjection projection = await _eventCreateCoordinator
+        .loadAvailabilityPreview(_state.draft);
+    if (request != _eventAvailabilityRequestSerial) return;
+    _eventAvailabilityPreview = projection;
+    _refreshingEventAvailability = false;
+    notifyListeners();
   }
 
   void updateEventFormat(EventFormat value) {
@@ -1336,8 +1985,15 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateEventCapacity(EventCapacityMode mode, {int? capacity}) {
+    if (_eventAdmissionConfigurationEnabled &&
+        !_eventAccessWritable('inventory')) {
+      return;
+    }
     _updateEvent(
       (EventDraftData event) => event.copyWith(
+        schemaVersion: _eventAdmissionConfigurationEnabled
+            ? EventDraftData.accessSchemaVersion
+            : event.schemaVersion,
         capacityMode: mode,
         capacity: mode == EventCapacityMode.known ? capacity : null,
         clearCapacity: mode != EventCapacityMode.known,
@@ -1358,6 +2014,18 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void updateEventExternalRegistrationUrl(String value) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    if (!_eventAccessWritable('admission')) return;
+    _updateEvent(
+      (event) => event.copyWith(
+        schemaVersion: EventDraftData.accessSchemaVersion,
+        externalBookingUrl: value.trim(),
+        clearExternalBookingUrl: value.trim().isEmpty,
+      ),
+    );
+  }
+
   void updateEventVisibility(EventVisibility value) {
     _updateEvent((EventDraftData event) => event.copyWith(visibility: value));
   }
@@ -1365,8 +2033,10 @@ class CreateController extends ChangeNotifier {
   Future<bool> goToEventStep(int step) async {
     final int nextStep = step.clamp(0, 4);
     if (nextStep > _state.eventStep) {
-      final List<EventValidationIssue> issues = _eventCreateCoordinator
-          .validate(_state.draft, throughStep: nextStep - 1);
+      final List<EventValidationIssue> issues = _eventIssues(
+        draft: _state.draft,
+        throughStep: nextStep - 1,
+      );
       final List<EventValidationIssue> blocking = issues
           .where((EventValidationIssue issue) => issue.isBlocking)
           .toList(growable: false);
@@ -2022,7 +2692,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateBasePrice(String value) {
-    final double? parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final double? parsed = parseLocaleDecimalInput(value);
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,
@@ -2762,7 +3432,7 @@ class CreateController extends ChangeNotifier {
   Map<String, String> _validate(CreateDraftEntity draft) {
     if (draft.objectType == CreateObjectType.event) {
       return <String, String>{
-        for (final EventValidationIssue issue in _eventIssues(draft))
+        for (final EventValidationIssue issue in _eventIssues(draft: draft))
           if (issue.isBlocking) issue.fieldId: issue.message,
       };
     }
@@ -2906,10 +3576,88 @@ class CreateController extends ChangeNotifier {
     city: _runtimeDefaults.city,
     timezoneId: _runtimeDefaults.timezone,
     currencyCode: _runtimeDefaults.currency,
+    publisherRef:
+        _activePublisherRef ??
+        PublisherRef(type: PublisherType.user, id: _state.draft.organizerId),
   );
 
-  List<EventValidationIssue> _eventIssues([CreateDraftEntity? draft]) =>
-      _eventCreateCoordinator.validate(draft ?? _state.draft);
+  List<EventValidationIssue> _eventIssues({
+    CreateDraftEntity? draft,
+    int? throughStep,
+  }) => _eventCreateCoordinator.validate(
+    draft ?? _state.draft,
+    throughStep: throughStep,
+    includeClassification: _eventClassificationEnabled,
+    includeAccessConfiguration: _eventAdmissionConfigurationEnabled,
+  );
+
+  bool _applyEventAdmission(EventAdmissionDraft admission) {
+    if (!_eventAccessWritable('admission')) return false;
+    _updateEvent(
+      (EventDraftData event) => event.copyWith(
+        schemaVersion: event.schemaVersion < EventDraftData.accessSchemaVersion
+            ? EventDraftData.accessSchemaVersion
+            : event.schemaVersion,
+        admission: admission,
+      ),
+    );
+    return true;
+  }
+
+  void _updateEventAdmissionPolicy(
+    EventAdmissionDraft Function(EventAdmissionDraft current) transform,
+  ) {
+    if (!_eventAdmissionConfigurationEnabled) return;
+    final EventAdmissionDraft current =
+        _state.draft.eventData?.admission ??
+        const EventAdmissionDraft(
+          admissionMode: null,
+          registrationMode: null,
+          confirmationMode: null,
+        );
+    _clearAdmissionPresetSelection();
+    _applyEventAdmission(transform(current));
+  }
+
+  void _clearAdmissionPresetSelection() {
+    _selectedAdmissionPreset = null;
+    _admissionPresetPreview = null;
+    _admissionPresetIssues = const <EventValidationIssue>[];
+    _admissionPresetRevision = null;
+  }
+
+  void _applyEventInventory(EventInventoryConfiguration inventory) {
+    if (!_eventAccessWritable('inventory')) return;
+    _eventAvailabilityRequestSerial++;
+    _eventAvailabilityPreview = EventAvailabilityProjection.unknown;
+    _refreshingEventAvailability = false;
+    _updateEvent(
+      (EventDraftData event) => event.copyWith(
+        schemaVersion: event.schemaVersion < EventDraftData.accessSchemaVersion
+            ? EventDraftData.accessSchemaVersion
+            : event.schemaVersion,
+        inventory: inventory,
+      ),
+    );
+  }
+
+  bool _eventAccessWritable(String fieldId) {
+    final EventDraftData? event = _state.draft.eventData;
+    final bool writable =
+        event != null &&
+        event.schemaVersion <= EventDraftData.currentSchemaVersion &&
+        !event.unsupportedFieldIds.contains('eventData') &&
+        !event.unsupportedFieldIds.contains(fieldId);
+    if (!writable) {
+      _setState(
+        _state.copyWith(
+          message:
+              'This Event uses a newer access contract and cannot be changed here.',
+        ),
+      );
+    }
+    return writable;
+  }
 
   void _updateEvent(
     EventDraftData Function(EventDraftData event) transform, {
@@ -2999,6 +3747,20 @@ class CreateController extends ChangeNotifier {
     _autosaveTimer?.cancel();
     _autosaveTimer = Timer(const Duration(milliseconds: 700), saveDraft);
   }
+
+  String _transitMutationFailureMessage(
+    ScenarioTransitMutationFailure? failure,
+  ) => switch (failure) {
+    ScenarioTransitMutationFailure.revisionConflict =>
+      'Scenario changed. Review the selected service and try again.',
+    ScenarioTransitMutationFailure.invalidSelection =>
+      'The selected service cannot be applied safely.',
+    ScenarioTransitMutationFailure.missingTarget =>
+      'The planned transport item no longer exists.',
+    ScenarioTransitMutationFailure.targetNotOfficial =>
+      'Only an official schedule item can be replaced here.',
+    null => 'The selected service was not applied.',
+  };
 
   List<FindPeopleValidationIssue> _findPeopleIssues([
     CreateDraftEntity? draft,
@@ -3115,7 +3877,7 @@ class CreateController extends ChangeNotifier {
   }
 
   static double? _parseDouble(String value) {
-    return double.tryParse(value.trim().replaceAll(',', '.'));
+    return parseLocaleDecimalInput(value);
   }
 
   String _localId() =>

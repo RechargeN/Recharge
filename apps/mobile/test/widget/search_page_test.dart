@@ -3,7 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/app/application/scenario_object_intake_config.dart';
+import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/features/auth/application/auth_providers.dart';
+import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
+import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
+import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
+import 'package:recharge/features/auth/domain/entities/auth_user_entity.dart';
+import 'package:recharge/features/auth/domain/repositories/auth_repository.dart';
+import 'package:recharge/features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.dart';
+import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
+import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
@@ -19,6 +31,94 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('search intake flag hides single and multi actions', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _SearchTestApp(
+        additionalOverrides: <Override>[
+          scenarioObjectIntakeConfigProvider.overrideWithValue(
+            const ScenarioObjectIntakeConfig(searchEnabled: false),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollPageUntilVisible(
+      find.text('Утренняя йога'),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(find.byTooltip('Select for Scenario'), findsNothing);
+    expect(find.byTooltip('Add Утренняя йога to Scenario'), findsNothing);
+  });
+
+  fullPageTestWidgets('Scenario intake is unavailable while signed out', (
+    tester,
+  ) async {
+    final authController = _authenticatedController();
+    await tester.pumpWidget(
+      _SearchTestApp(
+        additionalOverrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Select for Scenario'), findsNothing);
+    expect(find.text('Войдите, чтобы продолжить'), findsNothing);
+  });
+
+  fullPageTestWidgets(
+    'results select for Scenario preserves tap order and cancels explicitly',
+    (tester) async {
+      final authController = _authenticatedController();
+      await authController.signIn(
+        email: 'user@example.test',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'scenario_selection',
+      );
+      await tester.pumpWidget(
+        _SearchTestApp(
+          additionalOverrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            scenarioObjectIntakeAvailabilityProvider(
+              'user-1',
+            ).overrideWith((ref) async => true),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollPageUntilVisible(
+        find.text('Утренняя йога'),
+        320,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.byTooltip('Add Утренняя йога to Scenario'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Select for Scenario'));
+      await tester.pump();
+      await tester.tap(find.text('Прогулка у озера'));
+      await tester.pump();
+      await tester.tap(find.text('Утренняя йога'));
+      await tester.pump();
+
+      expect(find.text('2 selected'), findsOneWidget);
+      expect(find.text('1'), findsWidgets);
+      expect(find.text('2'), findsWidgets);
+      expect(find.text('Прогулка у озера'), findsWidgets);
+      expect(find.text('Утренняя йога'), findsWidgets);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pump();
+      expect(find.text('Select for Scenario'), findsNothing);
+      expect(find.text('2 selected'), findsNothing);
+    },
+  );
+
   testWidgets('matches the compact white search landing visual contract', (
     tester,
   ) async {
@@ -402,7 +502,7 @@ void main() {
     expect(find.text('10'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario builder from saved conditions', (
+  fullPageTestWidgets('does not build Scenario from saved conditions', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -415,13 +515,7 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(
-      find.byTooltip('Build route from saved conditions'),
-    );
-    await tester.tap(find.byTooltip('Build route from saved conditions'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved conditions'), findsNothing);
   });
 
   fullPageTestWidgets('opens create from saved conditions', (tester) async {
@@ -520,7 +614,7 @@ class _SearchLandingTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => const SizedBox.shrink(),
             ),
           ],
@@ -534,6 +628,7 @@ class _SearchTestApp extends StatelessWidget {
   _SearchTestApp({
     this.initialLocation = RouteNames.search,
     DiscoverFeedController? controller,
+    this.additionalOverrides = const <Override>[],
   }) : _controller =
            controller ??
            DiscoverFeedController(
@@ -546,6 +641,7 @@ class _SearchTestApp extends StatelessWidget {
            );
 
   final String initialLocation;
+  final List<Override> additionalOverrides;
 
   final DiscoverFeedController _controller;
 
@@ -554,6 +650,7 @@ class _SearchTestApp extends StatelessWidget {
     return ProviderScope(
       overrides: <Override>[
         discoverFeedControllerProvider.overrideWith((ref) => _controller),
+        ...additionalOverrides,
       ],
       child: MaterialApp.router(
         routerConfig: GoRouter(
@@ -587,7 +684,7 @@ class _SearchTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Center(
                   child: Column(
@@ -640,6 +737,48 @@ class _SearchTestApp extends StatelessWidget {
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+AuthController _authenticatedController() => AuthController(
+  signInUseCase: SignInUseCase(_AuthRepository()),
+  restoreSessionUseCase: RestoreSessionUseCase(_AuthRepository()),
+  signOutUseCase: SignOutUseCase(_AuthRepository()),
+  getCurrentUserUseCase: GetCurrentUserUseCase(_AuthRepository()),
+  analyticsService: _NoopAnalyticsService(),
+);
+
+class _AuthRepository implements AuthRepository {
+  @override
+  Future<AuthUserEntity?> getCurrentUser() async => null;
+
+  @override
+  Future<AuthResultEntity?> restoreSession() async => null;
+
+  @override
+  Future<AuthResultEntity> signIn({
+    required String email,
+    required String password,
+    required String deviceName,
+    required String platform,
+    required String appVersion,
+  }) async => AuthResultEntity(
+    session: AuthSessionEntity(
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      sessionId: 'session',
+      expiresAtUtc: DateTime.utc(2026, 8, 4),
+    ),
+    user: const AuthUserEntity(
+      id: 'user-1',
+      email: 'user@example.test',
+      role: 'user',
+      capabilities: <String>[],
+      profileStatus: 'active',
+    ),
+  );
+
+  @override
+  Future<void> signOut() async {}
 }
 
 class _FakeDiscoverRepository implements DiscoverRepository {

@@ -71,6 +71,88 @@ void main() {
     });
   });
 
+  test('legacy fuel data is readable but removed from normalized output', () {
+    final ScenarioDraftData restored = ScenarioDraftMapper.fromJson(
+      <String, Object?>{
+        'schemaVersion': 2,
+        'defaultTimezoneId': 'Europe/Riga',
+        'displayCurrencyCode': 'EUR',
+        'constraints': <String, Object?>{
+          'budgetBasis': 'whole_group',
+          'primaryTravelMode': 'car',
+          'allowedTravelModes': <String>['car', 'walking'],
+          'vehicleProfile': <String, Object?>{
+            'enabled': true,
+            'includeFuelInBudget': true,
+            'litresPer100Km': 8,
+            'fuelPricePerLitre': <String, Object?>{
+              'minorUnits': 180,
+              'currencyCode': 'EUR',
+            },
+            'passengerSeats': 4,
+          },
+        },
+        'legs': <Object?>[
+          <String, Object?>{
+            'id': 'legacy-leg',
+            'dayId': 'day-1',
+            'fromLocationId': 'location-1',
+            'toLocationId': 'location-2',
+            'mode': 'car',
+            'source': 'manual',
+            'status': 'ready',
+            'cost': <String, Object?>{
+              'components': <Object?>[
+                <String, Object?>{
+                  'componentCode': 'fuel',
+                  'knowledge': 'estimated',
+                  'amount': <String, Object?>{
+                    'minorUnits': 720,
+                    'currencyCode': 'EUR',
+                  },
+                  'source': 'user_override',
+                },
+                <String, Object?>{
+                  'componentCode': 'travel_extra',
+                  'knowledge': 'known',
+                  'amount': <String, Object?>{
+                    'minorUnits': 900,
+                    'currencyCode': 'EUR',
+                  },
+                  'source': 'manual',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    );
+
+    expect(restored.constraints.vehicleProfile.enabled, isTrue);
+    expect(restored.constraints.vehicleProfile.passengerSeats, 4);
+    expect(restored.legs.single.cost.components, hasLength(1));
+    expect(
+      restored.legs.single.cost.components.single.componentCode,
+      'travel_extra',
+    );
+
+    final normalized = ScenarioDraftMapper.toJson(restored);
+    final constraints = normalized['constraints']! as Map<String, Object?>;
+    final profile = constraints['vehicleProfile']! as Map<String, Object?>;
+    expect(
+      profile.keys,
+      isNot(
+        containsAll(<String>[
+          'includeFuelInBudget',
+          'litresPer100Km',
+          'fuelPricePerLitre',
+        ]),
+      ),
+    );
+    expect(normalized.toString().toLowerCase(), isNot(contains('fuel')));
+    expect(normalized.toString(), contains('travel_extra'));
+  });
+
   test('unknown future root payload is retained without guessing fields', () {
     final ScenarioDraftData restored = ScenarioDraftMapper.fromJson(
       <String, Object?>{
@@ -113,6 +195,155 @@ void main() {
       'whole_group',
     );
   });
+
+  test('Details intake origin survives a typed round-trip', () {
+    final source = ScenarioDraftData.defaults().copyWith(
+      origin: const ScenarioOriginDraft(
+        type: ScenarioOriginType.details,
+        sourceId: 'place-1',
+        sourceRevision: 4,
+      ),
+    );
+
+    final json = ScenarioDraftMapper.toJson(source);
+    final restored = ScenarioDraftMapper.fromJson(json);
+
+    expect((json['origin']! as Map<Object?, Object?>)['type'], 'details');
+    expect(restored.origin?.type, ScenarioOriginType.details);
+    expect(restored.origin?.sourceId, 'place-1');
+    expect(restored.origin?.sourceRevision, 4);
+  });
+
+  test('official transit snapshot preserves provenance and future fields', () {
+    const snapshot = ScenarioScheduleSnapshotDraft(
+      freshness: ScenarioScheduleFreshness.current,
+      providerCode: 'lv_vivi_train',
+      providerDisplayName: 'Vivi',
+      licenseName: 'CC0 1.0',
+      tripId: 'trip-42',
+      routeId: 'route-riga-valga',
+      serviceId: 'weekday',
+      originStopId: 'riga',
+      destinationStopId: 'sigulda',
+      feedSha256:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      serviceDate: ScenarioLocalDateDraft(year: 2026, month: 8, day: 3),
+      carrierName: 'Vivi',
+      serviceLabel: 'Rīga–Valga',
+      originLabel: 'Rīga',
+      destinationLabel: 'Sigulda',
+      plannedDeparture: ScenarioLocalTimeDraft(hour: 23, minute: 59),
+      plannedArrival: ScenarioLocalTimeDraft(hour: 0, minute: 50),
+      departureSecondsFromServiceDay: 86340,
+      arrivalSecondsFromServiceDay: 89400,
+      departureDayOffset: 0,
+      arrivalDayOffset: 1,
+      sourceUrl: 'https://vivi.lv/uploads/GTFS.zip',
+      unknownFields: <String, Object?>{
+        'futureEvidence': <String, Object?>{'confidence': 'official'},
+      },
+    );
+    final source = ScenarioDraftData.defaults().copyWith(
+      items: const <ScenarioItemDraft>[
+        ScenarioItemDraft(
+          id: 'transport-1',
+          kind: ScenarioItemKind.plannedTransport,
+          source: ScenarioPlannedTransportSourceDraft(
+            kind: ScenarioPlannedTransportKind.train,
+            carrierName: 'Vivi',
+            publicServiceLabel: 'Rīga–Valga',
+            scheduleSnapshot: snapshot,
+          ),
+          sourceStatus: ScenarioSourceStatus.ready,
+          schedule: ScenarioScheduleDraft(
+            mode: ScenarioTimeMode.fixed,
+            planned: ScenarioTemplatePlannedTimeDraft(startDayIndex: 0),
+          ),
+          durationMinutes: 51,
+          cost: ScenarioCostDraft(),
+          orderLocked: false,
+          timeLocked: true,
+          role: ScenarioItemRole.mandatory,
+          selected: true,
+          publicNote: '',
+        ),
+      ],
+      unscheduledItemIds: <String>['transport-1'],
+    );
+
+    final json = ScenarioDraftMapper.toJson(source);
+    final restored = ScenarioDraftMapper.fromJson(json);
+    final restoredSource =
+        restored.items.single.source as ScenarioPlannedTransportSourceDraft;
+    final restoredSnapshot = restoredSource.scheduleSnapshot!;
+
+    expect(restoredSnapshot.tripId, 'trip-42');
+    expect(restoredSnapshot.routeId, 'route-riga-valga');
+    expect(restoredSnapshot.originStopId, 'riga');
+    expect(restoredSnapshot.destinationStopId, 'sigulda');
+    expect(restoredSnapshot.departureSecondsFromServiceDay, 86340);
+    expect(restoredSnapshot.arrivalSecondsFromServiceDay, 89400);
+    expect(restoredSnapshot.arrivalDayOffset, 1);
+    expect(restoredSnapshot.unknownFields['futureEvidence'], <String, Object?>{
+      'confidence': 'official',
+    });
+    final outputItems = ScenarioDraftMapper.toJson(restored)['items']! as List;
+    final outputSource = (outputItems.single as Map)['source'] as Map;
+    final outputSnapshot = outputSource['scheduleSnapshot'] as Map;
+    expect(outputSnapshot['futureEvidence'], <String, Object?>{
+      'confidence': 'official',
+    });
+  });
+
+  test(
+    'legacy manual transit snapshot stays readable without new metadata',
+    () {
+      final source = ScenarioDraftData.defaults().copyWith(
+        items: const <ScenarioItemDraft>[
+          ScenarioItemDraft(
+            id: 'manual-transport',
+            kind: ScenarioItemKind.plannedTransport,
+            source: ScenarioPlannedTransportSourceDraft(
+              kind: ScenarioPlannedTransportKind.bus,
+              publicServiceLabel: '22',
+              scheduleSnapshot: ScenarioScheduleSnapshotDraft(
+                freshness: ScenarioScheduleFreshness.unknown,
+                providerCode: 'manual',
+                serviceLabel: '22',
+                plannedDeparture: ScenarioLocalTimeDraft(hour: 10, minute: 15),
+              ),
+            ),
+            sourceStatus: ScenarioSourceStatus.ready,
+            schedule: ScenarioScheduleDraft(
+              mode: ScenarioTimeMode.fixed,
+              planned: ScenarioTemplatePlannedTimeDraft(startDayIndex: 0),
+            ),
+            durationMinutes: 30,
+            cost: ScenarioCostDraft(),
+            orderLocked: false,
+            timeLocked: true,
+            role: ScenarioItemRole.mandatory,
+            selected: true,
+            publicNote: '',
+          ),
+        ],
+        unscheduledItemIds: <String>['manual-transport'],
+      );
+
+      final restored = ScenarioDraftMapper.fromJson(
+        ScenarioDraftMapper.toJson(source),
+      );
+      final restoredSnapshot =
+          (restored.items.single.source as ScenarioPlannedTransportSourceDraft)
+              .scheduleSnapshot!;
+
+      expect(restoredSnapshot.providerCode, 'manual');
+      expect(restoredSnapshot.serviceLabel, '22');
+      expect(restoredSnapshot.tripId, isNull);
+      expect(restoredSnapshot.feedSha256, isNull);
+      expect(restoredSnapshot.departureDayOffset, isNull);
+    },
+  );
 }
 
 ScenarioDraftData _fixture() {

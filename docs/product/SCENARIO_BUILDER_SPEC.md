@@ -1,6 +1,6 @@
 # RECHARGE — Scenario Builder Product Spec
 
-Версия: v1.5 (2026-07-31). Статус: **Accepted**.
+Версия: v1.7 (2026-08-04). Статус: **Accepted**.
 Уровень: продуктовая спецификация самостоятельного блока Scenario в Create
 Hub и personal Scenario flow.
 
@@ -22,6 +22,49 @@ criteria и проверками.
 - [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md);
 - `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - `docs/adr/`.
+
+---
+
+## 0B. Changelog v1.6 → v1.7
+
+`SCN-FUEL-CLEANUP-01` завершил принятое в v1.6 упрощение:
+
+1. Fuel consumption, price, budget toggle и inferred `fuel` cost удалены из
+   canonical runtime и Scenario Create UI.
+2. `Own car`, manual duration/distance и explicit `travel_extra` сохранены.
+3. Старые fuel-ключи читаются терпимо, игнорируются и больше не записываются;
+   legacy derived component `fuel` отбрасывается при нормализации.
+4. Полный gate: analyzer 0 issues, 590 tests passed, boundary passed с 59
+   существующими suppressions, diff check passed.
+
+Реализация завершена 2026-08-04. Подробности — в
+`SCENARIO_FUEL_CLEANUP_SLICE_SPEC.md`.
+
+---
+
+## 0A. Changelog v1.5 → v1.6
+
+Владелец продукта утвердил упрощение основного Scenario UX:
+
+1. Тип топлива, расход, цена топлива и автоматический fuel budget estimate не
+   входят в целевой продукт и удаляются отдельным backward-compatible cleanup
+   slice. Автомобиль остаётся primary mode с временем, расстоянием и явными
+   ручными дополнительными расходами.
+2. Exact planned-transport snapshot остаётся внутренним механизмом
+   воспроизводимости, offline и Recheck. Основной UI не показывает GTFS ids,
+   feed digest и технический `source status`; пользователю достаточно
+   `Плановое расписание`, времени последней проверки, понятного предупреждения
+   об изменении/устаревании, действия `Перепроверить` и обязательного `не live`.
+   Необходимая licence/provider attribution может оставаться во вторичных
+   сведениях.
+3. Local-demo AI generation сохраняется, но скрыта как experimental feature за
+   feature flag и не входит в основной путь создания Scenario.
+4. Основной путь продукта: `создать → добавить места/события → распределить по
+   дням → проверить время и логистику → сохранить`.
+
+Решение принято 2026-08-03. Фактическое удаление legacy fuel-полей и
+упрощение transport disclosure требуют отдельного согласованного file plan,
+миграции/rollback и полного gate; эта редакция spec сама код не меняет.
 
 ---
 

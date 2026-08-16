@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking.schema.json",
+  "title": "Recharge Booking projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "revision": { "$ref": "common.schema.json#/$defs/revision" },
+    "userId": { "$ref": "common.schema.json#/$defs/id" },
+    "eventId": { "$ref": "common.schema.json#/$defs/id" },
+    "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+    "inventoryPoolId": { "$ref": "common.schema.json#/$defs/id" },
+    "channel": { "$ref": "common.schema.json#/$defs/channel" },
+    "auxiliaryTrackId": { "$ref": "common.schema.json#/$defs/id" },
+    "admissionMode": { "$ref": "common.schema.json#/$defs/admissionMode" },
+    "confirmationMode": { "$ref": "common.schema.json#/$defs/confirmationMode" },
+    "state": { "$ref": "common.schema.json#/$defs/bookingState" },
+    "participantUnits": { "$ref": "common.schema.json#/$defs/positiveUnits" },
+    "namedGuests": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "common.schema.json#/$defs/namedGuest" }
+    },
+    "eligibilitySnapshotRef": { "$ref": "common.schema.json#/$defs/id" },
+    "activeHoldId": { "$ref": "common.schema.json#/$defs/id" },
+    "reconfirmationState": { "$ref": "common.schema.json#/$defs/reconfirmationState" },
+    "terminalReason": { "$ref": "common.schema.json#/$defs/terminalReason" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "confirmedAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "cancelledAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "expiredAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "revision",
+    "userId",
+    "eventId",
+    "occurrenceId",
+    "admissionMode",
+    "confirmationMode",
+    "state",
+    "participantUnits",
+    "reconfirmationState",
+    "createdAt",
+    "updatedAt"
+  ]
+}

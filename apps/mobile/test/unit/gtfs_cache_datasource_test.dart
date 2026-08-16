@@ -41,6 +41,13 @@ void main() {
     expect(loaded.sourceUrl, 'https://example.test/1.zip');
   });
 
+  test('inspection distinguishes a missing cache', () async {
+    final result = await dataSource.inspect('lv_test');
+
+    expect(result.status, GtfsCacheReadStatus.missing);
+    expect(result.archive, isNull);
+  });
+
   test('falls back to backup when current archive is corrupted', () async {
     await dataSource.write(archive(<int>[1, 2, 3], 1));
     await dataSource.write(archive(<int>[4, 5, 6], 2));
@@ -51,10 +58,28 @@ void main() {
     await current.writeAsBytes(<int>[9, 9, 9], flush: true);
 
     final loaded = await dataSource.read('lv_test');
+    final inspected = await dataSource.inspect('lv_test');
 
     expect(loaded, isNotNull);
     expect(loaded!.bytes, <int>[1, 2, 3]);
     expect(loaded.sourceUrl, 'https://example.test/1.zip');
+    expect(inspected.status, GtfsCacheReadStatus.ready);
+    expect(inspected.archive?.sourceUrl, 'https://example.test/1.zip');
+  });
+
+  test('inspection reports corrupt when no valid pair survives', () async {
+    final directory = Directory(
+      '${temporaryDirectory.path}${Platform.pathSeparator}scenario_gtfs',
+    );
+    await directory.create(recursive: true);
+    await File(
+      '${directory.path}${Platform.pathSeparator}lv_test.zip',
+    ).writeAsBytes(<int>[1, 2, 3]);
+
+    final result = await dataSource.inspect('lv_test');
+
+    expect(result.status, GtfsCacheReadStatus.corrupt);
+    expect(result.archive, isNull);
   });
 
   test('rejects a mismatched digest before replacing cache', () async {

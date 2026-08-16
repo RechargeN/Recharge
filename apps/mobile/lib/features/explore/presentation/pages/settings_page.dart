@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../app/config/legal_links.dart';
+import '../../../../app/presentation/workspace_section_host.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/explore_controller.dart';
 import '../../application/explore_providers.dart';
@@ -21,6 +22,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _avatarController = TextEditingController();
+  String? _loadKey;
 
   @override
   void dispose() {
@@ -45,16 +47,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
 
     if (!state.isLoaded || state.userId != user.id) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(exploreControllerProvider)
-            .ensureLoaded(
-              userId: user.id,
-              email: user.email,
-              role: user.role,
-              favoritesCount: state.favoritesCount,
-            );
-      });
+      _scheduleLoad(
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        favoritesCount: state.favoritesCount,
+      );
     }
     _syncControllers(state);
 
@@ -64,23 +62,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ExploreStatus.initial || ExploreStatus.loading => const Center(
           child: CircularProgressIndicator(),
         ),
-        ExploreStatus.error => const Center(
-          child: Text('Не удалось загрузить настройки'),
+        ExploreStatus.error => _StateMessage(
+          text: state.message ?? 'Не удалось загрузить настройки',
+          actionLabel: 'Повторить',
+          onTap: () {
+            _loadKey = null;
+            _scheduleLoad(
+              userId: user.id,
+              email: user.email,
+              role: user.role,
+              favoritesCount: state.favoritesCount,
+              force: true,
+            );
+          },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
             const _SettingsSectionTitle('ACCOUNT AND WORKSPACE'),
-            ListTile(
-              key: const ValueKey<String>('settings-switch-workspace'),
-              leading: const Icon(Icons.switch_account_outlined),
-              title: const Text('Switch workspace'),
-              subtitle: const Text(
-                'Personal profile, Professional Pages and Admin access',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(RouteNames.workspaceSwitcher),
-            ),
+            const SizedBox(height: 8),
+            WorkspaceSectionHost(userId: user.id),
             const Divider(height: 28),
             _ProfileEditSection(
               displayNameController: _displayNameController,
@@ -205,6 +206,29 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  void _scheduleLoad({
+    required String userId,
+    required String email,
+    required String role,
+    required int favoritesCount,
+    bool force = false,
+  }) {
+    final String key = '$userId:$role:$favoritesCount';
+    if (!force && _loadKey == key) return;
+    _loadKey = key;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(exploreControllerProvider)
+          .ensureLoaded(
+            userId: userId,
+            email: email,
+            role: role,
+            favoritesCount: favoritesCount,
+          );
+    });
+  }
+
   void _syncControllers(ExploreState state) {
     if (!state.isLoaded) return;
     _syncController(_displayNameController, state.profile.displayName);
@@ -238,6 +262,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({
+    required this.text,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String text;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(text),
+            const SizedBox(height: 10),
+            OutlinedButton(onPressed: onTap, child: Text(actionLabel)),
+          ],
+        ),
       ),
     );
   }

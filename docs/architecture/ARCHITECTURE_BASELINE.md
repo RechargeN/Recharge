@@ -1,8 +1,9 @@
 # Recharge Architecture Baseline
 
-Status: Frozen baseline  
-Effective date: 2026-04-17  
+Status: Frozen baseline, expanded by Accepted ADR 0019
+Effective date: 2026-08-08
 Owner: Recharge team
+Related expansion: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 
 ## 1) Canonical Project Tree
 
@@ -23,6 +24,11 @@ recharge/
 │     └─ task.md
 │
 ├─ apps/
+│  ├─ backend/                 # Accepted target; created only by Approved ECL-03 stage
+│  │  ├─ firebase.json
+│  │  ├─ firestore.rules
+│  │  ├─ firestore.indexes.json
+│  │  └─ functions/{src/,test/}
 │  └─ mobile/
 │     ├─ pubspec.yaml
 │     ├─ analysis_options.yaml
@@ -91,6 +97,12 @@ recharge/
 8. Mock/seed assets and mock datasources are excluded from production flavors.
 9. CI gates are required before merge: lint, tests, codegen check, boundaries check.
 10. Any architecture change to this baseline requires a new ADR with status `Accepted`.
+11. Authoritative Booking, hold, inventory, idempotency and related operational
+    writes cross a trusted backend command boundary; mobile clients never write
+    their authoritative collections directly.
+12. The accepted `apps/backend` target does not itself authorize directory
+    creation, Firebase deployment or production data processing. Each physical
+    implementation is bounded by an Approved ECL-03 stage and its gates.
 
 ## 3) Definition Of Done (Architecture Compliance)
 
@@ -99,3 +111,6 @@ recharge/
 - Tests are added according to change scope (`unit`/`widget`/`integration`).
 - No manual edits in generated code.
 - PR checklist is fully completed.
+- Backend slices additionally pass contract compatibility, emulator Rules,
+  transaction contention/idempotency and rollback/reconciliation gates before
+  production activation.

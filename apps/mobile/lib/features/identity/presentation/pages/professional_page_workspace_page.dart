@@ -34,7 +34,7 @@ class ProfessionalPageWorkspacePage extends ConsumerWidget {
             _ActiveProfessionalPage(page: page, section: section),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () => context.push(RouteNames.workspaceSwitcher),
+            onPressed: () => context.push(RouteNames.settings),
             icon: const Icon(Icons.switch_account_outlined),
             label: Text(
               page == null
@@ -111,6 +111,24 @@ class _ActiveProfessionalPage extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(_sectionDescription(section)),
+            if (section == ProfessionalPageSection.overview) ...<Widget>[
+              const SizedBox(height: 18),
+              OutlinedButton.icon(
+                key: const ValueKey<String>('preview-public-page'),
+                onPressed: () => context.push(
+                  RouteNames.professionalPagePreviewFor(page.id),
+                ),
+                icon: const Icon(Icons.visibility_outlined),
+                label: const Text('Preview public page'),
+              ),
+              if (!page.isPubliclyVisible) ...<Widget>[
+                const SizedBox(height: 8),
+                const Text(
+                  'Preview only. The page is not public until verification '
+                  'is approved.',
+                ),
+              ],
+            ],
           ],
         ),
       ),

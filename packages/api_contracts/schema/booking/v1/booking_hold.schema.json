@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_hold.schema.json",
+  "title": "Recharge Booking hold projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "bookingId": { "$ref": "common.schema.json#/$defs/id" },
+    "userId": { "$ref": "common.schema.json#/$defs/id" },
+    "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+    "inventoryPoolId": { "$ref": "common.schema.json#/$defs/id" },
+    "units": { "$ref": "common.schema.json#/$defs/positiveUnits" },
+    "kind": { "type": "string", "const": "waitlistOffer" },
+    "state": {
+      "type": "string",
+      "enum": ["active", "accepted", "declined", "expired", "released"]
+    },
+    "createdAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "resolvedAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "revision": { "$ref": "common.schema.json#/$defs/revision" }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "bookingId",
+    "userId",
+    "occurrenceId",
+    "inventoryPoolId",
+    "units",
+    "kind",
+    "state",
+    "createdAt",
+    "expiresAt",
+    "revision"
+  ]
+}

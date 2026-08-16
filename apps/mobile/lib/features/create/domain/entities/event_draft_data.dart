@@ -1,3 +1,11 @@
+import 'event_admission.dart';
+import 'event_inventory.dart';
+import 'event_classification.dart';
+import 'publisher_ref.dart';
+
+export 'event_admission.dart' show EventRegistrationMode;
+export 'event_inventory.dart' show EventCapacityMode;
+
 enum EventFormat { offline, online, hybrid }
 
 enum EventOnlineAccessMode { publicLink, externalRegistration, internalBooking }
@@ -17,10 +25,6 @@ enum EventDstOverlapPolicy { earlierOffset, laterOffset }
 enum EventPricingMode { free, fixed, ticketTypes, donation }
 
 enum EventPaymentCollectionMode { none, onsite, external, internal }
-
-enum EventRegistrationMode { none, external, internal }
-
-enum EventCapacityMode { known, unknown, unlimited }
 
 enum EventVisibility { public, unlisted, private }
 
@@ -223,6 +227,10 @@ class EventDraftData {
   const EventDraftData({
     required this.schemaVersion,
     required this.revision,
+    required this.publisherRef,
+    required this.classification,
+    required this.admission,
+    required this.inventory,
     required this.format,
     required this.onlineAccessMode,
     required this.publicOnlineUrl,
@@ -257,12 +265,19 @@ class EventDraftData {
     required this.visibility,
     required this.acceptedWarningCodes,
     required this.unknownFields,
+    required this.unsupportedFieldIds,
   });
 
-  static const int currentSchemaVersion = 1;
+  static const int classificationSchemaVersion = 2;
+  static const int accessSchemaVersion = 3;
+  static const int currentSchemaVersion = accessSchemaVersion;
 
   final int schemaVersion;
   final int revision;
+  final PublisherRef? publisherRef;
+  final EventClassificationDraft? classification;
+  final EventAdmissionDraft? admission;
+  final EventInventoryConfiguration? inventory;
   final EventFormat format;
   final EventOnlineAccessMode? onlineAccessMode;
   final String? publicOnlineUrl;
@@ -297,6 +312,7 @@ class EventDraftData {
   final EventVisibility visibility;
   final Set<String> acceptedWarningCodes;
   final Map<String, Object?> unknownFields;
+  final Set<String> unsupportedFieldIds;
 
   factory EventDraftData.defaults({
     required String marketCityId,
@@ -304,14 +320,19 @@ class EventDraftData {
     required String city,
     required String timezoneId,
     required String currencyCode,
+    PublisherRef? publisherRef,
   }) {
     final DateTime tomorrow = DateTime.now().toUtc().add(
       const Duration(days: 1),
     );
     final String localDate = _isoDate(tomorrow);
     return EventDraftData(
-      schemaVersion: currentSchemaVersion,
+      schemaVersion: classificationSchemaVersion,
       revision: 0,
+      publisherRef: publisherRef,
+      classification: null,
+      admission: null,
+      inventory: null,
       format: EventFormat.offline,
       onlineAccessMode: null,
       publicOnlineUrl: null,
@@ -350,12 +371,21 @@ class EventDraftData {
       visibility: EventVisibility.public,
       acceptedWarningCodes: const <String>{},
       unknownFields: const <String, Object?>{},
+      unsupportedFieldIds: const <String>{},
     );
   }
 
   EventDraftData copyWith({
     int? schemaVersion,
     int? revision,
+    PublisherRef? publisherRef,
+    bool clearPublisherRef = false,
+    EventClassificationDraft? classification,
+    bool clearClassification = false,
+    EventAdmissionDraft? admission,
+    bool clearAdmission = false,
+    EventInventoryConfiguration? inventory,
+    bool clearInventory = false,
     EventFormat? format,
     EventOnlineAccessMode? onlineAccessMode,
     bool clearOnlineAccessMode = false,
@@ -398,9 +428,18 @@ class EventDraftData {
     EventVisibility? visibility,
     Set<String>? acceptedWarningCodes,
     Map<String, Object?>? unknownFields,
+    Set<String>? unsupportedFieldIds,
   }) => EventDraftData(
     schemaVersion: schemaVersion ?? this.schemaVersion,
     revision: revision ?? this.revision,
+    publisherRef: clearPublisherRef
+        ? null
+        : (publisherRef ?? this.publisherRef),
+    classification: clearClassification
+        ? null
+        : (classification ?? this.classification),
+    admission: clearAdmission ? null : (admission ?? this.admission),
+    inventory: clearInventory ? null : (inventory ?? this.inventory),
     format: format ?? this.format,
     onlineAccessMode: clearOnlineAccessMode
         ? null
@@ -442,6 +481,7 @@ class EventDraftData {
     visibility: visibility ?? this.visibility,
     acceptedWarningCodes: acceptedWarningCodes ?? this.acceptedWarningCodes,
     unknownFields: unknownFields ?? this.unknownFields,
+    unsupportedFieldIds: unsupportedFieldIds ?? this.unsupportedFieldIds,
   );
 
   EventDraftData nextRevision() => copyWith(revision: revision + 1);

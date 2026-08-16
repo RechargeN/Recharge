@@ -22,7 +22,7 @@ class IdentityManagedPageLocalRecord {
 class IdentityWorkspaceLocalDataSource {
   const IdentityWorkspaceLocalDataSource(this._storage);
 
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
 
   final FlutterSecureStorage _storage;
 
@@ -77,8 +77,11 @@ class IdentityWorkspaceLocalDataSource {
 
     try {
       final Object? decoded = jsonDecode(raw);
-      if (decoded is! Map<String, dynamic> ||
-          decoded['schemaVersion'] != schemaVersion) {
+      if (decoded is! Map<String, dynamic>) {
+        return const IdentityManagedPageLocalRecord();
+      }
+      final int? storedVersion = decoded['schemaVersion'] as int?;
+      if (storedVersion != 1 && storedVersion != schemaVersion) {
         return const IdentityManagedPageLocalRecord();
       }
       final List<dynamic> pageJson =
@@ -137,6 +140,7 @@ class IdentityWorkspaceLocalDataSource {
       'ownerUserId': page.ownerUserId,
       'kind': page.kind.name,
       'displayName': page.displayName,
+      'slug': page.slug,
       'avatar': page.avatar,
       'verificationStatus': page.verificationStatus.name,
       'lifecycle': page.lifecycle.name,
@@ -157,6 +161,12 @@ class IdentityWorkspaceLocalDataSource {
       ownerUserId: json['ownerUserId'] as String,
       kind: _enumByName(ManagedPageKind.values, json['kind'] as String),
       displayName: json['displayName'] as String,
+      slug: (json['slug'] as String?)?.trim().isNotEmpty ?? false
+          ? (json['slug'] as String).trim()
+          : ManagedPageEntity.localSlug(
+              displayName: json['displayName'] as String,
+              pageId: json['id'] as String,
+            ),
       avatar: json['avatar'] as String? ?? '',
       verificationStatus: _enumByName(
         ManagedPageVerificationStatus.values,

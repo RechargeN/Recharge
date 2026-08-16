@@ -2,9 +2,9 @@
 
 Status: **Draft for product and architecture review**
 
-Version: **2.28**
+Version: **2.34**
 
-Date: **2026-08-12**
+Date: **2026-08-16**
 
 Scope: **target full-release product; documentation only**
 
@@ -33,9 +33,24 @@ When sources conflict, the following order applies:
 5. Draft profile-surface specifications on equal footing with each
    other — this document and all sibling profile documents
    (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`, `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
-   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`). None of them outranks
+   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
+   `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
+   `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`). None of them outranks
    another by virtue of which one a reader opened first; a conflict between
    them is blocked per §1.1, not resolved by this tier ordering.
+
+   `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` specifically is not a
+   second aggregate owner but a presentation split of this one, so its
+   conflicts resolve by a narrower, three-way rule rather than a blanket
+   "this document always wins": a conflict touching a `ManagedPage`
+   invariant, `PP-D` decision, lifecycle, verification, membership,
+   capability or `PublisherRef` resolves in this document's favor — that
+   document must be corrected to match; a question that is purely about
+   public display (field layout, CTA copy, UX-state handling, section
+   ordering) is owned by that document, not restated or overridden here; a
+   conflict that is genuinely shared and unresolved by either rule blocks
+   implementation of the affected behavior — it is never auto-resolved by
+   picking whichever document a reader opened first.
 6. `docs/product/VISION.md` and other general product material.
 
 Canonical supporting sources:
@@ -71,6 +86,10 @@ At the date of this document:
   only";
 - `IDP-05A` is Planned: complete application/router guards and negative
   cross-page coverage are not Done;
+- `PPP-01A` is in Review: the bounded local/mock public-page foundation has
+  deterministic slugs, a separate empty-by-default public read index,
+  verified-and-active ID/slug resolution and exact-membership pending-page
+  preview; unsupported public actions and content projections remain hidden;
 - production Auth, Creator/Page verification, remote membership authority,
   Firebase enforcement and externally reachable Professional Pages remain
   gated.
@@ -108,16 +127,16 @@ It is not:
 
 ### 1.1 Relationship to sibling documents
 
-Professional Page is one of four audience-scoped surfaces over the same
+Professional Page is one of six audience-scoped surfaces over the same
 underlying canonical aggregates, not a competing model. Surfaces are split
-by *who is looking*, not by *what data exists*. Framed by product/profile
-architecture, three of the four are personal-identity documents (Viewer,
-Creator, Public Creator) and this one is a `ManagedPage` peer, not a fourth
-personal-identity document — a distinction `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`
-§0 already states explicitly. That distinction is about what each document
-is *about*; it does not change the equal-footing conflict-precedence tier
-below (§0 item 5), where all four still sit together with none outranking
-another. The right-hand column is
+by *who is looking*, not by *what data exists*. They form three explicit
+private/public pairs: Viewer/Public Viewer, Creator/Public Creator and
+Professional Page/Public Professional Page. `ManagedPage` remains a peer
+aggregate rather than a personal identity, but all six Draft surface specs
+share the same equal-footing conflict-precedence tier (§0 item 5); none
+silently outranks another.
+
+The right-hand column is
 **primary surface responsibility** — which document specifies the UI/UX and
 policy for that concern — not aggregate ownership: canonical aggregate
 ownership always stays with that aggregate's own accepted domain
@@ -128,15 +147,19 @@ which profile document displays a projection of it.
 | Document | Audience | Primary surface responsibility |
 |---|---|---|
 | `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | The Viewer, about themselves | Scenario, Quick Plan, Favorites, Saved Searches, Visit History, personal participation, authored Reviews, photos, account/session state, and the baseline Public User Projection — shown only within a legitimate trigger context (Review, Find People response, invited Scenario, shared plan), never as a standalone searchable profile for every `User` |
+| `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | Another authorized Viewer, about a Viewer in a legitimate trigger context | The public Viewer projection and its privacy-safe resolver; it owns public rendering of Viewer identity and consumes, rather than redefines, Viewer-owned Block/Mute mechanics |
 | `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | The Creator, about themselves | `CreatorVerification` lifecycle, the personal `PublisherRef{type: user}` context, management of their own Created content, and the *private* workspace/publisher relationship to managed Professional Pages — public display of the Creator↔Page cross-link is owned separately by `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D05` |
 | `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Any other Viewer, about a verified Creator | The public card for a verified Creator — extends the Public User Projection with verification badge, specialization, published-content list, Follow, and (§5 there) public Creator↔Page cross-link display (`PCP-D05`). Aggregated reviews-about-*content* display is gated only on `PCP-D04` and is independent of `VP-D08`; reviews-about-a-*person* remain a separate, unaccepted feature gated on `VP-D08` alone |
-| This document | Any other Viewer, about a page; the page's own team | `ManagedPage` in full — team, page lifecycle, a page-scoped Booking **management projection**, and its own public projection (§8.2). The `Booking`/`BookingHold`/ledger aggregates themselves remain owned by the authoritative Booking contract (ADR 0019, §13) — this document owns the authorization boundary and UI over them, not the aggregates |
+| This document | The page's own team | `ManagedPage` in full — team, page lifecycle, a page-scoped Booking **management projection**. The `Booking`/`BookingHold`/ledger aggregates themselves remain owned by the authoritative Booking contract (ADR 0019, §13) — this document owns the authorization boundary and UI over them, not the aggregates |
+| `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | Any Viewer resolving the public page — including this document's own team members, whose public payload never differs from any other Viewer's (see that document's §1) | The public page projection split out of this document's former §8.2 — resolver, typed field contract, content projection, relation display, CTA logic and UX states. Owns its own `PPP-D`/`PPP-AC` numbering for questions that are genuinely about public presentation only; it never redefines a `PP-D` or restates a `PP-AC` under a new number, and a `ManagedPage`-invariant conflict still resolves in this document's favor per its own §0.1 |
 
 **Verified-against snapshot.** Every citation of a sibling document above
 and throughout this document was last cross-checked directly against
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.15,
+`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17,
 `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9 and
-`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9, as of 2026-08-16 — the
+`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9,
+`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.0 and
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.3, as of 2026-08-16 — the
 prior pin (v1.10/v1.4/v1.3) had gone stale by several versions each on the
 sibling side. Re-verification against the current text found this
 document's specific citations (`PP-D44`'s trilateral status, the
@@ -292,6 +315,14 @@ User | Creator | Admin
 `Pro` and `Pro generator` MUST NOT be stored roles, workspace types, publisher
 types or authorization inputs. Commercial packaging, if introduced later,
 must use a separate entitlement model and neutral product naming.
+
+This architectural constraint is Accepted (`PP-D11`/`PP-D42`): an
+entitlement never becomes a role or capability source, independent of
+whatever tier names or prices a future commercial model uses (§4.3(4),
+`PP-AC-67`). Naming, pricing and billing mechanics remain explicitly out of
+this document's scope — no separate Commercial/Billing specification is
+started by accepting the constraint here; `PP-D42`'s downgrade-mechanics
+remainder stays Explicitly deferred until one is.
 
 ### 3.2 Workspace
 
@@ -585,6 +616,88 @@ a verified one. The following invariants apply:
 - `relationKind` is registry/config data, not a reason to change
   `ManagedPage`'s own schema for every new relationship type.
 
+### 4.5 Field-level moderation overlay (`PP-D48`, Accepted)
+
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` needed a rule for what a
+moderated public field (`displayName`, descriptions, `customActivityLabel`,
+avatar/cover) shows while an edit is pending review. That is not
+presentation packaging — it requires its own persisted state, distinct from
+`ManagedPage`'s own field values, which this decision owns:
+
+```text
+ManagedPageModeratedFieldKey =
+  displayName | shortDescription | description | customActivityLabel |
+  avatarMediaRef | coverMediaRef
+
+ManagedPageModeratedFieldValue =
+  LocalizedTextValue { valuesByLocale } |
+  ShortTextValue { value } |
+  MediaValue { mediaId } |
+  ActivityLabelValue { value }
+
+ManagedPageFieldModerationOverlay {
+  pageId,
+  fieldKey,
+  lastApprovedValue?,
+  lastApprovedAtUtc?,
+  approvedForVerificationRevision?,
+  pendingSubmission?: {
+    submissionId,
+    value?,                 # absent only for an explicit clear request
+    clearRequested,
+    submittedAtUtc,
+    basedOnOverlayRevision
+  },
+  latestRejection?: {
+    submissionId,
+    rejectedValue?,
+    rejectedAtUtc,
+    rejectionReasonCode
+  },
+  clearedAtUtc?,
+  revision,
+  schemaVersion
+}
+```
+
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §3.1 only *reads* the resolved
+approved value; it never defines or mutates the overlay. The Accepted rules
+are:
+
+- one record exists per unique `(pageId, fieldKey)`; `fieldKey` uses the
+  closed registry above, and the value variant MUST match that key;
+- localized values are bounded to the page's supported locales and each
+  text/media identifier is length-limited by the Approved delivery slice;
+  unknown keys or variants fail closed and never enter the public payload;
+- each mutation supplies `basedOnOverlayRevision`; submit, approve, reject
+  and clear are atomic single-record transitions, and a stale revision is
+  rejected rather than merged silently;
+- `submissionId` is unique and idempotent per page and field. Approval moves
+  exactly that pending value to `lastApprovedValue`; rejection keeps the
+  previous approved value effective. A pending clear likewise keeps the old
+  public value until approved, then atomically removes it and sets
+  `clearedAtUtc`;
+- overlay `revision` is independent per field. `ManagedPage.revision` and the
+  public opaque revision are separate authorities and MUST NOT be inferred
+  from it;
+- a replacement media upload is quarantined as a pending `MediaValue`; the
+  existing approved media remains public until an atomic approval swap.
+  Rejection never exposes the quarantined media; media cleanup follows
+  `PP-D24` and must not delete a still-referenced approved object;
+- a rejected raw value is retained for at most 30 days after the later of
+  rejection or appeal closure, unless a documented legal hold applies;
+  after purge, only non-content audit metadata and the reason code remain;
+- verification revocation hides the entire public page but does not destroy
+  overlay history. Re-approval does not automatically re-expose old values:
+  each public value must carry `approvedForVerificationRevision` matching the
+  current verification revision or be revalidated atomically first;
+- an active Trust & Safety restriction may block new approvals but never
+  weakens an existing restriction or resurrects a hidden value;
+- migration is explicit and auditable: a field already lawfully public is
+  seeded once as approved with a migration submission id; all other existing
+  values enter pending review. No raw-field fallback is allowed if migration
+  is incomplete.
+
 ## 5. Page creation, membership and lifecycle
 
 ### 5.1 Creation
@@ -623,9 +736,12 @@ draft → pendingReview → active → archived
 active → suspended → active | archived
 ```
 
-Exact transition commands, appeal, re-review, expiry and public exposure rules
-must be fixed before production implementation. A verification badge displays
-only a safe projection; evidence and reviewer notes remain private.
+Public exposure itself is Accepted (`PP-D02`): a public page exists only for
+`verified + active`; the exact rule is §22.2's cascade table, and the
+resolver consuming it is `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §2.
+Exact transition commands, appeal, re-review and expiry mechanics still
+require an implementation slice. A verification badge displays only a safe
+projection; evidence and reviewer notes remain private.
 
 ### 5.3 Membership
 
@@ -815,28 +931,12 @@ Home · Favorites · Smart Search · Notifications · Profile
 
 ### 8.2 Public page
 
-The public projection SHOULD include, when present and policy-safe:
-
-- display name, avatar/cover, description and safe verification badge;
-- primary/secondary service categories and custom activity label;
-- market/city/operating-area display without exposing private location;
-- safe contacts (phone/email/website/messaging-handle) and external links,
-  reveal gated on page verification with an anti-spam rate limit —
-  per-market legal defaults for which contact types to expose are
-  Explicitly deferred to Privacy/Legal (`PP-D05` Accepted core, §15.1);
-- linked public Places by ID;
-- upcoming/ongoing/past public content projections;
-- optional gallery, follow/share and Review projection after their contracts
-  are approved.
-
-The public page MUST NOT expose membership lists, capabilities, identity
-evidence, reviewer notes, private contacts, private content, audience segments,
-Booking details or internal analytics.
-
-CTA is derived from the target content contract and readiness, not from the
-page category. For example, a Route may offer Save/Open, an Event may offer an
-honest external registration handoff, and unavailable/unknown capacity must not
-be presented as bookable.
+The public-facing projection — exact fields, content rules, CTA logic and
+what is never exposed — is owned by
+[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](./PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md),
+not restated here. That document is a presentation split-out only: it
+introduces no new decisions and defers to this document's `PP-D`/`PP-AC`
+numbering and invariants for every rule it states.
 
 ## 9. Create Hub and content ownership
 
@@ -973,8 +1073,14 @@ involved.
 Audience is a privacy-safe projection, not a transferable contact database.
 Segments are derived from explicit relationships and consented activity.
 Personal data is minimized; audience export and contact import remain gated.
-Whether following this page shares its relationship/consent model with
-following a person is not decided here — see `PP-D44` (§20) and §1.1.
+
+Following a page is Accepted (`PP-D06`) on the `FollowRelation` shape
+already defined at `PP-D44` (§20). Following is opt-in only; no historical
+audience export exists in v1 (consistent with Appendix B's already-Gated
+CRM stance). Whether this shape and its policy are *shared* with following
+a person, versus deliberately separate, remains genuinely undecided — see
+`PP-D44` (§20) and §1.1; that half of `PP-D06` stays blocked on the
+trilateral decision, not resolved by accepting the shape here.
 
 ### 12.3 Messages and announcements
 
@@ -986,6 +1092,13 @@ Requirements include sender capability, exact recipient basis, unsubscribe
 where applicable, frequency/rate limits, abuse reporting, localization,
 idempotent delivery, delivery status and retention. Promotional communication
 must be distinct from operational communication.
+
+`PP-D07`'s recipient-consent basis is Explicitly deferred to Legal: sender
+identity is the page itself, and the recipient basis is opt-in only
+(follower or a registered participant who consented to page communication)
+as a working default, but the exact consent-law basis for each target
+market (GDPR/PECR-class rules where applicable) requires Legal sign-off
+before this module is implementable, not this document's own judgment.
 
 ### 12.4 Analytics
 
@@ -1160,6 +1273,10 @@ scale, keyboard/screen-reader semantics and no color-only status meaning.
 ## 17. Delivery roadmap
 
 The target product is broad, but delivery remains independently reviewable.
+Which Mature extensions actually join the first full-release candidate
+(`PP-D12`) is Explicitly deferred to a dedicated release-planning pass once
+enough of the table below has an accepted status to staff against — not
+decided by this document itself.
 
 | Slice family | Scope | Class | Key dependency |
 |---|---|---|---|
@@ -1310,6 +1427,7 @@ aggregate, sensitive dataset or production dependency.
 - **PP-AC-94:** A `§4.4` `ManagedPageRelation`, however many exist, never grants `PublisherRef`, membership or any capability on the related page/Place; deleting or changing a relation never rewrites Event `PublisherRef` or Place geometry/address; an `unconfirmed` relation is never presented as equivalent to a `verified` one in the public projection.
 - **PP-AC-95:** No implementation adds a generic `attributes`/`sectionData` map to `ManagedPage` or `ManagedPageProfileExtension` under any name — including the `§4.2` reserved `ManagedPagePublicAttribute`/`ManagedPagePublicSection` names — before a separately Approved profile-builder slice exists.
 - **PP-AC-96:** Recording a user as an Event/Booking participant on a page's content never creates a `FollowRelation` or a `ManagedPageMembership` for that user, and vice versa — follower, page team member, Event/Booking participant and any future cross-event audience projection each resolve strictly from their own owning contract (§10.1).
+- **PP-AC-97:** Every moderated page field has at most one overlay record for `(pageId, fieldKey)`; a stale-revision, unknown-key, mismatched-value, duplicate-submission or partial approve/clear attempt fails atomically. Pending/rejected values and quarantined media never enter the public projection; an approved clear removes the field rather than emitting an empty value; verification re-approval exposes only values revalidated for the current verification revision; migration never falls back to the raw source field.
 
 ## 19. Required test matrix
 
@@ -1369,6 +1487,10 @@ At minimum, implementation slices cover:
 - a user recorded as an Event/Booking participant on a page's content
   gaining no `FollowRelation` and no `ManagedPageMembership` from that fact
   alone, and the reverse (PP-AC-96);
+- moderation-overlay migration and every submit/approve/reject/clear
+  transition, including stale revision, duplicate submission id, unknown
+  key/value mismatch, rejected-value purge, quarantined-media swap,
+  verification revoke/re-approve and no-raw-fallback cases (PP-AC-97);
 - ownership transfer requiring both-party confirmation and blocked by active
   obligations; claim/merge rollback leaving both pages unchanged on
   rejection;
@@ -1479,12 +1601,17 @@ problem, that one proposes the answer.
    anti-spam rate limit. Which contact types are safe or required to expose
    per jurisdiction is deferred to Privacy/Legal, per target launch market
    (§15.1).
-6. **PP-D06 — Audience/follow:** relationship model, consent, unfollow/block,
-   retention and deletion for following this page. Whether this shares its
-   model with personal Creator-follow is a separate, joint decision —
-   `PP-D44`.
-7. **PP-D07 — Communication:** sender identity, recipient basis, templates,
-   rate limits, delivery providers and moderation.
+6. **PP-D06 — Audience/follow (Accepted core; shared-vs-separate half
+   blocked on `PP-D44`):** §12.2 fixes the relationship model — opt-in
+   `FollowRelation`, no historical audience export in v1. Whether this
+   shares its model with personal Creator-follow is a separate, joint
+   decision — `PP-D44` — not resolved by accepting the page-follow shape
+   here.
+7. **PP-D07 — Communication (Explicitly deferred to Legal):** sender
+   identity and recipient basis default to page-identity/opt-in (§12.3),
+   but the consent-law basis for each target market requires Legal
+   sign-off before this module is implementable. Templates, rate limits,
+   delivery providers and moderation remain open pending that.
 8. **PP-D08 — Analytics (Accepted core; remainder Explicitly deferred):**
    `docs/analytics/ANALYTICS_TAXONOMY.md`'s event-naming and lifecycle
    conventions apply (§12.4) — but that taxonomy defines event names and
@@ -1511,10 +1638,15 @@ problem, that one proposes the answer.
     combination of these MAY inform a review queue, but only an authoritative
     Identity claim workflow with audit — never fuzzy matching alone — may
     grant a claim. Plus rollback.
-11. **PP-D11 — Commercial entitlements:** packaging and naming that do not
-    recreate `Pro` as an authorization role.
-12. **PP-D12 — Release composition:** which mature extensions join the first
-    full-release candidate based on estimates and readiness evidence.
+11. **PP-D11 — Commercial entitlements (Accepted):** §3.1 fixes the
+    architectural constraint — an entitlement never becomes a role or
+    capability source. Packaging and tier naming remain explicitly out of
+    scope; no separate Commercial/Billing specification is started by
+    this.
+12. **PP-D12 — Release composition (Explicitly deferred):** §17 notes this
+    is a dedicated release-planning pass, not a decision this document
+    makes — which mature extensions join the first full-release candidate
+    depends on estimates and readiness evidence not yet gathered.
 13. **PP-D13 — International metadata wire contract:** each international
     field resolves against a different, independent source of truth, and the
     implementation slice MUST NOT substitute an incompatible format for any
@@ -1551,11 +1683,13 @@ problem, that one proposes the answer.
     destination-initiated duplicate. Co-host remains a separate scoped
     grant; its exact capability registry belongs to the Approved `PP-02`
     implementation slice and does not reopen this accepted product model.
-17. **PP-D17 — Slug, rename and deep links:** §22.4 resolves that `id` is the
-    only authorization-relevant identifier and that deep links/redirects
-    survive rename. Still open: uniqueness/reservation policy, forbidden-name
-    list, rename frequency limits, and whether rename affects verification
-    standing.
+17. **PP-D17 — Slug, rename and deep links (Accepted):** §22.4 resolves
+    that `id` is the only authorization-relevant identifier, that deep
+    links/redirects survive rename, that a slug is globally unique, that
+    rename is limited to once per 30 days, and that rename never resets
+    verification standing (verification attaches to the entity, not the
+    display string). The exact forbidden-name moderation list is an
+    implementation-slice detail, not a reopened product decision.
 18. **PP-D18 — Concurrent editing and revisions:** §22.5 resolves
     `revision`-based rejection of stale mutations and mandatory actor
     attribution. Still open: section-level versus whole-object locking,
@@ -1729,11 +1863,16 @@ problem, that one proposes the answer.
     timezone-correct reporting, attribution changes, deletion requests
     reflected in aggregates, small-cohort suppression threshold, and
     reconciling discrepancies against Booking/provider reports.
-42. **PP-D42 — Entitlement and billing completeness:** billing owner,
-    trial, grace period, failed renewal, seat limits, invoices/tax,
-    downgrade while obligations are active, re-activation, dormant
-    integration cleanup after retention, and keeping entitlement, capability
-    and verification as three separate facts (§4.3(4), PP-D26).
+42. **PP-D42 — Entitlement and billing completeness (Accepted core;
+    remainder Explicitly deferred):** §3.1 fixes that entitlement,
+    capability and verification stay three separate facts (§4.3(4),
+    `PP-D26`) — that never changes regardless of how billing is designed.
+    Still open, and not started by accepting the constraint: billing
+    owner, trial, grace period, failed renewal, seat limits, invoices/tax,
+    downgrade-while-obligations-active mechanics, re-activation, and
+    dormant integration cleanup after retention. Gate: a Commercial/Billing
+    specification exists and is approved — the same prerequisite `PP-D11`
+    and `PP-D26` share.
 43. **PP-D43 — Rollout meta-decision for PP-D27–PP-D42:** sixteen
     operational areas (`PP-D27`–`PP-D42`) surfaced together as one
     operational-model gap, tracked in §20.1 against existing slices
@@ -1860,10 +1999,18 @@ problem, that one proposes the answer.
     represent; `placeIds` is unchanged for read-compatibility. The v1
     `relationKind` registry is exactly the four kinds listed. An
     `unconfirmed` relation displays with a neutral label, never hidden and
-    never shown as equivalent to `verified` (§8.2). As before: a relation
+    never shown as equivalent to `verified`
+    (`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §5). As before: a relation
     never grants management authority or `PublisherRef`, a page-to-Place
     relation never copies or overrides Place geometry, and an Event-owned
     relation to a page is never duplicated here as page authority.
+48. **`PP-D48` — Field-level moderation overlay (Accepted):** §4.5 fixes
+    the closed field/value registry, unique `(pageId, fieldKey)` record,
+    idempotent submission, per-field optimistic revision, atomic
+    submit/approve/reject/clear transitions, bounded rejected-value
+    retention, quarantined-media swap, auditable migration with no raw
+    fallback, and verification-revision revalidation. The public document
+    only reads the effective approved value.
 
 ### 20.1 Decision tracking
 
@@ -1884,13 +2031,13 @@ parameters`) — collapsing that distinction was itself a traceability defect.
 | PP-D03 | **Accepted** (§5.5 transfer flow and `canBecomeManagedPageOwner` predicate) | PP-12 | TBD | — |
 | PP-D04 | **Accepted** (§7 module table is the v1 set) | PP-01 | TBD | — |
 | PP-D05 | **Accepted core**; **Explicitly deferred**: per-market legal defaults | PP-01 | TBD (core); Privacy/Legal (remainder) | Privacy/Legal review completed for each target launch market |
-| PP-D06 | Open | PP-05 | TBD | — |
-| PP-D07 | Open | PP-06 | TBD | — |
+| PP-D06 | **Accepted core** (§12.2, `FollowRelation` shape); shared-vs-separate half blocked on `PP-D44` | PP-05 | TBD (core); joint with `PP-D44` (remainder) | `PP-D44` resolves |
+| PP-D07 | **Explicitly deferred** | PP-06 | Legal | Legal signs off on the recipient-consent basis per target market |
 | PP-D08 | **Accepted core** (naming reuse); **Explicitly deferred**: metric set/attribution/thresholds | PP-07 | TBD (core); Analytics/Privacy (remainder) | A page-metrics spec is written and approved |
 | PP-D09 | **Explicitly deferred** — no canonical Review contract exists anywhere in the repository | PP-08 | Whoever ends up owning the Review contract | That Review contract's own acceptance |
 | PP-D10 | **Accepted core** (insufficient-evidence list); **Explicitly deferred**: sufficient-evidence checklist | PP-12 | TBD (core); Trust & Safety/Legal (remainder) | T&S/Legal defines and approves the acceptable-evidence checklist |
-| PP-D11 | Open | Not yet in roadmap | TBD | — |
-| PP-D12 | Open | n/a (meta-decision) | TBD | — |
+| PP-D11 | **Accepted** (§3.1, architectural constraint only) | Not yet in roadmap | TBD | — |
+| PP-D12 | **Explicitly deferred** | n/a (meta-decision) | Product/release planning | A dedicated release-planning pass after enough of §17 has an accepted status to staff against |
 | PP-D13 | **Accepted** (§4.1 semantic types; wire naming is an implementation-slice detail) | PP-01 | TBD | — |
 | PP-D14 | **Accepted** (§22.1 core; 7-day invite expiry, 24h resend cooldown) | PP-03 | TBD | — |
 | PP-D15 | **Accepted core** (§22.2; Booking boundary per `PP-AC-54`); **Explicitly deferred**: retention window, appeal/re-review timing | PP-12 | TBD (core); Trust & Safety + Legal/Privacy (remainder) | Same gate as `PP-D19`, plus a T&S appeal/re-review SLA design |
@@ -1920,16 +2067,17 @@ parameters`) — collapsing that distinction was itself a traceability defect.
 | PP-D39 | **Explicitly deferred** — cannot be written before `PP-D21`'s provider is selected | PP-11 | Whoever owns `PP-D21`'s partnership decision | A provider is selected |
 | PP-D40 | **Accepted** (standard queued→sent→delivered\|failed→dead-letter pattern) | PP-06 | TBD | — |
 | PP-D41 | **Accepted core** (unique-user canonical count); **Explicitly deferred**: suppression threshold, data-quality remainder | PP-07 | TBD (core); Analytics/Privacy (remainder) | Same gate as `PP-D08` |
-| PP-D42 | Open | PP-10/PP-11 | TBD | — |
+| PP-D42 | **Accepted core** (§3.1, three-separate-facts constraint); **Explicitly deferred**: billing mechanics | PP-10/PP-11 | TBD (core); Commercial/Billing (remainder) | Same gate as `PP-D11`/`PP-D26` — a Commercial/Billing spec exists and is approved |
 | PP-D43 | **Accepted** (§17's existing PP-01–PP-16 mapping promoted to the formal answer) | n/a (meta-decision) | TBD | — |
 | PP-D44 | **Explicitly deferred** — trilateral (`PP-D44`/`VP-D12`/`PCP-D02`), cross-referenced by all three documents; `FollowRelation`/`FollowRef` shape mismatch unresolved | `FOL-01` | A party spanning all three sibling documents | Joint `FollowRelation`/`FollowRef` shape reconciliation with `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s `VP-D12` and `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02`; not resolvable by this document alone |
 | PP-D45 | **Accepted** — deterministic non-AI v1 (category + recurring weekday), inline Create Hub prompt, Event-only | PP-17 | TBD | v1 has no `AI-PLAT-LOCAL-01` dependency; semantic/AI matching is a separate v2+ extension requiring its own Approval |
 | PP-D46 | **Accepted core** (Event-only v1); **Explicitly deferred**: per-type expansion | PP-18 | TBD (core); Product, staged per type (remainder) | Each additional Create type's sensitive-data/migration review completed and approved |
 | PP-D47 | **Accepted** — own record type (§4.4), v1 registry fixed, `unconfirmed` display rule fixed | PP-01/PP-12 | TBD | Depends on `PP-D10`'s claim/merge plan only where a relation's verification state must survive a merge |
+| PP-D48 | **Accepted** — closed typed overlay and lifecycle fixed in §4.5; production persistence remains slice-gated | PP-01 | Product + Trust & Safety | Approved slice supplies storage limits, adapters and production evidence without changing the accepted semantics |
 
 ## 21. Definition of Done
 
-This document may become **Approved** only after PP-D01–D47 are either accepted
+This document may become **Approved** only after PP-D01–D48 are either accepted
 or explicitly deferred with owners and gates (tracked in §20.1).
 
 Professional Page is production Done only when:
@@ -2017,11 +2165,21 @@ contract's decision, not this page-level rule's.
 
 | Trigger | Ordinary mutations (new submissions, edits) | Obligation-serving / recovery-appeal-legal ops* | Page public exposure |
 |---|---|---|---|
-| Verification rejected | Allowed | Allowed | Unaffected (badge only) |
-| Verification revoked | Blocked | Allowed* | Hidden from Discovery |
-| Lifecycle suspended | Blocked | Allowed* | Hidden from Discovery and search |
-| Lifecycle archived | Blocked (read-only) | Allowed* | Out of active Discovery |
-| Deletion/tombstone (PP-D19) | Blocked | Allowed* within retention window | None |
+| Verification rejected | Allowed | Allowed | Not exposed — `rejected` is only reachable from `pending` (§5.2), so the page was never publicly exposed under `PP-D02` to begin with |
+| Verification revoked | Blocked | Allowed* | Not exposed — `PP-D02` requires `verified`; a revoked page no longer qualifies |
+| Lifecycle suspended | Blocked | Allowed* | Not exposed — `PP-D02` requires `active`; a suspended page no longer qualifies |
+| Lifecycle archived | Blocked (read-only) | Allowed* | Not exposed — `PP-D02` requires `active`; an archived page no longer qualifies |
+| Deletion/tombstone (PP-D19) | Blocked | Allowed* within retention window | Not exposed |
+
+`PP-D02` (Accepted) fixes the public-exposure rule for every row above at
+once: a public page exists only for the exact pair `verification ==
+verified` AND `lifecycle == active`; every other combination resolves to
+the same safe not-exposed state, consumed by the resolver in
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §2. This column previously
+used graduated language ("hidden from Discovery," "out of active
+Discovery") that read as merely reduced search visibility rather than full
+non-exposure — corrected, since `PP-D02` draws one hard line, not a
+gradient.
 
 \* "Allowed" in this column means the lifecycle/verification state alone
 does not block the operation — it is the named exception class from
@@ -2086,9 +2244,13 @@ does not reopen `PP-D16`'s accepted product model.
   slug would.
 - A deep link resolved by `id` MUST NOT depend on the current slug at all,
   and is subject to the same exposure-safe not-found rule.
+- A `slug` is globally unique across all pages at any point in time.
+- Rename is limited to once per 30 days per page.
+- Renaming a page never resets its verification standing — verification
+  attaches to the entity (`id`), never to the display string.
 
-Still open: uniqueness/reservation policy, forbidden-name list, rename
-frequency limits, and whether rename affects verification standing.
+The exact forbidden-name/impersonation moderation list is an
+implementation-slice detail (`PP-01`), not an open product decision.
 
 ### 22.5 Concurrent editing (PP-D18)
 
@@ -2160,41 +2322,13 @@ showing what a person may see. It does not override sections 1–21, introduce a
 module/aggregate/Create type or grant authority. Every block remains conditional
 on the owning contract, policy, capability, lifecycle and Approved slice.
 
-### A.1 Public page blocks
+The public-page block inventory and illustrative CTA-by-content-contract
+table moved to
+[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](./PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md)
+§4/§6 — this appendix now covers only the team-workspace surfaces that
+document does not.
 
-Subject to the safe-public-projection rules in §8.2:
-
-- identity header: display name, avatar/cover and safe verification badge;
-- short and full description;
-- primary/secondary service categories, custom activity label and activity
-  tags after PP-D01 is accepted;
-- market/city/operating-area display without private location;
-- safe contacts, website and external links after PP-D05 is accepted;
-- Follow / Contact / Share only when the corresponding relation/policy is
-  available;
-- upcoming and ongoing public content whose aggregate is ready;
-- linked public Places by ID;
-- public past/archive content where the aggregate permits it;
-- gallery/media;
-- Review projection only after the canonical Review contract is approved.
-
-### A.2 Illustrative CTA by content contract
-
-These examples inherit the normative rules referenced in the final column;
-they do not establish new requirements.
-
-| Content contract | Illustrative primary action | Inherited boundary |
-|---|---|---|
-| Event, external handoff | `Register externally` | §13.1: label the external handoff and never claim Recharge confirmation |
-| Event, internal Booking enabled | `Register` | §13.2: only when the authoritative Event ledger/readiness is live |
-| Bookable Session | `Book externally` / `Check with provider` | Internal confirmation appears only after Session-specific availability/Booking authority exists |
-| Route | `Open` / `Save` / `Start route` | Route readiness and navigation semantics remain Route-owned |
-| Public Scenario template | `Open` / `Save a copy` | Personal `Start scenario` is available only on a dated/revalidated personal copy |
-| Rental / Equipment | `Check availability` / `Open provider` | `Reserve` requires a separate approved Rental inventory/reservation contract; Event Booking is insufficient |
-| Collection / Guide | `Open` / `Save` | Read projection; no admission or Booking state |
-| Page with no eligible content | `Follow` / `Contact` / `Share`, when enabled | Do not show a disabled booking CTA as a substitute; fall back to safe page information |
-
-### A.3 Workspace destinations
+### A.1 Workspace destinations
 
 | Destination | Illustrative content |
 |---|---|
@@ -2204,7 +2338,7 @@ they do not establish new requirements.
 | Notifications | Exact-page operational notifications plus clearly separated personal/system items where policy permits |
 | Account | Personal account, Settings, workspace switcher and logout |
 
-### A.4 Required state coverage for design slices
+### A.2 Required state coverage for design slices
 
 A complete visual design derived from this inventory includes the applicable
 §16 states, not only the happy path. At minimum: empty/loading/error, pending
@@ -2271,10 +2405,9 @@ new one.
 
 ## Revision History
 
-Full detail for every version is in
-[`PROFESSIONAL_PAGE_SPEC_CHANGELOG.md`](./PROFESSIONAL_PAGE_SPEC_CHANGELOG.md)
-(same directory). This table is a short pointer, not a substitute — do not
-treat a one-line summary below as the complete rationale for a change.
+Each row is the record — no separate changelog file. Keep summaries short
+but real: what changed and, where it isn't obvious from the spec text
+itself, why.
 
 | Version | Summary |
 |---|---|
@@ -2306,3 +2439,9 @@ treat a one-line summary below as the complete rationale for a change.
 | 2.26 | Integrated the 17 decisions `PROFESSIONAL_PAGE_DECISION_PACKAGE.md` v1.3 resolved (`PP-D27`, `32`, `45`, `46`, `47` fully; `PP-D05`, `08`, `10`, `15`, `19`, `21`, `24`, `26`, `29`, `37`, `38`, `41` as Accepted core / Explicitly deferred remainder) directly into this document, which is now the normative source for them — the decision package becomes a historical rationale record for this scope, not a live source of truth. New §3.5 is the single normative statement of `PP-D27`'s non-Creator staff verification rule; §3.1/§9.1/`PP-AC-68` now reference it instead of restating it. `PP-AC-73`/§22.2 no longer claim ownership transfer is uniform across `suspended`/`archived`/`tombstoned` (`PP-D32`). §7/§14/`PP-17` roadmap/`PP-AC-86`–`89` drop the AI requirement from `PP-D45`'s v1 (deterministic category+weekday matching, inline Create Hub prompt, no `Assist` notification category); §7/`PP-18`/`PP-D46` fix v1 at Event-only, with per-type expansion Explicitly deferred to Product. §4.4's `ManagedPageRelation` (`PP-D47`) is now an accepted, separate entity from `placeIds`, with a locked v1 registry and an `unconfirmed` display state; `PP-AC-94` updated to match. The remaining twelve split decisions each gained an `(Accepted core; ... Explicitly deferred)` tag at their `§20` definition, a matching `§20.1` row with named remainder-owner and reopening gate, and a short pointer in their owning section (§4.2/§8.2/§11/§12.4/§15.1/§15.3/§22.6/§22.8 per `PP-D05`/`08`/`10`/`15`/`19`/`21`/`24`/`26`/`29`/`37`/`38`/`41`'s mapping). 30 decisions remain not yet integrated by this pass. Mechanical verification: `PP-D1`–`47` and `PP-AC1`–`96` unchanged in count, no gaps/duplicates; `§20.1` still has exactly 47 rows; 0 CR bytes; fences balanced. |
 | 2.27 | Integrated the remaining 21 fully-`Accepted` decisions from `PROFESSIONAL_PAGE_DECISION_PACKAGE.md` v1.3's §3/§4 (`PP-D01`, `02`, `03`, `04`, `13`, `14`, `16`, `17`, `18`, `20`, `23`, `25`, `28`, `30`, `31`, `33`, `34`, `35`, `36`, `40`, `43`) and marked `PP-D09`/`39`/`44` `Explicitly deferred` with named owner roles and reopening gates in §20.1 (`PP-D22` was already correctly `Explicitly deferred` from an earlier revision, unrelated to this pass). `PP-D03` needed real new content, not just a status tag: new §5.5 adds the accepted ownership-transfer flow and the `canBecomeManagedPageOwner` predicate (nine conditions, including the ownership-quota check that closes a transfer-based bypass of §5.1's 3-page limit) — §11's stale "ownership transfer... deferred" line corrected to match. The other 20 decisions' content was already substantively present in the document; this pass tags their `§20.1` status and, for `PP-D25`, cross-references the already-existing `PP-AC-66` split (Report vs. personal Block) rather than restating it. Only `PP-D06`, `07`, `11`, `12`, `42` remain `Open` — genuine business/legal/planning calls the decision package itself declines to default, per its own §5. Mechanical verification: status counts now exactly match the decision package's own partition — 25 `Accepted`, 13 `Accepted core`/split, 4 `Explicitly deferred`, 5 `Open`, summing to 47; `PP-D1`–`47`/`PP-AC1`–`96` unchanged in count; `§20.1` still 47 rows; 0 CR bytes; fences balanced. |
 | 2.28 | Corrected stale `PP-D16` prose left behind by v2.27: §20.1 already marked the decision Accepted, but its definition and §22.3 still called move-vs-copy open. Both now state the accepted move-only default, with copy as a separate destination-initiated duplicate; exact co-host capability wire codes remain an Approved `PP-02` slice detail rather than reopening the product decision. Refreshed the sibling snapshot to Creator/Public Creator v1.9. No runtime authorization. |
+| 2.29 | Resolved the last 5 open decisions directly with the product owner and integrated them: `PP-D06` Accepted core (§12.2, `FollowRelation` shape; shared-vs-separate half still blocked on `PP-D44`); `PP-D07` Explicitly deferred to Legal (§12.3, recipient-consent basis); `PP-D11` Accepted (§3.1, architectural constraint only — no Commercial/Billing spec started); `PP-D12` Explicitly deferred (§17, release composition is its own planning pass); `PP-D42` Accepted core / Explicitly deferred remainder (§3.1 constraint accepted, billing mechanics deferred, same gate as `PP-D11`/`PP-D26`). Every one of `PP-D01`–`PP-D47` now carries a disposition in §20.1 — none remain plain `Open` — satisfying §21's literal DoD text for the first time; `Owner` stays `TBD` for several `Accepted` entries, which is a separate, narrower gap from "no disposition at all." Mechanical verification: `§20.1` scanned for any row still starting `Open` returns none; `PP-D1`–`47`/`PP-AC1`–`96` unchanged in count; 0 CR bytes; fences balanced. |
+| 2.30 | Removed `PROFESSIONAL_PAGE_SPEC_CHANGELOG.md` at the product owner's direct instruction — a separate rationale file was judged not worth the maintenance overhead. Revision History below is now the sole record; its own header note updated accordingly. No content, decision or invariant changed. |
+| 2.31 | Split the public-facing projection out of §8.2 and Appendix A.1/A.2 into new `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.0, at the product owner's direct request, mirroring the existing `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`/`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` split. §8.2 is now a short pointer; Appendix A renumbered (A.1 Workspace destinations, A.2 Required state coverage — the two public-facing subsections moved, not merely renamed). §1.1's sibling framing updated to five documents (three personal-identity + a `ManagedPage`-peer pair), §0 item 5's precedence list gained the new document with an explicit tie-break in this document's favor since the new one owns no aggregate. The new document introduces no `PP-D`/`PP-AC` of its own — every rule in it cites back to a decision or invariant owned here. `PROFILE_DOCUMENTS_INDEX.md` was not touched (out of scope per direct instruction) and its own sibling-count framing is now one document behind reality until its own next pass. No decision, invariant or `PP-D`/`PP-AC` content changed — pure content relocation. Mechanical verification: `PP-D1`–`47`/`PP-AC1`–`96` unchanged in count and location; `§20.1` unchanged; 0 CR bytes in both files; fences balanced. |
+| 2.32 | External review of the v2.31 split found the public document was a relocation, not a functional spec, and found three real defects in this document too: stale header `Date` (never updated since 2.0, corrected to 2026-08-16); §5.2 still said public exposure "must be fixed before production implementation" despite `PP-D02` already being Accepted; §22.2's cascade table used graduated language ("hidden from Discovery," "out of active Discovery") that contradicted `PP-D02`'s hard verified+active-only line — corrected every non-`verified+active` row to state "Not exposed" explicitly, with a note explaining why. §0 item 5's blanket "this document always wins" against `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` replaced with the three-rule split that document's own §0.1 now states in parallel: aggregate-invariant conflicts resolve here; pure public-presentation questions are owned there; a genuinely shared unresolved conflict blocks rather than auto-resolving. No `PP-D`/`PP-AC`/`§20.1` content changed. Mechanical verification: `PP-D1`–`47`/`PP-AC1`–`96` unchanged in count; `§20.1` unchanged; 0 CR bytes; fences balanced. |
+| 2.33 | A second external review of the public split found a real self-contradiction here: `PP-D17`'s own definition and §22.4's body still said "still open" for slug uniqueness, rename frequency and verification-reset, while `PP-D17`'s `§20.1` row and the public spec's field table both already called them Accepted — same defect class as the earlier `PP-D16` staleness, now fixed the same way (both `§20` and `§22.4` now state global-unique slug, 1 rename/30 days, rename never resets verification, as `PP-D17`'s Accepted content). Added new §4.5 `ManagedPageFieldModerationOverlay` and `PP-D48` (Open) — the pending/approved/rejected/cleared persisted state a moderated public field needs, which the public spec's §3.1 was implicitly assuming without this document actually defining it; DoD range moves to `PP-D01–D48`. §1.1 corrected: the `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` row no longer claims "no `PP-D`/`PP-AC` of its own" (it now owns its own `PPP-D`/`PPP-AC` track, distinct from redefining a `PP-D`), and its audience description now states team members see the identical public payload rather than reading as if they were excluded from it. Also noted, for an accurate count only: the wider profile-surface ecosystem is six documents as of this revision (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` split its own `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` independently) — this document tracks none of that pair as its own sibling, since neither concerns `ManagedPage`. Mechanical verification: `PP-D1`–`48`/`PP-AC1`–`96` — 48 decisions, no gaps/duplicates; `§20.1` now 48 rows; 0 CR bytes; fences balanced. |
+| 2.34 | Product-owner confirmation integrated the public-page corrections into the canonical model. `PP-D48` is Accepted with a closed typed value union, unique per-field records, idempotent optimistic transitions, bounded rejected-value retention, media quarantine/swap, auditable migration, no raw fallback and verification-revision revalidation; `PP-AC-97` and matching tests make the behavior enforceable. §1.1 now uses the actual six-document, three private/public pair model and refreshes the sibling snapshot. This acceptance authorizes only an Approved bounded slice, never Firebase or production moderation by itself. |

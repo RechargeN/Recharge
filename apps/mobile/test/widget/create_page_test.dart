@@ -95,7 +95,7 @@ void main() {
         createController.state.draft.objectType,
         CreateObjectType.scenario,
       );
-      expect(find.text('Scenario Builder'), findsOneWidget);
+      expect(find.text('Scenario plan'), findsOneWidget);
       expect(handoff.contains('converted-scenario-1'), isFalse);
     },
   );
@@ -628,11 +628,26 @@ void main() {
             routes: <RouteBase>[
               GoRoute(
                 path: RouteNames.create,
-                builder: (context, state) =>
-                    CreatePage(seedParameters: state.uri.queryParameters),
+                builder: (context, state) {
+                  if (state.uri.queryParameters['source'] == 'route_seed') {
+                    return Scaffold(
+                      body: Column(
+                        children: <Widget>[
+                          const Text('Route Create page'),
+                          Text(state.uri.queryParameters['type'] ?? ''),
+                          Text(state.uri.queryParameters['category'] ?? ''),
+                          Text(state.uri.queryParameters['mood'] ?? ''),
+                          Text(state.uri.queryParameters['prompt'] ?? ''),
+                          Text(state.uri.queryParameters['steps'] ?? ''),
+                        ],
+                      ),
+                    );
+                  }
+                  return CreatePage(seedParameters: state.uri.queryParameters);
+                },
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -673,8 +688,8 @@ void main() {
     await tester.tap(find.text('Edit route'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('no-mode'), findsOneWidget);
+    expect(find.text('Route Create page'), findsOneWidget);
+    expect(find.text('route'), findsNWidgets(2));
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(
@@ -688,7 +703,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(

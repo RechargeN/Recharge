@@ -3,19 +3,58 @@ import '../domain/entities/scenario_budget_draft.dart';
 import '../domain/entities/scenario_draft_data.dart';
 import '../domain/entities/scenario_item_draft.dart';
 import '../domain/entities/scenario_logistics_draft.dart';
+import '../domain/entities/scenario_object_intake.dart';
+import '../domain/entities/scenario_transit_mutation.dart';
+import '../domain/entities/scenario_transit_schedule.dart';
 import '../domain/repositories/catalog_object_picker_port.dart';
 import '../domain/usecases/evaluate_scenario_readiness_usecase.dart';
+import '../domain/usecases/apply_scenario_transit_selection_usecase.dart';
+import '../domain/usecases/apply_scenario_object_intake_usecase.dart';
 
 class ScenarioCreateCoordinator {
-  const ScenarioCreateCoordinator({
+  ScenarioCreateCoordinator({
     required IdGenerator idGenerator,
     EvaluateScenarioReadinessUseCase evaluateReadiness =
         const EvaluateScenarioReadinessUseCase(),
+    ApplyScenarioTransitSelectionUseCase? applyTransitSelection,
+    ApplyScenarioObjectIntakeUseCase? applyObjectIntake,
   }) : _idGenerator = idGenerator,
-       _evaluateReadiness = evaluateReadiness;
+       _evaluateReadiness = evaluateReadiness,
+       _applyTransitSelection =
+           applyTransitSelection ??
+           ApplyScenarioTransitSelectionUseCase(
+             idGenerator: idGenerator,
+             evaluateReadiness: evaluateReadiness,
+           ),
+       _applyObjectIntake =
+           applyObjectIntake ??
+           ApplyScenarioObjectIntakeUseCase(
+             idGenerator: idGenerator,
+             evaluateReadiness: evaluateReadiness,
+           );
 
   final IdGenerator _idGenerator;
   final EvaluateScenarioReadinessUseCase _evaluateReadiness;
+  final ApplyScenarioTransitSelectionUseCase _applyTransitSelection;
+  final ApplyScenarioObjectIntakeUseCase _applyObjectIntake;
+
+  ScenarioIntakeResult applyObjectIntake(
+    ApplyScenarioObjectIntakeRequest request,
+  ) => _applyObjectIntake(request);
+
+  ScenarioTransitMutationResult applyTransitSelection(
+    ScenarioDraftData draft, {
+    required int expectedRevision,
+    required ScenarioTransitServiceOption option,
+    String? replaceItemId,
+  }) => _applyTransitSelection(
+    ScenarioTransitMutationRequest(
+      draft: draft,
+      expectedRevision: expectedRevision,
+      option: option,
+      replaceItemId: replaceItemId,
+    ),
+  );
 
   ScenarioDraftData initial({
     required String timezoneId,
@@ -149,21 +188,17 @@ class ScenarioCreateCoordinator {
     ScenarioDraftData draft, {
     required ScenarioTravelMode primaryTravelMode,
     required Set<ScenarioTravelMode> allowedTravelModes,
-    ScenarioVehicleProfileDraft? vehicleProfile,
   }) {
     final Set<ScenarioTravelMode> normalizedModes = <ScenarioTravelMode>{
       ...allowedTravelModes,
       primaryTravelMode,
     };
     final ScenarioVehicleProfileDraft currentVehicle =
-        vehicleProfile ?? draft.constraints.vehicleProfile;
+        draft.constraints.vehicleProfile;
     final ScenarioVehicleProfileDraft normalizedVehicle =
         ScenarioVehicleProfileDraft(
           enabled: normalizedModes.contains(ScenarioTravelMode.car),
-          includeFuelInBudget: currentVehicle.includeFuelInBudget,
           label: currentVehicle.label,
-          litresPer100Km: currentVehicle.litresPer100Km,
-          fuelPricePerLitre: currentVehicle.fuelPricePerLitre,
           passengerSeats: currentVehicle.passengerSeats,
         );
     return _next(
@@ -339,26 +374,6 @@ class ScenarioCreateCoordinator {
     final double distanceM = distanceKm * 1000;
     final List<ScenarioMoneyEstimateDraft> costs =
         <ScenarioMoneyEstimateDraft>[];
-    if (mode == ScenarioTravelMode.car) {
-      final int? fuelMinorUnits = draft.constraints.vehicleProfile
-          .fuelCostMinorUnits(distanceM);
-      if (fuelMinorUnits != null) {
-        costs.add(
-          ScenarioMoneyEstimateDraft(
-            componentCode: 'fuel',
-            knowledge: ScenarioPriceKnowledge.estimated,
-            source: ScenarioPriceSource.userOverride,
-            amount: ScenarioMoneyDraft(
-              minorUnits: fuelMinorUnits,
-              currencyCode: draft.displayCurrencyCode,
-            ),
-            basis: ScenarioPriceBasis.perGroup,
-            observedAtUtc: DateTime.now().toUtc(),
-            confidence: 0.7,
-          ),
-        );
-      }
-    }
     if (otherCostMinorUnits != null && otherCostMinorUnits >= 0) {
       costs.add(
         ScenarioMoneyEstimateDraft(

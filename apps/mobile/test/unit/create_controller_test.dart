@@ -326,6 +326,41 @@ void main() {
   );
 
   test(
+    'offline Scenario save keeps the full draft and remains retryable',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.scenario);
+      controller.updateTitle('Offline Latvia day');
+      controller.addScenarioTimeBlock(title: 'Museum', durationMinutes: 90);
+      controller.addScenarioTimeBlock(title: 'Dinner', durationMinutes: 60);
+      final draftBeforeSave = controller.state.draft;
+      final scenarioBeforeSave = draftBeforeSave.scenarioData;
+      repository.saveError = StateError('offline');
+
+      expect(await controller.saveScenarioToMyScenarios(), isFalse);
+
+      expect(controller.state.saveStatus, CreateSaveStatus.failed);
+      expect(identical(controller.state.draft, draftBeforeSave), isTrue);
+      expect(
+        identical(controller.state.draft.scenarioData, scenarioBeforeSave),
+        isTrue,
+      );
+      expect(controller.state.message, contains('Данные остались в форме'));
+
+      repository.saveError = null;
+      expect(await controller.saveScenarioToMyScenarios(), isTrue);
+      expect(
+        repository._stored?.scenarioData?.items.first.id,
+        'scenario-id-1',
+      );
+    },
+  );
+
+  test(
     'Place flow autosaves, requires warning confirmation, and publishes',
     () async {
       await controller.ensureLoaded(
@@ -412,6 +447,7 @@ class _SequentialIdGenerator implements IdGenerator {
 
 class _FakeCreateRepository implements CreateRepository {
   CreateDraftEntity? _stored;
+  Object? saveError;
 
   @override
   Future<CreateDraftEntity?> loadDraft(String userId) async => _stored;
@@ -434,6 +470,8 @@ class _FakeCreateRepository implements CreateRepository {
 
   @override
   Future<void> saveDraft(String userId, CreateDraftEntity draft) async {
+    final error = saveError;
+    if (error != null) throw error;
     _stored = draft;
   }
 }

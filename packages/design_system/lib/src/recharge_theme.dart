@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 class RechargeTheme {
   const RechargeTheme._();
 
-  static const Color homeBackgroundTop = Color(0xFF064936);
+  // Home hero gradient: top stop now uses the canonical brand green
+  // (#0B3028) instead of the old #064936; middle/bottom stops unchanged.
+  static const Color homeBackgroundTop = Color(0xFF0B3028);
   static const Color homeBackground = Color(0xFF003F32);
   static const Color homeBackgroundBottom = Color(0xFF002C25);
   static const Color homeMuted = Color(0xFFAFC3BC);
@@ -12,7 +14,8 @@ class RechargeTheme {
   static const double homeCardRadius = 12;
   static const double homePillRadius = 28;
 
-  static const Color emerald900 = Color(0xFF003F32);
+  /// Canonical brand color per AGENTS.md ("Основной цвет: #0B3028").
+  static const Color emerald900 = Color(0xFF0B3028);
   static const Color emerald700 = Color(0xFF0E6A57);
   static const Color mint100 = Color(0xFFDDF3EB);
   static const Color mint50 = Color(0xFFF4F8F5);
@@ -33,6 +36,13 @@ class RechargeTheme {
   static const Color profileAccent = emerald900;
   static const double profileCardRadius = 16;
   static const double profileCompactRadius = 12;
+
+  /// Neutral "soft gray" surface used for unselected pills/chips and
+  /// secondary controls in the create-flow visual language.
+  static const Color createSoftGray = Color(0xFFEEF0EC);
+  static const Color createSoftGrayLine = Color(0xFFE1E5DE);
+  static const double createPillRadius = 999;
+  static const double createSectionRadius = 20;
 
   static ThemeData light() {
     const ColorScheme colorScheme = ColorScheme(

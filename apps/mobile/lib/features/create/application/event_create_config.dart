@@ -3,11 +3,13 @@ class EventCreateStepConfig {
     required this.id,
     required this.title,
     required this.description,
+    required this.sectionIds,
   });
 
   final String id;
   final String title;
   final String description;
+  final List<String> sectionIds;
 }
 
 const List<EventCreateStepConfig> eventCreateSteps = <EventCreateStepConfig>[
@@ -15,26 +17,36 @@ const List<EventCreateStepConfig> eventCreateSteps = <EventCreateStepConfig>[
     id: 'basics_media',
     title: 'Basics',
     description: 'Identity, category, description and media',
+    sectionIds: <String>[
+      'event_taxonomy',
+      'event_classification',
+      'event_identity',
+      'event_media',
+    ],
   ),
   EventCreateStepConfig(
     id: 'location_schedule',
     title: 'When & where',
     description: 'Format, location, timezone and occurrences',
+    sectionIds: <String>['event_location', 'event_schedule'],
   ),
   EventCreateStepConfig(
     id: 'requirements',
     title: 'Requirements',
     description: 'Audience, amenities and participation rules',
+    sectionIds: <String>['event_requirements'],
   ),
   EventCreateStepConfig(
     id: 'price_participants',
     title: 'Price & people',
-    description: 'Money, capacity and external registration',
+    description: 'Money, admission, capacity and inventory',
+    sectionIds: <String>['event_pricing', 'event_admission', 'event_inventory'],
   ),
   EventCreateStepConfig(
     id: 'preview_publish',
     title: 'Publish',
     description: 'Preview, readiness and moderation submission',
+    sectionIds: <String>['event_preview', 'event_publish'],
   ),
 ];
 

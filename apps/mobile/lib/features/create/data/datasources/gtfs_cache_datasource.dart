@@ -19,6 +19,15 @@ class CachedGtfsArchive {
   final List<int> bytes;
 }
 
+enum GtfsCacheReadStatus { ready, missing, corrupt }
+
+class GtfsCacheReadResult {
+  const GtfsCacheReadResult({required this.status, this.archive});
+
+  final GtfsCacheReadStatus status;
+  final CachedGtfsArchive? archive;
+}
+
 class GtfsCacheDataSource {
   GtfsCacheDataSource({required Future<Directory> Function() supportDirectory})
     : _supportDirectory = supportDirectory;
@@ -26,11 +35,21 @@ class GtfsCacheDataSource {
   final Future<Directory> Function() _supportDirectory;
 
   Future<CachedGtfsArchive?> read(String providerCode) async {
+    return (await inspect(providerCode)).archive;
+  }
+
+  Future<GtfsCacheReadResult> inspect(String providerCode) async {
     _validateProviderCode(providerCode);
     final directory = await _cacheDirectory();
-    final current = await _readPair(directory, providerCode, suffix: '');
-    if (current != null) return current;
-    return _readPair(directory, providerCode, suffix: '.bak');
+    final current = await _inspectPair(directory, providerCode, suffix: '');
+    if (current.status == GtfsCacheReadStatus.ready) return current;
+    final backup = await _inspectPair(directory, providerCode, suffix: '.bak');
+    if (backup.status == GtfsCacheReadStatus.ready) return backup;
+    if (current.status == GtfsCacheReadStatus.corrupt ||
+        backup.status == GtfsCacheReadStatus.corrupt) {
+      return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
+    }
+    return const GtfsCacheReadResult(status: GtfsCacheReadStatus.missing);
   }
 
   Future<void> write(CachedGtfsArchive archive) async {
@@ -98,13 +117,13 @@ class GtfsCacheDataSource {
     return directory;
   }
 
-  Future<CachedGtfsArchive?> _readPair(
+  Future<GtfsCacheReadResult> _inspectPair(
     Directory directory,
     String providerCode, {
     required String suffix,
   }) {
     final base = _basePath(directory, providerCode);
-    return _readExplicitPair(
+    return _inspectExplicitPair(
       File('$base.zip$suffix'),
       File('$base.json$suffix'),
       providerCode,
@@ -116,13 +135,32 @@ class GtfsCacheDataSource {
     File manifest,
     String expectedProviderCode,
   ) async {
-    if (!zip.existsSync() || !manifest.existsSync()) return null;
+    return (await _inspectExplicitPair(
+      zip,
+      manifest,
+      expectedProviderCode,
+    )).archive;
+  }
+
+  Future<GtfsCacheReadResult> _inspectExplicitPair(
+    File zip,
+    File manifest,
+    String expectedProviderCode,
+  ) async {
+    final zipExists = zip.existsSync();
+    final manifestExists = manifest.existsSync();
+    if (!zipExists && !manifestExists) {
+      return const GtfsCacheReadResult(status: GtfsCacheReadStatus.missing);
+    }
+    if (!zipExists || !manifestExists) {
+      return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
+    }
     try {
       final json =
           jsonDecode(await manifest.readAsString()) as Map<String, dynamic>;
       if (json['schema_version'] != 1 ||
           json['provider_code'] != expectedProviderCode) {
-        return null;
+        return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
       }
       final sourceUrl = json['source_url'] as String?;
       final retrievedAt = DateTime.tryParse(
@@ -133,21 +171,24 @@ class GtfsCacheDataSource {
           Uri.tryParse(sourceUrl)?.scheme != 'https' ||
           retrievedAt == null ||
           expectedDigest == null) {
-        return null;
+        return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
       }
       final bytes = await zip.readAsBytes();
       if (bytes.isEmpty || sha256.convert(bytes).toString() != expectedDigest) {
-        return null;
+        return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
       }
-      return CachedGtfsArchive(
-        providerCode: expectedProviderCode,
-        sourceUrl: sourceUrl,
-        retrievedAtUtc: retrievedAt.toUtc(),
-        sha256: expectedDigest,
-        bytes: List<int>.unmodifiable(bytes),
+      return GtfsCacheReadResult(
+        status: GtfsCacheReadStatus.ready,
+        archive: CachedGtfsArchive(
+          providerCode: expectedProviderCode,
+          sourceUrl: sourceUrl,
+          retrievedAtUtc: retrievedAt.toUtc(),
+          sha256: expectedDigest,
+          bytes: List<int>.unmodifiable(bytes),
+        ),
       );
     } on Object {
-      return null;
+      return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
     }
   }
 

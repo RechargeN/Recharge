@@ -6,8 +6,36 @@ import '../../domain/entities/scenario_logistics_draft.dart';
 class ScenarioDraftMapper {
   const ScenarioDraftMapper._();
 
+  static const Set<String> _knownScheduleSnapshotKeys = <String>{
+    'freshness',
+    'providerCode',
+    'providerDisplayName',
+    'licenseName',
+    'tripId',
+    'routeId',
+    'serviceId',
+    'originStopId',
+    'destinationStopId',
+    'feedSha256',
+    'serviceDate',
+    'feedUpdatedAtUtc',
+    'retrievedAtUtc',
+    'carrierName',
+    'serviceLabel',
+    'originLabel',
+    'destinationLabel',
+    'plannedDeparture',
+    'plannedArrival',
+    'departureSecondsFromServiceDay',
+    'arrivalSecondsFromServiceDay',
+    'departureDayOffset',
+    'arrivalDayOffset',
+    'sourceUrl',
+  };
+
   static const Set<String> _knownRootKeys = <String>{
     'schemaVersion',
+    'updatesEnabled',
     'revision',
     'format',
     'dateMode',
@@ -60,6 +88,7 @@ class ScenarioDraftMapper {
         'public_scenario': ScenarioOriginType.publicScenario,
         'quick_plan_conversion': ScenarioOriginType.quickPlanConversion,
         'collection': ScenarioOriginType.collection,
+        'details': ScenarioOriginType.details,
         'search': ScenarioOriginType.search,
         'smart_search': ScenarioOriginType.smartSearch,
         'map_selection': ScenarioOriginType.mapSelection,
@@ -202,11 +231,7 @@ class ScenarioDraftMapper {
         fallback.displayCurrencyCode,
       ).toUpperCase(),
       party: _party(json['party'], fallback.party),
-      constraints: _constraints(
-        json['constraints'],
-        fallback.constraints,
-        sourceVersion: sourceVersion,
-      ),
+      constraints: _constraints(json['constraints'], fallback.constraints),
       days: _list(json['days']).map(_day).toList(growable: false),
       locations: _list(
         json['locations'],
@@ -218,6 +243,7 @@ class ScenarioDraftMapper {
       origin: _origin(json['origin']),
       capabilities: _capabilities(json['capabilities']),
       unknownFields: unknown,
+      updatesEnabled: _bool(json['updatesEnabled']) ?? fallback.updatesEnabled,
     );
   }
 
@@ -225,6 +251,7 @@ class ScenarioDraftMapper {
     return <String, Object?>{
       ...value.unknownFields,
       'schemaVersion': ScenarioDraftData.currentSchemaVersion,
+      'updatesEnabled': value.updatesEnabled,
       'revision': value.revision,
       'format': _id(_formats, value.format),
       'dateMode': _id(_dateModes, value.dateMode),
@@ -261,9 +288,8 @@ class ScenarioDraftMapper {
 
   static ScenarioConstraintsDraft _constraints(
     Object? value,
-    ScenarioConstraintsDraft fallback, {
-    required int sourceVersion,
-  }) {
+    ScenarioConstraintsDraft fallback,
+  ) {
     final Map<String, Object?> json = _map(value);
     final Set<ScenarioTravelMode> allowed =
         _stringList(json['allowedTravelModes'])
@@ -285,7 +311,6 @@ class ScenarioDraftMapper {
       vehicleProfile: _vehicleProfile(
         json['vehicleProfile'],
         fallback: fallback.vehicleProfile,
-        migrateWithoutProfile: sourceVersion < 2,
         carIsPrimary: primary == ScenarioTravelMode.car,
       ),
       maxWalkingMinutesPerLeg: _int(json['maxWalkingMinutesPerLeg']),
@@ -340,23 +365,14 @@ class ScenarioDraftMapper {
   static ScenarioVehicleProfileDraft _vehicleProfile(
     Object? value, {
     required ScenarioVehicleProfileDraft fallback,
-    required bool migrateWithoutProfile,
     required bool carIsPrimary,
   }) {
     final Map<String, Object?> json = _map(value);
-    if (json.isEmpty && migrateWithoutProfile) {
-      return ScenarioVehicleProfileDraft(
-        enabled: carIsPrimary,
-        includeFuelInBudget: false,
-      );
-    }
     return ScenarioVehicleProfileDraft(
-      enabled: _bool(json['enabled']) ?? fallback.enabled,
-      includeFuelInBudget:
-          _bool(json['includeFuelInBudget']) ?? fallback.includeFuelInBudget,
+      enabled:
+          _bool(json['enabled']) ??
+          (json.isEmpty ? carIsPrimary : fallback.enabled),
       label: _nullableString(json['label']),
-      litresPer100Km: _double(json['litresPer100Km']),
-      fuelPricePerLitre: _money(json['fuelPricePerLitre']),
       passengerSeats: _int(json['passengerSeats']),
     );
   }
@@ -365,12 +381,7 @@ class ScenarioDraftMapper {
     ScenarioVehicleProfileDraft value,
   ) => <String, Object?>{
     'enabled': value.enabled,
-    'includeFuelInBudget': value.includeFuelInBudget,
     'label': value.label,
-    'litresPer100Km': value.litresPer100Km,
-    'fuelPricePerLitre': value.fuelPricePerLitre == null
-        ? null
-        : _moneyToJson(value.fuelPricePerLitre!),
     'passengerSeats': value.passengerSeats,
   };
 
@@ -553,6 +564,14 @@ class ScenarioDraftMapper {
           _enum(_scheduleFreshness, json['freshness']) ??
           ScenarioScheduleFreshness.unknown,
       providerCode: _nullableString(json['providerCode']),
+      providerDisplayName: _nullableString(json['providerDisplayName']),
+      licenseName: _nullableString(json['licenseName']),
+      tripId: _nullableString(json['tripId']),
+      routeId: _nullableString(json['routeId']),
+      serviceId: _nullableString(json['serviceId']),
+      originStopId: _nullableString(json['originStopId']),
+      destinationStopId: _nullableString(json['destinationStopId']),
+      feedSha256: _nullableString(json['feedSha256']),
       serviceDate: _localDate(json['serviceDate']),
       feedUpdatedAtUtc: _dateTime(json['feedUpdatedAtUtc']),
       retrievedAtUtc: _dateTime(json['retrievedAtUtc']),
@@ -562,15 +581,38 @@ class ScenarioDraftMapper {
       destinationLabel: _nullableString(json['destinationLabel']),
       plannedDeparture: _localTime(json['plannedDeparture']),
       plannedArrival: _localTime(json['plannedArrival']),
+      departureSecondsFromServiceDay: _int(
+        json['departureSecondsFromServiceDay'],
+      ),
+      arrivalSecondsFromServiceDay: _int(json['arrivalSecondsFromServiceDay']),
+      departureDayOffset: _int(json['departureDayOffset']),
+      arrivalDayOffset: _int(json['arrivalDayOffset']),
       sourceUrl: _nullableString(json['sourceUrl']),
+      unknownFields: Map<String, Object?>.unmodifiable(
+        Map<String, Object?>.fromEntries(
+          json.entries.where(
+            (MapEntry<String, Object?> entry) =>
+                !_knownScheduleSnapshotKeys.contains(entry.key),
+          ),
+        ),
+      ),
     );
   }
 
   static Map<String, Object?> _scheduleSnapshotToJson(
     ScenarioScheduleSnapshotDraft value,
   ) => <String, Object?>{
+    ...value.unknownFields,
     'freshness': _id(_scheduleFreshness, value.freshness),
     'providerCode': value.providerCode,
+    'providerDisplayName': value.providerDisplayName,
+    'licenseName': value.licenseName,
+    'tripId': value.tripId,
+    'routeId': value.routeId,
+    'serviceId': value.serviceId,
+    'originStopId': value.originStopId,
+    'destinationStopId': value.destinationStopId,
+    'feedSha256': value.feedSha256,
     'serviceDate': _localDateToJson(value.serviceDate),
     'feedUpdatedAtUtc': value.feedUpdatedAtUtc?.toUtc().toIso8601String(),
     'retrievedAtUtc': value.retrievedAtUtc?.toUtc().toIso8601String(),
@@ -580,6 +622,10 @@ class ScenarioDraftMapper {
     'destinationLabel': value.destinationLabel,
     'plannedDeparture': _localTimeToJson(value.plannedDeparture),
     'plannedArrival': _localTimeToJson(value.plannedArrival),
+    'departureSecondsFromServiceDay': value.departureSecondsFromServiceDay,
+    'arrivalSecondsFromServiceDay': value.arrivalSecondsFromServiceDay,
+    'departureDayOffset': value.departureDayOffset,
+    'arrivalDayOffset': value.arrivalDayOffset,
     'sourceUrl': value.sourceUrl,
   };
 
@@ -780,17 +826,23 @@ class ScenarioDraftMapper {
   static ScenarioCostDraft _cost(Object? value) {
     final Map<String, Object?> json = _map(value);
     return ScenarioCostDraft(
-      components: _list(
-        json['components'],
-      ).map(_estimate).toList(growable: false),
+      components: _list(json['components'])
+          .map(_estimate)
+          .where((component) => !_isLegacyFuelComponent(component))
+          .toList(growable: false),
     );
   }
 
-  static Map<String, Object?> _costToJson(
-    ScenarioCostDraft value,
-  ) => <String, Object?>{
-    'components': value.components.map(_estimateToJson).toList(growable: false),
-  };
+  static Map<String, Object?> _costToJson(ScenarioCostDraft value) =>
+      <String, Object?>{
+        'components': value.components
+            .where((component) => !_isLegacyFuelComponent(component))
+            .map(_estimateToJson)
+            .toList(growable: false),
+      };
+
+  static bool _isLegacyFuelComponent(ScenarioMoneyEstimateDraft component) =>
+      component.componentCode.trim().toLowerCase() == 'fuel';
 
   static ScenarioMoneyEstimateDraft _estimate(Object? value) {
     final Map<String, Object?> json = _map(value);

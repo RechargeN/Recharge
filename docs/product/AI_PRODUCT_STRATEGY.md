@@ -1,7 +1,8 @@
 # RECHARGE — AI Product Strategy
 
-Версия: v1.0 (2026-07-30).
-Статус: **Approved product direction; implementation gated**.
+Версия: v1.1 (2026-08-03).
+Статус: **Approved product direction; local foundation implemented,
+production integration gated**.
 
 Этот документ фиксирует AI как общий capability layer Recharge. Он не
 утверждает конкретного AI-провайдера, не разрешает production integration и
@@ -15,6 +16,8 @@
 - [SCENARIO_BUILDER_SPEC.md](SCENARIO_BUILDER_SPEC.md);
 - [SCENARIO_AI_GENERATION_SPEC.md](SCENARIO_AI_GENERATION_SPEC.md);
 - [SCENARIO_CONNECTED_PLANNING_SPEC.md](SCENARIO_CONNECTED_PLANNING_SPEC.md);
+- [AI_PLATFORM_LOCAL_SLICE_SPEC.md](AI_PLATFORM_LOCAL_SLICE_SPEC.md);
+- `docs/adr/0018-provider-neutral-ai-assistance-capability.md`;
 - `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - `docs/architecture/LAUNCH_STATUS.md`;
 - `docs/adr/`.
@@ -50,6 +53,12 @@ AI Scenario Generation является одним из вариантов ис�
 Портфель может расширяться только через обновление продукта и отдельную
 спецификацию. AI не должен молча проникать в существующие flows как
 необъяснимое ранжирование или скрытая мутация.
+
+Общий local/mock foundation `AI-PLAT-LOCAL-01` реализован отдельно от этих
+use cases. Он даёт provider-neutral contracts, versioned prompt registry,
+redaction, bounded validation, kill switches, quota, deterministic fallback
+и zero-cost ledger, но сам не включает ни одного пользовательского AI-flow.
+Scenario, Place и Smart Search к нему этим slice не подключены.
 
 ---
 
@@ -111,7 +120,8 @@ UI обязан показывать существенную разницу м�
 ## 5. Архитектурные границы
 
 1. Domain entities не зависят от OpenAI, другой модели или SDK.
-2. AI provider вызывается через backend/application gateway.
+2. Production AI provider вызывается через backend/application gateway;
+   локальный simulator разрешён только как deterministic zero-cost adapter.
 3. AI получает минимальные typed DTO и tool descriptions, а не прямой доступ
    к Firestore, UI state или секретам.
 4. Tools используют существующие repositories/provider ports.

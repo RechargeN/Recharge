@@ -6,6 +6,7 @@ import 'package:design_system/design_system.dart';
 import '../../../../app/application/visit_history_facade.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/router/route_names.dart';
+import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/identity/account_experience.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -164,6 +165,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onPhotos: () => context.push(RouteNames.settings),
             ),
             const SizedBox(height: 14),
+            ScenarioLibraryPanel(userId: user.id),
+            const SizedBox(height: 14),
             if (roleSummary.isUser)
               _ViewerProfileBody(
                 state: visitedState!,
@@ -189,7 +192,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     queryParameters: const <String, String>{'type': 'route'},
                   ).toString(),
                 ),
-                onScenario: () => context.push(RouteNames.scenarioBuilder),
+                onScenario: () => context.push(
+                  Uri(
+                    path: RouteNames.create,
+                    queryParameters: const <String, String>{'type': 'scenario'},
+                  ).toString(),
+                ),
                 onFindPeople: () => context.push(RouteNames.search),
               )
             else
@@ -389,7 +397,12 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
             onSaved: () => context.push(RouteNames.favorites),
             onSearch: () => context.push(RouteNames.search),
             onCreate: () => context.push(RouteNames.create),
-            onScenario: () => context.push(RouteNames.scenarioBuilder),
+            onScenario: () => context.push(
+              Uri(
+                path: RouteNames.create,
+                queryParameters: const <String, String>{'type': 'scenario'},
+              ).toString(),
+            ),
             onEditScenario: workspaceData.latestScenario == null
                 ? null
                 : () => _openSavedScenario(workspaceData.latestScenario!),
@@ -459,7 +472,12 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
   void _openSavedScenario(FavoriteItemEntity scenario) {
     final String? targetRoute = scenario.targetRoute;
     if (targetRoute == null || targetRoute.trim().isEmpty) {
-      context.push(RouteNames.scenarioBuilder);
+      context.push(
+        Uri(
+          path: RouteNames.create,
+          queryParameters: const <String, String>{'type': 'scenario'},
+        ).toString(),
+      );
       return;
     }
     context.push(targetRoute);
@@ -1233,8 +1251,8 @@ class _LatestCreatedEvents extends StatelessWidget {
               ),
               _ProfileActionRow(
                 icon: Icons.auto_awesome_outlined,
-                title: 'Scenario Builder',
-                subtitle: 'Build a personal plan from intent',
+                title: 'Create Scenario',
+                subtitle: 'Open the Scenario block in Create Hub',
                 onTap: onScenario,
               ),
               _ProfileActionRow(
@@ -2646,7 +2664,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
         _CreatorNextStepData(
           icon: Icons.auto_awesome,
           title: 'Build next route',
-          subtitle: 'Open Scenario Builder for the next generated idea',
+          subtitle: 'Open Quick Plan for the next generated idea',
           onTap: onScenario,
         ),
       );
@@ -3005,20 +3023,20 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
   CreateDraftEntity? publishedDraft,
   CreateDraftEntity currentDraft,
 ) {
-  FavoriteItemEntity? latestScenario;
+  final List<FavoriteItemEntity> visibleFavorites = items
+      .where(
+        (item) =>
+            item.category.trim().toLowerCase() != 'scenario' &&
+            !(item.targetRoute?.contains(RouteNames.legacyScenarioBuilder) ??
+                false),
+      )
+      .toList(growable: false);
   SavedSearchEntity? latestSearch;
   SmartSearchHistoryEntity? latestSmartSearch;
-  int scenarioCount = 0;
   int freeCount = 0;
 
-  for (final FavoriteItemEntity item in items) {
+  for (final FavoriteItemEntity item in visibleFavorites) {
     if (item.isFree) freeCount += 1;
-    if (item.category != 'scenario') continue;
-    scenarioCount += 1;
-    if (latestScenario == null ||
-        item.savedAtUtc.isAfter(latestScenario.savedAtUtc)) {
-      latestScenario = item;
-    }
   }
 
   for (final SavedSearchEntity search in savedSearches) {
@@ -3056,12 +3074,15 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
         );
 
   return _ProfileWorkspaceData(
-    savedCount: items.length + savedSearches.length + smartSearchHistory.length,
-    scenarioCount: scenarioCount,
+    savedCount:
+        visibleFavorites.length +
+        savedSearches.length +
+        smartSearchHistory.length,
+    scenarioCount: 0,
     searchCount: savedSearches.length + smartSearchHistory.length,
-    activityCount: items.length - scenarioCount,
+    activityCount: visibleFavorites.length,
     freeCount: freeCount,
-    latestScenario: latestScenario,
+    latestScenario: null,
     latestSearch: latestSearch,
     latestSmartSearch: latestSmartSearch,
     draftListing: draftListing,
@@ -3170,8 +3191,13 @@ class _PublishedRouteListingContext {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _routeParameters(includeMode: false),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._routeParameters(includeMode: false),
+        'source': 'published_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
@@ -3184,7 +3210,7 @@ class _PublishedRouteListingContext {
 
   Map<String, String> _routeParameters({required bool includeMode}) {
     return <String, String>{
-      if (includeMode) 'mode': 'scenario',
+      if (includeMode) 'mode': 'route',
       'mood': mood,
       'duration': durationMinutes.toString(),
       'free': isFree ? '1' : '0',
@@ -3334,14 +3360,14 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._smartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -3388,8 +3414,13 @@ String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
   );
   if (parseResult != null) {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._smartRouteParameters(parseResult, includeMode: false),
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
   final String prompt = item.prompt.trim().isEmpty
@@ -3412,7 +3443,7 @@ Map<String, String> _smartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -3436,8 +3467,13 @@ String _scenarioBuilderRouteForQuery(
     if (prompt.isNotEmpty) 'prompt': prompt,
   };
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ...params,
+      'source': 'saved_search_route_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
