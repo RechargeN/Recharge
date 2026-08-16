@@ -1,19 +1,30 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.1**
-- Date: **2026-08-15**
+- Version: **0.2**
+- Date: **2026-08-16**
 - Spec status: **Draft — review required**
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
 - Parent architecture: [BCK-01 v0.3](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.1](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.2](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.2 — 2026-08-16
+
+- добавлена компактная review-map из 12 ключевых contract-вопросов без
+  создания параллельного decision registry;
+- добавлена factual delta-таблица Booking v1 → BCK-03 target, сохраняющая
+  Booking compatibility и отдельные authorization gates;
+- fixture matrix сгруппирована по validity, compatibility, behavioral safety
+  и delivery/effects evidence;
+- normative semantics, 64 stable AC, Draft/Absent status и запрет на
+  backend/mobile/Firebase/schema runtime не изменены.
 
 ### v0.1 — 2026-08-15
 
@@ -52,10 +63,31 @@ authorized canonical contract source + fixtures
 Firestore documents, Firebase SDK objects, Dart domain entities и TypeScript
 implementation classes не являются wire contract source.
 
-На дату v0.1 ADR 0019 разрешает language-neutral JSON Schema source только для
+На дату v0.2 ADR 0019 разрешает language-neutral JSON Schema source только для
 Booking. Для остальных domains действующий API Contracts Workflow сохраняет
 Dart-only source, пока отдельный Accepted architecture authorization явно не
 расширит cross-language schema policy.
+
+### 1.1. Ключевые review-вопросы
+
+Это navigation aid для reviewer, а не второй decision package и не замена
+OD/API-DEC registry из §40. Поскольку BCK-03 остаётся Draft, строка `Draft
+rule` означает предлагаемое normative правило, а не Accepted authority.
+
+| ID | Review question | Current disposition | Canonical sections |
+|---|---|---|---|
+| BCK03-RQ-01 | Как разделены command, query, webhook и internal event? | Draft rule: разные profiles, один common standard | §11, §15, §18, §24, §27 |
+| BCK03-RQ-02 | Какие version axes независимы? | Draft rule: contract/API/schema/package/resource/policy/client не смешиваются | §6, §25–26 |
+| BCK03-RQ-03 | Как связан idempotency key с request ID? | Draft mobile v1 rule: `idempotencyKey == requestId` | §12, §15–16 |
+| BCK03-RQ-04 | Как вычисляется canonical request hash? | Semantic inputs fixed; exact algorithm/version Open in API-DEC-03 | §16, §40 |
+| BCK03-RQ-05 | Что означает mutation timeout? | Draft rule: unknown outcome; retry exact same key/payload | §21 |
+| BCK03-RQ-06 | Как различаются success, cancelled и failure? | Draft rule: three outcomes; error only for failure | §13–14 |
+| BCK03-RQ-07 | Что additive, breaking, deprecated или retired? | Draft compatibility and migration rules | §25–26 |
+| BCK03-RQ-08 | Как работает minimum supported client? | Behavior fixed in Draft; bootstrap/offline mechanism Open in API-DEC-04 | §26, §40 |
+| BCK03-RQ-09 | Как доказывается Dart/TypeScript parity? | Required for ADR-authorized cross-language contracts; expansion gated by API-DEC-05 | §9, §35–37, §40 |
+| BCK03-RQ-10 | Как выглядит cross-domain event/outbox contract? | Proposed OD-09; not Accepted and no runtime | §27, §40 |
+| BCK03-RQ-11 | Какие payload/page/batch limits действуют? | Bounded Draft defaults/proposals; production tuning requires BCK-05/load evidence | §19–20, §38 |
+| BCK03-RQ-12 | Как исключается resource enumeration? | Draft common boundary; exact resource mapping delegated to BCK-04/domain | §14, §22–23 |
 
 ## 2. Product outcome
 
@@ -141,7 +173,7 @@ evidence of completion.
 
 | Area | Current evidence | Gap | Required response |
 |---|---|---|---|
-| Package | `packages/api_contracts` существует | Нет platform-wide contract registry | Определить target registry, не создавать runtime в v0.1 |
+| Package | `packages/api_contracts` существует | Нет platform-wide contract registry | Определить target registry, не создавать runtime в v0.2 |
 | Language-neutral schema | `schema/booking/v1/*.schema.json` | Только Booking namespace | Расширять `schema/<domain>/vN` по Approved domain specs |
 | JSON Schema | Draft 2020-12, `$id`, `$defs`, bounded fields | Нет общего cross-domain convention | Зафиксировать в §9 |
 | Fixtures | valid/invalid/forward Booking fixtures | Нет общей fixture taxonomy | Определить в §36–37 |
@@ -846,7 +878,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.1: **Proposed — not Accepted**
+- Status in BCK-03 v0.2: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -1045,6 +1077,18 @@ packages/api_contracts/schema/booking/v1/
   fixtures/{valid,invalid,forward}.json
 ```
 
+Factual compatibility delta:
+
+| Booking v1 today | BCK-03 target | Required treatment |
+|---|---|---|
+| `booking_result.kind`: Booking-specific outcome union | Common `success/cancelled/failure` envelope | Preserve v1; use explicit adapter or a separately approved new major, never double-wrap silently |
+| Booking-specific error names and result kinds | Common code plus namespaced `domainCode` | Maintain tested mapping; no in-place rename in this documentation slice |
+| `common.schema.json` is inside `booking/v1` | Conditional future platform primitives | Do not move or duplicate it until API-DEC-05 closes through Accepted architecture authorization |
+| `requestId` and idempotency semantics are fixture-verified | Mobile v1 requires `idempotencyKey == requestId` | Preserve equality; a split-key model requires a future explicit version/reconciliation |
+| Fixtures are `valid`, `invalid`, `forward` | Target adds broader compatibility/behavior evidence | Add only through an Approved executable contract change; missing fixture is a gap, not runtime failure |
+| Dart DTO/validator evidence exists | Future Dart/TypeScript parity | TypeScript consumer remains target-only until backend/tooling authorization |
+| `applicationFields` permits an open object | Production payloads must be bounded/classified | Define a bounded domain schema before production use; do not treat openness as authority |
+
 Rules:
 
 1. No rename/move in BCK-03 documentation slice.
@@ -1095,7 +1139,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No file in this map is created by BCK-03 v0.1 except this Markdown spec.
+No file in this map is created by BCK-03 v0.2 except this Markdown spec.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
 
@@ -1128,6 +1172,19 @@ Every contract version supplies applicable fixtures:
 
 Synthetic fixture IDs/content only; no production data.
 
+Evidence groups make fixture intent explicit:
+
+| Group | Fixtures/evidence | What it proves |
+|---|---|---|
+| Validity | valid-minimal/full, invalid-type/required/bound/unknown-command-field | Schema accepts intended bounded input and rejects malformed or unsafe input |
+| Temporal compatibility | forward-response, unknown-critical-enum, old-client | N/N-1 behavior is explicit; critical authority/money/eligibility drift fails closed |
+| Behavioral safety | idempotency same/different hash, stale revision, timeout-after-commit | Retry and concurrency cannot duplicate or silently overwrite mutation |
+| Delivery/effects | event duplicate, gap/out-of-order, replay/poison tests | At-least-once delivery cannot create duplicate or blind out-of-order effects |
+
+For every authorized cross-language contract, Dart and TypeScript validators
+consume the same committed fixture bytes and must produce the same verdict.
+Compilation alone or language-specific replacement fixtures are inconclusive.
+
 ## 37. Test and evidence requirements
 
 | Test family | Required evidence |
@@ -1149,11 +1206,11 @@ Mandatory backend-gate applicability:
 
 | Gate family | BCK-03 applicability |
 |---|---|
-| Emulator | Required when a transport/idempotency/event executable slice exists; not applicable to docs-only v0.1 |
+| Emulator | Required when a transport/idempotency/event executable slice exists; not applicable to docs-only v0.2 |
 | Firestore/Storage Rules | Negative direct-access tests belong to BCK-04/domain runtime; BCK-03 verifies no Rules shape leaks into API |
 | Security | Required for claims, enumeration, payload bounds, malformed schemas and rate outcomes |
 | Load/soak | Required before production for validation, pagination, idempotency and event throughput; values owned by BCK-05 |
-| Backup/DR | Contract artifacts must be reproducibly rebuilt; data restore belongs to BCK-05/domain and is not applicable to docs-only v0.1 |
+| Backup/DR | Contract artifacts must be reproducibly rebuilt; data restore belongs to BCK-05/domain and is not applicable to docs-only v0.2 |
 | Reconciliation | Required for Booking v1 adoption, event gaps/replay and old/new consumer compatibility |
 
 Timeout, skipped consumer, hand-checked JSON or successful compile alone is
@@ -1225,7 +1282,7 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.1 registry reflects BCK-01/BCK-03 actual statuses;
+- BCK-02 v2.4.2 registry reflects BCK-01/BCK-03 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
 - BCK-09 compatibility conflicts listed;
 - BCK-04/05/18 owners review their delegated boundaries;
@@ -1233,7 +1290,7 @@ BCK-03 may enter Review only when:
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.1 status: **Draft; not yet Review**.
+Current v0.2 status: **Draft; not yet Review**.
 
 ## 42. Definition of Done BCK-03
 
@@ -1326,14 +1383,14 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.1 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.2 leaves backend/Firebase/mobile runtime unchanged.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.1 the following remain absent:
+At v0.2 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1355,7 +1412,7 @@ BCK-03 does not claim them as general backend runtime.
 Before BCK-03 Review:
 
 1. move BCK-01 to Review after its reconciliation/sign-off;
-2. verify BCK-02 v2.4.1 registry status;
+2. verify BCK-02 v2.4.2 registry status;
 3. prepare BCK-04 Security/Privacy, BCK-05 Operations and BCK-20 Reference
    Data/Localization drafts;
 4. obtain named review from BCK-04/05/18 and Booking owners;
@@ -1368,7 +1425,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.1 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.2 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any
