@@ -1,4 +1,7 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
 import '../../application/event_create_config.dart';
@@ -35,14 +38,25 @@ class EventCreateBlock extends StatelessWidget {
       );
     }
     final int step = state.eventStep;
+    final EventCreateStepConfig stepConfig = eventCreateSteps[step];
     return Column(
       key: const Key('event-create-block'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         EventTemplatePanel(controller: controller),
-        const SizedBox(height: 12),
-        _StepHeader(step: step, onSelected: controller.goToEventStep),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        CreateFlowProgressBar(
+          stepCount: eventCreateSteps.length,
+          currentStep: step,
+        ),
+        const SizedBox(height: 8),
+        CreateFlowStepLabel(
+          stepNumber: step + 1,
+          stepCount: eventCreateSteps.length,
+          title: stepConfig.title,
+          description: stepConfig.description,
+        ),
+        const SizedBox(height: 14),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 180),
           child: switch (step) {
@@ -67,7 +81,6 @@ class EventCreateBlock extends StatelessWidget {
     EventDraftData event,
   ) => _EventCard(
     key: const ValueKey<String>('event-step-basics'),
-    title: '1. Basics & media',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -153,7 +166,6 @@ class EventCreateBlock extends StatelessWidget {
 
   Widget _schedule(BuildContext context, EventDraftData event) => _EventCard(
     key: const ValueKey<String>('event-step-schedule'),
-    title: '2. Location & schedule',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -208,7 +220,7 @@ class EventCreateBlock extends StatelessWidget {
                     signed: true,
                   ),
                   onChanged: (String value) => controller.updateEventLocation(
-                    latitude: double.tryParse(value.replaceAll(',', '.')),
+                    latitude: parseLocaleDecimalInput(value),
                     clearLatitude: value.trim().isEmpty,
                   ),
                 ),
@@ -224,7 +236,7 @@ class EventCreateBlock extends StatelessWidget {
                     signed: true,
                   ),
                   onChanged: (String value) => controller.updateEventLocation(
-                    longitude: double.tryParse(value.replaceAll(',', '.')),
+                    longitude: parseLocaleDecimalInput(value),
                     clearLongitude: value.trim().isEmpty,
                   ),
                 ),
@@ -308,7 +320,7 @@ class EventCreateBlock extends StatelessWidget {
             value: _time(event.startMinute),
             error: _error('startMinute'),
             onChanged: (String value) {
-              final int? minute = _minute(value);
+              final int? minute = parseClockMinute(value);
               if (minute != null) {
                 controller.updateEventSchedule(startMinute: minute);
               }
@@ -401,19 +413,17 @@ class EventCreateBlock extends StatelessWidget {
             spacing: 6,
             children: List<Widget>.generate(7, (int index) {
               final int weekday = index + 1;
-              return FilterChip(
+              return CreateFlowChip(
                 key: Key('event-weekday-$weekday'),
-                label: Text(
-                  const <String>[
-                    'Mon',
-                    'Tue',
-                    'Wed',
-                    'Thu',
-                    'Fri',
-                    'Sat',
-                    'Sun',
-                  ][index],
-                ),
+                label: const <String>[
+                  'Mon',
+                  'Tue',
+                  'Wed',
+                  'Thu',
+                  'Fri',
+                  'Sat',
+                  'Sun',
+                ][index],
                 selected: rule.weekdays.contains(weekday),
                 onSelected: (bool selected) {
                   final Set<int> days = <int>{...rule.weekdays};
@@ -476,7 +486,6 @@ class EventCreateBlock extends StatelessWidget {
   Widget _requirements(BuildContext context, EventDraftData event) =>
       _EventCard(
         key: const ValueKey<String>('event-step-requirements'),
-        title: '3. Requirements & amenities',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -493,9 +502,9 @@ class EventCreateBlock extends StatelessWidget {
               runSpacing: 6,
               children: eventAmenityTaxonomy
                   .map(
-                    (EventAmenityDefinition item) => FilterChip(
+                    (EventAmenityDefinition item) => CreateFlowChip(
                       key: Key('event-amenity-${item.id}'),
-                      label: Text(item.label),
+                      label: item.label,
                       selected: event.amenityIds.contains(item.id),
                       onSelected: (bool selected) =>
                           controller.setEventAmenity(item.id, selected),
@@ -566,7 +575,6 @@ class EventCreateBlock extends StatelessWidget {
 
   Widget _price(BuildContext context, EventDraftData event) => _EventCard(
     key: const ValueKey<String>('event-step-price'),
-    title: '4. Price & participants',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -697,7 +705,6 @@ class EventCreateBlock extends StatelessWidget {
         .toList(growable: false);
     return _EventCard(
       key: const ValueKey<String>('event-step-preview'),
-      title: '5. Preview & publish',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -783,39 +790,50 @@ class EventCreateBlock extends StatelessWidget {
     );
   }
 
-  Widget _navigation(int step) => Row(
-    children: <Widget>[
-      if (step > 0)
-        Expanded(
-          child: OutlinedButton(
-            key: const Key('event-step-back'),
-            onPressed: () => controller.goToEventStep(step - 1),
-            child: const Text('Back'),
-          ),
-        ),
-      if (step > 0) const SizedBox(width: 8),
-      Expanded(
-        child: OutlinedButton.icon(
-          key: const Key('event-save-draft'),
-          onPressed: state.status == CreateStatus.saving
+  // Step 4 (preview) has its own dedicated "Send for review" CTA inside
+  // _preview(), so the shared bottom bar only offers Back/Save draft there.
+  Widget _navigation(int step) => step < 4
+      ? CreateFlowBottomBar(
+          onBackPressed: step > 0
+              ? () => controller.goToEventStep(step - 1)
+              : null,
+          backKey: const Key('event-step-back'),
+          secondaryLabel: 'Save draft',
+          secondaryKey: const Key('event-save-draft'),
+          onSecondaryPressed: state.status == CreateStatus.saving
               ? null
               : controller.saveDraft,
-          icon: const Icon(Icons.save_outlined),
-          label: const Text('Save draft'),
-        ),
-      ),
-      if (step < 4) ...<Widget>[
-        const SizedBox(width: 8),
-        Expanded(
-          child: FilledButton(
-            key: const Key('event-step-next'),
-            onPressed: () => controller.goToEventStep(step + 1),
-            child: const Text('Continue'),
-          ),
-        ),
-      ],
-    ],
-  );
+          primaryKey: const Key('event-step-next'),
+          primaryLabel: 'Continue',
+          onPrimaryPressed: () => controller.goToEventStep(step + 1),
+        )
+      : Row(
+          children: <Widget>[
+            Expanded(
+              child: TextButton.icon(
+                key: const Key('event-step-back'),
+                onPressed: () => controller.goToEventStep(step - 1),
+                icon: const Icon(Icons.arrow_back, size: 16),
+                label: const Text('Back'),
+                style: TextButton.styleFrom(
+                  foregroundColor: RechargeTheme.mutedInk,
+                ),
+              ),
+            ),
+            Expanded(
+              child: TextButton(
+                key: const Key('event-save-draft'),
+                onPressed: state.status == CreateStatus.saving
+                    ? null
+                    : controller.saveDraft,
+                style: TextButton.styleFrom(
+                  foregroundColor: RechargeTheme.emerald900,
+                ),
+                child: const Text('Save draft'),
+              ),
+            ),
+          ],
+        );
 
   String? _error(String fieldId) {
     for (final EventValidationIssue issue in state.eventValidationIssues) {
@@ -825,78 +843,13 @@ class EventCreateBlock extends StatelessWidget {
   }
 }
 
-class _StepHeader extends StatelessWidget {
-  const _StepHeader({required this.step, required this.onSelected});
-
-  final int step;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: 'Event creation step ${step + 1} of ${eventCreateSteps.length}',
-    child: SizedBox(
-      height: 74,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: eventCreateSteps.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (BuildContext context, int index) {
-          final EventCreateStepConfig item = eventCreateSteps[index];
-          return ChoiceChip(
-            key: Key('event-step-${item.id}'),
-            selected: step == index,
-            onSelected: (_) => onSelected(index),
-            label: SizedBox(
-              width: 118,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(item.title, overflow: TextOverflow.ellipsis),
-                  Text(
-                    item.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
-
 class _EventCard extends StatelessWidget {
-  const _EventCard({super.key, this.title, required this.child});
+  const _EventCard({super.key, required this.child});
 
-  final String? title;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Card(
-    clipBehavior: Clip.antiAlias,
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          if (title != null) ...<Widget>[
-            Text(
-              title!,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-          ],
-          child,
-        ],
-      ),
-    ),
-  );
+  Widget build(BuildContext context) => CreateFlowSection(child: child);
 }
 
 class _EventGalleryEditor extends StatefulWidget {
@@ -1066,7 +1019,20 @@ class _TextFieldState extends State<_TextField> {
       decoration: InputDecoration(
         labelText: widget.label,
         errorText: widget.error,
-        border: const OutlineInputBorder(),
+        filled: true,
+        fillColor: RechargeTheme.createSoftGray,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: RechargeTheme.emerald900, width: 1.6),
+        ),
       ),
       onChanged: widget.onChanged,
     ),
@@ -1099,7 +1065,20 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         errorText: error,
-        border: const OutlineInputBorder(),
+        filled: true,
+        fillColor: RechargeTheme.createSoftGray,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: RechargeTheme.emerald900, width: 1.6),
+        ),
       ),
       items: values
           .map(
@@ -1148,23 +1127,7 @@ String _time(int minuteOfDay) =>
     '${(minuteOfDay ~/ 60).toString().padLeft(2, '0')}:'
     '${(minuteOfDay % 60).toString().padLeft(2, '0')}';
 
-int? _minute(String value) {
-  final List<String> parts = value.trim().split(':');
-  if (parts.length != 2) return null;
-  final int? hour = int.tryParse(parts[0]);
-  final int? minute = int.tryParse(parts[1]);
-  if (hour == null ||
-      minute == null ||
-      hour < 0 ||
-      hour > 23 ||
-      minute < 0 ||
-      minute > 59) {
-    return null;
-  }
-  return hour * 60 + minute;
-}
-
 int? _minor(String value) {
-  final double? parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+  final double? parsed = parseLocaleDecimalInput(value);
   return parsed == null ? null : (parsed * 100).round();
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
@@ -2691,7 +2692,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateBasePrice(String value) {
-    final double? parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final double? parsed = parseLocaleDecimalInput(value);
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,
@@ -3876,7 +3877,7 @@ class CreateController extends ChangeNotifier {
   }
 
   static double? _parseDouble(String value) {
-    return double.tryParse(value.trim().replaceAll(',', '.'));
+    return parseLocaleDecimalInput(value);
   }
 
   String _localId() =>

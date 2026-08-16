@@ -138,6 +138,37 @@ void main() {
     );
   });
 
+  test('allows multiple occurrences from the same category', () {
+    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioStepEntity suggestion = controller.state.draft.steps.first;
+    final int before = controller.state.draft.steps.length;
+
+    controller.addSuggestedStep(suggestion);
+    controller.addSuggestedStep(suggestion);
+
+    final added = controller.state.draft.steps.skip(before).toList();
+    expect(added, hasLength(2));
+    expect(added.map((step) => step.category).toSet(), <String>{
+      suggestion.category,
+    });
+    expect(added.map((step) => step.id).toSet(), hasLength(2));
+  });
+
+  test('suggestions do not suppress an already used category or object', () {
+    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioStepEntity existing = controller.state.draft.steps.first;
+    controller.applySeed(
+      mood: ScenarioMood.calm,
+      maxDurationMinutes: 720,
+      stepCategories: <String>[existing.category],
+    );
+
+    expect(
+      controller.suggestedSteps.map((step) => step.category),
+      contains(existing.category),
+    );
+  });
+
   test('route fit reports overloaded seeded route', () {
     final ScenarioBuilderController controller = ScenarioBuilderController();
 

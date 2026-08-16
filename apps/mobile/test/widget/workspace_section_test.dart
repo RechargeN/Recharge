@@ -18,7 +18,7 @@ import 'package:recharge/features/identity/domain/usecases/create_professional_p
 import 'package:recharge/features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import 'package:recharge/features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
 import 'package:recharge/features/identity/domain/usecases/select_workspace_usecase.dart';
-import 'package:recharge/features/identity/presentation/pages/workspace_switcher_page.dart';
+import 'package:recharge/features/identity/presentation/widgets/workspace_section.dart';
 
 void main() {
   testWidgets(
@@ -55,7 +55,14 @@ void main() {
               (Ref ref) => controller,
             ),
           ],
-          child: const MaterialApp(home: WorkspaceSwitcherPage(userId: userId)),
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: WorkspaceSection(userId: userId),
+              ),
+            ),
+          ),
         ),
       );
       await tester.pumpAndSettle();

@@ -1,6 +1,6 @@
 # RECHARGE — Product Vision (полное продуктовое видение)
 
-Версия: 2026-07-30. Приоритет документа: 4 (после ADR, slice spec,
+Версия: 2026-08-11. Приоритет документа: 4 (после ADR, slice spec,
 LAUNCH_STATUS — см. AGENTS.md). Описывает ЦЕЛЕВОЕ состояние продукта.
 Фактические статусы реализации — в AGENTS.md.
 
@@ -18,12 +18,15 @@ ADR 0013 и обязательная identity/publisher policy по ADR 0015.
 Роль, рабочий контекст и publisher — три разные оси.
 
 1. **User (Viewer)** — базовый личный профиль с обязательной авторизацией.
-   НЕ отправляет и не публикует контент.
-   Может: поиск, просмотр, участие, отзывы, избранное.
+   НЕ отправляет контент на модерацию и не публикует его в Discover/каталог.
+   Может: поиск, просмотр, участие, отзывы, избранное, а также
+   создание, редактирование и хранение собственных личных Scenario.
+   Для личного Scenario Creator verification и publisher не требуются;
+   Creator capability нужна только для публикации в Discover.
    Auth: Google / Apple Sign-In; unauthenticated guest mode отсутствует.
    Может сохранить разрешённый локальный pre-verification draft, но Submit и
    Publish заблокированы.
-   Профиль: Visited places, Photos, Saved list, Upgrade account.
+   Профиль: My scenarios, Visited places, Photos, Saved list, Upgrade account.
 
 2. **Creator** — после отдельной дополнительной identity verification.
    Google/Apple account, verified email или телефон сами по себе не дают

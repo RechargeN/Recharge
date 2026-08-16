@@ -85,7 +85,7 @@ void main() {
       initial: <FavoriteItemEntity>[
         _favorite('evt_1', 'Утренняя йога'),
         _favorite('place_1', 'Кофейня', category: 'place'),
-        _favorite('route_1', 'Тихий маршрут', category: 'scenario'),
+        _favorite('route_1', 'Тихий маршрут', category: 'route'),
       ],
     );
     final controller = FavoritesController(
@@ -126,7 +126,7 @@ void main() {
     expect(find.text('Кофейня'), findsNothing);
   });
 
-  fullPageTestWidgets('opens saved scenario in builder', (tester) async {
+  fullPageTestWidgets('removes saved Scenario from Favorites', (tester) async {
     final repository = _FakeFavoritesRepository(
       initial: <FavoriteItemEntity>[
         _favorite(
@@ -134,7 +134,7 @@ void main() {
           'Calm recharge scenario',
           category: 'scenario',
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=active&steps=sport.tennis',
+              '${RouteNames.legacyScenarioBuilder}?mood=active&steps=sport.tennis',
         ),
       ],
     );
@@ -162,7 +162,7 @@ void main() {
                 builder: (context, state) => const FavoritesPage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) =>
                     const Scaffold(body: Center(child: Text('Builder page'))),
               ),
@@ -173,17 +173,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ROUTE'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('More actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.text('Calm recharge scenario'), findsNothing);
+    expect(find.text('ROUTE'), findsNothing);
   });
 
-  fullPageTestWidgets('opens saved scenario route on map', (tester) async {
+  fullPageTestWidgets('does not expose saved Scenario map actions', (
+    tester,
+  ) async {
     final repository = _FakeFavoritesRepository(
       initial: <FavoriteItemEntity>[
         _favorite(
@@ -191,7 +187,7 @@ void main() {
           'Calm recharge scenario',
           category: 'scenario',
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&steps=food_drinks.coffee',
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&steps=food_drinks.coffee',
         ),
       ],
     );
@@ -237,16 +233,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ROUTE'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('More actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('Calm recharge scenario'), findsNothing);
+    expect(find.byTooltip('More actions'), findsNothing);
   });
 
   fullPageTestWidgets('opens saved conditions from favorites workspace', (
@@ -289,14 +277,7 @@ void main() {
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('art'), findsOneWidget);
 
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Build route from saved conditions'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.textContaining('museum'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved conditions'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -356,14 +337,7 @@ void main() {
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('art'), findsOneWidget);
 
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -412,14 +386,7 @@ void main() {
     expect(find.text('120 min'), findsOneWidget);
     expect(find.text('2 stops'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text(prompt), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -427,7 +394,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -436,10 +403,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
 }
@@ -511,7 +478,7 @@ class _FavoritesRouteTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Column(
                   children: <Widget>[

@@ -9,21 +9,38 @@ import '../../domain/entities/managed_page_entity.dart';
 import '../../domain/entities/managed_page_membership_entity.dart';
 import '../../domain/entities/workspace_ref.dart';
 
-class WorkspaceSwitcherPage extends ConsumerStatefulWidget {
-  const WorkspaceSwitcherPage({super.key, required this.userId});
+/// Self-contained "switch workspace" section: personal profile, Professional
+/// Pages, page creation/limit request and admin preview. Designed to be
+/// embedded inline (e.g. in Settings) instead of pushed as a separate route.
+class WorkspaceSection extends ConsumerStatefulWidget {
+  const WorkspaceSection({super.key, required this.userId});
 
   final String userId;
 
   @override
-  ConsumerState<WorkspaceSwitcherPage> createState() =>
-      _WorkspaceSwitcherPageState();
+  ConsumerState<WorkspaceSection> createState() => _WorkspaceSectionState();
 }
 
-class _WorkspaceSwitcherPageState extends ConsumerState<WorkspaceSwitcherPage> {
+class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
+  String? _loadKey;
+
   @override
   void initState() {
     super.initState();
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(covariant WorkspaceSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) _scheduleLoad();
+  }
+
+  void _scheduleLoad({bool force = false}) {
+    if (!force && _loadKey == widget.userId) return;
+    _loadKey = widget.userId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(identityWorkspaceControllerProvider).ensureLoaded(widget.userId);
     });
   }
@@ -33,42 +50,42 @@ class _WorkspaceSwitcherPageState extends ConsumerState<WorkspaceSwitcherPage> {
     final controller = ref.watch(identityWorkspaceControllerProvider);
     final IdentityWorkspaceState state = controller.state;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Switch workspace')),
-      body: switch (state.status) {
-        IdentityWorkspaceStatus.initial || IdentityWorkspaceStatus.loading =>
-          const Center(child: CircularProgressIndicator()),
-        IdentityWorkspaceStatus.error => _WorkspaceError(
-          message: state.message ?? 'Unable to load workspaces',
-          onRetry: () => controller.ensureLoaded(widget.userId),
-        ),
-        IdentityWorkspaceStatus.ready ||
-        IdentityWorkspaceStatus.switching ||
-        IdentityWorkspaceStatus.creatingPage ||
-        IdentityWorkspaceStatus.requestingLimit => _WorkspaceList(
-          state: state,
-          onSelect: (WorkspaceRef workspace) async {
-            final bool selected = await controller.selectWorkspace(workspace);
-            if (!context.mounted) return;
-            final String message = controller.state.message ?? '';
-            if (message.isNotEmpty) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(message)));
-            }
-            if (selected) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
-          },
-          onCreatePage: () => _createPage(context),
-          onRequestAdditionalPage: () => _requestAdditionalPage(context),
-          onPreview: (AdminExperiencePreview preview) {
-            controller.selectAdminPreview(preview);
-          },
-          onAdminTools: () => _showAdminAccess(context),
-        ),
-      },
-    );
+    return switch (state.status) {
+      IdentityWorkspaceStatus.initial ||
+      IdentityWorkspaceStatus.loading => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      IdentityWorkspaceStatus.error => _WorkspaceError(
+        message: state.message ?? 'Unable to load workspaces',
+        onRetry: () => _scheduleLoad(force: true),
+      ),
+      IdentityWorkspaceStatus.ready ||
+      IdentityWorkspaceStatus.switching ||
+      IdentityWorkspaceStatus.creatingPage ||
+      IdentityWorkspaceStatus.requestingLimit => _WorkspaceList(
+        state: state,
+        onSelect: (WorkspaceRef workspace) async {
+          final bool selected = await controller.selectWorkspace(workspace);
+          if (!context.mounted) return;
+          final String message = controller.state.message ?? '';
+          if (message.isNotEmpty) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          }
+          if (selected) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          }
+        },
+        onCreatePage: () => _createPage(context),
+        onRequestAdditionalPage: () => _requestAdditionalPage(context),
+        onPreview: (AdminExperiencePreview preview) {
+          controller.selectAdminPreview(preview);
+        },
+        onAdminTools: () => _showAdminAccess(context),
+      ),
+    };
   }
 
   Future<void> _createPage(BuildContext context) async {
@@ -146,8 +163,8 @@ class _WorkspaceList extends StatelessWidget {
     final WorkspaceRef active =
         state.activeWorkspace ?? WorkspaceRef.personal(state.userId);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         const _SectionLabel('PERSONAL'),
         const SizedBox(height: 8),

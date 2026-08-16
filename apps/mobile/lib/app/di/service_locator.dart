@@ -137,12 +137,16 @@ import '../../features/explore/domain/usecases/save_profile_editable_usecase.dar
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
+import '../../features/identity/data/datasources/public_professional_page_local_datasource.dart';
 import '../../features/identity/data/repositories/identity_workspace_repository_impl.dart';
+import '../../features/identity/data/repositories/public_professional_page_repository_impl.dart';
 import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
+import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
 import '../../features/identity/domain/usecases/create_professional_page_usecase.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
 import '../../features/identity/domain/usecases/select_workspace_usecase.dart';
+import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
@@ -252,11 +256,21 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<IdentityWorkspaceLocalDataSource>(
       () => IdentityWorkspaceLocalDataSource(sl()),
     )
+    ..registerLazySingleton<PublicProfessionalPageLocalDataSource>(
+      () => PublicProfessionalPageLocalDataSource(sl()),
+    )
     ..registerLazySingleton<IdentityWorkspaceRepository>(
       () => IdentityWorkspaceRepositoryImpl(
         localDataSource: sl(),
         mockFixture: sl(),
+        publicPageLocalDataSource: sl(),
       ),
+    )
+    ..registerLazySingleton<PublicProfessionalPageRepository>(
+      () => PublicProfessionalPageRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<PublicPageContentProjectionRepository>(
+      EmptyPublicPageContentProjectionRepository.new,
     )
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
@@ -559,6 +573,12 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory<SelectWorkspaceUseCase>(
       () => SelectWorkspaceUseCase(sl()),
+    )
+    ..registerFactory<ResolvePublicProfessionalPageUseCase>(
+      () => ResolvePublicProfessionalPageUseCase(
+        repository: sl(),
+        contentRepository: sl(),
+      ),
     )
     ..registerFactory<LoadCreateDraftUseCase>(
       () => LoadCreateDraftUseCase(sl()),

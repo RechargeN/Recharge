@@ -1,3 +1,5 @@
+enum FavoritePlanningTargetKind { quickPlan, scenario, route }
+
 class FavoriteItemEntity {
   const FavoriteItemEntity({
     required this.id,
@@ -11,6 +13,8 @@ class FavoriteItemEntity {
     required this.isFree,
     required this.savedAtUtc,
     required this.targetRoute,
+    this.planningTargetKind,
+    this.planningTargetId,
     this.coverImageUrl = '',
   });
 
@@ -25,12 +29,16 @@ class FavoriteItemEntity {
   final bool isFree;
   final DateTime savedAtUtc;
   final String? targetRoute;
+  final FavoritePlanningTargetKind? planningTargetKind;
+  final String? planningTargetId;
   final String coverImageUrl;
 
   FavoriteItemEntity copyWith({
     DateTime? savedAtUtc,
     String? targetRoute,
     String? coverImageUrl,
+    FavoritePlanningTargetKind? planningTargetKind,
+    String? planningTargetId,
     bool clearTargetRoute = false,
   }) {
     return FavoriteItemEntity(
@@ -45,6 +53,8 @@ class FavoriteItemEntity {
       isFree: isFree,
       savedAtUtc: savedAtUtc ?? this.savedAtUtc,
       targetRoute: clearTargetRoute ? null : (targetRoute ?? this.targetRoute),
+      planningTargetKind: planningTargetKind ?? this.planningTargetKind,
+      planningTargetId: planningTargetId ?? this.planningTargetId,
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
     );
   }

@@ -148,7 +148,7 @@ void main() {
           createdAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
           isRead: false,
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&duration=90&free=1'
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&duration=90&free=1'
               '&walking=1&steps=food_drinks.coffee',
         ),
         NotificationItemEntity(
@@ -292,7 +292,7 @@ void main() {
           createdAtUtc: DateTime.parse('2026-04-20T11:00:00Z'),
           isRead: false,
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&duration=90&free=1'
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&duration=90&free=1'
               '&walking=1'
               '&steps=food_drinks.coffee,wellness_recharge.calm_walk',
         ),
@@ -321,7 +321,7 @@ void main() {
                 builder: (context, state) => const NotificationsPage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -368,47 +368,14 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Route scenario'), findsOneWidget);
+    expect(find.text('Legacy notification'), findsOneWidget);
     await tester.tap(find.byTooltip('Notification actions').first);
     await tester.pumpAndSettle();
-    expect(find.text('Map route'), findsOneWidget);
-    expect(find.text('Create route'), findsOneWidget);
-    expect(find.text('Open route'), findsOneWidget);
+    expect(find.text('Map route'), findsNothing);
+    expect(find.text('Create route'), findsNothing);
+    expect(find.text('Open'), findsOneWidget);
 
-    await tester.tap(find.text('Map route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map route target'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
-    expect(notificationsController.state.items.single.isRead, isTrue);
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('Notification actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create route target'), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(find.text('Calm route with 2 stops'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('Notification actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Open route'));
+    await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
     expect(find.text('Scenario builder target'), findsOneWidget);

@@ -149,9 +149,6 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                       onRouteMap: () {
                         context.push(_scenarioMapLocationForDetails(item));
                       },
-                      onScenario: () {
-                        context.push(_scenarioLocationForDetails(item));
-                      },
                       onAddToScenario: intakeEnabled
                           ? () => _onAddToScenario(item: item)
                           : null,
@@ -933,7 +930,6 @@ class _DetailsActionHub extends StatelessWidget {
     required this.onFavoriteTap,
     required this.onMap,
     required this.onRouteMap,
-    required this.onScenario,
     required this.onAddToScenario,
     required this.onSearch,
     required this.onCreateSimilar,
@@ -948,7 +944,6 @@ class _DetailsActionHub extends StatelessWidget {
   final Future<void> Function() onFavoriteTap;
   final VoidCallback onMap;
   final VoidCallback onRouteMap;
-  final VoidCallback onScenario;
   final VoidCallback? onAddToScenario;
   final VoidCallback onSearch;
   final VoidCallback onCreateSimilar;
@@ -1051,12 +1046,6 @@ class _DetailsActionHub extends StatelessWidget {
                     subtitle: 'Add this stop to a personal plan',
                     onTap: onAddToScenario!,
                   ),
-                _DetailsActionTile(
-                  icon: Icons.auto_awesome,
-                  title: 'Build route',
-                  subtitle: 'Seed Scenario Builder',
-                  onTap: onScenario,
-                ),
                 _DetailsActionTile(
                   icon: Icons.search,
                   title: 'Find similar',
@@ -1782,7 +1771,7 @@ Map<String, String> _routeSeedForDetails(
 }) {
   final _DetailsRoutePlan plan = _routePlanForDetails(item);
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': plan.mood,
     'duration': plan.durationMinutes.toString(),
     'free': plan.freeOnly ? '1' : '0',
@@ -1822,13 +1811,6 @@ String _searchLocationForDetails(DiscoverItemEntity item) {
   ).toString();
 }
 
-String _scenarioLocationForDetails(DiscoverItemEntity item) {
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: _routeSeedForDetails(item, includeMode: false),
-  ).toString();
-}
-
 String _scenarioMapLocationForDetails(DiscoverItemEntity item) {
   return Uri(
     path: RouteNames.discoverMap,
@@ -1863,14 +1845,14 @@ String _createRouteLocationForDetails(DiscoverItemEntity item) {
     path: RouteNames.create,
     queryParameters: <String, String>{
       ..._routeSeedForDetails(item, includeMode: false),
-      'source': 'scenario',
-      'type': 'event',
+      'source': 'details_route_seed',
+      'type': 'route',
       'title': '${item.title} route',
       'subtitle':
           '${plan.stepCategories.length} stops · '
           '${plan.durationMinutes} min · from details',
       'q': plan.prompt,
-      'category': 'scenario',
+      'category': 'route',
       'city': item.city,
       'venue': item.venueName,
       'address': item.addressLine,

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../app/adapters/legacy_notification_route_resolver.dart';
+import '../../../../app/application/planning_navigation_intent.dart';
+import '../../../../app/application/planning_navigation_resolver.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../application/controllers/notifications_controller.dart';
@@ -10,7 +13,7 @@ import '../../application/notifications_providers.dart';
 import '../../application/state/notifications_state.dart';
 import '../../domain/entities/notification_item_entity.dart';
 
-enum _NotificationFeedFilter { all, newItems, reminders, updates }
+enum _NotificationFeedFilter { all, newItems, reminders, updates, scenarios }
 
 const Color _notificationsBackground = Color(0xFFF8FAF7);
 const Color _rechargeGreen = Color(0xFF0B3028);
@@ -199,8 +202,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         items
             .where(
               (NotificationItemEntity item) =>
-                  item.type != NotificationType.reminder,
+                  item.type != NotificationType.reminder &&
+                  item.scenarioContext == null,
             )
+            .toList(growable: false),
+      _NotificationFeedFilter.scenarios =>
+        items
+            .where((item) => item.scenarioContext != null)
             .toList(growable: false),
     };
   }
@@ -223,10 +231,23 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }) async {
     await ref.read(notificationsControllerProvider).markAsRead(item.id);
     if (!mounted) return;
-    final String? route = targetRoute ?? item.targetRoute;
+    final String? route =
+        targetRoute ?? _typedSubjectRoute(item.subjectRef) ?? item.targetRoute;
     if (route == null || route.isEmpty) return;
-    context.push(route);
+    final resolved = const LegacyNotificationRouteResolver().resolve(route);
+    if (resolved != null) context.push(resolved);
   }
+}
+
+String? _typedSubjectRoute(NotificationSubjectRef? subject) {
+  if (subject == null || subject.id.trim().isEmpty) return null;
+  return switch (subject.kind) {
+    NotificationSubjectKind.route => const PlanningNavigationResolver().resolve(
+      PlanningNavigationIntent.openRoute(subject.id),
+    ),
+    NotificationSubjectKind.system => null,
+    _ => '${RouteNames.discoverDetails}/${Uri.encodeComponent(subject.id)}',
+  };
 }
 
 class _NotificationFilterBar extends StatelessWidget {
@@ -270,6 +291,13 @@ class _NotificationFilterBar extends StatelessWidget {
             label: 'Updates',
             selected: selected == _NotificationFeedFilter.updates,
             onTap: () => onChanged(_NotificationFeedFilter.updates),
+          ),
+          const SizedBox(width: 8),
+          _NotificationFilterChip(
+            icon: Icons.event_note_outlined,
+            label: 'Scenarios',
+            selected: selected == _NotificationFeedFilter.scenarios,
+            onTap: () => onChanged(_NotificationFeedFilter.scenarios),
           ),
         ],
       ),
@@ -608,7 +636,7 @@ class _NotificationRoutePreview {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
+      path: RouteNames.legacyScenarioBuilder,
       queryParameters: _routeParameters(includeMode: false),
     ).toString();
   }
@@ -635,33 +663,16 @@ class _NotificationRoutePreview {
     ).toString();
   }
 
-  List<_NotificationRouteAction> get actionTargets {
-    return <_NotificationRouteAction>[
-      if (targetPath != RouteNames.scenarioBuilder)
-        _NotificationRouteAction(
-          icon: Icons.tune,
-          label: 'Edit route',
-          location: builderLocation,
-        ),
-      if (targetPath != RouteNames.discoverMap)
-        _NotificationRouteAction(
-          icon: Icons.map_outlined,
-          label: 'Map route',
-          location: mapLocation,
-        ),
-      _NotificationRouteAction(
-        icon: Icons.add_circle_outline,
-        label: 'Create route',
-        location: createLocation,
-      ),
-    ];
-  }
+  // Legacy raw planning links remain openable during the observation period,
+  // but Notifications must not expose Scenario/Builder route actions.
+  List<_NotificationRouteAction> get actionTargets =>
+      const <_NotificationRouteAction>[];
 
   static _NotificationRoutePreview? fromTargetRoute(String? targetRoute) {
     final String path = _pathForTargetRoute(targetRoute);
     final Map<String, String> query = _queryForTargetRoute(targetRoute);
     final bool isRouteTarget =
-        path == RouteNames.scenarioBuilder ||
+        path == RouteNames.legacyScenarioBuilder ||
         (path == RouteNames.discoverMap && query['mode'] == 'scenario');
     if (!isRouteTarget) return null;
 
@@ -737,11 +748,11 @@ _NotificationDestination _notificationDestinationFor(String? targetRoute) {
   final String path = _pathForTargetRoute(targetRoute);
   final Map<String, String> query = _queryForTargetRoute(targetRoute);
 
-  if (path == RouteNames.scenarioBuilder) {
+  if (path == RouteNames.legacyScenarioBuilder) {
     return const _NotificationDestination(
-      icon: Icons.route,
-      label: 'Route scenario',
-      actionLabel: 'Open route',
+      icon: Icons.notifications_outlined,
+      label: 'Legacy notification',
+      actionLabel: 'Open',
     );
   }
   if (path == RouteNames.discoverMap && query['mode'] == 'scenario') {

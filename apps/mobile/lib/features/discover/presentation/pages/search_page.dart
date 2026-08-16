@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/parsing/input_parsers.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -192,12 +193,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 controller.deleteSavedSearch(search.id),
           ),
           const SizedBox(height: 16),
-          _SectionHeader(
-            title: 'Quick plans',
-            action: 'See all',
-            onAction: () =>
-                context.go('${RouteNames.scenarioBuilder}?preview=1'),
-          ),
+          _SectionHeader(title: 'Quick plans', action: null, onAction: null),
           const SizedBox(height: 6),
           _QuickPlanRail(onOpen: (String location) => context.go(location)),
         ],
@@ -718,7 +714,7 @@ class _QuickBudgetSheet extends StatelessWidget {
         title: 'Budget per person',
         hint: 'Amount in EUR',
         initialValue: _isCustom ? '${selected!.round()}' : '',
-        parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
+        parser: parseLocaleDecimalInput,
         isValid: (double value) => value >= 0 && value <= 10000,
         errorMessage: 'Enter an amount from €0 to €10,000',
       ),
@@ -1302,7 +1298,7 @@ class _QuickPlanData {
   final String steps;
 
   String get location => Uri(
-    path: RouteNames.scenarioBuilder,
+    path: RouteNames.quickPlanFor('quick-template-$mood-$minutes'),
     queryParameters: <String, String>{
       'preview': '1',
       'title': title,
@@ -1704,7 +1700,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       title: 'Budget per person',
       hint: 'Amount in EUR',
       initialValue: _isCustomBudget ? '${_budgetMax!.round()}' : '',
-      parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
+      parser: parseLocaleDecimalInput,
       isValid: (double value) => value >= 0 && value <= 10000,
       errorMessage: 'Enter an amount from €0 to €10,000',
     );

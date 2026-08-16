@@ -1054,14 +1054,14 @@ String mapCreateLocationForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._mapSmartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -1079,11 +1079,13 @@ String mapScenarioBuilderLocationForSmartSearch(SmartSearchHistoryEntity item) {
   );
   if (parseResult != null) {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _mapSmartRouteParameters(
-        parseResult,
-        includeMode: false,
-      ),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._mapSmartRouteParameters(parseResult, includeMode: false),
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
   return mapScenarioBuilderLocationForQuery(item.query, prompt: item.prompt);
@@ -1120,8 +1122,13 @@ String mapScenarioBuilderLocationForQuery(
     if (routePrompt.isNotEmpty) 'prompt': routePrompt,
   };
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ...params,
+      'source': 'saved_search_route_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
@@ -1139,7 +1146,7 @@ Map<String, String> _mapSmartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -3003,23 +3010,28 @@ class _ScenarioMapRoute {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: scenarioParameters,
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ...scenarioParameters,
+        'source': 'map_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
   String get createLocation {
     final Map<String, String> params = <String, String>{
       ...scenarioParameters,
-      'source': 'scenario',
-      'type': 'event',
+      'source': 'map_route_seed',
+      'type': 'route',
       'title': '$moodLabel recharge route',
       'subtitle':
           '${stops.length} stops · '
           '$totalDurationMinutes min · '
           '${totalDistanceKm.toStringAsFixed(1)} km',
       'q': promptLabel,
-      'category': 'scenario',
+      'category': 'route',
     };
     return Uri(path: RouteNames.create, queryParameters: params).toString();
   }

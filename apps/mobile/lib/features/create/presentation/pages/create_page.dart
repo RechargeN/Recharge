@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../../app/router/route_names.dart';
 import '../../../../app/application/planning_conversion_providers.dart';
 import '../../../../app/application/active_create_publisher_provider.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
+import '../../../../core/parsing/input_parsers.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_providers.dart';
@@ -111,21 +113,37 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     final _ScenarioRouteSeedContext? scenarioSeedContext =
         _ScenarioRouteSeedContext.fromParameters(widget.seedParameters);
 
+    void goBack() {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(RouteNames.create);
+      }
+    }
+
+    final VoidCallback? onBack = widget.initialObjectType == null
+        ? null
+        : goBack;
+
     return Scaffold(
-      appBar: AppBar(
-        leading: widget.initialObjectType == null
-            ? null
-            : BackButton(
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go(RouteNames.create);
-                  }
-                },
-              ),
-        title: Text('Create ${blockConfig.title}'),
-      ),
+      appBar: state.draft.objectType == CreateObjectType.event
+          ? CreateFlowAppBar(
+              title: 'New ${blockConfig.title.toLowerCase()}',
+              onBack: onBack,
+              statusLabel: switch (state.saveStatus) {
+                CreateSaveStatus.saved => 'Saved',
+                CreateSaveStatus.saving => 'Saving…',
+                CreateSaveStatus.failed => 'Not saved',
+                CreateSaveStatus.unsaved => 'Draft',
+              },
+              statusIcon: state.saveStatus == CreateSaveStatus.saved
+                  ? Icons.check_circle_outline
+                  : Icons.edit_note,
+            )
+          : AppBar(
+              leading: onBack == null ? null : BackButton(onPressed: onBack),
+              title: Text('Create ${blockConfig.title}'),
+            ),
       body: switch (state.status) {
         CreateStatus.initial || CreateStatus.loading => const Center(
           child: CircularProgressIndicator(),
@@ -1850,8 +1868,13 @@ class _ScenarioRouteSeedContext {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _routeParameters(includeMode: false),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._routeParameters(includeMode: false),
+        'source': 'route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
@@ -1864,7 +1887,7 @@ class _ScenarioRouteSeedContext {
 
   Map<String, String> _routeParameters({required bool includeMode}) {
     return <String, String>{
-      if (includeMode) 'mode': 'scenario',
+      if (includeMode) 'mode': 'route',
       if (mood.isNotEmpty) 'mood': mood,
       if (duration.isNotEmpty) 'duration': duration,
       if (free.isNotEmpty) 'free': free,
@@ -2227,7 +2250,7 @@ double? _seedPrice(Map<String, String> params) {
     'basePrice',
   ]);
   if (value.isEmpty) return null;
-  return double.tryParse(value.replaceAll(',', '.'));
+  return parseLocaleDecimalInput(value);
 }
 
 bool _seedIsFree(Map<String, String> params, double? basePrice) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/parsing/input_parsers.dart';
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
 
@@ -329,8 +330,7 @@ ScenarioLocalTimeDraft? _time(String value) {
 }
 
 double? _number(String value) {
-  final String normalized = value.trim().replaceAll(',', '.');
-  return normalized.isEmpty ? null : double.tryParse(normalized);
+  return parseLocaleDecimalInput(value);
 }
 
 String _travelModeLabel(ScenarioTravelMode mode) => switch (mode) {

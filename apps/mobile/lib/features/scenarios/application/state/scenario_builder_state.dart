@@ -168,15 +168,11 @@ List<ScenarioStepEntity> scenarioStepsFor({
 }
 
 List<ScenarioStepEntity> scenarioSuggestionsFor(ScenarioDraftEntity draft) {
-  final Set<String> selectedCategories = draft.steps
-      .map((ScenarioStepEntity step) => step.category)
-      .toSet();
   final int remainingMinutes =
       draft.maxDurationMinutes - draft.totalDurationMinutes;
 
   return _allSteps
       .where((ScenarioStepEntity step) {
-        if (selectedCategories.contains(step.category)) return false;
         if (draft.freeOnly && !step.isFree) return false;
         if (draft.walkingOnly && step.distanceKm > 2.2) return false;
         if (remainingMinutes > 0 && step.durationMinutes > remainingMinutes) {

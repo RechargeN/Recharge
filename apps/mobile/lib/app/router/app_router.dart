@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/telemetry/analytics_service.dart';
 import '../di/service_locator.dart';
+import '../adapters/legacy_planning_link_classifier.dart';
+import '../application/planning_navigation_intent.dart';
+import '../application/planning_navigation_resolver.dart';
 import '../observers/app_route_observer.dart';
 import '../presentation/recharge_app_shell.dart';
+import '../presentation/workspace_section_host.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
@@ -25,8 +29,9 @@ import '../../features/discover/presentation/pages/smart_search_page.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
-import '../../features/identity/presentation/pages/workspace_switcher_page.dart';
 import '../../features/identity/presentation/pages/professional_page_workspace_page.dart';
+import '../../features/identity/presentation/pages/public_professional_page.dart';
+import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
@@ -99,10 +104,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 DiscoverResultsPage(seedParameters: state.uri.queryParameters),
           ),
           GoRoute(
-            name: 'scenario_builder',
-            path: RouteNames.scenarioBuilder,
-            builder: (context, state) =>
-                ScenarioBuilderPage(seedParameters: state.uri.queryParameters),
+            name: 'quick_plan',
+            path: '${RouteNames.quickPlan}/:quickPlanId',
+            builder: (context, state) => QuickPlanPage(
+              seedParameters: <String, String>{
+                ...state.uri.queryParameters,
+                'quickPlanId': state.pathParameters['quickPlanId'] ?? '',
+              },
+            ),
+          ),
+          GoRoute(
+            name: 'legacy_scenario_builder',
+            path: RouteNames.legacyScenarioBuilder,
+            redirect: (context, state) {
+              final classification = const LegacyPlanningLinkClassifier()
+                  .classify(state.uri.toString());
+              final id = classification.targetId;
+              if (id == null) return null;
+              final intent = switch (classification.kind) {
+                LegacyPlanningPayloadKind.scenario =>
+                  PlanningNavigationIntent.openScenario(id),
+                LegacyPlanningPayloadKind.quickPlan =>
+                  PlanningNavigationIntent.openQuickPlan(id),
+                LegacyPlanningPayloadKind.route =>
+                  PlanningNavigationIntent.openRoute(id),
+                _ => null,
+              };
+              return intent == null
+                  ? null
+                  : const PlanningNavigationResolver().resolve(intent);
+            },
+            builder: (context, state) => QuickPlanPage(
+              seedParameters: <String, String>{
+                ...state.uri.queryParameters,
+                'legacyCompatibility': '1',
+              },
+            ),
           ),
           GoRoute(
             name: 'favorites',
@@ -162,7 +199,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               section: ProfessionalPageSection.account,
             ),
           ),
+          GoRoute(
+            name: 'professional_page_preview',
+            path: '${RouteNames.professionalPagePreview}/:pageId',
+            builder: (context, state) => PublicProfessionalPage(
+              reference: state.pathParameters['pageId'] ?? '',
+              lookup: PublicProfessionalPageLookup.id,
+              userId: authController.state.user?.id ?? '',
+              preview: true,
+            ),
+          ),
         ],
+      ),
+      GoRoute(
+        name: 'public_professional_page_by_id',
+        path: '${RouteNames.publicProfessionalPagesById}/:pageId',
+        builder: (context, state) => PublicProfessionalPage(
+          reference: state.pathParameters['pageId'] ?? '',
+          lookup: PublicProfessionalPageLookup.id,
+          userId: authController.state.user?.id ?? '',
+        ),
+      ),
+      GoRoute(
+        name: 'public_professional_page_by_slug',
+        path: '${RouteNames.publicProfessionalPages}/:slug',
+        builder: (context, state) => PublicProfessionalPage(
+          reference: state.pathParameters['slug'] ?? '',
+          lookup: PublicProfessionalPageLookup.slug,
+          userId: authController.state.user?.id ?? '',
+        ),
       ),
       GoRoute(
         name: 'discover_details',
@@ -209,13 +274,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: 'settings',
         path: RouteNames.settings,
-        builder: (context, state) => const SettingsPage(),
-      ),
-      GoRoute(
-        name: 'workspace_switcher',
-        path: RouteNames.workspaceSwitcher,
-        builder: (context, state) =>
-            WorkspaceSwitcherPage(userId: authController.state.user?.id ?? ''),
+        builder: (context, state) => SettingsPage(
+          workspaceSectionBuilder: (userId) =>
+              WorkspaceSectionHost(userId: userId),
+        ),
       ),
       GoRoute(
         name: 'create_success',
@@ -245,11 +307,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == RouteNames.favorites ||
           state.matchedLocation == RouteNames.notifications ||
           state.matchedLocation == RouteNames.settings ||
-          state.matchedLocation == RouteNames.workspaceSwitcher ||
           state.matchedLocation == RouteNames.professionalPage ||
           state.matchedLocation == RouteNames.professionalPageContent ||
           state.matchedLocation == RouteNames.professionalPageCreate ||
           state.matchedLocation == RouteNames.professionalPageAccount ||
+          state.matchedLocation.startsWith(
+            '${RouteNames.professionalPagePreview}/',
+          ) ||
+          state.matchedLocation.startsWith(
+            '${RouteNames.publicProfessionalPages}/',
+          ) ||
           state.matchedLocation == RouteNames.createSuccess ||
           state.matchedLocation == RouteNames.routeModeration;
 

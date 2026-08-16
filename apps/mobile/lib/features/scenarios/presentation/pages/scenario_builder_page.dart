@@ -21,8 +21,8 @@ import '../../application/scenario_builder_providers.dart';
 import '../../application/state/scenario_builder_state.dart';
 import '../../domain/entities/scenario_draft_entity.dart';
 
-class ScenarioBuilderPage extends ConsumerStatefulWidget {
-  const ScenarioBuilderPage({
+class QuickPlanPage extends ConsumerStatefulWidget {
+  const QuickPlanPage({
     super.key,
     this.seedParameters = const <String, String>{},
   });
@@ -30,11 +30,12 @@ class ScenarioBuilderPage extends ConsumerStatefulWidget {
   final Map<String, String> seedParameters;
 
   @override
-  ConsumerState<ScenarioBuilderPage> createState() =>
-      _ScenarioBuilderPageState();
+  ConsumerState<QuickPlanPage> createState() => _QuickPlanPageState();
 }
 
-class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
+typedef ScenarioBuilderPage = QuickPlanPage;
+
+class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
   String? _seedKey;
   bool _intentLoadScheduled = false;
   late bool _previewMode;
@@ -65,7 +66,7 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_previewMode ? 'My plan' : 'Scenario Builder'),
+        title: Text(_previewMode ? 'My quick plan' : 'Quick Plan'),
         actions: <Widget>[
           if (_previewMode)
             TextButton.icon(
@@ -115,14 +116,16 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
                   _ScenarioSavedIntentPanel(
                     savedSearches: savedSearches,
                     smartSearchHistory: smartSearchHistory,
-                    onApplySaved: (SavedSearchEntity search) =>
-                        context.go(_scenarioBuilderRouteForSavedSearch(search)),
+                    onApplySaved: (SavedSearchEntity search) => context.go(
+                      _quickPlanRouteForSavedSearch(draft.id, search),
+                    ),
                     onMapSaved: (SavedSearchEntity search) =>
                         context.go(_mapRouteForSavedSearch(search)),
                     onCreateSaved: (SavedSearchEntity search) =>
                         context.go(_createRouteForSavedSearch(search)),
-                    onApplySmart: (SmartSearchHistoryEntity item) =>
-                        context.go(_scenarioBuilderRouteForSmartSearch(item)),
+                    onApplySmart: (SmartSearchHistoryEntity item) => context.go(
+                      _quickPlanRouteForSmartSearch(draft.id, item),
+                    ),
                     onMapSmart: (SmartSearchHistoryEntity item) =>
                         context.go(_mapRouteForSmartSearch(item)),
                     onCreateSmart: (SmartSearchHistoryEntity item) =>
@@ -235,10 +238,12 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
   Future<void> _saveScenario(ScenarioDraftEntity draft) async {
     final authState = ref.read(authControllerProvider).state;
     if (authState.user == null) {
-      final String origin = Uri.encodeComponent(RouteNames.scenarioBuilder);
+      final String origin = Uri.encodeComponent(
+        RouteNames.quickPlanFor(draft.id),
+      );
       context.push(
         '${RouteNames.signIn}?originRoute=$origin'
-        '&sourceScreen=scenario_builder&sourceAction=save_scenario',
+        '&sourceScreen=quick_plan&sourceAction=save_quick_plan',
       );
       return;
     }
@@ -246,11 +251,11 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
     final FavoriteItemEntity favorite = _favoriteFromScenario(draft);
     await ref
         .read(favoritesControllerProvider)
-        .addFavorite(favorite, sourceScreen: 'scenario_builder');
+        .addFavorite(favorite, sourceScreen: 'quick_plan');
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Scenario saved')));
+    ).showSnackBar(const SnackBar(content: Text('Quick Plan saved')));
   }
 
   Future<void> _copyScenario(ScenarioDraftEntity draft) async {
@@ -258,14 +263,16 @@ class _ScenarioBuilderPageState extends ConsumerState<ScenarioBuilderPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Scenario copied')));
+    ).showSnackBar(const SnackBar(content: Text('Quick Plan copied')));
   }
 
   Future<void> _expandToScenario(ScenarioDraftEntity draft) async {
     final authState = ref.read(authControllerProvider).state;
     final user = authState.user;
     if (user == null) {
-      final String origin = Uri.encodeComponent(RouteNames.scenarioBuilder);
+      final String origin = Uri.encodeComponent(
+        RouteNames.quickPlanFor(draft.id),
+      );
       context.go('${RouteNames.signIn}?origin=$origin');
       return;
     }
@@ -2061,23 +2068,25 @@ FavoriteItemEntity _favoriteFromScenario(ScenarioDraftEntity draft) {
       .map((ScenarioStepEntity step) => step.category.replaceAll('.', '_'))
       .join('_');
   return FavoriteItemEntity(
-    id: 'scenario_${draft.mood.name}_$categoryKey',
-    title: '${_moodLabel(draft.mood)} recharge scenario',
+    id: 'quick_plan_${draft.id}_$categoryKey',
+    title: '${_moodLabel(draft.mood)} quick plan',
     subtitle: '${draft.steps.length} stops · ${draft.totalDurationMinutes} min',
     city: 'Riga',
-    category: 'scenario',
+    category: 'quick_plan',
     startsAtUtc: now,
     distanceKm: draft.totalDistanceKm,
     priceAmount: draft.totalPriceAmount,
     isFree: draft.totalPriceAmount == 0,
     savedAtUtc: now,
     targetRoute: _targetRouteForScenario(draft),
+    planningTargetKind: FavoritePlanningTargetKind.quickPlan,
+    planningTargetId: draft.id,
   );
 }
 
 String _targetRouteForScenario(ScenarioDraftEntity draft) {
   return Uri(
-    path: RouteNames.scenarioBuilder,
+    path: RouteNames.quickPlanFor(draft.id),
     queryParameters: <String, String>{
       'mood': draft.mood.name,
       'duration': draft.maxDurationMinutes.toString(),
@@ -2096,7 +2105,7 @@ String _mapRouteForScenario(ScenarioDraftEntity draft) {
   return Uri(
     path: RouteNames.discoverMap,
     queryParameters: <String, String>{
-      'mode': 'scenario',
+      'mode': 'route',
       'mood': draft.mood.name,
       'duration': draft.maxDurationMinutes.toString(),
       'free': draft.freeOnly ? '1' : '0',
@@ -2120,15 +2129,15 @@ String _createRouteForScenario(ScenarioDraftEntity draft) {
   return Uri(
     path: RouteNames.create,
     queryParameters: <String, String>{
-      'source': 'scenario',
-      'type': 'event',
+      'source': 'quick_plan_route_seed',
+      'type': 'route',
       'title': '${_moodLabel(draft.mood)} recharge route',
       'subtitle':
           '${draft.steps.length} stops · '
           '${draft.totalDurationMinutes} min · '
           '${draft.totalDistanceKm.toStringAsFixed(1)} km',
       'q': prompt,
-      'category': 'scenario',
+      'category': 'route',
       'mood': draft.mood.name,
       'duration': draft.maxDurationMinutes.toString(),
       'free': draft.freeOnly ? '1' : '0',
@@ -2176,14 +2185,14 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._smartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -2195,27 +2204,34 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
   );
 }
 
-String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
-  return _scenarioBuilderRouteForQuery(
+String _quickPlanRouteForSavedSearch(
+  String quickPlanId,
+  SavedSearchEntity search,
+) {
+  return _quickPlanRouteForQuery(
+    quickPlanId,
     search.query,
     prompt: _promptForQuery(search.query),
   );
 }
 
-String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
+String _quickPlanRouteForSmartSearch(
+  String quickPlanId,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
   if (parseResult != null) {
     return Uri(
-      path: RouteNames.scenarioBuilder,
+      path: RouteNames.quickPlanFor(quickPlanId),
       queryParameters: _smartRouteParameters(parseResult, includeMode: false),
     ).toString();
   }
   final String prompt = item.prompt.trim().isEmpty
       ? _promptForQuery(item.query)
       : item.prompt.trim();
-  return _scenarioBuilderRouteForQuery(item.query, prompt: prompt);
+  return _quickPlanRouteForQuery(quickPlanId, item.query, prompt: prompt);
 }
 
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
@@ -2232,7 +2248,7 @@ Map<String, String> _smartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -2267,7 +2283,8 @@ String _createRouteForQuery(
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
-String _scenarioBuilderRouteForQuery(
+String _quickPlanRouteForQuery(
+  String quickPlanId,
   DiscoverQuery query, {
   required String prompt,
 }) {
@@ -2279,7 +2296,7 @@ String _scenarioBuilderRouteForQuery(
     if (prompt.trim().isNotEmpty) 'prompt': prompt.trim(),
   };
   return Uri(
-    path: RouteNames.scenarioBuilder,
+    path: RouteNames.quickPlanFor(quickPlanId),
     queryParameters: params,
   ).toString();
 }
