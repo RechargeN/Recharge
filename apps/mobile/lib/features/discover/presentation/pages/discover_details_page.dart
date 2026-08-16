@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/service_locator.dart';
-import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
@@ -67,19 +66,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     );
     final bool isFavorite = favoritesController.isFavorite(widget.itemId);
     final details = ref.watch(discoverDetailsProvider(widget.itemId));
-    final ownerId = authController.state.user?.id ?? '';
-    final hasTarget =
-        ref
-            .watch(scenarioObjectIntakeAvailabilityProvider(ownerId))
-            .asData
-            ?.value ??
-        false;
-    final intakeEnabled =
-        hasTarget &&
-        isScenarioObjectIntakeSurfaceEnabled(
-          ref,
-          ScenarioObjectIntakeSurface.details,
-        );
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.details,
+    );
 
     return details.when(
       data: (DiscoverItemEntity item) {
@@ -801,7 +791,7 @@ class _RouteSafetyReportDialogState extends State<_RouteSafetyReportDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             DropdownButtonFormField<String>(
-              value: _reasonCode,
+              initialValue: _reasonCode,
               decoration: const InputDecoration(labelText: 'Что произошло'),
               items: const <DropdownMenuItem<String>>[
                 DropdownMenuItem(
@@ -828,7 +818,7 @@ class _RouteSafetyReportDialogState extends State<_RouteSafetyReportDialog> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<DiscoverRouteSafetySeverity>(
-              value: _severity,
+              initialValue: _severity,
               decoration: const InputDecoration(labelText: 'Серьёзность'),
               items: const <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
                 DropdownMenuItem(

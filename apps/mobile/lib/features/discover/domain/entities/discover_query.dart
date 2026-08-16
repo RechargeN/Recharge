@@ -220,9 +220,9 @@ class DiscoverQuery {
     final int sourceVersion = (map['query_version'] as num?)?.toInt() ?? 1;
     final bool manualAreaSelected =
         (map['manual_area_selected'] as bool?) ?? false;
-    String marketCityId = (map['market_city_id'] as String?) ?? 'rezekne';
-    double centerLat = (map['center_lat'] as num?)?.toDouble() ?? 56.5099;
-    double centerLng = (map['center_lng'] as num?)?.toDouble() ?? 27.3332;
+    String marketCityId = (map['market_city_id'] as String?) ?? 'riga';
+    double centerLat = (map['center_lat'] as num?)?.toDouble() ?? 56.9496;
+    double centerLng = (map['center_lng'] as num?)?.toDouble() ?? 24.1052;
     final bool brokenLegacyDefault =
         sourceVersion < 2 &&
         !manualAreaSelected &&

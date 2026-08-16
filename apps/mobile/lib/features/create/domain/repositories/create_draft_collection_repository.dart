@@ -15,7 +15,6 @@ class CreateDraftSummary {
     this.scenarioActiveItemCount,
     this.scenarioFirstDate,
     this.scenarioLastDate,
-    this.scenarioUpdatesEnabled,
   });
 
   final String id;
@@ -29,16 +28,6 @@ class CreateDraftSummary {
   final int? scenarioActiveItemCount;
   final ScenarioLocalDateDraft? scenarioFirstDate;
   final ScenarioLocalDateDraft? scenarioLastDate;
-  final bool? scenarioUpdatesEnabled;
-
-  bool isCompletedOn(DateTime date) {
-    final last = scenarioLastDate;
-    if (scenarioDateMode == ScenarioDateMode.template || last == null) {
-      return false;
-    }
-    final today = DateTime.utc(date.year, date.month, date.day);
-    return DateTime.utc(last.year, last.month, last.day).isBefore(today);
-  }
 }
 
 enum CreateDraftCollectionSaveStatus {

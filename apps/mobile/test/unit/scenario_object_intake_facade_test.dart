@@ -3,13 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/application/scenario_object_intake_facade.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/datasources/scenario_object_intake_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
 import 'package:recharge/features/create/data/repositories/scenario_object_intake_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
-import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_object_intake.dart';
 import 'package:recharge/features/create/domain/entities/scenario_object_intake_session.dart';
@@ -25,7 +25,7 @@ void main() {
   setUp(() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     now = DateTime.utc(2026, 8, 3, 12);
-    ids = _Ids(<String>['item-new', 'location-new']);
+    ids = _Ids(<String>['day-new', 'scenario-new', 'item-new', 'location-new']);
     collection = CreateRepositoryImpl(
       localDataSource: CreateLocalDataSource(storage),
       idGenerator: ids,
@@ -37,16 +37,28 @@ void main() {
       intentRepository: intents,
       collectionRepository: collection,
       scenarioCoordinator: ScenarioCreateCoordinator(idGenerator: ids),
+      runtimeDefaults: _defaults,
       idGenerator: ids,
       clock: () => now,
     );
   });
 
-  test('object is added only to an existing Scenario', () async {
+  test('new Scenario is persisted only by successful atomic Apply', () async {
     final intent = _intent();
-    final target = _target();
-    await collection.saveDraft('user-1', target);
-    expect(await facade.begin(intent), hasLength(1));
+    expect(await facade.begin(intent), isEmpty);
+    final target = facade.materializeNewTarget(
+      intent: intent,
+      organizerEmail: 'user@example.test',
+      organizerName: 'User',
+      title: 'Latgale day',
+    );
+
+    expect(target.id, 'scenario-new');
+    expect(target.visibility, VisibilityType.private);
+    expect(
+      await collection.loadDraftById(ownerId: 'user-1', draftId: target.id),
+      isNull,
+    );
 
     final outcome = await facade.apply(
       ownerId: 'user-1',
@@ -92,11 +104,15 @@ void main() {
     expect((await facade.listTargets('user-1')), hasLength(1));
   });
 
-  test('expired intent cannot mutate an existing target', () async {
+  test('expired intent cannot create an otherwise valid new target', () async {
     final intent = _intent();
-    final target = _target();
-    await collection.saveDraft('user-1', target);
     await facade.begin(intent);
+    final target = facade.materializeNewTarget(
+      intent: intent,
+      organizerEmail: 'user@example.test',
+      organizerName: 'User',
+      title: 'Expired plan',
+    );
     now = now.add(const Duration(minutes: 31));
 
     final outcome = await facade.apply(
@@ -115,20 +131,25 @@ void main() {
     );
 
     expect(outcome.failure, ScenarioIntakeFailure.intentExpired);
-    expect((await facade.listTargets('user-1')).single.scenarioRevision, 0);
+    expect(await facade.listTargets('user-1'), isEmpty);
   });
 
   test(
     'kill switch blocks a pending intent without changing target data',
     () async {
       final intent = _intent();
-      final target = _target();
-      await collection.saveDraft('user-1', target);
       await facade.begin(intent);
+      final target = facade.materializeNewTarget(
+        intent: intent,
+        organizerEmail: 'user@example.test',
+        organizerName: 'User',
+        title: 'Retained plan',
+      );
       final disabled = ScenarioObjectIntakeFacade(
         intentRepository: intents,
         collectionRepository: collection,
         scenarioCoordinator: ScenarioCreateCoordinator(idGenerator: ids),
+        runtimeDefaults: _defaults,
         idGenerator: ids,
         clock: () => now,
         config: const ScenarioObjectIntakeConfig(enabled: false),
@@ -150,13 +171,13 @@ void main() {
       );
 
       expect(outcome.status, ScenarioObjectIntakeApplyStatus.rejected);
-      expect(
-        await collection.listDrafts(
-          ownerId: 'user-1',
-          type: CreateObjectType.scenario,
-        ),
-        hasLength(1),
-      );
+    expect(
+      await collection.listDrafts(
+        ownerId: 'user-1',
+        type: CreateObjectType.scenario,
+      ),
+      isEmpty,
+    );
       expect(
         (await intents.load(
           ownerId: 'user-1',
@@ -168,32 +189,13 @@ void main() {
   );
 }
 
-CreateDraftEntity _target() =>
-    CreateDraftEntity.defaults(
-      organizerId: 'user-1',
-      organizerEmail: 'user@example.test',
-      organizerName: 'User',
-      marketCityId: 'latvia',
-      timezone: 'Europe/Riga',
-      country: 'LV',
-      city: 'Riga',
-      currency: 'EUR',
-    ).copyWith(
-      id: 'scenario-existing',
-      objectType: CreateObjectType.scenario,
-      title: 'Latgale day',
-      clearEventData: true,
-      scenarioData: ScenarioDraftData.defaults().copyWith(
-        days: const <ScenarioDayDraft>[
-          ScenarioDayDraft(
-            id: 'day-new',
-            title: 'Day 1',
-            dayIndex: 0,
-            itemIds: <String>[],
-          ),
-        ],
-      ),
-    );
+const CreateRuntimeDefaults _defaults = CreateRuntimeDefaults(
+  marketCityId: 'latvia',
+  timezone: 'Europe/Riga',
+  country: 'LV',
+  city: 'Riga',
+  currency: 'EUR',
+);
 
 ScenarioObjectIntakeIntent _intent() => ScenarioObjectIntakeIntent(
   contractVersion: ScenarioObjectIntakeIntent.currentContractVersion,

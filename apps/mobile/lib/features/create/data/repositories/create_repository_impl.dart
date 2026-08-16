@@ -77,7 +77,6 @@ class CreateRepositoryImpl
             scenarioLastDate: dates == null || dates.isEmpty
                 ? null
                 : dates.last,
-            scenarioUpdatesEnabled: scenario?.updatesEnabled,
           );
         })
         .toList(growable: false);

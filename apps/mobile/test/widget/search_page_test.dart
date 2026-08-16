@@ -54,22 +54,26 @@ void main() {
     expect(find.byTooltip('Add Утренняя йога to Scenario'), findsNothing);
   });
 
-  fullPageTestWidgets('Scenario intake is unavailable while signed out', (
-    tester,
-  ) async {
-    final authController = _authenticatedController();
-    await tester.pumpWidget(
-      _SearchTestApp(
-        additionalOverrides: <Override>[
-          authControllerProvider.overrideWith((ref) => authController),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
+  fullPageTestWidgets(
+    'Scenario selection requires sign-in without guest mode',
+    (tester) async {
+      final authController = _authenticatedController();
+      await tester.pumpWidget(
+        _SearchTestApp(
+          additionalOverrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Select for Scenario'), findsNothing);
-    expect(find.text('Войдите, чтобы продолжить'), findsNothing);
-  });
+      await tester.tap(find.byTooltip('Select for Scenario'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Войдите, чтобы продолжить'), findsOneWidget);
+      expect(find.text('Продолжить как гость'), findsNothing);
+    },
+  );
 
   fullPageTestWidgets(
     'results select for Scenario preserves tap order and cancels explicitly',
@@ -85,9 +89,6 @@ void main() {
         _SearchTestApp(
           additionalOverrides: <Override>[
             authControllerProvider.overrideWith((ref) => authController),
-            scenarioObjectIntakeAvailabilityProvider(
-              'user-1',
-            ).overrideWith((ref) async => true),
           ],
         ),
       );

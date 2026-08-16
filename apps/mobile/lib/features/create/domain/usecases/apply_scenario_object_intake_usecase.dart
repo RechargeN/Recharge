@@ -1,4 +1,4 @@
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/scenario_budget_draft.dart';
 import '../entities/scenario_draft_data.dart';
@@ -114,6 +114,13 @@ class ApplyScenarioObjectIntakeUseCase {
       if (role != ScenarioItemRole.mandatory &&
           role != ScenarioItemRole.optional) {
         return _rejected(request, ScenarioIntakeFailure.invalidCandidate);
+      }
+      if (_alreadyContains(scenario, ref) &&
+          !request.placement.confirmedDuplicates.contains(ref)) {
+        return _rejected(
+          request,
+          ScenarioIntakeFailure.duplicateConfirmationRequired,
+        );
       }
       if (_scheduleNeedsAdjustment(candidate.schedule, scenario.dateMode) &&
           !request.placement.confirmedScheduleAdjustments.contains(ref)) {
@@ -329,6 +336,14 @@ class ApplyScenarioObjectIntakeUseCase {
         )
         .toList(growable: false);
   }
+
+  bool _alreadyContains(ScenarioDraftData scenario, ScenarioObjectRef ref) =>
+      scenario.items.any((item) {
+        final source = item.source;
+        return source is ScenarioCatalogObjectSourceDraft &&
+            source.objectId == ref.objectId &&
+            source.objectType == ref.objectType;
+      });
 
   String? _nextPermanentUniqueId(Set<String> allocated) {
     final id = _idGenerator.generate().trim();

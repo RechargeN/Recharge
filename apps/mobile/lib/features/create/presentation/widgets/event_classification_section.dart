@@ -1,4 +1,3 @@
-import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/event_classification_section.dart';
@@ -81,7 +80,7 @@ class EventClassificationSection extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<EventArchetype>(
             key: const Key('event-archetype'),
-            value: value?.archetype,
+            initialValue: value?.archetype,
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Event mechanics *',
@@ -119,7 +118,7 @@ class EventClassificationSection extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<ParticipationMode>(
             key: const Key('event-primary-participation'),
-            value: value?.primaryParticipationMode,
+            initialValue: value?.primaryParticipationMode,
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Primary attendee role *',
@@ -159,9 +158,9 @@ class EventClassificationSection extends StatelessWidget {
                   return Semantics(
                     label: '${_label(mode.wireName)} additional attendee role',
                     selected: selected,
-                    child: CreateFlowChip(
+                    child: FilterChip(
                       key: Key('event-additional-${mode.wireName}'),
-                      label: _label(mode.wireName),
+                      label: Text(_label(mode.wireName)),
                       selected: selected,
                       onSelected: canSelect
                           ? (bool next) =>

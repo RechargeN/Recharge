@@ -11,8 +11,16 @@ The following checks are required before merge:
 
 Boundary gate note:
 
-- Legacy exceptions are permitted only via `tools/scripts/boundaries-allowlist.txt`.
+- Canonical command is
+  `dart tools/scripts/check_boundaries.dart --repo-root . --format text`.
+- Windows may use the thin `tools/scripts/check-boundaries.ps1` wrapper.
+- Legacy exceptions are permitted only via the exact structured
+  `tools/scripts/boundary-exceptions.json` registry.
+- Exception budget is 106 and cannot increase without the approved
+  RFC/ADR/owner path; stale or expired entries fail CI.
 - New violations must fail CI unless approved through RFC+ADR process.
+- Missing Dart/runtime/root, config errors and timeouts are inconclusive and
+  therefore blocking, never a pass.
 
 ## Override Policy (Temporary Only)
 

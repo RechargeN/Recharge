@@ -34,7 +34,7 @@ class ScenarioContextSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<ScenarioFormat>(
-          value: data.format,
+          initialValue: data.format,
           decoration: const InputDecoration(
             labelText: 'Format',
             border: OutlineInputBorder(),
@@ -72,7 +72,7 @@ class ScenarioContextSection extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: DropdownButtonFormField<ScenarioPartyKind>(
-                value: data.party.kind,
+                initialValue: data.party.kind,
                 isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Party',
@@ -97,7 +97,7 @@ class ScenarioContextSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: DropdownButtonFormField<int>(
-                value: data.party.peopleCount.clamp(1, 12),
+                initialValue: data.party.peopleCount.clamp(1, 12),
                 isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'People',
@@ -121,7 +121,7 @@ class ScenarioContextSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<ScenarioPace>(
-          value: data.constraints.pace,
+          initialValue: data.constraints.pace,
           decoration: const InputDecoration(
             labelText: 'Pace',
             border: OutlineInputBorder(),
@@ -142,7 +142,7 @@ class ScenarioContextSection extends StatelessWidget {
         _TransportPreferences(controller: controller, data: data),
         const SizedBox(height: 10),
         DropdownButtonFormField<ScenarioBudgetBasis>(
-          value: data.constraints.budgetBasis,
+          initialValue: data.constraints.budgetBasis,
           decoration: const InputDecoration(
             labelText: 'Budget basis',
             border: OutlineInputBorder(),
@@ -198,7 +198,7 @@ class _TransportPreferences extends StatelessWidget {
             const SizedBox(height: 12),
             DropdownButtonFormField<ScenarioTravelMode>(
               key: const ValueKey<String>('scenario-primary-travel-mode'),
-              value: constraints.primaryTravelMode,
+              initialValue: constraints.primaryTravelMode,
               isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Primary transport',

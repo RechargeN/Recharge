@@ -9,6 +9,7 @@ class ScenarioObjectIntakeConfig {
     this.searchEnabled = true,
     this.mapEnabled = true,
     this.multiSelectEnabled = true,
+    this.createNewTargetEnabled = true,
     this.maxBatchSize = 20,
     this.intentTtl = const Duration(minutes: 30),
   });
@@ -21,6 +22,7 @@ class ScenarioObjectIntakeConfig {
   final bool searchEnabled;
   final bool mapEnabled;
   final bool multiSelectEnabled;
+  final bool createNewTargetEnabled;
   final int maxBatchSize;
   final Duration intentTtl;
 

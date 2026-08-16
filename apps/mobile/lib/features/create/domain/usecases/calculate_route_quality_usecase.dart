@@ -3,8 +3,8 @@ import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
 
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_quality_data.dart';
 import '../repositories/route_quality_calculator.dart';

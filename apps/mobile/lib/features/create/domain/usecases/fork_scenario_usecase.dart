@@ -1,4 +1,4 @@
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/scenario_draft_data.dart';
 import '../entities/scenario_item_draft.dart';

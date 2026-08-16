@@ -120,9 +120,6 @@ Future<Widget> _mapApp({ScenarioObjectIntakeConfig? config}) async {
       authControllerProvider.overrideWith((ref) => authController),
       discoverFeedControllerProvider.overrideWith((ref) => discoverController),
       favoritesControllerProvider.overrideWith((ref) => favoritesController),
-      scenarioObjectIntakeAvailabilityProvider(
-        'user-1',
-      ).overrideWith((ref) async => true),
       if (config != null)
         scenarioObjectIntakeConfigProvider.overrideWithValue(config),
     ],

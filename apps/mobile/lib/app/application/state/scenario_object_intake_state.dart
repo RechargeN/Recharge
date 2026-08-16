@@ -1,7 +1,6 @@
 import '../../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../../features/create/domain/repositories/create_draft_collection_repository.dart';
-import '../../../features/create/domain/repositories/scenario_copy_source_repository.dart';
 
 enum ScenarioObjectIntakeStage {
   loading,
@@ -39,15 +38,16 @@ class ScenarioObjectIntakeState {
     required this.stage,
     required this.intentId,
     required this.targets,
-    required this.copySources,
     required this.days,
     required this.anchors,
     required this.orderedRefs,
     required this.role,
+    required this.newTargetSelected,
+    required this.newTargetTitle,
+    required this.confirmDuplicate,
     required this.confirmUnavailable,
     required this.confirmScheduleAdjustment,
     this.selectedTargetId,
-    this.selectedCopySourceId,
     this.selectedTargetTitle,
     this.selectedDayId,
     this.afterItemId,
@@ -63,11 +63,13 @@ class ScenarioObjectIntakeState {
         stage: ScenarioObjectIntakeStage.loading,
         intentId: intentId,
         targets: const <CreateDraftSummary>[],
-        copySources: const <ScenarioCopySourceSummary>[],
         days: const <ScenarioIntakeDayOption>[],
         anchors: const <ScenarioIntakeAnchorOption>[],
         orderedRefs: const <ScenarioObjectRef>[],
         role: ScenarioItemRole.mandatory,
+        newTargetSelected: false,
+        newTargetTitle: '',
+        confirmDuplicate: false,
         confirmUnavailable: false,
         confirmScheduleAdjustment: false,
       );
@@ -75,16 +77,17 @@ class ScenarioObjectIntakeState {
   final ScenarioObjectIntakeStage stage;
   final String intentId;
   final List<CreateDraftSummary> targets;
-  final List<ScenarioCopySourceSummary> copySources;
   final String? selectedTargetId;
-  final String? selectedCopySourceId;
   final String? selectedTargetTitle;
+  final bool newTargetSelected;
+  final String newTargetTitle;
   final List<ScenarioIntakeDayOption> days;
   final List<ScenarioIntakeAnchorOption> anchors;
   final String? selectedDayId;
   final String? afterItemId;
   final List<ScenarioObjectRef> orderedRefs;
   final ScenarioItemRole role;
+  final bool confirmDuplicate;
   final bool confirmUnavailable;
   final bool confirmScheduleAdjustment;
   final String? message;
@@ -96,13 +99,12 @@ class ScenarioObjectIntakeState {
   ScenarioObjectIntakeState copyWith({
     ScenarioObjectIntakeStage? stage,
     List<CreateDraftSummary>? targets,
-    List<ScenarioCopySourceSummary>? copySources,
     String? selectedTargetId,
     bool clearSelectedTargetId = false,
-    String? selectedCopySourceId,
-    bool clearSelectedCopySourceId = false,
     String? selectedTargetTitle,
     bool clearSelectedTargetTitle = false,
+    bool? newTargetSelected,
+    String? newTargetTitle,
     List<ScenarioIntakeDayOption>? days,
     List<ScenarioIntakeAnchorOption>? anchors,
     String? selectedDayId,
@@ -111,6 +113,7 @@ class ScenarioObjectIntakeState {
     bool clearAfterItemId = false,
     List<ScenarioObjectRef>? orderedRefs,
     ScenarioItemRole? role,
+    bool? confirmDuplicate,
     bool? confirmUnavailable,
     bool? confirmScheduleAdjustment,
     String? message,
@@ -123,16 +126,14 @@ class ScenarioObjectIntakeState {
     stage: stage ?? this.stage,
     intentId: intentId,
     targets: targets ?? this.targets,
-    copySources: copySources ?? this.copySources,
     selectedTargetId: clearSelectedTargetId
         ? null
         : (selectedTargetId ?? this.selectedTargetId),
-    selectedCopySourceId: clearSelectedCopySourceId
-        ? null
-        : (selectedCopySourceId ?? this.selectedCopySourceId),
     selectedTargetTitle: clearSelectedTargetTitle
         ? null
         : (selectedTargetTitle ?? this.selectedTargetTitle),
+    newTargetSelected: newTargetSelected ?? this.newTargetSelected,
+    newTargetTitle: newTargetTitle ?? this.newTargetTitle,
     days: days ?? this.days,
     anchors: anchors ?? this.anchors,
     selectedDayId: clearSelectedDayId
@@ -141,6 +142,7 @@ class ScenarioObjectIntakeState {
     afterItemId: clearAfterItemId ? null : (afterItemId ?? this.afterItemId),
     orderedRefs: orderedRefs ?? this.orderedRefs,
     role: role ?? this.role,
+    confirmDuplicate: confirmDuplicate ?? this.confirmDuplicate,
     confirmUnavailable: confirmUnavailable ?? this.confirmUnavailable,
     confirmScheduleAdjustment:
         confirmScheduleAdjustment ?? this.confirmScheduleAdjustment,

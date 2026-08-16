@@ -91,8 +91,8 @@ void main() {
     );
     expect(find.text('Plan this recharge'), findsOneWidget);
     expect(find.text('Build route'), findsNothing);
-    expect(find.text('Add to Scenario'), findsNothing);
-    expect(find.text('Add this stop to a personal plan'), findsNothing);
+    expect(find.text('Add to Scenario'), findsOneWidget);
+    expect(find.text('Add this stop to a personal plan'), findsOneWidget);
     expect(find.text('Find similar'), findsOneWidget);
     expect(find.text('Create similar'), findsOneWidget);
     expect(find.text('Route from this'), findsOneWidget);

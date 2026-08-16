@@ -1,4 +1,3 @@
-import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -100,10 +99,10 @@ class EventInventorySection extends StatelessWidget {
                       final bool selected = value.additionalShapes.contains(
                         shape,
                       );
-                      return CreateFlowChip(
+                      return FilterChip(
                         key: Key('event-inventory-additional-${shape.name}'),
                         selected: selected,
-                        label: _label(shape.name),
+                        label: Text(_label(shape.name)),
                         onSelected: (next) {
                           final Set<InventoryShape> shapes = <InventoryShape>{
                             ...value.additionalShapes,
@@ -394,7 +393,7 @@ class _EnumField<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: DropdownButtonFormField<T>(
-      value: values.contains(value) ? value : null,
+      initialValue: values.contains(value) ? value : null,
       isExpanded: true,
       decoration: InputDecoration(labelText: label, errorText: error),
       items: values

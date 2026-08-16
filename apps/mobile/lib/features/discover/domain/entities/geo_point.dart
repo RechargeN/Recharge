@@ -1,1 +1,1 @@
-export '../../../../core/geo/geo_point.dart';
+export '../../../../shared/primitives/geo/geo_point.dart';

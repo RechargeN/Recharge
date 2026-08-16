@@ -4,7 +4,6 @@ import '../../../features/create/domain/entities/create_draft_entity.dart';
 import '../../../features/create/domain/entities/scenario_draft_data.dart';
 import '../../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../../features/create/domain/entities/scenario_object_intake.dart';
-import '../../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../../application/scenario_object_intake_facade.dart';
 import '../../application/scenario_object_intake_telemetry.dart';
 import '../state/scenario_object_intake_state.dart';
@@ -34,12 +33,21 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
   ScenarioObjectIntakeState _state;
   ScenarioObjectIntakeState get state => _state;
   List<ScenarioIntakeCandidate> get candidates => _intent.candidates;
-  List<CreateDraftSummary> get activeTargets => _state.targets
-      .where((target) => !target.isCompletedOn(_facade.nowUtc))
-      .toList(growable: false);
-  List<CreateDraftSummary> get completedTargets => _state.targets
-      .where((target) => target.isCompletedOn(_facade.nowUtc))
-      .toList(growable: false);
+  bool get canCreateNewTarget => _facade.config.createNewTargetEnabled;
+
+  bool get duplicateConfirmationRequired {
+    final target = _targetDraft?.scenarioData;
+    if (target == null) return false;
+    return _state.orderedRefs.any(
+      (ref) => target.items.any((item) {
+        final source = item.source;
+        return source is ScenarioCatalogObjectSourceDraft &&
+            source.objectId == ref.objectId &&
+            source.objectType == ref.objectType;
+      }),
+    );
+  }
+
   bool get unavailableConfirmationRequired => _intent.candidates.any(
     (candidate) => candidate.sourceStatus == ScenarioSourceStatus.unavailable,
   );
@@ -61,11 +69,9 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
   Future<void> initialize() async {
     try {
       final targets = await _facade.begin(_intent);
-      final copySources = await _facade.listCopySources();
       _state = _state.copyWith(
         stage: ScenarioObjectIntakeStage.target,
         targets: targets,
-        copySources: copySources,
         orderedRefs: _intent.candidates
             .map((candidate) => candidate.ref)
             .toList(growable: false),
@@ -87,29 +93,36 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     _state = _state.copyWith(
       selectedTargetId: targetId,
       selectedTargetTitle: summary.single.title,
-      clearSelectedCopySourceId: true,
+      newTargetSelected: false,
       clearMessage: true,
     );
     notifyListeners();
   }
 
-  void selectCopySource(String sourceId) {
-    final summary = _state.copySources.where((value) => value.id == sourceId);
-    if (summary.length != 1) return;
+  void selectNewTarget() {
+    if (!canCreateNewTarget) return;
     _targetDraft = null;
+    final suggested = '${_intent.candidates.first.snapshot.title} plan';
     _state = _state.copyWith(
       clearSelectedTargetId: true,
-      selectedCopySourceId: sourceId,
-      selectedTargetTitle: summary.single.title,
+      clearSelectedTargetTitle: true,
+      newTargetSelected: true,
+      newTargetTitle: _state.newTargetTitle.trim().isEmpty
+          ? suggested
+          : _state.newTargetTitle,
       clearMessage: true,
     );
+    notifyListeners();
+  }
+
+  void updateNewTargetTitle(String value) {
+    _state = _state.copyWith(newTargetTitle: value, clearMessage: true);
     notifyListeners();
   }
 
   Future<void> continueFromTarget() async {
-    if (_state.selectedTargetId == null &&
-        _state.selectedCopySourceId == null) {
-      _message('Choose an existing Scenario or make your own copy.');
+    if (!_state.newTargetSelected && _state.selectedTargetId == null) {
+      _message('Choose a Scenario or create a new one.');
       return;
     }
     _state = _state.copyWith(
@@ -118,17 +131,19 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     );
     notifyListeners();
     try {
-      _targetDraft = _state.selectedCopySourceId == null
-          ? await _facade.loadTarget(
-              ownerId: _intent.requesterId,
-              targetDraftId: _state.selectedTargetId!,
-            )
-          : await _facade.materializeCopyTarget(
-              sourceScenarioId: _state.selectedCopySourceId!,
-              ownerId: _intent.requesterId,
-              ownerEmail: _organizerEmail,
-              ownerName: _organizerName,
-            );
+      if (_state.newTargetSelected) {
+        _targetDraft = _facade.materializeNewTarget(
+          intent: _intent,
+          organizerEmail: _organizerEmail,
+          organizerName: _organizerName,
+          title: _state.newTargetTitle,
+        );
+      } else {
+        _targetDraft = await _facade.loadTarget(
+          ownerId: _intent.requesterId,
+          targetDraftId: _state.selectedTargetId!,
+        );
+      }
       final target = _targetDraft;
       if (target == null ||
           target.objectType != CreateObjectType.scenario ||
@@ -221,6 +236,11 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void confirmDuplicate(bool value) {
+    _state = _state.copyWith(confirmDuplicate: value, clearMessage: true);
+    notifyListeners();
+  }
+
   void confirmUnavailable(bool value) {
     _state = _state.copyWith(confirmUnavailable: value, clearMessage: true);
     notifyListeners();
@@ -240,6 +260,10 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     if (!authenticated) {
       _trackApply(ScenarioObjectIntakeTelemetryResult.authRequired);
       _message('Sign in again before adding items to Scenario.');
+      return;
+    }
+    if (duplicateConfirmationRequired && !_state.confirmDuplicate) {
+      _message('Confirm adding another occurrence.');
       return;
     }
     if (unavailableConfirmationRequired && !_state.confirmUnavailable) {
@@ -266,9 +290,9 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
       roles: <ScenarioObjectRef, ScenarioItemRole>{
         for (final ref in _state.orderedRefs) ref: _state.role,
       },
-      // Repeated occurrences are intentional Scenario items. The stable
-      // command/intent id, not source identity or category, guards retries.
-      confirmedDuplicates: _state.orderedRefs.toSet(),
+      confirmedDuplicates: _state.confirmDuplicate
+          ? _state.orderedRefs.toSet()
+          : const <ScenarioObjectRef>{},
       confirmedUnavailable: _state.confirmUnavailable
           ? _state.orderedRefs.toSet()
           : const <ScenarioObjectRef>{},
@@ -357,10 +381,9 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     );
   }
 
-  ScenarioObjectIntakeTargetKind get _targetKind =>
-      _state.selectedCopySourceId == null
-      ? ScenarioObjectIntakeTargetKind.existing
-      : ScenarioObjectIntakeTargetKind.copied;
+  ScenarioObjectIntakeTargetKind get _targetKind => _state.newTargetSelected
+      ? ScenarioObjectIntakeTargetKind.newTarget
+      : ScenarioObjectIntakeTargetKind.existing;
 
   ScenarioObjectIntakePlacementKind get _placementKind =>
       _state.selectedDayId == null
@@ -389,6 +412,7 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
       selectedDayId: selectedDayId,
       clearSelectedDayId: selectedDayId == null,
       clearAfterItemId: true,
+      confirmDuplicate: false,
       confirmUnavailable: false,
       confirmScheduleAdjustment: false,
       clearMessage: true,

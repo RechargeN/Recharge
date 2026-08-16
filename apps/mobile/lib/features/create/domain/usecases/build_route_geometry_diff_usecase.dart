@@ -1,4 +1,4 @@
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_quality_workflow_data.dart';
 import '../entities/route_publication_data.dart';

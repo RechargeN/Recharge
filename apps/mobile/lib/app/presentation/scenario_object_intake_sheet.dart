@@ -10,7 +10,6 @@ import '../../features/auth/presentation/widgets/auth_gate_sheet.dart';
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
-import '../../features/create/domain/repositories/scenario_copy_source_repository.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
 import '../application/controllers/scenario_object_intake_controller.dart';
 import '../application/scenario_object_intake_providers.dart';
@@ -344,70 +343,51 @@ class _TargetStep extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
-        const Text('Only existing editable Scenarios are shown.'),
+        const Text('Only your editable private drafts are shown.'),
         const SizedBox(height: 12),
         if (state.targets.isEmpty)
           const _Notice(
             icon: Icons.inbox_outlined,
-            text: 'No existing Scenario. Create one in Create Hub first.',
+            text: 'No saved Scenario yet. Create one below.',
           ),
-        if (controller.activeTargets.isNotEmpty) ...<Widget>[
-          Text(
-            'Active and upcoming',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-        ],
-        for (final target in controller.activeTargets)
-          RadioListTile<String>(
-            value: target.id,
-            groupValue: state.selectedTargetId,
+        if (state.targets.isNotEmpty)
+          RadioGroup<String>(
+            groupValue: state.newTargetSelected ? null : state.selectedTargetId,
             onChanged: (value) {
               if (value != null) controller.selectTarget(value);
             },
-            title: Text(
-              target.title.trim().isEmpty ? 'Untitled' : target.title,
+            child: Column(
+              children: <Widget>[
+                for (final target in state.targets)
+                  RadioListTile<String>(
+                    value: target.id,
+                    title: Text(
+                      target.title.trim().isEmpty ? 'Untitled' : target.title,
+                    ),
+                    subtitle: Text(_targetSummary(target)),
+                  ),
+              ],
             ),
-            subtitle: Text(_targetSummary(target)),
           ),
-        if (controller.completedTargets.isNotEmpty) ...<Widget>[
+        if (controller.canCreateNewTarget) ...<Widget>[
           const Divider(),
-          Text('Completed', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 4),
-        ],
-        for (final target in controller.completedTargets)
-          RadioListTile<String>(
-            value: target.id,
-            groupValue: state.selectedTargetId,
-            onChanged: (value) {
-              if (value != null) controller.selectTarget(value);
-            },
-            title: Text(
-              target.title.trim().isEmpty ? 'Untitled' : target.title,
+          RadioGroup<bool>(
+            groupValue: state.newTargetSelected ? true : null,
+            onChanged: (_) => controller.selectNewTarget(),
+            child: const RadioListTile<bool>(
+              value: true,
+              title: Text('Create new Scenario'),
+              subtitle: Text('Private · one Day 1 · saved only with the stop'),
             ),
-            subtitle: Text(_targetSummary(target)),
           ),
-        if (state.copySources.isNotEmpty) ...<Widget>[
-          const Divider(),
-          Text(
-            'Public Scenarios and templates',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const Text('Selecting one creates your private independent copy.'),
         ],
-        for (final source in state.copySources)
-          RadioListTile<String>(
-            value: source.id,
-            groupValue: state.selectedCopySourceId,
-            onChanged: (value) {
-              if (value != null) controller.selectCopySource(value);
-            },
-            title: Text(source.title),
-            subtitle: Text(
-              source.kind == ScenarioCopySourceKind.template
-                  ? 'Template · Create my copy and add'
-                  : 'Public Scenario · Create my copy and add',
-            ),
+        if (state.newTargetSelected)
+          TextFormField(
+            key: ValueKey<String>(state.newTargetTitle),
+            initialValue: state.newTargetTitle,
+            maxLength: 120,
+            decoration: const InputDecoration(labelText: 'Scenario title'),
+            onChanged: controller.updateNewTargetTitle,
           ),
         if (state.message != null) _ErrorText(state.message!),
         const SizedBox(height: 16),
@@ -438,7 +418,7 @@ class _PlacementStep extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: state.selectedDayId ?? '__unscheduled__',
+          initialValue: state.selectedDayId ?? '__unscheduled__',
           decoration: const InputDecoration(labelText: 'Day'),
           items: <DropdownMenuItem<String>>[
             for (final day in state.days)
@@ -459,7 +439,7 @@ class _PlacementStep extends StatelessWidget {
         if (state.selectedDayId != null) ...<Widget>[
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: state.afterItemId ?? '__end__',
+            initialValue: state.afterItemId ?? '__end__',
             decoration: const InputDecoration(labelText: 'Insert'),
             items: <DropdownMenuItem<String>>[
               const DropdownMenuItem<String>(
@@ -561,6 +541,16 @@ class _ReviewStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
+        if (controller.duplicateConfirmationRequired)
+          CheckboxListTile(
+            value: state.confirmDuplicate,
+            onChanged: (value) => controller.confirmDuplicate(value ?? false),
+            title: const Text('Add another occurrence'),
+            subtitle: const Text(
+              'This exact catalog object already exists in the Scenario.',
+            ),
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
         if (controller.unavailableConfirmationRequired)
           CheckboxListTile(
             value: state.confirmUnavailable,

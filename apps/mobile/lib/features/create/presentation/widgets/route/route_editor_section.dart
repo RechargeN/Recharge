@@ -182,68 +182,74 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                     container: true,
                     label:
                         'Anchor ${index + 1}, latitude ${anchor.position.latitude.toStringAsFixed(5)}, longitude ${anchor.position.longitude.toStringAsFixed(5)}',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(child: Text('${index + 1}')),
-                      title: Text(
-                        '${anchor.position.latitude.toStringAsFixed(5)}, '
-                        '${anchor.position.longitude.toStringAsFixed(5)}',
-                      ),
-                      subtitle: Wrap(
-                        spacing: 4,
-                        children: <Widget>[
-                          IconButton(
-                            tooltip: 'Move anchor north',
-                            onPressed: () => _nudge(anchor, latitude: 0.0001),
-                            icon: const Icon(Icons.north),
-                          ),
-                          IconButton(
-                            tooltip: 'Move anchor south',
-                            onPressed: () => _nudge(anchor, latitude: -0.0001),
-                            icon: const Icon(Icons.south),
-                          ),
-                          IconButton(
-                            tooltip: 'Move anchor west',
-                            onPressed: () => _nudge(anchor, longitude: -0.0001),
-                            icon: const Icon(Icons.west),
-                          ),
-                          IconButton(
-                            tooltip: 'Move anchor east',
-                            onPressed: () => _nudge(anchor, longitude: 0.0001),
-                            icon: const Icon(Icons.east),
-                          ),
-                        ],
-                      ),
-                      trailing: PopupMenuButton<String>(
-                        tooltip: 'Anchor actions',
-                        onSelected: (String value) {
-                          if (value == 'poi') {
-                            unawaited(
-                              widget.onCommand(
-                                AddRouteWaypoint(
-                                  anchorId: anchor.id,
-                                  typeId: 'viewpoint.v1',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(child: Text('${index + 1}')),
+                        title: Text(
+                          '${anchor.position.latitude.toStringAsFixed(5)}, '
+                          '${anchor.position.longitude.toStringAsFixed(5)}',
+                        ),
+                        subtitle: Wrap(
+                          spacing: 4,
+                          children: <Widget>[
+                            IconButton(
+                              tooltip: 'Move anchor north',
+                              onPressed: () => _nudge(anchor, latitude: 0.0001),
+                              icon: const Icon(Icons.north),
+                            ),
+                            IconButton(
+                              tooltip: 'Move anchor south',
+                              onPressed: () =>
+                                  _nudge(anchor, latitude: -0.0001),
+                              icon: const Icon(Icons.south),
+                            ),
+                            IconButton(
+                              tooltip: 'Move anchor west',
+                              onPressed: () =>
+                                  _nudge(anchor, longitude: -0.0001),
+                              icon: const Icon(Icons.west),
+                            ),
+                            IconButton(
+                              tooltip: 'Move anchor east',
+                              onPressed: () =>
+                                  _nudge(anchor, longitude: 0.0001),
+                              icon: const Icon(Icons.east),
+                            ),
+                          ],
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          tooltip: 'Anchor actions',
+                          onSelected: (String value) {
+                            if (value == 'poi') {
+                              unawaited(
+                                widget.onCommand(
+                                  AddRouteWaypoint(
+                                    anchorId: anchor.id,
+                                    typeId: 'viewpoint.v1',
+                                  ),
                                 ),
-                              ),
-                            );
-                          } else if (value == 'delete') {
-                            unawaited(
-                              widget.onCommand(
-                                RemoveRouteAnchor(anchorId: anchor.id),
-                              ),
-                            );
-                          }
-                        },
-                        itemBuilder: (_) => const <PopupMenuEntry<String>>[
-                          PopupMenuItem<String>(
-                            value: 'poi',
-                            child: Text('Add viewpoint'),
-                          ),
-                          PopupMenuItem<String>(
-                            value: 'delete',
-                            child: Text('Remove anchor'),
-                          ),
-                        ],
+                              );
+                            } else if (value == 'delete') {
+                              unawaited(
+                                widget.onCommand(
+                                  RemoveRouteAnchor(anchorId: anchor.id),
+                                ),
+                              );
+                            }
+                          },
+                          itemBuilder: (_) => const <PopupMenuEntry<String>>[
+                            PopupMenuItem<String>(
+                              value: 'poi',
+                              child: Text('Add viewpoint'),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Text('Remove anchor'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -262,64 +268,67 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                   final failed =
                       segment.operationState ==
                       RouteSegmentOperationState.failed;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      failed ? Icons.error_outline : Icons.route_outlined,
-                    ),
-                    title: Text(
-                      'Segment ${segment.order + 1} • '
-                      '${(segment.distanceMeters / 1000).toStringAsFixed(2)} km',
-                    ),
-                    subtitle: Text(
-                      '${segment.source.name} • ${segment.operationState.name}',
-                    ),
-                    trailing: PopupMenuButton<String>(
-                      tooltip: 'Segment actions',
-                      onSelected: (String value) {
-                        if (value == 'retry') {
-                          unawaited(
-                            widget.onCommand(RetryRouteSegment(segment.id)),
-                          );
-                        } else if (value == 'direct') {
-                          unawaited(
-                            widget.onCommand(
-                              SetRouteSegmentDirect(segmentId: segment.id),
-                            ),
-                          );
-                        } else if (value == 'split' &&
-                            segment.geometry.points.length >= 3) {
-                          unawaited(
-                            widget.onCommand(
-                              SplitRouteSegment(
-                                segmentId: segment.id,
-                                position:
-                                    segment.geometry.points[segment
-                                            .geometry
-                                            .points
-                                            .length ~/
-                                        2],
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        failed ? Icons.error_outline : Icons.route_outlined,
+                      ),
+                      title: Text(
+                        'Segment ${segment.order + 1} • '
+                        '${(segment.distanceMeters / 1000).toStringAsFixed(2)} km',
+                      ),
+                      subtitle: Text(
+                        '${segment.source.name} • ${segment.operationState.name}',
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        tooltip: 'Segment actions',
+                        onSelected: (String value) {
+                          if (value == 'retry') {
+                            unawaited(
+                              widget.onCommand(RetryRouteSegment(segment.id)),
+                            );
+                          } else if (value == 'direct') {
+                            unawaited(
+                              widget.onCommand(
+                                SetRouteSegmentDirect(segmentId: segment.id),
                               ),
+                            );
+                          } else if (value == 'split' &&
+                              segment.geometry.points.length >= 3) {
+                            unawaited(
+                              widget.onCommand(
+                                SplitRouteSegment(
+                                  segmentId: segment.id,
+                                  position:
+                                      segment.geometry.points[segment
+                                              .geometry
+                                              .points
+                                              .length ~/
+                                          2],
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (_) => <PopupMenuEntry<String>>[
+                          if (failed)
+                            const PopupMenuItem<String>(
+                              value: 'retry',
+                              child: Text('Retry routing'),
                             ),
-                          );
-                        }
-                      },
-                      itemBuilder: (_) => <PopupMenuEntry<String>>[
-                        if (failed)
                           const PopupMenuItem<String>(
-                            value: 'retry',
-                            child: Text('Retry routing'),
+                            value: 'direct',
+                            child: Text('Use intentional direct line'),
                           ),
-                        const PopupMenuItem<String>(
-                          value: 'direct',
-                          child: Text('Use intentional direct line'),
-                        ),
-                        if (segment.geometry.points.length >= 3)
-                          const PopupMenuItem<String>(
-                            value: 'split',
-                            child: Text('Split at midpoint'),
-                          ),
-                      ],
+                          if (segment.geometry.points.length >= 3)
+                            const PopupMenuItem<String>(
+                              value: 'split',
+                              child: Text('Split at midpoint'),
+                            ),
+                        ],
+                      ),
                     ),
                   );
                 })
@@ -334,41 +343,45 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
         : Column(
             children: widget.route.waypoints
                 .map((waypoint) {
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.place_outlined),
-                    title: Text(waypoint.typeId),
-                    subtitle: DropdownButton<String>(
-                      value: waypoint.anchorId,
-                      hint: const Text('Attach to anchor'),
-                      isExpanded: true,
-                      items: widget.route.anchors.indexed
-                          .map(
-                            (entry) => DropdownMenuItem<String>(
-                              value: entry.$2.id,
-                              child: Text('Anchor ${entry.$1 + 1}'),
-                            ),
-                          )
-                          .toList(growable: false),
-                      onChanged: (String? anchorId) {
-                        if (anchorId != null && anchorId != waypoint.anchorId) {
-                          unawaited(
-                            widget.onCommand(
-                              MoveRouteWaypoint(
-                                waypointId: waypoint.id,
-                                anchorId: anchorId,
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.place_outlined),
+                      title: Text(waypoint.typeId),
+                      subtitle: DropdownButton<String>(
+                        value: waypoint.anchorId,
+                        hint: const Text('Attach to anchor'),
+                        isExpanded: true,
+                        items: widget.route.anchors.indexed
+                            .map(
+                              (entry) => DropdownMenuItem<String>(
+                                value: entry.$2.id,
+                                child: Text('Anchor ${entry.$1 + 1}'),
                               ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    trailing: IconButton(
-                      tooltip: 'Remove waypoint',
-                      onPressed: () => unawaited(
-                        widget.onCommand(RemoveRouteWaypoint(waypoint.id)),
+                            )
+                            .toList(growable: false),
+                        onChanged: (String? anchorId) {
+                          if (anchorId != null &&
+                              anchorId != waypoint.anchorId) {
+                            unawaited(
+                              widget.onCommand(
+                                MoveRouteWaypoint(
+                                  waypointId: waypoint.id,
+                                  anchorId: anchorId,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
-                      icon: const Icon(Icons.delete_outline),
+                      trailing: IconButton(
+                        tooltip: 'Remove waypoint',
+                        onPressed: () => unawaited(
+                          widget.onCommand(RemoveRouteWaypoint(waypoint.id)),
+                        ),
+                        icon: const Icon(Icons.delete_outline),
+                      ),
                     ),
                   );
                 })

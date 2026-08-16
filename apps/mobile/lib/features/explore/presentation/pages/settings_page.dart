@@ -4,14 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../app/config/legal_links.dart';
-import '../../../../app/presentation/workspace_section_host.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/explore_controller.dart';
 import '../../application/explore_providers.dart';
 import '../../application/state/explore_state.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.workspaceSectionBuilder});
+
+  final Widget Function(String userId)? workspaceSectionBuilder;
 
   @override
   ConsumerState<SettingsPage> createState() => _SettingsPageState();
@@ -81,7 +82,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: <Widget>[
             const _SettingsSectionTitle('ACCOUNT AND WORKSPACE'),
             const SizedBox(height: 8),
-            WorkspaceSectionHost(userId: user.id),
+            widget.workspaceSectionBuilder?.call(user.id) ??
+                const ListTile(
+                  leading: Icon(Icons.account_tree_outlined),
+                  title: Text('Switch workspace'),
+                  subtitle: Text(
+                    'Personal profile, Professional Pages and Admin access',
+                  ),
+                ),
             const Divider(height: 28),
             _ProfileEditSection(
               displayNameController: _displayNameController,
@@ -123,7 +131,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const Divider(height: 28),
             const _SettingsSectionTitle('PREFERENCES'),
             DropdownButtonFormField<String>(
-              value: state.settings.language,
+              initialValue: state.settings.language,
               decoration: const InputDecoration(
                 labelText: 'Language',
                 border: OutlineInputBorder(),
@@ -141,7 +149,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: state.settings.currency,
+              initialValue: state.settings.currency,
               decoration: const InputDecoration(
                 labelText: 'Currency',
                 border: OutlineInputBorder(),

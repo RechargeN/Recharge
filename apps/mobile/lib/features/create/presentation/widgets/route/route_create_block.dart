@@ -404,7 +404,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             'The bundled Mežaparks graph currently validates walking routes locally.',
         child: DropdownButtonFormField<String>(
           key: const ValueKey<String>('route-profile'),
-          value: state.route.profile.id,
+          initialValue: state.route.profile.id,
           decoration: const InputDecoration(labelText: 'Profile'),
           items: runtime.supportedProfiles
               .map(
@@ -529,7 +529,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             children: <Widget>[
               DropdownButtonFormField<String>(
                 key: const ValueKey<String>('route-category'),
-                value: category.id,
+                initialValue: category.id,
                 decoration: const InputDecoration(labelText: 'Category'),
                 items: rechargeCreateTaxonomy
                     .where((item) => item.allows(CreateObjectType.route))
@@ -555,7 +555,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 key: ValueKey<String>('route-subcategory-${category.id}'),
-                value:
+                initialValue:
                     category.subcategories.any(
                       (item) => item.id == draft.subcategory,
                     )
@@ -590,7 +590,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
             children: <Widget>[
               DropdownButtonFormField<String>(
                 key: const ValueKey<String>('route-difficulty'),
-                value: state.route.conditions.difficultyId,
+                initialValue: state.route.conditions.difficultyId,
                 decoration: const InputDecoration(labelText: 'Difficulty'),
                 items: const <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
@@ -610,11 +610,14 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                   if (value != null) _changeDifficulty(state.route, value);
                 },
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Marked trail'),
-                value: state.route.conditions.isMarked ?? false,
-                onChanged: (bool value) => _changeMarked(state.route, value),
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Marked trail'),
+                  value: state.route.conditions.isMarked ?? false,
+                  onChanged: (bool value) => _changeMarked(state.route, value),
+                ),
               ),
             ],
           ),
@@ -805,20 +808,23 @@ class _MethodTile extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     selected: selected,
     button: true,
-    child: ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: selected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outlineVariant,
+    child: Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: selected ? const Icon(Icons.check_circle) : null,
+        onTap: onTap,
       ),
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: selected ? const Icon(Icons.check_circle) : null,
-      onTap: onTap,
     ),
   );
 }
@@ -874,55 +880,71 @@ class _GpxPreviewCard extends StatelessWidget {
               'Choose one track',
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            ...inspection.candidates.map(
-              (candidate) => RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                value: candidate.selectionKey,
-                groupValue: controller.selectedCandidateKey,
-                onChanged: controller.isBusy
-                    ? null
-                    : (value) {
-                        if (value != null) controller.selectCandidate(value);
-                      },
-                title: Text(
-                  candidate.name?.trim().isNotEmpty == true
-                      ? candidate.name!
-                      : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
-                ),
-                subtitle: Text(
-                  '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
-                  '${candidate.pointCount} points · '
-                  '${candidate.segmentCount} segment(s)',
-                ),
+            RadioGroup<String>(
+              groupValue: controller.selectedCandidateKey,
+              onChanged: (value) {
+                if (!controller.isBusy && value != null) {
+                  controller.selectCandidate(value);
+                }
+              },
+              child: Column(
+                children: inspection.candidates
+                    .map(
+                      (candidate) => Material(
+                        type: MaterialType.transparency,
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          value: candidate.selectionKey,
+                          enabled: !controller.isBusy,
+                          title: Text(
+                            candidate.name?.trim().isNotEmpty == true
+                                ? candidate.name!
+                                : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
+                          ),
+                          subtitle: Text(
+                            '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
+                            '${candidate.pointCount} points · '
+                            '${candidate.segmentCount} segment(s)',
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
               ),
             ),
             if (selected != null && selected.gapCount > 0)
-              CheckboxListTile(
-                key: const ValueKey<String>('route-gpx-confirm-gaps'),
-                contentPadding: EdgeInsets.zero,
-                value: controller.connectGapsConfirmed,
-                onChanged: controller.isBusy
-                    ? null
-                    : (value) =>
-                          controller.setConnectGapsConfirmed(value ?? false),
-                title: Text(
-                  'Connect ${selected.gapCount} gap(s) with straight lines',
-                ),
-                subtitle: const Text(
-                  'Review these connectors on the map before publishing.',
+              Material(
+                type: MaterialType.transparency,
+                child: CheckboxListTile(
+                  key: const ValueKey<String>('route-gpx-confirm-gaps'),
+                  contentPadding: EdgeInsets.zero,
+                  value: controller.connectGapsConfirmed,
+                  onChanged: controller.isBusy
+                      ? null
+                      : (value) =>
+                            controller.setConnectGapsConfirmed(value ?? false),
+                  title: Text(
+                    'Connect ${selected.gapCount} gap(s) with straight lines',
+                  ),
+                  subtitle: const Text(
+                    'Review these connectors on the map before publishing.',
+                  ),
                 ),
               ),
             if (inspection.waypoints.isNotEmpty)
-              SwitchListTile(
-                key: const ValueKey<String>('route-gpx-import-waypoints'),
-                contentPadding: EdgeInsets.zero,
-                value: controller.importWaypoints,
-                onChanged: controller.isBusy
-                    ? null
-                    : controller.setImportWaypoints,
-                title: Text('Import ${inspection.waypointCount} POI'),
-                subtitle: const Text(
-                  'They remain off-track until reviewed and positioned.',
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  key: const ValueKey<String>('route-gpx-import-waypoints'),
+                  contentPadding: EdgeInsets.zero,
+                  value: controller.importWaypoints,
+                  onChanged: controller.isBusy
+                      ? null
+                      : controller.setImportWaypoints,
+                  title: Text('Import ${inspection.waypointCount} POI'),
+                  subtitle: const Text(
+                    'They remain off-track until reviewed and positioned.',
+                  ),
                 ),
               ),
             const SizedBox(height: 8),
@@ -990,11 +1012,14 @@ class _PreferenceSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) => SwitchListTile(
-    contentPadding: EdgeInsets.zero,
-    title: Text(title),
-    value: value,
-    onChanged: onChanged,
+  Widget build(BuildContext context) => Material(
+    type: MaterialType.transparency,
+    child: SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(title),
+      value: value,
+      onChanged: onChanged,
+    ),
   );
 }
 

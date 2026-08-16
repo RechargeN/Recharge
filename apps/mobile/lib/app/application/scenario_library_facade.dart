@@ -1,4 +1,5 @@
 import '../../features/create/domain/entities/create_draft_entity.dart';
+import '../../features/create/domain/entities/scenario_draft_data.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../di/service_locator.dart';
 
@@ -35,16 +36,22 @@ class ScenarioLibraryFacade {
       ownerId: ownerId,
       type: CreateObjectType.scenario,
     );
-    return drafts
-        .map(
-          (draft) => ScenarioLibraryItem(
-            id: draft.id,
-            title: draft.title,
-            completed: draft.isCompletedOn(nowUtc),
-            updatesEnabled: draft.scenarioUpdatesEnabled ?? true,
-          ),
-        )
-        .toList(growable: false);
+    final items = <ScenarioLibraryItem>[];
+    for (final summary in drafts) {
+      final draft = await _repository.loadDraftById(
+        ownerId: ownerId,
+        draftId: summary.id,
+      );
+      items.add(
+        ScenarioLibraryItem(
+          id: summary.id,
+          title: summary.title,
+          completed: _isCompleted(summary, nowUtc),
+          updatesEnabled: draft?.scenarioData?.updatesEnabled ?? true,
+        ),
+      );
+    }
+    return List<ScenarioLibraryItem>.unmodifiable(items);
   }
 
   Future<bool> setUpdatesEnabled({
@@ -73,5 +80,19 @@ class ScenarioLibraryFacade {
     );
     return result.status == CreateDraftCollectionSaveStatus.saved ||
         result.status == CreateDraftCollectionSaveStatus.replayed;
+  }
+
+  bool _isCompleted(CreateDraftSummary summary, DateTime nowUtc) {
+    final lastDate = summary.scenarioLastDate;
+    if (summary.scenarioDateMode == ScenarioDateMode.template ||
+        lastDate == null) {
+      return false;
+    }
+    final today = nowUtc.toUtc();
+    return DateTime.utc(
+      lastDate.year,
+      lastDate.month,
+      lastDate.day,
+    ).isBefore(DateTime.utc(today.year, today.month, today.day));
   }
 }

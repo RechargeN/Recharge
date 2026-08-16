@@ -97,26 +97,15 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     final ScenarioIntakeSelectionState selection =
         _scenarioSelectionController.state;
     final DiscoverQuery query = state.appliedQuery;
-    final ownerId = ref.watch(scenarioIntakeOwnerIdProvider);
-    final hasTarget =
-        ref
-            .watch(scenarioObjectIntakeAvailabilityProvider(ownerId))
-            .asData
-            ?.value ??
-        false;
-    final intakeEnabled =
-        hasTarget &&
-        isScenarioObjectIntakeSurfaceEnabled(
-          ref,
-          ScenarioObjectIntakeSurface.search,
-        );
-    final multiSelectEnabled =
-        hasTarget &&
-        isScenarioObjectIntakeSurfaceEnabled(
-          ref,
-          ScenarioObjectIntakeSurface.search,
-          multiSelect: true,
-        );
+    final intakeEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.search,
+    );
+    final multiSelectEnabled = isScenarioObjectIntakeSurfaceEnabled(
+      ref,
+      ScenarioObjectIntakeSurface.search,
+      multiSelect: true,
+    );
     _syncSearchController(query.queryText);
 
     return Scaffold(

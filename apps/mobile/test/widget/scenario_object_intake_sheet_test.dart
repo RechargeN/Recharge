@@ -8,13 +8,12 @@ import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/scenario_object_intake_sheet.dart';
 import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/datasources/scenario_object_intake_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
 import 'package:recharge/features/create/data/repositories/scenario_object_intake_repository_impl.dart';
-import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
-import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 
 void main() {
@@ -30,7 +29,13 @@ void main() {
   testWidgets('auth expiry blocks Apply, then retry commits once', (
     tester,
   ) async {
-    final ids = _Ids(<String>['intent-1', 'item-1', 'location-1']);
+    final ids = _Ids(<String>[
+      'intent-1',
+      'day-1',
+      'scenario-1',
+      'item-1',
+      'location-1',
+    ]);
     sl.registerSingleton<IdGenerator>(ids);
     final collection = CreateRepositoryImpl(
       localDataSource: CreateLocalDataSource(storage),
@@ -42,10 +47,10 @@ void main() {
       ),
       collectionRepository: collection,
       scenarioCoordinator: ScenarioCreateCoordinator(idGenerator: ids),
+      runtimeDefaults: _defaults,
       idGenerator: ids,
       clock: () => DateTime.utc(2026, 8, 3, 12),
     );
-    await collection.saveDraft('user-1', _target('scenario-1', 'day-1'));
     var authenticated = false;
 
     await tester.pumpWidget(
@@ -81,7 +86,7 @@ void main() {
     await tester.tap(find.text('Launch intake'));
     await tester.pumpAndSettle();
     expect(find.text('1 of 3 · Scenario'), findsOneWidget);
-    await tester.tap(find.text('Latgale day'));
+    await tester.tap(find.text('Create new Scenario'));
     await tester.pump();
     await tester.tap(find.text('Continue to placement'));
     await tester.pumpAndSettle();
@@ -96,7 +101,7 @@ void main() {
       find.text('Sign in again before adding items to Scenario.'),
       findsOneWidget,
     );
-    expect((await facade.listTargets('user-1')).single.scenarioRevision, 0);
+    expect(await facade.listTargets('user-1'), isEmpty);
 
     authenticated = true;
     await tester.tap(find.text('Add 1'));
@@ -120,26 +125,24 @@ void main() {
     final semantics = tester.ensureSemantics();
     final ids = _Ids(<String>[
       'intent-adaptive',
+      'day-adaptive',
+      'scenario-adaptive',
       'item-adaptive',
       'location-adaptive',
     ]);
     sl.registerSingleton<IdGenerator>(ids);
-    final collection = CreateRepositoryImpl(
-      localDataSource: CreateLocalDataSource(storage),
-      idGenerator: ids,
-    );
     final facade = ScenarioObjectIntakeFacade(
       intentRepository: ScenarioObjectIntakeRepositoryImpl(
         ScenarioObjectIntakeLocalDataSource(storage),
       ),
-      collectionRepository: collection,
+      collectionRepository: CreateRepositoryImpl(
+        localDataSource: CreateLocalDataSource(storage),
+        idGenerator: ids,
+      ),
       scenarioCoordinator: ScenarioCreateCoordinator(idGenerator: ids),
+      runtimeDefaults: _defaults,
       idGenerator: ids,
       clock: () => DateTime.utc(2026, 8, 3, 12),
-    );
-    await collection.saveDraft(
-      'user-1',
-      _target('scenario-adaptive', 'day-adaptive'),
     );
 
     await tester.pumpWidget(
@@ -182,7 +185,7 @@ void main() {
     await tester.tap(find.text('Launch adaptive intake'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Latgale day'));
+    await tester.tap(find.text('Create new Scenario'));
     await tester.pump();
     await tester.ensureVisible(find.text('Continue to placement'));
     await tester.tap(find.text('Continue to placement'));
@@ -207,32 +210,13 @@ void main() {
   });
 }
 
-CreateDraftEntity _target(String id, String dayId) =>
-    CreateDraftEntity.defaults(
-      organizerId: 'user-1',
-      organizerEmail: 'user@example.test',
-      organizerName: 'User',
-      marketCityId: 'latvia',
-      timezone: 'Europe/Riga',
-      country: 'LV',
-      city: 'Riga',
-      currency: 'EUR',
-    ).copyWith(
-      id: id,
-      objectType: CreateObjectType.scenario,
-      title: 'Latgale day',
-      clearEventData: true,
-      scenarioData: ScenarioDraftData.defaults().copyWith(
-        days: <ScenarioDayDraft>[
-          ScenarioDayDraft(
-            id: dayId,
-            title: 'Day 1',
-            dayIndex: 0,
-            itemIds: const <String>[],
-          ),
-        ],
-      ),
-    );
+const CreateRuntimeDefaults _defaults = CreateRuntimeDefaults(
+  marketCityId: 'latvia',
+  timezone: 'Europe/Riga',
+  country: 'LV',
+  city: 'Riga',
+  currency: 'EUR',
+);
 
 final DiscoverItemEntity _item = DiscoverItemEntity(
   id: 'place-1',

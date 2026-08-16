@@ -1,8 +1,8 @@
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
-import '../../../../core/geo/geometry_encoding.dart';
-import '../../../../core/geo/geometry_hash.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geometry_encoding.dart';
+import '../../../../shared/primitives/geo/geometry_hash.dart';
 import 'route_quality_data.dart';
 
 enum RouteCreationMethod {

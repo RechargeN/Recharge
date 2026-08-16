@@ -5,7 +5,12 @@ import '../recharge_theme.dart';
 /// Soft, minimally-bordered rounded card used to group a Create-flow step's
 /// fields — the "Create a place" / "What is this place?" card pattern.
 class CreateFlowSection extends StatelessWidget {
-  const CreateFlowSection({super.key, this.title, this.subtitle, required this.child});
+  const CreateFlowSection({
+    super.key,
+    this.title,
+    this.subtitle,
+    required this.child,
+  });
 
   final String? title;
   final String? subtitle;
@@ -13,11 +18,11 @@ class CreateFlowSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RechargeTheme.createSectionRadius),
-        border: Border.all(color: RechargeTheme.createSoftGrayLine),
+        side: const BorderSide(color: RechargeTheme.createSoftGrayLine),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),

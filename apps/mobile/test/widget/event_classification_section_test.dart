@@ -1,4 +1,3 @@
-import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/event_classification_section.dart';
@@ -86,11 +85,11 @@ void main() {
       find.text('Explain the event mechanics when choosing Other.'),
       findsOneWidget,
     );
-    final CreateFlowChip disabled = tester.widget<CreateFlowChip>(
+    final FilterChip disabled = tester.widget<FilterChip>(
       find.byKey(const Key('event-additional-watch')),
     );
     expect(disabled.onSelected, isNull);
-    final CreateFlowChip selected = tester.widget<CreateFlowChip>(
+    final FilterChip selected = tester.widget<FilterChip>(
       find.byKey(const Key('event-additional-learn')),
     );
     selected.onSelected!(false);

@@ -11,7 +11,7 @@ void main() {
       intent: _intent,
       action: ScenarioObjectIntakeTelemetryAction.apply,
       result: ScenarioObjectIntakeTelemetryResult.success,
-      targetKind: ScenarioObjectIntakeTargetKind.copied,
+      targetKind: ScenarioObjectIntakeTargetKind.newTarget,
       placement: ScenarioObjectIntakePlacementKind.unscheduled,
     );
 
@@ -21,7 +21,7 @@ void main() {
       'action': 'apply',
       'result': 'success',
       'batch_size_bucket': 'two_to_five',
-      'target_kind': 'copied',
+      'target_kind': 'new',
       'placement': 'unscheduled',
       'source_status': 'mixed',
     });

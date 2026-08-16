@@ -9,6 +9,7 @@ import '../application/planning_navigation_intent.dart';
 import '../application/planning_navigation_resolver.dart';
 import '../observers/app_route_observer.dart';
 import '../presentation/recharge_app_shell.dart';
+import '../presentation/workspace_section_host.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
@@ -273,7 +274,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: 'settings',
         path: RouteNames.settings,
-        builder: (context, state) => const SettingsPage(),
+        builder: (context, state) => SettingsPage(
+          workspaceSectionBuilder: (userId) =>
+              WorkspaceSectionHost(userId: userId),
+        ),
       ),
       GoRoute(
         name: 'create_success',

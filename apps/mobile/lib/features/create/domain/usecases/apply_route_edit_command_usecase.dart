@@ -1,6 +1,6 @@
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_edit_command.dart';
 

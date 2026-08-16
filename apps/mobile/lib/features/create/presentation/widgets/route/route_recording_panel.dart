@@ -90,14 +90,17 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
   List<Widget> _controls(RouteRecordingState state) => switch (state.status) {
     RouteRecordingStatus.idle ||
     RouteRecordingStatus.failed when state.journal == null => <Widget>[
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: const Text('Continue while screen is locked'),
-        subtitle: const Text(
-          'Requires background location permission and shows a system indicator.',
+      Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Continue while screen is locked'),
+          subtitle: const Text(
+            'Requires background location permission and shows a system indicator.',
+          ),
+          value: _recordInBackground,
+          onChanged: (value) => setState(() => _recordInBackground = value),
         ),
-        value: _recordInBackground,
-        onChanged: (value) => setState(() => _recordInBackground = value),
       ),
       FilledButton.icon(
         key: const ValueKey<String>('route-gps-start'),
@@ -418,7 +421,7 @@ class _GapDecision extends StatelessWidget {
     BuildContext context,
   ) => DropdownButtonFormField<RouteRecordingGapResolution>(
     key: ValueKey<String>('route-gps-gap-${gap.id}'),
-    value: value,
+    initialValue: value,
     decoration: InputDecoration(
       labelText:
           'Gap ${index + 1}: ${gap.distanceMeters.round()} m, ${gap.elapsedSeconds} s',

@@ -23,7 +23,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.44.9'
 
       - name: Flutter pub get
         working-directory: ${{ steps.appdir.outputs.dir }}
@@ -38,6 +38,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run boundaries check
-        shell: pwsh
-        run: ./tools/scripts/check-boundaries.ps1
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+
+      - name: Boundary checker self-test
+        run: dart tools/scripts/check_boundaries.dart --self-test
+
+      - name: Run canonical boundary check
+        id: boundary_check
+        continue-on-error: true
+        run: >-
+          dart tools/scripts/check_boundaries.dart
+          --repo-root .
+          --format json
+          --output boundary-report.json
+
+      - name: Print boundary summary
+        if: steps.boundary_check.outcome == 'success'
+        run: >-
+          dart tools/scripts/check_boundaries.dart
+          --repo-root .
+          --format text
+
+      - name: Verify generated boundary inventory
+        if: steps.boundary_check.outcome == 'success'
+        run: >-
+          dart tools/scripts/check_boundaries.dart
+          --repo-root .
+          --format markdown
+          --output docs/architecture/MOBILE_BOUNDARY_INVENTORY.md
+          --check-output
+
+      - name: Upload boundary report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boundary-report
+          path: boundary-report.json
+          if-no-files-found: warn
+
+      - name: Enforce boundary result
+        if: steps.boundary_check.outcome == 'failure'
+        run: exit 1

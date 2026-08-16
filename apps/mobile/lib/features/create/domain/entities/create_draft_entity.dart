@@ -266,7 +266,10 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
-        publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
+        publisherRef: PublisherRef(
+          type: PublisherType.user,
+          id: organizerId,
+        ),
       ),
       placeData: null,
       findPeopleData: null,

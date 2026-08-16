@@ -131,7 +131,7 @@ void main() {
     expect(ids.count, 0);
   });
 
-  test('exact catalog object may be added as another occurrence', () {
+  test('exact catalog duplicate requires explicit confirmation', () {
     final duplicateRef = const ScenarioObjectRef(
       objectId: 'event-existing',
       objectType: ScenarioCatalogObjectType.event,
@@ -141,14 +141,25 @@ void main() {
       duplicateRef.objectId,
       duplicateRef.objectType,
     );
-    final accepted =
+    final rejected =
         apply(_request(target, <ScenarioIntakeCandidate>[candidate]))
+            as ScenarioIntakeRejected;
+
+    expect(
+      rejected.failure,
+      ScenarioIntakeFailure.duplicateConfirmationRequired,
+    );
+
+    final accepted =
+        apply(
+              _request(
+                target,
+                <ScenarioIntakeCandidate>[candidate],
+                confirmedDuplicates: <ScenarioObjectRef>{duplicateRef},
+              ),
+            )
             as ScenarioIntakeApplied;
     expect(accepted.draft.scenarioData!.items, hasLength(2));
-    expect(
-      accepted.draft.scenarioData!.items.map((item) => item.id).toSet(),
-      hasLength(2),
-    );
   });
 
   test('fixed Details event needs confirmation before template conversion', () {
@@ -286,6 +297,7 @@ ApplyScenarioObjectIntakeRequest _request(
   bool explicitUnscheduled = false,
   String? afterItemId,
   int revision = 4,
+  Set<ScenarioObjectRef> confirmedDuplicates = const <ScenarioObjectRef>{},
   Set<ScenarioObjectRef> confirmedScheduleAdjustments =
       const <ScenarioObjectRef>{},
 }) {
@@ -303,6 +315,7 @@ ApplyScenarioObjectIntakeRequest _request(
         for (final candidate in candidates)
           candidate.ref: ScenarioItemRole.mandatory,
       },
+      confirmedDuplicates: confirmedDuplicates,
       confirmedScheduleAdjustments: confirmedScheduleAdjustments,
     ),
   );

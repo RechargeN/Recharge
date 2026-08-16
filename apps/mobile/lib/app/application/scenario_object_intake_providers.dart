@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/auth/application/auth_providers.dart';
+import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
@@ -35,26 +35,9 @@ final scenarioObjectIntakeFacadeProvider = Provider<ScenarioObjectIntakeFacade>(
       intentRepository: sl<ScenarioObjectIntakeIntentRepository>(),
       collectionRepository: sl<CreateDraftCollectionRepository>(),
       scenarioCoordinator: sl<ScenarioCreateCoordinator>(),
+      runtimeDefaults: sl<CreateRuntimeDefaults>(),
       idGenerator: sl(),
       config: config,
     );
   },
 );
-
-final scenarioObjectIntakeAvailabilityProvider =
-    FutureProvider.family<bool, String>((ref, ownerId) async {
-      if (ownerId.trim().isEmpty) return false;
-      final facade = ref.watch(scenarioObjectIntakeFacadeProvider);
-      final targets = await facade.listTargets(ownerId);
-      if (targets.isNotEmpty) return true;
-      return (await facade.listCopySources()).isNotEmpty;
-    });
-
-final scenarioIntakeOwnerIdProvider = Provider<String>((ref) {
-  try {
-    return ref.watch(authControllerProvider).state.user?.id ?? '';
-  } on StateError {
-    // Isolated presentation tests and previews may omit application DI.
-    return '';
-  }
-});

@@ -1,13 +1,13 @@
 import '../../core/id/id_generator.dart';
+import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/domain/entities/create_draft_entity.dart';
+import '../../features/create/domain/entities/scenario_draft_data.dart';
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/create/domain/entities/scenario_object_intake_session.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
-import '../../features/create/domain/repositories/scenario_copy_source_repository.dart';
-import '../../features/create/domain/usecases/fork_scenario_usecase.dart';
 import 'scenario_object_intake_config.dart';
 
 typedef ScenarioObjectIntakeClock = DateTime Function();
@@ -39,29 +39,27 @@ class ScenarioObjectIntakeFacade {
     required ScenarioObjectIntakeIntentRepository intentRepository,
     required CreateDraftCollectionRepository collectionRepository,
     required ScenarioCreateCoordinator scenarioCoordinator,
+    required CreateRuntimeDefaults runtimeDefaults,
     required IdGenerator idGenerator,
-    ScenarioCopySourceRepository copySourceRepository =
-        const EmptyScenarioCopySourceRepository(),
     ScenarioObjectIntakeClock? clock,
     ScenarioObjectIntakeConfig config = const ScenarioObjectIntakeConfig(),
   }) : _intentRepository = intentRepository,
        _collectionRepository = collectionRepository,
        _scenarioCoordinator = scenarioCoordinator,
-       _copySourceRepository = copySourceRepository,
-       _forkScenario = ForkScenarioUseCase(idGenerator),
+       _runtimeDefaults = runtimeDefaults,
+       _idGenerator = idGenerator,
        _clock = clock ?? _utcNow,
        config = config.validated();
 
   final ScenarioObjectIntakeIntentRepository _intentRepository;
   final CreateDraftCollectionRepository _collectionRepository;
   final ScenarioCreateCoordinator _scenarioCoordinator;
-  final ScenarioCopySourceRepository _copySourceRepository;
-  final ForkScenarioUseCase _forkScenario;
+  final CreateRuntimeDefaults _runtimeDefaults;
+  final IdGenerator _idGenerator;
   final ScenarioObjectIntakeClock _clock;
   final ScenarioObjectIntakeConfig config;
 
   Duration get intentTtl => config.intentTtl;
-  DateTime get nowUtc => _clock().toUtc();
 
   Future<List<CreateDraftSummary>> begin(
     ScenarioObjectIntakeIntent intent,
@@ -88,26 +86,6 @@ class ScenarioObjectIntakeFacade {
         type: CreateObjectType.scenario,
       );
 
-  Future<List<ScenarioCopySourceSummary>> listCopySources() =>
-      _copySourceRepository.listAvailable();
-
-  Future<CreateDraftEntity?> materializeCopyTarget({
-    required String sourceScenarioId,
-    required String ownerId,
-    required String ownerEmail,
-    required String ownerName,
-  }) async {
-    final source = await _copySourceRepository.loadSource(sourceScenarioId);
-    if (source == null) return null;
-    return _forkScenario(
-      source: source,
-      ownerId: ownerId,
-      ownerEmail: ownerEmail,
-      ownerName: ownerName,
-      nowUtc: nowUtc,
-    );
-  }
-
   Future<CreateDraftEntity?> loadTarget({
     required String ownerId,
     required String targetDraftId,
@@ -115,6 +93,58 @@ class ScenarioObjectIntakeFacade {
     ownerId: ownerId,
     draftId: targetDraftId,
   );
+
+  CreateDraftEntity materializeNewTarget({
+    required ScenarioObjectIntakeIntent intent,
+    required String organizerEmail,
+    required String organizerName,
+    required String title,
+  }) {
+    if (!config.enabled || !config.createNewTargetEnabled) {
+      throw StateError('Creating a new Scenario target is disabled.');
+    }
+    final normalizedTitle = title.trim();
+    if (normalizedTitle.isEmpty) {
+      throw const FormatException('Scenario title is required.');
+    }
+    final sourceRef = intent.candidates.first.ref;
+    final originType = switch (intent.sourceSurface) {
+      ScenarioIntakeSourceSurface.details => ScenarioOriginType.details,
+      ScenarioIntakeSourceSurface.search => ScenarioOriginType.search,
+      ScenarioIntakeSourceSurface.map => ScenarioOriginType.mapSelection,
+    };
+    final scenario = _scenarioCoordinator
+        .initial(
+          timezoneId: _runtimeDefaults.timezone,
+          currencyCode: _runtimeDefaults.currency,
+        )
+        .copyWith(
+          origin: ScenarioOriginDraft(
+            type: originType,
+            sourceId:
+                intent.sourceSurface == ScenarioIntakeSourceSurface.details
+                ? sourceRef.objectId
+                : null,
+          ),
+        );
+    return CreateDraftEntity.defaults(
+      organizerId: intent.requesterId,
+      organizerEmail: organizerEmail,
+      organizerName: organizerName,
+      marketCityId: _runtimeDefaults.marketCityId,
+      timezone: _runtimeDefaults.timezone,
+      country: _runtimeDefaults.country,
+      city: _runtimeDefaults.city,
+      currency: _runtimeDefaults.currency,
+    ).copyWith(
+      id: _idGenerator.generate(),
+      objectType: CreateObjectType.scenario,
+      title: normalizedTitle,
+      clearEventData: true,
+      scenarioData: scenario,
+      visibility: VisibilityType.private,
+    );
+  }
 
   Future<ScenarioObjectIntakeApplyOutcome> apply({
     required String ownerId,

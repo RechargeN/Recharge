@@ -71,7 +71,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioPlannedTransportKind>(
-                value: kind,
+                initialValue: kind,
                 decoration: const InputDecoration(
                   labelText: 'Transport',
                   border: OutlineInputBorder(),
@@ -215,7 +215,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
               const Text('Manual values stay locked until you edit them.'),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioTravelMode>(
-                value: mode,
+                initialValue: mode,
                 decoration: const InputDecoration(
                   labelText: 'Travel mode',
                   border: OutlineInputBorder(),

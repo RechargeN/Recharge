@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-08-09. Канонический файл инструкций репозитория.
+Версия: 2026-08-10. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -33,6 +33,10 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 ## Команды (рабочая директория обязательна)
 
 - Из корня: Melos-скрипты (см. melos.yaml)
+- Boundary gate из корня:
+  `dart tools/scripts/check_boundaries.dart --repo-root . --format text`
+  (Windows wrapper: `powershell -NoProfile -ExecutionPolicy Bypass -File
+  .\tools\scripts\check-boundaries.ps1`).
 - Или из `apps/mobile/`: `flutter pub get`, `flutter analyze`,
   `flutter test`, `flutter run`
 - Перед завершением любого slice: `flutter analyze` и `flutter test`

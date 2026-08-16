@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import '../../../../core/geo/geo_point.dart';
-import '../../../../core/geo/geometry_encoding.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geometry_encoding.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_publication_data.dart';

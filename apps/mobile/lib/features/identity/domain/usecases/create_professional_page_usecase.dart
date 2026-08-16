@@ -1,4 +1,4 @@
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/managed_page_entity.dart';
 import '../entities/managed_page_membership_entity.dart';
 import '../entities/professional_page_creation_input.dart';

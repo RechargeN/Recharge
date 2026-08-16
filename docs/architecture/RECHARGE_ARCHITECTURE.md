@@ -274,8 +274,10 @@ Feature A ─► contract/facade ◄─ app wiring ─► Feature B
 Feature владеет своими entities, storage и state. Другой feature передаёт id
 или request contract, а не читает его datasource или внутренний controller.
 
-Boundary gate обязателен локально и в CI. Новая запись в legacy allowlist без
-mini-RFC и ADR запрещена.
+Boundary gate обязателен локально и в CI. Новое исключение в
+`tools/scripts/boundary-exceptions.json` запрещено без mini-RFC, владельца,
+срока, target slice и, когда меняется архитектурное решение, ADR. Budget
+реестра может только сокращаться.
 
 ---
 

@@ -56,13 +56,11 @@ class BuildScenarioTransitDisclosure {
   ScenarioTransitDisclosure call(ScenarioPlannedTransportSourceDraft source) {
     final snapshot = source.scheduleSnapshot;
     final providerCode = snapshot?.providerCode?.trim();
-    final isManual =
-        snapshot == null ||
+    final isManual = snapshot == null ||
         providerCode == null ||
         providerCode.isEmpty ||
         providerCode == 'manual';
-    final title =
-        _nonEmpty(source.publicServiceLabel) ??
+    final title = _nonEmpty(source.publicServiceLabel) ??
         _nonEmpty(source.carrierName) ??
         _nonEmpty(snapshot?.serviceLabel) ??
         'Planned transport';
@@ -86,8 +84,8 @@ class BuildScenarioTransitDisclosure {
       );
     }
 
-    final providerLabel =
-        _nonEmpty(snapshot.providerDisplayName) ?? providerCode;
+    final providerLabel = _nonEmpty(snapshot.providerDisplayName) ??
+        providerCode;
     final completeProvenance =
         _nonEmpty(snapshot.providerDisplayName) != null &&
         _nonEmpty(snapshot.licenseName) != null &&
@@ -124,7 +122,8 @@ class BuildScenarioTransitDisclosure {
   ) => switch (freshness) {
     ScenarioScheduleFreshness.current =>
       ScenarioTransitDisclosureFreshness.current,
-    ScenarioScheduleFreshness.stale => ScenarioTransitDisclosureFreshness.stale,
+    ScenarioScheduleFreshness.stale =>
+      ScenarioTransitDisclosureFreshness.stale,
     ScenarioScheduleFreshness.unknown =>
       ScenarioTransitDisclosureFreshness.unknown,
     ScenarioScheduleFreshness.notApplicable =>

@@ -4,6 +4,24 @@ Status: Frozen baseline, expanded by Accepted ADR 0019
 Effective date: 2026-08-08
 Owner: Recharge team
 Related expansion: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
+Backend delivery coordination: [BCK-02 v2.4](../product/RECHARGE_BACKEND_DELIVERY_MAP.md)
+— Approved canonical registry/ownership/waves/gates baseline; documentation only.
+Accepted mobile target supplement:
+[Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
+— Accepted 2026-08-10, documentation only.
+Current bounded migration slice:
+[MOB-ARCH-M1](MOBILE_ARCHITECTURE_M1_BOUNDARY_INVENTORY_PLAN.md) — approved
+tooling/docs implementation is locally complete and remains Review until the
+updated GitHub Actions Linux boundary job succeeds; no runtime claim.
+
+BCK-02 orders future backend specifications and gated implementation slices. It
+does not change this frozen architecture, supersede Accepted ADR or authorize
+`apps/backend`, Firebase provisioning, deployment or production data processing.
+
+Mobile Architecture v3.1 elaborates the target mobile structure, boundaries,
+market expansion and staged migration. It does not supersede this frozen
+baseline or Accepted ADR, and its acceptance does not authorize runtime work.
+Every implementation change still requires an Approved bounded slice.
 
 ## 1) Canonical Project Tree
 
@@ -103,6 +121,9 @@ recharge/
 12. The accepted `apps/backend` target does not itself authorize directory
     creation, Firebase deployment or production data processing. Each physical
     implementation is bounded by an Approved ECL-03 stage and its gates.
+13. Mobile target slices must cite the applicable Mobile Architecture v3.1
+    acceptance criteria by document version and stable AC ID. Any conflict with
+    this baseline requires an Accepted ADR rather than a silent reinterpretation.
 
 ## 3) Definition Of Done (Architecture Compliance)
 

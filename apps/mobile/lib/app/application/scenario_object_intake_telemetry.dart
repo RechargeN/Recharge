@@ -24,7 +24,7 @@ enum ScenarioObjectIntakeTelemetryResult {
 
 enum ScenarioObjectIntakeBatchBucket { one, twoToFive, sixToTwenty }
 
-enum ScenarioObjectIntakeTargetKind { existing, copied }
+enum ScenarioObjectIntakeTargetKind { existing, newTarget }
 
 enum ScenarioObjectIntakePlacementKind { day, unscheduled }
 
@@ -101,5 +101,5 @@ class ScenarioObjectIntakeTelemetry {
       };
 
   String _targetName(ScenarioObjectIntakeTargetKind kind) =>
-      kind == ScenarioObjectIntakeTargetKind.copied ? 'copied' : 'existing';
+      kind == ScenarioObjectIntakeTargetKind.newTarget ? 'new' : 'existing';
 }

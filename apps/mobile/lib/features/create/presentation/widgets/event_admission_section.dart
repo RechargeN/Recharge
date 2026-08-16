@@ -70,7 +70,7 @@ class EventAdmissionSection extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<EventAdmissionPreset>(
             key: const Key('event-admission-preset'),
-            value: state.selectedPreset,
+            initialValue: state.selectedPreset,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Configuration preset',
@@ -542,7 +542,7 @@ class _EnumField<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: DropdownButtonFormField<T>(
-      value: values.contains(value) ? value : null,
+      initialValue: values.contains(value) ? value : null,
       isExpanded: true,
       decoration: InputDecoration(labelText: label, errorText: error),
       items: values
