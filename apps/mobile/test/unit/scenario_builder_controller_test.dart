@@ -55,7 +55,7 @@ void main() {
       ),
       isTrue,
     );
-    expect(controller.state.draft.totalPriceAmount, 0);
+    expect(controller.state.draft.totalPrice.isZero, isTrue);
   });
 
   test('mood change rebuilds scenario steps', () {

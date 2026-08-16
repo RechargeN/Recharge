@@ -199,6 +199,7 @@ void main() {
             activeTimezone: 'Europe/Riga',
             activeCountry: 'LV',
             activeCity: 'Riga',
+            activeCurrency: 'EUR',
           );
       const CreateTemplateRepositoryImpl repository =
           CreateTemplateRepositoryImpl(dataSource);

@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 import '../../domain/entities/scenario_budget_draft.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/entities/scenario_item_draft.dart';
@@ -871,20 +874,21 @@ class ScenarioDraftMapper {
 
   static ScenarioMoneyDraft? _money(Object? value) {
     final Map<String, Object?> json = _map(value);
-    final int? minorUnits = _int(json['minorUnits']);
-    final String currencyCode = _string(json['currencyCode'], '').toUpperCase();
-    return minorUnits == null || currencyCode.isEmpty
-        ? null
-        : ScenarioMoneyDraft(
-            minorUnits: minorUnits,
-            currencyCode: currencyCode,
-          );
+    if (json.isEmpty) return null;
+    final Object? rawMinorUnits = json['minorUnits'];
+    final CurrencyCode? currency = CurrencyCode.tryParse(json['currencyCode']);
+    if (rawMinorUnits is! int || currency == null) {
+      throw const FormatException('Scenario money payload is invalid.');
+    }
+    return ScenarioMoneyDraft.fromMoney(
+      Money(minorUnits: rawMinorUnits, currency: currency),
+    );
   }
 
   static Map<String, Object?> _moneyToJson(ScenarioMoneyDraft value) =>
       <String, Object?>{
-        'minorUnits': value.minorUnits,
-        'currencyCode': value.currencyCode,
+        'minorUnits': value.money.minorUnits,
+        'currencyCode': value.money.currency.value,
       };
 
   static ScenarioTotalsDraft _totals(Object? value) {

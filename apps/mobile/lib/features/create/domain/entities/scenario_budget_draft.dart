@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 enum ScenarioPriceKnowledge { free, known, estimated, unknown }
 
 enum ScenarioPriceSource { catalog, userOverride, provider, manual }
@@ -19,6 +22,14 @@ class ScenarioMoneyDraft {
 
   final int minorUnits;
   final String currencyCode;
+
+  factory ScenarioMoneyDraft.fromMoney(Money money) => ScenarioMoneyDraft(
+    minorUnits: money.minorUnits,
+    currencyCode: money.currency.value,
+  );
+
+  Money get money =>
+      Money(minorUnits: minorUnits, currency: CurrencyCode.parse(currencyCode));
 
   bool get isStructurallyValid =>
       minorUnits >= 0 && RegExp(r'^[A-Z]{3}$').hasMatch(currencyCode);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
@@ -332,8 +333,9 @@ class _PublishedDraftCard extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   label: draft.isFree
                       ? 'Free'
-                      : '${draft.basePrice?.toStringAsFixed(0) ?? '0'} '
-                            '${draft.currency}',
+                      : draft.basePrice == null
+                      ? 'Price unavailable'
+                      : MoneyFormatter.format(draft.basePrice!),
                 ),
                 _StatusChip(icon: Icons.place_outlined, label: draft.city),
               ],
@@ -670,7 +672,7 @@ String _discoverRouteForDraft(String path, CreateDraftEntity draft) {
       'category': _discoverCategoryForDraft(draft.mainCategory),
       'free': draft.isFree ? '1' : '0',
       if (!draft.isFree && draft.basePrice != null)
-        'budgetMax': draft.basePrice!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter.decimal(draft.basePrice!),
       'radius': '5000',
       'unlimited': '0',
     },

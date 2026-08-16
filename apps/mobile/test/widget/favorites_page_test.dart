@@ -22,6 +22,7 @@ import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecas
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import 'package:recharge/features/favorites/presentation/pages/favorites_page.dart';
 
+import '../helpers/money_test_values.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
@@ -582,7 +583,6 @@ FavoriteItemEntity _favorite(
   String id,
   String title, {
   bool isFree = true,
-  double priceAmount = 0,
   String category = 'wellness',
   String? targetRoute,
 }) {
@@ -594,7 +594,7 @@ FavoriteItemEntity _favorite(
     category: category,
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
     distanceKm: 1.8,
-    priceAmount: priceAmount,
+    price: testZeroEur,
     isFree: isFree,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute: targetRoute,
@@ -609,7 +609,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: testTenEur,
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -624,7 +624,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: testTenEur,
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -665,7 +665,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      price: testZeroEur,
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,

@@ -1,3 +1,8 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+
 import '../../domain/entities/find_people_draft_data.dart';
 
 class FindPeopleDraftMapper {
@@ -55,7 +60,7 @@ class FindPeopleDraftMapper {
       'attendanceConfirmationRequired': value.attendanceConfirmationRequired,
       'guestPolicy': value.guestPolicy,
       'costType': value.costType.name,
-      'expectedSpendAmount': value.expectedSpendAmount,
+      'expectedSpendAmountMinorUnits': value.expectedSpendAmount?.minorUnits,
       'currencyCode': value.currencyCode,
       'costNote': value.costNote,
       'expenseSplitMode': value.expenseSplitMode.name,
@@ -64,7 +69,7 @@ class FindPeopleDraftMapper {
             (FindPeopleExpenseItemDraft item) => <String, Object?>{
               'id': item.id,
               'category': item.category,
-              'amount': item.amount,
+              'amountMinorUnits': item.amount.minorUnits,
               'payerNote': item.payerNote,
             },
           )
@@ -108,6 +113,9 @@ class FindPeopleDraftMapper {
       (dynamic key, dynamic value) =>
           MapEntry<String, Object?>(key.toString(), value),
     );
+    final CurrencyCode currency = json.containsKey('currencyCode')
+        ? CurrencyCode.parse(json['currencyCode']?.toString() ?? '')
+        : defaults.currency;
     return defaults.copyWith(
       revision: _int(json['revision']) ?? defaults.revision,
       skillLevel:
@@ -235,11 +243,21 @@ class FindPeopleDraftMapper {
       costType:
           _enumValue(FindPeopleCostType.values, json['costType']) ??
           defaults.costType,
-      expectedSpendAmount: _double(json['expectedSpendAmount']),
+      expectedSpendAmount: _money(
+        canonical: json['expectedSpendAmountMinorUnits'],
+        legacy: json['expectedSpendAmount'],
+        currency: currency,
+      ),
       clearExpectedSpendAmount:
-          json.containsKey('expectedSpendAmount') &&
-          _double(json['expectedSpendAmount']) == null,
-      currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
+          (json.containsKey('expectedSpendAmountMinorUnits') ||
+              json.containsKey('expectedSpendAmount')) &&
+          _money(
+                canonical: json['expectedSpendAmountMinorUnits'],
+                legacy: json['expectedSpendAmount'],
+                currency: currency,
+              ) ==
+              null,
+      currency: currency,
       costNote: _text(json['costNote']),
       clearCostNote:
           json.containsKey('costNote') && _text(json['costNote']) == null,
@@ -249,7 +267,10 @@ class FindPeopleDraftMapper {
             json['expenseSplitMode'],
           ) ??
           defaults.expenseSplitMode,
-      plannedExpenseItems: _expenses(json['plannedExpenseItems']),
+      plannedExpenseItems: _expenses(
+        json['plannedExpenseItems'],
+        currency: currency,
+      ),
       cancellationPolicyId:
           _text(json['cancellationPolicyId']) ?? defaults.cancellationPolicyId,
       publisherType:
@@ -363,19 +384,50 @@ class FindPeopleDraftMapper {
         .toList(growable: false);
   }
 
-  static List<FindPeopleExpenseItemDraft> _expenses(Object? source) {
+  static List<FindPeopleExpenseItemDraft> _expenses(
+    Object? source, {
+    required CurrencyCode currency,
+  }) {
     if (source is! List<dynamic>) return const <FindPeopleExpenseItemDraft>[];
     return source
         .whereType<Map<dynamic, dynamic>>()
         .map((Map<dynamic, dynamic> json) {
+          final Money? amount = _money(
+            canonical: json['amountMinorUnits'],
+            legacy: json['amount'],
+            currency: currency,
+          );
           return FindPeopleExpenseItemDraft(
             id: _text(json['id']) ?? '',
             category: _text(json['category']) ?? '',
-            amount: _double(json['amount']) ?? 0,
+            amount: amount ?? Money.zero(currency),
             payerNote: _text(json['payerNote']) ?? '',
           );
         })
         .toList(growable: false);
+  }
+
+  static Money? _money({
+    required Object? canonical,
+    required Object? legacy,
+    required CurrencyCode currency,
+  }) {
+    if (canonical != null) {
+      if (canonical is! int) {
+        throw const FormatException('Money minor units must be an integer.');
+      }
+      return Money(minorUnits: canonical, currency: currency);
+    }
+    if (legacy == null) return null;
+    if (legacy is! num) {
+      throw const FormatException('Legacy money amount is invalid.');
+    }
+    final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+      legacy,
+      currency: currency,
+    );
+    if (result is MoneyParseSuccess) return result.money;
+    throw const FormatException('Legacy money amount is ambiguous.');
   }
 
   static List<FindPeopleCoHostDraft> _coHosts(Object? source) {

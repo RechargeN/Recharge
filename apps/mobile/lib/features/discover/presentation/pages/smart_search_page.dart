@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -46,7 +48,16 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     super.initState();
     final String prompt = widget.seedParameters['prompt']?.trim() ?? '';
     _promptController = TextEditingController(text: prompt);
-    _parseResult = prompt.isEmpty ? null : parseSmartSearch(prompt);
+    _parseResult = prompt.isEmpty
+        ? null
+        : parseSmartSearch(
+            prompt,
+            currency: ref
+                .read(discoverFeedControllerProvider)
+                .state
+                .appliedQuery
+                .currency,
+          );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(discoverFeedControllerProvider).ensureSmartSearchHistoryLoaded();
     });
@@ -231,7 +242,16 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
 
   void _parsePrompt(String value) {
     setState(() {
-      _parseResult = value.trim().isEmpty ? null : parseSmartSearch(value);
+      _parseResult = value.trim().isEmpty
+          ? null
+          : parseSmartSearch(
+              value,
+              currency: ref
+                  .read(discoverFeedControllerProvider)
+                  .state
+                  .appliedQuery
+                  .currency,
+            );
     });
   }
 
@@ -252,7 +272,10 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
       return;
     }
 
-    final SmartSearchParseResult parsed = parseSmartSearch(prompt);
+    final SmartSearchParseResult parsed = parseSmartSearch(
+      prompt,
+      currency: controller.state.appliedQuery.currency,
+    );
     final _DateWindow? window = switch (parsed.datePreset) {
       SmartSearchDatePreset.today => _todayWindow(),
       SmartSearchDatePreset.tonight => _tonightWindow(),
@@ -464,7 +487,7 @@ String _resultsLocation(DiscoverQuery query) {
       'category': query.selectedCategoryIds.join(','),
       'free': query.freeOnly ? '1' : '0',
       if (query.budgetMax != null)
-        'budgetMax': query.budgetMax!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
       if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
       if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
       'radius': query.radiusMeters.round().toString(),

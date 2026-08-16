@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/discover/application/controllers/scenario_intake_selection_controller.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -78,7 +80,7 @@ void main() {
       startsAtUtc: invalid.startsAtUtc,
       latitude: 91,
       longitude: invalid.longitude,
-      priceAmount: invalid.priceAmount,
+      price: invalid.price,
       distanceKm: invalid.distanceKm,
       isFree: invalid.isFree,
     );
@@ -107,7 +109,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3, 12),
   latitude: 56.94 + index / 10000,
   longitude: 24.10 + index / 10000,
-  priceAmount: 0,
+  price: const Money.zero(CurrencyCode.eur),
   distanceKm: 1,
   isFree: true,
 );

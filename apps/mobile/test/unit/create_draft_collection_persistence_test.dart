@@ -296,7 +296,7 @@ void main() {
 
 CreateRepositoryImpl _repository(FlutterSecureStorage storage) =>
     CreateRepositoryImpl(
-      localDataSource: CreateLocalDataSource(storage),
+      localDataSource: CreateLocalDataSource(storage, activeCurrency: 'EUR'),
       idGenerator: const _FixedIdGenerator(),
     );
 

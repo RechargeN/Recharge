@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
@@ -475,7 +476,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                   icon: Icons.payments,
                   label: scenario.isFree
                       ? 'Free'
-                      : '${scenario.priceAmount.toStringAsFixed(0)} EUR',
+                      : MoneyFormatter.format(scenario.price, useSymbol: false),
                 ),
               ],
             ),
@@ -693,6 +694,7 @@ class _SmartSearchPanel extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final SmartRouteIntent? routeIntent = parseSmartSearch(
       item.prompt,
+      currency: item.query.currency,
     ).routeIntent;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -776,7 +778,8 @@ class _SmartSearchPanel extends StatelessWidget {
                 if (item.query.budgetMax != null)
                   _SavedScenarioChip(
                     icon: Icons.payments_outlined,
-                    label: 'Under ${item.query.budgetMax!.toStringAsFixed(0)}',
+                    label:
+                        'Under ${MoneyFormatter.format(item.query.budgetMax!, includeCurrency: false)}',
                   ),
               ],
             ),
@@ -1807,7 +1810,7 @@ String _homeCardMeta(DiscoverItemEntity item) {
   final String minute = local.minute.toString().padLeft(2, '0');
   final String price = item.isFree
       ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} EUR';
+      : MoneyFormatter.format(item.price, useSymbol: false);
   final String venue = item.venueName.isEmpty ? item.city : item.venueName;
   return '$price · $hour:$minute · $venue';
 }
@@ -1983,7 +1986,7 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -2016,7 +2019,10 @@ String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: item.query.currency,
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -2098,7 +2104,8 @@ String _promptForSavedSearch(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/get_category_criteria_usecase.dart';
 import '../../application/place_create_config.dart';
@@ -949,7 +951,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-from',
                         errorFieldId: 'entryPriceFrom',
                         label: 'Entry from, ${pricing.currencyCode} *',
-                        value: pricing.entryPriceFrom?.toString() ?? '',
+                        value: _moneyInput(pricing.entryPriceFrom),
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(entryFrom: value),
@@ -961,7 +963,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-to',
                         errorFieldId: 'entryPriceTo',
                         label: 'Entry to, ${pricing.currencyCode}',
-                        value: pricing.entryPriceTo?.toString() ?? '',
+                        value: _moneyInput(pricing.entryPriceTo),
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(entryTo: value),
@@ -978,7 +980,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-from',
                         label: 'Typical spend from',
-                        value: pricing.typicalSpendFrom?.toString() ?? '',
+                        value: _moneyInput(pricing.typicalSpendFrom),
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(spendFrom: value),
@@ -989,7 +991,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-to',
                         label: 'Typical spend to',
-                        value: pricing.typicalSpendTo?.toString() ?? '',
+                        value: _moneyInput(pricing.typicalSpendTo),
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(spendTo: value),
@@ -1673,6 +1675,9 @@ class _ValidationSummary extends StatelessWidget {
     );
   }
 }
+
+String _moneyInput(Money? value) =>
+    value == null ? '' : MoneyFormatter.format(value, includeCurrency: false);
 
 String _relationshipLabel(PlaceRelationship value) => switch (value) {
   PlaceRelationship.owner => 'Owner',

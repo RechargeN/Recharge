@@ -48,6 +48,34 @@ void main() {
     expect(restored.unknownFields['futureRootField'], 'preserved');
   });
 
+  test('fractional Scenario minor units fail closed', () {
+    final Map<String, Object?> json = ScenarioDraftMapper.toJson(_fixture());
+    final List<Object?> items = json['items']! as List<Object?>;
+    final Map<String, Object?> firstItem = Map<String, Object?>.from(
+      items.first as Map,
+    );
+    final Map<String, Object?> cost = Map<String, Object?>.from(
+      firstItem['cost']! as Map,
+    );
+    final List<Object?> components = List<Object?>.from(
+      cost['components']! as List,
+    );
+    final Map<String, Object?> component = Map<String, Object?>.from(
+      components.first as Map,
+    );
+    final Map<String, Object?> amount = Map<String, Object?>.from(
+      component['amount']! as Map,
+    )..['minorUnits'] = 12.5;
+    component['amount'] = amount;
+    components[0] = component;
+    cost['components'] = components;
+    firstItem['cost'] = cost;
+    items[0] = firstItem;
+    json['items'] = items;
+
+    expect(() => ScenarioDraftMapper.fromJson(json), throwsFormatException);
+  });
+
   test('Scenario v1 derives transport defaults without fabricating a car', () {
     final Map<String, Object?> legacy = <String, Object?>{
       'schemaVersion': 1,

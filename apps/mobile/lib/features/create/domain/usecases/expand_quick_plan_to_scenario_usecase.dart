@@ -1,4 +1,6 @@
 import '../../../../shared/primitives/id/id_generator.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../entities/quick_plan_conversion.dart';
 import '../entities/scenario_budget_draft.dart';
 import '../entities/scenario_draft_data.dart';
@@ -135,7 +137,7 @@ class ExpandQuickPlanToScenarioUseCase {
             planned: ScenarioTemplatePlannedTimeDraft(startDayIndex: 0),
           ),
           durationMinutes: stop.durationMinutes,
-          cost: _cost(stop, source.currencyCode),
+          cost: _cost(stop, source.currency),
           orderLocked: false,
           timeLocked: false,
           role: ScenarioItemRole.mandatory,
@@ -223,7 +225,7 @@ class ExpandQuickPlanToScenarioUseCase {
 
   static ScenarioCostDraft _cost(
     QuickPlanConversionStopSnapshot stop,
-    String currencyCode,
+    CurrencyCode currency,
   ) {
     if (stop.isFree) {
       return ScenarioCostDraft(
@@ -232,16 +234,13 @@ class ExpandQuickPlanToScenarioUseCase {
             componentCode: 'experience',
             knowledge: ScenarioPriceKnowledge.free,
             source: ScenarioPriceSource.manual,
-            amount: ScenarioMoneyDraft(
-              minorUnits: 0,
-              currencyCode: currencyCode,
-            ),
+            amount: ScenarioMoneyDraft.fromMoney(Money.zero(currency)),
             basis: ScenarioPriceBasis.perPerson,
           ),
         ],
       );
     }
-    final int? amount = stop.priceMinorUnits;
+    final Money? amount = stop.price;
     if (amount == null) {
       return const ScenarioCostDraft(
         components: <ScenarioMoneyEstimateDraft>[
@@ -259,10 +258,7 @@ class ExpandQuickPlanToScenarioUseCase {
           componentCode: 'experience',
           knowledge: ScenarioPriceKnowledge.estimated,
           source: ScenarioPriceSource.manual,
-          amount: ScenarioMoneyDraft(
-            minorUnits: amount,
-            currencyCode: currencyCode,
-          ),
+          amount: ScenarioMoneyDraft.fromMoney(amount),
           basis: ScenarioPriceBasis.perPerson,
           confidence: 0.5,
         ),

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+import '../../shared/primitives/money/currency_code.dart';
 import '../config/market_config.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
@@ -199,6 +200,7 @@ Future<void> setupDependencies() async {
         marketCityId: sl<MarketConfig>().marketCityId,
         centerLat: sl<MarketConfig>().centerLat,
         centerLng: sl<MarketConfig>().centerLng,
+        currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
       ),
     )
     ..registerLazySingleton<CreateRuntimeDefaults>(
@@ -259,11 +261,14 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton<DiscoverRemoteDataSource>(
-      MockDiscoverRemoteDataSource.new,
+      () => MockDiscoverRemoteDataSource(
+        currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
+      ),
     )
     ..registerLazySingleton<CreateLocalDataSource>(
       () => CreateLocalDataSource(
         sl(),
+        activeCurrency: sl<CreateRuntimeDefaults>().currency,
         activeMarketCityId: sl<CreateRuntimeDefaults>().marketCityId,
         activeTimezone: sl<CreateRuntimeDefaults>().timezone,
         activeCountry: sl<CreateRuntimeDefaults>().country,
@@ -277,6 +282,7 @@ Future<void> setupDependencies() async {
         activeTimezone: sl<CreateRuntimeDefaults>().timezone,
         activeCountry: sl<CreateRuntimeDefaults>().country,
         activeCity: sl<CreateRuntimeDefaults>().city,
+        activeCurrency: sl<CreateRuntimeDefaults>().currency,
       ),
     )
     ..registerLazySingleton<ScenarioObjectIntakeLocalDataSource>(
@@ -493,11 +499,15 @@ Future<void> setupDependencies() async {
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
+        defaultCurrency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
       ),
     )
     ..registerLazySingleton<DiscoverRepository>(
-      () =>
-          DiscoverRepositoryImpl(remoteDataSource: sl(), publishedRoutes: sl()),
+      () => DiscoverRepositoryImpl(
+        remoteDataSource: sl(),
+        publishedRoutes: sl(),
+        currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
+      ),
     )
     ..registerLazySingleton<TimezoneRepository>(TimezoneRepositoryImpl.new)
     ..registerLazySingleton<TravelTimeRepository>(
@@ -523,7 +533,10 @@ Future<void> setupDependencies() async {
       () => ExploreRepositoryImpl(localDataSource: sl()),
     )
     ..registerLazySingleton<FavoritesLocalDataSource>(
-      () => FavoritesLocalDataSource(sl()),
+      () => FavoritesLocalDataSource(
+        sl(),
+        legacyCurrency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
+      ),
     )
     ..registerLazySingleton<FavoritesRepository>(
       () => FavoritesRepositoryImpl(localDataSource: sl()),

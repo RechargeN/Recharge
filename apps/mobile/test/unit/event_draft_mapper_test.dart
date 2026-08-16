@@ -47,6 +47,11 @@ void main() {
     expect(restored.recurrence!.weekdays, <int>{1, 3});
     expect(restored.recurrence!.exceptionLocalDates, <String>{'2026-08-17'});
     expect(restored.price!.amountMinor, 1599);
+    expect((json['price']! as Map<String, Object?>)['minorUnits'], 1599);
+    expect(
+      (json['price']! as Map<String, Object?>),
+      isNot(contains('amountMinor')),
+    );
     expect(restored.unknownFields['futureCapability'], isA<Map>());
     expect(EventDraftMapper.toJson(restored)['futureCapability'], isA<Map>());
   });
@@ -97,15 +102,33 @@ void main() {
     ).toJson();
     final CreateDraftEntity restored = CreateDraftModel.fromJson(
       json,
+      activeCurrency: 'EUR',
       activeMarketCityId: 'riga',
       activeTimezone: 'Europe/Riga',
       activeCountry: 'LV',
       activeCity: 'Riga',
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.eventData!.format, EventFormat.online);
     expect(restored.eventData!.publicOnlineUrl, 'https://events.example/live');
     expect(restored.eventData!.unknownFields['futureEventField'], 42);
+  });
+
+  test('fractional Event minor units fail closed', () {
+    final EventDraftData defaults = EventDraftData.defaults(
+      marketCityId: 'riga',
+      countryCode: 'LV',
+      city: 'Riga',
+      timezoneId: 'Europe/Riga',
+      currencyCode: 'EUR',
+    );
+
+    expect(
+      () => EventDraftMapper.fromJson(const <String, Object?>{
+        'price': <String, Object?>{'minorUnits': 12.5, 'currencyCode': 'EUR'},
+      }, defaults: defaults),
+      throwsFormatException,
+    );
   });
 }

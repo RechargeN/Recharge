@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+
 enum FindPeopleScheduleMode { single, timePoll, recurring }
 
 enum FindPeopleMeetingMode { inPerson, online, hybrid }
@@ -85,7 +88,7 @@ class FindPeopleExpenseItemDraft {
 
   final String id;
   final String category;
-  final double amount;
+  final Money amount;
   final String payerNote;
 
   FindPeopleExpenseItemDraft copyWith({String? id}) {
@@ -166,7 +169,7 @@ class FindPeopleDraftData {
     required this.guestPolicy,
     required this.costType,
     required this.expectedSpendAmount,
-    required this.currencyCode,
+    required this.currency,
     required this.costNote,
     required this.expenseSplitMode,
     required this.plannedExpenseItems,
@@ -230,8 +233,8 @@ class FindPeopleDraftData {
   final String guestPolicy;
 
   final FindPeopleCostType costType;
-  final double? expectedSpendAmount;
-  final String currencyCode;
+  final Money? expectedSpendAmount;
+  final CurrencyCode currency;
   final String? costNote;
   final FindPeopleExpenseSplitMode expenseSplitMode;
   final List<FindPeopleExpenseItemDraft> plannedExpenseItems;
@@ -252,6 +255,8 @@ class FindPeopleDraftData {
   final bool accuracyConfirmed;
   final bool ageRequirementConfirmed;
   final DateTime? publishAtUtc;
+
+  String get currencyCode => currency.value;
 
   factory FindPeopleDraftData.defaults({
     required String userId,
@@ -299,7 +304,7 @@ class FindPeopleDraftData {
       guestPolicy: 'authenticated_adults_only',
       costType: FindPeopleCostType.free,
       expectedSpendAmount: null,
-      currencyCode: currencyCode,
+      currency: CurrencyCode.parse(currencyCode),
       costNote: null,
       expenseSplitMode: FindPeopleExpenseSplitMode.none,
       plannedExpenseItems: const <FindPeopleExpenseItemDraft>[],
@@ -407,9 +412,9 @@ class FindPeopleDraftData {
     bool? attendanceConfirmationRequired,
     String? guestPolicy,
     FindPeopleCostType? costType,
-    double? expectedSpendAmount,
+    Money? expectedSpendAmount,
     bool clearExpectedSpendAmount = false,
-    String? currencyCode,
+    CurrencyCode? currency,
     String? costNote,
     bool clearCostNote = false,
     FindPeopleExpenseSplitMode? expenseSplitMode,
@@ -511,7 +516,7 @@ class FindPeopleDraftData {
       expectedSpendAmount: clearExpectedSpendAmount
           ? null
           : (expectedSpendAmount ?? this.expectedSpendAmount),
-      currencyCode: currencyCode ?? this.currencyCode,
+      currency: currency ?? this.currency,
       costNote: clearCostNote ? null : (costNote ?? this.costNote),
       expenseSplitMode: expenseSplitMode ?? this.expenseSplitMode,
       plannedExpenseItems: plannedExpenseItems ?? this.plannedExpenseItems,

@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
 import 'time_fit_evaluation.dart';
@@ -20,7 +22,7 @@ class DiscoverItemEntity {
     required this.startsAtUtc,
     required this.latitude,
     required this.longitude,
-    required this.priceAmount,
+    required this.price,
     required this.distanceKm,
     required this.isFree,
     this.objectKind = DiscoverObjectKind.activity,
@@ -65,7 +67,7 @@ class DiscoverItemEntity {
   final DateTime startsAtUtc;
   final double latitude;
   final double longitude;
-  final double priceAmount;
+  final Money price;
   final double distanceKm;
   final bool isFree;
   final DiscoverObjectKind objectKind;
@@ -138,7 +140,7 @@ class DiscoverItemEntity {
       startsAtUtc: startsAtUtc,
       latitude: latitude,
       longitude: longitude,
-      priceAmount: priceAmount,
+      price: price,
       distanceKm: distanceKm ?? this.distanceKm,
       isFree: isFree,
       objectKind: objectKind ?? this.objectKind,

@@ -1,4 +1,8 @@
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -125,7 +129,7 @@ class CreateDraftModel {
   final bool petFriendly;
   final bool wheelchairAccessible;
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
   final bool registrationRequired;
@@ -192,7 +196,7 @@ class CreateDraftModel {
       );
     }
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: entity.id,
       basedOnPublishedVersionId: entity.basedOnPublishedVersionId,
       objectType: entity.objectType.taxonomyId,
@@ -298,10 +302,7 @@ class CreateDraftModel {
               : EventPaymentCollectionMode.onsite,
           price: isFree || basePrice == null
               ? null
-              : EventMoneyDraft(
-                  amountMinor: (basePrice! * 100).round(),
-                  currencyCode: currency,
-                ),
+              : EventMoneyDraft.fromMoney(basePrice!),
           capacityMode: maxParticipants == null
               ? EventCapacityMode.unknown
               : EventCapacityMode.known,
@@ -322,45 +323,47 @@ class CreateDraftModel {
             defaults: eventDefaults,
           )
         : null;
-    final PlaceDraftData legacyPlaceDefaults =
-        PlaceDraftData.defaults(
-          userId: organizerId,
-          marketCityId: marketCityId,
-          countryCode: country,
-          city: city,
-          timezoneId: timezone,
-          currencyCode: currency,
-        ).copyWith(
-          location:
-              PlaceDraftData.defaults(
-                userId: organizerId,
-                marketCityId: marketCityId,
-                countryCode: country,
-                city: city,
-                timezoneId: timezone,
-                currencyCode: currency,
-              ).location.copyWith(
-                formattedAddress: addressLine1.isEmpty ? null : addressLine1,
-                latitude: latitude,
-                longitude: longitude,
-                accuracy: PlaceLocationAccuracy.manual,
-                pinConfirmed: latitude != null && longitude != null,
-              ),
-          pricing: PlacePricingDraft(
+    final PlaceDraftData? legacyPlaceDefaults =
+        parsedObjectType == CreateObjectType.place
+        ? PlaceDraftData.defaults(
+            userId: organizerId,
+            marketCityId: marketCityId,
+            countryCode: country,
+            city: city,
+            timezoneId: timezone,
             currencyCode: currency,
-            entryType: isFree ? PlaceEntryType.free : PlaceEntryType.paid,
-            entryPriceFrom: isFree ? null : basePrice,
-          ),
-          contacts: PlaceContactsDraft(
-            phone: organizerPhone.isEmpty ? null : organizerPhone,
-            email: organizerEmail.isEmpty ? null : organizerEmail,
-            bookingUrl: bookingLink.isEmpty ? null : bookingLink,
-          ),
-        );
+          ).copyWith(
+            location:
+                PlaceDraftData.defaults(
+                  userId: organizerId,
+                  marketCityId: marketCityId,
+                  countryCode: country,
+                  city: city,
+                  timezoneId: timezone,
+                  currencyCode: currency,
+                ).location.copyWith(
+                  formattedAddress: addressLine1.isEmpty ? null : addressLine1,
+                  latitude: latitude,
+                  longitude: longitude,
+                  accuracy: PlaceLocationAccuracy.manual,
+                  pinConfirmed: latitude != null && longitude != null,
+                ),
+            pricing: PlacePricingDraft(
+              currency: CurrencyCode.parse(currency),
+              entryType: isFree ? PlaceEntryType.free : PlaceEntryType.paid,
+              entryPriceFrom: isFree ? null : basePrice,
+            ),
+            contacts: PlaceContactsDraft(
+              phone: organizerPhone.isEmpty ? null : organizerPhone,
+              email: organizerEmail.isEmpty ? null : organizerEmail,
+              bookingUrl: bookingLink.isEmpty ? null : bookingLink,
+            ),
+          )
+        : null;
     final PlaceDraftData? placeData = parsedObjectType == CreateObjectType.place
         ? PlaceDraftMapper.fromJson(
             migratedSectionData['place_details'],
-            defaults: legacyPlaceDefaults,
+            defaults: legacyPlaceDefaults!,
           )
         : null;
     final FindPeopleDraftData? findPeopleData =
@@ -494,6 +497,7 @@ class CreateDraftModel {
 
   factory CreateDraftModel.fromJson(
     Map<String, dynamic> json, {
+    required String activeCurrency,
     String activeMarketCityId = '',
     String activeTimezone = 'UTC',
     String activeCountry = '',
@@ -521,8 +525,12 @@ class CreateDraftModel {
         timezone = marketCityId == 'rezekne' ? 'Europe/Riga' : activeTimezone;
       }
     }
+    final String persistedCurrency = (json['currency'] as String? ?? '').trim();
+    final String currency = CurrencyCode.parse(
+      persistedCurrency.isEmpty ? activeCurrency : persistedCurrency,
+    ).value;
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: json['id'] as String,
       basedOnPublishedVersionId: json['basedOnPublishedVersionId'] as String?,
       objectType: json['objectType'] as String,
@@ -574,8 +582,12 @@ class CreateDraftModel {
       petFriendly: json['petFriendly'] as bool? ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] as bool? ?? false,
       isFree: json['isFree'] as bool? ?? true,
-      basePrice: (json['basePrice'] as num?)?.toDouble(),
-      currency: json['currency'] as String? ?? 'EUR',
+      basePrice: _readMoney(
+        canonicalMinorUnits: json['basePriceMinorUnits'],
+        legacyAmount: json['basePrice'],
+        currencyCode: currency,
+      ),
+      currency: currency,
       pricingModel: json['pricingModel'] as String? ?? 'fixed',
       registrationRequired: json['registrationRequired'] as bool? ?? true,
       approvalRequired: json['approvalRequired'] as bool? ?? false,
@@ -607,7 +619,7 @@ class CreateDraftModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'schemaVersion': 8,
+      'schemaVersion': 9,
       'id': id,
       'basedOnPublishedVersionId': basedOnPublishedVersionId,
       'objectType': objectType,
@@ -650,7 +662,7 @@ class CreateDraftModel {
       'petFriendly': petFriendly,
       'wheelchairAccessible': wheelchairAccessible,
       'isFree': isFree,
-      'basePrice': basePrice,
+      'basePriceMinorUnits': basePrice?.minorUnits,
       'currency': currency,
       'pricingModel': pricingModel,
       'registrationRequired': registrationRequired,
@@ -764,4 +776,35 @@ class CreateDraftModel {
       orElse: () => VisibilityType.public,
     );
   }
+}
+
+Money? _readMoney({
+  required Object? canonicalMinorUnits,
+  required Object? legacyAmount,
+  required String currencyCode,
+}) {
+  final CurrencyCode? currency = CurrencyCode.tryParse(currencyCode);
+  final bool hasAmount = canonicalMinorUnits != null || legacyAmount != null;
+  if (currency == null) {
+    if (!hasAmount) return null;
+    throw const FormatException('Create draft money currency is invalid.');
+  }
+  if (canonicalMinorUnits != null) {
+    if (canonicalMinorUnits is! int) {
+      throw const FormatException(
+        'Create draft minor units must be an integer.',
+      );
+    }
+    return Money(minorUnits: canonicalMinorUnits, currency: currency);
+  }
+  if (legacyAmount == null) return null;
+  if (legacyAmount is! num) {
+    throw const FormatException('Create draft legacy amount is invalid.');
+  }
+  final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+    legacyAmount,
+    currency: currency,
+  );
+  if (result is MoneyParseSuccess) return result.money;
+  throw const FormatException('Create draft amount is invalid or ambiguous.');
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/money_test_values.dart';
 import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/app/application/scenario_object_intake_facade.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
@@ -38,7 +40,7 @@ void main() {
     ]);
     sl.registerSingleton<IdGenerator>(ids);
     final collection = CreateRepositoryImpl(
-      localDataSource: CreateLocalDataSource(storage),
+      localDataSource: CreateLocalDataSource(storage, activeCurrency: 'EUR'),
       idGenerator: ids,
     );
     final facade = ScenarioObjectIntakeFacade(
@@ -136,7 +138,7 @@ void main() {
         ScenarioObjectIntakeLocalDataSource(storage),
       ),
       collectionRepository: CreateRepositoryImpl(
-        localDataSource: CreateLocalDataSource(storage),
+        localDataSource: CreateLocalDataSource(storage, activeCurrency: 'EUR'),
         idGenerator: ids,
       ),
       scenarioCoordinator: ScenarioCreateCoordinator(idGenerator: ids),
@@ -227,7 +229,7 @@ final DiscoverItemEntity _item = DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 8, 17),
   latitude: 56.5099,
   longitude: 27.3332,
-  priceAmount: 0,
+  price: testZeroEur,
   distanceKm: 1,
   isFree: true,
   objectKind: DiscoverObjectKind.place,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -385,7 +387,8 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       params: <String, Object?>{
         'item_id': item.id,
         'category': item.category,
-        'price_amount': item.priceAmount,
+        'price_minor_units': item.price.minorUnits,
+        'currency_code': item.price.currency.value,
       },
     );
     ScaffoldMessenger.of(context).showSnackBar(
@@ -491,7 +494,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       category: item.category,
       startsAtUtc: item.startsAtUtc,
       distanceKm: item.distanceKm,
-      priceAmount: item.priceAmount,
+      price: item.price,
       isFree: item.isFree,
       savedAtUtc: DateTime.now().toUtc(),
       targetRoute: null,
@@ -1662,7 +1665,7 @@ String _routeDifficultyLabel(String difficultyId) {
 
 String _priceLabel(DiscoverItemEntity item) {
   if (item.isFree) return 'Free';
-  return '${item.priceAmount.toStringAsFixed(0)} €';
+  return MoneyFormatter.format(item.price);
 }
 
 String _detailsTimeFitLabel(TimeFitEvaluation evaluation) =>
@@ -1850,7 +1853,7 @@ String _createLocationForDetails(DiscoverItemEntity item) {
       'venue': item.venueName,
       'address': item.addressLine,
       'free': item.isFree ? '1' : '0',
-      if (!item.isFree) 'budgetMax': item.priceAmount.toStringAsFixed(0),
+      if (!item.isFree) 'budgetMax': MoneyFormatter.decimal(item.price),
       'cover': item.coverImageUrl,
       'start': item.startsAtUtc.toIso8601String(),
     },

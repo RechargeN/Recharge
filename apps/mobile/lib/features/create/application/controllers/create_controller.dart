@@ -4,6 +4,10 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
@@ -2377,18 +2381,23 @@ class CreateController extends ChangeNotifier {
     String? pricingUrl,
   }) {
     _updatePlace((PlaceDraftData place) {
+      Money? parsed(String? value) => value == null
+          ? null
+          : _parseMoney(value, currency: place.pricing.currency);
+      final Money? parsedEntryFrom = parsed(entryFrom);
+      final Money? parsedEntryTo = parsed(entryTo);
+      final Money? parsedSpendFrom = parsed(spendFrom);
+      final Money? parsedSpendTo = parsed(spendTo);
       return place.copyWith(
         pricing: place.pricing.copyWith(
-          entryPriceFrom: entryFrom == null ? null : _parseDouble(entryFrom),
-          clearEntryPriceFrom:
-              entryFrom != null && _parseDouble(entryFrom) == null,
-          entryPriceTo: entryTo == null ? null : _parseDouble(entryTo),
-          clearEntryPriceTo: entryTo != null && _parseDouble(entryTo) == null,
-          typicalSpendFrom: spendFrom == null ? null : _parseDouble(spendFrom),
-          clearTypicalSpendFrom:
-              spendFrom != null && _parseDouble(spendFrom) == null,
-          typicalSpendTo: spendTo == null ? null : _parseDouble(spendTo),
-          clearTypicalSpendTo: spendTo != null && _parseDouble(spendTo) == null,
+          entryPriceFrom: parsedEntryFrom,
+          clearEntryPriceFrom: entryFrom != null && parsedEntryFrom == null,
+          entryPriceTo: parsedEntryTo,
+          clearEntryPriceTo: entryTo != null && parsedEntryTo == null,
+          typicalSpendFrom: parsedSpendFrom,
+          clearTypicalSpendFrom: spendFrom != null && parsedSpendFrom == null,
+          typicalSpendTo: parsedSpendTo,
+          clearTypicalSpendTo: spendTo != null && parsedSpendTo == null,
           pricingNote: note == null ? null : _nullableText(note),
           clearPricingNote: note != null && _nullableText(note) == null,
           officialPricingUrl: pricingUrl == null
@@ -2691,7 +2700,10 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateBasePrice(String value) {
-    final double? parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final CurrencyCode? currency = CurrencyCode.tryParse(_state.draft.currency);
+    final Money? parsed = currency == null
+        ? null
+        : _parseMoney(value, currency: currency);
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,
@@ -3877,6 +3889,53 @@ class CreateController extends ChangeNotifier {
 
   static double? _parseDouble(String value) {
     return double.tryParse(value.trim().replaceAll(',', '.'));
+  }
+
+  void updateFindPeopleExpectedSpend(String input) {
+    final FindPeopleDraftData? current = _state.draft.findPeopleData;
+    if (current == null) return;
+    final Money? amount = _parseMoney(input, currency: current.currency);
+    updateFindPeopleData(
+      current.copyWith(
+        expectedSpendAmount: amount,
+        clearExpectedSpendAmount: amount == null,
+      ),
+    );
+  }
+
+  bool addFindPeopleExpense({
+    required String category,
+    required String amountInput,
+    String payerNote = 'shared',
+  }) {
+    final FindPeopleDraftData? current = _state.draft.findPeopleData;
+    final String normalizedCategory = category.trim();
+    if (current == null || normalizedCategory.isEmpty) return false;
+    final Money? amount = _parseMoney(amountInput, currency: current.currency);
+    if (amount == null || amount.minorUnits <= 0) return false;
+    updateFindPeopleData(
+      current.copyWith(
+        plannedExpenseItems: <FindPeopleExpenseItemDraft>[
+          ...current.plannedExpenseItems,
+          FindPeopleExpenseItemDraft(
+            id: _localId(),
+            category: normalizedCategory,
+            amount: amount,
+            payerNote: payerNote,
+          ),
+        ],
+      ),
+    );
+    return true;
+  }
+
+  Money? _parseMoney(String value, {required CurrencyCode currency}) {
+    final MoneyParseResult result = MoneyParser.parse(
+      value,
+      currency: currency,
+      localeTag: _runtimeDefaults.defaultContentLocale,
+    );
+    return result is MoneyParseSuccess ? result.money : null;
   }
 
   String _localId() =>

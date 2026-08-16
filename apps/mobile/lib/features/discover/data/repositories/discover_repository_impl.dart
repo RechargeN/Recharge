@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
@@ -11,11 +13,14 @@ import '../datasources/discover_remote_datasource.dart';
 class DiscoverRepositoryImpl implements DiscoverRepository {
   DiscoverRepositoryImpl({
     required DiscoverRemoteDataSource remoteDataSource,
+    required CurrencyCode currency,
     PublishedRouteDiscoveryPort? publishedRoutes,
   }) : _remoteDataSource = remoteDataSource,
+       _currency = currency,
        _publishedRoutes = publishedRoutes;
 
   final DiscoverRemoteDataSource _remoteDataSource;
+  final CurrencyCode _currency;
   final PublishedRouteDiscoveryPort? _publishedRoutes;
 
   @override
@@ -27,7 +32,9 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
         : const <PublishedRouteDiscoveryEntity>[];
     final List<DiscoverItemEntity> source = <DiscoverItemEntity>[
       ...remote,
-      ...published.where((route) => route.isCoherent).map(_routeItem),
+      ...published
+          .where((route) => route.isCoherent)
+          .map((route) => _routeItem(route, query.currency)),
     ];
     final List<DiscoverItemEntity> globallyFiltered = source
         .where((DiscoverItemEntity item) => _passGlobalFilters(item, query))
@@ -70,7 +77,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   @override
   Future<DiscoverItemEntity> getDetails(String itemId) async {
     final route = await _publishedRoutes?.getActiveRoute(itemId);
-    if (route != null && route.isCoherent) return _routeItem(route);
+    if (route != null && route.isCoherent) return _routeItem(route, _currency);
     return _remoteDataSource.getDetails(itemId);
   }
 
@@ -111,10 +118,11 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
     if (query.freeOnly && !item.isFree) return false;
 
-    if (query.budgetMin != null && item.priceAmount < query.budgetMin!) {
+    if (item.price.currency != query.currency) return false;
+    if (query.budgetMin != null && item.price.compareTo(query.budgetMin!) < 0) {
       return false;
     }
-    if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+    if (query.budgetMax != null && item.price.compareTo(query.budgetMax!) > 0) {
       return false;
     }
 
@@ -189,33 +197,35 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
   double _toRadians(double degree) => degree * (math.pi / 180);
 
-  static DiscoverItemEntity _routeItem(PublishedRouteDiscoveryEntity route) =>
-      DiscoverItemEntity(
-        id: route.routeId,
-        title: route.title,
-        subtitle: route.subtitle,
-        city: route.city,
-        category: route.categoryId,
-        subcategory: route.subcategoryId,
-        startsAtUtc: route.publishedAtUtc,
-        latitude: route.startPoint.latitude,
-        longitude: route.startPoint.longitude,
-        priceAmount: 0,
-        distanceKm: 0,
-        isFree: true,
-        coverImageUrl: route.coverImage,
-        organizerName: route.publisherName,
-        venueName: 'Route start',
-        marketCityId: route.marketCityId,
-        timezoneId: route.timezoneId,
-        durationMinutes: (route.durationSeconds / 60).ceil(),
-        durationConfidence: DurationConfidence.exact,
-        ctaLabel: 'Open Route',
-        highlights: <String>[
-          '${(route.distanceMeters / 1000).toStringAsFixed(1)} km',
-          route.routingProfileId,
-          route.difficultyId,
-        ],
-        publishedRoute: route,
-      );
+  static DiscoverItemEntity _routeItem(
+    PublishedRouteDiscoveryEntity route,
+    CurrencyCode currency,
+  ) => DiscoverItemEntity(
+    id: route.routeId,
+    title: route.title,
+    subtitle: route.subtitle,
+    city: route.city,
+    category: route.categoryId,
+    subcategory: route.subcategoryId,
+    startsAtUtc: route.publishedAtUtc,
+    latitude: route.startPoint.latitude,
+    longitude: route.startPoint.longitude,
+    price: Money.zero(currency),
+    distanceKm: 0,
+    isFree: true,
+    coverImageUrl: route.coverImage,
+    organizerName: route.publisherName,
+    venueName: 'Route start',
+    marketCityId: route.marketCityId,
+    timezoneId: route.timezoneId,
+    durationMinutes: (route.durationSeconds / 60).ceil(),
+    durationConfidence: DurationConfidence.exact,
+    ctaLabel: 'Open Route',
+    highlights: <String>[
+      '${(route.distanceMeters / 1000).toStringAsFixed(1)} km',
+      route.routingProfileId,
+      route.difficultyId,
+    ],
+    publishedRoute: route,
+  );
 }

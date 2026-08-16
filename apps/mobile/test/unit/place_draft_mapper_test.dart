@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/place_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test(
@@ -54,6 +56,36 @@ void main() {
       throwsFormatException,
     );
   });
+
+  test(
+    'writes only integer minor units and rejects fractional canonical data',
+    () {
+      final PlaceDraftData priced = _defaults().copyWith(
+        pricing: const PlacePricingDraft(
+          entryType: PlaceEntryType.paid,
+          entryPriceFrom: Money(minorUnits: 1234, currency: CurrencyCode.eur),
+          currency: CurrencyCode.eur,
+        ),
+      );
+      final Map<String, Object?> encoded = PlaceDraftMapper.toJson(priced);
+      final Map<String, Object?> pricing = Map<String, Object?>.from(
+        encoded['pricing']! as Map,
+      );
+
+      expect(pricing['entryPriceFromMinorUnits'], 1234);
+      expect(pricing, isNot(contains('entryPriceFrom')));
+      expect(
+        () => PlaceDraftMapper.fromJson(<String, Object?>{
+          'schemaVersion': PlaceDraftData.currentSchemaVersion,
+          'pricing': <String, Object?>{
+            'currencyCode': 'EUR',
+            'entryPriceFromMinorUnits': 12.5,
+          },
+        }, defaults: _defaults()),
+        throwsFormatException,
+      );
+    },
+  );
 }
 
 PlaceDraftData _defaults() => PlaceDraftData.defaults(

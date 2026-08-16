@@ -89,7 +89,7 @@ void main() {
     });
   });
 
-  group('Create envelope v8', () {
+  group('Create envelope v9', () {
     test('stores typed routeData without runtime geometry duplication', () {
       final route = routeFixture(revision: 2);
       final draft =
@@ -109,7 +109,7 @@ void main() {
       final model = CreateDraftModel.fromEntity(draft);
       final restored = model.toEntity();
 
-      expect(model.schemaVersion, 8);
+      expect(model.schemaVersion, 9);
       expect(model.sectionData['route_details'], isA<Map>());
       expect(restored.routeData?.revision, 2);
       expect(restored.sectionData.containsKey('route_details'), isFalse);
@@ -135,7 +135,10 @@ void main() {
       routeJson['schemaVersion'] = 999;
       routeJson['futurePayload'] = 'untouched';
 
-      final restored = CreateDraftModel.fromJson(json).toEntity();
+      final restored = CreateDraftModel.fromJson(
+        json,
+        activeCurrency: 'EUR',
+      ).toEntity();
 
       expect(restored.routeData, isNull);
       expect(

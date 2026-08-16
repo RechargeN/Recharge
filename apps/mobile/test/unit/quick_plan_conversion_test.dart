@@ -9,6 +9,8 @@ import 'package:recharge/features/create/domain/entities/quick_plan_conversion.d
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/usecases/expand_quick_plan_to_scenario_usecase.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   late InMemoryQuickPlanConversionSource source;
@@ -213,7 +215,7 @@ QuickPlanConversionSnapshot _snapshot({
     ownerId: 'owner-1',
     title: 'Quick evening',
     timezoneId: 'Europe/Riga',
-    currencyCode: 'EUR',
+    currency: CurrencyCode.eur,
     readableByUserIds: const <String>{'owner-1'},
     stops: <QuickPlanConversionStopSnapshot>[
       const QuickPlanConversionStopSnapshot(
@@ -223,7 +225,7 @@ QuickPlanConversionSnapshot _snapshot({
         latitude: 56.95,
         longitude: 24.1,
         isFree: false,
-        priceMinorUnits: 500,
+        price: Money(minorUnits: 500, currency: CurrencyCode.eur),
         available: true,
         requesterPrivateNote: 'Window seat',
       ),
@@ -234,7 +236,7 @@ QuickPlanConversionSnapshot _snapshot({
         latitude: 56.96,
         longitude: 24.11,
         isFree: false,
-        priceMinorUnits: 1200,
+        price: const Money(minorUnits: 1200, currency: CurrencyCode.eur),
         available: secondAvailable,
       ),
     ],

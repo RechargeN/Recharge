@@ -38,6 +38,7 @@ class CreateCollectionConditionalSaveResult {
 class CreateLocalDataSource {
   CreateLocalDataSource(
     this._storage, {
+    required this.activeCurrency,
     this.activeMarketCityId = '',
     this.activeTimezone = 'UTC',
     this.activeCountry = '',
@@ -45,6 +46,7 @@ class CreateLocalDataSource {
   });
 
   final FlutterSecureStorage _storage;
+  final String activeCurrency;
   final String activeMarketCityId;
   final String activeTimezone;
   final String activeCountry;
@@ -86,6 +88,7 @@ class CreateLocalDataSource {
     final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
     return CreateDraftModel.fromJson(
       json,
+      activeCurrency: activeCurrency,
       activeMarketCityId: activeMarketCityId,
       activeTimezone: activeTimezone,
       activeCountry: activeCountry,
@@ -388,6 +391,7 @@ class CreateLocalDataSource {
     final json = jsonDecode(raw) as Map<String, dynamic>;
     return CreateDraftModel.fromJson(
       json,
+      activeCurrency: activeCurrency,
       activeMarketCityId: activeMarketCityId,
       activeTimezone: activeTimezone,
       activeCountry: activeCountry,
@@ -429,6 +433,7 @@ class CreateLocalDataSource {
         final json = jsonDecode(entry.value) as Map<String, dynamic>;
         final model = CreateDraftModel.fromJson(
           json,
+          activeCurrency: activeCurrency,
           activeMarketCityId: activeMarketCityId,
           activeTimezone: activeTimezone,
           activeCountry: activeCountry,

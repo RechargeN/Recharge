@@ -45,6 +45,7 @@ class CreateTemplateModel {
     required String activeTimezone,
     required String activeCountry,
     required String activeCity,
+    required String activeCurrency,
   }) {
     final int schemaVersion = (json['schemaVersion'] as num?)?.toInt() ?? 0;
     if (schemaVersion != CreateTemplateEntity.currentSchemaVersion) {
@@ -66,6 +67,7 @@ class CreateTemplateModel {
         activeTimezone: activeTimezone,
         activeCountry: activeCountry,
         activeCity: activeCity,
+        activeCurrency: activeCurrency,
       ),
       createdAtUtcIso: json['createdAtUtcIso'] as String,
       updatedAtUtcIso: json['updatedAtUtcIso'] as String,

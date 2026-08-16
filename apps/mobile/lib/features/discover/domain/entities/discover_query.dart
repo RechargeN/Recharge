@@ -1,3 +1,8 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+
 import 'time_window.dart';
 
 enum DiscoverSortMode { geoFreshness }
@@ -14,6 +19,7 @@ class DiscoverQuery {
     this.mood,
     required this.budgetMin,
     required this.budgetMax,
+    required this.currency,
     required this.freeOnly,
     required this.centerLat,
     required this.centerLng,
@@ -34,6 +40,10 @@ class DiscoverQuery {
     if (timeWindow != null && travelContext == null) {
       throw ArgumentError('travelContext is required with timeWindow');
     }
+    if ((budgetMin != null && budgetMin!.currency != currency) ||
+        (budgetMax != null && budgetMax!.currency != currency)) {
+      throw ArgumentError('Budget currency must match query currency.');
+    }
   }
 
   factory DiscoverQuery.defaults({
@@ -41,6 +51,7 @@ class DiscoverQuery {
     double centerLat = 0,
     double centerLng = 0,
     DateTime? nowUtc,
+    CurrencyCode currency = CurrencyCode.eur,
   }) => DiscoverQuery(
     queryText: '',
     selectedCategoryIds: const <String>[],
@@ -52,6 +63,7 @@ class DiscoverQuery {
     mood: null,
     budgetMin: null,
     budgetMax: null,
+    currency: currency,
     freeOnly: false,
     centerLat: centerLat,
     centerLng: centerLng,
@@ -64,7 +76,7 @@ class DiscoverQuery {
     manualAreaSelected: false,
     searchAreaDirty: false,
     sourceScreen: 'discover',
-    queryVersion: 2,
+    queryVersion: 3,
     appliedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
   );
 
@@ -76,8 +88,9 @@ class DiscoverQuery {
   final int? peopleCount;
   final int? availableDurationMinutes;
   final String? mood;
-  final double? budgetMin;
-  final double? budgetMax;
+  final Money? budgetMin;
+  final Money? budgetMax;
+  final CurrencyCode currency;
   final bool freeOnly;
   final double centerLat;
   final double centerLng;
@@ -126,10 +139,11 @@ class DiscoverQuery {
     bool clearAvailableDurationMinutes = false,
     String? mood,
     bool clearMood = false,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
+    CurrencyCode? currency,
     bool? freeOnly,
     double? centerLat,
     double? centerLng,
@@ -162,6 +176,7 @@ class DiscoverQuery {
     mood: clearMood ? null : (mood ?? this.mood),
     budgetMin: clearBudgetMin ? null : (budgetMin ?? this.budgetMin),
     budgetMax: clearBudgetMax ? null : (budgetMax ?? this.budgetMax),
+    currency: currency ?? this.currency,
     freeOnly: freeOnly ?? this.freeOnly,
     centerLat: centerLat ?? this.centerLat,
     centerLng: centerLng ?? this.centerLng,
@@ -191,8 +206,9 @@ class DiscoverQuery {
     'people_count': peopleCount,
     'available_duration_minutes': availableDurationMinutes,
     'mood': mood,
-    'budget_min': budgetMin,
-    'budget_max': budgetMax,
+    'budget_min_minor_units': budgetMin?.minorUnits,
+    'budget_max_minor_units': budgetMax?.minorUnits,
+    'currency_code': currency.value,
     'free_only': freeOnly,
     'center_lat': centerLat,
     'center_lng': centerLng,
@@ -205,7 +221,7 @@ class DiscoverQuery {
     'manual_area_selected': manualAreaSelected,
     'search_area_dirty': searchAreaDirty,
     'source_screen': sourceScreen,
-    'query_version': 2,
+    'query_version': 3,
     'applied_at_utc': appliedAtUtc.toIso8601String(),
     'time_window': timeWindow?.toMap(),
     'travel_context': travelContext?.toMap(),
@@ -216,6 +232,7 @@ class DiscoverQuery {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required CurrencyCode defaultCurrency,
   }) {
     final int sourceVersion = (map['query_version'] as num?)?.toInt() ?? 1;
     final bool manualAreaSelected =
@@ -238,6 +255,9 @@ class DiscoverQuery {
     final Map<String, Object?>? travelContextMap = _mapOrNull(
       map['travel_context'],
     );
+    final CurrencyCode currency = map.containsKey('currency_code')
+        ? CurrencyCode.parse(map['currency_code']?.toString() ?? '')
+        : defaultCurrency;
     return DiscoverQuery(
       queryText: (map['query_text'] as String?) ?? '',
       selectedCategoryIds:
@@ -252,8 +272,17 @@ class DiscoverQuery {
       availableDurationMinutes: (map['available_duration_minutes'] as num?)
           ?.toInt(),
       mood: map['mood'] as String?,
-      budgetMin: (map['budget_min'] as num?)?.toDouble(),
-      budgetMax: (map['budget_max'] as num?)?.toDouble(),
+      budgetMin: _readMoney(
+        canonical: map['budget_min_minor_units'],
+        legacy: map['budget_min'],
+        currency: currency,
+      ),
+      budgetMax: _readMoney(
+        canonical: map['budget_max_minor_units'],
+        legacy: map['budget_max'],
+        currency: currency,
+      ),
+      currency: currency,
       freeOnly: (map['free_only'] as bool?) ?? false,
       centerLat: centerLat,
       centerLng: centerLng,
@@ -269,7 +298,7 @@ class DiscoverQuery {
       manualAreaSelected: manualAreaSelected,
       searchAreaDirty: (map['search_area_dirty'] as bool?) ?? false,
       sourceScreen: (map['source_screen'] as String?) ?? 'discover',
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc:
           _dateOrNull(map['applied_at_utc']) ?? DateTime.now().toUtc(),
       timeWindow: sourceVersion < 2 || timeWindowMap == null
@@ -292,3 +321,25 @@ Map<String, Object?>? _mapOrNull(Object? value) =>
             MapEntry<String, Object?>(key as String, nested as Object?),
       )
     : null;
+
+Money? _readMoney({
+  required Object? canonical,
+  required Object? legacy,
+  required CurrencyCode currency,
+}) {
+  if (canonical != null) {
+    if (canonical is! int) {
+      throw const FormatException(
+        'Discover budget minor units must be an integer.',
+      );
+    }
+    return Money(minorUnits: canonical, currency: currency);
+  }
+  if (legacy is! num) return null;
+  final MoneyParseResult result = MoneyParser.parseLegacyNumber(
+    legacy,
+    currency: currency,
+  );
+  if (result is MoneyParseSuccess) return result.money;
+  throw const FormatException('Discover budget is invalid or ambiguous.');
+}

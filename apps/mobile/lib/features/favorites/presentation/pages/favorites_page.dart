@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../../discover/application/controllers/discover_feed_controller.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
@@ -1122,7 +1123,10 @@ String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: item.query.currency,
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -1158,7 +1162,7 @@ Map<String, String> _queryParametersForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter.decimal(query.budgetMax!),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -1208,7 +1212,8 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -1273,7 +1278,8 @@ List<_IntentChipData> _queryChips(DiscoverQuery query) {
     if (query.budgetMax != null)
       _IntentChipData(
         icon: Icons.savings_outlined,
-        label: 'Under ${query.budgetMax!.toStringAsFixed(0)}',
+        label:
+            'Under ${MoneyFormatter.format(query.budgetMax!, includeCurrency: false)}',
       ),
   ];
 }
