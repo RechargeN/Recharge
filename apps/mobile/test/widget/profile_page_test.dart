@@ -1696,10 +1696,13 @@ void main() {
 
     expect(find.text('Creator publications'), findsOneWidget);
     expect(find.text('Incomplete breathwork draft'), findsOneWidget);
-    expect(find.text('2 missing'), findsOneWidget);
+    // Recharge Activity no longer requires startDateTimeUtc (ACT-CRT-01
+    // spec AC #2: self-directed, evergreen, no start time) — only the
+    // cover image is missing from this draft now.
+    expect(find.text('1 missing'), findsOneWidget);
     expect(find.text('Creator next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
-    expect(find.text('Missing: cover, start time'), findsWidgets);
+    expect(find.text('Missing: cover'), findsWidgets);
 
     await tester.scrollPageUntilVisible(find.text('Finish draft').first, 220);
     await tester.tap(find.text('Finish draft').first);

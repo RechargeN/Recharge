@@ -206,7 +206,13 @@ void main() {
       capabilities: const <String>['create.route'],
     );
 
-    controller.setObjectType(CreateObjectType.activity);
+    // Session still requires startDateTimeUtc via the generic validation
+    // path (unlike event/place/findPeople/scenario, which have their own
+    // dedicated _validate branches that never touch the generic
+    // startDateTimeUtc key). Recharge Activity was deliberately made
+    // evergreen (no start time) by ACT-CRT-01 spec AC #2, so it no longer
+    // fits as the "missing time" example here.
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('Recharge walk');
     controller.updateMainCategory('food_drinks');
     controller.updateCity('Rezekne');

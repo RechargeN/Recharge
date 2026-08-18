@@ -3489,7 +3489,6 @@ class CreateController extends ChangeNotifier {
   CreateAvailabilityKind _availabilityKindFor(CreateObjectType type) {
     return switch (type) {
       CreateObjectType.event ||
-      CreateObjectType.activity ||
       CreateObjectType.session ||
       CreateObjectType.classWorkshop ||
       CreateObjectType.findPeople => CreateAvailabilityKind.eventSlots,

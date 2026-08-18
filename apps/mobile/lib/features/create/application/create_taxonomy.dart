@@ -88,9 +88,9 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
     description: 'Lightweight activity such as a walk or reset',
     defaultCategoryId: 'wellness_recharge',
     defaultSubcategoryId: 'recharge_walk',
-    requiresStartDateTime: true,
-    locationLabel: 'Meeting place',
-    priceLabel: 'Expected spend',
+    requiresStartDateTime: false,
+    locationLabel: 'Where to go',
+    priceLabel: '',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.route,
