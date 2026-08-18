@@ -291,6 +291,51 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'highlights': template['highlights'],
       });
     }
+
+    // Recharge Activity (ACT-CRT-01, spec AC #7): self-directed, evergreen,
+    // no Booking — unlike the event/place templates cycled above, it must
+    // NOT get an eventSlots/openingHours availability_kind or a real
+    // starts_at_utc. starts_at_utc mirrors DiscoverRepositoryImpl._routeItem's
+    // technique for the same non-nullable-but-semantically-inapplicable
+    // field on another date-less object type: a fixed technical timestamp,
+    // not a real start time.
+    result.add(<String, Object?>{
+      'id': 'mock-activity-coffee-walk',
+      'title': 'Coffee walk by the canal',
+      'subtitle': 'Casual self-guided stroll, drop in anytime',
+      'city': 'Riga',
+      'category': 'wellness_recharge',
+      'subcategory': 'recharge_walk',
+      'starts_at_utc': base.toIso8601String(),
+      'latitude': 56.9496,
+      'longitude': 24.1052,
+      'price_amount': 0.0,
+      'distance_km': 0.0,
+      'is_free': true,
+      'object_kind': 'activity',
+      'relevance_score': 0.0,
+      'cover_image_url':
+          'https://images.unsplash.com/photo-1447933601403-0c6688de566e'
+          '?auto=format&fit=crop&w=1200&q=80',
+      'organizer_name': 'Recharge Wellness',
+      'organizer_handle': '@recharge_wellness',
+      'venue_name': 'Canal embankment',
+      'address_line': 'Along the City Canal, Riga',
+      'market_city_id': 'riga',
+      'timezone_id': 'Europe/Riga',
+      'duration_minutes': 45,
+      'duration_confidence': 'estimated',
+      'availability_kind': 'none',
+      'schedule_slots': const <Map<String, Object?>>[],
+      'opening_hours': const <Map<String, Object?>>[],
+      'allows_partial_attendance': false,
+      'cta_label': 'View activity',
+      'highlights': const <String>[
+        'No sign-up, no fixed time',
+        'Easy access from the Old Town',
+      ],
+    });
+
     return result;
   }
 }
