@@ -1091,7 +1091,14 @@ void main() {
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // 'art_culture_museums'/'museum' was never an applicable category for
+    // CreateObjectType.activity (applicableTypeIds: ['event', 'place'] in
+    // recharge_taxonomy_seed.dart) — this only "worked" before because
+    // activity had no real subcategory-applicability check. Session has no
+    // dedicated _validate branch (falls through to the generic path, which
+    // never checked category applicability), so it's a safe substitute for
+    // this generic creator-listing-status fixture.
+    createController.setObjectType(CreateObjectType.session);
     createController.updateTitle('Museum evening route');
     createController.applyTaxonomySelection(
       mainCategory: 'art_culture_museums',
@@ -1257,7 +1264,17 @@ void main() {
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // 'travel_tours'/'walking_tour' was never an applicable category for
+    // CreateObjectType.activity (applicableTypeIds: ['event', 'route'] in
+    // recharge_taxonomy_seed.dart) — this only "worked" before because
+    // activity had no real subcategory-applicability check. ACT-CRT-01's
+    // _activityIssues wrapper now mirrors Place's real check, correctly
+    // rejecting this combination. Session has no dedicated _validate branch
+    // (falls through to the generic path, which never checked category
+    // applicability for any type), so it's a safe, minimal substitute — the
+    // legacy route-context rendering this test exercises is keyed only on
+    // mainCategory/subcategory, not objectType.
+    createController.setObjectType(CreateObjectType.session);
     createController.updateTitle('Calm coffee walking route');
     createController.applyTaxonomySelection(
       mainCategory: 'travel_tours',
@@ -1437,7 +1454,10 @@ void main() {
         organizerEmail: 'creator@example.com',
         organizerName: 'creator',
       );
-      createController.setObjectType(CreateObjectType.activity);
+      // See the 'opens legacy route-context activity' test above for why
+      // session (not activity) is used for this travel_tours/walking_tour
+      // legacy-route fixture.
+      createController.setObjectType(CreateObjectType.session);
       createController.updateTitle('Published calm route');
       createController.applyTaxonomySelection(
         mainCategory: 'travel_tours',
@@ -1696,10 +1716,13 @@ void main() {
 
     expect(find.text('Creator publications'), findsOneWidget);
     expect(find.text('Incomplete breathwork draft'), findsOneWidget);
-    expect(find.text('2 missing'), findsOneWidget);
+    // Recharge Activity no longer requires startDateTimeUtc (ACT-CRT-01
+    // spec AC #2: self-directed, evergreen, no start time) — only the
+    // cover image is missing from this draft now.
+    expect(find.text('1 missing'), findsOneWidget);
     expect(find.text('Creator next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
-    expect(find.text('Missing: cover, start time'), findsWidgets);
+    expect(find.text('Missing: cover'), findsWidgets);
 
     await tester.scrollPageUntilVisible(find.text('Finish draft').first, 220);
     await tester.tap(find.text('Finish draft').first);

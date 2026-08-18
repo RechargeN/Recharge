@@ -27,6 +27,7 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
+import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
 
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
@@ -131,7 +132,10 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Session still surfaces the generic 'Cover image обязательна' message;
+    // Recharge Activity now has its own ActivityValidationIssue messageKeys
+    // (ACT-CRT-01 spec) instead of this shared generic-form copy.
+    createController.setObjectType(CreateObjectType.session);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -209,7 +213,12 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Session has no dedicated Create block, so it still renders the
+    // generic _CreateTaxonomyPicker fallback this test exercises; Recharge
+    // Activity now routes to its own ActivityCreateBlock (Task 16). Session
+    // is also the only fallback type with 'sport' in its applicable
+    // categories (classWorkshop/rental/collection don't include it).
+    createController.setObjectType(CreateObjectType.session);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -227,12 +236,21 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    final Finder sportGroup = find.text('Sport');
+    // Scoped to the rail: session's default category is already 'sport', so
+    // an unscoped find.text('Sport') would also match the
+    // _SelectedTaxonomySummary duplicate rendered for the active category.
+    final Finder taxonomyRail = find.byKey(
+      const ValueKey<String>('create-taxonomy-group-rail'),
+    );
+    final Finder sportGroup = find.descendant(
+      of: taxonomyRail,
+      matching: find.text('Sport'),
+    );
     await tester.scrollUntilVisible(
       sportGroup,
       300,
       scrollable: find.descendant(
-        of: find.byKey(const ValueKey<String>('create-taxonomy-group-rail')),
+        of: taxonomyRail,
         matching: find.byType(Scrollable),
       ),
     );
@@ -240,7 +258,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(sportGroup);
     await tester.pumpAndSettle();
-    expect(find.text('sport.tennis · practice'), findsOneWidget);
+    // Session's participation mode for tennis is 'book' (you book a
+    // session), unlike activity's 'practice' — see
+    // CreateTaxonomySubcategory.participationModeFor(objectType).
+    expect(find.text('sport.tennis · book'), findsOneWidget);
 
     await tester.tap(find.text('Yoga'));
     await tester.pumpAndSettle();
@@ -767,7 +788,10 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
-      createController.setObjectType(CreateObjectType.activity);
+      // Session (generic success-hub flow; Recharge Activity now requires
+      // its own accessNotes/location fields per ACT-CRT-01 spec, which this
+      // generic-fields draft never sets).
+      createController.setObjectType(CreateObjectType.session);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',
@@ -880,6 +904,58 @@ void main() {
       expect(find.text('Create page'), findsOneWidget);
       expect(createController.state.draft.title, isEmpty);
       expect(createController.state.publishedDraft, isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'CreatePage renders ActivityCreateBlock for CreateObjectType.activity',
+    (tester) async {
+      final authController = AuthController(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await authController.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'seed',
+      );
+
+      final createRepository = _FakeCreateRepository();
+      final createController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: _testCreateDefaults,
+      );
+      await createController.ensureLoaded(
+        userId: 'u',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      createController.setObjectType(CreateObjectType.activity);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            createControllerProvider.overrideWith((ref) => createController),
+          ],
+          child: const MaterialApp(home: CreatePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ActivityCreateBlock), findsOneWidget);
+
+      // Flush the 700ms autosave timer so no pending Timer remains at test
+      // end.
+      await tester.pump(const Duration(milliseconds: 800));
     },
   );
 }

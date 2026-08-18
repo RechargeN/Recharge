@@ -1,4 +1,5 @@
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -7,6 +8,7 @@ import '../../domain/entities/place_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
+import 'activity_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
@@ -174,6 +176,11 @@ class CreateDraftModel {
     if (entity.placeData != null) {
       serializedSections['place_details'] = PlaceDraftMapper.toJson(
         entity.placeData!,
+      );
+    }
+    if (entity.activityData != null) {
+      serializedSections['activity_details'] = ActivityDraftMapper.toJson(
+        entity.activityData!,
       );
     }
     if (entity.findPeopleData != null) {
@@ -363,6 +370,17 @@ class CreateDraftModel {
             defaults: legacyPlaceDefaults,
           )
         : null;
+    final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
+      userId: organizerId,
+      currencyCode: currency,
+    );
+    final ActivityDraftData? activityData =
+        parsedObjectType == CreateObjectType.activity
+        ? ActivityDraftMapper.fromJson(
+            migratedSectionData['activity_details'],
+            defaults: legacyActivityDefaults,
+          )
+        : null;
     final FindPeopleDraftData? findPeopleData =
         parsedObjectType == CreateObjectType.findPeople
         ? FindPeopleDraftMapper.fromJson(
@@ -419,6 +437,7 @@ class CreateDraftModel {
       sectionData: runtimeSectionData,
       eventData: eventData,
       placeData: placeData,
+      activityData: activityData,
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
