@@ -131,7 +131,10 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Session still surfaces the generic 'Cover image обязательна' message;
+    // Recharge Activity now has its own ActivityValidationIssue messageKeys
+    // (ACT-CRT-01 spec) instead of this shared generic-form copy.
+    createController.setObjectType(CreateObjectType.session);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -767,7 +770,10 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
-      createController.setObjectType(CreateObjectType.activity);
+      // Session (generic success-hub flow; Recharge Activity now requires
+      // its own accessNotes/location fields per ACT-CRT-01 spec, which this
+      // generic-fields draft never sets).
+      createController.setObjectType(CreateObjectType.session);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',

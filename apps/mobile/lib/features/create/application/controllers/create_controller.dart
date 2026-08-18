@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../domain/entities/activity_draft_data.dart';
+import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
@@ -47,6 +49,9 @@ import '../../domain/usecases/validate_find_people_draft_usecase.dart';
 import '../../domain/usecases/validate_place_draft_usecase.dart';
 import '../../domain/usecases/apply_route_edit_command_usecase.dart';
 import '../../domain/usecases/build_route_publication_bundle_usecase.dart';
+import '../../domain/usecases/count_activity_informal_access_usecase.dart';
+import '../../domain/usecases/validate_activity_draft_usecase.dart';
+import '../activity_create_config.dart';
 import '../create_runtime_defaults.dart';
 import '../create_taxonomy.dart';
 import '../event_create_coordinator.dart';
@@ -98,6 +103,10 @@ class CreateController extends ChangeNotifier {
         const ValidateFindPeopleDraftUseCase(),
     CheckPlaceDuplicatesUseCase checkPlaceDuplicates =
         const CheckPlaceDuplicatesUseCase(),
+    ValidateActivityDraftUseCase validateActivityDraft =
+        const ValidateActivityDraftUseCase(),
+    CountActivityInformalAccessUseCase countActivityInformalAccess =
+        const CountActivityInformalAccessUseCase(),
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
@@ -119,7 +128,9 @@ class CreateController extends ChangeNotifier {
        _validateCreateAvailability = validateCreateAvailability,
        _validatePlaceDraft = validatePlaceDraft,
        _validateFindPeopleDraft = validateFindPeopleDraft,
-       _checkPlaceDuplicates = checkPlaceDuplicates;
+       _checkPlaceDuplicates = checkPlaceDuplicates,
+       _validateActivityDraft = validateActivityDraft,
+       _countActivityInformalAccess = countActivityInformalAccess;
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
   final LoadCreateDraftByIdUseCase? _loadCreateDraftByIdUseCase;
@@ -143,6 +154,8 @@ class CreateController extends ChangeNotifier {
   final ValidatePlaceDraftUseCase _validatePlaceDraft;
   final ValidateFindPeopleDraftUseCase _validateFindPeopleDraft;
   final CheckPlaceDuplicatesUseCase _checkPlaceDuplicates;
+  final ValidateActivityDraftUseCase _validateActivityDraft;
+  final CountActivityInformalAccessUseCase _countActivityInformalAccess;
   int _scenarioGenerationRequestSerial = 0;
   int _placeEnrichmentRequestSerial = 0;
 
@@ -527,6 +540,10 @@ class CreateController extends ChangeNotifier {
             ? (_state.draft.placeData ?? _placeDefaults(_state.userId))
             : null,
         clearPlaceData: type != CreateObjectType.place,
+        activityData: type == CreateObjectType.activity
+            ? (_state.draft.activityData ?? _activityDefaults(_state.userId))
+            : null,
+        clearActivityData: type != CreateObjectType.activity,
         findPeopleData: type == CreateObjectType.findPeople
             ? (_state.draft.findPeopleData ??
                   _findPeopleDefaults(_state.userId))
@@ -2199,6 +2216,145 @@ class CreateController extends ChangeNotifier {
     });
   }
 
+  void updateActivityCoordinates({
+    required String latitude,
+    required String longitude,
+  }) {
+    final double? lat = _parseDouble(latitude);
+    final double? lng = _parseDouble(longitude);
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        location: activity.location.copyWith(
+          latitude: lat,
+          clearLatitude: lat == null,
+          longitude: lng,
+          clearLongitude: lng == null,
+          pinConfirmed: false,
+        ),
+      ),
+    );
+  }
+
+  void confirmActivityPin() {
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        location: activity.location.copyWith(pinConfirmed: true),
+      ),
+    );
+  }
+
+  void updateActivityAddressLine(String value) {
+    final String trimmed = value.trim();
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        location: activity.location.copyWith(
+          addressLine: trimmed,
+          clearAddressLine: trimmed.isEmpty,
+        ),
+      ),
+    );
+  }
+
+  void updateActivityAccessNotes(String value) {
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        location: activity.location.copyWith(accessNotes: value.trim()),
+      ),
+    );
+  }
+
+  void updateActivityAccessCaution({required bool isInformal, String? note}) {
+    _updateActivity((ActivityDraftData activity) {
+      final String trimmedNote = (note ?? '').trim();
+      return activity.copyWith(
+        location: activity.location.copyWith(
+          accessCaution: isInformal
+              ? ActivityAccessCautionDraft(
+                  isInformal: true,
+                  note: trimmedNote.isEmpty ? null : trimmedNote,
+                )
+              : null,
+          clearAccessCaution: !isInformal,
+        ),
+      );
+    });
+  }
+
+  void updateActivityLinkedPlaceId(String? placeId) {
+    final String trimmed = (placeId ?? '').trim();
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        location: activity.location.copyWith(
+          linkedPlaceId: trimmed.isEmpty ? null : trimmed,
+          clearLinkedPlaceId: trimmed.isEmpty,
+        ),
+      ),
+    );
+  }
+
+  void updateActivityOptionalContribution({
+    ActivityContributionKind? kind,
+    String? note,
+    int? amountMinor,
+  }) {
+    _updateActivity((ActivityDraftData activity) {
+      final String trimmedNote = (note ?? '').trim();
+      return activity.copyWith(
+        optionalContribution: ActivityOptionalContributionDraft(
+          kind: kind,
+          note: trimmedNote.isEmpty ? null : trimmedNote,
+          amountHint: amountMinor == null
+              ? null
+              : ActivityContributionAmountDraft(
+                  amountMinor: amountMinor,
+                  currencyCode: _runtimeDefaults.currency,
+                ),
+        ),
+      );
+    });
+  }
+
+  void clearActivityOptionalContribution() {
+    _updateActivity(
+      (ActivityDraftData activity) =>
+          activity.copyWith(clearOptionalContribution: true),
+    );
+  }
+
+  void updateActivityBestTime({
+    ActivityTimeOfDay? timeOfDay,
+    ActivitySeason? season,
+  }) {
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        bestTime: ActivityBestTimeDraft(timeOfDay: timeOfDay, season: season),
+      ),
+    );
+  }
+
+  void updateActivityTypicalDuration({required int min, required int max}) {
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        typicalDurationMinutes: ActivityIntRangeDraft(min: min, max: max),
+      ),
+    );
+  }
+
+  void updateActivitySuggestedGroupSize({required int min, required int max}) {
+    _updateActivity(
+      (ActivityDraftData activity) => activity.copyWith(
+        suggestedGroupSize: ActivityIntRangeDraft(min: min, max: max),
+      ),
+    );
+  }
+
+  void clearActivitySuggestedGroupSize() {
+    _updateActivity(
+      (ActivityDraftData activity) =>
+          activity.copyWith(clearSuggestedGroupSize: true),
+    );
+  }
+
   void updatePlaceHoursMode(PlaceHoursMode mode) {
     _updatePlace((PlaceDraftData place) {
       final bool clearsPeriods =
@@ -3109,6 +3265,11 @@ class CreateController extends ChangeNotifier {
         );
       } else if (_state.draft.objectType == CreateObjectType.place) {
         _setPlaceIssues(_placeIssues(), message: 'Заполните обязательные поля');
+      } else if (_state.draft.objectType == CreateObjectType.activity) {
+        _setActivityIssues(
+          _activityIssues(),
+          message: 'Проверьте обязательные поля Recharge Activity',
+        );
       } else if (_state.draft.objectType == CreateObjectType.findPeople) {
         _setState(
           _state.copyWith(
@@ -3444,6 +3605,14 @@ class CreateController extends ChangeNotifier {
             issue.fieldId ?? issue.code: issue.messageKey,
       };
     }
+    if (draft.objectType == CreateObjectType.activity) {
+      final List<ActivityValidationIssue> issues = _activityIssues(draft);
+      return <String, String>{
+        for (final ActivityValidationIssue issue in issues)
+          if (issue.severity == ActivityValidationSeverity.error)
+            issue.fieldId ?? issue.code: issue.messageKey,
+      };
+    }
     if (draft.objectType == CreateObjectType.findPeople) {
       return <String, String>{
         for (final FindPeopleValidationIssue issue in _findPeopleIssues(draft))
@@ -3517,6 +3686,7 @@ class CreateController extends ChangeNotifier {
         saveStatus:
             resolved.objectType == CreateObjectType.event ||
                 resolved.objectType == CreateObjectType.place ||
+                resolved.objectType == CreateObjectType.activity ||
                 resolved.objectType == CreateObjectType.findPeople ||
                 resolved.objectType == CreateObjectType.scenario ||
                 resolved.objectType == CreateObjectType.route
@@ -3526,6 +3696,7 @@ class CreateController extends ChangeNotifier {
         clearValidationErrors: true,
         clearEventValidationIssues: true,
         clearPlaceValidationIssues: true,
+        clearActivityValidationIssues: true,
         placeEnrichmentLoading: invalidatesPlaceHelper ? false : null,
         clearPlaceEnrichmentProposal: invalidatesPlaceHelper,
         clearPlaceEnrichmentError: invalidatesPlaceHelper,
@@ -3534,6 +3705,7 @@ class CreateController extends ChangeNotifier {
     );
     if ((resolved.objectType == CreateObjectType.event ||
             resolved.objectType == CreateObjectType.place ||
+            resolved.objectType == CreateObjectType.activity ||
             resolved.objectType == CreateObjectType.findPeople ||
             resolved.objectType == CreateObjectType.scenario) &&
         _state.userId.isNotEmpty) {
@@ -3566,6 +3738,13 @@ class CreateController extends ChangeNotifier {
       timezoneId: _runtimeDefaults.timezone,
       currencyCode: _runtimeDefaults.currency,
       contentLocale: _runtimeDefaults.defaultContentLocale,
+    );
+  }
+
+  ActivityDraftData _activityDefaults(String userId) {
+    return ActivityDraftData.defaults(
+      userId: userId,
+      currencyCode: _runtimeDefaults.currency,
     );
   }
 
@@ -3787,6 +3966,23 @@ class CreateController extends ChangeNotifier {
     }
   }
 
+  void _updateActivity(
+    ActivityDraftData Function(ActivityDraftData activity) transform,
+  ) {
+    final ActivityDraftData? current = _state.draft.activityData;
+    if (_state.draft.objectType != CreateObjectType.activity ||
+        current == null) {
+      return;
+    }
+    final ActivityDraftData next = transform(current).nextRevision();
+    _updateDraft(
+      _state.draft.copyWith(
+        activityData: next,
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
   void _invalidatePlaceDuplicateCheck() {
     if (_state.draft.objectType != CreateObjectType.place) return;
     _setState(
@@ -3850,6 +4046,95 @@ class CreateController extends ChangeNotifier {
       }
     }
     return issues;
+  }
+
+  List<ActivityValidationIssue> _activityIssues([CreateDraftEntity? draft]) {
+    final CreateDraftEntity target = draft ?? _state.draft;
+    final List<ActivityValidationIssue> issues =
+        List<ActivityValidationIssue>.of(_validateActivityDraft(target));
+    final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
+      target.mainCategory,
+    );
+    final bool subcategoryAllowed =
+        category?.subcategories.any(
+          (CreateTaxonomySubcategory item) => item.id == target.subcategory,
+        ) ??
+        false;
+    if (!subcategoryAllowed && target.subcategory.isNotEmpty) {
+      issues.add(
+        const ActivityValidationIssue(
+          code: 'subcategory_not_applicable',
+          severity: ActivityValidationSeverity.error,
+          sectionId: 'basics',
+          fieldId: 'subcategory',
+          messageKey: 'activity.validation.subcategory_not_applicable',
+        ),
+      );
+    }
+    final CategoryCriteriaResult? criteria = const GetCategoryCriteriaUseCase()(
+      target.subcategory,
+    );
+    final Map<String, Object?> values = <String, Object?>{
+      ...?target.sectionData['criteria'] as Map<String, Object?>?,
+    };
+    for (final String fieldId
+        in criteria?.profile.requiredFieldIds ?? const <String>{}) {
+      final Object? value = values[fieldId];
+      if (value == null || (value is String && value.trim().isEmpty)) {
+        issues.add(
+          ActivityValidationIssue(
+            code: 'criterion_required',
+            severity: ActivityValidationSeverity.error,
+            sectionId: 'whenFor',
+            fieldId: fieldId,
+            messageKey: 'activity.validation.criterion_required',
+            messageParams: <String, Object?>{'fieldId': fieldId},
+          ),
+        );
+      }
+    }
+    return issues;
+  }
+
+  void _setActivityIssues(
+    List<ActivityValidationIssue> issues, {
+    required String message,
+  }) {
+    _setState(
+      _state.copyWith(
+        status: CreateStatus.ready,
+        activityValidationIssues: issues,
+        validationErrors: <String, String>{
+          for (final ActivityValidationIssue issue in issues)
+            if (issue.severity == ActivityValidationSeverity.error)
+              issue.fieldId ?? issue.code: issue.messageKey,
+        },
+        message: message,
+      ),
+    );
+  }
+
+  Future<bool> goToActivityStep(int step) async {
+    final int nextStep = step.clamp(0, activityCreateSteps.length - 1);
+    if (nextStep > _state.activityStep) {
+      final List<ActivityValidationIssue> issues = _activityIssues();
+      final String currentSectionId =
+          activityCreateSteps[_state.activityStep].id;
+      final List<ActivityValidationIssue> blocking = issues
+          .where(
+            (ActivityValidationIssue issue) =>
+                issue.severity == ActivityValidationSeverity.error &&
+                issue.sectionId == currentSectionId,
+          )
+          .toList(growable: false);
+      if (blocking.isNotEmpty) {
+        _setActivityIssues(issues, message: 'Проверьте обязательные поля шага');
+        return false;
+      }
+    }
+    _setState(_state.copyWith(activityStep: nextStep, clearMessage: true));
+    await saveDraft();
+    return true;
   }
 
   void _setPlaceIssues(

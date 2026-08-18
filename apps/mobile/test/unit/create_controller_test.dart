@@ -94,7 +94,12 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    controller.setObjectType(CreateObjectType.activity);
+    // Session still routes through the generic _validateCreateAvailability
+    // path (unlike event/place/findPeople/scenario/activity, which all have
+    // dedicated _validate branches). Recharge Activity has no Booking/
+    // attendance concept per ACT-CRT-01 spec AC #2, so it no longer fits
+    // as the "generic availability validation" example here.
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCoverImage('cover.jpg');
@@ -265,9 +270,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    controller.setObjectType(CreateObjectType.activity);
+    // Session (see comment on the "partial attendance" test above for why
+    // activity no longer fits this generic publish-success example).
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('My Event');
-    controller.updateMainCategory('outdoor');
+    controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
     controller.updateStartDateTime('2026-05-01T10:00:00Z');
@@ -437,6 +444,79 @@ void main() {
       expect(controller.state.draft.media.gallery.last, 'local://image-12.jpg');
     },
   );
+
+  group('CreateController activity wiring', () {
+    test('setObjectType(activity) seeds activityData with market defaults', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      expect(controller.state.draft.objectType, CreateObjectType.activity);
+      expect(controller.state.draft.activityData, isNotNull);
+      expect(controller.state.draft.activityData!.location.accessNotes, '');
+    });
+
+    test('updateActivityAccessNotes updates the draft and bumps revision', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      final int before = controller.state.draft.activityData!.revision;
+      controller.updateActivityAccessNotes('Gravel path from parking.');
+      expect(
+        controller.state.draft.activityData!.location.accessNotes,
+        'Gravel path from parking.',
+      );
+      expect(controller.state.draft.activityData!.revision, greaterThan(before));
+    });
+
+    test('confirmActivityPin sets pinConfirmed', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.confirmActivityPin();
+      expect(controller.state.draft.activityData!.location.pinConfirmed, isTrue);
+    });
+
+    test('goToActivityStep blocks forward navigation on a blocking error', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      // No cover image set yet -> cover_image_required is a 'basics'-section
+      // blocking error, and step 0 is 'basics'.
+      final bool advanced = await controller.goToActivityStep(2);
+      expect(advanced, isFalse);
+      expect(controller.state.activityStep, 0);
+      expect(controller.state.activityValidationIssues, isNotEmpty);
+    });
+
+    test('goToActivityStep allows forward navigation once the current step is valid', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateCoverImage('cover.jpg');
+      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.confirmActivityPin();
+      controller.updateActivityAccessNotes('Gravel path from parking.');
+      final bool advanced = await controller.goToActivityStep(1);
+      expect(advanced, isTrue);
+      expect(controller.state.activityStep, 1);
+    });
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
