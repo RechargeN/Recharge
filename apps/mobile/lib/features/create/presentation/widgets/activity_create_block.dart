@@ -196,8 +196,186 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     );
   }
 
-  // _locationStep, _whenForStep, _publishStep, _navigation added in Tasks 14-16.
-  Widget _locationStep(ActivityDraftData activity) => const SizedBox.shrink();
+  Widget _locationStep(ActivityDraftData activity) {
+    final ActivityAccessCautionDraft? caution = activity.location.accessCaution;
+    final bool isInformal = caution?.isInformal ?? false;
+    final ActivityOptionalContributionDraft? contribution =
+        activity.optionalContribution;
+    return _StepCard(
+      title: 'Where is it, and how do I get there?',
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextFormField(
+                controller: _field(
+                  'latitude',
+                  activity.location.latitude?.toString() ?? '',
+                ),
+                decoration: const InputDecoration(labelText: 'Latitude'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  signed: true,
+                  decimal: true,
+                ),
+                onChanged: (String value) => widget.controller
+                    .updateActivityCoordinates(
+                      latitude: value,
+                      longitude: _fields['longitude']?.text ?? '',
+                    ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                controller: _field(
+                  'longitude',
+                  activity.location.longitude?.toString() ?? '',
+                ),
+                decoration: const InputDecoration(labelText: 'Longitude'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  signed: true,
+                  decimal: true,
+                ),
+                onChanged: (String value) => widget.controller
+                    .updateActivityCoordinates(
+                      latitude: _fields['latitude']?.text ?? '',
+                      longitude: value,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        FilledButton(
+          onPressed: widget.controller.confirmActivityPin,
+          child: Text(
+            activity.location.pinConfirmed
+                ? 'Pin confirmed'
+                : 'Confirm this pin',
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _field('addressLine', activity.location.addressLine ?? ''),
+          decoration: const InputDecoration(labelText: 'Address line (optional)'),
+          onChanged: widget.controller.updateActivityAddressLine,
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _field('accessNotes', activity.location.accessNotes),
+          decoration: const InputDecoration(labelText: 'Access notes'),
+          maxLines: 2,
+          onChanged: widget.controller.updateActivityAccessNotes,
+        ),
+        SwitchListTile(
+          title: const Text('This is not an official spot'),
+          value: isInformal,
+          onChanged: (bool value) => widget.controller.updateActivityAccessCaution(
+            isInformal: value,
+            note: caution?.note,
+          ),
+        ),
+        if (isInformal)
+          TextFormField(
+            controller: _field('accessCautionNote', caution?.note ?? ''),
+            decoration: const InputDecoration(
+              labelText: 'What to know before you go',
+            ),
+            maxLines: 2,
+            onChanged: (String value) => widget.controller
+                .updateActivityAccessCaution(isInformal: true, note: value),
+          ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _field('linkedPlaceId', activity.location.linkedPlaceId ?? ''),
+          decoration: const InputDecoration(
+            labelText: 'Linked Place id (optional)',
+          ),
+          onChanged: widget.controller.updateActivityLinkedPlaceId,
+        ),
+        SwitchListTile(
+          title: const Text('It is customary to leave something here'),
+          value: contribution != null,
+          onChanged: (bool value) {
+            if (value) {
+              widget.controller.updateActivityOptionalContribution(
+                kind: ActivityContributionKind.donation,
+              );
+            } else {
+              widget.controller.clearActivityOptionalContribution();
+            }
+          },
+        ),
+        if (contribution != null) ...<Widget>[
+          DropdownButtonFormField<ActivityContributionKind>(
+            initialValue: contribution.kind,
+            decoration: const InputDecoration(labelText: 'Contribution kind'),
+            items: const <DropdownMenuItem<ActivityContributionKind>>[
+              DropdownMenuItem<ActivityContributionKind>(
+                value: ActivityContributionKind.purchase,
+                child: Text('Purchase (e.g. coffee at the counter)'),
+              ),
+              DropdownMenuItem<ActivityContributionKind>(
+                value: ActivityContributionKind.donation,
+                child: Text('Donation'),
+              ),
+              DropdownMenuItem<ActivityContributionKind>(
+                value: ActivityContributionKind.other,
+                child: Text('Other'),
+              ),
+            ],
+            onChanged: (ActivityContributionKind? kind) {
+              if (kind != null) {
+                widget.controller.updateActivityOptionalContribution(
+                  kind: kind,
+                  note: contribution.note,
+                  amountMinor: contribution.amountHint?.amountMinor,
+                );
+              }
+            },
+          ),
+          TextFormField(
+            controller: _field('contributionNote', contribution.note ?? ''),
+            decoration: const InputDecoration(
+              labelText: 'e.g. "Coffee on the counter, optional"',
+            ),
+            onChanged: (String value) => widget.controller
+                .updateActivityOptionalContribution(
+                  kind: contribution.kind,
+                  note: value,
+                  amountMinor: contribution.amountHint?.amountMinor,
+                ),
+          ),
+          TextFormField(
+            controller: _field(
+              'contributionAmountHint',
+              contribution.amountHint == null
+                  ? ''
+                  : (contribution.amountHint!.amountMinor / 100).toStringAsFixed(2),
+            ),
+            decoration: const InputDecoration(labelText: 'Approximate amount (optional)'),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (String value) {
+              final double? parsed = double.tryParse(value.replaceAll(',', '.'));
+              widget.controller.updateActivityOptionalContribution(
+                kind: contribution.kind,
+                note: contribution.note,
+                amountMinor: parsed == null ? null : (parsed * 100).round(),
+              );
+            },
+          ),
+        ],
+        for (final ActivityValidationIssue issue in _issuesFor('location'))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              issue.messageKey,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+      ],
+    );
+  }
   Widget _whenForStep(ActivityDraftData activity, CreateDraftEntity draft) =>
       const SizedBox.shrink();
   Widget _publishStep(CreateDraftEntity draft, ActivityDraftData activity) =>
