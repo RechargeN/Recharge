@@ -20,6 +20,7 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/create_availability.dart';
 import '../widgets/event_create_block.dart';
+import '../widgets/activity_create_block.dart';
 import '../widgets/find_people_create_block.dart';
 import '../widgets/place_create_block.dart';
 import '../widgets/route/route_create_block.dart';
@@ -224,6 +225,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 CreateObjectType.findPeople) ...<Widget>[
               const SizedBox(height: 12),
               FindPeopleCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.activity) ...<Widget>[
+              const SizedBox(height: 12),
+              ActivityCreateBlock(
                 controller: controller,
                 state: state,
                 onPublished: () =>
