@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/config/recharge_category_criteria.dart';
 import '../../application/activity_create_config.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
+import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
@@ -376,11 +378,252 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
       ],
     );
   }
-  Widget _whenForStep(ActivityDraftData activity, CreateDraftEntity draft) =>
-      const SizedBox.shrink();
-  Widget _publishStep(CreateDraftEntity draft, ActivityDraftData activity) =>
-      const SizedBox.shrink();
-  Widget _navigation() => const SizedBox.shrink();
+  Widget _whenForStep(ActivityDraftData activity, CreateDraftEntity draft) {
+    final CategoryCriteriaResult? criteria = const GetCategoryCriteriaUseCase()(
+      draft.subcategory,
+    );
+    final Map<String, Object?> criteriaValues = <String, Object?>{
+      ...?draft.sectionData['criteria'] as Map<String, Object?>?,
+    };
+    final ActivityIntRangeDraft? groupSize = activity.suggestedGroupSize;
+    return _StepCard(
+      title: 'When is it best, and how long does it take?',
+      children: <Widget>[
+        DropdownButtonFormField<ActivityTimeOfDay>(
+          initialValue: activity.bestTime?.timeOfDay,
+          decoration: const InputDecoration(
+            labelText: 'Best time of day (optional)',
+          ),
+          items: <DropdownMenuItem<ActivityTimeOfDay>>[
+            for (final ActivityTimeOfDay value in ActivityTimeOfDay.values)
+              DropdownMenuItem<ActivityTimeOfDay>(
+                value: value,
+                child: Text(value.name),
+              ),
+          ],
+          onChanged: (ActivityTimeOfDay? value) =>
+              widget.controller.updateActivityBestTime(
+                timeOfDay: value,
+                season: activity.bestTime?.season,
+              ),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<ActivitySeason>(
+          initialValue: activity.bestTime?.season,
+          decoration: const InputDecoration(labelText: 'Best season (optional)'),
+          items: <DropdownMenuItem<ActivitySeason>>[
+            for (final ActivitySeason value in ActivitySeason.values)
+              DropdownMenuItem<ActivitySeason>(
+                value: value,
+                child: Text(value.name),
+              ),
+          ],
+          onChanged: (ActivitySeason? value) =>
+              widget.controller.updateActivityBestTime(
+                timeOfDay: activity.bestTime?.timeOfDay,
+                season: value,
+              ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextFormField(
+                controller: _field(
+                  'durationMin',
+                  activity.typicalDurationMinutes.min.toString(),
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Typical duration, min (minutes)',
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (String value) {
+                  final int? min = int.tryParse(value);
+                  if (min != null) {
+                    widget.controller.updateActivityTypicalDuration(
+                      min: min,
+                      max: activity.typicalDurationMinutes.max,
+                    );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                controller: _field(
+                  'durationMax',
+                  activity.typicalDurationMinutes.max.toString(),
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Typical duration, max (minutes)',
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (String value) {
+                  final int? max = int.tryParse(value);
+                  if (max != null) {
+                    widget.controller.updateActivityTypicalDuration(
+                      min: activity.typicalDurationMinutes.min,
+                      max: max,
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+        SwitchListTile(
+          title: const Text('Suggest a group size'),
+          value: groupSize != null,
+          onChanged: (bool value) {
+            if (value) {
+              widget.controller.updateActivitySuggestedGroupSize(
+                min: 1,
+                max: 10,
+              );
+            } else {
+              widget.controller.clearActivitySuggestedGroupSize();
+            }
+          },
+        ),
+        if (groupSize != null)
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextFormField(
+                  controller: _field('groupMin', groupSize.min.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'Group, min people',
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (String value) {
+                    final int? min = int.tryParse(value);
+                    if (min != null) {
+                      widget.controller.updateActivitySuggestedGroupSize(
+                        min: min,
+                        max: groupSize.max,
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: _field('groupMax', groupSize.max.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'Group, max people',
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (String value) {
+                    final int? max = int.tryParse(value);
+                    if (max != null) {
+                      widget.controller.updateActivitySuggestedGroupSize(
+                        min: groupSize.min,
+                        max: max,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        if (criteria != null)
+          for (final RechargeCriteriaFieldDefinition field in criteria.fields)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: field.type == 'bool'
+                  ? SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(field.id.replaceAll('_', ' ')),
+                      value: criteriaValues[field.id] as bool? ?? false,
+                      onChanged: (bool value) => widget.controller
+                          .updateCategoryCriterion(field.id, value),
+                    )
+                  : TextFormField(
+                      controller: _field(
+                        'criterion-${field.id}',
+                        criteriaValues[field.id]?.toString() ?? '',
+                      ),
+                      decoration: InputDecoration(
+                        labelText: field.id.replaceAll('_', ' '),
+                      ),
+                      onChanged: (String value) => widget.controller
+                          .updateCategoryCriterion(field.id, value),
+                    ),
+            ),
+        for (final ActivityValidationIssue issue in _issuesFor('whenFor'))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              issue.messageKey,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _publishStep(CreateDraftEntity draft, ActivityDraftData activity) {
+    return _StepCard(
+      title: 'Preview and publish',
+      children: <Widget>[
+        Text(draft.title, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(draft.shortDescription),
+        const SizedBox(height: 8),
+        Text(
+          '${activity.typicalDurationMinutes.min}–${activity.typicalDurationMinutes.max} min',
+        ),
+        if (activity.location.accessCaution?.isInformal ?? false) ...<Widget>[
+          const SizedBox(height: 8),
+          Text(
+            activity.location.accessCaution!.note ?? '',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ],
+        for (final ActivityValidationIssue issue
+            in widget.state.activityValidationIssues)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              issue.messageKey,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _navigation() {
+    final int step = widget.state.activityStep;
+    final bool isLast = step == activityCreateSteps.length - 1;
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          if (step > 0)
+            TextButton(
+              onPressed: () => widget.controller.goToActivityStep(step - 1),
+              child: const Text('Back'),
+            )
+          else
+            const SizedBox.shrink(),
+          FilledButton(
+            onPressed: isLast
+                ? () async {
+                    final bool published = await widget.controller
+                        .publishDraft();
+                    if (published) widget.onPublished();
+                  }
+                : () => widget.controller.goToActivityStep(step + 1),
+            child: Text(isLast ? 'Send for review' : 'Save & continue'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StepCard extends StatelessWidget {
