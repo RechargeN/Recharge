@@ -11,6 +11,7 @@ import 'package:recharge/features/create/domain/entities/create_availability.dar
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/domain/usecases/count_activity_informal_access_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
@@ -517,6 +518,103 @@ void main() {
       expect(controller.state.activityStep, 1);
     });
   });
+
+  group('CreateController activity publish moderation (§12)', () {
+    test('4th+ informal-access card publishes flagged, not blocked', () async {
+      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+        countActivityInformalAccess: const CountActivityInformalAccessUseCase(
+          publishedInformalActivityCounts: <String, int>{'user-3': 3},
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-3',
+        organizerEmail: 'user3@example.com',
+        organizerName: 'user-3',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.flaggedForReview,
+      );
+      moderationController.dispose();
+    });
+
+    test('1st-3rd informal-access card publishes as normal pending', () async {
+      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user1@example.com',
+        organizerName: 'user-1',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.pending,
+      );
+      moderationController.dispose();
+    });
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
@@ -544,9 +642,13 @@ class _FakeCreateRepository implements CreateRepository {
     CreateDraftEntity draft,
   ) async {
     final now = DateTime.now().toUtc();
+    // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
+    // moderation threshold); otherwise default to the normal pending state.
     _stored = draft.copyWith(
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: ModerationStatus.pending,
+      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+          ? ModerationStatus.flaggedForReview
+          : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
       publishedAtUtc: now,
       updatedAtUtc: now,

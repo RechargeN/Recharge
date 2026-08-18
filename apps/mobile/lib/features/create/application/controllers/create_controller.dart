@@ -3326,6 +3326,23 @@ class CreateController extends ChangeNotifier {
       }
     }
 
+    CreateDraftEntity draftToPublish = _state.draft;
+    if (draftToPublish.objectType == CreateObjectType.activity) {
+      final ActivityAccessCautionDraft? caution =
+          draftToPublish.activityData?.location.accessCaution;
+      final bool isInformal = caution?.isInformal ?? false;
+      if (isInformal) {
+        final int priorInformalCount = _countActivityInformalAccess(
+          draftToPublish,
+        );
+        if (priorInformalCount >= 3) {
+          draftToPublish = draftToPublish.copyWith(
+            moderationStatus: ModerationStatus.flaggedForReview,
+          );
+        }
+      }
+    }
+
     _setState(
       _state.copyWith(
         status: CreateStatus.publishing,
@@ -3336,7 +3353,7 @@ class CreateController extends ChangeNotifier {
 
     final CreateDraftEntity published = await _publishCreateDraftUseCase(
       userId: _state.userId,
-      draft: _state.draft,
+      draft: draftToPublish,
     );
 
     _setState(
