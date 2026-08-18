@@ -282,13 +282,19 @@ class CreateRepositoryImpl
       id: publishedId,
       eventData: publishedEventData,
       placeData: draft.placeData?.replaceLocalIds(_idGenerator.generate),
+      activityData: draft.activityData?.replaceLocalIds(_idGenerator.generate),
       findPeopleData: draft.findPeopleData?.replaceLocalIds(
         _idGenerator.generate,
       ),
       sectionData: sectionData,
       scheduleSlots: publishedSlots,
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: ModerationStatus.pending,
+      // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
+      // moderation threshold, set by CreateController.publishDraft());
+      // otherwise default to the normal pending state.
+      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+          ? ModerationStatus.flaggedForReview
+          : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
       updatedAtUtc: now,
       publishedAtUtc: now,
