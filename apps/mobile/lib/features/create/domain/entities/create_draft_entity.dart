@@ -1,3 +1,4 @@
+import 'activity_draft_data.dart';
 import 'create_availability.dart';
 import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
@@ -60,7 +61,7 @@ CreateObjectType createObjectTypeFromId(String value) {
 
 enum DraftStatus { draft, pendingReview, published, archived, hidden, deleted }
 
-enum ModerationStatus { none, pending, approved, rejected }
+enum ModerationStatus { none, pending, approved, rejected, flaggedForReview }
 
 enum PublishStatus {
   draft,
@@ -102,6 +103,7 @@ class CreateDraftEntity {
     required this.sectionData,
     this.eventData,
     this.placeData,
+    this.activityData,
     this.findPeopleData,
     this.routeData,
     this.scenarioData,
@@ -173,6 +175,7 @@ class CreateDraftEntity {
   final Map<String, Object?> sectionData;
   final EventDraftData? eventData;
   final PlaceDraftData? placeData;
+  final ActivityDraftData? activityData;
   final FindPeopleDraftData? findPeopleData;
   final RouteDraftData? routeData;
   final ScenarioDraftData? scenarioData;
@@ -347,6 +350,8 @@ class CreateDraftEntity {
     bool clearEventData = false,
     PlaceDraftData? placeData,
     bool clearPlaceData = false,
+    ActivityDraftData? activityData,
+    bool clearActivityData = false,
     FindPeopleDraftData? findPeopleData,
     bool clearFindPeopleData = false,
     RouteDraftData? routeData,
@@ -435,6 +440,7 @@ class CreateDraftEntity {
       sectionData: sectionData ?? this.sectionData,
       eventData: clearEventData ? null : (eventData ?? this.eventData),
       placeData: clearPlaceData ? null : (placeData ?? this.placeData),
+      activityData: clearActivityData ? null : (activityData ?? this.activityData),
       findPeopleData: clearFindPeopleData
           ? null
           : (findPeopleData ?? this.findPeopleData),
