@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.1**
+- Version: **0.4.2**
 - Date: **2026-08-20**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Absent**
@@ -14,6 +14,15 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.2 — 2026-08-20
+
+- BCK-05 Operations v0.1 and BCK-20 Reference Data v0.1 are now tracked
+  Draft/Present documents with runtime Absent;
+- current-state and next-package text now reflects their real presence and
+  remaining Review/Approval blockers;
+- D1 traceability updated to BCK-02 v2.4.6, BCK-03 v0.2.4 and BCK-04 v0.4.3;
+- target architecture, Review status and runtime semantics are unchanged.
 
 ### v0.4.1 — 2026-08-20
 
@@ -182,7 +191,7 @@ Approval и требует reconciliation либо Accepted ADR.
 | Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
 | Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4.5](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, v2.4.1–2.4.5 — traceability amendments |
+| Backend sequencing | [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, v2.4.1–2.4.6 — traceability amendments |
 | Baltic rollout | [Latvia/Baltics roadmap](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
 | Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
 | Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
@@ -201,7 +210,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Область | Текущее evidence | Gap | Вывод |
 |---|---|---|---|
 | Mobile app | Flutter, layered features, local/mock datasources | Нет production remote authority | Не считать mock production backend |
-| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO; BCK-03 v0.2.3 Draft/Present | BCK-03 ещё не Review/Approved; Booking fixture/idempotency reconciliation открыт | Расширять один workflow; non-Booking schemas запрещены до Accepted API-DEC-05 |
+| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO; BCK-03 v0.2.4 Draft/Present | BCK-03 ещё не Review/Approved; Booking fixture/idempotency reconciliation открыт | Расширять один workflow; non-Booking schemas запрещены до Accepted API-DEC-05 |
 | Backend application | `apps/backend` отсутствует | Нет functions, Rules, indexes, tests, deployment | Runtime **Absent** |
 | Firebase projects | В repository нет project/options/config evidence | Не приняты topology, edition и locations | OD-07 блокирует provisioning |
 | Identity | Target принят ADR 0015; ADR 0016/0017 разрешили bounded local/mock access snapshot, user-created ManagedPage, workspace/capability guards и Admin preview | Нет production Auth/capability/revocation authority; local exception не является production evidence | BCK-06 + BCK-18 до product migration; сохранить compatibility без переноса mock grants |
@@ -211,9 +220,9 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Media/Notifications | Local/mobile foundations | Нет protected storage pipeline и delivery authority | BCK-13/14 |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
-| Operations | Общие CI/env/runbook policies существуют | Нет backend SLO, budgets, IAM, backup/restore evidence | BCK-05 + actual runbooks |
-| Privacy | BCK-04 v0.4.2 и coverage matrix v0.3.2 Draft/Present | Нет accepted Legal/Privacy decisions или DSR runtime | Закрыть BCK-04 blockers; наличие документа не является runtime evidence |
-| Baltic markets | Roadmap и target MarketConfig определены | Нет versioned backend reference distribution | BCK-20 + OD-10 |
+| Operations | BCK-05 v0.1 и coverage matrix v0.1 Draft/Present | Нет Accepted OD-07, numeric SLO/budgets/RPO/RTO, IAM или runtime evidence | Закрыть BCK-05 blockers; runbooks только из фактической topology |
+| Privacy | BCK-04 v0.4.3 и coverage matrix v0.3.3 Draft/Present | Нет accepted Legal/Privacy decisions или DSR runtime | Закрыть BCK-04 blockers; наличие документа не является runtime evidence |
+| Baltic markets | BCK-20 v0.1 и coverage matrix v0.1 Draft/Present | OD-10 не Accepted; versioned distribution runtime отсутствует | Закрыть BCK-20/OD-10 blockers без country forks |
 
 ### 4.1. Главный gap
 
@@ -892,13 +901,13 @@ Rollback имеет три разных уровня:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.1
+## 25. Definition of Done BCK-01 v0.4.2
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
 - все anchors существуют и ссылки валидны;
 - BCK-02 registry отражает фактический
-  `Draft v0.4.1/Present, runtime Absent`, а ownership reconciliation не содержит
+  `Review v0.4.2/Present, runtime Absent`, а ownership reconciliation не содержит
   двойных writers;
 - target layers/modules не создают второго writer;
 - LV/EE/LT boundary согласована с roadmap;
@@ -981,7 +990,7 @@ Approval требует reconciliation report и sign-off владельцев, 
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4.5 (Approved v2.4 semantics), BCK-02-A1
+46. **BCK-01-AC-46:** BCK-02 v2.4.6 (Approved v2.4 semantics), BCK-02-A1
     Draft v1.0 и BCK-09 Review v1.0 представлены с их фактическими
     status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
@@ -1003,7 +1012,7 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.4.1 не реализованы:
+На дату v0.4.2 не реализованы:
 
 - physical `apps/backend` application;
 - Firebase projects/resources/configuration;
@@ -1025,13 +1034,11 @@ Existing local/mock capability and docs/contracts do not change this list.
 
 Следующий formal step остаётся документационным:
 
-1. закрыть BCK-03 idempotency fixture conflict и оставшиеся BCK-04 Review
+1. закрыть BCK-03 idempotency fixture conflict и BCK-04/BCK-05/BCK-20 Review
    blockers;
-2. создать BCK-05 `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md`;
-3. создать BCK-20 `REFERENCE_DATA_LOCALIZATION_SPEC.md`;
-4. подготовить owner proposals/decisions OD-07/09/10/11;
-5. собрать D1 reconciliation/sign-off package без runtime changes;
-6. получить независимые specialist approvals до BCK-01 Approval/G1 там, где
+2. получить evidence-backed decisions OD-07/09/10/11 в требуемых статусах;
+3. собрать D1 reconciliation/sign-off package без runtime changes;
+4. получить независимые specialist approvals до BCK-01 Approval/G1 там, где
    interim совмещение ролей недостаточно.
 
 До завершения этого пакета и отдельного разрешения backend code, Firebase

@@ -1,21 +1,21 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-08-20**
 - Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
 - Accountable owner: **Platform Architecture owner**
 - Review coordinator: **RechargeN / Product owner**
-- Subject: [BCK-01 v0.4.1](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.5](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Subject: [BCK-01 v0.4.2](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MASTER_RECONCILIATION_REPORT.md`
 
 ---
 
 ## 1. Verdict
 
-BCK-01 v0.4.1 is internally consistent with the tracked Accepted ADR set,
+BCK-01 v0.4.2 is internally consistent with the tracked Accepted ADR set,
 Architecture Baseline and BCK-02 coordination model. Its module and
 authoritative-writer maps do not contain a confirmed double writer. All local
 anchors exist, 52 AC are sequential, and the revision creates no runtime.
@@ -33,10 +33,11 @@ normative sections:
 
 - `AGENTS.md` and `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - Accepted ADR 0012, 0013, 0015, 0016, 0017, 0018 and 0019;
-- BCK-02 v2.4.5 registry, ownership, §14 template, §15 reconciliation, gates
+- BCK-02 v2.4.6 registry, ownership, §14 template, §15 reconciliation, gates
   and next-package rules;
-- BCK-03 v0.2.3 and API Contracts Workflow;
-- BCK-04 v0.4.2 and coverage matrix v0.3.2;
+- BCK-03 v0.2.4 and API Contracts Workflow;
+- BCK-04 v0.4.3 and coverage matrix v0.3.3;
+- BCK-05 v0.1 and BCK-20 v0.1 plus their coverage matrices;
 - BCK-09 v1.0 Review contract and ECL-03B/C anchors;
 - BCK-02-A1 v1.0 Draft Latvia/Baltics roadmap;
 - LAUNCH_STATUS current tracked facts.
@@ -95,17 +96,17 @@ must be repeated and refined by their owning BCK spec before schema approval.
 
 | Anchor | Repository fact | BCK-01 treatment | Result |
 |---|---|---|---|
-| BCK-02 | Approved v2.4 semantics; v2.4.5 traceability | Coordination authority only | Pass |
+| BCK-02 | Approved v2.4 semantics; v2.4.6 traceability | Coordination authority only | Pass |
 | BCK-02-A1 | Draft v1.0, documentation only | Baltic rollout input, not Accepted authority | Pass |
-| BCK-03 | Draft v0.2.3, runtime Absent | API detail delegated; conflict remains explicit | Pass with blocker |
-| BCK-04 | Draft v0.4.2, runtime Absent | Security/privacy detail delegated | Pass with blockers |
-| BCK-05 | Planned/Absent | Operations ownership reserved | Pass; required for G1 |
+| BCK-03 | Draft v0.2.4, runtime Absent | API detail delegated; conflict remains explicit | Pass with blocker |
+| BCK-04 | Draft v0.4.3, runtime Absent | Security/privacy detail delegated | Pass with blockers |
+| BCK-05 | Draft v0.1, runtime Absent | Operations target and OD-07 proposal present | Pass with blockers |
 | BCK-09 | Review v1.0, runtime Absent | Stricter Booking rules preserved | Pass |
-| BCK-20 | Planned/Absent | Reference ownership reserved | Pass; required for G1 |
+| BCK-20 | Draft v0.1, runtime Absent | Reference/LocalizedText target and OD-10 proposal present | Pass with blockers |
 | Firebase Architecture | Proposed | Infrastructure input only | Pass |
 | `apps/backend` | Physically absent | Target plan only | Pass |
 
-## 6. Findings resolved in v0.4.1
+## 6. Findings resolved through v0.4.2
 
 | ID | Finding | Resolution |
 |---|---|---|
@@ -113,13 +114,14 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK01-F02 | §17 could be read as authorizing all domain JSON schemas | Non-Booking paths made conditional on Accepted API-DEC-05 |
 | BCK01-F03 | §28 asked to create BCK-03/BCK-04 after they already existed | Replaced by the actual Review and D1 completion sequence |
 | BCK01-F04 | BCK-02/BCK-03/BCK-04 version traceability had drifted | Reconciled through documentation-only patch revisions |
+| BCK01-F05 | BCK-05/BCK-20 were Planned/Absent | Added Draft specs and coverage matrices; runtime remains Absent |
 
 ## 7. Definition of Ready evidence
 
 | BCK-01 §25 condition | Evidence | State |
 |---|---|---|
 | Anchors exist and links are valid | Automated local-link audit | Pass |
-| BCK-02 reflects BCK-01 status | Registry: Review v0.4.1/Present, runtime Absent | Pass |
+| BCK-02 reflects BCK-01 status | Registry: Review v0.4.2/Present, runtime Absent | Pass |
 | No double writer | §4 writer reconciliation | Pass |
 | LV/EE/LT agrees with roadmap | Latvia first; EE/LT independently disabled | Pass |
 | Open decisions are not called Accepted | §5 status table and BCK-02 OD registry | Pass |
@@ -149,7 +151,7 @@ specialist evidence remain independently gated by BCK-04/BCK-05 and OD-07/11.
 
 ## 9. Review verdict and next action
 
-**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.1 may be
+**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.2 may be
 tracked as `Review`. Next:
 
 1. update BCK-02 registry and LAUNCH_STATUS atomically;
