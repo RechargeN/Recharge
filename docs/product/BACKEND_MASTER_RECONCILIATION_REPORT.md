@@ -1,13 +1,14 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-20**
-- Status: **Draft review evidence — owner confirmation required**
+- Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
 - Accountable owner: **Platform Architecture owner**
+- Review coordinator: **RechargeN / Product owner**
 - Subject: [BCK-01 v0.4.1](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.4](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.5](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MASTER_RECONCILIATION_REPORT.md`
 
 ---
@@ -19,9 +20,11 @@ Architecture Baseline and BCK-02 coordination model. Its module and
 authoritative-writer maps do not contain a confirmed double writer. All local
 anchors exist, 52 AC are sequential, and the revision creates no runtime.
 
-The document **must remain Draft** until named review owners are recorded.
-Role labels in BCK-02 establish accountability categories, but do not prove
-that a person or team accepted the review assignment required by `BCK-01 §25`.
+The Product owner assigned `RechargeN / Product owner` as interim review
+coordinator across all perspectives required by `BCK-01 §25`. This closes the
+procedural blocker for entry into `Review`; it does not constitute independent
+specialist approval and cannot authorize BCK-01 Approval, G1, provisioning or
+runtime.
 
 ## 2. Evidence scope
 
@@ -30,10 +33,10 @@ normative sections:
 
 - `AGENTS.md` and `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - Accepted ADR 0012, 0013, 0015, 0016, 0017, 0018 and 0019;
-- BCK-02 v2.4.4 registry, ownership, §14 template, §15 reconciliation, gates
+- BCK-02 v2.4.5 registry, ownership, §14 template, §15 reconciliation, gates
   and next-package rules;
-- BCK-03 v0.2.2 and API Contracts Workflow;
-- BCK-04 v0.4.1 and coverage matrix v0.3.1;
+- BCK-03 v0.2.3 and API Contracts Workflow;
+- BCK-04 v0.4.2 and coverage matrix v0.3.2;
 - BCK-09 v1.0 Review contract and ECL-03B/C anchors;
 - BCK-02-A1 v1.0 Draft Latvia/Baltics roadmap;
 - LAUNCH_STATUS current tracked facts.
@@ -92,10 +95,10 @@ must be repeated and refined by their owning BCK spec before schema approval.
 
 | Anchor | Repository fact | BCK-01 treatment | Result |
 |---|---|---|---|
-| BCK-02 | Approved v2.4 semantics; v2.4.4 traceability | Coordination authority only | Pass |
+| BCK-02 | Approved v2.4 semantics; v2.4.5 traceability | Coordination authority only | Pass |
 | BCK-02-A1 | Draft v1.0, documentation only | Baltic rollout input, not Accepted authority | Pass |
-| BCK-03 | Draft v0.2.2, runtime Absent | API detail delegated; conflict remains explicit | Pass with blocker |
-| BCK-04 | Draft v0.4.1, runtime Absent | Security/privacy detail delegated | Pass with blockers |
+| BCK-03 | Draft v0.2.3, runtime Absent | API detail delegated; conflict remains explicit | Pass with blocker |
+| BCK-04 | Draft v0.4.2, runtime Absent | Security/privacy detail delegated | Pass with blockers |
 | BCK-05 | Planned/Absent | Operations ownership reserved | Pass; required for G1 |
 | BCK-09 | Review v1.0, runtime Absent | Stricter Booking rules preserved | Pass |
 | BCK-20 | Planned/Absent | Reference ownership reserved | Pass; required for G1 |
@@ -116,39 +119,40 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK-01 §25 condition | Evidence | State |
 |---|---|---|
 | Anchors exist and links are valid | Automated local-link audit | Pass |
-| BCK-02 reflects BCK-01 status | Registry: Draft v0.4.1/Present, runtime Absent | Pass |
+| BCK-02 reflects BCK-01 status | Registry: Review v0.4.1/Present, runtime Absent | Pass |
 | No double writer | §4 writer reconciliation | Pass |
 | LV/EE/LT agrees with roadmap | Latvia first; EE/LT independently disabled | Pass |
 | Open decisions are not called Accepted | §5 status table and BCK-02 OD registry | Pass |
-| Review owners appointed | Roles exist; named assignment evidence absent | **Blocked** |
+| Review owners appointed | RechargeN / Product owner accepted interim combined coordination on 2026-08-20 | Pass for Review entry |
 | Conflicts recorded | BCK-03 idempotency and BCK-04 blockers linked | Pass |
 | Diff is documentation-only | Git scope + boundary/diff evidence | Pass |
 | Runtime remains Absent | No `apps/backend`/Firebase/runtime files | Pass |
 
-## 8. Required owner confirmation
+## 8. Recorded owner confirmation
 
-Before changing `Spec status` from Draft to Review, record a real assignee or
-team plus acknowledgement for each required perspective:
+Product owner instruction dated 2026-08-20 assigns `RechargeN / Product owner`
+as interim coordinator for the following review perspectives:
 
 | Review perspective | Required acknowledgement | Current evidence |
 |---|---|---|
-| Platform Architecture | Owns BCK-01 target and reconciliation | Role only — pending |
-| API Platform | Accepts delegation to BCK-03 | Role only — pending |
-| Security/Privacy | Accepts delegation to BCK-04 | Role only — pending |
-| Platform Operations | Accepts BCK-05 ownership and G1 dependency | Role only — pending |
-| Identity | Confirms ADR 0015/BCK-06 boundary | Role only — pending |
-| Mobile Architecture | Confirms adapter/import boundary | Role only — pending |
-| Booking, Content/Discover, Planning/Route domain owners | Confirm writer split for applicable domains | Roles only — pending |
+| Platform Architecture | Owns BCK-01 target and reconciliation | RechargeN / Product owner — acknowledged for Review |
+| API Platform | Accepts delegation to BCK-03 | RechargeN / Product owner — acknowledged for Review |
+| Security/Privacy | Accepts delegation to BCK-04 | RechargeN / Product owner — interim only; specialist Approval still required |
+| Platform Operations | Accepts BCK-05 ownership and G1 dependency | RechargeN / Product owner — interim only; operational Approval still required |
+| Identity | Confirms ADR 0015/BCK-06 boundary | RechargeN / Product owner — acknowledged for Review |
+| Mobile Architecture | Confirms adapter/import boundary | RechargeN / Product owner — acknowledged for Review |
+| Booking, Content/Discover, Planning/Route domain owners | Confirm writer split for applicable domains | RechargeN / Product owner — acknowledged for Review |
 
-The acknowledgement may live in a repository-owned review record or approved
-PR review. A document mentioning a role is not self-approval.
+This combined assignment is a repository-owned Review-entry record. Before
+`Approved`/G1, Security/Privacy, Legal and Operations decisions that require
+specialist evidence remain independently gated by BCK-04/BCK-05 and OD-07/11.
 
 ## 9. Review verdict and next action
 
-**Verdict: structurally ready, procedurally blocked.** BCK-01 v0.4.1 should
-remain Draft until §8 has owner evidence. After that evidence:
+**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.1 may be
+tracked as `Review`. Next:
 
-1. change BCK-01 to `Review` without changing architecture semantics;
-2. update BCK-02 registry and LAUNCH_STATUS atomically;
-3. continue BCK-03/BCK-04 blocker closure and create BCK-05/BCK-20;
+1. update BCK-02 registry and LAUNCH_STATUS atomically;
+2. continue BCK-03/BCK-04 blocker closure and create BCK-05/BCK-20;
+3. obtain independent specialist evidence required for Approval/G1;
 4. keep G1, provisioning and runtime unauthorized.
