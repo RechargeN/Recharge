@@ -1,17 +1,17 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4**
-- Date: **2026-08-16**
+- Version: **0.4.1**
+- Date: **2026-08-20**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.3](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.2.1](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
+- Parent architecture: [BCK-01 v0.4.1](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.4](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.2.2](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.0](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.1
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
 - Runtime effect of this revision: **none**
@@ -19,6 +19,13 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.1 — 2026-08-20
+
+- documentation-only traceability updated to BCK-01 v0.4.1,
+  BCK-02 v2.4.4, BCK-03 v0.2.2 and coverage matrix v0.3.1;
+- security/privacy semantics, 45 AC, 14 Open Decisions, Draft/Absent status
+  and runtime effect are unchanged.
 
 ### v0.4 — 2026-08-16
 
@@ -1165,7 +1172,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4:
+executable slice, согласованный с BCK-01 v0.4.1:
 
 ```text
 docs/runbooks/
@@ -1233,7 +1240,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.2.1.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.2.2.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1274,7 +1281,7 @@ Client input schema для `actorContext` намеренно отсутству�
 | Security tabletop/incident drill | SEV path, Article 33/34 assessment, contacts, clocks, evidence | Quarterly по RUN-01/RUN-06 registry |
 | Legal/Privacy review | §17 per-market review завершён до release | Per market, до G1/G3 |
 
-Ни одна строка этой таблицы не имеет пройденного runtime evidence в v0.4 —
+Ни одна строка этой таблицы не имеет пройденного runtime evidence в v0.4.1 —
 таблица
 фиксирует **что** будет проверяться, не заявляет прохождение.
 
@@ -1283,7 +1290,7 @@ Client input schema для `actorContext` намеренно отсутству�
 ### 30.1 Definition of Ready для BCK-04 Review
 
 - `BCK-01` переведён в `Review` (шаг 1 формальной последовательности,
-  зафиксированной владельцем — на момент v0.4 ещё не выполнен);
+  зафиксированной владельцем — на момент v0.4.1 ещё не выполнен);
 - coverage matrix подтверждена актуальной;
 - Security/Privacy owner — конкретный человек или команда, формально
   назначенный на роль accountable owner этого документа. Header уже
@@ -1428,7 +1435,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4 отсутствует:
+На момент v0.4.1 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

@@ -1,13 +1,13 @@
 # BCK-04 — Security & Privacy Coverage Matrix
 
 - ID: **BCK-04-PRE**
-- Version: **0.3**
-- Date: **2026-08-16**
+- Version: **0.3.1**
+- Date: **2026-08-20**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Security/Privacy owner**
-- Target document: [BCK-04 v0.4](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.3](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target document: [BCK-04 v0.4.1](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.4](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md`
 
 ---
@@ -20,18 +20,21 @@
 решения и не разрешает создание `apps/backend`, Firebase resources,
 credentials, production data processing или любой runtime-код.
 
+Revision v0.3.1 updates documentation traceability only; coverage,
+blockers, semantics and runtime authority are unchanged.
+
 ## 1. Проверенный baseline
 
 | Источник | Фактический статус в tracked checkout | Роль в reconciliation |
 |---|---|---|
 | Accepted ADR 0013, 0015, 0019 | Accepted | Непереопределяемые identity, capability и Booking authority invariants |
-| BCK-01 | Draft v0.4, Present; runtime Absent | Parent backend architecture и cross-cutting invariants |
-| BCK-02 | Approved v2.4.3; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
-| BCK-03 | Draft v0.2.1, Present; runtime Absent | API envelope/versioning/idempotency input, ещё не Accepted |
+| BCK-01 | Draft v0.4.1, Present; runtime Absent | Parent backend architecture и cross-cutting invariants |
+| BCK-02 | Approved v2.4.4; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
+| BCK-03 | Draft v0.2.2, Present; runtime Absent | API envelope/versioning/idempotency input, ещё не Accepted |
 | BCK-09 | Review v1.0; runtime Absent | Booking-specific transaction/security input, ещё не Approved |
 | Identity/Publisher spec | Approved v1.3, bounded local/mock scope | Identity semantics; не production authority |
 | Firebase Architecture | Proposed v2.2 | Proposed input only; не наследуется как settled решение |
-| BCK-04 | Draft v0.4; runtime Absent | Единственный target security/privacy contract |
+| BCK-04 | Draft v0.4.1; runtime Absent | Единственный target security/privacy contract |
 
 Версии в этой таблице являются repository facts на дату ревизии. Изменение
 статуса источника требует обновить BCK-02 и перепроверить BCK-04; оно не
@@ -39,7 +42,7 @@ credentials, production data processing или любой runtime-код.
 
 ## 2. Coverage matrix — 22 обязательных пункта
 
-| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4 | Evidence / остаток |
+| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.1 | Evidence / остаток |
 |---:|---|---|---|
 | 1 | ID/version/date/status/runtime/owner | Полное | Header |
 | 2 | Parent sources, anchors, conflict priority | Полное | §3; Accepted ADR выше Draft/Proposed inputs |
@@ -105,7 +108,7 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 ## 4. Decision/status reconciliation
 
-| Объект | Статус для BCK-04 v0.4 | Что запрещено утверждать |
+| Объект | Статус для BCK-04 v0.4.1 | Что запрещено утверждать |
 |---|---|---|
 | ADR 0013/0015/0019 | Accepted | Что BCK-04 может изменить их инварианты |
 | D05 Booking authoritative source | Accepted decision package input | Что BCK-04 создаёт новую Booking authority |
@@ -142,6 +145,6 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 ## 7. Итог
 
-BCK-04 v0.4 структурно покрывает обязательный template и готов к предметному
+BCK-04 v0.4.1 структурно покрывает обязательный template и готов к предметному
 architecture/legal review после устранения §5 blockers. Физическая реализация,
 provisioning и production processing по-прежнему не разрешены.
