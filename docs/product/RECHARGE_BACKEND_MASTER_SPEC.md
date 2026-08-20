@@ -1,8 +1,8 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.3**
-- Date: **2026-08-14**
+- Version: **0.4**
+- Date: **2026-08-16**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Platform Architecture owner**
@@ -13,6 +13,14 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4 — 2026-08-16
+
+- reconciled internal §8/§17 gap: `Privacy Orchestration`, already owned by
+  BCK-04 in bounded-module and authoritative-ownership tables, is now present
+  in the target `modules/privacy_orchestration/` map;
+- target root transport explicitly includes common middleware;
+- documentation/runtime effect remains none.
 
 ### v0.3 — 2026-08-14
 
@@ -609,6 +617,7 @@ apps/backend/
         flags/
       modules/
         identity/
+        privacy_orchestration/
         reference_data/
         content/
         discover/
@@ -622,6 +631,7 @@ apps/backend/
         trust_safety/
         analytics/
       transport/
+        middleware/
         callable/
         http/
       workers/
@@ -864,13 +874,13 @@ Rollback имеет три разных уровня:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.3
+## 25. Definition of Done BCK-01 v0.4
 
 BCK-01 может перейти из Draft в Review, когда:
 
 - все anchors существуют и ссылки валидны;
 - BCK-02 registry обновлён с `BCK-01 Planned/Absent` на фактический
-  `Draft v0.3/Present, runtime Absent`, а ownership reconciliation не содержит
+  `Draft v0.4/Present, runtime Absent`, а ownership reconciliation не содержит
   двойных writers;
 - target layers/modules не создают второго writer;
 - LV/EE/LT boundary согласована с roadmap;
@@ -974,7 +984,7 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.3 не реализованы:
+На дату v0.4 не реализованы:
 
 - physical `apps/backend` application;
 - Firebase projects/resources/configuration;
