@@ -1,19 +1,53 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.2.4**
+- Version: **0.3.3**
 - Date: **2026-08-20**
 - Spec status: **Draft — review required**
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.2](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.3 — 2026-08-20
+
+- recorded `RechargeN / Product owner` as the combined D1 API/Operations/
+  Security/Mobile reviewer identity with verdicts still Pending;
+- assignment is not treated as review completion, Approval or runtime authority;
+- API semantics, 64 stable AC, Draft status and runtime Absent are unchanged.
+
+### v0.3.2 — 2026-08-20
+
+- removed the D1→D2 circularity: BCK-03 Review requires a named Mobile
+  Platform review of the delegated boundary, not a pre-existing BCK-18 file;
+- added explicit DoR current state and the D1 owner sign-off ledger;
+- clarified disposition of API-DEC-01–05 and aligned current-version wording;
+- semantics, 64 stable AC, Draft status and runtime Absent are unchanged.
+
+### v0.3.1 — 2026-08-20
+
+- linked the D1 OD-09 review evidence package with Booking compatibility and
+  duplicate/gap/poison/replay matrices;
+- the event/outbox proposal and 64 AC are unchanged; OD-09 remains Proposed
+  pending cross-owner acceptance and no worker/runtime is authorized;
+- parent/coordination traceability updated to BCK-01 v0.4.4/BCK-02 v2.4.8.
+
+### v0.3 — 2026-08-20
+
+- accepted D1-DEC-01/ECL03-D11 reconciles Booking v1 request correlation and
+  logical idempotency identity without changing schema or fixtures;
+- effective deduplication is now `(resolved actor, command type,
+  idempotencyKey)`; retries may carry a new `requestId` only with the original
+  key and semantic payload;
+- BCK-09 v1.1, ECL-03 v1.2 and ECL-03C v1.1 now use the same split-key
+  semantics; the former fixture contradiction is closed;
+- OD-07/09/10/11 statuses remain unchanged and runtime remains Absent.
 
 ### v0.2.4 — 2026-08-20
 
@@ -89,7 +123,7 @@ authorized canonical contract source + fixtures
 Firestore documents, Firebase SDK objects, Dart domain entities и TypeScript
 implementation classes не являются wire contract source.
 
-На дату v0.2.4 ADR 0019 разрешает language-neutral JSON Schema source только для
+На дату v0.3 ADR 0019 разрешает language-neutral JSON Schema source только для
 Booking. Для остальных domains действующий API Contracts Workflow сохраняет
 Dart-only source, пока отдельный Accepted architecture authorization явно не
 расширит cross-language schema policy.
@@ -104,7 +138,7 @@ rule` означает предлагаемое normative правило, а н�
 |---|---|---|---|
 | BCK03-RQ-01 | Как разделены command, query, webhook и internal event? | Draft rule: разные profiles, один common standard | §11, §15, §18, §24, §27 |
 | BCK03-RQ-02 | Какие version axes независимы? | Draft rule: contract/API/schema/package/resource/policy/client не смешиваются | §6, §25–26 |
-| BCK03-RQ-03 | Как связан idempotency key с request ID? | Draft mobile v1 rule: `idempotencyKey == requestId` | §12, §15–16 |
+| BCK03-RQ-03 | Как связан idempotency key с request ID? | Accepted D1 rule: separate roles; equality optional | §12, §15–16, §34 |
 | BCK03-RQ-04 | Как вычисляется canonical request hash? | Semantic inputs fixed; exact algorithm/version Open in API-DEC-03 | §16, §40 |
 | BCK03-RQ-05 | Что означает mutation timeout? | Draft rule: unknown outcome; retry exact same key/payload | §21 |
 | BCK03-RQ-06 | Как различаются success, cancelled и failure? | Draft rule: three outcomes; error only for failure | §13–14 |
@@ -152,14 +186,15 @@ rule` означает предлагаемое normative правило, а н�
 | API workflow | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Не создавать второй source/codegen/change workflow |
 | Identity | [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Client identity/capability claims не authoritative |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
-| Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
+| Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
-| Reference data | BCK-20 v0.1 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
-| Security/privacy | BCK-04 v0.4.3 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |
-| Operations | BCK-05 v0.1 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
+| Reference data | BCK-20 v0.2.2 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
+| Security/privacy | BCK-04 v0.4.10 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |
+| Operations | BCK-05 v0.2.12 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
 | Mobile boundary | BCK-18 planned | Не импортировать Firebase schema/SDK в domain/presentation |
 
-Конфликт с Booking v1 блокирует BCK-03 Review до compatibility decision;
+Booking v1 split-key compatibility decision принят в
+[BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) и ECL03-D11;
 Booking v1 не переписывается молча под новый common envelope.
 
 ### 3.1. BCK-02 section-completeness reconciliation
@@ -199,7 +234,7 @@ evidence of completion.
 
 | Area | Current evidence | Gap | Required response |
 |---|---|---|---|
-| Package | `packages/api_contracts` существует | Нет platform-wide contract registry | Определить target registry, не создавать runtime в v0.2.4 |
+| Package | `packages/api_contracts` существует | Нет platform-wide contract registry | Определить target registry, не создавать runtime в v0.3 |
 | Language-neutral schema | `schema/booking/v1/*.schema.json` | Только Booking namespace | Расширять `schema/<domain>/vN` по Approved domain specs |
 | JSON Schema | Draft 2020-12, `$id`, `$defs`, bounded fields | Нет общего cross-domain convention | Зафиксировать в §9 |
 | Fixtures | valid/invalid/forward Booking fixtures | Нет общей fixture taxonomy | Определить в §36–37 |
@@ -490,6 +525,9 @@ Target platform context:
 Rules:
 
 - `requestId` обязателен и client-generated для mobile command/query;
+- каждый новый attempt использует свежий `requestId`; обнаруженное повторное
+  использование одного request ID с другим logical key/semantic command даёт
+  `invalid_argument` без mutation;
 - `contractVersion` выбирает platform envelope major, не domain payload version;
 - client metadata bounded и не используется как authorization grant;
 - Auth UID, session, App Check result, capabilities, IP/risk signals и service
@@ -606,7 +644,10 @@ Rules:
 
 - mutation только command, не query side effect;
 - command type/version registered и owned одним domain;
-- client v1: `idempotencyKey == requestId`; mismatch → `invalid_argument`;
+- `requestId` коррелирует одну попытку, `idempotencyKey` идентифицирует одну
+  logical mutation; equality допустима, но не обязательна;
+- retry сохраняет исходный `idempotencyKey` и semantic payload, но может иметь
+  новый свежий `requestId`;
 - create имеет permanent client-generated ID, если domain contract это
   принимает, иначе server returns mapping; `loc_*` authority запрещена;
 - update/delete/state transition несёт `expectedRevision`, если aggregate
@@ -638,7 +679,8 @@ spec; client key не заменяет verified provider event identity.
 - hash строится после schema normalization над command type/version, actor
   scope и canonical payload;
 - map keys sorted, absent/null различимы, timestamps/money normalized;
-- Auth token, volatile transport headers, correlation ID и retry count не входят;
+- Auth token, volatile transport headers, correlation ID, `requestId` и retry
+  count не входят в semantic hash;
 - algorithm/version фиксируется executable API tooling plan.
 
 ### 16.3. Replay outcomes
@@ -654,6 +696,12 @@ spec; client key не заменяет verified provider event identity.
 Idempotency retention belongs to domain/BCK-04/BCK-05. BCK-03 не задаёт
 универсальный срок, но запрещает удалять evidence раньше maximum safe retry/
 unknown-outcome window.
+
+`Return original committed result` означает тот же semantic outcome, resource
+identity и authoritative revision, но не повтор старого transport envelope:
+response echo использует `requestId` текущей попытки, а attempt correlation
+metadata может быть новой. Это сохраняет §13 request matching и не создаёт
+вторую domain mutation.
 
 ## 17. Optimistic concurrency and revisions
 
@@ -904,7 +952,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.2.4: **Proposed — not Accepted**
+- Status in BCK-03 v0.3.3: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -952,6 +1000,11 @@ Rules:
 - deleted/redacted source references follow approved privacy policy.
 
 ### 27.3. Acceptance evidence still required
+
+The review worksheet is
+[BCK-D1-OD09-EV-01](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md). It reconciles
+the proposal with Booking obligations and enumerates the required failure and
+owner evidence; it does not accept OD-09.
 
 - BCK-05 transport comparison, regions, retry/DLQ, cost and operations;
 - BCK-04 data classes, retention, deletion and audit review;
@@ -1110,7 +1163,7 @@ Factual compatibility delta:
 | `booking_result.kind`: Booking-specific outcome union | Common `success/cancelled/failure` envelope | Preserve v1; use explicit adapter or a separately approved new major, never double-wrap silently |
 | Booking-specific error names and result kinds | Common code plus namespaced `domainCode` | Maintain tested mapping; no in-place rename in this documentation slice |
 | `common.schema.json` is inside `booking/v1` | Conditional future platform primitives | Do not move or duplicate it until API-DEC-05 closes through Accepted architecture authorization |
-| `requestId` and idempotency semantics are fixture-verified | Mobile v1 requires `idempotencyKey == requestId` | Preserve equality; a split-key model requires a future explicit version/reconciliation |
+| `requestId` and `idempotencyKey` are separate required fields and valid fixtures use distinct values | Accepted D1-DEC-01/ECL03-D11 split-key semantics | Preserve both fields; request ID is attempt correlation, idempotency key is logical-mutation identity; equality remains valid but optional |
 | Fixtures are `valid`, `invalid`, `forward` | Target adds broader compatibility/behavior evidence | Add only through an Approved executable contract change; missing fixture is a gap, not runtime failure |
 | Dart DTO/validator evidence exists | Future Dart/TypeScript parity | TypeScript consumer remains target-only until backend/tooling authorization |
 | `applicationFields` permits an open object | Production payloads must be bounded/classified | Define a bounded domain schema before production use; do not treat openness as authority |
@@ -1122,12 +1175,14 @@ Rules:
    remain authoritative for existing fixture tests.
 3. Platform envelope adoption is staged via adapter/fixture reconciliation;
    Booking v1 is not wrapped twice on wire without explicit version.
-4. Conflict produces mapping plan or new Booking schema major.
+4. Split-key reconciliation requires no Booking schema major or fixture rewrite;
+   equal-value callers remain compatible.
 5. Dart DTO tests remain green.
 6. Future TypeScript validators consume same fixture semantics.
 7. `applicationFields` requires bounded domain schema before production usage;
    existing open object is not permission for arbitrary sensitive payload.
-8. BCK-09 Approval requires reconciliation report against accepted BCK-03.
+8. BCK-09 v1.1 is reconciled through BCK-D1-DEC-01; executable parity evidence
+   remains required before runtime.
 
 ## 35. Target artifact and file map
 
@@ -1165,7 +1220,8 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No file in this map is created by BCK-03 v0.2.4 except this Markdown spec.
+No runtime/schema file in this map is created by BCK-03 v0.3.3; this revision
+adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
 
@@ -1232,11 +1288,11 @@ Mandatory backend-gate applicability:
 
 | Gate family | BCK-03 applicability |
 |---|---|
-| Emulator | Required when a transport/idempotency/event executable slice exists; not applicable to docs-only v0.2.4 |
+| Emulator | Required when a transport/idempotency/event executable slice exists; not applicable to docs-only v0.3 |
 | Firestore/Storage Rules | Negative direct-access tests belong to BCK-04/domain runtime; BCK-03 verifies no Rules shape leaks into API |
 | Security | Required for claims, enumeration, payload bounds, malformed schemas and rate outcomes |
 | Load/soak | Required before production for validation, pagination, idempotency and event throughput; values owned by BCK-05 |
-| Backup/DR | Contract artifacts must be reproducibly rebuilt; data restore belongs to BCK-05/domain and is not applicable to docs-only v0.2.4 |
+| Backup/DR | Contract artifacts must be reproducibly rebuilt; data restore belongs to BCK-05/domain and is not applicable to docs-only v0.3 |
 | Reconciliation | Required for Booking v1 adoption, event gaps/replay and old/new consumer compatibility |
 
 Timeout, skipped consumer, hand-checked JSON or successful compile alone is
@@ -1279,10 +1335,11 @@ Rollback:
 - event producer/consumer compatibility checked before rollback;
 - contract/package rollback and data rollback are separate.
 
-## 40. Open decisions and owners
+## 40. Decision register and owners
 
 | ID | Status | Owner | Decision | Blocks |
 |---|---|---|---|---|
+| D1-DEC-01 / ECL03-D11 | Accepted | Product owner decision; API Platform + Booking affected owners | Separate request correlation from logical idempotency identity | Closed; executable parity remains gated |
 | OD-09 | Proposed in §27 | API Platform + Operations | Event transport, ordering, dedupe, replay, poison, retention | D3 effects/workers |
 | API-DEC-01 | Open | API Platform + BCK-05 | Exact mobile transport mapping: callable/HTTPS profiles and deadlines | Executable API scaffold |
 | API-DEC-02 | Open | API Platform | Generator versus fixture-verified consumers per language/contract | Codegen/tooling slice |
@@ -1308,15 +1365,21 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.6 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
+- BCK-02 v2.4.21 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
-- BCK-09 compatibility conflicts listed;
-- BCK-04/05/18 owners review their delegated boundaries;
+- BCK-09 compatibility decision and evidence listed;
+- BCK-04 Security/Privacy, BCK-05 Operations and a named Mobile Platform owner
+  review their delegated boundaries; this does not require the D2 BCK-18 file
+  to exist before D1 completes;
 - OD-09 remains explicitly Proposed with named acceptance owners;
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.2.4 status: **Draft; not yet Review**.
+Current v0.3.3 readiness: reviewer identity is assigned for the required
+API/Operations/Security/Mobile perspectives in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md), with an explicit
+single-owner independence disclosure. Every verdict remains Pending, so the
+delegated reviews are not complete and status remains **Draft**.
 
 ## 42. Definition of Done BCK-03
 
@@ -1328,8 +1391,11 @@ Approval requires:
 - Booking v1 compatibility report accepted;
 - BCK-04 Security/Privacy boundary review has no blocker;
 - BCK-05 Operations boundary review has no blocker;
-- BCK-18 Mobile boundary review has no blocker;
-- API-DEC-02/03 accepted before corresponding tooling/runtime;
+- named Mobile Platform boundary review has no blocker; BCK-18 remains a D2
+  specification and is not a circular D1 prerequisite;
+- API-DEC-01–05 have an explicit disposition (`Accepted` or `Deferred` with
+  owner, reason, review date and preserved gate); API-DEC-02/03 must be
+  Accepted before their corresponding tooling/runtime activates;
 - OD-09 at least Proposed for D1 exit and Accepted before D3 effects/workers;
 - 64 AC reviewable and sequential;
 - runtime remains Absent.
@@ -1367,8 +1433,10 @@ it does not mean schemas/code/backend deployed.
 21. **BCK-03-AC-21:** domain errors extend but do not redefine common codes.
 22. **BCK-03-AC-22:** security errors prevent resource enumeration.
 23. **BCK-03-AC-23:** every mutation is a registered versioned command.
-24. **BCK-03-AC-24:** mobile command v1 uses request ID as idempotency key.
-25. **BCK-03-AC-25:** same key/hash returns original committed result.
+24. **BCK-03-AC-24:** command v1 keeps request-attempt correlation separate
+    from logical idempotency identity; equal and distinct values are valid.
+25. **BCK-03-AC-25:** same key/hash returns the original committed semantic
+    outcome in a response envelope that echoes the current attempt request ID.
 26. **BCK-03-AC-26:** same key/different hash returns idempotency conflict.
 27. **BCK-03-AC-27:** command success follows durable commit only.
 28. **BCK-03-AC-28:** concurrent update uses expected resource revision.
@@ -1409,14 +1477,14 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.2.4 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.3.3 leaves backend/Firebase/mobile runtime unchanged.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.2.4 the following remain absent:
+At v0.3.3 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1437,21 +1505,19 @@ BCK-03 does not claim them as general backend runtime.
 
 Before BCK-03 Review:
 
-1. move BCK-01 to Review after its reconciliation/sign-off;
-2. verify BCK-02 v2.4.6 registry status;
-3. review BCK-04 v0.4.3, BCK-05 v0.1 and BCK-20 v0.1
-   coverage/blockers;
-4. obtain named review from BCK-04/05/18 and Booking owners;
-5. produce Booking v1 compatibility report;
-6. develop evidence proposals for API-DEC-01–05;
-7. keep OD-09 Proposed and all effects disabled until acceptance.
+1. complete D1-SIG-API/OPS/SEC/MOBILE bounded reviews under the recorded
+   combined-role disclosure without requiring the D2 BCK-18 artifact;
+2. develop evidence proposals for API-DEC-01–05;
+3. verify the accepted split-key contract in a future Approved executable
+   fixture/parity slice without changing current wire shape;
+4. keep OD-09 Proposed and all effects disabled until acceptance.
 
 Only an independent Approved executable slice may later create schemas,
 generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.2.4 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.3 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

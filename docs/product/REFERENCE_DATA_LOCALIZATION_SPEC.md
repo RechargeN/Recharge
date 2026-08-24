@@ -1,16 +1,16 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.1**
+- Version: **0.2.2**
 - Date: **2026-08-20**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.2](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.2.4](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Operations boundary: [BCK-05 v0.1](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
+- Operations boundary: [BCK-05 v0.2.12](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
 - Delivery annex: [BCK-02-A1 v1.0](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Runtime effect: **none**
@@ -19,6 +19,37 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.2 — 2026-08-20
+
+- recorded the combined Reference Data/Localization/API/Mobile/Content/Legal
+  assignments;
+- retained Pending verdicts and the qualified Legal evidence boundary;
+- reference/localization semantics, 50 stable AC, Draft status and runtime
+  Absent are unchanged.
+
+### v0.2.1 — 2026-08-20
+
+- separated owner-approved OD-10 documentation vectors from future executable
+  schema/fixture parity gated by API-DEC-05 and an executable slice;
+- added explicit DoR current state and D1 owner sign-off ledger;
+- reference/localization semantics, Category System 28/530 integrity, 50 stable
+  AC, Draft status and runtime Absent are unchanged.
+
+### v0.2 — 2026-08-20
+
+- added BCK-D1-OD10-EV-01 with deterministic resolution output, LV exact/
+  fallback/missing/forbidden vectors, EE/LT isolation and invalid cases;
+- separated documentation fixtures from future executable schema/tooling and
+  preserved Category System v1.4.3 identity/28/530 integrity;
+- OD-10 remains Proposed pending named owner review; runtime remains Absent.
+
+### v0.1.1 — 2026-08-20
+
+- synchronized with BCK-D1-DEC-01 and BCK-03 v0.3;
+- OD-10 remains Proposed and is not promoted without LV/EE/LT fixtures and
+  Reference/API/Content/Mobile/Legal evidence;
+- no taxonomy, schema, dataset, mobile adapter or runtime behavior changed.
 
 ### v0.1 — 2026-08-20
 
@@ -511,9 +542,14 @@ Status is **Proposed — not Accepted**. Acceptance requires API Platform,
 Reference Data, Product Localization, Content, Mobile and Legal review,
 fixtures for LV/EE/LT and explicit migration/rollback evidence.
 
+The review vectors and owner checklist are maintained in
+[BCK-D1-OD10-EV-01](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md). They make the
+proposal testable on paper but do not constitute Accepted or executable
+fixtures.
+
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.1:
+Future targets, absent and unauthorized in v0.2.2:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -597,11 +633,18 @@ must record owner, evidence, decision date, migration and rollback.
 - no schema/runtime/distribution/mobile implementation is created;
 - all Open Decisions have owner/gate/fail-closed default.
 
+Current readiness: Reference Data/Product Localization and delegated API/
+Content/Mobile/Legal roles are assigned to the combined owner in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). All verdicts and
+qualified Legal evidence remain absent, so BCK-20 remains Draft.
+
 ## 26. Definition of Done for Approved BCK-20
 
 - BCK-03, BCK-04 and BCK-05 applicable boundaries are ready and
   Approved/reconciled atomically as the D1 platform set;
-- OD-10 is Accepted with LV/EE/LT fixtures and migration/rollback evidence;
+- OD-10 is Accepted with approved expected results for the LV/EE/LT
+  documentation vectors and migration/rollback evidence; executable
+  schema/fixture parity remains gated by API-DEC-05 and a later Approved slice;
 - Category System 28/530 integrity and legacy migration fixtures pass;
 - market/locale/currency/timezone/service-area/policy references are versioned;
 - LocalizedText, fallback, missing and content-language rules are exact;
@@ -661,14 +704,14 @@ must record owner, evidence, decision date, migration and rollback.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.1 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.2 creates no backend/schema/mobile/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.1 the following remain absent:
+At v0.2.2 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;

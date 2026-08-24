@@ -1,8 +1,8 @@
-# ECL-03 — Decision package D01–D10
+# ECL-03 — Decision package D01–D11
 
-- Версия: 1.1
-- Дата: 2026-08-08
-- Статус: **Accepted — normative D01–D10 product/architecture decisions**
+- Версия: 1.2
+- Дата: 2026-08-20
+- Статус: **Accepted — normative D01–D11 product/architecture decisions**
 - Parent spec:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - Architecture proposal:
@@ -11,7 +11,7 @@
 
 ## 1. Назначение
 
-Этот пакет фиксирует принятые значения ECL03-D01–D10. Parent spec включает
+Этот пакет фиксирует принятые значения ECL03-D01–D11. Parent spec включает
 его по ссылке как normative contract, ADR 0019 имеет статус Accepted. Принятие
 не включает runtime/deployment: production activation остаётся за Identity,
 Privacy/Legal, Platform, notification и operations gates.
@@ -33,6 +33,7 @@ Booking, минимального operational риска и честного fai
 | `ECL03-D08` | Launch with general-capacity pools only, including channel/auxiliary pools; complex shapes remain config-only | Accepted |
 | `ECL03-D09` | 99.9% command availability target, p95 command 1.5s, zero oversell, one-minute worker targets, mandatory contention tests | Accepted |
 | `ECL03-D10` | Audited backend-only repair; two-person approval for allocation/state repair; no direct document editing | Accepted |
+| `ECL03-D11` | `requestId` is request correlation; `idempotencyKey` is logical-mutation identity; equality is optional | Accepted; runtime remains gated |
 
 ## 3. D01 — Backend topology
 
@@ -188,8 +189,10 @@ Rules:
   by Privacy/Legal before production;
 - changing retention is a versioned policy migration, not a console-only edit.
 
-These values are product recommendations, not legal advice. D04 remains open
-until Privacy/Legal/Product approve the exact table and backup behavior.
+These values are an Accepted product-policy baseline, not legal advice or
+production-processing authority. Privacy/Legal validation of the exact table,
+backup propagation and exceptional holds remains an activation gate; it does
+not change D04 back to Open.
 
 ## 7. D05 — Notification and reconfirmation delivery
 
@@ -405,9 +408,35 @@ Read-only investigation may use one authorized support actor. Any data export
 or broad participant query requires a separately audited privacy-approved
 workflow.
 
-## 13. Acceptance effect
+## 13. D11 — Booking request and idempotency identity
 
-D01–D10 are accepted exactly as recommended:
+### Accepted decision
+
+Booking command v1 keeps both required fields with different responsibilities:
+
+- `requestId` identifies and correlates one request attempt;
+- `idempotencyKey` identifies one logical mutation across retry attempts;
+- values may be equal, but equality is not required;
+- a retry reuses the original idempotency key and semantic payload, while a
+  transport/application retry may allocate a new request ID;
+- effective deduplication is scoped by resolved actor/service identity,
+  command type and idempotency key;
+- the canonical semantic hash excludes request-only correlation metadata;
+- same effective key/hash returns the stored result; same key/different hash
+  returns `idempotency_conflict` without mutation.
+
+This decision reconciles the Approved parent with committed Booking v1 schema,
+fixtures and DTO behavior. Equal-value callers remain compatible; no wire or
+data migration is required because backend persistence is absent. Exact hash
+canonicalization remains gated by `API-DEC-03` in BCK-03.
+
+The owner decision and compatibility evidence are recorded in
+[BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md). Acceptance does not
+authorize schema edits, generated consumers or Booking runtime.
+
+## 14. Acceptance effect
+
+D01–D11 are accepted exactly as recorded:
 
 1. copy the decisions into parent ECL-03 spec as normative values;
 2. update ADR 0019 from Proposed to Accepted with decision evidence;
@@ -423,10 +452,13 @@ Acceptance of this package does not authorize Firebase deployment,
 production secrets, data collection or ECL-03 runtime by itself. Those actions
 remain bounded by the approved implementation stages and environment gates.
 
-## 14. Acceptance record
+## 15. Acceptance record
 
 The product owner instructed the work to continue on 2026-08-08 immediately
 after the assistant requested explicit acceptance of D01–D10, ADR 0019 and the
 ECL-03 spec. The instruction is recorded as acceptance of the single complete
 recommended package presented in v1.0; v1.1 changes status/record only and does
-not alter the accepted values.
+not alter the accepted values. On 2026-08-20 the Product owner approved the D1
+file plan and explicit split-key recommendation. Version 1.2 records that
+approval as ECL03-D11 and reconciles the existing Booking v1 fixtures without
+authorizing runtime.

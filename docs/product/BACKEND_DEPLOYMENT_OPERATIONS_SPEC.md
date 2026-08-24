@@ -1,16 +1,28 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.1**
-- Date: **2026-08-20**
+- Version: **0.2.13**
+- Date: **2026-08-24**
 - Spec status: **Draft — Platform Operations review required**
-- Runtime status: **Absent**
+- Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.2](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.2.4](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Security/privacy boundary: [BCK-04 v0.4.3](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft)
+- Parent architecture: [BCK-01 v0.4.18](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.22](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
+- Security/privacy boundary: [BCK-04 v0.4.10](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed)
+- Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
+- Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
+- Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.2 (Draft; OD-04 Proposed)
+- Reliability evidence: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) v0.1 (Draft; OD-03 Proposed)
+- Recovery evidence: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) v0.1 (Draft; OD-05 Proposed)
+- Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
+- IAM/workload identity evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.1 (Draft; OD-02 Proposed)
+- Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.1 (Draft; OD-07 Proposed)
+- Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.1 (Draft; OD-01 Proposed)
+- Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.1 (local evidence present; amendments required)
+- Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2 (Approved; local implementation complete; Amendments Required before Pass)
+- R0 approval record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.1 (bounded R0 verdicts Accepted; no production approval)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
 - Infrastructure input: [FIREBASE_ARCHITECTURE v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
 - Delivery annex: [BCK-02-A1 v1.0](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
@@ -20,6 +32,143 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.13 — 2026-08-24
+
+- reconciled the Approved local R0 scaffold and execution evidence without
+  accepting OD-01 or authorizing cloud/product runtime;
+- recorded green local build/emulator/Rules/Terraform/reproducibility results,
+  Pending hosted parity and unresolved Moderate advisory disposition;
+- updated BCK-01/BCK-02 traceability to v0.4.18/v2.4.22.
+
+### v0.2.12 — 2026-08-23
+
+- added exact verified full-SHA identities for the three admitted R0 Actions;
+- rejected the unsigned reviewed Terraform Action and selected signed-archive
+  Terraform 1.15.9 installation with exact Windows/Linux checksums;
+- fixed explicit runner/action inputs and added the formal R0 decision record;
+- retained OD-01 as Proposed, R0 as Review/not Approved, BCK-05 as Draft and
+  runtime as Absent.
+
+### v0.2.11 — 2026-08-23
+
+- added the exact runtime/toolchain technical pre-review and bounded R0
+  toolchain/emulator slice specification with 40 and 52 AC respectively;
+- recorded proposed exact Firebase SDK, lint/format, JDK and test-runner
+  resolutions while keeping compatibility and named owner/security evidence
+  blocked;
+- retained BCK05-OD-01 as Proposed, BCK-R0-TCH-01 as Review/not Approved,
+  BCK-05 as Draft and runtime as Absent; no backend/package/cloud effect exists.
+
+### v0.2.10 — 2026-08-21
+
+- selected a dated Node.js 22/TypeScript/npm/Firebase CLI/Terraform candidate
+  in BCK05-OD01-TCH-01 with deterministic install, build, emulator, IaC,
+  upgrade and 50-AC contracts;
+- advanced `BCK05-OD-01` from Open to Proposed while preserving exact R0
+  compatibility, remaining tool pins, owner/security review and executable
+  evidence as blockers;
+- retained BCK-05 as Draft and runtime as Absent; no backend file, package,
+  workflow, cloud resource or deployment was created.
+
+### v0.2.9 — 2026-08-21
+
+- added complete Draft IAM/workload-identity and release-provenance evidence
+  models with 50 AC each;
+- advanced `BCK05-OD-02` and `BCK05-OD-07` from Open to Proposed while keeping
+  exact permissions, GitHub plan controls, toolchain, provider enforcement and
+  executable evidence blocked;
+- retained OD-07 platform topology as Proposed, BCK-05 as Draft and runtime as
+  Absent; no WIF pool, identity, workflow, artifact or deployment was created.
+
+### v0.2.8 — 2026-08-21
+
+- recorded the Product owner's exact bounded disposition for SLO v0.1, Cost
+  v0.2 and Recovery v0.1 as non-production stage-validation baselines;
+- retained Operations/Security evidence conditions and Inconclusive Finance/
+  Legal scopes without claiming independent specialist review;
+- retained OD-03/04/05 as Proposed, BCK-05 as Draft and runtime as Absent.
+
+### v0.2.7 — 2026-08-21
+
+- completed the exact-version technical owner review of SLO v0.1, cost v0.2
+  and recovery v0.1;
+- corrected retained-backup cost from four to 26 prod full-size equivalents,
+  exposed the L3 guardrail conflict and reconciled reliability/spend,
+  cold-start and soft-delete cost boundaries;
+- retained OD-03/04/05 as Proposed and BCK-05 as Draft; explicit owner,
+  Finance/Legal, stage/restore and runtime evidence remain blocked.
+
+### v0.2.6 — 2026-08-21
+
+- added independent numerical reliability and recovery evidence models with
+  user-journey SLIs/SLOs/error budgets plus record-family RPO/RTO, protection,
+  isolated restore, privacy re-deletion and drill contracts;
+- advanced `BCK05-OD-03` and `BCK05-OD-05` from Open to Proposed; owner verdicts,
+  stage measurement, executable alerts/backups/restores and provisioning remain
+  blocked;
+- BCK-05 remains Draft, OD-07 remains Proposed and runtime remains Absent.
+
+### v0.2.5 — 2026-08-21
+
+- added a dated infrastructure/cost model with reproducible formulas, five
+  workload envelopes, directional provider estimates and proposed EUR budgets;
+- advanced `BCK05-OD-04` from Open to Proposed; Product/Finance/Operations
+  verdict, actual EUR SKU export, stage reconciliation and provisioning remain
+  blocked;
+- OD-07 remains Proposed, BCK-05 remains Draft and runtime remains Absent.
+
+### v0.2.4 — 2026-08-20
+
+- added the ready-but-unexecuted incident tabletop package and its explicit
+  operations checkpoints;
+- `BCK05-OD-08` remains Proposed because real routing, break-glass, executable
+  alert evidence, named exercise participants and a completed result are absent;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.3 — 2026-08-20
+
+- added the shared security/privacy incident response model without creating a
+  second severity vocabulary;
+- advanced `BCK05-OD-08` from Open to Proposed; real routes, break-glass,
+  tabletop and executable alert evidence remain absent;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.2 — 2026-08-20
+
+- recorded the combined Platform Operations/Security/Legal/Finance assignments;
+- retained Pending verdicts and the qualified Legal evidence boundary;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.1 — 2026-08-20
+
+- removed OD-09 `Open/Proposed` ambiguity: its factual status is Proposed;
+- removed the OD-07 evidence/provisioning circularity by separating
+  pre-Acceptance modelled evidence from post-provision synthetic validation;
+- added explicit current DoR state and D1 owner sign-off ledger;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2 — 2026-08-20
+
+- added BCK-D1-OD07-EV-01 with official per-resource location constraints,
+  three candidate topologies and exact latency/cost/residency/IAM/recovery
+  evidence required before acceptance;
+- clarified that new Storage placement is a separate decision from Firestore
+  and that alerts-only budgets do not cap spending;
+- linked OD-09 failure/owner evidence; both decisions retain their existing
+  statuses and no infrastructure/runtime is authorized.
+
+### v0.1.1 — 2026-08-20
+
+- synchronized with BCK-D1-DEC-01, BCK-03 v0.3 and BCK-04 v0.4.4;
+- Booking split-key reconciliation closes the API fixture contradiction without
+  changing OD-07/OD-09 or operations authority;
+- OD-07 remains Proposed, all numeric/IAM/recovery specialist evidence remains
+  open, and runtime remains Absent.
 
 ### v0.1 — 2026-08-20
 
@@ -46,6 +195,8 @@ policy, product analytics, Legal decisions or market/reference semantics.
 This Draft creates no Firebase project, database, bucket, function, service
 account, secret, deployment, backup or production data. OD-07 remains
 `Proposed` until the evidence and named specialist approvals in §26 exist.
+The recorded numerical baseline disposition authorizes only future test design;
+it does not open G1, R0/R1 or any cloud action.
 
 ## 2. Authority and conflict priority
 
@@ -340,7 +491,8 @@ Scheduled/async work is disabled until the owning domain and BCK-05 define:
 - privacy classification and payload minimization.
 
 BCK-05 owns transport operation, not event business meaning. OD-09 remains
-Open/Proposed in BCK-03 until named owners accept a single contract.
+**Proposed — not Accepted** in BCK-03 until named owners accept a single
+contract.
 
 ## 17. Privacy, retention and Legal boundary
 
@@ -386,6 +538,17 @@ reserved facts.
 
 ### 19.2 OD-07 — Proposed decision, not Accepted
 
+The complete comparison and sign-off checklist is
+[BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). Its presence is
+review preparation, not decision acceptance.
+
+OD-07 Acceptance uses dated vendor facts, explicit cost/latency models,
+predeclared thresholds and an approved validation plan; it does not require
+creating cloud resources first. Actual synthetic measurements are collected
+only after G1 and a separately Approved R1 non-production provisioning slice,
+and must pass those thresholds before production traffic. This removes a
+circular dependency without weakening the irreversible-location gate.
+
 **Recommended option A for evidence review:**
 
 - three isolated Firebase/GCP projects: dev, stage, prod;
@@ -409,7 +572,9 @@ Official verification anchors:
 - <https://firebase.google.com/docs/projects/locations>
 - <https://firebase.google.com/docs/firestore/locations>
 - <https://firebase.google.com/docs/functions/locations>
-- <https://firebase.google.com/docs/firestore/editions>
+- <https://cloud.google.com/firestore>
+- <https://cloud.google.com/storage/docs/locations>
+- <https://cloud.google.com/billing/docs/how-to/budgets>
 
 ## 20. CI/CD, release and provenance
 
@@ -446,6 +611,12 @@ Exact production objectives and measurement windows are `BCK05-OD-03`; they
 must be numeric before Approval, based on stage load and cost evidence. Domain
 specs may be stricter, never weaker without explicit reconciliation.
 
+The concrete Draft proposal is
+[BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): 28-day
+journey-scoped availability, latency/freshness/lag targets, zero-tolerance
+invariants, burn alerts and deterministic release policy. `BCK05-OD-03` is
+Proposed; stage measurement and Product/domain/Operations verdicts are absent.
+
 Alerts are actionable: owner, severity, threshold/window, runbook, dedupe,
 escalation and recovery signal are mandatory. Alert presence without tested
 routing is not evidence.
@@ -460,8 +631,11 @@ routing is not evidence.
   invocations and projected monthly cost per critical journey;
 - each optional provider/AI/payment channel has its own budget and kill switch.
 
-Exact EUR budgets are `BCK05-OD-04` and block provisioning/activation for the
-applicable environment.
+The concrete Draft proposal and dated unit-price model are in
+[BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): dev €25, stage €75,
+prod L1 €150 and L2 €500 monthly guardrails, with L3 stress separately
+authorized. `BCK05-OD-04` is Proposed; these numbers block provisioning until
+Product/Finance/Operations verdict and actual EUR SKU reconciliation.
 
 ## 22. Backup, restore and disaster recovery
 
@@ -483,6 +657,11 @@ Required contract:
 - delete/retire procedure only after verified export, observation and owner approval.
 
 Exact RPO/RTO/retention are `BCK05-OD-05`; no invented value is called Accepted.
+The concrete Draft proposal is
+[BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md): record-family recovery
+classes, numerical RPO/safe/full RTO, candidate PITR/backup/Storage protection,
+isolated restore, privacy re-deletion, reconciliation and drills.
+`BCK05-OD-05` is Proposed; no protection or restore runtime exists.
 
 ## 23. Flags, rollout, rollback and emergency disable
 
@@ -507,7 +686,9 @@ bypass mandatory safe exits such as viewing/cancelling already committed state.
 
 ## 24. Exact conditional implementation map
 
-Files below are **future targets**, absent and unauthorized in v0.1:
+The complete product/operations tree below remains a **future target**. Its
+small R0-owned subset now exists only as the Approved local tooling scaffold;
+all product modules and cloud/deploy authority remain absent:
 
 ```text
 apps/backend/
@@ -589,17 +770,21 @@ indexes, IAM, provider configuration, billing, backup or latency.
 | ID | Status | Owner | Decision/evidence | Blocks |
 |---|---|---|---|---|
 | OD-07 | Proposed option A | Platform + Security/Privacy | edition, project separation, exact per-resource location, residency/latency/cost/export review | BCK-05 Approval, G1/R1 |
-| BCK05-OD-01 | Open | Platform Operations | backend runtime/toolchain/package manager and supported versions | executable R0 |
-| BCK05-OD-02 | Open | Platform Security/Operations | workload identity, deploy approval and break-glass design | BCK-05 Approval |
-| BCK05-OD-03 | Open | Platform Operations + domain owners | numeric SLO/error budgets and observation windows | BCK-05 Approval |
-| BCK05-OD-04 | Open | Product + Finance/Operations | numeric EUR budgets/quotas and containment thresholds per environment | R1 provisioning |
-| BCK05-OD-05 | Open | Platform + Privacy + domains | RPO/RTO, backup/PITR/export retention and restore design | BCK-05 Approval |
+| BCK05-OD-01 | Proposed | Platform Operations + Platform Security | [BCK05-OD01-TCH-01 v0.3.1](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.1](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [R0 decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [local result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md): exact local build/emulator/Rules/Terraform/reproducibility evidence is Present; hosted Windows/Linux parity and Moderate-advisory disposition remain open | hosted R0 workflow + explicit advisory verdict |
+| BCK05-OD-02 | Proposed | Platform Security/Operations | [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md): keyless OIDC/WIF, isolated identities, permissions, approvals, lifecycle and break-glass; exact claims/roles/plan/JIT/runtime evidence pending | BCK-05 Approval |
+| BCK05-OD-03 | Proposed | Platform Operations + domain owners | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): Product baseline recorded; stage telemetry/alerts and specialist verdict pending | BCK-05 Approval |
+| BCK05-OD-04 | Proposed | Product + Finance/Operations | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): Product baseline recorded; Finance remains Inconclusive pending EUR SKU/tax/stage evidence | R1 provisioning |
+| BCK05-OD-05 | Proposed | Platform + Privacy + domains | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md): Product baseline recorded; drills, IAM/privacy and specialist verdicts pending | BCK-05 Approval |
 | BCK05-OD-06 | Open | API Platform + Operations | OD-09 transport/task topology and delivery operations | D1 exit minimum Proposed; D3 effects Accepted |
-| BCK05-OD-07 | Open | Release Operations | artifact signing/provenance/promotion and rollback tooling | executable R0 |
-| BCK05-OD-08 | Open | Incident/Security owners | severity model, on-call route and break-glass/tabletop cadence | G5/G6 |
+| BCK05-OD-07 | Proposed | Release Operations + Platform Security | [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md): immutable manifest, provenance, Functions/container boundary, promotion and rollback; exact toolchain/attestor/registry/policy/runtime evidence pending | executable R0 |
+| BCK05-OD-08 | Proposed | Incident/Security owners | [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) plus ready-but-unexecuted [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md); real routes/break-glass/executable evidence and completed result pending | G5/G6 |
 
 Each Open/Proposed decision has a fail-closed default above. Acceptance records
 option, evidence links, reviewers, decision date, migration and rollback.
+
+OD-09 failure/compatibility review evidence is maintained in
+[BCK-D1-OD09-EV-01](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md); transport and
+worker activation stay blocked.
 
 ## 27. Definition of Ready for Review
 
@@ -610,6 +795,14 @@ option, evidence links, reviewers, decision date, migration and rollback.
 - BCK-03/04 conflicts are explicitly listed, not assumed resolved;
 - no project/resource/credential/runtime file is created;
 - all Open Decisions have owner, gate and fail-closed default.
+
+Current readiness: the Platform Operations and delegated Security/Legal/Finance
+roles are assigned to the combined owner in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). IAM and release
+design evidence is now Present and OD-02/07 are Proposed, but exact claim/role/
+toolchain/provider decisions, specialist verdicts, qualified Legal evidence,
+actual EUR SKU and measured stage/restore/runtime proof remain absent. BCK-05
+therefore remains Draft.
 
 ## 28. Definition of Done for Approved BCK-05
 
@@ -633,7 +826,7 @@ option, evidence links, reviewers, decision date, migration and rollback.
 4. **BCK-05-AC-04:** production cannot select mock, emulator or dev adapters.
 5. **BCK-05-AC-05:** project/resource creation waits for Accepted OD-07.
 6. **BCK-05-AC-06:** OD-07 records edition and every location independently.
-7. **BCK-05-AC-07:** Standard/Native/`eur3`/`europe-west1` remain Proposed in v0.1.
+7. **BCK-05-AC-07:** Standard/Native/`eur3`/`europe-west1` remain Proposed in v0.2.7.
 8. **BCK-05-AC-08:** LV activation never enables EE/LT implicitly.
 9. **BCK-05-AC-09:** one writer owns each operational record family.
 10. **BCK-05-AC-10:** Operations cannot mutate domain authority directly.
@@ -676,16 +869,16 @@ option, evidence links, reviewers, decision date, migration and rollback.
 47. **BCK-05-AC-47:** runbooks derive from actual deployed topology.
 48. **BCK-05-AC-48:** target file map is not runtime authorization.
 49. **BCK-05-AC-49:** Approval still requires a separate executable slice/G1.
-50. **BCK-05-AC-50:** v0.1 creates no backend/Firebase/resource/runtime effect.
+50. **BCK-05-AC-50:** v0.2.3 creates no backend/Firebase/resource/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic removal/change requires a
 new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.1 the following remain absent:
+At v0.2.13 the following remain absent:
 
-- `apps/backend` and backend toolchain;
+- product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;
 - IAM/service accounts/workload identity and production credentials;
 - deploy pipelines, manifests, flags, telemetry, alerts and budgets;
@@ -701,5 +894,6 @@ At v0.1 the following remain absent:
 3. resolve OD-07 and BCK05-OD-01–05/07/08 evidence;
 4. reconcile with BCK-03/04/20;
 5. move BCK-05 to Review, then Approved only when DoD is satisfied;
-6. keep R0/R1 and every physical resource blocked until G1 and a separately
-   Approved executable file plan.
+6. close R0 hosted parity and Moderate-advisory disposition; keep R1 and every
+   cloud/product resource blocked until G1 and a separately Approved executable
+   file plan.

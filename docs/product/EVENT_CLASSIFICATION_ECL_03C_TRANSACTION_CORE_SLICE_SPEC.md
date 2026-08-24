@@ -1,7 +1,7 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.0
-- Дата: 2026-08-09
+- Версия: 1.1
+- Дата: 2026-08-20
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
@@ -10,7 +10,7 @@
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
   [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
-  Accepted D01–D10
+  Accepted D01–D11
 - Dependency:
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
@@ -163,7 +163,7 @@ Names below are normative for ECL-03C.
 | `bookings` | `bookingId` | Booking aggregate projection | deny; callable query only |
 | `bookingPoolLedgers` | hash of occurrence/pool/channel | capacity and confirmed allocation counters | deny |
 | `bookingUserUsage` | `userId` | policy version plus active finite Booking evidence | deny |
-| `bookingIdempotency` | hash of actor/command/request | payload hash and stable completed result | deny |
+| `bookingIdempotency` | hash of actor/command/idempotency key | payload hash and stable completed result | deny |
 | `bookingAudit` | `auditId` | append-only privacy-safe mutation fact | deny |
 | `bookingOutbox` | deterministic obligation ID | post-commit notification obligation only | deny |
 | `bookingFeatureFlags` | flag/environment | server-owned disabled-by-default gate | deny |
@@ -260,13 +260,19 @@ ECL-03D.
 
 ## 7. Idempotency contract
 
-The effective key is `(actorId, commandType, requestId)`. In v1 the explicit
-derivation is `idempotencyKey == requestId`; a mismatch is an invalid command,
-not a second namespace. Neither body field is trusted as a global key.
-`payloadHash` is SHA-256 over canonical schema-known JSON fields.
+The effective key is `(resolvedActorOrServiceIdentity, commandType,
+idempotencyKey)`. `requestId` correlates one request attempt;
+`idempotencyKey` identifies one logical mutation across retries. Values may be
+equal, but equality is not required. A retry may use a new request ID only when
+it preserves the original idempotency key and normalized semantic payload.
+Neither body field is trusted as actor identity or a global key. `payloadHash`
+is SHA-256 over canonical schema-known semantic JSON fields and excludes
+transport-only request correlation; exact canonicalization/version remains
+gated by BCK-03 `API-DEC-03` before runtime.
 
 - same effective key and same hash returns the byte-equivalent stored domain
-  result after authorization;
+  result after authorization inside a response envelope that echoes the current
+  attempt request ID and may use new attempt correlation metadata;
 - same effective key and different hash returns `idempotency_conflict`;
 - success and authenticated deterministic domain refusals may be stored;
 - unauthenticated, malformed, unsupported-contract, contention, unavailable
@@ -274,6 +280,10 @@ not a second namespace. Neither body field is trusted as a global key.
 - no idempotency record is written before actor binding;
 - retention follows Accepted D04 and must exceed every supported retry window;
 - logs contain only hashed request correlation, not command payload.
+- a new idempotency key remains subject to duplicate-active, capacity, policy
+  and revision invariants and cannot bypass them.
+- every new attempt uses a fresh request ID; detected reuse of one request ID
+  with another key or semantic command is invalid and creates no mutation.
 
 ## 8. Security boundary
 

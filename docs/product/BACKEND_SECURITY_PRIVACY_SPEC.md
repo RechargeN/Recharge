@@ -1,18 +1,21 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.3**
+- Version: **0.4.10**
 - Date: **2026-08-20**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.2](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.6](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.2.4](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
-  [BCK-09 v1.0](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.3
+- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
+  [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.10
+- Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.1 (Draft; OD-01 Proposed)
+- Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
+- Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
 - Runtime effect of this revision: **none**
@@ -20,6 +23,68 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.10 — 2026-08-20
+
+- added a versioned incident tabletop package with scenario injects, mandatory
+  decisions, evaluator key, honest blank execution record and 30 AC;
+- the exercise is ready but not executed, so `BCK04-OD-09` stays Proposed and
+  no owner/Legal/tabletop/runtime gate is closed;
+- security/privacy semantics, 45 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.4.9 — 2026-08-20
+
+- added one incident-response proposal preserving the existing SEV-1/2/3
+  vocabulary while separating operational severity from GDPR risk/high-risk;
+- advanced `BCK04-OD-09` from Open to Proposed; owner, qualified Legal/Privacy
+  verdict and tabletop evidence remain absent;
+- security/privacy semantics, 45 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.4.8 — 2026-08-20
+
+- added the full asset/actor/trust-boundary STRIDE and privacy/abuse threat model
+  `BCK04-OD01-TM-01` with 36 threats and 20 stable AC;
+- advanced `BCK04-OD-01` from Open to Proposed because a concrete evidence
+  package now exists; owner verdict and independent security review remain absent;
+- security/privacy semantics, 45 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.4.7 — 2026-08-20
+
+- recorded the combined D1 Security/Privacy and Legal/Privacy assignment;
+- retained Pending verdicts and explicitly preserved the missing qualified
+  Legal/Privacy evidence boundary;
+- security/privacy semantics, 45 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.4.6 — 2026-08-20
+
+- added explicit D1 Security/Privacy and Legal sign-off assignments through
+  BCK-D1-SIG-01 without fabricating reviewer names or verdicts;
+- clarified current DoR state and retained OD-11 as Open;
+- synchronized the Mobile boundary with BCK-03 v0.3.2 and current D1 versions;
+- security/privacy semantics, 45 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.4.5 — 2026-08-20
+
+- linked the evidence-backed OD-07 infrastructure review and OD-11 Legal brief;
+- the brief records the Latvia Article 8 consent threshold only within its
+  legal scope and does not invent a Recharge minimum account/feature age;
+- OD-07 remains Proposed, OD-11 remains Open, specialist blockers and 45 AC are
+  unchanged; runtime remains Absent.
+
+### v0.4.4 — 2026-08-20
+
+- D1-DEC-01/ECL03-D11 closes the Booking request/idempotency fixture conflict;
+  BCK-03 v0.3 and BCK-09 v1.1 now share one split-key contract;
+- ECL03-D04 wording is reconciled as Accepted product policy with separate
+  Privacy/Legal production-activation validation, not an Open decision;
+- PRE-03 is resolved and PRE-04 is narrowed to legal activation/rights evidence;
+  remaining OD-07/11 and specialist blockers are unchanged;
+- runtime remains Absent and no security/privacy implementation is authorized.
 
 ### v0.4.3 — 2026-08-20
 
@@ -207,7 +272,7 @@ Draft/Review spec регистрируется и reconciled owners, а не р�
 - secrets/crypto material policy;
 - abuse/rate limiting принципы и numeric defaults, унаследованные из ADR 0013;
 - privacy processing: purpose, legal basis, consent, minimization;
-- `OD-11` minors/age Draft recommendation;
+- `OD-11` minors/age Open-decision constraints and Legal review brief;
 - retention/deletion/export/DSR модель;
 - logging/audit redaction правила;
 - data residency принципы (`OD-07` boundary, без выбора конкретного региона);
@@ -237,10 +302,11 @@ schema; `git diff` документационного slice не должен с
 
 ## 5. Threat model и trust boundaries
 
-Формального STRIDE-style документа в репозитории нет — это признанный Open
-gap (§27, `BCK04-OD-01`). Ниже — Draft модель доверия, согласованная с
-Accepted ADR, текущим BCK-01 baseline и явно отмеченным Proposed Firebase
-input; она не выдаётся за завершённый threat model.
+Полный proposal оформлен отдельно в
+[BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md). Ниже сохранена его
+обязательная trust-boundary основа, согласованная с Accepted ADR, BCK-01 и
+явно отмеченным Proposed Firebase input. Наличие evidence переводит
+`BCK04-OD-01` только в Proposed, не в Accepted.
 
 ```text
 Untrusted:  мобильный клиент, любой сетевой ввод, provider webhook payload
@@ -273,9 +339,10 @@ Mobile client (untrusted)
         -> Security Rules (defense-in-depth, deny-by-default for direct access)
 ```
 
-**Open:** полный per-asset threat model (STRIDE или аналог) с explicit
-attacker capabilities по каждому trust boundary — `BCK04-OD-01`, owner
-Security/Privacy, до Approved.
+**Proposed:** полный per-asset threat model с explicit attacker capabilities,
+36 threat records, control ownership, evidence gates and residual risks —
+[BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md). Owner verdict и
+independent security review отсутствуют, поэтому `BCK04-OD-01` не Accepted.
 
 ## 6. Backend data inventory
 
@@ -500,33 +567,24 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 Точный per-resource mapping (какие ресурсы enumeration-sensitive) —
 делегируется owning domain BCK-spec; здесь фиксируется только механизм.
 
-### 11.3 Зарегистрированный Review-contract-vs-fixture конфликт
+### 11.3 Booking idempotency reconciliation
 
-Два согласованных **Review-level target documents** предлагают одно правило:
+[BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
+the former Review-contract-vs-fixture contradiction. Booking v1 now has one
+contract across BCK-03 v0.3.3, BCK-09 v1.1, ECL-03 v1.2 and ECL-03C v1.1:
 
-- [`BCK-09` §13 Idempotency](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md):
-  "Для client v1: `idempotencyKey == requestId`. Mismatch — invalid
-  command.";
-- [`EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md` §5.3](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md):
-  client v1 выводит `idempotencyKey` из `requestId`; mismatch invalid.
+- `requestId` correlates one request attempt;
+- `idempotencyKey` identifies one logical mutation across retries;
+- equality is valid but optional;
+- effective scope is resolved actor/service identity + command type +
+  idempotency key;
+- same key/hash replays the stored result and same key/different hash fails
+  without mutation.
 
-Committed fixture (`packages/api_contracts/schema/booking/v1/fixtures/
-valid.json`) этому target не соответствует: `requestId` и
-`idempotencyKey` имеют разные значения. При этом BCK-09 и ECL-03C остаются
-`Review`, а schema/fixture является Done implementation artifact ECL-03B.
-Следовательно, ни equality, ни split-key нельзя повышать до Accepted общего
-правила до owner reconciliation. Фраза BCK-03 §34 о fixture-verified
-idempotency semantics фактически неверна.
-
-BCK-04 **не разрешает** этот конфликт самостоятельно. Блокер:
-**BCK-03 требует v0.3 reconciliation** — либо согласованно изменить
-fixture/schema/consumers под equality target, либо принять versioned split-key
-contract и обновить Review specs. Новое ADR требуется только при изменении
-Accepted архитектурного invariant, а не для обычного schema reconciliation.
-До этой reconciliation
-BCK-04 использует idempotency (§16) только по принципу — "ключ должен быть
-проверяемо стабильным между повторами", не полагаясь на то, равен он
-`requestId` или нет.
+Committed schema/fixtures remain unchanged and no data migration exists because
+runtime is Absent. BCK-04 relies on the accepted semantic rule but still does
+not define canonical hashing, persistence or retention; those remain owned by
+BCK-03, BCK-05 and the Booking domain.
 
 ## 12. Firestore Rules и IAM (Firestore Rules/IAM Matrix)
 
@@ -793,10 +851,12 @@ readiness не требует, чтобы ROPA/DPIA уже существова�
 `Open`, owner
 Security/Privacy, блокирует R2 production account creation, Find People,
 age-restricted publication/discovery, applicable Booking paths, G6. BCK-04
-не создаёт это решение с нуля — добавляет Draft recommendation-policy поверх
-него как материал для решения владельца:
+не создаёт это решение с нуля — добавляет candidate constraints как материал
+для решения владельца. Юридические источники, purpose-by-purpose вопросы и
+fail-closed review contract собраны в
+[BCK-D1-OD11-LGL-01](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md).
 
-### 18.1 Draft policy (Proposed — not Accepted)
+### 18.1 Candidate constraints (decision remains Open)
 
 - политика версионируется **отдельно для LV, EE и LT** — единого глобального
   возраста нет;
@@ -817,22 +877,23 @@ age-restricted publication/discovery, applicable Booking paths, G6. BCK-04
 
 ### 18.2 Статус
 
-`Proposed — not Accepted`. Реализация (age-gate UI, guardian flow,
-verification backend) не разрешается этой спецификацией — только контракт
-fail-closed поведения до Accepted.
+`Open — no Recharge age policy selected`. Candidate constraints and the Legal
+brief do not by themselves satisfy the `Open -> Proposed` transition. It
+requires a qualified Legal/Privacy owner, one concrete per-market proposal and
+the evidence named in the brief. Реализация (age-gate UI, guardian flow,
+verification backend) не разрешается этой спецификацией — действует только
+fail-closed поведение до Accepted.
 
 ## 19. Retention matrix (Retention/Deletion Matrix)
 
-### 19.1 Booking-scoped ECL03-D04 — source status conflict
+### 19.1 Booking-scoped ECL03-D04 — reconciled status and activation gate
 
 [ECL-03 Decision Package](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
-в §1 помечает `ECL03-D04` как `Accepted; legal validation before activation`,
-но §6 того же файла прямо говорит, что exact values остаются Open до
-Privacy/Legal/Product approval. BCK-04 не переименовывает этот конфликт в
-новый статус: decision-registry status остаётся **Accepted**, а таблица ниже
-остаётся **неактивным recommended Booking baseline** до указанного approval.
-Расхождение должен закрыть владелец исходного decision package до Review
-BCK-04:
+v1.2 однозначно фиксирует `ECL03-D04` как **Accepted product-policy baseline**.
+Это не Legal approval и не разрешение обрабатывать production personal data:
+Privacy/Legal validation exact values, backup propagation and exceptional holds
+остаётся отдельным activation gate. Таблица ниже нормативна для продукта, но
+неактивна до прохождения этого gate:
 
 | Data class | Active retention | Terminal retention | Terminal action |
 |---|---:|---:|---|
@@ -1023,6 +1084,11 @@ index applicability, к logging не относится и здесь не ци�
 
 ## 22. Data residency и OD-07
 
+Evidence review is centralized in
+[BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). It verifies
+per-resource location semantics and enumerates measurements/sign-offs still
+required; it does not accept OD-07 or authorize provisioning.
+
 `OD-07` — Proposed, owner Platform (совместно `BCK-04`/`BCK-05` по `BCK-01
 §21`), блокирует R1 provisioning. `FIREBASE_ARCHITECTURE.md §4.3`
 предлагает (**Proposed, не Accepted**) `eur3`/`europe-west1`, но сам текст
@@ -1141,18 +1207,25 @@ Detect -> Contain -> Assess scope/data classes affected (§7)
   -> Audit trail (§21) -> Post-incident report -> Remediation tasks
 ```
 
-- operational severity наследует `SEV-1/2/3` из `incident.md`;
-- privacy-risk classification не выводится из SEV автоматически: критерии
-  `risk`/ `high risk` для Articles 33/34 остаются Open;
-- exact risk-assessment criteria (что считается "high risk" для Art. 34) —
-  **Open**, требует Legal/Privacy;
+- operational severity сохраняет `SEV-1/2/3` и cadence из `incident.md`;
+- [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) proposes
+  incident-type mapping, roles, evidence, response targets and a separate
+  `assessmentPending/unlikelyRisk/likelyRisk/highRisk` privacy vocabulary;
+- [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) is the
+  first repeatable exercise package; its execution/result record is blank;
+- privacy-risk classification не выводится из SEV автоматически; exact
+  `likelyRisk/highRisk` conclusion остаётся qualified Legal/Privacy decision;
 - security tabletop/incident drill — упомянут в исходном запросе как
   обязательная проверка (§29); `RUN-01`/`RUN-06` уже требуют quarterly
   tabletop — periodичность для non-secret security incident наследует тот
   же квартальный ритм, если Security/Privacy owner не предложит иное.
 
-**Open:** mapping security incident type → SEV и exact `risk`/`high risk`
-criteria — `BCK04-OD-09`, owner Security/Privacy, до Approved. Сам факт
+**Proposed:** mapping security incident type → SEV, privacy assessment factors,
+roles, evidence and response targets are in
+[BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md). Owner and
+qualified Legal/Privacy verdicts plus executed/passed tabletop evidence remain
+absent, so
+`BCK04-OD-09` is not Accepted. Сам факт
 обязательности Art. 33/34
 пути и 72-часового окна — **не Open**, это прямое следствие GDPR
 применимости к LV/EE/LT и уже частично унаследованного `RUN-06`.
@@ -1163,7 +1236,7 @@ criteria — `BCK04-OD-09`, owner Security/Privacy, до Approved. Сам фак
 |---|---|---|---|:---:|
 | `OD-07` (внешний, `BCK-02 §16`) | Firebase topology/edition/regions | Platform (`BCK-04`+`BCK-05`) | R1 provisioning, §22 | Нет (R1) |
 | `OD-11` (внешний, `BCK-02 §16`) | Region-versioned minors/age policy | Security/Privacy | R2 account creation, Find People, age-restricted paths, applicable Booking, G6, §18 | Нет (R2/G6) |
-| `BCK04-OD-01` | Полный threat model (STRIDE или аналог) по каждому trust boundary | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
+| `BCK04-OD-01` | **Proposed:** полный threat model по каждому asset/trust boundary; owner verdict/independent review pending | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
 | `BCK04-OD-02` | Полный подписанный data inventory по каждому domain | Каждый domain owner + Security/Privacy | Production personal data для этого domain | Да, per-domain, до production |
 | `BCK04-OD-03` | Session/token TTL, refresh cadence, deletion provider-revocation detail | Identity owner (`BCK-06`) | Executable Auth slice | Да, до executable slice |
 | `BCK04-OD-04` | App Check recovery/emergency bypass policy | Platform Operations (`BCK-05`) | App Check enforce rollout | Да, до enforce rollout |
@@ -1171,7 +1244,7 @@ criteria — `BCK04-OD-09`, owner Security/Privacy, до Approved. Сам фак
 | `BCK04-OD-06` | Exact legal basis per purpose, consent versioning, Article 9/10 and applicable ePrivacy/direct-marketing gates | Legal/Privacy | G1 (наравне с OD-07/OD-10) | Нет (G1) |
 | `BCK04-OD-07` | Non-Booking retention Accepted values, backup RTO/RPO/encryption | Security/Privacy + `BCK-05` | Production personal data backup | Да, до production backup |
 | `BCK04-OD-08` | Rights-request SLA/API/formats, requester verification/step-up, Article 19 propagation evidence | Security/Privacy + Identity + `BCK-18` | Production rights-request processing | Да, до production DSR |
-| `BCK04-OD-09` | Security incident type → SEV mapping и `risk`/`high risk` criteria Articles 33/34 | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
+| `BCK04-OD-09` | **Proposed:** incident type → SEV-1/2/3, separate privacy-risk path, roles/cadence/evidence and ready-but-unexecuted tabletop package; verdict/execution pending | Security/Privacy + qualified Legal/Privacy | **Approved BCK-04 напрямую** | **Нет** |
 | `BCK04-OD-10` | ROPA / Records of Processing Activities (Art. 30) | Security/Privacy + Legal | Production personal data processing | Да, до production |
 | `BCK04-OD-11` | DPIA gate — какие features требуют Data Protection Impact Assessment (Art. 35) | Security/Privacy + Legal | Активация high-risk features (age-verification, large-scale profiling) | Да, до соответствующей feature |
 | `BCK04-OD-12` | Processor/subprocessor inventory + DPA (Art. 28) | Security/Privacy + Legal | Production использование любого third-party processor | Да, до production processor onboarding |
@@ -1192,7 +1265,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.2 Review:
+executable slice, согласованный с BCK-01 v0.4.17 Review:
 
 ```text
 docs/runbooks/
@@ -1260,7 +1333,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.2.4.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1301,7 +1374,7 @@ Client input schema для `actorContext` намеренно отсутству�
 | Security tabletop/incident drill | SEV path, Article 33/34 assessment, contacts, clocks, evidence | Quarterly по RUN-01/RUN-06 registry |
 | Legal/Privacy review | §17 per-market review завершён до release | Per market, до G1/G3 |
 
-Ни одна строка этой таблицы не имеет пройденного runtime evidence в v0.4.3 —
+Ни одна строка этой таблицы не имеет пройденного runtime evidence в v0.4.9 —
 таблица
 фиксирует **что** будет проверяться, не заявляет прохождение.
 
@@ -1315,6 +1388,16 @@ Client input schema для `actorContext` намеренно отсутству�
   остаётся назначить независимого Security/Privacy или Legal/Privacy
   specialist owner для решений, требующих профессионального sign-off;
 - Legal/Privacy owner назначен для `OD-11`/`BCK04-OD-06`.
+- OD-11 questions and verified legal-source boundaries are reviewable through
+  [BCK-D1-OD11-LGL-01](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md), but the
+  decision remains Open until a qualified owner selects a policy.
+
+Current readiness: the BCK-01 and coverage prerequisites plus interim
+coordination are evidenced. D1-SIG-SEC and D1-SIG-LEGAL are assigned to the
+combined owner in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md), but both verdicts
+remain Pending and qualified Legal/Privacy evidence is not established. BCK-04
+therefore remains Draft and cannot enter Review yet.
 
 ### 30.2 Definition of Done Approved BCK-04
 
@@ -1333,9 +1416,8 @@ Client input schema для `actorContext` намеренно отсутству�
 - `BCK04-OD-02`, `03`, `04`, `05`, `07`, `08`, `10`, `11`, `12`, `13`, `14`
   (deferrable по §27) — имеют owner и либо закрыты, либо явно перенесены с
   датой пересмотра и сохранённым (более узким) blocking scope;
-- reconciliation с `BCK-03` (idempotency fixture-conflict, §11.3 — требует
-  BCK-03 v0.3 reconciliation до этого пункта) и `BCK-09` (Booking-специфичные
-  правила) подтверждена соответствующими owners;
+- reconciliation с `BCK-03`/`BCK-09` подтверждена через
+  BCK-D1-DEC-01/ECL03-D11; executable parity evidence остаётся runtime gate;
 - runtime остаётся Absent.
 
 ### 30.3 Acceptance criteria
@@ -1372,8 +1454,9 @@ Client input schema для `actorContext` намеренно отсутству�
     `BCK-02 §5`, не переопределяет их.
 15. **BCK-04-AC-15:** reconciliation с `BCK-03`/`BCK-09` не переписывает их
     содержимое, только фиксирует расхождения.
-16. **BCK-04-AC-16:** §5 threat model явно помечает отсутствие полного
-    STRIDE-анализа как `BCK04-OD-01`, не выдаёт частичную модель за полную.
+16. **BCK-04-AC-16:** §5 links the full Proposed `BCK04-OD01-TM-01` evidence
+    and does not present its bounded trust-boundary summary as independent
+    acceptance or runtime proof.
 17. **BCK-04-AC-17:** §12 Firestore Rules/IAM не содержит ни одного
     разрешённого direct client write без явной пометки "делегировано
     domain-spec, safe default — запрещено" (§12.3).
@@ -1452,15 +1535,17 @@ Client input schema для `actorContext` намеренно отсутству�
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.3 отсутствует:
+На момент v0.4.10 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет
   domain-specs);
-- threat model документ (`BCK04-OD-01`);
+- Accepted owner/security verdict for the Proposed threat model
+  (`BCK04-OD-01`); the Draft evidence document is Present;
 - DSR orchestration runtime (request families §20.1);
-- backend-specific RUN-01/RUN-06 и accepted security-type→SEV/privacy-risk
-  criteria (`BCK04-OD-09`);
+- backend-specific RUN-01/RUN-06, accepted owner/Legal verdict and executed,
+  passed tabletop evidence for the Proposed security-type→SEV/privacy-risk model
+  (`BCK04-OD-09`);
 - Legal/Privacy review по любому рынку;
 - App Check emergency bypass policy;
 - physical IAM/MFA/KMS, encrypted-resource inventory, security scans,

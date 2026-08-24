@@ -1,16 +1,16 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
-- Версия: 1.0
-- Дата: 2026-08-09
+- Версия: 1.1
+- Дата: 2026-08-20
 - Статус: **Review — documentation only; implementation and deployment absent**
 - Область: authoritative internal free Event Booking, ECL-03C–H
 - Канон: [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md)
-- Parent slice: [ECL-03 v1.1](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
+- Parent slice: [ECL-03 v1.2](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - Architecture: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accepted decisions:
-  [ECL-03 D01–D10](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
+  [ECL-03 D01–D11](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.0](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.1](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 1. Назначение документа
@@ -564,9 +564,13 @@ delivery/fairness approval; иначе allocation остаётся confirmed и 
 
 ## 13. Idempotency
 
-Effective key: `(actorId/serviceIdentity, commandType, requestId)`.
+Effective key: `(resolvedActorOrServiceIdentity, commandType,
+idempotencyKey)`.
 
-Для client v1: `idempotencyKey == requestId`. Mismatch — invalid command.
+Для client v1 `requestId` коррелирует одну попытку, а `idempotencyKey`
+идентифицирует одну логическую mutation между retry. Значения могут совпадать,
+но equality не обязательна. Retry может получить новый `requestId`, только
+если сохраняет исходный `idempotencyKey` и semantic payload.
 
 - same key + same canonical payload hash возвращает stored result;
 - same key + different hash возвращает `idempotency_conflict`;
@@ -575,6 +579,12 @@ Effective key: `(actorId/serviceIdentity, commandType, requestId)`.
 - unauthenticated/malformed/contention/internal failure не записывается как
   successful completion;
 - retry не повторяет allocation, audit transition или notification obligation;
+- новый idempotency key не обходит duplicate-active, capacity, policy или
+  revision invariants;
+- replay сохраняет domain outcome/resource revision, но response echo использует
+  `requestId` текущей попытки; correlation metadata может быть новой;
+- новый attempt использует свежий request ID; обнаруженный reuse одного
+  request ID с другим logical key/semantic command invalid и не мутирует state;
 - retention превышает максимальное поддерживаемое retry window.
 
 ## 14. Workers and scheduling
@@ -1063,7 +1073,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 ### Документ Done
 
 - все ссылки, headings, code fences, таблицы и AC проверены;
-- документ не противоречит ADR 0019, D01–D10 и parent ECL-03;
+- документ не противоречит ADR 0019, D01–D11 и parent ECL-03;
 - runtime/app/backend не изменён;
 - product owner явно принял документ.
 
