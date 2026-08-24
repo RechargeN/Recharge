@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-08-23T23:43:37Z",
+  "runtime": {
+    "firebaseGeneration": 2,
+    "nodeMajor": 22,
+    "projectId": "demo-recharge"
+  },
+  "node": {
+    "version": "22.23.2",
+    "npm": "10.9.8"
+  },
+  "java": {
+    "distribution": "temurin",
+    "version": "21.0.12+8"
+  },
+  "terraform": {
+    "version": "1.15.9",
+    "providerGoogle": "7.43.0",
+    "linuxAmd64Sha256": "76edd0b22d2f27d3d2e097cd793209646f719cf60f02ff3af626b07361137da1",
+    "windowsAmd64Sha256": "b0fcd57e2abd19fc6d8e64b86a22f5f3fb734b0407385553cdcffc64677f18b6"
+  },
+  "packages": {
+    "firebase-functions": "7.3.2",
+    "firebase-admin": "14.3.0",
+    "@types/node": "22.20.1",
+    "typescript": "6.0.3",
+    "firebase-tools": "15.28.1",
+    "eslint": "9.39.5",
+    "typescript-eslint": "8.67.0",
+    "prettier": "3.9.6"
+  },
+  "githubActions": {
+    "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "actions/setup-node": "820762786026740c76f36085b0efc47a31fe5020",
+    "actions/setup-java": "b6effb05e454b25005698d916606bdc6ffcbf961"
+  },
+  "runners": ["ubuntu-24.04", "windows-2025"]
+}

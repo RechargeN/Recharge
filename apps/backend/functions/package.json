@@ -1,0 +1,39 @@
+{
+  "name": "@recharge/backend-r0-functions",
+  "version": "0.0.0-r0",
+  "private": true,
+  "description": "Non-product Firebase Emulator feasibility probe for Recharge R0",
+  "type": "module",
+  "main": "lib/src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "packageManager": "npm@10.9.8",
+  "scripts": {
+    "verify:cloud-context": "node ../scripts/verify-no-cloud-context.mjs",
+    "verify:toolchain": "node ../scripts/verify-toolchain.mjs",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.json\" \"*.mjs\" \"../*.json\" \"../scripts/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"*.json\" \"*.mjs\" \"../*.json\" \"../scripts/*.mjs\"",
+    "lint": "eslint src test",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test:unit": "npm run build --silent && node lib/test/unit/r0_toolchain_probe.test.js",
+    "test:contract": "npm run build --silent && node lib/test/contract/booking_fixture_parity.test.js",
+    "test:emulator:inside": "npm run build --silent && node lib/test/emulator/r0_emulator_isolation.test.js && node lib/test/emulator/rules_default_deny.test.js",
+    "test:emulator": "node ../scripts/run-emulator-tests.mjs",
+    "verify:generated": "node ../scripts/verify-generated-clean.mjs",
+    "verify:reproducibility": "node ../scripts/verify-reproducibility.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "14.3.0",
+    "firebase-functions": "7.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "eslint": "9.39.5",
+    "firebase-tools": "15.28.1",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0"
+  }
+}
