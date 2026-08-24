@@ -4,7 +4,7 @@ import '../entities/create_template_entity.dart';
 import '../entities/event_draft_data.dart';
 import '../entities/event_admission.dart';
 import '../entities/event_inventory.dart';
-import '../entities/publisher_ref.dart';
+import '../entities/rental_draft_data.dart';
 
 class ManageCreateTemplateUseCase {
   const ManageCreateTemplateUseCase(this._idGenerator);
@@ -262,6 +262,195 @@ class ManageCreateTemplateUseCase {
       reportCount: 0,
       clearPublishedAtUtc: true,
       clearBasedOnPublishedVersionId: true,
+      sectionData: _reusableSectionData(draft.sectionData),
+    );
+  }
+
+  /// Rental counterpart of `create()` — same shape, keyed on
+  /// `CreateObjectType.rental`/`RentalDraftData` (spec §15.3). A parallel
+  /// method on the same class rather than a generic refactor of the Event
+  /// path above, so Event's template behavior/tests are untouched.
+  CreateTemplateEntity createRentalTemplate({
+    required String userId,
+    required String name,
+    required CreateDraftEntity draft,
+    DateTime? nowUtc,
+  }) {
+    if (draft.objectType != CreateObjectType.rental ||
+        draft.rentalData == null) {
+      throw ArgumentError('Rental templates require a rental draft.');
+    }
+    final String normalizedName = _normalizedName(name);
+    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    return CreateTemplateEntity(
+      schemaVersion: CreateTemplateEntity.currentSchemaVersion,
+      id: _idGenerator.generate(),
+      ownerUserId: userId,
+      objectType: draft.objectType,
+      name: normalizedName,
+      snapshot: _sanitizeRentalSnapshot(draft),
+      createdAtUtc: now,
+      updatedAtUtc: now,
+      lastUsedAtUtc: now,
+    );
+  }
+
+  CreateTemplateEntity replaceRentalTemplate({
+    required CreateTemplateEntity template,
+    required String userId,
+    required CreateDraftEntity draft,
+    DateTime? nowUtc,
+  }) {
+    _verifyOwnership(template, userId);
+    if (draft.objectType != template.objectType || draft.rentalData == null) {
+      throw ArgumentError('Template and draft types must match.');
+    }
+    return template.copyWith(
+      snapshot: _sanitizeRentalSnapshot(draft),
+      updatedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
+    );
+  }
+
+  /// Materializes a brand-new Rental draft from [template]. Publisher and
+  /// market defaults always come from the current authenticated context —
+  /// never the template snapshot (spec §15.3).
+  CreateDraftEntity materializeRental({
+    required CreateTemplateEntity template,
+    required String userId,
+    required String currencyCode,
+    required String timeZoneId,
+    PublisherRef? publisherRef,
+    DateTime? nowUtc,
+  }) {
+    _verifyOwnership(template, userId);
+    if (template.objectType != CreateObjectType.rental) {
+      throw ArgumentError('Rental materialization requires a rental template.');
+    }
+    final CreateDraftEntity fresh = CreateDraftEntity.defaults(
+      organizerId: userId,
+      organizerEmail: '',
+      organizerName: '',
+      marketCityId: '',
+      timezone: timeZoneId,
+      country: '',
+      city: '',
+      currency: currencyCode,
+    );
+    final CreateDraftEntity source = template.snapshot;
+    final RentalDraftData sourceRental = source.rentalData!;
+    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final PublisherRef resolvedPublisher =
+        publisherRef ?? PublisherRef(type: PublisherType.user, id: userId);
+    final RentalDraftData rental = sourceRental.copyWith(
+      revision: 0,
+      publisherRef: resolvedPublisher,
+      inventoryGroups: sourceRental.inventoryGroups
+          .map((RentalInventoryGroup g) => g.copyWith(id: _newLocalId()))
+          .toList(growable: false),
+      availability: RentalAvailabilityCalendar(timeZoneId: timeZoneId),
+      fulfillment: const RentalExternalFulfillment(),
+      attestation: RentalPublisherAttestation(
+        policyVersion: sourceRental.attestation.policyVersion,
+      ),
+    );
+    return fresh.copyWith(
+      id: 'loc_${now.microsecondsSinceEpoch}',
+      objectType: CreateObjectType.rental,
+      title: source.title,
+      mainCategory: source.mainCategory,
+      subcategory: source.subcategory,
+      tags: List<String>.from(source.tags),
+      shortDescription: source.shortDescription,
+      fullDescription: source.fullDescription,
+      sectionData: _reusableSectionData(source.sectionData),
+      rentalData: rental,
+      clearEventData: true,
+      clearPlaceData: true,
+      clearFindPeopleData: true,
+      clearRouteData: true,
+      clearScenarioData: true,
+      clearActivityData: true,
+      media: const MediaEntity(coverImage: '', gallery: []),
+      draftStatus: DraftStatus.draft,
+      moderationStatus: ModerationStatus.none,
+      publishStatus: PublishStatus.draft,
+      reportCount: 0,
+      createdAtUtc: now,
+      updatedAtUtc: now,
+      clearPublishedAtUtc: true,
+      clearBasedOnPublishedVersionId: true,
+      organizerId: userId,
+    );
+  }
+
+  /// spec §15.4 `Duplicate listing` — reuses the same sanitizer and
+  /// materializer as templates, but only in-memory: the ephemeral
+  /// `CreateTemplateEntity` below is never persisted through
+  /// `CreateTemplateRepository`.
+  CreateDraftEntity duplicateRental({
+    required CreateDraftEntity draft,
+    required String userId,
+    required String currencyCode,
+    required String timeZoneId,
+    PublisherRef? publisherRef,
+    DateTime? nowUtc,
+  }) {
+    if (draft.objectType != CreateObjectType.rental ||
+        draft.rentalData == null) {
+      throw ArgumentError('Duplicate requires a rental draft.');
+    }
+    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final CreateTemplateEntity ephemeral = CreateTemplateEntity(
+      schemaVersion: CreateTemplateEntity.currentSchemaVersion,
+      id: _idGenerator.generate(),
+      ownerUserId: userId,
+      objectType: CreateObjectType.rental,
+      name: 'duplicate',
+      snapshot: _sanitizeRentalSnapshot(draft),
+      createdAtUtc: now,
+      updatedAtUtc: now,
+      lastUsedAtUtc: now,
+    );
+    return materializeRental(
+      template: ephemeral,
+      userId: userId,
+      currencyCode: currencyCode,
+      timeZoneId: timeZoneId,
+      publisherRef: publisherRef,
+      nowUtc: nowUtc,
+    );
+  }
+
+  CreateDraftEntity _sanitizeRentalSnapshot(CreateDraftEntity draft) {
+    final RentalDraftData source = draft.rentalData!;
+    final RentalDraftData sanitized = source.copyWith(
+      revision: 0,
+      publisherRef: const PublisherRef(type: PublisherType.user, id: ''),
+      inventoryGroups: source.inventoryGroups
+          .map((RentalInventoryGroup g) => g.copyWith(id: _newLocalId()))
+          .toList(growable: false),
+      availability: RentalAvailabilityCalendar(
+        timeZoneId: source.availability.timeZoneId,
+      ),
+      fulfillment: const RentalExternalFulfillment(),
+      attestation: RentalPublisherAttestation(
+        policyVersion: source.attestation.policyVersion,
+      ),
+    );
+    return draft.copyWith(
+      rentalData: sanitized,
+      media: const MediaEntity(coverImage: '', gallery: []),
+      draftStatus: DraftStatus.draft,
+      moderationStatus: ModerationStatus.none,
+      publishStatus: PublishStatus.draft,
+      reportCount: 0,
+      clearPublishedAtUtc: true,
+      clearBasedOnPublishedVersionId: true,
+      organizerId: '',
+      organizerName: '',
+      organizerEmail: '',
+      organizerProfileLink: '',
+      organizerPhone: '',
       sectionData: _reusableSectionData(draft.sectionData),
     );
   }

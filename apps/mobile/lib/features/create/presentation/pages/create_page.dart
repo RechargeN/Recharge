@@ -23,6 +23,7 @@ import '../widgets/event_create_block.dart';
 import '../widgets/activity_create_block.dart';
 import '../widgets/find_people_create_block.dart';
 import '../widgets/place_create_block.dart';
+import '../widgets/rental_create_block.dart';
 import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 
@@ -243,6 +244,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 CreateObjectType.route) ...<Widget>[
               const SizedBox(height: 12),
               RouteCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.rental) ...<Widget>[
+              const SizedBox(height: 12),
+              RentalCreateBlock(
                 controller: controller,
                 state: state,
                 onPublished: () =>

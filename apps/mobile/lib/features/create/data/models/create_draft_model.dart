@@ -5,6 +5,7 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/place_draft_data.dart';
+import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
@@ -12,6 +13,7 @@ import 'activity_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
+import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
 
@@ -196,6 +198,11 @@ class CreateDraftModel {
     if (entity.routeData != null) {
       serializedSections['route_details'] = RouteDraftMapper.toJson(
         entity.routeData!,
+      );
+    }
+    if (entity.rentalData != null) {
+      serializedSections['rental_details'] = RentalDraftMapper.toJson(
+        entity.rentalData!,
       );
     }
     return CreateDraftModel(
@@ -391,6 +398,17 @@ class CreateDraftModel {
             ),
           )
         : null;
+    final RentalDraftData? rentalData =
+        parsedObjectType == CreateObjectType.rental
+        ? RentalDraftMapper.fromJson(
+            migratedSectionData['rental_details'],
+            defaults: RentalDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+              timeZoneId: timezone,
+            ),
+          )
+        : null;
     final Object? scenarioPayload =
         migratedSectionData['scenario'] ??
         migratedSectionData['scenario_details'];
@@ -441,6 +459,7 @@ class CreateDraftModel {
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
+      rentalData: rentalData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),

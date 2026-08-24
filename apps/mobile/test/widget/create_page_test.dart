@@ -999,7 +999,12 @@ class _NoopAuthRepository implements AuthRepository {
         id: 'u',
         email: 'user@example.com',
         role: 'creator',
-        capabilities: <String>['create.event', 'create.place', 'create.route'],
+        capabilities: <String>[
+          'create.event',
+          'create.place',
+          'create.route',
+          'create.rental',
+        ],
         profileStatus: 'active',
       ),
     );
