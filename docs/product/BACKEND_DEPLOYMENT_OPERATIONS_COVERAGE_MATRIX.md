@@ -1,13 +1,13 @@
 # BCK-05 — Deployment & Operations Coverage Matrix
 
 - ID: **BCK-05-PRE**
-- Version: **0.2.14**
+- Version: **0.2.15**
 - Date: **2026-08-24**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Platform Operations owner**
-- Target: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.23](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.24](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_COVERAGE_MATRIX.md`
 
 ## 1. Purpose
@@ -21,15 +21,15 @@ select credentials, create runtime files or authorize production processing.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.19 | Review; local R0 scaffold Present, product/cloud runtime Absent | Parent architecture |
-| BCK-02 v2.4.23 | Approved semantic baseline | Registry/gates/template |
+| BCK-01 v0.4.20 | Review; local R0 scaffold Present, product/cloud runtime Absent | Parent architecture |
+| BCK-02 v2.4.24 | Approved semantic baseline | Registry/gates/template |
 | BCK-03 v0.3.3 | Draft; runtime Absent | API/event input; split-key conflict closed, not Approved |
 | BCK-04 v0.4.10 | Draft; runtime Absent; OD-01/09 Proposed | Security/privacy input, not Accepted |
 | BCK-20 v0.2.2 | Draft; runtime Absent | Market/reference revision input, not Accepted |
 | BCK-02-A1 v1.0 | Draft; docs only | Latvia/Baltics execution input |
 | Firebase Architecture v2.2 | Proposed | Candidate topology only |
 | ENV/CI policies | Accepted repository policy | Mandatory environment/CI constraints |
-| BCK-05 v0.2.14 | Draft; local R0 scaffold Present, product/cloud runtime Absent; OD-01/02/03/04/05/07/08 Proposed | Single target operations standard; bounded R0 is Approved and locally/hosted executed, Windows/Linux parity is Pass, while Moderate-advisory disposition, specialist evidence and every cloud/product gate remain pending |
+| BCK-05 v0.2.15 | Draft; bounded R0 Pass, product/cloud runtime Absent; OD-01/02/03/04/05/07/08 Proposed | Single target operations standard; `BCK-R0-TCH-ADV-01` accepts residual Moderate risk only through `2026-09-24` or earlier scope expansion; specialist evidence and every cloud/product gate remain pending |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -118,6 +118,6 @@ contract are in
 
 ## 8. Verdict
 
-BCK-05 v0.2.14 is structurally complete enough for specialist review preparation.
+BCK-05 v0.2.15 is structurally complete enough for specialist review preparation.
 It remains Draft until §6 blockers are addressed. No project, resource,
 credential, deployment, backup or runtime is authorized.

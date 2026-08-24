@@ -1,13 +1,13 @@
 # Recharge Backend — Runtime & Toolchain Technical Review
 
 - ID: **BCK05-OD01-TCH-REV-01**
-- Version: **0.2.2**
+- Version: **0.2.3**
 - Date: **2026-08-24**
-- Status: **Draft technical review — local/hosted evidence present; advisory verdict pending**
-- Reviewed artifact: [BCK05-OD01-TCH-01 v0.3.2](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Parent: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Executed slice: [BCK-R0-TCH-01 v0.2.1](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) (Amendments Required)
-- Approval record: [BCK-R0-TCH-DEC-01 v0.1](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
+- Status: **Draft technical review — bounded R0 Pass; OD-01 remains Proposed**
+- Reviewed artifact: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Parent: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Executed slice: [BCK-R0-TCH-01 v0.2.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) (Pass — bounded tooling feasibility only)
+- Approval record: [BCK-R0-TCH-DEC-01 v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Review author role: **technical pre-review; not Platform Operations or Platform Security sign-off**
 - Runtime effect: **none**
@@ -15,6 +15,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.3 — 2026-08-24
+
+- reconciled the explicit owner disposition `BCK-R0-TCH-ADV-01` for the two
+  root Moderate advisories and their 7 production / 10 complete effect chains;
+- rated residual risk Low only inside the bounded demo-only R0 context and
+  attached fail-closed controls plus the `2026-09-24`/scope-expansion expiry;
+- advanced R0 to bounded Pass without accepting OD-01, BCK-05, R1/G1 or cloud.
 
 ### v0.2.2 — 2026-08-24
 
@@ -49,20 +57,22 @@
 
 ## 1. Verdict
 
-**Technical verdict: Amendments Required.**
+**Technical verdict: Pass — bounded tooling feasibility only.**
 
-The v0.3.2 candidate completed the bounded local and hosted R0 feasibility
+The v0.3.3 candidate completed the bounded local and hosted R0 feasibility
 matrix. Exact install, peer/engine resolution, compilation, tests, emulators,
 default-deny Rules, reproducibility and backendless Terraform validation passed
 on both supported hosted runner labels.
 
-This verdict does **not** accept `BCK05-OD-01` because the dated Moderate
-transitive-advisory disposition is unresolved. Therefore:
+The two root Moderate advisories have an explicit owner disposition under
+`BCK-R0-TCH-ADV-01`. It is valid only for the demo-only, loopback-only R0
+context through `2026-09-24`, or until immediately before R1/G1 or any real
+cloud/public-ingress work, whichever occurs first. Therefore:
 
 - `BCK05-OD-01` remains **Proposed**;
 - BCK-05 remains **Draft**;
-- R0 remains **Amendments Required**, although its bounded slice is Approved
-  and executed;
+- R0 is **Pass — bounded tooling feasibility only**, subject to the recorded
+  expiry, reassessment and revocation controls;
 - G1/R1, Firebase projects, billing, credentials and deployment remain blocked.
 
 ## 2. Review scope
@@ -125,7 +135,7 @@ metadata from the committed lock and retain the registry-integrity hashes.
 | TCH-TR-10 | Required | Multiple tools can mutate overlapping Google/Firebase resources. | Preserve one-writer matrix; `gcloud` is inspection/bootstrap exception only. |
 | TCH-TR-11 | Resolved for bounded R0 | Demo-only project identity, loopback hosts, absent credential variables, live probe and default-deny client tests passed locally and on both hosted legs. | This remains non-production evidence. |
 | TCH-TR-12 | Process | A local scaffold could be misread as product/backend authorization. | State tooling scaffold Present separately from product/cloud runtime Absent in every parent ledger and LAUNCH_STATUS. |
-| TCH-TR-16 | Blocking R0 Pass | Dated audit reports 7 production / 10 total Moderate transitive advisories while direct Firebase pins remain latest. | Obtain an explicit Moderate-risk disposition or replace with clean supported upstream releases; never force/downgrade silently. |
+| TCH-TR-16 | Closed for bounded R0 only | Dated audit reports two root Moderate advisories producing 7 production / 10 complete effect chains while direct Firebase pins remain latest. | Owner accepted `BCK-R0-TCH-ADV-01` through `2026-09-24` or earlier scope expansion; re-audit on graph change and never force/downgrade silently. |
 | TCH-TR-13 | Blocking Approval | Reviewed `hashicorp/setup-terraform` v4.0.1 resolves to an unsigned commit and exposes unused credential inputs. | Exclude it; install exact official Terraform archives after signature and SHA verification. |
 | TCH-TR-14 | Required | GitHub hosted OS labels do not freeze the underlying weekly image. | Use explicit OS labels and record resolved runner/image versions; claim semantic parity only. |
 | TCH-TR-15 | Required | setup-node can automatically enable dependency caching. | Set `package-manager-cache: false`; R0 proves cold locked installs. |
@@ -323,6 +333,6 @@ No cell may be filled automatically from the existence of this document.
 ---
 
 **Conclusion:** the bounded local and hosted implementation is technically
-operational. Hosted Windows/Linux parity is Pass. R0 Pass remains blocked by
-the explicit Moderate-advisory disposition. BCK05-OD-01 remains Proposed;
+operational. Hosted Windows/Linux parity is Pass. The explicit, expiring
+Moderate-advisory disposition closes R0 only. BCK05-OD-01 remains Proposed;
 product/cloud runtime, credentials and deployment remain absent.

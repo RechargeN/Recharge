@@ -1,9 +1,9 @@
 # BCK-R0-TCH-01 — Execution Result
 
 - Slice: **BCK-R0-TCH-01 v0.2**
-- Decision: **BCK-R0-TCH-DEC-01 v0.1 — Approved bounded execution**
+- Decision: **BCK-R0-TCH-DEC-01 v0.2 — Approved bounded execution and advisory disposition**
 - Execution date: **2026-08-24**
-- Status: **Local and hosted execution complete; Amendments Required before R0 Pass**
+- Status: **Pass — bounded tooling feasibility only; time-bounded advisory controls apply**
 - Product/cloud runtime: **Absent**
 - Base commit: `a6b04cbb079c330dd9ddc23d17ac42f9d31669e5`
 - Branch: `codex/backend-r0-toolchain`
@@ -148,11 +148,29 @@ The dated npm advisory checks found:
 - `GHSA-8988-4f7v-96qf` through the development-only Firebase CLI Pub/Sub path;
 - npm offers only forced, breaking direct-package downgrades; none was applied.
 
-The High/Critical CI threshold passes, but BCK05-OD01 §3 also says a vulnerable
-pin blocks R0 until amendment. Because that wording has not been weakened or
-silently reinterpreted, the overall R0 verdict is **Amendments Required** until
-an explicit dated Moderate-risk disposition is approved or clean upstream
-releases replace these paths.
+These are effect-chain counts from two root advisories, not 7 or 10 distinct
+vulnerabilities. The reachable-path review found:
+
+- `GHSA-w5hq-g745-h8pq`: the affected installed `uuid` path is used by the
+  observed `teeny-request` and `gaxios` consumers only as `uuid.v4()` without a
+  caller-provided output buffer; the advisory concerns the buffer-writing paths
+  for v3/v5/v6;
+- `GHSA-8988-4f7v-96qf`: the affected OpenTelemetry core is reachable only
+  through the development-only Firebase CLI Pub/Sub dependency path; R0 has no
+  public ingress or custom production transport.
+
+Forced direct-package downgrades or unsupported transitive major overrides
+would violate the reviewed compatibility graph and were not applied.
+
+The Product owner accepted `BCK-R0-TCH-ADV-01` at
+`2026-08-24T10:49:37Z`. The disposition is limited to this demo-only,
+loopback-only R0 context and is valid through `2026-09-24`, or until
+immediately before R1/G1 or any real cloud/public-ingress work, whichever comes
+first. It requires unchanged no-cloud/no-credential/no-personal-data controls,
+disabled lifecycle scripts, High/Critical fail gates and a fresh audit on each
+direct-pin/lockfile change or before expiry/scope expansion. Any control breach,
+dependency-graph change, reachable exploit path or severity escalation revokes
+the disposition and returns R0 to `Amendments Required`.
 
 ## 8. Cloud effect ledger
 
@@ -168,10 +186,9 @@ releases replace these paths.
 
 ## 9. Current verdict
 
-**Local and hosted implementation evidence is complete and technically
-operational, but R0 is not Pass.** Windows/Linux parity is Pass; the remaining
-blocker is the unresolved Moderate advisory disposition under the stricter
-BCK05-OD01 wording.
+**Pass — bounded tooling feasibility only.** Local and hosted evidence is
+complete, Windows/Linux parity is Pass, and the residual Moderate risk has an
+explicit time-bounded owner disposition with fail-closed controls.
 
 Scaffold presence and local/hosted green tests are not production backend readiness.
 BCK05-OD-01 remains Proposed; R1/G1 and all cloud/product backend activation

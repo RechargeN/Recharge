@@ -1,14 +1,14 @@
 # Recharge Backend — R0 Toolchain & Emulator Feasibility Slice
 
 - Slice ID: **BCK-R0-TCH-01**
-- Version: **0.2.1**
+- Version: **0.2.2**
 - Date: **2026-08-24**
-- Status: **Approved and implemented locally/hosted — Amendments Required before Pass**
+- Status: **Pass — bounded tooling feasibility only; advisory controls expire**
 - Runtime status: **R0 tooling scaffold Present; product/cloud runtime Absent**
-- Parent operations spec: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Toolchain standard: [BCK05-OD01-TCH-01 v0.3.2](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Technical pre-review: [BCK05-OD01-TCH-REV-01 v0.2.2](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
-- Approval record: [BCK-R0-TCH-DEC-01 v0.1](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
+- Parent operations spec: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Toolchain standard: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Technical pre-review: [BCK05-OD01-TCH-REV-01 v0.2.3](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
+- Approval record: [BCK-R0-TCH-DEC-01 v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
 - Architecture authority: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accountable owner: **Platform Operations owner**
 - Required reviewers: **Platform Security owner, Architecture owner**
@@ -17,6 +17,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.2 — 2026-08-24
+
+- recorded `BCK-R0-TCH-ADV-01` as an explicit owner acceptance of the residual
+  Moderate risk for bounded R0 only;
+- advanced the completed local/hosted result to Pass with demo-only,
+  loopback-only, no-cloud controls and a `2026-09-24`/scope-expansion expiry;
+- retained OD-01, R1/G1 and all product/cloud work as blocked.
 
 ### v0.2.1 — 2026-08-24
 
@@ -95,7 +103,7 @@ mutation immediately stops the slice and records a boundary incident.
 | R0-PRE-02 | Platform Operations owner named | Pass; combined-role bootstrap owner recorded |
 | R0-PRE-03 | Platform Security owner reviews credential/egress boundaries | Pass for local R0 bootstrap; independent production review absent |
 | R0-PRE-04 | Architecture owner confirms file map under ADR 0019 | Pass for exact v0.2 boundary |
-| R0-PRE-05 | tool pins rechecked for support/security | Amendments Required; direct pins remain current, but dated npm audit reports unresolved Moderate transitive advisories and the stricter BCK05-OD01 wording has no approved disposition |
+| R0-PRE-05 | tool pins rechecked for support/security | Pass for bounded R0; direct pins remain current and `BCK-R0-TCH-ADV-01` accepts the two root Moderate advisories with expiring controls; recheck is mandatory on graph/scope change or before `2026-09-24` |
 | R0-PRE-06 | exact base commit and pre-existing dirty files recorded | Pass; base `a6b04cbb…`, 37 documentation paths preserved in result record |
 | R0-PRE-07 | no cloud/Firebase credentials are exposed to the job | Pass at entry; 0 sensitive context names, no `.firebaserc`/root `firebase.json` |
 | R0-PRE-08 | rollback owner and evidence directory agreed | Pass; Product owner, `docs/evidence/backend/r0/` |
@@ -423,7 +431,8 @@ The workflow additionally:
 
 CI success is R0 feasibility evidence, not production release evidence.
 This exact v0.2 boundary was Approved and executed locally and on both hosted
-runner labels. The Moderate-advisory disposition remains required before R0 Pass; it is not
+runner labels. The `BCK-R0-TCH-ADV-01` disposition closes R0 only while its
+controls and expiry remain valid; it is not
 waived by CI success, and CI success does not change the production/cloud
 authorization boundary.
 
@@ -576,6 +585,8 @@ R0 completion alone does not approve R1/G1.
 and on both hosted runner labels.
 Exact local and hosted build, emulator, Rules, Terraform and reproducibility
 evidence is present, and Windows/Linux parity is Pass. The Moderate advisory
-disposition is unresolved. R0 is therefore Amendments Required, not Pass.
+risk has the explicit, expiring `BCK-R0-TCH-ADV-01` disposition. R0 is therefore
+**Pass — bounded tooling feasibility only**. `BCK05-OD-01`, R1/G1 and all
+product/cloud backend work remain blocked.
 Product/cloud backend capability, R1/G1, credentials, provisioning, deployment
 and production data processing remain unauthorized.

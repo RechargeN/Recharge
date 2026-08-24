@@ -1,14 +1,17 @@
 # Recharge Backend — R0 Approval Decision Record
 
 - ID: **BCK-R0-TCH-DEC-01**
-- Version: **0.1**
-- Date: **2026-08-23**
-- Status: **Approved — bounded R0 v0.2 execution only**
-- Runtime status: **R0 scaffold authorized; product/cloud runtime remains Absent**
-- Decision target: [BCK-R0-TCH-01 v0.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md)
-- Toolchain target: [BCK05-OD01-TCH-01 v0.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Technical review: [BCK05-OD01-TCH-REV-01 v0.2](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
-- Parent operations spec: [BCK-05 v0.2.13](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Version: **0.2**
+- Date: **2026-08-24**
+- Status: **Approved — bounded R0 v0.2 execution and time-bounded advisory disposition only**
+- Runtime status: **R0 tooling feasibility Pass; product/cloud runtime remains Absent**
+- Original execution target: [BCK-R0-TCH-01 v0.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md)
+- Current status reconciliation: [BCK-R0-TCH-01 v0.2.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md)
+- Advisory evidence reviewed: BCK05-OD01-TCH-01 v0.3.2,
+  BCK05-OD01-TCH-REV-01 v0.2.2 and the completed R0 result
+- Current toolchain record: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Current technical review: [BCK05-OD01-TCH-REV-01 v0.2.3](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
+- Parent operations spec: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - Architecture authority: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accountable approver: **RechargeN / Product owner acting as combined Platform coordinator**
 - Required boundary reviewers: **Platform Operations, Platform Security, Architecture**
@@ -37,6 +40,50 @@ Firebase, cloud, domain, deployment or production authorization.
 | Execution branch | `codex/backend-r0-toolchain` |
 | Signature evidence | owner reply in the controlling Codex task |
 | Signed UTC | `2026-08-23T23:43:37Z` |
+
+### 0.1 BCK-R0-TCH-ADV-01 — residual advisory disposition
+
+The Product owner explicitly responded `Одобряю BCK-R0-TCH-ADV-01` on
+2026-08-24 after receiving the dated dependency audit, reachable-path
+assessment, rejected unsafe remediation options and the exact bounded-risk
+request. This records **Accept with controls** for the residual npm advisory
+risk in R0 only.
+
+| Field | Recorded value |
+|---|---|
+| Decision ID | `BCK-R0-TCH-ADV-01` |
+| Verdict | **Accept with controls** |
+| Risk owner | `RechargeN / Product owner acting as combined Platform coordinator` |
+| Scope | bounded, demo-only R0 toolchain/emulator scaffold on the existing local and hosted test paths |
+| Root advisories | `GHSA-w5hq-g745-h8pq` / `CVE-2026-41907`; `GHSA-8988-4f7v-96qf` / `CVE-2026-54285` |
+| Audit effect chains | production graph: 7 Moderate; complete graph: 10 Moderate; 0 High and 0 Critical in both |
+| Residual-risk rating | **Low for the bounded R0 context only**; not a rating for stage, production or a public backend |
+| Validity | through `2026-09-24`, or until immediately before R1/G1 or any real cloud/public-ingress work, whichever occurs first |
+| Signature evidence | exact owner reply `Одобряю BCK-R0-TCH-ADV-01` in the controlling Codex task |
+| Signed UTC | `2026-08-24T10:49:37Z` |
+
+The acceptance is valid only while all controls below remain true:
+
+1. R0 stays demo-only, loopback-only and isolated from public ingress.
+2. No real Firebase/Google project, credential, identity, billing link,
+   deployment, personal data or production-derived data enters the slice.
+3. Dependency lifecycle scripts remain disabled and no forced downgrade,
+   unsupported override or peer/engine bypass is introduced.
+4. CI continues to fail on any High or Critical advisory and retains both
+   production-graph and complete-graph audit evidence.
+5. The audit and reachable-path assessment are repeated on every direct-pin or
+   lockfile change and before expiry, R1/G1 or any scope expansion.
+
+The disposition expires immediately if severity rises to High/Critical, an
+affected path becomes reachable, a listener becomes public/non-loopback, a
+cloud credential/project or non-demo data is introduced, the dependency graph
+changes without reassessment, or the validity deadline is reached. Expiry
+returns R0 to `Amendments Required`; it never silently renews.
+
+This decision closes the final bounded R0 evidence blocker and permits the R0
+result to be recorded as **Pass — bounded tooling feasibility only**. It does
+not accept `BCK05-OD-01`, approve BCK-05, start R1/G1, or authorize a cloud or
+product backend.
 
 ## 1. Purpose
 
@@ -272,10 +319,26 @@ a separate Accepted owner decision; R1/G1 and all cloud work remain blocked.
 30. **BCK-R0-DEC-AC-30:** R0 Pass is not backend production readiness.
 31. **BCK-R0-DEC-AC-31:** OD-01 Acceptance remains a separate decision.
 32. **BCK-R0-DEC-AC-32:** R1/G1 remain blocked after this decision record.
+33. **BCK-R0-DEC-AC-33:** residual-risk acceptance has a stable decision ID,
+    owner, timestamp and exact scope.
+34. **BCK-R0-DEC-AC-34:** advisory effect-chain counts are not represented as
+    distinct vulnerability counts.
+35. **BCK-R0-DEC-AC-35:** the accepted risk rating applies only to bounded R0.
+36. **BCK-R0-DEC-AC-36:** the disposition has a calendar expiry and an earlier
+    scope-expansion expiry.
+37. **BCK-R0-DEC-AC-37:** severity, reachability, ingress, credentials, data and
+    dependency-graph changes revoke the disposition fail-closed.
+38. **BCK-R0-DEC-AC-38:** direct-pin or lockfile change requires a fresh audit.
+39. **BCK-R0-DEC-AC-39:** forced downgrade and unsupported transitive override
+    are not accepted remediation.
+40. **BCK-R0-DEC-AC-40:** bounded R0 Pass does not accept OD-01, BCK-05, R1/G1
+    or cloud/product runtime.
 
 ---
 
-**Current conclusion:** bounded BCK-R0-TCH-01 v0.2 execution is Approved under
-the combined-role bootstrap disclosure. Product/cloud backend runtime, R1/G1,
-credentials, provisioning and deployment remain unauthorized. R0 result stays
-Pending until the executable evidence record is completed.
+**Current conclusion:** bounded BCK-R0-TCH-01 execution and
+`BCK-R0-TCH-ADV-01` are Approved under the combined-role bootstrap disclosure.
+The completed local/hosted evidence is therefore **Pass — bounded tooling
+feasibility only**, subject to the controls and expiry in §0.1. Product/cloud
+backend runtime, `BCK05-OD-01`, R1/G1, credentials, provisioning and deployment
+remain unauthorized.
