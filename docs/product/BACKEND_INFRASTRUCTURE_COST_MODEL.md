@@ -1,8 +1,8 @@
 # Recharge Backend — Infrastructure and Cost Control Model
 
 - Evidence ID: **BCK05-OD04-COST-01**
-- Version: **0.2**
-- Date: **2026-08-21**
+- Version: **0.3**
+- Date: **2026-08-24**
 - Decision served: **BCK05-OD-04**; supporting evidence for **OD-07**
 - Decision status: **Proposed — Product/Finance/Operations verdict pending**
 - Evidence status: **Draft — dated vendor and model review required**
@@ -11,7 +11,7 @@
 - Required reviewers: **Platform Operations, Product/Finance,
   Security/Privacy and Legal/Privacy where invoice/residency/tax facts apply**
 - Parent: [BCK-05](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Infrastructure decision: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md)
+- Infrastructure decision: [BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), candidate `OD07-A1-EU-MR-v1`
 - Reliability boundary: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md)
 - Recovery boundary: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md)
 - Architecture input: [Firebase Architecture v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
@@ -22,6 +22,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.3 — 2026-08-24
+
+- bound the existing A1 formulas and guardrails to the exact review-ready
+  `OD07-A1-EU-MR-v1` candidate: Firestore `eur3`, Functions/media
+  `europe-west1`, disabled `EU` export bucket;
+- retained all prices/guardrails as Draft planning evidence and required a
+  fresh exact EUR SKU/billing-account reconciliation before chargeable work;
+- no budget, billing account, resource or runtime was created.
 
 ### v0.2 — 2026-08-21
 
@@ -137,10 +146,12 @@ remain placeholders until an Approved provisioning slice.
 | B — regional platform | Standard Native `europe-west1` | 2nd gen `europe-west1` | regional Standard `europe-west1` | simplest/cheapest colocation candidate; lower regional resilience requires explicit DR evidence | benchmark and compare before OD-07 Acceptance |
 | C — Nordic regional | Standard Native `europe-north1` | 2nd gen `europe-north1` where all triggers supported | regional Standard `europe-north1` | geographically closer to Baltics, but service coverage, measured latency and recovery remain unknown | evidence alternative, not default |
 
-Recommendation: use A1 as the **calculator and stage-validation baseline**, not
-as an Accepted irreversible choice. OD-07 still requires location-specific EUR
-SKU export, Latvia/EE/LT latency thresholds, Legal/Privacy residency review,
-restore/export design and specialist verdicts.
+Recommendation: use A1 as the exact **`OD07-A1-EU-MR-v1` calculator and
+stage-validation baseline**, not as an already Accepted or provisioned choice.
+The decision-ready evidence supplies locations, thresholds and export/rollback
+design; the exact owner verdict, current EUR SKU/billing-account reconciliation,
+qualified production Legal/Privacy review and runtime measurements remain
+separate gates.
 
 ## 6. Environment resource and budget boundary
 
@@ -419,8 +430,10 @@ independent Finance, Operations, Security or Legal verdict.
 9. migration/rollback and no-silent-budget-raise rules are signed;
 10. BCK-01/02/05, D1 ledger and LAUNCH_STATUS update atomically.
 
-OD-07 remains Proposed until its separate location, latency, residency,
-security, export/restore and specialist gates pass.
+OD-07 remains Proposed until the exact OD07-DEC-01 owner verdict. Its
+engineering location/threshold/export package is decision-ready; current EUR
+SKU/Finance evidence, qualified production Legal/Privacy review and runtime
+measurements remain separate provisioning/activation gates.
 
 ## 18. Provisioning gate
 

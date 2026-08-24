@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.6**
+- Version: **1.7**
 - Date: **2026-08-24**
 - Status: **Draft ledger — OD-01 verdict recorded; D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.7](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.4](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.8](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.5](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
@@ -90,8 +90,8 @@ accepts its accountability.
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
 | BCK-03 v0.3.3 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
-| BCK-04 v0.4.10 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; review pending |
-| BCK-05 v0.2.17 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and BCK05-OD-01 Acceptance are Present, while other OD/specialist/stage/product-cloud evidence remains pending |
+| BCK-04 v0.4.11 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 boundary reconciled; broader review pending |
+| BCK-05 v0.2.18 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and BCK05-OD-01 Acceptance are Present; OD-07 is decision-ready but unsigned; other OD/specialist/stage/product-cloud evidence remains pending |
 | BCK-20 v0.2.2 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; review pending |
 | BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
@@ -107,7 +107,7 @@ accepts its accountability.
 | BCK05-OD01-DEC-01 v0.2 | D1-SIG-OPS + D1-SIG-SEC | Architecture/release boundary review | Accepted at `2026-08-24T15:33:18Z`; exact baseline only; G1/R1 remain blocked |
 | BCK05-OD02-IAM-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | D1-SIG-LEGAL where applicable and release/runtime owners | Proposed; exact claims/roles/plan/JIT evidence and specialist verdicts pending |
 | BCK05-OD07-REL-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | API, domain, incident and release owners | Proposed; exact toolchain/attestor/registry/policy/provider/runtime evidence pending |
-| OD-07 evidence | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN | Proposed; assigned; unsigned |
+| OD-07 evidence v0.5 + OD07-DEC-01 v0.1 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-FIN; qualified D1-SIG-LEGAL remains mandatory before production processing | `OD07-A1-EU-MR-v1` Review-ready; exact owner verdict unsigned; no cloud permission |
 | OD-09 evidence | D1-SIG-API | D1-SIG-OPS; later D1-SIG-BOOK/NOTIF | Proposed; assigned; D1 minimum only |
 | OD-10 evidence | D1-SIG-REF | D1-SIG-L10N/API/MOBILE/CONTENT/LEGAL | Proposed; assigned; unsigned |
 | OD-11 brief | D1-SIG-SEC + D1-SIG-LEGAL | Product/domain owners per feature | Open; assigned; no policy selected |
@@ -226,7 +226,8 @@ returns a §6 review record.
 ## 11. Next action
 
 The bounded numerical baseline, R0 evidence and exact BCK05-OD-01 verdict are
-recorded. Next, resolve the remaining IAM/release, OD-07 and specialist
+recorded. Next, record or amend the exact OD-07 verdict, then resolve the
+remaining IAM/release and specialist
 evidence using §6. Qualified
 Legal/Privacy evidence remains an external prerequisite wherever legal
 judgment is required. D1 remains blocked and no new runtime gate opens.

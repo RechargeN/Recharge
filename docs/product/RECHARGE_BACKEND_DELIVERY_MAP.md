@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.26
+- Версия: 2.4.27
 - Дата: 2026-08-24
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
@@ -13,6 +13,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.27.** OD-07 decision-readiness reconciliation without changing the
+Approved v2.4 coordination semantics:
+
+- `BCK-D1-OD07-EV-01 v0.5` selects the exact review candidate
+  `OD07-A1-EU-MR-v1` and `OD07-DEC-01 v0.1` supplies the unsigned verdict
+  contract;
+- OD-07 remains Proposed until the exact owner phrase; qualified production
+  Legal/Privacy, D1/G1/R1 and cloud/product gates remain independent;
+- BCK-01/BCK-04/BCK-05 traceability advances to v0.4.23/v0.4.11/v0.2.18;
+  no cloud resource or runtime effect exists.
 
 **v2.4.26.** BCK05-OD-01 owner-decision reconciliation without changing the
 Approved v2.4 coordination semantics:
@@ -460,15 +471,15 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.26)
+## 5. Реестр проектных документов — 22 (v2.4.27)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
-| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.22 — Present | Local R0 tooling scaffold only; product/cloud Absent |
-| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.26 | N/A |
+| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.23 — Present | Local R0 tooling scaffold only; product/cloud Absent |
+| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.27 | N/A |
 | BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.3.3 — Present | Absent |
-| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.10 — Present; OD-01/OD-09 Proposed; tabletop ready/not executed | Absent |
-| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.17 — Present; OD-01 Accepted at baseline v0.3.3 with controls; OD-02/03/04/05/07/08 Proposed; bounded R0 Pass; specialist evidence pending | Local R0 tooling scaffold only; product/cloud Absent |
+| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.11 — Present; OD-07 engineering candidate Review-ready; qualified production Legal/Privacy and OD-01/09 remain unresolved | Absent |
+| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.18 — Present; OD-01 Accepted; OD-07 decision-ready but unsigned; OD-02/03/04/05/07/08 Proposed; bounded R0 Pass | Local R0 tooling scaffold only; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Planned | Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Planned | Absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Planned | Absent |
@@ -861,7 +872,7 @@ Open -> Proposed -> Accepted | Deferred | Superseded
 | OD-04 | Open | Mobile Platform owner | Import identity mapping, conflict policy, checkpoint, retry, dedupe, rollback and user disclosure | BCK-18 + domain specs | Any local-to-cloud migration |
 | OD-05 | Open | Data Platform owner | Product analytics transport/destination, consent classes, residency, access, retention and deletion | BCK-21 | Product analytics enablement |
 | OD-06 | Open | Trust & Safety owner | Enforcement levels, auto-hide reconciliation with ADR 0013, response targets, appeal and evidence retention | BCK-22 | Production UGC cohort |
-| OD-07 | Proposed | Platform owner | Firebase project separation, Firestore edition and per-resource regions/data residency; immutable-location review | BCK-04, BCK-05 | R1 provisioning |
+| OD-07 | Proposed — `OD07-A1-EU-MR-v1` Review-ready | Platform owner | [evidence v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) and unsigned [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md); exact verdict required | BCK-04, BCK-05 | R1 provisioning |
 | OD-08 | Open | Identity owner | Provider account linking, recovery, deletion, duplicate accounts and local/mock-to-production identity mapping | BCK-06, BCK-18 | R2 production Identity |
 | OD-09 | Proposed | API Platform owner | Cross-domain event/outbox envelope, ordering, delivery, dedupe, replay, poison message and retention | BCK-03, BCK-05, BCK-13 | D3 effects/workers |
 | OD-10 | Proposed | Reference Data owner | LocalizedText wire format, locale fallback, revisioning, missing translation and content-language policy | BCK-20, BCK-03 | BCK-07 Approval |
@@ -1068,7 +1079,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 
 ## 20. Следующий шаг после утверждения
 
-Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.22
+Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.23
 находится в Review с recorded interim coordinator evidence. Следующий D1-шаг —
 закрытие Review/Approval blockers уже существующих BCK-03, BCK-04, BCK-05 и
 BCK-20 без обхода specialist approvals.
@@ -1086,10 +1097,10 @@ Firestore/Storage resources, production schemas, credentials или deployments.
 
 Следующий review package содержит только documentation evidence:
 
-1. BCK-01 v0.4.22 Review с traceability/reconciliation к §3 и
+1. BCK-01 v0.4.23 Review с traceability/reconciliation к §3 и
    [`BCK-01-REV-01`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
-2. BCK-02 v2.4.26 traceability/checksum;
-3. BCK-03 v0.3.3, BCK-04 v0.4.10, BCK-05 v0.2.17 и BCK-20 v0.2.2
+2. BCK-02 v2.4.27 traceability/checksum;
+3. BCK-03 v0.3.3, BCK-04 v0.4.11, BCK-05 v0.2.18 и BCK-20 v0.2.2
    coverage/blocker evidence без ложного повышения статуса;
 4. linked review evidence for
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),
@@ -1121,7 +1132,7 @@ Firestore/Storage resources, production schemas, credentials или deployments.
 11. accepted BCK-D1-DEC-01 plus
    [BCK-D1-REV-01](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md), whose
    current verdict remains `D1 exit blocked`;
-12. [BCK-D1-SIG-01 v1.6](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) and
-    [BCK-D1-OWN-REV-01 v1.4](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+12. [BCK-D1-SIG-01 v1.7](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) and
+    [BCK-D1-OWN-REV-01 v1.5](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
     with the OD-01 verdict and incomplete broader D1 specialist sign-offs;
 13. доказательство отсутствия product/cloud runtime changes.

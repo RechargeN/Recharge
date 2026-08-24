@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.7**
+- Version: **1.8**
 - Date: **2026-08-24**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
@@ -59,12 +59,12 @@ Approval, G1, R1 or cloud/product runtime authorization.
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
 | [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation | Accepted | semantic conflict closed |
-| [OD-07 evidence](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) | topology/options/source/measurement checklist | Draft evidence | OD-07 remains Proposed |
+| [OD-07 evidence v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | Review-ready; owner verdict unsigned | OD-07 remains Proposed |
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.6; OD-01 recorded; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.4; OD-01 recorded | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.7; OD-01 recorded; OD-07 decision-ready; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.5; OD-01 recorded; OD-07 verdict pending | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -127,7 +127,8 @@ Still blocking Approval:
 Ready for owner review of:
 
 - environment isolation, release, flags, observability and rollback boundaries;
-- OD-07 Option A versus alternatives and evidence checklist;
+- OD-07 exact `OD07-A1-EU-MR-v1` candidate, rejected alternatives, evidence
+  checklist and owner-verdict contract;
 - OD-09 transport ownership boundary;
 - BCK05-OD-08 incident-response boundary and exercise contract;
 - honest budget-alert, cost, recovery and runtime status.
@@ -173,7 +174,8 @@ Still blocking Approval:
 ## 5. Required review sequence
 
 1. **API Platform:** review BCK-03 and OD-09; record comments/decision evidence.
-2. **Platform Operations:** review BCK-05 and OD-07; prepare dated vendor facts,
+2. **Platform Operations:** review BCK-05 and supply the exact OD-07 verdict;
+   revalidate dated vendor facts before any irreversible command,
    models, thresholds and cost/recovery evidence without provisioning resources.
 3. **Security/Privacy + Legal/Privacy:** review BCK-04, OD-07 boundary and OD-11;
    keep age-sensitive paths disabled.

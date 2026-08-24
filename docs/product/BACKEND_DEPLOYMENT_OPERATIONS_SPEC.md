@@ -1,19 +1,21 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.17**
+- Version: **0.2.18**
 - Date: **2026-08-24**
 - Spec status: **Draft — Platform Operations review required**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.22](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.26](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.23](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.27](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Security/privacy boundary: [BCK-04 v0.4.10](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed)
+- Security/privacy boundary: [BCK-04 v0.4.11](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
-- Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.2 (Draft; OD-04 Proposed)
+- Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.3 (Draft; OD-04 Proposed; numerical baseline unchanged)
+- Infrastructure decision evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.5 (Review-ready; OD-07 Proposed)
+- Infrastructure owner decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.1 (Review; unsigned)
 - Reliability evidence: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) v0.1 (Draft; OD-03 Proposed)
 - Recovery evidence: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) v0.1 (Draft; OD-05 Proposed)
 - Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
@@ -33,6 +35,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.18 — 2026-08-24
+
+- completed the review-ready `OD07-A1-EU-MR-v1` resource/location matrix and
+  added the exact unsigned `OD07-DEC-01` owner-decision contract;
+- distinguished European location-controlled customer-content resources from
+  Firebase Authentication/global service processing and retained the qualified
+  Legal/Privacy production gate;
+- kept OD-07 Proposed, BCK-05 Draft, D1/G1/R1 blocked and cloud runtime Absent.
 
 ### v0.2.17 — 2026-08-24
 
@@ -577,8 +588,10 @@ reserved facts.
 ### 19.2 OD-07 — Proposed decision, not Accepted
 
 The complete comparison and sign-off checklist is
-[BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). Its presence is
-review preparation, not decision acceptance.
+[BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). The exact
+owner contract is
+[OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md). Their
+presence is review preparation, not decision acceptance.
 
 OD-07 Acceptance uses dated vendor facts, explicit cost/latency models,
 predeclared thresholds and an approved validation plan; it does not require
@@ -587,18 +600,22 @@ only after G1 and a separately Approved R1 non-production provisioning slice,
 and must pass those thresholds before production traffic. This removes a
 circular dependency without weakening the irreversible-location gate.
 
-**Recommended option A for evidence review:**
+**Recommended exact candidate `OD07-A1-EU-MR-v1`:**
 
-- three isolated Firebase/GCP projects: dev, stage, prod;
-- Firestore **Standard edition, Native mode** initially;
-- Firestore candidate location `eur3` multi-region;
-- Functions candidate region `europe-west1`, explicitly configured;
-- Storage uses an EU-compatible location selected with the same residency,
-  latency and egress analysis; no bucket is created until exact value accepted;
+- three isolated Firebase/GCP projects: dev, stage, prod, with logical handles
+  and deterministic provider-ID rules rather than invented availability;
+- Firestore **Standard edition, Native mode, `(default)`, `eur3`**;
+- Functions **2nd gen `europe-west1`**, explicitly configured in backend and
+  callable clients;
+- runtime media Storage **regional `europe-west1`**; disabled recovery/export
+  bucket **`EU` multi-region**;
 - EE/LT use the same platform/projects initially with market-level activation,
   unless Legal/residency/blast-radius evidence later requires a superseding ADR;
-- Analytics reporting location and any product-specific resource location are
-  decided separately and recorded per resource.
+- location-controlled customer content is European; Authentication/global
+  services and mandatory/global logs are disclosed separately and remain
+  production-disabled until their Security/Privacy/Legal gates;
+- Analytics and every other disabled product/global service require their own
+  activation decision and may not inherit this location claim.
 
 Why this is only Proposed: Firestore edition/location and several resource
 locations are creation-time or migration-significant choices. Acceptance
@@ -807,7 +824,7 @@ indexes, IAM, provider configuration, billing, backup or latency.
 
 | ID | Status | Owner | Decision/evidence | Blocks |
 |---|---|---|---|---|
-| OD-07 | Proposed option A | Platform + Security/Privacy | edition, project separation, exact per-resource location, residency/latency/cost/export review | BCK-05 Approval, G1/R1 |
+| OD-07 | Proposed — `OD07-A1-EU-MR-v1` decision-ready | Platform + Security/Privacy + Product/Finance | [evidence v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) and unsigned [OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md); exact owner phrase still required | BCK-05 Approval, G1/R1 |
 | BCK05-OD-01 | Accepted — baseline v0.3.3 with controls | Platform Operations + Platform Security | [standard status record v0.3.4](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.4](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [owner decision v0.2](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md), [R0 decision record v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [execution result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md); R0 advisory exception does not propagate into R1 | fresh audit/reachability review before any R1 execution |
 | BCK05-OD-02 | Proposed | Platform Security/Operations | [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md): keyless OIDC/WIF, isolated identities, permissions, approvals, lifecycle and break-glass; exact claims/roles/plan/JIT/runtime evidence pending | BCK-05 Approval |
 | BCK05-OD-03 | Proposed | Platform Operations + domain owners | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): Product baseline recorded; stage telemetry/alerts and specialist verdict pending | BCK-05 Approval |
@@ -864,7 +881,7 @@ therefore remains Draft.
 4. **BCK-05-AC-04:** production cannot select mock, emulator or dev adapters.
 5. **BCK-05-AC-05:** project/resource creation waits for Accepted OD-07.
 6. **BCK-05-AC-06:** OD-07 records edition and every location independently.
-7. **BCK-05-AC-07:** Standard/Native/`eur3`/`europe-west1` remain Proposed in v0.2.7.
+7. **BCK-05-AC-07:** `OD07-A1-EU-MR-v1` remains Proposed until the exact OD07-DEC-01 owner verdict.
 8. **BCK-05-AC-08:** LV activation never enables EE/LT implicitly.
 9. **BCK-05-AC-09:** one writer owns each operational record family.
 10. **BCK-05-AC-10:** Operations cannot mutate domain authority directly.
@@ -914,7 +931,7 @@ new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.2.17 the following remain absent:
+At v0.2.18 the following remain absent:
 
 - product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;

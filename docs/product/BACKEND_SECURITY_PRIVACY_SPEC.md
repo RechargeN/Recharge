@@ -1,18 +1,20 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.10**
-- Date: **2026-08-20**
+- Version: **0.4.11**
+- Date: **2026-08-24**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.23](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.27](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.10
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.11
+- Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.5 (Review-ready; OD-07 Proposed)
+- Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.1 (Review; unsigned)
 - Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.1 (Draft; OD-01 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
@@ -23,6 +25,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.11 — 2026-08-24
+
+- reconciled the exact OD-07 candidate with per-resource European locations and
+  explicitly disclosed Firebase Authentication US processing plus global
+  service/logging boundaries;
+- separated architecture location Acceptance from the still-mandatory qualified
+  processor/transfer/legal production verdict;
+- retained OD-07 Proposed, BCK-04 Draft and all production processing disabled.
 
 ### v0.4.10 — 2026-08-20
 
@@ -275,7 +286,8 @@ Draft/Review spec регистрируется и reconciled owners, а не р�
 - `OD-11` minors/age Open-decision constraints and Legal review brief;
 - retention/deletion/export/DSR модель;
 - logging/audit redaction правила;
-- data residency принципы (`OD-07` boundary, без выбора конкретного региона);
+- data residency принципы (`OD-07` boundary, без самостоятельного выбора или
+  принятия региона вне единого owner-decision contract);
 - backup/restore privacy требования;
 - migration/import security инварианты;
 - rollout/rollback/emergency-disable для security-relevant флагов;
@@ -1085,9 +1097,11 @@ index applicability, к logging не относится и здесь не ци�
 ## 22. Data residency и OD-07
 
 Evidence review is centralized in
-[BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). It verifies
-per-resource location semantics and enumerates measurements/sign-offs still
-required; it does not accept OD-07 or authorize provisioning.
+[BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), with the
+exact unsigned owner contract in
+[OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md). The package
+selects a decision-ready engineering candidate but does not accept OD-07 or
+authorize provisioning.
 
 `OD-07` — Proposed, owner Platform (совместно `BCK-04`/`BCK-05` по `BCK-01
 §21`), блокирует R1 provisioning. `FIREBASE_ARCHITECTURE.md §4.3`
@@ -1097,7 +1111,7 @@ required; it does not accept OD-07 or authorize provisioning.
 ECL-03 Decision Package D02 также содержит Booking-scoped location proposal;
 он не закрывает cross-domain OD-07 и не разрешает irreversible provisioning.
 
-BCK-04 фиксирует только boundary-требования:
+BCK-04 фиксирует boundary-требования:
 
 - LV/EE/LT residency — единая политика для всех трёх, если Legal review не
   потребует разделения;
@@ -1106,8 +1120,16 @@ BCK-04 фиксирует только boundary-требования:
 - до Accepted `OD-07` и прохождения G1 — physical provisioning запрещён
   Approved coordination gate `BCK-02 §18`; отдельного ADR, уже выбравшего
   global Firebase location, нет.
+- European Firestore/Storage/Functions placement is not a claim that all
+  Firebase processing is EU-only. Firebase Authentication's documented US
+  processing and every global service remain disabled for production until
+  processor/subprocessor, DPA/transfer, legal-basis, transparency and retention
+  review is complete.
+- OD-07 may accept the engineering topology without pretending to supply legal
+  advice; qualified Legal/Privacy approval remains a separate production
+  activation gate and cannot be replaced by the combined Product owner.
 
-**Open:** сам `OD-07` (region/edition), и связанный LV/EE/LT-специфичный
+**Open:** owner verdict for `OD-07` (the exact candidate is Review-ready), и связанный LV/EE/LT-специфичный
 market policy detail — принадлежит `BCK-20` для non-residency частей.
 
 ## 23. Backup/restore privacy
@@ -1462,8 +1484,9 @@ therefore remains Draft and cannot enter Review yet.
     domain-spec, safe default — запрещено" (§12.3).
 18. **BCK-04-AC-18:** §9–10 cross-page isolation правило (`Page A membership
     никогда не авторизует Page B`) присутствует явно, не подразумевается.
-19. **BCK-04-AC-19:** §22 не выбирает конкретный регион/edition за `OD-07`;
-    фиксирует только совместный `BCK-04`+`BCK-05` Approval boundary.
+19. **BCK-04-AC-19:** §22 может ссылаться на точный единый кандидат `OD-07`,
+    но не выбирает, не меняет и не принимает region/edition самостоятельно;
+    owner verdict остаётся совместным `BCK-04`+`BCK-05` boundary.
 20. **BCK-04-AC-20:** §20 не изобретает внутренний SLA/формат экспорта:
     statutory Article 12 пределы обязательны, а более строгие operational
     детали остаются `BCK04-OD-08`.
@@ -1535,7 +1558,7 @@ therefore remains Draft and cannot enter Review yet.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.10 отсутствует:
+На момент v0.4.11 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

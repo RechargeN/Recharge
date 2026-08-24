@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.4**
+- Version: **1.5**
 - Date: **2026-08-24**
 - Status: **Draft workbook — OD-01 accepted; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
@@ -78,7 +78,7 @@ models or review evidence before an effective verdict.
 |---|---|---|---|
 | Full backend threat model | `BCK04-OD-01` | [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) now provides assets, actors, trust boundaries, 36 threats, controls and residual risks | **Present as Draft; OD-01 Proposed; owner/independent verdict pending** |
 | Incident risk/severity model | `BCK04-OD-09`, `BCK05-OD-08` | [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) defines the response model; [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) supplies Scenario A, injects, evaluator key and blank result record | **Package ready/not executed; both decisions Proposed; owner/Legal verdict and completed result pending** |
-| Infrastructure choice record | `OD-07` | completed resource matrix, dated vendor facts, latency/cost models, thresholds, export/rollback plan | keep Option A Proposed until complete |
+| Infrastructure choice record | `OD-07` | [evidence v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) completes the resource matrix, dated vendor facts, latency/cost thresholds, residency limits and export/rollback plan; [OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) is unsigned | exact owner phrase required; keep Proposed until recorded |
 | Service targets | `BCK05-OD-03` | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) now supplies journey SLIs/SLOs, error budgets, burn alerts and release rules | **Product baseline recorded; OD-03 Proposed; domain/Operations specialist verdict and stage evidence pending** |
 | Recovery targets | `BCK05-OD-05` | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) now supplies record-family RPO/RTO, protection, isolated restore, privacy reconciliation and drills | **Product baseline recorded; OD-05 Proposed; Platform/Privacy/domain verdict and restore evidence pending** |
 | Cost containment | `BCK05-OD-04` | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) now supplies five envelopes, formulas, directional estimates, EUR alert levels and safe containment actions | **Product baseline recorded; OD-04 Proposed; Finance Inconclusive; Operations/EUR SKU/stage evidence pending** |
@@ -129,7 +129,8 @@ claim qualified legal advice.
 Until this input exists:
 
 - `OD-11` remains Open;
-- `OD-07` and `OD-10` cannot be Accepted;
+- `OD-07` is decision-ready but cannot become Accepted without its exact owner
+  phrase; `OD-10` still cannot be Accepted;
 - BCK-04 cannot be Approved;
 - affected production processing and market activation remain disabled.
 
@@ -140,7 +141,7 @@ These are recommendations for the assigned owner, not signatures.
 | Sign-off ID | Recommended verdict now | Blocking amendment/evidence |
 |---|---|---|
 | `D1-SIG-API` | Accept with required amendments | accept/defer API-DEC-01–05 explicitly; preserve Booking parity gate |
-| `D1-SIG-OPS` | Accept with required amendments | review OD-03/04/05 proposals; complete OD-07, stage/restore proof and deployment controls |
+| `D1-SIG-OPS` | Accept with required amendments | decide OD-07; review OD-03/04/05 proposals; complete stage/restore proof and deployment controls |
 | `D1-SIG-SEC` | Accept with required amendments | review the Proposed threat and incident models; run the tabletop and close Legal boundaries |
 | `D1-SIG-LEGAL` | Inconclusive | qualified Legal/Privacy evidence absent |
 | `D1-SIG-REF` | Accept with required amendments | complete OD-10 and reference distribution/deprecation decisions |
@@ -158,10 +159,10 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
 | BCK-03 v0.3.3 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
-| BCK-04 v0.4.10 | retain Draft | `BCK04-OD-01`/`BCK04-OD-09` are Proposed but unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.17 | retain Draft | BCK05-OD-01 is Accepted and bounded R0 is Pass, but OD-02/03/04/05/07/08 and platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-04 v0.4.11 | retain Draft | OD-07 boundaries are reconciled, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.18 | retain Draft | BCK05-OD-01 is Accepted and bounded R0 is Pass; OD-07 is decision-ready but unsigned; OD-02/03/04/05/07/08 and platform/specialist/stage/product-cloud evidence remain incomplete |
 | BCK-20 v0.2.2 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
-| OD-07 | retain Proposed | resource/cost/security/legal decision record incomplete |
+| OD-07 | retain Proposed pending exact verdict | `OD07-A1-EU-MR-v1` evidence and decision contract are complete; owner phrase is absent, and qualified production Legal/Privacy remains a separate gate |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
 | OD-11 | retain Open | qualified Legal/Privacy policy not supplied |
