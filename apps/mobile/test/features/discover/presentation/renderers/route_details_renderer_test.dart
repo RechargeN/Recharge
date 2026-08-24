@@ -254,4 +254,3 @@ PublishedRouteDiscoveryEntity _route({
     publishedAtUtc: DateTime.utc(2026, 7, 25, 10),
   );
 }
-
