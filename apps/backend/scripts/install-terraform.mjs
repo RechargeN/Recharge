@@ -79,6 +79,8 @@ const archivePath = path.join(downloadRoot, selected.name);
 const sumsPath = path.join(downloadRoot, sumsName);
 const signaturePath = path.join(downloadRoot, signatureName);
 const keyPath = path.join(downloadRoot, "hashicorp-pgp-keys.asc");
+const toolPath = (target) =>
+  path.relative(backendRoot, target).split(path.sep).join("/");
 
 await Promise.all([
   download(`${releaseBase}/${selected.name}`, archivePath),
@@ -95,9 +97,9 @@ const inspectKey = spawnSync(
     "--import-options",
     "show-only",
     "--import",
-    keyPath,
+    toolPath(keyPath),
   ],
-  { encoding: "utf8", shell: false },
+  { cwd: backendRoot, encoding: "utf8", shell: false },
 );
 if (
   inspectKey.status !== 0 ||
@@ -110,8 +112,9 @@ if (
 
 const importKey = spawnSync(
   "gpg",
-  ["--batch", "--homedir", gpgHome, "--import", keyPath],
+  ["--batch", "--homedir", toolPath(gpgHome), "--import", toolPath(keyPath)],
   {
+    cwd: backendRoot,
     encoding: "utf8",
     shell: false,
   },
@@ -129,8 +132,15 @@ if (importKey.status !== 0) {
 
 const verifySignature = spawnSync(
   "gpg",
-  ["--batch", "--homedir", gpgHome, "--verify", signaturePath, sumsPath],
-  { encoding: "utf8", shell: false },
+  [
+    "--batch",
+    "--homedir",
+    toolPath(gpgHome),
+    "--verify",
+    toolPath(signaturePath),
+    toolPath(sumsPath),
+  ],
+  { cwd: backendRoot, encoding: "utf8", shell: false },
 );
 if (verifySignature.status !== 0) {
   throw new Error("Terraform checksum-manifest signature verification failed");
@@ -155,18 +165,47 @@ if (actualSha !== selected.sha256) {
   throw new Error("downloaded Terraform archive checksum mismatch");
 }
 
+let windowsTar;
+if (platform === "win32") {
+  const systemRoot = process.env.SystemRoot;
+  if (systemRoot === undefined || !path.isAbsolute(systemRoot)) {
+    throw new Error("trusted Windows SystemRoot is unavailable");
+  }
+  windowsTar = path.resolve(systemRoot, "System32", "tar.exe");
+  if (!existsSync(windowsTar)) {
+    throw new Error("trusted Windows tar.exe is unavailable");
+  }
+}
+
 const extraction =
   platform === "win32"
-    ? spawnSync("tar.exe", ["-xf", archivePath, "-C", binRoot], {
-        encoding: "utf8",
-        shell: false,
-      })
-    : spawnSync("unzip", ["-q", archivePath, "-d", binRoot], {
-        encoding: "utf8",
-        shell: false,
-      });
+    ? spawnSync(
+        windowsTar,
+        ["-xf", toolPath(archivePath), "-C", toolPath(binRoot)],
+        {
+          cwd: backendRoot,
+          encoding: "utf8",
+          shell: false,
+        },
+      )
+    : spawnSync(
+        "unzip",
+        ["-q", toolPath(archivePath), "-d", toolPath(binRoot)],
+        {
+          cwd: backendRoot,
+          encoding: "utf8",
+          shell: false,
+        },
+      );
 if (extraction.status !== 0) {
-  throw new Error("Terraform archive extraction failed");
+  const diagnostic = `${extraction.stderr || extraction.stdout}`
+    .replaceAll(backendRoot, "<backend-root>")
+    .replace(/[\r\n]+/gu, " ")
+    .trim()
+    .slice(0, 500);
+  throw new Error(
+    `Terraform archive extraction failed (exit ${String(extraction.status)}): ${diagnostic || "no diagnostic output"}`,
+  );
 }
 
 const executable = path.join(
