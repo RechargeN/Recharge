@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.8**
+- Version: **1.9**
 - Date: **2026-08-24**
-- Status: **Draft ledger — OD-01 and OD-07 verdicts recorded; D1 sign-offs incomplete**
+- Status: **Draft ledger — OD-01/OD-07 recorded; BCK05-OD-02 decision-ready; D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.9](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.6](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.10](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.7](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
@@ -91,8 +91,8 @@ accepts its accountability.
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
 | BCK-03 v0.3.3 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
-| BCK-04 v0.4.12 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 Accepted with controls; broader review pending |
-| BCK-05 v0.2.19 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01 and cross-domain OD-07 Acceptance are Present; other OD/specialist/stage/product-cloud evidence remains pending |
+| BCK-04 v0.4.13 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 Accepted with controls; IAM boundary decision-ready/Proposed; broader review pending |
+| BCK-05 v0.2.20 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01 and cross-domain OD-07 Acceptance are Present; BCK05-OD-02 is decision-ready/unsigned and other OD/specialist/stage/product-cloud evidence remains pending |
 | BCK-20 v0.2.2 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; review pending |
 | BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
@@ -106,7 +106,7 @@ accepts its accountability.
 | BCK-R0-TCH-01 v0.2.2 | Product/Platform owner | D1-SIG-OPS + D1-SIG-SEC + Architecture owner | Pass — bounded tooling feasibility only; no R1/cloud authorization |
 | BCK-R0-TCH-DEC-01 v0.2 | Product/Platform owner | D1-SIG-OPS + D1-SIG-SEC + Architecture owner | Bounded execution and `BCK-R0-TCH-ADV-01` accepted; product/cloud runtime excluded |
 | BCK05-OD01-DEC-01 v0.2 | D1-SIG-OPS + D1-SIG-SEC | Architecture/release boundary review | Accepted at `2026-08-24T15:33:18Z`; exact baseline only; G1/R1 remain blocked |
-| BCK05-OD02-IAM-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | D1-SIG-LEGAL where applicable and release/runtime owners | Proposed; exact claims/roles/plan/JIT evidence and specialist verdicts pending |
+| BCK05-OD02-IAM-01 v0.2 + BCK05-OD02-DEC-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | D1-SIG-LEGAL where applicable and release/runtime owners | Decision-ready but unsigned; exact candidate/claims selected; executable fixtures/roles/bindings/JIT and runtime evidence pending |
 | BCK05-OD07-REL-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | API, domain, incident and release owners | Proposed; exact toolchain/attestor/registry/policy/provider/runtime evidence pending |
 | OD-07 evidence v0.6 + OD07-DEC-01 v0.2 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-FIN; qualified D1-SIG-LEGAL remains mandatory before production processing | Accepted at `2026-08-24T17:51:38Z` with controls; no cloud permission |
 | OD-09 evidence | D1-SIG-API | D1-SIG-OPS; later D1-SIG-BOOK/NOTIF | Proposed; assigned; D1 minimum only |
@@ -171,7 +171,7 @@ review record explicitly accepts the bounded follow-up diff.
 |---|---|---|---|
 | BCK-03 | complete; technical circular dependency removed | combined owner assigned; verdicts pending | Draft |
 | BCK-04 | complete; OD-11 status reconciled | combined owner assigned; verdicts and qualified Legal evidence pending | Draft |
-| BCK-05 | complete; OD-07 evidence split; bounded R0 Pass and BCK05-OD-01 Acceptance recorded | full Operations/Finance/Security/Legal, remaining OD, stage and product-cloud evidence incomplete | Draft |
+| BCK-05 | complete; OD-07 evidence split; bounded R0 Pass and BCK05-OD-01 Acceptance recorded; BCK05-OD-02 exact candidate/unsigned verdict Present | exact OD-02 owner verdict plus full Operations/Finance/Security/Legal, remaining OD, stage and product-cloud evidence incomplete | Draft |
 | BCK-20 | complete; documentation/executable fixtures separated | combined owner assigned; verdicts and qualified Legal evidence pending | Draft |
 
 No child is promoted merely because the combined package is structurally

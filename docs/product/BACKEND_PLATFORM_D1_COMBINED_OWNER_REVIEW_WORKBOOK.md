@@ -1,9 +1,9 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.6**
+- Version: **1.7**
 - Date: **2026-08-24**
-- Status: **Draft workbook — OD-01 and OD-07 accepted; remaining D1 verdicts required**
+- Status: **Draft workbook — OD-01/OD-07 accepted; BCK05-OD-02 decision-ready; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
@@ -83,7 +83,7 @@ models or review evidence before an effective verdict.
 | Recovery targets | `BCK05-OD-05` | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) now supplies record-family RPO/RTO, protection, isolated restore, privacy reconciliation and drills | **Product baseline recorded; OD-05 Proposed; Platform/Privacy/domain verdict and restore evidence pending** |
 | Cost containment | `BCK05-OD-04` | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) now supplies five envelopes, formulas, directional estimates, EUR alert levels and safe containment actions | **Product baseline recorded; OD-04 Proposed; Finance Inconclusive; Operations/EUR SKU/stage evidence pending** |
 | Numeric cross-model review | `BCK05-OD-03/04/05` | [BCK05-NUM-REV-01 v0.2](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) reconciles exact SLO v0.1, cost v0.2 and recovery v0.1, including the backup-cost correction and bounded verdict | **Product baseline accepted for stage validation; Operations/Security require evidence; Finance/Legal Inconclusive; no status promotion** |
-| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain status record v0.3.4, technical review v0.2.4, R0 v0.2.2/result, decisions v0.2, IAM and release models | **BCK05-OD-01 Accepted at baseline v0.3.3 with controls; OD-02/07 remain Proposed; other specialist and cloud/runtime evidence remains absent** |
+| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain status record v0.3.4, technical review v0.2.4, R0 v0.2.2/result, OD-01 decision v0.2, IAM model v0.2, unsigned IAM decision v0.1 and release model | **BCK05-OD-01 Accepted at baseline v0.3.3 with controls; OD-02 is decision-ready but remains unsigned/Proposed; BCK05-OD-07 remains Proposed; cloud/runtime evidence remains absent** |
 | Localization decision record | `OD-10`, `BCK20-OD-01`–`07` | exact LV policy, EE/LT disabled policy, review workflow, distribution/deprecation choices | keep OD-10 Proposed until complete |
 
 The combined owner may approve the completed technical record, but the record
@@ -159,8 +159,8 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
 | BCK-03 v0.3.3 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
-| BCK-04 v0.4.12 | retain Draft | OD-07 is Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.19 | retain Draft | BCK05-OD-01 and cross-domain OD-07 are Accepted and bounded R0 is Pass; OD-02/03/04/05/07/08 and platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-04 v0.4.13 | retain Draft | OD-07 is Accepted with controls and the IAM boundary is decision-ready, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.20 | retain Draft | BCK05-OD-01 and cross-domain OD-07 are Accepted and bounded R0 is Pass; OD-02 is decision-ready/unsigned, OD-03/04/05/07/08 and platform/specialist/stage/product-cloud evidence remain incomplete |
 | BCK-20 v0.2.2 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |

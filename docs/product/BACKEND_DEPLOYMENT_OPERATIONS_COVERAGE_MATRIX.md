@@ -1,13 +1,13 @@
 # BCK-05 — Deployment & Operations Coverage Matrix
 
 - ID: **BCK-05-PRE**
-- Version: **0.2.19**
+- Version: **0.2.20**
 - Date: **2026-08-24**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Platform Operations owner**
-- Target: [BCK-05 v0.2.19](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.28](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-05 v0.2.20](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.29](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_COVERAGE_MATRIX.md`
 
 ## 1. Purpose
@@ -21,15 +21,15 @@ select credentials, create runtime files or authorize production processing.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.24 | Review; local R0 scaffold Present, product/cloud runtime Absent | Parent architecture |
-| BCK-02 v2.4.28 | Approved semantic baseline | Registry/gates/template |
+| BCK-01 v0.4.25 | Review; local R0 scaffold Present, product/cloud runtime Absent | Parent architecture |
+| BCK-02 v2.4.29 | Approved semantic baseline | Registry/gates/template |
 | BCK-03 v0.3.3 | Draft; runtime Absent | API/event input; split-key conflict closed, not Approved |
-| BCK-04 v0.4.12 | Draft; runtime Absent; OD-01/09 Proposed; OD-07 Accepted with controls | Security/privacy input; BCK-04 itself not Accepted |
+| BCK-04 v0.4.13 | Draft; runtime Absent; OD-01/09 Proposed; OD-07 Accepted with controls | Security/privacy input; BCK-04 itself not Accepted |
 | BCK-20 v0.2.2 | Draft; runtime Absent | Market/reference revision input, not Accepted |
 | BCK-02-A1 v1.0 | Draft; docs only | Latvia/Baltics execution input |
 | Firebase Architecture v2.2 | Proposed | Candidate topology only |
 | ENV/CI policies | Accepted repository policy | Mandatory environment/CI constraints |
-| BCK-05 v0.2.19 | Draft; bounded R0 Pass, product/cloud runtime Absent; BCK05-OD-01 and cross-domain OD-07 Accepted; BCK05-OD-02/03/04/05/07/08 Proposed | `OD07-A1-EU-MR-v1` is accepted through evidence v0.6 and OD07-DEC-01 v0.2; specialist evidence and every cloud/product gate remain pending |
+| BCK-05 v0.2.20 | Draft; bounded R0 Pass, product/cloud runtime Absent; BCK05-OD-01 and cross-domain OD-07 Accepted; BCK05-OD-02 decision-ready/Proposed; OD-03/04/05/07/08 Proposed | `BCK05-IAM-A1-ENV-WIF-v1` and unsigned BCK05-OD02-DEC-01 are Present; exact owner verdict, specialist evidence and every cloud/product gate remain pending |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -43,7 +43,7 @@ select credentials, create runtime files or authorize production processing.
 | 6 | Data classes/projections | Full at design level | §7 |
 | 7 | Commands/queries/events/errors | Full at semantic level | §8; BCK-03 Draft blocker |
 | 8 | Versions/evolution/client | Full | §9 |
-| 9 | AuthZ/revocation | Full at target level | §10 plus BCK05-OD02-IAM-01; exact claims/roles/runtime evidence pending |
+| 9 | AuthZ/revocation | Full at target level | §10 plus BCK05-OD02-IAM-01 v0.2; exact candidate/claims are selected, while executable fixtures/roles/bindings/JIT/runtime evidence remain pending |
 | 10 | Persistence/transactions | Full boundary | §11; runtime absent |
 | 11 | IDs/time/reference | Full | §12 |
 | 12 | Idempotency/concurrency/failure | Full | §13 |
@@ -103,7 +103,7 @@ contract are in
 | BCK05-PRE-04 | Product baseline for numeric SLO/error budgets recorded; Operations/domain specialist verdict, stage telemetry and executable alerts absent | Operations + domains | Accepted [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) exact-version specialist review record plus stage evidence |
 | BCK05-PRE-05 | Product baseline for corrected cost model recorded; Finance remains Inconclusive and EUR SKU/stage reconciliation is absent | Product + Finance/Operations | Accepted [BCK05-OD04-COST-01 v0.3](BACKEND_INFRASTRUCTURE_COST_MODEL.md) specialist review record plus EUR evidence |
 | BCK05-PRE-06 | Product baseline for recovery targets recorded; Privacy/domain/Operations verdict, representative restore drill and executable protection absent | Platform + Privacy + domains | Accepted [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) specialist review record plus restore evidence |
-| BCK05-PRE-07 | Bounded R0 and BCK05-OD-01 exact owner evidence are complete; BCK05-OD-02/07 and OD-08 remain Proposed, while specialist/cloud evidence is absent | Applicable owners | Accepted/deferred BCK05-OD-02/07 decisions, incident review and completed [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) record; fresh pre-R1 toolchain audit |
+| BCK05-PRE-07 | Bounded R0 and BCK05-OD-01 exact owner evidence are complete; BCK05-OD-02 is decision-ready but unsigned, BCK05-OD-07 and OD-08 remain Proposed, while specialist/cloud evidence is absent | Applicable owners | exact BCK05-OD02 owner verdict, accepted/deferred BCK05-OD-07 decision, incident review and completed [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) record; fresh pre-R1 toolchain audit |
 | BCK05-PRE-08 | OD-09 transport/effects contract unresolved | API + Operations | Minimum Proposed for D1; Accepted before effects |
 
 ## 7. Structural checks
@@ -120,6 +120,6 @@ contract are in
 
 ## 8. Verdict
 
-BCK-05 v0.2.19 is structurally complete enough for specialist review preparation.
+BCK-05 v0.2.20 is structurally complete enough for specialist review preparation.
 It remains Draft until §6 blockers are addressed. No project, resource,
 credential, deployment, backup or runtime is authorized.

@@ -1,24 +1,42 @@
 # Recharge Backend — IAM, Workload Identity and Break-glass Model
 
 - ID: **BCK05-OD02-IAM-01**
-- Version: **0.1**
-- Date: **2026-08-21**
-- Status: **Draft evidence — BCK05-OD-02 Proposed**
+- Version: **0.2**
+- Date: **2026-08-24**
+- Status: **Review-ready evidence — BCK05-OD-02 Proposed**
 - Runtime status: **Absent**
 - Accountable owners: **Platform Security and Platform Operations**
 - Review coordinator: **RechargeN / Product owner**
-- Parent: [BCK-05 v0.2.12](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Security boundary: [BCK-04 v0.4.10](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Infrastructure dependency: [OD-07 evidence v0.4](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md)
+- Parent: [BCK-05 v0.2.20](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Security boundary: [BCK-04 v0.4.13](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Infrastructure dependency: [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) (Accepted with controls)
+- Candidate baseline: **BCK05-IAM-A1-ENV-WIF-v1**
+- Owner decision: [BCK05-OD02-DEC-01 v0.1](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) (Review; unsigned)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
 - Runtime effect: **none**
 
 ---
 
+## 0. Changelog
+
+### v0.2 — 2026-08-24
+
+- reconciled the model with Accepted OD-07 and the actual bounded R0 scaffold;
+- recorded immutable GitHub repository/owner IDs, current mutable OIDC subject,
+  public visibility, absent environments and unprotected `main` from read-only
+  repository evidence;
+- selected environment-local WIF pools/providers without adding a fourth cloud
+  project, exact trust conditions and a compatible `europe-west1` secret-data
+  placement;
+- separated architecture Acceptance from exact role grants, GitHub/GCP
+  mutations, bootstrap, stage/prod approval and runtime evidence;
+- added the exact unsigned owner-decision contract and retained all cloud
+  authority as absent.
+
 ## 1. Verdict first
 
-Recharge's proposed CI/cloud authority model is **keyless, environment-isolated
-and task-specific**:
+The review-ready baseline `BCK05-IAM-A1-ENV-WIF-v1` is **keyless,
+environment-isolated and task-specific**:
 
 - GitHub Actions authenticates through OIDC and Google Cloud Workload Identity
   Federation (WIF), never through committed or stored service-account keys;
@@ -33,14 +51,16 @@ and task-specific**:
 - project-wide `Owner`, `Editor` and blanket service-account impersonation are
   forbidden for pipelines and runtimes.
 
-This is the concrete candidate policy needed to move `BCK05-OD-02` from Open
-to **Proposed**. It does not create a workload identity pool, service account,
-IAM binding, GitHub environment, secret, credential or cloud project. Exact
-resource names and permission lists remain evidence gates before Acceptance.
+This is the exact architecture candidate for `BCK05-OD-02` Acceptance. It does
+not create a workload identity pool, service account, IAM binding, GitHub
+environment, branch rule, secret, credential or cloud project. Exact provider
+resource names, expanded permissions and observed policy evidence remain
+mandatory before any binding or executable R1 action, not invented
+prerequisites for accepting a fail-closed architecture policy.
 
 ## 2. Normative inputs and dated vendor facts
 
-Vendor facts were rechecked on 2026-08-21. A future executable slice must
+Vendor facts were rechecked on 2026-08-24. A future executable slice must
 revalidate them and pin action/tool versions.
 
 | Source | Verified fact | Recharge consequence |
@@ -52,6 +72,9 @@ revalidate them and pin action/tool versions.
 | [GitHub OIDC for Google Cloud](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-google-cloud-platform) | A cloud-side condition is required to prevent untrusted repositories from obtaining tokens; immutable repository identity is preferred. | Mutable repository names alone never authorize Recharge cloud access. |
 | [GitHub deployment environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) | Environments can restrict branches/tags, require reviewers and prevent self-review, but capabilities depend on repository visibility/plan. | Plan/visibility capability is an explicit gate; unavailable GitHub controls require an equivalent independently reviewed gate. |
 | [Temporary elevated access](https://docs.cloud.google.com/iam/docs/temporary-elevated-access) | Privileged Access Manager or an equivalent JIT design can grant temporary elevated access with audit evidence. | Break-glass is time-limited elevation, not a permanent privileged account. |
+| [GitHub OIDC reference](https://docs.github.com/en/actions/reference/security/oidc) | Numeric repository/owner IDs, `workflow_ref`, `workflow_sha`, environment and event claims are available; older repositories keep mutable default subjects unless they opt in. | Recharge must opt in to immutable subjects and constrain numeric IDs plus workflow/environment context before token exchange. |
+| [Secret Manager locations](https://docs.cloud.google.com/secret-manager/docs/locations) | Global secrets support user-managed replication in `europe-west1`; regional Secret Manager is a different service. | Secret payload placement can match OD-07 while global service/control-plane behavior remains disclosed. |
+| [Cloud Run secrets](https://docs.cloud.google.com/run/docs/configuring/services/secrets) | Cloud Run does not support regional Secret Manager secrets. | Recharge must not select a regional secret that Functions/Cloud Run cannot bind; compatibility remains fail-closed. |
 
 ## 3. Scope and non-goals
 
@@ -78,15 +101,31 @@ Excluded:
 
 ### 3.1 Current repository reality
 
-The repository currently has mobile verification workflows only. They do not
-request `id-token: write`, authenticate to Google Cloud, reference protected
-backend deployment environments or contain backend deploy jobs. No WIF pool,
-provider, service account, IAM intended-state file or `apps/backend` exists.
-This is the correct safe state before an Approved executable slice.
+The repository contains the bounded R0 local/emulator scaffold under
+`apps/backend` and `.github/workflows/backend-r0.yml`. That workflow has only
+`contents: read`, pins its three Actions to full SHAs, rejects cloud context and
+has no deployment authority. It is not a release/deploy pipeline.
 
-Existing action references and GitHub repository plan/visibility still require
-separate hardening/capability evidence; this document does not relabel current
-mobile CI as a compliant backend release pipeline.
+Read-only GitHub evidence checked on 2026-08-24 records:
+
+| Fact | Observed value |
+|---|---|
+| repository | `RechargeN/Recharge` |
+| repository ID | `1213588766` |
+| owner ID | `277012929` |
+| visibility | `public` |
+| created | `2026-04-17T14:41:11Z` |
+| default branch | `main` |
+| OIDC subject setting | `use_default=true`, `use_immutable_subject=false` |
+| GitHub environments | none |
+| `main` branch protection | absent (`404 Branch not protected`) |
+| cloud-bearing workflow | absent |
+| WIF/IAM/secret/cloud resources | absent |
+
+Public visibility makes GitHub environment protection capabilities available
+on current plans, but capability is not configuration evidence. Until immutable
+OIDC, protected source and exact environments are configured and negatively
+tested by a separate Approved slice, no workflow may request cloud authority.
 
 ## 4. Trust-boundary model
 
@@ -112,13 +151,15 @@ identity.
 
 ### 5.1 Control plane
 
-Candidate A is one dedicated identity/control project containing the GitHub
-WIF pools/providers and non-secret trust configuration. It is recommended by
-the current vendor guidance but remains conditional on OD-07 topology,
-organization availability, cost and Security review.
+`BCK05-IAM-A1-ENV-WIF-v1` selects one environment-local `global` WIF
+pool/provider inside each Accepted OD-07 project: dev, stage and prod. A fourth
+dedicated identity project is not added. Although Google recommends central
+pool management for larger organizations, adding a fourth project would expand
+the Accepted OD-07 topology and introduce cross-project impersonation. Recharge
+instead uses project-local deployment service accounts and compensating
+provider/IAM drift controls.
 
-Minimum logical separation is mandatory even if a dedicated project is not
-selected:
+Mandatory logical separation:
 
 | Boundary | Required separation |
 |---|---|
@@ -127,8 +168,10 @@ selected:
 | `github-prod` | prod environment/release conditions and prod deploy identity |
 
 No binding grants an entire pool, GitHub organization or repository all three
-environments. Every grant binds the smallest principal/attribute set supported
-by the chosen immutable claim format.
+environments. Each provider and service account exists only in its environment
+project; every grant binds the smallest principal/attribute set supported by
+the immutable claim format. A later dedicated-project proposal requires a
+superseding OD-07/IAM decision and cross-project threat review.
 
 ### 5.2 Identity catalogue
 
@@ -188,6 +231,34 @@ Third-party actions are allowlisted and pinned to a full commit SHA. Dependabot
 or equivalent monitoring tracks pinned action updates; tag-only references do
 not satisfy the production gate.
 
+### 6.1 Exact Recharge trust candidate
+
+Before any cloud-bearing job, the repository opts in to GitHub immutable
+subject claims. The expected environment subject is:
+
+```text
+repo:RechargeN@277012929/Recharge@1213588766:environment:<backend-environment>
+```
+
+Each environment provider maps and constrains at least:
+
+| Claim | Required value |
+|---|---|
+| `iss` | `https://token.actions.githubusercontent.com` |
+| `aud` | exact environment provider resource/audience recorded by R1 |
+| `repository_id` | `1213588766` |
+| `repository_owner_id` | `277012929` |
+| `repository_visibility` | `public`; visibility change fails closed pending review |
+| `workflow_ref` | `RechargeN/Recharge/.github/workflows/backend-deploy.yml@refs/heads/main` |
+| `ref` | `refs/heads/main` |
+| `environment` | exact `backend-dev`, `backend-stage` or `backend-prod` for that provider |
+| `event_name` | dev: `push` or `workflow_dispatch`; stage/prod: `workflow_dispatch` only |
+
+`workflow_sha`, run ID/attempt and actor ID are audit evidence, not stable
+authorization identities. Pull requests and forks never match. R1 must first
+configure the immutable GitHub subject, then capture a sanitized no-cloud token
+claim fixture and prove every negative variant before creating a WIF binding.
+
 ## 7. Permission and role contract
 
 ### 7.1 Grant rules
@@ -240,10 +311,13 @@ production promotion until reconciled.
 | stage | exact verified manifest; approved source ref | one named non-author approval | stage WIF only |
 | prod | same manifest validated on stage; change/release record; all gates green | two distinct accountable approvals, no self-approval | prod WIF only after approval |
 
-If the current GitHub plan/visibility cannot enforce the required stage/prod
-controls, production remains blocked until an equivalent external approval gate
-is selected, evidenced and fail-closed. A chat acknowledgement is not a deploy
-approval.
+GitHub's native required-reviewer rule requires only one approval from its
+reviewer list. Therefore the production two-person rule cannot be claimed from
+one GitHub environment alone. Prod requires both a signed change/release
+approval and a distinct GitHub environment approval, with actual identities
+proved different and self/admin bypass disabled. Until at least two qualified
+people exist and the controls are configured, production deployment remains
+blocked. A chat acknowledgement is not a deploy approval.
 
 Deployment concurrency is one active promotion per environment. Approval is
 bound to manifest digest, environment, expected current revision and expiry;
@@ -288,6 +362,23 @@ There is no routine key exception in this model. A provider limitation that
 requires a long-lived key blocks Acceptance and requires a new bounded Security
 decision with owner, expiry, storage, rotation, revocation and migration back
 to keyless authentication.
+
+### 10.1 Secret placement and binding
+
+The exact candidate for future runtime secrets is the global Secret Manager
+resource model with **user-managed replication only in `europe-west1`**. The
+regional Secret Manager service is rejected for Functions/Cloud Run binding
+because Cloud Run does not support regional secrets.
+
+This choice means secret payload versions are placed in `europe-west1`, while
+service metadata/control-plane processing is not claimed to be region-only.
+Each secret has per-secret accessor IAM, separate administration/rotation
+authority, no project-wide accessor grant and no value in GitHub.
+
+Secrets remain disabled until an Approved compatibility slice proves the exact
+Firebase Functions v2/Cloud Run binding or direct-access path, version/rotation
+behavior, regional replication observation, audit/redaction, revocation and
+rollback. WIF bootstrap and deployment do not require a stored cloud secret.
 
 ## 11. Bootstrap and lifecycle
 
@@ -449,7 +540,7 @@ cross-platform path, exact provider/action SHAs and generated/manual ownership.
 
 | Evidence | Required proof | Gate |
 |---|---|---|
-| Claim fixtures | allowed exact claims pass; fork/PR/wrong repo/ref/environment fail | before BCK05-OD-02 Acceptance |
+| Claim fixtures | allowed exact claims pass; fork/PR/wrong repo/ref/environment fail | before any WIF binding or cloud-bearing job; architecture Acceptance alone creates neither |
 | Keyless proof | no user-managed SA key exists or is accepted by workflow | G1/R1 |
 | Permission expansion | no basic role, wildcard escalation or unrelated resource | every IAM change |
 | Cross-environment negative | dev/stage principal cannot reach prod; prod cannot use dev trust | R1 |
@@ -465,16 +556,17 @@ cross-platform path, exact provider/action SHAs and generated/manual ownership.
 Skipped, manual-without-record, timed-out or provider-unavailable checks are
 `Inconclusive`, never Pass.
 
-## 18. Open evidence and decisions
+## 18. Decision dispositions and remaining gates
 
-| ID | State | Required answer | Blocks |
+| ID | State in v0.2 | Selected answer / remaining gate | Blocks |
 |---|---|---|---|
-| IAM-OD-01 | Open | dedicated identity/control project versus isolated in-project providers, reconciled with OD-07 | BCK05-OD-02 Acceptance |
-| IAM-OD-02 | Open | exact immutable GitHub OIDC claim/sub format for the current repository | any WIF binding |
-| IAM-OD-03 | Open | exact per-identity resource roles/permissions reconciled to proposed [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) after R0 compatibility | BCK05-OD-02 Acceptance |
-| IAM-OD-04 | Open | GitHub repository visibility/plan and enforceable environment controls | stage/prod deployment |
-| IAM-OD-05 | Open | JIT/PAM tool and qualified two-person production roster | production/break-glass |
-| IAM-OD-06 | Open | organization/folder availability and enforceable key/default-SA constraints | G1 |
+| IAM-OD-01 | Selected for owner review | environment-local `global` WIF pool/provider and deployment identity in each OD-07 project; no fourth project | supersession only if a central project is later required |
+| IAM-OD-02 | Selected for owner review | immutable subject opt-in plus exact numeric IDs and §6.1 claim matrix; sanitized claim/negative fixtures still required | any WIF binding |
+| IAM-OD-03 | Deferred with fail-closed control | one per-identity expanded permission manifest is mandatory before each binding; no generic role list may be accepted early | each IAM binding and BCK-05 Approval evidence |
+| IAM-OD-04 | Capability verified; configuration absent | public repository supports environments/review rules, but no environment or `main` protection exists | any cloud workflow; stage/prod deployment |
+| IAM-OD-05 | Deferred with fail-closed control | PAM/equivalent and qualified two-person roster must be selected and rehearsed | production and break-glass |
+| IAM-OD-06 | Deferred with fail-closed control | effective project/parent key-creation, key-upload and default-SA policy must be read back; organization availability is not assumed | G1/bootstrap |
+| IAM-OD-07 | Selected for owner review | global Secret Manager resource with user-managed `europe-west1` replication; runtime binding disabled until compatibility proof | any runtime secret |
 
 Fail-closed default: no cloud-bearing workflow, service-account key, production
 promotion or privileged emergency access until the applicable row is resolved.
@@ -482,10 +574,10 @@ promotion or privileged emergency access until the applicable row is resolved.
 ## 19. Acceptance sequence
 
 ```text
-BCK05-OD02-IAM-01 Proposed
+BCK05-OD02-IAM-01 v0.2 Review-ready
   -> Platform Security + Operations exact-version review
-  -> resolve IAM-OD-01..06
-  -> BCK05-OD-02 Accepted
+  -> exact BCK05-OD02-DEC-01 owner verdict
+  -> BCK05-OD-02 Accepted as architecture policy only
   -> separately Approved non-production bootstrap/executable slice
   -> negative WIF/IAM/drift/revocation evidence
   -> stage deployment identity validation
@@ -547,3 +639,20 @@ does not automatically prove production readiness.
 48. **BCK05-IAM-AC-48:** inconclusive evidence is never Pass.
 49. **BCK05-IAM-AC-49:** Proposed status creates no resource or credential.
 50. **BCK05-IAM-AC-50:** runtime requires a separate Approved executable slice.
+51. **BCK05-IAM-AC-51:** one exact `BCK05-IAM-A1-ENV-WIF-v1` baseline is named.
+52. **BCK05-IAM-AC-52:** environment-local WIF does not silently add a fourth project.
+53. **BCK05-IAM-AC-53:** repository and owner numeric IDs are exact dated evidence.
+54. **BCK05-IAM-AC-54:** immutable subject opt-in precedes every cloud token job.
+55. **BCK05-IAM-AC-55:** absent main protection/environments block cloud authority.
+56. **BCK05-IAM-AC-56:** GitHub feature availability is not configuration proof.
+57. **BCK05-IAM-AC-57:** secret payload replication is `europe-west1` without claiming a regional control plane.
+58. **BCK05-IAM-AC-58:** exact permissions and effective key policy precede each binding.
+59. **BCK05-IAM-AC-59:** absent JIT tool/two-person roster blocks production, not policy review.
+60. **BCK05-IAM-AC-60:** Acceptance creates no GitHub/GCP mutation, runtime or `main` merge authority.
+
+---
+
+**Current conclusion:** `BCK05-IAM-A1-ENV-WIF-v1` is decision-ready and
+recommended, but BCK05-OD-02 remains **Proposed** until the exact owner verdict
+in BCK05-OD02-DEC-01 is recorded. Every GitHub/GCP mutation and cloud/runtime
+action remains blocked.
