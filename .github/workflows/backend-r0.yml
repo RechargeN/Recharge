@@ -3,19 +3,19 @@ name: Backend R0 toolchain and emulator feasibility
 on:
   pull_request:
     paths:
-      - '.github/workflows/backend-r0.yml'
-      - 'apps/backend/**'
-      - 'packages/api_contracts/schema/booking/v1/**'
-      - 'docs/evidence/backend/r0/**'
-      - 'docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md'
-      - 'docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md'
-      - 'docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md'
-      - 'docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md'
+      - ".github/workflows/backend-r0.yml"
+      - "apps/backend/**"
+      - "packages/api_contracts/schema/booking/v1/**"
+      - "docs/evidence/backend/r0/**"
+      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md"
+      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md"
+      - "docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md"
+      - "docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md"
   push:
     paths:
-      - '.github/workflows/backend-r0.yml'
-      - 'apps/backend/**'
-      - 'packages/api_contracts/schema/booking/v1/**'
+      - ".github/workflows/backend-r0.yml"
+      - "apps/backend/**"
+      - "packages/api_contracts/schema/booking/v1/**"
   workflow_dispatch:
 
 permissions:
@@ -33,9 +33,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-24.04
-          - windows-2025
+        include:
+          - os: ubuntu-24.04
+            java_version: 21.0.12+8
+          - os: windows-2025
+            # setup-java exposes the same Temurin build with its Windows LTS suffix.
+            java_version: 21.0.12+8.0.LTS
 
     steps:
       - name: Checkout without persisted authority
@@ -60,7 +63,7 @@ jobs:
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
           distribution: temurin
-          java-version: 21.0.12+8
+          java-version: ${{ matrix.java_version }}
           check-latest: false
           verify-signature: true
           overwrite-settings: false
