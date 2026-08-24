@@ -3,6 +3,7 @@ import 'create_availability.dart';
 import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
 import 'place_draft_data.dart';
+import 'rental_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
 
@@ -107,6 +108,7 @@ class CreateDraftEntity {
     this.findPeopleData,
     this.routeData,
     this.scenarioData,
+    this.rentalData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -179,6 +181,7 @@ class CreateDraftEntity {
   final FindPeopleDraftData? findPeopleData;
   final RouteDraftData? routeData;
   final ScenarioDraftData? scenarioData;
+  final RentalDraftData? rentalData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -358,6 +361,8 @@ class CreateDraftEntity {
     bool clearRouteData = false,
     ScenarioDraftData? scenarioData,
     bool clearScenarioData = false,
+    RentalDraftData? rentalData,
+    bool clearRentalData = false,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -448,6 +453,7 @@ class CreateDraftEntity {
       scenarioData: clearScenarioData
           ? null
           : (scenarioData ?? this.scenarioData),
+      rentalData: clearRentalData ? null : (rentalData ?? this.rentalData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),
