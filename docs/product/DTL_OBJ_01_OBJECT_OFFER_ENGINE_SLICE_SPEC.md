@@ -1,22 +1,36 @@
 # RECHARGE — DTL-OBJ-01: Object / Offer Engine Slice Spec (Phase 1)
 
-Версия: v0.4 (2026-08-24) — Rental Create prerequisite resolved,
-implementation unblocked.
-Статус: **Approved — ready to implement.** Prerequisite closed
-2026-08-24: Rental Create stabilized in a separate worktree (6
-commits: domain/data/application-controller/presentation/tests/docs),
-merged into `worktree-dtl-fnd-01`, and the full gate suite re-run on
-the merged branch is green (`flutter analyze` 0 issues, `flutter test`
-all passing with one pre-existing, explicitly tracked
-`skip: true`/TODO golden test unrelated to this work, boundary gate 0
-violations/71-71 budget unchanged, `git diff --check` clean — see
-`docs/architecture/LAUNCH_STATUS.md` Execution Log, 2026-08-24, and
-`docs/product/RENTAL_CREATE_STABILIZATION_PLAN.md` §8). Implementation
-of this slice starts now.
+Версия: v0.5 (2026-08-24) — Rental Create git-hygiene prerequisite
+resolved, но обнаружен второй, отдельный блокер: publication lifecycle.
+Статус: **Blocked on Rental publication lifecycle.** Rental Create
+prerequisite (git-история/раздельные коммиты) закрыт — см. раздел ниже.
+Но при подготовке file plan для §3 (Rental publication-sink vertical)
+обнаружено: текущий `CreateController.publishDraft()` →
+`CreateRepositoryImpl.publishDraft()` для Rental (как и для
+Event/Place/Activity/FindPeople — общий generic-путь) **всегда**
+переводит черновик в `pending_review`, никогда напрямую в `published`
+(`create_controller.dart:3525`,
+`create_repository_impl.dart:292/299`). Канонический
+`RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md` §16 прямо запрещает показывать
+`pending_review` в Discover (line 912) и явно относит выбор
+`pending_review | published` к отдельной **application policy**
+(§13.8, §16.1 шаг 12), которую `RNT-CRT-01` **не реализует** — §15.2
+того же документа явно ограничивает `RNT-CRT-01` только mock
+`pending_review`, "unless trusted test policy authorizes direct
+publish" — а такой policy сегодня в коде нет, хотя capability-сигнал
+(`publish.rental.direct`/`canPublishRentalDirect`) уже существует с
+момента Rental-стабилизации. Вызов `sink.activate(...)` сразу после
+сегодняшнего `publishDraft()` (как предполагал file plan) преждевременно
+открыл бы неодобренный Rental в Discover — прямое нарушение канонической
+спеки. Нужен отдельный bounded slice `RNT-PUB-01` до продолжения
+`DTL-OBJ-01` §3 (см. новый раздел «Rental publication lifecycle —
+Blocked» ниже). `RentalDetailsPage`/`app_router.dart` часть file plan
+(§4, read-сторона) остаются в силе без изменений — блокер касается
+только write-стороны (§3).
 
 Runtime effect (этого документа): **none**.
 
-## Rental Create prerequisite — resolved (было: Blocked)
+## Rental Create prerequisite (git-история) — resolved
 
 Historical record, kept for context (was blocking 2026-08-24 through
 the same day's later prerequisite pass):
@@ -58,9 +72,58 @@ Rental-фрагменты — высокий риск сломать что-то
 §8 для полной трассировки, включая 3 disclosed-отклонения от
 исходного 7-файлового плана, найденные только сквозным прогоном
 тестов). Rental Create теперь доступен в этой ветке как committed,
-gate-green prerequisite. Реализация `DTL-OBJ-01` начинается ниже по
-уже согласованному в предыдущих раундах содержанию плана (пересмотр
-`Draft for review` → `Approved` в силе).
+gate-green prerequisite. Этот конкретный (git-hygiene) блокер закрыт.
+
+## Rental publication lifecycle — Blocked (второй, отдельный блокер)
+
+Обнаружено 2026-08-24 при подготовке file plan для §3 этого документа
+(Rental publication-sink vertical), до написания какого-либо кода.
+
+**Проблема.** `sink.activate(...)` (§3.5) должен вызываться только для
+листингов в состоянии `published` — канонический
+`RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md` §16 (line 912): «`pending_review`
+отсутствует в Discover». Но единственный сегодняшний publish-путь для
+Rental — общий с Event/Place/Activity/FindPeople generic-путь
+`CreateController.publishDraft()` (`create_controller.dart:3525`) →
+`CreateRepositoryImpl.publishDraft()` (`create_repository_impl.dart:292,
+299`) — **всегда** устанавливает `DraftStatus.pendingReview`/
+`PublishStatus.pendingReview`, без исключений и без ветвления по
+capability. Вызов `sink.activate(...)` сразу после этого преждевременно
+показал бы в Discover неодобренный Rental.
+
+**Почему это не просто «добавить if» в существующий hook.** Канонический
+документ прямо относит выбор `pending_review | published` не к Create
+UI, а к отдельной **application policy**:
+
+- §13.8: «Author не выбирает moderation result. Application policy
+  возвращает `pending_review` или trusted direct `published`.»
+- §16.1 шаг 12: «policy-selected `pending_review | published` result».
+- §15.2: «`RNT-CRT-01` may simulate submit locally, but ... it is not
+  production publication ... unless trusted test policy authorizes
+  direct publish» — то есть уже реализованный (и смёрженный) `RNT-CRT-01`
+  **сознательно** ограничен только mock `pending_review`; trusted
+  direct-publish policy — заявленно отдельная, ещё не реализованная
+  часть контракта, не упущение этой стабилизации.
+- §4.2 Operation matrix уже называет `Direct publish` отдельной
+  operation, gated `publish.rental.direct` — capability-сигнал
+  (`canPublishRentalDirect`) уже добавлен в `CreateController` во время
+  Rental-стабилизации, но никак не влияет на фактический publish-путь
+  сегодня.
+
+**Решение.** Отдельный bounded slice `RNT-PUB-01` — trusted local/mock
+policy, решающая `pending_review | published` для Rental, точно по
+контракту §13.8/§16.1/§4.2. Только `published`-результат с валидной
+публичной проекцией может вызывать `sink.activate`; `pending_review`
+обязан продолжать давать `notFound` в Discover (как и сегодня — просто
+потому что `sink.activate` не вызывается вообще). До Approved
+`RNT-PUB-01` §3 этого документа не реализуется.
+
+**Что не блокируется.** §4 (Rental loader, read-сторона) и `RentalDetailsPage`/
+`app_router.dart`-часть file plana (см. предыдущий раунд обсуждения)
+не зависят от publication lifecycle и могут готовиться параллельно —
+но без реального Rental-контента для показа (`sink.activate` не
+вызван) для сквозного OBJ-AC-03 end-to-end теста всё равно нужен
+`RNT-PUB-01`.
 
 ## Что изменилось относительно v0.2
 
