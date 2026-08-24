@@ -9,17 +9,28 @@ import '../../domain/repositories/route_safety_reporting_port.dart';
 import 'details_renderer.dart';
 
 /// [DetailsRenderer] that reproduces, unchanged, the Details layout that
-/// shipped before `DTL-FND-01`: the same hero, summary, published-route
-/// card, action hub, organizer, info grid, highlights, location card and
-/// bottom bar — for Event, Activity, Place and (still bolted on as before)
-/// Route.
+/// shipped before `DTL-FND-01`: the same hero, summary, action hub,
+/// organizer, info grid, highlights, location card and bottom bar — for
+/// Event, Activity and Place.
 ///
 /// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this class
 /// proves the shell/renderer abstraction works for a real consumer. It
 /// does **not** implement the target Object/Offer section matrix
 /// (`DISCOVER_DETAILS_SYSTEM_SPEC.md` §5) — that is `DTL-OBJ-01`'s job.
-/// Route stays in its today-shape "bolted onto the generic card" form —
-/// that is `DTL-RTE-01`'s job to replace, not this class's.
+///
+/// Since `DTL-RTE-01`, `route` no longer dispatches here — see
+/// `RouteDetailsRenderer` (`../renderers/route_details_renderer.dart`),
+/// which owns Route's map-hero/elevation/difficulty treatment but reuses
+/// several of this class's originally-private widgets (promoted to public
+/// for exactly that reason: [SummaryCard], [DetailsActionHub],
+/// [OrganizerCard], [InfoGrid], [HighlightsCard], [LocationCard],
+/// [DetailsBottomBar] and their shared helpers) rather than duplicating
+/// them. `_PublishedRouteCard`, this class's own hero and category badge
+/// stay private — Route no longer reaches this class at all, so nothing
+/// here still calls its now-dead Route branch, but it is left in place
+/// rather than stripped, since `compatibility_object_renderer.dart` isn't
+/// in `DTL-RTE-01`'s own file map and a deeper cleanup risks touching more
+/// than that slice authorized.
 class CompatibilityObjectRenderer implements DetailsRenderer {
   const CompatibilityObjectRenderer({
     required this.item,
@@ -79,13 +90,13 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _SummaryCard(item: item),
+          SummaryCard(item: item),
           if (item.isPublishedRoute) ...<Widget>[
             const SizedBox(height: 12),
             _PublishedRouteCard(item: item, onReport: onReportRoute),
           ],
           const SizedBox(height: 12),
-          _DetailsActionHub(
+          DetailsActionHub(
             item: item,
             isFavorite: isFavorite,
             ctaSubmitted: ctaSubmitted,
@@ -100,13 +111,13 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
             onCtaTap: onCtaTap,
           ),
           const SizedBox(height: 12),
-          _OrganizerCard(item: item),
+          OrganizerCard(item: item),
           const SizedBox(height: 12),
-          _InfoGrid(item: item),
+          InfoGrid(item: item),
           const SizedBox(height: 12),
-          _HighlightsCard(item: item),
+          HighlightsCard(item: item),
           const SizedBox(height: 12),
-          _LocationCard(item: item, onOpenMap: onMap),
+          LocationCard(item: item, onOpenMap: onMap),
         ],
       ),
     );
@@ -114,7 +125,7 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
 
   @override
   Widget? buildStickyAction(BuildContext context) {
-    return _DetailsBottomBar(
+    return DetailsBottomBar(
       item: item,
       isFavorite: isFavorite,
       ctaSubmitted: ctaSubmitted,
@@ -173,7 +184,7 @@ class _DetailsHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_dateTimeLabel(item.startsAtUtc)} · ${_priceLabel(item)}',
+                  '${dateTimeLabelForDetails(item.startsAtUtc)} · ${priceLabelForDetails(item)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -208,8 +219,8 @@ class _CoverFallback extends StatelessWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.item});
+class SummaryCard extends StatelessWidget {
+  const SummaryCard({super.key, required this.item});
 
   final DiscoverItemEntity item;
 
@@ -232,32 +243,32 @@ class _SummaryCard extends StatelessWidget {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: _MetricTile(
+                  child: MetricTile(
                     icon: route == null
                         ? Icons.payments_outlined
                         : Icons.route_outlined,
                     label: route == null ? 'Price' : 'Length',
                     value: route == null
-                        ? _priceLabel(item)
+                        ? priceLabelForDetails(item)
                         : '${(route.distanceMeters / 1000).toStringAsFixed(1)} км',
                   ),
                 ),
                 Expanded(
-                  child: _MetricTile(
+                  child: MetricTile(
                     icon: route == null
                         ? Icons.group_outlined
                         : Icons.directions_walk_outlined,
                     label: route == null ? 'People' : 'Profile',
                     value: route == null
-                        ? _participantsLabel(item)
-                        : _routeProfileLabel(route.routingProfileId),
+                        ? participantsLabelForDetails(item)
+                        : routeProfileLabelForDetails(route.routingProfileId),
                   ),
                 ),
                 Expanded(
-                  child: _MetricTile(
+                  child: MetricTile(
                     icon: Icons.schedule_outlined,
                     label: 'Duration',
-                    value: _durationLabel(item),
+                    value: durationLabelForDetails(item),
                   ),
                 ),
               ],
@@ -268,16 +279,16 @@ class _SummaryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: <Widget>[
-                  _DetailsPill(label: _detailsTimeFitLabel(evaluation)),
-                  _DetailsPill(label: _detailsOpeningLabel(evaluation)),
+                  DetailsPill(label: timeFitLabelForDetails(evaluation)),
+                  DetailsPill(label: openingLabelForDetails(evaluation)),
                   if (evaluation.travelMinutes != null)
-                    _DetailsPill(
+                    DetailsPill(
                       label:
                           '${evaluation.travelMinutes} min travel'
                           '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · estimated' : ''}',
                     ),
                   if (evaluation.selectedSlotId != null)
-                    _DetailsPill(label: 'Slot ${evaluation.selectedSlotId}'),
+                    DetailsPill(label: 'Slot ${evaluation.selectedSlotId}'),
                 ],
               ),
             ],
@@ -314,24 +325,24 @@ class _PublishedRouteCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _DetailsPill(label: _routeProfileLabel(route.routingProfileId)),
-                _DetailsPill(label: _routeDifficultyLabel(route.difficultyId)),
+                DetailsPill(label: routeProfileLabelForDetails(route.routingProfileId)),
+                DetailsPill(label: routeDifficultyLabelForDetails(route.difficultyId)),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
-                  _DetailsPill(
+                  DetailsPill(
                     label:
                         'Recommended '
-                        '${_routeDifficultyLabel(route.recommendedDifficultyId)}',
+                        '${routeDifficultyLabelForDetails(route.recommendedDifficultyId)}',
                   ),
                 if (route.ascentMeters != null)
-                  _DetailsPill(label: '+${route.ascentMeters!.round()} m'),
+                  DetailsPill(label: '+${route.ascentMeters!.round()} m'),
                 if (route.descentMeters != null)
-                  _DetailsPill(label: '-${route.descentMeters!.round()} m'),
-                _DetailsPill(label: '${route.waypointCount} POI'),
+                  DetailsPill(label: '-${route.descentMeters!.round()} m'),
+                DetailsPill(label: '${route.waypointCount} POI'),
                 if (route.fieldVerifiedAtUtc != null)
-                  const _DetailsPill(label: 'Field verified'),
-                _DetailsPill(label: 'Version ${route.versionId}'),
-                if (route.demoOnly) const _DetailsPill(label: 'Demo data'),
+                  const DetailsPill(label: 'Field verified'),
+                DetailsPill(label: 'Version ${route.versionId}'),
+                if (route.demoOnly) const DetailsPill(label: 'Demo data'),
               ],
             ),
             if (route.attributions.isNotEmpty) ...<Widget>[
@@ -514,8 +525,9 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
   }
 }
 
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
+class MetricTile extends StatelessWidget {
+  const MetricTile({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -553,8 +565,9 @@ class _MetricTile extends StatelessWidget {
   }
 }
 
-class _DetailsActionHub extends StatelessWidget {
-  const _DetailsActionHub({
+class DetailsActionHub extends StatelessWidget {
+  const DetailsActionHub({
+    super.key,
     required this.item,
     required this.isFavorite,
     required this.ctaSubmitted,
@@ -585,7 +598,7 @@ class _DetailsActionHub extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final _DetailsRoutePlan routePlan = _routePlanForDetails(item);
+    final DetailsRoutePlan routePlan = routePlanForDetails(item);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -605,7 +618,7 @@ class _DetailsActionHub extends StatelessWidget {
                     ),
                   ),
                 ),
-                _DetailsPill(label: isFavorite ? 'Saved' : 'Not saved'),
+                DetailsPill(label: isFavorite ? 'Saved' : 'Not saved'),
               ],
             ),
             const SizedBox(height: 8),
@@ -620,13 +633,13 @@ class _DetailsActionHub extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _DetailsPill(label: rechargeTaxonomyLabel(item.category)),
-                _DetailsPill(label: _priceLabel(item)),
-                _DetailsPill(label: _participantsLabel(item)),
+                DetailsPill(label: rechargeTaxonomyLabel(item.category)),
+                DetailsPill(label: priceLabelForDetails(item)),
+                DetailsPill(label: participantsLabelForDetails(item)),
               ],
             ),
             const SizedBox(height: 12),
-            _DetailsRoutePreview(
+            DetailsRoutePreview(
               plan: routePlan,
               onRouteMap: onRouteMap,
               onCreateRoute: onCreateRoute,
@@ -662,33 +675,33 @@ class _DetailsActionHub extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               children: <Widget>[
-                _DetailsActionTile(
+                DetailsActionTile(
                   icon: Icons.map_outlined,
                   title: 'Map',
                   subtitle: 'Open nearby context',
                   onTap: onMap,
                 ),
                 if (onAddToScenario != null)
-                  _DetailsActionTile(
+                  DetailsActionTile(
                     icon: Icons.playlist_add,
                     title: 'Add to Scenario',
                     subtitle: 'Add this stop to a personal plan',
                     onTap: onAddToScenario!,
                   ),
-                _DetailsActionTile(
+                DetailsActionTile(
                   icon: Icons.search,
                   title: 'Find similar',
                   subtitle: 'Search with this category',
                   onTap: onSearch,
                 ),
-                _DetailsActionTile(
+                DetailsActionTile(
                   icon: Icons.add_circle_outline,
                   title: 'Create similar',
                   subtitle: 'Open Create Hub',
                   onTap: onCreateSimilar,
                 ),
                 if (item.objectKind == DiscoverObjectKind.place)
-                  _DetailsActionTile(
+                  DetailsActionTile(
                     icon: Icons.history_toggle_off,
                     title: 'Mark as visited',
                     subtitle: 'Add to private history',
@@ -703,8 +716,9 @@ class _DetailsActionHub extends StatelessWidget {
   }
 }
 
-class _DetailsActionTile extends StatelessWidget {
-  const _DetailsActionTile({
+class DetailsActionTile extends StatelessWidget {
+  const DetailsActionTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -761,14 +775,15 @@ class _DetailsActionTile extends StatelessWidget {
   }
 }
 
-class _DetailsRoutePreview extends StatelessWidget {
-  const _DetailsRoutePreview({
+class DetailsRoutePreview extends StatelessWidget {
+  const DetailsRoutePreview({
+    super.key,
     required this.plan,
     required this.onRouteMap,
     required this.onCreateRoute,
   });
 
-  final _DetailsRoutePlan plan;
+  final DetailsRoutePlan plan;
   final VoidCallback onRouteMap;
   final VoidCallback onCreateRoute;
 
@@ -801,7 +816,7 @@ class _DetailsRoutePreview extends StatelessWidget {
                     ),
                   ),
                 ),
-                _DetailsPill(label: '${plan.stepCategories.length} stops'),
+                DetailsPill(label: '${plan.stepCategories.length} stops'),
               ],
             ),
             const SizedBox(height: 8),
@@ -809,10 +824,10 @@ class _DetailsRoutePreview extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _DetailsPill(label: plan.mood),
-                _DetailsPill(label: '${plan.durationMinutes} min'),
-                if (plan.freeOnly) const _DetailsPill(label: 'Free'),
-                if (plan.walkingOnly) const _DetailsPill(label: 'Walking'),
+                DetailsPill(label: plan.mood),
+                DetailsPill(label: '${plan.durationMinutes} min'),
+                if (plan.freeOnly) const DetailsPill(label: 'Free'),
+                if (plan.walkingOnly) const DetailsPill(label: 'Walking'),
               ],
             ),
             const SizedBox(height: 8),
@@ -858,8 +873,8 @@ class _DetailsRoutePreview extends StatelessWidget {
   }
 }
 
-class _DetailsPill extends StatelessWidget {
-  const _DetailsPill({required this.label});
+class DetailsPill extends StatelessWidget {
+  const DetailsPill({super.key, required this.label});
 
   final String label;
 
@@ -884,8 +899,8 @@ class _DetailsPill extends StatelessWidget {
   }
 }
 
-class _OrganizerCard extends StatelessWidget {
-  const _OrganizerCard({required this.item});
+class OrganizerCard extends StatelessWidget {
+  const OrganizerCard({super.key, required this.item});
 
   final DiscoverItemEntity item;
 
@@ -950,8 +965,8 @@ class _OrganizerCard extends StatelessWidget {
   }
 }
 
-class _InfoGrid extends StatelessWidget {
-  const _InfoGrid({required this.item});
+class InfoGrid extends StatelessWidget {
+  const InfoGrid({super.key, required this.item});
 
   final DiscoverItemEntity item;
 
@@ -964,27 +979,27 @@ class _InfoGrid extends StatelessWidget {
         child: Column(
           children: <Widget>[
             if (route == null)
-              _InfoRow(
+              InfoRow(
                 icon: Icons.calendar_month_outlined,
                 label: 'Date and time',
-                value: _dateTimeLabel(item.startsAtUtc),
+                value: dateTimeLabelForDetails(item.startsAtUtc),
               )
             else
-              _InfoRow(
+              InfoRow(
                 icon: Icons.route_outlined,
                 label: 'Route geometry',
                 value:
                     '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
-                    '${_durationFromSeconds(route.durationSeconds)}',
+                    '${durationFromSecondsForDetails(route.durationSeconds)}',
               ),
             const Divider(height: 20),
-            _InfoRow(
+            InfoRow(
               icon: Icons.place_outlined,
               label: 'Location',
-              value: _venueLabel(item),
+              value: venueLabelForDetails(item),
             ),
             const Divider(height: 20),
-            _InfoRow(
+            InfoRow(
               icon: Icons.near_me_outlined,
               label: 'Distance',
               value: route == null
@@ -998,8 +1013,9 @@ class _InfoGrid extends StatelessWidget {
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
+class InfoRow extends StatelessWidget {
+  const InfoRow({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -1041,8 +1057,8 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _HighlightsCard extends StatelessWidget {
-  const _HighlightsCard({required this.item});
+class HighlightsCard extends StatelessWidget {
+  const HighlightsCard({super.key, required this.item});
 
   final DiscoverItemEntity item;
 
@@ -1092,8 +1108,12 @@ class _HighlightsCard extends StatelessWidget {
   }
 }
 
-class _LocationCard extends StatelessWidget {
-  const _LocationCard({required this.item, required this.onOpenMap});
+class LocationCard extends StatelessWidget {
+  const LocationCard({
+    super.key,
+    required this.item,
+    required this.onOpenMap,
+  });
 
   final DiscoverItemEntity item;
   final VoidCallback onOpenMap;
@@ -1164,8 +1184,9 @@ class _LocationCard extends StatelessWidget {
   }
 }
 
-class _DetailsBottomBar extends StatelessWidget {
-  const _DetailsBottomBar({
+class DetailsBottomBar extends StatelessWidget {
+  const DetailsBottomBar({
+    super.key,
     required this.item,
     required this.isFavorite,
     required this.ctaSubmitted,
@@ -1240,7 +1261,7 @@ class _CategoryBadge extends StatelessWidget {
   }
 }
 
-String _dateTimeLabel(DateTime value) {
+String dateTimeLabelForDetails(DateTime value) {
   final DateTime local = value.toLocal();
   final String day = local.day.toString().padLeft(2, '0');
   final String month = local.month.toString().padLeft(2, '0');
@@ -1249,7 +1270,7 @@ String _dateTimeLabel(DateTime value) {
   return '$day.$month.${local.year} · $hour:$minute';
 }
 
-String _durationFromSeconds(int seconds) {
+String durationFromSecondsForDetails(int seconds) {
   final int minutes = (seconds / 60).round();
   if (minutes < 60) return '$minutes min';
   final int hours = minutes ~/ 60;
@@ -1257,7 +1278,7 @@ String _durationFromSeconds(int seconds) {
   return remainder == 0 ? '$hours h' : '$hours h $remainder min';
 }
 
-String _routeProfileLabel(String profileId) {
+String routeProfileLabelForDetails(String profileId) {
   return switch (profileId.trim().toLowerCase()) {
     'walking' || 'foot' || 'hiking' => 'Walking',
     'cycling' || 'bike' => 'Cycling',
@@ -1266,7 +1287,7 @@ String _routeProfileLabel(String profileId) {
   };
 }
 
-String _routeDifficultyLabel(String difficultyId) {
+String routeDifficultyLabelForDetails(String difficultyId) {
   final String normalized = difficultyId.trim().toLowerCase().split('.').first;
   return switch (normalized) {
     'easy' => 'Easy',
@@ -1276,12 +1297,12 @@ String _routeDifficultyLabel(String difficultyId) {
   };
 }
 
-String _priceLabel(DiscoverItemEntity item) {
+String priceLabelForDetails(DiscoverItemEntity item) {
   if (item.isFree) return 'Free';
   return '${item.priceAmount.toStringAsFixed(0)} €';
 }
 
-String _detailsTimeFitLabel(TimeFitEvaluation evaluation) =>
+String timeFitLabelForDetails(TimeFitEvaluation evaluation) =>
     switch (evaluation.timeFitStatus) {
       TimeFitStatus.fits => 'Fits your time',
       TimeFitStatus.partial => 'Partial attendance possible',
@@ -1289,20 +1310,20 @@ String _detailsTimeFitLabel(TimeFitEvaluation evaluation) =>
       TimeFitStatus.unknown => 'Time not confirmed',
     };
 
-String _detailsOpeningLabel(TimeFitEvaluation evaluation) =>
+String openingLabelForDetails(TimeFitEvaluation evaluation) =>
     switch (evaluation.openingStatus) {
       OpeningStatus.open => 'Open',
       OpeningStatus.closed => 'Closed',
       OpeningStatus.unknown => 'Opening hours unknown',
     };
 
-String _participantsLabel(DiscoverItemEntity item) {
+String participantsLabelForDetails(DiscoverItemEntity item) {
   if (item.capacity == null) return 'Capacity unknown';
   if (item.participantsCount == null) return 'Participants unknown';
   return '${item.participantsCount}/${item.capacity}';
 }
 
-String _durationLabel(DiscoverItemEntity item) {
+String durationLabelForDetails(DiscoverItemEntity item) {
   final int? duration = item.durationMinutes;
   if (duration == null) return 'Flexible';
   if (duration < 60) return '$duration min';
@@ -1312,7 +1333,7 @@ String _durationLabel(DiscoverItemEntity item) {
   return '$hours h $minutes min';
 }
 
-String _venueLabel(DiscoverItemEntity item) {
+String venueLabelForDetails(DiscoverItemEntity item) {
   if (item.venueName.isNotEmpty && item.addressLine.isNotEmpty) {
     return '${item.venueName}, ${item.addressLine}';
   }
@@ -1321,8 +1342,8 @@ String _venueLabel(DiscoverItemEntity item) {
   return item.city;
 }
 
-class _DetailsRoutePlan {
-  const _DetailsRoutePlan({
+class DetailsRoutePlan {
+  const DetailsRoutePlan({
     required this.mood,
     required this.durationMinutes,
     required this.freeOnly,
@@ -1345,8 +1366,8 @@ class _DetailsRoutePlan {
   }
 }
 
-_DetailsRoutePlan _routePlanForDetails(DiscoverItemEntity item) {
-  return _DetailsRoutePlan(
+DetailsRoutePlan routePlanForDetails(DiscoverItemEntity item) {
+  return DetailsRoutePlan(
     mood: scenarioMoodForDetails(item),
     durationMinutes: (item.durationMinutes ?? 0) > 120
         ? item.durationMinutes!
@@ -1402,7 +1423,7 @@ Map<String, String> routeSeedForDetails(
   DiscoverItemEntity item, {
   required bool includeMode,
 }) {
-  final _DetailsRoutePlan plan = _routePlanForDetails(item);
+  final DetailsRoutePlan plan = routePlanForDetails(item);
   return <String, String>{
     if (includeMode) 'mode': 'route',
     'mood': plan.mood,
@@ -1418,13 +1439,13 @@ Map<String, String> routeSeedForDetails(
 String routeSeedTitle(DiscoverItemEntity item) => '${item.title} route';
 
 String routeSeedSubtitle(DiscoverItemEntity item) {
-  final _DetailsRoutePlan plan = _routePlanForDetails(item);
+  final DetailsRoutePlan plan = routePlanForDetails(item);
   return '${plan.stepCategories.length} stops · '
       '${plan.durationMinutes} min · from details';
 }
 
 String routeSeedPrompt(DiscoverItemEntity item) =>
-    _routePlanForDetails(item).prompt;
+    routePlanForDetails(item).prompt;
 
 String scenarioMoodForDetails(DiscoverItemEntity item) {
   final String category = normalizeRechargeContentGroupId(item.category);
@@ -1442,10 +1463,10 @@ String scenarioMoodForDetails(DiscoverItemEntity item) {
 String _ctaLabel(DiscoverItemEntity item) {
   if (item.ctaLabel.isNotEmpty) return item.ctaLabel;
   if (item.isFree) return 'Join activity';
-  return 'Book for ${_priceLabel(item)}';
+  return 'Book for ${priceLabelForDetails(item)}';
 }
 
-/// Public: shared by `_DetailsBottomBar`/`_DetailsActionHub` in this file
+/// Public: shared by `DetailsBottomBar`/`DetailsActionHub` in this file
 /// and by `discover_details_page.dart`'s CTA-submitted SnackBar copy.
 String ctaLabelForDetails(DiscoverItemEntity item) => _ctaLabel(item);
 

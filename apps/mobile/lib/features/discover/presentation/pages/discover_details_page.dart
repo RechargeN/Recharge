@@ -17,6 +17,7 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../renderers/route_details_renderer.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../shell/details_renderer.dart';
 import '../shell/details_shell.dart';
@@ -28,10 +29,12 @@ import '../shell/details_shell.dart';
 /// the side-effecting page-level flows (favorites, visit history, scenario
 /// intake, route safety reports) that predate the shell split.
 ///
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this page is
-/// the shell's first and only real consumer in this slice, rendering via
+/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this page was
+/// the shell's first real consumer, rendering every item via
 /// [CompatibilityObjectRenderer] with zero behavior change from the
-/// pre-shell layout.
+/// pre-shell layout. Since `DTL-RTE-01`, `route`-classified items
+/// dispatch to [RouteDetailsRenderer] instead — [CompatibilityObjectRenderer]
+/// now only ever renders Event/Activity/Place.
 class DiscoverDetailsPage extends ConsumerStatefulWidget {
   const DiscoverDetailsPage({
     super.key,
@@ -89,6 +92,62 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
           isAuthenticated: isAuthenticated,
           favoritesController: favoritesController,
         );
+        // Shared by both renderer families below (DTL-RTE-01): the
+        // callback shapes are identical, only which family gets *built*
+        // differs, decided by item.catalogObjectType. Local function
+        // declarations (not `final VoidCallback x = () {...}`) per
+        // `prefer_function_declarations_over_variables`.
+        Future<void> onFavoriteTap() async {
+          await _onFavoriteTap(
+            item: item,
+            isAuthenticated: isAuthenticated,
+            authController: authController,
+            favoritesController: favoritesController,
+          );
+        }
+
+        Future<void> onShareTap() async {
+          final String canonicalPath = RouteNames.discoverDetailsCanonicalFor(
+            CatalogObjectRef(
+              objectType: item.catalogObjectType,
+              objectId: item.id,
+            ),
+          );
+          await Clipboard.setData(
+            ClipboardData(text: 'recharge:/$canonicalPath'),
+          );
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+        }
+
+        void onMap() => context.push(_mapLocationForDetails(item));
+        void onRouteMap() {
+          context.push(_scenarioMapLocationForDetails(item));
+        }
+
+        final VoidCallback? onAddToScenario = intakeEnabled
+            ? () => _onAddToScenario(item: item)
+            : null;
+        void onSearch() {
+          context.push(_searchLocationForDetails(item));
+        }
+
+        void onCreateSimilar() {
+          context.push(_createLocationForDetails(item));
+        }
+
+        void onCreateRoute() {
+          context.push(_createRouteLocationForDetails(item));
+        }
+
+        void onMarkVisited() =>
+            _onMarkVisited(item: item, authController: authController);
+        void onCtaTap() => _onCtaTap(item);
+        void onReportRoute() =>
+            _reportRoute(item: item, authController: authController);
+
         final DetailsRendererRegistry registry = DetailsRendererRegistry(
           <DetailsRendererFamily, DetailsRendererBuilder>{
             DetailsRendererFamily.objectOffer: () =>
@@ -96,61 +155,41 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                   item: item,
                   isFavorite: isFavorite,
                   ctaSubmitted: _ctaSubmitted,
-                  onFavoriteTap: () async {
-                    await _onFavoriteTap(
-                      item: item,
-                      isAuthenticated: isAuthenticated,
-                      authController: authController,
-                      favoritesController: favoritesController,
-                    );
-                  },
-                  onShareTap: () async {
-                    final String canonicalPath =
-                        RouteNames.discoverDetailsCanonicalFor(
-                          CatalogObjectRef(
-                            objectType: item.catalogObjectType,
-                            objectId: item.id,
-                          ),
-                        );
-                    await Clipboard.setData(
-                      ClipboardData(text: 'recharge:/$canonicalPath'),
-                    );
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ссылка скопирована')),
-                    );
-                  },
-                  onMap: () => context.push(_mapLocationForDetails(item)),
-                  onRouteMap: () {
-                    context.push(_scenarioMapLocationForDetails(item));
-                  },
-                  onAddToScenario: intakeEnabled
-                      ? () => _onAddToScenario(item: item)
-                      : null,
-                  onSearch: () {
-                    context.push(_searchLocationForDetails(item));
-                  },
-                  onCreateSimilar: () {
-                    context.push(_createLocationForDetails(item));
-                  },
-                  onCreateRoute: () {
-                    context.push(_createRouteLocationForDetails(item));
-                  },
-                  onMarkVisited: () => _onMarkVisited(
-                    item: item,
-                    authController: authController,
-                  ),
-                  onCtaTap: () => _onCtaTap(item),
-                  onReportRoute: () => _reportRoute(
-                    item: item,
-                    authController: authController,
-                  ),
+                  onFavoriteTap: onFavoriteTap,
+                  onShareTap: onShareTap,
+                  onMap: onMap,
+                  onRouteMap: onRouteMap,
+                  onAddToScenario: onAddToScenario,
+                  onSearch: onSearch,
+                  onCreateSimilar: onCreateSimilar,
+                  onCreateRoute: onCreateRoute,
+                  onMarkVisited: onMarkVisited,
+                  onCtaTap: onCtaTap,
+                  onReportRoute: onReportRoute,
                 ),
+            DetailsRendererFamily.route: () => RouteDetailsRenderer(
+              item: item,
+              isFavorite: isFavorite,
+              ctaSubmitted: _ctaSubmitted,
+              onFavoriteTap: onFavoriteTap,
+              onShareTap: onShareTap,
+              onMap: onMap,
+              onRouteMap: onRouteMap,
+              onAddToScenario: onAddToScenario,
+              onSearch: onSearch,
+              onCreateSimilar: onCreateSimilar,
+              onCreateRoute: onCreateRoute,
+              onMarkVisited: onMarkVisited,
+              onCtaTap: onCtaTap,
+              onReportRoute: onReportRoute,
+            ),
           },
         );
-        return DetailsScreenAvailable(
-          renderer: registry.build(DetailsRendererFamily.objectOffer),
-        );
+        final DetailsRendererFamily family =
+            item.catalogObjectType == CatalogObjectType.route
+            ? DetailsRendererFamily.route
+            : DetailsRendererFamily.objectOffer;
+        return DetailsScreenAvailable(renderer: registry.build(family));
       },
       loading: () => const DetailsScreenLoading(),
       error: (_, __) {

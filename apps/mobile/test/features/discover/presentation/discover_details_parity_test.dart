@@ -176,19 +176,19 @@ void main() {
   );
 
   fullPageTestWidgets(
-    'a published-route item renders the route card and submits a safety '
-    'report through the same dialog flow',
+    'a published-route item dispatches to RouteDetailsRenderer (DTL-RTE-01) '
+    'and submits a safety report through the same dialog flow',
     (tester) async {
       _detailsItemForTest = _routeItem();
       await tester.pumpWidget(await _detailsApp());
       await tester.pumpAndSettle();
 
       await tester.scrollPageUntilVisible(
-        find.text('Published Route'),
+        find.text('Route details'),
         260,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Published Route'), findsOneWidget);
+      expect(find.text('Route details'), findsOneWidget);
       expect(find.text('Walking'), findsWidgets);
 
       await tester.tap(find.text('Сообщить о проблеме на маршруте'));

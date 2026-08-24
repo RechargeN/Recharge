@@ -1,10 +1,49 @@
 # RECHARGE — DTL-RTE-01: Route Details Renderer Slice Spec
 
 Версия: v0.3 (2026-08-24) — уточнение после третьего раунда review.
-Статус: **Draft for review — Proposed implementation slice.
-Implementation not authorized.**
+Статус: **Approved** (утверждён владельцем продукта 2026-08-24, вслед за
+`DTL-FND-01`/`DTL-LINK-01`/`DTL-CLG-01`; реализация авторизована и
+выполнена в изолированном worktree `dtl-fnd-01`; `DTL-OBJ-01`
+приостановлен отдельно — Rental Create-сторона отсутствует в git-истории
+этой ветки — и не блокирует этот slice).
 
-Runtime effect (этого документа): **none**.
+Runtime effect (этого документа): **none**. Сам текст не меняет код —
+изменения внесены отдельным implementation-коммитом, под собственными
+analyzer/test/boundary/diff gates.
+
+## Реализация — фактические отклонения от плана
+
+Зафиксировано явно, не молча:
+
+1. **`compatibility_object_renderer.dart` затронут** сверх исходного
+   file map (§2 не называл его). `RouteDetailsRenderer` реиспользует
+   `SummaryCard`/`DetailsActionHub`/`OrganizerCard`/`InfoGrid`/
+   `HighlightsCard`/`LocationCard`/`DetailsBottomBar` (и их приватные
+   помощники — `MetricTile`, `DetailsPill`, `DetailsActionTile`,
+   `DetailsRoutePreview`, `InfoRow`, `routeProfileLabelForDetails` и
+   т.д.) без изменения их поведения — только промоушен из
+   file-private в public, по тому же принципу, что `DTL-FND-01`
+   применил к `RouteSafetyReportDialog`. `_PublishedRouteCard` и
+   photo-hero (`_DetailsHero`/`_CoverFallback`/`_CategoryBadge`)
+   остались приватными и теперь мёртвым кодом (Route больше не
+   диспетчеризуется на этот класс) — не вычищены, поскольку файл вне
+   file map этого slice, а более глубокая чистка рискует зацепить
+   больше, чем slice авторизовал.
+2. **Заголовок маршрута добавлен в `buildBody`**, не заявленный явно в
+   file map. Фото-hero раньше показывал `item.title` поверх картинки;
+   интерактивная карта не даёт естественного места для такого оверлея.
+   Без этой строки Route Details полностью лишился бы заголовка —
+   реальная регрессия, не входившая в намерение ни одного AC. Заголовок
+   вынесен первой строкой тела, тем же способом, что
+   `CollectionDetailsRenderer` показывает свой.
+3. **GoogleMap не тестируется через `flutter test` виджет-пампы** —
+   подтверждённый существующий прецедент в этом репозитории
+   (`discover_map_create_route_test.dart` тестирует только чистые
+   URL-builder функции, никогда не пампит реальный `GoogleMap`). Карта
+   покрыта тестами `published_route_polyline_builder_test.dart` (чистая
+   функция geometry→Polyline) — её собственный виджет-тест подтверждает
+   отсутствие построения/layout ошибок, не визуальный вывод плитки
+   карты.
 
 ## Что изменилось относительно v0.2
 
