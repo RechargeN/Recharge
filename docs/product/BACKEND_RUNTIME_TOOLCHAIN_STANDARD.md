@@ -1,17 +1,18 @@
 # Recharge Backend — Runtime & Toolchain Standard
 
 - ID: **BCK05-OD01-TCH-01**
-- Version: **0.3.3**
+- Version: **0.3.4**
 - Date: **2026-08-24**
-- Status: **Draft evidence — BCK05-OD-01 Proposed; bounded R0 Pass with expiring controls**
+- Status: **Accepted baseline — BCK05-OD-01 v0.3.3 with controls**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Security reviewer: **Platform Security owner**
-- Parent: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Parent: [BCK-05 v0.2.17](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - Architecture authority: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) (Accepted target; no runtime authorization)
 - IAM dependency: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md)
 - Release dependency: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md)
-- Technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.3
+- Technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.4
+- Owner decision: [BCK05-OD01-DEC-01](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) v0.2 (Accepted baseline v0.3.3 with controls)
 - Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2.2 (Pass — bounded tooling feasibility only)
 - R0 decision record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.2
 - Runtime effect: **none**
@@ -20,6 +21,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.3.4 — 2026-08-24
+
+- recorded the exact `BCK05-OD01-DEC-01` owner verdict accepting baseline
+  v0.3.3 and `TCH-OD-01..05` with controls;
+- retained `TCH-OD-06..08`, all other BCK-05 decisions, G1/R1 and product/cloud
+  runtime as deferred, Proposed or blocked;
+- required a fresh audit/reachability review before R1 because the bounded R0
+  advisory exception does not propagate into cloud/public execution.
 
 ### v0.3.3 — 2026-08-24
 
@@ -75,12 +85,13 @@
 
 ## 0.1 Verdict
 
-This document selects a concrete, reproducible **candidate** backend toolchain
-for Recharge and moves `BCK05-OD-01` from Open to **Proposed**. It does not
-create `apps/backend`, change the Flutter application, install a dependency,
-authenticate to Google, provision Firebase, create billing, or deploy code.
+This document records the concrete, reproducible backend toolchain baseline
+accepted by `BCK05-OD01-DEC-01` for `BCK05-OD-01`. The accepted decision target
+is v0.3.3; this v0.3.4 revision records that status without changing its pins.
+It does not approve BCK-05, authenticate to Google, provision Firebase, create
+billing, deploy code or authorize G1/R1.
 
-The candidate is:
+The accepted baseline is:
 
 - Cloud Functions for Firebase **2nd gen**;
 - provider runtime **Node.js 22**;
@@ -95,10 +106,11 @@ The candidate is:
   Temurin JDK **21.0.12+8** and platform artifact checksums/digests captured at
   executable R0.
 
-These are point-in-time candidate pins reverified on 2026-08-23. Acceptance
-requires compatibility installation, build, emulator, negative-security and
-reproducibility evidence in an **Approved documentation/tooling-only R0 slice**.
-No floating `latest`, caret or tilde becomes release authority.
+These point-in-time pins were reverified and passed compatibility installation,
+build, emulator, negative-security, reproducibility and hosted parity evidence
+in the Approved bounded R0 slice. Before R1, they require a fresh audit and
+reachable-path review; the R0 advisory exception does not carry forward. No
+floating `latest`, caret or tilde becomes release authority.
 
 ## 1. Scope and non-goals
 
@@ -110,7 +122,7 @@ This standard defines:
 - deterministic install/build/test/emulator command contracts;
 - dependency, generated-output, cache and upgrade policy;
 - cross-platform developer and CI expectations;
-- evidence required before OD-01 can become Accepted.
+- evidence, revalidation and supersession rules for the Accepted OD-01 baseline.
 
 It does **not** decide:
 
@@ -725,9 +737,8 @@ after a support/security change, the candidate matrix is re-reviewed first.
 
 ---
 
-**Current conclusion:** the primary backend toolchain now has a concrete,
-locally and hosted-executed R0 scaffold. R0 is **Pass — bounded tooling
-feasibility only**, with `BCK-R0-TCH-ADV-01` controls expiring on `2026-09-24`
-or before scope expansion. `BCK05-OD-01` remains **Proposed**, not Accepted.
-Product backend behavior, cloud state, credentials and deployment remain
-absent and unauthorized.
+**Current conclusion:** `BCK05-OD-01` is **Accepted at baseline v0.3.3 with
+controls**, and bounded R0 is Pass. The R0 advisory exception expires before
+R1/G1/cloud expansion and is not production acceptance. BCK-05, G1/R1,
+product backend behavior, cloud state, credentials and deployment remain
+unapproved or absent.

@@ -1,21 +1,44 @@
 # Recharge Backend — Runtime & Toolchain Owner Decision
 
 - ID: **BCK05-OD01-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-24**
-- Status: **Review — explicit owner verdict required**
+- Status: **Accepted — BCK05-OD-01 v0.3.3 with controls**
 - Decision target: **BCK05-OD-01**
 - Reviewed standard: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
 - Technical review: [BCK05-OD01-TCH-REV-01 v0.2.3](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
 - R0 slice: [BCK-R0-TCH-01 v0.2.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md)
 - R0 decision: [BCK-R0-TCH-DEC-01 v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
 - Execution evidence: [BCK-R0-TCH-01 result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md)
-- Parent: [BCK-05 v0.2.16](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent: [BCK-05 v0.2.17](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Accountable verdict: **Platform Operations + Platform Security**
 - Assigned bootstrap owner: **RechargeN / Product owner acting as combined Platform coordinator**
 - Runtime effect: **none**
 
 ---
+
+## 0. Recorded owner verdict
+
+The Product owner supplied the exact effective phrase:
+
+```text
+Одобряю BCK05-OD01-DEC-01: Accept BCK05-OD-01 v0.3.3 with controls.
+```
+
+| Field | Recorded value |
+|---|---|
+| Decision | **Accept BCK05-OD-01 v0.3.3 with controls** |
+| Owner identity / actual role | `RechargeN / Product owner acting as combined Platform coordinator` |
+| Operations/Security scope | accepted for the D1 toolchain baseline under the disclosed combined-role bootstrap model; independent production review not claimed |
+| Accepted baseline | exact §3.1 pins and `TCH-OD-01..05` dispositions |
+| Deferred unchanged | `TCH-OD-06..08`, OD-07, OD-10, complete D1/G1 and R1 execution |
+| Controls | §4 advisory/revalidation contract and every §5 exclusion |
+| Signature evidence | exact owner reply in the controlling Codex task |
+| Signed UTC | `2026-08-24T15:33:18Z` |
+
+This status transition has documentation effect only. It records
+`BCK05-OD-01` as Accepted and opens preparation of a documentation-only R1
+candidate plan; it does not open or authorize G1/R1.
 
 ## 1. Purpose
 
@@ -195,7 +218,7 @@ decision silently.
 
 ---
 
-**Current conclusion:** the evidence supports the recommended bounded
-Acceptance, but `BCK05-OD-01` remains **Proposed** until the exact owner verdict
-in §6 is explicitly given and recorded. G1/R1 and product/cloud runtime remain
-blocked.
+**Current conclusion:** the exact owner verdict is recorded and
+`BCK05-OD-01` is **Accepted at baseline v0.3.3 with controls**.
+`TCH-OD-06..08`, all other BCK-05 decisions, complete D1/G1, R1 execution and
+product/cloud runtime remain blocked or unchanged.

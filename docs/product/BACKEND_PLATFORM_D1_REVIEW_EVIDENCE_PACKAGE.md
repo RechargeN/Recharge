@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.6**
+- Version: **1.7**
 - Date: **2026-08-24**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
@@ -33,9 +33,9 @@ none of G1–G7 or R1–R12 is opened by this package.
   baseline is recorded, but every broader D1 role sign-off remains incomplete.
 
 The full-SHA runtime/toolchain review, exact R0 plan, formal decisions and
-local/hosted execution evidence are Present and bounded R0 is Pass. The next
-legitimate action is the exact `BCK05-OD01-DEC-01` owner verdict; it is not G1,
-R1 or silent cloud/product runtime authorization.
+local/hosted execution evidence are Present; bounded R0 is Pass and
+`BCK05-OD-01` is Accepted at baseline v0.3.3 with controls. This is not BCK-05
+Approval, G1, R1 or cloud/product runtime authorization.
 
 ## 2. D1 entry and exit contract
 
@@ -63,8 +63,8 @@ R1 or silent cloud/product runtime authorization.
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.5; R0 reconciled; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.3; R0 reconciled | OD-01 and other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.6; OD-01 recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.4; OD-01 recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -72,11 +72,11 @@ R1 or silent cloud/product runtime authorization.
 | [Service reliability/SLO model](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) | journey-scoped SLIs/SLOs, error budgets, zero-tolerance invariants, burn alerts and 40 AC | Draft evidence; Product baseline recorded; BCK05-OD-03 Proposed | domain/Operations specialist verdict, stage telemetry and executable alert evidence pending |
 | [Backup/recovery model](BACKEND_BACKUP_RECOVERY_MODEL.md) | record-family RPO/RTO, candidate protection, isolated restore, privacy re-deletion, drills and 40 AC | Draft evidence; Product baseline recorded; BCK05-OD-05 Proposed | Platform/Privacy/domain verdict, representative restore and executable protection evidence pending |
 | [Operations numeric owner review](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) | exact-version cross-model audit, ten findings, corrected cost and bounded verdict | v0.2; bounded Product-owner disposition recorded | OD-03/04/05 remain Proposed; no runtime authority |
-| [Runtime/toolchain standard](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) | dated Node.js 22, exact SDK/JDK/lint plus three full-SHA Actions, signed Terraform archives and 56 AC | Draft v0.3.3; BCK05-OD-01 Proposed; bounded R0 Pass | exact OD-01 owner/security verdict pending |
-| [Runtime/toolchain technical review](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) | findings, exact minimal package/supply-chain recommendation and 48 AC | Draft v0.2.3; bounded R0 Pass | not the separate OD-01 owner/security decision |
+| [Runtime/toolchain standard](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) | dated Node.js 22, exact SDK/JDK/lint plus three full-SHA Actions, signed Terraform archives and 56 AC | v0.3.4; BCK05-OD-01 Accepted at baseline v0.3.3; bounded R0 Pass | fresh audit/reachability evidence required before R1 |
+| [Runtime/toolchain technical review](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) | findings, exact minimal package/supply-chain recommendation and 48 AC | v0.2.4; completed bounded technical review | separate owner verdict recorded |
 | [R0 toolchain/emulator slice](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) | exhaustive local-only file map, commands, CI, evidence, rollback and 60 AC | v0.2.2; Pass — bounded tooling feasibility only | no G1/R1/cloud authorization |
 | [R0 approval decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) | execution approval, immutable supply-chain controls and advisory disposition | v0.2; bounded decisions Accepted | product/cloud scope explicitly excluded |
-| [OD-01 owner decision](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) | exact toolchain disposition and preserved R1/G1 gates | Review v0.1 | explicit exact owner verdict required |
+| [OD-01 owner decision](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) | exact toolchain disposition and preserved R1/G1 gates | Accepted v0.2 | OD-01 closed; BCK-05/G1/R1 unchanged |
 | [IAM/workload identity model](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) | OIDC/WIF trust, identity catalogue, least privilege, approvals, lifecycle, break-glass and 50 AC | Draft v0.1; BCK05-OD-02 Proposed | exact claims/roles/GitHub plan/JIT and executable evidence pending |
 | [Release provenance/promotion model](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) | immutable manifest, provenance, Functions/container boundary, promotion, rollback and 50 AC | Draft v0.1; BCK05-OD-07 Proposed | exact toolchain/attestor/registry/policy/provider and executable evidence pending |
 
@@ -136,10 +136,10 @@ Ready for owner review of:
 - BCK05-OD05-REC-01 numerical recovery/protection/restore proposal.
 - BCK05-NUM-REV-01 exact-version cross-model findings and recorded bounded
   Product-owner disposition.
-- BCK05-OD01-TCH-01 v0.3.3 runtime/toolchain and completed deterministic R0 evidence.
-- BCK05-OD01-TCH-REV-01 v0.2.3 bounded technical Pass.
+- BCK05-OD01-TCH-01 v0.3.4 accepted status record for baseline v0.3.3.
+- BCK05-OD01-TCH-REV-01 v0.2.4 completed technical review.
 - BCK-R0-TCH-01 v0.2.2 bounded tooling Pass and decision record v0.2.
-- BCK05-OD01-DEC-01 exact owner-decision candidate, still Review.
+- BCK05-OD01-DEC-01 v0.2 exact Accepted owner decision.
 - BCK05-OD02-IAM-01 keyless workload-identity/least-privilege proposal.
 - BCK05-OD07-REL-01 immutable provenance/promotion/rollback proposal with an
   explicit Functions source-deploy limitation.
@@ -150,8 +150,7 @@ Still blocking Approval:
   bounded Product-owner baseline;
 - OD-07 Accepted;
 - owner-approved and stage-measured SLO/RPO/RTO/cost evidence;
-- exact BCK05-OD-01 owner verdict plus remaining IAM/release decisions and
-  executable stage/provider evidence;
+- remaining IAM/release decisions and executable stage/provider evidence;
 - backup/restore, executable incident routes and tabletop evidence;
 - BCK05 open decisions recorded in the specification.
 

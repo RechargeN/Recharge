@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.5**
+- Version: **1.6**
 - Date: **2026-08-24**
-- Status: **Draft ledger — bounded R0 reconciled; D1 sign-offs incomplete**
+- Status: **Draft ledger — OD-01 verdict recorded; D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.6](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.3](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.7](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.4](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
@@ -91,7 +91,7 @@ accepts its accountability.
 |---|---|---|---|
 | BCK-03 v0.3.3 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
 | BCK-04 v0.4.10 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; review pending |
-| BCK-05 v0.2.16 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass is Present, while BCK05-OD-01 and other OD/specialist/stage/product-cloud evidence remain pending |
+| BCK-05 v0.2.17 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and BCK05-OD-01 Acceptance are Present, while other OD/specialist/stage/product-cloud evidence remains pending |
 | BCK-20 v0.2.2 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; review pending |
 | BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
@@ -100,11 +100,11 @@ accepts its accountability.
 | BCK05-OD03-SLO-01 v0.1 | D1-SIG-OPS + Product/domain owners | D1-SIG-SEC, D1-SIG-MOBILE and affected domains | Proposed; Product baseline accepted; combined-owner Operations disposition requires stage telemetry/alerts and specialist proof |
 | BCK05-OD05-REC-01 v0.1 | D1-SIG-OPS + affected domain owners | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and Privacy | Proposed; Product baseline accepted; restore drills, privacy/IAM evidence and qualified review pending |
 | BCK05-NUM-REV-01 v0.2 | Product owner coordination | D1-SIG-OPS/FIN/SEC/LEGAL plus affected domains | Bounded exact-version Product-owner disposition recorded; no OD/BCK/runtime promotion |
-| BCK05-OD01-TCH-01 v0.3.3 | D1-SIG-OPS + D1-SIG-SEC | release, API and affected domain owners | Proposed; exact baseline and bounded R0 local/hosted evidence Pass; OD-01 owner verdict pending |
-| BCK05-OD01-TCH-REV-01 v0.2.3 | D1-SIG-OPS + D1-SIG-SEC | Architecture owner | Technical Pass for bounded tooling; OD-01 owner/security decision remains separate |
+| BCK05-OD01-TCH-01 v0.3.4 | D1-SIG-OPS + D1-SIG-SEC | release, API and affected domain owners | Accepted status record for exact baseline v0.3.3 with controls; pre-R1 revalidation mandatory |
+| BCK05-OD01-TCH-REV-01 v0.2.4 | D1-SIG-OPS + D1-SIG-SEC | Architecture owner | Completed technical review; bounded R0 Pass and separate owner verdict linked |
 | BCK-R0-TCH-01 v0.2.2 | Product/Platform owner | D1-SIG-OPS + D1-SIG-SEC + Architecture owner | Pass — bounded tooling feasibility only; no R1/cloud authorization |
 | BCK-R0-TCH-DEC-01 v0.2 | Product/Platform owner | D1-SIG-OPS + D1-SIG-SEC + Architecture owner | Bounded execution and `BCK-R0-TCH-ADV-01` accepted; product/cloud runtime excluded |
-| BCK05-OD01-DEC-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | Architecture/release boundary review | Review; exact OD-01 owner verdict required; G1/R1 remain blocked |
+| BCK05-OD01-DEC-01 v0.2 | D1-SIG-OPS + D1-SIG-SEC | Architecture/release boundary review | Accepted at `2026-08-24T15:33:18Z`; exact baseline only; G1/R1 remain blocked |
 | BCK05-OD02-IAM-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | D1-SIG-LEGAL where applicable and release/runtime owners | Proposed; exact claims/roles/plan/JIT evidence and specialist verdicts pending |
 | BCK05-OD07-REL-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | API, domain, incident and release owners | Proposed; exact toolchain/attestor/registry/policy/provider/runtime evidence pending |
 | OD-07 evidence | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN | Proposed; assigned; unsigned |
@@ -170,7 +170,7 @@ review record explicitly accepts the bounded follow-up diff.
 |---|---|---|---|
 | BCK-03 | complete; technical circular dependency removed | combined owner assigned; verdicts pending | Draft |
 | BCK-04 | complete; OD-11 status reconciled | combined owner assigned; verdicts and qualified Legal evidence pending | Draft |
-| BCK-05 | complete; OD-07 evidence split; bounded R0 local/hosted evidence Pass | numeric baseline recorded; BCK05-OD-01 and full Operations/Finance/Security/Legal/stage/product-cloud evidence incomplete | Draft |
+| BCK-05 | complete; OD-07 evidence split; bounded R0 Pass and BCK05-OD-01 Acceptance recorded | full Operations/Finance/Security/Legal, remaining OD, stage and product-cloud evidence incomplete | Draft |
 | BCK-20 | complete; documentation/executable fixtures separated | combined owner assigned; verdicts and qualified Legal evidence pending | Draft |
 
 No child is promoted merely because the combined package is structurally
@@ -225,8 +225,8 @@ returns a §6 review record.
 
 ## 11. Next action
 
-The bounded numerical baseline and R0 evidence are recorded. Next, obtain the
-exact `BCK05-OD01-DEC-01` Platform Operations/Security verdict, then resolve
-the remaining IAM/release, OD-07 and specialist evidence using §6. Qualified
+The bounded numerical baseline, R0 evidence and exact BCK05-OD-01 verdict are
+recorded. Next, resolve the remaining IAM/release, OD-07 and specialist
+evidence using §6. Qualified
 Legal/Privacy evidence remains an external prerequisite wherever legal
 judgment is required. D1 remains blocked and no new runtime gate opens.

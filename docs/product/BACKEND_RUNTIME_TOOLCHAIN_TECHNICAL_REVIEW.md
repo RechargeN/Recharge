@@ -1,13 +1,15 @@
 # Recharge Backend — Runtime & Toolchain Technical Review
 
 - ID: **BCK05-OD01-TCH-REV-01**
-- Version: **0.2.3**
+- Version: **0.2.4**
 - Date: **2026-08-24**
-- Status: **Draft technical review — bounded R0 Pass; OD-01 remains Proposed**
-- Reviewed artifact: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Parent: [BCK-05 v0.2.15](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Status: **Completed technical review — bounded R0 Pass; OD-01 owner verdict recorded**
+- Reviewed decision baseline: [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Current status record: [BCK05-OD01-TCH-01 v0.3.4](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Parent: [BCK-05 v0.2.17](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - Executed slice: [BCK-R0-TCH-01 v0.2.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) (Pass — bounded tooling feasibility only)
-- Approval record: [BCK-R0-TCH-DEC-01 v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
+- R0 approval record: [BCK-R0-TCH-DEC-01 v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
+- OD-01 owner decision: [BCK05-OD01-DEC-01 v0.2](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md)
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Review author role: **technical pre-review; not Platform Operations or Platform Security sign-off**
 - Runtime effect: **none**
@@ -15,6 +17,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.4 — 2026-08-24
+
+- recorded the exact owner acceptance of `BCK05-OD-01` baseline v0.3.3 with
+  the technical controls from this review;
+- retained the separate BCK-05, D1/G1, R1, cloud and production gates;
+- made a fresh pre-R1 audit/reachability review mandatory instead of carrying
+  the bounded R0 advisory exception forward.
 
 ### v0.2.3 — 2026-08-24
 
@@ -69,7 +79,8 @@ The two root Moderate advisories have an explicit owner disposition under
 context through `2026-09-24`, or until immediately before R1/G1 or any real
 cloud/public-ingress work, whichever occurs first. Therefore:
 
-- `BCK05-OD-01` remains **Proposed**;
+- `BCK05-OD-01` is **Accepted at baseline v0.3.3 with controls** by the separate
+  owner decision;
 - BCK-05 remains **Draft**;
 - R0 is **Pass — bounded tooling feasibility only**, subject to the recorded
   expiry, reassessment and revocation controls;
@@ -334,5 +345,6 @@ No cell may be filled automatically from the existence of this document.
 
 **Conclusion:** the bounded local and hosted implementation is technically
 operational. Hosted Windows/Linux parity is Pass. The explicit, expiring
-Moderate-advisory disposition closes R0 only. BCK05-OD-01 remains Proposed;
-product/cloud runtime, credentials and deployment remain absent.
+Moderate-advisory disposition closes R0 only. `BCK05-OD-01` is Accepted at
+baseline v0.3.3 by the separate owner record; BCK-05, D1/G1, R1,
+product/cloud runtime, credentials and deployment remain blocked or absent.
