@@ -1,8 +1,10 @@
 # RECHARGE — Discover Details System Spec
 
-Версия: v0.2 (2026-08-24). Статус: **Accepted** (принят владельцем
-продукта 2026-08-24, после трёх раундов review дочерних `DTL-*`
-документов).
+Версия: v0.3 (2026-08-24) — добавлен Этап 4 (фактический статус
+staged-реализации: FND/LINK/CLG/RTE Done, OBJ Blocked on Rental Create
+prerequisite, SCN Blocked on Approved `SCN-PUB-01`); §1–15 по содержанию
+не менялись. Статус: **Accepted** (принят владельцем продукта
+2026-08-24, после трёх раундов review дочерних `DTL-*` документов).
 Runtime effect: **none**. Принятие этого документа само по себе не
 изменяет код, маршруты, тесты, DI или ADR — оно фиксирует целевую
 архитектуру Details-поверхности Discover и авторизует переход к
@@ -668,3 +670,28 @@ follow-up, не одного слайса.
 
 Ни один из перечисленных документов не создаётся этим документом и не
 имеет статуса Approved.
+
+---
+
+## Этап 4 — фактический статус реализации (2026-08-24)
+
+Зафиксировано после staged-реализации в изолированном worktree
+`dtl-fnd-01`, по прямой авторизации владельца продукта. Обновляется
+здесь, а не переписывается задним числом в «Этап 3» — тот раздел
+описывает исходный план, этот — что из него реально произошло.
+
+| Slice | Статус | Коммит | Примечание |
+|---|---|---|---|
+| `DTL-FND-01` | **Done** — зелёные analyzer/test/boundary/diff gates | `7d4636d` | Details Shell + typed renderer foundation |
+| `DTL-LINK-01` | **Done** — зелёные gates | `026c7cd` | Canonical resolver vertical; попутно перенесён read-side Collection (~14 файлов), отсутствовавший в git-истории ветки |
+| `DTL-CLG-01` | **Done** — зелёные gates | `adb2d61` | Чистая shell-миграция Collection, без визуальной полировки |
+| `DTL-RTE-01` | **Done** — зелёные gates | `7810a9e` | `RouteDetailsRenderer`; добавлен заголовок в тело (map-hero не даёт места под оверлей — не было в исходном file map, задокументировано в самом slice-документе) |
+| `DTL-OBJ-01` | **Blocked on Rental Create prerequisite** | — | Не техническое «не начато» — реализация физически невозможна без отдельного prerequisite-захода (см. сам документ slice'а: стабилизировать/отделить/прогнать gates/закоммитить Rental Create в исходном checkout, только затем возвращаться) |
+| `DTL-SCN-01` | **Blocked on Approved `SCN-PUB-01`** | — | Без изменений с Этапа 3 — ждёт апстрим publication/read-projection contract |
+
+Каждый Done-slice прошёл `flutter analyze --no-pub` (0 замечаний),
+`flutter test --no-pub` (полный suite, единственный неродственный
+провал — заранее задокументированный golden-baseline
+`route_create_block_test.dart`), boundary gate (71/71, 0 нарушений) и
+`git diff --check` — по отдельности, каждый на своём коммите, не одним
+общим слайсом.
