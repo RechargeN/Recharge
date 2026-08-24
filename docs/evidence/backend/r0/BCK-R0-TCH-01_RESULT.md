@@ -3,11 +3,12 @@
 - Slice: **BCK-R0-TCH-01 v0.2**
 - Decision: **BCK-R0-TCH-DEC-01 v0.1 — Approved bounded execution**
 - Execution date: **2026-08-24**
-- Status: **Local execution complete; Amendments Required before R0 Pass**
+- Status: **Local and hosted execution complete; Amendments Required before R0 Pass**
 - Product/cloud runtime: **Absent**
 - Base commit: `a6b04cbb079c330dd9ddc23d17ac42f9d31669e5`
 - Branch: `codex/backend-r0-toolchain`
-- Execution host: Windows x64 worktree; machine-specific paths omitted
+- Execution hosts: Windows x64 worktree plus GitHub-hosted `ubuntu-24.04` and
+  `windows-2025`; machine-specific paths omitted
 - Rollback owner: `RechargeN / Product owner`
 
 ## 1. Approval evidence
@@ -113,7 +114,7 @@ downloaded to disposable locations and verified independently:
 The repository composite toolchain script could not spawn version subprocesses
 inside the local coding sandbox and therefore remains locally Inconclusive as
 one combined gate. The exact binaries were each invoked and verified directly;
-the combined gate remains mandatory in hosted CI.
+the combined gate then passed on both hosted CI legs.
 
 ## 6. Execution results
 
@@ -130,7 +131,7 @@ the combined gate remains mandatory in hosted CI.
 | emulator child cleanup | Pass | no configured emulator port remained listening after the final Windows run |
 | Terraform lock/fmt/init/validate | Pass | exact CLI/provider, signed checksums, backendless read-only lock init and valid empty provider skeleton |
 | two-build reproducibility | Pass locally | logical digest `628112d2b89584ec57fc33b83917f38a04d8579a8fe4b23c9db8ccefd20580aa` |
-| Windows/Linux hosted CI parity | Pending | workflow exists but has not been committed/pushed/executed |
+| Windows/Linux hosted CI parity | Pass | draft PR [#7](https://github.com/RechargeN/Recharge/pull/7), run [32684234236](https://github.com/RechargeN/Recharge/actions/runs/32684234236): Ubuntu job `97306221865` and Windows job `97306221917` completed successfully; all mandatory steps passed |
 | repository boundary gate | Pass | checker v1.0.0: 380 Dart files, 71 existing suppressions, 0 violations, 0 stale/expired exceptions |
 
 ## 7. Dependency advisory evidence
@@ -167,10 +168,11 @@ releases replace these paths.
 
 ## 9. Current verdict
 
-**Local implementation is complete and technically operational, but R0 is not
-Pass.** Hosted Windows/Linux CI is still absent and the Moderate advisory
-disposition is unresolved under the stricter BCK05-OD01 wording.
+**Local and hosted implementation evidence is complete and technically
+operational, but R0 is not Pass.** Windows/Linux parity is Pass; the remaining
+blocker is the unresolved Moderate advisory disposition under the stricter
+BCK05-OD01 wording.
 
-Scaffold presence and local green tests are not production backend readiness.
+Scaffold presence and local/hosted green tests are not production backend readiness.
 BCK05-OD-01 remains Proposed; R1/G1 and all cloud/product backend activation
 remain blocked.

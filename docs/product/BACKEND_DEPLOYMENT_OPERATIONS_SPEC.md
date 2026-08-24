@@ -1,14 +1,14 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.13**
+- Version: **0.2.14**
 - Date: **2026-08-24**
 - Spec status: **Draft — Platform Operations review required**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.18](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.22](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.19](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.23](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
 - Security/privacy boundary: [BCK-04 v0.4.10](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
@@ -19,8 +19,8 @@
 - Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
 - IAM/workload identity evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.1 (Draft; OD-02 Proposed)
 - Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.1 (Draft; OD-07 Proposed)
-- Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.1 (Draft; OD-01 Proposed)
-- Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.1 (local evidence present; amendments required)
+- Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.2 (Draft; OD-01 Proposed)
+- Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.2 (local/hosted evidence present; amendments required)
 - Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2 (Approved; local implementation complete; Amendments Required before Pass)
 - R0 approval record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.1 (bounded R0 verdicts Accepted; no production approval)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
@@ -32,6 +32,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.14 — 2026-08-24
+
+- recorded green hosted R0 parity for `ubuntu-24.04` and `windows-2025` in
+  draft PR #7, run `32684234236`;
+- closed the hosted-parity blocker without accepting OD-01 or authorizing
+  product/cloud runtime;
+- retained the explicit Moderate advisory disposition and specialist/cloud
+  evidence as open blockers; updated BCK-01/BCK-02 traceability to
+  v0.4.19/v2.4.23.
 
 ### v0.2.13 — 2026-08-24
 
@@ -770,7 +780,7 @@ indexes, IAM, provider configuration, billing, backup or latency.
 | ID | Status | Owner | Decision/evidence | Blocks |
 |---|---|---|---|---|
 | OD-07 | Proposed option A | Platform + Security/Privacy | edition, project separation, exact per-resource location, residency/latency/cost/export review | BCK-05 Approval, G1/R1 |
-| BCK05-OD-01 | Proposed | Platform Operations + Platform Security | [BCK05-OD01-TCH-01 v0.3.1](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.1](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [R0 decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [local result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md): exact local build/emulator/Rules/Terraform/reproducibility evidence is Present; hosted Windows/Linux parity and Moderate-advisory disposition remain open | hosted R0 workflow + explicit advisory verdict |
+| BCK05-OD-01 | Proposed | Platform Operations + Platform Security | [BCK05-OD01-TCH-01 v0.3.2](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.2](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [R0 decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [execution result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md): exact local/hosted build, emulator, Rules, Terraform and reproducibility evidence is Present; Windows/Linux parity is Pass; Moderate-advisory disposition remains open | explicit advisory verdict |
 | BCK05-OD-02 | Proposed | Platform Security/Operations | [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md): keyless OIDC/WIF, isolated identities, permissions, approvals, lifecycle and break-glass; exact claims/roles/plan/JIT/runtime evidence pending | BCK-05 Approval |
 | BCK05-OD-03 | Proposed | Platform Operations + domain owners | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): Product baseline recorded; stage telemetry/alerts and specialist verdict pending | BCK-05 Approval |
 | BCK05-OD-04 | Proposed | Product + Finance/Operations | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): Product baseline recorded; Finance remains Inconclusive pending EUR SKU/tax/stage evidence | R1 provisioning |
@@ -876,7 +886,7 @@ new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.2.13 the following remain absent:
+At v0.2.14 the following remain absent:
 
 - product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;
@@ -894,6 +904,6 @@ At v0.2.13 the following remain absent:
 3. resolve OD-07 and BCK05-OD-01–05/07/08 evidence;
 4. reconcile with BCK-03/04/20;
 5. move BCK-05 to Review, then Approved only when DoD is satisfied;
-6. close R0 hosted parity and Moderate-advisory disposition; keep R1 and every
+6. close the R0 Moderate-advisory disposition and preserve hosted parity evidence; keep R1 and every
    cloud/product resource blocked until G1 and a separately Approved executable
    file plan.

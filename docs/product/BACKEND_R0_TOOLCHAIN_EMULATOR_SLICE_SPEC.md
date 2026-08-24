@@ -1,13 +1,13 @@
 # Recharge Backend — R0 Toolchain & Emulator Feasibility Slice
 
 - Slice ID: **BCK-R0-TCH-01**
-- Version: **0.2**
+- Version: **0.2.1**
 - Date: **2026-08-24**
-- Status: **Approved and implemented locally — Amendments Required before Pass**
-- Runtime status: **R0 tooling scaffold Present locally; product/cloud runtime Absent**
-- Parent operations spec: [BCK-05 v0.2.13](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Toolchain standard: [BCK05-OD01-TCH-01 v0.3.1](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Technical pre-review: [BCK05-OD01-TCH-REV-01 v0.2.1](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
+- Status: **Approved and implemented locally/hosted — Amendments Required before Pass**
+- Runtime status: **R0 tooling scaffold Present; product/cloud runtime Absent**
+- Parent operations spec: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Toolchain standard: [BCK05-OD01-TCH-01 v0.3.2](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Technical pre-review: [BCK05-OD01-TCH-REV-01 v0.2.2](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md)
 - Approval record: [BCK-R0-TCH-DEC-01 v0.1](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
 - Architecture authority: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accountable owner: **Platform Operations owner**
@@ -17,6 +17,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.1 — 2026-08-24
+
+- recorded successful hosted R0 execution on `ubuntu-24.04` and `windows-2025`
+  in draft PR #7, run `32684234236`;
+- reconciled platform-specific Java selection, Windows verifier paths and
+  checkout EOL behavior without changing the Approved bounded scope;
+- retained the Moderate advisory disposition as the only R0 Pass blocker.
 
 ### v0.2 — 2026-08-23
 
@@ -414,9 +422,10 @@ The workflow additionally:
 - cannot deploy on success.
 
 CI success is R0 feasibility evidence, not production release evidence.
-This exact v0.2 boundary was Approved and executed locally. Hosted CI evidence
-and the Moderate-advisory disposition remain required before R0 Pass; neither
-changes the production/cloud authorization boundary.
+This exact v0.2 boundary was Approved and executed locally and on both hosted
+runner labels. The Moderate-advisory disposition remains required before R0 Pass; it is not
+waived by CI success, and CI success does not change the production/cloud
+authorization boundary.
 
 ## 16. Reproducibility contract
 
@@ -563,9 +572,10 @@ R0 completion alone does not approve R1/G1.
 
 ---
 
-**Current conclusion:** bounded R0 v0.2 is implemented and locally operational.
-Exact local build, emulator, Rules, Terraform and reproducibility evidence is
-present, but hosted Windows/Linux parity is Pending and the Moderate advisory
+**Current conclusion:** bounded R0 v0.2.1 is implemented and operational locally
+and on both hosted runner labels.
+Exact local and hosted build, emulator, Rules, Terraform and reproducibility
+evidence is present, and Windows/Linux parity is Pass. The Moderate advisory
 disposition is unresolved. R0 is therefore Amendments Required, not Pass.
 Product/cloud backend capability, R1/G1, credentials, provisioning, deployment
 and production data processing remain unauthorized.

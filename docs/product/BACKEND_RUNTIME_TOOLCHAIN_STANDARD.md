@@ -1,18 +1,18 @@
 # Recharge Backend — Runtime & Toolchain Standard
 
 - ID: **BCK05-OD01-TCH-01**
-- Version: **0.3.1**
+- Version: **0.3.2**
 - Date: **2026-08-24**
 - Status: **Draft evidence — BCK05-OD-01 Proposed; R0 amendments required**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Security reviewer: **Platform Security owner**
-- Parent: [BCK-05 v0.2.13](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Parent: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - Architecture authority: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) (Accepted target; no runtime authorization)
 - IAM dependency: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md)
 - Release dependency: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md)
-- Technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.1
-- Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2 (local evidence complete; Amendments Required)
+- Technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.2
+- Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2.1 (local and hosted evidence complete; Amendments Required)
 - R0 decision record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.1
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md`
@@ -20,6 +20,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.3.2 — 2026-08-24
+
+- recorded successful `ubuntu-24.04` and `windows-2025` hosted R0 matrices in
+  draft PR #7, including emulator, Rules, reproducibility and Terraform gates;
+- documented the Windows setup-java selector, MSYS-GPG path normalization,
+  trusted system tar and checkout-EOL-neutral format check;
+- retained the unresolved Moderate advisory disposition as the only R0
+  evidence blocker and preserved product/cloud runtime as Absent.
 
 ### v0.3.1 — 2026-08-24
 
@@ -117,7 +126,8 @@ As of 2026-08-24:
   executed with no credentials against `demo-recharge`;
 - local build, lint, typecheck, unit/contract, live Functions probe,
   default-deny Rules, Terraform and reproducibility gates passed;
-- hosted Windows/Linux workflow evidence is Pending;
+- hosted Windows/Linux workflow evidence is Pass in draft PR #7, run
+  `32684234236`;
 - no real `.firebaserc`, Firebase/Google project, credential, state, deploy
   workflow authority or product backend capability exists.
 
@@ -181,8 +191,8 @@ amended.
 R0 uses the Node.js built-in `node:test` runner and built-in coverage rather
 than Jest/Vitest. No bundler, runtime transpiler, dependency-injection framework
 or server framework is admitted by this slice. Clean local install and
-peer/engine compatibility passed; hosted parity and the Moderate-advisory
-disposition remain blocking evidence.
+peer/engine compatibility and hosted parity passed; the Moderate-advisory
+disposition remains blocking evidence.
 
 ### 4.2 Provider-managed patch boundary
 
@@ -707,7 +717,8 @@ after a support/security change, the candidate matrix is re-reviewed first.
 ---
 
 **Current conclusion:** the primary backend toolchain now has a concrete,
-locally executed R0 scaffold. `BCK05-OD-01` is **Proposed**, not Accepted,
-because hosted parity and the Moderate-advisory disposition remain open.
+locally and hosted-executed R0 scaffold. `BCK05-OD-01` is **Proposed**, not Accepted,
+because the Moderate-advisory disposition remains open. Hosted parity is Pass
+and is not an outstanding blocker.
 Product backend behavior, cloud state, credentials and deployment remain
 absent and unauthorized.

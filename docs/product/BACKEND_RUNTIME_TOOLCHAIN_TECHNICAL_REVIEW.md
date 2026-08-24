@@ -1,12 +1,12 @@
 # Recharge Backend — Runtime & Toolchain Technical Review
 
 - ID: **BCK05-OD01-TCH-REV-01**
-- Version: **0.2.1**
+- Version: **0.2.2**
 - Date: **2026-08-24**
-- Status: **Draft technical review — local evidence present; advisory/CI verdict pending**
-- Reviewed artifact: [BCK05-OD01-TCH-01 v0.3.1](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
-- Parent: [BCK-05 v0.2.13](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Executed slice: [BCK-R0-TCH-01 v0.2](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) (Amendments Required)
+- Status: **Draft technical review — local/hosted evidence present; advisory verdict pending**
+- Reviewed artifact: [BCK05-OD01-TCH-01 v0.3.2](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md)
+- Parent: [BCK-05 v0.2.14](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Executed slice: [BCK-R0-TCH-01 v0.2.1](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) (Amendments Required)
 - Approval record: [BCK-R0-TCH-DEC-01 v0.1](BACKEND_R0_APPROVAL_DECISION_RECORD.md)
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Review author role: **technical pre-review; not Platform Operations or Platform Security sign-off**
@@ -15,6 +15,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.2 — 2026-08-24
+
+- recorded successful hosted R0 parity on `ubuntu-24.04` and `windows-2025` in
+  draft PR #7, run `32684234236`;
+- closed Windows setup-java, MSYS-GPG/tar path and checkout-EOL defects without
+  weakening signature, checksum or formatting gates;
+- retained only the explicit Moderate transitive-advisory disposition as the
+  R0 Pass blocker.
 
 ### v0.2.1 — 2026-08-24
 
@@ -40,20 +49,20 @@
 
 ## 1. Verdict
 
-**Technical verdict: Pass with blocking evidence.**
+**Technical verdict: Amendments Required.**
 
-The v0.3 candidate is coherent enough to enter an owner/security review and a
-bounded R0 feasibility slice. The chosen stack is internally compatible at the
-design level, provider-supported and materially smaller than the common
-alternatives.
+The v0.3.2 candidate completed the bounded local and hosted R0 feasibility
+matrix. Exact install, peer/engine resolution, compilation, tests, emulators,
+default-deny Rules, reproducibility and backendless Terraform validation passed
+on both supported hosted runner labels.
 
-This verdict does **not** accept `BCK05-OD-01`. No package has been installed,
-no peer/engine relation has been resolved by npm, no compiler/emulator has run,
-and no Windows/Linux reproducibility result exists. Therefore:
+This verdict does **not** accept `BCK05-OD-01` because the dated Moderate
+transitive-advisory disposition is unresolved. Therefore:
 
 - `BCK05-OD-01` remains **Proposed**;
 - BCK-05 remains **Draft**;
-- R0 remains **not authorized** until its slice is explicitly Approved;
+- R0 remains **Amendments Required**, although its bounded slice is Approved
+  and executed;
 - G1/R1, Firebase projects, billing, credentials and deployment remain blocked.
 
 ## 2. Review scope
@@ -108,13 +117,13 @@ metadata from the committed lock and retain the registry-integrity hashes.
 | TCH-TR-02 | Required | Cloud Functions accepts a runtime major, not the local 22.23.2 patch. | Record provider runtime/revision separately; never claim patch identity. |
 | TCH-TR-03 | Required | TypeScript 6.0.3 is an intentional compatibility baseline, not the newest compiler generation. | Prove SDK/linter/type compatibility; upgrade only through a separate evidence change. |
 | TCH-TR-04 | Required | ESLint 10 is newer, but adopting a fresh major adds avoidable peer/config risk. | Use maintained 9.39.5 for R0; reconsider after a green isolated compatibility trial. |
-| TCH-TR-05 | Resolved locally | Exact npm peer/engine and lifecycle behavior was observed with scripts disabled; three hooks were inventoried and proved non-indispensable for R0. | Reconfirm in hosted CI; keep lifecycle scripts disabled. |
-| TCH-TR-06 | Resolved locally / CI pending | Exact Temurin 21.0.12+8 Windows archive checksum was verified; setup-java pins the same build for both hosted legs. | Record resolved hosted image/JDK evidence before Pass. |
+| TCH-TR-05 | Resolved for bounded R0 | Exact npm peer/engine and lifecycle behavior was observed locally and on both hosted legs with scripts disabled; three hooks remain non-indispensable for R0. | Keep lifecycle scripts disabled. |
+| TCH-TR-06 | Resolved for bounded R0 | Exact Temurin 21.0.12+8 archive evidence was verified; both hosted legs passed using the platform-specific setup-java selector for the same build. | Preserve the recorded hosted run and revalidate on pin changes. |
 | TCH-TR-07 | Required | A globally installed Firebase CLI could shadow the project pin. | Invoke project-local CLI and assert its version before every command. |
 | TCH-TR-08 | Improvement | Jest/Vitest would add dependency and transform complexity without R0 value. | Use compiled tests with built-in `node:test` and built-in coverage. |
 | TCH-TR-09 | Required | Terraform releases can advance between review passes. | Pin stable 1.15.9; reject silent upgrades and alpha/beta/RC inputs. |
 | TCH-TR-10 | Required | Multiple tools can mutate overlapping Google/Firebase resources. | Preserve one-writer matrix; `gcloud` is inspection/bootstrap exception only. |
-| TCH-TR-11 | Resolved for local R0 | Demo-only project identity, loopback hosts, absent credential variables, live probe and default-deny client tests passed. | Reconfirm on both hosted runner legs; this remains non-production evidence. |
+| TCH-TR-11 | Resolved for bounded R0 | Demo-only project identity, loopback hosts, absent credential variables, live probe and default-deny client tests passed locally and on both hosted legs. | This remains non-production evidence. |
 | TCH-TR-12 | Process | A local scaffold could be misread as product/backend authorization. | State tooling scaffold Present separately from product/cloud runtime Absent in every parent ledger and LAUNCH_STATUS. |
 | TCH-TR-16 | Blocking R0 Pass | Dated audit reports 7 production / 10 total Moderate transitive advisories while direct Firebase pins remain latest. | Obtain an explicit Moderate-risk disposition or replace with clean supported upstream releases; never force/downgrade silently. |
 | TCH-TR-13 | Blocking Approval | Reviewed `hashicorp/setup-terraform` v4.0.1 resolves to an unsigned commit and exposes unused credential inputs. | Exclude it; install exact official Terraform archives after signature and SHA verification. |
@@ -180,8 +189,8 @@ Terraform replacement:
   before extraction;
 - no HashiCorp/HCP credential, wrapper or mirror is configured.
 
-The local result establishes bounded compatibility on Windows, not hosted
-Windows/Linux parity or production compatibility. Every identity is rechecked
+The local and hosted results establish bounded toolchain compatibility on
+Windows and Linux, not production compatibility. Every identity is rechecked
 before execution; a moved/deleted tag, verification regression or digest
 mismatch blocks the run.
 
@@ -252,7 +261,7 @@ Timeout, dependency-source outage or a test that did not execute is
 
 | Role | Required verdict | Current state |
 |---|---|---|
-| Technical pre-review | Pass / amendments / fail | Amendments required after local execution: advisory disposition and hosted parity |
+| Technical pre-review | Pass / amendments / fail | Amendments required after local and hosted execution: advisory disposition only |
 | Platform Operations owner | Accept / amendments / reject | Accepted for bounded R0 bootstrap; OD-01 not accepted |
 | Platform Security owner | Accept / amendments / reject | Accepted for bounded local R0 bootstrap; independent production review absent |
 | Architecture owner | confirms ADR/file-map boundary | Accepted for exact v0.2 map only |
@@ -313,7 +322,7 @@ No cell may be filled automatically from the existence of this document.
 
 ---
 
-**Conclusion:** the bounded local implementation is technically operational.
-R0 Pass remains blocked by hosted Windows/Linux parity and the explicit
-Moderate-advisory disposition. BCK05-OD-01 remains Proposed; product/cloud
-runtime, credentials and deployment remain absent.
+**Conclusion:** the bounded local and hosted implementation is technically
+operational. Hosted Windows/Linux parity is Pass. R0 Pass remains blocked by
+the explicit Moderate-advisory disposition. BCK05-OD-01 remains Proposed;
+product/cloud runtime, credentials and deployment remain absent.
