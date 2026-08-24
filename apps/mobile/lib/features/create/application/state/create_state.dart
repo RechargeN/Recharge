@@ -5,6 +5,7 @@ import '../../domain/entities/find_people_validation_issue.dart';
 import '../../domain/entities/place_validation_issue.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
 import '../../domain/entities/place_enrichment_proposal.dart';
+import '../../domain/entities/rental_validation_issue.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
@@ -56,6 +57,8 @@ class CreateState {
     required this.routeStep,
     required this.routePublishReceipt,
     required this.routeModerationRequests,
+    required this.rentalStep,
+    required this.rentalValidationIssues,
   });
 
   factory CreateState.initial() {
@@ -96,6 +99,8 @@ class CreateState {
       routeStep: 0,
       routePublishReceipt: null,
       routeModerationRequests: const <RouteModerationRequest>[],
+      rentalStep: 0,
+      rentalValidationIssues: const <RentalValidationIssue>[],
     );
   }
 
@@ -131,6 +136,8 @@ class CreateState {
   final int routeStep;
   final RoutePublishReceipt? routePublishReceipt;
   final List<RouteModerationRequest> routeModerationRequests;
+  final int rentalStep;
+  final List<RentalValidationIssue> rentalValidationIssues;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -188,6 +195,9 @@ class CreateState {
     bool clearRoutePublishReceipt = false,
     List<RouteModerationRequest>? routeModerationRequests,
     bool clearRouteModerationRequests = false,
+    int? rentalStep,
+    List<RentalValidationIssue>? rentalValidationIssues,
+    bool clearRentalValidationIssues = false,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -259,6 +269,10 @@ class CreateState {
       routeModerationRequests: clearRouteModerationRequests
           ? const <RouteModerationRequest>[]
           : (routeModerationRequests ?? this.routeModerationRequests),
+      rentalStep: rentalStep ?? this.rentalStep,
+      rentalValidationIssues: clearRentalValidationIssues
+          ? const <RentalValidationIssue>[]
+          : (rentalValidationIssues ?? this.rentalValidationIssues),
     );
   }
 }
