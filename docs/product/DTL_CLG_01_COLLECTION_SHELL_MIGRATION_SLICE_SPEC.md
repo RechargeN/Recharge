@@ -1,10 +1,13 @@
 # RECHARGE — DTL-CLG-01: Collection Details Shell Migration Slice Spec
 
 Версия: v0.3 (2026-08-24) — уточнение после третьего раунда review.
-Статус: **Draft for review — Proposed implementation slice.
-Implementation not authorized.**
+Статус: **Approved** (утверждён владельцем продукта 2026-08-24, вслед за
+`DTL-FND-01`/`DTL-LINK-01`; реализация авторизована и выполнена в
+изолированном worktree `dtl-fnd-01`).
 
-Runtime effect (этого документа): **none**.
+Runtime effect (этого документа): **none**. Сам текст не меняет код —
+изменения внесены отдельным implementation-коммитом, под собственными
+analyzer/test/boundary/diff gates.
 
 ## Что изменилось относительно v0.2
 
