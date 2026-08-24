@@ -117,7 +117,14 @@ const importKey = spawnSync(
   },
 );
 if (importKey.status !== 0) {
-  throw new Error("HashiCorp signing key import failed");
+  const diagnostic = `${importKey.stderr || importKey.stdout}`
+    .replaceAll(backendRoot, "<backend-root>")
+    .replace(/[\r\n]+/gu, " ")
+    .trim()
+    .slice(0, 500);
+  throw new Error(
+    `HashiCorp signing key import failed (exit ${String(importKey.status)}): ${diagnostic || "no diagnostic output"}`,
+  );
 }
 
 const verifySignature = spawnSync(
