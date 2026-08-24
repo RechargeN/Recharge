@@ -1,20 +1,20 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.11**
+- Version: **0.4.12**
 - Date: **2026-08-24**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.23](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.27](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.24](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.28](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.11
-- Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.5 (Review-ready; OD-07 Proposed)
-- Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.1 (Review; unsigned)
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.12
+- Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
+- Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
 - Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.1 (Draft; OD-01 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
@@ -25,6 +25,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.12 — 2026-08-24
+
+- recorded OD-07 Acceptance at `OD07-A1-EU-MR-v1` through the exact
+  OD07-DEC-01 v0.2 owner verdict;
+- preserved the distinction between controlled European resource placement and
+  Firebase Authentication/global processing, plus the qualified production
+  Legal/Privacy gate;
+- kept BCK-04 Draft, OD-01/09 and all other specialist decisions unresolved,
+  with production processing and cloud runtime disabled.
 
 ### v0.4.11 — 2026-08-24
 
@@ -1097,14 +1107,14 @@ index applicability, к logging не относится и здесь не ци�
 ## 22. Data residency и OD-07
 
 Evidence review is centralized in
-[BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), with the
-exact unsigned owner contract in
-[OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md). The package
-selects a decision-ready engineering candidate but does not accept OD-07 or
-authorize provisioning.
+[BCK-D1-OD07-EV-01 v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), with the
+exact recorded owner verdict in
+[OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md). The package
+accepts the controlled engineering location baseline but does not authorize
+provisioning or production processing.
 
-`OD-07` — Proposed, owner Platform (совместно `BCK-04`/`BCK-05` по `BCK-01
-§21`), блокирует R1 provisioning. `FIREBASE_ARCHITECTURE.md §4.3`
+`OD-07` — Accepted at `OD07-A1-EU-MR-v1` with controls, owner Platform
+(совместно `BCK-04`/`BCK-05` по `BCK-01 §21`). `FIREBASE_ARCHITECTURE.md §4.3`
 предлагает (**Proposed, не Accepted**) `eur3`/`europe-west1`, но сам текст
 источника прямо требует "a recorded data-residency, cost and latency review"
 и запрещает "Creating the production database before that approval".
@@ -1115,11 +1125,10 @@ BCK-04 фиксирует boundary-требования:
 
 - LV/EE/LT residency — единая политика для всех трёх, если Legal review не
   потребует разделения;
-- итоговое решение о регионе — совместное Approval `BCK-04`+`BCK-05`, не
-  односторонне ни одним из них;
-- до Accepted `OD-07` и прохождения G1 — physical provisioning запрещён
-  Approved coordination gate `BCK-02 §18`; отдельного ADR, уже выбравшего
-  global Firebase location, нет.
+- принятое решение о регионе наследуется только из OD07-DEC-01 v0.2 и не
+  изменяется односторонне BCK-04 или BCK-05;
+- несмотря на Accepted `OD-07`, до прохождения G1 и отдельного exact Approved
+  R1 slice physical provisioning запрещён coordination gate `BCK-02 §18`;
 - European Firestore/Storage/Functions placement is not a claim that all
   Firebase processing is EU-only. Firebase Authentication's documented US
   processing and every global service remain disabled for production until
@@ -1129,8 +1138,9 @@ BCK-04 фиксирует boundary-требования:
   advice; qualified Legal/Privacy approval remains a separate production
   activation gate and cannot be replaced by the combined Product owner.
 
-**Open:** owner verdict for `OD-07` (the exact candidate is Review-ready), и связанный LV/EE/LT-специфичный
-market policy detail — принадлежит `BCK-20` для non-residency частей.
+**Open:** qualified production Legal/Privacy conclusions and the related
+LV/EE/LT-specific market-policy detail, which belongs to `BCK-20` for
+non-residency parts. The OD-07 engineering verdict itself is closed.
 
 ## 23. Backup/restore privacy
 
@@ -1558,7 +1568,7 @@ therefore remains Draft and cannot enter Review yet.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.11 отсутствует:
+На момент v0.4.12 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

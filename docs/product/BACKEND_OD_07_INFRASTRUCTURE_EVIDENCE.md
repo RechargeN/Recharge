@@ -1,13 +1,13 @@
 # BCK-D1 — OD-07 Infrastructure Decision Evidence
 
 - Evidence ID: **BCK-D1-OD07-EV-01**
-- Version: **0.5**
+- Version: **0.6**
 - Date: **2026-08-24**
 - Decision: **OD-07 — Firebase topology, edition and per-resource locations**
-- Decision status: **Proposed — owner decision prepared, not Accepted**
-- Evidence status: **Review-ready — owner verdict required**
+- Decision status: **Accepted — OD07-A1-EU-MR-v1 with controls**
+- Evidence status: **Accepted decision evidence — owner verdict recorded**
 - Candidate baseline: **OD07-A1-EU-MR-v1**
-- Owner-decision record: [OD07-DEC-01 v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md)
+- Owner-decision record: [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md)
 - Runtime status: **Absent**
 - Accountable decision owner: **Platform Operations owner**
 - Decision reviewers: **Security/Privacy and Product/Finance**
@@ -287,19 +287,16 @@ Approved executable slice exist. That slice must fail closed unless it proves:
 
 Console clicks, implicit defaults and project reuse are prohibited.
 
-## 13. Owner decision and remaining gates
+## 13. Recorded owner decision and remaining gates
 
-[OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) contains the
-exact review scope and verdict phrase. Until that phrase is supplied:
+[OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) records the
+exact owner phrase and accepts this architecture baseline with controls.
 
-- OD-07 remains `Proposed`;
-- D1/G1 and R1 remain blocked;
+- OD-07 is `Accepted` at `OD07-A1-EU-MR-v1`;
+- BCK-04/05, OD-10, complete D1/G1 and R1 remain blocked or unchanged;
 - no provider project ID, billing account, credential or resource exists;
-- every production Firebase/global service remains disabled.
-
-After exact acceptance, OD-07 becomes Accepted only as the architecture
-baseline above. BCK-04/05, OD-10, complete D1/G1, exact R1 authorization,
-qualified Legal/Privacy review and production activation remain independent.
+- every production Firebase/global service remains disabled;
+- qualified Legal/Privacy review and production activation remain independent.
 
 ## 14. Revalidation and supersession
 
@@ -350,6 +347,6 @@ resources never redefine the decision merely because they exist.
 
 ---
 
-**Current conclusion:** `OD07-A1-EU-MR-v1` is decision-ready and recommended,
-but OD-07 remains **Proposed** until the exact owner verdict in OD07-DEC-01 is
-recorded. No cloud action or merge to `main` is authorized by this document.
+**Current conclusion:** the exact owner verdict in OD07-DEC-01 v0.2 is recorded
+and OD-07 is **Accepted at `OD07-A1-EU-MR-v1` with controls**. No cloud action,
+production activation or merge to `main` is authorized by this document.

@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.7**
+- Version: **1.8**
 - Date: **2026-08-24**
-- Status: **Draft ledger — OD-01 verdict recorded; D1 sign-offs incomplete**
+- Status: **Draft ledger — OD-01 and OD-07 verdicts recorded; D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.8](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.5](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.9](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.6](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
@@ -25,7 +25,8 @@ The Product owner instruction dated 2026-08-20 assigns
   disposition in §4.1 is recorded, while full D1 role sign-offs remain
   incomplete;
 - BCK-03/04/05/20 remain Draft;
-- OD-07/09/10 remain Proposed and OD-11 remains Open;
+- OD-07 is Accepted at `OD07-A1-EU-MR-v1` with controls; OD-09/10 remain
+  Proposed and OD-11 remains Open;
 - D1 exit, G1–G7, provisioning and runtime remain blocked.
 
 This is a single-owner bootstrap assignment with no independent review. Codex
@@ -90,13 +91,13 @@ accepts its accountability.
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
 | BCK-03 v0.3.3 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
-| BCK-04 v0.4.11 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 boundary reconciled; broader review pending |
-| BCK-05 v0.2.18 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and BCK05-OD-01 Acceptance are Present; OD-07 is decision-ready but unsigned; other OD/specialist/stage/product-cloud evidence remains pending |
+| BCK-04 v0.4.12 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 Accepted with controls; broader review pending |
+| BCK-05 v0.2.19 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01 and cross-domain OD-07 Acceptance are Present; other OD/specialist/stage/product-cloud evidence remains pending |
 | BCK-20 v0.2.2 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; review pending |
 | BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |
-| BCK05-OD04-COST-01 v0.2 | D1-SIG-FIN + D1-SIG-OPS | Product owner, D1-SIG-SEC and D1-SIG-LEGAL where applicable | Proposed; Product baseline accepted for stage validation; Finance Inconclusive; EUR SKU/stage evidence pending |
+| BCK05-OD04-COST-01 v0.4 | D1-SIG-FIN + D1-SIG-OPS | Product owner, D1-SIG-SEC and D1-SIG-LEGAL where applicable | OD-07 Accepted; BCK05-OD-04 Proposed; Finance Inconclusive; EUR SKU/stage evidence pending |
 | BCK05-OD03-SLO-01 v0.1 | D1-SIG-OPS + Product/domain owners | D1-SIG-SEC, D1-SIG-MOBILE and affected domains | Proposed; Product baseline accepted; combined-owner Operations disposition requires stage telemetry/alerts and specialist proof |
 | BCK05-OD05-REC-01 v0.1 | D1-SIG-OPS + affected domain owners | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and Privacy | Proposed; Product baseline accepted; restore drills, privacy/IAM evidence and qualified review pending |
 | BCK05-NUM-REV-01 v0.2 | Product owner coordination | D1-SIG-OPS/FIN/SEC/LEGAL plus affected domains | Bounded exact-version Product-owner disposition recorded; no OD/BCK/runtime promotion |
@@ -107,7 +108,7 @@ accepts its accountability.
 | BCK05-OD01-DEC-01 v0.2 | D1-SIG-OPS + D1-SIG-SEC | Architecture/release boundary review | Accepted at `2026-08-24T15:33:18Z`; exact baseline only; G1/R1 remain blocked |
 | BCK05-OD02-IAM-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | D1-SIG-LEGAL where applicable and release/runtime owners | Proposed; exact claims/roles/plan/JIT evidence and specialist verdicts pending |
 | BCK05-OD07-REL-01 v0.1 | D1-SIG-OPS + D1-SIG-SEC | API, domain, incident and release owners | Proposed; exact toolchain/attestor/registry/policy/provider/runtime evidence pending |
-| OD-07 evidence v0.5 + OD07-DEC-01 v0.1 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-FIN; qualified D1-SIG-LEGAL remains mandatory before production processing | `OD07-A1-EU-MR-v1` Review-ready; exact owner verdict unsigned; no cloud permission |
+| OD-07 evidence v0.6 + OD07-DEC-01 v0.2 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-FIN; qualified D1-SIG-LEGAL remains mandatory before production processing | Accepted at `2026-08-24T17:51:38Z` with controls; no cloud permission |
 | OD-09 evidence | D1-SIG-API | D1-SIG-OPS; later D1-SIG-BOOK/NOTIF | Proposed; assigned; D1 minimum only |
 | OD-10 evidence | D1-SIG-REF | D1-SIG-L10N/API/MOBILE/CONTENT/LEGAL | Proposed; assigned; unsigned |
 | OD-11 brief | D1-SIG-SEC + D1-SIG-LEGAL | Product/domain owners per feature | Open; assigned; no policy selected |
@@ -214,7 +215,7 @@ returns a §6 review record.
 6. **D1-SIG-AC-06:** combined roles disclose independence risk.
 7. **D1-SIG-AC-07:** BCK-18 is not made a circular D1 dependency.
 8. **D1-SIG-AC-08:** Mobile Platform still reviews the delegated client boundary.
-9. **D1-SIG-AC-09:** pre-decision OD-07 evidence requires no unauthorized resource.
+9. **D1-SIG-AC-09:** OD-07 evidence and Acceptance require no unauthorized resource.
 10. **D1-SIG-AC-10:** post-provision validation occurs before traffic.
 11. **D1-SIG-AC-11:** documentation vectors do not claim executable parity.
 12. **D1-SIG-AC-12:** unsigned OD/BCK status is not promoted.
@@ -225,9 +226,8 @@ returns a §6 review record.
 
 ## 11. Next action
 
-The bounded numerical baseline, R0 evidence and exact BCK05-OD-01 verdict are
-recorded. Next, record or amend the exact OD-07 verdict, then resolve the
-remaining IAM/release and specialist
-evidence using §6. Qualified
+The bounded numerical baseline, R0 evidence and exact BCK05-OD-01 and OD-07
+verdicts are recorded. Next, revalidate OD-07 before provisioning and resolve
+the remaining IAM/release and specialist evidence using §6. Qualified
 Legal/Privacy evidence remains an external prerequisite wherever legal
 judgment is required. D1 remains blocked and no new runtime gate opens.

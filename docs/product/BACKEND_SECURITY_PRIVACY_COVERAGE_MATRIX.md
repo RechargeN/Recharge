@@ -1,13 +1,13 @@
 # BCK-04 — Security & Privacy Coverage Matrix
 
 - ID: **BCK-04-PRE**
-- Version: **0.3.11**
+- Version: **0.3.12**
 - Date: **2026-08-24**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Security/Privacy owner**
-- Target document: [BCK-04 v0.4.11](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.27](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target document: [BCK-04 v0.4.12](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.28](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md`
 
 ---
@@ -20,26 +20,26 @@
 решения и не разрешает создание `apps/backend`, Firebase resources,
 credentials, production data processing или любой runtime-код.
 
-Revision v0.3.11 also reconciles the review-ready OD-07 engineering candidate
-with the Authentication US/global-service disclosure and preserves qualified
-Legal/Privacy production review as a separate gate. OD-07 remains Proposed;
-owner, qualified Legal/Privacy and executed/passed tabletop evidence remain
-blocked.
+Revision v0.3.12 records OD-07 Acceptance at `OD07-A1-EU-MR-v1` with controls,
+retains the Authentication US/global-service disclosure and preserves
+qualified Legal/Privacy production review as a separate gate. BCK-04 remains
+Draft; owner, qualified Legal/Privacy and executed/passed tabletop evidence
+remain blocked.
 
 ## 1. Проверенный baseline
 
 | Источник | Фактический статус в tracked checkout | Роль в reconciliation |
 |---|---|---|
 | Accepted ADR 0013, 0015, 0019 | Accepted | Непереопределяемые identity, capability и Booking authority invariants |
-| BCK-01 | Review v0.4.23, Present; local R0 scaffold only, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
-| BCK-02 | Approved v2.4.27; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
+| BCK-01 | Review v0.4.24, Present; local R0 scaffold only, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
+| BCK-02 | Approved v2.4.28; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
 | BCK-03 | Draft v0.3.3, Present; runtime Absent | API envelope/versioning/idempotency input, split-key conflict closed |
-| BCK-05 | Draft v0.2.18, Present; local R0 scaffold only; OD-01 Accepted, OD-07 decision-ready but unsigned, other listed OD Proposed | Operations/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
+| BCK-05 | Draft v0.2.19, Present; local R0 scaffold only; BCK05-OD-01 and cross-domain OD-07 Accepted, other listed BCK05 OD Proposed | Operations/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
 | BCK-20 | Draft v0.2.2, Present; runtime Absent | Market/reference/localization input, ещё не Accepted |
 | BCK-09 | Review v1.1; runtime Absent | Booking-specific transaction/security input, ещё не Approved |
 | Identity/Publisher spec | Approved v1.3, bounded local/mock scope | Identity semantics; не production authority |
 | Firebase Architecture | Proposed v2.2 | Proposed input only; не наследуется как settled решение |
-| BCK-04 | Draft v0.4.11; runtime Absent; OD-01/09 Proposed | Единственный target security/privacy contract |
+| BCK-04 | Draft v0.4.12; runtime Absent; OD-01/09 Proposed; OD-07 Accepted with controls | Единственный target security/privacy contract |
 | BCK04-OD01-TM-01 | Draft v0.1; runtime N/A | Full threat-model evidence; OD-01 Proposed, not Accepted |
 | BCK04-OD09-IR-01 | Draft v0.1; runtime N/A | Incident/severity/privacy-risk evidence; OD-09/BCK05-OD-08 Proposed |
 | BCK04-OD09-TTX-01 | Ready v0.1; not executed; runtime N/A | Repeatable tabletop package; no result or gate closure |
@@ -50,7 +50,7 @@ blocked.
 
 ## 2. Coverage matrix — 22 обязательных пункта
 
-| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.11 | Evidence / остаток |
+| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.12 | Evidence / остаток |
 |---:|---|---|---|
 | 1 | ID/version/date/status/runtime/owner | Полное | Header |
 | 2 | Parent sources, anchors, conflict priority | Полное | §3; Accepted ADR выше Draft/Proposed inputs |
@@ -138,9 +138,9 @@ Resolved prerequisites:
   required for Legal/Privacy decisions or Approval/G1.
 - `PRE-03`: BCK-D1-DEC-01/ECL03-D11 reconciles BCK-03, BCK-09 and committed
   Booking fixtures on one split-key contract.
-- `PRE-03A`: OD-07 and OD-11 now have reviewable evidence/Legal packages;
-  their decision statuses remain Proposed/Open and the packages do not satisfy
-  the missing specialist decisions.
+- `PRE-03A`: OD-07 is Accepted through its exact decision record and OD-11 has
+  a reviewable Legal package; OD-11 remains Open and neither artifact satisfies
+  the missing qualified production decisions.
 
 | ID | Блокер | Owner | Exit evidence |
 |---|---|---|---|
@@ -148,7 +148,7 @@ Resolved prerequisites:
 | PRE-03C | Full threat-model evidence is Present and OD-01 is Proposed; owner verdict and independent security review remain absent | Security/Privacy owner | Accepted review record against [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) exact version |
 | PRE-03D | Incident-response evidence and tabletop package are Present; OD-09 is Proposed, but owner/qualified Legal verdict and executed/passed result remain absent | Security/Privacy + Legal/Privacy + Operations | Accepted review plus completed [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) record against exact versions |
 | PRE-04 | ECL03-D04 product status reconciled; exact production retention/backup validation and rights interface remain open | Booking + Security/Privacy + Legal + API Platform | BCK04-OD-07/BCK04-OD-08 decisions and Legal/Privacy evidence |
-| PRE-05 | Data residency/project topology и age policy не Accepted | Platform + Security/Privacy + Legal | OD-07 и OD-11 минимум в gate-required статусе |
+| PRE-05 | OD-07 engineering topology is Accepted; age policy and qualified production residency/transfer conclusions are not | Platform + Security/Privacy + Legal | Preserve OD-07 controls; move OD-11 to the gate-required status and record qualified Legal/Privacy evidence |
 | PRE-06 | Incident model Proposed; owner/Legal/tabletop evidence plus ROPA/DPIA and processor/transfer policy remain open | Security/Privacy + Legal + Operations | BCK04-OD-09…14 decisions and evidence templates |
 
 ## 6. Acceptance criteria матрицы
@@ -167,6 +167,6 @@ Resolved prerequisites:
 
 ## 7. Итог
 
-BCK-04 v0.4.11 структурно покрывает обязательный template и готов к предметному
+BCK-04 v0.4.12 структурно покрывает обязательный template и готов к предметному
 architecture/legal review после устранения §5 blockers. Физическая реализация,
 provisioning и production processing по-прежнему не разрешены.

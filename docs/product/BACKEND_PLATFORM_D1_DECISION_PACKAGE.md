@@ -1,17 +1,24 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.1**
-- Date: **2026-08-20**
+- Version: **0.2**
+- Date: **2026-08-24**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **Absent**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.3](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.7](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.24](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.28](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
 
 ---
+
+## 0. Revision note
+
+v0.2 preserves the Accepted Booking split-key decision and reconciles the
+later exact [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md)
+verdict: OD-07 is Accepted at `OD07-A1-EU-MR-v1` with controls. No D1 exit,
+G1/R1, cloud or runtime authority is added.
 
 ## 1. Purpose
 
@@ -139,7 +146,7 @@ actions remain gated by an Approved executable slice and API-DEC decisions.
 | Decision | Status after this package | Evidence / reason | Next gate |
 |---|---|---|---|
 | `D1-DEC-01` / `ECL03-D11` | **Accepted** | Product owner approved split-key reconciliation; matches committed Booking v1 wire/fixtures | Executable contract tests before mutation runtime |
-| `OD-07` | **Proposed** | BCK-05 option A is reviewable; exact project edition/resource locations, residency, cost/export and specialist evidence are incomplete | Accepted before G1/R1 provisioning |
+| `OD-07` | **Accepted with controls** | OD07-DEC-01 v0.2 accepts exact `OD07-A1-EU-MR-v1`; evidence v0.6 records locations, residency limits, thresholds, export/replacement and revalidation | G1 plus exact Approved R1 slice before provisioning; qualified Legal/Privacy before production processing |
 | `OD-09` | **Proposed** | BCK-03 defines an envelope and BCK-05 defines the operational boundary; delivery/retention/replay evidence is incomplete | Proposed is sufficient for D1 planning; Accepted before D3 effects/workers |
 | `OD-10` | **Proposed, acceptance-ready only after evidence** | BCK-20 defines LocalizedText v1 and deterministic fallback; LV/EE/LT fixtures, Content/Mobile/Legal review and migration evidence are absent | Accepted before BCK-20/BCK-07 Approval and G1 |
 | `OD-11` | **Open** | No authorized Legal/Privacy owner decision establishes minors/age policy | Accepted before production account creation and every applicable age-sensitive path |
@@ -152,8 +159,8 @@ No Proposed or Open item is promoted by implication.
 |---|---|---|---|
 | BCK-01 | Review | D1 conflict/status traceability updated | Independent specialist Approval and complete D1 sign-off |
 | BCK-03 | Draft | Booking split-key conflict closed | Delegated BCK-04/05/18 reviews and API-DEC evidence |
-| BCK-04 | Draft | PRE-03 idempotency blocker closed | Legal/Privacy ownership, OD-07/11 and recorded security/privacy decisions |
-| BCK-05 | Draft | API dependency now reconciled | Operations specialist, OD-07, SLO/budget/IAM/recovery evidence |
+| BCK-04 | Draft | PRE-03 idempotency blocker closed; OD-07 engineering topology Accepted | Legal/Privacy ownership, OD-11 and recorded security/privacy decisions |
+| BCK-05 | Draft | API dependency reconciled; OD-07 architecture Accepted | Operations specialist, remaining BCK05 decisions, SLO/budget/IAM/recovery evidence |
 | BCK-20 | Draft | API dependency and OD-10 disposition clarified | OD-10 fixtures and Reference/API/Content/Mobile/Legal review |
 | BCK-09 | Review | Target idempotency semantics now match Booking v1 fixtures | Physical implementation remains separately gated |
 
@@ -223,7 +230,7 @@ Executable verification, only after a separately Approved slice, must include:
 8. **BCK-D1-AC-08:** a new key never bypasses domain invariants.
 9. **BCK-D1-AC-09:** committed Booking v1 wire and fixtures require no migration.
 10. **BCK-D1-AC-10:** API-DEC-03 still gates canonical hash implementation.
-11. **BCK-D1-AC-11:** OD-07 remains Proposed and blocks provisioning.
+11. **BCK-D1-AC-11:** OD-07 is Accepted with controls but does not authorize provisioning.
 12. **BCK-D1-AC-12:** OD-09 remains Proposed and blocks effects/workers until Accepted.
 13. **BCK-D1-AC-13:** OD-10 remains Proposed until fixture and owner evidence exists.
 14. **BCK-D1-AC-14:** OD-11 remains Open and age-sensitive paths fail closed.
@@ -236,14 +243,16 @@ Executable verification, only after a separately Approved slice, must include:
 
 ## 11. Rollback
 
-Before runtime exists, rollback means reverting this documentation revision and
-restoring the previous equality proposal. Such rollback would reopen the
-known fixture contradiction and therefore requires an explicit new owner
-decision; it must not be performed silently.
+Before runtime exists, rollback of the Booking split-key decision means a new
+explicit owner decision; silently restoring the previous equality proposal
+would reopen the known fixture contradiction. OD-07 is governed separately by
+OD07-DEC-01 and can be changed only through its versioned supersession process,
+not by reverting this reconciliation package.
 
 ## 12. Final statement
 
-`D1-DEC-01` is Accepted and closes the Booking v1 key-semantics contradiction.
-The backend platform is still documentation-only. D1 exit, G1, physical
-Firebase, deployments and production data processing remain blocked by the
-statuses and evidence listed above.
+`D1-DEC-01` is Accepted and closes the Booking v1 key-semantics contradiction;
+OD-07 is separately Accepted at `OD07-A1-EU-MR-v1` with controls. The backend
+platform is still documentation-only. D1 exit, G1, physical Firebase,
+deployments and production data processing remain blocked by the statuses and
+evidence listed above.

@@ -1,7 +1,7 @@
 # Recharge Backend — Infrastructure and Cost Control Model
 
 - Evidence ID: **BCK05-OD04-COST-01**
-- Version: **0.3**
+- Version: **0.4**
 - Date: **2026-08-24**
 - Decision served: **BCK05-OD-04**; supporting evidence for **OD-07**
 - Decision status: **Proposed — Product/Finance/Operations verdict pending**
@@ -11,7 +11,7 @@
 - Required reviewers: **Platform Operations, Product/Finance,
   Security/Privacy and Legal/Privacy where invoice/residency/tax facts apply**
 - Parent: [BCK-05](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Infrastructure decision: [BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), candidate `OD07-A1-EU-MR-v1`
+- Infrastructure decision: [BCK-D1-OD07-EV-01 v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md), Accepted baseline `OD07-A1-EU-MR-v1`
 - Reliability boundary: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md)
 - Recovery boundary: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md)
 - Architecture input: [Firebase Architecture v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
@@ -22,6 +22,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.4 — 2026-08-24
+
+- recorded OD-07 Acceptance of `OD07-A1-EU-MR-v1` while retaining
+  BCK05-OD-04, exact EUR SKU/tax/billing evidence and chargeable work as
+  unapproved;
+- kept all formulas, thresholds and the numerical baseline unchanged;
+- preserved revalidation, replacement and qualified Legal/Privacy gates with
+  no billing, cloud resource or runtime effect.
 
 ### v0.3 — 2026-08-24
 
@@ -141,17 +150,15 @@ remain placeholders until an Approved provisioning slice.
 
 | Option | Firestore | Functions | Media Storage | Cost/reliability interpretation | Current disposition |
 |---|---|---|---|---|---|
-| A1 — balanced candidate | Standard Native `eur3` | 2nd gen `europe-west1`, min instances 0 | regional Standard `europe-west1` | resilient Firestore candidate; media processing co-located and lower transfer/storage cost | **Preferred for cost validation; not Accepted** |
+| A1 — balanced candidate | Standard Native `eur3` | 2nd gen `europe-west1`, min instances 0 | regional Standard `europe-west1` | resilient Firestore baseline; media processing co-located and lower transfer/storage cost | **Accepted by OD-07 with controls; cost authorization still absent** |
 | A2 — EU multi-region media | Standard Native `eur3` | 2nd gen `europe-west1` | EU multi-region Standard | higher storage/operation cost and possible `$0.02/GiB` processing transfer; broader media placement | retain only if reliability/residency evidence justifies delta |
-| B — regional platform | Standard Native `europe-west1` | 2nd gen `europe-west1` | regional Standard `europe-west1` | simplest/cheapest colocation candidate; lower regional resilience requires explicit DR evidence | benchmark and compare before OD-07 Acceptance |
+| B — regional platform | Standard Native `europe-west1` | 2nd gen `europe-west1` | regional Standard `europe-west1` | simplest/cheapest colocation candidate; lower regional resilience requires explicit DR evidence | replacement candidate if A1 misses a binding threshold; requires superseding decision |
 | C — Nordic regional | Standard Native `europe-north1` | 2nd gen `europe-north1` where all triggers supported | regional Standard `europe-north1` | geographically closer to Baltics, but service coverage, measured latency and recovery remain unknown | evidence alternative, not default |
 
-Recommendation: use A1 as the exact **`OD07-A1-EU-MR-v1` calculator and
-stage-validation baseline**, not as an already Accepted or provisioned choice.
-The decision-ready evidence supplies locations, thresholds and export/rollback
-design; the exact owner verdict, current EUR SKU/billing-account reconciliation,
-qualified production Legal/Privacy review and runtime measurements remain
-separate gates.
+Use A1 as the exact **`OD07-A1-EU-MR-v1` calculator and stage-validation
+baseline**. Architecture Acceptance is recorded, but provisioning is not.
+Current EUR SKU/billing-account reconciliation, BCK05-OD-04, qualified
+production Legal/Privacy review and runtime measurements remain separate gates.
 
 ## 6. Environment resource and budget boundary
 
@@ -430,10 +437,10 @@ independent Finance, Operations, Security or Legal verdict.
 9. migration/rollback and no-silent-budget-raise rules are signed;
 10. BCK-01/02/05, D1 ledger and LAUNCH_STATUS update atomically.
 
-OD-07 remains Proposed until the exact OD07-DEC-01 owner verdict. Its
-engineering location/threshold/export package is decision-ready; current EUR
-SKU/Finance evidence, qualified production Legal/Privacy review and runtime
-measurements remain separate provisioning/activation gates.
+OD-07 is Accepted through OD07-DEC-01 v0.2. Its controls do not satisfy current
+EUR SKU/Finance evidence, BCK05-OD-04, qualified production Legal/Privacy
+review or runtime measurements; those remain separate provisioning and
+activation gates.
 
 ## 18. Provisioning gate
 
@@ -456,7 +463,7 @@ This document alone authorizes none of those actions.
 - actual EUR SKU export or calculator artifact;
 - measured stage/production traffic, amplification or unit economics;
 - configured budgets, alerts, Pub/Sub notifications, quotas or flags;
-- accepted OD-07/BCK05-OD-04 verdicts;
+- accepted BCK05-OD-04 verdict and exact EUR cost authorization;
 - cloud credentials, production data, deployment or market activation.
 
 ## 20. Acceptance criteria
@@ -490,8 +497,8 @@ This document alone authorizes none of those actions.
 27. **BCK05-COST-AC-27:** market attribution does not activate EE/LT.
 28. **BCK05-COST-AC-28:** shared-platform allocation has one documented rule.
 29. **BCK05-COST-AC-29:** country project split requires evidence/new decision.
-30. **BCK05-COST-AC-30:** topology remains Proposed until OD-07 passes.
-31. **BCK05-COST-AC-31:** A1 is a validation baseline, not Accepted topology.
+30. **BCK05-COST-AC-30:** topology status changes only through an exact OD-07 verdict; A1 is now Accepted with controls.
+31. **BCK05-COST-AC-31:** A1 architecture Acceptance is not cost, billing or provisioning authorization.
 32. **BCK05-COST-AC-32:** location transfer appears as an explicit cost line.
 33. **BCK05-COST-AC-33:** min instances default to zero absent accepted evidence.
 34. **BCK05-COST-AC-34:** CUD purchase requires stable usage and break-even proof.

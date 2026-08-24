@@ -1,19 +1,41 @@
 # Recharge Backend — OD-07 Infrastructure Owner Decision
 
 - ID: **OD07-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-24**
-- Status: **Review — owner verdict not recorded**
+- Status: **Accepted — OD07-A1-EU-MR-v1 with controls**
 - Decision target: **OD-07**
 - Candidate baseline: **OD07-A1-EU-MR-v1**
-- Evidence: [BCK-D1-OD07-EV-01 v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md)
-- Parent: [BCK-05](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Evidence: [BCK-D1-OD07-EV-01 v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md)
+- Parent: [BCK-05 v0.2.19](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Accountable verdict: **Platform Operations + Security/Privacy + Product/Finance**
 - Legal boundary: **qualified Legal/Privacy production verdict is not replaced**
 - Assigned bootstrap owner: **RechargeN / Product owner acting as combined Platform coordinator**
 - Runtime effect: **none**
 
 ---
+
+## 0. Recorded owner verdict
+
+The Product owner supplied the exact effective phrase:
+
+```text
+Одобряю OD07-DEC-01: Accept OD07-A1-EU-MR-v1 with controls.
+```
+
+| Field | Recorded value |
+|---|---|
+| Decision | **Accept OD07-A1-EU-MR-v1 with controls** |
+| Owner identity / actual role | `RechargeN / Product owner acting as combined Platform coordinator` |
+| Architecture scope | exact §2 topology under every §4 control and §5 exclusion |
+| Legal scope | engineering location model only; qualified production Legal/Privacy verdict remains mandatory |
+| Signature evidence | exact owner reply in the controlling Codex task |
+| Signed UTC | `2026-08-24T17:51:38Z` |
+| Runtime effect | none |
+
+This transition records OD-07 architecture Acceptance only. It does not approve
+BCK-04/BCK-05, pass D1/G1, authorize R1, create cloud resources, process data
+or permit a merge to `main`.
 
 ## 1. Purpose
 
@@ -117,14 +139,14 @@ Allowed verdicts:
 
 Recommended verdict: **Accept OD07-A1-EU-MR-v1 with controls**.
 
-The only effective approval phrase is:
+The effective approval phrase is:
 
 ```text
 Одобряю OD07-DEC-01: Accept OD07-A1-EU-MR-v1 with controls.
 ```
 
 Generic “да”, “дальше”, approval of documentation work, silence or file
-presence is not this decision.
+presence is not this decision. The exact phrase is now recorded in §0.
 
 ## 8. Status after exact acceptance
 
@@ -159,6 +181,8 @@ presence is not this decision.
 
 ---
 
-**Current conclusion:** the decision is ready for the Product owner, but no
-verdict is recorded. OD-07 remains **Proposed** and all cloud actions remain
-blocked.
+**Current conclusion:** the exact owner verdict is recorded and OD-07 is
+**Accepted at `OD07-A1-EU-MR-v1` with controls**. BCK-04/BCK-05 Approval,
+qualified production Legal/Privacy review, complete D1/G1, exact R1 execution
+authorization, every cloud action and merge to `main` remain blocked or
+unchanged.

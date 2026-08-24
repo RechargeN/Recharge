@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.8**
+- Version: **1.9**
 - Date: **2026-08-24**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
 - Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
-- Accepted decision input: [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
+- Accepted decision input: [BCK-D1-DEC-01 v0.2](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
 - Owner sign-off ledger: [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Combined-owner review workbook: [BCK-D1-OWN-REV-01](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
@@ -21,7 +21,8 @@ none of G1–G7 or R1–R12 is opened by this package.
 
 - BCK-01 is in `Review`.
 - BCK-03, BCK-04, BCK-05 and BCK-20 remain `Draft`.
-- OD-07, OD-09 and OD-10 remain `Proposed`.
+- OD-07 is `Accepted` at `OD07-A1-EU-MR-v1` with controls; OD-09 and OD-10
+  remain `Proposed`.
 - OD-11 remains `Open`.
 - BCK-D1-DEC-01 is Accepted and closes only the request/idempotency semantic
   contradiction; it does not close executable parity.
@@ -47,7 +48,7 @@ Approval, G1, R1 or cloud/product runtime authorization.
 | BCK-04 Security/Privacy | Approved | Draft | Blocked |
 | BCK-05 Operations | Approved | Draft | Blocked |
 | BCK-20 Reference/Localization | Approved | Draft | Blocked |
-| OD-07 topology | Accepted | Proposed | Blocked |
+| OD-07 topology | Accepted | Accepted with controls | Pass for this D1 requirement; provisioning still blocked |
 | OD-10 localization | Accepted | Proposed | Blocked |
 | OD-09 event/outbox | at least Proposed for D1; Accepted before effects | Proposed | D1 minimum met; runtime blocked |
 | OD-11 minors/age | at least Proposed for D1 | Open | Blocked |
@@ -58,17 +59,17 @@ Approval, G1, R1 or cloud/product runtime authorization.
 
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
-| [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation | Accepted | semantic conflict closed |
-| [OD-07 evidence v0.5](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.1](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | Review-ready; owner verdict unsigned | OD-07 remains Proposed |
+| [BCK-D1-DEC-01 v0.2](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted | semantic conflict closed; OD-07 status reconciled without runtime authority |
+| [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | exact owner verdict recorded | OD-07 Accepted with controls; no cloud permission |
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.7; OD-01 recorded; OD-07 decision-ready; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.5; OD-01 recorded; OD-07 verdict pending | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.8; OD-01 and OD-07 recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.6; OD-01 and OD-07 recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
-| [Infrastructure/cost model](BACKEND_INFRASTRUCTURE_COST_MODEL.md) | dated prices, five workload envelopes, corrected backup-retention estimates, EUR budgets/containment and 40 AC | Draft v0.2; Product baseline recorded; BCK05-OD-04 Proposed | Finance Inconclusive; Operations/EUR SKU/measured stage evidence pending |
+| [Infrastructure/cost model](BACKEND_INFRASTRUCTURE_COST_MODEL.md) | dated prices, five workload envelopes, corrected backup-retention estimates, EUR budgets/containment and 40 AC | Draft v0.4; OD-07 Accepted, BCK05-OD-04 Proposed | Finance Inconclusive; Operations/EUR SKU/measured stage evidence pending |
 | [Service reliability/SLO model](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) | journey-scoped SLIs/SLOs, error budgets, zero-tolerance invariants, burn alerts and 40 AC | Draft evidence; Product baseline recorded; BCK05-OD-03 Proposed | domain/Operations specialist verdict, stage telemetry and executable alert evidence pending |
 | [Backup/recovery model](BACKEND_BACKUP_RECOVERY_MODEL.md) | record-family RPO/RTO, candidate protection, isolated restore, privacy re-deletion, drills and 40 AC | Draft evidence; Product baseline recorded; BCK05-OD-05 Proposed | Platform/Privacy/domain verdict, representative restore and executable protection evidence pending |
 | [Operations numeric owner review](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) | exact-version cross-model audit, ten findings, corrected cost and bounded verdict | v0.2; bounded Product-owner disposition recorded | OD-03/04/05 remain Proposed; no runtime authority |
@@ -127,8 +128,8 @@ Still blocking Approval:
 Ready for owner review of:
 
 - environment isolation, release, flags, observability and rollback boundaries;
-- OD-07 exact `OD07-A1-EU-MR-v1` candidate, rejected alternatives, evidence
-  checklist and owner-verdict contract;
+- OD-07 exact Accepted `OD07-A1-EU-MR-v1` baseline, rejected alternatives,
+  evidence checklist, recorded verdict and revalidation contract;
 - OD-09 transport ownership boundary;
 - BCK05-OD-08 incident-response boundary and exercise contract;
 - honest budget-alert, cost, recovery and runtime status.
@@ -149,7 +150,7 @@ Still blocking Approval:
 
 - accountable Platform Operations specialist verdict/sign-off beyond the
   bounded Product-owner baseline;
-- OD-07 Accepted;
+- every remaining BCK-05 decision and specialist verdict;
 - owner-approved and stage-measured SLO/RPO/RTO/cost evidence;
 - remaining IAM/release decisions and executable stage/provider evidence;
 - backup/restore, executable incident routes and tabletop evidence;
@@ -174,7 +175,7 @@ Still blocking Approval:
 ## 5. Required review sequence
 
 1. **API Platform:** review BCK-03 and OD-09; record comments/decision evidence.
-2. **Platform Operations:** review BCK-05 and supply the exact OD-07 verdict;
+2. **Platform Operations:** review BCK-05 and preserve the exact OD-07 verdict;
    revalidate dated vendor facts before any irreversible command,
    models, thresholds and cost/recovery evidence without provisioning resources.
 3. **Security/Privacy + Legal/Privacy:** review BCK-04, OD-07 boundary and OD-11;
@@ -278,7 +279,7 @@ required where the specifications depend on professional legal judgment.
 1. **D1-REV-AC-01:** every BCK/OD status matches its actual evidence.
 2. **D1-REV-AC-02:** BCK-01 Review is not described as Approved.
 3. **D1-REV-AC-03:** BCK-03/04/05/20 remain Draft without owner sign-off.
-4. **D1-REV-AC-04:** OD-07/09/10 remain Proposed.
+4. **D1-REV-AC-04:** OD-07 is Accepted with controls while OD-09/10 remain Proposed.
 5. **D1-REV-AC-05:** OD-11 remains Open and contains no invented product age.
 6. **D1-REV-AC-06:** BCK-D1-DEC-01 scope is not expanded to runtime.
 7. **D1-REV-AC-07:** specialist review cannot be replaced by coordination.
