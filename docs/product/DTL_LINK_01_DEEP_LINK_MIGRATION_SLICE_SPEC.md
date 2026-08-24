@@ -1,10 +1,51 @@
 # RECHARGE — DTL-LINK-01: Canonical Deep Link Migration Slice Spec
 
 Версия: v0.3 (2026-08-24) — major revision после третьего раунда review.
-Статус: **Draft for review — Proposed implementation slice.
-Implementation not authorized.**
+Статус: **Approved** (утверждён владельцем продукта 2026-08-24, вслед за
+`DTL-FND-01`; реализация авторизована и выполнена в изолированном
+worktree `dtl-fnd-01`).
 
-Runtime effect (этого документа): **none**.
+Runtime effect (этого документа): **none**. Сам текст не меняет код —
+изменения внесены отдельным implementation-коммитом поверх `DTL-FND-01`,
+под собственными analyzer/test/boundary/diff gates.
+
+## Реализация — фактические отклонения от плана
+
+Зафиксировано явно, не молча (см. также §4 file map ниже):
+
+1. **11 из 13 call site'ов реально изменены** (`route_names.dart`,
+   `app_router.dart`, `discover_details_page.dart`,
+   `collection_details_page.dart`, `discover_map_page.dart`,
+   `discover_results_page.dart`, `notifications_page.dart`,
+   `notifications_repository_impl.dart`, `profile_page.dart`,
+   `visited_places_page.dart`, `discover_hub_page.dart`).
+   `category_page.dart` и `favorites_page.dart` **намеренно оставлены
+   нетронутыми**: в обоих случаях `objectType` физически не известен в
+   момент построения ссылки без выхода за рамки этого slice —
+   `category_page.dart` знает только `itemId`, полученный из
+   `DiscoverFeedSection` (не входит в file map этого slice, отдельный
+   файл); `favorites_page.dart`'s `FavoriteItemEntity` не содержит
+   `objectKind`/`objectType` вовсе (тип никогда не сохранялся у
+   Favorites-записи). Тип угадан не был — оба сайта продолжают работать
+   через legacy нетипизированный путь без изменения поведения.
+2. **Collection-фича (~29 файлов read-side + минимальная DI-регистрация)
+   перенесена в этот worktree** из незакоммиченных изменений исходного
+   checkout — по явному запросу продукт-оунера, отдельным блоком перед
+   реализацией самого slice. Create-side авторинг Collection (координатор,
+   catalog search, publication repository — упирается в отдельную
+   незакоммиченную фичу Location Search и несовместимые правки
+   `CreateController`/`CreateState`/`CreateDraftEntity`) не перенесён —
+   вне scope этого slice.
+3. **`discover_item_entity.dart` затронут** сверх исходного file map:
+   добавлено расширение `DiscoverItemCatalogType.catalogObjectType` —
+   единая точка классификации `DiscoverItemEntity → CatalogObjectType`,
+   переиспользуемая `DiscoverItemDetailsLookup.classify` и presentation
+   self-link сайтами, чтобы не дублировать логику 7 раз и не тянуть
+   presentation-код в data-слой.
+4. Каноничная типизированная ссылка на Details, построенная self-link
+   сайтами внутри `DiscoverDetailsPage` (share, auth-gate `originRoute`),
+   теперь имеет форму `recharge://discover/details/{objectType}/{id}` —
+   было `recharge://discover/details/{id}`.
 
 ## Что изменилось относительно v0.2
 

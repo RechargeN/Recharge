@@ -724,6 +724,11 @@ class _SearchTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
+              path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Details page'))),
+            ),
+            GoRoute(
               path: '${RouteNames.discoverDetails}/:itemId',
               builder: (context, state) =>
                   const Scaffold(body: Center(child: Text('Details page'))),

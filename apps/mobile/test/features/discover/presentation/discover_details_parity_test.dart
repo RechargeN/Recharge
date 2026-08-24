@@ -135,9 +135,11 @@ void main() {
 
     expect(find.text('Ссылка скопирована'), findsOneWidget);
     expect(clipboardCalls, hasLength(1));
+    // DTL-LINK-01: the self-link is now the typed canonical form, not the
+    // pre-DTL-LINK-01 untyped `recharge://discover/details/{id}`.
     expect(
       clipboardCalls.single.arguments['text'],
-      'recharge://discover/details/evt_1',
+      'recharge://discover/details/activity/evt_1',
     );
   });
 

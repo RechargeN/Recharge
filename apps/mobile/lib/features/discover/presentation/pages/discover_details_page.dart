@@ -8,6 +8,7 @@ import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -104,10 +105,15 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
                     );
                   },
                   onShareTap: () async {
+                    final String canonicalPath =
+                        RouteNames.discoverDetailsCanonicalFor(
+                          CatalogObjectRef(
+                            objectType: item.catalogObjectType,
+                            objectId: item.id,
+                          ),
+                        );
                     await Clipboard.setData(
-                      ClipboardData(
-                        text: 'recharge://discover/details/${item.id}',
-                      ),
+                      ClipboardData(text: 'recharge:/$canonicalPath'),
                     );
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -222,7 +228,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         action: ProtectedAction.favorite,
         sourceScreen: 'discover_details',
         sourceAction: 'favorite_tap',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_details',
@@ -254,7 +262,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         action: ProtectedAction.report,
         sourceScreen: 'discover_details',
         sourceAction: 'route_safety_report',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_details',
@@ -335,7 +345,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         action: ProtectedAction.visit,
         sourceScreen: 'discover_details',
         sourceAction: 'mark_visited',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_details',
@@ -391,7 +403,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       sourceSurface: ScenarioObjectIntakeSurface.details,
       sourceScreen: 'discover_details',
       sourceAction: 'add_to_scenario',
-      originRoute: '${RouteNames.discoverDetails}/${item.id}',
+      originRoute: RouteNames.discoverDetailsCanonicalFor(
+        CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+      ),
     );
     if (result == null || !mounted) return;
     if (result.openScenario) {

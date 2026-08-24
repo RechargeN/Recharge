@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
@@ -232,7 +233,14 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                 state: discoverState,
                 onViewAll: () => context.go(RouteNames.search),
                 onOpenDetails: (DiscoverItemEntity item) {
-                  context.push('${RouteNames.discoverDetails}/${item.id}');
+                  context.push(
+                    RouteNames.discoverDetailsCanonicalFor(
+                      CatalogObjectRef(
+                        objectType: item.catalogObjectType,
+                        objectId: item.id,
+                      ),
+                    ),
+                  );
                 },
               ),
               if (_legacyPlanningOnMainEnabled()) ...<Widget>[

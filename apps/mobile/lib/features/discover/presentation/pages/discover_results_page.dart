@@ -6,6 +6,7 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../application/controllers/scenario_intake_selection_controller.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
@@ -317,8 +318,15 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               _searchController.clear();
               return controller.resetSearchConditions();
             },
-            onOpenDetails: (String itemId) {
-              context.push('${RouteNames.discoverDetails}/$itemId');
+            onOpenDetails: (DiscoverItemEntity item) {
+              context.push(
+                RouteNames.discoverDetailsCanonicalFor(
+                  CatalogObjectRef(
+                    objectType: item.catalogObjectType,
+                    objectId: item.id,
+                  ),
+                ),
+              );
             },
             onToggleScenarioSelection: _scenarioSelectionController.toggle,
             onAddToScenario: intakeEnabled
@@ -1236,7 +1244,7 @@ class _ResultsList extends StatelessWidget {
   final ScenarioIntakeSelectionState selection;
   final Future<void> Function() onRetry;
   final Future<void> Function() onReset;
-  final ValueChanged<String> onOpenDetails;
+  final ValueChanged<DiscoverItemEntity> onOpenDetails;
   final ValueChanged<DiscoverItemEntity> onToggleScenarioSelection;
   final ValueChanged<DiscoverItemEntity>? onAddToScenario;
 
@@ -1276,7 +1284,7 @@ class _ResultsList extends StatelessWidget {
                     selectionOrder: selection.orderOf(item.id),
                     onTap: selection.active
                         ? () => onToggleScenarioSelection(item)
-                        : () => onOpenDetails(item.id),
+                        : () => onOpenDetails(item),
                     onAddToScenario: onAddToScenario == null
                         ? null
                         : () => onAddToScenario!(item),

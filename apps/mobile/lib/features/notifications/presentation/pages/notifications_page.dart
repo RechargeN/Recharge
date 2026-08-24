@@ -6,6 +6,7 @@ import '../../../../app/router/route_names.dart';
 import '../../../../app/adapters/legacy_notification_route_resolver.dart';
 import '../../../../app/application/planning_navigation_intent.dart';
 import '../../../../app/application/planning_navigation_resolver.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../application/controllers/notifications_controller.dart';
@@ -246,7 +247,29 @@ String? _typedSubjectRoute(NotificationSubjectRef? subject) {
       PlanningNavigationIntent.openRoute(subject.id),
     ),
     NotificationSubjectKind.system => null,
-    _ => '${RouteNames.discoverDetails}/${Uri.encodeComponent(subject.id)}',
+    // Event/Activity/Place/bookableSession all already know their type at
+    // this point (`subject.kind`), so they build the typed canonical link
+    // (`DTL-LINK-01`) rather than the legacy untyped one. `bookableSession`
+    // maps to `CatalogObjectType.session`, which has no registered loader
+    // in this slice yet — it resolves to a safe `notFound`, not a crash;
+    // that is an improvement over today's behavior (a `session` id was
+    // never a valid Discover item id to begin with).
+    NotificationSubjectKind.event => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(objectType: CatalogObjectType.event, objectId: subject.id),
+    ),
+    NotificationSubjectKind.place => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(objectType: CatalogObjectType.place, objectId: subject.id),
+    ),
+    NotificationSubjectKind.activity => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(objectType: CatalogObjectType.activity, objectId: subject.id),
+    ),
+    NotificationSubjectKind.bookableSession =>
+      RouteNames.discoverDetailsCanonicalFor(
+        CatalogObjectRef(
+          objectType: CatalogObjectType.session,
+          objectId: subject.id,
+        ),
+      ),
   };
 }
 

@@ -12,6 +12,7 @@ import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/geo/geometry_encoding.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -446,7 +447,14 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               }
             },
             onOpenDetails: (DiscoverItemEntity item) {
-              context.push('${RouteNames.discoverDetails}/${item.id}');
+              context.push(
+                RouteNames.discoverDetailsCanonicalFor(
+                  CatalogObjectRef(
+                    objectType: item.catalogObjectType,
+                    objectId: item.id,
+                  ),
+                ),
+              );
             },
             onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
               item: item,
@@ -849,7 +857,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         action: ProtectedAction.favorite,
         sourceScreen: 'discover_map',
         sourceAction: 'favorite_tap',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_map',
