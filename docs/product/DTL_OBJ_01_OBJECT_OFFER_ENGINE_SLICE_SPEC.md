@@ -1,17 +1,25 @@
 # RECHARGE — DTL-OBJ-01: Object / Offer Engine Slice Spec (Phase 1)
 
-Версия: v0.3 (2026-08-24) — major revision после третьего раунда review.
-Статус: **Blocked on Rental Create prerequisite** (пересмотрено
-2026-08-24, при попытке реализации в worktree `dtl-fnd-01`, вслед за
-`DTL-FND-01`/`DTL-LINK-01`/`DTL-CLG-01`/`DTL-RTE-01`, все — Done с
-зелёными gates). Документ остаётся Approved по содержанию (§Approval
-gates ниже выполнены), но **реализация не может начаться**, пока не
-выполнен отдельный prerequisite (см. новый раздел ниже) — это не
-техническое «не начато», а обнаруженная блокировка среды.
+Версия: v0.4 (2026-08-24) — Rental Create prerequisite resolved,
+implementation unblocked.
+Статус: **Approved — ready to implement.** Prerequisite closed
+2026-08-24: Rental Create stabilized in a separate worktree (6
+commits: domain/data/application-controller/presentation/tests/docs),
+merged into `worktree-dtl-fnd-01`, and the full gate suite re-run on
+the merged branch is green (`flutter analyze` 0 issues, `flutter test`
+all passing with one pre-existing, explicitly tracked
+`skip: true`/TODO golden test unrelated to this work, boundary gate 0
+violations/71-71 budget unchanged, `git diff --check` clean — see
+`docs/architecture/LAUNCH_STATUS.md` Execution Log, 2026-08-24, and
+`docs/product/RENTAL_CREATE_STABILIZATION_PLAN.md` §8). Implementation
+of this slice starts now.
 
 Runtime effect (этого документа): **none**.
 
-## Blocked on Rental Create prerequisite — что обнаружено и что нужно
+## Rental Create prerequisite — resolved (было: Blocked)
+
+Historical record, kept for context (was blocking 2026-08-24 through
+the same day's later prerequisite pass):
 
 При попытке реализации (2026-08-24, worktree `dtl-fnd-01`) обнаружено:
 Rental Create-сторона (~20 файлов: draft data, create block, sections,
@@ -46,10 +54,13 @@ Rental-фрагменты — высокий риск сломать что-то
 5. Только затем — перенести эти проверенные prerequisite-коммиты в
    Details-worktree и вернуться к реализации `DTL-OBJ-01`.
 
-До выполнения шагов 1–5 этот документ не редактируется по содержанию —
-только пересмотр `Draft for review` → `Approved`, зафиксированный в
-предыдущих раундах, остаётся в силе; блокировка ниже — исключительно
-про среду реализации, не про сам план.
+Шаги 1–5 выполнены 2026-08-24 (см. `RENTAL_CREATE_STABILIZATION_PLAN.md`
+§8 для полной трассировки, включая 3 disclosed-отклонения от
+исходного 7-файлового плана, найденные только сквозным прогоном
+тестов). Rental Create теперь доступен в этой ветке как committed,
+gate-green prerequisite. Реализация `DTL-OBJ-01` начинается ниже по
+уже согласованному в предыдущих раундах содержанию плана (пересмотр
+`Draft for review` → `Approved` в силе).
 
 ## Что изменилось относительно v0.2
 

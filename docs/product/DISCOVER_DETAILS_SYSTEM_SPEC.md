@@ -1,9 +1,10 @@
 # RECHARGE — Discover Details System Spec
 
-Версия: v0.3 (2026-08-24) — добавлен Этап 4 (фактический статус
-staged-реализации: FND/LINK/CLG/RTE Done, OBJ Blocked on Rental Create
-prerequisite, SCN Blocked on Approved `SCN-PUB-01`); §1–15 по содержанию
-не менялись. Статус: **Accepted** (принят владельцем продукта
+Версия: v0.4 (2026-08-24) — Этап 4 обновлён: OBJ Rental Create
+prerequisite резолвлен тем же днём (см. `RENTAL_CREATE_STABILIZATION_PLAN.md`
+§8), OBJ теперь Approved/in progress, не Blocked. FND/LINK/CLG/RTE
+остаются Done, SCN остаётся Blocked on Approved `SCN-PUB-01`. §1–15 по
+содержанию не менялись. Статус: **Accepted** (принят владельцем продукта
 2026-08-24, после трёх раундов review дочерних `DTL-*` документов).
 Runtime effect: **none**. Принятие этого документа само по себе не
 изменяет код, маршруты, тесты, DI или ADR — оно фиксирует целевую
@@ -686,7 +687,7 @@ follow-up, не одного слайса.
 | `DTL-LINK-01` | **Done** — зелёные gates | `026c7cd` | Canonical resolver vertical; попутно перенесён read-side Collection (~14 файлов), отсутствовавший в git-истории ветки |
 | `DTL-CLG-01` | **Done** — зелёные gates | `adb2d61` | Чистая shell-миграция Collection, без визуальной полировки |
 | `DTL-RTE-01` | **Done** — зелёные gates | `7810a9e` | `RouteDetailsRenderer`; добавлен заголовок в тело (map-hero не даёт места под оверлей — не было в исходном file map, задокументировано в самом slice-документе) |
-| `DTL-OBJ-01` | **Blocked on Rental Create prerequisite** | — | Не техническое «не начато» — реализация физически невозможна без отдельного prerequisite-захода (см. сам документ slice'а: стабилизировать/отделить/прогнать gates/закоммитить Rental Create в исходном checkout, только затем возвращаться) |
+| `DTL-OBJ-01` | **Approved — in progress** (prerequisite resolved 2026-08-24) | — | Rental Create prerequisite closed: stabilized/separated/gate-verified/committed in a dedicated worktree, then merged into `worktree-dtl-fnd-01` with the full gate suite re-run green on the merged branch (см. `RENTAL_CREATE_STABILIZATION_PLAN.md` §8, `LAUNCH_STATUS.md` Execution Log 2026-08-24) |
 | `DTL-SCN-01` | **Blocked on Approved `SCN-PUB-01`** | — | Без изменений с Этапа 3 — ждёт апстрим publication/read-projection contract |
 
 Каждый Done-slice прошёл `flutter analyze --no-pub` (0 замечаний),

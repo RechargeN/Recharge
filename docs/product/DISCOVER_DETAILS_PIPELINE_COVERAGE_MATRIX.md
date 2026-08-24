@@ -31,12 +31,11 @@
    (`DTL-FND-01`, `7d4636d`), диспетчеризуемым через canonical resolver
    (`DTL-LINK-01`, `026c7cd`). Визуально и функционально не изменились
    — только оболочка.
-4. **Rental Details — статус блокировки уточнён**, S не меняется:
-   `DTL-OBJ-01` теперь явно **Blocked on Rental Create prerequisite**,
-   не просто «Draft». Это блокировка git-гигиены (Rental Create
-   отсутствует в истории Details-веток целиком, вперемешку с другими
-   незакоммиченными фичами в ~1368 строках `CreateController`), не
-   архитектурного или приоритетного порядка — см. новый раздел «Git-
+4. **Rental Details — блокировка резолвлена 2026-08-24**: Rental Create
+   prerequisite стабилизирован, отделён от Session/LocationSearch,
+   прогнан через полный gate suite и смёржен в Details-ветку (см.
+   `RENTAL_CREATE_STABILIZATION_PLAN.md` §8). `DTL-OBJ-01` — Approved/
+   in progress, git-гигиена больше не блокирует реализацию — см. раздел «Git-
    committed-status как отдельная ось» ниже.
 5. **Синтез (§3) переписан** под текущий расклад: Details-волна
    решена для 4 из 10 типов; оставшиеся два «shovel-ready» кандидата
@@ -100,7 +99,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `discover_item_entity.dart` (`objectKind.event`) | — |
 | Search | I | `SEARCH_FILTERS_TIME_SPEC.md` | — |
 | Map | I | `discover_map_page.dart` | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Типизированный `participation`-профиль не построен — `DTL-OBJ-01` Blocked on Rental Create prerequisite |
+| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Типизированный `participation`-профиль не построен — `DTL-OBJ-01` Approved/in progress (prerequisite resolved 2026-08-24) |
 | Primary action | P | AGENTS.md: MVP redirect на `externalBookingUrl` | Authoritative Booking backend не авторизован (ECL-03C-P — план) |
 | Lifecycle | P | ADR 0013 | Admin moderation queue не подтверждена как enforced |
 
@@ -113,7 +112,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `objectKind.activity` (дефолт) | — |
 | Search | I | тот же `DiscoverQuery` | — |
 | Map | I | — | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Нет типизированного `participation`-профиля — `DTL-OBJ-01` Blocked on Rental Create prerequisite |
+| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Нет типизированного `participation`-профиля — `DTL-OBJ-01` Approved/in progress (prerequisite resolved 2026-08-24) |
 | Primary action | P | generic "Join activity" | Нет специфичной механики |
 | Lifecycle | P | — | Repo-wide gap |
 
@@ -204,7 +203,7 @@ Rental не означает Implemented Details для Rental.
 |---|---|---|---|
 | Create | I | `RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md` v1.0 (Approved); RNT-CRT-01 | — |
 | Publish | I | capability-строки `create.rental`/`submit.rental`/`publish.rental.direct` | Только `externalBookingUrl`, без `contact_host` (принятый trade-off) |
-| Feed | M | нет discover-адаптера в runtime | `DTL-OBJ-01` **Blocked on Rental Create prerequisite**, не Draft — Create-сторона отсутствует в git-истории Details-веток (см. «Git-committed-status» выше) |
+| Feed | M | нет discover-адаптера в runtime | `DTL-OBJ-01` Approved/in progress — Rental Create prerequisite resolved 2026-08-24, discover-адаптер (RentalPublicationIndexSink/PublishedRentalDiscoveryPort/RentalPublicationDiscoveryAdapter/RentalDetailsLookup) — предмет реализации самого `DTL-OBJ-01` |
 | Search | M | — | — |
 | Map | M | — | — |
 | Details | **S** | `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` — полный write+read vertical спроектирован, Approved по содержанию | Ноль кода — но теперь известно, что «shovel-ready» относится только к спеке, не к среде: сначала нужен отдельный prerequisite-заход (стабилизировать/отделить/закоммитить Rental Create), не просто «взять в очередь» |
