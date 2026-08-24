@@ -200,7 +200,7 @@ class CreateRepositoryImpl
     }
     final DateTime now = DateTime.now().toUtc();
     final String idempotencyKey =
-        '$userId:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? 0}';
+        '$userId:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? draft.rentalData?.revision ?? 0}';
     final String publishedId = draft.id.startsWith('loc_')
         ? _idGenerator.generate()
         : draft.id;
@@ -286,6 +286,7 @@ class CreateRepositoryImpl
       findPeopleData: draft.findPeopleData?.replaceLocalIds(
         _idGenerator.generate,
       ),
+      rentalData: draft.rentalData?.replaceLocalIds(_idGenerator.generate),
       sectionData: sectionData,
       scheduleSlots: publishedSlots,
       draftStatus: DraftStatus.pendingReview,
