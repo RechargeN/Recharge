@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.2**
-- Date: **2026-08-23**
-- Status: **Draft workbook — bounded numeric baseline recorded; remaining verdicts required**
+- Version: **1.3**
+- Date: **2026-08-24**
+- Status: **Draft workbook — R0 evidence reconciled; remaining verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
-- Runtime status: **Absent**
+- Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
 - Parent review package: [BCK-D1-REV-01](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
 - Sign-off ledger: [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Runtime effect: **none**
@@ -34,7 +34,7 @@ The workbook deliberately separates:
 |---|---|---|
 | API rules | common request/result/error/version rules are coherent | five implementation choices need an explicit disposition |
 | Security/privacy | boundaries, threat/incident models and a repeatable tabletop package are documented | named exercise participants, actual execution/result, owner/independent review and qualified legal decisions |
-| Operations | environment/release/rollback structure, exact toolchain pre-review/R0 plan and numerical SLO, cost and recovery proposals are documented | explicit R0 Approval/execution, compatibility proof, specialist verdicts, representative stage/restore evidence and executable controls |
+| Operations | environment/release/rollback structure, bounded R0 local/hosted evidence and numerical SLO, cost and recovery proposals are documented | BCK05-OD-01 owner verdict, remaining specialist verdicts, representative stage/restore evidence and executable controls |
 | Languages/reference data | LV-first, EE/LT isolation and fallback model are documented | approved locale tables, mandatory legal-copy matrix and distribution choices |
 | Physical backend | target structure exists on paper | all server code, cloud resources, deployment and runtime evidence |
 
@@ -48,7 +48,7 @@ create an endpoint, schema, project or database.
 
 | Decision | Recommended owner verdict | Reason | Preserved gate |
 |---|---|---|---|
-| `API-DEC-01` — exact callable/HTTPS mapping and deadlines | **Deferred** to executable API scaffold | choosing transport values before the scaffold/load evidence would be false precision | no endpoint until R0/G1 Approved slice |
+| `API-DEC-01` — exact callable/HTTPS mapping and deadlines | **Deferred** to executable API scaffold | choosing transport values before the scaffold/load evidence would be false precision | no endpoint until G1 and a separate Approved executable slice |
 | `API-DEC-02` — generator versus fixture-verified consumers | **Deferred** to codegen/tooling slice | Booking fixtures work today; no new generator is justified yet | no generator/tooling until separate Approval |
 | `API-DEC-03` — canonical request-hash algorithm/version | **Deferred** to first mutation contract slice | algorithm must be fixed with implementation/parity tests | no mutation runtime until Accepted decision |
 | `API-DEC-04` — minimum-client bootstrap/offline behavior | **Deferred** to production client-gate slice | it requires actual client/config integration evidence | no production client enforcement until Accepted decision |
@@ -83,7 +83,7 @@ models or review evidence before an effective verdict.
 | Recovery targets | `BCK05-OD-05` | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) now supplies record-family RPO/RTO, protection, isolated restore, privacy reconciliation and drills | **Product baseline recorded; OD-05 Proposed; Platform/Privacy/domain verdict and restore evidence pending** |
 | Cost containment | `BCK05-OD-04` | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) now supplies five envelopes, formulas, directional estimates, EUR alert levels and safe containment actions | **Product baseline recorded; OD-04 Proposed; Finance Inconclusive; Operations/EUR SKU/stage evidence pending** |
 | Numeric cross-model review | `BCK05-OD-03/04/05` | [BCK05-NUM-REV-01 v0.2](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) reconciles exact SLO v0.1, cost v0.2 and recovery v0.1, including the backup-cost correction and bounded verdict | **Product baseline accepted for stage validation; Operations/Security require evidence; Finance/Legal Inconclusive; no status promotion** |
-| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain v0.3, full-SHA technical review/R0 v0.2 plan, unsigned decision record, IAM and release models define exact candidates and boundaries | **Present as Draft/Review; all R0 verdicts and OD remain Pending/Proposed; no compatibility/specialist/runtime evidence exists** |
+| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain v0.3.3, technical review v0.2.3, R0 v0.2.2/result, decision record v0.2, [BCK05-OD01-DEC-01](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md), IAM and release models | **R0 Pass for bounded tooling; BCK05-OD-01/02/07 remain Proposed; exact OD-01 owner verdict, other specialist decisions and cloud/runtime evidence remain absent** |
 | Localization decision record | `OD-10`, `BCK20-OD-01`–`07` | exact LV policy, EE/LT disabled policy, review workflow, distribution/deprecation choices | keep OD-10 Proposed until complete |
 
 The combined owner may approve the completed technical record, but the record
@@ -150,7 +150,7 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 |---|---|---|
 | BCK-03 v0.3.3 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
 | BCK-04 v0.4.10 | retain Draft | `BCK04-OD-01`/`BCK04-OD-09` are Proposed but unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.12 | retain Draft | full-SHA toolchain review/R0 plan/decision record, IAM/release and bounded numerical baselines are recorded, but R0 is not Approved, all listed OD remain Proposed, and compatibility/platform/specialist/runtime evidence remains absent |
+| BCK-05 v0.2.16 | retain Draft | bounded R0 evidence is Pass and BCK05-OD01-DEC-01 is ready for owner verdict, but all listed OD remain Proposed and platform/specialist/stage/product-cloud evidence remains incomplete |
 | BCK-20 v0.2.2 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Proposed | resource/cost/security/legal decision record incomplete |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
@@ -173,8 +173,8 @@ Date: 2026-08-20
 ```
 
 This confirmation authorizes only documentation disposition updates. It does
-not authorize D2, G1, R0/R1, Firebase, backend code, credentials or production
-data processing.
+not expand completed R0 or authorize D2, G1, R1, Firebase/cloud resources,
+product backend code, credentials or production data processing.
 
 ## 9. What happens after owner confirmation
 

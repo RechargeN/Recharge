@@ -1,14 +1,14 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.15**
+- Version: **0.2.16**
 - Date: **2026-08-24**
 - Spec status: **Draft — Platform Operations review required**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.20](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.24](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.21](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.25](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
 - Security/privacy boundary: [BCK-04 v0.4.10](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
@@ -21,6 +21,7 @@
 - Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.1 (Draft; OD-07 Proposed)
 - Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.3 (Draft; OD-01 Proposed; bounded R0 Pass)
 - Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.3 (bounded R0 Pass; OD-01 Proposed)
+- Runtime/toolchain owner decision: [BCK05-OD01-DEC-01](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) v0.1 (Review; explicit verdict required)
 - Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2.2 (Pass — bounded tooling feasibility only)
 - R0 approval record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.2 (bounded execution and advisory disposition; no production approval)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
@@ -32,6 +33,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.16 — 2026-08-24
+
+- added `BCK05-OD01-DEC-01` as the exact owner-decision candidate after
+  bounded R0 Pass, without silently accepting OD-01;
+- reconciled the current R0 facts in the D1 review/workbook/sign-off package;
+- retained BCK-05 Draft, every other OD status and all G1/R1/product-cloud
+  blockers; updated BCK-01/BCK-02 traceability to v0.4.21/v2.4.25.
 
 ### v0.2.15 — 2026-08-24
 
@@ -790,7 +799,7 @@ indexes, IAM, provider configuration, billing, backup or latency.
 | ID | Status | Owner | Decision/evidence | Blocks |
 |---|---|---|---|---|
 | OD-07 | Proposed option A | Platform + Security/Privacy | edition, project separation, exact per-resource location, residency/latency/cost/export review | BCK-05 Approval, G1/R1 |
-| BCK05-OD-01 | Proposed | Platform Operations + Platform Security | [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.3](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [R0 decision record v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [execution result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md): bounded R0 local/hosted evidence is Pass and `BCK-R0-TCH-ADV-01` controls the residual Moderate risk through `2026-09-24` or earlier scope expansion; OD-01 still lacks separate acceptance and production evidence | separate OD-01 owner/security acceptance |
+| BCK05-OD-01 | Proposed | Platform Operations + Platform Security | [BCK05-OD01-TCH-01 v0.3.3](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.3](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [owner-decision candidate v0.1](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md), [R0 decision record v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [execution result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md): bounded R0 evidence is Pass; `BCK-R0-TCH-ADV-01` expires before R1/G1/cloud expansion and does not propagate into R1 | exact `BCK05-OD01-DEC-01` owner verdict |
 | BCK05-OD-02 | Proposed | Platform Security/Operations | [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md): keyless OIDC/WIF, isolated identities, permissions, approvals, lifecycle and break-glass; exact claims/roles/plan/JIT/runtime evidence pending | BCK-05 Approval |
 | BCK05-OD-03 | Proposed | Platform Operations + domain owners | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): Product baseline recorded; stage telemetry/alerts and specialist verdict pending | BCK-05 Approval |
 | BCK05-OD-04 | Proposed | Product + Finance/Operations | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): Product baseline recorded; Finance remains Inconclusive pending EUR SKU/tax/stage evidence | R1 provisioning |
@@ -896,7 +905,7 @@ new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.2.15 the following remain absent:
+At v0.2.16 the following remain absent:
 
 - product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;
@@ -911,7 +920,8 @@ At v0.2.15 the following remain absent:
 
 1. confirm BCK-05 coverage/reconciliation matrix;
 2. assign named Platform Operations and specialist reviewers;
-3. resolve OD-07 and BCK05-OD-01–05/07/08 evidence;
+3. record the exact `BCK05-OD01-DEC-01` verdict, then resolve OD-07 and
+   BCK05-OD-02–05/07/08 evidence;
 4. reconcile with BCK-03/04/20;
 5. move BCK-05 to Review, then Approved only when DoD is satisfied;
 6. preserve hosted parity and monitor/re-audit the expiring
