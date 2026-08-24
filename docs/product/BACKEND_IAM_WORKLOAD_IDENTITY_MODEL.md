@@ -1,23 +1,32 @@
 # Recharge Backend — IAM, Workload Identity and Break-glass Model
 
 - ID: **BCK05-OD02-IAM-01**
-- Version: **0.2**
+- Version: **0.2.1**
 - Date: **2026-08-24**
-- Status: **Review-ready evidence — BCK05-OD-02 Proposed**
+- Status: **Accepted architecture baseline — BCK05-OD-02 with controls**
 - Runtime status: **Absent**
 - Accountable owners: **Platform Security and Platform Operations**
 - Review coordinator: **RechargeN / Product owner**
-- Parent: [BCK-05 v0.2.20](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Security boundary: [BCK-04 v0.4.13](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Parent: [BCK-05 v0.2.21](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Security boundary: [BCK-04 v0.4.14](BACKEND_SECURITY_PRIVACY_SPEC.md)
 - Infrastructure dependency: [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) (Accepted with controls)
 - Candidate baseline: **BCK05-IAM-A1-ENV-WIF-v1**
-- Owner decision: [BCK05-OD02-DEC-01 v0.1](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) (Review; unsigned)
+- Owner decision: [BCK05-OD02-DEC-01 v0.2](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) (Accepted)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Changelog
+
+### v0.2.1 — 2026-08-24
+
+- recorded the exact BCK05-OD02-DEC-01 owner verdict accepting
+  `BCK05-IAM-A1-ENV-WIF-v1` with all mandatory controls;
+- retained executable claims, permissions, WIF/IAM bindings, JIT/roster,
+  secrets, BCK-05, D1/G1 and R1 as separate blocked gates;
+- created no GitHub/GCP mutation, credential, resource, runtime or `main`
+  merge authority.
 
 ### v0.2 — 2026-08-24
 
@@ -574,9 +583,9 @@ promotion or privileged emergency access until the applicable row is resolved.
 ## 19. Acceptance sequence
 
 ```text
-BCK05-OD02-IAM-01 v0.2 Review-ready
+BCK05-OD02-IAM-01 v0.2 reviewed
   -> Platform Security + Operations exact-version review
-  -> exact BCK05-OD02-DEC-01 owner verdict
+  -> exact BCK05-OD02-DEC-01 v0.2 owner verdict recorded
   -> BCK05-OD-02 Accepted as architecture policy only
   -> separately Approved non-production bootstrap/executable slice
   -> negative WIF/IAM/drift/revocation evidence
@@ -652,7 +661,7 @@ does not automatically prove production readiness.
 
 ---
 
-**Current conclusion:** `BCK05-IAM-A1-ENV-WIF-v1` is decision-ready and
-recommended, but BCK05-OD-02 remains **Proposed** until the exact owner verdict
-in BCK05-OD02-DEC-01 is recorded. Every GitHub/GCP mutation and cloud/runtime
-action remains blocked.
+**Current conclusion:** `BCK05-IAM-A1-ENV-WIF-v1` is **Accepted with
+controls** through BCK05-OD02-DEC-01 v0.2. Acceptance grants no executable
+authority: every GitHub/GCP mutation, IAM binding, secret and cloud/runtime
+action remains blocked pending its separately Approved gate.

@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.10**
+- Version: **1.11**
 - Date: **2026-08-24**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
@@ -38,10 +38,9 @@ local/hosted execution evidence are Present; bounded R0 is Pass and
 `BCK05-OD-01` is Accepted at baseline v0.3.3 with controls. This is not BCK-05
 Approval, G1, R1 or cloud/product runtime authorization.
 
-`BCK05-OD02-IAM-01 v0.2` now selects the exact decision-ready
-`BCK05-IAM-A1-ENV-WIF-v1` candidate, and BCK05-OD02-DEC-01 v0.1 provides the
-unsigned owner contract. BCK05-OD-02 remains Proposed; no GitHub/GCP setting,
-identity, binding, secret or runtime exists.
+`BCK05-OD02-IAM-01 v0.2.1` records `BCK05-IAM-A1-ENV-WIF-v1` as Accepted with
+controls through BCK05-OD02-DEC-01 v0.2. This is architecture policy only; no
+GitHub/GCP setting, identity, binding, secret or runtime exists.
 
 ## 2. D1 entry and exit contract
 
@@ -69,8 +68,8 @@ identity, binding, secret or runtime exists.
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.9; OD-01/OD-07 recorded and OD-02 decision-ready/unsigned; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.7; OD-01/OD-07 recorded and OD-02 decision-ready | exact and other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.10; OD-01/OD-02/OD-07 recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.8; OD-01/OD-02/OD-07 recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -83,7 +82,7 @@ identity, binding, secret or runtime exists.
 | [R0 toolchain/emulator slice](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) | exhaustive local-only file map, commands, CI, evidence, rollback and 60 AC | v0.2.2; Pass — bounded tooling feasibility only | no G1/R1/cloud authorization |
 | [R0 approval decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) | execution approval, immutable supply-chain controls and advisory disposition | v0.2; bounded decisions Accepted | product/cloud scope explicitly excluded |
 | [OD-01 owner decision](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) | exact toolchain disposition and preserved R1/G1 gates | Accepted v0.2 | OD-01 closed; BCK-05/G1/R1 unchanged |
-| [IAM/workload identity model](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) and [owner decision](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) | exact OIDC/WIF topology/claims, identity catalogue, least privilege, approvals, lifecycle, break-glass and 60 AC | model v0.2 decision-ready; decision v0.1 unsigned; BCK05-OD-02 Proposed | exact owner verdict plus executable fixtures/permissions/bindings/JIT/runtime evidence pending |
+| [IAM/workload identity model](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) and [owner decision](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) | exact OIDC/WIF topology/claims, identity catalogue, least privilege, approvals, lifecycle, break-glass and 60 AC | model v0.2.1 and decision v0.2 Accepted with controls | executable fixtures/permissions/bindings/JIT/runtime evidence pending; no cloud permission |
 | [Release provenance/promotion model](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) | immutable manifest, provenance, Functions/container boundary, promotion, rollback and 50 AC | Draft v0.1; BCK05-OD-07 Proposed | exact toolchain/attestor/registry/policy/provider and executable evidence pending |
 
 Evidence being present is not the same as evidence being accepted. Each packet
@@ -147,8 +146,8 @@ Ready for owner review of:
 - BCK05-OD01-TCH-REV-01 v0.2.4 completed technical review.
 - BCK-R0-TCH-01 v0.2.2 bounded tooling Pass and decision record v0.2.
 - BCK05-OD01-DEC-01 v0.2 exact Accepted owner decision.
-- BCK05-OD02-IAM-01 v0.2 exact keyless workload-identity candidate and
-  unsigned BCK05-OD02-DEC-01 v0.1 owner contract.
+- BCK05-OD02-IAM-01 v0.2.1 exact keyless workload-identity baseline and
+  Accepted BCK05-OD02-DEC-01 v0.2 owner verdict.
 - BCK05-OD07-REL-01 immutable provenance/promotion/rollback proposal with an
   explicit Functions source-deploy limitation.
 

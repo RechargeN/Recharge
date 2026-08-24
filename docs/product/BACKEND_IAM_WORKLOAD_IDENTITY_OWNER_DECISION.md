@@ -1,20 +1,39 @@
 # Recharge Backend — IAM & Workload Identity Owner Decision
 
 - ID: **BCK05-OD02-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-24**
-- Status: **Review — owner verdict not recorded**
+- Status: **Accepted — BCK05-IAM-A1-ENV-WIF-v1 with controls**
 - Decision target: **BCK05-OD-02**
 - Candidate baseline: **BCK05-IAM-A1-ENV-WIF-v1**
 - Evidence: [BCK05-OD02-IAM-01 v0.2](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md)
 - Infrastructure dependency: [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) (Accepted)
-- Parent: [BCK-05 v0.2.20](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent: [BCK-05 v0.2.21](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Accountable verdict: **Platform Security + Platform Operations**
 - Assigned bootstrap owner: **RechargeN / Product owner acting as combined Platform coordinator**
 - Independent production review: **not supplied**
 - Runtime effect: **none**
 
 ---
+
+## 0. Recorded owner verdict
+
+The Product owner supplied the exact effective phrase:
+
+```text
+Одобряю BCK05-OD02-DEC-01: Accept BCK05-IAM-A1-ENV-WIF-v1 with controls.
+```
+
+| Field | Recorded value |
+|---|---|
+| Decision | **Accept BCK05-IAM-A1-ENV-WIF-v1 with controls** |
+| Owner identity / actual role | `RechargeN / Product owner acting as combined Platform coordinator` |
+| Operations/Security scope | Accepted under the disclosed combined-role bootstrap model; independent production review is not claimed |
+| Accepted baseline | BCK05-OD02-IAM-01 v0.2 and all §4 controls |
+| Deferred unchanged | executable claim fixtures, permission manifests, bindings, JIT/roster, BCK-05, D1/G1 and R1 |
+| Runtime authority | none |
+| Signature evidence | exact owner reply in the controlling Codex task |
+| Signed UTC | `2026-08-24T19:53:07Z` |
 
 ## 1. Purpose
 
@@ -121,7 +140,7 @@ release provenance, cost/recovery and runtime evidence remain independent.
 These are executable/production blockers. They do not become fictional proof
 and are not bypassed by accepting the fail-closed architecture policy.
 
-## 7. Owner verdict
+## 7. Owner-verdict contract
 
 Allowed verdicts:
 
@@ -132,7 +151,7 @@ Allowed verdicts:
 | `Reject` | remains Proposed; replacement direction is recorded |
 | `Inconclusive` | remains Proposed; missing evidence/authority is named |
 
-Recommended verdict: **Accept BCK05-IAM-A1-ENV-WIF-v1 with controls**.
+Recorded verdict: **Accept BCK05-IAM-A1-ENV-WIF-v1 with controls**.
 
 The only effective approval phrase is:
 
@@ -140,8 +159,9 @@ The only effective approval phrase is:
 Одобряю BCK05-OD02-DEC-01: Accept BCK05-IAM-A1-ENV-WIF-v1 with controls.
 ```
 
-Generic “да”, “дальше”, approval of documentation work, silence or file
-presence is not this decision.
+The exact phrase above has now been supplied. Generic “да”, “дальше”, approval
+of documentation work, silence or file presence remains ineffective for any
+future amendment, supersession or executable slice.
 
 ## 8. Status after exact acceptance
 
@@ -193,6 +213,7 @@ redefines the decision merely because it exists.
 
 ---
 
-**Current conclusion:** the exact candidate is decision-ready, but no owner
-verdict is recorded. BCK05-OD-02 remains **Proposed** and every GitHub/GCP
-mutation, cloud action and runtime remains blocked.
+**Current conclusion:** BCK05-OD-02 is **Accepted** at
+`BCK05-IAM-A1-ENV-WIF-v1` with all §4 controls. This is architecture-policy
+Acceptance only: every GitHub/GCP mutation, executable IAM/secret action,
+cloud runtime, R1 authorization and `main` merge remains blocked.

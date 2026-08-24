@@ -1,21 +1,21 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.13**
+- Version: **0.4.14**
 - Date: **2026-08-24**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.25](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.29](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.26](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.30](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.13
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.14
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
-- IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2 (Review-ready; BCK05-OD-02 Proposed)
+- IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (BCK05-OD-02 Accepted with controls)
 - Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.1 (Draft; OD-01 Proposed)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
@@ -26,6 +26,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.14 — 2026-08-24
+
+- recorded BCK05-OD-02 Acceptance at `BCK05-IAM-A1-ENV-WIF-v1` with controls
+  through the exact BCK05-OD02-DEC-01 v0.2 owner verdict;
+- retained BCK-04 Draft, qualified Legal/Privacy review, executable IAM/
+  secrets evidence, BCK04-OD-01/09 and all cloud/runtime gates;
+- created no Rules, GitHub/GCP mutation, credential, production processing or
+  `main` merge authority.
 
 ### v0.4.13 — 2026-08-24
 
@@ -1579,7 +1588,7 @@ therefore remains Draft and cannot enter Review yet.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.13 отсутствует:
+На момент v0.4.14 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет
