@@ -166,6 +166,28 @@ class CreateDraftModel {
     return value is num && value.isFinite ? value.toInt() : null;
   }
 
+  /// RNT-PUB-01 §1.2.1 `expectedRentalRevision` CAS guard. `null` when this
+  /// draft has no typed Rental payload at all (peeked at the raw
+  /// `rental_details` section, mirroring [routeRevision]/[scenarioRevision]
+  /// — the datasource layer never decodes into domain entities).
+  int? get rentalRevision {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
+  /// RNT-PUB-01 §1.2.1 owner check. `{'type': 'user'|'page', 'id': String}`
+  /// as stored by `RentalDraftMapper.toJson`, or `null` if this draft has no
+  /// typed Rental payload / the section is malformed.
+  Map<String, Object?>? get rentalPublisherRefJson {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? ref = payload['publisherRef'];
+    if (ref is! Map) return null;
+    return Map<String, Object?>.from(ref);
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
       entity.sectionData,

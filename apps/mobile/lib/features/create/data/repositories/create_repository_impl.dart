@@ -6,6 +6,7 @@ import '../../domain/entities/route_draft_save_result.dart';
 import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/repositories/create_repository.dart';
 import '../../domain/repositories/create_draft_collection_repository.dart';
+import '../../domain/repositories/rental_promotion_repository.dart';
 import '../../domain/repositories/route_draft_persistence_repository.dart';
 import '../datasources/create_local_datasource.dart';
 import '../models/create_draft_model.dart';
@@ -14,7 +15,8 @@ class CreateRepositoryImpl
     implements
         CreateRepository,
         RouteDraftPersistenceRepository,
-        CreateDraftCollectionRepository {
+        CreateDraftCollectionRepository,
+        RentalPromotionRepository {
   CreateRepositoryImpl({
     required CreateLocalDataSource localDataSource,
     required IdGenerator idGenerator,
@@ -305,5 +307,33 @@ class CreateRepositoryImpl
       CreateDraftModel.fromEntity(published),
     );
     return published;
+  }
+
+  @override
+  Future<CreateDraftEntity> promoteRentalToPublished({
+    required String userId,
+    required String rentalId,
+    required int expectedRentalRevision,
+  }) async {
+    final RentalPromotionResult result = await _localDataSource
+        .promoteRentalDraftIfCurrent(
+          userId: userId,
+          expectedRentalId: rentalId,
+          expectedRentalRevision: expectedRentalRevision,
+        );
+    switch (result.status) {
+      case RentalPromotionStatus.promoted:
+      case RentalPromotionStatus.alreadyPublished:
+        return result.persisted!.toEntity();
+      case RentalPromotionStatus.conflict:
+        throw const RentalPromotionException(
+          'Rental draft changed since publish; direct-publish promotion '
+          'was not applied.',
+        );
+      case RentalPromotionStatus.invalidExistingData:
+        throw const RentalPromotionException(
+          'No matching pending_review Rental draft to promote.',
+        );
+    }
   }
 }
