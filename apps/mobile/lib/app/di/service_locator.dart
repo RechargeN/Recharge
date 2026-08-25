@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../config/market_config.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
+import '../adapters/rental_publication_discovery_adapter.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
 import '../adapters/route_safety_reporting_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
@@ -77,6 +78,7 @@ import '../../features/create/domain/repositories/rental_promotion_repository.da
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
+import '../../features/create/domain/repositories/rental_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_authoring_policy.dart';
 import '../../features/create/domain/repositories/route_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_publication_repository.dart';
@@ -109,6 +111,7 @@ import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
 import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
 import '../../features/discover/data/repositories/collection_item_resolution_repository_impl.dart';
@@ -122,6 +125,7 @@ import '../../features/discover/domain/repositories/collection_item_resolution_r
 import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_route_discovery_port.dart';
 import '../../features/discover/domain/repositories/route_safety_reporting_port.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -350,6 +354,22 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<PublishedRouteDiscoveryPort>(
       () => sl<RoutePublicationDiscoveryAdapter>(),
+    )
+    // Rental — both sides active (DTL-OBJ-01 §3.6): unlike Collection
+    // below, Rental's Create-authoring half (RentalDirectPublishPolicy
+    // etc.) is already wired, so RentalPublicationIndexSink is registered
+    // too, mirroring Route above.
+    ..registerLazySingleton<PublishedRentalDiscoveryLocalDataSource>(
+      () => PublishedRentalDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationDiscoveryAdapter>(
+      () => RentalPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationIndexSink>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedRentalDiscoveryPort>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
     )
     // Collection read side only (DTL-LINK-01): the Create-authoring half
     // of this feature (CollectionCreateCoordinator and everything it

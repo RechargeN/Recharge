@@ -42,6 +42,7 @@ import '../../domain/entities/scenario_validation_issue.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
 import '../../domain/repositories/create_template_repository.dart';
 import '../../domain/repositories/rental_private_authoring_repository.dart';
+import '../../domain/repositories/rental_publication_index_sink.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 import '../../domain/usecases/build_rental_public_projection_usecase.dart';
 import '../../domain/usecases/check_place_duplicates_usecase.dart';
@@ -142,6 +143,7 @@ class CreateController extends ChangeNotifier {
     RentalDirectPublishPolicy rentalDirectPublishPolicy =
         const RentalDirectPublishPolicy(),
     PromoteRentalToPublishedUseCase? promoteRentalToPublished,
+    RentalPublicationIndexSink? rentalPublicationIndexSink,
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
@@ -173,7 +175,8 @@ class CreateController extends ChangeNotifier {
        _rentalPrivateAuthoringRepository = rentalPrivateAuthoringRepository,
        _resolveRentalDirectPublish = resolveRentalDirectPublish,
        _rentalDirectPublishPolicy = rentalDirectPublishPolicy,
-       _promoteRentalToPublished = promoteRentalToPublished;
+       _promoteRentalToPublished = promoteRentalToPublished,
+       _rentalPublicationIndexSink = rentalPublicationIndexSink;
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
   final LoadCreateDraftByIdUseCase? _loadCreateDraftByIdUseCase;
@@ -207,6 +210,7 @@ class CreateController extends ChangeNotifier {
   final ResolveRentalDirectPublishUseCase _resolveRentalDirectPublish;
   final RentalDirectPublishPolicy _rentalDirectPublishPolicy;
   final PromoteRentalToPublishedUseCase? _promoteRentalToPublished;
+  final RentalPublicationIndexSink? _rentalPublicationIndexSink;
   bool _isVerifiedCreator = false;
   List<CreateTemplateEntity> _rentalTemplates = const <CreateTemplateEntity>[];
   int _scenarioGenerationRequestSerial = 0;
@@ -3579,6 +3583,28 @@ class CreateController extends ChangeNotifier {
           // Fail-closed: keep the pending_review result already obtained
           // above — the user sees a normal successful submit, not an error.
           finalPublished = published;
+        }
+        // DTL-OBJ-01 §3.5: activate the Discover-facing sink only after a
+        // confirmed `published` promotion, never speculatively. Best-effort
+        // — a sink failure here does not roll back the already-genuine
+        // publish; it only means Discover indexing is delayed (acceptable
+        // in this local/mock slice, no retry queue exists yet).
+        final RentalPublicationIndexSink? sink = _rentalPublicationIndexSink;
+        if (directPublishApplied && sink != null) {
+          try {
+            await sink.activate(
+              RentalPublishedVersion(
+                listing: _buildRentalPublicProjection(
+                  id: finalPublished.id,
+                  draft: finalPublished.rentalData ?? rentalData,
+                ),
+                publishedAtUtc:
+                    finalPublished.publishedAtUtc ?? DateTime.now().toUtc(),
+              ),
+            );
+          } on Object {
+            // Swallowed deliberately — see comment above.
+          }
         }
       }
     }

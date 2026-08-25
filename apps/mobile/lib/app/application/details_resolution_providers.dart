@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/discover/data/repositories/collection_details_lookup.dart';
 import '../../features/discover/data/repositories/discover_item_details_lookup.dart';
+import '../../features/discover/data/repositories/rental_details_lookup.dart';
 import '../../features/discover/domain/repositories/details_lookup_port.dart';
 import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/usecases/get_discover_details_usecase.dart';
 import '../../shared/models/catalog_object_ref.dart';
 import '../di/service_locator.dart';
@@ -17,11 +19,12 @@ import 'resolve_details_usecase.dart';
 /// Collection today, further families in later `DTL-*` slices).
 ///
 /// Registers loaders for exactly the families this slice provides
-/// (`DTL-LINK-01` §1.2/AC-07): Event/Activity/Place/Route (one shared
-/// port) and Collection. Session/Find People/Class-Workshop/Rental/
-/// Scenario are deliberately absent — `_registry.portFor(...)` returning
-/// `null` for them is the correct, safe `notFound` behavior until a later
-/// slice registers a loader for one of them.
+/// (`DTL-LINK-01` §1.2/AC-07, extended by `DTL-OBJ-01` §4):
+/// Event/Activity/Place/Route (one shared port), Collection, and Rental.
+/// Session/Find People/Class-Workshop/Scenario are deliberately absent —
+/// `_registry.portFor(...)` returning `null` for them is the correct, safe
+/// `notFound` behavior until a later slice registers a loader for one of
+/// them.
 final detailsLookupRegistryProvider = Provider<DetailsLookupRegistry>((ref) {
   final DetailsLookupPort discoverItemLookup = DiscoverItemDetailsLookup(
     sl<GetDiscoverDetailsUseCase>(),
@@ -29,12 +32,16 @@ final detailsLookupRegistryProvider = Provider<DetailsLookupRegistry>((ref) {
   final DetailsLookupPort collectionLookup = CollectionDetailsLookup(
     sl<PublishedCollectionDiscoveryPort>(),
   );
+  final DetailsLookupPort rentalLookup = RentalDetailsLookup(
+    sl<PublishedRentalDiscoveryPort>(),
+  );
   return DetailsLookupRegistry(<CatalogObjectType, DetailsLookupPort>{
     CatalogObjectType.event: discoverItemLookup,
     CatalogObjectType.activity: discoverItemLookup,
     CatalogObjectType.place: discoverItemLookup,
     CatalogObjectType.route: discoverItemLookup,
     CatalogObjectType.collection: collectionLookup,
+    CatalogObjectType.rental: rentalLookup,
   });
 });
 

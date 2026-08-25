@@ -17,6 +17,7 @@ import 'route_publication_coordinator.dart';
 import '../domain/entities/rental_direct_publish_policy.dart';
 import '../domain/repositories/catalog_object_picker_port.dart';
 import '../domain/repositories/create_template_repository.dart';
+import '../domain/repositories/rental_publication_index_sink.dart';
 import '../domain/usecases/load_create_draft_usecase.dart';
 import '../domain/usecases/manage_create_template_usecase.dart';
 import '../domain/usecases/promote_rental_to_published_usecase.dart';
@@ -61,6 +62,7 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
       isTrusted: true,
     ),
     promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
+    rentalPublicationIndexSink: sl<RentalPublicationIndexSink>(),
   );
 });
 
