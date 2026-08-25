@@ -238,6 +238,31 @@ The canonical implementation contract is
 
 Use this section as a running log (newest first).
 
+- 2026-08-24: `RNT-PUB-01` (Rental trusted direct-publish policy)
+  moved to Done, closing `DTL-OBJ-01`'s second prerequisite (Rental
+  publication lifecycle). Approved after 3 review rounds tightened the
+  authorization contract (isVerifiedCreator as its own signal sourced
+  from `IdentityAccessSnapshot`, personal-`PublisherRef`-ownership,
+  Page publishers explicitly fail-closed, an injected not-hardcoded
+  trusted-policy flag, and a genuine conditional/CAS datasource write
+  with owner+revision guards). Implemented in 4 commits
+  (`454b758`/`1bded1b`/`e6d795f`/`4a6b23f`). One additional defect not
+  caught by any review round was found and fixed while getting the
+  full suite green before committing: `saveDraft()`'s new
+  queue-routing (needed so a concurrent plain save can't race Rental
+  promotion) caused `saveRouteDraftIfCurrent` to deadlock against
+  itself, since it called the now-requeuing public `saveDraft`
+  reentrantly from inside its own already-running queued operation —
+  fixed by routing that internal write through a new
+  `_writeDraftUnlocked` instead. Full gate suite green after the fix:
+  `flutter analyze` 0 issues, `flutter test` 854 passing (1
+  pre-existing tracked skip, unrelated), boundary gate 0
+  violations/71-71 budget unchanged, `git diff --check` clean. See
+  `docs/product/RNT_PUB_01_RENTAL_PUBLICATION_LIFECYCLE_SLICE_SPEC.md`
+  "Фактический результат реализации" for full detail, including one
+  disclosed, deliberately un-added test (a widget-level regression
+  test for `create_page.dart`'s `_loadKey` fix). `DTL-OBJ-01` §3
+  (Rental publication-sink vertical) can resume.
 - 2026-08-24: Rental Create stabilization prerequisite (6 commits:
   domain/data/application-controller/presentation/tests/docs) merged
   into the DTL-wave branch (`worktree-dtl-fnd-01`), unblocking

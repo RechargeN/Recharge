@@ -1,9 +1,15 @@
 # RECHARGE — RNT-PUB-01: Rental Trusted Direct-Publish Policy Slice Spec
 
-- Статус: **Approved** (product owner, 2026-08-24, contingent на v0.4
-  фиксах round-3 review — подтверждено: «После этих правок в v0.4
-  контракт будет готов к Approved»). Реализация начинается по file map
-  §2, коммит за коммитом, с полным gate suite в конце.
+- Статус: **Done** (2026-08-24). Approved после v0.4 round-3 fixes,
+  реализовано тем же днём 4 коммитами (`454b758` domain, `1bded1b`
+  data, `e6d795f` controller/DI wiring, `4a6b23f` tests). Полный gate
+  suite зелёный: `flutter analyze` 0 issues, `flutter test` 854 passing
+  (1 pre-existing tracked skip, не относится к этому slice), boundary
+  gate 0 violations/71-71 budget не изменился, `git diff --check`
+  чисто. См. «Фактический результат реализации» ниже — один
+  дополнительный дефект (реальный deadlock, не предусмотренный ни
+  одним раундом review) найден и исправлен при первом прогоне полного
+  test suite, до коммитов.
 - Версия: 0.4 (2026-08-24) — 3 проверенных дефекта после третьего
   review: `saveDraft()` в реальности не проходит через
   `_conditionalSaveQueues` (v0.3's AC-07a была неверна в этой части);
@@ -626,6 +632,45 @@ Analytics: `create_publish_succeeded` получает опциональный
 - **PUB-AC-14.** `saveDraft()` для любого не-Rental типа ведёт себя
   наблюдаемо идентично поведению до рефакторинга §1.2.0 — 0
   regressions в существующих тестах, не завязанных на Rental.
+
+## Фактический результат реализации (2026-08-24)
+
+Реализация прошла по file map §2 без структурных отклонений от v0.4.
+Один новый дефект — не предусмотренный ни одним из трёх review-раундов
+— найден при первом полном прогоне `flutter test` после реализации,
+до коммитов:
+
+**Deadlock в `saveDraft`/`saveRouteDraftIfCurrent`.** §1.2.0
+рефакторинг перевёл `saveDraft()` на тот же per-`userId` queue, что уже
+использовал `saveRouteDraftIfCurrent`. Но `saveRouteDraftIfCurrent`
+сам, внутри уже выполняющейся queued-операции для этого ключа, вызывал
+публичный `saveDraft(...)` для фактической записи — после рефакторинга
+это заставляло `saveDraft` вставать в очередь **позади самого себя**
+(операция ждёт своего же завершения, которое ждёт её). `flutter test
+test/unit/route_draft_persistence_test.dart` зависал на таймаутах
+(30s per test) — обнаружено именно потому, что этот slice's discipline
+требовал полного прогона suite, а не только Rental-scoped тестов, до
+коммита. Исправлено: `saveRouteDraftIfCurrent` теперь вызывает новый
+приватный `_writeDraftUnlocked` напрямую (он уже внутри своей очереди,
+повторно входить в неё не нужно), не публичный `saveDraft`. Других
+подобных reentrant-вызовов в файле не найдено (проверено grep по всем
+вызовам `saveDraft(` внутри `create_local_datasource.dart`). После
+фикса `route_draft_persistence_test.dart` и
+`create_draft_collection_persistence_test.dart` (Collection делит
+тот же файл, но использует отдельный `_saveCollectionUnconditional`,
+не публичный `saveDraft`, — не задет) оба зелёные, полный suite —
+854 passing.
+
+**Известный, раскрытый пробел покрытия: `_loadKey` fix (round-3
+review пункт 3, второй половина).** Сам факт добавления
+`isVerifiedCreator` в `_loadKey`-строку `create_page.dart` покрыт
+только review кода (однострочное, явно корректное изменение), не
+отдельным автоматическим тестом — `_scheduleLoad` приватен
+внутри `_CreatePageState`, а изолированный unit-тест для него
+потребовал бы pump'а виджета с mocked `identityWorkspaceControllerProvider`
+transition, что не было сделано в рамках bounded-scope этого slice.
+Не блокирует Done — сам bug (stuck `isVerifiedCreator: false`) уже
+предотвращён кодом, только не имеет отдельного regression-теста.
 
 ## 4. Rollback
 

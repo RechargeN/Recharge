@@ -31,17 +31,18 @@
    (`DTL-FND-01`, `7d4636d`), диспетчеризуемым через canonical resolver
    (`DTL-LINK-01`, `026c7cd`). Визуально и функционально не изменились
    — только оболочка.
-4. **Rental Details — git-hygiene блокировка резолвлена, найден второй
-   блокер 2026-08-24**: Rental Create prerequisite стабилизирован,
-   отделён от Session/LocationSearch, прогнан через полный gate suite и
-   смёржен в Details-ветку (см. `RENTAL_CREATE_STABILIZATION_PLAN.md`
-   §8) — git-гигиена больше не блокирует. Но при подготовке file plan
-   для `DTL-OBJ-01` §3 обнаружено: `sink.activate(...)` требует
-   `published`-only state, а текущий Rental publish-путь всегда даёт
-   `pending_review` (канонически запрещено показывать в Discover).
-   `DTL-OBJ-01` остаётся **Blocked on Rental publication lifecycle**
-   (`RNT-PUB-01` prerequisite) — см. `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`
-   v0.5. См. также раздел «Git-committed-status как отдельная ось» ниже.
+4. **Rental Details — оба prerequisite'а резолвлены 2026-08-24**:
+   Rental Create git-hygiene prerequisite стабилизирован, отделён от
+   Session/LocationSearch, прогнан через полный gate suite и смёржен в
+   Details-ветку (см. `RENTAL_CREATE_STABILIZATION_PLAN.md` §8). Найден
+   и закрыт тем же днём второй, отдельный блокер — Rental publication
+   lifecycle (`sink.activate(...)` требует `published`-only state,
+   а generic publish-путь всегда давал `pending_review`) — `RNT-PUB-01`
+   реализован и Done (trusted local/mock direct-publish policy, см.
+   `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` v0.6). `DTL-OBJ-01` —
+   Approved/in progress, ни git-гигиена, ни publication lifecycle
+   больше не блокируют реализацию. См. также раздел
+   «Git-committed-status как отдельная ось» ниже.
 5. **Синтез (§3) переписан** под текущий расклад: Details-волна
    решена для 4 из 10 типов; оставшиеся два «shovel-ready» кандидата
    (Rental, Scenario) заблокированы **разнородными** причинами
@@ -104,7 +105,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `discover_item_entity.dart` (`objectKind.event`) | — |
 | Search | I | `SEARCH_FILTERS_TIME_SPEC.md` | — |
 | Map | I | `discover_map_page.dart` | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Типизированный `participation`-профиль не построен — `DTL-OBJ-01` Blocked on Rental publication lifecycle (`RNT-PUB-01` prerequisite) |
+| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Типизированный `participation`-профиль не построен — `DTL-OBJ-01` Approved/in progress (оба prerequisite'а resolved 2026-08-24) |
 | Primary action | P | AGENTS.md: MVP redirect на `externalBookingUrl` | Authoritative Booking backend не авторизован (ECL-03C-P — план) |
 | Lifecycle | P | ADR 0013 | Admin moderation queue не подтверждена как enforced |
 
@@ -117,7 +118,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `objectKind.activity` (дефолт) | — |
 | Search | I | тот же `DiscoverQuery` | — |
 | Map | I | — | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Нет типизированного `participation`-профиля — `DTL-OBJ-01` Blocked on Rental publication lifecycle (`RNT-PUB-01` prerequisite) |
+| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Нет типизированного `participation`-профиля — `DTL-OBJ-01` Approved/in progress (оба prerequisite'а resolved 2026-08-24) |
 | Primary action | P | generic "Join activity" | Нет специфичной механики |
 | Lifecycle | P | — | Repo-wide gap |
 
@@ -208,7 +209,7 @@ Rental не означает Implemented Details для Rental.
 |---|---|---|---|
 | Create | I | `RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md` v1.0 (Approved); RNT-CRT-01 | — |
 | Publish | I | capability-строки `create.rental`/`submit.rental`/`publish.rental.direct` | Только `externalBookingUrl`, без `contact_host` (принятый trade-off) |
-| Feed | M | нет discover-адаптера в runtime | `DTL-OBJ-01` Blocked on Rental publication lifecycle — `sink.activate` не может быть реализован до `RNT-PUB-01` (pending_review→published policy); discover-адаптер (RentalPublicationIndexSink/PublishedRentalDiscoveryPort/RentalPublicationDiscoveryAdapter/RentalDetailsLookup) остаётся предметом `DTL-OBJ-01` после этого prerequisite |
+| Feed | M | нет discover-адаптера в runtime | `DTL-OBJ-01` Approved/in progress — `RNT-PUB-01` Done, `published`-состояние достижимо; discover-адаптер (RentalPublicationIndexSink/PublishedRentalDiscoveryPort/RentalPublicationDiscoveryAdapter/RentalDetailsLookup) остаётся предметом реализации самого `DTL-OBJ-01` §3 |
 | Search | M | — | — |
 | Map | M | — | — |
 | Details | **S** | `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` — полный write+read vertical спроектирован, Approved по содержанию | Ноль кода — но теперь известно, что «shovel-ready» относится только к спеке, не к среде: сначала нужен отдельный prerequisite-заход (стабилизировать/отделить/закоммитить Rental Create), не просто «взять в очередь» |
