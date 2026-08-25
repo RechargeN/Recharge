@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.30**
+- Version: **0.4.31**
 - Date: **2026-08-25**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,15 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.31 — 2026-08-25
+
+- added BCK-14 v0.2 Review and its v0.2 22/22 coverage evidence as the
+  single-writer Media asset/upload/object/variant/delivery contract;
+- separated Media readiness from the still-absent BCK-07 content attachment
+  and publication lifecycle, keeping integration fail-closed;
+- advanced traceability to BCK-02 v2.4.35 while all Storage, contracts,
+  workers, migration, provisioning, runtime and production gates remain absent.
 
 ### v0.4.30 — 2026-08-25
 
@@ -476,7 +485,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Content/Create | 10 типов local/config-driven | Нет trusted publication lifecycle и catalog source | BCK-07, затем BCK-08 |
 | Discover | Mock/local projections | Нет rebuildable server projections/search decision | BCK-08 + OD-01/03 |
 | Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |
-| Media/Notifications | Local/mobile foundations | Нет protected storage pipeline и delivery authority | BCK-13/14 |
+| Media/Notifications | Local/mobile foundations; BCK-14 v0.2 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime or notification authority; BCK-07 attachment contract and ten BCK14 owner decisions remain unresolved | BCK-14 Approval and BCK-07 before Media runtime; BCK-13 independently |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
 | Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Plan a separately Approved release R0; re-audit before R1 |
