@@ -1,17 +1,43 @@
 # BCK05-OD-07 — Owner Decision Record
 
 - ID: **BCK05-OD07-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-25**
-- Status: **Review — unsigned**
+- Status: **Accepted — BCK05-REL-A1-DUAL-PROV-v1 with controls**
 - Decision owner: **RechargeN / Product owner**
 - Security reviewers: **Release Operations and Platform Security**
 - Candidate: **BCK05-REL-A1-DUAL-PROV-v1**
-- Evidence: [BCK05-OD07-REL-01 v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md)
-- Parent: [BCK-05 v0.2.22](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Evidence: [BCK05-OD07-REL-01 v0.2.1](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md)
+- Parent: [BCK-05 v0.2.23](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Accountable verdict: **Release Operations + Platform Security**
+- Assigned bootstrap owner: **RechargeN / Product owner acting as combined Platform coordinator**
+- Independent production review: **not supplied**
 - Runtime effect: **none**
 
 ---
+
+## 0. Recorded owner verdict
+
+The Product owner supplied the exact effective phrase:
+
+```text
+Одобряю BCK05-OD07-DEC-01: Accept BCK05-REL-A1-DUAL-PROV-v1 with controls.
+```
+
+| Field | Recorded value |
+|---|---|
+| Decision | **Accept BCK05-REL-A1-DUAL-PROV-v1 with controls** |
+| Owner identity / actual role | `RechargeN / Product owner acting as combined Platform coordinator` |
+| Release/Security scope | Accepted under the disclosed combined-role bootstrap model; independent production review is not claimed |
+| Accepted baseline | BCK05-OD07-REL-01 v0.2.1 and every retained control in this record |
+| Deferred unchanged | executable schemas/workflows/policies, GitHub settings, WIF/cloud resources, D1/G1/R0/R1 and production |
+| Runtime authority | none |
+| Signature evidence | exact owner reply in the controlling Codex task |
+| Signed UTC | `2026-08-25T12:36:58Z` |
+
+This transition records architecture-and-controls Acceptance only. It creates
+no release, attestation, repository/cloud mutation, deployment, production
+processing or `main` merge authority.
 
 ## 1. Decision requested
 
@@ -57,21 +83,17 @@ until their own Approved executable or infrastructure slice and evidence gate:
 `Selected, unproved` remains evidence debt, not a Pass. An unsupported or
 unavailable mandatory control fails closed.
 
-## 3. Exact decision phrase
+## 3. Exact decision phrase — recorded
 
-To sign this record, the decision owner must provide exactly:
+The exact controlling-task evidence is preserved in §0. It matches the
+candidate and all controls without qualification.
 
-> Одобряю BCK05-OD07-DEC-01: Accept BCK05-REL-A1-DUAL-PROV-v1 with controls.
+## 4. Effect of the recorded signature
 
-Before that exact phrase appears in owner evidence, status remains `Review —
-unsigned` and BCK05-OD-07 remains `Proposed`.
+After repository documents are reconciled:
 
-## 4. Effect after valid signature
-
-After the exact phrase is recorded and repository documents are reconciled:
-
-- this record becomes `Accepted with controls`;
-- BCK05-OD-07 becomes `Accepted with controls` at candidate
+- this record is `Accepted with controls`;
+- BCK05-OD-07 is `Accepted with controls` at candidate
   `BCK05-REL-A1-DUAL-PROV-v1`;
 - R0 release tooling may be planned, but may start only through a separately
   Approved, bounded, non-production executable slice;

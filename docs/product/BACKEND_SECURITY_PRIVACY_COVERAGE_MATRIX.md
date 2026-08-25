@@ -1,13 +1,13 @@
 # BCK-04 — Security & Privacy Coverage Matrix
 
 - ID: **BCK-04-PRE**
-- Version: **0.3.15**
+- Version: **0.3.16**
 - Date: **2026-08-25**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Security/Privacy owner**
-- Target document: [BCK-04 v0.4.15](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.31](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target document: [BCK-04 v0.4.16](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.32](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md`
 
 ---
@@ -20,9 +20,9 @@
 решения и не разрешает создание `apps/backend`, Firebase resources,
 credentials, production data processing или любой runtime-код.
 
-Revision v0.3.15 reconciles BCK-04 with decision-ready release candidate
-`BCK05-REL-A1-DUAL-PROV-v1` without treating provenance policy as executable
-evidence. It retains the Authentication US/global-service disclosure and
+Revision v0.3.16 records BCK05-OD-07 Acceptance at
+`BCK05-REL-A1-DUAL-PROV-v1` with controls without treating provenance policy
+as executable evidence. It retains the Authentication US/global-service disclosure and
 preserves qualified Legal/Privacy production review as a separate gate. BCK-04
 remains Draft; executable IAM/cloud, owner, qualified Legal/Privacy and
 executed/passed tabletop evidence remain blocked.
@@ -32,15 +32,15 @@ executed/passed tabletop evidence remain blocked.
 | Источник | Фактический статус в tracked checkout | Роль в reconciliation |
 |---|---|---|
 | Accepted ADR 0013, 0015, 0019 | Accepted | Непереопределяемые identity, capability и Booking authority invariants |
-| BCK-01 | Review v0.4.27, Present; local R0 scaffold only, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
-| BCK-02 | Approved v2.4.31; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
+| BCK-01 | Review v0.4.28, Present; local R0 scaffold only, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
+| BCK-02 | Approved v2.4.32; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
 | BCK-03 | Draft v0.3.3, Present; runtime Absent | API envelope/versioning/idempotency input, split-key conflict closed |
-| BCK-05 | Draft v0.2.22, Present; local R0 scaffold only; BCK05-OD-01/02 and cross-domain OD-07 Accepted; BCK05-OD-07 decision-ready but Proposed | Operations/IAM/release/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
+| BCK-05 | Draft v0.2.23, Present; local R0 scaffold only; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted | Operations/IAM/release/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
 | BCK-20 | Draft v0.2.2, Present; runtime Absent | Market/reference/localization input, ещё не Accepted |
 | BCK-09 | Review v1.1; runtime Absent | Booking-specific transaction/security input, ещё не Approved |
 | Identity/Publisher spec | Approved v1.3, bounded local/mock scope | Identity semantics; не production authority |
 | Firebase Architecture | Proposed v2.2 | Proposed input only; не наследуется как settled решение |
-| BCK-04 | Draft v0.4.15; runtime Absent; OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted with controls | Единственный target security/privacy contract |
+| BCK-04 | Draft v0.4.16; runtime Absent; OD-01/09 Proposed; OD-07 and BCK05-OD-02/07 Accepted with controls | Единственный target security/privacy contract |
 | BCK04-OD01-TM-01 | Draft v0.1; runtime N/A | Full threat-model evidence; OD-01 Proposed, not Accepted |
 | BCK04-OD09-IR-01 | Draft v0.1; runtime N/A | Incident/severity/privacy-risk evidence; OD-09/BCK05-OD-08 Proposed |
 | BCK04-OD09-TTX-01 | Ready v0.1; not executed; runtime N/A | Repeatable tabletop package; no result or gate closure |
@@ -51,7 +51,7 @@ executed/passed tabletop evidence remain blocked.
 
 ## 2. Coverage matrix — 22 обязательных пункта
 
-| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.15 | Evidence / остаток |
+| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.16 | Evidence / остаток |
 |---:|---|---|---|
 | 1 | ID/version/date/status/runtime/owner | Полное | Header |
 | 2 | Parent sources, anchors, conflict priority | Полное | §3; Accepted ADR выше Draft/Proposed inputs |
@@ -168,6 +168,6 @@ Resolved prerequisites:
 
 ## 7. Итог
 
-BCK-04 v0.4.15 структурно покрывает обязательный template и готов к предметному
+BCK-04 v0.4.16 структурно покрывает обязательный template и готов к предметному
 architecture/legal review после устранения §5 blockers. Физическая реализация,
 provisioning и production processing по-прежнему не разрешены.

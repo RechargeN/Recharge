@@ -1,24 +1,33 @@
 # Recharge Backend — Release Provenance, Promotion and Rollback Model
 
 - ID: **BCK05-OD07-REL-01**
-- Version: **0.2**
+- Version: **0.2.1**
 - Date: **2026-08-25**
-- Status: **Review-ready evidence — BCK05-OD-07 Proposed**
+- Status: **Accepted evidence — BCK05-OD-07 Accepted with controls**
 - Runtime status: **Absent**
 - Accountable owners: **Release Operations and Platform Security**
 - Review coordinator: **RechargeN / Product owner**
-- Parent: [BCK-05 v0.2.22](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Parent: [BCK-05 v0.2.23](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - IAM dependency: [BCK05-OD02-IAM-01 v0.2.1](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) (Accepted with controls)
 - Infrastructure dependency: [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) (Accepted with controls)
 - Toolchain dependency: [BCK05-OD01-TCH-01 v0.3.4](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) (Accepted baseline v0.3.3 with controls)
 - Candidate baseline: **BCK05-REL-A1-DUAL-PROV-v1**
-- Owner decision: [BCK05-OD07-DEC-01 v0.1](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) (Review; unsigned)
+- Owner decision: [BCK05-OD07-DEC-01 v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) (Accepted with controls)
 - CI policy: [CI_GATES_POLICY](../architecture/CI_GATES_POLICY.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Changelog
+
+### v0.2.1 — 2026-08-25
+
+- recorded the exact BCK05-OD07-DEC-01 v0.2 owner verdict and accepted
+  `BCK05-REL-A1-DUAL-PROV-v1` with every stated control;
+- preserved all executable policy/schema/workflow, GitHub setting,
+  WIF/cloud, D1/G1/R0/R1, deployment and production gates;
+- created no release, attestation, repository/cloud mutation, runtime or
+  `main` merge authority.
 
 ### v0.2 — 2026-08-25
 
@@ -43,7 +52,7 @@ it.
 
 ## 2. Verdict first
 
-The review-ready `BCK05-REL-A1-DUAL-PROV-v1` contract is **build once, verify
+The Accepted `BCK05-REL-A1-DUAL-PROV-v1` contract is **build once, verify
 once, promote the same immutable release**:
 
 - release output is content-addressed and bound to source commit, workflow,
@@ -62,7 +71,7 @@ once, promote the same immutable release**:
 - an unknown or partially applied deployment is `unknown_outcome` or
   `recovery_required`, never success.
 
-This is the exact architecture candidate for `BCK05-OD-07` Acceptance. It
+This is the exact Accepted architecture baseline for `BCK05-OD-07`. It
 creates no workflow, release, artifact, registry, attestation, signing key,
 deployment or runtime authority. Exact cloud permissions, repository settings,
 executable fixtures and provider observations remain mandatory before R1, not
@@ -711,9 +720,7 @@ release may progress.
 ## 21. Acceptance sequence
 
 ```text
-BCK05-OD07-REL-01 Review-ready
-  -> owner signs BCK05-OD07-DEC-01 exact decision phrase
-  -> BCK05-OD-07 Accepted with controls
+BCK05-OD07-REL-01 Accepted with controls
   -> separately Approved R0 non-production pipeline scaffold
   -> resolve REL-OD-01..03/05 executable evidence and REL-OD-04 policy
   -> manifest/provenance/negative/rollback evidence

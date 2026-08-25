@@ -1,18 +1,18 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.15**
+- Version: **0.4.16**
 - Date: **2026-08-25**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.27](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.31](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.28](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.32](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.15
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.16
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
 - IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (BCK05-OD-02 Accepted with controls)
@@ -26,6 +26,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.16 — 2026-08-25
+
+- recorded BCK05-OD-07 Acceptance at `BCK05-REL-A1-DUAL-PROV-v1` with
+  controls through exact BCK05-OD07-DEC-01 v0.2 owner evidence;
+- retained BCK-04 Draft, qualified Legal/Privacy, threat/incident, retention,
+  executable IAM/release and production gates;
+- created no workflow, repository/cloud mutation, credential, deployment,
+  production processing or `main` merge authority.
 
 ### v0.4.15 — 2026-08-25
 
@@ -1598,7 +1607,7 @@ therefore remains Draft and cannot enter Review yet.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.15 отсутствует:
+На момент v0.4.16 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет
