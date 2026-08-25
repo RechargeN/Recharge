@@ -1,12 +1,12 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.39
+- Версия: 2.4.40
 - Дата: 2026-08-26
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
 - Registry amendments: **2026-08-15, 2026-08-16, 2026-08-20, 2026-08-21,
-  2026-08-24 and 2026-08-25, Product owner
+  2026-08-24, 2026-08-25 and 2026-08-26, Product owner
   instructions; documentation traceability only, semantics/gates/checksum
   unchanged**
 - Назначение: единая распределительная карта backend-работ Recharge
@@ -14,6 +14,16 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.40.** BCK-12 Review reconciliation without changing the Approved v2.4
+coordination semantics:
+
+- BCK-12 v0.2 and BCK-12-PRE v0.2 are Present in Review with 22/22 mandatory
+  design coverage, 60 AC and ten explicit BCK12 decisions;
+- Library and Reviews remain separate; Visit History stays explicit Place-only
+  self-report and rating stays a rebuildable Reviews projection;
+- BCK-01 traceability advances to v0.4.36; contracts, privacy decisions,
+  BCK-22 integration, Firebase, runtime and `main` remain blocked.
 
 **v2.4.39.** BCK-19 Review reconciliation without changing the Approved v2.4
 coordination semantics:
@@ -599,7 +609,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.39)
+## 5. Реестр проектных документов — 22 (v2.4.40)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
@@ -614,7 +624,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.1 | Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Planned | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Planned | Absent |
-| BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Planned | Absent |
+| BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.2 — Present; 22/22 coverage, 60 AC, ten BCK12 decisions; Approval/privacy/BCK-22/runtime blockers remain | Absent |
 | BCK-13 | `NOTIFICATIONS_BACKEND_SPEC.md` | Notifications owner | Inbox, push tokens/FCM, preferences, deep links, outbox consumers and optional email | BCK-03, BCK-04, BCK-05, BCK-06, BCK-18, BCK-20, OD-02, OD-09, OD-10 | Review v0.2 | Absent |
 | BCK-14 | `MEDIA_STORAGE_BACKEND_SPEC.md` | Media Platform owner | Upload/finalize, metadata, ownership, transforms, protected access, deletion/orphan cleanup | BCK-03, BCK-04, BCK-05, BCK-06, BCK-07 | Review v0.2.1 — Present; BCK-07 v0.2 reconciled; 22/22 design coverage, 60 AC, ten BCK14 decisions; Approval/runtime blockers remain | Absent |
 | BCK-15 | `AI_BACKEND_SPEC.md` | AI Platform owner | Provider-neutral server proxy, quota, redaction, prompts/evals and kill switches | ADR 0018, BCK-03, BCK-04, BCK-05, BCK-06 | Planned, gated | Absent |

@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.35**
+- Version: **0.4.36**
 - Date: **2026-08-26**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,16 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.36 — 2026-08-26
+
+- registered BCK-12 v0.2 and BCK-12-PRE v0.2 as Review/Present with runtime
+  Absent;
+- preserved User Library and Reviews as separate bounded aggregates;
+- fixed the explicit Visit History, typed Favorite, review source and
+  rebuildable rating-projection boundaries;
+- kept BCK-22 cases, Firebase, migration and runtime blocked;
+- advanced BCK-02 traceability to v2.4.40.
 
 ### v0.4.35 — 2026-08-26
 
