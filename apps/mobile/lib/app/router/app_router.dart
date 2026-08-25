@@ -22,7 +22,9 @@ import '../../features/create/presentation/pages/create_hub_page.dart';
 import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/create/presentation/pages/route_moderation_page.dart';
+import '../../features/discover/domain/entities/published_rental_discovery_entity.dart';
 import '../../features/discover/presentation/pages/collection_details_page.dart';
+import '../../features/discover/presentation/pages/rental_details_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/categories_page.dart';
 import '../../features/discover/presentation/pages/category_page.dart';
@@ -428,9 +430,23 @@ class _ResolvedDetailsRoute extends ConsumerWidget {
           CatalogObjectType.collection => CollectionDetailsPage(
             collectionId: resolvedRef.objectId,
           ),
+          // DTL-OBJ-01 §4: unlike Collection above, RentalDetailsPage takes
+          // the already-resolved projection directly instead of
+          // re-fetching it through a second provider by id — the resolver
+          // just loaded it one line above via RentalDetailsLookup, so a
+          // second fetch would be redundant, not merely a style choice.
+          CatalogObjectType.rental => result.projection != null
+              ? RentalDetailsPage(
+                  projection: result.projection! as PublishedRentalDiscoveryEntity,
+                )
+              : const DetailsShell(
+                  state: DetailsScreenUnavailable(
+                    reason: DetailsUnavailableReason.notFound,
+                  ),
+                ),
           // Unreachable today: detailsLookupRegistryProvider
           // (`app/application/details_resolution_providers.dart`)
-          // registers no loader for these five types, so
+          // registers no loader for these four types, so
           // ResolveDetailsUseCase always returns notFound for them first.
           // A later slice that registers one of these must add its own
           // branch here too — this fallback is a safe default, not a
@@ -438,8 +454,7 @@ class _ResolvedDetailsRoute extends ConsumerWidget {
           CatalogObjectType.session ||
           CatalogObjectType.scenario ||
           CatalogObjectType.findPeople ||
-          CatalogObjectType.classWorkshop ||
-          CatalogObjectType.rental => const DetailsShell(
+          CatalogObjectType.classWorkshop => const DetailsShell(
             state: DetailsScreenUnavailable(
               reason: DetailsUnavailableReason.notFound,
             ),

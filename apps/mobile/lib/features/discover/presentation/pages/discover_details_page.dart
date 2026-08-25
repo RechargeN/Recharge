@@ -18,6 +18,7 @@ import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../renderers/route_details_renderer.dart';
+import '../renderers/object_offer_details_renderer.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../shell/details_renderer.dart';
 import '../shell/details_shell.dart';
@@ -150,8 +151,13 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
 
         final DetailsRendererRegistry registry = DetailsRendererRegistry(
           <DetailsRendererFamily, DetailsRendererBuilder>{
+            // DTL-OBJ-01: registered under ObjectOfferDetailsRenderer now,
+            // not CompatibilityObjectRenderer directly — for Event/Activity/
+            // Place it delegates to CompatibilityObjectRenderer wholesale
+            // (OBJ-AC-02 visual/functional parity), so this call site's
+            // params are unchanged.
             DetailsRendererFamily.objectOffer: () =>
-                CompatibilityObjectRenderer(
+                ObjectOfferDetailsRenderer.discoverItem(
                   item: item,
                   isFavorite: isFavorite,
                   ctaSubmitted: _ctaSubmitted,
