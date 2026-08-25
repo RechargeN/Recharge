@@ -1,6 +1,15 @@
 # RECHARGE — RNT-PUB-01: Rental Trusted Direct-Publish Policy Slice Spec
 
 - Статус: **Draft for review**
+- Версия: 0.4 (2026-08-24) — 3 проверенных дефекта после третьего
+  review: `saveDraft()` в реальности не проходит через
+  `_conditionalSaveQueues` (v0.3's AC-07a была неверна в этой части);
+  conditional contract у promotion недостаточен без `expectedRentalRevision`
+  и восстановленной (потерянной при переносе на datasource-уровень)
+  owner/`publisherRef` проверки; verification-сигнал должен идти через
+  app-level primitive provider, не прямой Identity-импорт в
+  `create_page.dart`, и обязан входить в `_loadKey`. См. «Что
+  изменилось в v0.4».
 - Версия: 0.3 (2026-08-24) — 4 точечных архитектурных исправления после
   второго review: отдельный verified-Creator сигнал (не capability),
   context строится из сохранённого `published.rentalData.publisherRef`
@@ -180,6 +189,80 @@ contract) осталось верным, но реализационные де�
    через новый datasource-метод, не собственный repository-уровневый
    read-then-write.
 
+## Что изменилось в v0.4
+
+Третий review нашёл 3 проверенных дефекта в v0.3. Direction (conditional
+write через существующий queue-механизм, отдельный verified-сигнал,
+context из сохранённого publisherRef) остался верным; сама реализация
+v0.3 была неполной/неточной в деталях:
+
+1. **`_conditionalSaveQueues` не защищает от конкурентного plain
+   `saveDraft()`.** v0.3's `AC-07a` утверждал, что новый
+   `promoteRentalDraftIfCurrent` «сериализуется с любой другой
+   conditional/unconditional записью для того же пользователя» — это
+   было неверно для «unconditional» половины утверждения. Прямым
+   чтением подтверждено: `saveDraft()`
+   (`create_local_datasource.dart:96`) пишет напрямую в
+   `_storage.write(...)`, вообще не касаясь `_conditionalSaveQueues`.
+   Значит конкурентный обычный autosave **всё ещё** мог бы гонки с
+   promotion — очередь защищала только promotion-vs-promotion, не
+   promotion-vs-обычный-save. Исправление: `saveDraft()` сам
+   переводится на тот же per-`_draftKey(userId)` queue-механизм —
+   внутренняя запись выносится в `_writeDraftUnlocked(...)`, а
+   `saveDraft()`/`promoteRentalDraftIfCurrent`/`saveRouteDraftIfCurrent`
+   все ставятся в одну очередь по одному и тому же ключу. Это
+   поведенчески прозрачно для всех остальных типов (тот же итоговый
+   результат записи, просто гарантированно упорядоченный, а не
+   потенциально гоняющийся) — но затрагивает shared datasource-метод,
+   поэтому явно раскрыто как pre-existing-поведение-сохраняющий
+   рефакторинг, не Rental-only изменение по факту (хотя мотивирован
+   именно нуждами Rental promotion).
+2. **Conditional contract потерял owner-проверку при переносе на
+   datasource-уровень в v0.3 и не имел revision-guard ни в v0.2, ни в
+   v0.3.** v0.2 (repository-уровень) проверял `publisherRef`
+   соответствие `userId` как defense-in-depth; при переносе логики в
+   `promoteRentalDraftIfCurrent` (v0.3) эта проверка была потеряна —
+   v0.3 проверял только `id`/`objectType`/`publishStatus`. Отдельно,
+   ни одна версия не предохраняла promotion от гонки с параллельной
+   мутацией *содержимого* того же pending_review черновика (не
+   структуры — уже сериализовано очередью после исправления п.1, но
+   значение `rentalData` могло устареть между тем, как
+   `CreateController` получил `published` от generic publish, и тем,
+   как promotion реально записывает — новый `expectedRentalRevision`
+   guard закрывает именно это, по образцу уже существующего
+   `expectedRevision` в `saveRouteDraftIfCurrent`). Добавлены: явная
+   `rentalData != null` проверка; `rentalData!.publisherRef.type ==
+   PublisherType.user && rentalData!.publisherRef.id == userId`;
+   `rentalData!.revision == expectedRentalRevision`. Любое несовпадение
+   — fail-closed `conflict`/`invalidExistingData`, без записи.
+3. **Verification-сигнал: app-level primitive provider, не прямой
+   Identity-импорт в `create_page.dart`; обязателен в `_loadKey`.**
+   v0.3's controller-wiring текст описывал
+   `create_page.dart` вызывающим `ref.watch(identityWorkspaceControllerProvider)`
+   напрямую — это нарушило бы boundary rule (`features/create` →
+   `features/identity` прямой импорт, как и `activeCreatePublisherProvider`
+   уже избегает через app-level bridge) и противоречило собственной
+   file-map-строке того же v0.3, которая (верно) предполагала
+   отдельный provider. Исправлено: новый app-level provider
+   (`apps/app/application/`), по образцу
+   `active_create_publisher_provider.dart`, отдаёт голый `bool`;
+   `create_page.dart` его читает, `features/create` не импортирует
+   Identity вообще. Отдельно: `_scheduleLoad`'s `_loadKey` дедупликаций-строка
+   не включала `isVerifiedCreator` — при первом build (до того как
+   Identity snapshot асинхронно загрузился) `ensureLoaded` вызывался бы
+   с `isVerifiedCreator: false`, а последующий rebuild с реальным
+   `true` не отличался бы по остальным полям ключа и **не вызвал бы
+   повторный `ensureLoaded`** — контроллер навсегда застрял бы на
+   `false`. `isVerifiedCreator` добавлен в состав `_loadKey`.
+
+Дополнительно (без отдельного номера — редакционная точность):
+убрана формулировка «`published.rentalData != null`, что гарантировано
+[`objectType == rental`]» — это утверждение об инварианте, не проверка;
+код обязан делать явный `null`-check с graceful fallback (пропустить
+direct-publish попытку, оставить уже полученный `pendingReview`
+результат), а не полагаться на предположение, которое будущий рефакторинг
+может незаметно нарушить.
+
 ## 1. Scope
 
 ### 1.1 Authorization contract (пункты review round 1 — 1–4, 6–7; round 2 — 1, 2)
@@ -237,9 +320,25 @@ Resolver — чистая функция, без I/O, без доступа к �
 canonical §4.2 Operation matrix, где «Verified Creator» называется
 раньше конкретной capability в каждой ячейке personal-колонки.
 
-### 1.2 Promotion contract — conditional write (round-1 review 4–7; round-2 review 4)
+### 1.2 Promotion contract — conditional write (round-1 review 4–7; round-2 review 4; round-3 review 1–2)
 
-Слой datasource (`create_local_datasource.dart`) получает новый метод:
+**1.2.0 Общая очередь для всех draft-мутаций (round-3 review пункт 1).**
+`saveDraft(userId, model)` перестаёт писать в `_storage` напрямую.
+Внутренняя запись выносится в приватный
+`_writeDraftUnlocked(userId, model)` (тело — сегодняшнее тело
+`saveDraft`, без изменений семантики). Сам `saveDraft` становится
+`_enqueueDraftMutation(_draftKey(userId), () =>
+_writeDraftUnlocked(userId, model))`, где `_enqueueDraftMutation<T>`
+— вынесенный в общий приватный helper паттерн, уже используемый
+`saveRouteDraftIfCurrent`/`saveCollectionDraftIfCurrent`
+(`_conditionalSaveQueues[key] = ...`, chain-on-previous). Это делает
+`_conditionalSaveQueues` истинно общим per-`_draftKey(userId)` мьютексом
+для **любой** мутации draft-слота — не только conditional. Поведенчески
+прозрачно для Event/Place/Activity/FindPeople и т.д. (тот же результат
+записи, теперь строго упорядоченный); отдельный regression-тест
+подтверждает это для не-Rental типа.
+
+**1.2.1 Новый datasource-метод:**
 
 ```text
 enum RentalPromotionStatus { promoted, alreadyPublished, conflict, invalidExistingData }
@@ -252,45 +351,61 @@ class RentalPromotionResult {
 Future<RentalPromotionResult> promoteRentalDraftIfCurrent({
   required String userId,
   required String expectedRentalId,
+  required int expectedRentalRevision,
 })
 ```
 
-Реализация — **точно по паттерну `saveRouteDraftIfCurrent`**
-(`create_local_datasource.dart:512–583`, тот же
-`_conditionalSaveQueues[_draftKey(userId)]`):
+Реализация — через тот же `_enqueueDraftMutation(_draftKey(userId),
+...)`, что теперь и `saveDraft`/`saveRouteDraftIfCurrent` (§1.2.0):
 
-1. Ставится в очередь на ключ `_draftKey(userId)` — сериализуется с
-   любой другой conditional/unconditional записью для того же
-   пользователя (round-2 review пункт 4: устраняет
-   `await`-окно между чтением и записью, в котором конкурентная
-   операция могла молча выиграть).
-2. **Внутри** очереди, непосредственно перед записью: загружает
-   текущий persisted draft; если `null` или `id != expectedRentalId`
-   или `objectType != rental` → `invalidExistingData`, без записи.
-3. Если `publishStatus == published` уже → `alreadyPublished`,
-   возвращает текущую запись как есть, без записи (idempotency,
-   round-1 review пункт 5; `publishedAtUtc` не трогается).
-4. Если `publishStatus != pendingReview` (и не `published`) →
-   `conflict`, без записи (round-1 review пункт 4 — fail-closed на
-   неожиданном state).
-5. Если `publishStatus == pendingReview` — строит новую модель:
+1. **Внутри** очереди, непосредственно перед записью: загружает
+   текущий persisted draft.
+2. Fail-closed валидация, **всё** до единственной записи —
+   любое несовпадение → соответствующий non-`promoted` статус, ноль
+   записи:
+   - `null`/`id != expectedRentalId`/`objectType != rental` →
+     `invalidExistingData`;
+   - `rentalData == null` → `invalidExistingData` (round-3 review,
+     дополнительный пункт: явная проверка, не предположение об
+     инварианте — см. «Что изменилось в v0.4»);
+   - `rentalData!.publisherRef.type != PublisherType.user ||
+     rentalData!.publisherRef.id != userId` → `conflict` (round-3
+     review пункт 2 — восстановленная owner-проверка, потерянная при
+     переносе логики на datasource-уровень в v0.3; defense-in-depth
+     поверх resolver'а, который тот же owner-факт уже проверил на
+     уровне `CreateController`);
+   - `publishStatus == published` уже → **не ошибка** — `alreadyPublished`
+     (idempotency, round-1 review пункт 5; `publishedAtUtc` не
+     трогается; revision здесь не проверяется — повторный вызов на
+     уже-опубликованной записи легитимен вне зависимости от того, с
+     каким `expectedRentalRevision` его вызвали);
+   - `publishStatus != pendingReview` (и не `published`) → `conflict`
+     (round-1 review пункт 4 — fail-closed на неожиданном state);
+   - `rentalData!.revision != expectedRentalRevision` → `conflict`
+     (round-3 review пункт 2, новый guard — та же типизированная
+     проверка, что уже делает `expectedRevision` в
+     `saveRouteDraftIfCurrent`: между тем, как `CreateController`
+     получил `published` от generic publish, и тем, как promotion
+     реально пишет, значение `rentalData` не должно было устареть).
+3. Если все проверки пройдены — строит новую модель:
    `draftStatus: published`, `publishStatus: published`,
    `moderationStatus: none` (trusted direct-publish — не эквивалент
    модерационного `approved`), **новый** `publishedAtUtc:
-   DateTime.now().toUtc()` (round-1 review пункт 6). Один `saveDraft`
-   вызов внутри той же очереди — единственная точка записи. Статус
-   `promoted`.
+   DateTime.now().toUtc()` (round-1 review пункт 6). Один
+   `_writeDraftUnlocked` вызов внутри той же очереди — единственная
+   точка записи. Статус `promoted`.
 
-`CreateRepositoryImpl.promoteRentalToPublished({userId, rentalId})`
-— тонкая обёртка: вызывает `promoteRentalDraftIfCurrent`, мапит
-`RentalPromotionResult` на `CreateDraftEntity`/`throw`:
-`invalidExistingData`/`conflict` → типизированное исключение (без
-побочных эффектов — datasource уже гарантировал ноль записи);
-`promoted`/`alreadyPublished` → `persisted.toEntity()`. Вызывающий код
-(`CreateController`) ловит исключение и оставляет уже полученный от
-generic publish результат (`pending_review`) без изменений — round-1
-review пункт 7, теперь дополнительно защищено на уровне datasource, а
-не только порядком операций в repository.
+`CreateRepositoryImpl.promoteRentalToPublished({userId, rentalId,
+expectedRentalRevision})` — тонкая обёртка: вызывает
+`promoteRentalDraftIfCurrent`, мапит `RentalPromotionResult` на
+`CreateDraftEntity`/`throw`: `invalidExistingData`/`conflict` →
+типизированное исключение (без побочных эффектов — datasource уже
+гарантировал ноль записи); `promoted`/`alreadyPublished` →
+`persisted.toEntity()`. Вызывающий код (`CreateController`) ловит
+исключение и оставляет уже полученный от generic publish результат
+(`pending_review`) без изменений — round-1 review пункт 7, защищено на
+уровне datasource через настоящую сериализацию (§1.2.0), не только
+порядком операций в repository.
 
 ### 1.3 `RentalDirectPublishPolicy` — инжектируемая, не hardcoded (round-2 review 3)
 
@@ -319,9 +434,14 @@ resolver в обход wiring.
 
 `CreateController.publishDraft()`: после `_publishCreateDraftUseCase`
 (текущий generic publish, без изменений) — если
-`published.objectType == rental` (и `published.rentalData != null`,
-что гарантировано этим же условием — round-2 review пункт 2),
-строит `RentalDirectPublishContext` из:
+`published.objectType == rental`, **явно проверяет**
+`published.rentalData` на `null` (round-3 review, редакционный пункт:
+не заявлять `objectType == rental` гарантией непустого `rentalData` —
+это предположение об инварианте, не проверка; код обязан graceful
+fail-closed на `null`, пропуская direct-publish попытку и оставляя уже
+полученный `pendingReview` результат как есть, тем же путём, что и
+`notAuthorized`/exception). Если `rentalData != null` — строит
+`RentalDirectPublishContext` из:
 
 - `actorUserId: _state.userId`;
 - `isVerifiedCreator`: из нового поля контроллера (см. ниже) —
@@ -336,13 +456,16 @@ resolver в обход wiring.
 - `isPolicyTrusted: _rentalDirectPublishPolicy.isTrusted`.
 
 При `authorized` — вызывает `promoteRentalToPublished(userId:
-_state.userId, rentalId: published.id)` (round-2 review пункт 2 —
+_state.userId, rentalId: published.id, expectedRentalRevision:
+published.rentalData!.revision)` (round-2 review пункт 2 —
 `published.id`, итоговый де-`loc_`-фицированный id, не любой более
-ранний draft id) в `try/catch`; при успехе использует
-promoted-сущность для `_setState`/analytics/сообщения; при исключении
-— использует исходный (`pendingReview`) `published` без изменений.
-При `notAuthorized` (любой `reasonCode`) promotion не вызывается
-вовсе — поведение идентично сегодняшнему.
+ранний draft id; round-3 review пункт 2 — `expectedRentalRevision` из
+той же `published`-сущности, не отдельным запросом) в `try/catch`; при
+успехе использует promoted-сущность для
+`_setState`/analytics/сообщения; при исключении — использует исходный
+(`pendingReview`) `published` без изменений. При `notAuthorized`
+(любой `reasonCode`) promotion не вызывается вовсе — поведение
+идентично сегодняшнему.
 
 **Новый входной сигнал `isVerifiedCreator`.** `CreateController` не
 имеет сегодня доступа к `IdentityAccessSnapshot` — сигнал должен
@@ -354,13 +477,27 @@ promoted-сущность для `_setState`/analytics/сообщения; пр�
 реальными Identity-данными — `route_moderation_page.dart` его тоже
 вызывает, но получит default `false`, что для его сценария поведенчески
 не отличается от сегодняшнего дня, так как Route direct-publish эту
-policy не использует) передаёт
-`ref.watch(identityWorkspaceControllerProvider).state.accessSnapshot?.isVerifiedCreator
-?? false` — тот же уровень (presentation/app-composition), где уже
-читаются `authControllerProvider`/`activeCreatePublisherProvider`, не
-внутрь `features/create` (boundary rule не нарушается — `features/create`
-получает готовое примитивное `bool`, не импортирует
-`features/identity`).
+policy не использует) читает **новый app-level primitive provider**
+(round-3 review пункт 3 — не прямой `ref.watch(identityWorkspaceControllerProvider)`
+внутри `create_page.dart`, что нарушило бы boundary rule ровно так же,
+как `active_create_publisher_provider.dart` уже избегает для
+`PublisherRef`): `apps/mobile/lib/app/application/` получает новый
+provider вида `activeCreatorVerificationProvider`, отдающий голый
+`bool` — `ref.watch(identityWorkspaceControllerProvider).state.accessSnapshot?.isVerifiedCreator
+?? false` внутри app-level кода, где Identity-импорт уже легален
+(тот же файл/соседний файл, что `activeCreatePublisherProvider`).
+`create_page.dart` читает только этот provider, `features/create`
+Identity вообще не импортирует.
+
+**`_loadKey` обязан включать `isVerifiedCreator`** (round-3 review
+пункт 3): `_scheduleLoad`'s дедупликаций-ключ сегодня строится из
+`userId`/`organizerEmail`/`capabilities`/`publisherRef` — без
+`isVerifiedCreator` первый build (до того, как Identity snapshot
+асинхронно догрузится) закешировал бы `ensureLoaded(isVerifiedCreator:
+false)`, а последующий rebuild с реальным `true` не отличался бы по
+остальным полям ключа и не вызвал бы повторный `ensureLoaded` —
+контроллер навсегда застрял бы на `false`. Новый ключ:
+`'$userId:$organizerEmail:$isVerifiedCreator:${capabilities.join(',')}:...'`.
 
 Analytics: `create_publish_succeeded` получает опциональный
 `'direct_publish': true` только когда promotion реально применена
@@ -389,16 +526,18 @@ Analytics: `create_publish_succeeded` получает опциональный
 | `apps/mobile/lib/features/create/domain/entities/rental_direct_publish_decision.dart` | новый | `RentalDirectPublishContext`, `RentalDirectPublishDecision`, `RentalDirectPublishReasonCode` (§1.1) |
 | `apps/mobile/lib/features/create/domain/usecases/resolve_rental_direct_publish_usecase.dart` | новый | Resolver — чистая функция §1.1, 6 упорядоченных проверок |
 | `apps/mobile/lib/features/create/domain/entities/rental_direct_publish_policy.dart` | новый | `RentalDirectPublishPolicy` — инжектируемый `isTrusted` value object, default `false` (§1.3) |
-| `apps/mobile/lib/features/create/data/datasources/create_local_datasource.dart` | правка | Новый `promoteRentalDraftIfCurrent(...)` метод через существующий `_conditionalSaveQueues`, по паттерну `saveRouteDraftIfCurrent` (§1.2) |
-| `apps/mobile/lib/features/create/domain/repositories/create_repository.dart` | правка | Новый interface-метод `Future<CreateDraftEntity> promoteRentalToPublished({required String userId, required String rentalId})` |
+| `apps/mobile/lib/features/create/data/datasources/create_local_datasource.dart` | правка | `saveDraft`→`_writeDraftUnlocked`+`_enqueueDraftMutation` рефакторинг (§1.2.0); новый `promoteRentalDraftIfCurrent(...)` через ту же очередь, с owner/revision/null-guard'ами (§1.2.1) |
+| `apps/mobile/lib/features/create/domain/repositories/create_repository.dart` | правка | Новый interface-метод `Future<CreateDraftEntity> promoteRentalToPublished({required String userId, required String rentalId, required int expectedRentalRevision})` |
 | `apps/mobile/lib/features/create/data/repositories/create_repository_impl.dart` | правка | Тонкая обёртка над datasource-методом — маппинг `RentalPromotionResult` → сущность/исключение (§1.2) |
-| `apps/mobile/lib/app/application/active_create_publisher_provider.dart` или соседний новый provider | правка/новый | `isVerifiedCreator` bool provider из `identityWorkspaceControllerProvider` (§1.4) |
-| `apps/mobile/lib/features/create/presentation/pages/create_page.dart` | правка | Передаёт `isVerifiedCreator` в `ensureLoaded(...)` |
-| `apps/mobile/lib/features/create/application/controllers/create_controller.dart` | правка | `publishDraft()` wiring §1.4 |
+| `apps/mobile/lib/app/application/active_creator_verification_provider.dart` | новый | `activeCreatorVerificationProvider` — голый `bool` из `identityWorkspaceControllerProvider`, по образцу `active_create_publisher_provider.dart` (§1.4) |
+| `apps/mobile/lib/features/create/presentation/pages/create_page.dart` | правка | Читает `activeCreatorVerificationProvider`, передаёt `isVerifiedCreator` в `ensureLoaded(...)`, добавляет его в `_loadKey` |
+| `apps/mobile/lib/features/create/application/controllers/create_controller.dart` | правка | `ensureLoaded` новый параметр; `publishDraft()` wiring §1.4, включая явный `rentalData != null` guard |
 | тесты resolver | новый | все 6 reason codes (`creator_unverified`, `capability_missing`, `policy_untrusted`, `page_membership_unsupported` безусловно, `not_owner` при mismatch), authorized happy path, порядок проверок (первая непройденная побеждает при множественных нарушениях) |
-| тесты datasource promotion | новый | `promoteRentalDraftIfCurrent`: pendingReview→published; `alreadyPublished` повтор не меняет `publishedAtUtc`; id/type mismatch → `invalidExistingData`, ноль записи; неожиданный state (не pendingReview/published) → `conflict`, ноль записи; **конкурентная модификация**: вторая операция для того же `userId`, поставленная в очередь параллельно (ещё один `saveDraft`/вторая promotion попытка), сериализуется через `_conditionalSaveQueues` и получает согласованный, не потерянный результат — не race |
+| тесты datasource `saveDraft`/очередь | новый | non-Rental тип: поведение `saveDraft` не изменилось после рефакторинга §1.2.0 (regression guard) |
+| тесты datasource promotion | новый | `promoteRentalDraftIfCurrent`: pendingReview→published; `alreadyPublished` повтор не меняет `publishedAtUtc` и не проверяет revision; id/type/`rentalData==null` mismatch → `invalidExistingData`, ноль записи; owner mismatch (`publisherRef.type != user` или `id != userId`) → `conflict`, ноль записи; revision mismatch → `conflict`, ноль записи; неожиданный state → `conflict`, ноль записи; **конкурентная модификация**: параллельный **обычный** `saveDraft` для того же `userId` (не только вторая promotion попытка) сериализуется через общую очередь §1.2.0 и не создаёт lost update — прямая проверка того, что `AC-07a` v0.3 неверно утверждал как уже работающее |
 | тесты repository promotion | новый | маппинг каждого `RentalPromotionStatus` на entity/exception; **промежуточный сбой**: мокнутый datasource, бросающий исключение, оставляет вызывающий код с чистым исключением, без частичного состояния (review round-1 пункт 7) |
-| тесты controller integration | новый | personal + verified + trusted + capability → published, используя `published.rentalData.publisherRef` (не мутированный `_activePublisherRef`, отдельный тест на переключение workspace между save и publish); page publisher → остаётся pendingReview; `isVerifiedCreator = false` → pendingReview; policy `isTrusted = false` (через constructor default, не через resolver напрямую) → pendingReview; capability отсутствует → pendingReview (текущее поведение, 0 regressions) |
+| тесты controller integration | новый | personal + verified + trusted + capability → published, используя `published.rentalData.publisherRef` (не мутированный `_activePublisherRef`, отдельный тест на переключение workspace между save и publish); page publisher → остаётся pendingReview; `isVerifiedCreator = false` → pendingReview; policy `isTrusted = false` (через constructor default, не через resolver напрямую) → pendingReview; capability отсутствует → pendingReview (текущее поведение, 0 regressions); `rentalData == null` при `objectType == rental` (искусственный edge case) → graceful pendingReview, не throw/crash |
+| тесты `_loadKey`/`ensureLoaded` | новый | второй `ensureLoaded` вызов с тем же `userId`/`capabilities`/`publisherRef`, но другим `isVerifiedCreator`, реально долетает до контроллера (не съедается дедупликацией) |
 
 Ни один файл `DTL-OBJ-01` §3/§4 (`rental_publication_index_sink.dart`,
 `published_rental_discovery_port.dart`, adapter, loader,
@@ -447,10 +586,20 @@ Analytics: `create_publish_succeeded` получает опциональный
   `pending_review` — ни частичного состояния, ни повторной записи; у
   пользователя итог неотличим от «policy не авторизовала».
 - **PUB-AC-07a.** Конкурентная модификация того же пользовательского
-  draft-слота во время promotion (другой `saveDraft`/вторая promotion
-  попытка для того же `userId`) сериализуется через
-  `_conditionalSaveQueues`, а не даёт lost-update — проверено
-  выделенным тестом, не только рассуждением о порядке кода.
+  draft-слота во время promotion — **включая обычный, не только
+  conditional, `saveDraft` для того же `userId`** (v0.3 некорректно
+  ограничивал это утверждение только promotion-vs-promotion) —
+  сериализуется через общую `_enqueueDraftMutation`/`_conditionalSaveQueues`
+  очередь (§1.2.0), не даёт lost-update. Проверено выделенным тестом на
+  реальной гонке с plain `saveDraft`, не только рассуждением о порядке
+  кода.
+- **PUB-AC-07b.** Promotion с устаревшим `expectedRentalRevision`
+  (значение `rentalData.revision` изменилось между тем, как
+  `CreateController` получил `published`, и вызовом promotion) даёт
+  `conflict`, без записи.
+- **PUB-AC-07c.** Promotion с `rentalData.publisherRef`, не совпадающим
+  с `userId` по personal-правилу (owner mismatch на datasource-уровне,
+  defense-in-depth поверх resolver'а), даёт `conflict`, без записи.
 - **PUB-AC-08.** `isTrusted == false` (policy toggle выключен через
   constructor default) даёт `pending_review` даже при наличии
   capability, verification и корректном owner — policy проверяется
@@ -464,15 +613,30 @@ Analytics: `create_publish_succeeded` получает опциональный
   реализации, не только намерением; явно фиксирует, что Page-publisher
   direct-publish остаётся fail-closed/нереализованным по дизайну, не
   забытым.
+- **PUB-AC-12.** Второй `ensureLoaded` вызов, отличающийся только
+  `isVerifiedCreator`, реально долетает до контроллера — `_loadKey`
+  не съедает изменение (round-3 review пункт 3).
+- **PUB-AC-13.** `rentalData == null` при `objectType == rental`
+  (искусственный edge case — код не предполагает инвариант) не
+  вызывает throw/crash в `publishDraft()`, а даёт тот же
+  `pending_review` результат, что и `notAuthorized`.
+- **PUB-AC-14.** `saveDraft()` для любого не-Rental типа ведёт себя
+  наблюдаемо идентично поведению до рефакторинга §1.2.0 — 0
+  regressions в существующих тестах, не завязанных на Rental.
 
 ## 4. Rollback
 
 1. Удалить `resolve_rental_direct_publish_usecase.dart`,
-   `rental_direct_publish_decision.dart`, `rental_direct_publish_policy.dart`.
+   `rental_direct_publish_decision.dart`, `rental_direct_publish_policy.dart`,
+   `active_creator_verification_provider.dart`.
 2. Убрать `promoteRentalToPublished` из интерфейса репозитория,
-   `promoteRentalDraftIfCurrent` из datasource.
+   `promoteRentalDraftIfCurrent` из datasource. `_writeDraftUnlocked`/
+   `_enqueueDraftMutation`-рефакторинг `saveDraft` (§1.2.0) можно
+   оставить как есть — он поведенчески прозрачен и не Rental-specific,
+   откатывать не обязательно, если полезен сам по себе (общая
+   надёжность datasource).
 3. Убрать точечную ветку и `isVerifiedCreator`/`rentalDirectPublishPolicy`
-   параметры из `CreateController`; убрать проброс `isVerifiedCreator`
-   из `create_page.dart`.
+   параметры из `CreateController`; убрать `_loadKey`'s
+   `isVerifiedCreator` составляющую и проброс из `create_page.dart`.
 4. Rental publish возвращается к сегодняшнему поведению — всегда
    `pending_review`, без regressions для уже существующих тестов.
