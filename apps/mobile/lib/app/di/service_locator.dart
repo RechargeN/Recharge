@@ -73,6 +73,7 @@ import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/domain/repositories/rental_promotion_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
@@ -99,6 +100,7 @@ import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
+import '../../features/create/domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/save_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/check_place_duplicates_usecase.dart';
@@ -313,6 +315,21 @@ Future<void> setupDependencies() async {
       }
       return repository as CreateDraftCollectionRepository;
     })
+    // RNT-PUB-01 §1.2: same repository instance, cast to the narrower
+    // RentalPromotionRepository interface — mirrors the
+    // CreateDraftCollectionRepository cast above.
+    ..registerLazySingleton<RentalPromotionRepository>(() {
+      final repository = sl<CreateRepository>();
+      if (repository is! RentalPromotionRepository) {
+        throw StateError(
+          'Create repository must support Rental direct-publish promotion.',
+        );
+      }
+      return repository as RentalPromotionRepository;
+    })
+    ..registerLazySingleton<PromoteRentalToPublishedUseCase>(
+      () => PromoteRentalToPublishedUseCase(sl()),
+    )
     ..registerLazySingleton<CreateTemplateRepository>(
       () => CreateTemplateRepositoryImpl(sl()),
     )

@@ -14,10 +14,12 @@ import 'scenario_transit_telemetry.dart';
 import 'place_enrichment_coordinator.dart';
 import 'route_create_runtime.dart';
 import 'route_publication_coordinator.dart';
+import '../domain/entities/rental_direct_publish_policy.dart';
 import '../domain/repositories/catalog_object_picker_port.dart';
 import '../domain/repositories/create_template_repository.dart';
 import '../domain/usecases/load_create_draft_usecase.dart';
 import '../domain/usecases/manage_create_template_usecase.dart';
+import '../domain/usecases/promote_rental_to_published_usecase.dart';
 import '../domain/usecases/publish_create_draft_usecase.dart';
 import '../domain/usecases/save_create_draft_usecase.dart';
 import '../domain/usecases/check_place_duplicates_usecase.dart';
@@ -53,6 +55,12 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     placeEnrichmentCoordinator: sl<PlaceEnrichmentCoordinator>(),
     catalogObjectPicker: sl<CatalogObjectPickerPort>(),
     checkPlaceDuplicates: sl<CheckPlaceDuplicatesUseCase>(),
+    // RNT-PUB-01 §1.3: local/mock composition explicitly opts into the
+    // trusted direct-publish policy — the domain default is `false`.
+    rentalDirectPublishPolicy: const RentalDirectPublishPolicy(
+      isTrusted: true,
+    ),
+    promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
   );
 });
 

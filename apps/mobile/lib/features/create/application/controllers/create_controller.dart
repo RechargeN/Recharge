@@ -23,6 +23,8 @@ import '../../domain/entities/place_creation_policy.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
 import '../../domain/entities/place_enrichment_proposal.dart';
 import '../../domain/entities/place_validation_issue.dart';
+import '../../domain/entities/rental_direct_publish_decision.dart';
+import '../../domain/entities/rental_direct_publish_policy.dart';
 import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/rental_listing.dart';
 import '../../domain/entities/rental_private_authoring_data.dart';
@@ -50,7 +52,9 @@ import '../../domain/usecases/generate_scenario_proposal_usecase.dart';
 import '../../domain/usecases/load_create_draft_usecase.dart';
 import '../../domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../domain/usecases/manage_create_template_usecase.dart';
+import '../../domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../domain/usecases/publish_create_draft_usecase.dart';
+import '../../domain/usecases/resolve_rental_direct_publish_usecase.dart';
 import '../../domain/usecases/save_create_draft_usecase.dart';
 import '../../domain/usecases/validate_create_availability_usecase.dart';
 import '../../domain/usecases/validate_find_people_draft_usecase.dart';
@@ -133,6 +137,11 @@ class CreateController extends ChangeNotifier {
     BuildRentalPublicProjectionUseCase buildRentalPublicProjection =
         const BuildRentalPublicProjectionUseCase(),
     RentalPrivateAuthoringRepository? rentalPrivateAuthoringRepository,
+    ResolveRentalDirectPublishUseCase resolveRentalDirectPublish =
+        const ResolveRentalDirectPublishUseCase(),
+    RentalDirectPublishPolicy rentalDirectPublishPolicy =
+        const RentalDirectPublishPolicy(),
+    PromoteRentalToPublishedUseCase? promoteRentalToPublished,
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
@@ -161,7 +170,10 @@ class CreateController extends ChangeNotifier {
        _evaluateRentalAvailability = evaluateRentalAvailability,
        _estimateRentalRate = estimateRentalRate,
        _buildRentalPublicProjection = buildRentalPublicProjection,
-       _rentalPrivateAuthoringRepository = rentalPrivateAuthoringRepository;
+       _rentalPrivateAuthoringRepository = rentalPrivateAuthoringRepository,
+       _resolveRentalDirectPublish = resolveRentalDirectPublish,
+       _rentalDirectPublishPolicy = rentalDirectPublishPolicy,
+       _promoteRentalToPublished = promoteRentalToPublished;
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
   final LoadCreateDraftByIdUseCase? _loadCreateDraftByIdUseCase;
@@ -192,6 +204,10 @@ class CreateController extends ChangeNotifier {
   final EstimateRentalRateUseCase _estimateRentalRate;
   final BuildRentalPublicProjectionUseCase _buildRentalPublicProjection;
   final RentalPrivateAuthoringRepository? _rentalPrivateAuthoringRepository;
+  final ResolveRentalDirectPublishUseCase _resolveRentalDirectPublish;
+  final RentalDirectPublishPolicy _rentalDirectPublishPolicy;
+  final PromoteRentalToPublishedUseCase? _promoteRentalToPublished;
+  bool _isVerifiedCreator = false;
   List<CreateTemplateEntity> _rentalTemplates = const <CreateTemplateEntity>[];
   int _scenarioGenerationRequestSerial = 0;
   int _placeEnrichmentRequestSerial = 0;
@@ -398,6 +414,7 @@ class CreateController extends ChangeNotifier {
     required String organizerName,
     List<String> capabilities = const <String>[],
     PublisherRef? activePublisherRef,
+    bool isVerifiedCreator = false,
   }) async {
     final PublisherRef resolvedPublisher = activePublisherRef?.isValid == true
         ? activePublisherRef!
@@ -405,11 +422,13 @@ class CreateController extends ChangeNotifier {
     if (_loadedUserId == userId && _state.isLoaded) {
       _capabilities = capabilities.toSet();
       _activePublisherRef = resolvedPublisher;
+      _isVerifiedCreator = isVerifiedCreator;
       return;
     }
     _loadedUserId = userId;
     _capabilities = capabilities.toSet();
     _activePublisherRef = resolvedPublisher;
+    _isVerifiedCreator = isVerifiedCreator;
 
     _setState(
       _state.copyWith(
@@ -3527,19 +3546,59 @@ class CreateController extends ChangeNotifier {
       draft: draftToPublish,
     );
 
+    // RNT-PUB-01 §1.4: a single, bounded, Rental-only trusted direct-publish
+    // attempt immediately after the generic publish above. `rentalData` is
+    // checked explicitly here rather than assumed from `objectType ==
+    // rental` — that assumption is not a guarantee the code should rely on.
+    CreateDraftEntity finalPublished = published;
+    bool directPublishApplied = false;
+    final RentalDraftData? rentalData = published.rentalData;
+    final PromoteRentalToPublishedUseCase? promoteRentalToPublished =
+        _promoteRentalToPublished;
+    if (published.objectType == CreateObjectType.rental &&
+        rentalData != null &&
+        promoteRentalToPublished != null) {
+      final RentalDirectPublishDecision decision = _resolveRentalDirectPublish(
+        RentalDirectPublishContext(
+          actorUserId: _state.userId,
+          isVerifiedCreator: _isVerifiedCreator,
+          capabilities: _capabilities,
+          draftPublisherRef: rentalData.publisherRef,
+          isPolicyTrusted: _rentalDirectPublishPolicy.isTrusted,
+        ),
+      );
+      if (decision.authorized) {
+        try {
+          finalPublished = await promoteRentalToPublished(
+            userId: _state.userId,
+            rentalId: published.id,
+            expectedRentalRevision: rentalData.revision,
+          );
+          directPublishApplied = true;
+        } on Object {
+          // Fail-closed: keep the pending_review result already obtained
+          // above — the user sees a normal successful submit, not an error.
+          finalPublished = published;
+        }
+      }
+    }
+
     _setState(
       _state.copyWith(
         status: CreateStatus.publishSuccess,
-        draft: published,
-        publishedDraft: published,
-        message: 'Отправлено на модерацию',
+        draft: finalPublished,
+        publishedDraft: finalPublished,
+        message: directPublishApplied
+            ? 'Опубликовано'
+            : 'Отправлено на модерацию',
       ),
     );
     _analyticsService.track(
       'create_publish_succeeded',
       params: <String, Object?>{
-        'object_type': published.objectType.taxonomyId,
-        'publish_status': published.publishStatus.name,
+        'object_type': finalPublished.objectType.taxonomyId,
+        'publish_status': finalPublished.publishStatus.name,
+        if (directPublishApplied) 'direct_publish': true,
       },
     );
     return true;
