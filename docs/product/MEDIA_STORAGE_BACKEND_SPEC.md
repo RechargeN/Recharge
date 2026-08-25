@@ -1,7 +1,7 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.2**
+- Version: **0.2.1**
 - Date: **2026-08-25**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
@@ -9,12 +9,19 @@
 - Review owners: **Security/Privacy, Platform Operations, Content, Identity,
   Mobile, Trust & Safety, Route and Legal/Privacy**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.35](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Coverage evidence: [BCK-14-PRE v0.2](BACKEND_MEDIA_STORAGE_COVERAGE_MATRIX.md)
+- Coordination baseline: [BCK-02 v2.4.36](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coverage evidence: [BCK-14-PRE v0.2.1](BACKEND_MEDIA_STORAGE_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/MEDIA_STORAGE_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.2.1 — 2026-08-25
+
+- reconciled the new BCK-07 v0.2 Review dependency without changing Media
+  ownership, AC numbering or runtime status;
+- replaced the former physical-absence blocker with BCK-07 Approval/runtime
+  and handoff-evidence blockers.
 
 ### v0.2 — 2026-08-25
 
@@ -37,11 +44,11 @@
 BCK-14 defines the target Media authority for Recharge. The design is ready for
 cross-owner Review, not Approval or implementation. Runtime is Absent.
 
-The missing BCK-07 file is not hidden: Media may own upload sessions, bytes,
+BCK-07 v0.2 is now Present in Review. Media may own upload sessions, bytes,
 technical validation, variants and cleanup, but **cannot attach an asset to
 published content, publish/restore/archive content or decide its visibility**.
-Those effects remain disabled until BCK-07 is Approved and its integration
-command is contract-tested.
+Those effects remain disabled until BCK-07 is Approved, implemented and its
+integration command is contract-tested.
 
 Document status, emulator evidence, staged deployment and production readiness
 are independent. Nothing here provisions Firebase/GCP, creates credentials,
@@ -817,7 +824,7 @@ recovery and owner sign-off. `Approved`, `Done` and `Enabled` are not synonyms.
 - metadata database, object store and signed delivery implementation;
 - malware/safety scanners and media processors;
 - image/video/audio/document/GPX production family profiles;
-- content attachment integration and BCK-07 itself;
+- content attachment integration and BCK-07 runtime;
 - BCK-06 production access integration;
 - mobile picker/uploader/cache/cutover adapters;
 - legacy URL or GPX migration;
@@ -828,6 +835,6 @@ recovery and owner sign-off. `Approved`, `Done` and `Enabled` are not synonyms.
 
 ## 31. Final statement
 
-BCK-14 v0.2 is a complete Review contract for a production-grade Media
+BCK-14 v0.2.1 is a complete Review contract for a production-grade Media
 subsystem design. It is intentionally fail-closed where ownership, policy or
 runtime evidence is absent. It neither claims nor authorizes implementation.

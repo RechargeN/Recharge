@@ -1,16 +1,22 @@
 # BCK-14 — Media Storage Backend Coverage Matrix
 
 - ID: **BCK-14-PRE**
-- Version: **0.2**
+- Version: **0.2.1**
 - Date: **2026-08-25**
 - Status: **Review — coverage and reconciliation evidence**
 - Runtime status: **N/A; no Storage/runtime authority**
 - Accountable owner: **Media Platform owner**
-- Target: [BCK-14 v0.2](MEDIA_STORAGE_BACKEND_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.35](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-14 v0.2.1](MEDIA_STORAGE_BACKEND_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.36](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MEDIA_STORAGE_COVERAGE_MATRIX.md`
 
 ## 0. Changelog
+
+### v0.2.1 — 2026-08-25
+
+- reconciled BCK-07 v0.2 as Present in Review;
+- preserved BCK-07 Approval/runtime/handoff as blockers and changed no Media
+  contract semantics, AC numbering or runtime status.
 
 ### v0.2 — 2026-08-25
 
@@ -28,15 +34,15 @@
 
 ## 1. Verdict
 
-BCK-14 v0.2 is suitable for **Review as a documentation-only target**. It
+BCK-14 v0.2.1 is suitable for **Review as a documentation-only target**. It
 defines one Media authority for upload sessions, blob generations, validation,
 quarantine, transforms, protected delivery and cleanup without granting Media
 ownership of Content, Identity, Route or moderation decisions.
 
-Runtime remains **Absent**. `BCK-07` is physically absent, BCK-03/04/05 are
-Draft, BCK-06 and BCK-18 are Review, exact media policy decisions are open and
-no Firebase Storage resource, Rules, worker, callable endpoint or mobile upload
-adapter is authorized by this matrix.
+Runtime remains **Absent**. BCK-07 is Review but not Approved or implemented;
+BCK-03/04/05 are Draft, BCK-06 and BCK-18 are Review, exact media policy
+decisions are open and no Firebase Storage resource, Rules, worker, callable
+endpoint or mobile upload adapter is authorized by this matrix.
 
 ## 2. Sources and status
 
@@ -44,13 +50,13 @@ adapter is authorized by this matrix.
 |---|---|---|
 | ADR 0013 | Accepted | Media references decoupled from draft finalization; preprocessing/retry/orphan cleanup required |
 | ADR 0015 | Accepted | Persistent `PublisherRef`; capability and exact-page membership authority remain BCK-06 |
-| BCK-01 v0.4.30 | Review | Parent target architecture; runtime claims remain Absent |
-| BCK-02 v2.4.35 | Approved coordination | Owner, scope, dependencies, D3/R4 placement and 22-category template |
+| BCK-01 v0.4.32 | Review | Parent target architecture; runtime claims remain Absent |
+| BCK-02 v2.4.36 | Approved coordination | Owner, scope, dependencies, D3/R4 placement and 22-category template |
 | BCK-03 v0.3.3 | Draft with Accepted split-key decision | Envelope, typed errors, version, idempotency; ordinary envelope excludes media bytes |
 | BCK-04 v0.4.16 | Draft | Mandatory media security overlay; exact path/variants/retention delegated here |
 | BCK-05 v0.2.23 | Draft | Accepted regional Storage baseline plus deployment/recovery/cost gates; no provisioning authority |
 | BCK-06 v0.2 | Review | Actor, session, capability, page membership and PublisherRef eligibility input |
-| BCK-07 | Planned/Absent | Content lifecycle and attachment authority; missing dependency is explicit |
+| BCK-07 v0.2 | Review/runtime Absent | Content lifecycle and attachment authority; Approval/runtime/handoff remain blockers |
 | BCK-18 v0.2 | Review | Typed mobile seam; upload adapters and production binding absent |
 | Firebase Architecture v2.2 | Proposed input | Staging model is useful but not silently Accepted |
 | Backup Recovery Model | Draft operational input | Generation/hash recovery and privacy-resurrection controls |
@@ -119,7 +125,7 @@ Approval, implementation or cloud-readiness claim.
 | ID | Finding | Required disposition |
 |---|---|---|
 | BCK14-GAP-01 | BCK-14 target file was absent | Closed by v0.2 Review; runtime still Absent |
-| BCK14-GAP-02 | BCK-07 content contract is absent | No attach-to-published-content or content lifecycle effect before BCK-07 Approval |
+| BCK14-GAP-02 | BCK-07 contract is Review but not Approved/implemented | No attach-to-published-content or content lifecycle effect before BCK-07 Approval and runtime handoff evidence |
 | BCK14-GAP-03 | Proposed Firebase path model mixes technical paths and product families | Use opaque server-selected object keys; exact manifest remains owner decision |
 | BCK14-GAP-04 | Exact accepted Media API schema family is absent | No hand-authored generated client; API/Mobile owners decide workflow |
 | BCK14-GAP-05 | Variant profiles and formats are not settled | Public delivery disabled until bounded profile is Accepted and measured |

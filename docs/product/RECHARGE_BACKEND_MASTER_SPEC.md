@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.31**
+- Version: **0.4.32**
 - Date: **2026-08-25**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,15 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.32 — 2026-08-25
+
+- added BCK-07 v0.2 Review and its v0.2 22/22 coverage evidence as the single
+  Content publication lifecycle/current-revision authority;
+- fixed the canonical ten-type registry around Scenario, left Quick Plan
+  legacy-read/private only and separated source-domain, Media and Catalog writers;
+- advanced traceability to BCK-02 v2.4.36 while OD-03/10/11, dependency
+  Approval, contracts, migration, Firebase and runtime remain unresolved.
 
 ### v0.4.31 — 2026-08-25
 
@@ -482,10 +491,10 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Backend application | локальный R0 scaffold существует в `apps/backend` | Есть только non-product probe, default-deny Rules, emulator tests, backendless Terraform и CI contract; нет доменных handlers/repositories/deployment authority | Tooling **Present locally**; product/cloud runtime **Absent** |
 | Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
 | Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions and executable evidence remain blocked | BCK-06 and BCK-18 Approval до product migration; сохранить compatibility без переноса mock grants |
-| Content/Create | 10 типов local/config-driven | Нет trusted publication lifecycle и catalog source | BCK-07, затем BCK-08 |
+| Content/Create | Ten-type local/config-driven Create Hub; BCK-07 v0.2 Review/Present defines the 22/22 publication/revision/provenance contract | No backend authority; OD-03/10/11, missing type/source contracts, Money, Media, Identity and migration gates remain | BCK-07 Approval, then BCK-08; Quick Plan remains outside catalog |
 | Discover | Mock/local projections | Нет rebuildable server projections/search decision | BCK-08 + OD-01/03 |
 | Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |
-| Media/Notifications | Local/mobile foundations; BCK-14 v0.2 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime or notification authority; BCK-07 attachment contract and ten BCK14 owner decisions remain unresolved | BCK-14 Approval and BCK-07 before Media runtime; BCK-13 independently |
+| Media/Notifications | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime or notification authority; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime; BCK-13 independently |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
 | Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Plan a separately Approved release R0; re-audit before R1 |
