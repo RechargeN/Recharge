@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.38
-- Дата: 2026-08-25
+- Версия: 2.4.39
+- Дата: 2026-08-26
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
 - Registry amendments: **2026-08-15, 2026-08-16, 2026-08-20, 2026-08-21,
@@ -14,6 +14,16 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.39.** BCK-19 Review reconciliation without changing the Approved v2.4
+coordination semantics:
+
+- BCK-19 v0.2 and BCK-19-PRE v0.2 are Present in Review with 22/22 mandatory
+  design coverage, 60 AC and ten explicit BCK19 decisions;
+- Admin/Support owns cases/read audit/repair workflow but never Identity/IAM,
+  domain records, Privacy, T&S, flags or notification state;
+- BCK-01 traceability advances to v0.4.35; staff access, domain repair commands,
+  RUN-03/G5, Firebase, runtime and `main` remain blocked.
 
 **v2.4.38.** BCK-13 Review reconciliation without changing the Approved v2.4
 coordination semantics:
@@ -589,7 +599,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.38)
+## 5. Реестр проектных документов — 22 (v2.4.39)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
@@ -611,7 +621,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-16 | `PROVIDER_INTEGRATION_BACKEND_SPEC.md` | Integrations owner | Provider adapters, provider availability source, provenance/freshness, cache, live-check/handoff | BCK-03, BCK-04, BCK-05, BCK-08, BCK-20 | Planned, gated | Absent |
 | BCK-17 | `PAYMENTS_BACKEND_SPEC.md` | Payments owner | Payment authority, ledger, webhooks, refunds, disputes and compliance | Hard: new Accepted ADR, BCK-03, BCK-04, BCK-05, BCK-06; integration peer: BCK-13 | Planned, gated | Absent |
 | BCK-18 | `MOBILE_BACKEND_INTEGRATION_STANDARD.md` | Mobile Platform owner | Typed ports/adapters, shared fixtures, local/cache/server states, compatibility and import orchestration | BCK-03, BCK-04, BCK-06, BCK-20, API workflow, OD-04, OD-08, OD-10 | Review v0.2 — Present; 22/22 design coverage, 60 AC, eight BCK18 decisions; M2 Money and Approval blockers remain | Absent |
-| BCK-19 | `ADMIN_SUPPORT_BACKEND_SPEC.md` | Admin Operations owner | Privileged staff surface, cases, read audit, repair proposal/approval, emergency disable | BCK-03, BCK-04, BCK-05, BCK-06 | Planned | Absent |
+| BCK-19 | `ADMIN_SUPPORT_BACKEND_SPEC.md` | Admin Operations owner | Privileged staff surface, cases, read audit, repair proposal/approval, emergency disable | BCK-03, BCK-04, BCK-05, BCK-06 | Review v0.2 | Absent |
 | BCK-20 | `REFERENCE_DATA_LOCALIZATION_SPEC.md` | Reference Data owner | Versioned distribution/governance for taxonomy, regions, currencies, languages and localized wire values | BCK-01, BCK-03, Category System v1.4.3, OD-10 | Draft v0.2.2 — Present | Absent |
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Planned | Absent |
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Planned | Absent |

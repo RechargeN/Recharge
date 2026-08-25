@@ -1,8 +1,8 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.34**
-- Date: **2026-08-25**
+- Version: **0.4.35**
+- Date: **2026-08-26**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Architecture owner**
@@ -14,6 +14,17 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.35 — 2026-08-26
+
+- added BCK-19 v0.2 Review and its v0.2 22/22 coverage evidence as the
+  single-writer Admin/Support case, privileged-read-audit and repair-workflow
+  contract;
+- preserved Identity/IAM, owning-domain, Privacy, T&S, Notifications and
+  Platform Operations authority and made direct data editing/impersonation
+  explicitly fail-closed;
+- advanced traceability to BCK-02 v2.4.39 while ten BCK19 decisions, domain
+  repair commands, staff access, RUN-03, Firebase and runtime remain absent.
 
 ### v0.4.34 — 2026-08-25
 
@@ -515,6 +526,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |
 | Media | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime |
 | Notifications | Local secure-storage inbox/mark-read/string routes; BCK-13 v0.2 Review/Present defines 22/22 inbox/preferences/registration/delivery boundaries | No server inbox, FCM/email, token registry or worker; OD-02/09/10 and ten BCK13 decisions unresolved | BCK-13 Approval and R4 gate; push stays a hint and email stays disabled |
+| Admin/Support | Local mock Admin experience preview and Route moderation/safety UI; BCK-19 v0.2 Review/Present defines 22/22 case/read-audit/propose-approve-execute boundaries | No dedicated staff identity, server case, reveal audit, repair registry/command, RUN-03 or privileged runtime | BCK-19 Approval; implement bounded domain commands, then build/drill RUN-03 before persistent stage |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
 | Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Plan a separately Approved release R0; re-audit before R1 |
