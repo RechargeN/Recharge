@@ -1,6 +1,9 @@
 # RECHARGE — RNT-PUB-01: Rental Trusted Direct-Publish Policy Slice Spec
 
-- Статус: **Draft for review**
+- Статус: **Approved** (product owner, 2026-08-24, contingent на v0.4
+  фиксах round-3 review — подтверждено: «После этих правок в v0.4
+  контракт будет готов к Approved»). Реализация начинается по file map
+  §2, коммит за коммитом, с полным gate suite в конце.
 - Версия: 0.4 (2026-08-24) — 3 проверенных дефекта после третьего
   review: `saveDraft()` в реальности не проходит через
   `_conditionalSaveQueues` (v0.3's AC-07a была неверна в этой части);
