@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.36
+- Версия: 2.4.37
 - Дата: 2026-08-25
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
@@ -14,6 +14,16 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.37.** BCK-08 Review reconciliation without changing the Approved v2.4
+coordination semantics:
+
+- BCK-08 v0.2 and BCK-08-PRE v0.2 are Present in Review with 22/22 mandatory
+  design coverage, 60 AC and ten explicit BCK08 decisions;
+- Feed/Map/Search share one query fingerprint, compatible projection-set
+  revision and freshness; availability sources retain separate writers;
+- BCK-01 traceability advances to v0.4.33; OD-01/03, BCK-07 runtime, contracts,
+  indexes, migration, Firebase, production and `main` remain blocked.
 
 **v2.4.36.** BCK-07 Review reconciliation without changing the Approved v2.4
 coordination semantics:
@@ -568,7 +578,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.36)
+## 5. Реестр проектных документов — 22 (v2.4.37)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
@@ -579,7 +589,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.23 — Present; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed; bounded R0 Pass | Local R0 tooling scaffold only; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, nine BCK06 decisions fail-closed; Approval blockers remain | Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK07 decisions; OD/dependency/Approval blockers remain | Absent |
-| BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Planned | Absent |
+| BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK08 decisions; OD/source/Approval blockers remain | Absent |
 | BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.1 | Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Planned | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Planned | Absent |

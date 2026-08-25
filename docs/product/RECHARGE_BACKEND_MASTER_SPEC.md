@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.32**
+- Version: **0.4.33**
 - Date: **2026-08-25**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,15 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.33 — 2026-08-25
+
+- added BCK-08 v0.2 Review and its v0.2 22/22 coverage evidence as the one-writer
+  Catalog/Search/Feed/Map/Details/public-availability projection contract;
+- made shared query fingerprint, compatible projection-set revision, typed
+  map/feed membership reconciliation and data freshness normative;
+- advanced traceability to BCK-02 v2.4.37 while OD-01/03, BCK-07 runtime,
+  contracts, indexes, migration, Firebase and production remain unresolved.
 
 ### v0.4.32 — 2026-08-25
 
@@ -492,7 +501,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
 | Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions and executable evidence remain blocked | BCK-06 and BCK-18 Approval до product migration; сохранить compatibility без переноса mock grants |
 | Content/Create | Ten-type local/config-driven Create Hub; BCK-07 v0.2 Review/Present defines the 22/22 publication/revision/provenance contract | No backend authority; OD-03/10/11, missing type/source contracts, Money, Media, Identity and migration gates remain | BCK-07 Approval, then BCK-08; Quick Plan remains outside catalog |
-| Discover | Mock/local projections | Нет rebuildable server projections/search decision | BCK-08 + OD-01/03 |
+| Discover | Mock/local query/feed/map/details; BCK-08 v0.2 Review/Present defines 22/22 rebuildable catalog/search/parity/availability boundaries | No source/runtime/index; OD-01/03, typed ten-type projections, Money, quality/cost and migration remain blocked | BCK-08 Approval/G3 after BCK-07 runtime and accepted decisions |
 | Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |
 | Media/Notifications | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime or notification authority; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime; BCK-13 independently |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
