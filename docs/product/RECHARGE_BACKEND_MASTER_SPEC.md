@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.28**
+- Version: **0.4.29**
 - Date: **2026-08-25**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,15 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.29 — 2026-08-25
+
+- added BCK-06 v0.2 Review and its v0.3 22/22 coverage/reconciliation evidence
+  as the first D2 authority specification;
+- preserved OD-08/OD-11, session, verification, capability, retention,
+  Legal/Privacy, BCK-18 and every executable R2 gate as unresolved;
+- advanced traceability to BCK-02 v2.4.33 without Firebase, product backend,
+  mobile runtime, deployment, push or `main` merge authority.
 
 ### v0.4.28 — 2026-08-25
 
@@ -454,7 +463,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO; BCK-03 v0.3.3 Draft/Present | Split-key conflict closed; combined owner assigned, verdicts pending | Расширять один workflow; non-Booking schemas запрещены до Accepted API-DEC-05 |
 | Backend application | локальный R0 scaffold существует в `apps/backend` | Есть только non-product probe, default-deny Rules, emulator tests, backendless Terraform и CI contract; нет доменных handlers/repositories/deployment authority | Tooling **Present locally**; product/cloud runtime **Absent** |
 | Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
-| Identity | Target принят ADR 0015; ADR 0016/0017 разрешили bounded local/mock access snapshot, user-created ManagedPage, workspace/capability guards и Admin preview | Нет production Auth/capability/revocation authority; local exception не является production evidence | BCK-06 + BCK-18 до product migration; сохранить compatibility без переноса mock grants |
+| Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions, BCK-18 and executable evidence remain blocked | BCK-06 Approval + BCK-18 до product migration; сохранить compatibility без переноса mock grants |
 | Content/Create | 10 типов local/config-driven | Нет trusted publication lifecycle и catalog source | BCK-07, затем BCK-08 |
 | Discover | Mock/local projections | Нет rebuildable server projections/search decision | BCK-08 + OD-01/03 |
 | Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |

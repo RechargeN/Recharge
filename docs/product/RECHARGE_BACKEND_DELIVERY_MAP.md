@@ -1,11 +1,12 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.32
+- Версия: 2.4.33
 - Дата: 2026-08-25
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
-- Registry amendments: **2026-08-15, 2026-08-16, 2026-08-20, 2026-08-21 and 2026-08-24, Product owner
+- Registry amendments: **2026-08-15, 2026-08-16, 2026-08-20, 2026-08-21,
+  2026-08-24 and 2026-08-25, Product owner
   instructions; documentation traceability only, semantics/gates/checksum
   unchanged**
 - Назначение: единая распределительная карта backend-работ Recharge
@@ -13,6 +14,16 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.33.** BCK-06 Review reconciliation without changing the Approved v2.4
+coordination semantics:
+
+- BCK-06 v0.2 and BCK-06-PRE v0.3 are Present in Review with 22/22 mandatory
+  design coverage, 60 target AC and nine explicit fail-closed BCK06 decisions;
+- OD-08/OD-11, BCK04-OD-03/08/09, capability/quota/retention decisions,
+  qualified Legal/Privacy, BCK-18 and every R2/runtime gate remain unresolved;
+- BCK-01 traceability advances to v0.4.29; no Firebase, product backend,
+  mobile adapter, deployment, push or `main` merge authority exists.
 
 **v2.4.32.** BCK05-OD-07 owner-verdict reconciliation without changing the
 Approved v2.4 coordination semantics:
@@ -535,7 +546,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.3.3 — Present | Absent |
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.16 — Present; OD-07 and BCK05-OD-02/07 Accepted with controls; qualified production Legal/Privacy and OD-01/09 remain unresolved | Absent |
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.23 — Present; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed; bounded R0 Pass | Local R0 tooling scaffold only; product/cloud Absent |
-| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Planned | Absent |
+| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, nine BCK06 decisions fail-closed; Approval blockers remain | Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Planned | Absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Planned | Absent |
 | BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.1 | Absent |
