@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.36**
+- Version: **0.4.37**
 - Date: **2026-08-26**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,17 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.37 — 2026-08-26
+
+- registered BCK-21 v0.2 and BCK-21-PRE v0.2 as Review/Present with runtime
+  Absent;
+- separated product analytics from BCK-05 telemetry, domain/audit facts and
+  BCK-22 enforcement authority;
+- recorded current 66 emitted literal names versus 27 catalog definitions,
+  unresolved owners and unsafe identifier debt as migration blockers;
+- kept OD-05, destination, retention/DSR, contracts, IAM and runtime blocked;
+- advanced BCK-02 traceability to v2.4.41.
 
 ### v0.4.36 — 2026-08-26
 
