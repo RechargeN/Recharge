@@ -1,19 +1,37 @@
 # Recharge Backend — Release Provenance, Promotion and Rollback Model
 
 - ID: **BCK05-OD07-REL-01**
-- Version: **0.1**
-- Date: **2026-08-21**
-- Status: **Draft evidence — BCK05-OD-07 Proposed**
+- Version: **0.2**
+- Date: **2026-08-25**
+- Status: **Review-ready evidence — BCK05-OD-07 Proposed**
 - Runtime status: **Absent**
 - Accountable owners: **Release Operations and Platform Security**
 - Review coordinator: **RechargeN / Product owner**
-- Parent: [BCK-05 v0.2.12](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- IAM dependency: [BCK05-OD02-IAM-01 v0.1](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md)
-- Infrastructure dependency: [OD-07 evidence v0.4](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md)
+- Parent: [BCK-05 v0.2.22](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- IAM dependency: [BCK05-OD02-IAM-01 v0.2.1](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) (Accepted with controls)
+- Infrastructure dependency: [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) (Accepted with controls)
+- Toolchain dependency: [BCK05-OD01-TCH-01 v0.3.4](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) (Accepted baseline v0.3.3 with controls)
+- Candidate baseline: **BCK05-REL-A1-DUAL-PROV-v1**
+- Owner decision: [BCK05-OD07-DEC-01 v0.1](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) (Review; unsigned)
 - CI policy: [CI_GATES_POLICY](../architecture/CI_GATES_POLICY.md)
 - Runtime effect: **none**
 
 ---
+
+## 0. Changelog
+
+### v0.2 — 2026-08-25
+
+- reconciled release policy with Accepted OD-01, BCK05-OD-02 and platform
+  OD-07 plus the actual bounded R0 scaffold;
+- selected `BCK05-REL-A1-DUAL-PROV-v1`: GitHub keyless provenance for the
+  caller-controlled release plus honest Firebase/Cloud Build provider receipts;
+- separated release manifest, environment plan, provider receipt and promotion
+  record, removing self-referential digest and pre-deploy provider-output gaps;
+- selected exact public-repository attestation/action candidates, immutable
+  release assets and environment-local Artifact Registry mirrors;
+- added the exact unsigned owner-decision contract while retaining every
+  workflow/cloud/runtime action as blocked.
 
 ## 1. Naming boundary
 
@@ -25,16 +43,17 @@ it.
 
 ## 2. Verdict first
 
-Recharge's proposed release contract is **build once, verify once, promote the
-same immutable manifest**:
+The review-ready `BCK05-REL-A1-DUAL-PROV-v1` contract is **build once, verify
+once, promote the same immutable release**:
 
 - release output is content-addressed and bound to source commit, workflow,
   dependencies, toolchain, tests, SBOM and provenance;
 - dev, stage and prod never rebuild an allegedly identical release;
 - every promotion verifies provenance, policy, approval, expected current
   revision and environment compatibility before obtaining deploy authority;
-- direct Cloud Run images use immutable digests and may use Binary Authorization
-  when the selected topology supports enforceable attestations;
+- any future direct Cloud Run image uses immutable digests and may use Binary
+  Authorization only after an amended component inventory proves enforceable
+  attestations;
 - Firebase/Cloud Functions source deployment is represented honestly as a
   signed source-bundle digest plus provider-build/deployed-revision evidence,
   not falsely claimed as caller-controlled container signing;
@@ -43,19 +62,27 @@ same immutable manifest**:
 - an unknown or partially applied deployment is `unknown_outcome` or
   `recovery_required`, never success.
 
-This concrete candidate advances `BCK05-OD-07` from Open to **Proposed**. It
-creates no workflow, artifact, registry, attestation, signing key, deployment
-or runtime authority.
+This is the exact architecture candidate for `BCK05-OD-07` Acceptance. It
+creates no workflow, release, artifact, registry, attestation, signing key,
+deployment or runtime authority. Exact cloud permissions, repository settings,
+executable fixtures and provider observations remain mandatory before R1, not
+fictional prerequisites for accepting a fail-closed release policy.
 
 ## 3. Normative inputs and dated vendor facts
 
-Vendor facts were rechecked on 2026-08-21 and must be revalidated by the
+Vendor facts were rechecked on 2026-08-25 and must be revalidated by the
 executable slice.
 
 | Source | Verified fact | Recharge consequence |
 |---|---|---|
+| [RFC 8785 — JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785) | JCS defines deterministic JSON serialization suitable for cryptographic hashing/signing. | Release records use JCS canonical bytes and keep their digest outside the hashed object. |
 | [GitHub artifact attestations](https://docs.github.com/en/actions/concepts/security/artifact-attestations) | Attestations bind an artifact to repository/workflow/commit/environment evidence; generating an attestation has no security value unless consumers verify it. | Promotion must verify provenance against a policy, not merely upload an attestation. |
-| [GitHub attestation usage](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) | Attestations can cover binaries/container images, but availability for private repositories depends on GitHub plan. | GitHub attestations are a candidate, not an assumed capability; plan evidence is required. |
+| [GitHub attestation usage](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) | Attestations are available for public repositories on all current plans and require `id-token: write` plus `attestations: write`; consumers verify with GitHub CLI. | Current public visibility supports the selected candidate, but release jobs must isolate attestation permissions and verify every subject. |
+| [GitHub immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases) | When enabled before publication, a release locks its tag/assets and automatically receives a release attestation. | The durable caller-controlled source bundle/manifest store is an immutable GitHub release, not a 90-day workflow artifact. |
+| [GitHub workflow artifact retention](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/remove-workflow-artifacts) | Public-repository workflow artifacts are retained for at most 90 days and can be deleted with their run. | Ordinary Actions artifacts are transport/debug evidence only, never the rollback authority. |
+| [`actions/attest`](https://github.com/actions/attest) | The official action emits SLSA provenance or SBOM/custom attestations; v4.2.2 resolves to signed commit `1e69f48acb82d1966a394da916b4c1698aa569d6`. | The future release workflow uses that full SHA only after a fresh dependency review; `@v4` is not accepted authority. |
+| [Artifact Registry generic artifacts](https://docs.cloud.google.com/artifact-registry/docs/generic) | Regional generic repositories store versioned immutable archives/configuration; conflicting uploads return `ALREADY_EXISTS`. | Each OD-07 environment may mirror the exact verified release bytes in its own `europe-west1` repository without cross-project runtime trust. |
+| [Cloud Build provenance](https://docs.cloud.google.com/build/docs/securing-builds/generate-validate-build-provenance) | Cloud Build can emit SLSA provenance for supported Artifact Registry outputs, but generation and validation have explicit configuration/format limitations. | Firebase provider provenance is captured and validated when available; its absence is disclosed and cannot be replaced by caller attestation. |
 | [GitHub deployment environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) | Environments can restrict sources, require reviewers and prevent self-review; availability varies by plan/visibility. | Production approval must prove the available enforcement or use an equivalent gate. |
 | [Google Binary Authorization attestations](https://docs.cloud.google.com/binary-authorization/docs/attestations) | Binary Authorization can verify signed image-digest attestations before Cloud Run/GKE deployment. | Direct container deployment can be digest/attestation-gated where supported. |
 | [Binary Authorization for Cloud Run](https://docs.cloud.google.com/binary-authorization/docs/run/overview) | Cloud Run services/jobs can enforce policy, but Functions deployed through the Cloud Run source-deploy repository require an exemption; policy changes are not retroactive. | Functions provenance must preserve the source-to-provider-build mapping; no false universal Binary Authorization claim. |
@@ -76,8 +103,8 @@ Included:
 
 Excluded:
 
-- BCK05-OD01-TCH-01 is Proposed, but no installed/verified backend runtime,
-  package manager or deploy CLI exists;
+- Accepted OD-01/BCK05-OD-02/platform OD-07 do not authorize a release workflow,
+  cloud identity, provider build or deployment;
 - no registry, KMS key, Sigstore issuer or Binary Authorization resource;
 - no actual GitHub plan/visibility assumption;
 - no universal image-signing claim for provider-built Functions;
@@ -88,27 +115,48 @@ Excluded:
 
 ### 4.1 Current repository reality
 
-The current `.github/workflows` files verify mobile code and upload ordinary CI
-artifacts. They do not build a backend release manifest, generate/verify SBOM or
-provenance, attest a backend artifact, promote between environments or deploy
-cloud resources. Existing actions use version tags such as `@v4`/`@v2`, not
-full commit SHAs, so they do not yet satisfy this proposed production release
-gate. No workflow is modified by this documentation slice.
+Read-only repository evidence on 2026-08-25 records:
 
-`apps/backend`, Artifact Registry releases, signing/attestation resources and
-deployed backend revisions remain absent.
+| Fact | Observed value |
+|---|---|
+| repository | public `RechargeN/Recharge`; numeric ID `1213588766` |
+| bounded backend scaffold | `apps/backend` Present for R0 emulator/toolchain only |
+| backend workflow | `.github/workflows/backend-r0.yml`; full-SHA Actions, `contents: read`, explicit no-cloud guard |
+| release/deploy workflow | absent |
+| release manifest/SBOM/provenance | absent |
+| environments / protected `main` | none / absent |
+| repository Actions policy | all actions allowed; repository SHA-pinning enforcement disabled |
+| immutable-release configuration/evidence | not established; no backend immutable release exists |
+| WIF/IAM/Artifact Registry/provider revision | absent |
 
-## 5. Release unit and immutable manifest
+Mobile workflows still contain tag-based `actions/upload-artifact` references.
+Therefore repo-wide SHA enforcement would currently break unrelated CI and must
+be preceded by a separately reviewed mobile-workflow pin migration. Every
+future backend release workflow pins its own Actions immediately; repository
+enforcement remains a fail-closed pre-cloud gate. No workflow is changed by
+this documentation slice.
 
-The release unit is `BackendReleaseManifest v1`, an immutable,
-content-addressed record. The manifest digest is the promotion identity.
+## 5. Immutable records and digest rules
 
-Minimum fields:
+The candidate deliberately separates facts known at release time from facts
+known only for one environment or after a provider deployment.
+
+### 5.1 Canonical digest rule
+
+Every record below is UTF-8 JSON, rejects duplicate keys, unknown required
+schema revisions and non-finite numbers, and is canonicalized with JSON
+Canonicalization Scheme (JCS) before hashing. A digest is lowercase
+`sha256:<64 hex>` over the exact canonical bytes. The digest is carried by the
+envelope/reference to the record and **never appears inside the bytes it
+hashes**. Raw archive bytes are hashed separately and are not JCS-normalized.
+
+### 5.2 `BackendReleaseManifest v1`
+
+This environment-neutral record is the release identity. Minimum fields:
 
 ```text
 manifestVersion
 releaseId
-manifestDigest
 sourceRepositoryId
 sourceCommitSha
 sourceTreeDigest
@@ -121,34 +169,84 @@ toolchain[]
 dependencyLockDigests[]
 contractFixtureDigest
 components[]
-sbomDigest
-provenance[]
+sbomSubjects[]
+provenanceSubjects[]
 securityScanEvidence[]
 testEvidence[]
 compatibilityPlanRevision
-minimumConfigRevision
-targetEnvironmentClass[]
+supportedEnvironmentClasses[]
 createdAt
 ```
 
-Each component records:
+Each component contains only release-time facts:
 
 ```text
 componentId
 componentType
-artifactUri
+artifactFileName
+artifactMediaType
 artifactDigest
 sourceBundleDigest?
-providerBuildId?
-providerOutputDigest?
-configurationDigest
 deploymentOrder
 rollbackClass
 dataCompatibilityWindow
 ```
 
-Mutable tags (`latest`, branch, semantic version) are display/discovery aliases
-only. Deployment resolves and records the immutable digest before approval.
+It does not contain environment IDs, mutable URIs, secrets, provider build IDs,
+provider output digests or deployed revision IDs.
+
+### 5.3 `EnvironmentDeploymentPlan v1`
+
+The plan binds one release to one target without rebuilding it:
+
+```text
+planVersion
+releaseManifestDigest
+environmentId / environmentClass
+configurationDigest
+secretReferenceSetDigest
+featureFlagSnapshotDigest
+compatibilityPlanRevision
+expectedPreviousHealthyDeploymentId
+componentTargets[]
+changeRecordId
+createdAt / expiresAt
+```
+
+Secret references are names/versions or opaque IDs, never secret values. A plan
+change creates a new `deploymentPlanDigest` and invalidates approval even when
+the release manifest is unchanged.
+
+### 5.4 `ProviderDeploymentReceipt v1`
+
+Only the deploy/reconcile job may create this post-provider record:
+
+```text
+receiptVersion
+releaseManifestDigest / deploymentPlanDigest
+environmentId / componentId
+providerOperationId / providerBuildId?
+providerOutputDigest? / deployedRevisionId
+observedConfigurationDigest
+startedAt / completedAt
+result / typedFailure
+rawEvidenceReferences[]
+```
+
+Missing provider fields remain explicitly `unsupported` or `unobserved`; they
+are never fabricated from the caller-controlled source digest.
+
+### 5.5 `PromotionRecord v1` and healthy pointer
+
+The append-only promotion record binds manifest, plan, approvals, receipts,
+validation and final state. `LastKnownHealthyDeployment` is a compare-and-set
+pointer to a successful promotion record. It updates only after all required
+components reconcile and post-deploy validation passes; partial/unknown results
+cannot move it.
+
+Mutable tags (`latest`, branch, semantic version) and human release names are
+display/discovery aliases only. Deployment resolves and verifies the immutable
+manifest and plan digests before approval and again immediately before use.
 
 ## 6. Artifact classes
 
@@ -163,11 +261,27 @@ only. Deployment resolves and records the immutable digest before approval.
 | migration package | immutable migration ID/digest | domain owner, forward/rollback/reconciliation and backup gate |
 
 The manifest may contain multiple classes, but partial success never produces a
-new healthy release pointer.
+new healthy release pointer. The durable caller-controlled package is a
+normalized source archive, manifest, SBOM and evidence index published together
+as assets of one draft GitHub release and made immutable only on publication.
+Its release tag is discovery metadata; asset digests and `manifestDigest` remain
+authority.
+
+Ordinary GitHub Actions artifacts may transport evidence inside a workflow but
+are not canonical storage or rollback authority. Before any environment deploy,
+the exact verified assets may be mirrored without modification to an
+environment-local Artifact Registry generic repository in `europe-west1`.
+`ALREADY_EXISTS` is accepted only when downloaded bytes match the expected
+digest; otherwise it is `artifact_conflict`. Cross-project runtime pull grants
+are not introduced by this design.
 
 ## 7. Functions and container enforcement boundary
 
-For a direct OCI deployment, the target state is:
+The Accepted initial R1 component inventory is Firebase/Cloud Functions v2 plus
+Rules/index/config artifacts. Direct OCI Cloud Run services/jobs are disabled
+until an amended inventory and separately Approved slice exist.
+
+For a future direct OCI deployment, the target state is:
 
 ```text
 verified source
@@ -192,10 +306,16 @@ verified normalized source bundle digest
   -> observed deployed revision mapped back to source bundle/manifest
 ```
 
-The exemption is documented as residual supply-chain risk. A source bundle
+The Functions exemption is documented as residual supply-chain risk. A source bundle
 digest, GitHub attestation or provider build provenance is not mislabeled as a
 Binary Authorization guarantee. If Functions later supports stronger
 caller-enforced provenance, a reviewed revision may adopt it.
+
+Provider Cloud Build provenance is captured when the concrete operation exposes
+a supported verifiable statement. `unsupported` or unavailable provider
+provenance blocks any claim of end-to-end SLSA/Binary Authorization, but does
+not erase the independently verified caller-controlled source provenance. The
+provider receipt and deployed revision reconciliation remain mandatory.
 
 ## 8. Build reproducibility and dependency policy
 
@@ -212,6 +332,23 @@ caller-enforced provenance, a reviewed revision may adopt it.
   reproducibility;
 - build scripts cannot download unpinned executable code after verification;
 - secret values are never inputs to the artifact digest or embedded output.
+
+The candidate future release job is `.github/workflows/backend-release.yml`:
+it runs from protected `main`, has no cloud deploy identity, produces the
+normalized package, validates the four schemas, generates SBOM/scan evidence,
+and creates GitHub keyless SLSA provenance with official `actions/attest`
+resolved to reviewed full commit SHA
+`1e69f48acb82d1966a394da916b4c1698aa569d6`. The SHA is a dated candidate and
+must be rechecked when the executable slice starts. `id-token: write` and
+`attestations: write` exist only on the smallest attestation job; all other job
+permissions are explicit and read-only unless an output publication step
+requires a narrower write permission.
+
+The future `.github/workflows/backend-deploy.yml` accepts only
+`manifestDigest`, `deploymentPlanDigest` and target environment. It verifies
+the immutable release, GitHub attestation, policy and approvals before acquiring
+the environment-specific WIF identity from accepted BCK05-OD-02. It never
+rebuilds source and never inherits release-publisher authority.
 
 A second clean build of caller-controlled artifacts must reproduce the same
 digest or produce a documented, bounded non-determinism finding. Provider-built
@@ -250,9 +387,22 @@ Minimum provenance binds:
 - build timestamps and environment class;
 - declared predicate/schema version.
 
-Accepted implementations may use GitHub artifact attestations, cloud-native
-provenance, in-toto/DSSE, Sigstore or KMS-backed attestations after BCK05-OD-01
-and `REL-OD-01/02` select one interoperable verification path.
+`BCK05-REL-A1-DUAL-PROV-v1` selects two non-interchangeable evidence lanes:
+
+1. the caller-controlled release bundle, manifest and SBOM use GitHub keyless
+   artifact attestations (Sigstore/in-toto SLSA predicates) issued only by the
+   reviewed release workflow in `RechargeN/Recharge`;
+2. Firebase/Cloud Functions provider builds use provider operation, build,
+   output and revision receipts plus Cloud Build provenance when the concrete
+   build exposes a supported verifiable statement.
+
+GitHub verification constrains repository numeric ID, repository owner,
+workflow path/ref, source commit, event, environment when present, subject
+digest and supported predicate type. Repository rename or transfer cannot be
+accepted merely because a display name still matches. Promotion stores the
+verification result and verifier version. Provider provenance is never used to
+replace or retroactively manufacture caller provenance, and the two statements
+must reconcile through the same source-bundle digest.
 
 Requirements independent of tool:
 
@@ -266,12 +416,20 @@ Requirements independent of tool:
 - signing key material, if any, is non-exportable/managed and never in GitHub;
 - keyless/OIDC identity follows BCK05-OD02-IAM-01.
 
+The canonical caller assets live in a GitHub **immutable release** only after
+all assets and attestations are complete and the draft is published. If
+immutable releases are unavailable or cannot be proven enabled, publication is
+`capability_unavailable` and no stage/prod promotion occurs. Re-uploading bytes
+under the same semantic version is prohibited; a correction is a new release.
+
 ## 11. Release state machine
 
 ```text
-built
+drafted
+  -> built
   -> verified
   -> attested
+  -> published_immutable
   -> approved_dev
   -> deployed_dev
   -> approved_stage
@@ -289,16 +447,19 @@ rejected | expired | revoked | quarantined | superseded
 rolled_back | degraded | unknown_outcome | recovery_required
 ```
 
-Transitions require expected current state/revision. Approval expires and is
-invalidated by digest, policy, workflow, source, compatibility plan or target
-environment change.
+Release publication state is global, while approvals/deployments are separate
+per-environment promotion records. A release can therefore be deployed to dev
+without implying stage/prod approval. Transitions require expected current
+state/revision. Approval expires and is invalidated by manifest digest, plan
+digest, policy, workflow, source, compatibility plan, target environment or
+expected-current-revision change.
 
 ## 12. Promotion contract
 
 ### 12.1 Build once, promote same digest
 
-- environment-specific configuration is a separately versioned manifest input,
-  not a code rebuild;
+- environment-specific configuration belongs to a separately hashed
+  `EnvironmentDeploymentPlan`, not the release manifest and not a code rebuild;
 - stage and prod consume the same component/source-bundle digests;
 - provider-generated revision IDs may differ by environment, but each must map
   to the same approved source bundle and compatibility plan;
@@ -310,22 +471,30 @@ environment change.
 | Transition | Minimum gate |
 |---|---|
 | source -> built | protected source, clean builder, pinned dependencies/toolchain |
-| built -> verified | tests, contracts, SBOM, scans, digest and manifest validation |
-| verified -> attested | approved issuer/builder/workflow policy and exact digest |
-| attested -> dev | dev IAM, config and drift checks |
+| built -> verified | tests, contracts, SBOM, scans, canonical digest and manifest validation |
+| verified -> attested | approved issuer/builder/workflow policy and exact subject digests |
+| attested -> published_immutable | complete draft assets, immutable-release capability and post-publication digest verification |
+| published_immutable -> dev | dev plan, IAM, config and drift checks |
 | dev -> stage | same digest, stage approval, compatibility/emulator evidence |
 | stage -> validated_stage | smoke/integration/load/rollback evidence against predeclared thresholds |
 | validated_stage -> approved_prod | all non-deferrable BCK/OD gates, change record, two distinct approvals, budget/recovery readiness |
 | approved_prod -> deployed_prod | reverify digest/provenance/policy/IAM/drift/expected revision immediately before deploy |
 
-GitHub plan-dependent protections require capability evidence. If unavailable,
-an equivalent independently reviewed approval mechanism is required; chat or a
-workflow input alone is insufficient.
+GitHub plan-dependent protections require capability evidence. For the current
+public repository, the candidate uses GitHub environments with source branch
+restriction, required reviewer, prevent-self-review and no admin bypass where
+supported. Native environment approval may be a single approval; therefore
+production additionally requires a signed release/change approval by another
+authorized person, and the environment approver must be distinct from that
+person and the initiating deploy actor. If these identities cannot be proven,
+production remains blocked. Chat or a workflow input alone is insufficient.
 
 ### 12.3 Concurrency and idempotency
 
 - one active deployment lease per environment;
 - promotion key: environment + target manifest digest + change/release ID;
+- the key also binds `deploymentPlanDigest`; a changed plan is a different
+  operation and invalidates prior approval;
 - same key/same digest returns the committed result;
 - same key/different digest is `idempotency_conflict`;
 - stale environment revision is `revision_conflict`;
@@ -335,8 +504,10 @@ workflow input alone is insufficient.
 
 ## 13. Compatibility and component ordering
 
-No universal hardcoded order is safe for every release. Each manifest carries
-an reviewed compatibility DAG with preconditions and rollback class.
+No universal hardcoded order is safe for every release. The release manifest
+references a reviewed compatibility plan revision; each environment plan binds
+the concrete target DAG, preconditions and rollback classes without changing
+release bytes.
 
 Rules:
 
@@ -418,25 +589,24 @@ Deleting or overwriting the compromised evidence is prohibited.
 
 ## 17. Evidence record and retention boundary
 
-Every build/promotion/rollback record includes:
+The canonical evidence graph is:
 
 ```text
-operationId
-manifestDigest
-componentDigests[]
-sourceCommitSha
-workflow/build/attestation IDs
-environment
-actor/federated/deploy identity
-approvers[]
-expectedPreviousRevision
-providerOperation/revision IDs
-startedAt / completedAt
-result / typedFailure
-observedStateDigest
-validationEvidence[]
-incident/change references
+BackendReleaseManifestDigest
+  -> caller artifact/SBOM/provenance subject digests
+  -> EnvironmentDeploymentPlanDigest
+     -> approvals + expected previous healthy deployment
+     -> ProviderDeploymentReceiptDigest[]
+     -> validation evidence
+     -> PromotionRecordDigest
+        -> LastKnownHealthyDeployment (conditional pointer)
 ```
+
+Every promotion/rollback record also includes operation ID, source commit,
+workflow/build/attestation IDs, actor/federated/deploy identities, approvers,
+timestamps, typed result/failure, observed-state digest and incident/change
+references. The record is append-only; corrections supersede by digest and do
+not rewrite prior evidence.
 
 Release manifest, provenance, approval, deployment and rollback evidence cannot
 be deleted while the artifact is deployed, rollback-eligible, quarantined,
@@ -453,7 +623,10 @@ Only a separately Approved executable slice may create:
 ```text
 apps/backend/
   infra/release/
-    manifest.schema.json
+    backend-release-manifest.schema.json
+    environment-deployment-plan.schema.json
+    provider-deployment-receipt.schema.json
+    promotion-record.schema.json
     compatibility-plan.schema.json
     provenance-policy.*
     promotion-policy.*
@@ -482,23 +655,30 @@ docs/runbooks/
 ```
 
 R0 replaces `*` with one pinned cross-platform implementation. This file map is
-not permission to edit existing mobile CI or create backend runtime now.
+not permission to edit existing mobile CI, repository settings, releases,
+environments, cloud resources or backend runtime now. A separate mobile Action
+pin migration precedes repository-wide SHA enforcement.
 
 ## 19. Evidence and test matrix
 
 | Evidence | Required proof | Gate |
 |---|---|---|
 | Manifest schema | unknown/missing critical field fails closed | R0 |
-| Digest | archive/image/config digest is stable and verified before promotion | R0 |
+| Canonical digest | JCS record digest is external/non-self-referential; archive/config digests are stable | R0 |
+| Record separation | pre-release manifest cannot contain post-deploy provider facts or environment secrets/config | R0 |
 | Clean rebuild | caller-controlled output reproduces or bounded non-determinism is recorded | R0/R1 |
 | Action/tool pinning | workflow has no unapproved mutable action/tool reference | R0 |
 | SBOM/scan | complete shipped dependency inventory and accepted policy result | R0/R1 |
 | Provenance positive | approved issuer/builder/workflow/source/digest verifies | R0 |
 | Provenance negative | wrong repo/workflow/digest/issuer/revoked subject fails | R0 |
+| Immutable release | incomplete/mutable/unverifiable release cannot become promotion authority | R0 |
+| Durable retrieval | canonical assets survive workflow-artifact expiry and reverify byte-for-byte | R0 |
+| Mirror conflict | existing generic artifact is accepted only when bytes match expected digest | R1 |
 | Functions mapping | source digest maps to provider build and deployed revision | R1 |
 | Binary Authorization | direct OCI non-attested digest is denied where selected | R1 |
 | Same-artifact | dev/stage/prod use the same approved artifact/source-bundle digest | R1 |
 | Approval binding | changed digest/environment/revision invalidates approval | R1 |
+| Separation of persons | production release approval, environment approval and deploy initiator satisfy distinctness policy | G5/G6 |
 | Concurrency | two promotions cannot mutate one environment concurrently | R1 |
 | Unknown outcome | timeout reconciles provider/observed state before retry | R1 |
 | Compatibility DAG | partial step enters recovery state; no false success | R1 |
@@ -506,6 +686,7 @@ not permission to edit existing mobile CI or create backend runtime now.
 | Data boundary | code rollback cannot pretend to reverse migration/data | every migration |
 | Revocation | quarantined/revoked artifact cannot promote | G5 |
 | Plan capability | required GitHub protections/attestations exist or equivalent gate | before prod |
+| Healthy pointer | unknown/partial/failed deployment cannot replace last known healthy record | R1 |
 
 Timed-out, skipped, manual-without-record or unsupported checks are
 `Inconclusive`, never Pass.
@@ -514,12 +695,12 @@ Timed-out, skipped, manual-without-record or unsupported checks are
 
 | ID | State | Required answer | Blocks |
 |---|---|---|---|
-| REL-OD-01 | Open | exact builder/package/deploy integration and compatibility evidence for proposed BCK05-OD01-TCH-01 | BCK05-OD-07 Acceptance |
-| REL-OD-02 | Open | provenance/attestation format, issuer, verifier and immutable storage | BCK05-OD-07 Acceptance |
-| REL-OD-03 | Open | artifact registry/source-bundle store and cross-environment access model | R0/R1 |
+| REL-OD-01 | Selected, unproved | Accepted OD-01 toolchain; normalized archive/JCS/SHA-256 package; exact executable versions revalidated in R0 | R0 execution |
+| REL-OD-02 | Selected, unproved | GitHub keyless SLSA/SBOM attestations constrained to exact repo/workflow/commit/subject plus separate provider receipts | R0/R1 evidence |
+| REL-OD-03 | Selected, unproved | immutable GitHub release is canonical caller store; environment-local Artifact Registry generic mirror | R0/R1 evidence |
 | REL-OD-04 | Open | exact vulnerability/license acceptance policy and exception process | production |
-| REL-OD-05 | Open | GitHub visibility/plan support for attestations, approvals and self-review prevention | stage/prod |
-| REL-OD-06 | Open | direct OCI versus Functions source-deploy component inventory and Binary Authorization applicability | R1 |
+| REL-OD-05 | Partially observed | repository is public; environments/protection/immutable-release settings remain absent or unproved | stage/prod |
+| REL-OD-06 | Selected | first R1 uses Functions v2/Rules/index/config; direct OCI and Binary Authorization are deferred to amendment | future direct OCI |
 | REL-OD-07 | Open | per-component compatibility/rollback classes and first release DAG | first deploy |
 | REL-OD-08 | Open | exact release/evidence retention aligned with BCK-04/Legal | production |
 
@@ -530,15 +711,21 @@ release may progress.
 ## 21. Acceptance sequence
 
 ```text
-BCK05-OD07-REL-01 Proposed
-  -> Release Operations + Platform Security exact-version review
-  -> resolve REL-OD-01..08 and BCK05-OD-01/02 dependencies
-  -> BCK05-OD-07 Accepted
+BCK05-OD07-REL-01 Review-ready
+  -> owner signs BCK05-OD07-DEC-01 exact decision phrase
+  -> BCK05-OD-07 Accepted with controls
   -> separately Approved R0 non-production pipeline scaffold
+  -> resolve REL-OD-01..03/05 executable evidence and REL-OD-04 policy
   -> manifest/provenance/negative/rollback evidence
   -> R1 dev/stage provider mapping and drift evidence
+  -> resolve REL-OD-07/08 for the first component DAG/retention
   -> production remains blocked until G5/G6 and all D1 dependencies pass
 ```
+
+Acceptance of the candidate selects the architecture and controls only. It does
+not convert any `Selected, unproved` item into runtime evidence and does not
+authorize GitHub settings, release publication, workflow creation, WIF/cloud
+resources, deployment or production data processing.
 
 ## 22. Acceptance criteria
 
@@ -592,3 +779,18 @@ BCK05-OD07-REL-01 Proposed
 48. **BCK05-REL-AC-48:** inconclusive evidence is never Pass.
 49. **BCK05-REL-AC-49:** Proposed status creates no workflow/artifact/resource.
 50. **BCK05-REL-AC-50:** runtime requires a separate Approved executable slice.
+51. **BCK05-REL-AC-51:** manifest digest is external to the canonical bytes it hashes.
+52. **BCK05-REL-AC-52:** JSON records use one fail-closed canonicalization and digest contract.
+53. **BCK05-REL-AC-53:** release manifest contains only environment-neutral release-time facts.
+54. **BCK05-REL-AC-54:** environment plan changes create a new digest and invalidate approval.
+55. **BCK05-REL-AC-55:** provider output identity is written only in a post-deploy receipt.
+56. **BCK05-REL-AC-56:** manifest, plan, receipt and promotion records form a verifiable digest graph.
+57. **BCK05-REL-AC-57:** immutable release assets, not workflow artifacts, are canonical caller storage.
+58. **BCK05-REL-AC-58:** registry mirrors preserve exact verified bytes and fail on digest conflict.
+59. **BCK05-REL-AC-59:** caller and provider provenance remain distinct and reconcile through source digest.
+60. **BCK05-REL-AC-60:** repository numeric identity is constrained during attestation verification.
+61. **BCK05-REL-AC-61:** initial R1 excludes direct OCI and makes no Binary Authorization claim for Functions.
+62. **BCK05-REL-AC-62:** production approval evidence proves required separation of persons.
+63. **BCK05-REL-AC-63:** partial, failed or unknown deployment cannot move the healthy pointer.
+64. **BCK05-REL-AC-64:** repository-wide SHA enforcement waits for the reviewed mobile Action pin migration.
+65. **BCK05-REL-AC-65:** candidate Acceptance selects policy only and leaves every executable/cloud action separately gated.

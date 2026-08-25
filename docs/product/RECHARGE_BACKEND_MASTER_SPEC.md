@@ -1,8 +1,8 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.26**
-- Date: **2026-08-24**
+- Version: **0.4.27**
+- Date: **2026-08-25**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Architecture owner**
@@ -14,6 +14,16 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.27 — 2026-08-25
+
+- added decision-ready BCK05-OD-07 release/provenance candidate
+  `BCK05-REL-A1-DUAL-PROV-v1` and its unsigned owner-decision contract;
+- retained BCK05-OD-07 Proposed plus BCK-04/BCK-05 Draft, complete D1/G1,
+  exact R0/R1 authorization and all executable/cloud/product-runtime gates;
+- advanced traceability to BCK-02 v2.4.31, BCK-04 v0.4.15 and BCK-05 v0.2.22
+  without workflow, repository/cloud mutation, deployment or `main` merge
+  authority.
 
 ### v0.4.26 — 2026-08-24
 
@@ -412,7 +422,7 @@ Approval и требует reconciliation либо Accepted ADR.
 | Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
 | Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4.30](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, v2.4.1–2.4.30 — traceability amendments |
+| Backend sequencing | [BCK-02 v2.4.31](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, v2.4.1–2.4.31 — traceability amendments |
 | Baltic rollout | [Latvia/Baltics roadmap](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
 | Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
 | Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
@@ -441,8 +451,8 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Media/Notifications | Local/mobile foundations | Нет protected storage pipeline и delivery authority | BCK-13/14 |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
-| Operations | BCK-05 v0.2.21 и coverage matrix v0.2.21 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02 and cross-domain OD-07 are Accepted; OD-03/04/05/07/08 and executable IAM/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Revalidate accepted baselines, close remaining blockers and re-audit before R1 |
-| Privacy | BCK-04 v0.4.14 и coverage matrix v0.3.14 Draft/Present | OD-07 topology and fail-closed BCK05-OD-02 IAM policy are Accepted while EU-resource/global-service boundaries, threat/incident models and tabletop package remain explicit; owner/independent/qualified Legal verdicts, executable IAM and DSR runtime remain absent | Закрыть BCK-04 blockers; OD-07/IAM policy Acceptance не является Legal approval/runtime evidence |
+| Operations | BCK-05 v0.2.22 и coverage matrix v0.2.22 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02 and cross-domain OD-07 are Accepted; BCK05-OD-07 is decision-ready but Proposed; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Obtain exact OD-07 release verdict, then plan a separately Approved executable R0; re-audit before R1 |
+| Privacy | BCK-04 v0.4.15 и coverage matrix v0.3.15 Draft/Present | OD-07 topology and fail-closed BCK05-OD-02 IAM policy are Accepted while release provenance remains proposed and EU-resource/global-service boundaries, threat/incident models and tabletop package remain explicit; owner/independent/qualified Legal verdicts, executable IAM and DSR runtime remain absent | Закрыть BCK-04 blockers; architecture policy Acceptance не является Legal approval/runtime evidence |
 | Baltic markets | BCK-20 v0.2.2 и coverage matrix v0.2.2 Draft/Present | Combined owner assigned; OD-10 remains Proposed and executable parity/distribution runtime remain absent | Закрыть BCK-20/OD-10 blockers без country forks |
 
 ### 4.1. Главный gap
@@ -1126,13 +1136,13 @@ Rollback имеет три разных уровня:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.26
+## 25. Definition of Done BCK-01 v0.4.27
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
 - все anchors существуют и ссылки валидны;
 - BCK-02 registry отражает фактический
-  `Review v0.4.26/Present, local R0 tooling Present, product/cloud runtime Absent`,
+  `Review v0.4.27/Present, local R0 tooling Present, product/cloud runtime Absent`,
   а ownership reconciliation не содержит
   двойных writers;
 - target layers/modules не создают второго writer;
@@ -1217,7 +1227,7 @@ Approval требует reconciliation report и sign-off владельцев, 
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4.30 (Approved v2.4 semantics), BCK-02-A1
+46. **BCK-01-AC-46:** BCK-02 v2.4.31 (Approved v2.4 semantics), BCK-02-A1
     Draft v1.0 и BCK-09 Review v1.0 представлены с их фактическими
     status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
@@ -1239,7 +1249,7 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.4.26 не реализованы:
+На дату v0.4.27 не реализованы:
 
 - product/domain `apps/backend` application beyond the local R0 tooling probe;
 - Firebase projects/resources/configuration;

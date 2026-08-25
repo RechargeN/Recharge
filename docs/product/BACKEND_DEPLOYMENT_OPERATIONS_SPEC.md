@@ -1,16 +1,16 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.21**
-- Date: **2026-08-24**
+- Version: **0.2.22**
+- Date: **2026-08-25**
 - Spec status: **Draft — Platform Operations review required**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.26](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.30](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.27](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.31](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Security/privacy boundary: [BCK-04 v0.4.14](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted)
+- Security/privacy boundary: [BCK-04 v0.4.15](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
@@ -21,7 +21,8 @@
 - Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
 - IAM/workload identity evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (Accepted baseline with controls)
 - IAM owner decision: [BCK05-OD02-DEC-01](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) v0.2 (Accepted)
-- Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.1 (Draft; BCK05-OD-07 Proposed)
+- Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.2 (Review-ready; BCK05-OD-07 Proposed)
+- Release owner decision: [BCK05-OD07-DEC-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) v0.1 (Review; unsigned)
 - Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.4 (Accepted baseline v0.3.3 with controls)
 - Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.4 (completed; bounded R0 Pass)
 - Runtime/toolchain owner decision: [BCK05-OD01-DEC-01](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) v0.2 (Accepted)
@@ -36,6 +37,18 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.22 — 2026-08-25
+
+- prepared decision-ready `BCK05-REL-A1-DUAL-PROV-v1` with separate release
+  manifest, environment plan, provider receipt, promotion record and guarded
+  last-known-healthy pointer;
+- selected GitHub keyless caller provenance, immutable release assets and
+  environment-local exact-byte mirrors while preserving honest Functions
+  provider-build evidence and deferring direct OCI/Binary Authorization;
+- added unsigned BCK05-OD07-DEC-01; BCK05-OD-07 remains Proposed and no
+  workflow, GitHub setting, artifact, cloud resource, deploy or runtime is
+  authorized.
 
 ### v0.2.21 — 2026-08-24
 
@@ -862,7 +875,7 @@ indexes, IAM, provider configuration, billing, backup or latency.
 | BCK05-OD-04 | Proposed | Product + Finance/Operations | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): Product baseline recorded; Finance remains Inconclusive pending EUR SKU/tax/stage evidence | R1 provisioning |
 | BCK05-OD-05 | Proposed | Platform + Privacy + domains | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md): Product baseline recorded; drills, IAM/privacy and specialist verdicts pending | BCK-05 Approval |
 | BCK05-OD-06 | Open | API Platform + Operations | OD-09 transport/task topology and delivery operations | D1 exit minimum Proposed; D3 effects Accepted |
-| BCK05-OD-07 | Proposed | Release Operations + Platform Security | [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md): immutable manifest, provenance, Functions/container boundary, promotion and rollback; exact toolchain/attestor/registry/policy/runtime evidence pending | executable R0 |
+| BCK05-OD-07 | Proposed; decision-ready | Release Operations + Platform Security | [BCK05-OD07-REL-01 v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) selects `BCK05-REL-A1-DUAL-PROV-v1`; [BCK05-OD07-DEC-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) is unsigned; executable/policy/provider evidence remains pending | exact owner verdict, then separately Approved executable R0 |
 | BCK05-OD-08 | Proposed | Incident/Security owners | [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) plus ready-but-unexecuted [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md); real routes/break-glass/executable evidence and completed result pending | G5/G6 |
 
 Each Open/Proposed decision has a fail-closed default above. Acceptance records
@@ -962,7 +975,7 @@ new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.2.21 the following remain absent:
+At v0.2.22 the following remain absent:
 
 - product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;

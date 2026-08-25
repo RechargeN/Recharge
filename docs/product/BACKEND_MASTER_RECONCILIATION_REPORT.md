@@ -1,21 +1,21 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **1.8**
-- Date: **2026-08-23**
+- Version: **1.9**
+- Date: **2026-08-25**
 - Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
 - Accountable owner: **Platform Architecture owner**
 - Review coordinator: **RechargeN / Product owner**
-- Subject: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Subject: [BCK-01 v0.4.27](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.31](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MASTER_RECONCILIATION_REPORT.md`
 
 ---
 
 ## 1. Verdict
 
-BCK-01 v0.4.17 is internally consistent with the tracked Accepted ADR set,
+BCK-01 v0.4.27 is internally consistent with the tracked Accepted ADR set,
 Architecture Baseline and BCK-02 coordination model. Its module and
 authoritative-writer maps do not contain a confirmed double writer. All local
 anchors exist, 52 AC are sequential, and the revision creates no runtime.
@@ -137,8 +137,8 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK01-F17 | BCK05-OD-05 required record-family RPO/RTO and restore design but only generic recovery prose existed | BCK05-OD05-REC-01 adds numerical targets, candidate protection policy, isolated restore, privacy re-deletion, reconciliation and drills; OD-05 is Proposed, not Accepted |
 | BCK01-F18 | Cost v0.1 retained four backup copies while recovery v0.1 proposed 26 prod copies | Cost v0.2 and BCK05-NUM-REV-01 reconcile full-size equivalents, correct S/L1/L2/L3 estimates and expose the L3 guardrail conflict; no status is promoted |
 | BCK01-F19 | Numerical models had a technical recommendation but no owner disposition | BCK05-NUM-REV-01 v0.2 and BCK-D1-SIG-01 v1.0 record the Product stage-validation baseline, evidence-conditioned Operations/Security perspectives and Inconclusive Finance/Legal scopes; OD/BCK/runtime statuses remain unchanged |
-| BCK01-F20 | BCK05-OD-02 named workload identity/approval/break-glass but had no concrete trust, identity or permission model | BCK05-OD02-IAM-01 defines keyless OIDC/WIF, immutable claims, environment/task separation, intended permissions, lifecycle, break-glass and 50 AC; OD-02 is Proposed, not Accepted |
-| BCK01-F21 | BCK05-OD-07 named signing/provenance/promotion/rollback but did not distinguish direct OCI from provider-built Functions | BCK05-OD07-REL-01 defines the immutable manifest/state machine and honest source-bundle-to-provider-revision evidence; OD-07 is Proposed and no universal Functions Binary Authorization claim is made |
+| BCK01-F20 | BCK05-OD-02 named workload identity/approval/break-glass but had no concrete trust, identity or permission model | BCK05-OD02-IAM-01 v0.2.1 defines keyless OIDC/WIF, immutable claims, environment/task separation, intended permissions, lifecycle, break-glass and 50 AC; OD-02 is Accepted with controls, while executable IAM remains absent |
+| BCK01-F21 | BCK05-OD-07 named signing/provenance/promotion/rollback but did not distinguish direct OCI from provider-built Functions | BCK05-OD07-REL-01 v0.2 separates manifest/plan/provider receipt/promotion record, selects dual provenance and keeps Functions outside any universal Binary Authorization claim; OD-07 is decision-ready but Proposed |
 | BCK01-F22 | BCK05-OD-01 left the backend runtime, compiler, package manager and IaC/deploy ownership unspecified | BCK05-OD01-TCH-01 selects a dated Node.js 22/TypeScript/npm/Firebase CLI/Terraform candidate; BCK-R0-TCH-01 adds a deterministic R0 contract and 60 AC; OD-01 is Proposed, not Accepted |
 | BCK01-F23 | The toolchain candidate lacked an exact minimal SDK/lint/JDK package disposition and bounded executable feasibility plan | BCK05-OD01-TCH-REV-01 records a non-owner technical Pass with blockers and BCK-R0-TCH-01 defines an exhaustive local-only file/command/evidence boundary; R0 remains Review/not Approved |
 | BCK01-F24 | R0 required full-SHA Actions but did not resolve exact identities, runner inputs or the unsigned Terraform Action risk | Toolchain v0.3/R0 v0.2 pin three verified Action commits, reject the unsigned Terraform Action, fix signed Terraform archive checksums and add BCK-R0-TCH-DEC-01; all verdicts remain Pending |
