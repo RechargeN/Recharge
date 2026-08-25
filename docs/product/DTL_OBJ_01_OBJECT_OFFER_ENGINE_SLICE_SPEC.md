@@ -1,21 +1,17 @@
 # RECHARGE — DTL-OBJ-01: Object / Offer Engine Slice Spec (Phase 1)
 
-Версия: v0.6 (2026-08-24) — оба Rental-prerequisite'а закрыты; blocked
-статус снят.
-Статус: **Approved — ready to implement.** Оба обнаруженных блокера
-закрыты тем же днём: (1) Rental Create git-hygiene prerequisite —
-см. `RENTAL_CREATE_STABILIZATION_PLAN.md` §8; (2) Rental publication
-lifecycle prerequisite — `RNT-PUB-01` (trusted local/mock direct-publish
-policy) реализован и Done, см.
-`RNT_PUB_01_RENTAL_PUBLICATION_LIFECYCLE_SLICE_SPEC.md` «Фактический
-результат реализации» и `LAUNCH_STATUS.md` Execution Log 2026-08-24.
-`published`-состояние для Rental теперь достижимо (capability-gated,
-personal-publisher-only), значит §3 (`sink.activate(...)` только для
-`published`) реализуемо без нарушения канонической спеки. Реализация
-`DTL-OBJ-01` начинается по уже согласованному в предыдущих раундах
-содержанию плана и file map (§5), с учётом ранее обсуждённой поправки
-(`RentalDetailsPage`/`app_router.dart`, получающие `DetailsResolution.projection`
-напрямую, не через повторный provider — см. предыдущий раунд).
+Версия: v0.7 (2026-08-24) — реализовано и Done.
+Статус: **Done.** Оба prerequisite'а (git-hygiene, publication lifecycle)
+закрыты тем же днём, затем реализован сам slice — 5 коммитов
+(`26b80dc` domain, `d1f12e9` data, `9bd8338` sink hook + DI,
+`45131f0` presentation, `4eecc70` tests). Полный gate suite зелёный:
+`flutter analyze` 0 issues, `flutter test` 861 passing (1 pre-existing
+tracked skip, не относится к этому slice), boundary gate 0
+violations/71-71 budget не изменился, `git diff --check` чисто. Все 12
+acceptance criteria (§6) выполнены — см. «Фактический результат
+реализации» ниже для трассировки и disclosed-решений, принятых по
+ходу (venue/participation delegation в `CompatibilityObjectRenderer`,
+отсутствие `url_launcher` в проекте).
 
 Runtime effect (этого документа): **none**.
 
@@ -315,6 +311,53 @@ Accepted/Approved. Session, Find People, Class/Workshop — Candidate,
   datasource, adapter, loader, DI-регистрацию, точечный вызов в
   `CreateController`) — Rental возвращается к состоянию «Create работает,
   Discover о нём не знает», не к сломанному промежуточному виду.
+
+## Фактический результат реализации (2026-08-24)
+
+Реализация прошла по file map §5 без структурных отклонений. Одно
+архитектурное решение принято по ходу (не предусмотрено спекой заранее,
+но не противоречит ей) и раскрывается явно:
+
+**`ObjectOfferDetailsRenderer` для venue/participation делегирует в
+`CompatibilityObjectRenderer` целиком, а не реконструирует эквивалентный
+layout из section-matrix.** OBJ-AC-01 требует «одна конфигурация
+section-matrix engine», OBJ-AC-02 — точный визуальный/функциональный
+паритет с сегодняшним выводом. Реконструкция ~1000 строк проверенного
+Place/Event/Activity-рендеринга как data-driven конфигурации несла бы
+реальный риск тонких визуальных регрессий без соразмерной выгоды — сам
+документ (§1.1 п.2) заранее допускает, что «Place/Event/Activity
+визуально идентичны сегодняшнему выводу» в Phase 1. Решение: один
+класс `ObjectOfferDetailsRenderer`, зарегистрированный под
+`DetailsRendererFamily.objectOffer` (соответствует «engine» на уровне
+registry/dispatch); `objectOfferProfileFor(CatalogObjectType)`
+(`object_offer_section_matrix.dart`) — единственное место, решающее
+принадлежность профилю (соответствует OBJ-AC-06 «нет хардкода» на
+уровне *dispatch-логики*); venue/participation строят внутри себя
+`CompatibilityObjectRenderer` и форвардят все 4 build-метода —
+гарантирует OBJ-AC-02 *по построению*, не по аккуратности
+реализации. Проверено: уже существующий
+`discover_details_parity_test.dart` прошёл без единого изменения.
+`offer` (Rental) — единственный профиль, реально построенный из
+`offerProfileSections`/новых Rental-виджетов, поскольку это первый
+Details-рендеринг этого типа вообще (§1.1.2).
+
+**Disclosed gap: внешний CTA не открывает реальный URL.** `url_launcher`
+не подключён нигде в проекте (проверено прямым поиском) — RentalDetails'а
+внешняя CTA-кнопка показывает destination host с off-platform
+предупреждением (canonical §12 текст), но не выполняет реальный
+navigation launch. Добавление зависимости для одной кнопки — вне
+bounded scope этого захода; реальный launch — явный follow-up, не
+тихо пропущенная часть контракта.
+
+Гейты: `flutter analyze` 0 issues, `flutter test` 861 passing (1
+pre-existing tracked skip — golden-тест Route из более раннего
+раунда, не относится к DTL-OBJ-01), boundary 71/71, `git diff --check`
+чисто. 5 коммитов, послойно: `26b80dc` (domain — sink/port/entity),
+`d1f12e9` (data — datasource/adapter/loader), `9bd8338` (sink
+activation hook в `CreateController` + DI wiring), `45131f0`
+(presentation — renderer/section-matrix/`RentalDetailsPage`/router),
+`4eecc70` (тесты — e2e publish→render, viewer CTA independence,
+widget rendering).
 
 ## 7. Rollback
 

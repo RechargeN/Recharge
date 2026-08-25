@@ -105,7 +105,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `discover_item_entity.dart` (`objectKind.event`) | — |
 | Search | I | `SEARCH_FILTERS_TIME_SPEC.md` | — |
 | Map | I | `discover_map_page.dart` | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Типизированный `participation`-профиль не построен — `DTL-OBJ-01` Approved/in progress (оба prerequisite'а resolved 2026-08-24) |
+| Details | I | `ObjectOfferDetailsRenderer` (`participation`-профиль делегирует в `CompatibilityObjectRenderer`, `DTL-OBJ-01`, Done) | — |
 | Primary action | P | AGENTS.md: MVP redirect на `externalBookingUrl` | Authoritative Booking backend не авторизован (ECL-03C-P — план) |
 | Lifecycle | P | ADR 0013 | Admin moderation queue не подтверждена как enforced |
 
@@ -118,7 +118,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `objectKind.activity` (дефолт) | — |
 | Search | I | тот же `DiscoverQuery` | — |
 | Map | I | — | — |
-| Details | I (legacy) | `CompatibilityObjectRenderer` под `DetailsShell` (`DTL-FND-01`/`DTL-LINK-01`) | Нет типизированного `participation`-профиля — `DTL-OBJ-01` Approved/in progress (оба prerequisite'а resolved 2026-08-24) |
+| Details | I | `ObjectOfferDetailsRenderer` (`participation`-профиль делегирует в `CompatibilityObjectRenderer`, `DTL-OBJ-01`, Done) | — |
 | Primary action | P | generic "Join activity" | Нет специфичной механики |
 | Lifecycle | P | — | Repo-wide gap |
 
@@ -144,7 +144,7 @@ Rental не означает Implemented Details для Rental.
 | Feed | I | `objectKind.place` | — |
 | Search | I | — | — |
 | Map | I | — | — |
-| Details | P | generic + 1 action-tile | Нет `venue`-профиля как первоклассных секций |
+| Details | I | `ObjectOfferDetailsRenderer` (`venue`-профиль делегирует в `CompatibilityObjectRenderer`, `DTL-OBJ-01`, Done) | — |
 | Primary action | I | `VIS-HIST-01` Done | — |
 | Lifecycle | P | — | Repo-wide gap |
 
@@ -209,10 +209,10 @@ Rental не означает Implemented Details для Rental.
 |---|---|---|---|
 | Create | I | `RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md` v1.0 (Approved); RNT-CRT-01 | — |
 | Publish | I | capability-строки `create.rental`/`submit.rental`/`publish.rental.direct` | Только `externalBookingUrl`, без `contact_host` (принятый trade-off) |
-| Feed | M | нет discover-адаптера в runtime | `DTL-OBJ-01` Approved/in progress — `RNT-PUB-01` Done, `published`-состояние достижимо; discover-адаптер (RentalPublicationIndexSink/PublishedRentalDiscoveryPort/RentalPublicationDiscoveryAdapter/RentalDetailsLookup) остаётся предметом реализации самого `DTL-OBJ-01` §3 |
-| Search | M | — | — |
-| Map | M | — | — |
-| Details | **S** | `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` — полный write+read vertical спроектирован, Approved по содержанию | Ноль кода — но теперь известно, что «shovel-ready» относится только к спеке, не к среде: сначала нужен отдельный prerequisite-заход (стабилизировать/отделить/закоммитить Rental Create), не просто «взять в очередь» |
+| Feed | I | `RentalPublicationIndexSink`/`PublishedRentalDiscoveryPort`/`RentalPublicationDiscoveryAdapter` (`DTL-OBJ-01`, Done) | Только Details-путь; Search/Map ленты Rental не покрывает этот slice |
+| Search | M | — | Rental не участвует в `DiscoverQuery` search/filter пути |
+| Map | M | — | Rental не участвует в map-слое |
+| Details | I | `ObjectOfferDetailsRenderer.rental`/`RentalDetailsPage` (`DTL-OBJ-01`, Done) — первый Details-рендеринг этого типа | Availability tri-state (declared/unavailable/unknown, спека §8.3) не в `RentalListing`/проекции — показывается только статичное «Creator-declared» уведомление |
 | Primary action | S | `Rent` CTA в §5.1 родительского документа | — |
 | Lifecycle | P | `moderationStatus` в Create-драфте | Discover-facing lifecycle недостижим без read-пути |
 

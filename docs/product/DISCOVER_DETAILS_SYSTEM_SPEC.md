@@ -1,11 +1,15 @@
 # RECHARGE — Discover Details System Spec
 
-Версия: v0.6 (2026-08-24) — Этап 4 обновлён трижды тем же днём: оба
-Rental-prerequisite'а (git-hygiene — `RENTAL_CREATE_STABILIZATION_PLAN.md`
-§8; publication lifecycle — `RNT_PUB_01_RENTAL_PUBLICATION_LIFECYCLE_SLICE_SPEC.md`,
-Done) закрыты. OBJ — Approved/in progress, не Blocked.
-FND/LINK/CLG/RTE остаются Done, SCN остаётся Blocked on Approved
-`SCN-PUB-01`. §1–15 по содержанию не менялись. Статус: **Accepted** (принят владельцем продукта
+Версия: v0.7 (2026-08-24) — Этап 4 обновлён четырежды тем же днём: оба
+Rental-prerequisite'а закрыты (git-hygiene —
+`RENTAL_CREATE_STABILIZATION_PLAN.md` §8; publication lifecycle —
+`RNT_PUB_01_RENTAL_PUBLICATION_LIFECYCLE_SLICE_SPEC.md`, Done), затем
+`DTL-OBJ-01` сам реализован и переведён в Done (5 коммитов, полный
+gate suite зелёный — см.
+`DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` v0.7). Теперь FND/LINK/
+CLG/RTE/OBJ — все Done, SCN остаётся Blocked on Approved
+`SCN-PUB-01` — единственный неначатый slice Details-волны. §1–15 по
+содержанию не менялись. Статус: **Accepted** (принят владельцем продукта
 2026-08-24, после трёх раундов review дочерних `DTL-*` документов).
 Runtime effect: **none**. Принятие этого документа само по себе не
 изменяет код, маршруты, тесты, DI или ADR — оно фиксирует целевую
@@ -688,7 +692,7 @@ follow-up, не одного слайса.
 | `DTL-LINK-01` | **Done** — зелёные gates | `026c7cd` | Canonical resolver vertical; попутно перенесён read-side Collection (~14 файлов), отсутствовавший в git-истории ветки |
 | `DTL-CLG-01` | **Done** — зелёные gates | `adb2d61` | Чистая shell-миграция Collection, без визуальной полировки |
 | `DTL-RTE-01` | **Done** — зелёные gates | `7810a9e` | `RouteDetailsRenderer`; добавлен заголовок в тело (map-hero не даёт места под оверлей — не было в исходном file map, задокументировано в самом slice-документе) |
-| `DTL-OBJ-01` | **Approved — in progress** (оба prerequisite'а resolved 2026-08-24) | — | Rental Create git-hygiene prerequisite closed (`RENTAL_CREATE_STABILIZATION_PLAN.md` §8); Rental publication lifecycle prerequisite closed — `RNT-PUB-01` Done, `published`-состояние достижимо (см. `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` v0.6) |
+| `DTL-OBJ-01` | **Done** (2026-08-24) | `object_offer_details_renderer.dart`, `rental_details_page.dart`, `rental_publication_discovery_adapter.dart` | 5 коммитов, gate suite зелёный. Place/Event/Activity — делегирование в `CompatibilityObjectRenderer` (парity подтверждён существующим тестом); Rental — новый `offer`-профиль, первый Details-рендеринг этого типа. См. `DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md` v0.7 |
 | `DTL-SCN-01` | **Blocked on Approved `SCN-PUB-01`** | — | Без изменений с Этапа 3 — ждёт апстрим publication/read-projection contract |
 
 Каждый Done-slice прошёл `flutter analyze --no-pub` (0 замечаний),

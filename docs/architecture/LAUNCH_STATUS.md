@@ -238,6 +238,29 @@ The canonical implementation contract is
 
 Use this section as a running log (newest first).
 
+- 2026-08-24: `DTL-OBJ-01` (Object/Offer Engine, Phase 1) moved to
+  Done, same day as both its prerequisites closed. 5 commits:
+  `26b80dc` (Rental publication-sink domain: sink/port/entity),
+  `d1f12e9` (data: datasource/adapter/loader), `9bd8338`
+  (`CreateController.publishDraft()` calls `sink.activate(...)` only
+  after a confirmed `RNT-PUB-01` promotion + DI wiring), `45131f0`
+  (`ObjectOfferDetailsRenderer` + `RentalDetailsPage` + router branch),
+  `4eecc70` (tests). One disclosed design choice: for Place/Event/
+  Activity (`venue`/`participation` profiles), `ObjectOfferDetailsRenderer`
+  delegates wholesale to the existing `CompatibilityObjectRenderer`
+  rather than reconstructing an equivalent section-matrix layout —
+  confirmed safe by the pre-existing `discover_details_parity_test.dart`
+  passing unchanged; only `offer` (Rental) is genuinely new,
+  section-matrix-driven content, since it is this type's first Details
+  rendering at all. Also disclosed: the external CTA shows a
+  destination-host warning instead of launching a real URL — no
+  `url_launcher` dependency exists anywhere in this codebase, and
+  adding one for a single button was out of this slice's scope. Full
+  gate suite green: `flutter analyze` 0 issues, `flutter test` 861
+  passing (1 pre-existing tracked skip, unrelated), boundary gate 0
+  violations/71-71 budget unchanged, `git diff --check` clean. See
+  `docs/product/DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`
+  "Фактический результат реализации" for full detail.
 - 2026-08-24: `RNT-PUB-01` (Rental trusted direct-publish policy)
   moved to Done, closing `DTL-OBJ-01`'s second prerequisite (Rental
   publication lifecycle). Approved after 3 review rounds tightened the
