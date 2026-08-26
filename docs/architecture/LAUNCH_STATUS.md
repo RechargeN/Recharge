@@ -238,12 +238,42 @@ The canonical implementation contract is
 
 Use this section as a running log (newest first).
 
-- 2026-08-24: `DTL-OBJ-01` (Object/Offer Engine, Phase 1) moved to
-  Done, same day as both its prerequisites closed. 5 commits:
-  `26b80dc` (Rental publication-sink domain: sink/port/entity),
-  `d1f12e9` (data: datasource/adapter/loader), `9bd8338`
-  (`CreateController.publishDraft()` calls `sink.activate(...)` only
-  after a confirmed `RNT-PUB-01` promotion + DI wiring), `45131f0`
+- 2026-08-26: `DTL-OBJ-01` re-verified and moved back to Done after a
+  correction-pass. The 2026-08-24 Done claim below was premature: it
+  rested on green technical gates without a full code/contract
+  conformance check. A subsequent full review found 6 real defects —
+  CTA never launched a URL; `object_offer_section_matrix.dart`'s
+  `offerProfileSections`/`objectOfferProfileFor` were dead code and
+  Rental's body was hardcoded (`OBJ-AC-01`/`06` unmet); the "e2e" test
+  called `sink.activate()` manually instead of going through
+  `CreateController.publishDraft()`/router/widget (`OBJ-AC-03`
+  unproven); availability copy said "available" with no freshness
+  signal, against canonical §17.3/§17.5; a failed `sink.activate()`
+  was swallowed with no retry or trace; and `PublisherRef.type` was
+  lost in `PublishedRentalDiscoveryEntity` (only `.id` was kept).
+  Status was reverted to Review and each finding closed as its own
+  commit: `1aa03a5` (restore `publisherType`), `1d40954` (sink
+  activation retry + `rental_sink_activation_failed` tracking),
+  `aa73b23` (section-matrix genuinely wired via a dispatcher +
+  `.discoverItem` runtime guard, real `url_launcher` CTA launch,
+  "N units listed"/"Confirm on provider site" copy), `9af552f`
+  (`_ResolvedDetailsRoute` promoted to public `ResolvedDetailsRoute`;
+  `rental_details_end_to_end_test.dart` rewritten to drive the real
+  publish→sink→resolver→router→widget path instead of calling
+  `sink.activate` directly). Full gate suite re-run and green:
+  `flutter analyze` 0 issues, `flutter test` 861 passing (same 1
+  pre-existing tracked skip, 0 failures), boundary gate 71/71
+  unchanged, `git diff --check` clean. See
+  `docs/product/DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`
+  "Correction-pass (2026-08-26)" for the finding-by-finding trace.
+- 2026-08-24: `DTL-OBJ-01` (Object/Offer Engine, Phase 1) first moved
+  to Done, same day as both its prerequisites closed — **this specific
+  Done claim was premature and was reverted the same review cycle**;
+  see the 2026-08-26 entry above for what the follow-up review found
+  and how it was closed. 5 commits: `26b80dc` (Rental publication-sink
+  domain: sink/port/entity), `d1f12e9` (data: datasource/adapter/loader),
+  `9bd8338` (`CreateController.publishDraft()` calls `sink.activate(...)`
+  only after a confirmed `RNT-PUB-01` promotion + DI wiring), `45131f0`
   (`ObjectOfferDetailsRenderer` + `RentalDetailsPage` + router branch),
   `4eecc70` (tests). One disclosed design choice: for Place/Event/
   Activity (`venue`/`participation` profiles), `ObjectOfferDetailsRenderer`
@@ -252,15 +282,11 @@ Use this section as a running log (newest first).
   confirmed safe by the pre-existing `discover_details_parity_test.dart`
   passing unchanged; only `offer` (Rental) is genuinely new,
   section-matrix-driven content, since it is this type's first Details
-  rendering at all. Also disclosed: the external CTA shows a
-  destination-host warning instead of launching a real URL — no
-  `url_launcher` dependency exists anywhere in this codebase, and
-  adding one for a single button was out of this slice's scope. Full
-  gate suite green: `flutter analyze` 0 issues, `flutter test` 861
-  passing (1 pre-existing tracked skip, unrelated), boundary gate 0
-  violations/71-71 budget unchanged, `git diff --check` clean. See
-  `docs/product/DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`
-  "Фактический результат реализации" for full detail.
+  rendering at all. Full gate suite green at the time: `flutter analyze`
+  0 issues, `flutter test` 861 passing (1 pre-existing tracked skip,
+  unrelated), boundary gate 0 violations/71-71 budget unchanged,
+  `git diff --check` clean — but, as the entry above documents, green
+  gates alone were not sufficient evidence of contract conformance.
 - 2026-08-24: `RNT-PUB-01` (Rental trusted direct-publish policy)
   moved to Done, closing `DTL-OBJ-01`'s second prerequisite (Rental
   publication lifecycle). Approved after 3 review rounds tightened the

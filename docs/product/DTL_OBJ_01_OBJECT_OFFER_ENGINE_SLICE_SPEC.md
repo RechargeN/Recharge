@@ -1,17 +1,25 @@
 # RECHARGE — DTL-OBJ-01: Object / Offer Engine Slice Spec (Phase 1)
 
-Версия: v0.7 (2026-08-24) — реализовано и Done.
-Статус: **Done.** Оба prerequisite'а (git-hygiene, publication lifecycle)
-закрыты тем же днём, затем реализован сам slice — 5 коммитов
-(`26b80dc` domain, `d1f12e9` data, `9bd8338` sink hook + DI,
-`45131f0` presentation, `4eecc70` tests). Полный gate suite зелёный:
-`flutter analyze` 0 issues, `flutter test` 861 passing (1 pre-existing
-tracked skip, не относится к этому slice), boundary gate 0
-violations/71-71 budget не изменился, `git diff --check` чисто. Все 12
-acceptance criteria (§6) выполнены — см. «Фактический результат
-реализации» ниже для трассировки и disclosed-решений, принятых по
-ходу (venue/participation delegation в `CompatibilityObjectRenderer`,
-отсутствие `url_launcher` в проекте).
+Версия: v0.9 (2026-08-26) — Done: correction-pass закрыл все 6
+находок review (5 контрактных проблем + 1 доп., `PublisherRef.type`),
+полный gate suite перепрогнан и зелёный.
+Статус: **Done** (второй раз, после Review). Первый gate-прогон
+(`26b80dc`…`4eecc70`) был технически зелёным, но code review вскрыл:
+(1) CTA не выполнял реальный launch внешнего URL — disclosed gap не
+отменял canonical-контракт §12; (2) `object_offer_section_matrix.dart`
+был мёртвым кодом — `offerProfileSections`/`objectOfferProfileFor`
+нигде не вызывались, Rental-body был хардкодом (`OBJ-AC-01`/`06` не
+выполнены); (3) «e2e»-тест вызывал `sink.activate()` вручную, минуя
+`CreateController.publishDraft()`/router/widget (`OBJ-AC-03` не
+доказан); (4) availability-подписи говорили «available» без
+requested-interval/freshness — канонический §17.3/§8.3 требует «N
+units listed» и «Confirm on provider site»; (5) сбой `sink.activate()`
+проглатывался без retry/трассировки — Rental мог навсегда остаться
+невидимым в Discover при видимом пользователю «Опубликовано»; (доп.)
+`PublisherRef.type` терялся в `PublishedRentalDiscoveryEntity`,
+оставался только `id`. Каждая находка закрыта отдельным, проверяемым
+изменением — см. «Фактический результат реализации» ниже за точной
+трассировкой пункт-за-пунктом на коммиты и файлы.
 
 Runtime effect (этого документа): **none**.
 
@@ -312,7 +320,7 @@ Accepted/Approved. Session, Find People, Class/Workshop — Candidate,
   `CreateController`) — Rental возвращается к состоянию «Create работает,
   Discover о нём не знает», не к сломанному промежуточному виду.
 
-## Фактический результат реализации (2026-08-24)
+## Фактический результат реализации (2026-08-24, первый заход)
 
 Реализация прошла по file map §5 без структурных отклонений. Одно
 архитектурное решение принято по ходу (не предусмотрено спекой заранее,
@@ -329,10 +337,7 @@ Place/Event/Activity-рендеринга как data-driven конфигура�
 визуально идентичны сегодняшнему выводу» в Phase 1. Решение: один
 класс `ObjectOfferDetailsRenderer`, зарегистрированный под
 `DetailsRendererFamily.objectOffer` (соответствует «engine» на уровне
-registry/dispatch); `objectOfferProfileFor(CatalogObjectType)`
-(`object_offer_section_matrix.dart`) — единственное место, решающее
-принадлежность профилю (соответствует OBJ-AC-06 «нет хардкода» на
-уровне *dispatch-логики*); venue/participation строят внутри себя
+registry/dispatch); venue/participation строят внутри себя
 `CompatibilityObjectRenderer` и форвардят все 4 build-метода —
 гарантирует OBJ-AC-02 *по построению*, не по аккуратности
 реализации. Проверено: уже существующий
@@ -341,23 +346,83 @@ registry/dispatch); `objectOfferProfileFor(CatalogObjectType)`
 `offerProfileSections`/новых Rental-виджетов, поскольку это первый
 Details-рендеринг этого типа вообще (§1.1.2).
 
-**Disclosed gap: внешний CTA не открывает реальный URL.** `url_launcher`
-не подключён нигде в проекте (проверено прямым поиском) — RentalDetails'а
-внешняя CTA-кнопка показывает destination host с off-platform
-предупреждением (canonical §12 текст), но не выполняет реальный
-navigation launch. Добавление зависимости для одной кнопки — вне
-bounded scope этого захода; реальный launch — явный follow-up, не
-тихо пропущенная часть контракта.
+Первый gate-прогон был технически зелёным (`flutter analyze` 0 issues,
+`flutter test` 861 passing, boundary 71/71, `git diff --check` чисто,
+5 коммитов `26b80dc`…`4eecc70`), и на этой основе slice был
+преждевременно помечен Done — без полной сверки кода против контракта.
+Владелец продукта затребовал такую сверку отдельно; она нашла 6 находок
+(перечислены в статус-заголовке выше), после чего статус был откачен
+на Review. Итоговое закрытие каждой находки — ниже.
 
-Гейты: `flutter analyze` 0 issues, `flutter test` 861 passing (1
-pre-existing tracked skip — golden-тест Route из более раннего
-раунда, не относится к DTL-OBJ-01), boundary 71/71, `git diff --check`
-чисто. 5 коммитов, послойно: `26b80dc` (domain — sink/port/entity),
-`d1f12e9` (data — datasource/adapter/loader), `9bd8338` (sink
-activation hook в `CreateController` + DI wiring), `45131f0`
-(presentation — renderer/section-matrix/`RentalDetailsPage`/router),
-`4eecc70` (тесты — e2e publish→render, viewer CTA independence,
-widget rendering).
+## Correction-pass (2026-08-26) — закрытие 6 находок review
+
+Один заход внутри того же slice, без новой спеки, 4 послойных коммита
+(тесты — отдельным пятым):
+
+**1. CTA не открывал URL (canonical §12).** Добавлена зависимость
+`url_launcher: ^6.3.0` (её не было нигде в проекте). `RentalDetailsPage`
+теперь реально вызывает `launchUrl(parsed, mode:
+LaunchMode.externalApplication)` со snackbar-фоллбэком при неудаче.
+Viewer-auth check сознательно не добавлен: соседний generic-Details CTA
+(`discover_details_page.dart`'s `_onCtaTap`) тоже не auth-гейтится, а
+§17.5 прямо говорит «Все product users уже authenticated; Guest-row в
+матрице нет» — это раскрытое отклонение от буквальной формулировки
+review, не тихое игнорирование. Коммит `aa73b23`.
+
+**2. Section-matrix была мёртвым кодом.** `offerProfileSections`
+теперь реально управляет `buildBody()` Rental-профиля через
+`_bodySectionFor`-диспетчер (переставить/убрать секцию в списке меняет
+фактический рендер). `objectOfferProfileFor` — который до этого не
+вызывался вообще нигде — теперь реальный runtime-guard: `assert` в
+`.discoverItem`-конструкторе ловит попытку прогнать non-venue/
+participation тип через этот путь (и бросает `ArgumentError` для
+любого типа вне scope этого slice) вместо тихого рендера чего-то
+generic. `OBJ-AC-01`/`06` теперь выполнены буквально, не только по
+намерению. Коммит `aa73b23`.
+
+**3. «E2E»-тест вызывал `sink.activate()` вручную.**
+`rental_details_end_to_end_test.dart` переписан: основной widget-тест
+теперь идёт `CreateController.publishDraft()` → реальный
+`RentalPublicationDiscoveryAdapter` → реальный `GoRouter`,
+зарегистрированный точно как canonical route в `app_router.dart`, →
+публичный (промотирован из `_ResolvedDetailsRoute`) `ResolvedDetailsRoute`
+→ ассерты на фактический вывод `RentalDetailsPage`. Никто в тесте не
+вызывает `sink.activate` или порт напрямую — `OBJ-AC-03` доказан
+сквозным путём, не изолированной вызываемостью файлов. Коммит `9af552f`.
+
+**4. Availability-подписи говорили «available» без freshness.**
+`rentalInventoryGroupLabel` теперь пишет «`N units listed`» (канонический
+§17.3), не «available». Поскольку `PublishedRentalDiscoveryEntity`
+вообще не несёт поля `confirmedAt`/freshness (pre-existing пробел, не
+внесённый этим slice) — CTA-матрица §17.5 «unknown/stale»-строка
+применяется безусловно, не только «иногда»: кнопка теперь всегда
+показывает `Confirm on provider site` (было `Check availability on
+provider site`), это строже буквальной формулировки review, выведено
+прямым чтением полной таблицы §17.5, а не только двух процитированных
+пунктов. Коммит `aa73b23`.
+
+**5. Сбой `sink.activate()` проглатывался без retry/трассировки.**
+`CreateController` получил `_activateRentalSinkWithRetry`: одна
+немедленная повторная попытка, затем — при повторном сбое —
+`analyticsService.track('rental_sink_activation_failed', {rental_id})`
+вместо тихого проглатывания. `create_publish_succeeded` получил
+`sink_activated: bool`, чтобы «опубликовано, но не проиндексировано»
+было отличимо от настоящего успеха в телеметрии. Коммит `1d40954`.
+
+**(доп.) `PublisherRef.type` терялся в read-модели.**
+`PublishedRentalDiscoveryEntity` получил обязательное поле
+`publisherType` (`user`/`page`), прописанное сквозь entity, local
+datasource (`_toMap`/`_fromMap`) и
+`RentalPublicationDiscoveryAdapter.activate()`. Коммит `1aa03a5`.
+
+Гейты после correction-pass: `flutter analyze` 0 issues, `flutter test`
+861 passing (тот же 1 pre-existing tracked skip — golden-тест Route,
+не относится к DTL-OBJ-01; 0 failures), boundary 71/71 (бюджет не
+менялся), `git diff --check` чисто. 5 коммитов поверх исходных шести:
+`1aa03a5` (PublisherRef.type), `1d40954` (sink retry/tracking),
+`aa73b23` (section-matrix wiring + real CTA launch + availability
+copy), `9af552f` (router promotion + переписанные e2e/widget тесты),
+и коммит с этим документом.
 
 ## 7. Rollback
 
