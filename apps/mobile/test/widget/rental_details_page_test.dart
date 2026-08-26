@@ -13,6 +13,7 @@ void main() {
     return PublishedRentalDiscoveryEntity(
       rentalId: 'rental-1',
       publisherId: 'user-1',
+      publisherType: 'user',
       title: 'Mountain bikes for rent',
       shortDescription: 'Trail bikes',
       fullDescription: 'Trail bikes for the whole family.',
@@ -59,7 +60,7 @@ void main() {
     expect(find.text('Mountain bikes for rent'), findsOneWidget);
     expect(find.textContaining('Adult M'), findsOneWidget);
     expect(
-      find.text('Check availability on provider site'),
+      find.text('Confirm on provider site'),
       findsOneWidget,
     );
   });
@@ -75,7 +76,7 @@ void main() {
 
       final Finder ctaButton = find.widgetWithText(
         FilledButton,
-        'Check availability on provider site',
+        'Confirm on provider site',
       );
       expect(ctaButton, findsOneWidget);
       final FilledButton button = tester.widget<FilledButton>(ctaButton);

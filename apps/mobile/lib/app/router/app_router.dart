@@ -258,7 +258,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             );
           }
-          return _ResolvedDetailsRoute(target: target);
+          return ResolvedDetailsRoute(target: target);
         },
       ),
       GoRoute(
@@ -390,8 +390,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// `CollectionDetailsPage` remains its own `Scaffold` until `DTL-CLG-01`.
 /// This widget only ever hands off a bare, already-verified id — it never
 /// re-renders content itself.
-class _ResolvedDetailsRoute extends ConsumerWidget {
-  const _ResolvedDetailsRoute({required this.target});
+///
+/// Public (not `_ResolvedDetailsRoute`) — promoted the same way
+/// `compatibility_object_renderer.dart`'s originally-private widgets were
+/// during `DTL-FND-01`, specifically so a test can pump the real router
+/// dispatch logic directly (`RentalDetailsPage`/`CollectionDetailsPage`
+/// alone cannot prove the canonical route actually reaches them).
+class ResolvedDetailsRoute extends ConsumerWidget {
+  const ResolvedDetailsRoute({super.key, required this.target});
 
   final DetailsRouteTarget target;
 
