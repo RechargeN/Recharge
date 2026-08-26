@@ -9,6 +9,7 @@ class PublishedRentalDiscoveryEntity {
   const PublishedRentalDiscoveryEntity({
     required this.rentalId,
     required this.publisherId,
+    required this.publisherType,
     required this.title,
     required this.shortDescription,
     required this.fullDescription,
@@ -48,6 +49,12 @@ class PublishedRentalDiscoveryEntity {
 
   final String rentalId;
   final String publisherId;
+
+  /// `user` / `page` — wire-safe name of Create's `PublisherType`. Lost in
+  /// the first version of this entity (only `.id` was carried) — restored
+  /// so a future Page-aware Discover feature is not forced to re-derive
+  /// it from nothing.
+  final String publisherType;
 
   final String title;
   final String shortDescription;

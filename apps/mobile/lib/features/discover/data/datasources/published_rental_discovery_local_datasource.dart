@@ -95,6 +95,7 @@ class PublishedRentalDiscoveryLocalDataSource {
       <String, Object?>{
         'rentalId': value.rentalId,
         'publisherId': value.publisherId,
+        'publisherType': value.publisherType,
         'title': value.title,
         'shortDescription': value.shortDescription,
         'fullDescription': value.fullDescription,
@@ -159,6 +160,7 @@ class PublishedRentalDiscoveryLocalDataSource {
     return PublishedRentalDiscoveryEntity(
       rentalId: map['rentalId']! as String,
       publisherId: map['publisherId'] as String? ?? '',
+      publisherType: map['publisherType'] as String? ?? 'user',
       title: map['title'] as String? ?? '',
       shortDescription: map['shortDescription'] as String? ?? '',
       fullDescription: map['fullDescription'] as String? ?? '',

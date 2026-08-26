@@ -22,6 +22,7 @@ class RentalPublicationDiscoveryAdapter
       PublishedRentalDiscoveryEntity(
         rentalId: listing.id,
         publisherId: listing.publisherRef.id,
+        publisherType: listing.publisherRef.type.name,
         title: listing.title,
         shortDescription: listing.shortDescription,
         fullDescription: listing.fullDescription,
