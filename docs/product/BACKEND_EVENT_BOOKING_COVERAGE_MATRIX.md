@@ -1,13 +1,20 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.2**
+- Version: **1.3**
 - Status: **Review — documentation only**
 - Runtime status: **N/A / Absent**
 - Date: **2026-08-26**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.3 — 2026-08-26
+
+- registered BCK09-API-REV-01 v0.1 technical Hold and BCK09-REV-01 v0.3;
+- recorded schema/DTO, request-attempt binding, transport/hash, request-ID and
+  executable parity gaps without changing 22/22 design coverage or 27 AC;
+- kept BCK-09/ECL-03C Review and runtime Absent.
 
 ### v1.2 — 2026-08-26
 
@@ -34,8 +41,8 @@
 
 ## 1. Verdict
 
-**Coverage: 22/22. Recommendation: register BCK-09 v1.4 as Review / Present /
-runtime Absent.**
+**Coverage: 22/22. API technical review: Hold. Recommendation: keep BCK-09
+v1.4 as Review / Present / runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
 not Approved, executable, deployed or production-ready. The first possible
@@ -51,13 +58,14 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | ECL03-D01–D11 | Accepted / normative | Product/architecture decisions |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
 | ECL-03C v1.2 | Review, runtime not authorized | Exact first executable plan with deterministic active key |
-| BCK-01 v0.4.40 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.44 | Approved baseline + amendments | Registry, categories, OD/gates |
+| BCK-01 v0.4.41 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.45 | Approved baseline + amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.3 | Draft | Common API proposal and Booking v1 reconciliation |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
 | BCK09-DEC-01 v0.2 | Accepted with controls | Product baseline selection and explicit ten-decision dispositions; no runtime authority |
-| BCK09-REV-01 v0.2 | Ready for specialist review | Technical reconciliation and nine Pending sign-offs; no runtime authority |
+| BCK09-REV-01 v0.3 | Specialist review in progress | API technical Hold; all nine named sign-offs remain Pending |
+| BCK09-API-REV-01 v0.1 | Technical Hold | Schema/DTO, request binding, API-DEC-01/03, request-ID and parity findings; not a named signature |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -146,6 +154,7 @@ writer path.
 |---|---|---|
 | ECL-03C plan/runtime authorization absent | Blocks executable work | BCK09-OD-01 exact verdict and slice approval |
 | API transport/hash implementation open | Blocks mutation runtime | API-DEC-01/03 + BCK09-OD-02 |
+| API technical pre-review Hold | Blocks API signature | BCK09-API-TR-01..06 closure and named API Platform verdict |
 | Production Identity/capability absent | Blocks all production commands | BCK-06/BCK-18 runtime evidence |
 | Event projection writer/handoff absent | Blocks production mutation | BCK-07 runtime + BCK09-OD-04 |
 | OD-09/BCK-13 effect handoff not Accepted/runtime | Blocks notifications/workers | BCK09-OD-05 |

@@ -17,11 +17,13 @@
 - Transaction-core plan:
   [ECL-03C v1.2](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.2](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.3](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.2 — signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.3 — API technical Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- API Platform pre-review:
+  [BCK09-API-REV-01 v0.1 — Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
