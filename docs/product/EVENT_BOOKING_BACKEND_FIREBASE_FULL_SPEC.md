@@ -1,7 +1,7 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.3**
+- Версия: **1.4**
 - Дата: **2026-08-26**
 - Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
@@ -15,14 +15,29 @@
 - Accepted decisions:
   [ECL-03 D01–D11](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.1](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.2](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.1](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.2](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
+- Specialist review:
+  [BCK09-REV-01 v0.2 — signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.4 — 2026-08-26
+
+- resolved BCK09-TR-09 with a deterministic `bookingActiveKeys` transaction
+  record and synchronized ECL-03C v1.2 without changing callable scope;
+- resolved BCK09-TR-10 by attributing proposal/approval to BCK-19 and retaining
+  only `ExecuteApprovedBookingRepair` as the BCK-09 mutation;
+- resolved BCK09-TR-11 with immutable suppressed/required handoff disposition,
+  preventing disabled pre-activation obligations from becoming late effects;
+- reconciled one server-issued, callback-retry-stable Booking ID with ADR 0013,
+  BCK-03 and the committed v1 command/fixture surface without a wire change;
+- appended AC-76..79, kept Product baseline/Review status unchanged and added
+  no backend, Firebase, contract, adapter, mobile or deployment runtime.
 
 ### v1.3 — 2026-08-26
 
@@ -304,6 +319,7 @@ fail closed. Deep link повторяет Auth и authorization.
 | `bookingHolds` | `holdId` | Future ECL-03D TTL offer/allocation |
 | `bookingPoolLedgers` | occurrence/pool/channel hash | Capacity counters and revision |
 | `bookingUserUsage` | `userId` | Uniform cap evidence and policy version |
+| `bookingActiveKeys` | versioned actor/occurrence/admission-track hash | One non-terminal Booking lock per duplicate-active scope |
 | `bookingIdempotency` | actor/command/key hash | Payload hash and stored result |
 | `bookingAudit` | `auditId` | Append-only mutation facts |
 | `bookingOutbox` | deterministic obligation ID | Booking-owned post-commit notification need |
@@ -313,14 +329,13 @@ fail closed. Deep link повторяет Auth и authorization.
 | `bookingReconciliationRuns` | `runId` | Drift findings and resolution state |
 | `bookingRetentionJobs` | `jobId` | Deletion/pseudonymization checkpoint |
 
-Только восемь ECL-03C records (`bookingEventProjections`, `bookings`,
-`bookingPoolLedgers`, `bookingUserUsage`, `bookingIdempotency`, `bookingAudit`,
-`bookingOutbox`, `bookingFeatureFlags`) нормативны для первого executable plan.
+Только девять ECL-03C records (`bookingEventProjections`, `bookings`,
+`bookingPoolLedgers`, `bookingUserUsage`, `bookingActiveKeys`,
+`bookingIdempotency`, `bookingAudit`, `bookingOutbox`, `bookingFeatureFlags`)
+нормативны для первого executable plan.
 `bookingHolds` и остальные operational records выше являются conditional
 target names: их physical schema/index/ownership фиксирует соответствующий
-Approved ECL-03D–H/BCK-05 slice. Duplicate-active evidence обязательно, но
-отдельная `bookingActiveKeys` collection не вводится этим документом вопреки
-exact ECL-03C file/data plan.
+Approved ECL-03D–H/BCK-05 slice.
 
 Repair proposal/case/approval records в эту таблицу намеренно не входят: ими
 владеет BCK-19. BCK-09 владеет только валидируемой repair command, Booking
@@ -330,9 +345,16 @@ BCK-09 владеет только атомарным `bookingOutbox` fact. BCK-
 OD-09 handoff владеет inbox, preferences, push registration и channel delivery
 attempts. Booking не создаёт второй notification-delivery source of truth.
 
-No document contains an unbounded participant array. Participant queries use
-indexes and cursor pagination. Email, phone, access code and raw token are
-never document IDs.
+Каждый immutable obligation фиксирует `effectDisposition` и policy revision:
+
+- `suppressedPreActivation` — OD-09/BCK-13 effect gate был выключен при commit;
+  запись является terminal suppressed evidence и никогда позднее не доставляется;
+- `handoffRequired` — Accepted handoff был включён при commit; BCK-13 обязан
+  создать собственный dedupe/terminal receipt либо quarantine/dead-letter.
+
+BCK-09 не меняет inbox/delivery state. Старые suppressed records нельзя
+`replay` после включения notifications, поэтому активация не создаёт запоздалые
+или неожиданные сообщения.
 
 ### 8.1. Booking
 
@@ -399,6 +421,44 @@ count pending application/plain waitlist/unlimited RSVP: no
 completion grace: 120 minutes
 personal/publisher/category override: forbidden
 ```
+
+### 8.5. Duplicate-active key
+
+Для Accepted scope `(userId, occurrenceId, admission track)` BCK-09 вычисляет
+opaque key по каноническому tuple:
+
+```text
+scopeVersion = booking_active_scope_v1
+admissionTrackId = general для ECL-03C
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+activeKeyId = lowercaseHex(SHA-256(
+  encode(scopeVersion) || encode(actorId) ||
+  encode(occurrenceId) || encode(admissionTrackId)
+))
+```
+
+Для Viewer `actorId` является authoritative `userId`. Length-prefix encoding
+исключает ambiguous tuple; fixtures фиксируют exact UTF-8 bytes/hash.
+Exact key record читается до любой write и создаётся/удаляется в той же
+transaction, что Booking. Он содержит ссылку на один non-terminal Booking и
+нужен для finite и explicit-unlimited paths. Existing valid key возвращает
+`already_active`; dangling/mismatch/schema drift возвращает
+`temporarily_unavailable`, блокирует scope для reconciliation и никогда не
+разрешает второй Booking. Cancel terminal transition удаляет key атомарно;
+rejoin после commit получает новый Booking ULID.
+
+Booking v1 `createBooking` не принимает `bookingId` в payload. Поэтому
+trusted handler до входа в Firestore callback выдаёт ровно один request-scoped
+candidate Booking ULID и повторно использует его при каждом внутреннем retry.
+ID становится authoritative и возвращается в typed result только после commit;
+refusal/failure не сохраняет Booking или mapping. Это соответствует ADR 0013
+и разрешённой BCK-03 ветке server-returned mapping, не связывает `bookingId` с
+`requestId` или `idempotencyKey` и не требует несовместимого изменения Booking
+v1 wire.
+
+No document contains an unbounded participant array. Participant queries use
+indexes and cursor pagination. Email, phone, access code and raw token are
+never document IDs.
 
 ## 9. Event operational projection
 
@@ -469,23 +529,24 @@ PromoteWaitlist(requestId, idempotencyKey, bookingId, expectedRevision)
 CancelManagedBooking(requestId, idempotencyKey, bookingId, reasonCode, expectedRevision)
 ```
 
-### 10.4. Internal operations
+### 10.4. Cross-service and internal operations
 
-```text
-PublishBookingEventProjection
-ProcessOccurrenceMaterialChange
-ProcessOccurrenceCancellation
-DispatchBookingOutbox
-ExpireBookingHolds
-OpenReconfirmationWindows
-SendReconfirmationReminders
-ReleaseMissedReconfirmations
-ReconcileBookingLedgers
-ApplyBookingRetention
-ProposeBookingRepair
-ApproveAndExecuteBookingRepair
-EmergencyDisableBookingMutations
-```
+| Operation | Single owner | BCK-09 relationship / gate |
+|---|---|---|
+| `PublishBookingEventProjection` | BCK-07 | BCK-09 validates and consumes the pinned revision; it never publishes Event state |
+| `ProcessOccurrenceMaterialChange` | BCK-09 | Conditional ECL-03E/F command after revision-safe BCK-07 handoff |
+| `ProcessOccurrenceCancellation` | BCK-09 | Conditional bounded Booking mutation after BCK-07 fact |
+| `ConsumeBookingOutbox` | BCK-13 | Conditional after Accepted OD-09; BCK-09 owns only immutable obligation creation |
+| `ExpireBookingHolds` | BCK-09 | Conditional ECL-03D worker |
+| `OpenReconfirmationWindows` | BCK-09 | Conditional ECL-03E worker |
+| `SendReconfirmationReminders` | BCK-13 | Conditional BCK-13 effect from an Accepted handoff |
+| `ReleaseMissedReconfirmations` | BCK-09 | Disabled until delivery/fairness approval |
+| `ReconcileBookingLedgers` | BCK-09 | Detect/block only; cannot invent repair approval |
+| `ApplyBookingRetention` | BCK-09 | Conditional on qualified policy and deletion workflow |
+| `CreateBookingRepairProposal` | BCK-19 | BCK-09 exposes no proposal write surface |
+| `ApproveBookingRepairProposal` | BCK-19 | Requires separate authorized approver; no Booking mutation yet |
+| `ExecuteApprovedBookingRepair` | BCK-09 | Only owning-domain invariant-safe repair mutation after exact BCK-19 receipt |
+| `EmergencyDisableBookingMutations` | BCK-05 | BCK-05 writes the flag; BCK-09 consumes it fail closed |
 
 ### 10.5. Booking v1 result and BCK-03 compatibility
 
@@ -577,18 +638,27 @@ window, eligibility, revision, cap и capacity checks.
 
 ### 12.1. Instant finite Booking
 
+До transaction callback trusted handler один раз генерирует
+`candidateBookingId`. Callback получает его как immutable input и не вызывает
+ID generator; каждый Firestore retry использует тот же candidate.
+
 В одной Firestore transaction:
 
 1. read idempotency;
 2. read Event projection and exact ledger;
 3. validate lifecycle/window/free/internal/generalCapacity;
 4. validate guest units and eligibility;
-5. read duplicate-active evidence and user usage;
+5. derive/read the exact duplicate-active key and read user usage;
 6. enforce duplicate-active and uniform cap;
 7. enforce remaining capacity;
-8. create Booking and atomically preserve duplicate-active uniqueness;
+8. create Booking and its active key atomically;
 9. increment ledger and user usage;
 10. write audit, outbox and idempotency result.
+
+Finite и unlimited create конфликтуют на одном deterministic active-key record
+для `(actorId, occurrenceId, admissionTrackId)`. Different idempotency keys не
+обходят uniqueness. Dangling/mismatched key fail closed и уходит в
+reconciliation; transaction не пытается чинить его автоматически.
 
 Create payload имеет explicit `onFull: reject | joinWaitlist`, default
 `reject`. При `reject` sold out не создаёт Booking. При заранее подтверждённом
@@ -628,6 +698,7 @@ Owner/Creator cancellation:
 
 - проверяет authority, revision и deadline;
 - terminal transition выполняется ровно один раз;
+- exact active key обязан ссылаться на этот Booking и удаляется в transaction;
 - finite confirmed units/active hold/user usage освобождаются атомарно;
 - terminal Booking перестаёт участвовать в active uniqueness evidence;
 - audit/outbox/idempotency записываются в той же transaction;
@@ -715,7 +786,7 @@ idempotencyKey)`.
 | Reminder | every minute | Deterministic bounded reminders |
 | Auto-release | gated, every minute | Release only after delivery-policy approval |
 | Occurrence completion | every 5 minutes | Stop cap count after 120-minute grace |
-| Outbox handoff | event + minute sweep | BCK-13 consumes Booking obligation after OD-09 Acceptance |
+| Outbox handoff | event + minute sweep | BCK-13 consumes only `handoffRequired` obligations after OD-09 Acceptance; suppressed records are never replayed |
 | Reconciliation | frequent scoped + daily full | Detect ledger/usage/audit drift |
 | Retention | daily | Delete/pseudonymize expired data |
 
@@ -769,8 +840,9 @@ Push payload не содержит private Event location, access code, particip
 name или application text. Deep link содержит opaque ID и повторно проходит
 authorization. Device token имеет lifecycle регистрации, rotation, revoke и
 user logout cleanup под BCK-13 authority. Пока OD-09 Proposed или BCK-13 не
-Approved/runtime-ready, `bookingOutbox` может быть записан core-транзакцией,
-но никакой cross-domain dispatcher/FCM effect не включается.
+Approved/runtime-ready, `bookingOutbox` записывается только с
+`effectDisposition=suppressedPreActivation`: никакой cross-domain
+dispatcher/FCM effect не включается и поздний replay запрещён.
 
 ## 16. Security
 
@@ -891,9 +963,10 @@ Reconciliation проверяет:
 ledger.confirmedUnits == sum(active finite confirmed allocations)
 ledger.activeHoldUnits == sum(active holds)
 user usage == policy-counted Booking/hold evidence
-duplicate-active evidence == at most one non-terminal Booking per scope
+one active-key record == exactly one referenced non-terminal Booking per active scope
 every state mutation has audit
-every notification obligation has delivery/dead-letter resolution
+suppressedPreActivation obligation has no delivery and is never replayed
+handoffRequired obligation has BCK-13 terminal receipt or quarantine/dead-letter
 ```
 
 При drift:
@@ -1104,6 +1177,9 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 - finite/unlimited/unknown capacity;
 - guest units и one-slot concurrency counting;
 - duplicate-active deterministic key;
+- forced transaction callback retry сохраняет один server candidate Booking ID;
+- 100 parallel distinct-idempotency creates для одного actor/scope: ровно один
+  Booking/key в finite и explicit-unlimited paths;
 - same idempotency key 100 раз;
 - 100 parallel requests за последнее место;
 - parallel allocations на границе cap=5;
@@ -1113,7 +1189,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 - cancel-vs-reconfirm;
 - duplicate scheduled worker and lease expiry;
 - function failure injection после каждого planned write;
-- no partial Booking/ledger/usage/audit/outbox state;
+- no partial Booking/active-key/ledger/usage/audit/outbox state;
 - cross-user and cross-page denial;
 - revoked account and forged claims;
 - App Check observe/enforce modes;
@@ -1200,7 +1276,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
     либо отдельно Approved compatible major.
 65. `requestId` коррелирует попытку, `idempotencyKey` идентифицирует mutation;
     retry сохраняет key/payload и использует fresh request ID.
-66. ECL-03C использует exact нормативные имена восьми operational records.
+66. ECL-03C использует exact нормативные имена девяти operational records.
 67. Later holds/workers/repair records conditional до exact ECL-03D–H plans.
 68. BCK-07 остаётся единственным writer published Event lifecycle/config;
     BCK-09 только потребляет pinned operational input.
@@ -1216,6 +1292,14 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 74. OD-11-sensitive Booking paths disabled per market до Accepted policy и
     qualified Legal/Privacy/Identity evidence.
 75. BCK-09 Review/Approval не создаёт Firebase/runtime/deployment/main authority.
+76. Duplicate-active scope имеет versioned canonical tuple и один deterministic
+    key record для finite и explicit-unlimited Booking.
+77. Create/cancel атомарно создаёт/удаляет active key; dangling/mismatch fail
+    closed и не чинится внутри пользовательской transaction.
+78. BCK-19 один владеет repair proposal/approval; BCK-09 предоставляет только
+    `ExecuteApprovedBookingRepair` owning-domain mutation.
+79. Suppressed pre-activation outbox никогда не replay; только
+    `handoffRequired` obligation требует BCK-13 terminal receipt/dead-letter.
 
 ## 28. Definition of Ready для начала реализации
 
@@ -1263,7 +1347,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.2, D01–D11 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Exact transaction-core plan v1.1 | Review | Not authorized |
+| ECL-03C | Exact transaction-core plan v1.2 | Review | Not authorized |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1281,7 +1365,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.1 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.2 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
 | BCK09-OD-02 | Deferred/Open | API Platform + Booking | Preserve Booking v1/D11; close API-DEC-01/03 and prove transport/hash fixture parity | No mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |

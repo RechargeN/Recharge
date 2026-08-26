@@ -1,6 +1,6 @@
 # Event Classification v2.2.3 — cumulative runtime coverage matrix
 
-- Версия аудита: 2026-08-09
+- Версия аудита: 2026-08-26
 - Статус: **ECL-00–ECL-03B Done; ECL-03C exact plan Review; runtime absent**
 - Канон: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md),
   Accepted v2.2.3, SHA-256
@@ -158,7 +158,7 @@ classification/configuration coverage.
 | Creator/Page Booking capability | Local preview only | Server-owned exact scope |
 | Booking API schemas | Implemented in ECL-03B | Shared schema/fixture source; backend consumer still absent |
 | Pure Booking domain | Implemented in ECL-03B | No application/data/presentation or command execution |
-| ECL-03C exact plan | Review v1.0 | Docs/file plan only; external authorization and Identity/Platform prerequisites remain |
+| ECL-03C exact plan | Review v1.2 | Five callable surfaces, nine exact records, deterministic duplicate-active key and 41 AC; external authorization and Identity/Platform prerequisites remain |
 | Atomic inventory ledger | Absent | Trusted backend transaction |
 | Idempotency store | Absent | Backend contract + retention |
 | Uniform cap policy catalog | Docs only | Approved version/value/counting rule |

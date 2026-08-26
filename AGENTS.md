@@ -58,10 +58,13 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    отдельная capability-gated поверхность, не профиль, workspace или
    publisher. Термин `Pro generator` — legacy UI и не целевая модель.
    Guest mode более не является целевой продуктовой политикой.
-2. **ID** — по ADR: ULID/UUID, генерация на клиенте. Временные `loc_*`
-   допустимы ТОЛЬКО для несохранённых локальных черновиков и обязаны
-   заменяться постоянным ULID при публикации. Все связи между
-   сущностями — только по id, без ссылок по имени.
+2. **ID** — по ADR 0013: server IDs — immutable ULID/UUID-style IDs.
+   Permanent client-generated ID допустим только там, где это явно принимает
+   domain contract; иначе authoritative create возвращает permanent ID и
+   explicit mapping. Временные `loc_*` допустимы ТОЛЬКО для несохранённых
+   локальных черновиков и обязаны заменяться постоянным ID при authoritative
+   create/publish. Все связи между сущностями — только по id, без ссылок по
+   имени.
 3. **Firebase** — целевой бэкенд (Auth: Google/Apple, Firestore,
    Storage). Текущее состояние — mock datasources. Accepted ADR 0019
    разрешает целевую архитектуру authoritative Booking backend и staged
@@ -163,7 +166,7 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 |---|---|
 | Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract |
 | Create Hub: 10 типов | config-driven runtime; Place / Business, Event, Find People и Scenario имеют типизированные Create-блоки на mock; Place получил PLC-ADP-01: трёхшаговую адаптивную форму по профилю места, релевантные часы/вход/расходы/контакты и explicit local-demo Creator Assist без автоматической публикации; Event получил local-first пользовательские templates CRT-TPL-01 (несколько шаблонов, выбор, управление и новый независимый draft из последнего шаблона); видимый planning-slot занимает Scenario, `quickPlan` скрыт как legacy read-compatibility type |
-| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа, полное покрытие Category System v1.4.3 и provider-neutral roadmap. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 spec v1.2 Approved и D01-D11 Accepted. ECL-03B: shared Booking v1 JSON schemas/fixtures, immutable fixture-verified Dart DTOs и независимый pure mobile Booking domain/readiness/transition validation; package analyze 0 и 9 tests, mobile analyzer 0 и полный suite 659 passed, boundary 59 прежних suppressions без новых. ECL-03C-P exact transaction-core plan v1.1 в Review: пять callable surfaces, finite general-capacity/explicit unlimited instant-free paths, atomic ledger/usage/audit/outbox/idempotency, exact file map и 38 AC; runtime effect none. BCK-09 v1.3 и coverage matrix v1.1 находятся в Review/Present, runtime Absent; BCK09-DEC-01 v0.2 Product-accepted with controls: шесть design dispositions Accepted в ограниченной границе, четыре Deferred/Open. Нет client/network/repository/data/application/presentation/DI/Create/product-backend/Firebase runtime. Физическая ECL-03C реализация требует отдельного plan acceptance, post-stabilization backend authorization, независимых specialist verdicts и production Identity/Platform prerequisites; provider sync/Payments также не реализованы |
+| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа, полное покрытие Category System v1.4.3 и provider-neutral roadmap. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 spec v1.2 Approved и D01-D11 Accepted. ECL-03B: shared Booking v1 JSON schemas/fixtures, immutable fixture-verified Dart DTOs и независимый pure mobile Booking domain/readiness/transition validation; package analyze 0 и 9 tests, mobile analyzer 0 и полный suite 659 passed, boundary 59 прежних suppressions без новых. ECL-03C-P exact transaction-core plan v1.2 в Review: пять callable surfaces, nine exact records, finite general-capacity/explicit unlimited instant-free paths, deterministic duplicate-active key, atomic ledger/usage/audit/outbox/idempotency и 41 AC; runtime effect none. BCK-09 v1.4 и coverage matrix v1.2 находятся в Review/Present, runtime Absent; BCK09-DEC-01 v0.2 Product-accepted with controls, TR-09..11 resolved, BCK09-REV-01 v0.2 ready с девятью Pending specialist signatures. Нет client/network/repository/data/application/presentation/DI/Create/product-backend/Firebase runtime. Физическая ECL-03C реализация требует отдельного plan acceptance, post-stabilization backend authorization, независимых specialist verdicts и production Identity/Platform prerequisites; provider sync/Payments также не реализованы |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
 | Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only presentation preview Viewer/Creator/Professional Page реализован без смены authority; production shell скрывает legacy manual profile-mode selector; production verification НЕ реализована |

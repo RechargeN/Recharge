@@ -1,11 +1,11 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.1
-- Дата: 2026-08-20
+- Версия: 1.2
+- Дата: 2026-08-26
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
-  Approved v1.1
+  Approved v1.2
 - Architecture:
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
@@ -15,6 +15,22 @@
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
 - Runtime effect of this revision: **none**
+
+## 0. Changelog
+
+### v1.2 — 2026-08-26
+
+- replaced an unspecified duplicate-active query with one deterministic
+  `bookingActiveKeys` transaction record per `(actorId, occurrenceId,
+  admissionTrackId)` scope;
+- made create/cancel atomically acquire/release that record and required
+  dangling/mismatched keys to fail closed for reconciliation;
+- confirmed one server-issued, callback-retry-stable Booking v1 ID path without
+  changing its command schema or conflating entity/request/idempotency identity;
+- froze ECL-03C outbox records as terminal `suppressedPreActivation` evidence
+  that can never be delivered or replayed before a later Accepted handoff;
+- added exact implementation/test ownership and three appended AC without
+  changing the five callable surfaces or enabling runtime.
 
 ## 1. Outcome
 
@@ -27,6 +43,7 @@ defines one trusted Firebase transaction core for:
 - listing actor-owned Bookings with bounded cursor pagination;
 - reading an authoritative occurrence availability projection;
 - maintaining finite-capacity pool ledger and user concurrency usage;
+- acquiring and releasing one deterministic duplicate-active key per scope;
 - storing idempotency, audit and notification-obligation records atomically;
 - denying direct client writes and proving no oversell under contention.
 
@@ -35,6 +52,15 @@ general-capacity registration. A successful finite-capacity command returns a
 server-confirmed Booking only after the Firestore transaction commits. An
 explicit unlimited RSVP may confirm without a ledger allocation. Unknown
 capacity is never treated as unlimited.
+
+Booking v1 create does not accept `bookingId` from the command payload. The
+trusted handler therefore issues exactly one request-scoped candidate Booking
+ULID before entering the Firestore transaction callback and reuses that same
+candidate across every internal callback retry. It becomes authoritative and
+is returned only when the transaction commits. A refusal/failure persists no
+Booking or mapping. This follows ADR 0013's server-ID baseline and BCK-03's
+explicit server-returned mapping branch; it does not conflate `bookingId`,
+`requestId` or `idempotencyKey`, and requires no Booking v1 wire change.
 
 This document is the required exact plan. It does not create `apps/backend`,
 connect Firebase, deploy anything, collect production data or change mobile
@@ -87,9 +113,9 @@ authorization boundary must fail closed so ECL-03D can add exact
 10. `getMyBooking`, `listMyBookings` and `getEventAvailability` queries.
 11. Finite `generalCapacity` pool/channel allocation.
 12. Explicit unlimited RSVP without capacity allocation or concurrency usage.
-13. Duplicate-active prevention.
+13. Duplicate-active prevention through an exact transaction key.
 14. Platform policy v1: maximum five active finite-capacity Bookings per user.
-15. Atomic Booking, ledger, usage, audit, outbox and idempotency writes.
+15. Atomic Booking, active-key, ledger, usage, audit, outbox and idempotency writes.
 16. Stable typed rejections and retryable failures.
 17. Feature flags with all production mutations disabled by default.
 18. Rules/IAM boundary documentation and emulator Rules tests.
@@ -163,6 +189,7 @@ Names below are normative for ECL-03C.
 | `bookings` | `bookingId` | Booking aggregate projection | deny; callable query only |
 | `bookingPoolLedgers` | hash of occurrence/pool/channel | capacity and confirmed allocation counters | deny |
 | `bookingUserUsage` | `userId` | policy version plus active finite Booking evidence | deny |
+| `bookingActiveKeys` | SHA-256 of versioned actor/occurrence/admission-track tuple | one non-terminal Booking lock and Booking reference | deny |
 | `bookingIdempotency` | hash of actor/command/idempotency key | payload hash and stable completed result | deny |
 | `bookingAudit` | `auditId` | append-only privacy-safe mutation fact | deny |
 | `bookingOutbox` | deterministic obligation ID | post-commit notification obligation only | deny |
@@ -173,7 +200,42 @@ application answers are absent from ECL-03C. IDs in document paths are stable
 ULID/opaque hashes; raw email, phone, access code or payload is not used as a
 path key.
 
-### 5.1. Event operational projection
+### 5.1. Duplicate-active key
+
+For the Accepted parent scope `(userId, occurrenceId, admission track)`, the
+server derives:
+
+```text
+scopeVersion = booking_active_scope_v1
+admissionTrackId = general
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+activeKeyId = lowercaseHex(SHA-256(
+  encode(scopeVersion) || encode(actorId) ||
+  encode(occurrenceId) || encode(admissionTrackId)
+))
+```
+
+For Viewer self-service, resolved `actorId` is the authoritative `userId` in
+the parent duplicate-active invariant. Length-prefix encoding prevents tuple
+ambiguity; all implementations and fixtures use the exact UTF-8 bytes above.
+The input IDs are already opaque server-bound identifiers. Raw email, phone,
+display name, payload or access secret is never used. The key document stores
+only `scopeVersion`, actor/occurrence/track IDs, `bookingId`, Booking revision,
+created/updated server time and a schema version.
+
+Create reads the exact key before any write. An existing valid key returns
+`already_active` and the authorized current Booking projection. A missing key
+is created atomically with the new Booking. A dangling, mismatched or malformed
+key fails closed as `temporarily_unavailable`, blocks that scope for
+reconciliation and never creates a second Booking.
+
+Cancellation reads and verifies the same key, transitions the referenced
+Booking and deletes the key in the same transaction. A concurrent rejoin can
+therefore proceed only after the terminal transition commits and must allocate
+a new Booking ULID. This record is required for finite and explicit-unlimited
+Bookings; it is separate from the finite-only concurrency usage counter.
+
+### 5.2. Event operational projection
 
 The emulator suite seeds a minimal projection containing:
 
@@ -189,6 +251,21 @@ ECL-03C has no production writer for this projection. A production mutation
 cannot be enabled until a later approved publishing/synchronization slice
 provides revision-safe source ownership. Manual console seeding is prohibited.
 
+### 5.3. Pre-activation outbox disposition
+
+Every ECL-03C `bookingOutbox` record has immutable
+`effectDisposition=suppressedPreActivation` plus the resolved policy revision.
+It is terminal evidence that the Booking transaction intentionally emitted no
+cross-domain notification effect while OD-09/BCK-13 handoff was unavailable.
+It is not a delivery backlog, is excluded from delivery-lag breach, and must
+never be dispatched, mutated to `handoffRequired` or replayed after activation.
+
+A later Approved notification stage may allow only new post-activation
+transactions to write `effectDisposition=handoffRequired`; BCK-13 then owns its
+dedupe and terminal receipt/quarantine/dead-letter. ECL-03C contains no outbox
+dispatcher, inbox writer, push worker or compatibility path that upgrades old
+suppressed records.
+
 ## 6. Transaction contract
 
 Every create/cancel command executes one deterministic Admin SDK Firestore
@@ -197,6 +274,11 @@ transaction closure has no external side effects; outbox delivery happens only
 after commit in a later stage. Firestore guarantees all-or-nothing writes and
 documents retry behavior in
 [transactions and batched writes](https://firebase.google.com/docs/firestore/manage-data/transactions).
+
+For create, the trusted handler generates `candidateBookingId` once before the
+callback. The callback receives it as immutable input; it never calls an ID
+generator. Concurrent attempts may have different candidates, but idempotency
+and the active-key read ensure that only the committed result becomes visible.
 
 ### 6.1. Create, in exact order
 
@@ -211,13 +293,15 @@ documents retry behavior in
 9. verify instant mode, window, eligibility and guest units;
 10. resolve exact general-capacity pool/channel and ledger revision;
 11. read actor usage under policy `active_confirmed_finite_v1`;
-12. query/read duplicate-active evidence;
+12. derive and read the exact `bookingActiveKeys` record;
 13. enforce maximum five active finite-capacity Bookings;
 14. enforce finite capacity, or verify explicit unlimited mode;
-15. allocate a new server-authorized Booking ULID;
-16. write Booking and, for finite capacity, ledger/usage;
+15. bind the handler's immutable `candidateBookingId` to this completed result;
+    the client-supplied `requestId`/`idempotencyKey` remain distinct;
+16. write Booking plus its active key and, for finite capacity, ledger/usage;
 17. write one append-only audit record;
-18. write one deterministic notification-obligation outbox record;
+18. write one deterministic outbox record with immutable
+    `effectDisposition=suppressedPreActivation`;
 19. write completed idempotency result;
 20. commit, then return the stored typed result.
 
@@ -232,11 +316,13 @@ exhaustion returns `contention`; it never reports confirmation.
 3. calculate payload hash and read idempotency record;
 4. read Booking and verify owner;
 5. verify state/revision and authoritative cancellation deadline;
-6. read exact ledger and user usage records when allocation is finite;
-7. transition Booking to terminal `cancelled` with server time/reason;
-8. release the exact confirmed units and finite usage evidence;
-9. write audit, outbox and completed idempotency result;
-10. commit, then return stored result.
+6. derive/read the exact active key and verify it references this Booking;
+7. read exact ledger and user usage records when allocation is finite;
+8. transition Booking to terminal `cancelled` with server time/reason;
+9. delete the active key and release exact finite units/usage when applicable;
+10. write audit, terminal `suppressedPreActivation` outbox evidence and the
+    completed idempotency result;
+11. commit, then return stored result.
 
 Repeated cancellation with the same key returns the original result. A new
 key against an already terminal Booking returns the authorized current
@@ -287,7 +373,7 @@ gated by BCK-03 `API-DEC-03` before runtime.
 
 ## 8. Security boundary
 
-1. Firestore Rules deny every direct mobile write to all eight collections.
+1. Firestore Rules deny every direct mobile write to all nine collections.
 2. ECL-03C also denies direct client reads; callable queries return minimized
    projections. A later direct-read design requires an explicit spec revision.
 3. Admin SDK bypasses Rules, therefore IAM/service-account least privilege is
@@ -363,6 +449,7 @@ plus mechanically generated lockfiles.
 | `apps/backend/functions/src/booking/booking_queries.ts` | Get/list owner projections |
 | `apps/backend/functions/src/booking/availability_query.ts` | Non-reserving authoritative availability |
 | `apps/backend/functions/src/inventory/ledger.ts` | General-capacity ledger invariants |
+| `apps/backend/functions/src/inventory/active_key.ts` | Deterministic duplicate-active scope key and validation |
 | `apps/backend/functions/src/policy/concurrency.ts` | D06 policy v1 and usage evidence |
 | `apps/backend/functions/src/audit/booking_audit.ts` | Append-only privacy-safe mutation facts |
 | `apps/backend/functions/src/notifications/outbox.ts` | Obligation record only; no delivery |
@@ -381,12 +468,15 @@ current runtime table lists Node 22 and 20 as supported:
 | `apps/backend/functions/test/support/fake_clock.ts` | Window/deadline determinism |
 | `apps/backend/functions/test/unit/contract_fixtures.test.ts` | Same ECL-03B valid/invalid/forward fixtures |
 | `apps/backend/functions/test/unit/idempotency.test.ts` | Canonical hash and replay matrix |
+| `apps/backend/functions/test/unit/booking_id.test.ts` | One server candidate per request, stable across callback retries and absent on refusal |
+| `apps/backend/functions/test/unit/active_key.test.ts` | Canonical tuple/hash, malformed and mismatch cases |
+| `apps/backend/functions/test/unit/outbox_disposition.test.ts` | Suppressed record is immutable, non-dispatchable and non-replayable |
 | `apps/backend/functions/test/unit/booking_domain.test.ts` | Finite/unlimited/cap/guest invariants |
 | `apps/backend/functions/test/emulator/create_booking.test.ts` | Atomic success/refusal/no-partial-write |
 | `apps/backend/functions/test/emulator/cancel_booking.test.ts` | Exact release and terminal retry |
 | `apps/backend/functions/test/emulator/booking_queries.test.ts` | Owner scope, pagination, minimized projection |
 | `apps/backend/functions/test/emulator/security_rules.test.ts` | Direct access denied and auth matrix |
-| `apps/backend/functions/test/emulator/contention.test.ts` | Parallel creates, cap and idempotency proof |
+| `apps/backend/functions/test/emulator/contention.test.ts` | Parallel same-scope creates, active-key uniqueness, cap and idempotency proof |
 
 Security tests use the Local Emulator Suite and
 `@firebase/rules-unit-testing`, the Firebase-supported mechanism for mocked
@@ -441,6 +531,9 @@ pass the shared fixtures before any command handler is exported.
 | Rules | unauthenticated/wrong-user/direct operational access denied |
 | Capacity contention | at least 100 parallel attempts into bounded pools; zero oversell |
 | Duplicate idempotency | 100 same-key retries; exactly one allocation/result |
+| Transaction retry ID | forced callback rerun preserves one server candidate and returns only the committed ID |
+| Duplicate active | 100 distinct-key parallel creates for one actor/scope; exactly one Booking/key, including explicit unlimited |
+| Outbox suppression | ECL-03C writes only immutable `suppressedPreActivation`; no dispatcher/replay path exists |
 | User cap contention | parallel events cannot create more than five active finite allocations |
 | Failure atomicity | injected failure at each write boundary leaves no partial mutation |
 | Query pagination | stable order, no duplicate/omitted item across bounded pages |
@@ -491,13 +584,21 @@ remain ECL-03H or later gates.
 31. Availability query is authoritative at response time but reserves nothing.
 32. Server time decides every window/deadline.
 33. Audit/log/metric records contain no participant contact or access secret.
-34. Outbox is an obligation record only; no delivery is claimed.
+34. ECL-03C outbox is immutable `suppressedPreActivation` evidence only: no
+    delivery is claimed, no dispatcher consumes it and later activation cannot
+    replay or upgrade it.
 35. All production mutation flags remain off after implementation.
 36. No mobile/Create/Event runtime file changes in ECL-03C.
 37. Backend, contract, emulator, boundary and full mobile regression gates are
     green with recorded commands/counts.
 38. ECL-03C may be marked Done only as a disabled authoritative core; internal
     Booking product/runtime remains not activated until later stages.
+39. The versioned duplicate-active tuple and SHA-256 encoding are canonical and
+    fixture-tested across the TypeScript implementation and test helpers.
+40. Create/cancel writes or deletes the exact active key atomically with the
+    Booking and every applicable ledger/usage/audit/outbox/idempotency record.
+41. One hundred parallel distinct-idempotency creates for the same actor/scope
+    commit exactly one Booking/key for both finite and explicit-unlimited paths.
 
 ## 13. Rollback and stop conditions
 

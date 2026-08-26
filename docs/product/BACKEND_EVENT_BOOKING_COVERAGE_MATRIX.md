@@ -1,13 +1,20 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.1**
+- Version: **1.2**
 - Status: **Review — documentation only**
 - Runtime status: **N/A / Absent**
 - Date: **2026-08-26**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.2 — 2026-08-26
+
+- reconciled BCK09-REV-01 findings TR-09..11 into BCK-09 v1.4 and ECL-03C v1.2;
+- added one deterministic active-key record, exact BCK-19/BCK-09 repair
+  ownership and fail-closed outbox suppression/handoff semantics;
+- preserved all 24 preparatory AC and appended AC-25..27; runtime remains Absent.
 
 ### v1.1 — 2026-08-26
 
@@ -27,7 +34,7 @@
 
 ## 1. Verdict
 
-**Coverage: 22/22. Recommendation: register BCK-09 v1.3 as Review / Present /
+**Coverage: 22/22. Recommendation: register BCK-09 v1.4 as Review / Present /
 runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
@@ -43,13 +50,14 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | ECL-03 v1.2 | Approved, activation gated | Parent implementation contract |
 | ECL03-D01–D11 | Accepted / normative | Product/architecture decisions |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
-| ECL-03C v1.1 | Review, runtime not authorized | Exact first executable plan |
-| BCK-01 v0.4.39 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.43 | Approved baseline + amendments | Registry, categories, OD/gates |
+| ECL-03C v1.2 | Review, runtime not authorized | Exact first executable plan with deterministic active key |
+| BCK-01 v0.4.40 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.44 | Approved baseline + amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.3 | Draft | Common API proposal and Booking v1 reconciliation |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
 | BCK09-DEC-01 v0.2 | Accepted with controls | Product baseline selection and explicit ten-decision dispositions; no runtime authority |
+| BCK09-REV-01 v0.2 | Ready for specialist review | Technical reconciliation and nine Pending sign-offs; no runtime authority |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -65,7 +73,7 @@ promote any dependency or owner decision.
 |---|---|---|
 | ECL-03A | Accepted/Approved documents only | Architecture is fixed; runtime absent |
 | ECL-03B | Booking v1 JSON schemas/fixtures and Dart DTO/domain tests | Contract evidence, not backend |
-| ECL-03C | Exact v1.1 plan in Review | Implementation not authorized |
+| ECL-03C | Exact v1.2 plan in Review | Implementation not authorized |
 | ECL-03D–H | Full target behavior only | Separate specs/evidence required |
 | Event runtime | Local/mock availability and external handoff | Never Booking authority |
 | Backend scaffold | R0 tooling only; no product handlers/resources | Cannot claim Booking runtime |
@@ -103,7 +111,7 @@ promote any dependency or owner decision.
 | Record/capability | Single writer | BCK-09 posture |
 |---|---|---|
 | Published Event lifecycle/config revision | BCK-07 Content | Consume pinned input only |
-| Booking/hold/ledger/usage/idempotency/audit | BCK-09 Booking | Own |
+| Booking/active-key/hold/ledger/usage/idempotency/audit | BCK-09 Booking | Own |
 | Booking notification obligation | BCK-09 Booking | Own atomic outbox fact |
 | Inbox/preferences/device registration/delivery attempt | BCK-13 Notifications | Emit Accepted intent only |
 | Internal availability source | BCK-09 Booking | Own ledger-derived source |
@@ -118,16 +126,19 @@ writer path.
 
 ## 6. Contract and collection reconciliation
 
-| Concern | Previous risk | v1.2 disposition |
+| Concern | Previous risk | v1.4 disposition |
 |---|---|---|
 | Booking result | Invented `ApiResult` drift | Preserve committed Booking v1 `kind`; BCK-03 adapter/new major gated |
 | Cancellation wording | Domain cancel confused with transport cancel | `CancelBooking` success is distinct from common `cancelled` outcome |
 | Retry identity | Request and logical mutation could be conflated | D11 split-key contract preserved; fresh attempt ID on retry |
-| ECL-03C collections | Full-target names could override exact plan | Exact eight ECL-03C names are normative |
+| ECL-03C collections | Full-target names could override exact plan | Exact nine ECL-03C names are normative; active key is part of C |
 | Holds/workers/repair collections | Appeared prematurely executable | Conditional until ECL-03D–H exact plans |
 | Notification delivery | BCK-09 looked like second delivery writer | BCK-13 owns inbox/channel attempts; BCK-09 owns only obligation |
 | Feature flags | Domain appeared to own platform registry | BCK-05 writer; BCK-09 fail-closed consumer |
 | Waitlist on sold out | Full target could leak into ECL-03C | ECL-03C always rejects; waitlist starts in ECL-03D |
+| Duplicate-active | Query prose did not name a contention point | Deterministic versioned active-key record is atomic for finite/unlimited create/cancel |
+| Repair operations | BCK-09 surface could absorb BCK-19 proposal/approval | BCK-19 owns proposal/approval; BCK-09 owns only approved execution |
+| Disabled outbox | Suppressed obligations could look overdue or replay later | Immutable suppressed/required disposition; pre-activation records never replay |
 
 ## 7. Gap register
 
@@ -179,15 +190,18 @@ writer path.
 19. **BCK-09-PRE-AC-19:** OD-09 effects are disabled until Accepted.
 20. **BCK-09-PRE-AC-20:** OD-11-sensitive paths are disabled per market.
 21. **BCK-09-PRE-AC-21:** Ten owner decisions have recorded dispositions and explicit safe defaults.
-22. **BCK-09-PRE-AC-22:** Target AC remain stable `1..61` and append `62..75`.
+22. **BCK-09-PRE-AC-22:** Target AC remain stable `1..75` and append `76..79`.
 23. **BCK-09-PRE-AC-23:** Runtime remains explicitly Absent.
 24. **BCK-09-PRE-AC-24:** Review authorizes no Firebase/deployment/main merge.
+25. **BCK-09-PRE-AC-25:** ECL-03C exact nine-record plan includes one deterministic finite/unlimited active key.
+26. **BCK-09-PRE-AC-26:** BCK-19 proposal/approval and BCK-09 repair execution remain separate writers.
+27. **BCK-09-PRE-AC-27:** Suppressed pre-activation outbox records never replay as late effects.
 
 ## 10. Evidence summary
 
 - design coverage: **22/22**;
-- target AC: **75 sequential criteria**;
-- preparatory AC: **24 sequential criteria**;
+- target AC: **79 sequential criteria**;
+- preparatory AC: **27 sequential criteria**;
 - owner decisions: **6 Accepted at bounded design scope; 4 Deferred/Open; all
   runtime-sensitive defaults remain fail-closed**;
 - runtime files changed: **0**;
@@ -195,7 +209,7 @@ writer path.
 
 ## 11. Recommendation
 
-Register BCK-09 v1.3 as **Review / Present / runtime Absent**. The Product
+Register BCK-09 v1.4 as **Review / Present / runtime Absent**. The Product
 baseline is Accepted with controls, while Approval still requires the named
 independent boundary reviews and closure of the four Deferred/Open decisions.
 Executable work may begin only through a separately Approved ECL-03C slice;

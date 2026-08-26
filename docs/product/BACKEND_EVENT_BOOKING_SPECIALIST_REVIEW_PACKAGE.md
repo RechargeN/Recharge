@@ -1,31 +1,35 @@
 # Recharge Backend — Event Booking Specialist Review Package
 
 - ID: **BCK09-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-26**
-- Status: **Technical pre-review — amendments required before specialist signature**
-- Target: **BCK-09 v1.3**
+- Status: **Ready for named specialist review — all signatures Pending**
+- Target: **BCK-09 v1.4**
 - Product baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1 — Accepted with controls**
 - Product decision:
   [BCK09-DEC-01 v0.2](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.1](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.2](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
-- Review source snapshot: **`c1fbbb72eed69e32ad19407352163e6ab9b5c198`**
+- Frozen source hashes:
+  - convention: SHA-256 of UTF-8 text normalized to LF line endings
+  - BCK-09 v1.4 SHA-256: `cdc066e7b5fc62499e1d3aef9880d69dc90933cddb3e3a9a067d53f47b48213c`
+  - ECL-03C v1.2 SHA-256: `f0a307e2d6419a40bf397de7948d495e7bd803387cb79ee897d1c62b9ea39b3c`
+  - BCK-09-PRE v1.2 SHA-256: `51290d16d461759fc045bceffd78d973f842f74c59ae666c51d6340baf62b02a`
 - Runtime effect: **none**
 
 ---
 
 ## 0. Verdict
 
-**Technical pre-review: Accept with required amendments.**
+**Technical pre-review: Pass for named specialist review, with blocking runtime evidence.**
 
-BCK-09 v1.3 preserves the accepted product baseline, but two contract
-reconciliation defects and one unresolved physical uniqueness choice must be closed
-before specialist signatures are requested. This verdict does not approve
-BCK-09, sign any specialist row, approve ECL-03C, create a Firebase resource or
-authorize implementation. All nine specialist verdicts below remain `Pending`.
+BCK-09 v1.4 and ECL-03C v1.2 incorporate TR-09..11 without changing the
+Product-selected callable/product scope. The review surface is internally
+reconcilable. This verdict does not approve BCK-09, sign any specialist row,
+approve ECL-03C, create a Firebase resource or authorize implementation. All
+nine specialist verdicts below remain `Pending`.
 
 ## 1. Purpose
 
@@ -41,7 +45,7 @@ possible BCK-09 documentation Approval. It:
    as independent Security, API, Operations or qualified Legal advice.
 
 It is not an implementation plan. The only first executable candidate remains
-ECL-03C v1.1, still in Review and not authorized.
+ECL-03C v1.2, still in Review and not authorized.
 
 ## 2. Authority and frozen inputs
 
@@ -52,9 +56,9 @@ ECL-03C v1.1, still in Review and not authorized.
 | ECL-03 | v1.2 Approved; activation gated | Parent staged delivery contract |
 | ECL03-D01–D11 | Accepted | Normative product/architecture decisions |
 | ECL-03B | v1.1 Done; contracts/domain only | Booking v1 wire and pure-domain evidence |
-| ECL-03C | v1.1 Review; runtime not authorized | Only first executable candidate |
-| BCK-09 | v1.3 Review; runtime Absent | Target under review |
-| BCK-09-PRE | v1.1 Review | 22/22 reconciliation evidence |
+| ECL-03C | v1.2 Review; runtime not authorized | Only first executable candidate; deterministic active key added |
+| BCK-09 | v1.4 Review; runtime Absent | Target under review |
+| BCK-09-PRE | v1.2 Review | 22/22 reconciliation evidence |
 | BCK09-DEC-01 | v0.2 Accepted with controls | Product baseline and ten dispositions |
 | BCK-03/04/05/06/07/13/18/19 | Current repository statuses | Parent/peer proposals and blockers; no inherited Approval |
 | OD-09 | Proposed | Required before cross-domain effects |
@@ -107,16 +111,17 @@ These stay explicit later gates even if all design reviews are accepted.
 | BCK09-TR-06 | Pass | Timeout remains unknown and local/mock state cannot confirm Booking | Preserve typed mobile recovery |
 | BCK09-TR-07 | Pass | Waitlist/holds are excluded from ECL-03C | Keep sold-out result non-mutating |
 | BCK09-TR-08 | Pass | Personal data, age policy and market activation remain gated | Qualified Legal/Privacy input still required |
-| BCK09-TR-09 | Amendment required | `query/read duplicate-active evidence` does not freeze the exact bounded predicate, index/lock record or contention-proof strategy | BCK09-OD-02/ECL-03C executable contract must name one atomic physical strategy and prove parallel same-actor/same-occurrence requests cannot both commit |
-| BCK09-TR-10 | Amendment required | BCK-09 §10.4 lists `ProposeBookingRepair` and `ApproveAndExecuteBookingRepair`, while accepted ownership gives proposal/approval to BCK-19 and only invariant-safe execution to BCK-09 | Attribute proposal/approval surfaces to BCK-19 and retain one BCK-09 `ExecuteApprovedBookingRepair` command |
-| BCK09-TR-11 | Amendment required | BCK-09 §19 requires every outbox obligation to have delivery/dead-letter resolution, but §15 permits a retained undelivered obligation while OD-09/BCK-13 effects are disabled | Define an explicit disabled/pending-handoff state excluded from delivery-lag breach until activation; require terminal delivery/dead-letter only after an Accepted handoff is enabled |
+| BCK09-TR-09 | Resolved in BCK-09 v1.4 / ECL-03C v1.2 | Exact versioned tuple and deterministic `bookingActiveKeys` record are atomic for finite/unlimited create/cancel | API specialist must still validate hash/contract implementation and emulator contention proof before runtime |
+| BCK09-TR-09A | Pass | Booking v1 create has no client `bookingId`; one server candidate ULID is generated before the transaction callback, reused across internal retries and returned only after commit | Preserve Booking v1 wire/fixture parity and callback-retry ID test; a client-ID variant requires a separately versioned contract |
+| BCK09-TR-10 | Resolved in BCK-09 v1.4 | BCK-19 exclusively owns proposal/approval; BCK-09 exposes only `ExecuteApprovedBookingRepair` | Admin/Security specialist verdict and later runtime proof remain required |
+| BCK09-TR-11 | Resolved in BCK-09 v1.4 / ECL-03C v1.2 | Immutable `suppressedPreActivation` versus `handoffRequired` disposition distinguishes no-effect records from BCK-13 obligations; C writes only terminal suppressed evidence | Notifications/API specialist verdict and Accepted OD-09 remain required |
 | BCK09-TR-12 | Pending evidence | Production Identity and Event projection authority do not exist | Keep all commands disabled |
 | BCK09-TR-13 | Pending evidence | Notification, repair and operational proof do not exist | Keep effects/repair/cohort disabled |
 | BCK09-TR-14 | Pending evidence | No qualified per-market Legal/Privacy verdict is recorded | Do not process production personal data |
 
-These findings do not reopen the Product-selected staged free-Booking baseline.
-TR-10/11 reconcile the already accepted single-writer and fail-closed controls;
-TR-09 closes a deferred implementation detail without selecting it by guess.
+The three amendments do not reopen the Product-selected staged free-Booking
+baseline. TR-10/11 implement its accepted single-writer/fail-closed controls;
+TR-09 freezes the missing physical invariant under Deferred/Open BCK09-OD-02.
 
 Firestore guarantees serializable transaction isolation by commit time and
 retries transactions when read data is concurrently changed, but those
@@ -262,7 +267,7 @@ Reviewer role:
 Named reviewer identity:
 Organization/team:
 Qualification or authority basis:
-Target: BCK-09 v1.3 / BCK09-REV-01 v0.1
+Target: BCK-09 v1.4 / BCK09-REV-01 v0.2
 Verdict:
 Accepted scope:
 Required amendments:
@@ -330,7 +335,7 @@ data, credentials, billing, deployment, push or merge to `main`.
 
 ---
 
-**Current conclusion:** BCK09-REV-01 v0.1 completed technical pre-review and
-found three required amendments before named specialist signatures begin. The
-Product baseline remains accepted, all nine signatures remain Pending, and
-every runtime/activation gate remains open. Runtime effect is none.
+**Current conclusion:** BCK09-REV-01 v0.2 is ready for named specialist review.
+The three technical amendments are incorporated and hash-frozen; the Product
+baseline remains accepted, all nine signatures remain Pending, and every
+runtime/activation gate remains open. Runtime effect is none.
