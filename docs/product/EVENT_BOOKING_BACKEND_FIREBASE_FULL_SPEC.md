@@ -1,9 +1,9 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.2**
+- Версия: **1.3**
 - Дата: **2026-08-26**
-- Spec status: **Review — documentation only; approval pending**
+- Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Booking owner**
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
@@ -17,10 +17,22 @@
 - Transaction-core plan:
   [ECL-03C v1.1](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.0](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.1](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+- Product decision:
+  [BCK09-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.3 — 2026-08-26
+
+- recorded Product acceptance of `BCK09-A1-STAGED-FREE-BOOKING-v1` with the
+  mandatory controls in BCK09-DEC-01 v0.2;
+- accepted BCK09-OD-04/05/06/08/09/10 only at their documented design
+  boundaries and kept BCK09-OD-01/02/03/07 Deferred/Open;
+- kept BCK-09 in Review pending independent specialist verdicts and preserved
+  every ECL-03C, Firebase, production-data, deployment and activation gate;
+- created no backend, Firebase, contract, adapter, mobile or deployment runtime.
 
 ### v1.2 — 2026-08-26
 
@@ -1269,18 +1281,20 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Open | Booking + Architecture | Approve exact ECL-03C executable slice and backend exception | No backend/product runtime |
-| BCK09-OD-02 | Open | API Platform + Booking | Close API-DEC-01/03 transport and canonical hash implementation | No mutation endpoint |
-| BCK09-OD-03 | Open | Identity + Security | Production actor/account/capability/revocation readiness | Deny all production commands |
-| BCK09-OD-04 | Open | Content + Booking | BCK-07 pinned Event projection writer/handoff/cutover | No production projection; mutations off |
-| BCK09-OD-05 | Open | Notifications + API + Operations | Accept OD-09 and BCK-13 outbox handoff/dedupe | Outbox retained; no delivery effect |
-| BCK09-OD-06 | Open | Legal/Privacy + Security + Booking | Validate D04 legal basis/rights/retention/deletion per market | No production personal data |
-| BCK09-OD-07 | Open | Security/Privacy + Identity + Legal | Accept OD-11 for applicable age-sensitive paths | Paths server-disabled |
-| BCK09-OD-08 | Open | Operations + Booking | Approve stage SLO, cost, backup/RPO/RTO and stop evidence | No cohort/GA |
-| BCK09-OD-09 | Open | Admin Operations + Booking + Security | Approve BCK-19 two-person repair seam and domain command | Drifted pool blocked; no manual repair |
-| BCK09-OD-10 | Open | Booking + Product + Mobile | Approve bounded ECL-03D–H sequence and per-stage contracts | Only separately authorized ECL-03C scope |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.1 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
+| BCK09-OD-02 | Deferred/Open | API Platform + Booking | Preserve Booking v1/D11; close API-DEC-01/03 and prove transport/hash fixture parity | No mutation endpoint |
+| BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
+| BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
+| BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |
+| BCK09-OD-06 | Accepted — D04 design baseline; Legal gate retained | Legal/Privacy + Security + Booking | Retention classes/targets are the design baseline | No production personal data before qualified per-market Legal/Privacy validation |
+| BCK09-OD-07 | Deferred/Open | Security/Privacy + Identity + Legal | Preserve OD-11 ownership and market versioning | Applicable paths server-disabled |
+| BCK09-OD-08 | Accepted — thresholds; proof deferred | Operations + Booking | SLO/zero-tolerance/automatic-stop values are test targets | No cohort/GA before cost, DR, load and restore evidence |
+| BCK09-OD-09 | Accepted — repair seam; runtime deferred | Admin Operations + Booking + Security | BCK-19 owns case/proposal/approval; BCK-09 executes an invariant-safe command | Drifted pool blocked; no console/manual repair |
+| BCK09-OD-10 | Accepted — staged sequence | Booking + Product + Mobile | ECL-03C → D → E → F → G → H; every stage remains bounded | No stage inherits executable authority |
 
-Accepted ECL03-D01–D11 are not reopened by this table. These BCK09 decisions
-cover executable integration and activation evidence only. Review does not
-accept them automatically; every closure requires a versioned verdict and
+Accepted ECL03-D01–D11 are not reopened by this table. BCK09-DEC-01 v0.2
+records the Product disposition: six decisions are Accepted only at their
+stated design boundaries and four remain Deferred/Open. It supplies neither
+independent specialist verdicts nor executable integration, ECL-03C runtime or
+activation authority; every remaining closure requires a versioned verdict and
 evidence link.

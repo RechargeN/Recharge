@@ -1,13 +1,19 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.0**
+- Version: **1.1**
 - Status: **Review — documentation only**
 - Runtime status: **N/A / Absent**
 - Date: **2026-08-26**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.1 — 2026-08-26
+
+- recorded BCK09-DEC-01 v0.2 Product acceptance with controls;
+- reconciled six Accepted design dispositions and four Deferred/Open decisions;
+- preserved BCK-09 Review, ECL-03C Review and runtime Absent boundaries.
 
 ### v1.0 — 2026-08-26
 
@@ -21,7 +27,7 @@
 
 ## 1. Verdict
 
-**Coverage: 22/22. Recommendation: register BCK-09 v1.2 as Review / Present /
+**Coverage: 22/22. Recommendation: register BCK-09 v1.3 as Review / Present /
 runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
@@ -38,11 +44,12 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | ECL03-D01–D11 | Accepted / normative | Product/architecture decisions |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
 | ECL-03C v1.1 | Review, runtime not authorized | Exact first executable plan |
-| BCK-01 v0.4.38 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.42 | Approved baseline + amendments | Registry, categories, OD/gates |
+| BCK-01 v0.4.39 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.43 | Approved baseline + amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.3 | Draft | Common API proposal and Booking v1 reconciliation |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
+| BCK09-DEC-01 v0.2 | Accepted with controls | Product baseline selection and explicit ten-decision dispositions; no runtime authority |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -171,7 +178,7 @@ writer path.
 18. **BCK-09-PRE-AC-18:** ECL-03C sold out never creates waitlist.
 19. **BCK-09-PRE-AC-19:** OD-09 effects are disabled until Accepted.
 20. **BCK-09-PRE-AC-20:** OD-11-sensitive paths are disabled per market.
-21. **BCK-09-PRE-AC-21:** Ten owner decisions have explicit safe defaults.
+21. **BCK-09-PRE-AC-21:** Ten owner decisions have recorded dispositions and explicit safe defaults.
 22. **BCK-09-PRE-AC-22:** Target AC remain stable `1..61` and append `62..75`.
 23. **BCK-09-PRE-AC-23:** Runtime remains explicitly Absent.
 24. **BCK-09-PRE-AC-24:** Review authorizes no Firebase/deployment/main merge.
@@ -181,13 +188,15 @@ writer path.
 - design coverage: **22/22**;
 - target AC: **75 sequential criteria**;
 - preparatory AC: **24 sequential criteria**;
-- owner decisions: **10 Open with fail-closed defaults**;
+- owner decisions: **6 Accepted at bounded design scope; 4 Deferred/Open; all
+  runtime-sensitive defaults remain fail-closed**;
 - runtime files changed: **0**;
 - runtime evidence: **Absent**.
 
 ## 11. Recommendation
 
-Register BCK-09 v1.2 as **Review / Present / runtime Absent**. Approval requires
-the named boundary reviews and explicit dispositions of BCK09-OD-01..10.
+Register BCK-09 v1.3 as **Review / Present / runtime Absent**. The Product
+baseline is Accepted with controls, while Approval still requires the named
+independent boundary reviews and closure of the four Deferred/Open decisions.
 Executable work may begin only through a separately Approved ECL-03C slice;
 later behavior requires its own ECL-03D–H approval and evidence.

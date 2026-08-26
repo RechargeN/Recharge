@@ -1,10 +1,10 @@
 # Recharge Backend — Event Booking Owner Decision
 
 - ID: **BCK09-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-26**
-- Status: **Ready for owner verdict — not Accepted**
-- Decision target: **BCK-09 v1.2 / BCK09-OD-01..10**
+- Status: **Accepted — BCK09-A1-STAGED-FREE-BOOKING-v1 with controls**
+- Decision target: **BCK-09 v1.3 / BCK09-OD-01..10**
 - Candidate baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1**
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
@@ -25,12 +25,21 @@
 
 ## 0. Current verdict state
 
-No effective owner verdict is recorded yet. Generic continuation, approval of
-documentation work, silence or file presence does not accept this decision.
+The Product owner recorded the exact acceptance phrase required by §7.
+
+| Field | Recorded value |
+|---|---|
+| Decision | `BCK09-DEC-01` |
+| Owner identity | RechargeN / Product owner |
+| Accepted baseline | `BCK09-A1-STAGED-FREE-BOOKING-v1` with §4 controls |
+| Exact evidence | `Одобряю BCK09-DEC-01: Accept BCK09-A1-STAGED-FREE-BOOKING-v1 with controls.` |
+| Signed UTC | `2026-08-26T08:53:31Z` |
+| Independent verdicts | Not inherited; the reviewers named above remain required |
+| Runtime effect | None |
 
 ## 1. Purpose
 
-This record asks one bounded product/architecture question:
+This record answers one bounded product/architecture question:
 
 > May Recharge select `BCK09-A1-STAGED-FREE-BOOKING-v1` as the single design
 > baseline for internal free Event Booking, with the dispositions and controls
@@ -63,12 +72,12 @@ enable a flag, connect mobile or merge to `main`.
 12. Latvia is the first possible cohort; Estonia and Lithuania remain
     independently disabled.
 
-## 3. Proposed dispositions
+## 3. Recorded dispositions
 
-The verdict accepts or defers each decision explicitly. A deferred decision is
+The accepted verdict accepts or defers each decision explicitly. A deferred decision is
 not a hidden acceptance: its fail-closed default remains binding.
 
-| Decision | Proposed disposition | Exact effect | Remaining gate/default |
+| Decision | Recorded disposition | Exact effect | Remaining gate/default |
 |---|---|---|---|
 | BCK09-OD-01 | **Defer executable authorization** | Select ECL-03C v1.1 as the only first candidate | No product backend until separate explicit post-stabilization approval |
 | BCK09-OD-02 | **Defer implementation details** | Preserve Booking v1 and D11 semantics | No endpoint until API-DEC-01/03 accepted and fixture parity proved |
@@ -161,17 +170,18 @@ Allowed verdicts:
 | `Reject` | BCK-09 remains Review; replacement direction is recorded |
 | `Inconclusive` | BCK-09 remains Review; missing decision/evidence is named |
 
-Recommended verdict:
+Recorded verdict:
 **Accept `BCK09-A1-STAGED-FREE-BOOKING-v1` with controls.**
 
-The only effective Product-owner phrase is:
+The effective Product-owner phrase was:
 
 ```text
 Одобряю BCK09-DEC-01: Accept BCK09-A1-STAGED-FREE-BOOKING-v1 with controls.
 ```
 
 Generic `да`, `дальше`, approval of previous BCK-09 editing, silence or
-document presence is not this verdict.
+document presence is not this verdict. The exact verdict above is recorded in
+§0 with owner identity and timestamp.
 
 ## 8. Status after exact Product acceptance
 
@@ -223,6 +233,7 @@ rollback and effective date. No silent reinterpretation is allowed.
 
 ---
 
-**Current conclusion:** `BCK09-DEC-01` is ready for the exact Product-owner
-verdict. No acceptance, BCK-09 Approval, ECL-03C authorization, Firebase
-runtime, deployment, production data, push or `main` merge is recorded.
+**Current conclusion:** `BCK09-DEC-01` is Accepted at the Product design
+boundary with controls. BCK-09 remains Review, all independent specialist
+verdicts remain separate, and no ECL-03C authorization, Firebase runtime,
+deployment, production data, push or `main` merge is recorded.
