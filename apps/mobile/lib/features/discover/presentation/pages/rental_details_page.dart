@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/published_rental_discovery_entity.dart';
 import '../renderers/object_offer_details_renderer.dart';
@@ -13,7 +14,7 @@ import '../shell/details_shell.dart';
 /// too).
 ///
 /// Takes the already-resolved [projection] directly, not a bare id — the
-/// canonical route (`app/router/app_router.dart`'s `_ResolvedDetailsRoute`)
+/// canonical route (`app/router/app_router.dart`'s `ResolvedDetailsRoute`)
 /// already loaded it once via `RentalDetailsLookup` to verify the object
 /// exists; a second fetch here would be redundant.
 class RentalDetailsPage extends StatelessWidget {
@@ -23,20 +24,28 @@ class RentalDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void onExternalCtaTap() {
+    Future<void> onExternalCtaTap() async {
       final String? url = projection.externalBookingUrl;
       if (url == null || url.isEmpty) return;
-      // No url_launcher dependency exists anywhere in this codebase yet
-      // (verified — Discover has no established "open external URL"
-      // pattern today); rather than add one silently for this slice, the
-      // destination host is surfaced with the same off-platform warning
-      // spec §12 requires, without an actual navigation launch. Adding
-      // real external navigation is a disclosed follow-up, not part of
-      // DTL-OBJ-01.
-      final String host = Uri.tryParse(url)?.host ?? url;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Continues on $host — outside Recharge.')),
+      // Canonical RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md §12: "CTA: `Check
+      // availability on provider site`" is a real off-platform redirect,
+      // not a no-op — every product Viewer is already authenticated
+      // (§17.5: "Все product users уже authenticated; Guest-row в
+      // матрице нет"), and the sibling generic-Details CTA
+      // (`discover_details_page.dart`'s `_onCtaTap`) does not auth-gate
+      // either, so no auth check is added here to stay consistent with
+      // that established convention.
+      final Uri? parsed = Uri.tryParse(url);
+      if (parsed == null) return;
+      final bool launched = await launchUrl(
+        parsed,
+        mode: LaunchMode.externalApplication,
       );
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open ${parsed.host}.')),
+        );
+      }
     }
 
     return DetailsShell(

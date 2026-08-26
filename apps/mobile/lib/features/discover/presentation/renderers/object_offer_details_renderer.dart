@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -5,22 +7,27 @@ import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_rental_discovery_entity.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../shell/details_renderer.dart';
+import 'object_offer_section_matrix.dart';
 
 /// [DetailsRenderer] for the three Object/Offer visual profiles
 /// (`DTL-OBJ-01` §2): `venue` (Place), `participation` (Event/Activity),
 /// `offer` (Rental). One class registered under
-/// `DetailsRendererFamily.objectOffer` — which profile applies is decided
-/// by which named constructor the caller used, itself driven by
-/// `object_offer_section_matrix.dart`'s `objectOfferProfileFor(...)`, not
-/// by a type switch inside this class.
+/// `DetailsRendererFamily.objectOffer`.
 ///
 /// `venue`/`participation` deliberately delegate every build method to an
 /// internally-built [CompatibilityObjectRenderer] rather than
 /// reconstructing an equivalent layout from `offerProfileSections` — this
 /// is what makes OBJ-AC-02 (visual/functional parity with the pre-existing
-/// output) true by construction, not by careful reimplementation. Only
-/// `offer` (Rental) — the first Details rendering this type has ever had —
-/// builds new, section-matrix-driven content.
+/// output) true by construction, not by careful reimplementation.
+/// `offerProfileSections` genuinely drives `offer` (Rental)'s body below —
+/// [buildBody] iterates it and dispatches each [ObjectOfferSection] to its
+/// widget, so adding/removing/reordering an entry in the matrix changes
+/// what actually renders (OBJ-AC-01/06), not just documents an intent.
+/// `objectOfferProfileFor` is likewise load-bearing, not decorative: the
+/// `.discoverItem` constructor's `assert` below calls it on every
+/// construction, so a caller routing an out-of-scope or `offer`-profile
+/// type through `.discoverItem` fails loudly in debug builds instead of
+/// silently rendering the wrong layout.
 class ObjectOfferDetailsRenderer implements DetailsRenderer {
   ObjectOfferDetailsRenderer.discoverItem({
     required DiscoverItemEntity item,
@@ -37,7 +44,16 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     required VoidCallback onMarkVisited,
     required VoidCallback onCtaTap,
     required VoidCallback onReportRoute,
-  }) : _delegate = CompatibilityObjectRenderer(
+  }) : assert(
+         objectOfferProfileFor(item.catalogObjectType) !=
+             ObjectOfferProfile.offer,
+         'ObjectOfferDetailsRenderer.discoverItem is for the venue/'
+         'participation profiles only — Rental (offer) must use .rental. '
+         'objectOfferProfileFor also throws here for any type outside '
+         "this slice's scope (DTL-OBJ-01 §1.1), catching a misrouted "
+         'caller instead of silently rendering something generic.',
+       ),
+       _delegate = CompatibilityObjectRenderer(
          item: item,
          isFavorite: isFavorite,
          ctaSubmitted: ctaSubmitted,
@@ -58,14 +74,14 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
 
   ObjectOfferDetailsRenderer.rental({
     required PublishedRentalDiscoveryEntity projection,
-    required VoidCallback onExternalCtaTap,
+    required Future<void> Function() onExternalCtaTap,
   }) : _delegate = null,
        _rentalProjection = projection,
        _onExternalCtaTap = onExternalCtaTap;
 
   final CompatibilityObjectRenderer? _delegate;
   final PublishedRentalDiscoveryEntity? _rentalProjection;
-  final VoidCallback? _onExternalCtaTap;
+  final Future<void> Function()? _onExternalCtaTap;
 
   @override
   List<Widget> buildAppBarActions(BuildContext context) {
@@ -93,20 +109,40 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _RentalInventoryCard(projection: projection),
-          const SizedBox(height: 12),
-          const _RentalAvailabilityNote(),
-          const SizedBox(height: 12),
-          _RentalPricingCard(projection: projection),
-          const SizedBox(height: 12),
-          _RentalPickupCard(projection: projection),
-          const SizedBox(height: 12),
-          _RentalDurationSafetyCard(projection: projection),
-          const SizedBox(height: 12),
-          _RentalPublisherCard(projection: projection),
+          for (final ObjectOfferSection section in offerProfileSections)
+            if (_bodySectionFor(section, projection) case final Widget widget) ...<Widget>[
+              widget,
+              const SizedBox(height: 12),
+            ],
         ],
       ),
     );
+  }
+
+  /// `hero` and `externalCta` are handled by [buildHero]/[buildStickyAction]
+  /// respectively, not the scrollable body — returns `null` for them so
+  /// the loop above skips them cleanly rather than special-casing the
+  /// section list itself.
+  Widget? _bodySectionFor(
+    ObjectOfferSection section,
+    PublishedRentalDiscoveryEntity projection,
+  ) {
+    return switch (section) {
+      ObjectOfferSection.hero => null,
+      ObjectOfferSection.inventory => _RentalInventoryCard(
+        projection: projection,
+      ),
+      ObjectOfferSection.availability => const _RentalAvailabilityNote(),
+      ObjectOfferSection.pricing => _RentalPricingCard(projection: projection),
+      ObjectOfferSection.pickup => _RentalPickupCard(projection: projection),
+      ObjectOfferSection.duration => _RentalDurationSafetyCard(
+        projection: projection,
+      ),
+      ObjectOfferSection.publisher => _RentalPublisherCard(
+        projection: projection,
+      ),
+      ObjectOfferSection.externalCta => null,
+    };
   }
 
   @override
@@ -300,8 +336,15 @@ class _RentalAvailabilityNote extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Availability is Creator-declared, not a live booking '
-                'guarantee. Confirm the exact dates on the provider site.',
+                // Canonical spec §8.3: no confirmedAt/freshness field
+                // exists anywhere in this projection (RentalListing never
+                // carried it — a pre-existing gap, not introduced here),
+                // so this must never claim current/fresh availability —
+                // only that Creator-declared numbers exist and require
+                // confirmation.
+                'Listed quantities are Creator-declared, not a live '
+                'booking guarantee or confirmed-fresh count. Confirm on '
+                'the provider site before relying on them.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -457,6 +500,7 @@ class _RentalPublisherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isPage = projection.publisherType == 'page';
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -466,14 +510,16 @@ class _RentalPublisherCard extends StatelessWidget {
               radius: 20,
               backgroundColor: RechargeTheme.travelPanel,
               child: Icon(
-                Icons.storefront_outlined,
+                isPage ? Icons.storefront_outlined : Icons.person_outline,
                 color: RechargeTheme.travelGreenDark,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Listed by ${projection.publisherId}',
+                isPage
+                    ? 'Listed by page ${projection.publisherId}'
+                    : 'Listed by ${projection.publisherId}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -490,7 +536,7 @@ class _RentalExternalCtaBar extends StatelessWidget {
   const _RentalExternalCtaBar({required this.projection, required this.onTap});
 
   final PublishedRentalDiscoveryEntity projection;
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -505,10 +551,18 @@ class _RentalExternalCtaBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
           child: FilledButton(
-            onPressed: hasUrl && hasInventory ? onTap : null,
+            onPressed: hasUrl && hasInventory
+                ? () {
+                    unawaited(onTap());
+                  }
+                : null,
             child: Text(
               hasInventory
-                  ? 'Check availability on provider site'
+                  // Canonical §17.5 CTA matrix: this projection never
+                  // carries a freshness/confirmedAt signal (see
+                  // _RentalAvailabilityNote), so the "unknown/stale" row
+                  // applies unconditionally here, never the "fresh" row.
+                  ? 'Confirm on provider site'
                   : 'Currently unavailable',
             ),
           ),
@@ -528,12 +582,16 @@ String rentalBaseRateLabel(PublishedRentalDiscoveryEntity projection) {
   return '${_moneyLabel(first.unitPriceMinor, projection.currencyCode)} / $unit';
 }
 
+/// Canonical §17.3: "Без requested interval card показывает `N units
+/// listed`, а не `N available`" — this Details-page listing has no
+/// requested-interval query either, so the same discipline applies: never
+/// claim a verified-available count, only the declared quantity.
 String rentalInventoryGroupLabel(PublishedRentalInventoryGroupRef group) {
   final String variant = group.sizeOrVariant == null
       ? ''
       : ' · ${group.sizeOrVariant}';
   final String status = group.isAvailable ? '' : ' · ${group.status}';
-  return '${group.label}$variant — ${group.quantity} available$status';
+  return '${group.label}$variant — ${group.quantity} units listed$status';
 }
 
 String rentalRateStepLabel(
