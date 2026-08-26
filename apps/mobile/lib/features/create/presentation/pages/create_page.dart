@@ -7,6 +7,7 @@ import '../../../../app/router/app_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../app/application/planning_conversion_providers.dart';
 import '../../../../app/application/active_create_publisher_provider.dart';
+import '../../../../app/application/active_creator_verification_provider.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../../../core/parsing/input_parsers.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -21,8 +22,11 @@ import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/create_availability.dart';
 import '../widgets/event_create_block.dart';
 import '../widgets/activity_create_block.dart';
+import '../widgets/collection_create_block.dart';
 import '../widgets/find_people_create_block.dart';
 import '../widgets/place_create_block.dart';
+import '../widgets/rental_create_block.dart';
+import '../widgets/session_create_block.dart';
 import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 
@@ -86,6 +90,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     final PublisherRef activePublisher =
         ref.watch(activeCreatePublisherProvider) ??
         PublisherRef(type: PublisherType.user, id: user?.id ?? '');
+    final bool isVerifiedCreator = ref.watch(activeCreatorVerificationProvider);
     final CreateController controller = ref.watch(createControllerProvider);
     final CreateState state = controller.state;
 
@@ -99,6 +104,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       organizerName: user.email.split('@').first,
       capabilities: user.capabilities,
       publisherRef: activePublisher,
+      isVerifiedCreator: isVerifiedCreator,
     );
     _syncControllers(state);
     _scheduleExactScenarioDraft(controller, state, user.id);
@@ -240,9 +246,27 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                     ref.read(appRouterProvider).go(RouteNames.createSuccess),
               ),
             ] else if (state.draft.objectType ==
+                CreateObjectType.session) ...<Widget>[
+              const SizedBox(height: 12),
+              SessionCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
                 CreateObjectType.route) ...<Widget>[
               const SizedBox(height: 12),
               RouteCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.rental) ...<Widget>[
+              const SizedBox(height: 12),
+              RentalCreateBlock(
                 controller: controller,
                 state: state,
                 onPublished: () =>
@@ -258,6 +282,24 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                     scenarioTransitPickerConfig.pickerEnabled
                     ? ref.watch(scenarioTransitPickerControllerProvider)
                     : null,
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.rental) ...<Widget>[
+              const SizedBox(height: 12),
+              RentalCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.collection) ...<Widget>[
+              const SizedBox(height: 12),
+              CollectionCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
               ),
             ] else ...<Widget>[
               const SizedBox(height: 12),
@@ -506,9 +548,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     required String organizerName,
     required List<String> capabilities,
     required PublisherRef publisherRef,
+    required bool isVerifiedCreator,
   }) {
+    // RNT-PUB-01 §1.4: isVerifiedCreator must be part of this dedup key.
+    // The Identity snapshot it comes from resolves asynchronously — without
+    // it here, a first build's `false` would be cached, and a later
+    // rebuild carrying the real `true` (with every other field unchanged)
+    // would never re-trigger ensureLoaded, leaving the controller stuck.
     final String key =
-        '$userId:$organizerEmail:${capabilities.join(',')}:'
+        '$userId:$organizerEmail:$isVerifiedCreator:${capabilities.join(',')}:'
         '${publisherRef.type.wireName}:${publisherRef.id}';
     if (_loadKey == key) return;
     _loadKey = key;
@@ -522,6 +570,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             organizerName: organizerName,
             capabilities: capabilities,
             activePublisherRef: publisherRef,
+            isVerifiedCreator: isVerifiedCreator,
           );
     });
   }

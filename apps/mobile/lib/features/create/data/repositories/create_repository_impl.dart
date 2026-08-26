@@ -6,6 +6,7 @@ import '../../domain/entities/route_draft_save_result.dart';
 import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/repositories/create_repository.dart';
 import '../../domain/repositories/create_draft_collection_repository.dart';
+import '../../domain/repositories/rental_promotion_repository.dart';
 import '../../domain/repositories/route_draft_persistence_repository.dart';
 import '../datasources/create_local_datasource.dart';
 import '../models/create_draft_model.dart';
@@ -14,7 +15,8 @@ class CreateRepositoryImpl
     implements
         CreateRepository,
         RouteDraftPersistenceRepository,
-        CreateDraftCollectionRepository {
+        CreateDraftCollectionRepository,
+        RentalPromotionRepository {
   CreateRepositoryImpl({
     required CreateLocalDataSource localDataSource,
     required IdGenerator idGenerator,
@@ -199,8 +201,16 @@ class CreateRepositoryImpl
       return existing;
     }
     final DateTime now = DateTime.now().toUtc();
+    // RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md v1.4 §11.3: the key must vary
+    // with Activity's own revision. Without `activityData?.revision` here,
+    // every Activity publish attempt fell through to the shared `?? 0`
+    // default, so a genuinely new revision could replay as a duplicate of
+    // an earlier one. Full formula also names `PublisherRef` + `actionKind`;
+    // those are not yet folded into this shared cross-type key (same
+    // `userId:draftId:revision` shape used by every other Create type) —
+    // deferred as a separate cross-type change, not silently dropped.
     final String idempotencyKey =
-        '$userId:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? 0}';
+        '$userId:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? draft.sessionData?.revision ?? draft.activityData?.revision ?? draft.rentalData?.revision ?? 0}';
     final String publishedId = draft.id.startsWith('loc_')
         ? _idGenerator.generate()
         : draft.id;
@@ -286,13 +296,16 @@ class CreateRepositoryImpl
       findPeopleData: draft.findPeopleData?.replaceLocalIds(
         _idGenerator.generate,
       ),
+      sessionData: draft.sessionData?.replaceLocalIds(_idGenerator.generate),
+      rentalData: draft.rentalData?.replaceLocalIds(_idGenerator.generate),
       sectionData: sectionData,
       scheduleSlots: publishedSlots,
       draftStatus: DraftStatus.pendingReview,
       // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
       // moderation threshold, set by CreateController.publishDraft());
       // otherwise default to the normal pending state.
-      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+      moderationStatus:
+          draft.moderationStatus == ModerationStatus.flaggedForReview
           ? ModerationStatus.flaggedForReview
           : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
@@ -304,5 +317,33 @@ class CreateRepositoryImpl
       CreateDraftModel.fromEntity(published),
     );
     return published;
+  }
+
+  @override
+  Future<CreateDraftEntity> promoteRentalToPublished({
+    required String userId,
+    required String rentalId,
+    required int expectedRentalRevision,
+  }) async {
+    final RentalPromotionResult result = await _localDataSource
+        .promoteRentalDraftIfCurrent(
+          userId: userId,
+          expectedRentalId: rentalId,
+          expectedRentalRevision: expectedRentalRevision,
+        );
+    switch (result.status) {
+      case RentalPromotionStatus.promoted:
+      case RentalPromotionStatus.alreadyPublished:
+        return result.persisted!.toEntity();
+      case RentalPromotionStatus.conflict:
+        throw const RentalPromotionException(
+          'Rental draft changed since publish; direct-publish promotion '
+          'was not applied.',
+        );
+      case RentalPromotionStatus.invalidExistingData:
+        throw const RentalPromotionException(
+          'No matching pending_review Rental draft to promote.',
+        );
+    }
   }
 }

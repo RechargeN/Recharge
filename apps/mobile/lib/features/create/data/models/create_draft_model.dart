@@ -5,15 +5,19 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/place_draft_data.dart';
+import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
+import '../../domain/entities/session_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
 import 'activity_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
+import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
+import 'session_draft_mapper.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -164,6 +168,28 @@ class CreateDraftModel {
     return value is num && value.isFinite ? value.toInt() : null;
   }
 
+  /// RNT-PUB-01 §1.2.1 `expectedRentalRevision` CAS guard. `null` when this
+  /// draft has no typed Rental payload at all (peeked at the raw
+  /// `rental_details` section, mirroring [routeRevision]/[scenarioRevision]
+  /// — the datasource layer never decodes into domain entities).
+  int? get rentalRevision {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
+  /// RNT-PUB-01 §1.2.1 owner check. `{'type': 'user'|'page', 'id': String}`
+  /// as stored by `RentalDraftMapper.toJson`, or `null` if this draft has no
+  /// typed Rental payload / the section is malformed.
+  Map<String, Object?>? get rentalPublisherRefJson {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? ref = payload['publisherRef'];
+    if (ref is! Map) return null;
+    return Map<String, Object?>.from(ref);
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
       entity.sectionData,
@@ -196,6 +222,16 @@ class CreateDraftModel {
     if (entity.routeData != null) {
       serializedSections['route_details'] = RouteDraftMapper.toJson(
         entity.routeData!,
+      );
+    }
+    if (entity.sessionData != null) {
+      serializedSections['session_details'] = SessionDraftMapper.toJson(
+        entity.sessionData!,
+      );
+    }
+    if (entity.rentalData != null) {
+      serializedSections['rental_details'] = RentalDraftMapper.toJson(
+        entity.rentalData!,
       );
     }
     return CreateDraftModel(
@@ -370,6 +406,17 @@ class CreateDraftModel {
             defaults: legacyPlaceDefaults,
           )
         : null;
+    final RentalDraftData? rentalData =
+        parsedObjectType == CreateObjectType.rental
+        ? RentalDraftMapper.fromJson(
+            migratedSectionData['rental_details'],
+            defaults: RentalDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+              timeZoneId: timezone,
+            ),
+          )
+        : null;
     final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
       userId: organizerId,
       currencyCode: currency,
@@ -423,6 +470,35 @@ class CreateDraftModel {
         routeData = null;
       }
     }
+    SessionDraftData? sessionData;
+    if (parsedObjectType == CreateObjectType.session) {
+      final Object? sessionPayload = migratedSectionData['session_details'];
+      if (sessionPayload is Map) {
+        try {
+          sessionData = SessionDraftMapper.fromJson(
+            Map<String, Object?>.from(sessionPayload),
+          );
+          runtimeSectionData.remove('session_details');
+        } on UnsupportedSessionSchemaException {
+          sessionData = null;
+        }
+      } else {
+        final List<CreateTimeSlotDraft> legacySlots = scheduleSlots
+            .map(CreateTimeSlotDraft.fromMap)
+            .toList(growable: false);
+        if (legacySlots.isNotEmpty) {
+          sessionData =
+              SessionDraftData.defaults(
+                resourceName: title,
+                timezoneId: timezone,
+              ).copyWith(
+                legacySchedule: SessionDraftMapper.migrateLegacyEventSlots(
+                  legacySlots,
+                ),
+              );
+        }
+      }
+    }
     return CreateDraftEntity(
       id: id,
       basedOnPublishedVersionId: basedOnPublishedVersionId,
@@ -441,6 +517,8 @@ class CreateDraftModel {
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
+      sessionData: sessionData,
+      rentalData: rentalData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),

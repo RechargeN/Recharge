@@ -22,11 +22,13 @@ class CreateHubPage extends StatelessWidget {
 
     final bool canCreatePlace = capabilities.contains('create.place');
     final bool canCreateRoute = capabilities.contains('create.route');
+    final bool canCreateRental = capabilities.contains('create.rental');
     final List<CreateBlockConfig> availableBlocks = rechargeCreateBlockConfigs
         .where(
           (CreateBlockConfig config) =>
               (config.objectType != CreateObjectType.place || canCreatePlace) &&
-              (config.objectType != CreateObjectType.route || canCreateRoute),
+              (config.objectType != CreateObjectType.route || canCreateRoute) &&
+              (config.objectType != CreateObjectType.rental || canCreateRental),
         )
         .toList(growable: false);
 

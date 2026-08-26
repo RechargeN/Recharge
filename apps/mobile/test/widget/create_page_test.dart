@@ -132,10 +132,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Session still surfaces the generic 'Cover image обязательна' message;
-    // Recharge Activity now has its own ActivityValidationIssue messageKeys
-    // (ACT-CRT-01 spec) instead of this shared generic-form copy.
-    createController.setObjectType(CreateObjectType.session);
+    // Class/Workshop still surfaces the generic 'Cover image обязательна'
+    // message; Recharge Activity, Bookable Session, Rental and Collection
+    // now have their own typed validation issues (ACT-CRT-01, SES-CRT-01,
+    // RNT-CRT-01, CLG-CRT-01) instead of this shared generic-form copy.
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -213,12 +214,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Session has no dedicated Create block, so it still renders the
+    // Class/Workshop has no dedicated Create block, so it still renders the
     // generic _CreateTaxonomyPicker fallback this test exercises; Recharge
-    // Activity now routes to its own ActivityCreateBlock (Task 16). Session
-    // is also the only fallback type with 'sport' in its applicable
-    // categories (classWorkshop/rental/collection don't include it).
-    createController.setObjectType(CreateObjectType.session);
+    // Activity, Bookable Session, Rental and Collection now route to their
+    // own typed blocks (ACT-CRT-01, SES-CRT-01, RNT-CRT-01, CLG-CRT-01).
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -236,34 +236,36 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    // Scoped to the rail: session's default category is already 'sport', so
-    // an unscoped find.text('Sport') would also match the
+    // Scoped to the rail: the group tile text can also match the
     // _SelectedTaxonomySummary duplicate rendered for the active category.
     final Finder taxonomyRail = find.byKey(
       const ValueKey<String>('create-taxonomy-group-rail'),
     );
-    final Finder sportGroup = find.descendant(
+    final Finder workshopsGroup = find.descendant(
       of: taxonomyRail,
-      matching: find.text('Sport'),
+      matching: find.text('Workshops & masterclasses'),
     );
     await tester.scrollUntilVisible(
-      sportGroup,
+      workshopsGroup,
       300,
       scrollable: find.descendant(
         of: taxonomyRail,
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.ensureVisible(sportGroup);
+    await tester.ensureVisible(workshopsGroup);
     await tester.pumpAndSettle();
-    await tester.tap(sportGroup);
+    await tester.tap(workshopsGroup);
     await tester.pumpAndSettle();
-    // Session's participation mode for tennis is 'book' (you book a
-    // session), unlike activity's 'practice' — see
+    // Class/Workshop's participation mode for its default subcategory
+    // (Workshop) is 'learn' — see
     // CreateTaxonomySubcategory.participationModeFor(objectType).
-    expect(find.text('sport.tennis · book'), findsOneWidget);
+    expect(
+      find.text('workshops_masterclasses.workshop · learn'),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Yoga'));
+    await tester.tap(find.text('Masterclass'));
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
@@ -278,10 +280,10 @@ void main() {
       find.widgetWithText(TextField, 'Subcategory'),
     );
 
-    expect(categoryField.controller?.text, 'sport');
-    expect(subcategoryField.controller?.text, 'yoga');
-    expect(createController.state.draft.mainCategory, 'sport');
-    expect(createController.state.draft.subcategory, 'yoga');
+    expect(categoryField.controller?.text, 'workshops_masterclasses');
+    expect(subcategoryField.controller?.text, 'masterclass');
+    expect(createController.state.draft.mainCategory, 'workshops_masterclasses');
+    expect(createController.state.draft.subcategory, 'masterclass');
   });
 
   fullPageTestWidgets('generic visual clutter is absent from Create forms', (
@@ -999,7 +1001,12 @@ class _NoopAuthRepository implements AuthRepository {
         id: 'u',
         email: 'user@example.com',
         role: 'creator',
-        capabilities: <String>['create.event', 'create.place', 'create.route'],
+        capabilities: <String>[
+          'create.event',
+          'create.place',
+          'create.route',
+          'create.rental',
+        ],
         profileStatus: 'active',
       ),
     );

@@ -93,7 +93,24 @@ class CreateLocalDataSource {
     );
   }
 
-  Future<void> saveDraft(String userId, CreateDraftModel model) async {
+  /// RNT-PUB-01 §1.2.0: routed through [_enqueueDraftMutation] on this
+  /// user's draft-slot key, same as every conditional write below — a plain
+  /// `saveDraft` for a user now genuinely serializes against a concurrent
+  /// `promoteRentalDraftIfCurrent`/`saveRouteDraftIfCurrent` for that same
+  /// user, not just against other conditional calls. Observable result is
+  /// unchanged for every other caller: still writes exactly what was asked,
+  /// just strictly ordered rather than potentially racing.
+  Future<void> saveDraft(String userId, CreateDraftModel model) {
+    return _enqueueDraftMutation(
+      _draftKey(userId),
+      () => _writeDraftUnlocked(userId, model),
+    );
+  }
+
+  Future<void> _writeDraftUnlocked(
+    String userId,
+    CreateDraftModel model,
+  ) async {
     if (model.objectType == 'scenario' && model.organizerId == userId) {
       await _saveCollectionUnconditional(ownerId: userId, model: model);
     }
@@ -101,6 +118,38 @@ class CreateLocalDataSource {
       key: _draftKey(userId),
       value: jsonEncode(model.toJson()),
     );
+  }
+
+  /// RNT-PUB-01 §1.2.0. General per-key async mutation queue — chains onto
+  /// whatever is already pending for [key] in [_conditionalSaveQueues], runs
+  /// [operation] once the queue reaches it, and removes the queue entry
+  /// again once this operation is the most recent one still tracked. Shared
+  /// by [saveDraft], `saveRouteDraftIfCurrent`, and
+  /// `promoteRentalDraftIfCurrent` — a single per-user-draft-slot mutex, not
+  /// three independent ones.
+  Future<T> _enqueueDraftMutation<T>(
+    String key,
+    Future<T> Function() operation,
+  ) {
+    final completer = Completer<T>();
+    final previous = _conditionalSaveQueues[key] ?? Future<void>.value();
+    late final Future<void> wrapped;
+    wrapped = previous
+        .catchError((Object _) {})
+        .then((_) async {
+          try {
+            completer.complete(await operation());
+          } on Object catch (error, stackTrace) {
+            completer.completeError(error, stackTrace);
+          }
+        })
+        .whenComplete(() {
+          if (identical(_conditionalSaveQueues[key], wrapped)) {
+            _conditionalSaveQueues.remove(key);
+          }
+        });
+    _conditionalSaveQueues[key] = wrapped;
+    return completer.future;
   }
 
   Future<List<CreateDraftModel>> listCollectionDrafts({
@@ -560,7 +609,11 @@ class CreateLocalDataSource {
             return;
           }
 
-          await saveDraft(userId, model);
+          // Not the public `saveDraft` — this callback is already running
+          // inside the queued operation for this same key (RNT-PUB-01
+          // v0.4 §1.2.0); re-entering `saveDraft` would enqueue behind
+          // itself and deadlock.
+          await _writeDraftUnlocked(userId, model);
           completer.complete(
             CreateConditionalSaveResult(
               status: CreateConditionalSaveStatus.saved,
@@ -581,6 +634,90 @@ class CreateLocalDataSource {
     _conditionalSaveQueues[key] = operation;
     return completer.future;
   }
+
+  /// RNT-PUB-01 §1.2.1. Conditional `pending_review` → `published`
+  /// transition for one Rental draft, queued through
+  /// [_enqueueDraftMutation] on the same per-user key as [saveDraft] and
+  /// `saveRouteDraftIfCurrent` (§1.2.0) — genuinely serialized against any
+  /// concurrent mutation of this user's draft slot, not just other
+  /// promotion attempts. Fail-closed: every check below runs before the
+  /// single write, so any mismatch leaves the persisted record untouched.
+  Future<RentalPromotionResult> promoteRentalDraftIfCurrent({
+    required String userId,
+    required String expectedRentalId,
+    required int expectedRentalRevision,
+  }) {
+    return _enqueueDraftMutation(_draftKey(userId), () async {
+      CreateDraftModel? current;
+      try {
+        current = await _loadDraftStrict(userId);
+      } on Object {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.invalidExistingData,
+        );
+      }
+      if (current == null ||
+          current.id != expectedRentalId ||
+          current.objectType != 'rental') {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.invalidExistingData,
+        );
+      }
+      final Map<String, Object?>? publisherRef = current.rentalPublisherRefJson;
+      if (publisherRef == null) {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.invalidExistingData,
+        );
+      }
+      if (publisherRef['type'] != 'user' || publisherRef['id'] != userId) {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.conflict,
+        );
+      }
+      if (current.publishStatus == 'published') {
+        return RentalPromotionResult(
+          status: RentalPromotionStatus.alreadyPublished,
+          persisted: current,
+        );
+      }
+      if (current.publishStatus != 'pendingReview') {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.conflict,
+        );
+      }
+      if (current.rentalRevision != expectedRentalRevision) {
+        return const RentalPromotionResult(
+          status: RentalPromotionStatus.conflict,
+        );
+      }
+      final Map<String, dynamic> json = current.toJson();
+      json['draftStatus'] = 'published';
+      json['publishStatus'] = 'published';
+      json['moderationStatus'] = 'none';
+      json['publishedAtUtcIso'] = DateTime.now().toUtc().toIso8601String();
+      final CreateDraftModel promoted = CreateDraftModel.fromJson(
+        json,
+        activeMarketCityId: activeMarketCityId,
+        activeTimezone: activeTimezone,
+        activeCountry: activeCountry,
+        activeCity: activeCity,
+      );
+      await _writeDraftUnlocked(userId, promoted);
+      return RentalPromotionResult(
+        status: RentalPromotionStatus.promoted,
+        persisted: promoted,
+      );
+    });
+  }
+}
+
+enum RentalPromotionStatus { promoted, alreadyPublished, conflict, invalidExistingData }
+
+class RentalPromotionResult {
+  const RentalPromotionResult({required this.status, this.persisted});
+
+  final RentalPromotionStatus status;
+  final CreateDraftModel? persisted;
 }
 
 class _CollectionIndex {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../application/controllers/visited_places_controller.dart';
 import '../../application/state/visited_places_state.dart';
 import '../../application/visited_places_providers.dart';
@@ -92,7 +93,12 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
                   child: _VisitedPlaceCard(
                     item: item,
                     onTap: () => context.push(
-                      '${RouteNames.discoverDetails}/${item.placeId}',
+                      RouteNames.discoverDetailsCanonicalFor(
+                        CatalogObjectRef(
+                          objectType: CatalogObjectType.place,
+                          objectId: item.placeId,
+                        ),
+                      ),
                     ),
                     onRemove: () => _removeVisit(
                       context,

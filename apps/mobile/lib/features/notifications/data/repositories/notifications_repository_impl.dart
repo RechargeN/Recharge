@@ -1,4 +1,6 @@
+import '../../../../app/router/route_names.dart';
 import '../../../../core/notifications/app_notification_sink.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../domain/entities/notification_item_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import '../datasources/notifications_local_datasource.dart';
@@ -119,7 +121,15 @@ class NotificationsRepositoryImpl
             .subtract(const Duration(minutes: 55))
             .toIso8601String(),
         isRead: false,
-        targetRoute: '/discover/details/place-1',
+        // DTL-LINK-01 §3.2: built via CatalogObjectRef, not a hardcoded
+        // path string — the subject type ('place') is known right here,
+        // at the point this seed notification is generated.
+        targetRoute: RouteNames.discoverDetailsCanonicalFor(
+          const CatalogObjectRef(
+            objectType: CatalogObjectType.place,
+            objectId: 'place-1',
+          ),
+        ),
         subjectKind: NotificationSubjectKind.place.name,
         subjectId: 'place-1',
         scenarioDraftId: 'scenario-demo-1',
@@ -134,7 +144,15 @@ class NotificationsRepositoryImpl
             .subtract(const Duration(minutes: 56))
             .toIso8601String(),
         isRead: false,
-        targetRoute: '/discover/details/place-1',
+        // DTL-LINK-01 §3.2: built via CatalogObjectRef, not a hardcoded
+        // path string — the subject type ('place') is known right here,
+        // at the point this seed notification is generated.
+        targetRoute: RouteNames.discoverDetailsCanonicalFor(
+          const CatalogObjectRef(
+            objectType: CatalogObjectType.place,
+            objectId: 'place-1',
+          ),
+        ),
         subjectKind: NotificationSubjectKind.place.name,
         subjectId: 'place-1',
         scenarioDraftId: 'scenario-demo-1',

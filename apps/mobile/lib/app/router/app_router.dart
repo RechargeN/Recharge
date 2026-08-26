@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/telemetry/analytics_service.dart';
+import '../../shared/models/catalog_object_ref.dart';
 import '../di/service_locator.dart';
 import '../adapters/legacy_planning_link_classifier.dart';
+import '../application/details_resolution_providers.dart';
 import '../application/planning_navigation_intent.dart';
 import '../application/planning_navigation_resolver.dart';
+import '../application/resolve_details_usecase.dart';
 import '../observers/app_route_observer.dart';
 import '../presentation/recharge_app_shell.dart';
 import '../presentation/workspace_section_host.dart';
@@ -19,6 +22,9 @@ import '../../features/create/presentation/pages/create_hub_page.dart';
 import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/create/presentation/pages/route_moderation_page.dart';
+import '../../features/discover/domain/entities/published_rental_discovery_entity.dart';
+import '../../features/discover/presentation/pages/collection_details_page.dart';
+import '../../features/discover/presentation/pages/rental_details_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../../features/discover/presentation/pages/categories_page.dart';
 import '../../features/discover/presentation/pages/category_page.dart';
@@ -26,6 +32,7 @@ import '../../features/discover/presentation/pages/discover_map_page.dart';
 import '../../features/discover/presentation/pages/discover_results_page.dart';
 import '../../features/discover/presentation/pages/search_page.dart';
 import '../../features/discover/presentation/pages/smart_search_page.dart';
+import '../../features/discover/presentation/shell/details_shell.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
@@ -35,6 +42,7 @@ import '../../features/identity/domain/usecases/resolve_public_professional_page
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
+import 'details_route_parser.dart';
 import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -229,12 +237,43 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           userId: authController.state.user?.id ?? '',
         ),
       ),
+      // Canonical, typed Details route (`DTL-LINK-01`). Registered before
+      // the legacy 3-segment route below: go_router matches by literal
+      // segment structure, and `:objectType/:objectId` (4 segments) never
+      // collides with legacy `:itemId` (3 segments), so both coexist
+      // without redirecting or removing the legacy one
+      // (`docs/product/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md`
+      // §1.1.6/§1.2: legacy routes are not removed by this slice).
+      GoRoute(
+        name: 'discover_details_canonical',
+        path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+        builder: (context, state) {
+          final DetailsRouteTarget? target = parseDetailsRoutePath(
+            state.uri.path,
+          );
+          if (target == null) {
+            return const DetailsShell(
+              state: DetailsScreenUnavailable(
+                reason: DetailsUnavailableReason.notFound,
+              ),
+            );
+          }
+          return ResolvedDetailsRoute(target: target);
+        },
+      ),
       GoRoute(
         name: 'discover_details',
         path: '${RouteNames.discoverDetails}/:itemId',
         builder: (context, state) => DiscoverDetailsPage(
           itemId: state.pathParameters['itemId'] ?? '',
           favoriteApplied: state.uri.queryParameters['favoriteApplied'] == '1',
+        ),
+      ),
+      GoRoute(
+        name: 'collection_details',
+        path: '${RouteNames.collectionDetails}/:collectionId',
+        builder: (context, state) => CollectionDetailsPage(
+          collectionId: state.pathParameters['collectionId'] ?? '',
         ),
       ),
       GoRoute(
@@ -334,3 +373,100 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
   );
 });
+
+/// Builds the canonical Details route's content: resolves+verifies
+/// [target] via `ResolveDetailsUseCase`, then dispatches to whichever
+/// existing page already owns that family's rendering.
+///
+/// `DTL-FND-01`'s `DetailsShell` is reused here for the loading/unavailable
+/// states — this is genuinely the first real production caller of
+/// `DetailsUnavailableReason.notFound` (`details_shell.dart`'s own doc
+/// comment already anticipated `DTL-LINK-01`/`DTL-OBJ-01` as the first
+/// producers). It is **not** used for the `found` case: neither
+/// `DiscoverDetailsPage` (Event/Activity/Place/Route) nor
+/// `CollectionDetailsPage` (Collection) has been migrated onto a shared
+/// `DetailsRenderer` for their content yet — `DiscoverDetailsPage` already
+/// composes its own `DetailsShell` internally (`DTL-FND-01`);
+/// `CollectionDetailsPage` remains its own `Scaffold` until `DTL-CLG-01`.
+/// This widget only ever hands off a bare, already-verified id — it never
+/// re-renders content itself.
+///
+/// Public (not `_ResolvedDetailsRoute`) — promoted the same way
+/// `compatibility_object_renderer.dart`'s originally-private widgets were
+/// during `DTL-FND-01`, specifically so a test can pump the real router
+/// dispatch logic directly (`RentalDetailsPage`/`CollectionDetailsPage`
+/// alone cannot prove the canonical route actually reaches them).
+class ResolvedDetailsRoute extends ConsumerWidget {
+  const ResolvedDetailsRoute({super.key, required this.target});
+
+  final DetailsRouteTarget target;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<DetailsResolution> resolution = ref.watch(
+      resolveDetailsProvider(target),
+    );
+
+    return resolution.when(
+      loading: () => const DetailsShell(state: DetailsScreenLoading()),
+      error: (Object error, StackTrace stackTrace) => DetailsShell(
+        state: DetailsScreenUnavailable(
+          reason: DetailsUnavailableReason.temporarilyUnavailable,
+          onRetry: () => ref.invalidate(resolveDetailsProvider(target)),
+        ),
+      ),
+      data: (DetailsResolution result) {
+        final CatalogObjectRef? resolvedRef = result.ref;
+        if (result.status == DetailsResolutionStatus.notFound ||
+            resolvedRef == null) {
+          return const DetailsShell(
+            state: DetailsScreenUnavailable(
+              reason: DetailsUnavailableReason.notFound,
+            ),
+          );
+        }
+        return switch (resolvedRef.objectType) {
+          CatalogObjectType.event ||
+          CatalogObjectType.activity ||
+          CatalogObjectType.place ||
+          CatalogObjectType.route => DiscoverDetailsPage(
+            itemId: resolvedRef.objectId,
+            favoriteApplied: false,
+          ),
+          CatalogObjectType.collection => CollectionDetailsPage(
+            collectionId: resolvedRef.objectId,
+          ),
+          // DTL-OBJ-01 §4: unlike Collection above, RentalDetailsPage takes
+          // the already-resolved projection directly instead of
+          // re-fetching it through a second provider by id — the resolver
+          // just loaded it one line above via RentalDetailsLookup, so a
+          // second fetch would be redundant, not merely a style choice.
+          CatalogObjectType.rental => result.projection != null
+              ? RentalDetailsPage(
+                  projection: result.projection! as PublishedRentalDiscoveryEntity,
+                )
+              : const DetailsShell(
+                  state: DetailsScreenUnavailable(
+                    reason: DetailsUnavailableReason.notFound,
+                  ),
+                ),
+          // Unreachable today: detailsLookupRegistryProvider
+          // (`app/application/details_resolution_providers.dart`)
+          // registers no loader for these four types, so
+          // ResolveDetailsUseCase always returns notFound for them first.
+          // A later slice that registers one of these must add its own
+          // branch here too — this fallback is a safe default, not a
+          // silent substitute for that.
+          CatalogObjectType.session ||
+          CatalogObjectType.scenario ||
+          CatalogObjectType.findPeople ||
+          CatalogObjectType.classWorkshop => const DetailsShell(
+            state: DetailsScreenUnavailable(
+              reason: DetailsUnavailableReason.notFound,
+            ),
+          ),
+        };
+      },
+    );
+  }
+}

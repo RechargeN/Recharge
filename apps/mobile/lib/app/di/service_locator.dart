@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../config/market_config.dart';
 import '../config/travel_policy_config.dart';
+import '../adapters/collection_publication_discovery_adapter.dart';
+import '../adapters/rental_publication_discovery_adapter.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
 import '../adapters/route_safety_reporting_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
@@ -40,9 +42,19 @@ import '../../features/create/data/datasources/gtfs_cache_datasource.dart';
 import '../../features/create/data/datasources/latvia_gtfs_datasource.dart';
 import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/event_create_coordinator.dart';
+import '../../features/create/application/session_create_coordinator.dart';
+import '../../features/create/application/collection_create_config.dart';
+import '../../features/create/application/collection_create_coordinator.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/application/scenario_generation_coordinator.dart';
 import '../../features/create/application/place_enrichment_coordinator.dart';
+import '../../features/create/application/place_search_coordinator.dart';
+import '../../features/create/application/location_search_config.dart';
+import '../../features/create/data/datasources/google_places_search_datasource.dart';
+import '../../features/create/data/repositories/location_search_repository_impl.dart';
+import '../../features/create/domain/repositories/location_search_repository.dart';
+import '../../features/create/domain/usecases/search_location_suggestions_usecase.dart';
+import '../../features/create/domain/usecases/resolve_location_suggestion_usecase.dart';
 import '../../features/create/application/scenario_transit_schedule_coordinator.dart';
 import '../../features/create/application/route_create_config.dart';
 import '../../features/create/application/route_create_coordinator.dart';
@@ -50,6 +62,13 @@ import '../../features/create/application/route_create_runtime.dart';
 import '../../features/create/application/route_draft_autosave_coordinator.dart';
 import '../../features/create/application/route_publication_coordinator.dart';
 import '../../features/create/application/route_quality_workflow_coordinator.dart';
+import '../../features/create/data/datasources/collection_catalog_search_mock_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_local_datasource.dart';
+import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
+import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
+import '../../features/create/domain/repositories/collection_catalog_search_repository.dart';
+import '../../features/create/domain/repositories/collection_publication_index_sink.dart';
+import '../../features/create/domain/repositories/collection_publication_repository.dart';
 import '../../features/create/data/datasources/route_publication_memory_datasource.dart';
 import '../../features/create/data/datasources/route_quality_workflow_memory_datasource.dart';
 import '../../features/create/data/datasources/route_gpx_memory_source_store.dart';
@@ -72,9 +91,11 @@ import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/domain/repositories/rental_promotion_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
+import '../../features/create/domain/repositories/rental_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_authoring_policy.dart';
 import '../../features/create/domain/repositories/route_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_publication_repository.dart';
@@ -97,7 +118,9 @@ import '../../features/create/domain/usecases/generate_place_enrichment_proposal
 import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
+import '../../features/create/domain/usecases/materialize_session_schedule_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
+import '../../features/create/domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/save_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/check_place_duplicates_usecase.dart';
@@ -105,16 +128,22 @@ import '../../features/create/domain/usecases/build_route_publication_bundle_use
 import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
+import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
+import '../../features/discover/data/repositories/collection_item_resolution_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_repository_impl.dart';
 import '../../features/discover/data/repositories/timezone_repository_impl.dart';
 import '../../features/discover/data/repositories/travel_time_repository_impl.dart';
 import '../../features/discover/data/repositories/time_fit_evaluation_store_impl.dart';
 import '../../features/discover/domain/entities/discover_query.dart';
+import '../../features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
+import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_route_discovery_port.dart';
 import '../../features/discover/domain/repositories/route_safety_reporting_port.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -136,17 +165,26 @@ import '../../features/explore/domain/usecases/load_settings_usecase.dart';
 import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
+import '../../features/identity/data/datasources/managed_page_field_moderation_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
 import '../../features/identity/data/datasources/public_professional_page_local_datasource.dart';
+import '../../features/identity/data/datasources/team_invitation_local_datasource.dart';
 import '../../features/identity/data/repositories/identity_workspace_repository_impl.dart';
+import '../../features/identity/data/repositories/managed_page_field_moderation_repository_impl.dart';
 import '../../features/identity/data/repositories/public_professional_page_repository_impl.dart';
+import '../../features/identity/data/repositories/team_invitation_repository_impl.dart';
 import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
+import '../../features/identity/domain/repositories/managed_page_field_moderation_repository.dart';
 import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
+import '../../features/identity/domain/repositories/team_invitation_repository.dart';
 import '../../features/identity/domain/usecases/create_professional_page_usecase.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
+import '../../features/identity/domain/usecases/revoke_team_invitation_usecase.dart';
 import '../../features/identity/domain/usecases/select_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
+import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
+import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
@@ -272,6 +310,18 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<PublicPageContentProjectionRepository>(
       EmptyPublicPageContentProjectionRepository.new,
     )
+    ..registerLazySingleton<TeamInvitationLocalDataSource>(
+      () => TeamInvitationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<TeamInvitationRepository>(
+      () => TeamInvitationRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<ManagedPageFieldModerationLocalDataSource>(
+      () => ManagedPageFieldModerationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<ManagedPageFieldModerationRepository>(
+      () => ManagedPageFieldModerationRepositoryImpl(sl()),
+    )
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
     )
@@ -308,6 +358,21 @@ Future<void> setupDependencies() async {
       }
       return repository as CreateDraftCollectionRepository;
     })
+    // RNT-PUB-01 §1.2: same repository instance, cast to the narrower
+    // RentalPromotionRepository interface — mirrors the
+    // CreateDraftCollectionRepository cast above.
+    ..registerLazySingleton<RentalPromotionRepository>(() {
+      final repository = sl<CreateRepository>();
+      if (repository is! RentalPromotionRepository) {
+        throw StateError(
+          'Create repository must support Rental direct-publish promotion.',
+        );
+      }
+      return repository as RentalPromotionRepository;
+    })
+    ..registerLazySingleton<PromoteRentalToPublishedUseCase>(
+      () => PromoteRentalToPublishedUseCase(sl()),
+    )
     ..registerLazySingleton<CreateTemplateRepository>(
       () => CreateTemplateRepositoryImpl(sl()),
     )
@@ -328,6 +393,39 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<PublishedRouteDiscoveryPort>(
       () => sl<RoutePublicationDiscoveryAdapter>(),
+    )
+    // Rental — both sides active (DTL-OBJ-01 §3.6): unlike Collection
+    // below, Rental's Create-authoring half (RentalDirectPublishPolicy
+    // etc.) is already wired, so RentalPublicationIndexSink is registered
+    // too, mirroring Route above.
+    ..registerLazySingleton<PublishedRentalDiscoveryLocalDataSource>(
+      () => PublishedRentalDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationDiscoveryAdapter>(
+      () => RentalPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationIndexSink>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedRentalDiscoveryPort>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    // Collection read side only (DTL-LINK-01): the Create-authoring half
+    // of this feature (CollectionCreateCoordinator and everything it
+    // depends on) is not part of this slice and is not registered here —
+    // see the DTL-LINK-01 commit message for why. Mirrors
+    // RoutePublicationDiscoveryAdapter's dual-interface pattern above.
+    ..registerLazySingleton<PublishedCollectionDiscoveryLocalDataSource>(
+      () => PublishedCollectionDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationDiscoveryAdapter>(
+      () => CollectionPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<PublishedCollectionDiscoveryPort>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<CollectionItemResolutionRepository>(
+      CollectionItemResolutionRepositoryImpl.new,
     )
     ..registerLazySingleton<RoutePublicationMemoryDataSource>(
       RoutePublicationMemoryDataSource.new,
@@ -436,6 +534,83 @@ Future<void> setupDependencies() async {
         );
       },
     )
+    ..registerLazySingleton<LocationSearchRuntimeConfig>(
+      () => const LocationSearchRuntimeConfig(),
+    )
+    ..registerLazySingleton<GooglePlacesSearchDatasource>(
+      () => GooglePlacesSearchDatasource(
+        client: sl<http.Client>(),
+        // Local-only secret, never committed: add
+        // GOOGLE_PLACES_API_KEY=... to google_maps.properties and run with
+        // --dart-define-from-file=google_maps.properties. Empty key (or the
+        // rollback flag off) means the datasource degrades to no
+        // suggestions — the manual map-tap flow always keeps working.
+        apiKey: sl<LocationSearchRuntimeConfig>().enabled
+            ? const String.fromEnvironment(
+                'GOOGLE_PLACES_API_KEY',
+                defaultValue: '',
+              )
+            : '',
+      ),
+    )
+    ..registerLazySingleton<LocationSearchRepository>(
+      () => LocationSearchRepositoryImpl(sl<GooglePlacesSearchDatasource>()),
+    )
+    ..registerFactory<SearchLocationSuggestionsUseCase>(
+      () => SearchLocationSuggestionsUseCase(sl<LocationSearchRepository>()),
+    )
+    ..registerFactory<ResolveLocationSuggestionUseCase>(
+      () => ResolveLocationSuggestionUseCase(sl<LocationSearchRepository>()),
+    )
+    ..registerFactory<PlaceSearchCoordinator>(
+      () => PlaceSearchCoordinator(
+        search: sl<SearchLocationSuggestionsUseCase>(),
+        resolve: sl<ResolveLocationSuggestionUseCase>(),
+      ),
+    )
+    ..registerLazySingleton<CollectionCreateRuntimeConfig>(
+      () => const CollectionCreateRuntimeConfig(),
+    )
+    ..registerLazySingleton<CollectionCatalogSearchMockDatasource>(
+      CollectionCatalogSearchMockDatasource.new,
+    )
+    ..registerLazySingleton<CollectionCatalogSearchRepository>(
+      () => CollectionCatalogSearchRepositoryImpl(
+        datasource: sl<CollectionCatalogSearchMockDatasource>(),
+      ),
+    )
+    ..registerLazySingleton<CollectionPublicationLocalDatasource>(
+      () => CollectionPublicationLocalDatasource(idGenerator: sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationRepository>(
+      () => CollectionPublicationRepositoryImpl(
+        datasource: sl<CollectionPublicationLocalDatasource>(),
+      ),
+    )
+    ..registerLazySingleton<PublishedCollectionDiscoveryLocalDataSource>(
+      () => PublishedCollectionDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationDiscoveryAdapter>(
+      () => CollectionPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationIndexSink>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedCollectionDiscoveryPort>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<CollectionItemResolutionRepository>(
+      CollectionItemResolutionRepositoryImpl.new,
+    )
+    ..registerFactory<CollectionCreateCoordinator>(
+      () => CollectionCreateCoordinator(
+        idGenerator: sl(),
+        catalogSearchRepository: sl<CollectionCatalogSearchRepository>(),
+        publicationRepository: sl<CollectionPublicationRepository>(),
+        locationSearchRepository: sl<LocationSearchRepository>(),
+        config: sl<CollectionCreateRuntimeConfig>(),
+      ),
+    )
     ..registerLazySingleton<EventTimezoneRepository>(
       EventTimezoneRepositoryImpl.new,
     )
@@ -453,6 +628,12 @@ Future<void> setupDependencies() async {
         materializeSchedule: sl(),
         inventorySnapshotRepository: sl(),
       ),
+    )
+    ..registerFactory<MaterializeSessionScheduleUseCase>(
+      () => MaterializeSessionScheduleUseCase(sl<EventTimezoneRepository>()),
+    )
+    ..registerFactory<SessionCreateCoordinator>(
+      () => SessionCreateCoordinator(materializeSchedule: sl()),
     )
     ..registerLazySingleton<CatalogObjectPickerPort>(
       MockCatalogObjectPickerDataSource.new,
@@ -578,6 +759,26 @@ Future<void> setupDependencies() async {
       () => ResolvePublicProfessionalPageUseCase(
         repository: sl(),
         contentRepository: sl(),
+        moderationRepository: sl(),
+      ),
+    )
+    ..registerFactory<SendTeamInvitationUseCase>(
+      () => SendTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+        idGenerator: sl(),
+      ),
+    )
+    ..registerFactory<RevokeTeamInvitationUseCase>(
+      () => RevokeTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+      ),
+    )
+    ..registerFactory<SubmitManagedPageFieldEditUseCase>(
+      () => SubmitManagedPageFieldEditUseCase(
+        workspaceRepository: sl(),
+        moderationRepository: sl(),
       ),
     )
     ..registerFactory<LoadCreateDraftUseCase>(

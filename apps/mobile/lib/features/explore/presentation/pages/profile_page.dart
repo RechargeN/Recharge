@@ -6,6 +6,7 @@ import 'package:design_system/design_system.dart';
 import '../../../../app/application/visit_history_facade.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/identity/account_experience.dart';
@@ -171,7 +172,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               _ViewerProfileBody(
                 state: visitedState!,
                 onOpenVisit: (VisitHistoryItem item) => context.push(
-                  '${RouteNames.discoverDetails}/${item.placeId}',
+                  RouteNames.discoverDetailsCanonicalFor(
+                    CatalogObjectRef(
+                      objectType: CatalogObjectType.place,
+                      objectId: item.placeId,
+                    ),
+                  ),
                 ),
                 onViewAllVisits: () => context.push(RouteNames.visitedPlaces),
                 onSavedList: () => context.push(RouteNames.favorites),
