@@ -3556,6 +3556,7 @@ class CreateController extends ChangeNotifier {
     // rental` — that assumption is not a guarantee the code should rely on.
     CreateDraftEntity finalPublished = published;
     bool directPublishApplied = false;
+    bool sinkActivated = false;
     final RentalDraftData? rentalData = published.rentalData;
     final PromoteRentalToPublishedUseCase? promoteRentalToPublished =
         _promoteRentalToPublished;
@@ -3585,26 +3586,23 @@ class CreateController extends ChangeNotifier {
           finalPublished = published;
         }
         // DTL-OBJ-01 §3.5: activate the Discover-facing sink only after a
-        // confirmed `published` promotion, never speculatively. Best-effort
-        // — a sink failure here does not roll back the already-genuine
-        // publish; it only means Discover indexing is delayed (acceptable
-        // in this local/mock slice, no retry queue exists yet).
+        // confirmed `published` promotion, never speculatively. A sink
+        // failure does not roll back the already-genuine publish (the
+        // draft really is `published` in Create's own storage) — but it
+        // must not be silently invisible either: one immediate retry, then
+        // a distinct, trackable failure signal (`sinkActivated = false`)
+        // that reaches analytics regardless of outcome, not swallowed.
         final RentalPublicationIndexSink? sink = _rentalPublicationIndexSink;
         if (directPublishApplied && sink != null) {
-          try {
-            await sink.activate(
-              RentalPublishedVersion(
-                listing: _buildRentalPublicProjection(
-                  id: finalPublished.id,
-                  draft: finalPublished.rentalData ?? rentalData,
-                ),
-                publishedAtUtc:
-                    finalPublished.publishedAtUtc ?? DateTime.now().toUtc(),
-              ),
-            );
-          } on Object {
-            // Swallowed deliberately — see comment above.
-          }
+          final RentalPublishedVersion version = RentalPublishedVersion(
+            listing: _buildRentalPublicProjection(
+              id: finalPublished.id,
+              draft: finalPublished.rentalData ?? rentalData,
+            ),
+            publishedAtUtc:
+                finalPublished.publishedAtUtc ?? DateTime.now().toUtc(),
+          );
+          sinkActivated = await _activateRentalSinkWithRetry(sink, version);
         }
       }
     }
@@ -3625,9 +3623,33 @@ class CreateController extends ChangeNotifier {
         'object_type': finalPublished.objectType.taxonomyId,
         'publish_status': finalPublished.publishStatus.name,
         if (directPublishApplied) 'direct_publish': true,
+        if (directPublishApplied) 'sink_activated': sinkActivated,
       },
     );
     return true;
+  }
+
+  /// DTL-OBJ-01 §3.5 review correction: one immediate retry before giving
+  /// up, and a distinct, always-tracked failure signal — `sink.activate`
+  /// failing must never be indistinguishable from success. Returns whether
+  /// activation is confirmed to have reached the Discover-facing index.
+  Future<bool> _activateRentalSinkWithRetry(
+    RentalPublicationIndexSink sink,
+    RentalPublishedVersion version,
+  ) async {
+    for (int attempt = 0; attempt < 2; attempt++) {
+      try {
+        await sink.activate(version);
+        return true;
+      } on Object {
+        // Second failure falls through to the tracked-failure branch below.
+      }
+    }
+    _analyticsService.track(
+      'rental_sink_activation_failed',
+      params: <String, Object?>{'rental_id': version.rentalId},
+    );
+    return false;
   }
 
   Future<bool> _publishRouteDraft() async {
