@@ -1,7 +1,7 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.2
-- Дата: 2026-08-26
+- Версия: 1.3
+- Дата: 2026-08-27
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
@@ -15,8 +15,23 @@
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
 - Runtime effect of this revision: **none**
+- Product API baseline:
+  [BCK09-API-DEC-01 v0.1](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Contract correction plan:
+  [BCK09-API-CORR-01 v0.1](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.3 — 2026-08-27
+
+- added exact logical-mutation and request-attempt record kinds inside the
+  existing `bookingIdempotency` collection, preserving nine collections;
+- selected a Product-level JCS/SHA-256 semantic hash and callable 10/15/30
+  deadline target while keeping named API/Security/Operations acceptance open;
+- exposed the Approved-parent ULID versus Booking-v1 opaque request-ID conflict
+  as a fail-closed `ECL03-D12` prerequisite rather than silently overriding it;
+- linked the bounded Booking v1 schema/DTO correction plan and added six AC;
+- changed no schema, DTO, backend, Firebase, mobile or deployment file.
 
 ### v1.2 — 2026-08-26
 
@@ -160,7 +175,10 @@ checks.
 Rules:
 
 - `schemaVersion=1` is mandatory;
-- `requestId` and `idempotencyKey` are ULIDs for mutations;
+- under the current Approved ECL-03 parent, `requestId` and `idempotencyKey`
+  remain ULIDs for mutations; Booking wire v1 currently permits an opaque
+  bounded ID, so no endpoint may be implemented until `ECL03-D12` reconciles
+  the parent, schema, fixtures and consumers;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -178,6 +196,18 @@ and `enforceAppCheck` for Functions v2:
 [callable functions](https://firebase.google.com/docs/functions/callable) and
 [App Check enforcement](https://firebase.google.com/docs/app-check/cloud-functions).
 
+### 4.1. Product-selected transport target
+
+The target is one Functions v2 callable in `europe-west1` per named surface,
+with no generic router, 10-second query client deadlines, 15-second mutation
+client deadlines and a 30-second server timeout. A mutation timeout or lost
+connection is an unknown outcome; recovery preserves semantic payload and
+idempotency key while using a fresh request ID, or reads authorized state.
+
+This is the Product baseline from `BCK09-API-DEC-01`, not an Accepted
+`API-DEC-01`. API Platform and BCK-05 Operations must validate the values and
+SDK/latency/cost behavior before endpoint scaffold or deploy configuration.
+
 ## 5. Authoritative operational records
 
 Operational collections are separate from Event drafts and from one another.
@@ -190,7 +220,7 @@ Names below are normative for ECL-03C.
 | `bookingPoolLedgers` | hash of occurrence/pool/channel | capacity and confirmed allocation counters | deny |
 | `bookingUserUsage` | `userId` | policy version plus active finite Booking evidence | deny |
 | `bookingActiveKeys` | SHA-256 of versioned actor/occurrence/admission-track tuple | one non-terminal Booking lock and Booking reference | deny |
-| `bookingIdempotency` | hash of actor/command/idempotency key | payload hash and stable completed result | deny |
+| `bookingIdempotency` | domain-separated hash; `m1_` logical or `r1_` attempt kind | logical payload/result or atomic request-attempt binding | deny |
 | `bookingAudit` | `auditId` | append-only privacy-safe mutation fact | deny |
 | `bookingOutbox` | deterministic obligation ID | post-commit notification obligation only | deny |
 | `bookingFeatureFlags` | flag/environment | server-owned disabled-by-default gate | deny |
@@ -200,7 +230,33 @@ application answers are absent from ECL-03C. IDs in document paths are stable
 ULID/opaque hashes; raw email, phone, access code or payload is not used as a
 path key.
 
-### 5.1. Duplicate-active key
+### 5.1. Idempotency record kinds
+
+The collection count does not change. `bookingIdempotency` stores exactly two
+closed record kinds derived with length-prefixed UTF-8 tuple encoding:
+
+```text
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+
+logicalMutationId = "m1_" + lowercaseHex(SHA-256(
+  encode("booking_logical_mutation_v1") || encode(actorId) ||
+  encode(commandType) || encode(idempotencyKey)
+))
+
+requestAttemptId = "r1_" + lowercaseHex(SHA-256(
+  encode("booking_request_attempt_v1") || encode(actorId) ||
+  encode(requestId)
+))
+```
+
+The logical record stores its kind, actor scope, command/key reference,
+semantic hash, completed result and server-owned timestamps. The attempt
+record stores its kind, actor scope, command/key reference, semantic hash and
+server-owned timestamps. Both records are read before writes and created in
+the same transaction as the domain mutation. Retention is no shorter than the
+logical retry window. Raw IDs, keys and payloads are excluded from logs.
+
+### 5.2. Duplicate-active key
 
 For the Accepted parent scope `(userId, occurrenceId, admission track)`, the
 server derives:
@@ -235,7 +291,7 @@ therefore proceed only after the terminal transition commits and must allocate
 a new Booking ULID. This record is required for finite and explicit-unlimited
 Bookings; it is separate from the finite-only concurrency usage counter.
 
-### 5.2. Event operational projection
+### 5.3. Event operational projection
 
 The emulator suite seeds a minimal projection containing:
 
@@ -251,7 +307,7 @@ ECL-03C has no production writer for this projection. A production mutation
 cannot be enabled until a later approved publishing/synchronization slice
 provides revision-safe source ownership. Manual console seeding is prohibited.
 
-### 5.3. Pre-activation outbox disposition
+### 5.4. Pre-activation outbox disposition
 
 Every ECL-03C `bookingOutbox` record has immutable
 `effectDisposition=suppressedPreActivation` plus the resolved policy revision.
@@ -285,8 +341,8 @@ and the active-key read ensure that only the committed result becomes visible.
 1. validate transport shape before privileged reads;
 2. resolve verified actor and active-account authority;
 3. evaluate environment/App Check/`internal_booking_create_v1` flag;
-4. calculate canonical payload hash;
-5. read idempotency record;
+4. validate the closed command variant and calculate its canonical payload hash;
+5. derive/read both logical-mutation and request-attempt idempotency records;
 6. read occurrence operational projection;
 7. verify published/open lifecycle and material revision;
 8. verify internal authority, free pricing and no payment collection;
@@ -302,7 +358,7 @@ and the active-key read ensure that only the committed result becomes visible.
 17. write one append-only audit record;
 18. write one deterministic outbox record with immutable
     `effectDisposition=suppressedPreActivation`;
-19. write completed idempotency result;
+19. write the completed logical result and atomic attempt binding;
 20. commit, then return the stored typed result.
 
 The transaction reads all required documents before writes. Any contention
@@ -313,15 +369,15 @@ exhaustion returns `contention`; it never reports confirmation.
 
 1. validate transport and resolve verified actor;
 2. evaluate `internal_booking_cancel_v1` flag;
-3. calculate payload hash and read idempotency record;
+3. validate/hash the command and read both logical and attempt records;
 4. read Booking and verify owner;
 5. verify state/revision and authoritative cancellation deadline;
 6. derive/read the exact active key and verify it references this Booking;
 7. read exact ledger and user usage records when allocation is finite;
 8. transition Booking to terminal `cancelled` with server time/reason;
 9. delete the active key and release exact finite units/usage when applicable;
-10. write audit, terminal `suppressedPreActivation` outbox evidence and the
-    completed idempotency result;
+10. write audit, terminal `suppressedPreActivation` outbox evidence, completed
+    logical result and atomic attempt binding;
 11. commit, then return stored result.
 
 Repeated cancellation with the same key returns the original result. A new
@@ -351,10 +407,17 @@ idempotencyKey)`. `requestId` correlates one request attempt;
 `idempotencyKey` identifies one logical mutation across retries. Values may be
 equal, but equality is not required. A retry may use a new request ID only when
 it preserves the original idempotency key and normalized semantic payload.
-Neither body field is trusted as actor identity or a global key. `payloadHash`
-is SHA-256 over canonical schema-known semantic JSON fields and excludes
-transport-only request correlation; exact canonicalization/version remains
-gated by BCK-03 `API-DEC-03` before runtime.
+Neither body field is trusted as actor identity or a global key. The selected
+semantic hash algorithm is `booking_semantic_hash_v1`: validate one closed
+command variant, project exactly `{algorithmVersion, commandType,
+commandSchemaVersion, resolvedActorScope, payload}`, serialize it as RFC 8785
+JCS UTF-8 and encode the SHA-256 digest as lowercase hexadecimal. It excludes
+`requestId`, `idempotencyKey`, transport metadata, raw Auth/App Check context
+and server timestamps. Duplicate keys, non-finite numbers and values outside
+the cross-language safe numeric subset are rejected before hashing. Dart and
+TypeScript golden vectors must cover Unicode, key ordering, absent versus
+null, integers, arrays and nested objects. This remains a Product-selected
+target until API Platform and Security accept BCK-03 `API-DEC-03`.
 
 - same effective key and same hash returns the byte-equivalent stored domain
   result after authorization inside a response envelope that echoes the current
@@ -370,6 +433,8 @@ gated by BCK-03 `API-DEC-03` before runtime.
   and revision invariants and cannot bypass them.
 - every new attempt uses a fresh request ID; detected reuse of one request ID
   with another key or semantic command is invalid and creates no mutation.
+- the logical and attempt records from §5.1 are checked and written in the same
+  transaction as every successful or stored deterministic domain result.
 
 ## 8. Security boundary
 
@@ -599,6 +664,18 @@ remain ECL-03H or later gates.
     Booking and every applicable ledger/usage/audit/outbox/idempotency record.
 41. One hundred parallel distinct-idempotency creates for the same actor/scope
     commit exactly one Booking/key for both finite and explicit-unlimited paths.
+42. `bookingIdempotency` has closed logical-mutation and request-attempt record
+    kinds without creating a tenth operational collection.
+43. Both idempotency record kinds are read and written atomically with the
+    applicable domain mutation and reject request reuse conflicts fail closed.
+44. `booking_semantic_hash_v1` has one exact JCS/SHA-256 projection and requires
+    cross-language golden vectors before runtime.
+45. Callable region and 10/15/30-second deadlines remain Product-selected
+    targets until named API Platform, Security and BCK-05 decisions are effective.
+46. The ECL-03 ULID versus Booking-v1 opaque request-ID conflict blocks endpoint
+    work until an explicit `ECL03-D12` parent amendment is accepted.
+47. Booking command schema correction requires separate approval of
+    `BCK09-API-CORR-01`; this revision changes no wire or runtime file.
 
 ## 13. Rollback and stop conditions
 

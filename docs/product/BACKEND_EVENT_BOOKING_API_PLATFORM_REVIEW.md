@@ -1,21 +1,28 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.1**
-- Date: **2026-08-26**
-- Status: **Technical pre-review complete — Hold for named API Platform sign-off**
-- Target: **BCK-09 v1.4 / ECL-03C v1.2 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.3](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Version: **0.2**
+- Date: **2026-08-27**
+- Status: **Product baseline selected — Hold for contract correction and named sign-off**
+- Target: **BCK-09 v1.5 / ECL-03C v1.3 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.4](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - Governing API draft: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **none**
+- Product API decision:
+  [BCK09-API-DEC-01 v0.1](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Contract correction plan:
+  [BCK09-API-CORR-01 v0.1](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Verdict
 
-**Hold.** The existing Booking v1 Dart contract tests are green and the target
+**Hold, narrowed.** The Product owner selected exact target dispositions for
+request binding, semantic hashing, transport/deadlines and request-ID format.
+The existing Booking v1 Dart contract tests are green and the target
 preserves the committed result union, split request/idempotency identity,
 unknown-outcome semantics and fail-closed forward compatibility. A named API
-Platform reviewer must not sign yet because two previously hidden contract
-gaps and three already disclosed decisions still block an executable API.
+Platform reviewer must not sign yet because the command schema correction,
+formal ECL-03 request-ID amendment, named API/Security/Operations decisions and
+executable parity evidence still block an API.
 
 This is a technical preparation record, not an independent specialist
 signature. `BCK09-SIG-API` remains `Pending`.
@@ -58,10 +65,10 @@ consumer is stricter than the document declared to be the sole wire source.
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
 | `BCK09-API-TR-01` | Blocking | Fail | `booking_command.schema.json` lists a shared payload property bag but does not encode the command-specific required/allowed matrix implemented by Dart | Make the schema a true closed discriminated union or explicitly replace the “sole wire source” claim with a second normative semantic matrix; add cross-language invalid fixtures |
-| `BCK09-API-TR-02` | Blocking | Fail | ECL-03C requires rejection when one `requestId` is reused with another logical mutation, but the exact physical plan has only logical idempotency-key lookup and no atomic request-attempt binding | Add a deterministic actor/request binding record in the existing `bookingIdempotency` collection and include it in create/cancel atomicity/contention tests |
-| `BCK09-API-TR-03` | Blocking decision | Open | BCK-03 `API-DEC-01` has no Accepted callable/HTTPS mapping, client/server deadlines or retry ownership | Accept one exact transport profile before any endpoint scaffold |
-| `BCK09-API-TR-04` | Blocking decision | Open | BCK-03 `API-DEC-03` leaves canonical semantic hash algorithm/version undefined | Accept one versioned canonical projection and cross-language golden vectors before mutation runtime |
-| `BCK09-API-TR-05` | Owner decision | Conflict | Approved ECL-03 calls `requestId` a ULID; Booking v1 `common.id` is any bounded non-empty string and committed fixtures include non-ULID values | Select strict ULID validation with compatible migration/fixtures, or amend the parent semantic to opaque bounded client-generated ID; do not enforce a hidden backend-only rule |
+| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.3 now defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Named API review and later atomicity/contention evidence remain required |
+| `BCK09-API-TR-03` | Product disposition selected | Specialist decision Open | Callable v2, `europe-west1` and 10/15/30-second deadlines are the target | API Platform + BCK-05 must accept API-DEC-01 before endpoint scaffold |
+| `BCK09-API-TR-04` | Product disposition selected | Specialist decision Open | `booking_semantic_hash_v1` selects RFC 8785 JCS UTF-8 plus lowercase SHA-256 and exact projection | API Platform + Security must accept API-DEC-03 and golden vectors before runtime |
+| `BCK09-API-TR-05` | Product disposition selected | Parent conflict Open | Opaque bounded client-generated `requestId` is selected, but Approved ECL-03 still says ULID | Accept `ECL03-D12` across parent/schema/fixtures/consumers; no hidden backend-only rule |
 | `BCK09-API-TR-06` | Runtime evidence | Pending | Query/page/availability schemas and TypeScript consumer do not exist yet | Keep ECL-03C runtime unauthorized until an Approved contract slice creates them and proves Dart/TypeScript parity |
 
 ## 4. Passing checks
@@ -159,8 +166,8 @@ Recommended baseline:
 - freeze Dart/TypeScript golden vectors, including Unicode, key ordering,
   absent-versus-null, integers and arrays.
 
-This recommendation remains `Proposed` until API Platform + Security accept
-`API-DEC-03`.
+This is now the Product-selected baseline. It remains non-executable until API
+Platform + Security accept `API-DEC-03`.
 
 ### 5.4. Candidate `API-DEC-01` disposition
 
@@ -176,8 +183,9 @@ Recommended ECL-03C transport profile:
   never bypasses domain result parsing;
 - automatic SDK retry is not treated as a new logical mutation.
 
-Exact values require Platform load/latency evidence and joint API/BCK-05
-acceptance. Until then this remains `Proposed`, not deployable configuration.
+Exact values are now Product-selected, but require Platform load/latency
+evidence and joint API/BCK-05 acceptance. Until then they are not deployable
+configuration.
 
 ## 6. Named reviewer checklist
 
@@ -207,14 +215,14 @@ after:
 11. **BCK09-API-REV-AC-11:** unknown schema/enum cannot mutate state.
 12. **BCK09-API-REV-AC-12:** target-only error values cannot leak into v1.
 13. **BCK09-API-REV-AC-13:** query schemas remain runtime prerequisites.
-14. **BCK09-API-REV-AC-14:** API-DEC-01/03 remain explicit blocking decisions.
+14. **BCK09-API-REV-AC-14:** API-DEC-01/03 have exact Product baselines but remain named-owner blocking decisions.
 15. **BCK09-API-REV-AC-15:** `BCK09-SIG-API` remains Pending.
 16. **BCK09-API-REV-AC-16:** no runtime, schema, DTO, Firebase or deployment file changes are authorized by this review.
 
 ## 8. Final state
 
 BCK-09 remains Review, ECL-03C remains unapproved for implementation and
-`BCK09-SIG-API` remains Pending. The next safe step is an owner decision on
-TR-05 and the proposed API-DEC-01/03 baselines, followed by a bounded
-documentation amendment. Contract/schema/runtime edits require their own
-Approved slice.
+`BCK09-SIG-API` remains Pending. Product ambiguity is closed by
+`BCK09-API-DEC-01`, but `BCK09-API-CORR-01`, `ECL03-D12`, named API-DEC-01/03
+decisions and parity evidence remain blockers. Contract/schema/runtime edits
+require their own Approved slice.

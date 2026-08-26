@@ -1,8 +1,8 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.4**
-- Дата: **2026-08-26**
+- Версия: **1.5**
+- Дата: **2026-08-27**
 - Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Booking owner**
@@ -15,18 +15,35 @@
 - Accepted decisions:
   [ECL-03 D01–D11](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.2](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.3](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.3](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.4](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.3 — API technical Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.4 — API narrowed Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.1 — Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.2 — Product baseline selected; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+- Product API decision:
+  [BCK09-API-DEC-01 v0.1 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Contract correction plan:
+  [BCK09-API-CORR-01 v0.1 — Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.5 — 2026-08-27
+
+- recorded one Product-selected API baseline for atomic request binding,
+  `booking_semantic_hash_v1` and callable 10/15/30-second deadlines without
+  claiming named API/Security/Operations acceptance;
+- preserved nine ECL-03C collections while defining logical and request-attempt
+  record kinds inside `bookingIdempotency`;
+- made the ECL-03 ULID versus Booking-v1 opaque request-ID conflict an explicit
+  `ECL03-D12` blocker;
+- linked a bounded, separately approvable command schema/DTO correction plan;
+- appended AC-80..85 and changed no schema, DTO, backend, Firebase, mobile or
+  deployment file.
 
 ### v1.4 — 2026-08-26
 
@@ -322,7 +339,7 @@ fail closed. Deep link повторяет Auth и authorization.
 | `bookingPoolLedgers` | occurrence/pool/channel hash | Capacity counters and revision |
 | `bookingUserUsage` | `userId` | Uniform cap evidence and policy version |
 | `bookingActiveKeys` | versioned actor/occurrence/admission-track hash | One non-terminal Booking lock per duplicate-active scope |
-| `bookingIdempotency` | actor/command/key hash | Payload hash and stored result |
+| `bookingIdempotency` | domain-separated `m1_` logical or `r1_` attempt hash | Payload/result or atomic request-attempt binding |
 | `bookingAudit` | `auditId` | Append-only mutation facts |
 | `bookingOutbox` | deterministic obligation ID | Booking-owned post-commit notification need |
 | `bookingPlatformPolicies` | policy/version | Concurrency/reschedule/retention policy |
@@ -610,9 +627,13 @@ invalid_contract
 machine-verified contract; ECL-03C до contract change использует существующий
 fail-closed v1 result/error mapping и не изобретает wire value в handler.
 
-Callable Functions v2 — выбранный ECL-03C target profile, но executable
-transport/deadline/error mapping остаётся заблокирован BCK-03 API-DEC-01 и
-BCK09-OD-02. Текст target API не является deployable endpoint registry.
+Product-selected target: одна callable Functions v2 в `europe-west1` на каждую
+из пяти ECL-03C surfaces, без generic router; client deadline 10 секунд для
+query и 15 секунд для mutation, server timeout 30 секунд. Timeout/connection
+loss mutation означает unknown outcome; recovery использует тот же semantic
+payload/idempotency key и fresh request ID либо authorized query. Это не
+deployable endpoint registry: exact mapping остаётся заблокирован до named API
+Platform + BCK-05 acceptance of BCK-03 `API-DEC-01`.
 
 Availability projection различает `available`, `limited`, `soldOut`,
 `closed`, `stale`, `unknown` и `unsupported`. Только response, прочитанный из
@@ -628,8 +649,8 @@ authoritative projection/ledger, может быть помечен authoritativ
 3. verify App Check mode;
 4. load server-owned feature flag;
 5. bind actor/capability to resource;
-6. calculate canonical payload hash;
-7. resolve idempotency record;
+6. validate the closed command variant and calculate canonical payload hash;
+7. resolve logical-mutation and request-attempt idempotency records;
 8. run exact domain transaction;
 9. return stored authoritative result after commit.
 
@@ -646,7 +667,7 @@ ID generator; каждый Firestore retry использует тот же cand
 
 В одной Firestore transaction:
 
-1. read idempotency;
+1. read logical-mutation and request-attempt idempotency records;
 2. read Event projection and exact ledger;
 3. validate lifecycle/window/free/internal/generalCapacity;
 4. validate guest units and eligibility;
@@ -655,7 +676,7 @@ ID generator; каждый Firestore retry использует тот же cand
 7. enforce remaining capacity;
 8. create Booking and its active key atomically;
 9. increment ledger and user usage;
-10. write audit, outbox and idempotency result.
+10. write audit, outbox, logical result and atomic attempt binding.
 
 Finite и unlimited create конфликтуют на одном deterministic active-key record
 для `(actorId, occurrenceId, admissionTrackId)`. Different idempotency keys не
@@ -777,6 +798,38 @@ idempotencyKey)`.
 - новый attempt использует свежий request ID; обнаруженный reuse одного
   request ID с другим logical key/semantic command invalid и не мутирует state;
 - retention превышает максимальное поддерживаемое retry window.
+
+Existing `bookingIdempotency` stores two closed record kinds and remains one
+collection:
+
+```text
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+logicalMutationId = "m1_" + SHA256hex(
+  encode("booking_logical_mutation_v1") || encode(actorId) ||
+  encode(commandType) || encode(idempotencyKey))
+requestAttemptId = "r1_" + SHA256hex(
+  encode("booking_request_attempt_v1") || encode(actorId) || encode(requestId))
+```
+
+The logical record owns the semantic hash/stored result; the attempt record
+binds the same actor/request ID to command, logical-key reference and semantic
+hash. Both are read before writes and created atomically with the mutation.
+Same attempt/same mutation may replay the stored result; same attempt with
+another command/key/hash returns `invalid_contract` without mutation.
+
+`booking_semantic_hash_v1` projects exactly `{algorithmVersion, commandType,
+commandSchemaVersion, resolvedActorScope, payload}` after closed-variant
+validation, serializes RFC 8785 JCS UTF-8, then emits lowercase hexadecimal
+SHA-256. Request/idempotency IDs, transport metadata, raw Auth/App Check and
+server timestamps are excluded. Duplicate JSON keys, non-finite numbers and
+cross-language unsafe values fail before hashing. Dart/TypeScript golden
+vectors are mandatory. API Platform + Security acceptance of `API-DEC-03`
+remains Pending.
+
+The Product-selected wire target treats `requestId` as opaque bounded client
+input, but Approved ECL-03 still specifies ULID. No endpoint may be implemented
+until `ECL03-D12` chooses one consistent rule across parent, schema, fixtures
+and consumers.
 
 ## 14. Workers and scheduling
 
@@ -1302,10 +1355,24 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
     `ExecuteApprovedBookingRepair` owning-domain mutation.
 79. Suppressed pre-activation outbox никогда не replay; только
     `handoffRequired` obligation требует BCK-13 terminal receipt/dead-letter.
+80. `bookingIdempotency` содержит закрытые logical-mutation и request-attempt
+    record kinds без создания десятой ECL-03C collection.
+81. Request-attempt reuse с другим command/key/hash атомарно отклоняется до
+    Booking, ledger, usage, audit или outbox mutation.
+82. `booking_semantic_hash_v1` использует exact JCS/SHA-256 projection и
+    cross-language golden vectors до runtime.
+83. Callable v2 и 10/15/30-second deadline profile остаются Product-selected,
+    пока API Platform/BCK-05 не примут API-DEC-01.
+84. ECL-03 ULID и Booking-v1 opaque request-ID reconciled только отдельным
+    Accepted `ECL03-D12`; до этого endpoint implementation заблокирован.
+85. Command schema/DTO divergence исправляется только через отдельно Approved
+    BCK09-API-CORR-01 и не скрывается backend-only validation.
 
 ## 28. Definition of Ready для начала реализации
 
 - этот master-spec и exact ECL-03C plan явно Approved;
+- BCK09-API-CORR-01 implemented/verified и `ECL03-D12` Accepted;
+- BCK-03 API-DEC-01/03 приняты их named owners с exact evidence;
 - отдельный post-stabilization backend stage разрешён;
 - production Identity/account/capability authority имеет Approved contract и
   verified dependency plan;
@@ -1349,7 +1416,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.2, D01–D11 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Exact transaction-core plan v1.2 | Review | Not authorized |
+| ECL-03C | Exact transaction-core plan v1.3 | Review | Not authorized |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1367,8 +1434,8 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.2 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
-| BCK09-OD-02 | Deferred/Open | API Platform + Booking | Preserve Booking v1/D11; close API-DEC-01/03 and prove transport/hash fixture parity | No mutation endpoint |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.3 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
+| BCK09-OD-02 | Product baseline selected; specialist decision Open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; validate BCK09-API-DEC-01, close API-DEC-01/03 and prove contract/hash fixture parity | No mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
 | BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |
