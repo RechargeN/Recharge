@@ -2,12 +2,10 @@ import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_validation_issue.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
-import '../../domain/entities/location_search_suggestion.dart';
 import '../../domain/entities/place_validation_issue.dart';
-import '../../domain/entities/rental_validation_issue.dart';
-import '../../domain/entities/session_validation_issue.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
 import '../../domain/entities/place_enrichment_proposal.dart';
+import '../../domain/entities/rental_validation_issue.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
@@ -42,16 +40,11 @@ class CreateState {
     required this.findPeopleValidationIssues,
     required this.placeValidationIssues,
     required this.activityValidationIssues,
-    required this.sessionValidationIssues,
-    required this.rentalStep,
-    required this.rentalValidationIssues,
     required this.placeDuplicateMatches,
     required this.duplicateOverrideConfirmed,
     required this.placeEnrichmentLoading,
     required this.placeEnrichmentProposal,
     required this.placeEnrichmentError,
-    required this.placeLocationSuggestions,
-    required this.placeLocationSearchLoading,
     required this.scenarioStep,
     required this.scenarioUndoStack,
     required this.scenarioRedoStack,
@@ -64,7 +57,8 @@ class CreateState {
     required this.routeStep,
     required this.routePublishReceipt,
     required this.routeModerationRequests,
-    required this.collectionStep,
+    required this.rentalStep,
+    required this.rentalValidationIssues,
   });
 
   factory CreateState.initial() {
@@ -88,16 +82,11 @@ class CreateState {
       findPeopleValidationIssues: const <FindPeopleValidationIssue>[],
       placeValidationIssues: const <PlaceValidationIssue>[],
       activityValidationIssues: const <ActivityValidationIssue>[],
-      sessionValidationIssues: const <SessionValidationIssue>[],
-      rentalStep: 0,
-      rentalValidationIssues: const <RentalValidationIssue>[],
       placeDuplicateMatches: const <PlaceDuplicateMatch>[],
       duplicateOverrideConfirmed: false,
       placeEnrichmentLoading: false,
       placeEnrichmentProposal: null,
       placeEnrichmentError: null,
-      placeLocationSuggestions: const <LocationSearchSuggestion>[],
-      placeLocationSearchLoading: false,
       scenarioStep: 0,
       scenarioUndoStack: const <ScenarioDraftData>[],
       scenarioRedoStack: const <ScenarioDraftData>[],
@@ -110,7 +99,8 @@ class CreateState {
       routeStep: 0,
       routePublishReceipt: null,
       routeModerationRequests: const <RouteModerationRequest>[],
-      collectionStep: 0,
+      rentalStep: 0,
+      rentalValidationIssues: const <RentalValidationIssue>[],
     );
   }
 
@@ -129,16 +119,11 @@ class CreateState {
   final List<FindPeopleValidationIssue> findPeopleValidationIssues;
   final List<PlaceValidationIssue> placeValidationIssues;
   final List<ActivityValidationIssue> activityValidationIssues;
-  final List<SessionValidationIssue> sessionValidationIssues;
-  final int rentalStep;
-  final List<RentalValidationIssue> rentalValidationIssues;
   final List<PlaceDuplicateMatch> placeDuplicateMatches;
   final bool duplicateOverrideConfirmed;
   final bool placeEnrichmentLoading;
   final PlaceEnrichmentProposal? placeEnrichmentProposal;
   final String? placeEnrichmentError;
-  final List<LocationSearchSuggestion> placeLocationSuggestions;
-  final bool placeLocationSearchLoading;
   final int scenarioStep;
   final List<ScenarioDraftData> scenarioUndoStack;
   final List<ScenarioDraftData> scenarioRedoStack;
@@ -151,7 +136,8 @@ class CreateState {
   final int routeStep;
   final RoutePublishReceipt? routePublishReceipt;
   final List<RouteModerationRequest> routeModerationRequests;
-  final int collectionStep;
+  final int rentalStep;
+  final List<RentalValidationIssue> rentalValidationIssues;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -182,11 +168,6 @@ class CreateState {
     bool clearPlaceValidationIssues = false,
     List<ActivityValidationIssue>? activityValidationIssues,
     bool clearActivityValidationIssues = false,
-    List<SessionValidationIssue>? sessionValidationIssues,
-    bool clearSessionValidationIssues = false,
-    int? rentalStep,
-    List<RentalValidationIssue>? rentalValidationIssues,
-    bool clearRentalValidationIssues = false,
     List<PlaceDuplicateMatch>? placeDuplicateMatches,
     bool clearPlaceDuplicateMatches = false,
     bool? duplicateOverrideConfirmed,
@@ -195,8 +176,6 @@ class CreateState {
     bool clearPlaceEnrichmentProposal = false,
     String? placeEnrichmentError,
     bool clearPlaceEnrichmentError = false,
-    List<LocationSearchSuggestion>? placeLocationSuggestions,
-    bool? placeLocationSearchLoading,
     int? scenarioStep,
     List<ScenarioDraftData>? scenarioUndoStack,
     bool clearScenarioUndoStack = false,
@@ -216,7 +195,9 @@ class CreateState {
     bool clearRoutePublishReceipt = false,
     List<RouteModerationRequest>? routeModerationRequests,
     bool clearRouteModerationRequests = false,
-    int? collectionStep,
+    int? rentalStep,
+    List<RentalValidationIssue>? rentalValidationIssues,
+    bool clearRentalValidationIssues = false,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -246,13 +227,6 @@ class CreateState {
       activityValidationIssues: clearActivityValidationIssues
           ? const <ActivityValidationIssue>[]
           : (activityValidationIssues ?? this.activityValidationIssues),
-      sessionValidationIssues: clearSessionValidationIssues
-          ? const <SessionValidationIssue>[]
-          : (sessionValidationIssues ?? this.sessionValidationIssues),
-      rentalStep: rentalStep ?? this.rentalStep,
-      rentalValidationIssues: clearRentalValidationIssues
-          ? const <RentalValidationIssue>[]
-          : (rentalValidationIssues ?? this.rentalValidationIssues),
       placeDuplicateMatches: clearPlaceDuplicateMatches
           ? const <PlaceDuplicateMatch>[]
           : (placeDuplicateMatches ?? this.placeDuplicateMatches),
@@ -266,10 +240,6 @@ class CreateState {
       placeEnrichmentError: clearPlaceEnrichmentError
           ? null
           : (placeEnrichmentError ?? this.placeEnrichmentError),
-      placeLocationSuggestions:
-          placeLocationSuggestions ?? this.placeLocationSuggestions,
-      placeLocationSearchLoading:
-          placeLocationSearchLoading ?? this.placeLocationSearchLoading,
       scenarioStep: scenarioStep ?? this.scenarioStep,
       scenarioUndoStack: clearScenarioUndoStack
           ? const <ScenarioDraftData>[]
@@ -299,7 +269,10 @@ class CreateState {
       routeModerationRequests: clearRouteModerationRequests
           ? const <RouteModerationRequest>[]
           : (routeModerationRequests ?? this.routeModerationRequests),
-      collectionStep: collectionStep ?? this.collectionStep,
+      rentalStep: rentalStep ?? this.rentalStep,
+      rentalValidationIssues: clearRentalValidationIssues
+          ? const <RentalValidationIssue>[]
+          : (rentalValidationIssues ?? this.rentalValidationIssues),
     );
   }
 }

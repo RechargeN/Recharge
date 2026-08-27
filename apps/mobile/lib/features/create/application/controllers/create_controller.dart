@@ -7,10 +7,6 @@ import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
-import '../../domain/entities/collection_draft_data.dart';
-import '../../domain/entities/collection_item_draft.dart';
-import '../../domain/entities/collection_publication_data.dart';
-import '../../domain/entities/collection_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
@@ -22,7 +18,6 @@ import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_validation_issue.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
-import '../../domain/entities/location_search_suggestion.dart';
 import '../../domain/entities/place_draft_data.dart';
 import '../../domain/entities/place_creation_policy.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
@@ -44,14 +39,7 @@ import '../../domain/entities/scenario_logistics_draft.dart';
 import '../../domain/entities/scenario_transit_mutation.dart';
 import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/entities/scenario_validation_issue.dart';
-import '../../domain/entities/session_availability_exception.dart';
-import '../../domain/entities/session_draft_data.dart';
-import '../../domain/entities/session_price_disclosure.dart';
-import '../../domain/entities/session_schedule.dart';
-import '../../domain/entities/session_slot_projection.dart';
-import '../../domain/entities/session_validation_issue.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
-import '../../domain/repositories/collection_catalog_search_repository.dart';
 import '../../domain/repositories/create_template_repository.dart';
 import '../../domain/repositories/rental_private_authoring_repository.dart';
 import '../../domain/repositories/rental_publication_index_sink.dart';
@@ -78,8 +66,6 @@ import '../../domain/usecases/build_route_publication_bundle_usecase.dart';
 import '../../domain/usecases/count_activity_informal_access_usecase.dart';
 import '../../domain/usecases/validate_activity_draft_usecase.dart';
 import '../activity_create_config.dart';
-import '../collection_create_config.dart';
-import '../collection_create_coordinator.dart';
 import '../create_runtime_defaults.dart';
 import '../create_taxonomy.dart';
 import '../event_create_coordinator.dart';
@@ -88,7 +74,6 @@ import '../event_classification_section.dart';
 import '../event_inventory_section.dart';
 import '../place_create_config.dart';
 import '../place_enrichment_coordinator.dart';
-import '../place_search_coordinator.dart';
 import '../rental_availability_section.dart';
 import '../rental_create_config.dart';
 import '../rental_external_fulfillment_section.dart';
@@ -103,13 +88,9 @@ import '../route_publication_coordinator.dart';
 import '../scenario_create_coordinator.dart';
 import '../scenario_generation_coordinator.dart';
 import '../scenario_transit_telemetry.dart';
-import '../session_create_config.dart';
-import '../session_create_coordinator.dart';
 import '../get_category_criteria_usecase.dart';
-import '../state/collection_create_state.dart';
 import '../state/create_state.dart';
 import '../state/route_create_state.dart';
-import '../../domain/usecases/validate_session_draft_usecase.dart';
 
 class CreateController extends ChangeNotifier {
   CreateController({
@@ -128,8 +109,6 @@ class CreateController extends ChangeNotifier {
     ScenarioCreateCoordinator? scenarioCreateCoordinator,
     ScenarioGenerationCoordinator? scenarioGenerationCoordinator,
     PlaceEnrichmentCoordinator? placeEnrichmentCoordinator,
-    PlaceSearchCoordinator? placeSearchCoordinator,
-    SessionCreateCoordinator? sessionCreateCoordinator,
     CatalogObjectPickerPort? catalogObjectPicker,
     CreateRuntimeDefaults runtimeDefaults = const CreateRuntimeDefaults(
       marketCityId: '',
@@ -181,8 +160,6 @@ class CreateController extends ChangeNotifier {
        _scenarioCreateCoordinator = scenarioCreateCoordinator,
        _scenarioGenerationCoordinator = scenarioGenerationCoordinator,
        _placeEnrichmentCoordinator = placeEnrichmentCoordinator,
-       _placeSearchCoordinator = placeSearchCoordinator,
-       _sessionCreateCoordinator = sessionCreateCoordinator,
        _catalogObjectPicker = catalogObjectPicker,
        _runtimeDefaults = runtimeDefaults,
        _validateCreateAvailability = validateCreateAvailability,
@@ -217,9 +194,6 @@ class CreateController extends ChangeNotifier {
   final ScenarioCreateCoordinator? _scenarioCreateCoordinator;
   final ScenarioGenerationCoordinator? _scenarioGenerationCoordinator;
   final PlaceEnrichmentCoordinator? _placeEnrichmentCoordinator;
-  final PlaceSearchCoordinator? _placeSearchCoordinator;
-  int _placeLocationSearchOperationSeq = 0;
-  final SessionCreateCoordinator? _sessionCreateCoordinator;
   final CatalogObjectPickerPort? _catalogObjectPicker;
   final CreateRuntimeDefaults _runtimeDefaults;
   final ValidateCreateAvailabilityUseCase _validateCreateAvailability;
@@ -267,8 +241,6 @@ class CreateController extends ChangeNotifier {
   bool get canManageRental => _capabilities.contains('manage.rental');
   bool get canArchiveRental => _capabilities.contains('archive.rental');
   RouteCreateState? get routeCreateState => _routeCoordinator?.state;
-  CollectionCreateState? get collectionCreateState =>
-      _collectionCoordinator?.state;
   bool get eventClassificationEnabled => _eventClassificationEnabled;
   EventClassificationSectionState get eventClassificationState =>
       _eventCreateCoordinator.classificationState(
@@ -417,25 +389,12 @@ class CreateController extends ChangeNotifier {
     return Uri.tryParse(url.trim())?.host;
   }
 
-  /// Live materialized schedule preview for the current Session draft
-  /// (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §11, §12 Блок 2). Empty for any
-  /// other object type or before a coordinator is wired.
-  List<SessionSlotProjection> get sessionSchedulePreview {
-    final SessionCreateCoordinator? coordinator = _sessionCreateCoordinator;
-    if (coordinator == null ||
-        _state.draft.objectType != CreateObjectType.session) {
-      return const <SessionSlotProjection>[];
-    }
-    return coordinator.materialize(_state.draft).projections;
-  }
-
   String? _loadedUserId;
   Set<String> _capabilities = const <String>{};
   PublisherRef? _activePublisherRef;
   Timer? _autosaveTimer;
   int _localIdCounter = 0;
   RouteCreateCoordinator? _routeCoordinator;
-  CollectionCreateCoordinator? _collectionCoordinator;
   List<CreateTemplateEntity> _eventTemplates = const <CreateTemplateEntity>[];
   EventAdmissionPreset? _selectedAdmissionPreset;
   EventAdmissionDraft? _admissionPresetPreview;
@@ -523,10 +482,6 @@ class CreateController extends ChangeNotifier {
     if (draft.objectType == CreateObjectType.route && draft.routeData == null) {
       draft = draft.copyWith(routeData: createEmptyRouteDraft());
     }
-    if (draft.objectType == CreateObjectType.rental &&
-        draft.rentalData == null) {
-      draft = draft.copyWith(rentalData: _rentalDefaults(userId));
-    }
 
     _setState(
       _state.copyWith(
@@ -538,7 +493,6 @@ class CreateController extends ChangeNotifier {
       ),
     );
     await _loadEventTemplates(userId);
-    await _loadRentalTemplates(userId);
     _analyticsService.track(
       'create_draft_loaded',
       params: <String, Object?>{
@@ -791,19 +745,10 @@ class CreateController extends ChangeNotifier {
             ? (_state.draft.routeData ?? createEmptyRouteDraft())
             : null,
         clearRouteData: type != CreateObjectType.route,
-        sessionData: type == CreateObjectType.session
-            ? (_state.draft.sessionData ?? _sessionDefaults(_state.draft.title))
-            : null,
-        clearSessionData: type != CreateObjectType.session,
         rentalData: type == CreateObjectType.rental
             ? (_state.draft.rentalData ?? _rentalDefaults(_state.userId))
             : null,
         clearRentalData: type != CreateObjectType.rental,
-        collectionData: type == CreateObjectType.collection
-            ? (_state.draft.collectionData ??
-                  _collectionDefaults(_state.userId))
-            : null,
-        clearCollectionData: type != CreateObjectType.collection,
         updatedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -817,7 +762,6 @@ class CreateController extends ChangeNotifier {
         placeStep: 0,
         findPeopleStep: 0,
         clearFindPeopleValidationIssues: true,
-        clearSessionValidationIssues: true,
         clearPlaceDuplicateMatches: true,
         duplicateOverrideConfirmed: false,
         scenarioStep: 0,
@@ -831,7 +775,6 @@ class CreateController extends ChangeNotifier {
         routeStep: 0,
         rentalStep: 0,
         clearRentalValidationIssues: true,
-        collectionStep: 0,
       ),
     );
   }
@@ -921,270 +864,6 @@ class CreateController extends ChangeNotifier {
   void goToRouteStep(int step) {
     if (step < 0 || step >= routeCreateSteps.length) return;
     _setState(_state.copyWith(routeStep: step, clearMessage: true));
-  }
-
-  // ---------------------------------------------------------------------
-  // Collection / Guide (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §7, §8)
-  // Same attach/delegate/adopt pattern as Route above — the coordinator
-  // owns items/sections/search/undo/composition-review state, this
-  // controller only holds the current step and syncs `draft` after every
-  // command.
-  // ---------------------------------------------------------------------
-
-  void attachCollectionCoordinator(CollectionCreateCoordinator coordinator) {
-    if (identical(_collectionCoordinator, coordinator)) return;
-    final CreateDraftEntity draft = _state.draft.objectType == CreateObjectType.collection
-        ? _state.draft.copyWith(
-            collectionData:
-                _state.draft.collectionData ??
-                _collectionDefaults(_state.userId),
-          )
-        : _state.draft;
-    if (draft.objectType != CreateObjectType.collection ||
-        _state.userId.isEmpty) {
-      return;
-    }
-    _collectionCoordinator = coordinator;
-    coordinator.initialize(createDraft: draft);
-    _setState(_state.copyWith(draft: coordinator.state.createDraft));
-  }
-
-  void detachCollectionCoordinator(CollectionCreateCoordinator coordinator) {
-    if (identical(_collectionCoordinator, coordinator)) {
-      _collectionCoordinator = null;
-    }
-  }
-
-  Future<void> searchCollectionCatalog(
-    String text, {
-    Set<CollectionCatalogObjectType>? types,
-  }) async {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    await coordinator.searchCatalog(text, types: types);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void clearCollectionCatalogSearch() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.clearCatalogSearch();
-    _adoptCollectionCoordinatorState();
-  }
-
-  void setCollectionAreaLabel(String value) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.setAreaLabel(value);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void setCollectionAreaId(String? value) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.setAreaId(value);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void setCollectionAreaAnchor({
-    required double latitude,
-    required double longitude,
-  }) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.setAreaAnchor(latitude: latitude, longitude: longitude);
-    _adoptCollectionCoordinatorState();
-  }
-
-  Future<void> searchCollectionAreaLocation(String query) async {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    await coordinator.searchAreaLocation(query);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void clearCollectionAreaLocationSuggestions() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.clearAreaLocationSuggestions();
-    _adoptCollectionCoordinatorState();
-  }
-
-  Future<void> selectCollectionAreaLocationSuggestion(
-    String suggestionId,
-  ) async {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    await coordinator.selectAreaLocationSuggestion(suggestionId);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void addCollectionItem(CollectionCatalogSearchResult result) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.addItem(result);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void removeCollectionItem(String itemId) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.removeItem(itemId);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void moveCollectionItem({
-    required String itemId,
-    String? toSectionId,
-    required int toIndex,
-  }) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.moveItem(
-      itemId: itemId,
-      toSectionId: toSectionId,
-      toIndex: toIndex,
-    );
-    _adoptCollectionCoordinatorState();
-  }
-
-  void addCollectionSection(String title) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.addSection(title);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void renameCollectionSection(String sectionId, String title) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.renameSection(sectionId, title);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void removeCollectionSection(String sectionId) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.removeSection(sectionId);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void moveCollectionSection(String sectionId, int toIndex) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.moveSection(sectionId, toIndex);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void setCollectionCuratorNote(String itemId, String note) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.setCuratorNote(itemId, note);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void toggleCollectionHighlight(String itemId) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.toggleHighlight(itemId);
-    _adoptCollectionCoordinatorState();
-  }
-
-  void setCollectionBudgetIndicator(CollectionBudgetTier? tier) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.setBudgetIndicator(tier);
-    _adoptCollectionCoordinatorState();
-  }
-
-  /// Read-only — does not mutate state or notify listeners on its own.
-  CollectionBudgetTier? suggestCollectionBudgetTier() {
-    return _collectionCoordinator?.suggestBudgetTier();
-  }
-
-  void undoCollection() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.undo();
-    _adoptCollectionCoordinatorState();
-  }
-
-  void redoCollection() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.redo();
-    _adoptCollectionCoordinatorState();
-  }
-
-  Future<void> buildCollectionPreview() async {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    await coordinator.buildPreview();
-    _adoptCollectionCoordinatorState();
-  }
-
-  void acknowledgeCollectionCompositionReview() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    coordinator.acknowledgeCompositionReview();
-    _adoptCollectionCoordinatorState();
-  }
-
-  List<CollectionValidationIssue> validateCollection() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return const <CollectionValidationIssue>[];
-    final List<CollectionValidationIssue> issues = coordinator.validate();
-    _adoptCollectionCoordinatorState();
-    return issues;
-  }
-
-  Future<CollectionPublishReceipt?> publishCollection() async {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return null;
-    try {
-      final CollectionPublishReceipt receipt = await coordinator.publish();
-      _adoptCollectionCoordinatorState();
-      return receipt;
-    } catch (_) {
-      _adoptCollectionCoordinatorState();
-      rethrow;
-    }
-  }
-
-  /// Self-service removal from the already-published active version
-  /// (§3.11, Вопрос 19) — no `submit`/`moderate` round trip. Does not touch
-  /// draft state, so there is nothing to re-adopt into `CreateState`
-  /// afterwards.
-  Future<CollectionPublishReceipt?> removeCollectionItemsFromActiveVersion(
-    Set<String> stableKeys,
-  ) {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) {
-      return Future<CollectionPublishReceipt?>.value();
-    }
-    return coordinator.removeItemsFromActiveVersion(stableKeys);
-  }
-
-  void goToCollectionStep(int step) {
-    if (step < 0 || step >= collectionCreateSteps.length) return;
-    _setState(_state.copyWith(collectionStep: step, clearMessage: true));
-  }
-
-  void _adoptCollectionCoordinatorState() {
-    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null) return;
-    _setState(
-      _state.copyWith(
-        draft: coordinator.state.createDraft,
-        saveStatus: CreateSaveStatus.unsaved,
-      ),
-    );
-  }
-
-  CollectionDraftData _collectionDefaults(String userId) {
-    return CollectionDraftData.defaults(
-      publisherRef: PublisherRef(type: PublisherType.user, id: userId),
-    );
   }
 
   ScenarioReadinessResult? get scenarioReadiness {
@@ -2731,87 +2410,6 @@ class CreateController extends ChangeNotifier {
     });
   }
 
-  /// Debounced by the caller (widget) — this fires the actual lookup.
-  /// Below the usecase's own minimum length it resolves to an empty list
-  /// without a network call.
-  Future<void> searchPlaceLocation(String query) async {
-    final PlaceSearchCoordinator? coordinator = _placeSearchCoordinator;
-    if (coordinator == null) return;
-    final int requestSerial = ++_placeLocationSearchOperationSeq;
-    _setState(_state.copyWith(placeLocationSearchLoading: true));
-    List<LocationSearchSuggestion> results;
-    try {
-      results = await coordinator.search(
-        query,
-        marketCityId: _state.draft.marketCityId,
-      );
-    } catch (_) {
-      results = const <LocationSearchSuggestion>[];
-    }
-    if (requestSerial != _placeLocationSearchOperationSeq) return;
-    _setState(
-      _state.copyWith(
-        placeLocationSuggestions: results,
-        placeLocationSearchLoading: false,
-      ),
-    );
-  }
-
-  void clearPlaceLocationSuggestions() {
-    _setState(
-      _state.copyWith(
-        placeLocationSuggestions: const <LocationSearchSuggestion>[],
-        placeLocationSearchLoading: false,
-      ),
-    );
-  }
-
-  /// Resolves [suggestion] and, unless the author already manually
-  /// confirmed a pin (`pinConfirmed`), prefills the map marker + formatted
-  /// address with it — the map tap in the Visit step still always wins over
-  /// this on the next tap. Failures are swallowed: search is a convenience,
-  /// never a hard dependency of Place creation.
-  Future<void> selectPlaceLocationSuggestion(
-    LocationSearchSuggestion suggestion,
-  ) async {
-    final PlaceSearchCoordinator? coordinator = _placeSearchCoordinator;
-    if (coordinator == null) return;
-    final int requestSerial = ++_placeLocationSearchOperationSeq;
-    LocationSearchResolution resolution;
-    try {
-      resolution = await coordinator.resolve(suggestion.id);
-    } catch (_) {
-      clearPlaceLocationSuggestions();
-      return;
-    }
-    if (requestSerial != _placeLocationSearchOperationSeq) return;
-    final bool alreadyConfirmed = _state.draft.placeData?.location.pinConfirmed ?? false;
-    if (!alreadyConfirmed) {
-      _updatePlace(
-        (PlaceDraftData place) {
-          return place.copyWith(
-            location: place.location.copyWith(
-              latitude: resolution.latitude,
-              longitude: resolution.longitude,
-              formattedAddress: resolution.formattedAddress,
-              timezoneId: '',
-              accuracy: PlaceLocationAccuracy.approximate,
-              pinConfirmed: false,
-              geocodedAtUtc: DateTime.now().toUtc(),
-            ),
-          );
-        },
-        commonDraft: (CreateDraftEntity draft) {
-          return draft.copyWith(
-            latitude: resolution.latitude,
-            longitude: resolution.longitude,
-          );
-        },
-      );
-    }
-    clearPlaceLocationSuggestions();
-  }
-
   void updateActivityCoordinates({
     required String latitude,
     required String longitude,
@@ -3866,11 +3464,6 @@ class CreateController extends ChangeNotifier {
           _activityIssues(),
           message: 'Проверьте обязательные поля Recharge Activity',
         );
-      } else if (_state.draft.objectType == CreateObjectType.session) {
-        _setSessionIssues(
-          _sessionIssues(),
-          message: 'Проверьте обязательные поля Bookable session',
-        );
       } else if (_state.draft.objectType == CreateObjectType.findPeople) {
         _setState(
           _state.copyWith(
@@ -3935,7 +3528,6 @@ class CreateController extends ChangeNotifier {
       if (isInformal) {
         final int priorInformalCount = _countActivityInformalAccess(
           draftToPublish,
-          actorUserId: _state.userId,
         );
         if (priorInformalCount >= 3) {
           draftToPublish = draftToPublish.copyWith(
@@ -4323,12 +3915,6 @@ class CreateController extends ChangeNotifier {
             issue.fieldId: issue.message,
       };
     }
-    if (draft.objectType == CreateObjectType.session) {
-      return <String, String>{
-        for (final SessionValidationIssue issue in _sessionIssues(draft))
-          if (issue.isBlocking) (issue.fieldId ?? issue.code): issue.code,
-      };
-    }
     if (draft.objectType == CreateObjectType.scenario) {
       final ScenarioDraftData? scenario = draft.scenarioData;
       if (scenario == null || _scenarioCreateCoordinator == null) {
@@ -4367,14 +3953,11 @@ class CreateController extends ChangeNotifier {
   CreateAvailabilityKind _availabilityKindFor(CreateObjectType type) {
     return switch (type) {
       CreateObjectType.event ||
+      CreateObjectType.session ||
       CreateObjectType.classWorkshop ||
       CreateObjectType.findPeople => CreateAvailabilityKind.eventSlots,
       CreateObjectType.rental => CreateAvailabilityKind.openingHours,
-      // Session's typed SessionSchedule is the single time authority
-      // (§6.1) — the generic eventSlots picker is not used by the new
-      // writer.
-      CreateObjectType.place ||
-      CreateObjectType.session => CreateAvailabilityKind.none,
+      CreateObjectType.place => CreateAvailabilityKind.none,
       _ => CreateAvailabilityKind.none,
     };
   }
@@ -4385,12 +3968,6 @@ class CreateController extends ChangeNotifier {
     if (next.objectType == CreateObjectType.route && coordinator != null) {
       coordinator.synchronizeEnvelope(next);
       resolved = coordinator.state.createDraft;
-    }
-    final collectionCoordinator = _collectionCoordinator;
-    if (next.objectType == CreateObjectType.collection &&
-        collectionCoordinator != null) {
-      collectionCoordinator.synchronizeEnvelope(next);
-      resolved = collectionCoordinator.state.createDraft;
     }
     final bool invalidatesPlaceHelper =
         _state.draft.objectType == CreateObjectType.place ||
@@ -4408,7 +3985,6 @@ class CreateController extends ChangeNotifier {
                 resolved.objectType == CreateObjectType.findPeople ||
                 resolved.objectType == CreateObjectType.scenario ||
                 resolved.objectType == CreateObjectType.route ||
-                resolved.objectType == CreateObjectType.session ||
                 resolved.objectType == CreateObjectType.rental
             ? CreateSaveStatus.unsaved
             : _state.saveStatus,
@@ -4417,7 +3993,6 @@ class CreateController extends ChangeNotifier {
         clearEventValidationIssues: true,
         clearPlaceValidationIssues: true,
         clearActivityValidationIssues: true,
-        clearSessionValidationIssues: true,
         clearRentalValidationIssues: true,
         placeEnrichmentLoading: invalidatesPlaceHelper ? false : null,
         clearPlaceEnrichmentProposal: invalidatesPlaceHelper,
@@ -4430,7 +4005,6 @@ class CreateController extends ChangeNotifier {
             resolved.objectType == CreateObjectType.activity ||
             resolved.objectType == CreateObjectType.findPeople ||
             resolved.objectType == CreateObjectType.scenario ||
-            resolved.objectType == CreateObjectType.session ||
             resolved.objectType == CreateObjectType.rental) &&
         _state.userId.isNotEmpty) {
       _autosaveTimer?.cancel();
@@ -4471,11 +4045,6 @@ class CreateController extends ChangeNotifier {
       currencyCode: _runtimeDefaults.currency,
     );
   }
-
-  SessionDraftData _sessionDefaults(String title) => SessionDraftData.defaults(
-    resourceName: title,
-    timezoneId: _runtimeDefaults.timezone,
-  );
 
   RentalDraftData _rentalDefaults(String userId) {
     final CreateBlockConfig config = createBlockConfigFor(
@@ -5231,245 +4800,6 @@ class CreateController extends ChangeNotifier {
     return null;
   }
 
-  /// Mutates the typed Session payload and mirrors it back onto the shared
-  /// envelope through the coordinator's `apply()` (§12, §14) — the single
-  /// path any Session field change goes through.
-  void _updateSession(
-    SessionDraftData Function(SessionDraftData session) transform,
-  ) {
-    final SessionCreateCoordinator? coordinator = _sessionCreateCoordinator;
-    final SessionDraftData? current = _state.draft.sessionData;
-    if (coordinator == null ||
-        _state.draft.objectType != CreateObjectType.session ||
-        current == null) {
-      return;
-    }
-    final SessionDraftData next = transform(current);
-    _updateDraft(coordinator.apply(_state.draft, next));
-  }
-
-  List<SessionValidationIssue> _sessionIssues([CreateDraftEntity? draft]) {
-    final SessionCreateCoordinator? coordinator = _sessionCreateCoordinator;
-    if (coordinator == null) return const <SessionValidationIssue>[];
-    final CreateDraftEntity target = draft ?? _state.draft;
-    final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
-      target.mainCategory,
-    );
-    final bool categoryAllowed =
-        category?.allows(CreateObjectType.session) ?? false;
-    return coordinator.validate(
-      target,
-      context: SessionExternalValidationContext(
-        categoryAllowedForSession: categoryAllowed,
-        hasCover: target.media.coverImage.trim().isNotEmpty,
-        // Publisher/page capability enforcement is not implemented anywhere
-        // in the current mock runtime (ADR 0015 target, not yet wired) —
-        // consistent with every other Create type today, not a Session-only
-        // gap.
-        publisherEligible: true,
-      ),
-    );
-  }
-
-  void _setSessionIssues(
-    List<SessionValidationIssue> issues, {
-    required String message,
-  }) {
-    _setState(
-      _state.copyWith(
-        status: CreateStatus.ready,
-        sessionValidationIssues: issues,
-        validationErrors: <String, String>{
-          for (final SessionValidationIssue issue in issues)
-            if (issue.isBlocking) (issue.fieldId ?? issue.code): issue.code,
-        },
-        message: message,
-      ),
-    );
-  }
-
-  // --- Session public commands (§12) ---
-
-  void updateSessionResourceName(String value) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(resourceName: value),
-    );
-  }
-
-  void confirmSessionTimezone(String timezoneId) {
-    _updateSession(
-      (SessionDraftData session) =>
-          session.copyWith(timezoneId: timezoneId, timezoneConfirmed: true),
-    );
-  }
-
-  void applySessionWeeklyPreset(SessionWeeklyPreset preset) {
-    _updateSession((SessionDraftData session) {
-      int counter = 0;
-      final List<SessionWeeklyRule> rules = preset.buildRules(
-        () =>
-            'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}_${counter++}',
-      );
-      return session.copyWith(
-        schedule: session.schedule.copyWith(weeklyRules: rules),
-      );
-    });
-  }
-
-  void addSessionWeeklyRule({
-    required int isoWeekday,
-    required int startMinuteLocal,
-    required int endMinuteLocalExclusive,
-  }) {
-    _updateSession((SessionDraftData session) {
-      final SessionWeeklyRule rule = SessionWeeklyRule(
-        id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
-        isoWeekday: isoWeekday,
-        startMinuteLocal: startMinuteLocal,
-        endMinuteLocalExclusive: endMinuteLocalExclusive,
-      );
-      return session.copyWith(
-        schedule: session.schedule.copyWith(
-          weeklyRules: <SessionWeeklyRule>[
-            ...session.schedule.weeklyRules,
-            rule,
-          ],
-        ),
-      );
-    });
-  }
-
-  void removeSessionWeeklyRule(String ruleId) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        schedule: session.schedule.copyWith(
-          weeklyRules: session.schedule.weeklyRules
-              .where((SessionWeeklyRule rule) => rule.id != ruleId)
-              .toList(growable: false),
-        ),
-      ),
-    );
-  }
-
-  void setSessionSlotDuration(int minutes) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        schedule: session.schedule.copyWith(slotDurationMinutes: minutes),
-      ),
-    );
-  }
-
-  void setSessionBuffer(int minutes) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        schedule: session.schedule.copyWith(bufferAfterSlotMinutes: minutes),
-      ),
-    );
-  }
-
-  void setSessionNotice(int minutes) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        schedule: session.schedule.copyWith(minNoticeMinutes: minutes),
-      ),
-    );
-  }
-
-  void addSessionException({
-    required String startDateLocal,
-    required String endDateLocal,
-    required bool allDay,
-    int? startMinuteLocal,
-    int? endMinuteLocalExclusive,
-    String? note,
-  }) {
-    _updateSession((SessionDraftData session) {
-      final SessionAvailabilityException exception =
-          SessionAvailabilityException(
-            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
-            startDateLocal: startDateLocal,
-            endDateLocal: endDateLocal,
-            allDay: allDay,
-            startMinuteLocal: allDay ? null : startMinuteLocal,
-            endMinuteLocalExclusive: allDay ? null : endMinuteLocalExclusive,
-            privateNote: (note ?? '').trim().isEmpty ? null : note!.trim(),
-            createdByUserId: _state.userId,
-            createdAtUtc: DateTime.now().toUtc(),
-          );
-      return session.copyWith(
-        exceptions: <SessionAvailabilityException>[
-          ...session.exceptions,
-          exception,
-        ],
-      );
-    });
-  }
-
-  void removeSessionException(String exceptionId) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        exceptions: session.exceptions
-            .where(
-              (SessionAvailabilityException exception) =>
-                  exception.id != exceptionId,
-            )
-            .toList(growable: false),
-      ),
-    );
-  }
-
-  void setSessionPriceFree() {
-    _updateSession(
-      (SessionDraftData session) =>
-          session.copyWith(price: SessionPriceDisclosure.free),
-    );
-  }
-
-  void setSessionPriceFixed({
-    required int amountMinor,
-    required String currencyCode,
-  }) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        price: SessionPriceDisclosure(
-          mode: SessionPricingMode.fixed,
-          amount: SessionMoneyDraft(
-            amountMinor: amountMinor,
-            currencyCode: currencyCode,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void setSessionExternalBookingUrl(String url) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(externalBookingUrl: url),
-    );
-  }
-
-  void setSessionExternalTermsUrl(String? url) {
-    final String trimmed = (url ?? '').trim();
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(
-        externalTermsUrl: trimmed.isEmpty ? null : trimmed,
-        clearExternalTermsUrl: trimmed.isEmpty,
-      ),
-    );
-  }
-
-  void setSessionMaxPartySize(int value) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(maxPartySize: value),
-    );
-  }
-
-  void setSessionAmenityIds(Set<String> amenityIds) {
-    _updateSession(
-      (SessionDraftData session) => session.copyWith(amenityIds: amenityIds),
-    );
-  }
-
   void _invalidatePlaceDuplicateCheck() {
     if (_state.draft.objectType != CreateObjectType.place) return;
     _setState(
@@ -5538,12 +4868,7 @@ class CreateController extends ChangeNotifier {
   List<ActivityValidationIssue> _activityIssues([CreateDraftEntity? draft]) {
     final CreateDraftEntity target = draft ?? _state.draft;
     final List<ActivityValidationIssue> issues =
-        List<ActivityValidationIssue>.of(
-          _validateActivityDraft(
-            target,
-            activeMarketCurrencyCode: _runtimeDefaults.currency,
-          ),
-        );
+        List<ActivityValidationIssue>.of(_validateActivityDraft(target));
     final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
       target.mainCategory,
     );

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
 import '../../../core/telemetry/analytics_service.dart';
-import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
 import 'scenario_create_coordinator.dart';
@@ -13,8 +12,6 @@ import 'scenario_transit_schedule_coordinator.dart';
 import 'scenario_transit_picker_config.dart';
 import 'scenario_transit_telemetry.dart';
 import 'place_enrichment_coordinator.dart';
-import 'place_search_coordinator.dart';
-import 'session_create_coordinator.dart';
 import 'route_create_runtime.dart';
 import 'route_publication_coordinator.dart';
 import '../domain/entities/rental_direct_publish_policy.dart';
@@ -57,8 +54,6 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     scenarioCreateCoordinator: sl<ScenarioCreateCoordinator>(),
     scenarioGenerationCoordinator: sl<ScenarioGenerationCoordinator>(),
     placeEnrichmentCoordinator: sl<PlaceEnrichmentCoordinator>(),
-    placeSearchCoordinator: sl<PlaceSearchCoordinator>(),
-    sessionCreateCoordinator: sl<SessionCreateCoordinator>(),
     catalogObjectPicker: sl<CatalogObjectPickerPort>(),
     checkPlaceDuplicates: sl<CheckPlaceDuplicatesUseCase>(),
     // RNT-PUB-01 §1.3: local/mock composition explicitly opts into the
@@ -78,11 +73,6 @@ final routeCreateRuntimeProvider =
         unawaited(runtime.coordinator.dispose());
       });
       return runtime;
-    });
-
-final collectionCreateCoordinatorProvider =
-    Provider.autoDispose<CollectionCreateCoordinator>((ref) {
-      return sl<CollectionCreateCoordinator>();
     });
 
 final routeGpxTransferControllerProvider =

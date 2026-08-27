@@ -8,7 +8,6 @@ import '../../domain/entities/place_draft_data.dart';
 import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
-import '../../domain/entities/session_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
 import 'activity_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
@@ -17,7 +16,6 @@ import 'place_draft_mapper.dart';
 import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
-import 'session_draft_mapper.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -224,11 +222,6 @@ class CreateDraftModel {
         entity.routeData!,
       );
     }
-    if (entity.sessionData != null) {
-      serializedSections['session_details'] = SessionDraftMapper.toJson(
-        entity.sessionData!,
-      );
-    }
     if (entity.rentalData != null) {
       serializedSections['rental_details'] = RentalDraftMapper.toJson(
         entity.rentalData!,
@@ -406,17 +399,6 @@ class CreateDraftModel {
             defaults: legacyPlaceDefaults,
           )
         : null;
-    final RentalDraftData? rentalData =
-        parsedObjectType == CreateObjectType.rental
-        ? RentalDraftMapper.fromJson(
-            migratedSectionData['rental_details'],
-            defaults: RentalDraftData.defaults(
-              userId: organizerId,
-              currencyCode: currency,
-              timeZoneId: timezone,
-            ),
-          )
-        : null;
     final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
       userId: organizerId,
       currencyCode: currency,
@@ -435,6 +417,17 @@ class CreateDraftModel {
             defaults: FindPeopleDraftData.defaults(
               userId: organizerId,
               currencyCode: currency,
+            ),
+          )
+        : null;
+    final RentalDraftData? rentalData =
+        parsedObjectType == CreateObjectType.rental
+        ? RentalDraftMapper.fromJson(
+            migratedSectionData['rental_details'],
+            defaults: RentalDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+              timeZoneId: timezone,
             ),
           )
         : null;
@@ -470,35 +463,6 @@ class CreateDraftModel {
         routeData = null;
       }
     }
-    SessionDraftData? sessionData;
-    if (parsedObjectType == CreateObjectType.session) {
-      final Object? sessionPayload = migratedSectionData['session_details'];
-      if (sessionPayload is Map) {
-        try {
-          sessionData = SessionDraftMapper.fromJson(
-            Map<String, Object?>.from(sessionPayload),
-          );
-          runtimeSectionData.remove('session_details');
-        } on UnsupportedSessionSchemaException {
-          sessionData = null;
-        }
-      } else {
-        final List<CreateTimeSlotDraft> legacySlots = scheduleSlots
-            .map(CreateTimeSlotDraft.fromMap)
-            .toList(growable: false);
-        if (legacySlots.isNotEmpty) {
-          sessionData =
-              SessionDraftData.defaults(
-                resourceName: title,
-                timezoneId: timezone,
-              ).copyWith(
-                legacySchedule: SessionDraftMapper.migrateLegacyEventSlots(
-                  legacySlots,
-                ),
-              );
-        }
-      }
-    }
     return CreateDraftEntity(
       id: id,
       basedOnPublishedVersionId: basedOnPublishedVersionId,
@@ -517,7 +481,6 @@ class CreateDraftModel {
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
-      sessionData: sessionData,
       rentalData: rentalData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null

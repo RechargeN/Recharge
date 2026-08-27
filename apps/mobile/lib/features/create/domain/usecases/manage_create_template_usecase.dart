@@ -370,8 +370,6 @@ class ManageCreateTemplateUseCase {
       clearRouteData: true,
       clearScenarioData: true,
       clearActivityData: true,
-      clearSessionData: true,
-      clearCollectionData: true,
       media: const MediaEntity(coverImage: '', gallery: []),
       draftStatus: DraftStatus.draft,
       moderationStatus: ModerationStatus.none,
