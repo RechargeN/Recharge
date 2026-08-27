@@ -1,18 +1,31 @@
 # BCK09-API-CORR-01 — Booking v1 Contract Correction Slice
 
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-08-27**
-- Status: **Review — exact correction plan; implementation not authorized**
+- Status: **Implemented — Review; package gates green, repository gate blocked**
 - Parent finding:
-  [BCK09-API-REV-01 v0.3](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.4](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product baseline:
-  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Parent decision:
   [ECL03-D12 Accepted](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Target package: **`packages/api_contracts` / Booking wire v1**
 - Runtime effect of this revision: **none**
 
 ## 0. Outcome
+
+### v0.3 — 2026-08-27
+
+- Product owner authorized the bounded implementation by replying `дальше`
+  directly to the explicit BCK09-API-CORR-01 approval gate;
+- replaced the permissive command property bag with nine closed Schema
+  variants and froze the existing-command revision matrix;
+- aligned Dart parsing with Schema for D12, null-versus-absent, bounded IDs,
+  participant/guest/reason limits and recursive authority rejection;
+- added 14 valid and 38 invalid command vectors; the bounded Dart validator
+  and independent Python `jsonschema` Draft 2020-12 validator agree on all;
+- prepared `api_contracts` `0.2.1` as a pre-runtime corrective release;
+- changed no backend, mobile, Firebase, endpoint, deployment or generated file.
 
 ### v0.2 — 2026-08-27
 
@@ -36,7 +49,7 @@ deployed contract.
 
 ## 1. Scope
 
-### 1.1. Included after explicit approval
+### 1.1. Implemented after explicit approval
 
 1. Replace the shared command payload property bag with a closed discriminated
    union for every existing Booking v1 command.
@@ -98,9 +111,9 @@ The correction must encode ECL03-D12 explicitly and prove equivalent Unicode
 scalar counting/non-blank behavior in the standards validator and Dart. It
 must preserve valid opaque non-ULID values.
 
-## 3. Exact future file plan
+## 3. Exact implementation file plan
 
-Only after explicit slice approval may the correction touch:
+The approved correction was limited to:
 
 | Path | Intended change |
 |---|---|
@@ -121,19 +134,20 @@ resolution genuinely changes. No `apps/backend` or `apps/mobile` file is in
 scope. The implementation diff must fail if any unlisted product/runtime path
 appears.
 
-## 4. Schema strategy gate
+## 4. Selected Schema strategy
 
-Before editing, the implementer must select and record one test strategy:
+The implementation selected strategy 2:
 
-1. use a standards-compliant Draft 2020-12 validator in tests; or
-2. extend the bounded helper with the exact `oneOf`/`const`/closure semantics
-   and prove it against an independent standards validator.
+1. the checked-in bounded helper now fails unknown normative keywords and
+   executes the exact `oneOf`/`const`/closure/reference semantics used here;
+2. an independent Python `jsonschema 4.17.3` Draft 2020-12 run validates the
+   canonical Schema and rejects the same command fixtures.
 
 Hand-coded tests that validate only the Dart DTO while declaring JSON Schema
 the sole wire source are insufficient. A validator that ignores an unknown
 keyword is also insufficient and must fail the test setup.
 
-## 5. Compatibility gate
+## 5. Compatibility gate — passed
 
 The correction remains Booking wire v1 only when all checks below pass:
 
@@ -146,9 +160,11 @@ The correction remains Booking wire v1 only when all checks below pass:
   the permissive shape;
 - package changelog identifies this as a pre-runtime defect correction.
 
-Any contrary evidence stops the slice. The implementer records the affected
-producer and proposes a versioned migration instead of weakening validation or
-silently breaking compatibility.
+Repository search found no supported producer, deployed endpoint, stored
+command log or product Booking runtime. The only non-package reader is the R0
+TypeScript contract-read test, which parses the canonical files but emits no
+command. Existing valid fixtures remain valid. Therefore this is a safe
+pre-runtime `v1` defect correction; no migration or wire-major change applies.
 
 ## 6. Required invalid fixture families
 
@@ -194,7 +210,7 @@ producer and open a versioned compatibility slice.
 
 ## 9. Acceptance criteria
 
-1. **BCK09-API-CORR-AC-01:** this file is a plan and grants no implementation authority.
+1. **BCK09-API-CORR-AC-01:** this file records a bounded correction and grants no backend/runtime authority.
 2. **BCK09-API-CORR-AC-02:** scope is limited to the command matrix and Accepted D12 conformance defects.
 3. **BCK09-API-CORR-AC-03:** all current command names remain unchanged.
 4. **BCK09-API-CORR-AC-04:** the Booking v1 result union remains unchanged.
@@ -217,7 +233,7 @@ producer and open a versioned compatibility slice.
 21. **BCK09-API-CORR-AC-21:** no backend, mobile, Firebase or deployment file may change.
 22. **BCK09-API-CORR-AC-22:** package analyze/test and boundary gates must pass.
 23. **BCK09-API-CORR-AC-23:** the correction has a pre-runtime changelog and rollback path.
-24. **BCK09-API-CORR-AC-24:** implementation requires a separate explicit approval.
+24. **BCK09-API-CORR-AC-24:** implementation had separate explicit Product approval before files changed.
 25. **BCK09-API-CORR-AC-25:** push and `main` merge remain separately authorized.
 26. **BCK09-API-CORR-AC-26:** non-ULID opaque request IDs remain valid.
 27. **BCK09-API-CORR-AC-27:** Schema and Dart count/enforce the same 1–128 Unicode scalar boundary.
@@ -225,6 +241,24 @@ producer and open a versioned compatibility slice.
 
 ## 10. Final state
 
-The correction is now bounded enough to approve independently. Until that
-happens, the checked-in schema and DTO remain divergent, the API specialist
-row remains Pending and no endpoint may be implemented.
+The command Schema/Dart divergence and D12 artifact-parity blocker are closed.
+Verification evidence:
+
+- package analyzer: **0 issues**;
+- package Dart suite: **13/13 passed**;
+- independent Draft 2020-12 validator: **14/14 valid accepted**, **38/38
+  invalid rejected**;
+- full mobile analyzer: **0 diagnostics**;
+- full mobile suite: **663 passed / 1 failed**; the unrelated-to-this-diff Route
+  golden `route_create_block_method.png` differs by 2.52% (11,229 px), and a
+  focused rerun fails identically;
+- all nine command variants represented and mechanically reconciled;
+- LF-normalized SHA-256 values are frozen in `packages/api_contracts/CHANGELOG.md`;
+- no supported producer/deployment/migration dependency found;
+- diff contains no backend/mobile/Firebase/runtime file.
+
+The contract defect is corrected, but this slice stays `Review` until the
+repository-wide Route golden gate is green or explicitly dispositioned by its
+own owner. This does not close named API-DEC-01/03, TypeScript consumer/query
+parity, specialist signatures or ECL-03C runtime authorization. Push and
+`main` merge remain separate owner actions.

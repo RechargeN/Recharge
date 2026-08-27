@@ -76,8 +76,194 @@
         "commandType": "cancelBooking",
         "requestId": "request-1",
         "idempotencyKey": "idempotency-1",
+        "expectedBookingRevision": 0,
         "payload": { "bookingId": "booking-1", "actorId": "admin-1" }
       }
+    },
+    {
+      "target": "command",
+      "reason": "createBooking empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-create-empty", "idempotencyKey": "k-create-empty", "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "cancelBooking empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "cancelBooking", "requestId": "r-cancel-empty", "idempotencyKey": "k-cancel-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "approveApplication empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "approveApplication", "requestId": "r-approve-empty", "idempotencyKey": "k-approve-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "rejectApplication empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "rejectApplication", "requestId": "r-reject-empty", "idempotencyKey": "k-reject-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "joinWaitlist empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "joinWaitlist", "requestId": "r-join-empty", "idempotencyKey": "k-join-empty", "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "leaveWaitlist empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "leaveWaitlist", "requestId": "r-leave-empty", "idempotencyKey": "k-leave-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "acceptWaitlistHold empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "acceptWaitlistHold", "requestId": "r-accept-empty", "idempotencyKey": "k-accept-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "declineWaitlistHold empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "declineWaitlistHold", "requestId": "r-decline-empty", "idempotencyKey": "k-decline-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "reconfirmBooking empty payload is invalid",
+      "value": { "schemaVersion": 1, "commandType": "reconfirmBooking", "requestId": "r-reconfirm-empty", "idempotencyKey": "k-reconfirm-empty", "expectedBookingRevision": 0, "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "createBooking cannot use bookingId payload",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-create-booking-id", "idempotencyKey": "k-create-booking-id", "payload": { "bookingId": "booking-1" } }
+    },
+    {
+      "target": "command",
+      "reason": "cancelBooking cannot use occurrenceId payload",
+      "value": { "schemaVersion": 1, "commandType": "cancelBooking", "requestId": "r-cancel-occurrence", "idempotencyKey": "k-cancel-occurrence", "expectedBookingRevision": 0, "payload": { "occurrenceId": "occurrence-1" } }
+    },
+    {
+      "target": "command",
+      "reason": "createBooking requires participantUnits",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-create-units", "idempotencyKey": "k-create-units", "payload": { "occurrenceId": "occurrence-1" } }
+    },
+    {
+      "target": "command",
+      "reason": "pool requires channel",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-pool-only", "idempotencyKey": "k-pool-only", "payload": { "occurrenceId": "occurrence-1", "inventoryPoolId": "pool-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "channel requires pool",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-channel-only", "idempotencyKey": "k-channel-only", "payload": { "occurrenceId": "occurrence-1", "channel": "onsite", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "unknown envelope field is invalid",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-envelope-unknown", "idempotencyKey": "k-envelope-unknown", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }, "serverTime": "2026-08-27T00:00:00Z" }
+    },
+    {
+      "target": "command",
+      "reason": "unknown payload field is invalid",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-payload-unknown", "idempotencyKey": "k-payload-unknown", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "future": true } }
+    },
+    {
+      "target": "command",
+      "reason": "nested authority injection is invalid",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-nested-authority", "idempotencyKey": "k-nested-authority", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "applicationFields": { "answer": [{ "PublisherId": "page-1" }] } } }
+    },
+    {
+      "target": "command",
+      "reason": "createBooking forbids expectedBookingRevision",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-create-revision", "idempotencyKey": "k-create-revision", "expectedBookingRevision": 0, "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "cancelBooking requires expectedBookingRevision",
+      "value": { "schemaVersion": 1, "commandType": "cancelBooking", "requestId": "r-cancel-revision", "idempotencyKey": "k-cancel-revision", "payload": { "bookingId": "booking-1" } }
+    },
+    {
+      "target": "command",
+      "reason": "unknown command type is invalid",
+      "value": { "schemaVersion": 1, "commandType": "futureCommand", "requestId": "r-future-command", "idempotencyKey": "k-future-command", "payload": {} }
+    },
+    {
+      "target": "command",
+      "reason": "unsupported command schema is invalid",
+      "value": { "schemaVersion": 2, "commandType": "createBooking", "requestId": "r-schema-2", "idempotencyKey": "k-schema-2", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "empty requestId is invalid",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "", "idempotencyKey": "k-request-empty", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "every D12 blank scalar family is blank",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "\u0009\u000a\u000b\u000c\u000d\u0020\u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000", "idempotencyKey": "k-request-blank", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "requestId cannot exceed 128 Unicode scalars",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "idempotencyKey": "k-request-129", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "requestId rejects unpaired UTF-16 surrogate",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "\ud800", "idempotencyKey": "k-request-surrogate", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "requestId cannot be null",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": null, "idempotencyKey": "k-request-null", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "idempotencyKey cannot exceed 128 scalars",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-key-129", "idempotencyKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "participantUnits cannot exceed 21",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-units-22", "idempotencyKey": "k-units-22", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 22 } }
+    },
+    {
+      "target": "command",
+      "reason": "namedGuests cannot exceed 20 entries",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-guests-21", "idempotencyKey": "k-guests-21", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "namedGuests": [{"displayName":"1"},{"displayName":"2"},{"displayName":"3"},{"displayName":"4"},{"displayName":"5"},{"displayName":"6"},{"displayName":"7"},{"displayName":"8"},{"displayName":"9"},{"displayName":"10"},{"displayName":"11"},{"displayName":"12"},{"displayName":"13"},{"displayName":"14"},{"displayName":"15"},{"displayName":"16"},{"displayName":"17"},{"displayName":"18"},{"displayName":"19"},{"displayName":"20"},{"displayName":"21"}] } }
+    },
+    {
+      "target": "command",
+      "reason": "reasonCode cannot exceed 64 scalars",
+      "value": { "schemaVersion": 1, "commandType": "rejectApplication", "requestId": "r-reason-65", "idempotencyKey": "k-reason-65", "expectedBookingRevision": 0, "payload": { "bookingId": "booking-1", "reasonCode": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } }
+    },
+    {
+      "target": "command",
+      "reason": "present occurredAgainstEventRevision cannot be null",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-null-event-revision", "idempotencyKey": "k-null-event-revision", "occurredAgainstEventRevision": null, "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "present optional pool cannot be null",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-null-pool", "idempotencyKey": "k-null-pool", "payload": { "occurrenceId": "occurrence-1", "inventoryPoolId": null, "channel": "onsite", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "present namedGuests cannot be null",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-null-guests", "idempotencyKey": "k-null-guests", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "namedGuests": null } }
+    },
+    {
+      "target": "command",
+      "reason": "present applicationFields cannot be null",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-null-application", "idempotencyKey": "k-null-application", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "applicationFields": null } }
+    },
+    {
+      "target": "command",
+      "reason": "command IDs cannot be blank",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-blank-id", "idempotencyKey": "\u00a0\u3000", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 } }
+    },
+    {
+      "target": "command",
+      "reason": "reasonCode cannot be blank",
+      "value": { "schemaVersion": 1, "commandType": "rejectApplication", "requestId": "r-blank-reason", "idempotencyKey": "k-blank-reason", "expectedBookingRevision": 0, "payload": { "bookingId": "booking-1", "reasonCode": "\u00a0\u3000" } }
+    },
+    {
+      "target": "command",
+      "reason": "named guest displayName cannot be blank",
+      "value": { "schemaVersion": 1, "commandType": "createBooking", "requestId": "r-blank-guest", "idempotencyKey": "k-blank-guest", "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1, "namedGuests": [{ "displayName": "\u00a0\u3000" }] } }
     },
     {
       "target": "error",

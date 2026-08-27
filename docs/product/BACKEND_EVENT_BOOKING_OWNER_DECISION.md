@@ -4,7 +4,7 @@
 - Version: **0.3**
 - Date: **2026-08-27**
 - Status: **Accepted — BCK09-A1-STAGED-FREE-BOOKING-v1 with controls**
-- Decision target: **BCK-09 v1.6 / BCK09-OD-01..10**
+- Decision target: **BCK-09 v1.7 / BCK09-OD-01..10**
 - Candidate baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1**
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
@@ -14,7 +14,7 @@
 - Parent contract:
   [ECL-03 v1.3](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - First executable plan:
-  [ECL-03C v1.4](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.5](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Accountable product verdict: **RechargeN / Product owner**
 - Required independent verdicts: **API Platform, Security/Privacy, Identity,
   Content, Notifications, Operations, Mobile Platform, Admin Operations and
@@ -83,7 +83,7 @@ not a hidden acceptance: its fail-closed default remains binding.
 
 | Decision | Recorded disposition | Exact effect | Remaining gate/default |
 |---|---|---|---|
-| BCK09-OD-01 | **Defer executable authorization** | Select ECL-03C v1.4 as the only first candidate | No product backend until separate explicit post-stabilization approval |
+| BCK09-OD-01 | **Defer executable authorization** | Select ECL-03C v1.5 as the only first candidate | No product backend until separate explicit post-stabilization approval |
 | BCK09-OD-02 | **Defer implementation details** | Preserve Booking v1 and D11 semantics | No endpoint until API-DEC-01/03 accepted and fixture parity proved |
 | BCK09-OD-03 | **Defer runtime readiness** | Accept server-owned actor/capability boundary | Deny production commands until BCK-06/18 authority evidence exists |
 | BCK09-OD-04 | **Accept ownership boundary** | BCK-07 alone writes pinned published Event input | Mutations off until revision-safe runtime handoff is proved |

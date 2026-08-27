@@ -1,6 +1,6 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.4
+- Версия: 1.5
 - Дата: 2026-08-27
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
@@ -16,11 +16,19 @@
   Done v1.1
 - Runtime effect of this revision: **none**
 - Product API baseline:
-  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
-- Contract correction plan:
-  [BCK09-API-CORR-01 v0.2](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Contract correction evidence:
+  [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.5 — 2026-08-27
+
+- registered the verified nine-variant command union and D12 Schema/Dart
+  parity from BCK09-API-CORR-01 v0.3;
+- retained TypeScript/query parity, named API decisions and explicit runtime
+  authorization as blockers;
+- changed no callable, collection, AC or runtime scope.
 
 ### v1.4 — 2026-08-27
 
@@ -186,8 +194,8 @@ Rules:
 - `requestId` follows Accepted ECL03-D12: exact case-sensitive, non-blank,
   1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
 - `idempotencyKey` remains a separate opaque required logical-mutation ID;
-- no endpoint may be implemented until BCK09-API-CORR-01 proves identical
-  Schema/Dart/TypeScript/fixture enforcement;
+- command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3; no endpoint
+  may be implemented until TypeScript/query fixture parity is also proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -681,10 +689,10 @@ remain ECL-03H or later gates.
     cross-language golden vectors before runtime.
 45. Callable region and 10/15/30-second deadlines remain Product-selected
     targets until named API Platform, Security and BCK-05 decisions are effective.
-46. Accepted ECL03-D12 defines opaque bounded request IDs; endpoint work remains
-    blocked until the correction slice proves identical artifact enforcement.
-47. Booking command schema correction requires separate approval of
-    `BCK09-API-CORR-01`; this revision changes no wire or runtime file.
+46. Accepted ECL03-D12 defines opaque bounded request IDs; command Schema/Dart
+    enforcement is proven, while endpoint TypeScript parity remains blocked.
+47. Booking command schema correction was separately Approved and verified in
+    `BCK09-API-CORR-01 v0.3`; this plan still grants no runtime authority.
 
 ## 13. Rollback and stop conditions
 

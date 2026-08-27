@@ -1,28 +1,26 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.3**
+- Version: **0.4**
 - Date: **2026-08-27**
-- Status: **Product baseline selected — Hold for contract correction and named sign-off**
-- Target: **BCK-09 v1.6 / ECL-03C v1.4 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.5](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Status: **Contract correction verified — Hold for named sign-off and runtime parity**
+- Target: **BCK-09 v1.7 / ECL-03C v1.5 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.6](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - Governing API draft: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **none**
 - Product API decision:
-  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Contract correction plan:
-  [BCK09-API-CORR-01 v0.2](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Verdict
 
-**Hold, narrowed.** The Product owner selected exact target dispositions for
-request binding, semantic hashing, transport/deadlines and request-ID format.
-The existing Booking v1 Dart contract tests are green and the target
-preserves the committed result union, split request/idempotency identity,
-unknown-outcome semantics and fail-closed forward compatibility. A named API
-Platform reviewer must not sign yet because the command/request-ID schema
-correction, named API/Security/Operations decisions and
-executable parity evidence still block an API.
+**Hold, narrowed again.** BCK09-API-CORR-01 v0.3 closes the command-union and
+D12 Schema/Dart defects with fixture and independent Draft 2020-12 evidence.
+The target preserves the committed result union, split request/idempotency
+identity, unknown-outcome semantics and fail-closed forward compatibility. A
+named API Platform reviewer must not sign yet because API-DEC-01/03,
+TypeScript/query/availability parity and runtime evidence remain incomplete.
 
 This is a technical preparation record, not an independent specialist
 signature. `BCK09-SIG-API` remains `Pending`.
@@ -43,32 +41,32 @@ Mobile cutover and qualified Legal/Privacy verdicts remain separate reviews.
 
 ```text
 cwd: packages/api_contracts
+dart analyze
+result: 0 issues
+
 dart test
-result: 9 passed
+result: 13 passed
 ```
 
-An independent Draft 2020-12 validator was also run against the checked-in
-`booking_command.schema.json`. The schema accepted all three inputs below,
-while `BookingCommandDto` rejects them:
+The independent Python `jsonschema 4.17.3` Draft 2020-12 validator was rerun
+against the corrected `booking_command.schema.json`:
 
 ```text
-createBooking + empty payload                         -> schema accepted
-createBooking + payload.bookingId only                -> schema accepted
-cancelBooking + payload.occurrenceId only             -> schema accepted
+14/14 valid commands accepted
+38/38 invalid commands rejected
 ```
 
-This is not a failing current Dart test: it proves that the fixture-tested Dart
-consumer is stricter than the document declared to be the sole wire source.
+The bounded Dart validator and `BookingCommandDto` agree with those vectors.
 
 ## 3. Findings
 
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
-| `BCK09-API-TR-01` | Blocking | Fail | `booking_command.schema.json` lists a shared payload property bag but does not encode the command-specific required/allowed matrix implemented by Dart | Make the schema a true closed discriminated union or explicitly replace the “sole wire source” claim with a second normative semantic matrix; add cross-language invalid fixtures |
-| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.4 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Named API review and later atomicity/contention evidence remain required |
+| `BCK09-API-TR-01` | Resolved | Pass | `booking_command.schema.json` now contains nine closed command-local variants; Schema, bounded validator and Dart agree on all checked-in command fixtures | Preserve fixture/hash evidence; TypeScript parity remains TR-06 |
+| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.5 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Named API review and later atomicity/contention evidence remain required |
 | `BCK09-API-TR-03` | Product disposition selected | Specialist decision Open | Callable v2, `europe-west1` and 10/15/30-second deadlines are the target | API Platform + BCK-05 must accept API-DEC-01 before endpoint scaffold |
 | `BCK09-API-TR-04` | Product disposition selected | Specialist decision Open | `booking_semantic_hash_v1` selects RFC 8785 JCS UTF-8 plus lowercase SHA-256 and exact projection | API Platform + Security must accept API-DEC-03 and golden vectors before runtime |
-| `BCK09-API-TR-05` | Parent semantic resolved | Artifact conformance Pending | ECL03-D12 accepts exact opaque bounded request IDs and removes the parent ULID rule | Implement identical Schema/Dart constraints and fixtures through BCK09-API-CORR-01; no hidden backend-only rule |
+| `BCK09-API-TR-05` | Resolved | Pass | ECL03-D12 opaque request IDs are enforced identically in command Schema/Dart, including scalar bounds, blank set, no rewrite and surrogate rejection | Preserve frozen v0.3 fixtures; no hidden backend-only rule |
 | `BCK09-API-TR-06` | Runtime evidence | Pending | Query/page/availability schemas and TypeScript consumer do not exist yet | Keep ECL-03C runtime unauthorized until an Approved contract slice creates them and proves Dart/TypeScript parity |
 
 ## 4. Passing checks
@@ -205,8 +203,8 @@ after:
 
 1. **BCK09-API-REV-AC-01:** the reviewed target versions are explicit.
 2. **BCK09-API-REV-AC-02:** this technical review is not a named signature.
-3. **BCK09-API-REV-AC-03:** JSON Schema/DTO divergence is evidenced.
-4. **BCK09-API-REV-AC-04:** current nine Dart tests are recorded as green.
+3. **BCK09-API-REV-AC-03:** the former JSON Schema/DTO divergence and its verified closure are evidenced.
+4. **BCK09-API-REV-AC-04:** current thirteen Dart tests are recorded as green.
 5. **BCK09-API-REV-AC-05:** command variants require one normative closed matrix.
 6. **BCK09-API-REV-AC-06:** request-attempt reuse has an atomic physical owner.
 7. **BCK09-API-REV-AC-07:** request and idempotency identities remain distinct.
@@ -223,8 +221,7 @@ after:
 ## 8. Final state
 
 BCK-09 remains Review, ECL-03C remains unapproved for implementation and
-`BCK09-SIG-API` remains Pending. Product ambiguity is closed by
-`BCK09-API-DEC-01`, and ECL03-D12 closes the parent semantic conflict. However,
-`BCK09-API-CORR-01`, named API-DEC-01/03 decisions and parity evidence remain
-blockers. Contract/schema/runtime edits
-require their own Approved slice.
+`BCK09-SIG-API` remains Pending. Product ambiguity, the command-union defect
+and D12 command-artifact parity are closed. Named API-DEC-01/03 decisions,
+TypeScript/query/availability parity and runtime evidence remain blockers.
+Further contract or runtime edits require their own Approved slice.

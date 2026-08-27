@@ -7,6 +7,7 @@ void main() {
   final valid = readJsonObject('$bookingSchemaRoot/fixtures/valid.json');
   final invalid = readJsonObject('$bookingSchemaRoot/fixtures/invalid.json');
   final forward = readJsonObject('$bookingSchemaRoot/fixtures/forward.json');
+  final schemaValidator = BookingSchemaFixtureValidator();
 
   test('valid shared fixtures round-trip without semantic loss', () {
     for (final raw in readObjectList(valid, 'bookings')) {
@@ -19,6 +20,11 @@ void main() {
       expect(BookingPolicyDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'commands')) {
+      expect(
+        schemaValidator.validateInstance('booking_command.schema.json', raw),
+        isEmpty,
+        reason: '${raw['commandType']} ${raw['requestId']}',
+      );
       expect(BookingCommandDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'errors')) {
@@ -41,9 +47,33 @@ void main() {
         'error' => () => BookingErrorDto.fromJson(value),
         _ => throw StateError('Unknown fixture target $target'),
       };
-      expect(decode, throwsFormatException,
-          reason: fixture['reason'] as String);
+      expect(
+        decode,
+        throwsFormatException,
+        reason: fixture['reason'] as String,
+      );
+      if (target == 'command') {
+        expect(
+          schemaValidator.validateInstance(
+            'booking_command.schema.json',
+            value,
+          ),
+          isNotEmpty,
+          reason: fixture['reason'] as String,
+        );
+      }
     }
+  });
+
+  test('valid command fixtures cover every closed command variant', () {
+    final commandTypes = readObjectList(
+      valid,
+      'commands',
+    ).map((command) => command['commandType']).toSet();
+    expect(
+      commandTypes,
+      BookingCommandType.values.map((value) => value.name).toSet(),
+    );
   });
 
   test('forward fixtures become opaque unsupported results', () {

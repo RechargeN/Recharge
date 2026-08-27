@@ -26,6 +26,9 @@ class BookingCommandDto {
         'occurredAgainstEventRevision must be non-negative',
       );
     }
+    _validateRequestId(requestId);
+    _requireBoundedId(idempotencyKey, 'idempotencyKey');
+    _validateExpectedRevision(commandType, expectedBookingRevision);
     _validatePayload(commandType, this.payload);
   }
 
@@ -57,18 +60,16 @@ class BookingCommandDto {
         BookingCommandType.values,
         field: 'commandType',
       ),
-      requestId: requireNonBlankString(json['requestId'], 'requestId'),
-      idempotencyKey: requireNonBlankString(
-        json['idempotencyKey'],
-        'idempotencyKey',
-      ),
-      expectedBookingRevision: json['expectedBookingRevision'] == null
+      requestId: _requireString(json['requestId'], 'requestId'),
+      idempotencyKey: _requireString(json['idempotencyKey'], 'idempotencyKey'),
+      expectedBookingRevision: !json.containsKey('expectedBookingRevision')
           ? null
           : requireNonNegativeInt(
               json['expectedBookingRevision'],
               'expectedBookingRevision',
             ),
-      occurredAgainstEventRevision: json['occurredAgainstEventRevision'] == null
+      occurredAgainstEventRevision:
+          !json.containsKey('occurredAgainstEventRevision')
           ? null
           : requireNonNegativeInt(
               json['occurredAgainstEventRevision'],
@@ -87,16 +88,16 @@ class BookingCommandDto {
   final Map<String, Object?> payload;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'schemaVersion': schemaVersion,
-        'commandType': commandType.name,
-        'requestId': requestId,
-        'idempotencyKey': idempotencyKey,
-        if (expectedBookingRevision != null)
-          'expectedBookingRevision': expectedBookingRevision,
-        if (occurredAgainstEventRevision != null)
-          'occurredAgainstEventRevision': occurredAgainstEventRevision,
-        'payload': thawJsonMap(payload),
-      };
+    'schemaVersion': schemaVersion,
+    'commandType': commandType.name,
+    'requestId': requestId,
+    'idempotencyKey': idempotencyKey,
+    if (expectedBookingRevision != null)
+      'expectedBookingRevision': expectedBookingRevision,
+    if (occurredAgainstEventRevision != null)
+      'occurredAgainstEventRevision': occurredAgainstEventRevision,
+    'payload': thawJsonMap(payload),
+  };
 
   static const Map<BookingCommandType, Set<String>> _requiredPayloadKeys = {
     BookingCommandType.createBooking: {'occurrenceId', 'participantUnits'},
@@ -139,6 +140,16 @@ class BookingCommandDto {
     BookingCommandType.reconfirmBooking: {'bookingId'},
   };
 
+  static const Set<BookingCommandType> _commandsRequiringExpectedRevision = {
+    BookingCommandType.cancelBooking,
+    BookingCommandType.approveApplication,
+    BookingCommandType.rejectApplication,
+    BookingCommandType.leaveWaitlist,
+    BookingCommandType.acceptWaitlistHold,
+    BookingCommandType.declineWaitlistHold,
+    BookingCommandType.reconfirmBooking,
+  };
+
   static const Set<String> _forbiddenAuthorityKeys = {
     'actorid',
     'userid',
@@ -163,31 +174,199 @@ class BookingCommandDto {
     _rejectAuthorityKeys(payload);
 
     for (final key in const ['bookingId', 'holdId', 'occurrenceId']) {
-      if (payload.containsKey(key)) requireNonBlankString(payload[key], key);
+      if (payload.containsKey(key)) _requireBoundedId(payload[key], key);
     }
     for (final key in const ['inventoryPoolId', 'auxiliaryTrackId']) {
-      if (payload[key] != null) requireNonBlankString(payload[key], key);
+      if (payload.containsKey(key)) _requireBoundedId(payload[key], key);
     }
     if (payload.containsKey('participantUnits')) {
-      requirePositiveInt(payload['participantUnits'], 'participantUnits');
+      final units = requirePositiveInt(
+        payload['participantUnits'],
+        'participantUnits',
+      );
+      if (units > 21) {
+        throw const BookingContractFormatException(
+          'participantUnits must be at most 21',
+        );
+      }
     }
-    if (payload['channel'] != null) {
+    if (payload.containsKey('channel')) {
       parseWireEnum(
         payload['channel'],
         BookingChannel.values,
         field: 'channel',
       );
     }
-    if (payload['reasonCode'] != null) {
-      requireNonBlankString(payload['reasonCode'], 'reasonCode');
+    if (payload.containsKey('reasonCode')) {
+      _requireBoundedNonBlankString(payload['reasonCode'], 'reasonCode', 64);
     }
-    final hasPool = payload['inventoryPoolId'] != null;
-    final hasChannel = payload['channel'] != null;
+    if (payload.containsKey('namedGuests')) {
+      _validateNamedGuests(payload['namedGuests']);
+    }
+    if (payload.containsKey('applicationFields') &&
+        payload['applicationFields'] is! Map) {
+      throw const BookingContractFormatException(
+        'applicationFields must be an object',
+      );
+    }
+    _rejectNonFiniteNumbers(payload);
+    final hasPool = payload.containsKey('inventoryPoolId');
+    final hasChannel = payload.containsKey('channel');
     if (hasPool != hasChannel &&
         commandType != BookingCommandType.approveApplication) {
       throw const BookingContractFormatException(
         'inventoryPoolId and channel must be present together',
       );
+    }
+  }
+
+  static String _requireString(Object? raw, String field) {
+    if (raw is! String) {
+      throw BookingContractFormatException('$field must be a string');
+    }
+    return raw;
+  }
+
+  static void _requireBoundedId(Object? raw, String field) {
+    _requireBoundedNonBlankString(raw, field, 128);
+  }
+
+  static void _validateExpectedRevision(
+    BookingCommandType commandType,
+    int? expectedBookingRevision,
+  ) {
+    final required = _commandsRequiringExpectedRevision.contains(commandType);
+    if (required && expectedBookingRevision == null) {
+      throw BookingContractFormatException(
+        '${commandType.name} requires expectedBookingRevision',
+      );
+    }
+    if (!required && expectedBookingRevision != null) {
+      throw BookingContractFormatException(
+        '${commandType.name} forbids expectedBookingRevision',
+      );
+    }
+  }
+
+  static void _validateRequestId(String value) {
+    final scalars = _unicodeScalarValues(value, 'requestId');
+    if (scalars.isEmpty || scalars.length > 128) {
+      throw const BookingContractFormatException(
+        'requestId must contain 1 to 128 Unicode scalar values',
+      );
+    }
+    if (scalars.every(_isBookingRequestIdBlankScalar)) {
+      throw const BookingContractFormatException(
+        'requestId must contain a non-blank Unicode scalar value',
+      );
+    }
+  }
+
+  static void _requireBoundedNonBlankString(
+    Object? raw,
+    String field,
+    int maximumScalars,
+  ) {
+    if (raw is! String) {
+      throw BookingContractFormatException('$field must be a string');
+    }
+    final scalars = _unicodeScalarValues(raw, field);
+    if (scalars.isEmpty || scalars.length > maximumScalars) {
+      throw BookingContractFormatException(
+        '$field must contain 1 to $maximumScalars Unicode scalar values',
+      );
+    }
+    if (scalars.every(_isGenericBlankScalar)) {
+      throw BookingContractFormatException('$field must be non-blank');
+    }
+  }
+
+  static List<int> _unicodeScalarValues(String value, String field) {
+    final scalars = <int>[];
+    final units = value.codeUnits;
+    for (var index = 0; index < units.length; index++) {
+      final unit = units[index];
+      if (unit >= 0xD800 && unit <= 0xDBFF) {
+        if (index + 1 >= units.length) {
+          throw BookingContractFormatException(
+            '$field contains an unpaired UTF-16 surrogate',
+          );
+        }
+        final low = units[++index];
+        if (low < 0xDC00 || low > 0xDFFF) {
+          throw BookingContractFormatException(
+            '$field contains an unpaired UTF-16 surrogate',
+          );
+        }
+        scalars.add(0x10000 + ((unit - 0xD800) << 10) + (low - 0xDC00));
+      } else if (unit >= 0xDC00 && unit <= 0xDFFF) {
+        throw BookingContractFormatException(
+          '$field contains an unpaired UTF-16 surrogate',
+        );
+      } else {
+        scalars.add(unit);
+      }
+    }
+    return scalars;
+  }
+
+  static bool _isBookingRequestIdBlankScalar(int scalar) =>
+      (scalar >= 0x0009 && scalar <= 0x000D) ||
+      scalar == 0x0020 ||
+      scalar == 0x0085 ||
+      scalar == 0x00A0 ||
+      scalar == 0x1680 ||
+      (scalar >= 0x2000 && scalar <= 0x200A) ||
+      scalar == 0x2028 ||
+      scalar == 0x2029 ||
+      scalar == 0x202F ||
+      scalar == 0x205F ||
+      scalar == 0x3000;
+
+  static bool _isGenericBlankScalar(int scalar) =>
+      _isBookingRequestIdBlankScalar(scalar) || scalar == 0xFEFF;
+
+  static void _validateNamedGuests(Object? value) {
+    if (value is! List || value.length > 20) {
+      throw const BookingContractFormatException(
+        'namedGuests must be an array with at most 20 items',
+      );
+    }
+    for (final rawGuest in value) {
+      if (rawGuest is! Map) {
+        throw const BookingContractFormatException(
+          'namedGuests entries must be objects',
+        );
+      }
+      final guest = rawGuest.cast<String, Object?>();
+      requireExactKeys(
+        guest,
+        allowed: const {'displayName'},
+        required: const {'displayName'},
+        objectName: 'namedGuest',
+      );
+      _requireBoundedNonBlankString(
+        guest['displayName'],
+        'namedGuest.displayName',
+        120,
+      );
+    }
+  }
+
+  static void _rejectNonFiniteNumbers(Object? value) {
+    if (value is num && !value.isFinite) {
+      throw const BookingContractFormatException(
+        'Command payload numbers must be finite',
+      );
+    }
+    if (value is Map) {
+      for (final nested in value.values) {
+        _rejectNonFiniteNumbers(nested);
+      }
+    } else if (value is List) {
+      for (final nested in value) {
+        _rejectNonFiniteNumbers(nested);
+      }
     }
   }
 

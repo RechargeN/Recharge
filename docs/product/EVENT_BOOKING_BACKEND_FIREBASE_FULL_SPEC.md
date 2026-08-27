@@ -1,7 +1,7 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.6**
+- Версия: **1.7**
 - Дата: **2026-08-27**
 - Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
@@ -15,22 +15,30 @@
 - Accepted decisions:
   [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.4](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.5](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.5](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.6](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.5 — API narrowed Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.6 — API narrowed Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.3 — D12 reconciled; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.4 — contract corrected; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
-  [BCK09-API-DEC-01 v0.2 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
-- Contract correction plan:
-  [BCK09-API-CORR-01 v0.2 — Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-DEC-01 v0.3 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Contract correction evidence:
+  [BCK09-API-CORR-01 v0.3 — Implemented / Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.7 — 2026-08-27
+
+- registered BCK09-API-CORR-01 v0.3 as verified pre-runtime command
+  Schema/Dart/D12 correction;
+- narrowed the API Hold to named API-DEC-01/03 and absent
+  TypeScript/query/availability/runtime evidence;
+- kept 85 AC, all specialist signatures Pending and runtime Absent.
 
 ### v1.6 — 2026-08-27
 
@@ -836,8 +844,9 @@ remains Pending.
 
 Accepted ECL03-D12 treats `requestId` as an exact case-sensitive, non-blank
 string of 1–128 Unicode scalar values, opaque and not normalized/interpreted as
-ULID. No endpoint may be implemented until BCK09-API-CORR-01 proves identical
-Schema/Dart/TypeScript/fixture enforcement.
+ULID. BCK09-API-CORR-01 v0.3 proves command Schema/Dart/fixture enforcement;
+no endpoint may be implemented until TypeScript/query parity and named API
+decisions are independently complete.
 
 ## 14. Workers and scheduling
 
@@ -1372,9 +1381,9 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 83. Callable v2 и 10/15/30-second deadline profile остаются Product-selected,
     пока API Platform/BCK-05 не примут API-DEC-01.
 84. Accepted ECL03-D12 является единственным Booking-v1 request-ID semantic
-    authority; artifact enforcement остаётся блокером до correction evidence.
-85. Command schema/DTO divergence исправляется только через отдельно Approved
-    BCK09-API-CORR-01 и не скрывается backend-only validation.
+    authority; command artifact enforcement доказан BCK09-API-CORR-01 v0.3.
+85. Command schema/DTO divergence исправлен только через отдельно Approved
+    BCK09-API-CORR-01; backend-only validation остаётся запрещённой.
 
 ## 28. Definition of Ready для начала реализации
 
@@ -1442,7 +1451,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.4 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.5 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
 | BCK09-OD-02 | Product baseline selected; specialist decision Open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; validate BCK09-API-DEC-01, close API-DEC-01/03 and prove contract/hash fixture parity | No mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
