@@ -1,13 +1,22 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.7**
+- Version: **1.8**
 - Status: **Review — documentation only**
 - Runtime status: **N/A / Absent**
-- Date: **2026-08-27**
+- Date: **2026-08-28**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.8 — 2026-08-28
+
+- registered BCK09-API-PAR-01 v0.2 / `api_contracts` v0.3.0 as implemented
+  contracts/test-only Dart/TypeScript query and semantic-hash parity;
+- closed the TR-06 contract gap and pre-runtime golden-vector portion of TR-04;
+  retained Node 22 confirmation, raw callable-body feasibility, independent
+  specialist evidence and all nine signatures as blockers;
+- kept 22/22 coverage, 32 preparatory AC, BCK-09 Review and runtime Absent.
 
 ### v1.7 — 2026-08-27
 
@@ -74,8 +83,8 @@
 
 ## 1. Verdict
 
-**Coverage: 22/22. API technical review: parity/evidence Hold. Recommendation:
-keep BCK-09 v1.8 as Review / Present / runtime Absent.**
+**Coverage: 22/22. Contract parity is implemented; API review remains on a
+runtime/evidence Hold. Keep BCK-09 v1.9 as Review / Present / runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
 not Approved, executable, deployed or production-ready. The first possible
@@ -90,18 +99,19 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | ECL-03 v1.3 | Approved, activation gated | Parent implementation contract |
 | ECL03-D01–D12 | Accepted / normative | Product/architecture decisions including opaque bounded request ID |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
-| ECL-03C v1.6 | Review, runtime not authorized | Exact first executable plan with active key, amended hash and planned atomic request binding; command parity verified |
-| BCK-01 v0.4.46 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.50 | Approved baseline + factual amendments | Registry, categories, OD/gates |
-| BCK-03 v0.3.4 | Draft | Common API proposal and Accepted Booking-v1 named decisions |
+| ECL-03C v1.7 | Review, runtime not authorized | Exact first executable plan with active key, amended hash and planned atomic request binding; bounded contract parity verified |
+| BCK-01 v0.4.47 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.51 | Approved baseline + factual amendments | Registry, categories, OD/gates |
+| BCK-03 v0.3.5 | Draft | Common API proposal, Accepted Booking-v1 named decisions and bounded parity evidence |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
 | BCK09-DEC-01 v0.3 | Accepted with controls | Product baseline reconciled with D12; ten dispositions; no runtime authority |
-| BCK09-REV-01 v0.7 | Specialist review in progress | Parity/evidence Hold; all nine named sign-offs remain Pending |
-| BCK09-API-REV-01 v0.5 | Named decisions Accepted; Hold | TypeScript/query/hash/runtime parity and independent evidence remain blockers |
+| BCK09-REV-01 v0.8 | Specialist review in progress | Runtime/evidence Hold; all nine named sign-offs remain Pending |
+| BCK09-API-REV-01 v0.6 | Contract parity implemented; Hold | Node 22, raw callable-body feasibility, runtime controls and independent evidence remain blockers |
 | BCK09-API-DEC-01 v0.4 | Reconciled | Product baseline now points to the Accepted Booking-v1 named decision |
 | BCK09-API-NAMED-DEC-01 v0.2 | Accepted with controls | Exact callable/hash targets; no specialist signature or runtime authority |
 | BCK09-API-CORR-01 v0.3 | Done | Closed command union, exact D12 Schema/Dart parity and repository gates verified; no runtime authority |
+| BCK09-API-PAR-01 v0.2 | Implemented / Review | Query/read/page/availability schemas and independent Dart/TypeScript hash parity; Node 22 confirmation pending; no runtime authority |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -184,18 +194,18 @@ writer path.
 | Repair operations | BCK-09 surface could absorb BCK-19 proposal/approval | BCK-19 owns proposal/approval; BCK-09 owns only approved execution |
 | Disabled outbox | Suppressed obligations could look overdue or replay later | Immutable suppressed/required disposition; pre-activation records never replay |
 | Request-attempt reuse | No physical binding for one reused request ID | Two atomic domain-separated record kinds inside `bookingIdempotency` |
-| Semantic hash | Algorithm/version remained prose-only | Booking-v1 JCS/SHA-256 decision Accepted with revision fields; cross-language vectors Pending |
+| Semantic hash | Algorithm/version remained prose-only | Booking-v1 JCS/SHA-256 decision Accepted with revision fields; independent Dart/TypeScript vectors pass at test-only scope |
 | Transport/deadlines | Callable profile had no exact values | Booking-v1 callable v2/europe-west1/10-15-30 decision Accepted; stage evidence Pending |
 | Request-ID format | Approved parent and Booking v1 disagreed | ECL03-D12 semantics and command Schema/Dart parity are verified |
-| Command schema/DTO | Schema accepted variants rejected by Dart | BCK09-API-CORR-01 v0.3 closes the defect; TypeScript/query endpoint parity remains blocked |
+| Command schema/DTO | Schema accepted variants rejected by Dart | BCK09-API-CORR-01 v0.3 closes command parity; BCK09-API-PAR-01 v0.2 closes bounded TypeScript/query contract parity |
 
 ## 7. Gap register
 
 | Gap | Severity | Closure evidence |
 |---|---|---|
 | ECL-03C plan/runtime authorization absent | Blocks executable work | BCK09-OD-01 exact verdict and slice approval |
-| API transport/hash executable parity absent | Blocks mutation runtime | Named decisions are Accepted; TypeScript/query/hash vectors remain required |
-| API technical pre-review Hold | Blocks API signature | Independent API/Security/Operations evidence plus TypeScript/query/runtime parity |
+| Callable raw-body feasibility and canonical Node 22 evidence absent | Blocks mutation runtime | Prove duplicate-key visibility at the runtime adapter and rerun parity on Node 22 |
+| API technical pre-review Hold | Blocks API signature | Independent API/Security/Operations evidence plus callable/runtime controls |
 | Production Identity/capability absent | Blocks all production commands | BCK-06/BCK-18 runtime evidence |
 | Event projection writer/handoff absent | Blocks production mutation | BCK-07 runtime + BCK09-OD-04 |
 | OD-09/BCK-13 effect handoff not Accepted/runtime | Blocks notifications/workers | BCK09-OD-05 |
@@ -265,9 +275,10 @@ writer path.
 
 ## 11. Recommendation
 
-Register BCK-09 v1.8 as **Review / Present / runtime Absent**. The Product
-baseline and exact Booking-v1 API decisions are Accepted with controls, while
-Approval still requires all independent boundary reviews, executable parity
-and closure of the remaining Open decisions.
+Register BCK-09 v1.9 as **Review / Present / runtime Absent**. The Product
+baseline, exact Booking-v1 API decisions and bounded contracts/test parity are
+recorded, while Approval still requires all independent boundary reviews,
+canonical Node 22/runtime-adapter evidence and closure of the remaining Open
+decisions.
 Executable work may begin only through a separately Approved ECL-03C slice;
 later behavior requires its own ECL-03D–H approval and evidence.

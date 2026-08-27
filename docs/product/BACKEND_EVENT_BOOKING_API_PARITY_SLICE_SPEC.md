@@ -1,9 +1,9 @@
 # Recharge Backend — Event Booking API Contract Parity Slice
 
 - ID: **BCK09-API-PAR-01**
-- Version: **0.1**
-- Date: **2026-08-27**
-- Status: **Proposed — explicit implementation approval required**
+- Version: **0.2**
+- Date: **2026-08-28**
+- Status: **Implemented / Review — contracts and test-only parity; Node 22 confirmation pending**
 - Scope: **Booking v1 contracts and test-only Dart/TypeScript parity**
 - Runtime effect: **none**
 - Firebase effect: **none**
@@ -11,11 +11,11 @@
 - Parent named decision:
   [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - API standard:
-  [BCK-03 v0.3.4](BACKEND_API_CONTRACT_STANDARD.md)
+  [BCK-03 v0.3.5](BACKEND_API_CONTRACT_STANDARD.md)
 - Booking target:
-  [BCK-09 v1.8](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
+  [BCK-09 v1.9](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - Transaction-core plan:
-  [ECL-03C v1.6](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.7](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Contract workflow:
   [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Canonical path:
@@ -25,25 +25,48 @@
 
 ## 0. Verdict
 
-**Ready for owner review as a bounded contracts/test-only implementation
-proposal. Not Approved for implementation.**
+**The owner-approved v0.1 scope is implemented in commit `a7296f5` and remains
+in Review pending a canonical Node 22 rerun.**
 
 The slice closes only `BCK09-API-TR-06` contract parity and the pre-runtime
 golden-vector part of `BCK09-API-TR-04`. It creates no handler, callable,
 Firestore access, Rules/IAM binding, App Check enforcement, Firebase resource,
 credential, deployment, mobile adapter or persisted Booking state.
 
-Two amendments are required before implementation:
+Two amendments were required and are implemented:
 
 1. ECL-03C names request/page/availability schemas but has no separate typed
    single-read response for `getMyBookingV1`. This slice adds
    `booking_read.schema.json`; a bare `Booking` object is not an adequate query
    result because it cannot carry `requestId`, `serverTime`, not-found privacy
    semantics or unsupported-contract handling.
-2. The current TypeScript test only parses schema/fixture JSON. Parseability is
+2. The pre-slice TypeScript test only parsed schema/fixture JSON. Parseability is
    not schema validation, and `JSON.parse` cannot prove duplicate-key rejection.
    This slice adds an actual Draft 2020-12 consumer and an independent strict
    raw-JSON/hash test path.
+
+No amendment expanded the approved scope. The implementation added no handler,
+callable export, backend source, mobile code, Firebase resource, credential or
+deployment configuration.
+
+### 0.1. Recorded implementation evidence
+
+- `packages/api_contracts` advanced to `0.3.0`;
+- all four closed schema roots and the shared query/hash fixture corpora exist;
+- Dart analyze is clean and the complete package suite passes `20/20`;
+- Ajv 8.20.0 / ajv-formats 3.0.1 validate the shared schemas and the Node
+  contract suite passes `10/10`;
+- backend format, lint and strict typecheck pass;
+- full mobile analyzer passes and the Flutter suite passes `664/664`;
+- boundary scan passes: 380 files, 71/71 suppressions, 0 violations, 0 stale,
+  0 expired;
+- backend `src/`, mobile, Firebase/deployment files and Accepted ADRs are
+  unchanged; `r0ToolchainProbe` remains the only backend export.
+
+The Node evidence was executed on Node 20.17 while the repository engine target
+is Node 22. That version mismatch does not invalidate the contract result, but
+it keeps this slice at `Implemented / Review` rather than `Done` until the same
+suite is rerun successfully on the canonical toolchain.
 
 ## 1. Authority and non-authority
 
@@ -518,13 +541,14 @@ Stop and return the slice to Review if:
 39. **BCK09-PAR-AC-39:** all nine specialist signatures remain Pending.
 40. **BCK09-PAR-AC-40:** push, merge, provisioning and deployment remain separate actions.
 
-## 15. Proposed approval text
+## 15. Recorded approval
 
 ```text
 Одобряю BCK09-API-PAR-01 v0.1 для contracts/test-only implementation.
 Runtime, Firebase, callable exports и deployment не разрешаю.
 ```
 
-After that exact approval, implementation may begin only with the §8 file
-scope and must stop again before documentation status reconciliation or any
-runtime work.
+The owner supplied this exact approval before commit `a7296f5`. It authorized
+only the §8 contracts/test implementation. This reconciliation records the
+result and does not authorize runtime work, push, merge, provisioning or
+deployment.

@@ -1,19 +1,29 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.4**
-- Date: **2026-08-27**
+- Version: **0.3.5**
+- Date: **2026-08-28**
 - Spec status: **Draft — review required**
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.46](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.50](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.47](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.51](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.5 — 2026-08-28
+
+- registered BCK09-API-PAR-01 v0.2 and `api_contracts` v0.3.0 as bounded
+  Booking-v1 contracts/test-only parity evidence;
+- recorded closed query/read/page/availability roots, Ajv Draft 2020-12
+  validation and independent Dart/TypeScript JCS/SHA-256 goldens;
+- retained Draft/runtime Absent: Node 22 confirmation, callable raw-body
+  feasibility, API-DEC-02/04/05, independent signatures, Firebase and runtime
+  authority remain unresolved.
 
 ### v0.3.4 — 2026-08-27
 
@@ -248,7 +258,7 @@ evidence of completion.
 | JSON Schema | Draft 2020-12, `$id`, `$defs`, bounded fields | Нет общего cross-domain convention | Зафиксировать в §9 |
 | Fixtures | valid/invalid/forward Booking fixtures | Нет общей fixture taxonomy | Определить в §36–37 |
 | Dart DTO | Immutable Booking DTOs и serializers | Нет общего envelope DTO | Target only; создаётся executable slice |
-| TypeScript | Backend physically absent | Validators/generated consumers отсутствуют | Runtime remains Absent |
+| TypeScript | Test-only Booking validator/hash consumer exists; product backend remains absent | No runtime adapter, generated production consumer or callable export | Runtime remains Absent; Node 22 and adapter evidence gated |
 | API standard | Booking-specific callable/error semantics в BCK-09 | Нет общего command/query contract | BCK-03 defines shared semantics |
 | Events/outbox | ADR 0019 Booking outbox; OD-09 Proposed | Нет Accepted cross-domain envelope | Proposed envelope в §27; transport/retention ещё gated |
 | Minimum client | Общего server policy нет | Silent incompatible clients possible | Определить contract в §26 |

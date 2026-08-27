@@ -1,7 +1,7 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.6
-- Дата: 2026-08-27
+- Версия: 1.7
+- Дата: 2026-08-28
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
@@ -21,8 +21,20 @@
   [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - Contract correction evidence:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+- Contract parity evidence:
+  [BCK09-API-PAR-01 v0.2 — Implemented / Review](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.7 — 2026-08-28
+
+- registered `api_contracts` v0.3.0 and BCK09-API-PAR-01 v0.2 as implemented
+  contracts/test-only query/read/page/availability and semantic-hash parity;
+- closed the pre-runtime TypeScript/query/hash artifact gap without adding a
+  callable, backend source, repository, Firestore access or mobile adapter;
+- retained canonical Node 22 confirmation, raw callable-body feasibility,
+  independent specialist evidence, explicit runtime authorization and all
+  Firebase/deployment gates; nine collections and 47 AC are unchanged.
 
 ### v1.6 — 2026-08-27
 
@@ -206,8 +218,10 @@ Rules:
 - `requestId` follows Accepted ECL03-D12: exact case-sensitive, non-blank,
   1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
 - `idempotencyKey` remains a separate opaque required logical-mutation ID;
-- command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3; no endpoint
-  may be implemented until TypeScript/query fixture parity is also proven;
+- command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3 and bounded
+  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.2; no endpoint
+  may be implemented until canonical Node 22, raw callable-body feasibility
+  and independent API/Security/Operations evidence are also proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
