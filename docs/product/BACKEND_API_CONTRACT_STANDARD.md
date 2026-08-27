@@ -1,19 +1,28 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.3**
-- Date: **2026-08-20**
+- Version: **0.3.4**
+- Date: **2026-08-27**
 - Spec status: **Draft — review required**
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.46](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.50](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.4 — 2026-08-27
+
+- accepted Booking-v1 scoped `API-DEC-01` and `API-DEC-03` through
+  [BCK09-API-NAMED-DEC-01 v0.2](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md);
+- froze the five callable surfaces, `europe-west1`, 10/15/30-second deadlines
+  and amended JCS/SHA-256 projection including applicable revision fields;
+- kept API-DEC-02/04/05, all specialist signatures, executable parity,
+  Firebase and runtime authority unresolved; Draft/runtime Absent are unchanged.
 
 ### v0.3.3 — 2026-08-20
 
@@ -139,7 +148,7 @@ rule` означает предлагаемое normative правило, а н�
 | BCK03-RQ-01 | Как разделены command, query, webhook и internal event? | Draft rule: разные profiles, один common standard | §11, §15, §18, §24, §27 |
 | BCK03-RQ-02 | Какие version axes независимы? | Draft rule: contract/API/schema/package/resource/policy/client не смешиваются | §6, §25–26 |
 | BCK03-RQ-03 | Как связан idempotency key с request ID? | Accepted D1 rule: separate roles; equality optional | §12, §15–16, §34 |
-| BCK03-RQ-04 | Как вычисляется canonical request hash? | Semantic inputs fixed; exact algorithm/version Open in API-DEC-03 | §16, §40 |
+| BCK03-RQ-04 | Как вычисляется canonical request hash? | Booking v1: Accepted JCS/SHA-256 semantic projection with revision-field amendment; other scopes require their own decision | §16, §40 |
 | BCK03-RQ-05 | Что означает mutation timeout? | Draft rule: unknown outcome; retry exact same key/payload | §21 |
 | BCK03-RQ-06 | Как различаются success, cancelled и failure? | Draft rule: three outcomes; error only for failure | §13–14 |
 | BCK03-RQ-07 | Что additive, breaking, deprecated или retired? | Draft compatibility and migration rules | §25–26 |
@@ -1341,9 +1350,9 @@ Rollback:
 |---|---|---|---|---|
 | D1-DEC-01 / ECL03-D11 | Accepted | Product owner decision; API Platform + Booking affected owners | Separate request correlation from logical idempotency identity | Closed; executable parity remains gated |
 | OD-09 | Proposed in §27 | API Platform + Operations | Event transport, ordering, dedupe, replay, poison, retention | D3 effects/workers |
-| API-DEC-01 | Open | API Platform + BCK-05 | Exact mobile transport mapping: callable/HTTPS profiles and deadlines | Executable API scaffold |
+| API-DEC-01 | Accepted — Booking v1 only | Combined owner; independent API Platform + BCK-05 evidence pending | `API01-BCK09-CALLABLE-V2-EU-10-15-30-v1` in BCK09-API-NAMED-DEC-01 v0.2 | Executable API scaffold remains blocked |
 | API-DEC-02 | Open | API Platform | Generator versus fixture-verified consumers per language/contract | Codegen/tooling slice |
-| API-DEC-03 | Open | API Platform + Security | Canonical request-hash algorithm/version and normalization implementation | First mutation runtime |
+| API-DEC-03 | Accepted — Booking v1 only | Combined owner; independent API Platform + Security evidence pending | `API03-BCK09-JCS-SHA256-SEMANTIC-v1` with revision-field amendment in BCK09-API-NAMED-DEC-01 v0.2 | First mutation runtime remains blocked |
 | API-DEC-04 | Open | API Platform + Mobile | Exact minimum-client policy bootstrap surface and offline behavior | Production client gate |
 | API-DEC-05 | Open | Platform Architecture + API Platform | Accepted ADR/policy path for extending language-neutral schema beyond Booking | Any platform/non-Booking schema creation |
 
@@ -1507,9 +1516,11 @@ Before BCK-03 Review:
 
 1. complete D1-SIG-API/OPS/SEC/MOBILE bounded reviews under the recorded
    combined-role disclosure without requiring the D2 BCK-18 artifact;
-2. develop evidence proposals for API-DEC-01–05;
-3. verify the accepted split-key contract in a future Approved executable
-   fixture/parity slice without changing current wire shape;
+2. develop evidence proposals for API-DEC-02/04/05 and preserve the Accepted
+   Booking-v1 API-DEC-01/03 controls;
+3. verify the accepted split-key and semantic-hash contracts in a future
+   Approved fixture/parity slice without creating runtime or changing current
+   wire shape;
 4. keep OD-09 Proposed and all effects disabled until acceptance.
 
 Only an independent Approved executable slice may later create schemas,

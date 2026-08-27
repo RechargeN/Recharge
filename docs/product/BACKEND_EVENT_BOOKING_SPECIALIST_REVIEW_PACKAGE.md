@@ -1,42 +1,45 @@
 # Recharge Backend — Event Booking Specialist Review Package
 
 - ID: **BCK09-REV-01**
-- Version: **0.6**
+- Version: **0.7**
 - Date: **2026-08-27**
-- Status: **Specialist review in progress — API narrowed Hold; all signatures Pending**
-- Target: **BCK-09 v1.7**
+- Status: **Specialist review in progress — parity/evidence Hold; all signatures Pending**
+- Target: **BCK-09 v1.8**
 - Product baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1 — Accepted with controls**
 - Product decision:
   [BCK09-DEC-01 v0.3](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.6](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.7](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.4 — contract corrected; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.5 — named decisions Accepted; parity Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
-  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Named API decision:
+  [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - Contract correction evidence:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Frozen source hashes:
   - convention: SHA-256 of UTF-8 text normalized to LF line endings
-  - BCK-09 v1.7 SHA-256: `570dba37950644a4ebc40c64c7f38e4d6b71a7a1f2be9e879f8f6b474dc659e3`
-  - ECL-03C v1.5 SHA-256: `e76f831bfa1fe862582f3edd69a969d6d21149240cf9997d9e0e21497a70f5ed`
-  - BCK-09-PRE v1.6 SHA-256: `312207d0bc32fda42177dd75601b8526dd34009f941bb54563eb4c3ddab19ef7`
+  - BCK-09 v1.8 SHA-256: `4ea2b9317433674bd92793fd852fc7343d6a799c48d82fdeb8f0ab385f8b38c2`
+  - ECL-03C v1.6 SHA-256: `13647e3b7497518c1de500afb03f2b82e1c6e293bbe7ede8e92bf111e3f95020`
+  - BCK-09-PRE v1.7 SHA-256: `fadddb0e7ddb477a4ee3cd80fd74dafd78128400f54f19ce8517c2d4285ed2ab`
 - Runtime effect: **none**
 
 ---
 
 ## 0. Verdict
 
-**Specialist review remains open; the API Hold is narrowed, not cleared.**
+**Specialist review remains open; named decisions are closed, but executable
+parity and independent evidence are not.**
 
-BCK-09 v1.7 and ECL-03C v1.5 incorporate TR-09..11, Accepted ECL03-D12 and the
-Product-selected API baseline without changing the callable/product scope.
+BCK-09 v1.8 and ECL-03C v1.6 incorporate TR-09..11, Accepted ECL03-D12 and the
+Accepted Booking-v1 named API decisions without changing callable/product scope.
 The review surface is internally reconcilable at the previously reviewed
 boundaries. BCK09-API-CORR-01 is Done and closes command Schema/Dart parity, but
-BCK09-API-REV-01 still blocks on named API decisions and executable
-TypeScript/query/runtime parity evidence. This verdict does not
+BCK09-API-REV-01 still blocks on executable TypeScript/query/hash/runtime
+parity and independent stage/Security evidence. This verdict does not
 approve BCK-09, sign any specialist row, approve ECL-03C, create a Firebase
 resource or authorize implementation. All nine specialist verdicts below
 remain `Pending`.
@@ -55,7 +58,7 @@ possible BCK-09 documentation Approval. It:
    as independent Security, API, Operations or qualified Legal advice.
 
 It is not an implementation plan. The only first executable candidate remains
-ECL-03C v1.5, still in Review and not authorized.
+ECL-03C v1.6, still in Review and not authorized.
 
 ## 2. Authority and frozen inputs
 
@@ -66,12 +69,13 @@ ECL-03C v1.5, still in Review and not authorized.
 | ECL-03 | v1.3 Approved; activation gated | Parent staged delivery contract |
 | ECL03-D01–D12 | Accepted | Normative product/architecture decisions, including request-ID representation |
 | ECL-03B | v1.1 Done; contracts/domain only | Booking v1 wire and pure-domain evidence |
-| ECL-03C | v1.4 Review; runtime not authorized | First candidate; active key plus planned atomic request binding |
-| BCK-09 | v1.6 Review; runtime Absent | Target under review |
-| BCK-09-PRE | v1.6 Review | 22/22 reconciliation plus narrowed API Hold evidence |
+| ECL-03C | v1.6 Review; runtime not authorized | First candidate; active key, amended hash and planned atomic request binding |
+| BCK-09 | v1.8 Review; runtime Absent | Target under review |
+| BCK-09-PRE | v1.7 Review | 22/22 reconciliation plus parity/evidence Hold |
 | BCK09-DEC-01 | v0.3 Accepted with controls | Product baseline/ten dispositions reconciled with D12 |
-| BCK09-API-REV-01 | v0.4 contract corrected; Hold | API evidence/findings only; not a named signature |
-| BCK09-API-DEC-01 | v0.3 Product-selected with controls | Exact target dispositions; not specialist acceptance |
+| BCK09-API-REV-01 | v0.5 named decisions Accepted; Hold | API evidence/findings only; not an independent signature |
+| BCK09-API-DEC-01 | v0.4 reconciled | Product baseline points to named decision; not specialist acceptance |
+| BCK09-API-NAMED-DEC-01 | v0.2 Accepted with controls | Combined-owner Booking-v1 API decisions; no runtime authority |
 | BCK09-API-CORR-01 | v0.3 Done | Command/D12 Schema-Dart parity and repository gates verified; no runtime authority |
 | BCK-03/04/05/06/07/13/18/19 | Current repository statuses | Parent/peer proposals and blockers; no inherited Approval |
 | OD-09 | Proposed | Required before cross-domain effects |
@@ -131,7 +135,7 @@ These stay explicit later gates even if all design reviews are accepted.
 | BCK09-TR-12 | Pending evidence | Production Identity and Event projection authority do not exist | Keep all commands disabled |
 | BCK09-TR-13 | Pending evidence | Notification, repair and operational proof do not exist | Keep effects/repair/cohort disabled |
 | BCK09-TR-14 | Pending evidence | No qualified per-market Legal/Privacy verdict is recorded | Do not process production personal data |
-| BCK09-TR-15 | API narrowed Hold | ECL03-D12 resolves request-ID semantics; schema/Dart correction, named API-DEC-01/03 and parity evidence remain open | Approve/execute the bounded correction and obtain named decisions; keep `BCK09-SIG-API` Pending |
+| BCK09-TR-15 | API parity/evidence Hold | ECL03-D12, schema/Dart correction and named API-DEC-01/03 are closed; TypeScript/query/hash/runtime and independent evidence remain open | Prepare a separately Approved parity slice; keep `BCK09-SIG-API` Pending |
 
 The three amendments do not reopen the Product-selected staged free-Booking
 baseline. TR-10/11 implement its accepted single-writer/fail-closed controls;
@@ -149,7 +153,7 @@ invariant explicit and contention-test it:
 
 | Sign-off ID | Reviewer role | Design scope | Current verdict | Runtime/activation gate retained |
 |---|---|---|---|---|
-| BCK09-SIG-API | API Platform | Booking v1 adapter, callable profile, deadlines, canonical request hash, compatibility | Pending — narrowed Hold in BCK09-API-REV-01 v0.4 | No mutation endpoint before API-DEC-01/03 and TypeScript/query/runtime fixture parity |
+| BCK09-SIG-API | API Platform | Booking v1 adapter, callable profile, deadlines, canonical request hash, compatibility | Pending — parity/evidence Hold in BCK09-API-REV-01 v0.5 | No mutation endpoint before TypeScript/query/hash/runtime parity and independent evidence |
 | BCK09-SIG-SEC | Security/Privacy | AuthZ, Rules/IAM, App Check, abuse, logs, fail-closed OD-11 posture | Pending | No production commands/data before executable controls and security evidence |
 | BCK09-SIG-ID | Identity | Account state, revocation, Viewer and exact-page capabilities | Pending | Deny commands until BCK-06/BCK-18 production authority evidence |
 | BCK09-SIG-CONTENT | Content Platform | Pinned published Event projection writer, revision and barrier handoff | Pending | Mutations off until BCK-07 runtime handoff is revision-safe |
@@ -284,7 +288,7 @@ Reviewer role:
 Named reviewer identity:
 Organization/team:
 Qualification or authority basis:
-Target: BCK-09 v1.7 / BCK09-REV-01 v0.6
+Target: BCK-09 v1.8 / BCK09-REV-01 v0.7
 Verdict:
 Accepted scope:
 Required amendments:
@@ -316,7 +320,8 @@ data, credentials, billing, deployment, push or merge to `main`.
 ## 10. Current blockers after this package
 
 - all nine specialist signatures are Pending;
-- API-DEC-01/03 have Product targets but remain unresolved named-owner decisions;
+- API-DEC-01/03 are Accepted for Booking v1 by the combined owner, without an
+  independent specialist signature;
 - BCK09-API-CORR-01 v0.3 is Done with command Schema/Dart/D12 evidence and a
   green 664/664 mobile gate; TypeScript/query/runtime parity remains absent;
 - BCK-06/BCK-18 production Identity authority is absent;
@@ -354,8 +359,8 @@ data, credentials, billing, deployment, push or merge to `main`.
 
 ---
 
-**Current conclusion:** BCK09-REV-01 v0.6 continues the specialist phase.
-BCK09-API-REV-01 v0.4 records a narrowed technical Hold without impersonating a named
-reviewer; the other eight review rows have not started. The Product baseline
-remains accepted, all nine signatures remain Pending, and every
-runtime/activation gate remains open. Runtime effect is none.
+**Current conclusion:** BCK09-REV-01 v0.7 continues the specialist phase.
+BCK09-API-REV-01 v0.5 records a parity/evidence Hold without impersonating an
+independent reviewer; the other eight review rows have not started. The named
+Booking API decisions are accepted, all nine signatures remain Pending, and
+every runtime/activation gate remains open. Runtime effect is none.

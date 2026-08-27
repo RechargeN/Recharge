@@ -1,33 +1,35 @@
 # Recharge Backend — Event Booking Named API Decision Package
 
 - ID: **BCK09-API-NAMED-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-27**
-- Status: **Proposed — explicit combined-owner verdict required**
+- Status: **Accepted with controls — Booking v1 documentation decision only**
 - Decisions in scope: **BCK-03 `API-DEC-01` and `API-DEC-03` for Booking v1**
 - Accountable roles: **API Platform + BCK-05 Operations; API Platform + Security**
 - Assigned combined owner: **RechargeN / Product owner**
+- Recorded owner verdict: **Accepted on 2026-08-27 with the amendments and
+  controls in this document; runtime and Firebase explicitly not authorized**
 - Independence: **none; independent Security/Operations review remains required by later gates**
 - Runtime effect: **none**
 - Product baseline:
-  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Technical pre-review:
-  [BCK09-API-REV-01 v0.4](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.5](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Contract correction:
   [BCK09-API-CORR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Parent target:
-  [BCK-09 v1.7](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
+  [BCK-09 v1.8](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - Transaction-core plan:
-  [ECL-03C v1.5](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.6](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Canonical path:
   `docs/product/BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md`
 
 ---
 
-## 0. Proposed verdict
+## 0. Accepted verdict
 
-**Accept both Booking-scoped decisions with controls and one required semantic
-amendment.**
+**Both Booking-scoped decisions are Accepted with controls and one required
+semantic amendment.**
 
 - `API-DEC-01` candidate:
   `API01-BCK09-CALLABLE-V2-EU-10-15-30-v1`.
@@ -39,10 +41,11 @@ amendment.**
   `occurredAgainstEventRevision`; accepting that omission would permit two
   semantically different attempts to share one payload hash.
 
-This package is a decision proposal, not an implementation approval. Until an
-explicit verdict is recorded, both BCK-03 decisions remain `Open`. Even after
-Acceptance, no callable, TypeScript runtime module, Firebase resource,
-credential, deployment or production mutation is authorized.
+The Product owner recorded the exact bounded verdict on 2026-08-27. BCK-03
+`API-DEC-01` and `API-DEC-03` are therefore `Accepted` for Booking v1 only.
+This is not an implementation approval: no callable, TypeScript runtime
+module, Firebase resource, credential, deployment or production mutation is
+authorized.
 
 ## 1. Scope and authority
 
@@ -300,7 +303,7 @@ No deployed migration exists because product Booking runtime is Absent.
 - A callable profile change requires a new decision revision and stage
   evidence; it is never silently edited in deployment configuration.
 
-## 8. Proposed owner verdict record
+## 8. Recorded owner verdict
 
 | Field | Value |
 |---|---|
@@ -308,8 +311,8 @@ No deployed migration exists because product Booking runtime is Absent.
 | API Platform role | assigned, not independently reviewed |
 | BCK-05 Operations role | assigned, stage evidence pending |
 | Security role | assigned, independent Security review pending |
-| Proposed verdict | Accept both candidates with controls and required amendment |
-| Signed at UTC | Pending explicit owner instruction |
+| Recorded verdict | Accept both candidates with controls and required amendment |
+| Recorded date | 2026-08-27 |
 | Runtime authority | none |
 
 Allowed verdicts:
@@ -318,14 +321,11 @@ Allowed verdicts:
 - `Amend` — name the exact field/value to change;
 - `Defer` — retain safe defaults and create no parity/runtime implementation.
 
-Recommended explicit approval text:
+Recorded owner instruction:
 
 ```text
-Одобряю BCK09-API-NAMED-DEC-01: Accept
-API01-BCK09-CALLABLE-V2-EU-10-15-30-v1 and
-API03-BCK09-JCS-SHA256-SEMANTIC-v1 with the required revision-field
-amendment and controls. Combined-owner decision; independent Security and
-Operations evidence remains pending. No Firebase or runtime authority.
+Одобряю BCK09-API-NAMED-DEC-01 с указанными в документе поправками и
+ограничениями. Runtime и Firebase не разрешаю.
 ```
 
 ## 9. Acceptance criteria
@@ -361,14 +361,9 @@ Operations evidence remains pending. No Firebase or runtime authority.
 29. **BCK09-NAPI-AC-29:** explicit owner verdict is required before status synchronization.
 30. **BCK09-NAPI-AC-30:** push, `main` merge, provisioning and deployment remain separate actions.
 
-## 10. Next step after explicit verdict
+## 10. Next separately gated step
 
-If the exact proposed verdict is Accepted:
-
-1. update BCK-03, BCK-09, ECL-03C, API review, specialist package, coverage,
-   BCK-01/BCK-02 and LAUNCH_STATUS without changing runtime status;
-2. prepare a separate exact file plan for `BCK09-API-PAR-01`;
-3. wait for explicit approval of that contracts/test-only implementation
-   slice before changing Schema, Dart or TypeScript files.
-
-If the verdict is Amend or Defer, no implementation plan is authorized.
+The documentation chain is synchronized without changing runtime status. The
+next allowed action is to prepare a separate exact file plan for
+`BCK09-API-PAR-01`, then wait for explicit approval of that contracts/test-only
+implementation slice before changing Schema, Dart or TypeScript files.

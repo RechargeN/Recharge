@@ -1,6 +1,6 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.5
+- Версия: 1.6
 - Дата: 2026-08-27
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
@@ -16,11 +16,23 @@
   Done v1.1
 - Runtime effect of this revision: **none**
 - Product API baseline:
-  [BCK09-API-DEC-01 v0.3](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Named API decision:
+  [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - Contract correction evidence:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.6 — 2026-08-27
+
+- inherited Booking-v1 Accepted API-DEC-01/03 from
+  BCK09-API-NAMED-DEC-01 v0.2;
+- amended the semantic hash projection to include applicable
+  `expectedBookingRevision` and `occurredAgainstEventRevision` fields;
+- retained TypeScript/query/hash parity, independent specialist evidence,
+  explicit runtime authorization and Firebase as blockers; callable,
+  collection and 47-AC scope are unchanged.
 
 ### v1.5 — 2026-08-27
 
@@ -221,9 +233,10 @@ client deadlines and a 30-second server timeout. A mutation timeout or lost
 connection is an unknown outcome; recovery preserves semantic payload and
 idempotency key while using a fresh request ID, or reads authorized state.
 
-This is the Product baseline from `BCK09-API-DEC-01`, not an Accepted
-`API-DEC-01`. API Platform and BCK-05 Operations must validate the values and
-SDK/latency/cost behavior before endpoint scaffold or deploy configuration.
+This is the Booking-v1 Accepted `API-DEC-01` from
+`BCK09-API-NAMED-DEC-01 v0.2`. Independent API Platform and BCK-05 Operations
+must still validate SDK/latency/cost behavior before endpoint scaffold or
+deploy configuration.
 
 ## 5. Authoritative operational records
 
@@ -423,18 +436,22 @@ The effective key is `(resolvedActorOrServiceIdentity, commandType,
 idempotencyKey)`. `requestId` correlates one request attempt;
 `idempotencyKey` identifies one logical mutation across retries. Values may be
 equal, but equality is not required. A retry may use a new request ID only when
-it preserves the original idempotency key and normalized semantic payload.
+it preserves the original idempotency key and validated semantic payload.
 Neither body field is trusted as actor identity or a global key. The selected
 semantic hash algorithm is `booking_semantic_hash_v1`: validate one closed
 command variant, project exactly `{algorithmVersion, commandType,
-commandSchemaVersion, resolvedActorScope, payload}`, serialize it as RFC 8785
-JCS UTF-8 and encode the SHA-256 digest as lowercase hexadecimal. It excludes
+commandSchemaVersion, resolvedActorScope, expectedBookingRevision?,
+occurredAgainstEventRevision?, payload}`, serialize it as RFC 8785 JCS UTF-8
+and encode the SHA-256 digest as lowercase hexadecimal. It excludes
 `requestId`, `idempotencyKey`, transport metadata, raw Auth/App Check context
-and server timestamps. Duplicate keys, non-finite numbers and values outside
-the cross-language safe numeric subset are rejected before hashing. Dart and
-TypeScript golden vectors must cover Unicode, key ordering, absent versus
-null, integers, arrays and nested objects. This remains a Product-selected
-target until API Platform and Security accept BCK-03 `API-DEC-03`.
+and server timestamps. Duplicate keys, fractional/non-finite numbers, integers
+outside `-9007199254740991..9007199254740991`, unpaired surrogates and invalid
+nulls are rejected before hashing. Unicode normalization, case folding and
+trimming are forbidden after validation. Dart and TypeScript golden vectors
+must cover Unicode, key ordering, absent versus
+null, integers, arrays and nested objects. This is the Booking-v1 Accepted
+`API-DEC-03`; independent cross-language and Security evidence remains a
+runtime prerequisite.
 
 - same effective key and same hash returns the byte-equivalent stored domain
   result after authorization inside a response envelope that echoes the current
@@ -687,8 +704,9 @@ remain ECL-03H or later gates.
     applicable domain mutation and reject request reuse conflicts fail closed.
 44. `booking_semantic_hash_v1` has one exact JCS/SHA-256 projection and requires
     cross-language golden vectors before runtime.
-45. Callable region and 10/15/30-second deadlines remain Product-selected
-    targets until named API Platform, Security and BCK-05 decisions are effective.
+45. Callable region, 10/15/30-second deadlines and the amended semantic hash
+    are Accepted for Booking v1, while independent API Platform, Security and
+    BCK-05 evidence remains required before runtime.
 46. Accepted ECL03-D12 defines opaque bounded request IDs; command Schema/Dart
     enforcement is proven, while endpoint TypeScript parity remains blocked.
 47. Booking command schema correction was separately Approved and verified in

@@ -1,18 +1,20 @@
 # Recharge Backend — Event Booking API Baseline Decision
 
 - ID: **BCK09-API-DEC-01**
-- Version: **0.3**
+- Version: **0.4**
 - Date: **2026-08-27**
-- Status: **Product-selected with controls — specialist acceptance Pending**
-- Decision target: **BCK09-API-REV-01 v0.4 / BCK-09 v1.7 / ECL-03C v1.5**
+- Status: **Reconciled — named Booking API decisions Accepted; specialist signatures Pending**
+- Decision target: **BCK09-API-REV-01 v0.5 / BCK-09 v1.8 / ECL-03C v1.6**
 - Accountable product verdict: **RechargeN / Product owner**
 - Recorded instruction: **`давай` on 2026-08-27, immediately after the
   proposed step “принять рекомендуемые API dispositions”; interpreted only as
   Product target selection under the controls below**
 - Required independent owners: **API Platform, Security/Privacy and BCK-05
   Platform Operations**
+- Named decision:
+  [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - Technical evidence:
-  [BCK09-API-REV-01 v0.4](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.5](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Contract-correction plan:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Parent request-ID decision:
@@ -26,12 +28,12 @@ baseline for further BCK-09 contract work. This resolves product ambiguity; it
 does **not** impersonate or replace the named API Platform, Security/Privacy or
 BCK-05 Operations decisions.
 
-Version 0.3 records that ECL03-D12 is Accepted and BCK09-API-CORR-01 v0.3 has
+Version 0.4 records that ECL03-D12 is Accepted, BCK09-API-CORR-01 v0.3 has
 closed command Schema/Dart parity. Consequently:
 
 - `BCK09-SIG-API` remains `Pending`;
-- BCK-03 `API-DEC-01` and `API-DEC-03` remain open until their named owners
-  accept the exact values and evidence;
+- BCK-03 `API-DEC-01` and `API-DEC-03` are Accepted for Booking v1 through
+  BCK09-API-NAMED-DEC-01 v0.2, including the revision-field amendment;
 - the ECL-03 parent now normatively uses the selected opaque bounded attempt ID;
 - Schema/Dart enforcement of that exact bound is fixture-verified;
 - command union and null/boundary parity defects are closed without a deployed
@@ -100,11 +102,16 @@ The selected target for BCK-03 `API-DEC-03` is:
 
 - algorithm ID `booking_semantic_hash_v1`;
 - exact projection `{algorithmVersion, commandType, commandSchemaVersion,
-  resolvedActorScope, payload}` after successful closed-variant validation;
+  resolvedActorScope, expectedBookingRevision?,
+  occurredAgainstEventRevision?, payload}` after successful closed-variant
+  validation;
 - `requestId`, `idempotencyKey`, transport metadata, raw Auth/App Check
   context and server timestamps are excluded;
-- duplicate JSON keys, non-finite numbers and values outside the
-  cross-language safe numeric subset are rejected before hashing;
+- duplicate JSON keys, fractional/non-finite numbers, integers outside
+  `-9007199254740991..9007199254740991`, unpaired surrogates and invalid nulls
+  are rejected before hashing;
+- Unicode normalization, case folding and trimming are forbidden after
+  validation;
 - canonical bytes are RFC 8785 JCS UTF-8;
 - digest is SHA-256 encoded as lowercase hexadecimal;
 - Dart and TypeScript share frozen golden vectors for Unicode, key ordering,
@@ -130,20 +137,21 @@ The selected target for BCK-03 `API-DEC-01` is:
 - transport mapping terminates in the existing Booking v1 result union and
   never invents a parallel success/error envelope.
 
-These values are a Product baseline only. API Platform and BCK-05 must validate
-regional support, latency, SDK behavior, cost and operational evidence before
-accepting `API-DEC-01` or configuring a deployment.
+These values are the Accepted Booking-v1 documentation decision. Independent
+API Platform and BCK-05 evidence must still validate regional support,
+latency, SDK behavior, cost and operational behavior before any deployment
+configuration or endpoint activation.
 
 ## 3. Mandatory controls
 
 1. No JSON Schema, Dart DTO, TypeScript, mobile, Firebase or deployment change
    is authorized by this decision.
-2. The schema/DTO divergence is corrected only through
-   `BCK09-API-CORR-01` after explicit slice approval.
+2. The schema/DTO divergence was corrected only through the separately
+   Approved `BCK09-API-CORR-01` slice.
 3. ECL03-D12 is the parent authority for request-ID semantics; lower-level
    prose or code cannot override it.
-4. API-DEC-01/03 stay Open until their named owners sign the exact baseline or
-   record amendments.
+4. API-DEC-01/03 are Accepted only for Booking v1 under
+   BCK09-API-NAMED-DEC-01 v0.2; this does not sign BCK09-SIG-API/SEC/OPS.
 5. All nine BCK-09 specialist signatures stay Pending.
 6. Unknown schema, command variant, enum, actor state, App Check mode or
    request binding fails before mutation.
@@ -157,9 +165,9 @@ accepting `API-DEC-01` or configuring a deployment.
 | Finding | Product disposition | Current state | Required closure |
 |---|---|---|---|
 | BCK09-API-TR-01 | Closed discriminated command union | Implemented and verified in BCK09-API-CORR-01 v0.3 | Preserve fixtures and hashes |
-| BCK09-API-TR-02 | Two atomic record kinds in `bookingIdempotency` | Selected for plan | Named API review plus later emulator proof |
-| BCK09-API-TR-03 | Callable v2, 10/15/30-second profile | Selected Product baseline | API Platform + BCK-05 acceptance |
-| BCK09-API-TR-04 | JCS/SHA-256 semantic hash v1 | Selected Product baseline | API Platform + Security acceptance and goldens |
+| BCK09-API-TR-02 | Two atomic record kinds in `bookingIdempotency` | Selected for plan | Later emulator atomicity/contention proof |
+| BCK09-API-TR-03 | Callable v2, 10/15/30-second profile | Accepted for Booking v1 | Independent API Platform + BCK-05 stage evidence |
+| BCK09-API-TR-04 | JCS/SHA-256 semantic hash v1 with revision fields | Accepted for Booking v1 | Independent cross-language goldens and Security evidence |
 | BCK09-API-TR-05 | Opaque bounded request ID | Parent and command artifacts reconciled | Preserve D12 Schema/DTO fixture parity |
 | BCK09-API-TR-06 | Query/TS parity evidence | Not yet available | Approved contract/runtime slice and tests |
 
@@ -184,6 +192,7 @@ accepting `API-DEC-01` or configuring a deployment.
 
 ## 6. Final state
 
-The ambiguity now has one reviewable Product baseline and its command-artifact
-correction is complete. It remains deliberately non-deployable: named
-specialist decisions and TypeScript/query/runtime evidence are still required.
+The ambiguity now has one Accepted Booking-v1 named decision and its
+command-artifact correction is complete. It remains deliberately
+non-deployable: all specialist signatures and TypeScript/query/runtime evidence
+are still required.
