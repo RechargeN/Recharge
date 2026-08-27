@@ -2,7 +2,7 @@
 
 - Version: **0.3**
 - Date: **2026-08-27**
-- Status: **Implemented — Review; package gates green, repository gate blocked**
+- Status: **Done — pre-runtime contract correction only**
 - Parent finding:
   [BCK09-API-REV-01 v0.4](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product baseline:
@@ -249,16 +249,18 @@ Verification evidence:
 - independent Draft 2020-12 validator: **14/14 valid accepted**, **38/38
   invalid rejected**;
 - full mobile analyzer: **0 diagnostics**;
-- full mobile suite: **663 passed / 1 failed**; the unrelated-to-this-diff Route
-  golden `route_create_block_method.png` differs by 2.52% (11,229 px), and a
-  focused rerun fails identically;
+- full mobile suite: **664/664 passed** after preserving the canonical non-Windows
+  Route baseline, adding the exact Flutter 3.44.9 Windows baseline and retaining
+  a strict `366 × 1216` layout-size assertion;
 - all nine command variants represented and mechanically reconciled;
 - LF-normalized SHA-256 values are frozen in `packages/api_contracts/CHANGELOG.md`;
 - no supported producer/deployment/migration dependency found;
-- diff contains no backend/mobile/Firebase/runtime file.
+- correction commit `d366818` contains no backend/mobile/Firebase/runtime file;
+  the independent repository-gate disposition changes only the Route widget
+  test and its Windows-only golden baseline.
 
-The contract defect is corrected, but this slice stays `Review` until the
-repository-wide Route golden gate is green or explicitly dispositioned by its
-own owner. This does not close named API-DEC-01/03, TypeScript consumer/query
+The contract defect and every gate owned by this correction slice are closed;
+`BCK09-API-CORR-01 v0.3` is `Done`. This does not close named API-DEC-01/03,
+TypeScript consumer/query
 parity, specialist signatures or ECL-03C runtime authorization. Push and
 `main` merge remain separate owner actions.

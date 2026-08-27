@@ -20,9 +20,9 @@
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Frozen source hashes:
   - convention: SHA-256 of UTF-8 text normalized to LF line endings
-  - BCK-09 v1.7 SHA-256: `add2d779ad3a3a8adac96bc26f9c1711cf1bf020f82ce78cec742d7a8bf2b522`
+  - BCK-09 v1.7 SHA-256: `570dba37950644a4ebc40c64c7f38e4d6b71a7a1f2be9e879f8f6b474dc659e3`
   - ECL-03C v1.5 SHA-256: `e76f831bfa1fe862582f3edd69a969d6d21149240cf9997d9e0e21497a70f5ed`
-  - BCK-09-PRE v1.6 SHA-256: `890a539842eef6e33fd1f3e359abd897b8e222ef2eaf4c18c2948e3d83746707`
+  - BCK-09-PRE v1.6 SHA-256: `312207d0bc32fda42177dd75601b8526dd34009f941bb54563eb4c3ddab19ef7`
 - Runtime effect: **none**
 
 ---
@@ -34,7 +34,7 @@
 BCK-09 v1.7 and ECL-03C v1.5 incorporate TR-09..11, Accepted ECL03-D12 and the
 Product-selected API baseline without changing the callable/product scope.
 The review surface is internally reconcilable at the previously reviewed
-boundaries. BCK09-API-CORR-01 closes command Schema/Dart parity, but
+boundaries. BCK09-API-CORR-01 is Done and closes command Schema/Dart parity, but
 BCK09-API-REV-01 still blocks on named API decisions and executable
 TypeScript/query/runtime parity evidence. This verdict does not
 approve BCK-09, sign any specialist row, approve ECL-03C, create a Firebase
@@ -72,7 +72,7 @@ ECL-03C v1.5, still in Review and not authorized.
 | BCK09-DEC-01 | v0.3 Accepted with controls | Product baseline/ten dispositions reconciled with D12 |
 | BCK09-API-REV-01 | v0.4 contract corrected; Hold | API evidence/findings only; not a named signature |
 | BCK09-API-DEC-01 | v0.3 Product-selected with controls | Exact target dispositions; not specialist acceptance |
-| BCK09-API-CORR-01 | v0.3 Implemented / Review | Command/D12 Schema-Dart parity verified; unrelated Route golden blocks repository Done |
+| BCK09-API-CORR-01 | v0.3 Done | Command/D12 Schema-Dart parity and repository gates verified; no runtime authority |
 | BCK-03/04/05/06/07/13/18/19 | Current repository statuses | Parent/peer proposals and blockers; no inherited Approval |
 | OD-09 | Proposed | Required before cross-domain effects |
 | OD-11 | Open | Required before applicable age-sensitive paths |
@@ -317,9 +317,8 @@ data, credentials, billing, deployment, push or merge to `main`.
 
 - all nine specialist signatures are Pending;
 - API-DEC-01/03 have Product targets but remain unresolved named-owner decisions;
-- BCK09-API-CORR-01 v0.3 is Implemented/Review with command Schema/Dart/D12
-  evidence; an unrelated Route golden blocks repository Done, and
-  TypeScript/query/runtime parity remains absent;
+- BCK09-API-CORR-01 v0.3 is Done with command Schema/Dart/D12 evidence and a
+  green 664/664 mobile gate; TypeScript/query/runtime parity remains absent;
 - BCK-06/BCK-18 production Identity authority is absent;
 - BCK-07 revision-safe Event projection runtime is absent;
 - BCK-13/OD-09 executable effect handoff is absent;

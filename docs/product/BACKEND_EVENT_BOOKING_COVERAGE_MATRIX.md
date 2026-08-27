@@ -11,7 +11,9 @@
 
 ### v1.6 — 2026-08-27
 
-- registered BCK09-API-CORR-01 v0.3 Implemented/Review and command Schema/Dart/D12 parity;
+- registered BCK09-API-CORR-01 v0.3 Done and command Schema/Dart/D12 parity;
+- recorded the green 664/664 mobile gate after adding a strict Windows-specific
+  Route raster baseline without replacing the canonical non-Windows baseline;
 - narrowed the API gap to named API decisions and TypeScript/query/runtime
   evidence;
 - kept 22/22 coverage, 32 AC, all nine signatures Pending and runtime Absent.
@@ -81,8 +83,8 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | ECL03-D01–D12 | Accepted / normative | Product/architecture decisions including opaque bounded request ID |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
 | ECL-03C v1.5 | Review, runtime not authorized | Exact first executable plan with active key and planned atomic request binding; command parity verified |
-| BCK-01 v0.4.44 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.48 | Approved baseline + factual amendments | Registry, categories, OD/gates |
+| BCK-01 v0.4.45 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.49 | Approved baseline + factual amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.3 | Draft | Common API proposal and Booking v1 reconciliation |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
@@ -90,7 +92,7 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 | BCK09-REV-01 v0.6 | Specialist review in progress | API narrowed Hold; all nine named sign-offs remain Pending |
 | BCK09-API-REV-01 v0.4 | Contract corrected; Hold | Named API decisions and TypeScript/query/runtime parity remain blockers |
 | BCK09-API-DEC-01 v0.3 | Product-selected with controls | Exact request-binding/hash/transport/ID targets; no specialist or runtime authority |
-| BCK09-API-CORR-01 v0.3 | Implemented / Review | Closed command union and D12 Schema/Dart parity verified; repository gate blocked by unrelated Route golden |
+| BCK09-API-CORR-01 v0.3 | Done | Closed command union, exact D12 Schema/Dart parity and repository gates verified; no runtime authority |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |

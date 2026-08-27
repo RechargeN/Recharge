@@ -27,15 +27,15 @@
 - Product API decision:
   [BCK09-API-DEC-01 v0.3 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Contract correction evidence:
-  [BCK09-API-CORR-01 v0.3 — Implemented / Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
 
 ### v1.7 — 2026-08-27
 
-- registered BCK09-API-CORR-01 v0.3 as verified pre-runtime command
-  Schema/Dart/D12 correction;
+- registered BCK09-API-CORR-01 v0.3 as a Done pre-runtime command
+  Schema/Dart/D12 correction with green repository gates;
 - narrowed the API Hold to named API-DEC-01/03 and absent
   TypeScript/query/availability/runtime evidence;
 - kept 85 AC, all specialist signatures Pending and runtime Absent.
