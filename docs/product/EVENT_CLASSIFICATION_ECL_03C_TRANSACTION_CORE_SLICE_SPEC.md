@@ -1,6 +1,6 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.7
+- Версия: 1.8
 - Дата: 2026-08-28
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
@@ -22,9 +22,17 @@
 - Contract correction evidence:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
-  [BCK09-API-PAR-01 v0.2 — Implemented / Review](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+  [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.8 — 2026-08-28
+
+- promoted the bounded contracts/test-only parity dependency to Done after
+  exact Node 22.23.2 hosted Ubuntu/Windows evidence passed;
+- retained raw callable-body feasibility, independent specialist evidence,
+  explicit runtime authorization and all Firebase/deployment gates;
+- changed no callable, collection, transaction, record or 47-AC scope.
 
 ### v1.7 — 2026-08-28
 
@@ -219,8 +227,8 @@ Rules:
   1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
 - `idempotencyKey` remains a separate opaque required logical-mutation ID;
 - command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3 and bounded
-  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.2; no endpoint
-  may be implemented until canonical Node 22, raw callable-body feasibility
+  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.3; no endpoint
+  may be implemented until raw callable-body feasibility
   and independent API/Security/Operations evidence are also proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;

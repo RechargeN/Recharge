@@ -1,12 +1,12 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.6**
+- Version: **0.7**
 - Date: **2026-08-28**
-- Status: **Contract parity implemented — Hold for runtime feasibility and independent evidence**
-- Target: **BCK-09 v1.9 / ECL-03C v1.7 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.8](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
-- Governing API draft: [BCK-03 v0.3.5](BACKEND_API_CONTRACT_STANDARD.md)
+- Status: **Contract parity Done — Hold for runtime feasibility and independent evidence**
+- Target: **BCK-09 v1.10 / ECL-03C v1.8 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.9](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Governing API draft: [BCK-03 v0.3.6](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **none**
 - Product API decision:
   [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
@@ -15,19 +15,18 @@
 - Contract correction plan:
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
-  [BCK09-API-PAR-01 v0.2 — Implemented / Review](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+  [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
 
 ## 0. Verdict
 
-**Hold, narrowed to runtime adapter feasibility, canonical Node 22 confirmation
-and independent evidence.**
+**Hold, narrowed to runtime adapter feasibility and independent evidence.**
 BCK09-API-CORR-01 v0.3 closes the command-union and D12 Schema/Dart defects.
 BCK09-API-NAMED-DEC-01 v0.2 accepts the exact Booking-v1 callable and semantic
-hash decisions, including the revision-field amendment. BCK09-API-PAR-01 v0.2
+hash decisions, including the revision-field amendment. BCK09-API-PAR-01 v0.3
 implements the missing query/read/page/availability roots and independent
 Dart/TypeScript semantic-hash evidence without adding runtime. A named
 independent API Platform reviewer still must not sign because raw callable-body
-feasibility, canonical Node 22, stage/Security evidence and runtime controls
+feasibility, stage/Security evidence and runtime controls
 remain incomplete.
 
 This is a technical preparation record, not an independent specialist
@@ -69,19 +68,20 @@ The bounded Dart validator and `BookingCommandDto` agree with those vectors.
 The independent Node contract suite passes `10/10` with Ajv 8.20.0 Draft
 2020-12 validation, strict raw-JSON rejection and byte-identical JCS/SHA-256
 goldens. Backend format, lint and strict typecheck pass; full Flutter analyze,
-`664/664` tests and the 380-file boundary scan are green. Node ran on 20.17,
-not the repository's canonical Node 22 target, so that rerun remains required.
+`664/664` tests and the 380-file boundary scan are green. Hosted runs
+`33127684319` and `33127686757` pass on exact Node 22.23.2 for both
+`ubuntu-24.04` and `windows-2025`.
 
 ## 3. Findings
 
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
 | `BCK09-API-TR-01` | Resolved | Pass | `booking_command.schema.json` contains nine closed command-local variants; Schema, bounded validator, Dart and TypeScript agree on all checked-in command fixtures | Preserve frozen fixture/hash evidence |
-| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.7 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Later atomicity/contention evidence remains required |
+| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.8 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Later atomicity/contention evidence remains required |
 | `BCK09-API-TR-03` | Named decision | Accepted for Booking v1 | Callable v2, `europe-west1` and 10/15/30-second deadlines are exact | Independent API Platform + BCK-05 stage evidence remains required before endpoint scaffold |
 | `BCK09-API-TR-04` | Contract portion resolved | Pass / runtime Hold | `booking_semantic_hash_v1` uses RFC 8785 JCS UTF-8, lowercase SHA-256 and includes applicable revision fields; independent Dart/TypeScript goldens agree | Raw callable-body feasibility and independent Security evidence remain required before runtime |
 | `BCK09-API-TR-05` | Resolved | Pass | ECL03-D12 opaque request IDs are enforced identically in command Schema/Dart, including scalar bounds, blank set, no rewrite and surrogate rejection | Preserve frozen v0.3 fixtures; no hidden backend-only rule |
-| `BCK09-API-TR-06` | Resolved at contract/test scope | Pass / runtime absent | Closed query/read/page/availability schemas and a real TypeScript Draft 2020-12 consumer exist; shared Dart/TypeScript fixtures and hashes pass | Preserve evidence, rerun on Node 22 and keep ECL-03C runtime unauthorized until later runtime gates pass |
+| `BCK09-API-TR-06` | Resolved at contract/test scope | Pass / runtime absent | Closed query/read/page/availability schemas and a real TypeScript Draft 2020-12 consumer exist; shared Dart/TypeScript fixtures and hashes pass on Node 22.23.2 | Preserve evidence and keep ECL-03C runtime unauthorized until later runtime gates pass |
 
 ## 4. Passing checks
 
@@ -181,7 +181,7 @@ Recommended baseline:
   absent-versus-null, integers and arrays.
 
 This is Accepted for Booking v1 by BCK09-API-NAMED-DEC-01 v0.2. Independent
-test-only Dart/TypeScript goldens pass in BCK09-API-PAR-01 v0.2. Runtime remains
+test-only Dart/TypeScript goldens pass in BCK09-API-PAR-01 v0.3. Runtime remains
 blocked until raw callable-body feasibility and independent Security evidence
 pass their separately Approved gates.
 
@@ -241,7 +241,7 @@ after:
 BCK-09 remains Review, ECL-03C runtime remains unapproved and
 `BCK09-SIG-API` remains Pending. Product ambiguity, the command-union defect,
 D12 command-artifact parity, Booking-v1 named API decisions and the bounded
-TypeScript/query/hash contract parity slice are closed. Canonical Node 22
-confirmation, raw callable-body feasibility, independent specialist evidence
-and runtime controls remain blockers. Further contract or runtime edits require
+TypeScript/query/hash contract parity slice and canonical Node 22 confirmation
+are closed. Raw callable-body feasibility, independent specialist evidence and
+runtime controls remain blockers. Further contract or runtime edits require
 their own Approved slice.

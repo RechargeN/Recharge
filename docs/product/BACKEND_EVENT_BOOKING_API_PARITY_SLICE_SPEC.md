@@ -1,9 +1,9 @@
 # Recharge Backend — Event Booking API Contract Parity Slice
 
 - ID: **BCK09-API-PAR-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-08-28**
-- Status: **Implemented / Review — contracts and test-only parity; Node 22 confirmation pending**
+- Status: **Done — contracts and test-only parity verified on canonical Node 22.23.2**
 - Scope: **Booking v1 contracts and test-only Dart/TypeScript parity**
 - Runtime effect: **none**
 - Firebase effect: **none**
@@ -11,11 +11,11 @@
 - Parent named decision:
   [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
 - API standard:
-  [BCK-03 v0.3.5](BACKEND_API_CONTRACT_STANDARD.md)
+  [BCK-03 v0.3.6](BACKEND_API_CONTRACT_STANDARD.md)
 - Booking target:
-  [BCK-09 v1.9](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
+  [BCK-09 v1.10](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - Transaction-core plan:
-  [ECL-03C v1.7](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.8](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Contract workflow:
   [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Canonical path:
@@ -25,8 +25,8 @@
 
 ## 0. Verdict
 
-**The owner-approved v0.1 scope is implemented in commit `a7296f5` and remains
-in Review pending a canonical Node 22 rerun.**
+**The owner-approved v0.1 scope is implemented in commit `a7296f5` and verified
+on the canonical hosted Node 22.23.2 toolchain. This bounded slice is Done.**
 
 The slice closes only `BCK09-API-TR-06` contract parity and the pre-runtime
 golden-vector part of `BCK09-API-TR-04`. It creates no handler, callable,
@@ -63,10 +63,13 @@ deployment configuration.
 - backend `src/`, mobile, Firebase/deployment files and Accepted ADRs are
   unchanged; `r0ToolchainProbe` remains the only backend export.
 
-The Node evidence was executed on Node 20.17 while the repository engine target
-is Node 22. That version mismatch does not invalidate the contract result, but
-it keeps this slice at `Implemented / Review` rather than `Done` until the same
-suite is rerun successfully on the canonical toolchain.
+Initial local Node evidence was executed on Node 20.17. Commit `b734367` repaired
+only the stale Ubuntu Temurin registry selector, preserving the locked
+21.0.12+8 build. Hosted push run `33127684319` and pull-request run
+`33127686757` then passed on both `ubuntu-24.04` and `windows-2025` with exact
+Node 22.23.2, including Booking contract parity, emulator isolation,
+reproducibility and Terraform gates. Codegen, lint, boundaries and the complete
+mobile test workflow also passed on the same head SHA.
 
 ## 1. Authority and non-authority
 
