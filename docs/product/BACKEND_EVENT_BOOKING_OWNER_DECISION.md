@@ -1,10 +1,10 @@
 # Recharge Backend — Event Booking Owner Decision
 
 - ID: **BCK09-DEC-01**
-- Version: **0.2**
-- Date: **2026-08-26**
+- Version: **0.3**
+- Date: **2026-08-27**
 - Status: **Accepted — BCK09-A1-STAGED-FREE-BOOKING-v1 with controls**
-- Decision target: **BCK-09 v1.3 / BCK09-OD-01..10**
+- Decision target: **BCK-09 v1.6 / BCK09-OD-01..10**
 - Candidate baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1**
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
@@ -12,9 +12,9 @@
   [BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Architecture: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Parent contract:
-  [ECL-03 v1.2](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
+  [ECL-03 v1.3](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - First executable plan:
-  [ECL-03C v1.1](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.4](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Accountable product verdict: **RechargeN / Product owner**
 - Required independent verdicts: **API Platform, Security/Privacy, Identity,
   Content, Notifications, Operations, Mobile Platform, Admin Operations and
@@ -22,6 +22,10 @@
 - Runtime effect: **none**
 
 ---
+
+Version 0.3 reconciles Accepted ECL03-D12 and current BCK-09/ECL-03C document
+versions. It does not alter the recorded Product verdict, ten dispositions,
+specialist gates or runtime effect.
 
 ## 0. Current verdict state
 
@@ -79,7 +83,7 @@ not a hidden acceptance: its fail-closed default remains binding.
 
 | Decision | Recorded disposition | Exact effect | Remaining gate/default |
 |---|---|---|---|
-| BCK09-OD-01 | **Defer executable authorization** | Select ECL-03C v1.1 as the only first candidate | No product backend until separate explicit post-stabilization approval |
+| BCK09-OD-01 | **Defer executable authorization** | Select ECL-03C v1.4 as the only first candidate | No product backend until separate explicit post-stabilization approval |
 | BCK09-OD-02 | **Defer implementation details** | Preserve Booking v1 and D11 semantics | No endpoint until API-DEC-01/03 accepted and fixture parity proved |
 | BCK09-OD-03 | **Defer runtime readiness** | Accept server-owned actor/capability boundary | Deny production commands until BCK-06/18 authority evidence exists |
 | BCK09-OD-04 | **Accept ownership boundary** | BCK-07 alone writes pinned published Event input | Mutations off until revision-safe runtime handoff is proved |
@@ -202,7 +206,7 @@ document presence is not this verdict. The exact verdict above is recorded in
 
 ## 9. Revalidation and supersession
 
-Re-review is mandatory if the Booking v1 major, D01–D11, ADR 0019, ECL-03C
+Re-review is mandatory if the Booking v1 major, D01–D12, ADR 0019, ECL-03C
 scope, Firebase topology, single-writer ownership, concurrency policy,
 retention baseline, age policy or stage order changes. A replacement records
 the old/new baseline, compatibility, migration, security/privacy impact,

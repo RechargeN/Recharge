@@ -1,13 +1,20 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.4**
+- Version: **1.5**
 - Status: **Review — documentation only**
 - Runtime status: **N/A / Absent**
 - Date: **2026-08-27**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.5 — 2026-08-27
+
+- registered Accepted ECL03-D12 and parent ECL-03 v1.3;
+- replaced the request-ID semantic conflict with a bounded artifact-conformance
+  requirement in BCK09-API-CORR-01 v0.2;
+- kept 22/22 coverage, 32 AC, all nine signatures Pending and runtime Absent.
 
 ### v1.4 — 2026-08-27
 
@@ -51,7 +58,7 @@
 ## 1. Verdict
 
 **Coverage: 22/22. API technical review: narrowed Hold. Recommendation: keep
-BCK-09 v1.5 as Review / Present / runtime Absent.**
+BCK-09 v1.6 as Review / Present / runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
 not Approved, executable, deployed or production-ready. The first possible
@@ -63,20 +70,20 @@ runtime remains the separately approved, bounded ECL-03C transaction core.
 |---|---|---|
 | ADR 0019 | Accepted | Booking architecture and hard invariants |
 | Event Classification v2.2.3 | Accepted | Canonical Event/admission product semantics |
-| ECL-03 v1.2 | Approved, activation gated | Parent implementation contract |
-| ECL03-D01–D11 | Accepted / normative | Product/architecture decisions |
+| ECL-03 v1.3 | Approved, activation gated | Parent implementation contract |
+| ECL03-D01–D12 | Accepted / normative | Product/architecture decisions including opaque bounded request ID |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
-| ECL-03C v1.3 | Review, runtime not authorized | Exact first executable plan with active key and planned atomic request binding |
-| BCK-01 v0.4.42 | Review | Parent modular/single-writer architecture |
-| BCK-02 v2.4.46 | Approved baseline + factual amendments | Registry, categories, OD/gates |
+| ECL-03C v1.4 | Review, runtime not authorized | Exact first executable plan with active key and planned atomic request binding |
+| BCK-01 v0.4.43 | Review | Parent modular/single-writer architecture |
+| BCK-02 v2.4.47 | Approved baseline + factual amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.3 | Draft | Common API proposal and Booking v1 reconciliation |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
-| BCK09-DEC-01 v0.2 | Accepted with controls | Product baseline selection and explicit ten-decision dispositions; no runtime authority |
-| BCK09-REV-01 v0.4 | Specialist review in progress | API narrowed Hold; all nine named sign-offs remain Pending |
-| BCK09-API-REV-01 v0.2 | Product baseline selected; Hold | Contract correction, ECL03-D12, named API decisions and parity evidence remain blockers |
-| BCK09-API-DEC-01 v0.1 | Product-selected with controls | Exact request-binding/hash/transport/ID targets; no specialist or runtime authority |
-| BCK09-API-CORR-01 v0.1 | Review plan | Closed command-union correction; implementation not authorized |
+| BCK09-DEC-01 v0.3 | Accepted with controls | Product baseline reconciled with D12; ten dispositions; no runtime authority |
+| BCK09-REV-01 v0.5 | Specialist review in progress | API narrowed Hold; all nine named sign-offs remain Pending |
+| BCK09-API-REV-01 v0.3 | D12 reconciled; Hold | Contract correction, named API decisions and parity evidence remain blockers |
+| BCK09-API-DEC-01 v0.2 | Product-selected with controls | Exact request-binding/hash/transport/ID targets; no specialist or runtime authority |
+| BCK09-API-CORR-01 v0.2 | Review plan | Closed command-union and D12 conformance correction; implementation not authorized |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -92,7 +99,7 @@ promote any dependency or owner decision.
 |---|---|---|
 | ECL-03A | Accepted/Approved documents only | Architecture is fixed; runtime absent |
 | ECL-03B | Booking v1 JSON schemas/fixtures and Dart DTO/domain tests | Contract evidence, not backend |
-| ECL-03C | Exact v1.3 plan in Review | Implementation not authorized |
+| ECL-03C | Exact v1.4 plan in Review | Implementation not authorized |
 | ECL-03D–H | Full target behavior only | Separate specs/evidence required |
 | Event runtime | Local/mock availability and external handoff | Never Booking authority |
 | Backend scaffold | R0 tooling only; no product handlers/resources | Cannot claim Booking runtime |
@@ -161,7 +168,7 @@ writer path.
 | Request-attempt reuse | No physical binding for one reused request ID | Two atomic domain-separated record kinds inside `bookingIdempotency` |
 | Semantic hash | Algorithm/version remained prose-only | Product-selected exact RFC 8785 JCS/SHA-256 target; named decision Pending |
 | Transport/deadlines | Callable profile had no exact values | Product-selected callable v2 10/15/30 target; named decision Pending |
-| Request-ID format | Approved parent and Booking v1 disagreed | Explicit `ECL03-D12` blocker; no hidden backend-only interpretation |
+| Request-ID format | Approved parent and Booking v1 disagreed | ECL03-D12 resolves semantics; Schema/Dart parity remains correction evidence |
 | Command schema/DTO | Schema accepted variants rejected by Dart | Separate BCK09-API-CORR-01 plan; endpoint remains blocked |
 
 ## 7. Gap register
@@ -170,7 +177,7 @@ writer path.
 |---|---|---|
 | ECL-03C plan/runtime authorization absent | Blocks executable work | BCK09-OD-01 exact verdict and slice approval |
 | API transport/hash named decisions open | Blocks mutation runtime | Product baseline exists; API-DEC-01/03 named-owner acceptance still required |
-| API technical pre-review Hold | Blocks API signature | BCK09-API-CORR-01, ECL03-D12, parity evidence and named API verdict |
+| API technical pre-review Hold | Blocks API signature | BCK09-API-CORR-01, parity evidence and named API verdict |
 | Production Identity/capability absent | Blocks all production commands | BCK-06/BCK-18 runtime evidence |
 | Event projection writer/handoff absent | Blocks production mutation | BCK-07 runtime + BCK09-OD-04 |
 | OD-09/BCK-13 effect handoff not Accepted/runtime | Blocks notifications/workers | BCK09-OD-05 |
@@ -224,7 +231,7 @@ writer path.
 28. **BCK-09-PRE-AC-28:** Product API selection is not represented as named specialist acceptance.
 29. **BCK-09-PRE-AC-29:** logical and attempt bindings share the existing idempotency collection atomically.
 30. **BCK-09-PRE-AC-30:** hash and transport targets remain named-owner decisions before runtime.
-31. **BCK-09-PRE-AC-31:** the request-ID conflict remains fail-closed until ECL03-D12.
+31. **BCK-09-PRE-AC-31:** Accepted ECL03-D12 is authoritative while artifact conformance remains fail-closed.
 32. **BCK-09-PRE-AC-32:** schema/DTO correction requires separate explicit slice approval.
 
 ## 10. Evidence summary
@@ -240,9 +247,9 @@ writer path.
 
 ## 11. Recommendation
 
-Register BCK-09 v1.5 as **Review / Present / runtime Absent**. The Product
+Register BCK-09 v1.6 as **Review / Present / runtime Absent**. The Product
 baseline and exact API target are selected with controls, while Approval still
-requires the named independent boundary reviews, contract correction,
-ECL03-D12 and closure of the remaining Open decisions.
+requires the named independent boundary reviews, contract correction and
+closure of the remaining Open decisions.
 Executable work may begin only through a separately Approved ECL-03C slice;
 later behavior requires its own ECL-03D–H approval and evidence.

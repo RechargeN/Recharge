@@ -1,20 +1,29 @@
 # BCK09-API-CORR-01 — Booking v1 Contract Correction Slice
 
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-27**
 - Status: **Review — exact correction plan; implementation not authorized**
 - Parent finding:
-  [BCK09-API-REV-01 v0.1](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.3](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product baseline:
-  [BCK09-API-DEC-01 v0.1](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Parent decision:
+  [ECL03-D12 Accepted](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Target package: **`packages/api_contracts` / Booking wire v1**
 - Runtime effect of this revision: **none**
 
 ## 0. Outcome
 
+### v0.2 — 2026-08-27
+
+- incorporated Accepted ECL03-D12 into the future Schema/DTO parity scope;
+- kept implementation unapproved and added three acceptance criteria;
+- changed no contract or runtime artifact.
+
 This slice will make the normative Booking v1 command schema and executable
-consumers describe the same closed command variants. It corrects a
-pre-runtime specification defect; it does not add a backend, endpoint, mobile
+consumers describe the same closed command variants and the same D12 request-ID
+constraints. It corrects two
+pre-runtime specification defects; it does not add a backend, endpoint, mobile
 adapter, Firebase resource or new Booking capability.
 
 The current schema accepts command/payload combinations that the Dart DTO
@@ -38,17 +47,23 @@ deployed contract.
    the actual Draft 2020-12 keywords used by the normative schema.
 5. Add negative fixtures for every command variant and boundary family.
 6. Verify Dart behavior against the corrected schema.
-7. Add a future TypeScript parity entry point and golden-vector contract, but
+7. Enforce D12 identically: exact case-sensitive value, 1–128 Unicode scalar
+   values, at least one scalar outside the versioned D12 blank set and no
+   normalization/rewrite.
+8. Add valid/invalid D12 fixtures including every blank-set family,
+   leading/trailing retained blanks, 129 scalars, unpaired surrogates,
+   non-ULID opaque IDs, case distinction and Unicode scalar boundaries.
+9. Add a future TypeScript parity entry point and golden-vector contract, but
    do not create backend runtime in this slice unless a later explicit
    authorization expands the file plan.
-8. Record compatibility evidence and exact hashes of the accepted fixtures.
+10. Record compatibility evidence and exact hashes of the accepted fixtures.
 
 ### 1.2. Excluded
 
 - changing Event Classification behavior or adding a Booking flow;
 - changing the Booking v1 result union;
 - query/page/availability API creation;
-- ECL-03 request-ID parent amendment;
+- changing the Accepted ECL03-D12 request-ID policy;
 - canonical semantic-hash implementation;
 - `apps/backend`, Firebase, Functions, Firestore, Rules or deployment;
 - mobile repository/datasource/application/presentation/DI changes;
@@ -77,6 +92,11 @@ fields are command-local. Unknown fields, authority fields, mixed variants and
 missing required fields are invalid. This plan does not guess the detailed
 field matrix: the implementation review must extract and reconcile it against
 the current DTO and fixtures before editing the normative schema.
+
+The `requestId` constraint is not inferred from the generic entity-ID name.
+The correction must encode ECL03-D12 explicitly and prove equivalent Unicode
+scalar counting/non-blank behavior in the standards validator and Dart. It
+must preserve valid opaque non-ULID values.
 
 ## 3. Exact future file plan
 
@@ -175,7 +195,7 @@ producer and open a versioned compatibility slice.
 ## 9. Acceptance criteria
 
 1. **BCK09-API-CORR-AC-01:** this file is a plan and grants no implementation authority.
-2. **BCK09-API-CORR-AC-02:** the evidenced schema/DTO divergence is the only defect scope.
+2. **BCK09-API-CORR-AC-02:** scope is limited to the command matrix and Accepted D12 conformance defects.
 3. **BCK09-API-CORR-AC-03:** all current command names remain unchanged.
 4. **BCK09-API-CORR-AC-04:** the Booking v1 result union remains unchanged.
 5. **BCK09-API-CORR-AC-05:** every command has one closed schema variant.
@@ -190,7 +210,7 @@ producer and open a versioned compatibility slice.
 14. **BCK09-API-CORR-AC-14:** a repository producer compatibility audit is required.
 15. **BCK09-API-CORR-AC-15:** contrary compatibility evidence forces a versioned migration.
 16. **BCK09-API-CORR-AC-16:** no Event/Booking capability is added.
-17. **BCK09-API-CORR-AC-17:** request-ID policy is outside this slice.
+17. **BCK09-API-CORR-AC-17:** request-ID policy is inherited unchanged from Accepted ECL03-D12.
 18. **BCK09-API-CORR-AC-18:** hashing and transport implementation are outside this slice.
 19. **BCK09-API-CORR-AC-19:** query and availability schemas remain separately gated.
 20. **BCK09-API-CORR-AC-20:** TypeScript parity remains an explicit later prerequisite.
@@ -199,6 +219,9 @@ producer and open a versioned compatibility slice.
 23. **BCK09-API-CORR-AC-23:** the correction has a pre-runtime changelog and rollback path.
 24. **BCK09-API-CORR-AC-24:** implementation requires a separate explicit approval.
 25. **BCK09-API-CORR-AC-25:** push and `main` merge remain separately authorized.
+26. **BCK09-API-CORR-AC-26:** non-ULID opaque request IDs remain valid.
+27. **BCK09-API-CORR-AC-27:** Schema and Dart count/enforce the same 1–128 Unicode scalar boundary.
+28. **BCK09-API-CORR-AC-28:** whitespace-only and normalized-equivalent-but-distinct attempt IDs are fixture-tested.
 
 ## 10. Final state
 

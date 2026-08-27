@@ -1,26 +1,34 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.3
+- Версия: 1.4
 - Дата: 2026-08-27
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
-  Approved v1.2
+  Approved v1.3
 - Architecture:
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
   [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
-  Accepted D01–D11
+  Accepted D01–D12
 - Dependency:
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
 - Runtime effect of this revision: **none**
 - Product API baseline:
-  [BCK09-API-DEC-01 v0.1](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Contract correction plan:
-  [BCK09-API-CORR-01 v0.1](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.2](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.4 — 2026-08-27
+
+- inherited Accepted ECL03-D12 opaque bounded request-ID semantics from parent
+  ECL-03 v1.3 and removed the semantic ULID conflict;
+- retained Schema/Dart/TypeScript conformance as a blocking
+  BCK09-API-CORR-01 implementation requirement;
+- changed no callable scope, collection, AC count, schema or runtime artifact.
 
 ### v1.3 — 2026-08-27
 
@@ -175,10 +183,11 @@ checks.
 Rules:
 
 - `schemaVersion=1` is mandatory;
-- under the current Approved ECL-03 parent, `requestId` and `idempotencyKey`
-  remain ULIDs for mutations; Booking wire v1 currently permits an opaque
-  bounded ID, so no endpoint may be implemented until `ECL03-D12` reconciles
-  the parent, schema, fixtures and consumers;
+- `requestId` follows Accepted ECL03-D12: exact case-sensitive, non-blank,
+  1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
+- `idempotencyKey` remains a separate opaque required logical-mutation ID;
+- no endpoint may be implemented until BCK09-API-CORR-01 proves identical
+  Schema/Dart/TypeScript/fixture enforcement;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -672,8 +681,8 @@ remain ECL-03H or later gates.
     cross-language golden vectors before runtime.
 45. Callable region and 10/15/30-second deadlines remain Product-selected
     targets until named API Platform, Security and BCK-05 decisions are effective.
-46. The ECL-03 ULID versus Booking-v1 opaque request-ID conflict blocks endpoint
-    work until an explicit `ECL03-D12` parent amendment is accepted.
+46. Accepted ECL03-D12 defines opaque bounded request IDs; endpoint work remains
+    blocked until the correction slice proves identical artifact enforcement.
 47. Booking command schema correction requires separate approval of
     `BCK09-API-CORR-01`; this revision changes no wire or runtime file.
 

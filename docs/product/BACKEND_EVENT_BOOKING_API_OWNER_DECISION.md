@@ -1,10 +1,10 @@
 # Recharge Backend — Event Booking API Baseline Decision
 
 - ID: **BCK09-API-DEC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-27**
 - Status: **Product-selected with controls — specialist acceptance Pending**
-- Decision target: **BCK09-API-REV-01 v0.1 / BCK-09 v1.4 / ECL-03C v1.2**
+- Decision target: **BCK09-API-REV-01 v0.3 / BCK-09 v1.6 / ECL-03C v1.4**
 - Accountable product verdict: **RechargeN / Product owner**
 - Recorded instruction: **`давай` on 2026-08-27, immediately after the
   proposed step “принять рекомендуемые API dispositions”; interpreted only as
@@ -12,9 +12,11 @@
 - Required independent owners: **API Platform, Security/Privacy and BCK-05
   Platform Operations**
 - Technical evidence:
-  [BCK09-API-REV-01 v0.1](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.3](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Contract-correction plan:
-  [BCK09-API-CORR-01 v0.1](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.2](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+- Parent request-ID decision:
+  [ECL03-D12 Accepted](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Runtime effect: **none**
 
 ## 0. Verdict
@@ -24,14 +26,15 @@ baseline for further BCK-09 contract work. This resolves product ambiguity; it
 does **not** impersonate or replace the named API Platform, Security/Privacy or
 BCK-05 Operations decisions.
 
-Consequently:
+Version 0.2 records that ECL03-D12 is now Accepted and the parent semantic
+conflict is closed. Consequently:
 
 - `BCK09-SIG-API` remains `Pending`;
 - BCK-03 `API-DEC-01` and `API-DEC-03` remain open until their named owners
   accept the exact values and evidence;
-- the ECL-03 parent still says `requestId: ULID`, so the selected opaque-ID
-  interpretation is not normative until an explicit parent amendment is
-  accepted;
+- the ECL-03 parent now normatively uses the selected opaque bounded attempt ID;
+- Schema/Dart enforcement of that exact bound remains part of the unapproved
+  correction slice;
 - the Booking v1 JSON Schema/DTO mismatch remains a blocking defect until the
   separately Approved correction slice is implemented and verified;
 - BCK-09 and ECL-03C remain `Review`, and backend runtime remains absent.
@@ -53,16 +56,11 @@ transport attempt; it is not a Booking ID, idempotency key, actor identity or
 authorization fact. A retry of the same logical mutation may use a fresh
 `requestId` only with the same `idempotencyKey` and semantic payload.
 
-This is a Product selection, not a silent rewrite of Approved ECL-03. Before
-contract or runtime implementation, a separately reviewed `ECL03-D12` parent
-amendment must either:
-
-1. accept the opaque bounded identifier consistently across parent prose,
-   schemas, fixtures and consumers; or
-2. reject this selection and migrate all supported producers/fixtures to strict
-   ULID validation through an explicit compatible revision.
-
-Until then, no backend may enforce an undocumented third interpretation.
+This Product selection is now reconciled by Accepted ECL03-D12. It specifies
+an exact case-sensitive string of 1–128 Unicode scalar values with at least one
+scalar outside D12's versioned blank set and no normalization/rewrite.
+Contract artifacts must still be aligned through BCK09-API-CORR-01; no backend
+may enforce a hidden ULID-only or otherwise divergent interpretation.
 
 ### 2.2. Atomic request-attempt binding
 
@@ -143,8 +141,8 @@ accepting `API-DEC-01` or configuring a deployment.
    is authorized by this decision.
 2. The schema/DTO divergence is corrected only through
    `BCK09-API-CORR-01` after explicit slice approval.
-3. The ECL-03 request-ID conflict is corrected only through a separately
-   reviewed parent amendment; lower-level prose cannot override it.
+3. ECL03-D12 is the parent authority for request-ID semantics; lower-level
+   prose or code cannot override it.
 4. API-DEC-01/03 stay Open until their named owners sign the exact baseline or
    record amendments.
 5. All nine BCK-09 specialist signatures stay Pending.
@@ -163,7 +161,7 @@ accepting `API-DEC-01` or configuring a deployment.
 | BCK09-API-TR-02 | Two atomic record kinds in `bookingIdempotency` | Selected for plan | Named API review plus later emulator proof |
 | BCK09-API-TR-03 | Callable v2, 10/15/30-second profile | Selected Product baseline | API Platform + BCK-05 acceptance |
 | BCK09-API-TR-04 | JCS/SHA-256 semantic hash v1 | Selected Product baseline | API Platform + Security acceptance and goldens |
-| BCK09-API-TR-05 | Opaque bounded request ID | Selected but conflicts with parent | Accepted ECL03-D12 amendment |
+| BCK09-API-TR-05 | Opaque bounded request ID | Parent semantic resolved by ECL03-D12 | Implement Schema/DTO fixture parity through BCK09-API-CORR-01 |
 | BCK09-API-TR-06 | Query/TS parity evidence | Not yet available | Approved contract/runtime slice and tests |
 
 ## 5. Acceptance criteria
@@ -171,7 +169,7 @@ accepting `API-DEC-01` or configuring a deployment.
 1. **BCK09-API-DEC-AC-01:** Product selection is distinct from specialist acceptance.
 2. **BCK09-API-DEC-AC-02:** all four selected dispositions are exact and versioned.
 3. **BCK09-API-DEC-AC-03:** request and idempotency identities remain distinct.
-4. **BCK09-API-DEC-AC-04:** the ECL-03 ULID conflict remains explicit until amended.
+4. **BCK09-API-DEC-AC-04:** Accepted ECL03-D12 is the sole Booking-v1 request-ID semantic authority.
 5. **BCK09-API-DEC-AC-05:** the nine-collection boundary is preserved.
 6. **BCK09-API-DEC-AC-06:** logical and attempt records use domain-separated length-prefixed keys.
 7. **BCK09-API-DEC-AC-07:** request reuse conflict is rejected atomically before mutation.
@@ -188,5 +186,5 @@ accepting `API-DEC-01` or configuring a deployment.
 ## 6. Final state
 
 The ambiguity now has one reviewable Product baseline. It is deliberately not
-deployable: formal parent-contract reconciliation, contract correction, named
-specialist decisions and executable evidence remain required.
+deployable: contract artifact correction, named specialist decisions and
+executable evidence remain required.

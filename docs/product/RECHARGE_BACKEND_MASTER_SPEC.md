@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.42**
+- Version: **0.4.43**
 - Date: **2026-08-27**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
@@ -14,6 +14,16 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.43 — 2026-08-27
+
+- registered ECL03-D12 and parent ECL-03 v1.3 as Accepted/Approved docs-only
+  request-ID semantics;
+- reconciled BCK-09 v1.6, ECL-03C v1.4, coverage v1.5 and API review chain
+  without treating semantic acceptance as contract/runtime evidence;
+- kept BCK09-API-CORR-01, named API decisions, specialist signatures,
+  Firebase, deployment and production runtime blocked;
+- advanced BCK-02 factual traceability to v2.4.47.
 
 ### v0.4.42 — 2026-08-27
 
@@ -598,7 +608,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions and executable evidence remain blocked | BCK-06 and BCK-18 Approval до product migration; сохранить compatibility без переноса mock grants |
 | Content/Create | Ten-type local/config-driven Create Hub; BCK-07 v0.2 Review/Present defines the 22/22 publication/revision/provenance contract | No backend authority; OD-03/10/11, missing type/source contracts, Money, Media, Identity and migration gates remain | BCK-07 Approval, then BCK-08; Quick Plan remains outside catalog |
 | Discover | Mock/local query/feed/map/details; BCK-08 v0.2 Review/Present defines 22/22 rebuildable catalog/search/parity/availability boundaries | No source/runtime/index; OD-01/03, typed ten-type projections, Money, quality/cost and migration remain blocked | BCK-08 Approval/G3 after BCK-07 runtime and accepted decisions |
-| Event Booking | ADR 0019 Accepted; BCK-09 v1.5 and BCK-09-PRE v1.4 Review/Present with 22/22 coverage; BCK09-A1 accepted and BCK09-API-DEC-01 Product-selected with controls; BCK09-REV-01 v0.4 / API review v0.2 narrowed Hold; all nine named signatures Pending; ECL-03B contracts/domain Done; ECL-03C v1.3 exact nine-record/47-AC plan Review | Command schema/DTO correction, ECL03-D12, named API-DEC-01/03, TypeScript/query parity, OD-09/11, Identity, Event projection, notification/repair seams and production evidence remain blocked; no authoritative runtime | Approve/execute BCK09-API-CORR-01 and parent amendment, obtain named API verdicts, then complete remaining reviews/dependencies; only afterwards may a separately Approved ECL-03C runtime slice be considered |
+| Event Booking | ADR 0019 Accepted; ECL-03 v1.3/D01–D12 Approved/Accepted; BCK-09 v1.6 and coverage v1.5 Review/Present with 22/22 coverage; BCK09 API target selected; BCK09-REV-01 v0.5 / API review v0.3 narrowed Hold; all nine signatures Pending; ECL-03B contracts/domain Done; ECL-03C v1.4 exact nine-collection/47-AC plan Review | D12 semantics are resolved, but command/request-ID Schema/DTO correction, named API-DEC-01/03, TypeScript/query parity, OD-09/11, Identity, Event projection, effects/repair seams and production evidence remain blocked; no authoritative runtime | Approve/execute BCK09-API-CORR-01, obtain named API verdicts, then complete remaining reviews/dependencies; only afterwards may a separately Approved ECL-03C runtime slice be considered |
 | Media | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime |
 | Notifications | Local secure-storage inbox/mark-read/string routes; BCK-13 v0.2 Review/Present defines 22/22 inbox/preferences/registration/delivery boundaries | No server inbox, FCM/email, token registry or worker; OD-02/09/10 and ten BCK13 decisions unresolved | BCK-13 Approval and R4 gate; push stays a hint and email stays disabled |
 | Admin/Support | Local mock Admin experience preview and Route moderation/safety UI; BCK-19 v0.2 Review/Present defines 22/22 case/read-audit/propose-approve-execute boundaries | No dedicated staff identity, server case, reveal audit, repair registry/command, RUN-03 or privileged runtime | BCK-19 Approval; implement bounded domain commands, then build/drill RUN-03 before persistent stage |
@@ -1380,8 +1390,8 @@ Approval требует reconciliation report и sign-off владельцев, 
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4.46 (Approved v2.4 semantics), BCK-02-A1
-    Draft v1.0 и BCK-09 Review v1.5 представлены с их фактическими
+46. **BCK-01-AC-46:** BCK-02 v2.4.47 (Approved v2.4 semantics), BCK-02-A1
+    Draft v1.0 и BCK-09 Review v1.6 представлены с их фактическими
     status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
     architecture authority, implementation status и delivery coordination.

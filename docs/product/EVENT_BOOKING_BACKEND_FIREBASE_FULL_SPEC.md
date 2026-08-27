@@ -1,7 +1,7 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.5**
+- Версия: **1.6**
 - Дата: **2026-08-27**
 - Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
@@ -10,27 +10,35 @@
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
 - Канон: [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md)
-- Parent slice: [ECL-03 v1.2](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
+- Parent slice: [ECL-03 v1.3](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - Architecture: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accepted decisions:
-  [ECL-03 D01–D11](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
+  [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.3](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.4](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.4](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.5](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
-  [BCK09-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
+  [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.4 — API narrowed Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.5 — API narrowed Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.2 — Product baseline selected; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.3 — D12 reconciled; Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
-  [BCK09-API-DEC-01 v0.1 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.2 — selected with controls](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Contract correction plan:
-  [BCK09-API-CORR-01 v0.1 — Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.2 — Review](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.6 — 2026-08-27
+
+- inherited Accepted ECL03-D12 and parent ECL-03 v1.3, replacing the Booking-v1
+  request-ID ULID conflict with exact opaque bounded semantics;
+- kept Schema/Dart/TypeScript conformance inside unapproved
+  BCK09-API-CORR-01 v0.2 and retained the API specialist Hold;
+- changed no target AC count, schema, DTO, backend, Firebase, mobile or runtime.
 
 ### v1.5 — 2026-08-27
 
@@ -826,10 +834,10 @@ cross-language unsafe values fail before hashing. Dart/TypeScript golden
 vectors are mandatory. API Platform + Security acceptance of `API-DEC-03`
 remains Pending.
 
-The Product-selected wire target treats `requestId` as opaque bounded client
-input, but Approved ECL-03 still specifies ULID. No endpoint may be implemented
-until `ECL03-D12` chooses one consistent rule across parent, schema, fixtures
-and consumers.
+Accepted ECL03-D12 treats `requestId` as an exact case-sensitive, non-blank
+string of 1–128 Unicode scalar values, opaque and not normalized/interpreted as
+ULID. No endpoint may be implemented until BCK09-API-CORR-01 proves identical
+Schema/Dart/TypeScript/fixture enforcement.
 
 ## 14. Workers and scheduling
 
@@ -1363,15 +1371,15 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
     cross-language golden vectors до runtime.
 83. Callable v2 и 10/15/30-second deadline profile остаются Product-selected,
     пока API Platform/BCK-05 не примут API-DEC-01.
-84. ECL-03 ULID и Booking-v1 opaque request-ID reconciled только отдельным
-    Accepted `ECL03-D12`; до этого endpoint implementation заблокирован.
+84. Accepted ECL03-D12 является единственным Booking-v1 request-ID semantic
+    authority; artifact enforcement остаётся блокером до correction evidence.
 85. Command schema/DTO divergence исправляется только через отдельно Approved
     BCK09-API-CORR-01 и не скрывается backend-only validation.
 
 ## 28. Definition of Ready для начала реализации
 
 - этот master-spec и exact ECL-03C plan явно Approved;
-- BCK09-API-CORR-01 implemented/verified и `ECL03-D12` Accepted;
+- BCK09-API-CORR-01 implemented/verified against Accepted `ECL03-D12`;
 - BCK-03 API-DEC-01/03 приняты их named owners с exact evidence;
 - отдельный post-stabilization backend stage разрешён;
 - production Identity/account/capability authority имеет Approved contract и
@@ -1390,7 +1398,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 ### Документ Done
 
 - все ссылки, headings, code fences, таблицы и AC проверены;
-- документ не противоречит ADR 0019, D01–D11 и parent ECL-03;
+- документ не противоречит ADR 0019, D01–D12 и parent ECL-03;
 - runtime/app/backend не изменён;
 - product owner явно принял документ.
 
@@ -1414,9 +1422,9 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 
 | Stage | Current evidence | Status | Runtime authority |
 |---|---|---|---|
-| ECL-03A | ADR 0019, parent v1.2, D01–D11 | Accepted/Approved docs | None |
+| ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Exact transaction-core plan v1.3 | Review | Not authorized |
+| ECL-03C | Exact transaction-core plan v1.4 | Review | Not authorized |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1434,7 +1442,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.3 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.4 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
 | BCK09-OD-02 | Product baseline selected; specialist decision Open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; validate BCK09-API-DEC-01, close API-DEC-01/03 and prove contract/hash fixture parity | No mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
@@ -1445,7 +1453,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 | BCK09-OD-09 | Accepted — repair seam; runtime deferred | Admin Operations + Booking + Security | BCK-19 owns case/proposal/approval; BCK-09 executes an invariant-safe command | Drifted pool blocked; no console/manual repair |
 | BCK09-OD-10 | Accepted — staged sequence | Booking + Product + Mobile | ECL-03C → D → E → F → G → H; every stage remains bounded | No stage inherits executable authority |
 
-Accepted ECL03-D01–D11 are not reopened by this table. BCK09-DEC-01 v0.2
+Accepted ECL03-D01–D12 are not reopened by this table. BCK09-DEC-01 v0.3
 records the Product disposition: six decisions are Accepted only at their
 stated design boundaries and four remain Deferred/Open. It supplies neither
 independent specialist verdicts nor executable integration, ECL-03C runtime or

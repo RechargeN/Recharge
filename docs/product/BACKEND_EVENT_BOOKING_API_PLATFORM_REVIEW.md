@@ -1,17 +1,17 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-08-27**
 - Status: **Product baseline selected — Hold for contract correction and named sign-off**
-- Target: **BCK-09 v1.5 / ECL-03C v1.3 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.4](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Target: **BCK-09 v1.6 / ECL-03C v1.4 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.5](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - Governing API draft: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **none**
 - Product API decision:
-  [BCK09-API-DEC-01 v0.1](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+  [BCK09-API-DEC-01 v0.2](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Contract correction plan:
-  [BCK09-API-CORR-01 v0.1](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+  [BCK09-API-CORR-01 v0.2](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 
 ## 0. Verdict
 
@@ -20,8 +20,8 @@ request binding, semantic hashing, transport/deadlines and request-ID format.
 The existing Booking v1 Dart contract tests are green and the target
 preserves the committed result union, split request/idempotency identity,
 unknown-outcome semantics and fail-closed forward compatibility. A named API
-Platform reviewer must not sign yet because the command schema correction,
-formal ECL-03 request-ID amendment, named API/Security/Operations decisions and
+Platform reviewer must not sign yet because the command/request-ID schema
+correction, named API/Security/Operations decisions and
 executable parity evidence still block an API.
 
 This is a technical preparation record, not an independent specialist
@@ -65,10 +65,10 @@ consumer is stricter than the document declared to be the sole wire source.
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
 | `BCK09-API-TR-01` | Blocking | Fail | `booking_command.schema.json` lists a shared payload property bag but does not encode the command-specific required/allowed matrix implemented by Dart | Make the schema a true closed discriminated union or explicitly replace the “sole wire source” claim with a second normative semantic matrix; add cross-language invalid fixtures |
-| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.3 now defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Named API review and later atomicity/contention evidence remain required |
+| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.4 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Named API review and later atomicity/contention evidence remain required |
 | `BCK09-API-TR-03` | Product disposition selected | Specialist decision Open | Callable v2, `europe-west1` and 10/15/30-second deadlines are the target | API Platform + BCK-05 must accept API-DEC-01 before endpoint scaffold |
 | `BCK09-API-TR-04` | Product disposition selected | Specialist decision Open | `booking_semantic_hash_v1` selects RFC 8785 JCS UTF-8 plus lowercase SHA-256 and exact projection | API Platform + Security must accept API-DEC-03 and golden vectors before runtime |
-| `BCK09-API-TR-05` | Product disposition selected | Parent conflict Open | Opaque bounded client-generated `requestId` is selected, but Approved ECL-03 still says ULID | Accept `ECL03-D12` across parent/schema/fixtures/consumers; no hidden backend-only rule |
+| `BCK09-API-TR-05` | Parent semantic resolved | Artifact conformance Pending | ECL03-D12 accepts exact opaque bounded request IDs and removes the parent ULID rule | Implement identical Schema/Dart constraints and fixtures through BCK09-API-CORR-01; no hidden backend-only rule |
 | `BCK09-API-TR-06` | Runtime evidence | Pending | Query/page/availability schemas and TypeScript consumer do not exist yet | Keep ECL-03C runtime unauthorized until an Approved contract slice creates them and proves Dart/TypeScript parity |
 
 ## 4. Passing checks
@@ -196,7 +196,8 @@ after:
 2. TR-02 has an exact atomic record/key/retention contract;
 3. API-DEC-01 and API-DEC-03 are Accepted or explicitly Deferred with this
    signature remaining Pending;
-4. TR-05 has an owner decision consistent across ECL-03, schema and fixtures;
+4. TR-05's Accepted ECL03-D12 semantics are implemented consistently across
+   schema, Dart and fixtures;
 5. no unverified error value or transport envelope is introduced;
 6. required contract/parity/emulator evidence remains a later activation gate.
 
@@ -223,6 +224,7 @@ after:
 
 BCK-09 remains Review, ECL-03C remains unapproved for implementation and
 `BCK09-SIG-API` remains Pending. Product ambiguity is closed by
-`BCK09-API-DEC-01`, but `BCK09-API-CORR-01`, `ECL03-D12`, named API-DEC-01/03
-decisions and parity evidence remain blockers. Contract/schema/runtime edits
+`BCK09-API-DEC-01`, and ECL03-D12 closes the parent semantic conflict. However,
+`BCK09-API-CORR-01`, named API-DEC-01/03 decisions and parity evidence remain
+blockers. Contract/schema/runtime edits
 require their own Approved slice.
