@@ -35,7 +35,8 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            java_version: 21.0.12+8
+            # setup-java registry alias; resolves to the locked Temurin 21.0.12+8 build.
+            java_version: 21.0.12+8.0.LTS
           - os: windows-2025
             # setup-java exposes the same Temurin build with its Windows LTS suffix.
             java_version: 21.0.12+8.0.LTS
