@@ -9,28 +9,37 @@ void main() {
   final forward = readJsonObject('$bookingSchemaRoot/fixtures/forward.json');
   final schemaValidator = BookingSchemaFixtureValidator();
 
+  void expectSchemaValid(String schema, Map<String, Object?> value) {
+    expect(
+      schemaValidator.validateInstance(schema, value),
+      isEmpty,
+      reason: '$schema: $value',
+    );
+  }
+
   test('valid shared fixtures round-trip without semantic loss', () {
     for (final raw in readObjectList(valid, 'bookings')) {
+      expectSchemaValid('booking.schema.json', raw);
       expect(BookingDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'holds')) {
+      expectSchemaValid('booking_hold.schema.json', raw);
       expect(BookingHoldDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'policies')) {
+      expectSchemaValid('booking_policy.schema.json', raw);
       expect(BookingPolicyDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'commands')) {
-      expect(
-        schemaValidator.validateInstance('booking_command.schema.json', raw),
-        isEmpty,
-        reason: '${raw['commandType']} ${raw['requestId']}',
-      );
+      expectSchemaValid('booking_command.schema.json', raw);
       expect(BookingCommandDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'errors')) {
+      expectSchemaValid('booking_error.schema.json', raw);
       expect(BookingErrorDto.fromJson(raw).toJson(), equals(raw));
     }
     for (final raw in readObjectList(valid, 'results')) {
+      expectSchemaValid('booking_result.schema.json', raw);
       expect(BookingResultDto.fromJson(raw).toJson(), equals(raw));
     }
   });

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_query.schema.json",
+  "title": "Recharge Booking query request union v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "payload": { "$ref": "#/$defs/getMyBookingPayload" }
+      },
+      "required": ["schemaVersion", "queryType", "requestId", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "listMyBookings" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "payload": { "$ref": "#/$defs/listMyBookingsPayload" }
+      },
+      "required": ["schemaVersion", "queryType", "requestId", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getEventAvailability" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "payload": { "$ref": "#/$defs/getEventAvailabilityPayload" }
+      },
+      "required": ["schemaVersion", "queryType", "requestId", "payload"]
+    }
+  ],
+  "$defs": {
+    "getMyBookingPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "bookingId": { "$ref": "common.schema.json#/$defs/id" } },
+      "required": ["bookingId"]
+    },
+    "listMyBookingsPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pageSize": { "$ref": "common.schema.json#/$defs/pageSize" },
+        "cursor": { "$ref": "common.schema.json#/$defs/cursor" },
+        "stateFilter": { "$ref": "common.schema.json#/$defs/bookingState" }
+      }
+    },
+    "getEventAvailabilityPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" }
+      },
+      "required": ["eventId", "occurrenceId"]
+    }
+  }
+}

@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_availability.schema.json",
+  "title": "Recharge non-reserving Booking availability response v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getEventAvailability" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "succeeded" },
+        "availability": { "$ref": "#/$defs/availability" }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "availability"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getEventAvailability" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "unsupportedContract" },
+        "unsupportedPayload": {
+          "$ref": "booking_read.schema.json#/$defs/boundedOpaquePayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "unsupportedPayload"
+      ]
+    }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": {
+          "enum": [
+            "available",
+            "limited",
+            "soldOut",
+            "closed",
+            "stale",
+            "unknown",
+            "unsupported"
+          ]
+        },
+        "authority": { "enum": ["authoritative", "nonAuthoritative"] },
+        "capacityMode": { "enum": ["finite", "unlimited", "notApplicable"] },
+        "ledgerRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "availableUnits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reasonCode": {
+          "enum": [
+            "source_stale",
+            "source_unavailable",
+            "flow_unsupported",
+            "channel_unsupported",
+            "temporarily_unavailable"
+          ]
+        }
+      }
+    },
+    "availability": {
+      "oneOf": [
+        { "$ref": "#/$defs/finiteAvailable" },
+        { "$ref": "#/$defs/finiteLimited" },
+        { "$ref": "#/$defs/finiteSoldOut" },
+        { "$ref": "#/$defs/unlimitedAvailable" },
+        { "$ref": "#/$defs/closed" },
+        { "$ref": "#/$defs/stale" },
+        { "$ref": "#/$defs/unknownSource" },
+        { "$ref": "#/$defs/unknownTemporary" },
+        { "$ref": "#/$defs/unsupportedFlow" },
+        { "$ref": "#/$defs/unsupportedChannel" }
+      ]
+    },
+    "finiteAvailable": { "$ref": "#/$defs/finiteAvailableShape" },
+    "finiteLimited": { "$ref": "#/$defs/finiteLimitedShape" },
+    "finiteSoldOut": { "$ref": "#/$defs/finiteSoldOutShape" },
+    "unlimitedAvailable": { "$ref": "#/$defs/unlimitedAvailableShape" },
+    "closed": { "$ref": "#/$defs/closedShape" },
+    "stale": { "$ref": "#/$defs/staleShape" },
+    "unknownSource": { "$ref": "#/$defs/unknownSourceShape" },
+    "unknownTemporary": { "$ref": "#/$defs/unknownTemporaryShape" },
+    "unsupportedFlow": { "$ref": "#/$defs/unsupportedFlowShape" },
+    "unsupportedChannel": { "$ref": "#/$defs/unsupportedChannelShape" },
+    "finiteAvailableShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "available" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "finite" },
+        "ledgerRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "availableUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "ledgerRevision",
+        "availableUnits"
+      ]
+    },
+    "finiteLimitedShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "limited" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "finite" },
+        "ledgerRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "availableUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "ledgerRevision",
+        "availableUnits"
+      ]
+    },
+    "finiteSoldOutShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "soldOut" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "finite" },
+        "ledgerRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "availableUnits": { "const": 0 }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "ledgerRevision",
+        "availableUnits"
+      ]
+    },
+    "unlimitedAvailableShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "available" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "unlimited" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode"
+      ]
+    },
+    "closedShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "closed" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "notApplicable" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode"
+      ]
+    },
+    "staleShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "stale" },
+        "authority": { "const": "nonAuthoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "reasonCode": { "const": "source_stale" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "reasonCode"
+      ]
+    },
+    "unknownSourceShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "unknown" },
+        "authority": { "const": "nonAuthoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "reasonCode": { "const": "source_unavailable" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "reasonCode"
+      ]
+    },
+    "unknownTemporaryShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "unknown" },
+        "authority": { "const": "nonAuthoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "reasonCode": { "const": "temporarily_unavailable" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "reasonCode"
+      ]
+    },
+    "unsupportedFlowShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "unsupported" },
+        "authority": { "const": "nonAuthoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "reasonCode": { "const": "flow_unsupported" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "reasonCode"
+      ]
+    },
+    "unsupportedChannelShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "unsupported" },
+        "authority": { "const": "nonAuthoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "reasonCode": { "const": "channel_unsupported" }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "reasonCode"
+      ]
+    }
+  }
+}

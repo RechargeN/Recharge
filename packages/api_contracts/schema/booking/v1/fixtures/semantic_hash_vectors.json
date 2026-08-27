@@ -1,0 +1,227 @@
+{
+  "vectors": [
+    {
+      "id": "key-order-a",
+      "group": "key-order-equivalent",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"attempt-a\",\"idempotencyKey\":\"key-a\",\"payload\":{\"participantUnits\":1,\"occurrenceId\":\"occurrence-1\"}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "payload": { "participantUnits": 1, "occurrenceId": "occurrence-1" }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "782f0e4a319a21e0d66f94cab9fe12198994ccdcd79af8de084e403edfa2ef8d"
+    },
+    {
+      "id": "key-order-b-request-change",
+      "group": "key-order-equivalent",
+      "rawCommandJson": "{\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1},\"idempotencyKey\":\"key-a\",\"requestId\":\"attempt-b\",\"commandType\":\"createBooking\",\"schemaVersion\":1}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "782f0e4a319a21e0d66f94cab9fe12198994ccdcd79af8de084e403edfa2ef8d"
+    },
+    {
+      "id": "nested-unicode-nfc-literal",
+      "group": "nfc-literal-escaped",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"unicode-1\",\"idempotencyKey\":\"unicode-key\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1,\"applicationFields\":{\"name\":\"é😀\",\"answers\":[true,{\"rank\":2}]}}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+        "payload": {
+          "occurrenceId": "occurrence-1",
+          "participantUnits": 1,
+          "applicationFields": {
+            "name": "é😀",
+            "answers": [true, { "rank": 2 }]
+          }
+        }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226170706c69636174696f6e4669656c6473223a7b22616e7377657273223a5b747275652c7b2272616e6b223a327d5d2c226e616d65223a22c3a9f09f9880227d2c226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722df09f9880222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "9205cd69dd8e39a97ae0d0fa61928e05a6dced45f6f692762ccd129bc88c6e03"
+    },
+    {
+      "id": "nested-unicode-nfc-escaped",
+      "group": "nfc-literal-escaped",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"unicode-2\",\"idempotencyKey\":\"unicode-key\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1,\"applicationFields\":{\"name\":\"\\u00e9\\ud83d\\ude00\",\"answers\":[true,{\"rank\":2}]}}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+        "payload": {
+          "occurrenceId": "occurrence-1",
+          "participantUnits": 1,
+          "applicationFields": {
+            "name": "é😀",
+            "answers": [true, { "rank": 2 }]
+          }
+        }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226170706c69636174696f6e4669656c6473223a7b22616e7377657273223a5b747275652c7b2272616e6b223a327d5d2c226e616d65223a22c3a9f09f9880227d2c226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722df09f9880222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "9205cd69dd8e39a97ae0d0fa61928e05a6dced45f6f692762ccd129bc88c6e03"
+    },
+    {
+      "id": "unicode-nfd-distinct",
+      "group": "unicode-normalization-distinct",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"unicode-3\",\"idempotencyKey\":\"unicode-key\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1,\"applicationFields\":{\"name\":\"e\\u0301😀\"}}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-😀" },
+        "payload": {
+          "occurrenceId": "occurrence-1",
+          "participantUnits": 1,
+          "applicationFields": { "name": "é😀" }
+        }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226170706c69636174696f6e4669656c6473223a7b226e616d65223a2265cc81f09f9880227d2c226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722df09f9880222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "98240df2b62a18930f39ad6427d9273d857a9eaec5a4ffef58f3e6aac5702fb7"
+    },
+    {
+      "id": "absent-revisions",
+      "group": "revision-absence",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"joinWaitlist\",\"requestId\":\"wait-1\",\"idempotencyKey\":\"wait-key\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"inventoryPoolId\":\"pool-1\",\"channel\":\"onsite\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "joinWaitlist",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "payload": {
+          "occurrenceId": "occurrence-1",
+          "inventoryPoolId": "pool-1",
+          "channel": "onsite",
+          "participantUnits": 1
+        }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a226a6f696e576169746c697374222c227061796c6f6164223a7b226368616e6e656c223a226f6e73697465222c22696e76656e746f7279506f6f6c4964223a22706f6f6c2d31222c226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "a968fa25685f6d365103ab76e948b864ab46a9b67c8a05f13c0691c62a629e81"
+    },
+    {
+      "id": "booking-revision-7",
+      "group": "booking-revision-difference",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"cancelBooking\",\"requestId\":\"cancel-7\",\"idempotencyKey\":\"cancel-key\",\"expectedBookingRevision\":7,\"payload\":{\"bookingId\":\"booking-1\"}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "cancelBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "expectedBookingRevision": 7,
+        "payload": { "bookingId": "booking-1" }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a2263616e63656c426f6f6b696e67222c226578706563746564426f6f6b696e675265766973696f6e223a372c227061796c6f6164223a7b22626f6f6b696e674964223a22626f6f6b696e672d31227d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "a9d7ef4f5d2efc0d65b12a068200e0ae54d4049d9ee767a11da78d825b48c236"
+    },
+    {
+      "id": "booking-revision-8",
+      "group": "booking-revision-difference",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"cancelBooking\",\"requestId\":\"cancel-8\",\"idempotencyKey\":\"cancel-key\",\"expectedBookingRevision\":8,\"payload\":{\"bookingId\":\"booking-1\"}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "cancelBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "expectedBookingRevision": 8,
+        "payload": { "bookingId": "booking-1" }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a2263616e63656c426f6f6b696e67222c226578706563746564426f6f6b696e675265766973696f6e223a382c227061796c6f6164223a7b22626f6f6b696e674964223a22626f6f6b696e672d31227d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "a310bb466b86b349e45449f99c19c90f87ef75dda4709cbcc5ab0a9731acbb57"
+    },
+    {
+      "id": "event-revision-11",
+      "group": "event-revision-difference",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"event-11\",\"idempotencyKey\":\"event-key\",\"occurredAgainstEventRevision\":11,\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "occurredAgainstEventRevision": 11,
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c226f63637572726564416761696e73744576656e745265766973696f6e223a31312c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "bfc45ec643d15ae5b13ee17251bdb9febdccc15d2ad20056b1dbc014719ad56a"
+    },
+    {
+      "id": "event-revision-12",
+      "group": "event-revision-difference",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"event-12\",\"idempotencyKey\":\"event-key\",\"occurredAgainstEventRevision\":12,\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "occurredAgainstEventRevision": 12,
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c226f63637572726564416761696e73744576656e745265766973696f6e223a31322c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "2a695d13bdec3479089be1f15cc96b3ba5ca02b7b9ad5b82524c0ab53251c07c"
+    },
+    {
+      "id": "safe-max-equivalent-number",
+      "group": "safe-integer-boundary",
+      "rawCommandJson": "{\"schemaVersion\":1.0,\"commandType\":\"createBooking\",\"requestId\":\"max\",\"idempotencyKey\":\"max-key\",\"occurredAgainstEventRevision\":9007199254740991,\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1e0}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "occurredAgainstEventRevision": 9007199254740991,
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c226f63637572726564416761696e73744576656e745265766973696f6e223a393030373139393235343734303939312c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "a425fa7be8eaf3ce4399685e4143f4cd787637dbacefa5b1e57ba3fc5c6ff688"
+    },
+    {
+      "id": "idempotency-a",
+      "group": "idempotency-excluded",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"idem-a\",\"idempotencyKey\":\"logical-a\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "782f0e4a319a21e0d66f94cab9fe12198994ccdcd79af8de084e403edfa2ef8d"
+    },
+    {
+      "id": "idempotency-b",
+      "group": "idempotency-excluded",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"idem-b\",\"idempotencyKey\":\"logical-b\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" },
+      "expectedProjection": {
+        "algorithmVersion": "booking_semantic_hash_v1",
+        "commandType": "createBooking",
+        "commandSchemaVersion": 1,
+        "resolvedActorScope": { "kind": "user", "id": "user-1" },
+        "payload": { "occurrenceId": "occurrence-1", "participantUnits": 1 }
+      },
+      "expectedCanonicalHex": "7b22616c676f726974686d56657273696f6e223a22626f6f6b696e675f73656d616e7469635f686173685f7631222c22636f6d6d616e64536368656d6156657273696f6e223a312c22636f6d6d616e6454797065223a22637265617465426f6f6b696e67222c227061796c6f6164223a7b226f6363757272656e63654964223a226f6363757272656e63652d31222c227061727469636970616e74556e697473223a317d2c227265736f6c7665644163746f7253636f7065223a7b226964223a22757365722d31222c226b696e64223a2275736572227d7d",
+      "expectedDigest": "782f0e4a319a21e0d66f94cab9fe12198994ccdcd79af8de084e403edfa2ef8d"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "cases": [
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "newer request schema fails closed",
+      "value": {
+        "schemaVersion": 2,
+        "queryType": "getMyBooking",
+        "requestId": "future-1",
+        "payload": { "bookingId": "booking-1" }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "new query type fails closed",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getBookingInsights",
+        "requestId": "future-2",
+        "payload": {}
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "new availability status fails closed",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "future-3",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "queued",
+          "authority": "nonAuthoritative",
+          "capacityMode": "notApplicable"
+        }
+      }
+    }
+  ]
+}

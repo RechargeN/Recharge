@@ -1,0 +1,170 @@
+{
+  "cases": [
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "actor injection",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getMyBooking",
+        "requestId": "q1",
+        "payload": { "bookingId": "booking-1", "userId": "user-1" }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "unknown query",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "searchBookings",
+        "requestId": "q2",
+        "payload": {}
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "null cursor",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "listMyBookings",
+        "requestId": "q3",
+        "payload": { "cursor": null }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "page size above maximum",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "listMyBookings",
+        "requestId": "q4",
+        "payload": { "pageSize": 51 }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "cursor control character",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "listMyBookings",
+        "requestId": "q5",
+        "payload": { "cursor": "bad\nvalue" }
+      }
+    },
+    {
+      "schema": "booking_read.schema.json",
+      "reason": "notFound cannot carry booking",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getMyBooking",
+        "requestId": "r1",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "notFound",
+        "booking": {}
+      }
+    },
+    {
+      "schema": "booking_page.schema.json",
+      "reason": "next cursor cannot be null",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "listMyBookings",
+        "requestId": "p1",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "page": {
+          "items": [],
+          "nextCursor": null,
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "sort": "createdAtDescIdDesc",
+          "consistency": "liveKeyset"
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "sold out must be zero",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "a1",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "soldOut",
+          "authority": "authoritative",
+          "capacityMode": "finite",
+          "ledgerRevision": 1,
+          "availableUnits": 1
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "unlimited cannot expose units",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "a2",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "available",
+          "authority": "authoritative",
+          "capacityMode": "unlimited",
+          "availableUnits": 999
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "stale cannot expose reservable units",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "a3",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "stale",
+          "authority": "nonAuthoritative",
+          "capacityMode": "notApplicable",
+          "reasonCode": "source_stale",
+          "availableUnits": 1
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "wrong reason for unknown",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "a4",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "unknown",
+          "authority": "nonAuthoritative",
+          "capacityMode": "notApplicable",
+          "reasonCode": "flow_unsupported"
+        }
+      }
+    }
+  ]
+}

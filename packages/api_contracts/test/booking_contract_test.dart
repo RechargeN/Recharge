@@ -12,9 +12,13 @@ void main() {
       'booking_command.schema.json',
       'booking_result.schema.json',
       'booking_error.schema.json',
+      'booking_query.schema.json',
+      'booking_read.schema.json',
+      'booking_page.schema.json',
+      'booking_availability.schema.json',
     ];
 
-    test('all six roots use Draft 2020-12 and the bounded vocabulary', () {
+    test('all ten roots use Draft 2020-12 and the bounded vocabulary', () {
       final validator = BookingSchemaFixtureValidator();
       for (final fileName in rootSchemas) {
         final schema = readJsonObject('$bookingSchemaRoot/$fileName');
@@ -24,7 +28,13 @@ void main() {
           reason: fileName,
         );
         expect(schema[r'$id'], contains('/booking/v1/'));
-        if (fileName == 'booking_command.schema.json') {
+        if ({
+          'booking_command.schema.json',
+          'booking_query.schema.json',
+          'booking_read.schema.json',
+          'booking_page.schema.json',
+          'booking_availability.schema.json',
+        }.contains(fileName)) {
           expect(schema['oneOf'], isA<List<Object?>>());
         } else {
           expect(
@@ -63,6 +73,17 @@ void main() {
         'idempotency_conflict',
         'unsupported_schema',
       }),
+    );
+  });
+
+  test('safe revisions reject values above the cross-language maximum', () {
+    expect(
+      requireNonNegativeInt(bookingMaxSafeInteger, 'revision'),
+      bookingMaxSafeInteger,
+    );
+    expect(
+      () => requireNonNegativeInt(bookingMaxSafeInteger + 1, 'revision'),
+      throwsFormatException,
     );
   });
 

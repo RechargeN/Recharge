@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "test:unit": "npm run build --silent && node lib/test/unit/r0_toolchain_probe.test.js",
-    "test:contract": "npm run build --silent && node lib/test/contract/booking_fixture_parity.test.js",
+    "test:contract": "npm run build --silent && node --test lib/test/contract/booking_fixture_parity.test.js lib/test/contract/booking_query_parity.test.js lib/test/contract/booking_semantic_hash.test.js",
     "test:emulator:inside": "npm run build --silent && node lib/test/emulator/r0_emulator_isolation.test.js && node lib/test/emulator/rules_default_deny.test.js",
     "test:emulator": "node ../scripts/run-emulator-tests.mjs",
     "verify:generated": "node ../scripts/verify-generated-clean.mjs",
@@ -30,6 +30,8 @@
   },
   "devDependencies": {
     "@types/node": "22.20.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "eslint": "9.39.5",
     "firebase-tools": "15.28.1",
     "prettier": "3.9.6",

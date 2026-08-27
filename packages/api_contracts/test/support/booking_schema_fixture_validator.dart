@@ -37,6 +37,7 @@ class BookingSchemaFixtureValidator {
     'propertyNames',
     'required',
     'dependentRequired',
+    'default',
     'oneOf',
     'enum',
     'const',
@@ -45,12 +46,22 @@ class BookingSchemaFixtureValidator {
     'minLength',
     'maxLength',
     'maxItems',
+    'maxProperties',
     'items',
     'format',
     'pattern',
   };
 
   final Map<String, Map<String, Object?>> _documents = {};
+
+  List<String> validateBoundedOpaquePayload(Object? value) {
+    final failures = <String>[];
+    _validateOpaqueValue(value, r'$', failures, 0);
+    if (utf8.encode(jsonEncode(value)).length > 4096) {
+      failures.add(r'$ exceeds 4096 canonical UTF-8 bytes');
+    }
+    return failures;
+  }
 
   List<String> validateSchemaDocument(Map<String, Object?> schema) {
     final failures = <String>[];
@@ -238,6 +249,10 @@ class BookingSchemaFixtureValidator {
 
     if (value is Map) {
       final object = value.cast<String, Object?>();
+      final maximumProperties = schema['maxProperties'];
+      if (maximumProperties is int && object.length > maximumProperties) {
+        failures.add('$path has more than $maximumProperties properties');
+      }
       final required = schema['required'];
       if (required is List) {
         for (final field in required.cast<String>()) {
@@ -328,6 +343,61 @@ class BookingSchemaFixtureValidator {
       count++;
     }
     return count;
+  }
+
+  void _validateOpaqueValue(
+    Object? value,
+    String path,
+    List<String> failures,
+    int depth,
+  ) {
+    if (depth > 8) {
+      failures.add('$path exceeds opaque depth 8');
+      return;
+    }
+    if (value == null || value is bool) return;
+    if (value is int) {
+      if (value < -9007199254740991 || value > 9007199254740991) {
+        failures.add('$path is outside the safe integer range');
+      }
+      return;
+    }
+    if (value is num) {
+      failures.add('$path must be a safe integer');
+      return;
+    }
+    if (value is String) {
+      final scalars = _unicodeScalarCount(value);
+      if (scalars == null || scalars > 512) {
+        failures.add('$path exceeds 512 Unicode scalars or is malformed');
+      }
+      return;
+    }
+    if (value is List) {
+      if (value.length > 32) failures.add('$path exceeds 32 items');
+      for (var index = 0; index < value.length; index++) {
+        _validateOpaqueValue(
+          value[index],
+          '$path[$index]',
+          failures,
+          depth + 1,
+        );
+      }
+      return;
+    }
+    if (value is Map) {
+      if (value.length > 16) failures.add('$path exceeds 16 properties');
+      for (final entry in value.entries) {
+        _validateOpaqueValue(
+          entry.value,
+          '$path.${entry.key}',
+          failures,
+          depth + 1,
+        );
+      }
+      return;
+    }
+    failures.add('$path has an unsupported value type');
   }
 
   Map<String, Object?> _loadDocument(String file) => _documents.putIfAbsent(

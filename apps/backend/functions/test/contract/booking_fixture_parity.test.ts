@@ -1,72 +1,74 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { test } from 'node:test';
 
-const bookingContractRoot = path.resolve(
-  process.cwd(),
-  '..',
-  '..',
-  '..',
-  'packages',
-  'api_contracts',
-  'schema',
-  'booking',
-  'v1',
-);
+import {
+  asRecord,
+  bookingSchemaFiles,
+  createBookingSchemaRegistry,
+  readBookingJson,
+} from '../support/booking_schema_registry.js';
 
-const schemaFiles = [
-  'common.schema.json',
-  'booking.schema.json',
-  'booking_hold.schema.json',
-  'booking_policy.schema.json',
-  'booking_command.schema.json',
-  'booking_result.schema.json',
-  'booking_error.schema.json',
-] as const;
+const validGroups = {
+  bookings: 'booking.schema.json',
+  holds: 'booking_hold.schema.json',
+  policies: 'booking_policy.schema.json',
+  commands: 'booking_command.schema.json',
+  errors: 'booking_error.schema.json',
+  results: 'booking_result.schema.json',
+} as const;
 
-async function readJson(filePath: string): Promise<unknown> {
-  return JSON.parse(await readFile(filePath, 'utf8')) as unknown;
-}
+void test('all canonical Booking v1 schema ids are unique and registered', async () => {
+  const registry = await createBookingSchemaRegistry();
+  assert.equal(registry.ids.length, bookingSchemaFiles.length);
+  assert.equal(new Set(registry.ids).size, bookingSchemaFiles.length);
+  for (const fileName of bookingSchemaFiles)
+    assert.equal(typeof registry.validator(fileName), 'function');
+});
 
-function asRecord(value: unknown): Record<string, unknown> {
-  assert.equal(typeof value, 'object');
-  assert.notEqual(value, null);
-  assert.equal(Array.isArray(value), false);
-  return value as Record<string, unknown>;
-}
-
-void test('all canonical Booking v1 schemas remain parseable and version-owned', async () => {
-  for (const fileName of schemaFiles) {
-    const schema = asRecord(await readJson(path.join(bookingContractRoot, fileName)));
-    assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema');
-    assert.match(String(schema.$id), /^https:\/\/recharge\.app\/schemas\/booking\/v1\//u);
+void test('existing valid fixtures pass actual Draft 2020-12 validation', async () => {
+  const registry = await createBookingSchemaRegistry();
+  const container = asRecord(await readBookingJson('fixtures/valid.json'));
+  for (const [group, schema] of Object.entries(validGroups)) {
+    const values = container[group];
+    assert.ok(Array.isArray(values), group);
+    const validate = registry.validator(schema);
+    for (const value of values)
+      assert.equal(validate(value), true, JSON.stringify(validate.errors));
   }
 });
 
-void test('valid, invalid and forward fixture containers remain readable without mutation', async () => {
-  const valid = asRecord(await readJson(path.join(bookingContractRoot, 'fixtures', 'valid.json')));
-  const invalid = asRecord(
-    await readJson(path.join(bookingContractRoot, 'fixtures', 'invalid.json')),
-  );
-  const forward = asRecord(
-    await readJson(path.join(bookingContractRoot, 'fixtures', 'forward.json')),
-  );
-
-  assert.ok(Array.isArray(valid.bookings));
-  assert.ok(Array.isArray(valid.holds));
-  assert.ok(Array.isArray(valid.commands));
+void test('existing invalid and forward fixtures retain fail-closed verdicts', async () => {
+  const registry = await createBookingSchemaRegistry();
+  const invalid = asRecord(await readBookingJson('fixtures/invalid.json'));
   assert.ok(Array.isArray(invalid.cases));
-  assert.ok(Array.isArray(forward.cases));
+  const byTarget: Record<string, string> = {
+    booking: 'booking.schema.json',
+    hold: 'booking_hold.schema.json',
+    policy: 'booking_policy.schema.json',
+    command: 'booking_command.schema.json',
+    error: 'booking_error.schema.json',
+  };
+  for (const raw of invalid.cases) {
+    const fixture = asRecord(raw);
+    const schema = byTarget[String(fixture.target)];
+    assert.notEqual(schema, undefined);
+    const validate = registry.validator(schema!);
+    const schemaRejected = !validate(fixture.value);
+    const value = asRecord(fixture.value);
+    const frozenDartInvariantRejected =
+      (fixture.target === 'booking' &&
+        Object.hasOwn(value, 'inventoryPoolId') !== Object.hasOwn(value, 'channel')) ||
+      (fixture.target === 'hold' &&
+        value.state !== 'active' &&
+        !Object.hasOwn(value, 'resolvedAt'));
+    assert.equal(schemaRejected || frozenDartInvariantRejected, true, String(fixture.reason));
+  }
 
-  const commandSchema = asRecord(
-    await readJson(path.join(bookingContractRoot, 'booking_command.schema.json')),
-  );
-  assert.deepEqual(commandSchema.required, [
-    'schemaVersion',
-    'commandType',
-    'requestId',
-    'idempotencyKey',
-    'payload',
-  ]);
+  const forward = asRecord(await readBookingJson('fixtures/forward.json'));
+  assert.ok(Array.isArray(forward.cases));
+  const validateResult = registry.validator('booking_result.schema.json');
+  for (const raw of forward.cases) {
+    const fixture = asRecord(raw);
+    assert.equal(validateResult(fixture.value), false, String(fixture.reason));
+  }
 });
