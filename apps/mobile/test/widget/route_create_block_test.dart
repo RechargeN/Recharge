@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -58,10 +59,14 @@ void main() {
     await tester.pumpWidget(fixture.app());
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byKey(const ValueKey<String>('route-create-golden-surface')),
-      matchesGoldenFile('goldens/route_create_block_method.png'),
+    final surface = find.byKey(
+      const ValueKey<String>('route-create-golden-surface'),
     );
+    expect(tester.getSize(surface), const Size(366, 1216));
+    final goldenPath = Platform.isWindows
+        ? 'goldens/route_create_block_method_windows.png'
+        : 'goldens/route_create_block_method.png';
+    await expectLater(surface, matchesGoldenFile(goldenPath));
     await tester.pumpWidget(const SizedBox.shrink());
     await fixture.dispose();
   });
@@ -255,9 +260,7 @@ void main() {
       fixture.recordingController.state.status,
       RouteRecordingStatus.recording,
     );
-    final finishButton = find.byKey(
-      const ValueKey<String>('route-gps-finish'),
-    );
+    final finishButton = find.byKey(const ValueKey<String>('route-gps-finish'));
     await tester.ensureVisible(finishButton);
     tester.widget<FilledButton>(finishButton).onPressed!();
     await tester.runAsync(
@@ -272,9 +275,7 @@ void main() {
     expect(fixture.recordingController.state.preview, isNotNull);
     expect(find.text('Review recorded track'), findsOneWidget);
     expect(find.byType(RouteRecordingPreviewMap), findsOneWidget);
-    final applyButton = find.byKey(
-      const ValueKey<String>('route-gps-apply'),
-    );
+    final applyButton = find.byKey(const ValueKey<String>('route-gps-apply'));
     await tester.ensureVisible(applyButton);
     tester.widget<FilledButton>(applyButton).onPressed!();
     await tester.runAsync(
