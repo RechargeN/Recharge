@@ -6,45 +6,70 @@ import '../../../../shared/primitives/id/id_generator.dart';
 import '../../domain/entities/collection_moderation_request.dart';
 import '../../domain/entities/collection_publication_data.dart';
 import '../models/collection_publication_model.dart';
+import '../models/collection_publication_store_mapper.dart';
+import 'collection_publication_store.dart';
 
-/// In-memory stand-in for the crash-recoverable staged store described in
-/// §12 — an actual persisted, staged-write/restart-recovery/corrupt-record-
-/// isolation implementation is a tracked follow-up (this class does not yet
-/// meet that bar — see the CLG-CRT-01 LAUNCH_STATUS entry); this keeps the
-/// exact idempotency, removal-only and moderation *contracts* so the
-/// eventual storage backend is a drop-in swap, not an API change.
+/// CLG-PST-01: persisted, staged-write local store for §12/§17's
+/// "crash-recoverable staged store" requirement — this class used to be a
+/// pure in-memory `Map` (see the CLG-CRT-01 LAUNCH_STATUS entries for that
+/// history); it now durably persists through [CollectionPublicationStore],
+/// keeping the exact idempotency, removal-only and moderation *contracts*
+/// unchanged so `CollectionPublicationRepositoryImpl` and everything above
+/// it needed no changes at all.
+///
+/// Every write follows one rule: the business effect (an active version, a
+/// pending moderation request) is committed durably *before* the
+/// idempotency receipt or sealed decision that certifies it — never after.
+/// A crash between the two just means a retry redoes idempotent work; the
+/// reverse ordering would let a receipt claim something happened that a
+/// crash actually prevented, which a retry could never detect or repair.
+///
+/// Active-version writes specifically go through a three-step staged
+/// commit (`_commitActiveVersion`): write to a `staging.<id>` key, read it
+/// back and verify the bytes actually landed, only then copy the same
+/// bytes into `active.<id>` — the atomic pointer flip. A crash before that
+/// last step leaves `active.<id>` exactly as it was (last-known-good); the
+/// abandoned staging entry is never read by anything and is simply
+/// overwritten by the next attempt.
+///
+/// Every stored envelope carries a schema version and a content hash
+/// (`CollectionPublicationStoreMapper`); a record that fails either check
+/// is corrupt and is isolated to the one lookup that hit it — a
+/// known-collectionId/requestId lookup surfaces
+/// `CollectionPublicationFailure.persistenceUnavailable` (silently
+/// returning "not found" would be indistinguishable from real data loss to
+/// a caller building a removal-only base revision on top of it), while
+/// enumeration (`pendingRequests()`) skips just that one entry and returns
+/// the rest.
 class CollectionPublicationLocalDatasource {
-  CollectionPublicationLocalDatasource({required IdGenerator idGenerator})
-    : _idGenerator = idGenerator;
+  CollectionPublicationLocalDatasource({
+    required IdGenerator idGenerator,
+    required CollectionPublicationStore store,
+  }) : _idGenerator = idGenerator,
+       _store = store;
 
   final IdGenerator _idGenerator;
+  final CollectionPublicationStore _store;
 
-  final Map<String, PublishedCollectionVersion> _activeByCollectionId =
-      <String, PublishedCollectionVersion>{};
+  static const String _prefix = 'collection_publication_v1';
 
-  /// Keyed by `'$commandType:$actorId:${bundle.publishAttemptId}'` — §12's
-  /// effective `(actorId, commandType, requestId)` key. `publish` and
-  /// `submitForReview` each get their own `commandType` prefix so a replay
-  /// of one can never be read back as a receipt for the other (a review
-  /// receipt replayed through `publish`'s key space, or vice versa, would
-  /// otherwise report an activation that never happened).
-  final Map<String, _ReceiptRecord> _receiptsByIdempotencyKey =
-      <String, _ReceiptRecord>{};
-
-  /// Every moderation request ever created, pending or decided — a decided
-  /// request stays here (sealed, immutable `decision`) rather than being
-  /// removed, so [decide] can detect and refuse a second decision on the
-  /// same request instead of silently re-deciding it.
-  final Map<String, CollectionModerationRequest> _moderationRequests =
-      <String, CollectionModerationRequest>{};
+  String _activeKey(String collectionId) => '$_prefix.active.$collectionId';
+  String _stagingKey(String collectionId) => '$_prefix.staging.$collectionId';
+  String _receiptKey(String commandType, String actorId, String requestId) =>
+      '$_prefix.receipt.$commandType.$actorId.$requestId';
+  String _removalReceiptKey(String collectionId, String requestId) =>
+      '$_prefix.receipt.removal.$collectionId.$requestId';
+  String _moderationKey(String requestId) =>
+      '$_prefix.moderation.$requestId';
+  static const String _moderationPrefix = '$_prefix.moderation.';
 
   Future<CollectionPublishReceipt> publish(
     CollectionPublishBundle bundle, {
     required String actorId,
   }) async {
-    final String key = 'publish:$actorId:${bundle.publishAttemptId}';
+    final String key = _receiptKey('publish', actorId, bundle.publishAttemptId);
     final String payloadHash = _hashBundle(bundle);
-    final _ReceiptRecord? existing = _receiptsByIdempotencyKey[key];
+    final _StoredReceipt? existing = await _readReceipt(key);
     if (existing != null) {
       if (existing.payloadHash != payloadHash) {
         throw const CollectionPublicationException(
@@ -62,33 +87,28 @@ class CollectionPublicationLocalDatasource {
       bundle: bundle,
       publishedAtUtc: now,
     );
-    // "Staged write": build the record fully before it becomes visible, so
-    // a crash mid-write never leaves a half-applied active version.
-    _activeByCollectionId[bundle.collectionId] = version;
+    await _commitActiveVersion(bundle.collectionId, version);
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: bundle.collectionId,
       collectionVersionId: bundle.collectionVersionId,
       publishedAtUtc: now,
       outcome: CollectionPublishOutcome.created,
     );
-    _receiptsByIdempotencyKey[key] = _ReceiptRecord(
-      payloadHash: payloadHash,
-      receipt: receipt,
-    );
+    await _writeReceipt(key, payloadHash, receipt);
     return receipt;
   }
 
   /// §6/§7 Шаг 5: same idempotency contract as [publish], but its own key
-  /// space (see the `_receiptsByIdempotencyKey` doc comment) and the
-  /// version only lands in [_moderationRequests] — never
-  /// [_activeByCollectionId] — until [decide] accepts it.
+  /// space (see the key-naming helpers above) and the version only lands
+  /// as a moderation request — never [_commitActiveVersion] — until
+  /// [decide] accepts it.
   Future<CollectionPublishReceipt> submitForReview(
     CollectionPublishBundle bundle, {
     required String actorId,
   }) async {
-    final String key = 'review:$actorId:${bundle.publishAttemptId}';
+    final String key = _receiptKey('review', actorId, bundle.publishAttemptId);
     final String payloadHash = _hashBundle(bundle);
-    final _ReceiptRecord? existing = _receiptsByIdempotencyKey[key];
+    final _StoredReceipt? existing = await _readReceipt(key);
     if (existing != null) {
       if (existing.payloadHash != payloadHash) {
         throw const CollectionPublicationException(
@@ -99,20 +119,20 @@ class CollectionPublicationLocalDatasource {
       }
       // Review finding: unlike `publish()`, a replay here must NOT be
       // relabelled `replayedIdempotentSuccess` — that outcome reads as
-      // "activated" everywhere it is checked (coordinator/controller treat
-      // anything other than `pendingReview` as published), so it would
-      // report a still-pending, never-activated submission as a live
-      // publish. The original receipt is already exactly right — return
-      // it unchanged.
+      // "activated" everywhere it is checked, so it would report a
+      // still-pending, never-activated submission as a live publish. The
+      // stored receipt is already exactly right — return it unchanged.
       return existing.receipt;
     }
     final DateTime now = DateTime.now().toUtc();
     final String requestId = bundle.publishAttemptId;
-    _moderationRequests[requestId] = CollectionModerationRequest(
-      requestId: requestId,
-      bundle: bundle,
-      submittedAtUtc: now,
-      submittedByActorId: actorId,
+    await _writeModerationRequest(
+      CollectionModerationRequest(
+        requestId: requestId,
+        bundle: bundle,
+        submittedAtUtc: now,
+        submittedByActorId: actorId,
+      ),
     );
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: bundle.collectionId,
@@ -120,17 +140,24 @@ class CollectionPublicationLocalDatasource {
       submittedAtUtc: now,
       outcome: CollectionPublishOutcome.pendingReview,
     );
-    _receiptsByIdempotencyKey[key] = _ReceiptRecord(
-      payloadHash: payloadHash,
-      receipt: receipt,
-    );
+    await _writeReceipt(key, payloadHash, receipt);
     return receipt;
   }
 
+  /// Enumeration, not a keyed lookup — corrupt entries are skipped, not
+  /// fatal (see the class doc comment).
   Future<List<CollectionModerationRequest>> pendingRequests() async {
-    return _moderationRequests.values
-        .where((CollectionModerationRequest request) => request.isPending)
-        .toList(growable: false);
+    final Map<String, String> stored = await _store.readAllWithPrefix(
+      _moderationPrefix,
+    );
+    final List<CollectionModerationRequest> result =
+        <CollectionModerationRequest>[];
+    for (final String raw in stored.values) {
+      final CollectionModerationRequest? request =
+          CollectionPublicationStoreMapper.decodeModerationRequest(raw);
+      if (request != null && request.isPending) result.add(request);
+    }
+    return List<CollectionModerationRequest>.unmodifiable(result);
   }
 
   /// Returns the decided request (its `decision` now sealed) plus the
@@ -154,11 +181,20 @@ class CollectionPublicationLocalDatasource {
         'Must be null when accepting.',
       );
     }
-    final CollectionModerationRequest? request = _moderationRequests[requestId];
-    if (request == null) {
+    final String key = _moderationKey(requestId);
+    final String? raw = await _store.read(key);
+    if (raw == null) {
       throw const CollectionPublicationException(
         CollectionPublicationFailure.notFound,
         'Moderation request not found.',
+      );
+    }
+    final CollectionModerationRequest? request =
+        CollectionPublicationStoreMapper.decodeModerationRequest(raw);
+    if (request == null) {
+      throw const CollectionPublicationException(
+        CollectionPublicationFailure.persistenceUnavailable,
+        'Moderation request record is corrupt.',
       );
     }
     if (!request.isPending) {
@@ -182,32 +218,45 @@ class CollectionPublicationLocalDatasource {
             decidedByActorId: decidedByActorId,
             rejectionReason: rejectionReason,
           );
-    final CollectionModerationRequest decided = request.copyWith(
-      decision: decision,
-    );
-    _moderationRequests[requestId] = decided;
-    if (!accept) return (decided, null);
+    if (!accept) {
+      final CollectionModerationRequest decided = request.copyWith(
+        decision: decision,
+      );
+      await _writeModerationRequest(decided);
+      return (decided, null);
+    }
+    // Accept: commit the version first (the business effect), seal the
+    // decision second — same effect-before-receipt ordering as everywhere
+    // else in this class.
     final PublishedCollectionVersion version = PublishedCollectionVersion(
       bundle: request.bundle,
       publishedAtUtc: now,
     );
-    _activeByCollectionId[request.bundle.collectionId] = version;
+    await _commitActiveVersion(request.bundle.collectionId, version);
+    final CollectionModerationRequest decided = request.copyWith(
+      decision: decision,
+    );
+    await _writeModerationRequest(decided);
     return (decided, version);
   }
 
   Future<CollectionPublishReceipt> removeItemsOnly(
     CollectionRemovalOnlyCommand command,
   ) async {
-    final String key = 'removal:${command.collectionId}:${command.requestId}';
-    final _ReceiptRecord? existing = _receiptsByIdempotencyKey[key];
+    final String key = _removalReceiptKey(
+      command.collectionId,
+      command.requestId,
+    );
+    final _StoredReceipt? existing = await _readReceipt(key);
     if (existing != null) {
       return existing.receipt.copyWith(
         outcome: CollectionPublishOutcome.replayedIdempotentSuccess,
       );
     }
 
-    final PublishedCollectionVersion? active =
-        _activeByCollectionId[command.collectionId];
+    final PublishedCollectionVersion? active = await activeVersion(
+      command.collectionId,
+    );
     if (active == null) {
       throw const CollectionPublicationException(
         CollectionPublicationFailure.notFound,
@@ -240,9 +289,9 @@ class CollectionPublicationLocalDatasource {
           .toList(growable: false),
       publishAttemptId: command.requestId,
     );
-    _activeByCollectionId[command.collectionId] = PublishedCollectionVersion(
-      bundle: nextBundle,
-      publishedAtUtc: now,
+    await _commitActiveVersion(
+      command.collectionId,
+      PublishedCollectionVersion(bundle: nextBundle, publishedAtUtc: now),
     );
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: nextBundle.collectionId,
@@ -250,21 +299,121 @@ class CollectionPublicationLocalDatasource {
       publishedAtUtc: now,
       outcome: CollectionPublishOutcome.created,
     );
-    _receiptsByIdempotencyKey[key] = _ReceiptRecord(
-      payloadHash: _hashBundle(nextBundle),
-      receipt: receipt,
-    );
+    await _writeReceipt(key, _hashBundle(nextBundle), receipt);
     return receipt;
   }
 
   /// Returns whether an active version existed to deactivate — the caller
-  /// only needs to reach the Discover sink when it did.
+  /// only needs to reach the Discover sink when it did. Deletes whatever
+  /// is under the key regardless of whether it still decodes cleanly —
+  /// archiving corrupt garbage under an active-version key is still a
+  /// meaningful, safe action.
   Future<bool> archive(String collectionId) async {
-    return _activeByCollectionId.remove(collectionId) != null;
+    final String key = _activeKey(collectionId);
+    final String? existing = await _store.read(key);
+    if (existing == null) return false;
+    await _store.delete(key);
+    return true;
   }
 
-  PublishedCollectionVersion? activeVersion(String collectionId) =>
-      _activeByCollectionId[collectionId];
+  /// A known-collectionId lookup — a corrupt record here throws
+  /// `persistenceUnavailable` rather than silently reading as "never
+  /// published" (see the class doc comment).
+  Future<PublishedCollectionVersion?> activeVersion(String collectionId) async {
+    final String? raw = await _store.read(_activeKey(collectionId));
+    if (raw == null) return null;
+    final PublishedCollectionVersion? version =
+        CollectionPublicationStoreMapper.decodeVersion(raw);
+    if (version == null) {
+      throw const CollectionPublicationException(
+        CollectionPublicationFailure.persistenceUnavailable,
+        'Active version record is corrupt.',
+      );
+    }
+    return version;
+  }
+
+  /// Staged write -> verified commit marker -> atomic active pointer (see
+  /// the class doc comment). The only mutator of `active.<id>` — every
+  /// caller above (publish/removeItemsOnly/decide-accept) goes through
+  /// this, so the three-step discipline can never be bypassed.
+  Future<void> _commitActiveVersion(
+    String collectionId,
+    PublishedCollectionVersion version,
+  ) async {
+    final String encoded = CollectionPublicationStoreMapper.encodeVersion(
+      version,
+    );
+    final String stagingKey = _stagingKey(collectionId);
+    try {
+      await _store.write(stagingKey, encoded);
+      final String? verified = await _store.read(stagingKey);
+      if (verified != encoded) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.persistenceUnavailable,
+          'Staged write verification failed.',
+        );
+      }
+      // Atomic pointer flip: readers only ever consult `active.<id>`,
+      // never `staging.<id>` — this is the single instant the new version
+      // becomes visible. Any failure up to and including this write means
+      // `active.<id>` is left exactly as it was — last-known-good, no
+      // partial state ever observable.
+      await _store.write(_activeKey(collectionId), encoded);
+    } on CollectionPublicationException {
+      rethrow;
+    } on Object catch (error) {
+      throw CollectionPublicationException(
+        CollectionPublicationFailure.persistenceUnavailable,
+        'Staged commit failed: $error',
+      );
+    }
+    try {
+      await _store.delete(stagingKey);
+    } on Object {
+      // Best-effort cleanup — the commit above already landed durably; a
+      // leftover staging entry is inert (never read) and simply gets
+      // overwritten by the next attempt for this collectionId.
+    }
+  }
+
+  Future<_StoredReceipt?> _readReceipt(String key) async {
+    final String? raw = await _store.read(key);
+    if (raw == null) return null;
+    final ({String payloadHash, CollectionPublishReceipt receipt})? decoded =
+        CollectionPublicationStoreMapper.decodeReceipt(raw);
+    if (decoded == null) {
+      throw const CollectionPublicationException(
+        CollectionPublicationFailure.persistenceUnavailable,
+        'Idempotency receipt record is corrupt.',
+      );
+    }
+    return _StoredReceipt(
+      payloadHash: decoded.payloadHash,
+      receipt: decoded.receipt,
+    );
+  }
+
+  Future<void> _writeReceipt(
+    String key,
+    String payloadHash,
+    CollectionPublishReceipt receipt,
+  ) {
+    return _store.write(
+      key,
+      CollectionPublicationStoreMapper.encodeReceipt(
+        payloadHash: payloadHash,
+        receipt: receipt,
+      ),
+    );
+  }
+
+  Future<void> _writeModerationRequest(CollectionModerationRequest request) {
+    return _store.write(
+      _moderationKey(request.requestId),
+      CollectionPublicationStoreMapper.encodeModerationRequest(request),
+    );
+  }
 
   static String _hashBundle(CollectionPublishBundle bundle) {
     final String json = jsonEncode(CollectionPublicationModel.toJson(bundle));
@@ -272,8 +421,8 @@ class CollectionPublicationLocalDatasource {
   }
 }
 
-class _ReceiptRecord {
-  const _ReceiptRecord({required this.payloadHash, required this.receipt});
+class _StoredReceipt {
+  const _StoredReceipt({required this.payloadHash, required this.receipt});
 
   final String payloadHash;
   final CollectionPublishReceipt receipt;

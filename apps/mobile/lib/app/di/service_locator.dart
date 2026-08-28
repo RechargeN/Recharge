@@ -71,6 +71,7 @@ import '../../features/create/application/collection_create_config.dart';
 import '../../features/create/application/collection_create_coordinator.dart';
 import '../../features/create/data/datasources/collection_catalog_search_mock_datasource.dart';
 import '../../features/create/data/datasources/collection_publication_local_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_store.dart';
 import '../../features/create/data/datasources/google_places_search_datasource.dart';
 import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
 import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
@@ -411,8 +412,14 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<CollectionCreateRuntimeConfig>(
       () => const CollectionCreateRuntimeConfig(),
     )
+    // CLG-PST-01: persisted, staged-write store — see
+    // `CollectionPublicationStore`'s own doc comment for why this has no
+    // AES-GCM layer of its own, unlike `RouteRecordingSecureStore`.
+    ..registerLazySingleton<CollectionPublicationStore>(
+      () => SecureCollectionPublicationStore(sl<FlutterSecureStorage>()),
+    )
     ..registerLazySingleton<CollectionPublicationLocalDatasource>(
-      () => CollectionPublicationLocalDatasource(idGenerator: sl()),
+      () => CollectionPublicationLocalDatasource(idGenerator: sl(), store: sl()),
     )
     ..registerLazySingleton<CollectionPublicationRepository>(
       () => CollectionPublicationRepositoryImpl(

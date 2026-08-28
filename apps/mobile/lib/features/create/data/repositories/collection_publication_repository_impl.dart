@@ -91,9 +91,7 @@ class CollectionPublicationRepositoryImpl
 
   @override
   Future<PublishedCollectionVersion?> getActiveVersion(String collectionId) {
-    return Future<PublishedCollectionVersion?>.value(
-      datasource.activeVersion(collectionId),
-    );
+    return datasource.activeVersion(collectionId);
   }
 
   /// Shared by [publish] and [removeItemsOnly]: both leave a fresh active
@@ -107,7 +105,7 @@ class CollectionPublicationRepositoryImpl
       return receipt; // nothing active yet — should not reach here in
       // practice (submitForReview never calls this), guarded anyway.
     }
-    final PublishedCollectionVersion? active = datasource.activeVersion(
+    final PublishedCollectionVersion? active = await datasource.activeVersion(
       receipt.collectionId,
     );
     if (active == null) return receipt;

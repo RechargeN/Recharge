@@ -1,8 +1,10 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/collection_create_coordinator.dart';
 import 'package:recharge/features/create/application/state/collection_create_state.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
+import 'package:recharge/features/create/data/datasources/collection_publication_store.dart';
 import 'package:recharge/features/create/data/repositories/collection_publication_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/collection_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/collection_item_draft.dart';
@@ -64,8 +66,10 @@ void main() {
   late CollectionCreateCoordinator coordinator;
 
   setUp(() {
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
     datasource = CollectionPublicationLocalDatasource(
       idGenerator: _SequentialIdGenerator(),
+      store: const SecureCollectionPublicationStore(FlutterSecureStorage()),
     );
     sink = _NoopSink();
     publicationRepository = CollectionPublicationRepositoryImpl(

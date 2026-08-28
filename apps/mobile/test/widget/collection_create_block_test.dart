@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -9,6 +10,7 @@ import 'package:recharge/features/create/application/controllers/create_controll
 import 'package:recharge/features/create/application/create_providers.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
+import 'package:recharge/features/create/data/datasources/collection_publication_store.dart';
 import 'package:recharge/features/create/data/repositories/collection_publication_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/collection_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
@@ -33,6 +35,7 @@ CollectionCreateCoordinator _buildCoordinator() {
     publicationRepository: CollectionPublicationRepositoryImpl(
       datasource: CollectionPublicationLocalDatasource(
         idGenerator: _SequentialIdGenerator(),
+        store: const SecureCollectionPublicationStore(FlutterSecureStorage()),
       ),
       sink: _NoopSink(),
     ),
@@ -46,6 +49,7 @@ void main() {
   late CollectionCreateCoordinator coordinator;
 
   setUp(() {
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
     repository = _FakeCreateRepository();
     coordinator = _buildCoordinator();
     controller = CreateController(

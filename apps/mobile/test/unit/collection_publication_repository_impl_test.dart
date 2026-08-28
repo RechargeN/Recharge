@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/collection_publication_discovery_adapter.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
+import 'package:recharge/features/create/data/datasources/collection_publication_store.dart';
 import 'package:recharge/features/create/data/repositories/collection_publication_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/collection_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/collection_item_draft.dart';
@@ -50,8 +51,15 @@ void main() {
   late _FakeIdGenerator idGenerator;
 
   setUp(() {
+    // CLG-PST-01: the datasource is now backed by a real persisted store —
+    // this whole suite proves the store swap did not change the contract,
+    // not just the coordinator/repository layers above it.
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
     idGenerator = _FakeIdGenerator();
-    datasource = CollectionPublicationLocalDatasource(idGenerator: idGenerator);
+    datasource = CollectionPublicationLocalDatasource(
+      idGenerator: idGenerator,
+      store: const SecureCollectionPublicationStore(FlutterSecureStorage()),
+    );
     sink = _RecordingSink();
     repository = CollectionPublicationRepositoryImpl(
       datasource: datasource,
@@ -414,7 +422,12 @@ void main() {
       final CollectionPublicationDiscoveryAdapter adapter =
           CollectionPublicationDiscoveryAdapter(discoveryStore);
       final CollectionPublicationLocalDatasource realDatasource =
-          CollectionPublicationLocalDatasource(idGenerator: _FakeIdGenerator());
+          CollectionPublicationLocalDatasource(
+            idGenerator: _FakeIdGenerator(),
+            store: const SecureCollectionPublicationStore(
+              FlutterSecureStorage(),
+            ),
+          );
       final CollectionPublicationRepositoryImpl realRepository =
           CollectionPublicationRepositoryImpl(
             datasource: realDatasource,

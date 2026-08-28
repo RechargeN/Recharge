@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -7,6 +8,7 @@ import 'package:recharge/features/create/application/controllers/create_controll
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/state/collection_create_state.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
+import 'package:recharge/features/create/data/datasources/collection_publication_store.dart';
 import 'package:recharge/features/create/data/repositories/collection_publication_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/collection_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/collection_publication_data.dart';
@@ -32,6 +34,7 @@ CollectionCreateCoordinator _buildCoordinator({
     publicationRepository: CollectionPublicationRepositoryImpl(
       datasource: CollectionPublicationLocalDatasource(
         idGenerator: _SequentialIdGenerator(),
+        store: const SecureCollectionPublicationStore(FlutterSecureStorage()),
       ),
       sink: sink,
     ),
@@ -88,6 +91,11 @@ void main() {
   }
 
   setUp(() {
+    // CLG-PST-01: each fresh CollectionPublicationLocalDatasource built by
+    // _buildCoordinator() below shares the same mock FlutterSecureStorage
+    // backend across the whole process — reset it per test so one test's
+    // Collection data can never leak into another's.
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
     repository = _FakeCreateRepository();
     sink = _RecordingSink();
   });
