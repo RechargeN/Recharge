@@ -176,6 +176,9 @@ async function postRaw(body: Buffer): Promise<HttpResult> {
       },
     );
     outbound.once('error', reject);
+    outbound.setTimeout(20_000, () => {
+      outbound.destroy(new Error('RAW-B loopback request exceeded 20 seconds'));
+    });
     outbound.end(body);
   });
 }

@@ -262,10 +262,19 @@ The suite must prove:
 | leftover `.raw-body-probe-*` directories | Pass — 0 |
 | RAW-B emulator corpus | Inconclusive — exact local toolchain unavailable |
 | existing R0 unit/emulator suites | Inconclusive locally — same toolchain mismatch |
-| Ubuntu/Windows hosted evidence | Pending; push was not authorized |
+| Initial Ubuntu/Windows hosted evidence | Fail — runs `33206783480` and `33206787424` exposed a temporary ESM bootstrap incompatibility before any handler result |
+| Corrected Ubuntu/Windows hosted evidence | Pending; repair has not been pushed |
 
 The implementation therefore remains in Review. Static green gates do not
 establish that Functions middleware preserves the required bytes.
+
+The initial hosted failure was fail-safe and infrastructure-only: Firebase
+Emulator attempted synchronous `require()` of a generated ESM entry containing
+top-level `await`, then the runner reached its 300-second timeout. Both operating
+systems reported the same cause. The repair uses a temporary Node 22 synchronous
+CJS bootstrap, declares the already pinned parent `firebase-admin` dependency
+without installing or importing Admin SDK in the probe, and bounds every client
+request to 20 seconds. A new hosted run is required before changing the verdict.
 
 ## 11. Definition of Ready
 

@@ -146,21 +146,13 @@ async function createTemporarySource() {
       path.join(emulatorTarget, path.basename(compiledProbe)),
     );
 
-    const normalizedFunctionsRoot = pathToFileURL(functionsRoot).href;
     await writeFile(
-      path.join(temporaryRoot, "index.js"),
+      path.join(temporaryRoot, "index.cjs"),
       [
         `process.chdir(${JSON.stringify(functionsRoot)});`,
-        `const probe = await import(${JSON.stringify(
-          new URL(
-            "./test/emulator/booking_callable_raw_body_probe.js",
-            pathToFileURL(`${temporaryRoot}${path.sep}`),
-          ).href,
-        )});`,
-        "export const bookingRawBodyProbeV1 = probe.bookingRawBodyProbeV1;",
-        `if (typeof bookingRawBodyProbeV1 !== "function") throw new Error(${JSON.stringify(
-          `RAW-B probe export failed from ${normalizedFunctionsRoot}`,
-        )});`,
+        'const probe = require("./test/emulator/booking_callable_raw_body_probe.js");',
+        'if (typeof probe.bookingRawBodyProbeV1 !== "function") throw new Error("RAW-B probe export is absent");',
+        "module.exports = { bookingRawBodyProbeV1: probe.bookingRawBodyProbeV1 };",
         "",
       ].join("\n"),
       "utf8",
@@ -172,9 +164,12 @@ async function createTemporarySource() {
           name: "recharge-raw-body-probe-temporary",
           private: true,
           type: "module",
-          main: "index.js",
+          main: "index.cjs",
           engines: { node: "22" },
-          dependencies: { "firebase-functions": "7.3.2" },
+          dependencies: {
+            "firebase-admin": "14.3.0",
+            "firebase-functions": "7.3.2",
+          },
         },
         null,
         2,
