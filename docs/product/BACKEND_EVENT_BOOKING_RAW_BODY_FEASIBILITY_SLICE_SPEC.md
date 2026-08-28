@@ -1,9 +1,9 @@
 # Recharge Backend — Booking callable raw-body feasibility slice
 
 - ID: **BCK09-API-RAW-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-08-28**
-- Status: **Proposed — owner approval required before implementation**
+- Status: **Implemented/Review — local contract gates pass; canonical Node 22 hosted evidence pending**
 - Target: **BCK-09 v1.10 / ECL-03C v1.8 / Booking wire v1**
 - Parent review:
   [BCK09-API-REV-01 v0.7](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
@@ -12,20 +12,40 @@
 - Runtime effect: **none**
 - Firebase resource effect: **none**
 - Deployment authority: **none**
+- Plan commit: **`cd6e28e`**
+- Implementation commit: **`d4621c5`**
 
 ---
 
-## 0. Decision requested
+## 0. Outcome
 
-Approve only **Phase A**, a contracts/test-only feasibility implementation.
-It may prove that the pinned Functions SDK exposes the callable wire bytes and
-that a bounded adapter can validate the callable envelope before using
-`request.data`. It must not create or export a callable, start Booking runtime,
-access Firestore, change Firebase configuration or deploy anything.
+The Product owner approved only **Phase A**, and the bounded contracts/test-only
+implementation now exists in commit `d4621c5`. It proves locally that a strict
+adapter can inspect the complete callable envelope before trusting
+`request.data`, reject pre-decode ambiguity and preserve all existing Booking
+semantic-hash evidence. It creates no callable, runtime, Firebase access,
+configuration or deployment surface.
 
 Phase B, an actual Firebase Emulator callable-path proof, remains a separate
-future approval. Phase A cannot promote BCK-09, ECL-03C or any specialist
-signature and cannot turn the current runtime/evidence Hold into Pass.
+future approval. Exact Node 22.23.2 hosted evidence cannot be obtained without
+the separately prohibited push, so Phase A remains `Implemented/Review`, not
+`Done`. It cannot promote BCK-09, ECL-03C or any specialist signature and cannot
+turn the current runtime/evidence Hold into Pass.
+
+### 0.1. v0.2 implementation reconciliation
+
+- added a pure test-only raw-envelope inspector with a closed typed failure
+  vocabulary, 64 KiB bound, fatal UTF-8/BOM checks, exact `data` envelope,
+  protocol-wrapper denial and raw/framework equality guard;
+- hardened the existing strict number reader so mathematically fractional
+  underflow or rounded fractions cannot collapse into accepted integers;
+- added five Phase A subtests covering all valid commands, every frozen
+  semantic-hash vector, key-order equivalence, malformed wire inputs,
+  decode mismatch and invalid/forward commands;
+- retained byte-identical backend `src/**`, all 19 Booking schemas/fixtures,
+  Firebase configuration, mobile code and Accepted ADRs;
+- kept RAW-B, runtime, Firebase changes, callable exports, push, merge and
+  deployment unauthorized.
 
 ## 1. Why this slice exists
 
@@ -100,11 +120,11 @@ retention, availability or transaction behavior.
 `RAW-A` must never be reported as `RAW-B` or `RAW-C`. A skipped, mocked,
 timed-out or version-mismatched gate is `Inconclusive`, never Pass.
 
-## 4. Phase A — approved candidate scope
+## 4. Phase A — approved and implemented bounded scope
 
 ### 4.1. Included
 
-Phase A may add a test-only adapter that:
+Phase A adds a test-only adapter that:
 
 1. accepts a Firebase callable `rawBody` as `Buffer` and the already-decoded
    `request.data` only as a comparison input;
@@ -334,6 +354,55 @@ Phase A is Done only when:
 10. BCK-09/ECL-03C remain Review/runtime Absent and all nine signatures remain
     Pending.
 
+### 12.1. Current evidence at commit `d4621c5`
+
+Passed locally:
+
+```text
+npm run format:check                 Pass
+npm run lint                         Pass
+npm run typecheck                    Pass
+npm run test:contract                Pass — 15/15
+npm run verify:cloud-context         Pass
+npm run verify:reproducibility       Pass
+npm run verify:generated             Pass — 26 files
+git diff --check                     Pass
+```
+
+Reproducible logical build digest:
+`feb602f946ebaa6482c4702556c70d4f7bcdce3551f0a43ed28bd8aec2e688b8`.
+
+The baseline/post-change comparison covered both tracked files under
+`apps/backend/functions/src/` plus all 19 Booking v1 schema/fixture files:
+21/21 LF-normalized SHA-256 values are byte-identical. Git scope confirms no
+Firebase, infrastructure, mobile, shared contract or ADR change.
+
+Implementation LF-normalized SHA-256:
+
+| File | SHA-256 |
+|---|---|
+| `apps/backend/functions/package.json` | `6dd5bd750958df541740cc0213a6597324056214b9ff15782ec8707f3ec007e0` |
+| `apps/backend/functions/test/support/booking_raw_json.ts` | `59fa2aaa97517998503f8d985b25f920aa7f03acf14c55dfea8a37feb944c592` |
+| `apps/backend/functions/test/support/booking_callable_raw_body.ts` | `8b3dbe969d4d3da1e429511f4d54c4a90ccb0517f5cc39cd7bfa493304da2688` |
+| `apps/backend/functions/test/contract/booking_callable_raw_body.test.ts` | `e363645f4eb0e7bd0e3e4528b52d15fd330a0b6e2186586e1c0f9d6565bebe6c` |
+
+Inconclusive/blocked evidence:
+
+- the local host exposes Node `20.17.0` / npm `10.8.2`, not the canonical Node
+  `22.23.2` / npm `10.9.8`; `verify:toolchain` therefore correctly failed;
+- `test:unit` reached an existing Node-20-only CommonJS/ESM dependency error
+  before executing its R0 probe; this is environment evidence, not a Pass;
+- the boundary command produced no output for 180 seconds and was stopped, so
+  it is Inconclusive;
+- the existing R0 emulator suite was not claimed on the wrong Node/Java
+  toolchain;
+- the hosted Ubuntu/Windows matrix is unavailable because push remains
+  explicitly unauthorized.
+
+Accordingly, the only honest result is:
+**`Static adapter implemented locally — canonical RAW-A evidence pending`; RAW-B
+remains blocked.**
+
 ## 13. Rollback
 
 Rollback is one revert of the isolated Phase A implementation commit and, if
@@ -358,7 +427,7 @@ Stop and return the slice to Review if:
 
 1. **BCK09-RAW-AC-01:** the slice is test-only and has no runtime effect.
 2. **BCK09-RAW-AC-02:** RAW-A, RAW-B and RAW-C cannot be conflated.
-3. **BCK09-RAW-AC-03:** only Phase A is proposed for the present approval.
+3. **BCK09-RAW-AC-03:** only Phase A was approved and implemented.
 4. **BCK09-RAW-AC-04:** the public callable property chain is explicit.
 5. **BCK09-RAW-AC-05:** public API availability is not emulator evidence.
 6. **BCK09-RAW-AC-06:** the full callable envelope is inspected before decoding.
@@ -389,10 +458,14 @@ Stop and return the slice to Review if:
 31. **BCK09-RAW-AC-31:** push, merge and deployment remain separate actions.
 32. **BCK09-RAW-AC-32:** rollback is commit-bounded and has no data operation.
 
-## 16. Approval phrase
+## 16. Recorded approval
 
 ```text
 Одобряю BCK09-API-RAW-01 v0.1 Phase A для contracts/test-only implementation.
 RAW-B emulator probe, runtime, Firebase changes, callable exports, push, merge и
 deployment не разрешаю.
 ```
+
+The owner supplied this exact approval before implementation commit `d4621c5`.
+It does not authorize RAW-B, runtime, Firebase changes, callable exports, push,
+merge or deployment.
