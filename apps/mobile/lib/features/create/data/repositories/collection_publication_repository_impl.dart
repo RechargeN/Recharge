@@ -20,18 +20,23 @@ class CollectionPublicationRepositoryImpl
 
   @override
   Future<CollectionPublishReceipt> publish(
-    CollectionPublishBundle bundle,
-  ) async {
-    final CollectionPublishReceipt receipt = await datasource.publish(bundle);
+    CollectionPublishBundle bundle, {
+    required String actorId,
+  }) async {
+    final CollectionPublishReceipt receipt = await datasource.publish(
+      bundle,
+      actorId: actorId,
+    );
     return _withSyncedActiveVersion(receipt);
   }
 
   @override
   Future<CollectionPublishReceipt> submitForReview(
-    CollectionPublishBundle bundle,
-  ) {
+    CollectionPublishBundle bundle, {
+    required String actorId,
+  }) {
     // Pending, not active — nothing for the Discover sink to see yet.
-    return datasource.submitForReview(bundle);
+    return datasource.submitForReview(bundle, actorId: actorId);
   }
 
   @override
@@ -40,17 +45,29 @@ class CollectionPublicationRepositoryImpl
   }
 
   @override
-  Future<void> decide({
+  Future<CollectionModerationDecisionResult> decide({
     required String requestId,
     required bool accept,
+    CollectionModerationRejectionReason? rejectionReason,
   }) async {
-    final PublishedCollectionVersion? activated = await datasource.decide(
-      requestId: requestId,
-      accept: accept,
-    );
-    if (activated != null) {
-      await _activateSinkWithRetry(activated);
+    final (CollectionModerationRequest decided, PublishedCollectionVersion? activated) =
+        await datasource.decide(
+          requestId: requestId,
+          accept: accept,
+          rejectionReason: rejectionReason,
+        );
+    if (activated == null) {
+      // Reject, or nothing to sync — trivially "synced".
+      return CollectionModerationDecisionResult(
+        request: decided,
+        discoverSynced: true,
+      );
     }
+    final bool synced = await _activateSinkWithRetry(activated);
+    return CollectionModerationDecisionResult(
+      request: decided,
+      discoverSynced: synced,
+    );
   }
 
   @override
@@ -64,11 +81,10 @@ class CollectionPublicationRepositoryImpl
   }
 
   @override
-  Future<void> archive(String collectionId) async {
+  Future<bool> archive(String collectionId) async {
     final bool hadActive = await datasource.archive(collectionId);
-    if (hadActive) {
-      await _archiveSinkWithRetry(collectionId);
-    }
+    if (!hadActive) return true; // nothing to sync
+    return _archiveSinkWithRetry(collectionId);
   }
 
   @override
@@ -85,6 +101,10 @@ class CollectionPublicationRepositoryImpl
   Future<CollectionPublishReceipt> _withSyncedActiveVersion(
     CollectionPublishReceipt receipt,
   ) async {
+    if (receipt.outcome == CollectionPublishOutcome.pendingReview) {
+      return receipt; // nothing active yet — should not reach here in
+      // practice (submitForReview never calls this), guarded anyway.
+    }
     final PublishedCollectionVersion? active = datasource.activeVersion(
       receipt.collectionId,
     );
@@ -109,19 +129,15 @@ class CollectionPublicationRepositoryImpl
     return false;
   }
 
-  /// `archive()` has no receipt channel back to the caller in this slice,
-  /// so a lasting sink failure here is best-effort only: the local record
-  /// is already archived (source of truth for Create), and a stale
-  /// Discover-facing entry is a reconciliation concern out of scope for
-  /// CLG-CRT-01.
-  Future<void> _archiveSinkWithRetry(String collectionId) async {
+  Future<bool> _archiveSinkWithRetry(String collectionId) async {
     for (int attempt = 0; attempt < 2; attempt++) {
       try {
         await _sink.archive(collectionId);
-        return;
+        return true;
       } on Object {
-        // retry once, then give up silently — see doc comment above.
+        // retry once, then report the failure back to the caller.
       }
     }
+    return false;
   }
 }

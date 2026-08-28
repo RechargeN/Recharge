@@ -46,6 +46,7 @@ import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/entities/scenario_validation_issue.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
 import '../../domain/repositories/collection_catalog_search_repository.dart';
+import '../../domain/repositories/collection_publication_repository.dart';
 import '../../domain/repositories/create_template_repository.dart';
 import '../../domain/repositories/rental_private_authoring_repository.dart';
 import '../../domain/repositories/rental_publication_index_sink.dart';
@@ -5298,19 +5299,27 @@ class CreateController extends ChangeNotifier {
     try {
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: direct,
+        actorId: _state.userId,
       );
       _adoptCollectionCoordinatorState();
       _collectionTelemetry.trackPublish(
         direct: direct,
         outcome: receipt.outcome,
+        discoverSynced: receipt.discoverSynced,
       );
-      _setState(
-        _state.copyWith(
-          message: receipt.outcome == CollectionPublishOutcome.pendingReview
-              ? 'Collection отправлен на проверку.'
-              : 'Collection опубликован.',
-        ),
-      );
+      final bool pending =
+          receipt.outcome == CollectionPublishOutcome.pendingReview;
+      // Review finding: `discoverSynced == false` must never be silently
+      // indistinguishable from a clean success to the author — the write
+      // itself succeeded (never reported as a failed publish, per the
+      // receipt's own contract), but the softer wording says so honestly.
+      final String message = pending
+          ? 'Collection отправлен на проверку.'
+          : receipt.discoverSynced
+          ? 'Collection опубликован.'
+          : 'Collection опубликован, но синхронизация с Discover ещё не '
+                'завершена.';
+      _setState(_state.copyWith(message: message));
       return true;
     } on CollectionPublicationException catch (e) {
       _adoptCollectionCoordinatorState();
@@ -5336,7 +5345,9 @@ class CreateController extends ChangeNotifier {
       final CollectionPublishReceipt? receipt = await coordinator
           .removeItemsFromActiveVersion(stableKeys);
       if (receipt == null) return false;
-      _collectionTelemetry.trackRemovalOnly();
+      _collectionTelemetry.trackRemovalOnly(
+        discoverSynced: receipt.discoverSynced,
+      );
       return true;
     } on CollectionPublicationException catch (e) {
       _collectionTelemetry.trackFailure(
@@ -5353,8 +5364,17 @@ class CreateController extends ChangeNotifier {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null || !canArchiveCollection) return false;
     try {
-      await coordinator.archive();
-      _collectionTelemetry.trackArchive();
+      final bool discoverSynced = await coordinator.archive();
+      _collectionTelemetry.trackArchive(discoverSynced: discoverSynced);
+      if (!discoverSynced) {
+        _setState(
+          _state.copyWith(
+            message:
+                'Collection архивирован, но синхронизация с Discover ещё '
+                'не завершена.',
+          ),
+        );
+      }
       return true;
     } on CollectionPublicationException catch (e) {
       _collectionTelemetry.trackFailure(
@@ -5376,18 +5396,46 @@ class CreateController extends ChangeNotifier {
     return coordinator.pendingModerationRequests();
   }
 
+  /// [rejectionReason] is required when [accept] is `false` (spec §6:
+  /// "sealed request, reason code при отказе") — the coordinator/repository
+  /// enforce this too, but the check here fails fast with a clear message
+  /// instead of surfacing a raw `ArgumentError`.
   Future<bool> decideCollectionModerationRequest({
     required String requestId,
     required bool accept,
+    CollectionModerationRejectionReason? rejectionReason,
   }) async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null || !canModerateCollection) return false;
-    try {
-      await coordinator.decideModerationRequest(
-        requestId: requestId,
-        accept: accept,
+    if (!accept && rejectionReason == null) {
+      _setState(
+        _state.copyWith(
+          message: 'Отказ по Collection требует кода причины.',
+        ),
       );
-      _collectionTelemetry.trackModerationDecision(accept: accept);
+      return false;
+    }
+    try {
+      final CollectionModerationDecisionResult result = await coordinator
+          .decideModerationRequest(
+            requestId: requestId,
+            accept: accept,
+            rejectionReason: rejectionReason,
+          );
+      _collectionTelemetry.trackModerationDecision(
+        accept: accept,
+        discoverSynced: result.discoverSynced,
+        rejectionReason: rejectionReason,
+      );
+      if (accept && !result.discoverSynced) {
+        _setState(
+          _state.copyWith(
+            message:
+                'Collection принят, но синхронизация с Discover ещё не '
+                'завершена.',
+          ),
+        );
+      }
       return true;
     } on CollectionPublicationException catch (e) {
       _collectionTelemetry.trackFailure(

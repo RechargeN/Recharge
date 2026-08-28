@@ -584,7 +584,13 @@ class CollectionCreateCoordinator {
 
   /// §6/§7 Шаг 5, §12: [direct] selects the write path only — capability
   /// gating happens one layer up, in `CreateController`, never here.
-  Future<CollectionPublishReceipt> publish({required bool direct}) async {
+  /// [actorId] is the trusted-context actor for the idempotency key (§12)
+  /// — never client-suppliable free text, always `CreateController`'s own
+  /// loaded `userId`.
+  Future<CollectionPublishReceipt> publish({
+    required bool direct,
+    required String actorId,
+  }) async {
     final List<CollectionValidationIssue> issues = validate();
     if (issues.any(
       (CollectionValidationIssue issue) =>
@@ -618,8 +624,11 @@ class CollectionCreateCoordinator {
     );
     try {
       final CollectionPublishReceipt receipt = direct
-          ? await _publicationRepository.publish(bundle)
-          : await _publicationRepository.submitForReview(bundle);
+          ? await _publicationRepository.publish(bundle, actorId: actorId)
+          : await _publicationRepository.submitForReview(
+              bundle,
+              actorId: actorId,
+            );
       _publishAttemptId = publishAttemptId;
       _publishAttemptVersionId = bundle.collectionVersionId;
       _publishAttemptRevision = beforePublish.revision;
@@ -651,13 +660,15 @@ class CollectionCreateCoordinator {
   }
 
   /// §3.11 lifecycle command — distinct from removal-only; deactivates the
-  /// Discover-facing version without publishing anything new. A no-op if
-  /// this Collection was never published (including a `loc_*` draft that
-  /// has no permanent id yet).
-  Future<void> archive() async {
+  /// Discover-facing version without publishing anything new. A no-op
+  /// (returns `true`, trivially in sync) if this Collection was never
+  /// published (including a `loc_*` draft that has no permanent id yet).
+  /// Returns whether Discover ended up in sync — see the repository's own
+  /// `archive` doc.
+  Future<bool> archive() async {
     final String collectionId = state.createDraft.id;
-    if (collectionId.startsWith('loc_')) return;
-    await _publicationRepository.archive(collectionId);
+    if (collectionId.startsWith('loc_')) return true;
+    return _publicationRepository.archive(collectionId);
   }
 
   /// §6 moderation surface — process-wide, not scoped to this draft; a
@@ -668,11 +679,16 @@ class CollectionCreateCoordinator {
     return _publicationRepository.pendingRequests();
   }
 
-  Future<void> decideModerationRequest({
+  Future<CollectionModerationDecisionResult> decideModerationRequest({
     required String requestId,
     required bool accept,
+    CollectionModerationRejectionReason? rejectionReason,
   }) {
-    return _publicationRepository.decide(requestId: requestId, accept: accept);
+    return _publicationRepository.decide(
+      requestId: requestId,
+      accept: accept,
+      rejectionReason: rejectionReason,
+    );
   }
 
   /// Self-service removal from the *published* active version (§3.11,

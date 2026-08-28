@@ -426,12 +426,17 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<CollectionCatalogSearchRepository>(
       () => CollectionCatalogSearchRepositoryImpl(datasource: sl()),
     )
-    // LOC-SRCH prerequisite: no Dart-side Google Places API key source
-    // exists yet in this composition — `GooglePlacesSearchDatasource`
-    // fails closed (empty results) on an empty key, so this is safe, not a
-    // stub that silently misbehaves. Wire a real key source when one exists.
+    // LOC-SRCH prerequisite: key comes from the gitignored
+    // google_maps.properties via --dart-define-from-file (documented in
+    // the tracked google_maps.properties.example), same mechanism the
+    // native Google Maps SDK config already uses. `GooglePlacesSearchDatasource`
+    // still fails closed (empty results) if the value is empty — a missing
+    // properties file degrades safely, it does not crash the build.
     ..registerLazySingleton<GooglePlacesSearchDatasource>(
-      () => GooglePlacesSearchDatasource(client: sl(), apiKey: ''),
+      () => GooglePlacesSearchDatasource(
+        client: sl(),
+        apiKey: const String.fromEnvironment('GOOGLE_PLACES_API_KEY'),
+      ),
     )
     ..registerLazySingleton<LocationSearchRepository>(
       () => LocationSearchRepositoryImpl(sl()),

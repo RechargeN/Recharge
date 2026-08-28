@@ -13,6 +13,7 @@ import 'package:recharge/features/create/domain/entities/location_search_suggest
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/create/domain/repositories/collection_catalog_search_repository.dart';
 import 'package:recharge/features/create/domain/repositories/collection_publication_index_sink.dart';
+import 'package:recharge/features/create/domain/repositories/collection_publication_repository.dart';
 import 'package:recharge/features/create/domain/repositories/location_search_repository.dart';
 
 const _publisher = PublisherRef(type: PublisherType.user, id: 'u1');
@@ -86,9 +87,11 @@ void main() {
 
       final CollectionPublishReceipt first = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
       final CollectionPublishReceipt second = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
 
       expect(first.outcome, CollectionPublishOutcome.created);
@@ -102,12 +105,14 @@ void main() {
       coordinator.initialize(createDraft: _draft(id: 'loc_new2'));
       final CollectionPublishReceipt first = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
 
       coordinator.setBudgetIndicator(CollectionBudgetTier.low);
       coordinator.acknowledgeCompositionReview();
       final CollectionPublishReceipt second = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
 
       expect(second.outcome, CollectionPublishOutcome.created);
@@ -124,12 +129,13 @@ void main() {
 
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
 
       expect(coordinator.state.createDraft.id, receipt.collectionId);
       expect(coordinator.state.createDraft.id, isNot(startsWith('loc_')));
 
-      await coordinator.publish(direct: true); // replay must not re-mint
+      await coordinator.publish(direct: true, actorId: 'user-1'); // replay must not re-mint
       expect(coordinator.state.createDraft.id, receipt.collectionId);
     });
 
@@ -137,6 +143,7 @@ void main() {
       coordinator.initialize(createDraft: _draft(id: 'already-permanent'));
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
       expect(receipt.collectionId, 'already-permanent');
       expect(coordinator.state.createDraft.id, 'already-permanent');
@@ -148,6 +155,7 @@ void main() {
       coordinator.initialize(createDraft: _draft(id: 'loc_direct'));
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
 
       expect(receipt.outcome, CollectionPublishOutcome.created);
@@ -160,6 +168,7 @@ void main() {
       coordinator.initialize(createDraft: _draft(id: 'loc_review'));
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: false,
+        actorId: 'user-1',
       );
 
       expect(receipt.outcome, CollectionPublishOutcome.pendingReview);
@@ -174,7 +183,7 @@ void main() {
         createDraft: _draft(id: 'loc_invalid', data: CollectionDraftData.defaults(publisherRef: _publisher)),
       );
       expect(
-        () => coordinator.publish(direct: true),
+        () => coordinator.publish(direct: true, actorId: 'user-1'),
         throwsA(isA<StateError>()),
       );
       expect(coordinator.state.status, CollectionCreateStatus.editing);
@@ -184,7 +193,8 @@ void main() {
   group('archive', () {
     test('never called on a Collection that was never published (loc_* id)', () async {
       coordinator.initialize(createDraft: _draft(id: 'loc_unpublished'));
-      await coordinator.archive();
+      final bool synced = await coordinator.archive();
+      expect(synced, isTrue); // trivially in sync — nothing to archive
       expect(sink.archiveCalls, isEmpty);
     });
 
@@ -192,28 +202,56 @@ void main() {
       coordinator.initialize(createDraft: _draft(id: 'loc_toarchive'));
       final CollectionPublishReceipt receipt = await coordinator.publish(
         direct: true,
+        actorId: 'user-1',
       );
-      await coordinator.archive();
+      final bool synced = await coordinator.archive();
+      expect(synced, isTrue);
       expect(sink.archiveCalls, <String>[receipt.collectionId]);
     });
   });
 
   group('moderation delegation', () {
     test('pendingModerationRequests and decideModerationRequest delegate '
-        'straight to the repository', () async {
+        'straight to the repository, accept activates', () async {
       coordinator.initialize(createDraft: _draft(id: 'loc_moderate'));
-      await coordinator.publish(direct: false);
+      await coordinator.publish(direct: false, actorId: 'user-1');
       final List<CollectionModerationRequest> pending = await coordinator
           .pendingModerationRequests();
       expect(pending, hasLength(1));
 
-      await coordinator.decideModerationRequest(
-        requestId: pending.single.requestId,
-        accept: true,
-      );
+      final CollectionModerationDecisionResult result = await coordinator
+          .decideModerationRequest(
+            requestId: pending.single.requestId,
+            accept: true,
+          );
 
+      expect(
+        result.request.decision!.outcome,
+        CollectionModerationDecisionOutcome.accepted,
+      );
       expect(await coordinator.pendingModerationRequests(), isEmpty);
       expect(sink.activateCalls, hasLength(1));
+    });
+
+    test('reject requires a reason code and never activates', () async {
+      coordinator.initialize(createDraft: _draft(id: 'loc_moderate_reject'));
+      await coordinator.publish(direct: false, actorId: 'user-1');
+      final List<CollectionModerationRequest> pending = await coordinator
+          .pendingModerationRequests();
+
+      final CollectionModerationDecisionResult result = await coordinator
+          .decideModerationRequest(
+            requestId: pending.single.requestId,
+            accept: false,
+            rejectionReason:
+                CollectionModerationRejectionReason.incompleteSubmission,
+          );
+
+      expect(
+        result.request.decision!.outcome,
+        CollectionModerationDecisionOutcome.rejected,
+      );
+      expect(sink.activateCalls, isEmpty);
     });
   });
 }

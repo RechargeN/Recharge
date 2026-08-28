@@ -156,6 +156,33 @@ void main() {
     controller.dispose();
   });
 
+  test(
+    'the real default composition (no config override at all — the exact '
+    'shape service_locator.dart registers) blocks publish the same way',
+    () async {
+      final controller = buildController(); // no collectionCreateConfig arg
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'e@example.com',
+        organizerName: 'n',
+        capabilities: const <String>[
+          'create.collection',
+          'publish.collection.direct',
+        ],
+      );
+      controller.setObjectType(CreateObjectType.collection);
+      controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
+      _fillPublishableCollection(controller);
+
+      final bool published = await controller.publishCollection();
+
+      expect(published, isFalse);
+      expect(controller.state.message, contains('временно отключена'));
+      expect(sink.activateCalls, isEmpty);
+      controller.dispose();
+    },
+  );
+
   test('submit.collection without publish.collection.direct always takes '
       'the review path, never activates the sink', () async {
     final controller = buildController(

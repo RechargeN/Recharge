@@ -1,4 +1,5 @@
 import '../../../core/telemetry/analytics_service.dart';
+import '../domain/entities/collection_moderation_request.dart';
 import '../domain/entities/collection_publication_data.dart';
 
 /// COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §15 "Telemetry и privacy" — a
@@ -41,6 +42,8 @@ class CollectionCreateTelemetry {
     required CollectionCreateTelemetryResult result,
     bool? direct,
     bool? accept,
+    bool? synced,
+    CollectionModerationRejectionReason? rejectionReason,
   }) {
     _analytics?.track(
       'collection_create_action',
@@ -49,6 +52,12 @@ class CollectionCreateTelemetry {
         'result': result.name,
         if (direct != null) 'direct': direct,
         if (accept != null) 'accept': accept,
+        // Review finding: a persistent Discover-sink failure on
+        // publish/moderation-accept/archive must never be indistinguishable
+        // from a clean success in telemetry, even though the *author* is
+        // still told it succeeded (the local write did).
+        if (synced != null) 'synced': synced,
+        if (rejectionReason != null) 'rejection_reason': rejectionReason.name,
       },
     );
   }
@@ -56,39 +65,53 @@ class CollectionCreateTelemetry {
   /// `direct` records which write path was taken
   /// (`publish.collection.direct` vs `submit.collection`); `outcome`
   /// distinguishes an actually-active publish from one still awaiting
-  /// `moderate.collection`.
+  /// `moderate.collection`; `discoverSynced` is only meaningful when the
+  /// outcome activated something (ignored for `pendingReview`).
   void trackPublish({
     required bool direct,
     required CollectionPublishOutcome outcome,
+    bool discoverSynced = true,
   }) {
+    final bool isPending = outcome == CollectionPublishOutcome.pendingReview;
     _track(
       action: CollectionCreateTelemetryAction.publish,
-      result: outcome == CollectionPublishOutcome.pendingReview
+      result: isPending
           ? CollectionCreateTelemetryResult.pendingReview
           : CollectionCreateTelemetryResult.success,
       direct: direct,
+      synced: isPending ? null : discoverSynced,
     );
   }
 
-  void trackRemovalOnly() {
+  void trackRemovalOnly({bool discoverSynced = true}) {
     _track(
       action: CollectionCreateTelemetryAction.removalOnly,
       result: CollectionCreateTelemetryResult.success,
+      synced: discoverSynced,
     );
   }
 
-  void trackArchive() {
+  void trackArchive({bool discoverSynced = true}) {
     _track(
       action: CollectionCreateTelemetryAction.archive,
       result: CollectionCreateTelemetryResult.success,
+      synced: discoverSynced,
     );
   }
 
-  void trackModerationDecision({required bool accept}) {
+  void trackModerationDecision({
+    required bool accept,
+    bool discoverSynced = true,
+    CollectionModerationRejectionReason? rejectionReason,
+  }) {
     _track(
       action: CollectionCreateTelemetryAction.moderationDecision,
       result: CollectionCreateTelemetryResult.success,
       accept: accept,
+      // Nothing to sync on a reject — omit rather than report a
+      // meaningless "true".
+      synced: accept ? discoverSynced : null,
+      rejectionReason: rejectionReason,
     );
   }
 

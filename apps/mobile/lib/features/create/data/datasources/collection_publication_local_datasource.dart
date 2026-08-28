@@ -8,9 +8,11 @@ import '../../domain/entities/collection_publication_data.dart';
 import '../models/collection_publication_model.dart';
 
 /// In-memory stand-in for the crash-recoverable staged store described in
-/// §12 — an actual persisted/staged implementation is a later gate; this
-/// keeps the exact idempotency, removal-only and moderation contracts so
-/// callers do not have to change when the storage backend does.
+/// §12 — an actual persisted, staged-write/restart-recovery/corrupt-record-
+/// isolation implementation is a tracked follow-up (this class does not yet
+/// meet that bar — see the CLG-CRT-01 LAUNCH_STATUS entry); this keeps the
+/// exact idempotency, removal-only and moderation *contracts* so the
+/// eventual storage backend is a drop-in swap, not an API change.
 class CollectionPublicationLocalDatasource {
   CollectionPublicationLocalDatasource({required IdGenerator idGenerator})
     : _idGenerator = idGenerator;
@@ -19,15 +21,28 @@ class CollectionPublicationLocalDatasource {
 
   final Map<String, PublishedCollectionVersion> _activeByCollectionId =
       <String, PublishedCollectionVersion>{};
+
+  /// Keyed by `'$commandType:$actorId:${bundle.publishAttemptId}'` — §12's
+  /// effective `(actorId, commandType, requestId)` key. `publish` and
+  /// `submitForReview` each get their own `commandType` prefix so a replay
+  /// of one can never be read back as a receipt for the other (a review
+  /// receipt replayed through `publish`'s key space, or vice versa, would
+  /// otherwise report an activation that never happened).
   final Map<String, _ReceiptRecord> _receiptsByIdempotencyKey =
       <String, _ReceiptRecord>{};
-  final Map<String, CollectionModerationRequest> _pendingByRequestId =
+
+  /// Every moderation request ever created, pending or decided — a decided
+  /// request stays here (sealed, immutable `decision`) rather than being
+  /// removed, so [decide] can detect and refuse a second decision on the
+  /// same request instead of silently re-deciding it.
+  final Map<String, CollectionModerationRequest> _moderationRequests =
       <String, CollectionModerationRequest>{};
 
   Future<CollectionPublishReceipt> publish(
-    CollectionPublishBundle bundle,
-  ) async {
-    final String key = bundle.publishAttemptId;
+    CollectionPublishBundle bundle, {
+    required String actorId,
+  }) async {
+    final String key = 'publish:$actorId:${bundle.publishAttemptId}';
     final String payloadHash = _hashBundle(bundle);
     final _ReceiptRecord? existing = _receiptsByIdempotencyKey[key];
     if (existing != null) {
@@ -63,13 +78,15 @@ class CollectionPublicationLocalDatasource {
     return receipt;
   }
 
-  /// §6/§7 Шаг 5: same idempotency contract as [publish], but the version
-  /// only lands in [_pendingByRequestId] — never [_activeByCollectionId] —
-  /// until [decide] accepts it.
+  /// §6/§7 Шаг 5: same idempotency contract as [publish], but its own key
+  /// space (see the `_receiptsByIdempotencyKey` doc comment) and the
+  /// version only lands in [_moderationRequests] — never
+  /// [_activeByCollectionId] — until [decide] accepts it.
   Future<CollectionPublishReceipt> submitForReview(
-    CollectionPublishBundle bundle,
-  ) async {
-    final String key = bundle.publishAttemptId;
+    CollectionPublishBundle bundle, {
+    required String actorId,
+  }) async {
+    final String key = 'review:$actorId:${bundle.publishAttemptId}';
     final String payloadHash = _hashBundle(bundle);
     final _ReceiptRecord? existing = _receiptsByIdempotencyKey[key];
     if (existing != null) {
@@ -86,7 +103,7 @@ class CollectionPublicationLocalDatasource {
     }
     final DateTime now = DateTime.now().toUtc();
     final String requestId = bundle.publishAttemptId;
-    _pendingByRequestId[requestId] = CollectionModerationRequest(
+    _moderationRequests[requestId] = CollectionModerationRequest(
       requestId: requestId,
       bundle: bundle,
       submittedAtUtc: now,
@@ -105,36 +122,68 @@ class CollectionPublicationLocalDatasource {
   }
 
   Future<List<CollectionModerationRequest>> pendingRequests() async {
-    return List<CollectionModerationRequest>.unmodifiable(
-      _pendingByRequestId.values,
-    );
+    return _moderationRequests.values
+        .where((CollectionModerationRequest request) => request.isPending)
+        .toList(growable: false);
   }
 
-  /// Returns the newly-active [PublishedCollectionVersion] on acceptance,
-  /// or `null` on rejection (nothing to activate). The caller (repository
-  /// impl) is the one that talks to the Discover sink — this datasource
-  /// only owns the local pending/active split.
-  Future<PublishedCollectionVersion?> decide({
+  /// Returns the decided request (its `decision` now sealed) plus the
+  /// newly-active [PublishedCollectionVersion] on acceptance, or `null` on
+  /// rejection (nothing to activate). The caller (repository impl) is the
+  /// one that talks to the Discover sink — this datasource only owns the
+  /// local pending/decided split.
+  Future<(CollectionModerationRequest, PublishedCollectionVersion?)> decide({
     required String requestId,
     required bool accept,
+    CollectionModerationRejectionReason? rejectionReason,
   }) async {
-    final CollectionModerationRequest? request = _pendingByRequestId.remove(
-      requestId,
-    );
+    if (!accept && rejectionReason == null) {
+      throw ArgumentError.notNull('rejectionReason');
+    }
+    if (accept && rejectionReason != null) {
+      throw ArgumentError.value(
+        rejectionReason,
+        'rejectionReason',
+        'Must be null when accepting.',
+      );
+    }
+    final CollectionModerationRequest? request = _moderationRequests[requestId];
     if (request == null) {
       throw const CollectionPublicationException(
         CollectionPublicationFailure.notFound,
         'Moderation request not found.',
       );
     }
-    if (!accept) return null;
+    if (!request.isPending) {
+      // Sealed (§6): a second decide() on the same request is refused, not
+      // silently replayed or overwritten.
+      throw const CollectionPublicationException(
+        CollectionPublicationFailure.idempotencyConflict,
+        'This moderation request was already decided.',
+      );
+    }
     final DateTime now = DateTime.now().toUtc();
+    final CollectionModerationDecision decision = accept
+        ? CollectionModerationDecision(
+            outcome: CollectionModerationDecisionOutcome.accepted,
+            decidedAtUtc: now,
+          )
+        : CollectionModerationDecision(
+            outcome: CollectionModerationDecisionOutcome.rejected,
+            decidedAtUtc: now,
+            rejectionReason: rejectionReason,
+          );
+    final CollectionModerationRequest decided = request.copyWith(
+      decision: decision,
+    );
+    _moderationRequests[requestId] = decided;
+    if (!accept) return (decided, null);
     final PublishedCollectionVersion version = PublishedCollectionVersion(
       bundle: request.bundle,
       publishedAtUtc: now,
     );
     _activeByCollectionId[request.bundle.collectionId] = version;
-    return version;
+    return (decided, version);
   }
 
   Future<CollectionPublishReceipt> removeItemsOnly(

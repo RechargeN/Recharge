@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/collection_create_telemetry.dart';
+import 'package:recharge/features/create/domain/entities/collection_moderation_request.dart';
 import 'package:recharge/features/create/domain/entities/collection_publication_data.dart';
 
 void main() {
@@ -37,14 +38,23 @@ void main() {
         direct: true,
         outcome: CollectionPublishOutcome.pendingReview,
       );
-      telemetry.trackModerationDecision(accept: false);
+      telemetry.trackModerationDecision(
+        accept: false,
+        rejectionReason: CollectionModerationRejectionReason.qualityIssue,
+      );
+      telemetry.trackArchive(discoverSynced: false);
       telemetry.trackFailure(
         action: CollectionCreateTelemetryAction.removalOnly,
         failureCode: 'notFound',
       );
 
       for (final _TrackedEvent event in analytics.events) {
-        expect(event.params.keys, everyElement(anyOf('action', 'result', 'direct', 'accept')));
+        expect(
+          event.params.keys,
+          everyElement(
+            anyOf('action', 'result', 'direct', 'accept', 'synced', 'rejection_reason'),
+          ),
+        );
         for (final Object? value in event.params.values) {
           expect(value, anyOf(isA<String>(), isA<bool>()));
           if (value is String) {
@@ -52,7 +62,10 @@ void main() {
             // raw id, title, note, price, coordinate or error message.
             expect(
               CollectionCreateTelemetryAction.values.map((a) => a.name).contains(value) ||
-                  CollectionCreateTelemetryResult.values.map((r) => r.name).contains(value),
+                  CollectionCreateTelemetryResult.values.map((r) => r.name).contains(value) ||
+                  CollectionModerationRejectionReason.values
+                      .map((r) => r.name)
+                      .contains(value),
               isTrue,
               reason: '"$value" is not an allowlisted enum name',
             );
@@ -61,6 +74,31 @@ void main() {
       }
     },
   );
+
+  test('trackModerationDecision(accept:false) records the reason code, '
+      'never synced (nothing to sync on a reject)', () {
+    telemetry.trackModerationDecision(
+      accept: false,
+      rejectionReason: CollectionModerationRejectionReason.duplicateCollection,
+    );
+    final Map<String, Object?> params = analytics.events.single.params;
+    expect(params['accept'], isFalse);
+    expect(
+      params['rejection_reason'],
+      CollectionModerationRejectionReason.duplicateCollection.name,
+    );
+    expect(params.containsKey('synced'), isFalse);
+  });
+
+  test('a persistent Discover-sink failure is tracked, never silently '
+      'reported as a clean success', () {
+    telemetry.trackPublish(
+      direct: true,
+      outcome: CollectionPublishOutcome.created,
+      discoverSynced: false,
+    );
+    expect(analytics.events.single.params['synced'], isFalse);
+  });
 
   test('trackPublish(direct:false) records the direct flag as false', () {
     telemetry.trackPublish(

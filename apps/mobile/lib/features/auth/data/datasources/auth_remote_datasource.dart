@@ -51,12 +51,18 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     'moderate.route',
     'manage.route',
     'archive.route',
-    // CLG-CRT-01 §6: demo actor can author and submit a Collection, but not
-    // publish it live, moderate others' submissions, or manage/archive an
-    // already-published one — those stay off this fixture on purpose so
-    // the review/moderation path is exercised, not bypassed, in the demo.
+    // CLG-CRT-01 §6: same single-actor-plays-every-role pattern as Route
+    // above — `CreateController` reads capabilities from
+    // `AuthUserEntity.capabilities` (this list), not from the separate
+    // `IdentityAccessSnapshot` fixture, so `moderate.collection` has to be
+    // here too or moderation is unreachable through the running app no
+    // matter what the kill switches are set to.
     'create.collection',
     'submit.collection',
+    'publish.collection.direct',
+    'moderate.collection',
+    'manage.collection',
+    'archive.collection',
     'create.place',
     'create.venue',
     'create.bookable_slot',
