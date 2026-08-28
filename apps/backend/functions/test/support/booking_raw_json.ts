@@ -97,11 +97,30 @@ export class StrictJsonReader {
   }
 
   private readNumber(): number {
-    const match = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u.exec(
+    const match = /^-?(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?/u.exec(
       this.source.slice(this.offset),
     );
     if (match === null) throw new TypeError('value_expected');
     this.offset += match[0].length;
+    const integerDigits = match[1];
+    const fractionalDigits = match[2] ?? '';
+    const coefficient = `${integerDigits}${fractionalDigits}`;
+    const isZero = !/[1-9]/u.test(coefficient);
+    const exponent = Number(match[3] ?? '0');
+    if (!Number.isSafeInteger(exponent)) {
+      if (!isZero) throw new TypeError(exponent < 0 ? 'fractional_number' : 'unsafe_integer');
+    } else {
+      const decimalScale = exponent - fractionalDigits.length;
+      if (decimalScale < 0 && !isZero) {
+        const requiredTrailingZeros = -decimalScale;
+        if (
+          requiredTrailingZeros > coefficient.length ||
+          /[1-9]/u.test(coefficient.slice(-requiredTrailingZeros))
+        ) {
+          throw new TypeError('fractional_number');
+        }
+      }
+    }
     const value = Number(match[0]);
     if (!Number.isSafeInteger(value) || Math.abs(value) > maxSafeInteger) {
       throw new TypeError(Number.isInteger(value) ? 'unsafe_integer' : 'fractional_number');
