@@ -1,9 +1,9 @@
 # Recharge Backend — Booking callable raw-body feasibility slice
 
 - ID: **BCK09-API-RAW-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-08-28**
-- Status: **Implemented/Review — local contract gates pass; canonical Node 22 hosted evidence pending**
+- Status: **Done for RAW-A — RAW-B emulator callable-path proof remains blocked**
 - Target: **BCK-09 v1.10 / ECL-03C v1.8 / Booking wire v1**
 - Parent review:
   [BCK09-API-REV-01 v0.7](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
@@ -14,6 +14,7 @@
 - Deployment authority: **none**
 - Plan commit: **`cd6e28e`**
 - Implementation commit: **`d4621c5`**
+- Hosted evidence head: **`3e540f58d0f6a42652a51aa4d800fdaae138dfd2`**
 
 ---
 
@@ -27,12 +28,26 @@ semantic-hash evidence. It creates no callable, runtime, Firebase access,
 configuration or deployment surface.
 
 Phase B, an actual Firebase Emulator callable-path proof, remains a separate
-future approval. Exact Node 22.23.2 hosted evidence cannot be obtained without
-the separately prohibited push, so Phase A remains `Implemented/Review`, not
-`Done`. It cannot promote BCK-09, ECL-03C or any specialist signature and cannot
-turn the current runtime/evidence Hold into Pass.
+future approval. Exact Node 22.23.2 hosted evidence passed on Ubuntu and Windows,
+so RAW-A is `Done`. This does not promote BCK-09, ECL-03C or any specialist
+signature and does not turn the remaining RAW-B/runtime/evidence Hold into
+Pass.
 
-### 0.1. v0.2 implementation reconciliation
+### 0.1. v0.3 hosted evidence reconciliation
+
+- push and pull-request R0 matrices passed on exact head `3e540f5` using pinned
+  Node `22.23.2`, npm `10.9.8`, Temurin `21.0.12+8` and Terraform `1.15.9`;
+- both Ubuntu 24.04 and Windows 2025 passed dependency integrity/audit,
+  formatting, lint, typecheck, unit, all 15 Booking contract tests, existing R0
+  emulator isolation/default-deny, generated-output, reproducibility and
+  Terraform gates;
+- boundaries, codegen, mobile lint and the full mobile test workflow passed on
+  the same exact head;
+- draft PR #7 remained `CLEAN`; no merge was performed;
+- promoted only RAW-A from `Implemented/Review` to `Done`; RAW-B, runtime,
+  Firebase changes, callable exports and deployment remain unauthorized.
+
+### 0.2. v0.2 implementation reconciliation
 
 - added a pure test-only raw-envelope inspector with a closed typed failure
   vocabulary, 64 KiB bound, fatal UTF-8/BOM checks, exact `data` envelope,
@@ -354,7 +369,7 @@ Phase A is Done only when:
 10. BCK-09/ECL-03C remain Review/runtime Absent and all nine signatures remain
     Pending.
 
-### 12.1. Current evidence at commit `d4621c5`
+### 12.1. Final RAW-A evidence
 
 Passed locally:
 
@@ -396,12 +411,22 @@ Inconclusive/blocked evidence:
   it is Inconclusive;
 - the existing R0 emulator suite was not claimed on the wrong Node/Java
   toolchain;
-- the hosted Ubuntu/Windows matrix is unavailable because push remains
-  explicitly unauthorized.
+- these local environment limitations were superseded for RAW-A by the exact
+  hosted evidence below; they remain an honest record of the local run.
 
-Accordingly, the only honest result is:
-**`Static adapter implemented locally — canonical RAW-A evidence pending`; RAW-B
-remains blocked.**
+Hosted exact-head evidence:
+
+| Run | Event | Result |
+|---|---|---|
+| `33183030767` | pull request R0 | Ubuntu and Windows Pass |
+| `33183025743` | push R0 | Ubuntu and Windows Pass |
+| `33183030771` | mobile CI | boundaries and lint Pass |
+| `33183030786` | codegen | Pass |
+| `33183030790` | full mobile tests | Pass |
+
+Accordingly, the final bounded result is:
+**`RAW-A Done — static callable-envelope adapter verified on canonical hosted
+toolchains`; RAW-B remains blocked.**
 
 ## 13. Rollback
 
