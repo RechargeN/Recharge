@@ -3,7 +3,7 @@
 - ID: **BCK09-API-RAW-B-01**
 - Version: **0.1**
 - Date: **2026-08-28**
-- Status: **Review — implementation present; emulator evidence Inconclusive**
+- Status: **Done — Emulator feasible on Ubuntu and Windows**
 - Target: **RAW-B only / BCK-09 v1.10 / ECL-03C v1.8**
 - Parent evidence:
   [BCK09-API-RAW-01 v0.3 — RAW-A Done](BACKEND_EVENT_BOOKING_RAW_BODY_FEASIBILITY_SLICE_SPEC.md)
@@ -25,11 +25,11 @@ inside a cleanup-bound generated emulator source directory. It does not permit
 a product callable, a tracked Firebase resource/configuration change, Firestore
 access, runtime implementation, deployment, push or merge.
 
-The implementation is **not Done** and the transport verdict is
-**Inconclusive** until the exact Node 22.23.2 / npm 10.9.8 / Temurin 21.0.12+8
-job passes on both Ubuntu 24.04 and Windows 2025. The local checkout has Node
-20.17.0 / npm 10.8.2 / Java 17.0.1, so the runner correctly stopped at its
-toolchain gate before creating a temporary source or starting an emulator.
+The implementation is **Done** with the bounded transport verdict
+**Emulator feasible**. Exact Node 22.23.2 / npm 10.9.8 / Temurin 21.0.12+8
+jobs passed on both Ubuntu 24.04 and Windows 2025 at commit `e043218`. This is
+emulator-only evidence: it does not authorize or establish production runtime,
+security, identity, persistence, deployment or operational readiness.
 
 ## 1. Outcome required
 
@@ -260,13 +260,15 @@ The suite must prove:
 | repository boundary gate | Pass — 0 violations, 0 stale/expired exceptions |
 | immutable Git diff from approved plan commit `ab31c22` | Pass |
 | leftover `.raw-body-probe-*` directories | Pass — 0 |
-| RAW-B emulator corpus | Inconclusive — exact local toolchain unavailable |
-| existing R0 unit/emulator suites | Inconclusive locally — same toolchain mismatch |
+| RAW-B emulator corpus | Pass hosted — 19/19 vectors on Ubuntu and Windows |
+| existing R0 unit/emulator suites | Pass hosted on Ubuntu and Windows |
 | Initial Ubuntu/Windows hosted evidence | Fail — runs `33206783480` and `33206787424` exposed a temporary ESM bootstrap incompatibility before any handler result |
-| Corrected Ubuntu/Windows hosted evidence | Pending; repair has not been pushed |
+| Corrected Ubuntu/Windows hosted evidence | Pass — runs `33207838539` and `33207840478` at `e043218` |
+| hosted reproducible logical build | Pass — identical digest `e9443933cf9b823819e95ebdd921c62909c3dc38a618092348ac8f0ac775d8e4` |
+| repository lint/boundaries/codegen/mobile tests | Pass on `e043218` |
 
-The implementation therefore remains in Review. Static green gates do not
-establish that Functions middleware preserves the required bytes.
+The completed hosted probe establishes only that the pinned Functions Emulator
+preserved and exposed the required bytes for the committed synthetic corpus.
 
 The initial hosted failure was fail-safe and infrastructure-only: Firebase
 Emulator attempted synchronous `require()` of a generated ESM entry containing
@@ -274,7 +276,7 @@ top-level `await`, then the runner reached its 300-second timeout. Both operatin
 systems reported the same cause. The repair uses a temporary Node 22 synchronous
 CJS bootstrap, declares the already pinned parent `firebase-admin` dependency
 without installing or importing Admin SDK in the probe, and bounds every client
-request to 20 seconds. A new hosted run is required before changing the verdict.
+request to 20 seconds. The corrected jobs passed on both operating systems.
 
 ## 11. Definition of Ready
 
@@ -305,6 +307,10 @@ RAW-B is Done only when:
 9. documentation reports only `Emulator feasible`;
 10. BCK-09/ECL-03C remain Review/runtime Absent and all specialist signatures
     remain Pending.
+
+All ten conditions passed at `e043218`. RAW-C, product callable exports,
+Booking runtime, Firebase resource changes, Firestore/Admin access, deployment
+and merge remain outside this verdict and require separate authorization.
 
 ## 13. Stop conditions
 
