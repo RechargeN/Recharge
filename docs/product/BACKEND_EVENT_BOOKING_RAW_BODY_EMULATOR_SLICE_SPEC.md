@@ -3,7 +3,7 @@
 - ID: **BCK09-API-RAW-B-01**
 - Version: **0.1**
 - Date: **2026-08-28**
-- Status: **Proposed — separate owner approval required**
+- Status: **Review — implementation present; emulator evidence Inconclusive**
 - Target: **RAW-B only / BCK-09 v1.10 / ECL-03C v1.8**
 - Parent evidence:
   [BCK09-API-RAW-01 v0.3 — RAW-A Done](BACKEND_EVENT_BOOKING_RAW_BODY_FEASIBILITY_SLICE_SPEC.md)
@@ -13,16 +13,23 @@
 
 ---
 
-## 0. Decision requested
+## 0. Owner decision and current verdict
 
-Approve a disposable **Firebase Functions Emulator/test-only** proof that sends
-exact HTTP callable protocol bytes through a temporary Functions v2 export and
-verifies what the handler receives as `request.rawRequest.rawBody`.
+The Product owner approved this exact v0.1 scope on 2026-08-28. A disposable
+**Firebase Functions Emulator/test-only** proof is now present and sends exact
+HTTP callable protocol bytes through a temporary Functions v2 export to verify
+what the handler receives as `request.rawRequest.rawBody`.
 
-This approval would permit one temporary test-fixture callable export created
-only inside a cleanup-bound generated emulator source directory. It would not
-permit a product callable, a tracked Firebase resource/configuration change,
-Firestore access, runtime implementation, deployment, push or merge.
+The approval permits only one temporary test-fixture callable export created
+inside a cleanup-bound generated emulator source directory. It does not permit
+a product callable, a tracked Firebase resource/configuration change, Firestore
+access, runtime implementation, deployment, push or merge.
+
+The implementation is **not Done** and the transport verdict is
+**Inconclusive** until the exact Node 22.23.2 / npm 10.9.8 / Temurin 21.0.12+8
+job passes on both Ubuntu 24.04 and Windows 2025. The local checkout has Node
+20.17.0 / npm 10.8.2 / Java 17.0.1, so the runner correctly stopped at its
+toolchain gate before creating a temporary source or starting an emulator.
 
 ## 1. Outcome required
 
@@ -240,19 +247,39 @@ The suite must prove:
 11. baseline/post hashes match for every immutable surface;
 12. draft PR remains unmerged.
 
+### 10.1. Current local evidence
+
+| Gate | Result |
+|---|---|
+| Prettier check | Pass |
+| ESLint | Pass |
+| strict TypeScript typecheck | Pass |
+| Booking contract suite | Pass — 15/15 |
+| generated-output safety | Pass — 30 files |
+| reproducible logical build | Pass — `a9a84bc49bb2e49b828c7567ed74c63fdcfcefbb265ab3463bd803290f38b0e6` |
+| repository boundary gate | Pass — 0 violations, 0 stale/expired exceptions |
+| immutable Git diff from approved plan commit `ab31c22` | Pass |
+| leftover `.raw-body-probe-*` directories | Pass — 0 |
+| RAW-B emulator corpus | Inconclusive — exact local toolchain unavailable |
+| existing R0 unit/emulator suites | Inconclusive locally — same toolchain mismatch |
+| Ubuntu/Windows hosted evidence | Pending; push was not authorized |
+
+The implementation therefore remains in Review. Static green gates do not
+establish that Functions middleware preserves the required bytes.
+
 ## 11. Definition of Ready
 
-Implementation may start only when:
+Implementation started only after:
 
-1. the Product owner explicitly approves this exact v0.1 slice;
-2. the owner explicitly permits the narrowly scoped disposable test-fixture
+1. the Product owner explicitly approved this exact v0.1 slice;
+2. the owner explicitly permitted the narrowly scoped disposable test-fixture
    callable export while retaining the product-export prohibition;
 3. RAW-A v0.3 remains Done and unchanged;
-4. the working tree is clean and branch head is known;
-5. the exact baseline hashes are recorded;
-6. Node/Firebase dependencies remain pinned and installed;
+4. the working tree was clean at approved plan commit `ab31c22`;
+5. the exact baseline hashes were recorded;
+6. Node/Firebase dependencies remained pinned and installed;
 7. no runtime, tracked Firebase config, cloud, push, merge or deployment
-   permission is inferred.
+   permission was inferred.
 
 ## 12. Definition of Done
 

@@ -19,6 +19,7 @@
     "build": "tsc",
     "test:unit": "npm run build --silent && node lib/test/unit/r0_toolchain_probe.test.js",
     "test:contract": "npm run build --silent && node --test lib/test/contract/booking_fixture_parity.test.js lib/test/contract/booking_query_parity.test.js lib/test/contract/booking_semantic_hash.test.js lib/test/contract/booking_callable_raw_body.test.js",
+    "test:emulator:raw-body": "node ../scripts/run-booking-raw-body-probe.mjs",
     "test:emulator:inside": "npm run build --silent && node lib/test/emulator/r0_emulator_isolation.test.js && node lib/test/emulator/rules_default_deny.test.js",
     "test:emulator": "node ../scripts/run-emulator-tests.mjs",
     "verify:generated": "node ../scripts/verify-generated-clean.mjs",

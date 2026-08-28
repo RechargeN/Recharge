@@ -11,6 +11,7 @@ on:
       - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md"
       - "docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md"
       - "docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md"
+      - "docs/product/BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md"
   push:
     paths:
       - ".github/workflows/backend-r0.yml"
@@ -122,6 +123,10 @@ jobs:
       - name: Booking contract fixture parity
         working-directory: apps/backend/functions
         run: npm run test:contract
+
+      - name: Booking callable raw-body emulator probe
+        working-directory: apps/backend/functions
+        run: npm run test:emulator:raw-body
 
       - name: Firebase emulator isolation and default-deny Rules
         working-directory: apps/backend/functions
