@@ -67,13 +67,25 @@ import '../../features/create/data/repositories/create_template_repository_impl.
 import '../../features/create/data/repositories/scenario_object_intake_repository_impl.dart';
 import '../../features/create/data/repositories/route_publication_repository_impl.dart';
 import '../../features/create/data/repositories/route_quality_workflow_repository_impl.dart';
+import '../../features/create/application/collection_create_config.dart';
+import '../../features/create/application/collection_create_coordinator.dart';
+import '../../features/create/data/datasources/collection_catalog_search_mock_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_local_datasource.dart';
+import '../../features/create/data/datasources/google_places_search_datasource.dart';
+import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
+import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
+import '../../features/create/data/repositories/location_search_repository_impl.dart';
 import '../../features/create/data/repositories/route_gpx_repository_impl.dart';
 import '../../features/create/data/repositories/route_recording_journal_repository_impl.dart';
 import '../../features/create/data/repositories/scenario_transit_schedule_repository_impl.dart';
 import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
+import '../../features/create/domain/repositories/collection_catalog_search_repository.dart';
+import '../../features/create/domain/repositories/collection_publication_index_sink.dart';
+import '../../features/create/domain/repositories/collection_publication_repository.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/domain/repositories/location_search_repository.dart';
 import '../../features/create/domain/repositories/rental_promotion_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
@@ -371,22 +383,67 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<PublishedRentalDiscoveryPort>(
       () => sl<RentalPublicationDiscoveryAdapter>(),
     )
-    // Collection read side only (DTL-LINK-01): the Create-authoring half
-    // of this feature (CollectionCreateCoordinator and everything it
-    // depends on) is not part of this slice and is not registered here —
-    // see the DTL-LINK-01 commit message for why. Mirrors
-    // RoutePublicationDiscoveryAdapter's dual-interface pattern above.
+    // Collection — both sides active (CLG-CRT-01): mirrors Rental above.
+    // `CollectionPublicationDiscoveryAdapter` is the one file that imports
+    // both `CollectionPublicationIndexSink` (Create) and
+    // `PublishedCollectionDiscoveryPort` (Discover); `sink`/`port` here are
+    // the same instance, same pattern as Route/Rental.
     ..registerLazySingleton<PublishedCollectionDiscoveryLocalDataSource>(
       () => PublishedCollectionDiscoveryLocalDataSource(sl()),
     )
     ..registerLazySingleton<CollectionPublicationDiscoveryAdapter>(
       () => CollectionPublicationDiscoveryAdapter(sl()),
     )
+    ..registerLazySingleton<CollectionPublicationIndexSink>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
     ..registerLazySingleton<PublishedCollectionDiscoveryPort>(
       () => sl<CollectionPublicationDiscoveryAdapter>(),
     )
     ..registerLazySingleton<CollectionItemResolutionRepository>(
       CollectionItemResolutionRepositoryImpl.new,
+    )
+    // CLG-CRT-01 §15 "Миграция и rollback": one config instance for the
+    // whole composition — `collectionCreateEnabled: true` is safe to ship,
+    // `collectionPublishingEnabled`/`collectionDiscoverEnabled` stay `false`
+    // (the class defaults) until this slice's own gates are green end to
+    // end; flip both here, in one place, once that is true.
+    ..registerLazySingleton<CollectionCreateRuntimeConfig>(
+      () => const CollectionCreateRuntimeConfig(),
+    )
+    ..registerLazySingleton<CollectionPublicationLocalDatasource>(
+      () => CollectionPublicationLocalDatasource(idGenerator: sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationRepository>(
+      () => CollectionPublicationRepositoryImpl(
+        datasource: sl(),
+        sink: sl<CollectionPublicationIndexSink>(),
+      ),
+    )
+    ..registerLazySingleton<CollectionCatalogSearchMockDatasource>(
+      CollectionCatalogSearchMockDatasource.new,
+    )
+    ..registerLazySingleton<CollectionCatalogSearchRepository>(
+      () => CollectionCatalogSearchRepositoryImpl(datasource: sl()),
+    )
+    // LOC-SRCH prerequisite: no Dart-side Google Places API key source
+    // exists yet in this composition — `GooglePlacesSearchDatasource`
+    // fails closed (empty results) on an empty key, so this is safe, not a
+    // stub that silently misbehaves. Wire a real key source when one exists.
+    ..registerLazySingleton<GooglePlacesSearchDatasource>(
+      () => GooglePlacesSearchDatasource(client: sl(), apiKey: ''),
+    )
+    ..registerLazySingleton<LocationSearchRepository>(
+      () => LocationSearchRepositoryImpl(sl()),
+    )
+    ..registerFactory<CollectionCreateCoordinator>(
+      () => CollectionCreateCoordinator(
+        idGenerator: sl(),
+        catalogSearchRepository: sl(),
+        publicationRepository: sl(),
+        locationSearchRepository: sl(),
+        config: sl<CollectionCreateRuntimeConfig>(),
+      ),
     )
     ..registerLazySingleton<RoutePublicationMemoryDataSource>(
       RoutePublicationMemoryDataSource.new,

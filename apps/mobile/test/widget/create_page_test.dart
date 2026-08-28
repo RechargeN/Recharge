@@ -1006,6 +1006,7 @@ class _NoopAuthRepository implements AuthRepository {
           'create.place',
           'create.route',
           'create.rental',
+          'create.collection',
         ],
         profileStatus: 'active',
       ),

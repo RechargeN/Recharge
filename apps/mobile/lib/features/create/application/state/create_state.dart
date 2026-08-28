@@ -59,6 +59,7 @@ class CreateState {
     required this.routeModerationRequests,
     required this.rentalStep,
     required this.rentalValidationIssues,
+    required this.collectionStep,
   });
 
   factory CreateState.initial() {
@@ -101,6 +102,7 @@ class CreateState {
       routeModerationRequests: const <RouteModerationRequest>[],
       rentalStep: 0,
       rentalValidationIssues: const <RentalValidationIssue>[],
+      collectionStep: 0,
     );
   }
 
@@ -138,6 +140,7 @@ class CreateState {
   final List<RouteModerationRequest> routeModerationRequests;
   final int rentalStep;
   final List<RentalValidationIssue> rentalValidationIssues;
+  final int collectionStep;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -198,6 +201,7 @@ class CreateState {
     int? rentalStep,
     List<RentalValidationIssue>? rentalValidationIssues,
     bool clearRentalValidationIssues = false,
+    int? collectionStep,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -273,6 +277,7 @@ class CreateState {
       rentalValidationIssues: clearRentalValidationIssues
           ? const <RentalValidationIssue>[]
           : (rentalValidationIssues ?? this.rentalValidationIssues),
+      collectionStep: collectionStep ?? this.collectionStep,
     );
   }
 }

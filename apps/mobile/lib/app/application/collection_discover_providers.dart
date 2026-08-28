@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/create/application/collection_create_config.dart';
 import '../../features/discover/domain/entities/published_collection_discovery_entity.dart';
 import '../../features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
@@ -8,15 +9,20 @@ import '../di/service_locator.dart';
 /// App-level composition, not `features/discover/application/` — reads
 /// only through the Discover-owned `PublishedCollectionDiscoveryPort`
 /// (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §14), same layering as
-/// `scenario_object_intake_providers.dart`. There is no separate
-/// "Discover collection rendering" kill switch: when
-/// `collectionPublishingEnabled` is off, nothing is ever written to the
-/// discovery store, so `loadActiveCollections()` is naturally empty —
-/// gating the read side too would just be dead code, not a real safeguard.
+/// `scenario_object_intake_providers.dart`.
+///
+/// `collectionDiscoverEnabled` (§15 kill switch) is checked here, on the
+/// read side, independently of `collectionPublishingEnabled` gating writes
+/// on the Create side — the two are deliberately separate levers so
+/// Discover's surface can be hidden on its own (e.g. an incident) without
+/// freezing authors' ability to keep publishing, and vice versa.
 final activeCollectionsProvider =
     FutureProvider.autoDispose<List<PublishedCollectionDiscoveryEntity>>((
       ref,
     ) {
+      if (!sl<CollectionCreateRuntimeConfig>().collectionDiscoverEnabled) {
+        return const <PublishedCollectionDiscoveryEntity>[];
+      }
       return sl<PublishedCollectionDiscoveryPort>().loadActiveCollections();
     });
 
@@ -25,6 +31,9 @@ final collectionByIdProvider = FutureProvider.autoDispose
       ref,
       collectionId,
     ) {
+      if (!sl<CollectionCreateRuntimeConfig>().collectionDiscoverEnabled) {
+        return null;
+      }
       return sl<PublishedCollectionDiscoveryPort>().getActiveCollection(
         collectionId,
       );

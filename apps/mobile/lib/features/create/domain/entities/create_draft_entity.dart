@@ -1,4 +1,5 @@
 import 'activity_draft_data.dart';
+import 'collection_draft_data.dart';
 import 'create_availability.dart';
 import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
@@ -108,6 +109,7 @@ class CreateDraftEntity {
     this.findPeopleData,
     this.routeData,
     this.scenarioData,
+    this.collectionData,
     this.rentalData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
@@ -181,6 +183,7 @@ class CreateDraftEntity {
   final FindPeopleDraftData? findPeopleData;
   final RouteDraftData? routeData;
   final ScenarioDraftData? scenarioData;
+  final CollectionDraftData? collectionData;
   final RentalDraftData? rentalData;
 
   final DateTime? startDateTimeUtc;
@@ -281,6 +284,7 @@ class CreateDraftEntity {
       findPeopleData: null,
       routeData: null,
       scenarioData: null,
+      collectionData: null,
       startDateTimeUtc: null,
       endDateTimeUtc: null,
       durationMinutes: null,
@@ -361,6 +365,8 @@ class CreateDraftEntity {
     bool clearRouteData = false,
     ScenarioDraftData? scenarioData,
     bool clearScenarioData = false,
+    CollectionDraftData? collectionData,
+    bool clearCollectionData = false,
     RentalDraftData? rentalData,
     bool clearRentalData = false,
     DateTime? startDateTimeUtc,
@@ -453,6 +459,9 @@ class CreateDraftEntity {
       scenarioData: clearScenarioData
           ? null
           : (scenarioData ?? this.scenarioData),
+      collectionData: clearCollectionData
+          ? null
+          : (collectionData ?? this.collectionData),
       rentalData: clearRentalData ? null : (rentalData ?? this.rentalData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null

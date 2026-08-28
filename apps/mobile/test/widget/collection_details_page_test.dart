@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/di/service_locator.dart';
+import 'package:recharge/features/create/application/collection_create_config.dart';
 import 'package:recharge/features/discover/domain/entities/published_collection_discovery_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/published_collection_discovery_port.dart';
@@ -13,6 +14,14 @@ import 'package:recharge/features/discover/presentation/pages/collection_details
 void main() {
   setUp(() async {
     await sl.reset();
+    // CLG-CRT-01 §15 kill switch: `collectionDiscoverEnabled` gates the
+    // same read providers this shell-migration test exercises. Production
+    // composition always registers this; this test's manual `sl` bootstrap
+    // must too, or every read throws "not registered" instead of exercising
+    // the actual DetailsShell rendering this file is about.
+    sl.registerSingleton<CollectionCreateRuntimeConfig>(
+      const CollectionCreateRuntimeConfig(collectionDiscoverEnabled: true),
+    );
   });
 
   tearDown(() async {

@@ -1,5 +1,6 @@
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/activity_draft_data.dart';
+import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -10,6 +11,7 @@ import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
 import 'activity_draft_mapper.dart';
+import 'collection_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
@@ -225,6 +227,11 @@ class CreateDraftModel {
     if (entity.rentalData != null) {
       serializedSections['rental_details'] = RentalDraftMapper.toJson(
         entity.rentalData!,
+      );
+    }
+    if (entity.collectionData != null) {
+      serializedSections['collection_details'] = CollectionDraftMapper.toJson(
+        entity.collectionData!,
       );
     }
     return CreateDraftModel(
@@ -446,6 +453,18 @@ class CreateDraftModel {
             ),
           )
         : null;
+    final CollectionDraftData? collectionData =
+        parsedObjectType == CreateObjectType.collection
+        ? CollectionDraftMapper.fromJson(
+            migratedSectionData['collection_details'],
+            defaults: CollectionDraftData.defaults(
+              publisherRef: PublisherRef(
+                type: PublisherType.user,
+                id: organizerId,
+              ),
+            ),
+          )
+        : null;
     final Object? routePayload = migratedSectionData['route_details'];
     RouteDraftData? routeData;
     final Map<String, Object?> runtimeSectionData = Map<String, Object?>.from(
@@ -481,6 +500,7 @@ class CreateDraftModel {
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
+      collectionData: collectionData,
       rentalData: rentalData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null

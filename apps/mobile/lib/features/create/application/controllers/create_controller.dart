@@ -7,6 +7,11 @@ import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
+import '../../domain/entities/collection_draft_data.dart';
+import '../../domain/entities/collection_item_draft.dart';
+import '../../domain/entities/collection_moderation_request.dart';
+import '../../domain/entities/collection_publication_data.dart';
+import '../../domain/entities/collection_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
@@ -40,6 +45,7 @@ import '../../domain/entities/scenario_transit_mutation.dart';
 import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/entities/scenario_validation_issue.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
+import '../../domain/repositories/collection_catalog_search_repository.dart';
 import '../../domain/repositories/create_template_repository.dart';
 import '../../domain/repositories/rental_private_authoring_repository.dart';
 import '../../domain/repositories/rental_publication_index_sink.dart';
@@ -66,6 +72,9 @@ import '../../domain/usecases/build_route_publication_bundle_usecase.dart';
 import '../../domain/usecases/count_activity_informal_access_usecase.dart';
 import '../../domain/usecases/validate_activity_draft_usecase.dart';
 import '../activity_create_config.dart';
+import '../collection_create_config.dart';
+import '../collection_create_coordinator.dart';
+import '../collection_create_telemetry.dart';
 import '../create_runtime_defaults.dart';
 import '../create_taxonomy.dart';
 import '../event_create_coordinator.dart';
@@ -89,6 +98,7 @@ import '../scenario_create_coordinator.dart';
 import '../scenario_generation_coordinator.dart';
 import '../scenario_transit_telemetry.dart';
 import '../get_category_criteria_usecase.dart';
+import '../state/collection_create_state.dart';
 import '../state/create_state.dart';
 import '../state/route_create_state.dart';
 
@@ -144,6 +154,9 @@ class CreateController extends ChangeNotifier {
         const RentalDirectPublishPolicy(),
     PromoteRentalToPublishedUseCase? promoteRentalToPublished,
     RentalPublicationIndexSink? rentalPublicationIndexSink,
+    CollectionCreateRuntimeConfig collectionCreateConfig =
+        const CollectionCreateRuntimeConfig(),
+    CollectionCreateTelemetry? collectionTelemetry,
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
@@ -176,7 +189,10 @@ class CreateController extends ChangeNotifier {
        _resolveRentalDirectPublish = resolveRentalDirectPublish,
        _rentalDirectPublishPolicy = rentalDirectPublishPolicy,
        _promoteRentalToPublished = promoteRentalToPublished,
-       _rentalPublicationIndexSink = rentalPublicationIndexSink;
+       _rentalPublicationIndexSink = rentalPublicationIndexSink,
+       _collectionCreateConfig = collectionCreateConfig,
+       _collectionTelemetry =
+           collectionTelemetry ?? CollectionCreateTelemetry(analyticsService);
 
   final LoadCreateDraftUseCase _loadCreateDraftUseCase;
   final LoadCreateDraftByIdUseCase? _loadCreateDraftByIdUseCase;
@@ -211,6 +227,8 @@ class CreateController extends ChangeNotifier {
   final RentalDirectPublishPolicy _rentalDirectPublishPolicy;
   final PromoteRentalToPublishedUseCase? _promoteRentalToPublished;
   final RentalPublicationIndexSink? _rentalPublicationIndexSink;
+  final CollectionCreateRuntimeConfig _collectionCreateConfig;
+  final CollectionCreateTelemetry _collectionTelemetry;
   bool _isVerifiedCreator = false;
   List<CreateTemplateEntity> _rentalTemplates = const <CreateTemplateEntity>[];
   int _scenarioGenerationRequestSerial = 0;
@@ -240,6 +258,18 @@ class CreateController extends ChangeNotifier {
       _capabilities.contains('publish.rental.direct');
   bool get canManageRental => _capabilities.contains('manage.rental');
   bool get canArchiveRental => _capabilities.contains('archive.rental');
+  // COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §6 — each capability is its own
+  // gate, none implied by another; re-checked at every mutation/publish
+  // call site below, not just once at entry.
+  bool get canCreateCollection => _capabilities.contains('create.collection');
+  bool get canSubmitCollection => _capabilities.contains('submit.collection');
+  bool get canPublishCollectionDirect =>
+      _capabilities.contains('publish.collection.direct');
+  bool get canModerateCollection =>
+      _capabilities.contains('moderate.collection');
+  bool get canManageCollection => _capabilities.contains('manage.collection');
+  bool get canArchiveCollection =>
+      _capabilities.contains('archive.collection');
   RouteCreateState? get routeCreateState => _routeCoordinator?.state;
   bool get eventClassificationEnabled => _eventClassificationEnabled;
   EventClassificationSectionState get eventClassificationState =>
@@ -395,6 +425,7 @@ class CreateController extends ChangeNotifier {
   Timer? _autosaveTimer;
   int _localIdCounter = 0;
   RouteCreateCoordinator? _routeCoordinator;
+  CollectionCreateCoordinator? _collectionCoordinator;
   List<CreateTemplateEntity> _eventTemplates = const <CreateTemplateEntity>[];
   EventAdmissionPreset? _selectedAdmissionPreset;
   EventAdmissionDraft? _admissionPresetPreview;
@@ -700,6 +731,15 @@ class CreateController extends ChangeNotifier {
       );
       return;
     }
+    if (type == CreateObjectType.collection && !canCreateCollection) {
+      _setState(
+        _state.copyWith(
+          message:
+              'Для создания Collection требуется capability create.collection.',
+        ),
+      );
+      return;
+    }
     final CreateBlockConfig config = createBlockConfigFor(type);
     final bool sameType = _state.draft.objectType == type;
     final bool keepTaxonomy =
@@ -749,6 +789,10 @@ class CreateController extends ChangeNotifier {
             ? (_state.draft.rentalData ?? _rentalDefaults(_state.userId))
             : null,
         clearRentalData: type != CreateObjectType.rental,
+        collectionData: type == CreateObjectType.collection
+            ? (_state.draft.collectionData ?? _collectionDefaults())
+            : null,
+        clearCollectionData: type != CreateObjectType.collection,
         updatedAtUtc: DateTime.now().toUtc(),
       ),
     );
@@ -775,6 +819,7 @@ class CreateController extends ChangeNotifier {
         routeStep: 0,
         rentalStep: 0,
         clearRentalValidationIssues: true,
+        collectionStep: 0,
       ),
     );
   }
@@ -3969,6 +4014,12 @@ class CreateController extends ChangeNotifier {
       coordinator.synchronizeEnvelope(next);
       resolved = coordinator.state.createDraft;
     }
+    final collectionCoordinator = _collectionCoordinator;
+    if (next.objectType == CreateObjectType.collection &&
+        collectionCoordinator != null) {
+      collectionCoordinator.synchronizeEnvelope(next);
+      resolved = collectionCoordinator.state.createDraft;
+    }
     final bool invalidatesPlaceHelper =
         _state.draft.objectType == CreateObjectType.place ||
         resolved.objectType == CreateObjectType.place;
@@ -3985,7 +4036,8 @@ class CreateController extends ChangeNotifier {
                 resolved.objectType == CreateObjectType.findPeople ||
                 resolved.objectType == CreateObjectType.scenario ||
                 resolved.objectType == CreateObjectType.route ||
-                resolved.objectType == CreateObjectType.rental
+                resolved.objectType == CreateObjectType.rental ||
+                resolved.objectType == CreateObjectType.collection
             ? CreateSaveStatus.unsaved
             : _state.saveStatus,
         clearMessage: true,
@@ -4005,7 +4057,8 @@ class CreateController extends ChangeNotifier {
             resolved.objectType == CreateObjectType.activity ||
             resolved.objectType == CreateObjectType.findPeople ||
             resolved.objectType == CreateObjectType.scenario ||
-            resolved.objectType == CreateObjectType.rental) &&
+            resolved.objectType == CreateObjectType.rental ||
+            resolved.objectType == CreateObjectType.collection) &&
         _state.userId.isNotEmpty) {
       _autosaveTimer?.cancel();
       _autosaveTimer = Timer(const Duration(milliseconds: 700), saveDraft);
@@ -4062,6 +4115,15 @@ class CreateController extends ChangeNotifier {
           PublisherRef(type: PublisherType.user, id: userId),
     );
   }
+
+  /// COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §9: `publisherRef` is captured
+  /// once from the active workspace at draft creation and never rewritten
+  /// by a later workspace switch — same invariant as Rental/Event above.
+  CollectionDraftData _collectionDefaults() => CollectionDraftData.defaults(
+    publisherRef:
+        _activePublisherRef ??
+        PublisherRef(type: PublisherType.user, id: _state.userId),
+  );
 
   EventDraftData _eventDefaults() => EventDraftData.defaults(
     marketCityId: _runtimeDefaults.marketCityId,
@@ -4983,6 +5045,364 @@ class CreateController extends ChangeNotifier {
 
   String _localId() =>
       'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}_${_localIdCounter++}';
+
+  // ---------------------------------------------------------------------
+  // Collection / Guide (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §6, §7, §8)
+  // Same attach/delegate/adopt pattern as Route above — the coordinator
+  // owns items/sections/search/undo/composition-review/publish state, this
+  // controller owns capability enforcement (re-checked on every mutation,
+  // not just once at entry — §6), the `collectionCreateEnabled`/
+  // `collectionPublishingEnabled` kill switches, and the single telemetry
+  // emission point for `collection_create_action` (§15 "Telemetry и
+  // privacy") — the coordinator itself never calls the analytics service.
+  // ---------------------------------------------------------------------
+
+  CollectionCreateState? get collectionCreateState =>
+      _collectionCoordinator?.state;
+
+  void attachCollectionCoordinator(CollectionCreateCoordinator coordinator) {
+    if (identical(_collectionCoordinator, coordinator)) return;
+    if (!_collectionCreateConfig.collectionCreateEnabled) return;
+    final bool isCollectionDraft =
+        _state.draft.objectType == CreateObjectType.collection;
+    if (!isCollectionDraft || _state.userId.isEmpty || !canCreateCollection) {
+      return;
+    }
+    final CreateDraftEntity draft = _state.draft.copyWith(
+      collectionData: _state.draft.collectionData ?? _collectionDefaults(),
+    );
+    _collectionCoordinator = coordinator;
+    coordinator.initialize(createDraft: draft);
+    _setState(_state.copyWith(draft: coordinator.state.createDraft));
+  }
+
+  void detachCollectionCoordinator(CollectionCreateCoordinator coordinator) {
+    if (identical(_collectionCoordinator, coordinator)) {
+      _collectionCoordinator = null;
+    }
+  }
+
+  void goToCollectionStep(int step) {
+    _setState(_state.copyWith(collectionStep: step));
+  }
+
+  Future<void> searchCollectionCatalog(
+    String text, {
+    Set<CollectionCatalogObjectType>? types,
+  }) async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    await coordinator.searchCatalog(text, types: types);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void clearCollectionCatalogSearch() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    coordinator.clearCatalogSearch();
+    _adoptCollectionCoordinatorState();
+  }
+
+  void setCollectionAreaLabel(String value) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.setAreaLabel(value);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void setCollectionAreaId(String? value) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.setAreaId(value);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void setCollectionAreaAnchor({
+    required double latitude,
+    required double longitude,
+  }) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.setAreaAnchor(latitude: latitude, longitude: longitude);
+    _adoptCollectionCoordinatorState();
+  }
+
+  Future<void> searchCollectionAreaLocation(String query) async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    await coordinator.searchAreaLocation(query);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void clearCollectionAreaLocationSuggestions() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    coordinator.clearAreaLocationSuggestions();
+    _adoptCollectionCoordinatorState();
+  }
+
+  Future<void> selectCollectionAreaLocationSuggestion(
+    String suggestionId,
+  ) async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    await coordinator.selectAreaLocationSuggestion(suggestionId);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void addCollectionItem(CollectionCatalogSearchResult result) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.addItem(result);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void removeCollectionItem(String itemId) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.removeItem(itemId);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void moveCollectionItem({
+    required String itemId,
+    String? toSectionId,
+    required int toIndex,
+  }) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.moveItem(
+      itemId: itemId,
+      toSectionId: toSectionId,
+      toIndex: toIndex,
+    );
+    _adoptCollectionCoordinatorState();
+  }
+
+  void addCollectionSection(String title) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.addSection(title);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void renameCollectionSection(String sectionId, String title) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.renameSection(sectionId, title);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void removeCollectionSection(String sectionId) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.removeSection(sectionId);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void moveCollectionSection(String sectionId, int toIndex) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.moveSection(sectionId, toIndex);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void setCollectionCuratorNote(String itemId, String note) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.setCuratorNote(itemId, note);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void toggleCollectionHighlight(String itemId) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.toggleHighlight(itemId);
+    _adoptCollectionCoordinatorState();
+  }
+
+  void setCollectionBudgetIndicator(CollectionBudgetTier? tier) {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.setBudgetIndicator(tier);
+    _adoptCollectionCoordinatorState();
+  }
+
+  CollectionBudgetTier? suggestCollectionBudgetTier() {
+    return _collectionCoordinator?.suggestBudgetTier();
+  }
+
+  void undoCollection() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.undo();
+    _adoptCollectionCoordinatorState();
+  }
+
+  void redoCollection() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.redo();
+    _adoptCollectionCoordinatorState();
+  }
+
+  Future<void> buildCollectionPreview() async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    await coordinator.buildPreview();
+    _adoptCollectionCoordinatorState();
+  }
+
+  void acknowledgeCollectionCompositionReview() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canCreateCollection) return;
+    coordinator.acknowledgeCompositionReview();
+    _adoptCollectionCoordinatorState();
+  }
+
+  List<CollectionValidationIssue> validateCollection() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return const <CollectionValidationIssue>[];
+    final List<CollectionValidationIssue> issues = coordinator.validate();
+    _adoptCollectionCoordinatorState();
+    return issues;
+  }
+
+  /// §6/§7 Шаг 5, §12: branches direct-publish vs mock-review path purely
+  /// on capability — `publish.collection.direct` present publishes live
+  /// immediately, only `submit.collection` sends it to `moderate.collection`
+  /// review without touching Discover, neither capability refuses outright.
+  /// Never called if `collectionPublishingEnabled` is off (§15 kill switch).
+  Future<bool> publishCollection() async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return false;
+    if (!_collectionCreateConfig.collectionPublishingEnabled) {
+      _setState(
+        _state.copyWith(
+          message: 'Публикация Collection временно отключена.',
+        ),
+      );
+      return false;
+    }
+    final bool direct = canPublishCollectionDirect;
+    if (!direct && !canSubmitCollection) {
+      _setState(
+        _state.copyWith(
+          message:
+              'Для публикации Collection нужна capability submit.collection '
+              'или publish.collection.direct.',
+        ),
+      );
+      return false;
+    }
+    try {
+      final CollectionPublishReceipt receipt = await coordinator.publish(
+        direct: direct,
+      );
+      _adoptCollectionCoordinatorState();
+      _collectionTelemetry.trackPublish(
+        direct: direct,
+        outcome: receipt.outcome,
+      );
+      _setState(
+        _state.copyWith(
+          message: receipt.outcome == CollectionPublishOutcome.pendingReview
+              ? 'Collection отправлен на проверку.'
+              : 'Collection опубликован.',
+        ),
+      );
+      return true;
+    } on CollectionPublicationException catch (e) {
+      _adoptCollectionCoordinatorState();
+      _collectionTelemetry.trackFailure(
+        action: CollectionCreateTelemetryAction.publish,
+        failureCode: e.failure.name,
+      );
+      _setState(
+        _state.copyWith(message: 'Collection не опубликован: ${e.failure.name}.'),
+      );
+      return false;
+    }
+  }
+
+  /// Self-service removal from the *published* active version (§3.11) —
+  /// requires `manage.collection`, never touches `submit`/`moderate`.
+  Future<bool> removeCollectionItemsFromActiveVersion(
+    Set<String> stableKeys,
+  ) async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canManageCollection) return false;
+    try {
+      final CollectionPublishReceipt? receipt = await coordinator
+          .removeItemsFromActiveVersion(stableKeys);
+      if (receipt == null) return false;
+      _collectionTelemetry.trackRemovalOnly();
+      return true;
+    } on CollectionPublicationException catch (e) {
+      _collectionTelemetry.trackFailure(
+        action: CollectionCreateTelemetryAction.removalOnly,
+        failureCode: e.failure.name,
+      );
+      return false;
+    }
+  }
+
+  /// §3.11 lifecycle command — distinct from removal-only, requires
+  /// `archive.collection`, activates nothing, only deactivates Discover.
+  Future<bool> archiveCollection() async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canArchiveCollection) return false;
+    try {
+      await coordinator.archive();
+      _collectionTelemetry.trackArchive();
+      return true;
+    } on CollectionPublicationException catch (e) {
+      _collectionTelemetry.trackFailure(
+        action: CollectionCreateTelemetryAction.archive,
+        failureCode: e.failure.name,
+      );
+      return false;
+    }
+  }
+
+  /// §6 moderation surface — no dedicated page in this slice, but the
+  /// commands are real: `moderate.collection` actors list and decide on
+  /// pending versions submitted without `publish.collection.direct`.
+  Future<List<CollectionModerationRequest>> loadPendingCollectionModerationRequests() async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canModerateCollection) {
+      return const <CollectionModerationRequest>[];
+    }
+    return coordinator.pendingModerationRequests();
+  }
+
+  Future<bool> decideCollectionModerationRequest({
+    required String requestId,
+    required bool accept,
+  }) async {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null || !canModerateCollection) return false;
+    try {
+      await coordinator.decideModerationRequest(
+        requestId: requestId,
+        accept: accept,
+      );
+      _collectionTelemetry.trackModerationDecision(accept: accept);
+      return true;
+    } on CollectionPublicationException catch (e) {
+      _collectionTelemetry.trackFailure(
+        action: CollectionCreateTelemetryAction.moderationDecision,
+        failureCode: e.failure.name,
+      );
+      return false;
+    }
+  }
+
+  void _adoptCollectionCoordinatorState() {
+    final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
+    if (coordinator == null) return;
+    _setState(_state.copyWith(draft: coordinator.state.createDraft));
+  }
 
   void _setState(CreateState state) {
     _state = state;

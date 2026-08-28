@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
 import '../../../core/telemetry/analytics_service.dart';
+import 'collection_create_config.dart';
+import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
 import 'scenario_create_coordinator.dart';
@@ -63,8 +65,17 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     ),
     promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
     rentalPublicationIndexSink: sl<RentalPublicationIndexSink>(),
+    // CLG-CRT-01: the same `CollectionCreateRuntimeConfig` instance the
+    // coordinator factory and the Discover-side providers read — one
+    // composition-wide source of truth for the three kill switches.
+    collectionCreateConfig: sl<CollectionCreateRuntimeConfig>(),
   );
 });
+
+final collectionCreateCoordinatorProvider =
+    Provider.autoDispose<CollectionCreateCoordinator>((ref) {
+      return sl<CollectionCreateCoordinator>();
+    });
 
 final routeCreateRuntimeProvider =
     FutureProvider.autoDispose<RouteCreateRuntime>((ref) async {

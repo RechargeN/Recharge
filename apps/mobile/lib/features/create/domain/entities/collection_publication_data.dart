@@ -80,20 +80,59 @@ class CollectionPublishBundle {
   }
 }
 
-enum CollectionPublishOutcome { created, replayedIdempotentSuccess }
+enum CollectionPublishOutcome {
+  created,
+  replayedIdempotentSuccess,
 
+  /// §6/§7 Шаг 5: submitted without `publish.collection.direct` — a real,
+  /// idempotent write happened (a version now exists), but it is not the
+  /// active Discover-facing version until `moderate.collection` accepts it.
+  pendingReview,
+}
+
+/// Typed lifecycle, not a single ambiguous timestamp (review finding):
+/// [publishedAtUtc] is set only when [outcome] is [created] or
+/// [replayedIdempotentSuccess] — a version that actually became active.
+/// [submittedAtUtc] is set only for [pendingReview] — a version exists but
+/// was never activated. Exactly one of the two is non-null.
 class CollectionPublishReceipt {
   const CollectionPublishReceipt({
     required this.collectionId,
     required this.collectionVersionId,
-    required this.publishedAtUtc,
     required this.outcome,
-  });
+    this.publishedAtUtc,
+    this.submittedAtUtc,
+    this.discoverSynced = true,
+  }) : assert(
+         (publishedAtUtc == null) != (submittedAtUtc == null),
+         'Exactly one of publishedAtUtc/submittedAtUtc must be set.',
+       );
 
   final String collectionId;
   final String collectionVersionId;
-  final DateTime publishedAtUtc;
   final CollectionPublishOutcome outcome;
+  final DateTime? publishedAtUtc;
+  final DateTime? submittedAtUtc;
+
+  /// False when the write to Create's own store succeeded but the
+  /// Discover-facing sink failed after a retry (§14 review finding) — the
+  /// caller must not report this as a failed publish, only track it
+  /// separately. Always true for [pendingReview] (nothing to sync yet).
+  final bool discoverSynced;
+
+  CollectionPublishReceipt copyWith({
+    CollectionPublishOutcome? outcome,
+    bool? discoverSynced,
+  }) {
+    return CollectionPublishReceipt(
+      collectionId: collectionId,
+      collectionVersionId: collectionVersionId,
+      outcome: outcome ?? this.outcome,
+      publishedAtUtc: publishedAtUtc,
+      submittedAtUtc: submittedAtUtc,
+      discoverSynced: discoverSynced ?? this.discoverSynced,
+    );
+  }
 }
 
 /// The active, immutable version of a published Collection — what
