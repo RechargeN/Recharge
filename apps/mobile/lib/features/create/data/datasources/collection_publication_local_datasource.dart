@@ -97,9 +97,14 @@ class CollectionPublicationLocalDatasource {
           'payload.',
         );
       }
-      return existing.receipt.copyWith(
-        outcome: CollectionPublishOutcome.replayedIdempotentSuccess,
-      );
+      // Review finding: unlike `publish()`, a replay here must NOT be
+      // relabelled `replayedIdempotentSuccess` — that outcome reads as
+      // "activated" everywhere it is checked (coordinator/controller treat
+      // anything other than `pendingReview` as published), so it would
+      // report a still-pending, never-activated submission as a live
+      // publish. The original receipt is already exactly right — return
+      // it unchanged.
+      return existing.receipt;
     }
     final DateTime now = DateTime.now().toUtc();
     final String requestId = bundle.publishAttemptId;
@@ -107,6 +112,7 @@ class CollectionPublicationLocalDatasource {
       requestId: requestId,
       bundle: bundle,
       submittedAtUtc: now,
+      submittedByActorId: actorId,
     );
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: bundle.collectionId,
@@ -135,6 +141,7 @@ class CollectionPublicationLocalDatasource {
   Future<(CollectionModerationRequest, PublishedCollectionVersion?)> decide({
     required String requestId,
     required bool accept,
+    required String decidedByActorId,
     CollectionModerationRejectionReason? rejectionReason,
   }) async {
     if (!accept && rejectionReason == null) {
@@ -167,10 +174,12 @@ class CollectionPublicationLocalDatasource {
         ? CollectionModerationDecision(
             outcome: CollectionModerationDecisionOutcome.accepted,
             decidedAtUtc: now,
+            decidedByActorId: decidedByActorId,
           )
         : CollectionModerationDecision(
             outcome: CollectionModerationDecisionOutcome.rejected,
             decidedAtUtc: now,
+            decidedByActorId: decidedByActorId,
             rejectionReason: rejectionReason,
           );
     final CollectionModerationRequest decided = request.copyWith(

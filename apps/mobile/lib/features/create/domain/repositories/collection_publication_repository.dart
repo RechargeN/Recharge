@@ -47,6 +47,7 @@ abstract interface class CollectionPublicationRepository {
   Future<CollectionModerationDecisionResult> decide({
     required String requestId,
     required bool accept,
+    required String decidedByActorId,
     CollectionModerationRejectionReason? rejectionReason,
   });
 

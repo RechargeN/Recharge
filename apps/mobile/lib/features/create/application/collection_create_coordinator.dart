@@ -682,11 +682,13 @@ class CollectionCreateCoordinator {
   Future<CollectionModerationDecisionResult> decideModerationRequest({
     required String requestId,
     required bool accept,
+    required String decidedByActorId,
     CollectionModerationRejectionReason? rejectionReason,
   }) {
     return _publicationRepository.decide(
       requestId: requestId,
       accept: accept,
+      decidedByActorId: decidedByActorId,
       rejectionReason: rejectionReason,
     );
   }

@@ -272,27 +272,54 @@ void main() {
       expect(await repository.getActiveVersion('col-1'), isNull);
     });
 
+    test(
+      'replaying submitForReview stays pendingReview — it must never read '
+      'back as a publish (the original review finding)',
+      () async {
+        final CollectionPublishReceipt first = await repository
+            .submitForReview(_bundle(), actorId: _actor);
+        final CollectionPublishReceipt replay = await repository
+            .submitForReview(_bundle(), actorId: _actor);
+
+        expect(first.outcome, CollectionPublishOutcome.pendingReview);
+        expect(replay.outcome, CollectionPublishOutcome.pendingReview);
+        expect(replay.publishedAtUtc, isNull);
+        expect(await repository.getActiveVersion('col-1'), isNull);
+      },
+    );
+
     test('a pending request appears in pendingRequests until decided', () async {
       await repository.submitForReview(_bundle(), actorId: _actor);
       final requests = await repository.pendingRequests();
       expect(requests, hasLength(1));
       expect(requests.single.collectionId, 'col-1');
-      expect(requests.single.submittedBy, _publisher);
+      expect(requests.single.submittedAsPublisher, _publisher);
+      expect(requests.single.submittedByActorId, _actor);
       expect(requests.single.isPending, isTrue);
 
-      await repository.decide(requestId: 'attempt-1', accept: true);
+      await repository.decide(
+        requestId: 'attempt-1',
+        accept: true,
+        decidedByActorId: 'moderator-1',
+      );
       expect(await repository.pendingRequests(), isEmpty);
     });
 
-    test('accepting activates the version through the sink', () async {
+    test('accepting activates the version through the sink and records the '
+        'moderator', () async {
       await repository.submitForReview(_bundle(), actorId: _actor);
       final CollectionModerationDecisionResult result = await repository
-          .decide(requestId: 'attempt-1', accept: true);
+          .decide(
+            requestId: 'attempt-1',
+            accept: true,
+            decidedByActorId: 'moderator-1',
+          );
 
       expect(
         result.request.decision!.outcome,
         CollectionModerationDecisionOutcome.accepted,
       );
+      expect(result.request.decision!.decidedByActorId, 'moderator-1');
       expect(result.discoverSynced, isTrue);
       expect(sink.activateCalls, hasLength(1));
       expect(await repository.getActiveVersion('col-1'), isNotNull);
@@ -302,7 +329,11 @@ void main() {
       await repository.submitForReview(_bundle(), actorId: _actor);
 
       expect(
-        () => repository.decide(requestId: 'attempt-1', accept: false),
+        () => repository.decide(
+          requestId: 'attempt-1',
+          accept: false,
+          decidedByActorId: 'moderator-1',
+        ),
         throwsArgumentError,
       );
 
@@ -310,6 +341,7 @@ void main() {
           .decide(
             requestId: 'attempt-1',
             accept: false,
+            decidedByActorId: 'moderator-1',
             rejectionReason: CollectionModerationRejectionReason.qualityIssue,
           );
 
@@ -328,10 +360,18 @@ void main() {
     test('a decision is sealed — deciding the same request twice is refused',
         () async {
       await repository.submitForReview(_bundle(), actorId: _actor);
-      await repository.decide(requestId: 'attempt-1', accept: true);
+      await repository.decide(
+        requestId: 'attempt-1',
+        accept: true,
+        decidedByActorId: 'moderator-1',
+      );
 
       expect(
-        () => repository.decide(requestId: 'attempt-1', accept: true),
+        () => repository.decide(
+          requestId: 'attempt-1',
+          accept: true,
+          decidedByActorId: 'moderator-1',
+        ),
         throwsA(
           isA<CollectionPublicationException>().having(
             (e) => e.failure,
@@ -344,7 +384,11 @@ void main() {
 
     test('deciding an unknown request id is a not-found failure', () async {
       expect(
-        () => repository.decide(requestId: 'missing', accept: true),
+        () => repository.decide(
+          requestId: 'missing',
+          accept: true,
+          decidedByActorId: 'moderator-1',
+        ),
         throwsA(
           isA<CollectionPublicationException>().having(
             (e) => e.failure,

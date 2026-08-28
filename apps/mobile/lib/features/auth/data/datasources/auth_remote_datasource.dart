@@ -51,15 +51,24 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     'moderate.route',
     'manage.route',
     'archive.route',
-    // CLG-CRT-01 §6: same single-actor-plays-every-role pattern as Route
-    // above — `CreateController` reads capabilities from
-    // `AuthUserEntity.capabilities` (this list), not from the separate
-    // `IdentityAccessSnapshot` fixture, so `moderate.collection` has to be
-    // here too or moderation is unreachable through the running app no
-    // matter what the kill switches are set to.
+    // CLG-CRT-01 §6: deliberately NOT the same shape as Route above.
+    // `CreateController.publishCollection` always takes the direct path
+    // when `publish.collection.direct` is present (§7 Шаг 5: capability
+    // alone decides, there is no caller override) — giving the one demo
+    // actor both `submit` and `publish.direct` would make every publish
+    // go direct, so `submitForReview` (and therefore the whole
+    // pendingReview -> moderate.collection flow) could never be exercised
+    // through the standard UI at all. Withholding `publish.collection.direct`
+    // here is what makes that flow reachable by this same actor.
+    // `CreateController` reads capabilities from `AuthUserEntity.capabilities`
+    // (this list), not the separate `IdentityAccessSnapshot` fixture, so
+    // `moderate.collection` has to be here too or moderation stays
+    // unreachable no matter what the kill switches are set to. No
+    // dedicated moderation page ships in this slice regardless — see
+    // `CreateController.loadPendingCollectionModerationRequests`'s own doc
+    // comment.
     'create.collection',
     'submit.collection',
-    'publish.collection.direct',
     'moderate.collection',
     'manage.collection',
     'archive.collection',

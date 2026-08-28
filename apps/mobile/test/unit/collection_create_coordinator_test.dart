@@ -223,12 +223,15 @@ void main() {
           .decideModerationRequest(
             requestId: pending.single.requestId,
             accept: true,
+            decidedByActorId: 'moderator-1',
           );
 
       expect(
         result.request.decision!.outcome,
         CollectionModerationDecisionOutcome.accepted,
       );
+      expect(result.request.decision!.decidedByActorId, 'moderator-1');
+      expect(result.request.submittedByActorId, 'user-1');
       expect(await coordinator.pendingModerationRequests(), isEmpty);
       expect(sink.activateCalls, hasLength(1));
     });
@@ -243,6 +246,7 @@ void main() {
           .decideModerationRequest(
             requestId: pending.single.requestId,
             accept: false,
+            decidedByActorId: 'moderator-1',
             rejectionReason:
                 CollectionModerationRejectionReason.incompleteSubmission,
           );

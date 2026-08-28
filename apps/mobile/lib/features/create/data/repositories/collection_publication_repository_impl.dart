@@ -48,12 +48,14 @@ class CollectionPublicationRepositoryImpl
   Future<CollectionModerationDecisionResult> decide({
     required String requestId,
     required bool accept,
+    required String decidedByActorId,
     CollectionModerationRejectionReason? rejectionReason,
   }) async {
     final (CollectionModerationRequest decided, PublishedCollectionVersion? activated) =
         await datasource.decide(
           requestId: requestId,
           accept: accept,
+          decidedByActorId: decidedByActorId,
           rejectionReason: rejectionReason,
         );
     if (activated == null) {

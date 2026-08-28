@@ -5348,6 +5348,15 @@ class CreateController extends ChangeNotifier {
       _collectionTelemetry.trackRemovalOnly(
         discoverSynced: receipt.discoverSynced,
       );
+      if (!receipt.discoverSynced) {
+        _setState(
+          _state.copyWith(
+            message:
+                'Пункты удалены, но синхронизация с Discover ещё не '
+                'завершена.',
+          ),
+        );
+      }
       return true;
     } on CollectionPublicationException catch (e) {
       _collectionTelemetry.trackFailure(
@@ -5385,9 +5394,10 @@ class CreateController extends ChangeNotifier {
     }
   }
 
-  /// §6 moderation surface — no dedicated page in this slice, but the
-  /// commands are real: `moderate.collection` actors list and decide on
-  /// pending versions submitted without `publish.collection.direct`.
+  /// §6 moderation surface. Real and unit/widget-tested, but nothing in
+  /// the presentation layer calls this yet — no dedicated moderation page
+  /// ships in this slice, so the flow is not reachable end to end through
+  /// the running app.
   Future<List<CollectionModerationRequest>> loadPendingCollectionModerationRequests() async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null || !canModerateCollection) {
@@ -5420,6 +5430,7 @@ class CreateController extends ChangeNotifier {
           .decideModerationRequest(
             requestId: requestId,
             accept: accept,
+            decidedByActorId: _state.userId,
             rejectionReason: rejectionReason,
           );
       _collectionTelemetry.trackModerationDecision(

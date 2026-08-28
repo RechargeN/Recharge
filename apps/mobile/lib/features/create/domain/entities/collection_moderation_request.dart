@@ -17,11 +17,15 @@ enum CollectionModerationDecisionOutcome { accepted, rejected }
 
 /// Immutable once created — `decide()` builds exactly one of these per
 /// request and never mutates it afterwards; that is the "sealed" half of
-/// §6's requirement.
+/// §6's requirement. [decidedByActorId] is the moderator's own trusted
+/// actor id — never `bundle.publisherRef`, which identifies who the
+/// *submission* is published as (a Professional Page, say), not who is
+/// deciding on it.
 class CollectionModerationDecision {
   const CollectionModerationDecision({
     required this.outcome,
     required this.decidedAtUtc,
+    required this.decidedByActorId,
     this.rejectionReason,
   }) : assert(
          (outcome == CollectionModerationDecisionOutcome.rejected) ==
@@ -31,6 +35,7 @@ class CollectionModerationDecision {
 
   final CollectionModerationDecisionOutcome outcome;
   final DateTime decidedAtUtc;
+  final String decidedByActorId;
   final CollectionModerationRejectionReason? rejectionReason;
 }
 
@@ -38,14 +43,18 @@ class CollectionModerationDecision {
 /// (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §6/§7 Шаг 5, §12). The bundle
 /// already exists and has a permanent id — it just is not the active
 /// Discover-facing version until a `moderate.collection` actor accepts it.
-/// No dedicated moderation page ships in this slice, but the commands over
-/// this entity are real: `CreateController.loadPendingCollectionModerationRequests`/
-/// `decideCollectionModerationRequest` exercise the full accept/reject path.
+///
+/// No dedicated moderation page ships in this slice — the commands over
+/// this entity (`CreateController.loadPendingCollectionModerationRequests`/
+/// `decideCollectionModerationRequest`) are real and unit/widget-tested,
+/// but nothing in the presentation layer calls them, so the flow is not
+/// reachable end to end through the running app yet.
 class CollectionModerationRequest {
   const CollectionModerationRequest({
     required this.requestId,
     required this.bundle,
     required this.submittedAtUtc,
+    required this.submittedByActorId,
     this.decision,
   });
 
@@ -53,17 +62,22 @@ class CollectionModerationRequest {
   final CollectionPublishBundle bundle;
   final DateTime submittedAtUtc;
 
+  /// The trusted actor (`CreateController._state.userId`, threaded through
+  /// `submitForReview`'s own `actorId` param) who submitted this version —
+  /// distinct from [submittedAsPublisher], which is who it is *published
+  /// as* and may be a Professional Page a human actor merely represents.
+  final String submittedByActorId;
+
   /// `null` while awaiting a `moderate.collection` decision; set exactly
   /// once and never after (§6 "sealed request").
   final CollectionModerationDecision? decision;
 
   String get collectionId => bundle.collectionId;
 
-  /// Who submitted this version — the request's "actor" (§6). Read off the
-  /// bundle rather than duplicated onto this entity, since a
-  /// `CollectionPublishBundle`'s `publisherRef` is already the trusted
-  /// record of who it represents.
-  PublisherRef get submittedBy => bundle.publisherRef;
+  /// Who this submission is published as — a `PublisherRef` (user or
+  /// Professional Page), not the human actor who clicked submit. See
+  /// [submittedByActorId] for that.
+  PublisherRef get submittedAsPublisher => bundle.publisherRef;
 
   bool get isPending => decision == null;
 
@@ -72,6 +86,7 @@ class CollectionModerationRequest {
       requestId: requestId,
       bundle: bundle,
       submittedAtUtc: submittedAtUtc,
+      submittedByActorId: submittedByActorId,
       decision: decision ?? this.decision,
     );
   }
