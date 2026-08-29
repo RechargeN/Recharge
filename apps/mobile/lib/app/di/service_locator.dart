@@ -405,10 +405,15 @@ Future<void> setupDependencies() async {
       CollectionItemResolutionRepositoryImpl.new,
     )
     // CLG-CRT-01 §15 "Миграция и rollback": one config instance for the
-    // whole composition — `collectionCreateEnabled: true` is safe to ship,
-    // `collectionPublishingEnabled`/`collectionDiscoverEnabled` stay `false`
-    // (the class defaults) until this slice's own gates are green end to
-    // end; flip both here, in one place, once that is true.
+    // whole composition, always the bare class default — never an override
+    // here, on purpose (see `collection_discover_default_composition_test.dart`,
+    // which exists specifically to catch this site silently diverging from
+    // the class's own default). CLG-CRT-01/CLG-PST-01/CLG-PST-02's gates are
+    // now all green, so `CollectionCreateRuntimeConfig`'s own default
+    // enables `collectionPublishingEnabled`/`collectionDiscoverEnabled`
+    // (`collectionCreateEnabled` was already `true`). For an emergency
+    // rollback, override at this exact call site — never edit the class
+    // default for a temporary rollback.
     ..registerLazySingleton<CollectionCreateRuntimeConfig>(
       () => const CollectionCreateRuntimeConfig(),
     )

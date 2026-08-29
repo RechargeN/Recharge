@@ -57,8 +57,8 @@ class CollectionCreateRuntimeConfig {
     this.budgetSuggestionMinPriceCount = 2,
     this.maximumHistoryEntries = 50,
     this.collectionCreateEnabled = true,
-    this.collectionPublishingEnabled = false,
-    this.collectionDiscoverEnabled = false,
+    this.collectionPublishingEnabled = true,
+    this.collectionDiscoverEnabled = true,
   });
 
   /// Вопрос 4 — publish-time gate, not a continuously enforced invariant.
@@ -85,6 +85,16 @@ class CollectionCreateRuntimeConfig {
 
   /// Rollback flags (§15 "Миграция и rollback"). Disabling a flag never
   /// deletes drafts or active local records — it only gates the surface.
+  /// `collectionPublishingEnabled`/`collectionDiscoverEnabled` defaulted to
+  /// `false` while CLG-CRT-01's own persistence-correctness gates (§12/§17,
+  /// closed by CLG-PST-01/CLG-PST-02) were still open; both now default to
+  /// `true` — publishing and Discover are live. Set either back to `false`
+  /// at the one composition-root call site (`service_locator.dart`) for an
+  /// emergency rollback; it stays a real, tested code path, not a removed
+  /// one — see `collection_discover_default_composition_test.dart`'s
+  /// rollback-direction case and
+  /// `collection_create_controller_test.dart`'s
+  /// `collectionPublishingEnabled:false` case.
   final bool collectionCreateEnabled;
   final bool collectionPublishingEnabled;
   final bool collectionDiscoverEnabled;

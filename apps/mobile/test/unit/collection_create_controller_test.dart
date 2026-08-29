@@ -166,7 +166,8 @@ void main() {
 
   test(
     'the real default composition (no config override at all — the exact '
-    'shape service_locator.dart registers) blocks publish the same way',
+    'shape service_locator.dart registers) allows publish, now that '
+    'CollectionCreateRuntimeConfig\'s own default enables it (CLG-PST-02)',
     () async {
       final controller = buildController(); // no collectionCreateConfig arg
       await controller.ensureLoaded(
@@ -184,9 +185,12 @@ void main() {
 
       final bool published = await controller.publishCollection();
 
-      expect(published, isFalse);
-      expect(controller.state.message, contains('временно отключена'));
-      expect(sink.activateCalls, isEmpty);
+      expect(published, isTrue);
+      expect(
+        controller.collectionCreateState?.status,
+        CollectionCreateStatus.published,
+      );
+      expect(sink.activateCalls, hasLength(1));
       controller.dispose();
     },
   );

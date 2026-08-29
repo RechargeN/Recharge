@@ -7,13 +7,23 @@ import 'package:recharge/features/discover/domain/entities/published_collection_
 import 'package:recharge/features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/published_collection_discovery_port.dart';
 
-/// Review finding: every other test of the three CLG-CRT-01 kill switches
-/// explicitly overrides `CollectionCreateRuntimeConfig`, so none of them
-/// actually exercises the *real* default the app ships with. This file
-/// registers `const CollectionCreateRuntimeConfig()` — the exact literal
-/// `service_locator.dart` registers, not a test-chosen override — so a
-/// silent flip of that default would fail here even if every other
-/// Collection test still passed.
+/// Review finding (CLG-CRT-01, seventh pass): every other test of the three
+/// CLG-CRT-01 kill switches explicitly overrides `CollectionCreateRuntimeConfig`,
+/// so none of them actually exercises the *real* default the app ships
+/// with. This file registers `const CollectionCreateRuntimeConfig()` — the
+/// exact literal `service_locator.dart` registers, not a test-chosen
+/// override — so a silent flip of that default would fail here even if
+/// every other Collection test still passed.
+///
+/// CLG-PST-02 follow-up: once CLG-CRT-01/CLG-PST-01/CLG-PST-02's gates went
+/// green, `CollectionCreateRuntimeConfig`'s own default flipped
+/// `collectionPublishingEnabled`/`collectionDiscoverEnabled` to `true` (see
+/// its own doc comment) — this file's assertions are the *inverse* of what
+/// they were before that flip, on purpose: it still tests "the real
+/// default", the real default itself just changed. The rollback direction
+/// (explicitly turning a flag back off) is still covered below, since that
+/// is the one path that must keep working even though it is no longer the
+/// default.
 void main() {
   setUp(() async {
     await sl.reset();
@@ -24,19 +34,19 @@ void main() {
   });
 
   test(
-    'CollectionCreateRuntimeConfig defaults ship with authoring on, '
-    'publishing and Discover off',
+    'CollectionCreateRuntimeConfig defaults ship with authoring, '
+    'publishing and Discover all on',
     () {
       const CollectionCreateRuntimeConfig config = CollectionCreateRuntimeConfig();
       expect(config.collectionCreateEnabled, isTrue);
-      expect(config.collectionPublishingEnabled, isFalse);
-      expect(config.collectionDiscoverEnabled, isFalse);
+      expect(config.collectionPublishingEnabled, isTrue);
+      expect(config.collectionDiscoverEnabled, isTrue);
     },
   );
 
   test(
     'with the real default config, an active Collection in the port is '
-    'still invisible through activeCollectionsProvider/collectionByIdProvider',
+    'visible through activeCollectionsProvider/collectionByIdProvider',
     () async {
       // The exact same literal service_locator.dart registers — not an
       // override chosen to make this test pass.
@@ -60,18 +70,20 @@ void main() {
         collectionByIdProvider('col-1').future,
       );
 
-      expect(feed, isEmpty);
-      expect(single, isNull);
+      expect(feed, hasLength(1));
+      expect(feed.single.collectionId, 'col-1');
+      expect(single, isNotNull);
+      expect(single!.collectionId, 'col-1');
     },
   );
 
   test(
-    'flipping collectionDiscoverEnabled to true (still via CollectionCreateRuntimeConfig, '
-    'not an ad-hoc override) makes the same active Collection visible',
+    'rollback direction: explicitly flipping collectionDiscoverEnabled back '
+    'to false hides the same active Collection again',
     () async {
       sl
         ..registerSingleton<CollectionCreateRuntimeConfig>(
-          const CollectionCreateRuntimeConfig(collectionDiscoverEnabled: true),
+          const CollectionCreateRuntimeConfig(collectionDiscoverEnabled: false),
         )
         ..registerSingleton<PublishedCollectionDiscoveryPort>(
           _FakePort(entity: _entity()),
@@ -85,9 +97,12 @@ void main() {
 
       final List<PublishedCollectionDiscoveryEntity> feed = await container
           .read(activeCollectionsProvider.future);
+      final PublishedCollectionDiscoveryEntity? single = await container.read(
+        collectionByIdProvider('col-1').future,
+      );
 
-      expect(feed, hasLength(1));
-      expect(feed.single.collectionId, 'col-1');
+      expect(feed, isEmpty);
+      expect(single, isNull);
     },
   );
 }
