@@ -197,7 +197,7 @@ void main() {
   group('archive', () {
     test('never called on a Collection that was never published (loc_* id)', () async {
       coordinator.initialize(createDraft: _draft(id: 'loc_unpublished'));
-      final bool synced = await coordinator.archive();
+      final bool synced = await coordinator.archive(actorId: 'user-1');
       expect(synced, isTrue); // trivially in sync — nothing to archive
       expect(sink.archiveCalls, isEmpty);
     });
@@ -208,7 +208,7 @@ void main() {
         direct: true,
         actorId: 'user-1',
       );
-      final bool synced = await coordinator.archive();
+      final bool synced = await coordinator.archive(actorId: 'user-1');
       expect(synced, isTrue);
       expect(sink.archiveCalls, <String>[receipt.collectionId]);
     });

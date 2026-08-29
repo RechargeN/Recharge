@@ -206,6 +206,7 @@ void main() {
               expectedBaseRevisionOrHash: published.collectionVersionId,
               removedItemRefs: <String>{item1.ref.stableKey},
               requestId: 'removal-1',
+              actorId: _actor,
             ),
           );
 
@@ -226,6 +227,7 @@ void main() {
             expectedBaseRevisionOrHash: 'stale-version',
             removedItemRefs: <String>{},
             requestId: 'removal-1',
+            actorId: _actor,
           ),
         ),
         throwsA(
@@ -242,7 +244,7 @@ void main() {
   group('archive', () {
     test('deactivates the active version and calls sink.archive', () async {
       await repository.publish(_bundle(), actorId: _actor);
-      final bool synced = await repository.archive('col-1');
+      final bool synced = await repository.archive('col-1', actorId: _actor);
 
       expect(synced, isTrue);
       expect(sink.archiveCalls, <String>['col-1']);
@@ -251,7 +253,10 @@ void main() {
 
     test('archiving a Collection with no active version never touches the '
         'sink and is trivially synced', () async {
-      final bool synced = await repository.archive('never-published');
+      final bool synced = await repository.archive(
+        'never-published',
+        actorId: _actor,
+      );
       expect(synced, isTrue);
       expect(sink.archiveCalls, isEmpty);
     });
@@ -260,12 +265,36 @@ void main() {
         'local record stays archived either way', () async {
       await repository.publish(_bundle(), actorId: _actor);
       sink.failNextArchives = 5; // exceeds the retry budget
-      final bool synced = await repository.archive('col-1');
+      final bool synced = await repository.archive('col-1', actorId: _actor);
 
       expect(synced, isFalse);
       expect(sink.archiveCalls, hasLength(2)); // one try + one retry
       expect(await repository.getActiveVersion('col-1'), isNull);
     });
+
+    test(
+      'a retried archive() after a sink failure re-attempts the sink '
+      'instead of silently giving up — CLG-PST-01 review finding',
+      () async {
+        await repository.publish(_bundle(), actorId: _actor);
+        sink.failNextArchives = 2; // exhausts the one-try-plus-one-retry budget
+        final bool firstAttempt = await repository.archive(
+          'col-1',
+          actorId: _actor,
+        );
+        expect(firstAttempt, isFalse); // one try + one retry, both failed
+        expect(sink.archiveCalls, hasLength(2));
+
+        // The local record must already be archived (not deleted outright)
+        // so this second call still has something to sync against.
+        final bool secondAttempt = await repository.archive(
+          'col-1',
+          actorId: _actor,
+        );
+        expect(secondAttempt, isTrue);
+        expect(sink.archiveCalls, hasLength(3)); // sink actually called again
+      },
+    );
   });
 
   group('moderation (submit / pending / decide)', () {
@@ -461,7 +490,7 @@ void main() {
       expect(discovered.single.collectionId, 'col-real');
       expect(discovered.single.title, 'A guide');
 
-      await realRepository.archive('col-real');
+      await realRepository.archive('col-real', actorId: _actor);
       expect(await adapter.loadActiveCollections(), isEmpty);
     });
   });

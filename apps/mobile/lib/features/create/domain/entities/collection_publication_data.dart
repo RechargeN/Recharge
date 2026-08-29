@@ -163,6 +163,7 @@ class CollectionRemovalOnlyCommand {
     required this.expectedBaseRevisionOrHash,
     required this.removedItemRefs,
     required this.requestId,
+    required this.actorId,
   });
 
   final String collectionId;
@@ -170,6 +171,12 @@ class CollectionRemovalOnlyCommand {
   final String expectedBaseRevisionOrHash;
   final Set<String> removedItemRefs; // CollectionObjectRef.stableKey values
   final String requestId;
+
+  /// The trusted actor performing this self-service removal — required so
+  /// the local adapter's audit record (§12) names who did it, not a
+  /// placeholder. Server/application-derived, never client-suppliable free
+  /// text (same trust boundary as [publish]'s own `actorId`).
+  final String actorId;
 }
 
 enum CollectionPublicationFailure {

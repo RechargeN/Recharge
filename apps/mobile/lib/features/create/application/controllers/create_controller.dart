@@ -5343,7 +5343,7 @@ class CreateController extends ChangeNotifier {
     if (coordinator == null || !canManageCollection) return false;
     try {
       final CollectionPublishReceipt? receipt = await coordinator
-          .removeItemsFromActiveVersion(stableKeys);
+          .removeItemsFromActiveVersion(stableKeys, actorId: _state.userId);
       if (receipt == null) return false;
       _collectionTelemetry.trackRemovalOnly(
         discoverSynced: receipt.discoverSynced,
@@ -5373,7 +5373,9 @@ class CreateController extends ChangeNotifier {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null || !canArchiveCollection) return false;
     try {
-      final bool discoverSynced = await coordinator.archive();
+      final bool discoverSynced = await coordinator.archive(
+        actorId: _state.userId,
+      );
       _collectionTelemetry.trackArchive(discoverSynced: discoverSynced);
       if (!discoverSynced) {
         _setState(

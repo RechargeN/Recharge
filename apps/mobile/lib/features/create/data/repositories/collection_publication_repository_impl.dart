@@ -83,9 +83,24 @@ class CollectionPublicationRepositoryImpl
   }
 
   @override
-  Future<bool> archive(String collectionId) async {
-    final bool hadActive = await datasource.archive(collectionId);
-    if (!hadActive) return true; // nothing to sync
+  Future<bool> archive(
+    String collectionId, {
+    required String actorId,
+    String? requestId,
+  }) async {
+    // CLG-PST-02 review finding: `datasource.archive` returns `true` both
+    // the first time a real version is archived *and* on every later retry
+    // of an already-archived collection — that is deliberate. A retry must
+    // still (re)attempt the sink call below; short-circuiting it here (as
+    // the previous version of this method did whenever the local record
+    // was already gone) is exactly what made a failed Discover-sync
+    // permanently unretryable.
+    final bool hasRecord = await datasource.archive(
+      collectionId,
+      actorId: actorId,
+      requestId: requestId,
+    );
+    if (!hasRecord) return true; // never published — nothing to sync, ever.
     return _archiveSinkWithRetry(collectionId);
   }
 

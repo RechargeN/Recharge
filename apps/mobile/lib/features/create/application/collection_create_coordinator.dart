@@ -665,10 +665,10 @@ class CollectionCreateCoordinator {
   /// published (including a `loc_*` draft that has no permanent id yet).
   /// Returns whether Discover ended up in sync — see the repository's own
   /// `archive` doc.
-  Future<bool> archive() async {
+  Future<bool> archive({required String actorId}) async {
     final String collectionId = state.createDraft.id;
     if (collectionId.startsWith('loc_')) return true;
-    return _publicationRepository.archive(collectionId);
+    return _publicationRepository.archive(collectionId, actorId: actorId);
   }
 
   /// §6 moderation surface — process-wide, not scoped to this draft; a
@@ -701,8 +701,9 @@ class CollectionCreateCoordinator {
   /// Returns `null` if this Collection has never been published yet — there
   /// is no active version to remove from.
   Future<CollectionPublishReceipt?> removeItemsFromActiveVersion(
-    Set<String> stableKeys,
-  ) async {
+    Set<String> stableKeys, {
+    required String actorId,
+  }) async {
     final String collectionId = state.createDraft.id;
     final PublishedCollectionVersion? active = await _publicationRepository
         .getActiveVersion(collectionId);
@@ -711,6 +712,7 @@ class CollectionCreateCoordinator {
       activeVersion: active,
       removedItemStableKeys: stableKeys,
       requestId: _idGenerator.generate(),
+      actorId: actorId,
     );
     return _publicationRepository.removeItemsOnly(command);
   }

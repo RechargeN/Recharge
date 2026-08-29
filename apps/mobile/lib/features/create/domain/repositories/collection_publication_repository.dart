@@ -66,8 +66,16 @@ abstract interface class CollectionPublicationRepository {
   /// up in sync: `true` if there was nothing to archive or the sink
   /// deactivation succeeded, `false` if the local record is archived but a
   /// persistent Discover-sink failure means the public entry may still be
-  /// visible or stale.
-  Future<bool> archive(String collectionId);
+  /// visible or stale. A retried [archive] call on an already-archived
+  /// collection always re-attempts the sink — it is never short-circuited
+  /// just because the local side is already durably archived.
+  /// [requestId] is auto-generated if omitted; both it and [actorId] are
+  /// recorded in the local adapter's persisted tombstone/audit record (§12).
+  Future<bool> archive(
+    String collectionId, {
+    required String actorId,
+    String? requestId,
+  });
 
   /// Create's own read of what it last wrote — distinct from Discover's
   /// independently-populated `PublishedCollectionDiscoveryPort` (§14).

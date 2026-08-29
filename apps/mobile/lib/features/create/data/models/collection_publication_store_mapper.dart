@@ -57,6 +57,145 @@ class CollectionPublicationStoreMapper {
   }
 
   // ---------------------------------------------------------------------
+  // Active-pointer envelope (CLG-PST-02)
+  // ---------------------------------------------------------------------
+
+  static String encodePointer({required String activeVersionId}) {
+    final Map<String, Object?> body = <String, Object?>{
+      'schema_version': currentSchemaVersion,
+      'active_version_id': activeVersionId,
+    };
+    return jsonEncode(_sealed(body));
+  }
+
+  /// Returns the version id this pointer names, or `null` if the envelope
+  /// cannot be trusted (missing/malformed/wrong-schema/hash-mismatched).
+  /// The caller — not this decode — decides what "cannot be trusted" means
+  /// (fall back to `.previous`, or treat as never-published).
+  static String? decodePointer(String? raw) {
+    final Map<String, Object?>? body = _verified(raw);
+    if (body == null) return null;
+    return _text(body['active_version_id']);
+  }
+
+  // ---------------------------------------------------------------------
+  // Archive tombstone envelope (CLG-PST-02)
+  // ---------------------------------------------------------------------
+
+  static String encodeTombstone({
+    required String archivedVersionId,
+    required String actorId,
+    required String requestId,
+    required DateTime archivedAtUtc,
+  }) {
+    final Map<String, Object?> body = <String, Object?>{
+      'schema_version': currentSchemaVersion,
+      'archived_version_id': archivedVersionId,
+      'actor_id': actorId,
+      'request_id': requestId,
+      'archived_at_utc': archivedAtUtc.toIso8601String(),
+    };
+    return jsonEncode(_sealed(body));
+  }
+
+  static ({
+    String archivedVersionId,
+    String actorId,
+    String requestId,
+    DateTime archivedAtUtc,
+  })?
+  decodeTombstone(String? raw) {
+    final Map<String, Object?>? body = _verified(raw);
+    if (body == null) return null;
+    final String? archivedVersionId = _text(body['archived_version_id']);
+    final String? actorId = _text(body['actor_id']);
+    final String? requestId = _text(body['request_id']);
+    final DateTime? archivedAtUtc = _dateTime(body['archived_at_utc']);
+    if (archivedVersionId == null ||
+        actorId == null ||
+        requestId == null ||
+        archivedAtUtc == null) {
+      return null;
+    }
+    return (
+      archivedVersionId: archivedVersionId,
+      actorId: actorId,
+      requestId: requestId,
+      archivedAtUtc: archivedAtUtc,
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Audit envelope (CLG-PST-02) — §12's "команда и diff попадают в audit".
+  // Write-only from the datasource in this pass; no production reader
+  // exists yet. Tests read it directly through the injected
+  // `CollectionPublicationStore`.
+  // ---------------------------------------------------------------------
+
+  static String encodeAudit({
+    required String collectionId,
+    required String commandType,
+    required String actorId,
+    required String requestId,
+    required DateTime atUtc,
+    required String outcome,
+    List<String>? diff,
+  }) {
+    final Map<String, Object?> body = <String, Object?>{
+      'schema_version': currentSchemaVersion,
+      'collection_id': collectionId,
+      'command_type': commandType,
+      'actor_id': actorId,
+      'request_id': requestId,
+      'at_utc': atUtc.toIso8601String(),
+      'outcome': outcome,
+      'diff': diff,
+    };
+    return jsonEncode(_sealed(body));
+  }
+
+  static ({
+    String collectionId,
+    String commandType,
+    String actorId,
+    String requestId,
+    DateTime atUtc,
+    String outcome,
+    List<String>? diff,
+  })?
+  decodeAudit(String? raw) {
+    final Map<String, Object?>? body = _verified(raw);
+    if (body == null) return null;
+    final String? collectionId = _text(body['collection_id']);
+    final String? commandType = _text(body['command_type']);
+    final String? actorId = _text(body['actor_id']);
+    final String? requestId = _text(body['request_id']);
+    final DateTime? atUtc = _dateTime(body['at_utc']);
+    final String? outcome = _text(body['outcome']);
+    if (collectionId == null ||
+        commandType == null ||
+        actorId == null ||
+        requestId == null ||
+        atUtc == null ||
+        outcome == null) {
+      return null;
+    }
+    final Object? rawDiff = body['diff'];
+    final List<String>? diff = rawDiff is List
+        ? rawDiff.map((Object? e) => e.toString()).toList(growable: false)
+        : null;
+    return (
+      collectionId: collectionId,
+      commandType: commandType,
+      actorId: actorId,
+      requestId: requestId,
+      atUtc: atUtc,
+      outcome: outcome,
+      diff: diff,
+    );
+  }
+
+  // ---------------------------------------------------------------------
   // Idempotency receipt envelope
   // ---------------------------------------------------------------------
 

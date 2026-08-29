@@ -12,6 +12,7 @@ class RemoveCollectionItemsOnlyUseCase {
     required PublishedCollectionVersion activeVersion,
     required Set<String> removedItemStableKeys,
     required String requestId,
+    required String actorId,
   }) {
     if (removedItemStableKeys.isEmpty) {
       throw ArgumentError('At least one item must be selected for removal.');
@@ -39,6 +40,7 @@ class RemoveCollectionItemsOnlyUseCase {
       expectedBaseRevisionOrHash: activeVersion.collectionVersionId,
       removedItemRefs: removedItemStableKeys,
       requestId: requestId,
+      actorId: actorId,
     );
   }
 }
