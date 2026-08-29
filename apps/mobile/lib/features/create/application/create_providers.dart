@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
 import '../../../core/telemetry/analytics_service.dart';
+import 'collection_create_config.dart';
+import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
 import 'scenario_create_coordinator.dart';
@@ -14,10 +16,13 @@ import 'scenario_transit_telemetry.dart';
 import 'place_enrichment_coordinator.dart';
 import 'route_create_runtime.dart';
 import 'route_publication_coordinator.dart';
+import '../domain/entities/rental_direct_publish_policy.dart';
 import '../domain/repositories/catalog_object_picker_port.dart';
 import '../domain/repositories/create_template_repository.dart';
+import '../domain/repositories/rental_publication_index_sink.dart';
 import '../domain/usecases/load_create_draft_usecase.dart';
 import '../domain/usecases/manage_create_template_usecase.dart';
+import '../domain/usecases/promote_rental_to_published_usecase.dart';
 import '../domain/usecases/publish_create_draft_usecase.dart';
 import '../domain/usecases/save_create_draft_usecase.dart';
 import '../domain/usecases/check_place_duplicates_usecase.dart';
@@ -53,8 +58,24 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     placeEnrichmentCoordinator: sl<PlaceEnrichmentCoordinator>(),
     catalogObjectPicker: sl<CatalogObjectPickerPort>(),
     checkPlaceDuplicates: sl<CheckPlaceDuplicatesUseCase>(),
+    // RNT-PUB-01 §1.3: local/mock composition explicitly opts into the
+    // trusted direct-publish policy — the domain default is `false`.
+    rentalDirectPublishPolicy: const RentalDirectPublishPolicy(
+      isTrusted: true,
+    ),
+    promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
+    rentalPublicationIndexSink: sl<RentalPublicationIndexSink>(),
+    // CLG-CRT-01: the same `CollectionCreateRuntimeConfig` instance the
+    // coordinator factory and the Discover-side providers read — one
+    // composition-wide source of truth for the three kill switches.
+    collectionCreateConfig: sl<CollectionCreateRuntimeConfig>(),
   );
 });
+
+final collectionCreateCoordinatorProvider =
+    Provider.autoDispose<CollectionCreateCoordinator>((ref) {
+      return sl<CollectionCreateCoordinator>();
+    });
 
 final routeCreateRuntimeProvider =
     FutureProvider.autoDispose<RouteCreateRuntime>((ref) async {

@@ -1,4 +1,6 @@
+import '../../../../app/router/route_names.dart';
 import '../../../../core/notifications/app_notification_sink.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../domain/entities/notification_item_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import '../datasources/notifications_local_datasource.dart';
@@ -86,6 +88,10 @@ class NotificationsRepositoryImpl
             createdAtUtcIso: item.createdAtUtcIso,
             isRead: true,
             targetRoute: item.targetRoute,
+            subjectKind: item.subjectKind,
+            subjectId: item.subjectId,
+            scenarioDraftId: item.scenarioDraftId,
+            scenarioItemId: item.scenarioItemId,
           );
         })
         .toList(growable: false);
@@ -107,19 +113,50 @@ class NotificationsRepositoryImpl
         targetRoute: '/discover',
       ),
       NotificationItemModel(
-        id: 'notif_route_1',
-        title: 'Готов спокойный маршрут',
-        body: 'Кофе, прогулка и тихая точка рядом с вами.',
+        id: 'notif_scenario_occurrence_morning',
+        title: 'Изменились часы места в вашем Scenario',
+        body: 'Утренняя остановка GORS требует проверки времени.',
         type: NotificationType.activity.name,
         createdAtUtcIso: now
             .subtract(const Duration(minutes: 55))
             .toIso8601String(),
         isRead: false,
-        targetRoute:
-            '/scenario-builder?mood=calm&duration=90&free=1&walking=1'
-            '&prompt=quiet%20coffee%20walk%20nearby'
-            '&steps=food_drinks.coffee,wellness_recharge.calm_walk,'
-            'outdoor_nature_walking.city_walk',
+        // DTL-LINK-01 §3.2: built via CatalogObjectRef, not a hardcoded
+        // path string — the subject type ('place') is known right here,
+        // at the point this seed notification is generated.
+        targetRoute: RouteNames.discoverDetailsCanonicalFor(
+          const CatalogObjectRef(
+            objectType: CatalogObjectType.place,
+            objectId: 'place-1',
+          ),
+        ),
+        subjectKind: NotificationSubjectKind.place.name,
+        subjectId: 'place-1',
+        scenarioDraftId: 'scenario-demo-1',
+        scenarioItemId: 'scenario-item-morning',
+      ),
+      NotificationItemModel(
+        id: 'notif_scenario_occurrence_evening',
+        title: 'Изменились часы места в вашем Scenario',
+        body: 'Вечерняя остановка GORS требует проверки времени.',
+        type: NotificationType.activity.name,
+        createdAtUtcIso: now
+            .subtract(const Duration(minutes: 56))
+            .toIso8601String(),
+        isRead: false,
+        // DTL-LINK-01 §3.2: built via CatalogObjectRef, not a hardcoded
+        // path string — the subject type ('place') is known right here,
+        // at the point this seed notification is generated.
+        targetRoute: RouteNames.discoverDetailsCanonicalFor(
+          const CatalogObjectRef(
+            objectType: CatalogObjectType.place,
+            objectId: 'place-1',
+          ),
+        ),
+        subjectKind: NotificationSubjectKind.place.name,
+        subjectId: 'place-1',
+        scenarioDraftId: 'scenario-demo-1',
+        scenarioItemId: 'scenario-item-evening',
       ),
       NotificationItemModel(
         id: 'notif_2',

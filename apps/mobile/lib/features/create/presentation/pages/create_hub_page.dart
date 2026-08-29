@@ -22,11 +22,23 @@ class CreateHubPage extends StatelessWidget {
 
     final bool canCreatePlace = capabilities.contains('create.place');
     final bool canCreateRoute = capabilities.contains('create.route');
+    final bool canCreateRental = capabilities.contains('create.rental');
+    // CLG-CRT-01 §6: the Hub gate checks only `create.collection` — the
+    // finer-grained submit/publish-direct/moderate/manage/archive
+    // capabilities are re-checked inside `CreateController` at each
+    // mutation, not here.
+    final bool canCreateCollection = capabilities.contains(
+      'create.collection',
+    );
     final List<CreateBlockConfig> availableBlocks = rechargeCreateBlockConfigs
         .where(
           (CreateBlockConfig config) =>
               (config.objectType != CreateObjectType.place || canCreatePlace) &&
-              (config.objectType != CreateObjectType.route || canCreateRoute),
+              (config.objectType != CreateObjectType.route || canCreateRoute) &&
+              (config.objectType != CreateObjectType.rental ||
+                  canCreateRental) &&
+              (config.objectType != CreateObjectType.collection ||
+                  canCreateCollection),
         )
         .toList(growable: false);
 

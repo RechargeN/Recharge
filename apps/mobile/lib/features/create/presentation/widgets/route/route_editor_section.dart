@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/geo/geo_bounds.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
+import '../../../../../core/parsing/input_parsers.dart';
 import '../../../application/route_create_coordinator.dart';
 import '../../../application/route_edit_command.dart';
 import '../../../domain/entities/route_draft_data.dart';
@@ -389,8 +390,8 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
   );
 
   void _addCoordinateAnchor() {
-    final latitude = double.tryParse(_latitude.text.replaceAll(',', '.'));
-    final longitude = double.tryParse(_longitude.text.replaceAll(',', '.'));
+    final latitude = parseLocaleDecimalInput(_latitude.text);
+    final longitude = parseLocaleDecimalInput(_longitude.text);
     if (latitude == null || longitude == null) return;
     unawaited(
       widget.onCommand(

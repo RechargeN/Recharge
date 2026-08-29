@@ -1,15 +1,21 @@
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../domain/entities/activity_draft_data.dart';
+import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/place_draft_data.dart';
+import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
+import 'activity_draft_mapper.dart';
+import 'collection_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
+import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
 
@@ -162,6 +168,28 @@ class CreateDraftModel {
     return value is num && value.isFinite ? value.toInt() : null;
   }
 
+  /// RNT-PUB-01 §1.2.1 `expectedRentalRevision` CAS guard. `null` when this
+  /// draft has no typed Rental payload at all (peeked at the raw
+  /// `rental_details` section, mirroring [routeRevision]/[scenarioRevision]
+  /// — the datasource layer never decodes into domain entities).
+  int? get rentalRevision {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
+  /// RNT-PUB-01 §1.2.1 owner check. `{'type': 'user'|'page', 'id': String}`
+  /// as stored by `RentalDraftMapper.toJson`, or `null` if this draft has no
+  /// typed Rental payload / the section is malformed.
+  Map<String, Object?>? get rentalPublisherRefJson {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? ref = payload['publisherRef'];
+    if (ref is! Map) return null;
+    return Map<String, Object?>.from(ref);
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
       entity.sectionData,
@@ -174,6 +202,11 @@ class CreateDraftModel {
     if (entity.placeData != null) {
       serializedSections['place_details'] = PlaceDraftMapper.toJson(
         entity.placeData!,
+      );
+    }
+    if (entity.activityData != null) {
+      serializedSections['activity_details'] = ActivityDraftMapper.toJson(
+        entity.activityData!,
       );
     }
     if (entity.findPeopleData != null) {
@@ -189,6 +222,16 @@ class CreateDraftModel {
     if (entity.routeData != null) {
       serializedSections['route_details'] = RouteDraftMapper.toJson(
         entity.routeData!,
+      );
+    }
+    if (entity.rentalData != null) {
+      serializedSections['rental_details'] = RentalDraftMapper.toJson(
+        entity.rentalData!,
+      );
+    }
+    if (entity.collectionData != null) {
+      serializedSections['collection_details'] = CollectionDraftMapper.toJson(
+        entity.collectionData!,
       );
     }
     return CreateDraftModel(
@@ -363,6 +406,17 @@ class CreateDraftModel {
             defaults: legacyPlaceDefaults,
           )
         : null;
+    final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
+      userId: organizerId,
+      currencyCode: currency,
+    );
+    final ActivityDraftData? activityData =
+        parsedObjectType == CreateObjectType.activity
+        ? ActivityDraftMapper.fromJson(
+            migratedSectionData['activity_details'],
+            defaults: legacyActivityDefaults,
+          )
+        : null;
     final FindPeopleDraftData? findPeopleData =
         parsedObjectType == CreateObjectType.findPeople
         ? FindPeopleDraftMapper.fromJson(
@@ -370,6 +424,17 @@ class CreateDraftModel {
             defaults: FindPeopleDraftData.defaults(
               userId: organizerId,
               currencyCode: currency,
+            ),
+          )
+        : null;
+    final RentalDraftData? rentalData =
+        parsedObjectType == CreateObjectType.rental
+        ? RentalDraftMapper.fromJson(
+            migratedSectionData['rental_details'],
+            defaults: RentalDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+              timeZoneId: timezone,
             ),
           )
         : null;
@@ -385,6 +450,18 @@ class CreateDraftModel {
             defaults: ScenarioDraftData.defaults(
               timezoneId: timezone,
               currencyCode: currency,
+            ),
+          )
+        : null;
+    final CollectionDraftData? collectionData =
+        parsedObjectType == CreateObjectType.collection
+        ? CollectionDraftMapper.fromJson(
+            migratedSectionData['collection_details'],
+            defaults: CollectionDraftData.defaults(
+              publisherRef: PublisherRef(
+                type: PublisherType.user,
+                id: organizerId,
+              ),
             ),
           )
         : null;
@@ -419,9 +496,12 @@ class CreateDraftModel {
       sectionData: runtimeSectionData,
       eventData: eventData,
       placeData: placeData,
+      activityData: activityData,
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
+      collectionData: collectionData,
+      rentalData: rentalData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),

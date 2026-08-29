@@ -27,6 +27,7 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
+import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
 
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
@@ -95,7 +96,7 @@ void main() {
         createController.state.draft.objectType,
         CreateObjectType.scenario,
       );
-      expect(find.text('Scenario Builder'), findsOneWidget);
+      expect(find.text('Scenario plan'), findsOneWidget);
       expect(handoff.contains('converted-scenario-1'), isFalse);
     },
   );
@@ -131,7 +132,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Class/Workshop still surfaces the generic 'Cover image обязательна'
+    // message; Recharge Activity, Bookable Session, Rental and Collection
+    // now have their own typed validation issues (ACT-CRT-01, SES-CRT-01,
+    // RNT-CRT-01, CLG-CRT-01) instead of this shared generic-form copy.
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -209,7 +214,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Class/Workshop has no dedicated Create block, so it still renders the
+    // generic _CreateTaxonomyPicker fallback this test exercises; Recharge
+    // Activity, Bookable Session, Rental and Collection now route to their
+    // own typed blocks (ACT-CRT-01, SES-CRT-01, RNT-CRT-01, CLG-CRT-01).
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -227,22 +236,36 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    final Finder sportGroup = find.text('Sport');
+    // Scoped to the rail: the group tile text can also match the
+    // _SelectedTaxonomySummary duplicate rendered for the active category.
+    final Finder taxonomyRail = find.byKey(
+      const ValueKey<String>('create-taxonomy-group-rail'),
+    );
+    final Finder workshopsGroup = find.descendant(
+      of: taxonomyRail,
+      matching: find.text('Workshops & masterclasses'),
+    );
     await tester.scrollUntilVisible(
-      sportGroup,
+      workshopsGroup,
       300,
       scrollable: find.descendant(
-        of: find.byKey(const ValueKey<String>('create-taxonomy-group-rail')),
+        of: taxonomyRail,
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.ensureVisible(sportGroup);
+    await tester.ensureVisible(workshopsGroup);
     await tester.pumpAndSettle();
-    await tester.tap(sportGroup);
+    await tester.tap(workshopsGroup);
     await tester.pumpAndSettle();
-    expect(find.text('sport.tennis · practice'), findsOneWidget);
+    // Class/Workshop's participation mode for its default subcategory
+    // (Workshop) is 'learn' — see
+    // CreateTaxonomySubcategory.participationModeFor(objectType).
+    expect(
+      find.text('workshops_masterclasses.workshop · learn'),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Yoga'));
+    await tester.tap(find.text('Masterclass'));
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
@@ -257,10 +280,10 @@ void main() {
       find.widgetWithText(TextField, 'Subcategory'),
     );
 
-    expect(categoryField.controller?.text, 'sport');
-    expect(subcategoryField.controller?.text, 'yoga');
-    expect(createController.state.draft.mainCategory, 'sport');
-    expect(createController.state.draft.subcategory, 'yoga');
+    expect(categoryField.controller?.text, 'workshops_masterclasses');
+    expect(subcategoryField.controller?.text, 'masterclass');
+    expect(createController.state.draft.mainCategory, 'workshops_masterclasses');
+    expect(createController.state.draft.subcategory, 'masterclass');
   });
 
   fullPageTestWidgets('generic visual clutter is absent from Create forms', (
@@ -628,11 +651,26 @@ void main() {
             routes: <RouteBase>[
               GoRoute(
                 path: RouteNames.create,
-                builder: (context, state) =>
-                    CreatePage(seedParameters: state.uri.queryParameters),
+                builder: (context, state) {
+                  if (state.uri.queryParameters['source'] == 'route_seed') {
+                    return Scaffold(
+                      body: Column(
+                        children: <Widget>[
+                          const Text('Route Create page'),
+                          Text(state.uri.queryParameters['type'] ?? ''),
+                          Text(state.uri.queryParameters['category'] ?? ''),
+                          Text(state.uri.queryParameters['mood'] ?? ''),
+                          Text(state.uri.queryParameters['prompt'] ?? ''),
+                          Text(state.uri.queryParameters['steps'] ?? ''),
+                        ],
+                      ),
+                    );
+                  }
+                  return CreatePage(seedParameters: state.uri.queryParameters);
+                },
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -673,8 +711,8 @@ void main() {
     await tester.tap(find.text('Edit route'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('no-mode'), findsOneWidget);
+    expect(find.text('Route Create page'), findsOneWidget);
+    expect(find.text('route'), findsNWidgets(2));
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(
@@ -688,7 +726,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(
@@ -752,7 +790,10 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
-      createController.setObjectType(CreateObjectType.activity);
+      // Session (generic success-hub flow; Recharge Activity now requires
+      // its own accessNotes/location fields per ACT-CRT-01 spec, which this
+      // generic-fields draft never sets).
+      createController.setObjectType(CreateObjectType.session);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',
@@ -867,6 +908,58 @@ void main() {
       expect(createController.state.publishedDraft, isNull);
     },
   );
+
+  fullPageTestWidgets(
+    'CreatePage renders ActivityCreateBlock for CreateObjectType.activity',
+    (tester) async {
+      final authController = AuthController(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await authController.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'seed',
+      );
+
+      final createRepository = _FakeCreateRepository();
+      final createController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: _testCreateDefaults,
+      );
+      await createController.ensureLoaded(
+        userId: 'u',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      createController.setObjectType(CreateObjectType.activity);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            createControllerProvider.overrideWith((ref) => createController),
+          ],
+          child: const MaterialApp(home: CreatePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ActivityCreateBlock), findsOneWidget);
+
+      // Flush the 700ms autosave timer so no pending Timer remains at test
+      // end.
+      await tester.pump(const Duration(milliseconds: 800));
+    },
+  );
 }
 
 const CreateRuntimeDefaults _testCreateDefaults = CreateRuntimeDefaults(
@@ -908,7 +1001,13 @@ class _NoopAuthRepository implements AuthRepository {
         id: 'u',
         email: 'user@example.com',
         role: 'creator',
-        capabilities: <String>['create.event', 'create.place', 'create.route'],
+        capabilities: <String>[
+          'create.event',
+          'create.place',
+          'create.route',
+          'create.rental',
+          'create.collection',
+        ],
         profileStatus: 'active',
       ),
     );

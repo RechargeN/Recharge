@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/parsing/input_parsers.dart';
+
 class ScenarioTimeBlockDraft {
   const ScenarioTimeBlockDraft({
     required this.title,
@@ -221,6 +223,5 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
 }
 
 double? _coordinate(String value) {
-  final String normalized = value.trim().replaceAll(',', '.');
-  return double.tryParse(normalized);
+  return parseLocaleDecimalInput(value);
 }

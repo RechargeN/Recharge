@@ -200,15 +200,15 @@
     {
       "id": "BND-LEGACY-0016",
       "rule": "cross_feature_import",
-      "source": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+      "source": "apps/mobile/lib/features/discover/presentation/shell/compatibility_object_renderer.dart",
       "target": "apps/mobile/lib/features/create/application/create_taxonomy.dart",
       "owner": "discover-feature",
-      "reason": "Legacy direct cross-feature import pending facade migration.",
+      "reason": "Legacy direct cross-feature import pending facade migration. Source path updated by DTL-FND-01: the import moved unchanged from discover_details_page.dart into CompatibilityObjectRenderer (same underlying dependency, no new coupling introduced).",
       "introducedBefore": "2026-08-10",
       "targetSlice": "BND-REM-DISCOVER-CREATE",
       "expiresOn": null,
       "expiryRationale": "No removal date accepted; registry budget cannot increase.",
-      "fingerprint": "f4faaed4"
+      "fingerprint": "f898fa82"
     },
     {
       "id": "BND-LEGACY-0017",

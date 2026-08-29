@@ -11,6 +11,7 @@ import 'package:recharge/features/create/domain/entities/create_availability.dar
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/domain/usecases/count_activity_informal_access_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
@@ -94,7 +95,12 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    controller.setObjectType(CreateObjectType.activity);
+    // Session still routes through the generic _validateCreateAvailability
+    // path (unlike event/place/findPeople/scenario/activity, which all have
+    // dedicated _validate branches). Recharge Activity has no Booking/
+    // attendance concept per ACT-CRT-01 spec AC #2, so it no longer fits
+    // as the "generic availability validation" example here.
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCoverImage('cover.jpg');
@@ -206,7 +212,13 @@ void main() {
       capabilities: const <String>['create.route'],
     );
 
-    controller.setObjectType(CreateObjectType.activity);
+    // Session still requires startDateTimeUtc via the generic validation
+    // path (unlike event/place/findPeople/scenario, which have their own
+    // dedicated _validate branches that never touch the generic
+    // startDateTimeUtc key). Recharge Activity was deliberately made
+    // evergreen (no start time) by ACT-CRT-01 spec AC #2, so it no longer
+    // fits as the "missing time" example here.
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('Recharge walk');
     controller.updateMainCategory('food_drinks');
     controller.updateCity('Rezekne');
@@ -259,9 +271,11 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    controller.setObjectType(CreateObjectType.activity);
+    // Session (see comment on the "partial attendance" test above for why
+    // activity no longer fits this generic publish-success example).
+    controller.setObjectType(CreateObjectType.session);
     controller.updateTitle('My Event');
-    controller.updateMainCategory('outdoor');
+    controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
     controller.updateStartDateTime('2026-05-01T10:00:00Z');
@@ -431,6 +445,176 @@ void main() {
       expect(controller.state.draft.media.gallery.last, 'local://image-12.jpg');
     },
   );
+
+  group('CreateController activity wiring', () {
+    test('setObjectType(activity) seeds activityData with market defaults', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      expect(controller.state.draft.objectType, CreateObjectType.activity);
+      expect(controller.state.draft.activityData, isNotNull);
+      expect(controller.state.draft.activityData!.location.accessNotes, '');
+    });
+
+    test('updateActivityAccessNotes updates the draft and bumps revision', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      final int before = controller.state.draft.activityData!.revision;
+      controller.updateActivityAccessNotes('Gravel path from parking.');
+      expect(
+        controller.state.draft.activityData!.location.accessNotes,
+        'Gravel path from parking.',
+      );
+      expect(controller.state.draft.activityData!.revision, greaterThan(before));
+    });
+
+    test('confirmActivityPin sets pinConfirmed', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.confirmActivityPin();
+      expect(controller.state.draft.activityData!.location.pinConfirmed, isTrue);
+    });
+
+    test('goToActivityStep blocks forward navigation on a blocking error', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      // No cover image set yet -> cover_image_required is a 'basics'-section
+      // blocking error, and step 0 is 'basics'.
+      final bool advanced = await controller.goToActivityStep(2);
+      expect(advanced, isFalse);
+      expect(controller.state.activityStep, 0);
+      expect(controller.state.activityValidationIssues, isNotEmpty);
+    });
+
+    test('goToActivityStep allows forward navigation once the current step is valid', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateCoverImage('cover.jpg');
+      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.confirmActivityPin();
+      controller.updateActivityAccessNotes('Gravel path from parking.');
+      final bool advanced = await controller.goToActivityStep(1);
+      expect(advanced, isTrue);
+      expect(controller.state.activityStep, 1);
+    });
+  });
+
+  group('CreateController activity publish moderation (§12)', () {
+    test('4th+ informal-access card publishes flagged, not blocked', () async {
+      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+        countActivityInformalAccess: const CountActivityInformalAccessUseCase(
+          publishedInformalActivityCounts: <String, int>{'user-3': 3},
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-3',
+        organizerEmail: 'user3@example.com',
+        organizerName: 'user-3',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.flaggedForReview,
+      );
+      moderationController.dispose();
+    });
+
+    test('1st-3rd informal-access card publishes as normal pending', () async {
+      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user1@example.com',
+        organizerName: 'user-1',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.pending,
+      );
+      moderationController.dispose();
+    });
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
@@ -458,9 +642,13 @@ class _FakeCreateRepository implements CreateRepository {
     CreateDraftEntity draft,
   ) async {
     final now = DateTime.now().toUtc();
+    // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
+    // moderation threshold); otherwise default to the normal pending state.
     _stored = draft.copyWith(
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: ModerationStatus.pending,
+      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+          ? ModerationStatus.flaggedForReview
+          : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
       publishedAtUtc: now,
       updatedAtUtc: now,

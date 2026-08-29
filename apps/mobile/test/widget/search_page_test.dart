@@ -503,7 +503,7 @@ void main() {
     expect(find.text('10'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario builder from saved conditions', (
+  fullPageTestWidgets('does not build Scenario from saved conditions', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -516,13 +516,7 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(
-      find.byTooltip('Build route from saved conditions'),
-    );
-    await tester.tap(find.byTooltip('Build route from saved conditions'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved conditions'), findsNothing);
   });
 
   fullPageTestWidgets('opens create from saved conditions', (tester) async {
@@ -621,7 +615,7 @@ class _SearchLandingTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => const SizedBox.shrink(),
             ),
           ],
@@ -691,7 +685,7 @@ class _SearchTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Center(
                   child: Column(
@@ -728,6 +722,11 @@ class _SearchTestApp extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+            GoRoute(
+              path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Details page'))),
             ),
             GoRoute(
               path: '${RouteNames.discoverDetails}/:itemId',

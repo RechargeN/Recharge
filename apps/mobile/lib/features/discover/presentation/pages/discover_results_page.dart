@@ -6,6 +6,7 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../application/controllers/scenario_intake_selection_controller.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
@@ -236,9 +237,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onOpenMap: (SavedSearchEntity search) {
               context.go(_mapLocationForQuery(search.query));
             },
-            onBuildScenario: (SavedSearchEntity search) {
-              context.go(_scenarioBuilderLocationForQuery(search.query));
-            },
+            onBuildScenario: null,
             onCreateListing: (SavedSearchEntity search) {
               context.go(_createLocationForSavedSearch(search));
             },
@@ -319,8 +318,15 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               _searchController.clear();
               return controller.resetSearchConditions();
             },
-            onOpenDetails: (String itemId) {
-              context.push('${RouteNames.discoverDetails}/$itemId');
+            onOpenDetails: (DiscoverItemEntity item) {
+              context.push(
+                RouteNames.discoverDetailsCanonicalFor(
+                  CatalogObjectRef(
+                    objectType: item.catalogObjectType,
+                    objectId: item.id,
+                  ),
+                ),
+              );
             },
             onToggleScenarioSelection: _scenarioSelectionController.toggle,
             onAddToScenario: intakeEnabled
@@ -450,7 +456,7 @@ class _SavedSearchesPanel extends StatelessWidget {
     required this.onCreateCurrent,
     required this.onApply,
     required this.onOpenMap,
-    required this.onBuildScenario,
+    this.onBuildScenario,
     required this.onCreateListing,
     required this.onDelete,
   });
@@ -460,7 +466,7 @@ class _SavedSearchesPanel extends StatelessWidget {
   final VoidCallback onCreateCurrent;
   final ValueChanged<SavedSearchEntity> onApply;
   final ValueChanged<SavedSearchEntity> onOpenMap;
-  final ValueChanged<SavedSearchEntity> onBuildScenario;
+  final ValueChanged<SavedSearchEntity>? onBuildScenario;
   final ValueChanged<SavedSearchEntity> onCreateListing;
   final ValueChanged<SavedSearchEntity> onDelete;
 
@@ -525,7 +531,9 @@ class _SavedSearchesPanel extends StatelessWidget {
                           search: search,
                           onApply: () => onApply(search),
                           onOpenMap: () => onOpenMap(search),
-                          onBuildScenario: () => onBuildScenario(search),
+                          onBuildScenario: onBuildScenario == null
+                              ? null
+                              : () => onBuildScenario!(search),
                           onCreateListing: () => onCreateListing(search),
                           onDelete: () => onDelete(search),
                         ),
@@ -545,7 +553,7 @@ class _SavedSearchTile extends StatelessWidget {
     required this.search,
     required this.onApply,
     required this.onOpenMap,
-    required this.onBuildScenario,
+    this.onBuildScenario,
     required this.onCreateListing,
     required this.onDelete,
   });
@@ -553,7 +561,7 @@ class _SavedSearchTile extends StatelessWidget {
   final SavedSearchEntity search;
   final VoidCallback onApply;
   final VoidCallback onOpenMap;
-  final VoidCallback onBuildScenario;
+  final VoidCallback? onBuildScenario;
   final VoidCallback onCreateListing;
   final VoidCallback onDelete;
 
@@ -617,12 +625,14 @@ class _SavedSearchTile extends StatelessWidget {
                   onPressed: onOpenMap,
                   icon: const Icon(Icons.map_outlined),
                 ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: 'Build route from saved conditions',
-                  onPressed: onBuildScenario,
-                  icon: const Icon(Icons.route_outlined),
-                ),
+                if (onBuildScenario != null) ...<Widget>[
+                  const SizedBox(width: 4),
+                  IconButton.filledTonal(
+                    tooltip: 'Build route from saved conditions',
+                    onPressed: onBuildScenario,
+                    icon: const Icon(Icons.route_outlined),
+                  ),
+                ],
                 const SizedBox(width: 4),
                 IconButton.filledTonal(
                   tooltip: 'Create listing from saved conditions',
@@ -636,58 +646,6 @@ class _SavedSearchTile extends StatelessWidget {
       ),
     );
   }
-}
-
-String _scenarioBuilderLocationForQuery(DiscoverQuery query) {
-  final String prompt = _promptForQuery(query);
-  final Map<String, String> params = <String, String>{
-    'mood': _scenarioMoodForQuery(query),
-    'duration': query.radiusMeters <= 5000 ? '120' : '180',
-    'walking': query.unlimitedRadius ? '0' : '1',
-    if (query.freeOnly) 'free': '1',
-    if (prompt.isNotEmpty) 'prompt': prompt,
-  };
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
-  ).toString();
-}
-
-String _scenarioMoodForQuery(DiscoverQuery query) {
-  return _scenarioMoodForSignals(query.queryText, query.selectedCategoryIds);
-}
-
-String _scenarioMoodForSignals(String queryText, List<String> categories) {
-  final String normalized = queryText.toLowerCase();
-  final Set<String> normalizedCategories = categories
-      .map(normalizeRechargeContentGroupId)
-      .toSet();
-  if (normalized.contains('tennis') ||
-      normalized.contains('run') ||
-      normalized.contains('sport') ||
-      normalizedCategories.contains('sport') ||
-      normalizedCategories.contains('outdoor_nature_walking')) {
-    return 'active';
-  }
-  if (normalizedCategories.contains('music_nightlife') ||
-      normalizedCategories.contains('art_culture_museums') ||
-      normalizedCategories.contains('family_kids')) {
-    return 'social';
-  }
-  return 'calm';
-}
-
-String _promptForQuery(DiscoverQuery query) {
-  final List<String> parts = <String>[
-    if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
-    if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
-    query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
-  ];
-  return parts.join(' · ');
 }
 
 String _mapLocationForQuery(DiscoverQuery query) {
@@ -1286,7 +1244,7 @@ class _ResultsList extends StatelessWidget {
   final ScenarioIntakeSelectionState selection;
   final Future<void> Function() onRetry;
   final Future<void> Function() onReset;
-  final ValueChanged<String> onOpenDetails;
+  final ValueChanged<DiscoverItemEntity> onOpenDetails;
   final ValueChanged<DiscoverItemEntity> onToggleScenarioSelection;
   final ValueChanged<DiscoverItemEntity>? onAddToScenario;
 
@@ -1326,7 +1284,7 @@ class _ResultsList extends StatelessWidget {
                     selectionOrder: selection.orderOf(item.id),
                     onTap: selection.active
                         ? () => onToggleScenarioSelection(item)
-                        : () => onOpenDetails(item.id),
+                        : () => onOpenDetails(item),
                     onAddToScenario: onAddToScenario == null
                         ? null
                         : () => onAddToScenario!(item),

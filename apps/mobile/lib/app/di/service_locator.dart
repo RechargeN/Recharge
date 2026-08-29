@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../config/market_config.dart';
 import '../config/travel_policy_config.dart';
+import '../adapters/collection_publication_discovery_adapter.dart';
+import '../adapters/rental_publication_discovery_adapter.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
 import '../adapters/route_safety_reporting_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
@@ -65,16 +67,31 @@ import '../../features/create/data/repositories/create_template_repository_impl.
 import '../../features/create/data/repositories/scenario_object_intake_repository_impl.dart';
 import '../../features/create/data/repositories/route_publication_repository_impl.dart';
 import '../../features/create/data/repositories/route_quality_workflow_repository_impl.dart';
+import '../../features/create/application/collection_create_config.dart';
+import '../../features/create/application/collection_create_coordinator.dart';
+import '../../features/create/data/datasources/collection_catalog_search_mock_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_local_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_store.dart';
+import '../../features/create/data/datasources/google_places_search_datasource.dart';
+import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
+import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
+import '../../features/create/data/repositories/location_search_repository_impl.dart';
 import '../../features/create/data/repositories/route_gpx_repository_impl.dart';
 import '../../features/create/data/repositories/route_recording_journal_repository_impl.dart';
 import '../../features/create/data/repositories/scenario_transit_schedule_repository_impl.dart';
 import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
+import '../../features/create/domain/repositories/collection_catalog_search_repository.dart';
+import '../../features/create/domain/repositories/collection_publication_index_sink.dart';
+import '../../features/create/domain/repositories/collection_publication_repository.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/domain/repositories/location_search_repository.dart';
+import '../../features/create/domain/repositories/rental_promotion_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
+import '../../features/create/domain/repositories/rental_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_authoring_policy.dart';
 import '../../features/create/domain/repositories/route_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_publication_repository.dart';
@@ -98,6 +115,7 @@ import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
+import '../../features/create/domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/save_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/check_place_duplicates_usecase.dart';
@@ -105,16 +123,22 @@ import '../../features/create/domain/usecases/build_route_publication_bundle_use
 import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
+import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
+import '../../features/discover/data/repositories/collection_item_resolution_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_repository_impl.dart';
 import '../../features/discover/data/repositories/timezone_repository_impl.dart';
 import '../../features/discover/data/repositories/travel_time_repository_impl.dart';
 import '../../features/discover/data/repositories/time_fit_evaluation_store_impl.dart';
 import '../../features/discover/domain/entities/discover_query.dart';
+import '../../features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
+import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_route_discovery_port.dart';
 import '../../features/discover/domain/repositories/route_safety_reporting_port.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -137,12 +161,16 @@ import '../../features/explore/domain/usecases/save_profile_editable_usecase.dar
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
+import '../../features/identity/data/datasources/public_professional_page_local_datasource.dart';
 import '../../features/identity/data/repositories/identity_workspace_repository_impl.dart';
+import '../../features/identity/data/repositories/public_professional_page_repository_impl.dart';
 import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
+import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
 import '../../features/identity/domain/usecases/create_professional_page_usecase.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
 import '../../features/identity/domain/usecases/select_workspace_usecase.dart';
+import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
@@ -252,11 +280,21 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<IdentityWorkspaceLocalDataSource>(
       () => IdentityWorkspaceLocalDataSource(sl()),
     )
+    ..registerLazySingleton<PublicProfessionalPageLocalDataSource>(
+      () => PublicProfessionalPageLocalDataSource(sl()),
+    )
     ..registerLazySingleton<IdentityWorkspaceRepository>(
       () => IdentityWorkspaceRepositoryImpl(
         localDataSource: sl(),
         mockFixture: sl(),
+        publicPageLocalDataSource: sl(),
       ),
+    )
+    ..registerLazySingleton<PublicProfessionalPageRepository>(
+      () => PublicProfessionalPageRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<PublicPageContentProjectionRepository>(
+      EmptyPublicPageContentProjectionRepository.new,
     )
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
@@ -294,6 +332,21 @@ Future<void> setupDependencies() async {
       }
       return repository as CreateDraftCollectionRepository;
     })
+    // RNT-PUB-01 §1.2: same repository instance, cast to the narrower
+    // RentalPromotionRepository interface — mirrors the
+    // CreateDraftCollectionRepository cast above.
+    ..registerLazySingleton<RentalPromotionRepository>(() {
+      final repository = sl<CreateRepository>();
+      if (repository is! RentalPromotionRepository) {
+        throw StateError(
+          'Create repository must support Rental direct-publish promotion.',
+        );
+      }
+      return repository as RentalPromotionRepository;
+    })
+    ..registerLazySingleton<PromoteRentalToPublishedUseCase>(
+      () => PromoteRentalToPublishedUseCase(sl()),
+    )
     ..registerLazySingleton<CreateTemplateRepository>(
       () => CreateTemplateRepositoryImpl(sl()),
     )
@@ -314,6 +367,100 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<PublishedRouteDiscoveryPort>(
       () => sl<RoutePublicationDiscoveryAdapter>(),
+    )
+    // Rental — both sides active (DTL-OBJ-01 §3.6): unlike Collection
+    // below, Rental's Create-authoring half (RentalDirectPublishPolicy
+    // etc.) is already wired, so RentalPublicationIndexSink is registered
+    // too, mirroring Route above.
+    ..registerLazySingleton<PublishedRentalDiscoveryLocalDataSource>(
+      () => PublishedRentalDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationDiscoveryAdapter>(
+      () => RentalPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationIndexSink>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedRentalDiscoveryPort>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    // Collection — both sides active (CLG-CRT-01): mirrors Rental above.
+    // `CollectionPublicationDiscoveryAdapter` is the one file that imports
+    // both `CollectionPublicationIndexSink` (Create) and
+    // `PublishedCollectionDiscoveryPort` (Discover); `sink`/`port` here are
+    // the same instance, same pattern as Route/Rental.
+    ..registerLazySingleton<PublishedCollectionDiscoveryLocalDataSource>(
+      () => PublishedCollectionDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationDiscoveryAdapter>(
+      () => CollectionPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationIndexSink>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedCollectionDiscoveryPort>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<CollectionItemResolutionRepository>(
+      CollectionItemResolutionRepositoryImpl.new,
+    )
+    // CLG-CRT-01 §15 "Миграция и rollback": one config instance for the
+    // whole composition, always the bare class default — never an override
+    // here, on purpose (see `collection_discover_default_composition_test.dart`,
+    // which exists specifically to catch this site silently diverging from
+    // the class's own default). CLG-CRT-01/CLG-PST-01/CLG-PST-02's gates are
+    // now all green, so `CollectionCreateRuntimeConfig`'s own default
+    // enables `collectionPublishingEnabled`/`collectionDiscoverEnabled`
+    // (`collectionCreateEnabled` was already `true`). For an emergency
+    // rollback, override at this exact call site — never edit the class
+    // default for a temporary rollback.
+    ..registerLazySingleton<CollectionCreateRuntimeConfig>(
+      () => const CollectionCreateRuntimeConfig(),
+    )
+    // CLG-PST-01: persisted, staged-write store — see
+    // `CollectionPublicationStore`'s own doc comment for why this has no
+    // AES-GCM layer of its own, unlike `RouteRecordingSecureStore`.
+    ..registerLazySingleton<CollectionPublicationStore>(
+      () => SecureCollectionPublicationStore(sl<FlutterSecureStorage>()),
+    )
+    ..registerLazySingleton<CollectionPublicationLocalDatasource>(
+      () => CollectionPublicationLocalDatasource(idGenerator: sl(), store: sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationRepository>(
+      () => CollectionPublicationRepositoryImpl(
+        datasource: sl(),
+        sink: sl<CollectionPublicationIndexSink>(),
+      ),
+    )
+    ..registerLazySingleton<CollectionCatalogSearchMockDatasource>(
+      CollectionCatalogSearchMockDatasource.new,
+    )
+    ..registerLazySingleton<CollectionCatalogSearchRepository>(
+      () => CollectionCatalogSearchRepositoryImpl(datasource: sl()),
+    )
+    // LOC-SRCH prerequisite: key comes from the gitignored
+    // google_maps.properties via --dart-define-from-file (documented in
+    // the tracked google_maps.properties.example), same mechanism the
+    // native Google Maps SDK config already uses. `GooglePlacesSearchDatasource`
+    // still fails closed (empty results) if the value is empty — a missing
+    // properties file degrades safely, it does not crash the build.
+    ..registerLazySingleton<GooglePlacesSearchDatasource>(
+      () => GooglePlacesSearchDatasource(
+        client: sl(),
+        apiKey: const String.fromEnvironment('GOOGLE_PLACES_API_KEY'),
+      ),
+    )
+    ..registerLazySingleton<LocationSearchRepository>(
+      () => LocationSearchRepositoryImpl(sl()),
+    )
+    ..registerFactory<CollectionCreateCoordinator>(
+      () => CollectionCreateCoordinator(
+        idGenerator: sl(),
+        catalogSearchRepository: sl(),
+        publicationRepository: sl(),
+        locationSearchRepository: sl(),
+        config: sl<CollectionCreateRuntimeConfig>(),
+      ),
     )
     ..registerLazySingleton<RoutePublicationMemoryDataSource>(
       RoutePublicationMemoryDataSource.new,
@@ -559,6 +706,12 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory<SelectWorkspaceUseCase>(
       () => SelectWorkspaceUseCase(sl()),
+    )
+    ..registerFactory<ResolvePublicProfessionalPageUseCase>(
+      () => ResolvePublicProfessionalPageUseCase(
+        repository: sl(),
+        contentRepository: sl(),
+      ),
     )
     ..registerFactory<LoadCreateDraftUseCase>(
       () => LoadCreateDraftUseCase(sl()),

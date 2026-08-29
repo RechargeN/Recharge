@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/parsing/input_parsers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -901,9 +902,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 decimal: true,
               ),
               onChanged: (String value) {
-                final double? amount = double.tryParse(
-                  value.replaceAll(',', '.'),
-                );
+                final double? amount = parseLocaleDecimalInput(value);
                 _update(
                   data.copyWith(
                     expectedSpendAmount: amount,
@@ -1460,9 +1459,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   void _addExpense(FindPeopleDraftData data) {
     final String? category = _text(_expenseCategory.text);
-    final double? amount = double.tryParse(
-      _expenseAmount.text.replaceAll(',', '.'),
-    );
+    final double? amount = parseLocaleDecimalInput(_expenseAmount.text);
     if (category == null || amount == null || amount <= 0) return;
     _update(
       data.copyWith(

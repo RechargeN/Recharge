@@ -11,7 +11,7 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../../../core/geo/geometry_encoding.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -37,6 +37,7 @@ import '../widgets/scenario_intake_marker_icon_factory.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/map_marker_utils.dart';
 import '../widgets/map_style.dart';
+import '../widgets/published_route_polyline_builder.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -446,7 +447,14 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               }
             },
             onOpenDetails: (DiscoverItemEntity item) {
-              context.push('${RouteNames.discoverDetails}/${item.id}');
+              context.push(
+                RouteNames.discoverDetailsCanonicalFor(
+                  CatalogObjectRef(
+                    objectType: item.catalogObjectType,
+                    objectId: item.id,
+                  ),
+                ),
+              );
             },
             onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
               item: item,
@@ -730,37 +738,12 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   ) {
     final Set<Polyline> polylines = <Polyline>{};
     final publishedRoute = selectedItem?.publishedRoute;
-    if (publishedRoute != null && publishedRoute.isCoherent) {
-      try {
-        final points = GeometryEncoding.decode(
-          publishedRoute.fullEncodedPolyline,
-          policy: GeometryEncodingPolicy(
-            precision: publishedRoute.encodingPrecision,
-          ),
-        );
-        if (points.length >= 2) {
-          polylines.add(
-            Polyline(
-              polylineId: PolylineId(
-                'published_route_${publishedRoute.routeId}_'
-                '${publishedRoute.versionId}',
-              ),
-              points: points
-                  .map((point) => LatLng(point.latitude, point.longitude))
-                  .toList(growable: false),
-              color: RechargeTheme.travelGreen,
-              width: 6,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
-            ),
-          );
-        }
-      } on FormatException {
-        // A malformed snapshot is ignored instead of triggering rerouting.
-      } on RangeError {
-        // Unsupported precision is treated as an unreadable snapshot.
-      }
+    if (publishedRoute != null) {
+      // Extracted to a pure function (DTL-RTE-01), reused by
+      // RouteDetailsRenderer's map-hero — only this branch moved; the
+      // Scenario-route branch below is untouched.
+      final Polyline? polyline = buildPublishedRoutePolyline(publishedRoute);
+      if (polyline != null) polylines.add(polyline);
     }
     if (scenarioRoute != null && scenarioRoute.stops.length >= 2) {
       polylines.add(
@@ -849,7 +832,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         action: ProtectedAction.favorite,
         sourceScreen: 'discover_map',
         sourceAction: 'favorite_tap',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_map',
@@ -1054,14 +1039,14 @@ String mapCreateLocationForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._mapSmartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -1079,11 +1064,13 @@ String mapScenarioBuilderLocationForSmartSearch(SmartSearchHistoryEntity item) {
   );
   if (parseResult != null) {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _mapSmartRouteParameters(
-        parseResult,
-        includeMode: false,
-      ),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._mapSmartRouteParameters(parseResult, includeMode: false),
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
   return mapScenarioBuilderLocationForQuery(item.query, prompt: item.prompt);
@@ -1120,8 +1107,13 @@ String mapScenarioBuilderLocationForQuery(
     if (routePrompt.isNotEmpty) 'prompt': routePrompt,
   };
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ...params,
+      'source': 'saved_search_route_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
@@ -1139,7 +1131,7 @@ Map<String, String> _mapSmartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -3003,23 +2995,28 @@ class _ScenarioMapRoute {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: scenarioParameters,
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ...scenarioParameters,
+        'source': 'map_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
   String get createLocation {
     final Map<String, String> params = <String, String>{
       ...scenarioParameters,
-      'source': 'scenario',
-      'type': 'event',
+      'source': 'map_route_seed',
+      'type': 'route',
       'title': '$moodLabel recharge route',
       'subtitle':
           '${stops.length} stops · '
           '$totalDurationMinutes min · '
           '${totalDistanceKm.toStringAsFixed(1)} km',
       'q': promptLabel,
-      'category': 'scenario',
+      'category': 'route',
     };
     return Uri(path: RouteNames.create, queryParameters: params).toString();
   }

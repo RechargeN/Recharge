@@ -1,8 +1,8 @@
 # Identity, Creator Verification And Professional Publisher Slice
 
 Status: Approved; bounded local/mock implementation allowed during stabilization
-Version: 1.3
-Date: 2026-07-31
+Version: 1.3.1
+Date: 2026-08-11
 Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017,
 `docs/architecture/FIREBASE_ARCHITECTURE.md`
 
@@ -68,7 +68,7 @@ publication remain post-stabilization.
 
 | Access state | Required state | Allowed baseline |
 |---|---|---|
-| Viewer | Authenticated, active `User` | Discover, favorites, participation, profile; optional local pre-verification drafts |
+| Viewer | Authenticated, active `User` | Discover, favorites, participation, profile; create/edit/save owned personal Scenarios; optional local pre-verification publisher drafts |
 | Creator | Viewer + approved identity verification + Creator grants | Same personal UI plus eligible Creator tools; submit/publish as personal publisher |
 | Professional Page access | Creator + active membership for an exact page + page grants | Open that page workspace; manage and publish as that eligible page |
 | Admin | Authenticated `Admin` + explicit admin capabilities | Verification, grants and moderation through audited operations |
@@ -427,6 +427,11 @@ backend authorization repeats the decision and records the audit event.
 
 Exact codes are versioned by the implementation slice. The minimum semantic
 matrix is:
+
+An owned personal Scenario is User-owned planning state, not a publisher-bound
+catalog object. An authenticated Viewer may create, edit and save it without
+Creator verification or a `PublisherRef`. Submit or publication to Discover
+still requires verified Creator eligibility and the applicable capabilities.
 
 | Operation | Personal publisher | Page publisher |
 |---|---|---|

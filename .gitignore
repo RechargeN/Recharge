@@ -59,4 +59,8 @@ app.*.map.json
 *.keystore
 **/secrets/**
 **/secret/**
+apps/mobile/google_maps.properties
 .aider*
+
+# Isolated git worktrees used for agent-driven feature work (superpowers:using-git-worktrees)
+.worktrees/

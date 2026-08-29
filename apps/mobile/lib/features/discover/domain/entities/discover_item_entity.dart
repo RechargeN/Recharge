@@ -1,3 +1,4 @@
+import '../../../../shared/models/catalog_object_ref.dart';
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
 import 'time_fit_evaluation.dart';
@@ -177,5 +178,27 @@ class DiscoverItemEntity {
           ? null
           : (publishedRoute ?? this.publishedRoute),
     );
+  }
+}
+
+/// Not part of the original `DTL-LINK-01` file map — added because both
+/// `DiscoverItemDetailsLookup.classify`
+/// (`features/discover/data/repositories/discover_item_details_lookup.dart`)
+/// and several presentation call sites building a typed self-link
+/// (`discover_details_page.dart`, `discover_map_page.dart`,
+/// `discover_hub_page.dart`) need the exact same
+/// `isPublishedRoute`/`objectKind` classification. A single domain-layer
+/// extension avoids duplicating that logic across files and, just as
+/// importantly, avoids presentation code importing a `data/repositories`
+/// class directly (`ARCHITECTURE_BASELINE.md` rule 3).
+extension DiscoverItemCatalogType on DiscoverItemEntity {
+  CatalogObjectType get catalogObjectType {
+    if (isPublishedRoute) return CatalogObjectType.route;
+    return switch (objectKind) {
+      DiscoverObjectKind.event => CatalogObjectType.event,
+      DiscoverObjectKind.activity => CatalogObjectType.activity,
+      DiscoverObjectKind.place => CatalogObjectType.place,
+      DiscoverObjectKind.route => CatalogObjectType.route,
+    };
   }
 }

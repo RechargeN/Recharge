@@ -1,9 +1,11 @@
+import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_validation_issue.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
 import '../../domain/entities/place_validation_issue.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
 import '../../domain/entities/place_enrichment_proposal.dart';
+import '../../domain/entities/rental_validation_issue.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
@@ -33,9 +35,11 @@ class CreateState {
     required this.eventStep,
     required this.eventValidationIssues,
     required this.placeStep,
+    required this.activityStep,
     required this.findPeopleStep,
     required this.findPeopleValidationIssues,
     required this.placeValidationIssues,
+    required this.activityValidationIssues,
     required this.placeDuplicateMatches,
     required this.duplicateOverrideConfirmed,
     required this.placeEnrichmentLoading,
@@ -53,6 +57,9 @@ class CreateState {
     required this.routeStep,
     required this.routePublishReceipt,
     required this.routeModerationRequests,
+    required this.rentalStep,
+    required this.rentalValidationIssues,
+    required this.collectionStep,
   });
 
   factory CreateState.initial() {
@@ -71,9 +78,11 @@ class CreateState {
       eventStep: 0,
       eventValidationIssues: const <EventValidationIssue>[],
       placeStep: 0,
+      activityStep: 0,
       findPeopleStep: 0,
       findPeopleValidationIssues: const <FindPeopleValidationIssue>[],
       placeValidationIssues: const <PlaceValidationIssue>[],
+      activityValidationIssues: const <ActivityValidationIssue>[],
       placeDuplicateMatches: const <PlaceDuplicateMatch>[],
       duplicateOverrideConfirmed: false,
       placeEnrichmentLoading: false,
@@ -91,6 +100,9 @@ class CreateState {
       routeStep: 0,
       routePublishReceipt: null,
       routeModerationRequests: const <RouteModerationRequest>[],
+      rentalStep: 0,
+      rentalValidationIssues: const <RentalValidationIssue>[],
+      collectionStep: 0,
     );
   }
 
@@ -104,9 +116,11 @@ class CreateState {
   final int eventStep;
   final List<EventValidationIssue> eventValidationIssues;
   final int placeStep;
+  final int activityStep;
   final int findPeopleStep;
   final List<FindPeopleValidationIssue> findPeopleValidationIssues;
   final List<PlaceValidationIssue> placeValidationIssues;
+  final List<ActivityValidationIssue> activityValidationIssues;
   final List<PlaceDuplicateMatch> placeDuplicateMatches;
   final bool duplicateOverrideConfirmed;
   final bool placeEnrichmentLoading;
@@ -124,6 +138,9 @@ class CreateState {
   final int routeStep;
   final RoutePublishReceipt? routePublishReceipt;
   final List<RouteModerationRequest> routeModerationRequests;
+  final int rentalStep;
+  final List<RentalValidationIssue> rentalValidationIssues;
+  final int collectionStep;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -146,11 +163,14 @@ class CreateState {
     List<EventValidationIssue>? eventValidationIssues,
     bool clearEventValidationIssues = false,
     int? placeStep,
+    int? activityStep,
     int? findPeopleStep,
     List<FindPeopleValidationIssue>? findPeopleValidationIssues,
     bool clearFindPeopleValidationIssues = false,
     List<PlaceValidationIssue>? placeValidationIssues,
     bool clearPlaceValidationIssues = false,
+    List<ActivityValidationIssue>? activityValidationIssues,
+    bool clearActivityValidationIssues = false,
     List<PlaceDuplicateMatch>? placeDuplicateMatches,
     bool clearPlaceDuplicateMatches = false,
     bool? duplicateOverrideConfirmed,
@@ -178,6 +198,10 @@ class CreateState {
     bool clearRoutePublishReceipt = false,
     List<RouteModerationRequest>? routeModerationRequests,
     bool clearRouteModerationRequests = false,
+    int? rentalStep,
+    List<RentalValidationIssue>? rentalValidationIssues,
+    bool clearRentalValidationIssues = false,
+    int? collectionStep,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -196,6 +220,7 @@ class CreateState {
           ? const <EventValidationIssue>[]
           : (eventValidationIssues ?? this.eventValidationIssues),
       placeStep: placeStep ?? this.placeStep,
+      activityStep: activityStep ?? this.activityStep,
       findPeopleStep: findPeopleStep ?? this.findPeopleStep,
       findPeopleValidationIssues: clearFindPeopleValidationIssues
           ? const <FindPeopleValidationIssue>[]
@@ -203,6 +228,9 @@ class CreateState {
       placeValidationIssues: clearPlaceValidationIssues
           ? const <PlaceValidationIssue>[]
           : (placeValidationIssues ?? this.placeValidationIssues),
+      activityValidationIssues: clearActivityValidationIssues
+          ? const <ActivityValidationIssue>[]
+          : (activityValidationIssues ?? this.activityValidationIssues),
       placeDuplicateMatches: clearPlaceDuplicateMatches
           ? const <PlaceDuplicateMatch>[]
           : (placeDuplicateMatches ?? this.placeDuplicateMatches),
@@ -245,6 +273,11 @@ class CreateState {
       routeModerationRequests: clearRouteModerationRequests
           ? const <RouteModerationRequest>[]
           : (routeModerationRequests ?? this.routeModerationRequests),
+      rentalStep: rentalStep ?? this.rentalStep,
+      rentalValidationIssues: clearRentalValidationIssues
+          ? const <RentalValidationIssue>[]
+          : (rentalValidationIssues ?? this.rentalValidationIssues),
+      collectionStep: collectionStep ?? this.collectionStep,
     );
   }
 }
