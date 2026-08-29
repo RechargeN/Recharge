@@ -1,7 +1,7 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.10**
+- Версия: **1.11**
 - Дата: **2026-08-28**
 - Spec status: **Review — documentation only; independent specialist approval pending**
 - Runtime status: **Absent**
@@ -15,15 +15,15 @@
 - Accepted decisions:
   [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.8](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.9](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.9](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.10](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.9 — runtime/evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.10 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.7 — contract parity Done; runtime/evidence Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.8 — RAW-B Done; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
   [BCK09-API-DEC-01 v0.4 — reconciled](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Named API decision:
@@ -32,9 +32,25 @@
   [BCK09-API-CORR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Callable raw-body emulator evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Next disabled-adapter plan:
+  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v1.11 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done after 19/19 disposable
+  Functions Emulator transport vectors passed on Ubuntu and Windows at
+  `e043218`, with byte-identical raw-body visibility and cleanup evidence;
+- closed only the callable raw-body transport-feasibility gap and introduced
+  BCK09-API-RAW-C-01 v0.1 as a Proposed, separately authorized disabled-adapter
+  plan;
+- kept 85 existing AC stable and appended AC-86..89; all nine signatures,
+  product runtime, Firestore/Admin access, callable exports, Firebase changes,
+  deployment and activation remain blocked/Absent.
 
 ### v1.10 — 2026-08-28
 
@@ -876,16 +892,18 @@ Request/idempotency IDs, transport metadata, raw Auth/App Check and server
 timestamps are excluded. Duplicate keys, fractional/non-finite numbers,
 integers outside `-9007199254740991..9007199254740991`, unpaired surrogates
 and invalid nulls fail before hashing. Unicode normalization, case folding and
-trimming are forbidden after validation. Dart/TypeScript golden vectors pass
-at contracts/test-only scope; raw callable-body feasibility and independent
-Security evidence remain mandatory before runtime.
+  trimming are forbidden after validation. Dart/TypeScript golden vectors pass
+  at contracts/test-only scope. BCK09-API-RAW-B-01 v0.1 proves the pinned
+  Functions Emulator preserves the committed synthetic raw-body corpus on
+  Ubuntu and Windows; this is not product-adapter, Security or production
+  evidence.
 
 Accepted ECL03-D12 treats `requestId` as an exact case-sensitive, non-blank
 string of 1–128 Unicode scalar values, opaque and not normalized/interpreted as
 ULID. BCK09-API-CORR-01 v0.3 proves command Schema/Dart/fixture enforcement,
-and BCK09-API-PAR-01 v0.3 proves bounded query/hash contract parity. No endpoint
-may be implemented until raw callable-body feasibility and
-all independent evidence gates are complete.
+  and BCK09-API-PAR-01 v0.3 proves bounded query/hash contract parity. No product
+  endpoint may be implemented until BCK09-API-RAW-C-01 receives separate
+  executable authorization and all independent evidence gates are complete.
 
 ## 14. Workers and scheduling
 
@@ -1424,11 +1442,21 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
     authority; command artifact enforcement доказан BCK09-API-CORR-01 v0.3.
 85. Command schema/DTO divergence исправлен только через отдельно Approved
     BCK09-API-CORR-01; backend-only validation остаётся запрещённой.
+86. BCK09-API-RAW-B-01 proves only disposable Emulator transport feasibility;
+    it creates no product callable, Firestore/Admin access or runtime authority.
+87. RAW-B evidence cannot grant any specialist signature or satisfy independent
+    Security, Operations, Identity, Content, Legal or production evidence.
+88. BCK09-API-RAW-C-01 remains Proposed and requires a separate explicit
+    executable authorization before any product source or Firebase access edit.
+89. Runtime, callable export, Firebase configuration, deployment and activation
+    remain prohibited until their own recorded gates and approvals pass.
 
 ## 28. Definition of Ready для начала реализации
 
 - этот master-spec и exact ECL-03C plan явно Approved;
 - BCK09-API-CORR-01 implemented/verified against Accepted `ECL03-D12`;
+- BCK09-API-RAW-B-01 remains Done on the pinned cross-platform Emulator corpus;
+- BCK09-API-RAW-C-01 exact plan is separately accepted for implementation;
 - BCK-03 API-DEC-01/03 приняты их named owners с exact evidence;
 - отдельный post-stabilization backend stage разрешён;
 - production Identity/account/capability authority имеет Approved contract и
@@ -1473,7 +1501,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Exact transaction-core plan v1.8 | Review | Not authorized |
+| ECL-03C | Exact transaction-core plan v1.9; RAW-C v0.1 Proposed | Review | Not authorized |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1491,8 +1519,8 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.8 is the only first executable candidate; grant separate executable authorization | No backend/product runtime |
-| BCK09-OD-02 | Named API decisions and contract parity Done; runtime evidence open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; prove raw callable-body feasibility and independent stage/Security evidence | No mutation endpoint |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.9 remains the only first executable candidate; decide a separate RAW-C/executable authorization | No backend/product runtime |
+| BCK09-OD-02 | Named API decisions, contract parity and RAW-B transport feasibility Done; product runtime evidence open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; independently review RAW-C controls and later stage/Security evidence | No mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
 | BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |

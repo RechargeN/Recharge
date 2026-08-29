@@ -1,12 +1,12 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.7**
+- Version: **0.8**
 - Date: **2026-08-28**
-- Status: **Contract parity Done — Hold for runtime feasibility and independent evidence**
-- Target: **BCK-09 v1.10 / ECL-03C v1.8 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.9](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
-- Governing API draft: [BCK-03 v0.3.6](BACKEND_API_CONTRACT_STANDARD.md)
+- Status: **Contract parity and RAW-B Done — Hold for independent evidence and product runtime**
+- Target: **BCK-09 v1.11 / ECL-03C v1.9 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.10](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Governing API draft: [BCK-03 v0.3.7](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **none**
 - Product API decision:
   [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
@@ -16,17 +16,24 @@
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Raw-body transport evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Next product-adapter plan:
+  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 
 ## 0. Verdict
 
-**Hold, narrowed to runtime adapter feasibility and independent evidence.**
+**Hold, narrowed to independent evidence and separately authorized product
+runtime.**
 BCK09-API-CORR-01 v0.3 closes the command-union and D12 Schema/Dart defects.
 BCK09-API-NAMED-DEC-01 v0.2 accepts the exact Booking-v1 callable and semantic
 hash decisions, including the revision-field amendment. BCK09-API-PAR-01 v0.3
 implements the missing query/read/page/availability roots and independent
-Dart/TypeScript semantic-hash evidence without adding runtime. A named
-independent API Platform reviewer still must not sign because raw callable-body
-feasibility, stage/Security evidence and runtime controls
+Dart/TypeScript semantic-hash evidence without adding runtime.
+BCK09-API-RAW-B-01 v0.1 additionally proves 19/19 synthetic raw-body vectors
+through a disposable Functions Emulator callable on Ubuntu and Windows. A named
+independent API Platform reviewer still must not sign because RAW-B is not the
+product adapter, and independent stage/Security evidence plus runtime controls
 remain incomplete.
 
 This is a technical preparation record, not an independent specialist
@@ -77,9 +84,9 @@ goldens. Backend format, lint and strict typecheck pass; full Flutter analyze,
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
 | `BCK09-API-TR-01` | Resolved | Pass | `booking_command.schema.json` contains nine closed command-local variants; Schema, bounded validator, Dart and TypeScript agree on all checked-in command fixtures | Preserve frozen fixture/hash evidence |
-| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.8 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Later atomicity/contention evidence remains required |
+| `BCK09-API-TR-02` | Product disposition selected | Planned, not implemented | ECL-03C v1.9 defines atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency` | Later atomicity/contention evidence remains required |
 | `BCK09-API-TR-03` | Named decision | Accepted for Booking v1 | Callable v2, `europe-west1` and 10/15/30-second deadlines are exact | Independent API Platform + BCK-05 stage evidence remains required before endpoint scaffold |
-| `BCK09-API-TR-04` | Contract portion resolved | Pass / runtime Hold | `booking_semantic_hash_v1` uses RFC 8785 JCS UTF-8, lowercase SHA-256 and includes applicable revision fields; independent Dart/TypeScript goldens agree | Raw callable-body feasibility and independent Security evidence remain required before runtime |
+| `BCK09-API-TR-04` | Contract and transport-feasibility portions resolved | Pass / product runtime Hold | `booking_semantic_hash_v1` uses RFC 8785 JCS UTF-8, lowercase SHA-256 and includes applicable revision fields; independent Dart/TypeScript goldens agree; RAW-B proves exact synthetic raw bytes reach the disposable Emulator handler | Independently review the separately authorized RAW-C product adapter and Security evidence before runtime |
 | `BCK09-API-TR-05` | Resolved | Pass | ECL03-D12 opaque request IDs are enforced identically in command Schema/Dart, including scalar bounds, blank set, no rewrite and surrogate rejection | Preserve frozen v0.3 fixtures; no hidden backend-only rule |
 | `BCK09-API-TR-06` | Resolved at contract/test scope | Pass / runtime absent | Closed query/read/page/availability schemas and a real TypeScript Draft 2020-12 consumer exist; shared Dart/TypeScript fixtures and hashes pass on Node 22.23.2 | Preserve evidence and keep ECL-03C runtime unauthorized until later runtime gates pass |
 
@@ -181,9 +188,10 @@ Recommended baseline:
   absent-versus-null, integers and arrays.
 
 This is Accepted for Booking v1 by BCK09-API-NAMED-DEC-01 v0.2. Independent
-test-only Dart/TypeScript goldens pass in BCK09-API-PAR-01 v0.3. Runtime remains
-blocked until raw callable-body feasibility and independent Security evidence
-pass their separately Approved gates.
+test-only Dart/TypeScript goldens pass in BCK09-API-PAR-01 v0.3 and disposable
+Emulator transport feasibility passes in BCK09-API-RAW-B-01 v0.1. Product
+runtime remains blocked until RAW-C is separately authorized, implemented and
+independently reviewed together with Security/Operations evidence.
 
 ### 5.4. Accepted `API-DEC-01` disposition
 
@@ -215,7 +223,8 @@ after:
 4. TR-05's Accepted ECL03-D12 semantics are implemented consistently across
    schema, Dart and fixtures;
 5. no unverified error value or transport envelope is introduced;
-6. remaining runtime-adapter/emulator evidence remains a later activation gate.
+6. RAW-B transport evidence remains test-only and RAW-C product-adapter plus
+   independent runtime evidence remain later gates.
 
 ## 7. Review acceptance criteria
 
@@ -235,6 +244,9 @@ after:
 14. **BCK09-API-REV-AC-14:** API-DEC-01/03 are Accepted for Booking v1 without satisfying executable or independent specialist gates.
 15. **BCK09-API-REV-AC-15:** `BCK09-SIG-API` remains Pending.
 16. **BCK09-API-REV-AC-16:** no runtime, schema, DTO, Firebase or deployment file changes are authorized by this review.
+17. **BCK09-API-REV-AC-17:** RAW-B proves exact raw-body visibility only for the disposable Emulator corpus.
+18. **BCK09-API-REV-AC-18:** RAW-B grants no product export, Firestore/Admin access or specialist signature.
+19. **BCK09-API-REV-AC-19:** RAW-C remains Proposed and requires a separate explicit executable authorization.
 
 ## 8. Final state
 
@@ -242,6 +254,7 @@ BCK-09 remains Review, ECL-03C runtime remains unapproved and
 `BCK09-SIG-API` remains Pending. Product ambiguity, the command-union defect,
 D12 command-artifact parity, Booking-v1 named API decisions and the bounded
 TypeScript/query/hash contract parity slice and canonical Node 22 confirmation
-are closed. Raw callable-body feasibility, independent specialist evidence and
-runtime controls remain blockers. Further contract or runtime edits require
-their own Approved slice.
+are closed. Disposable callable raw-body transport feasibility is also closed
+by RAW-B. Independent specialist evidence, a separately authorized RAW-C
+product adapter and runtime controls remain blockers. Further contract or
+runtime edits require their own Approved slice.

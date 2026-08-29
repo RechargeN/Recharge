@@ -1,19 +1,30 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.6**
+- Version: **0.3.7**
 - Date: **2026-08-28**
 - Spec status: **Draft — review required**
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.48](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.52](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.49](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.53](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.7 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done after disposable Functions
+  Emulator raw-body evidence passed on pinned Ubuntu and Windows toolchains;
+- closed only Booking-v1 raw transport feasibility and registered
+  BCK09-API-RAW-C-01 v0.1 as a Proposed, separately authorized product-adapter
+  plan;
+- retained Draft/runtime Absent: API-DEC-02/04/05, independent signatures,
+  product callable exports, Firestore/Admin access, Firebase and deployment
+  authority remain unresolved.
 
 ### v0.3.6 — 2026-08-28
 
@@ -1505,19 +1516,23 @@ it does not mean schemas/code/backend deployed.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
 64. **BCK-03-AC-64:** v0.3.3 leaves backend/Firebase/mobile runtime unchanged.
+65. **BCK-03-AC-65:** RAW-B closes only Booking-v1 disposable Emulator transport feasibility.
+66. **BCK-03-AC-66:** RAW-B grants no product adapter, Firebase access or specialist signature.
+67. **BCK-03-AC-67:** RAW-C requires separate explicit executable authorization and independent evidence.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.3.3 the following remain absent:
+At v0.3.7 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
 - API endpoints, callable/HTTP adapters and middleware;
 - backend application and Firebase resources;
-- idempotency persistence and canonical hash implementation;
+- product idempotency persistence and canonical hash implementation (test-only
+  cross-language hash evidence exists for Booking v1);
 - query cursors, server pagination and projection runtime;
 - minimum-client server policy/runtime;
 - event bus/task/queue/outbox consumers;
@@ -1536,9 +1551,9 @@ Before BCK-03 Review:
    combined-role disclosure without requiring the D2 BCK-18 artifact;
 2. develop evidence proposals for API-DEC-02/04/05 and preserve the Accepted
    Booking-v1 API-DEC-01/03 controls;
-3. verify the accepted split-key and semantic-hash contracts in a future
-   Approved fixture/parity slice without creating runtime or changing current
-   wire shape;
+3. preserve the completed Booking-v1 split-key, semantic-hash and RAW-B
+   transport evidence; any RAW-C product adapter remains a separately Approved
+   executable slice;
 4. keep OD-09 Proposed and all effects disabled until acceptance.
 
 Only an independent Approved executable slice may later create schemas,
@@ -1546,7 +1561,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.3 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.7 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

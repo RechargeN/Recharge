@@ -1,6 +1,6 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.8
+- Версия: 1.9
 - Дата: 2026-08-28
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
@@ -23,8 +23,23 @@
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Callable raw-body emulator evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Disabled-adapter plan:
+  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.9 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done: 19/19 disposable callable
+  Emulator vectors passed on pinned Ubuntu/Windows toolchains and proved exact
+  raw-body visibility for the synthetic corpus;
+- replaced the raw-body feasibility blocker with a separately gated RAW-C
+  disabled-adapter implementation plan and retained every independent
+  API/Security/Operations, Identity, Firebase and activation prerequisite;
+- preserved the five callable surfaces, nine operational collections and all
+  existing 47 AC; appended AC-48..51 without granting runtime authority.
 
 ### v1.8 — 2026-08-28
 
@@ -227,9 +242,11 @@ Rules:
   1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
 - `idempotencyKey` remains a separate opaque required logical-mutation ID;
 - command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3 and bounded
-  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.3; no endpoint
-  may be implemented until raw callable-body feasibility
-  and independent API/Security/Operations evidence are also proven;
+  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.3;
+  BCK09-API-RAW-B-01 v0.1 proves only disposable Emulator transport
+  feasibility, not a product endpoint; no product adapter may be implemented
+  until RAW-C has separate executable authorization and independent
+  API/Security/Operations evidence is also proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -730,9 +747,17 @@ remain ECL-03H or later gates.
     are Accepted for Booking v1, while independent API Platform, Security and
     BCK-05 evidence remains required before runtime.
 46. Accepted ECL03-D12 defines opaque bounded request IDs; command Schema/Dart
-    enforcement is proven, while endpoint TypeScript parity remains blocked.
+    enforcement and disposable raw transport feasibility are proven, while
+    product endpoint/runtime parity remains blocked.
 47. Booking command schema correction was separately Approved and verified in
     `BCK09-API-CORR-01 v0.3`; this plan still grants no runtime authority.
+48. BCK09-API-RAW-B-01 evidence is emulator/test-only and cannot authorize a
+    tracked product callable, Admin SDK initialization or Firestore access.
+49. BCK09-API-RAW-C-01 v0.1 remains Proposed until separately approved with
+    exact executable permissions; this reconciliation itself changes no code.
+50. All nine BCK-09 specialist signatures remain Pending after RAW-B.
+51. RAW-C cannot deploy, activate a market/cohort, process production data or
+    grant ECL-03D–H any inherited authority.
 
 ## 13. Rollback and stop conditions
 
@@ -755,12 +780,13 @@ ADR or edits production documents manually.
 
 ## 14. Handoff
 
-After this document is accepted and the external prerequisites are actually
-met, implementation proceeds in four reviewable commits:
+After this document, RAW-C and the external prerequisites are separately
+accepted and actually met, implementation proceeds in reviewable commits. The
+already completed contracts/test evidence is not duplicated:
 
-1. shared query contracts and TypeScript fixture consumer;
-2. backend scaffold, Rules and disabled callable queries;
-3. create/cancel transactions, ledger, usage, audit/outbox/idempotency;
+1. disabled product-adapter scaffold and fail-closed guards;
+2. create/cancel transactions, ledger, usage, audit/outbox/idempotency;
+3. owner queries and availability projection;
 4. emulator contention/security evidence and status reconciliation.
 
 ECL-03D remains the next product stage only after ECL-03C is verified. Until

@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.52
+- Версия: 2.4.53
 - Дата: 2026-08-28
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
@@ -14,6 +14,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.53.** Booking RAW-B evidence reconciliation without changing Approved
+v2.4 coordination semantics:
+
+- BCK09-API-RAW-B-01 v0.1 is Done after 19/19 disposable Emulator raw-body
+  vectors passed on Ubuntu and Windows at `e043218`;
+- BCK-09 v1.11, ECL-03C v1.9, coverage v1.10, API review v0.8 and specialist
+  package v0.10 remain Review/Hold with all nine signatures Pending;
+- BCK09-API-RAW-C-01 v0.1 is Proposed; BCK-03 advances to v0.3.7 and BCK-01 to
+  v0.4.49; product runtime, Firestore/Admin access, Firebase changes, callable
+  exports, deployment and `main` remain blocked.
 
 **v2.4.52.** Booking-v1 canonical Node 22 parity closure without changing
 Approved v2.4 coordination semantics:
@@ -742,19 +753,19 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.52)
+## 5. Реестр проектных документов — 22 (v2.4.53)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
-| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.48 — Present | Local R0 tooling scaffold only; product/cloud Absent |
-| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4 baseline; factual registry v2.4.52 | N/A |
-| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.3.6 — Present; Booking-v1 named decisions and Node 22 parity evidence recorded | Absent |
+| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.49 — Present | Local R0 tooling scaffold only; product/cloud Absent |
+| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4 baseline; factual registry v2.4.53 | N/A |
+| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.3.7 — Present; Booking-v1 named decisions, Node 22 parity and RAW-B transport evidence recorded | Absent |
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.16 — Present; OD-07 and BCK05-OD-02/07 Accepted with controls; qualified production Legal/Privacy and OD-01/09 remain unresolved | Absent |
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.23 — Present; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed; bounded R0 Pass | Local R0 tooling scaffold only; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, nine BCK06 decisions fail-closed; Approval blockers remain | Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK07 decisions; OD/dependency/Approval blockers remain | Absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK08 decisions; OD/source/Approval blockers remain | Absent |
-| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.10 — Present; 22/22 coverage, 85 AC; named API decisions and Node 22 contract parity recorded; BCK09-REV-01 v0.9 runtime/evidence Hold, all nine signatures Pending | Absent |
+| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.11 — Present; 22/22 coverage, 89 AC; named API decisions, Node 22 contract parity and RAW-B transport feasibility recorded; BCK09-REV-01 v0.10 independent-evidence/runtime Hold, all nine signatures Pending; RAW-C v0.1 Proposed | Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Planned | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Planned | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.2 — Present; 22/22 coverage, 60 AC, ten BCK12 decisions; Approval/privacy/BCK-22/runtime blockers remain | Absent |
@@ -769,19 +780,19 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Review v0.2 — Present; 22/22 coverage, 60 AC, ten BCK21 decisions; OD-05/privacy/destination/runtime blockers remain | Absent |
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Planned | Absent |
 
-BCK-09 v1.10 и его 22/22 coverage matrix v1.9 существуют как Review-документы:
+BCK-09 v1.11 и его 22/22 coverage matrix v1.10 существуют как Review-документы:
 [Event Booking Backend/Firebase full spec](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md).
 Design reconciliation с BCK-01/03/04/05/06/07/08/13/19 завершена без
 переписывания принятых Event/Booking инвариантов. BCK09-DEC-01 v0.3 сохраняет
 Product baseline с controls. BCK09-API-NAMED-DEC-01 v0.2 принимает exact
 Booking-v1 API-DEC-01/03, но не заменяет независимые specialist signatures.
-ECL03-D12, BCK09-API-CORR-01 и BCK09-API-PAR-01 v0.3 закрывают parent semantics,
-command artifact и bounded query/hash contract parity. Перед `Approved` всё
-ещё нужны девять независимых verdicts из BCK09-REV-01 v0.9;
-BCK09-API-REV-01 v0.7 сохраняет Hold для callable raw-body/runtime feasibility
-и independent evidence. Перед runtime также необходимы отдельно Approved
-ECL-03C v1.8 и все
-platform/Identity/Privacy gates.
+ECL03-D12, BCK09-API-CORR-01, BCK09-API-PAR-01 v0.3 и RAW-B v0.1 закрывают
+parent semantics, command artifact, bounded query/hash parity и disposable
+Emulator raw-body feasibility. Перед `Approved` всё ещё нужны девять
+независимых verdicts из BCK09-REV-01 v0.10; BCK09-API-REV-01 v0.8 сохраняет
+Hold для independently reviewed RAW-C product adapter/runtime controls и
+evidence. Перед runtime также необходимы отдельно Approved ECL-03C v1.9,
+RAW-C implementation scope и все platform/Identity/Privacy gates.
 
 Число 22 — checksum текущей ревизии, не вечный invariant. Новый BCK требует
 уникального ID, одного accountable owner, непересекающегося scope, dependencies,
@@ -1376,10 +1387,10 @@ Firestore/Storage resources, production schemas, credentials или deployments.
 
 Следующий review package содержит только documentation evidence:
 
-1. BCK-01 v0.4.28 Review с traceability/reconciliation к §3 и
+1. BCK-01 v0.4.49 Review с traceability/reconciliation к §3 и
    [`BCK-01-REV-01`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
-2. BCK-02 v2.4.32 traceability/checksum;
-3. BCK-03 v0.3.6, BCK-04 v0.4.16, BCK-05 v0.2.23 и BCK-20 v0.2.2
+2. BCK-02 v2.4.53 traceability/checksum;
+3. BCK-03 v0.3.7, BCK-04 v0.4.16, BCK-05 v0.2.23 и BCK-20 v0.2.2
    coverage/blocker evidence без ложного повышения статуса;
 4. linked review evidence for
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),

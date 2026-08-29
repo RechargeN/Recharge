@@ -1,19 +1,19 @@
 # Recharge Backend — Event Booking Specialist Review Package
 
 - ID: **BCK09-REV-01**
-- Version: **0.9**
+- Version: **0.10**
 - Date: **2026-08-28**
-- Status: **Specialist review in progress — runtime/evidence Hold; all signatures Pending**
-- Target: **BCK-09 v1.10**
+- Status: **Specialist review in progress — independent-evidence/runtime Hold; all signatures Pending**
+- Target: **BCK-09 v1.11**
 - Product baseline: **BCK09-A1-STAGED-FREE-BOOKING-v1 — Accepted with controls**
 - Product decision:
   [BCK09-DEC-01 v0.3](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.9](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.10](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Target specification:
   [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.7 — contract parity Done; runtime/evidence Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.8 — RAW-B Done; independent-evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
   [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Named API decision:
@@ -22,27 +22,34 @@
   [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
 - Contract parity evidence:
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Raw-body transport evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Disabled-adapter plan:
+  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 - Frozen source hashes:
   - convention: SHA-256 of UTF-8 text normalized to LF line endings
-  - BCK-09 v1.10 SHA-256: `02f1eb9206cec5e00eeeab07df2959b9f41f123c9a9c4ffff586896da2151ef8`
-  - ECL-03C v1.8 SHA-256: `9fe7c3d44140ca993a847e39abb918f62d2ec68d4d94f95eef701af59a64fc55`
-  - BCK-09-PRE v1.9 SHA-256: `d4d922bebac588f1396e39e48f5ea00460c35f31b224feefdf7402a5d4e8b635`
+  - BCK-09 v1.11 SHA-256: `0d59087566990d773275be35b584a2cf43fb4e776473ef6e857725db1e7b61fd`
+  - ECL-03C v1.9 SHA-256: `0249030b7aa7a27b9fc1bda368e7292dab84147e8fb1d7fdabd765788ec52bca`
+  - BCK-09-PRE v1.10 SHA-256: `86adabbbc9643bb72685b361d7f9fc7ff4a35c7e787865c732dc08b041f2ebbf`
 - Runtime effect: **none**
 
 ---
 
 ## 0. Verdict
 
-**Specialist review remains open; named decisions and bounded contract parity
-are closed, but runtime feasibility and independent evidence are not.**
+**Specialist review remains open; named decisions, bounded contract parity and
+RAW-B transport feasibility are closed, but product runtime and independent
+evidence are not.**
 
-BCK-09 v1.10 and ECL-03C v1.8 incorporate TR-09..11, Accepted ECL03-D12 and the
+BCK-09 v1.11 and ECL-03C v1.9 incorporate TR-09..11, Accepted ECL03-D12 and the
 Accepted Booking-v1 named API decisions without changing callable/product scope.
 The review surface is internally reconcilable at the previously reviewed
 boundaries. BCK09-API-CORR-01 closes command Schema/Dart parity and
 BCK09-API-PAR-01 v0.3 completes bounded Dart/TypeScript query/hash parity on
-exact Node 22.23.2, but BCK09-API-REV-01 still blocks on raw callable-body/runtime
-feasibility and independent stage/Security evidence. This verdict does not
+exact Node 22.23.2. BCK09-API-RAW-B-01 v0.1 proves 19/19 synthetic raw-body
+vectors through a disposable Emulator callable on Ubuntu and Windows, but
+BCK09-API-REV-01 still blocks on the product adapter, independent
+stage/Security evidence and runtime controls. This verdict does not
 approve BCK-09, sign any specialist row, approve ECL-03C, create a Firebase
 resource or authorize implementation. All nine specialist verdicts below
 remain `Pending`.
@@ -61,7 +68,8 @@ possible BCK-09 documentation Approval. It:
    as independent Security, API, Operations or qualified Legal advice.
 
 It is not an implementation plan. The only first executable candidate remains
-ECL-03C v1.8, still in Review and not authorized.
+ECL-03C v1.9 through a separately approved RAW-C slice; both are still in
+Review/Proposed state and not authorized.
 
 ## 2. Authority and frozen inputs
 
@@ -72,14 +80,17 @@ ECL-03C v1.8, still in Review and not authorized.
 | ECL-03 | v1.3 Approved; activation gated | Parent staged delivery contract |
 | ECL03-D01–D12 | Accepted | Normative product/architecture decisions, including request-ID representation |
 | ECL-03B | v1.1 Done; contracts/domain only | Booking v1 wire and pure-domain evidence |
-| ECL-03C | v1.6 Review; runtime not authorized | First candidate; active key, amended hash and planned atomic request binding |
-| BCK-09 | v1.8 Review; runtime Absent | Target under review |
-| BCK-09-PRE | v1.7 Review | 22/22 reconciliation plus parity/evidence Hold |
+| ECL-03C | v1.9 Review; runtime not authorized | First candidate; active key, amended hash, planned atomic request binding and RAW-B evidence reconciliation |
+| BCK-09 | v1.11 Review; runtime Absent | Target under review |
+| BCK-09-PRE | v1.10 Review | 22/22 reconciliation plus independent-evidence/runtime Hold |
 | BCK09-DEC-01 | v0.3 Accepted with controls | Product baseline/ten dispositions reconciled with D12 |
-| BCK09-API-REV-01 | v0.5 named decisions Accepted; Hold | API evidence/findings only; not an independent signature |
+| BCK09-API-REV-01 | v0.8 contract parity and RAW-B Done; Hold | API evidence/findings only; not an independent signature |
 | BCK09-API-DEC-01 | v0.4 reconciled | Product baseline points to named decision; not specialist acceptance |
 | BCK09-API-NAMED-DEC-01 | v0.2 Accepted with controls | Combined-owner Booking-v1 API decisions; no runtime authority |
 | BCK09-API-CORR-01 | v0.3 Done | Command/D12 Schema-Dart parity and repository gates verified; no runtime authority |
+| BCK09-API-PAR-01 | v0.3 Done | Query/hash parity on exact Node 22.23.2; no runtime authority |
+| BCK09-API-RAW-B-01 | v0.1 Done | Disposable Emulator raw-body transport feasibility only |
+| BCK09-API-RAW-C-01 | v0.1 Proposed | Future disabled product adapter; separately authorized |
 | BCK-03/04/05/06/07/13/18/19 | Current repository statuses | Parent/peer proposals and blockers; no inherited Approval |
 | OD-09 | Proposed | Required before cross-domain effects |
 | OD-11 | Open | Required before applicable age-sensitive paths |
@@ -138,7 +149,7 @@ These stay explicit later gates even if all design reviews are accepted.
 | BCK09-TR-12 | Pending evidence | Production Identity and Event projection authority do not exist | Keep all commands disabled |
 | BCK09-TR-13 | Pending evidence | Notification, repair and operational proof do not exist | Keep effects/repair/cohort disabled |
 | BCK09-TR-14 | Pending evidence | No qualified per-market Legal/Privacy verdict is recorded | Do not process production personal data |
-| BCK09-TR-15 | API runtime/evidence Hold | ECL03-D12, schema/Dart correction, named API-DEC-01/03 and bounded Node 22 TypeScript/query/hash parity are closed | Prove raw callable-body/runtime feasibility and collect independent evidence; keep `BCK09-SIG-API` Pending |
+| BCK09-TR-15 | API independent-evidence/runtime Hold | ECL03-D12, schema/Dart correction, named API-DEC-01/03, bounded Node 22 TypeScript/query/hash parity and RAW-B Emulator transport feasibility are closed | Separately authorize and review RAW-C product-adapter controls and collect independent evidence; keep `BCK09-SIG-API` Pending |
 
 The three amendments do not reopen the Product-selected staged free-Booking
 baseline. TR-10/11 implement its accepted single-writer/fail-closed controls;
@@ -156,7 +167,7 @@ invariant explicit and contention-test it:
 
 | Sign-off ID | Reviewer role | Design scope | Current verdict | Runtime/activation gate retained |
 |---|---|---|---|---|
-| BCK09-SIG-API | API Platform | Booking v1 adapter, callable profile, deadlines, canonical request hash, compatibility | Pending — runtime/evidence Hold in BCK09-API-REV-01 v0.7 | No mutation endpoint before raw callable-body/runtime feasibility and independent evidence |
+| BCK09-SIG-API | API Platform | Booking v1 adapter, callable profile, deadlines, canonical request hash, compatibility | Pending — independent-evidence/runtime Hold in BCK09-API-REV-01 v0.8 | No product mutation endpoint before separately authorized RAW-C and independent evidence |
 | BCK09-SIG-SEC | Security/Privacy | AuthZ, Rules/IAM, App Check, abuse, logs, fail-closed OD-11 posture | Pending | No production commands/data before executable controls and security evidence |
 | BCK09-SIG-ID | Identity | Account state, revocation, Viewer and exact-page capabilities | Pending | Deny commands until BCK-06/BCK-18 production authority evidence |
 | BCK09-SIG-CONTENT | Content Platform | Pinned published Event projection writer, revision and barrier handoff | Pending | Mutations off until BCK-07 runtime handoff is revision-safe |
@@ -291,7 +302,7 @@ Reviewer role:
 Named reviewer identity:
 Organization/team:
 Qualification or authority basis:
-Target: BCK-09 v1.10 / BCK09-REV-01 v0.9
+Target: BCK-09 v1.11 / BCK09-REV-01 v0.10
 Verdict:
 Accepted scope:
 Required amendments:
@@ -327,8 +338,9 @@ data, credentials, billing, deployment, push or merge to `main`.
   independent specialist signature;
 - BCK09-API-CORR-01 v0.3 and BCK09-API-PAR-01 v0.3 are Done with green exact
   Node 22.23.2 Dart/TypeScript/query/hash contract evidence;
-- callable raw-body/runtime feasibility and independent
-  API/Security/Operations evidence remain absent;
+- RAW-B disposable Emulator transport feasibility is Done, but the RAW-C
+  product adapter is only Proposed and independent API/Security/Operations
+  evidence remains absent;
 - BCK-06/BCK-18 production Identity authority is absent;
 - BCK-07 revision-safe Event projection runtime is absent;
 - BCK-13/OD-09 executable effect handoff is absent;
@@ -361,12 +373,15 @@ data, credentials, billing, deployment, push or merge to `main`.
 20. **BCK09-REV-AC-20:** documentation Approval creates no runtime authority.
 21. **BCK09-REV-AC-21:** no application/backend/Firebase file is changed.
 22. **BCK09-REV-AC-22:** push and `main` merge remain separately authorized.
+23. **BCK09-REV-AC-23:** RAW-B transport evidence is test-only and grants no signature.
+24. **BCK09-REV-AC-24:** RAW-C remains Proposed until separately authorized.
+25. **BCK09-REV-AC-25:** all product runtime, Firebase, deployment and activation gates remain open.
 
 ---
 
-**Current conclusion:** BCK09-REV-01 v0.9 continues the specialist phase.
-BCK09-API-REV-01 v0.7 records a narrowed runtime/evidence Hold without
+**Current conclusion:** BCK09-REV-01 v0.10 continues the specialist phase.
+BCK09-API-REV-01 v0.8 records a narrowed independent-evidence/runtime Hold without
 impersonating an independent reviewer; the other eight review rows have not
-started. The named Booking API decisions and bounded contract parity are
-recorded, all nine signatures remain Pending, and every runtime/activation gate
-remains open. Runtime effect is none.
+started. The named Booking API decisions, bounded contract parity and RAW-B
+transport feasibility are recorded, all nine signatures remain Pending, and
+every product runtime/activation gate remains open. Runtime effect is none.
