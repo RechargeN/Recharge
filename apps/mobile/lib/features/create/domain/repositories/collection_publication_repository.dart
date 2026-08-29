@@ -37,10 +37,12 @@ abstract interface class CollectionPublicationRepository {
   Future<List<CollectionModerationRequest>> pendingRequests();
 
   /// Accepts or rejects a pending version — a *sealed* decision (§6): once
-  /// set, calling [decide] again on the same [requestId] throws
-  /// [CollectionPublicationFailure.idempotencyConflict] rather than
-  /// silently re-deciding. [rejectionReason] is required when `accept` is
-  /// `false` and ignored (must be `null`) when it is `true`. Accepting
+  /// set, an exact replay by the same actor returns that immutable decision
+  /// (and retries Discover sync after acceptance), while any different
+  /// outcome/actor/reason throws
+  /// [CollectionPublicationFailure.idempotencyConflict]. [rejectionReason]
+  /// is required when `accept` is `false` and ignored (must be `null`) when
+  /// it is `true`. Accepting
   /// activates the version through the same Discover-sink path a direct
   /// [publish] uses; rejecting discards it without ever touching the
   /// active version.

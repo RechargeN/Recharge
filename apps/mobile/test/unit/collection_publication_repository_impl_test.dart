@@ -80,7 +80,10 @@ void main() {
       );
 
       expect(first.outcome, CollectionPublishOutcome.created);
-      expect(replay.outcome, CollectionPublishOutcome.replayedIdempotentSuccess);
+      expect(
+        replay.outcome,
+        CollectionPublishOutcome.replayedIdempotentSuccess,
+      );
       expect(replay.collectionId, first.collectionId);
       expect(sink.activateCalls, hasLength(2)); // both calls sync the sink
     });
@@ -89,10 +92,8 @@ void main() {
         'conflict', () async {
       await repository.publish(_bundle(), actorId: _actor);
       expect(
-        () => repository.publish(
-          _bundle(collectionId: 'col-2'),
-          actorId: _actor,
-        ),
+        () =>
+            repository.publish(_bundle(collectionId: 'col-2'), actorId: _actor),
         throwsA(
           isA<CollectionPublicationException>().having(
             (e) => e.failure,
@@ -124,8 +125,10 @@ void main() {
 
         // And replaying publish() again now correctly reports a publish
         // replay, not a review one.
-        final CollectionPublishReceipt publishReplay = await repository
-            .publish(_bundle(), actorId: _actor);
+        final CollectionPublishReceipt publishReplay = await repository.publish(
+          _bundle(),
+          actorId: _actor,
+        );
         expect(
           publishReplay.outcome,
           CollectionPublishOutcome.replayedIdempotentSuccess,
@@ -135,16 +138,19 @@ void main() {
   });
 
   group('Discover sink wiring', () {
-    test('publish activates the sink with the freshly-active version', () async {
-      final CollectionPublishReceipt receipt = await repository.publish(
-        _bundle(),
-        actorId: _actor,
-      );
+    test(
+      'publish activates the sink with the freshly-active version',
+      () async {
+        final CollectionPublishReceipt receipt = await repository.publish(
+          _bundle(),
+          actorId: _actor,
+        );
 
-      expect(sink.activateCalls, hasLength(1));
-      expect(sink.activateCalls.single.collectionId, 'col-1');
-      expect(receipt.discoverSynced, isTrue);
-    });
+        expect(sink.activateCalls, hasLength(1));
+        expect(sink.activateCalls.single.collectionId, 'col-1');
+        expect(receipt.discoverSynced, isTrue);
+      },
+    );
 
     test('a sink failure retries once, then reports discoverSynced: false '
         'without failing the publish', () async {
@@ -272,35 +278,34 @@ void main() {
       expect(await repository.getActiveVersion('col-1'), isNull);
     });
 
-    test(
-      'a retried archive() after a sink failure re-attempts the sink '
-      'instead of silently giving up — CLG-PST-01 review finding',
-      () async {
-        await repository.publish(_bundle(), actorId: _actor);
-        sink.failNextArchives = 2; // exhausts the one-try-plus-one-retry budget
-        final bool firstAttempt = await repository.archive(
-          'col-1',
-          actorId: _actor,
-        );
-        expect(firstAttempt, isFalse); // one try + one retry, both failed
-        expect(sink.archiveCalls, hasLength(2));
+    test('a retried archive() after a sink failure re-attempts the sink '
+        'instead of silently giving up — CLG-PST-01 review finding', () async {
+      await repository.publish(_bundle(), actorId: _actor);
+      sink.failNextArchives = 2; // exhausts the one-try-plus-one-retry budget
+      final bool firstAttempt = await repository.archive(
+        'col-1',
+        actorId: _actor,
+      );
+      expect(firstAttempt, isFalse); // one try + one retry, both failed
+      expect(sink.archiveCalls, hasLength(2));
 
-        // The local record must already be archived (not deleted outright)
-        // so this second call still has something to sync against.
-        final bool secondAttempt = await repository.archive(
-          'col-1',
-          actorId: _actor,
-        );
-        expect(secondAttempt, isTrue);
-        expect(sink.archiveCalls, hasLength(3)); // sink actually called again
-      },
-    );
+      // The local record must already be archived (not deleted outright)
+      // so this second call still has something to sync against.
+      final bool secondAttempt = await repository.archive(
+        'col-1',
+        actorId: _actor,
+      );
+      expect(secondAttempt, isTrue);
+      expect(sink.archiveCalls, hasLength(3)); // sink actually called again
+    });
   });
 
   group('moderation (submit / pending / decide)', () {
     test('submitForReview never touches the sink', () async {
-      final CollectionPublishReceipt receipt = await repository
-          .submitForReview(_bundle(), actorId: _actor);
+      final CollectionPublishReceipt receipt = await repository.submitForReview(
+        _bundle(),
+        actorId: _actor,
+      );
 
       expect(receipt.outcome, CollectionPublishOutcome.pendingReview);
       expect(receipt.publishedAtUtc, isNull);
@@ -309,48 +314,51 @@ void main() {
       expect(await repository.getActiveVersion('col-1'), isNull);
     });
 
-    test(
-      'replaying submitForReview stays pendingReview — it must never read '
-      'back as a publish (the original review finding)',
-      () async {
-        final CollectionPublishReceipt first = await repository
-            .submitForReview(_bundle(), actorId: _actor);
-        final CollectionPublishReceipt replay = await repository
-            .submitForReview(_bundle(), actorId: _actor);
+    test('replaying submitForReview stays pendingReview — it must never read '
+        'back as a publish (the original review finding)', () async {
+      final CollectionPublishReceipt first = await repository.submitForReview(
+        _bundle(),
+        actorId: _actor,
+      );
+      final CollectionPublishReceipt replay = await repository.submitForReview(
+        _bundle(),
+        actorId: _actor,
+      );
 
-        expect(first.outcome, CollectionPublishOutcome.pendingReview);
-        expect(replay.outcome, CollectionPublishOutcome.pendingReview);
-        expect(replay.publishedAtUtc, isNull);
-        expect(await repository.getActiveVersion('col-1'), isNull);
+      expect(first.outcome, CollectionPublishOutcome.pendingReview);
+      expect(replay.outcome, CollectionPublishOutcome.pendingReview);
+      expect(replay.publishedAtUtc, isNull);
+      expect(await repository.getActiveVersion('col-1'), isNull);
+    });
+
+    test(
+      'a pending request appears in pendingRequests until decided',
+      () async {
+        await repository.submitForReview(_bundle(), actorId: _actor);
+        final requests = await repository.pendingRequests();
+        expect(requests, hasLength(1));
+        expect(requests.single.collectionId, 'col-1');
+        expect(requests.single.submittedAsPublisher, _publisher);
+        expect(requests.single.submittedByActorId, _actor);
+        expect(requests.single.isPending, isTrue);
+
+        await repository.decide(
+          requestId: 'attempt-1',
+          accept: true,
+          decidedByActorId: 'moderator-1',
+        );
+        expect(await repository.pendingRequests(), isEmpty);
       },
     );
-
-    test('a pending request appears in pendingRequests until decided', () async {
-      await repository.submitForReview(_bundle(), actorId: _actor);
-      final requests = await repository.pendingRequests();
-      expect(requests, hasLength(1));
-      expect(requests.single.collectionId, 'col-1');
-      expect(requests.single.submittedAsPublisher, _publisher);
-      expect(requests.single.submittedByActorId, _actor);
-      expect(requests.single.isPending, isTrue);
-
-      await repository.decide(
-        requestId: 'attempt-1',
-        accept: true,
-        decidedByActorId: 'moderator-1',
-      );
-      expect(await repository.pendingRequests(), isEmpty);
-    });
 
     test('accepting activates the version through the sink and records the '
         'moderator', () async {
       await repository.submitForReview(_bundle(), actorId: _actor);
-      final CollectionModerationDecisionResult result = await repository
-          .decide(
-            requestId: 'attempt-1',
-            accept: true,
-            decidedByActorId: 'moderator-1',
-          );
+      final CollectionModerationDecisionResult result = await repository.decide(
+        requestId: 'attempt-1',
+        accept: true,
+        decidedByActorId: 'moderator-1',
+      );
 
       expect(
         result.request.decision!.outcome,
@@ -362,40 +370,64 @@ void main() {
       expect(await repository.getActiveVersion('col-1'), isNotNull);
     });
 
-    test('rejecting requires a reason code and never touches the sink', () async {
-      await repository.submitForReview(_bundle(), actorId: _actor);
+    test(
+      'rejecting requires a reason code and never touches the sink',
+      () async {
+        await repository.submitForReview(_bundle(), actorId: _actor);
 
-      expect(
-        () => repository.decide(
-          requestId: 'attempt-1',
-          accept: false,
-          decidedByActorId: 'moderator-1',
-        ),
-        throwsArgumentError,
-      );
-
-      final CollectionModerationDecisionResult result = await repository
-          .decide(
+        expect(
+          () => repository.decide(
             requestId: 'attempt-1',
             accept: false,
             decidedByActorId: 'moderator-1',
-            rejectionReason: CollectionModerationRejectionReason.qualityIssue,
-          );
+          ),
+          throwsArgumentError,
+        );
 
-      expect(
-        result.request.decision!.outcome,
-        CollectionModerationDecisionOutcome.rejected,
-      );
-      expect(
-        result.request.decision!.rejectionReason,
-        CollectionModerationRejectionReason.qualityIssue,
-      );
-      expect(sink.activateCalls, isEmpty);
-      expect(await repository.getActiveVersion('col-1'), isNull);
-    });
+        final CollectionModerationDecisionResult result = await repository
+            .decide(
+              requestId: 'attempt-1',
+              accept: false,
+              decidedByActorId: 'moderator-1',
+              rejectionReason: CollectionModerationRejectionReason.qualityIssue,
+            );
 
-    test('a decision is sealed — deciding the same request twice is refused',
-        () async {
+        expect(
+          result.request.decision!.outcome,
+          CollectionModerationDecisionOutcome.rejected,
+        );
+        expect(
+          result.request.decision!.rejectionReason,
+          CollectionModerationRejectionReason.qualityIssue,
+        );
+        expect(sink.activateCalls, isEmpty);
+        expect(await repository.getActiveVersion('col-1'), isNull);
+      },
+    );
+
+    test(
+      'an exact accepted-decision replay is idempotent and retries sink',
+      () async {
+        await repository.submitForReview(_bundle(), actorId: _actor);
+        await repository.decide(
+          requestId: 'attempt-1',
+          accept: true,
+          decidedByActorId: 'moderator-1',
+        );
+
+        final CollectionModerationDecisionResult replay = await repository
+            .decide(
+              requestId: 'attempt-1',
+              accept: true,
+              decidedByActorId: 'moderator-1',
+            );
+
+        expect(replay.request.decision!.decidedByActorId, 'moderator-1');
+        expect(sink.activateCalls, hasLength(2));
+      },
+    );
+
+    test('a sealed decision rejects a conflicting second decision', () async {
       await repository.submitForReview(_bundle(), actorId: _actor);
       await repository.decide(
         requestId: 'attempt-1',
@@ -406,8 +438,9 @@ void main() {
       expect(
         () => repository.decide(
           requestId: 'attempt-1',
-          accept: true,
+          accept: false,
           decidedByActorId: 'moderator-1',
+          rejectionReason: CollectionModerationRejectionReason.qualityIssue,
         ),
         throwsA(
           isA<CollectionPublicationException>().having(

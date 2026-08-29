@@ -247,6 +247,26 @@ The canonical implementation contract is
 
 Use this section as a running log (newest first).
 
+- 2026-08-29: Final `CLG-PST-02` crash-consistency audit closed the
+  remaining cross-key visibility gaps that the earlier green suite did not
+  exercise. Publish/removal now prepare immutable version data, durably
+  verify audit and receipt, and flip the pointer last; submit writes its
+  moderation marker last; archive writes its tombstone last; moderation
+  acceptance stores an explicit moderation guard in the pointer so a
+  pointer written before the sealed decision remains invisible. Exact
+  receipt replay repairs a missing final marker without rolling a newer
+  active version backwards. Pointer provenance also prevents a pending
+  review from hiding a direct publish that legitimately reused the same
+  `(actorId, requestId)` in the separate command namespace. Audit keys are
+  now immutable and isolated by collection/command/actor/request rather than
+  allowing publish, submit and moderation records to overwrite one another.
+  Receipt, moderation, audit, pointer, version and tombstone writes all use
+  readback verification. Verification on the final diff: focused
+  publication/storage suite 44 passed; full `flutter test --no-pub` 969
+  passed with 1 pre-existing skip and 0 failures; `flutter analyze --no-pub`
+  0 issues; boundary gate 71/71 existing suppressions, 0 violations;
+  `git diff --check` clean. `CLG-CRT-01`/`CLG-PST-02` remain `Done` on
+  verified evidence rather than the earlier incomplete ordering claim.
 - 2026-08-29: Product owner confirmed enabling
   `collectionPublishingEnabled`/`collectionDiscoverEnabled` now that
   `CLG-PST-02`'s gates were green. `CollectionCreateRuntimeConfig`'s

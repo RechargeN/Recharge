@@ -50,27 +50,21 @@ import 'collection_publication_store.dart';
 ///   one up.
 /// - `receipt.<commandType>.<actorId>.<requestId>` / `moderation.<requestId>`
 ///   — unchanged from CLG-PST-01.
-/// - `audit.<collectionId>.<requestId>` — §12's "команда и diff попадают в
-///   audit" requirement: one immutable record per state-changing command
-///   (publish/submit/removal/moderation decision/archive), written after
-///   the effect it describes and before the receipt/seal that closes the
-///   command out. Write-only from this class in this pass — no production
+/// - `audit.<collectionId>.<commandType>.<actorId>.<requestId>` — §12's
+///   "команда и diff попадают в audit" requirement: one immutable record per
+///   state-changing command
+///   (publish/submit/removal/moderation decision/archive), written before
+///   the final visibility marker that closes the command out. Write-only
+///   from this class in this pass — no production
 ///   reader exists yet; tests read it directly through the injected
 ///   [CollectionPublicationStore].
 ///
-/// Every write in this class follows one ordering rule: the business effect
-/// (a version, a moderation decision, an archive tombstone) lands before
-/// the audit record, which lands before the idempotency receipt or sealed
-/// decision that closes the command out — never in the other order. A crash
-/// before the receipt/seal just means a retry redoes idempotent work; the
-/// reverse ordering would let a receipt claim something a crash actually
-/// prevented, undetectably. [removeItemsOnly] additionally recognizes "the
-/// active version already carries this exact request id" as its own proof
-/// of prior completion (see the comment inside it) — without that, a crash
-/// between committing the new version and writing its receipt would make a
-/// retry compare its pre-mutation base revision against the *already
-/// mutated* active version and fail with a spurious `revisionConflict`,
-/// which was CLG-PST-01's own second confirmed defect.
+/// A command prepares immutable data first, writes its audit and receipt,
+/// and flips the verified visibility marker last. For a publish/removal that
+/// marker is `pointer.<collectionId>`; for review submission it is the
+/// moderation record; for archive it is the tombstone. Consequently a crash
+/// before the final marker leaves the previous visible state intact. A replay
+/// that finds a prepared receipt completes only the missing final marker.
 ///
 /// Every stored envelope carries a schema version and a content hash
 /// (`CollectionPublicationStoreMapper`); a record that fails either check
@@ -98,14 +92,17 @@ class CollectionPublicationLocalDatasource {
       '$_prefix.pointer.$collectionId.previous';
   String _tombstoneKey(String collectionId) =>
       '$_prefix.tombstone.$collectionId';
-  String _auditKey(String collectionId, String requestId) =>
-      '$_prefix.audit.$collectionId.$requestId';
+  String _auditKey(
+    String collectionId,
+    String commandType,
+    String actorId,
+    String requestId,
+  ) => '$_prefix.audit.$collectionId.$commandType.$actorId.$requestId';
   String _receiptKey(String commandType, String actorId, String requestId) =>
       '$_prefix.receipt.$commandType.$actorId.$requestId';
   String _removalReceiptKey(String collectionId, String requestId) =>
       '$_prefix.receipt.removal.$collectionId.$requestId';
-  String _moderationKey(String requestId) =>
-      '$_prefix.moderation.$requestId';
+  String _moderationKey(String requestId) => '$_prefix.moderation.$requestId';
   static const String _moderationPrefix = '$_prefix.moderation.';
 
   Future<CollectionPublishReceipt> publish(
@@ -123,6 +120,9 @@ class CollectionPublicationLocalDatasource {
           'payload.',
         );
       }
+      // The receipt may have landed immediately before a pointer-write crash.
+      // Finish that one missing visibility step before reporting replay.
+      await _activateReceiptVersion(existing.receipt);
       return existing.receipt.copyWith(
         outcome: CollectionPublishOutcome.replayedIdempotentSuccess,
       );
@@ -132,7 +132,7 @@ class CollectionPublicationLocalDatasource {
       bundle: bundle,
       publishedAtUtc: now,
     );
-    await _commitVersion(version);
+    final PublishedCollectionVersion staged = await _stageVersion(version);
     await _writeAudit(
       collectionId: bundle.collectionId,
       commandType: 'publish',
@@ -144,10 +144,11 @@ class CollectionPublicationLocalDatasource {
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: bundle.collectionId,
       collectionVersionId: bundle.collectionVersionId,
-      publishedAtUtc: now,
+      publishedAtUtc: staged.publishedAtUtc,
       outcome: CollectionPublishOutcome.created,
     );
     await _writeReceipt(key, payloadHash, receipt);
+    await _activateVersion(staged);
     return receipt;
   }
 
@@ -170,6 +171,38 @@ class CollectionPublicationLocalDatasource {
           'payload.',
         );
       }
+      final String? moderationRaw = await _guardStorage(
+        () => _store.read(_moderationKey(bundle.publishAttemptId)),
+      );
+      if (moderationRaw == null) {
+        // Receipt durable, final moderation marker missing: reconstruct it
+        // with the original receipt timestamp instead of minting a new event.
+        final DateTime submittedAtUtc = existing.receipt.submittedAtUtc!;
+        await _writeAudit(
+          collectionId: bundle.collectionId,
+          commandType: 'submit',
+          actorId: actorId,
+          requestId: bundle.publishAttemptId,
+          atUtc: submittedAtUtc,
+          outcome: 'pendingReview',
+        );
+        await _writeModerationRequest(
+          CollectionModerationRequest(
+            requestId: bundle.publishAttemptId,
+            bundle: bundle,
+            submittedAtUtc: submittedAtUtc,
+            submittedByActorId: actorId,
+          ),
+        );
+      } else if (CollectionPublicationStoreMapper.decodeModerationRequest(
+            moderationRaw,
+          ) ==
+          null) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.persistenceUnavailable,
+          'Moderation request record is corrupt.',
+        );
+      }
       // A replay here must NOT be relabelled `replayedIdempotentSuccess` —
       // that outcome reads as "activated" everywhere it is checked, so it
       // would report a still-pending, never-activated submission as a live
@@ -179,13 +212,11 @@ class CollectionPublicationLocalDatasource {
     }
     final DateTime now = DateTime.now().toUtc();
     final String requestId = bundle.publishAttemptId;
-    await _writeModerationRequest(
-      CollectionModerationRequest(
-        requestId: requestId,
-        bundle: bundle,
-        submittedAtUtc: now,
-        submittedByActorId: actorId,
-      ),
+    final CollectionModerationRequest pending = CollectionModerationRequest(
+      requestId: requestId,
+      bundle: bundle,
+      submittedAtUtc: now,
+      submittedByActorId: actorId,
     );
     await _writeAudit(
       collectionId: bundle.collectionId,
@@ -202,6 +233,9 @@ class CollectionPublicationLocalDatasource {
       outcome: CollectionPublishOutcome.pendingReview,
     );
     await _writeReceipt(key, payloadHash, receipt);
+    // Visibility marker last: pendingRequests() cannot expose a request whose
+    // audit/receipt did not both land durably.
+    await _writeModerationRequest(pending);
     return receipt;
   }
 
@@ -259,12 +293,27 @@ class CollectionPublicationLocalDatasource {
       );
     }
     if (!request.isPending) {
-      // Sealed (§6): a second decide() on the same request is refused, not
-      // silently replayed or overwritten.
-      throw const CollectionPublicationException(
-        CollectionPublicationFailure.idempotencyConflict,
-        'This moderation request was already decided.',
-      );
+      final CollectionModerationDecision sealed = request.decision!;
+      final CollectionModerationDecisionOutcome requestedOutcome = accept
+          ? CollectionModerationDecisionOutcome.accepted
+          : CollectionModerationDecisionOutcome.rejected;
+      final bool sameDecision =
+          sealed.outcome == requestedOutcome &&
+          sealed.decidedByActorId == decidedByActorId &&
+          sealed.rejectionReason == rejectionReason;
+      if (!sameDecision) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.idempotencyConflict,
+          'This moderation request was already decided differently.',
+        );
+      }
+      // Idempotent replay of the exact sealed decision. Returning the active
+      // version on accept deliberately lets the repository retry a failed
+      // Discover sink without mutating the sealed request.
+      final PublishedCollectionVersion? active = accept
+          ? await activeVersion(request.collectionId)
+          : null;
+      return (request, active);
     }
     final DateTime now = DateTime.now().toUtc();
     final CollectionModerationDecision decision = accept
@@ -295,14 +344,15 @@ class CollectionPublicationLocalDatasource {
       await _writeModerationRequest(decided);
       return (decided, null);
     }
-    // Accept: commit the version first (the business effect), audit
-    // second, seal the decision third — same effect-before-receipt
-    // ordering as everywhere else in this class.
+    // Accept prepares the immutable version and audit before sealing the
+    // decision. The pointer may be written first, but activeVersion() hides
+    // it while this request is still pending, so the sealed decision remains
+    // the externally visible commit marker.
     final PublishedCollectionVersion version = PublishedCollectionVersion(
       bundle: request.bundle,
       publishedAtUtc: now,
     );
-    await _commitVersion(version);
+    final PublishedCollectionVersion staged = await _stageVersion(version);
     await _writeAudit(
       collectionId: request.collectionId,
       commandType: 'moderate_accept',
@@ -311,11 +361,15 @@ class CollectionPublicationLocalDatasource {
       atUtc: now,
       outcome: 'accepted',
     );
+    // The pointer is prepared before the sealed decision, but activeVersion()
+    // hides it while this request is still pending. The moderation record is
+    // therefore the final visibility marker for an accepted review.
+    await _activateVersion(staged, moderationRequestId: requestId);
     final CollectionModerationRequest decided = request.copyWith(
       decision: decision,
     );
     await _writeModerationRequest(decided);
-    return (decided, version);
+    return (decided, staged);
   }
 
   Future<CollectionPublishReceipt> removeItemsOnly(
@@ -327,6 +381,8 @@ class CollectionPublicationLocalDatasource {
     );
     final _StoredReceipt? existing = await _readReceipt(key);
     if (existing != null) {
+      // Receipt can precede the final pointer flip. Exact replay repairs it.
+      await _activateReceiptVersion(existing.receipt);
       return existing.receipt.copyWith(
         outcome: CollectionPublishOutcome.replayedIdempotentSuccess,
       );
@@ -340,36 +396,6 @@ class CollectionPublicationLocalDatasource {
         CollectionPublicationFailure.notFound,
         'Collection not found.',
       );
-    }
-
-    // CLG-PST-02 review finding: a crash between committing the new version
-    // below and writing this command's own receipt would otherwise make a
-    // retry compare its *pre-mutation* `expectedBaseRevisionOrHash` against
-    // the *already-mutated* active version and fail with a spurious
-    // `revisionConflict` — the one command whose idempotency depended on
-    // pre-mutation state broke exactly because the effect and its receipt
-    // were not one atomic unit. The committed version's own
-    // `publishAttemptId` records which requestId produced it (see the
-    // `copyWith` below), so recognizing that match here recovers a retry
-    // without redoing (or re-validating against stale state) any work.
-    if (active.bundle.publishAttemptId == command.requestId) {
-      final CollectionPublishReceipt recovered = CollectionPublishReceipt(
-        collectionId: active.collectionId,
-        collectionVersionId: active.collectionVersionId,
-        publishedAtUtc: active.publishedAtUtc,
-        outcome: CollectionPublishOutcome.created,
-      );
-      await _writeAudit(
-        collectionId: active.collectionId,
-        commandType: 'removal',
-        actorId: command.actorId,
-        requestId: command.requestId,
-        atUtc: active.publishedAtUtc,
-        outcome: 'created',
-        diff: command.removedItemRefs.toList(growable: false),
-      );
-      await _writeReceipt(key, _hashBundle(active.bundle), recovered);
-      return recovered;
     }
 
     if (active.collectionVersionId != command.expectedBaseRevisionOrHash) {
@@ -398,7 +424,7 @@ class CollectionPublicationLocalDatasource {
           .toList(growable: false),
       publishAttemptId: command.requestId,
     );
-    await _commitVersion(
+    final PublishedCollectionVersion staged = await _stageVersion(
       PublishedCollectionVersion(bundle: nextBundle, publishedAtUtc: now),
     );
     await _writeAudit(
@@ -413,10 +439,11 @@ class CollectionPublicationLocalDatasource {
     final CollectionPublishReceipt receipt = CollectionPublishReceipt(
       collectionId: nextBundle.collectionId,
       collectionVersionId: nextBundle.collectionVersionId,
-      publishedAtUtc: now,
+      publishedAtUtc: staged.publishedAtUtc,
       outcome: CollectionPublishOutcome.created,
     );
     await _writeReceipt(key, _hashBundle(nextBundle), receipt);
+    await _activateVersion(staged);
     return receipt;
   }
 
@@ -438,8 +465,12 @@ class CollectionPublicationLocalDatasource {
     required String actorId,
     String? requestId,
   }) async {
-    final ({String versionId, PublishedCollectionVersion version})? resolved =
-        await _resolveActive(collectionId);
+    final ({
+      String versionId,
+      PublishedCollectionVersion version,
+      String? moderationRequestId,
+    })?
+    resolved = await _resolveActive(collectionId);
     if (resolved == null) return false; // never published — nothing, ever.
 
     final _Tombstone? tombstone = await _readTombstone(collectionId);
@@ -448,6 +479,16 @@ class CollectionPublicationLocalDatasource {
     if (!alreadyArchived) {
       final String effectiveRequestId = requestId ?? _idGenerator.generate();
       final DateTime now = DateTime.now().toUtc();
+      await _writeAudit(
+        collectionId: collectionId,
+        commandType: 'archive',
+        actorId: actorId,
+        requestId: effectiveRequestId,
+        atUtc: now,
+        outcome: 'archived',
+      );
+      // Tombstone is the final visibility marker. If audit persistence fails,
+      // the Collection remains active and a retry can safely start over.
       await _writeVerified(
         _tombstoneKey(collectionId),
         CollectionPublicationStoreMapper.encodeTombstone(
@@ -457,12 +498,15 @@ class CollectionPublicationLocalDatasource {
           archivedAtUtc: now,
         ),
       );
+    } else {
+      // Repair an audit that may have been lost after an older implementation
+      // wrote its tombstone first, while keeping the original actor/request.
       await _writeAudit(
         collectionId: collectionId,
         commandType: 'archive',
-        actorId: actorId,
-        requestId: effectiveRequestId,
-        atUtc: now,
+        actorId: tombstone.actorId,
+        requestId: tombstone.requestId,
+        atUtc: tombstone.archivedAtUtc,
         outcome: 'archived',
       );
     }
@@ -475,12 +519,39 @@ class CollectionPublicationLocalDatasource {
   /// collection was never published and when it is currently archived
   /// (tombstone matches the pointer's current version id).
   Future<PublishedCollectionVersion?> activeVersion(String collectionId) async {
-    final ({String versionId, PublishedCollectionVersion version})? resolved =
-        await _resolveActive(collectionId);
+    final ({
+      String versionId,
+      PublishedCollectionVersion version,
+      String? moderationRequestId,
+    })?
+    resolved = await _resolveActive(collectionId);
     if (resolved == null) return null;
     final _Tombstone? tombstone = await _readTombstone(collectionId);
-    if (tombstone != null && tombstone.archivedVersionId == resolved.versionId) {
+    if (tombstone != null &&
+        tombstone.archivedVersionId == resolved.versionId) {
       return null; // archived, and no republish since.
+    }
+    final String? requestId = resolved.moderationRequestId;
+    if (requestId == null) return resolved.version;
+    final String? moderationRaw = await _guardStorage(
+      () => _store.read(_moderationKey(requestId)),
+    );
+    if (moderationRaw != null) {
+      final CollectionModerationRequest? moderation =
+          CollectionPublicationStoreMapper.decodeModerationRequest(
+            moderationRaw,
+          );
+      if (moderation == null) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.persistenceUnavailable,
+          'Moderation request record is corrupt.',
+        );
+      }
+      if (moderation.isPending) return null;
+      if (moderation.decision!.outcome ==
+          CollectionModerationDecisionOutcome.rejected) {
+        return null;
+      }
     }
     return resolved.version;
   }
@@ -490,34 +561,109 @@ class CollectionPublicationLocalDatasource {
   /// mutator of `pointer.<id>` — every caller above (publish/
   /// removeItemsOnly/decide-accept) goes through this, so the discipline
   /// can never be bypassed.
-  Future<void> _commitVersion(PublishedCollectionVersion version) async {
+  /// Writes the immutable version record and verifies it, but does not make it
+  /// visible. If this exact version id already exists, its original timestamp
+  /// and bytes win; the record is never overwritten with different content.
+  Future<PublishedCollectionVersion> _stageVersion(
+    PublishedCollectionVersion version,
+  ) async {
     final String collectionId = version.collectionId;
     final String versionId = version.collectionVersionId;
-    final String encodedVersion = CollectionPublicationStoreMapper.encodeVersion(
-      version,
-    );
-    // The version record itself is immutable and self-verifying — writing
-    // and reading it back here catches a torn/lost write directly at the
-    // source, not just at the small pointer that names it.
-    await _writeVerified(_versionKey(collectionId, versionId), encodedVersion);
+    final String encodedVersion =
+        CollectionPublicationStoreMapper.encodeVersion(version);
+    final String versionKey = _versionKey(collectionId, versionId);
+    final String? existing = await _guardStorage(() => _store.read(versionKey));
+    if (existing != null) {
+      final PublishedCollectionVersion? decoded =
+          CollectionPublicationStoreMapper.decodeVersion(existing);
+      if (decoded == null ||
+          _hashBundle(decoded.bundle) != _hashBundle(version.bundle)) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.idempotencyConflict,
+          'A version id already exists with different or corrupt content.',
+        );
+      }
+      return decoded;
+    }
+    await _writeVerified(versionKey, encodedVersion);
+    return version;
+  }
+
+  /// Final commit marker for a prepared publish/removal/moderation-accept.
+  Future<void> _activateVersion(
+    PublishedCollectionVersion version, {
+    String? moderationRequestId,
+  }) async {
+    final String collectionId = version.collectionId;
+    final String versionId = version.collectionVersionId;
 
     final String pointerKey = _pointerKey(collectionId);
     final String? currentPointerRaw = await _guardStorage(
       () => _store.read(pointerKey),
     );
     if (currentPointerRaw != null) {
-      // Back up the last verified pointer before it is replaced — this is
-      // the last-known-good fallback `_resolveActive` reads if the new
-      // pointer write below is ever torn or its target unreadable.
-      await _writeVerified(_pointerPreviousKey(collectionId), currentPointerRaw);
+      final current = CollectionPublicationStoreMapper.decodePointerEnvelope(
+        currentPointerRaw,
+      );
+      if (current?.activeVersionId == versionId &&
+          current?.moderationRequestId == moderationRequestId) {
+        return;
+      }
+      final currentResolved = await _tryResolvePointer(
+        currentPointerRaw,
+        collectionId,
+      );
+      if (currentResolved != null) {
+        // Only a pointer whose envelope *and target version* are readable is
+        // last-known-good. Never replace `.previous` with corrupt bytes.
+        await _writeVerified(
+          _pointerPreviousKey(collectionId),
+          currentPointerRaw,
+        );
+      }
     }
     final String newPointer = CollectionPublicationStoreMapper.encodePointer(
       activeVersionId: versionId,
+      moderationRequestId: moderationRequestId,
     );
     // The single instant the new version becomes visible to readers. Any
     // failure up to and including this write leaves `pointer.<id>` exactly
     // as it was — last-known-good, no partial state ever observable.
     await _writeVerified(pointerKey, newPointer);
+  }
+
+  /// Completes the final pointer flip for a durable publish/removal receipt.
+  /// Missing or corrupt prepared data is a typed storage failure: replay must
+  /// never claim success when it cannot materialize the receipt's effect.
+  Future<void> _activateReceiptVersion(CollectionPublishReceipt receipt) async {
+    final String? raw = await _guardStorage(
+      () => _store.read(
+        _versionKey(receipt.collectionId, receipt.collectionVersionId),
+      ),
+    );
+    final PublishedCollectionVersion? version = raw == null
+        ? null
+        : CollectionPublicationStoreMapper.decodeVersion(raw);
+    if (version == null) {
+      throw const CollectionPublicationException(
+        CollectionPublicationFailure.persistenceUnavailable,
+        'Prepared version for the durable receipt is missing or corrupt.',
+      );
+    }
+    final ({
+      String versionId,
+      PublishedCollectionVersion version,
+      String? moderationRequestId,
+    })?
+    current = await _resolveActive(receipt.collectionId);
+    if (current != null &&
+        current.versionId != receipt.collectionVersionId &&
+        !current.version.publishedAtUtc.isBefore(version.publishedAtUtc)) {
+      // A later command already advanced the Collection. Replaying an older
+      // receipt must never roll the active pointer backwards.
+      return;
+    }
+    await _activateVersion(version);
   }
 
   /// Resolves `pointer.<collectionId>` to its named version record, falling
@@ -526,24 +672,40 @@ class CollectionPublicationLocalDatasource {
   /// there is no pointer at all (never published) — a pointer that exists
   /// but cannot be resolved even through the fallback throws
   /// `persistenceUnavailable`.
-  Future<({String versionId, PublishedCollectionVersion version})?>
+  Future<
+    ({
+      String versionId,
+      PublishedCollectionVersion version,
+      String? moderationRequestId,
+    })?
+  >
   _resolveActive(String collectionId) async {
     final String? primaryRaw = await _guardStorage(
       () => _store.read(_pointerKey(collectionId)),
     );
-    if (primaryRaw == null) return null;
-    final ({String versionId, PublishedCollectionVersion version})? primary =
-        await _tryResolvePointer(primaryRaw, collectionId);
-    if (primary != null) return primary;
+    if (primaryRaw != null) {
+      final ({
+        String versionId,
+        PublishedCollectionVersion version,
+        String? moderationRequestId,
+      })?
+      primary = await _tryResolvePointer(primaryRaw, collectionId);
+      if (primary != null) return primary;
+    }
 
     final String? previousRaw = await _guardStorage(
       () => _store.read(_pointerPreviousKey(collectionId)),
     );
     if (previousRaw != null) {
-      final ({String versionId, PublishedCollectionVersion version})? fallback =
-          await _tryResolvePointer(previousRaw, collectionId);
+      final ({
+        String versionId,
+        PublishedCollectionVersion version,
+        String? moderationRequestId,
+      })?
+      fallback = await _tryResolvePointer(previousRaw, collectionId);
       if (fallback != null) return fallback;
     }
+    if (primaryRaw == null) return null;
     throw const CollectionPublicationException(
       CollectionPublicationFailure.persistenceUnavailable,
       'Active version record is corrupt and no last-known-good pointer '
@@ -551,12 +713,17 @@ class CollectionPublicationLocalDatasource {
     );
   }
 
-  Future<({String versionId, PublishedCollectionVersion version})?>
+  Future<
+    ({
+      String versionId,
+      PublishedCollectionVersion version,
+      String? moderationRequestId,
+    })?
+  >
   _tryResolvePointer(String raw, String collectionId) async {
-    final String? versionId = CollectionPublicationStoreMapper.decodePointer(
-      raw,
-    );
-    if (versionId == null) return null;
+    final pointer = CollectionPublicationStoreMapper.decodePointerEnvelope(raw);
+    if (pointer == null) return null;
+    final String versionId = pointer.activeVersionId;
     final String? versionRaw = await _guardStorage(
       () => _store.read(_versionKey(collectionId, versionId)),
     );
@@ -564,7 +731,11 @@ class CollectionPublicationLocalDatasource {
     final PublishedCollectionVersion? version =
         CollectionPublicationStoreMapper.decodeVersion(versionRaw);
     if (version == null) return null;
-    return (versionId: versionId, version: version);
+    return (
+      versionId: versionId,
+      version: version,
+      moderationRequestId: pointer.moderationRequestId,
+    );
   }
 
   Future<_Tombstone?> _readTombstone(String collectionId) async {
@@ -609,23 +780,19 @@ class CollectionPublicationLocalDatasource {
     String payloadHash,
     CollectionPublishReceipt receipt,
   ) {
-    return _guardStorage(
-      () => _store.write(
-        key,
-        CollectionPublicationStoreMapper.encodeReceipt(
-          payloadHash: payloadHash,
-          receipt: receipt,
-        ),
+    return _writeVerified(
+      key,
+      CollectionPublicationStoreMapper.encodeReceipt(
+        payloadHash: payloadHash,
+        receipt: receipt,
       ),
     );
   }
 
   Future<void> _writeModerationRequest(CollectionModerationRequest request) {
-    return _guardStorage(
-      () => _store.write(
-        _moderationKey(request.requestId),
-        CollectionPublicationStoreMapper.encodeModerationRequest(request),
-      ),
+    return _writeVerified(
+      _moderationKey(request.requestId),
+      CollectionPublicationStoreMapper.encodeModerationRequest(request),
     );
   }
 
@@ -637,19 +804,47 @@ class CollectionPublicationLocalDatasource {
     required DateTime atUtc,
     required String outcome,
     List<String>? diff,
-  }) {
-    return _guardStorage(
-      () => _store.write(
-        _auditKey(collectionId, requestId),
-        CollectionPublicationStoreMapper.encodeAudit(
-          collectionId: collectionId,
-          commandType: commandType,
-          actorId: actorId,
-          requestId: requestId,
-          atUtc: atUtc,
-          outcome: outcome,
-          diff: diff,
-        ),
+  }) async {
+    final String key = _auditKey(collectionId, commandType, actorId, requestId);
+    final String? existingRaw = await _guardStorage(() => _store.read(key));
+    if (existingRaw != null) {
+      final existing = CollectionPublicationStoreMapper.decodeAudit(
+        existingRaw,
+      );
+      if (existing == null) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.persistenceUnavailable,
+          'Audit record is corrupt.',
+        );
+      }
+      final bool sameDiff = diff == null
+          ? existing.diff == null
+          : existing.diff != null &&
+                existing.diff!.toSet().containsAll(diff) &&
+                diff.toSet().containsAll(existing.diff!);
+      if (existing.collectionId != collectionId ||
+          existing.commandType != commandType ||
+          existing.actorId != actorId ||
+          existing.requestId != requestId ||
+          existing.outcome != outcome ||
+          !sameDiff) {
+        throw const CollectionPublicationException(
+          CollectionPublicationFailure.idempotencyConflict,
+          'Audit identity was already used for a different command.',
+        );
+      }
+      return; // immutable exact replay; preserve the original timestamp.
+    }
+    await _writeVerified(
+      key,
+      CollectionPublicationStoreMapper.encodeAudit(
+        collectionId: collectionId,
+        commandType: commandType,
+        actorId: actorId,
+        requestId: requestId,
+        atUtc: atUtc,
+        outcome: outcome,
+        diff: diff,
       ),
     );
   }

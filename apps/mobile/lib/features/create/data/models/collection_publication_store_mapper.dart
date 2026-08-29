@@ -60,10 +60,15 @@ class CollectionPublicationStoreMapper {
   // Active-pointer envelope (CLG-PST-02)
   // ---------------------------------------------------------------------
 
-  static String encodePointer({required String activeVersionId}) {
+  static String encodePointer({
+    required String activeVersionId,
+    String? moderationRequestId,
+  }) {
     final Map<String, Object?> body = <String, Object?>{
       'schema_version': currentSchemaVersion,
       'active_version_id': activeVersionId,
+      if (moderationRequestId != null)
+        'moderation_request_id': moderationRequestId,
     };
     return jsonEncode(_sealed(body));
   }
@@ -73,9 +78,26 @@ class CollectionPublicationStoreMapper {
   /// The caller — not this decode — decides what "cannot be trusted" means
   /// (fall back to `.previous`, or treat as never-published).
   static String? decodePointer(String? raw) {
+    return decodePointerEnvelope(raw)?.activeVersionId;
+  }
+
+  /// The optional moderation id is an explicit visibility guard. Legacy and
+  /// direct-publish pointers omit it and remain fully readable.
+  static ({String activeVersionId, String? moderationRequestId})?
+  decodePointerEnvelope(String? raw) {
     final Map<String, Object?>? body = _verified(raw);
     if (body == null) return null;
-    return _text(body['active_version_id']);
+    final String? activeVersionId = _text(body['active_version_id']);
+    if (activeVersionId == null) return null;
+    final Object? moderationValue = body['moderation_request_id'];
+    final String? moderationRequestId = moderationValue == null
+        ? null
+        : _text(moderationValue);
+    if (moderationValue != null && moderationRequestId == null) return null;
+    return (
+      activeVersionId: activeVersionId,
+      moderationRequestId: moderationRequestId,
+    );
   }
 
   // ---------------------------------------------------------------------
@@ -236,15 +258,13 @@ class CollectionPublicationStoreMapper {
       receiptJson['outcome'] as String?,
       CollectionPublishOutcome.values,
     );
-    if (collectionId == null || collectionVersionId == null || outcome == null) {
+    if (collectionId == null ||
+        collectionVersionId == null ||
+        outcome == null) {
       return null;
     }
-    final DateTime? publishedAtUtc = _dateTime(
-      receiptJson['published_at_utc'],
-    );
-    final DateTime? submittedAtUtc = _dateTime(
-      receiptJson['submitted_at_utc'],
-    );
+    final DateTime? publishedAtUtc = _dateTime(receiptJson['published_at_utc']);
+    final DateTime? submittedAtUtc = _dateTime(receiptJson['submitted_at_utc']);
     if ((publishedAtUtc == null) == (submittedAtUtc == null)) {
       // CollectionPublishReceipt's own constructor asserts exactly one of
       // these is set — a stored envelope violating that is corrupt, not a
