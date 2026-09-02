@@ -131,11 +131,28 @@ clearTimeout(loadTimeout);
 if (typeof loadedFunctions.r0ToolchainProbe !== "function") {
   throw new Error("R0 function entry does not export r0ToolchainProbe");
 }
+const bookingExports = Object.keys(loadedFunctions)
+  .filter((name) => name.endsWith("V1") && name !== "r0ToolchainProbe")
+  .sort();
+const expectedBookingExports = [
+  "cancelInternalBookingV1",
+  "createInternalBookingV1",
+  "getEventAvailabilityV1",
+  "getMyBookingV1",
+  "listMyBookingsV1",
+];
+if (JSON.stringify(bookingExports) !== JSON.stringify(expectedBookingExports)) {
+  throw new Error(
+    `RAW-C must expose exactly five Booking v1 callables: ${bookingExports.join(",")}`,
+  );
+}
 process.stdout.write(
   `R0 ESM function entry loaded in ${Date.now() - loadStartedAt}ms.\n`,
 );
 
-const insideCommand = "npm --prefix functions run test:emulator:inside";
+// Both Windows cmd.exe and POSIX sh support this form. Running from the
+// package root keeps fixture/schema resolution identical to standalone gates.
+const insideCommand = "cd functions && npm run test:emulator:inside";
 
 const child = spawn(
   process.execPath,
@@ -170,7 +187,7 @@ const timeout = setTimeout(() => {
   } else {
     child.kill("SIGTERM");
   }
-}, 300_000);
+}, 600_000);
 
 const exitCode = await new Promise((resolve, reject) => {
   child.once("error", reject);
@@ -186,5 +203,5 @@ if (exitCode !== 0) {
 }
 
 process.stdout.write(
-  "Firebase emulator isolation and default-deny gates passed.\n",
+  "Firebase emulator R0, RAW-C transaction, contention, security, cleanup and default-deny gates passed.\n",
 );
