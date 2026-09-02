@@ -1,10 +1,10 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.11**
-- Дата: **2026-08-28**
-- Spec status: **Review — documentation only; independent specialist approval pending**
-- Runtime status: **Absent**
+- Версия: **1.12**
+- Дата: **2026-09-03**
+- Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
+- Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Accountable owner: **Booking owner**
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
@@ -15,15 +15,15 @@
 - Accepted decisions:
   [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.9](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.10](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.10](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.11](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.10 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.11 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.8 — RAW-B Done; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.9 — RAW-C local evidence; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
   [BCK09-API-DEC-01 v0.4 — reconciled](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Named API decision:
@@ -34,11 +34,23 @@
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
 - Callable raw-body emulator evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
-- Next disabled-adapter plan:
-  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
-- Runtime effect: **none**
+- Disabled-adapter evidence:
+  [BCK09-API-RAW-C-01 v0.2 — Review / Inconclusive](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+- Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.12 — 2026-09-03
+
+- recorded exact RAW-C v0.1 implementation authority and the disabled local
+  ECL-03C adapter with exactly five Booking v1 callables and nine operational
+  collections under `demo-recharge` Emulator-only guards;
+- recorded local Node 22.23.2 unit 13/13, contract 15/15, Emulator 23/23,
+  generated/reproducibility and Flutter analyze plus 664/664 test evidence;
+- kept BCK-09 in Review and deployed runtime Absent because hosted exact
+  Ubuntu/Windows toolchain evidence and all nine
+  independent specialist signatures remain Pending; no cloud or activation
+  authority was granted; the local boundary gate passes with 0 violations.
 
 ### v1.11 — 2026-08-28
 
@@ -175,8 +187,9 @@ Accepted ADR, затем parent ECL-03 spec. Изменение их инвар�
 - **Review** означает, что полный target-контракт и его blockers готовы к
   проверке, но не приняты как executable authorization;
 - **Approved** потребует owner/reviewer verdicts и закрытия применимых решений;
-- **Runtime Absent** означает отсутствие authoritative Booking Functions,
-  Firestore records, deployed workers, production data и mobile integration;
+- **Runtime Absent** означает отсутствие deployed authoritative Booking
+  Functions, cloud Firestore records, workers, production data и mobile
+  integration; disabled local Emulator source alone does not change this;
 - ECL-03B schemas/fixtures/Dart domain являются contract evidence, но не runtime;
 - ни этот документ, ни его Approval не разрешают автоматически создать
   Firebase resources, включить flags, обработать production data или слить
@@ -901,9 +914,10 @@ and invalid nulls fail before hashing. Unicode normalization, case folding and
 Accepted ECL03-D12 treats `requestId` as an exact case-sensitive, non-blank
 string of 1–128 Unicode scalar values, opaque and not normalized/interpreted as
 ULID. BCK09-API-CORR-01 v0.3 proves command Schema/Dart/fixture enforcement,
-  and BCK09-API-PAR-01 v0.3 proves bounded query/hash contract parity. No product
-  endpoint may be implemented until BCK09-API-RAW-C-01 receives separate
-  executable authorization and all independent evidence gates are complete.
+  and BCK09-API-PAR-01 v0.3 proves bounded query/hash contract parity. RAW-C
+  v0.1 received separate authority for a disabled local adapter only; no
+  endpoint may be deployed or activated until all independent evidence gates
+  are complete.
 
 ## 14. Workers and scheduling
 
@@ -1446,10 +1460,12 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
     it creates no product callable, Firestore/Admin access or runtime authority.
 87. RAW-B evidence cannot grant any specialist signature or satisfy independent
     Security, Operations, Identity, Content, Legal or production evidence.
-88. BCK09-API-RAW-C-01 remains Proposed and requires a separate explicit
-    executable authorization before any product source or Firebase access edit.
-89. Runtime, callable export, Firebase configuration, deployment and activation
-    remain prohibited until their own recorded gates and approvals pass.
+88. BCK09-API-RAW-C-01 v0.1 received exact bounded authority for disabled local
+    source and Emulator-only Firestore/Admin evidence; v0.2 remains
+    Inconclusive pending every mandatory gate.
+89. Cloud runtime, deployment, activation, mobile integration and any authority
+    beyond the exact five disabled exports remain prohibited until their own
+    recorded gates and approvals pass.
 
 ## 28. Definition of Ready для начала реализации
 
@@ -1501,13 +1517,13 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Exact transaction-core plan v1.9; RAW-C v0.1 Proposed | Review | Not authorized |
+| ECL-03C | Plan v1.10; RAW-C v0.2 local unit/contract/Emulator evidence | Review / Inconclusive | Disabled local source only; no deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
 | ECL-03G | Mobile remote integration/cutover | Target only | None |
 | ECL-03H | Production security/load/operations proof | Target only | None |
-| Firebase/product backend | No provisioned product runtime/evidence | Absent | None |
+| Firebase/product backend | Local `demo-recharge` Emulator-only source/evidence; no provisioned cloud runtime | Cloud runtime Absent | None |
 
 Current ECL-02 local/mock availability and external handoff are compatibility
 evidence only. They are never imported as confirmed Booking, ledger counters,
@@ -1519,8 +1535,8 @@ source evidence; `currentParticipants` is never migrated into capacity.
 
 | ID | Status | Owner(s) | Decision required | Fail-closed default |
 |---|---|---|---|---|
-| BCK09-OD-01 | Deferred/Open | Booking + Architecture | ECL-03C v1.9 remains the only first executable candidate; decide a separate RAW-C/executable authorization | No backend/product runtime |
-| BCK09-OD-02 | Named API decisions, contract parity and RAW-B transport feasibility Done; product runtime evidence open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; independently review RAW-C controls and later stage/Security evidence | No mutation endpoint |
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | RAW-C local implementation exists; decide only the remaining evidence and later deploy/activation authority | No deployed backend/product runtime |
+| BCK09-OD-02 | Named API decisions, contract parity, RAW-B and local RAW-C evidence present; independent runtime evidence open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; independently review RAW-C controls and later stage/Security evidence | No deployed mutation endpoint |
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
 | BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |

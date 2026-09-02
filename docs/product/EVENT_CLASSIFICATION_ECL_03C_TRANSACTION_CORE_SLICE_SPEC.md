@@ -1,8 +1,8 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.9
-- Дата: 2026-08-28
-- Статус: **Review — exact implementation plan; runtime not authorized**
+- Версия: 1.10
+- Дата: 2026-09-03
+- Статус: **Review — disabled local implementation present; production runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
   Approved v1.3
@@ -14,7 +14,7 @@
 - Dependency:
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
-- Runtime effect of this revision: **none**
+- Runtime effect of this revision: **disabled demo-recharge Emulator-only source; no deployment or activation**
 - Product API baseline:
   [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Named API decision:
@@ -25,10 +25,22 @@
   [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
 - Callable raw-body emulator evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
-- Disabled-adapter plan:
-  [BCK09-API-RAW-C-01 v0.1 — Proposed](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+- Disabled-adapter evidence:
+  [BCK09-API-RAW-C-01 v0.2 — Review / Inconclusive](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.10 — 2026-09-03
+
+- recorded the exact RAW-C v0.1 executable approval and the resulting disabled
+  ECL-03C source, exactly five callable exports and nine-collection
+  `demo-recharge` Emulator-only implementation;
+- recorded local Node 22.23.2 unit 13/13, contract 15/15 and disposable Emulator
+  23/23 passes, generated/reproducibility checks and mobile 664/664 regression;
+- kept ECL-03C in Review because exact hosted npm/JDK Ubuntu/Windows evidence
+  and all independent specialist verdicts remain pending; the local boundary
+  gate passes with 0 violations; no cloud project, deployment, activation or mobile integration was
+  authorized.
 
 ### v1.9 — 2026-08-28
 
@@ -140,28 +152,34 @@ Booking or mapping. This follows ADR 0013's server-ID baseline and BCK-03's
 explicit server-returned mapping branch; it does not conflate `bookingId`,
 `requestId` or `idempotencyKey`, and requires no Booking v1 wire change.
 
-This document is the required exact plan. It does not create `apps/backend`,
-connect Firebase, deploy anything, collect production data or change mobile
-runtime.
+This document remains the exact ECL-03C contract. RAW-C v0.1 implemented only
+its disabled local/Emulator subset inside `apps/backend`; it did not connect a
+real Firebase project, deploy anything, collect production data or change
+mobile runtime.
 
 ## 2. Authorization and prerequisites
 
 ### 2.1. Current gate
 
-The plan may be reviewed during stabilization. Physical backend creation and
-runtime implementation may start only after all of the following are true:
+The owner granted a bounded exception for RAW-C v0.1: tracked backend source,
+exactly five callable exports and local `demo-recharge` Emulator-only
+Firestore/Admin access. That exception has been consumed and does not satisfy
+production readiness.
 
-1. this exact plan is explicitly accepted;
-2. a separate post-stabilization Firebase implementation authorization, or an
-   Accepted ADR/slice exception of equal authority, permits `apps/backend`;
-3. the production Identity dependency sequence from Accepted D03 has a
-   implemented and verified server-owned Auth/account/capability authority;
-4. Platform confirms dev/staging/prod project ownership, `eur3` Firestore,
+Deployment or production/staging runtime may start only after all of the
+following are true:
+
+1. ECL-03C and the exact deployable slice are explicitly Approved;
+2. production Identity implements verified server-owned
+   Auth/account/capability/revocation authority;
+3. Platform confirms dev/staging/prod project ownership, `eur3` Firestore,
    `europe-west1` Functions and environment-scoped service identities;
-5. no unresolved higher-priority ADR conflicts with this slice.
+4. independent API, Security, Operations and other applicable specialist
+   verdicts pass;
+5. no unresolved higher-priority ADR conflicts with the deployable slice.
 
-Implementation approval is not production activation. Every production
-mutation flag remains off until the later staging, security, legal and
+Disabled implementation evidence is not production activation. Every
+production mutation flag remains off until later staging, security, legal and
 operations gates explicitly allow activation.
 
 ### 2.2. Why Identity is a hard dependency
@@ -243,10 +261,10 @@ Rules:
 - `idempotencyKey` remains a separate opaque required logical-mutation ID;
 - command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3 and bounded
   TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.3;
-  BCK09-API-RAW-B-01 v0.1 proves only disposable Emulator transport
-  feasibility, not a product endpoint; no product adapter may be implemented
-  until RAW-C has separate executable authorization and independent
-  API/Security/Operations evidence is also proven;
+  BCK09-API-RAW-B-01 v0.1 proves disposable Emulator transport feasibility;
+  RAW-C v0.1 adds a disabled product adapter under exact bounded authority, but
+  no deployment or activation is allowed until independent
+  API/Security/Operations evidence is proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -753,9 +771,10 @@ remain ECL-03H or later gates.
     `BCK09-API-CORR-01 v0.3`; this plan still grants no runtime authority.
 48. BCK09-API-RAW-B-01 evidence is emulator/test-only and cannot authorize a
     tracked product callable, Admin SDK initialization or Firestore access.
-49. BCK09-API-RAW-C-01 v0.1 remains Proposed until separately approved with
-    exact executable permissions; this reconciliation itself changes no code.
-50. All nine BCK-09 specialist signatures remain Pending after RAW-B.
+49. BCK09-API-RAW-C-01 v0.1 received exact bounded implementation authority;
+    v0.2 records disabled local evidence and remains Inconclusive pending all
+    mandatory gates.
+50. All nine BCK-09 specialist signatures remain Pending after RAW-C local evidence.
 51. RAW-C cannot deploy, activate a market/cohort, process production data or
     grant ECL-03D–H any inherited authority.
 
@@ -780,16 +799,16 @@ ADR or edits production documents manually.
 
 ## 14. Handoff
 
-After this document, RAW-C and the external prerequisites are separately
-accepted and actually met, implementation proceeds in reviewable commits. The
-already completed contracts/test evidence is not duplicated:
+RAW-C local implementation has completed the following bounded work without
+deployment or activation:
 
 1. disabled product-adapter scaffold and fail-closed guards;
 2. create/cancel transactions, ledger, usage, audit/outbox/idempotency;
 3. owner queries and availability projection;
 4. emulator contention/security evidence and status reconciliation.
 
-ECL-03D remains the next product stage only after ECL-03C is verified. Until
+ECL-03D remains the next product stage only after RAW-C receives the remaining
+hosted and independent-review evidence and ECL-03C is verified. Until
 then Recharge continues to present provider handoff or an explicitly
 unavailable internal action; it must not display a local/mock Booking as
 confirmed.

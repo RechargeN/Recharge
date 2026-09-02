@@ -1,47 +1,44 @@
 # Recharge Backend — Booking disabled runtime adapter slice
 
 - ID: **BCK09-API-RAW-C-01**
-- Version: **0.1**
-- Date: **2026-08-28**
-- Status: **Proposed — documentation only; implementation not authorized**
+- Version: **0.2**
+- Date: **2026-09-03**
+- Status: **Review — approved v0.1 disabled implementation present; required evidence incomplete**
 - Target: **ECL-03C disabled authoritative core / Booking wire v1**
-- Product status after this document: **unchanged — runtime Absent**
-- Firebase/Firestore/Admin effect of this document: **none**
-- Callable export effect of this document: **none**
+- Product status after this document: **disabled local source Present; deployed runtime Absent**
+- Firebase/Firestore/Admin effect of this document: **demo-recharge Emulator-only Rules/index/source and test evidence; no cloud effect**
+- Callable export effect of this document: **exactly five disabled Emulator-only Booking v1 exports; no deployment or traffic**
 - Deployment/activation authority: **none**
 - Parent architecture:
   [ADR 0019 — Accepted](../adr/0019-authoritative-internal-booking-ledger.md)
 - Parent product plan:
-  [ECL-03C v1.9 — Review; runtime not authorized](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.10 — Review; disabled local source Present](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Backend contract:
-  [BCK-09 v1.11 — Review; runtime Absent](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
+  [BCK-09 v1.12 — Review; deployed runtime Absent](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - API review:
-  [BCK09-API-REV-01 v0.8 — independent-evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.9 — hosted/independent-evidence runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Required predecessor evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 
 ---
 
-## 0. Decision requested
+## 0. Decision and execution record
 
-This document asks for review of an exact **future** implementation slice. It
-does not authorize implementation.
+The owner granted the exact v0.1 executable permission recorded in §18. That
+permission allowed only the tracked §8 backend files, exactly five Booking v1
+callable exports and local `demo-recharge` Emulator-only Firestore/Admin use.
+It did not authorize production/staging projects, credentials, cloud resources,
+deployment, activation, mobile changes, ECL-03D–H, push or merge.
 
-If later approved with explicit executable permissions, RAW-C may build the
-first tracked ECL-03C Booking adapter and transaction core, exercise it only in
-an isolated Firebase Emulator environment, and leave every production/staging
-activation path disabled. It must not provision or deploy cloud resources.
-
-RAW-C is not approved by:
+No broader RAW-C authority is implied by:
 
 - approval of ADR 0019, BCK-09 or ECL-03C prose;
 - completion of contract parity, RAW-A or RAW-B;
-- approval of this docs-only reconciliation;
+- this evidence reconciliation;
 - an emulator pass, pull request, reviewer comment or green generic CI job.
 
-The future approval must name this ID/version and expressly authorize tracked
-product backend source, the five callable exports, local Emulator-only Admin
-SDK/Firestore access, Rules/index test changes and the exact files in §8.
+Version 0.2 records implementation evidence only. It changes no v0.1 scope,
+contract, runtime authority or activation boundary.
 
 ## 1. Outcome
 
@@ -68,8 +65,8 @@ Precedence is:
 
 1. Accepted ADR 0019;
 2. ECL-03 v1.3 and Accepted ECL03-D01–D12;
-3. ECL-03C v1.9;
-4. BCK-09 v1.11;
+3. ECL-03C v1.10;
+4. BCK-09 v1.12;
 5. Accepted BCK09-API-NAMED-DEC-01 v0.2;
 6. Booking wire v1 schemas, fixtures and semantic-hash vectors;
 7. this RAW-C plan.
@@ -219,12 +216,12 @@ enable a synthetic test-only flag only inside a per-test isolated project and
 must reset it during cleanup. Missing, malformed or unreadable configuration is
 disabled, never permissive.
 
-## 8. Exact future file plan
+## 8. Exact implementation file plan
 
 This section is a plan, not authorization. Paths not listed here require a plan
 revision and new approval before editing.
 
-### 8.1. Add after separate approval
+### 8.1. Added under the recorded v0.1 approval
 
 | Path | Purpose |
 |---|---|
@@ -258,7 +255,7 @@ revision and new approval before editing.
 | `apps/backend/functions/test/emulator/booking_contention.test.ts` | oversell/cap/idempotency contention tests |
 | `apps/backend/functions/test/emulator/booking_security.test.ts` | Rules/Auth/App Check/flag denial matrix |
 
-### 8.2. Modify after separate approval
+### 8.2. Modified under the recorded v0.1 approval
 
 | Path | Exact bounded change |
 |---|---|
@@ -282,7 +279,7 @@ revision and new approval before editing.
 - Terraform provider/resource topology;
 - `.firebaserc`, production aliases, credentials and deployment workflows.
 
-## 9. Implementation phases after approval
+## 9. Implementation phases
 
 RAW-C implementation must remain reviewable and stop between phases:
 
@@ -398,6 +395,31 @@ The completion record must include:
 - proof that production flags, deployments and cloud resources remain absent;
 - failures and retries, not only the final green run.
 
+### 12.1. Local evidence — 2026-09-03
+
+| Gate | Result |
+|---|---|
+| Base commit | `3b1df20` |
+| RAW-C implementation commit | `02c6e79` |
+| Node unit suite | Pass, 13/13 on Node 22.23.2 |
+| Booking contract suite | Pass, 15/15 on Node 22.23.2 |
+| Disposable Firebase Emulator suite | Pass, 23/23; cleanup completed |
+| Formatting, lint, strict TypeScript | Pass |
+| No-cloud-context check | Pass |
+| Generated-output verification | Pass, 88 files |
+| Reproducibility | Pass, digest `a5202fe025855d175c6c58add5614859fc568e48547717ad499ff7c4776ddecd` |
+| Mobile regression | `flutter analyze --no-pub` pass; `flutter test --no-pub` 664/664 pass |
+| Protected diff | No mobile, frozen Booking schema or Accepted ADR edit |
+| Repository boundary gate | Pass: 380 files, 71/71 suppressed, 0 violations, 0 stale/expired exceptions |
+| Exact hosted toolchain | Pending: local npm 10.8.2 and JDK 21.0.6 do not satisfy the pinned npm 10.9.8 / JDK 21.0.12+8 evidence target |
+| Ubuntu/Windows hosted CI | Pending; push was not authorized |
+| Independent specialist verdicts | Pending |
+
+Local implementation and Emulator behavior pass their bounded checks. The
+slice verdict remains **Inconclusive** until every mandatory §11 gate passes on
+the exact committed revision. No cloud project, credential, deployment,
+activation, mobile runtime integration or production data was used.
+
 ## 13. Stop conditions
 
 Stop immediately and return to Review if:
@@ -434,10 +456,9 @@ manual Firestore edit proves the slice exceeded its authority.
 
 ## 15. Definition of Ready
 
-RAW-C implementation is Ready only when every §3.1 prerequisite is present,
-the exact §8 plan is revalidated against the current checkout, and the owner
-has granted the explicit executable permissions in §17. Generic approval such
-as “continue” is insufficient.
+RAW-C implementation entered execution only after the exact §18 permission was
+recorded and the §8 plan was revalidated. This readiness record grants no
+permission beyond v0.1.
 
 ## 16. Definition of Done
 
@@ -457,8 +478,8 @@ production, activation, ECL-03D–H, mobile cutover or merge to `main`.
 
 ## 17. Acceptance criteria
 
-1. **BCK09-RAW-C-AC-01:** v0.1 is Proposed and documentation-only.
-2. **BCK09-RAW-C-AC-02:** implementation requires exact separate approval.
+1. **BCK09-RAW-C-AC-01:** v0.1 scope received exact implementation approval; v0.2 only reconciles evidence.
+2. **BCK09-RAW-C-AC-02:** implementation authority is limited to the exact §18 permission.
 3. **BCK09-RAW-C-AC-03:** RAW-B is a prerequisite, not runtime authority.
 4. **BCK09-RAW-C-AC-04:** Booking wire v1 remains unchanged.
 5. **BCK09-RAW-C-AC-05:** Accepted ADR 0019 and D01–D12 remain authoritative.
@@ -511,9 +532,9 @@ production, activation, ECL-03D–H, mobile cutover or merge to `main`.
 AC numbers are stable. New criteria append; a semantic change requires a new
 version and a reference migration note.
 
-## 18. Future implementation approval phrase
+## 18. Recorded implementation approval
 
-This phrase is intentionally **not approved** by the current docs-only work:
+The owner recorded the following exact approval before implementation:
 
 ```text
 Одобряю BCK09-API-RAW-C-01 v0.1 для disabled ECL-03C
@@ -524,5 +545,6 @@ Production/staging projects, credentials, cloud resources, deployment,
 activation, mobile changes, ECL-03D–H, push и merge не разрешаю.
 ```
 
-Approval of the plan may instead request amendments. Until an exact executable
-approval is recorded, the repository must remain docs-only for RAW-C.
+This approval is consumed only by RAW-C v0.1. It does not authorize push,
+merge, staging, production, deployment, activation, mobile integration or a
+later ECL-03 stage.
