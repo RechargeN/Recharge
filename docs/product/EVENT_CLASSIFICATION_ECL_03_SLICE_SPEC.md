@@ -1,7 +1,7 @@
 # ECL-03 — Internal free registration and authoritative Booking
 
-- Версия: 1.1
-- Дата: 2026-08-08
+- Версия: 1.3
+- Дата: 2026-08-27
 - Статус: **Approved — implementation contract; production activation gated**
 - Канон: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md),
   Accepted v2.2.3
@@ -12,8 +12,15 @@
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decision recommendations:
   [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
-  Accepted / normative
+  Accepted D01–D12 / normative
 - Runtime boundary: production/backend; local/mock confirmation запрещена
+
+### Revision 1.3
+
+ECL03-D12 replaces only the Booking-v1 `requestId: ULID` representation with
+an opaque bounded client-generated attempt ID. It preserves D11, stable entity
+IDs and every runtime gate. Wire Schema/DTO conformance remains separately
+gated by BCK09-API-CORR-01; this revision changes documentation only.
 
 ## 1. Решение и цель
 
@@ -39,7 +46,8 @@ Slice должен поддержать:
 
 ECL-03 не может быть реализован только во Flutter. ADR 0019 и этот contract
 приняты, но production Auth/identity authority, executable backend slice,
-notification readiness и exact ECL-03B plan остаются runtime gates. Локальная
+notification readiness, BCK09 contract correction и parity evidence остаются
+runtime gates. Локальная
 кнопка, запись в device storage или mock snapshot не считаются Booking и не
 могут отображаться как confirmed.
 
@@ -48,6 +56,8 @@ notification readiness и exact ECL-03B plan остаются runtime gates. Л�
 Пользователь 2026-08-08 сначала одобрил ECL-03A documentation package, затем
 после представления единого D01–D10 package дал команду продолжать. ADR 0019,
 D01–D10 и этот implementation contract приняты без runtime claims.
+ECL03-D11 был принят 2026-08-20, ECL03-D12 — 2026-08-27; оба расширяют
+документационный контракт без runtime authority.
 
 До ECL-03B code обязательны:
 
@@ -424,7 +434,7 @@ to duplicate-active and policy checks.
 ### 7.3. Duplicate-active invariant
 
 Для `(userId, occurrenceId, admission track)` одновременно допустим максимум
-один non-terminal Booking. Repeated create with a new request ID returns typed
+один non-terminal Booking. Repeated create with a new idempotency key returns typed
 `already_active` and current authorized projection; it does not create another
 Booking or consume capacity.
 
@@ -457,7 +467,8 @@ but final command repeats every condition inside the mutation transaction.
 Conflict/retry behavior is bounded. The backend retries transaction contention
 according to versioned operational policy, then returns typed `contention`
 without partial writes. The mobile application may offer Retry with the same
-request ID.
+idempotency key and semantic payload; a new request ID may be used only for
+correlation of the retry attempt.
 
 ### 8.2. Server time
 
@@ -476,7 +487,8 @@ Device clock may render a countdown but cannot authorize a mutation.
 Each mutation request contains:
 
 ```text
-requestId: ULID
+requestId: opaque bounded client-generated attempt ID (ECL03-D12)
+idempotencyKey: opaque required ID
 commandType
 actorId (from auth, never trusted from body)
 resourceId
@@ -486,7 +498,17 @@ payloadHash
 
 Rules:
 
-- same actor/command/request ID and same hash returns original result;
+- effective key is `(resolvedActorOrServiceIdentity, commandType,
+  idempotencyKey)`;
+- `requestId` correlates one attempt; `idempotencyKey` identifies the logical
+  mutation, and equality is optional;
+- `requestId` is an exact case-sensitive non-blank string of 1–128 Unicode
+  scalar values; it is not normalized or interpreted as ULID/time/order;
+- same effective key and same hash returns original result even when a retry
+  has a new request ID; the semantic outcome is stable while response echo uses
+  the current attempt request ID;
+- a new attempt generates a fresh request ID; known reuse with another logical
+  key/semantic command is invalid and creates no mutation;
 - same key with different payload returns `idempotency_conflict`;
 - failed validation may be cached only according to explicit contract;
 - transient infrastructure failures do not claim success;
@@ -771,12 +793,12 @@ ListMyBookings(cursor, stateFilter?)
 ### 18.2. Viewer commands
 
 ```text
-CreateInternalBooking(requestId, occurrenceId, poolId?, guestPayload?)
-SubmitInternalApplication(requestId, occurrenceId, fields)
-CancelBooking(requestId, bookingId, expectedRevision)
-ReconfirmBooking(requestId, bookingId, expectedRevision)
-AcceptWaitlistOffer(requestId, bookingId, holdId, expectedRevision)
-DeclineWaitlistOffer(requestId, bookingId, holdId, expectedRevision)
+CreateInternalBooking(requestId, idempotencyKey, occurrenceId, poolId?, guestPayload?)
+SubmitInternalApplication(requestId, idempotencyKey, occurrenceId, fields)
+CancelBooking(requestId, idempotencyKey, bookingId, expectedRevision)
+ReconfirmBooking(requestId, idempotencyKey, bookingId, expectedRevision)
+AcceptWaitlistOffer(requestId, idempotencyKey, bookingId, holdId, expectedRevision)
+DeclineWaitlistOffer(requestId, idempotencyKey, bookingId, holdId, expectedRevision)
 ```
 
 ### 18.3. Creator queries/commands
@@ -784,10 +806,10 @@ DeclineWaitlistOffer(requestId, bookingId, holdId, expectedRevision)
 ```text
 ListOccurrenceBookings(occurrenceId, cursor, stateFilter?)
 ListApplications(occurrenceId, auxiliaryTrackId?, cursor)
-ApproveApplication(requestId, bookingId, poolId?, expectedRevision)
-RejectApplication(requestId, bookingId, reasonCode, expectedRevision)
-PromoteWaitlist(requestId, bookingId, expectedRevision)
-CancelManagedBooking(requestId, bookingId, reasonCode, expectedRevision)
+ApproveApplication(requestId, idempotencyKey, bookingId, poolId?, expectedRevision)
+RejectApplication(requestId, idempotencyKey, bookingId, reasonCode, expectedRevision)
+PromoteWaitlist(requestId, idempotencyKey, bookingId, expectedRevision)
+CancelManagedBooking(requestId, idempotencyKey, bookingId, reasonCode, expectedRevision)
 ```
 
 ### 18.4. Typed response envelope
@@ -1155,6 +1177,11 @@ Paths are relative to `apps/mobile/lib/`.
 48. Retention, incident, rollback and reconciliation runbooks are approved.
 49. Payments/provider/assigned seating/check-in remain absent.
 50. Status documentation claims production readiness only after staging evidence.
+51. Booking v1 treats request ID as attempt correlation and idempotency key as
+    logical-mutation identity; equal and distinct values are both valid.
+52. Booking v1 request ID follows ECL03-D12 opaque bounded semantics; exact
+    actor-scoped reuse binding is enforced before mutation and Schema/Dart/
+    TypeScript conformance is fixture-verified.
 
 ## 27. Required test matrix
 
@@ -1232,7 +1259,7 @@ ECL-03 documentation gate (ECL-03A) is ready for approval when:
 Full ECL-03 is Done only when:
 
 - ADR 0019 and this spec are Approved/Accepted;
-- ECL-03B–H pass all 50 AC;
+- ECL-03B–H pass all 52 AC;
 - production Auth/capabilities, backend and notification delivery are live in
   staging and proven through required tests;
 - retention/privacy/operations gates are approved;
@@ -1242,7 +1269,7 @@ Full ECL-03 is Done only when:
 
 ## 31. Accepted decision register and remaining activation gates
 
-The complete D01-D10 package is Accepted and normative through the
+The complete D01-D12 package is Accepted and normative through the
 [ECL-03 decision package](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md).
 Its exact values must not be replaced by implementation defaults.
 
@@ -1258,6 +1285,8 @@ Its exact values must not be replaced by implementation defaults.
 | `ECL03-D08` | Initial supported inventory shapes | Accepted |
 | `ECL03-D09` | Staging load/SLO/error-budget thresholds | Accepted; staging proof remains activation gate |
 | `ECL03-D10` | Support repair authority and workflow | Accepted; support identities/process remain activation gate |
+| `ECL03-D11` | Request correlation and logical idempotency identity are separate | Accepted; no wire migration, runtime remains gated |
+| `ECL03-D12` | Booking v1 request ID is opaque, bounded and actor-scoped for attempt reuse | Accepted; Schema/DTO/TypeScript conformance remains gated |
 
 Acceptance fixes the product and architecture choices. It does not assert
 that Identity, Privacy/Legal, Platform, notification or operations readiness
@@ -1271,7 +1300,7 @@ Documentation package prepared and audited 2026-08-08:
 - canonical Event Classification v2.2.3 read completely (1567 lines);
 - Accepted ADR 0019 defines the frozen-baseline/backend decision without
   creating `apps/backend`;
-- this specification contains 50 sequential AC and 10 Accepted decisions;
+- this specification contains 52 sequential AC and 12 Accepted decisions;
 - cumulative coverage matrix reconciled from the historical pre-ECL-01
   snapshot to the factual post-ECL-02 baseline: 20 I, 8 P, 2 M, 12 M/G, 1 D;
 - all relative Markdown links resolve and all code fences are balanced;

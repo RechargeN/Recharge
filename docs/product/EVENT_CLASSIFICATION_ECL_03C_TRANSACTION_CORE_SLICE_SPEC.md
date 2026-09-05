@@ -1,20 +1,138 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.0
-- Дата: 2026-08-09
-- Статус: **Review — exact implementation plan; runtime not authorized**
+- Версия: 1.11
+- Дата: 2026-09-03
+- Статус: **Review — disabled local implementation present; production runtime not authorized**
 - Parent:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
-  Approved v1.1
+  Approved v1.3
 - Architecture:
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
   [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
-  Accepted D01–D10
+  Accepted D01–D12
 - Dependency:
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
   Done v1.1
-- Runtime effect of this revision: **none**
+- Runtime effect of this revision: **disabled demo-recharge Emulator-only source; no deployment or activation**
+- Product API baseline:
+  [BCK09-API-DEC-01 v0.4](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Named API decision:
+  [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
+- Contract correction evidence:
+  [BCK09-API-CORR-01 v0.3](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+- Contract parity evidence:
+  [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Callable raw-body emulator evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Disabled-adapter evidence:
+  [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+
+## 0. Changelog
+
+### v1.11 — 2026-09-03
+
+- recorded successful push and pull-request RAW-C matrices at exact head
+  `75818f78c67e9bcfa06edbc12820424235c39627`: runs `33689696133` and
+  `33689700189` passed on Ubuntu 24.04 and Windows 2025;
+- confirmed exact toolchain, no-cloud-context, unit, contract, RAW-B, RAW-C,
+  cleanup, generated-output, reproducibility and Terraform safety gates on both
+  operating systems; PR #7 remains Draft;
+- kept ECL-03C in Review because all nine independent BCK-09 specialist
+  verdicts remain Pending; deployment, activation, mobile integration and
+  ECL-03D–H remain unauthorized.
+
+### v1.10 — 2026-09-03
+
+- recorded the exact RAW-C v0.1 executable approval and the resulting disabled
+  ECL-03C source, exactly five callable exports and nine-collection
+  `demo-recharge` Emulator-only implementation;
+- recorded local Node 22.23.2 unit 13/13, contract 15/15 and disposable Emulator
+  23/23 passes, generated/reproducibility checks and mobile 664/664 regression;
+- kept ECL-03C in Review because exact hosted npm/JDK Ubuntu/Windows evidence
+  and all independent specialist verdicts remain pending; the local boundary
+  gate passes with 0 violations; no cloud project, deployment, activation or mobile integration was
+  authorized.
+
+### v1.9 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done: 19/19 disposable callable
+  Emulator vectors passed on pinned Ubuntu/Windows toolchains and proved exact
+  raw-body visibility for the synthetic corpus;
+- replaced the raw-body feasibility blocker with a separately gated RAW-C
+  disabled-adapter implementation plan and retained every independent
+  API/Security/Operations, Identity, Firebase and activation prerequisite;
+- preserved the five callable surfaces, nine operational collections and all
+  existing 47 AC; appended AC-48..51 without granting runtime authority.
+
+### v1.8 — 2026-08-28
+
+- promoted the bounded contracts/test-only parity dependency to Done after
+  exact Node 22.23.2 hosted Ubuntu/Windows evidence passed;
+- retained raw callable-body feasibility, independent specialist evidence,
+  explicit runtime authorization and all Firebase/deployment gates;
+- changed no callable, collection, transaction, record or 47-AC scope.
+
+### v1.7 — 2026-08-28
+
+- registered `api_contracts` v0.3.0 and BCK09-API-PAR-01 v0.2 as implemented
+  contracts/test-only query/read/page/availability and semantic-hash parity;
+- closed the pre-runtime TypeScript/query/hash artifact gap without adding a
+  callable, backend source, repository, Firestore access or mobile adapter;
+- retained canonical Node 22 confirmation, raw callable-body feasibility,
+  independent specialist evidence, explicit runtime authorization and all
+  Firebase/deployment gates; nine collections and 47 AC are unchanged.
+
+### v1.6 — 2026-08-27
+
+- inherited Booking-v1 Accepted API-DEC-01/03 from
+  BCK09-API-NAMED-DEC-01 v0.2;
+- amended the semantic hash projection to include applicable
+  `expectedBookingRevision` and `occurredAgainstEventRevision` fields;
+- retained TypeScript/query/hash parity, independent specialist evidence,
+  explicit runtime authorization and Firebase as blockers; callable,
+  collection and 47-AC scope are unchanged.
+
+### v1.5 — 2026-08-27
+
+- registered the verified nine-variant command union and D12 Schema/Dart
+  parity from BCK09-API-CORR-01 v0.3;
+- retained TypeScript/query parity, named API decisions and explicit runtime
+  authorization as blockers;
+- changed no callable, collection, AC or runtime scope.
+
+### v1.4 — 2026-08-27
+
+- inherited Accepted ECL03-D12 opaque bounded request-ID semantics from parent
+  ECL-03 v1.3 and removed the semantic ULID conflict;
+- retained Schema/Dart/TypeScript conformance as a blocking
+  BCK09-API-CORR-01 implementation requirement;
+- changed no callable scope, collection, AC count, schema or runtime artifact.
+
+### v1.3 — 2026-08-27
+
+- added exact logical-mutation and request-attempt record kinds inside the
+  existing `bookingIdempotency` collection, preserving nine collections;
+- selected a Product-level JCS/SHA-256 semantic hash and callable 10/15/30
+  deadline target while keeping named API/Security/Operations acceptance open;
+- exposed the Approved-parent ULID versus Booking-v1 opaque request-ID conflict
+  as a fail-closed `ECL03-D12` prerequisite rather than silently overriding it;
+- linked the bounded Booking v1 schema/DTO correction plan and added six AC;
+- changed no schema, DTO, backend, Firebase, mobile or deployment file.
+
+### v1.2 — 2026-08-26
+
+- replaced an unspecified duplicate-active query with one deterministic
+  `bookingActiveKeys` transaction record per `(actorId, occurrenceId,
+  admissionTrackId)` scope;
+- made create/cancel atomically acquire/release that record and required
+  dangling/mismatched keys to fail closed for reconciliation;
+- confirmed one server-issued, callback-retry-stable Booking v1 ID path without
+  changing its command schema or conflating entity/request/idempotency identity;
+- froze ECL-03C outbox records as terminal `suppressedPreActivation` evidence
+  that can never be delivered or replayed before a later Accepted handoff;
+- added exact implementation/test ownership and three appended AC without
+  changing the five callable surfaces or enabling runtime.
 
 ## 1. Outcome
 
@@ -27,6 +145,7 @@ defines one trusted Firebase transaction core for:
 - listing actor-owned Bookings with bounded cursor pagination;
 - reading an authoritative occurrence availability projection;
 - maintaining finite-capacity pool ledger and user concurrency usage;
+- acquiring and releasing one deterministic duplicate-active key per scope;
 - storing idempotency, audit and notification-obligation records atomically;
 - denying direct client writes and proving no oversell under contention.
 
@@ -36,28 +155,43 @@ server-confirmed Booking only after the Firestore transaction commits. An
 explicit unlimited RSVP may confirm without a ledger allocation. Unknown
 capacity is never treated as unlimited.
 
-This document is the required exact plan. It does not create `apps/backend`,
-connect Firebase, deploy anything, collect production data or change mobile
-runtime.
+Booking v1 create does not accept `bookingId` from the command payload. The
+trusted handler therefore issues exactly one request-scoped candidate Booking
+ULID before entering the Firestore transaction callback and reuses that same
+candidate across every internal callback retry. It becomes authoritative and
+is returned only when the transaction commits. A refusal/failure persists no
+Booking or mapping. This follows ADR 0013's server-ID baseline and BCK-03's
+explicit server-returned mapping branch; it does not conflate `bookingId`,
+`requestId` or `idempotencyKey`, and requires no Booking v1 wire change.
+
+This document remains the exact ECL-03C contract. RAW-C v0.1 implemented only
+its disabled local/Emulator subset inside `apps/backend`; it did not connect a
+real Firebase project, deploy anything, collect production data or change
+mobile runtime.
 
 ## 2. Authorization and prerequisites
 
 ### 2.1. Current gate
 
-The plan may be reviewed during stabilization. Physical backend creation and
-runtime implementation may start only after all of the following are true:
+The owner granted a bounded exception for RAW-C v0.1: tracked backend source,
+exactly five callable exports and local `demo-recharge` Emulator-only
+Firestore/Admin access. That exception has been consumed and does not satisfy
+production readiness.
 
-1. this exact plan is explicitly accepted;
-2. a separate post-stabilization Firebase implementation authorization, or an
-   Accepted ADR/slice exception of equal authority, permits `apps/backend`;
-3. the production Identity dependency sequence from Accepted D03 has a
-   implemented and verified server-owned Auth/account/capability authority;
-4. Platform confirms dev/staging/prod project ownership, `eur3` Firestore,
+Deployment or production/staging runtime may start only after all of the
+following are true:
+
+1. ECL-03C and the exact deployable slice are explicitly Approved;
+2. production Identity implements verified server-owned
+   Auth/account/capability/revocation authority;
+3. Platform confirms dev/staging/prod project ownership, `eur3` Firestore,
    `europe-west1` Functions and environment-scoped service identities;
-5. no unresolved higher-priority ADR conflicts with this slice.
+4. independent API, Security, Operations and other applicable specialist
+   verdicts pass;
+5. no unresolved higher-priority ADR conflicts with the deployable slice.
 
-Implementation approval is not production activation. Every production
-mutation flag remains off until the later staging, security, legal and
+Disabled implementation evidence is not production activation. Every
+production mutation flag remains off until later staging, security, legal and
 operations gates explicitly allow activation.
 
 ### 2.2. Why Identity is a hard dependency
@@ -87,9 +221,9 @@ authorization boundary must fail closed so ECL-03D can add exact
 10. `getMyBooking`, `listMyBookings` and `getEventAvailability` queries.
 11. Finite `generalCapacity` pool/channel allocation.
 12. Explicit unlimited RSVP without capacity allocation or concurrency usage.
-13. Duplicate-active prevention.
+13. Duplicate-active prevention through an exact transaction key.
 14. Platform policy v1: maximum five active finite-capacity Bookings per user.
-15. Atomic Booking, ledger, usage, audit, outbox and idempotency writes.
+15. Atomic Booking, active-key, ledger, usage, audit, outbox and idempotency writes.
 16. Stable typed rejections and retryable failures.
 17. Feature flags with all production mutations disabled by default.
 18. Rules/IAM boundary documentation and emulator Rules tests.
@@ -134,7 +268,15 @@ checks.
 Rules:
 
 - `schemaVersion=1` is mandatory;
-- `requestId` and `idempotencyKey` are ULIDs for mutations;
+- `requestId` follows Accepted ECL03-D12: exact case-sensitive, non-blank,
+  1–128 Unicode scalar values, opaque and not normalized/interpreted as ULID;
+- `idempotencyKey` remains a separate opaque required logical-mutation ID;
+- command Schema/Dart parity is proven by BCK09-API-CORR-01 v0.3 and bounded
+  TypeScript/query/hash contract parity by BCK09-API-PAR-01 v0.3;
+  BCK09-API-RAW-B-01 v0.1 proves disposable Emulator transport feasibility;
+  RAW-C v0.1 adds a disabled product adapter under exact bounded authority, but
+  no deployment or activation is allowed until independent
+  API/Security/Operations evidence is proven;
 - `actorId`, roles, capabilities and server time are never accepted from body;
 - queries have a maximum page size of 50 and default of 20;
 - cursors are opaque, signed/versioned server tokens or stable backend-owned
@@ -152,6 +294,19 @@ and `enforceAppCheck` for Functions v2:
 [callable functions](https://firebase.google.com/docs/functions/callable) and
 [App Check enforcement](https://firebase.google.com/docs/app-check/cloud-functions).
 
+### 4.1. Product-selected transport target
+
+The target is one Functions v2 callable in `europe-west1` per named surface,
+with no generic router, 10-second query client deadlines, 15-second mutation
+client deadlines and a 30-second server timeout. A mutation timeout or lost
+connection is an unknown outcome; recovery preserves semantic payload and
+idempotency key while using a fresh request ID, or reads authorized state.
+
+This is the Booking-v1 Accepted `API-DEC-01` from
+`BCK09-API-NAMED-DEC-01 v0.2`. Independent API Platform and BCK-05 Operations
+must still validate SDK/latency/cost behavior before endpoint scaffold or
+deploy configuration.
+
 ## 5. Authoritative operational records
 
 Operational collections are separate from Event drafts and from one another.
@@ -163,7 +318,8 @@ Names below are normative for ECL-03C.
 | `bookings` | `bookingId` | Booking aggregate projection | deny; callable query only |
 | `bookingPoolLedgers` | hash of occurrence/pool/channel | capacity and confirmed allocation counters | deny |
 | `bookingUserUsage` | `userId` | policy version plus active finite Booking evidence | deny |
-| `bookingIdempotency` | hash of actor/command/request | payload hash and stable completed result | deny |
+| `bookingActiveKeys` | SHA-256 of versioned actor/occurrence/admission-track tuple | one non-terminal Booking lock and Booking reference | deny |
+| `bookingIdempotency` | domain-separated hash; `m1_` logical or `r1_` attempt kind | logical payload/result or atomic request-attempt binding | deny |
 | `bookingAudit` | `auditId` | append-only privacy-safe mutation fact | deny |
 | `bookingOutbox` | deterministic obligation ID | post-commit notification obligation only | deny |
 | `bookingFeatureFlags` | flag/environment | server-owned disabled-by-default gate | deny |
@@ -173,7 +329,68 @@ application answers are absent from ECL-03C. IDs in document paths are stable
 ULID/opaque hashes; raw email, phone, access code or payload is not used as a
 path key.
 
-### 5.1. Event operational projection
+### 5.1. Idempotency record kinds
+
+The collection count does not change. `bookingIdempotency` stores exactly two
+closed record kinds derived with length-prefixed UTF-8 tuple encoding:
+
+```text
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+
+logicalMutationId = "m1_" + lowercaseHex(SHA-256(
+  encode("booking_logical_mutation_v1") || encode(actorId) ||
+  encode(commandType) || encode(idempotencyKey)
+))
+
+requestAttemptId = "r1_" + lowercaseHex(SHA-256(
+  encode("booking_request_attempt_v1") || encode(actorId) ||
+  encode(requestId)
+))
+```
+
+The logical record stores its kind, actor scope, command/key reference,
+semantic hash, completed result and server-owned timestamps. The attempt
+record stores its kind, actor scope, command/key reference, semantic hash and
+server-owned timestamps. Both records are read before writes and created in
+the same transaction as the domain mutation. Retention is no shorter than the
+logical retry window. Raw IDs, keys and payloads are excluded from logs.
+
+### 5.2. Duplicate-active key
+
+For the Accepted parent scope `(userId, occurrenceId, admission track)`, the
+server derives:
+
+```text
+scopeVersion = booking_active_scope_v1
+admissionTrackId = general
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+activeKeyId = lowercaseHex(SHA-256(
+  encode(scopeVersion) || encode(actorId) ||
+  encode(occurrenceId) || encode(admissionTrackId)
+))
+```
+
+For Viewer self-service, resolved `actorId` is the authoritative `userId` in
+the parent duplicate-active invariant. Length-prefix encoding prevents tuple
+ambiguity; all implementations and fixtures use the exact UTF-8 bytes above.
+The input IDs are already opaque server-bound identifiers. Raw email, phone,
+display name, payload or access secret is never used. The key document stores
+only `scopeVersion`, actor/occurrence/track IDs, `bookingId`, Booking revision,
+created/updated server time and a schema version.
+
+Create reads the exact key before any write. An existing valid key returns
+`already_active` and the authorized current Booking projection. A missing key
+is created atomically with the new Booking. A dangling, mismatched or malformed
+key fails closed as `temporarily_unavailable`, blocks that scope for
+reconciliation and never creates a second Booking.
+
+Cancellation reads and verifies the same key, transitions the referenced
+Booking and deletes the key in the same transaction. A concurrent rejoin can
+therefore proceed only after the terminal transition commits and must allocate
+a new Booking ULID. This record is required for finite and explicit-unlimited
+Bookings; it is separate from the finite-only concurrency usage counter.
+
+### 5.3. Event operational projection
 
 The emulator suite seeds a minimal projection containing:
 
@@ -189,6 +406,21 @@ ECL-03C has no production writer for this projection. A production mutation
 cannot be enabled until a later approved publishing/synchronization slice
 provides revision-safe source ownership. Manual console seeding is prohibited.
 
+### 5.4. Pre-activation outbox disposition
+
+Every ECL-03C `bookingOutbox` record has immutable
+`effectDisposition=suppressedPreActivation` plus the resolved policy revision.
+It is terminal evidence that the Booking transaction intentionally emitted no
+cross-domain notification effect while OD-09/BCK-13 handoff was unavailable.
+It is not a delivery backlog, is excluded from delivery-lag breach, and must
+never be dispatched, mutated to `handoffRequired` or replayed after activation.
+
+A later Approved notification stage may allow only new post-activation
+transactions to write `effectDisposition=handoffRequired`; BCK-13 then owns its
+dedupe and terminal receipt/quarantine/dead-letter. ECL-03C contains no outbox
+dispatcher, inbox writer, push worker or compatibility path that upgrades old
+suppressed records.
+
 ## 6. Transaction contract
 
 Every create/cancel command executes one deterministic Admin SDK Firestore
@@ -198,27 +430,34 @@ after commit in a later stage. Firestore guarantees all-or-nothing writes and
 documents retry behavior in
 [transactions and batched writes](https://firebase.google.com/docs/firestore/manage-data/transactions).
 
+For create, the trusted handler generates `candidateBookingId` once before the
+callback. The callback receives it as immutable input; it never calls an ID
+generator. Concurrent attempts may have different candidates, but idempotency
+and the active-key read ensure that only the committed result becomes visible.
+
 ### 6.1. Create, in exact order
 
 1. validate transport shape before privileged reads;
 2. resolve verified actor and active-account authority;
 3. evaluate environment/App Check/`internal_booking_create_v1` flag;
-4. calculate canonical payload hash;
-5. read idempotency record;
+4. validate the closed command variant and calculate its canonical payload hash;
+5. derive/read both logical-mutation and request-attempt idempotency records;
 6. read occurrence operational projection;
 7. verify published/open lifecycle and material revision;
 8. verify internal authority, free pricing and no payment collection;
 9. verify instant mode, window, eligibility and guest units;
 10. resolve exact general-capacity pool/channel and ledger revision;
 11. read actor usage under policy `active_confirmed_finite_v1`;
-12. query/read duplicate-active evidence;
+12. derive and read the exact `bookingActiveKeys` record;
 13. enforce maximum five active finite-capacity Bookings;
 14. enforce finite capacity, or verify explicit unlimited mode;
-15. allocate a new server-authorized Booking ULID;
-16. write Booking and, for finite capacity, ledger/usage;
+15. bind the handler's immutable `candidateBookingId` to this completed result;
+    the client-supplied `requestId`/`idempotencyKey` remain distinct;
+16. write Booking plus its active key and, for finite capacity, ledger/usage;
 17. write one append-only audit record;
-18. write one deterministic notification-obligation outbox record;
-19. write completed idempotency result;
+18. write one deterministic outbox record with immutable
+    `effectDisposition=suppressedPreActivation`;
+19. write the completed logical result and atomic attempt binding;
 20. commit, then return the stored typed result.
 
 The transaction reads all required documents before writes. Any contention
@@ -229,14 +468,16 @@ exhaustion returns `contention`; it never reports confirmation.
 
 1. validate transport and resolve verified actor;
 2. evaluate `internal_booking_cancel_v1` flag;
-3. calculate payload hash and read idempotency record;
+3. validate/hash the command and read both logical and attempt records;
 4. read Booking and verify owner;
 5. verify state/revision and authoritative cancellation deadline;
-6. read exact ledger and user usage records when allocation is finite;
-7. transition Booking to terminal `cancelled` with server time/reason;
-8. release the exact confirmed units and finite usage evidence;
-9. write audit, outbox and completed idempotency result;
-10. commit, then return stored result.
+6. derive/read the exact active key and verify it references this Booking;
+7. read exact ledger and user usage records when allocation is finite;
+8. transition Booking to terminal `cancelled` with server time/reason;
+9. delete the active key and release exact finite units/usage when applicable;
+10. write audit, terminal `suppressedPreActivation` outbox evidence, completed
+    logical result and atomic attempt binding;
+11. commit, then return stored result.
 
 Repeated cancellation with the same key returns the original result. A new
 key against an already terminal Booking returns the authorized current
@@ -260,13 +501,30 @@ ECL-03D.
 
 ## 7. Idempotency contract
 
-The effective key is `(actorId, commandType, requestId)`. In v1 the explicit
-derivation is `idempotencyKey == requestId`; a mismatch is an invalid command,
-not a second namespace. Neither body field is trusted as a global key.
-`payloadHash` is SHA-256 over canonical schema-known JSON fields.
+The effective key is `(resolvedActorOrServiceIdentity, commandType,
+idempotencyKey)`. `requestId` correlates one request attempt;
+`idempotencyKey` identifies one logical mutation across retries. Values may be
+equal, but equality is not required. A retry may use a new request ID only when
+it preserves the original idempotency key and validated semantic payload.
+Neither body field is trusted as actor identity or a global key. The selected
+semantic hash algorithm is `booking_semantic_hash_v1`: validate one closed
+command variant, project exactly `{algorithmVersion, commandType,
+commandSchemaVersion, resolvedActorScope, expectedBookingRevision?,
+occurredAgainstEventRevision?, payload}`, serialize it as RFC 8785 JCS UTF-8
+and encode the SHA-256 digest as lowercase hexadecimal. It excludes
+`requestId`, `idempotencyKey`, transport metadata, raw Auth/App Check context
+and server timestamps. Duplicate keys, fractional/non-finite numbers, integers
+outside `-9007199254740991..9007199254740991`, unpaired surrogates and invalid
+nulls are rejected before hashing. Unicode normalization, case folding and
+trimming are forbidden after validation. Dart and TypeScript golden vectors
+must cover Unicode, key ordering, absent versus
+null, integers, arrays and nested objects. This is the Booking-v1 Accepted
+`API-DEC-03`; independent cross-language and Security evidence remains a
+runtime prerequisite.
 
 - same effective key and same hash returns the byte-equivalent stored domain
-  result after authorization;
+  result after authorization inside a response envelope that echoes the current
+  attempt request ID and may use new attempt correlation metadata;
 - same effective key and different hash returns `idempotency_conflict`;
 - success and authenticated deterministic domain refusals may be stored;
 - unauthenticated, malformed, unsupported-contract, contention, unavailable
@@ -274,10 +532,16 @@ not a second namespace. Neither body field is trusted as a global key.
 - no idempotency record is written before actor binding;
 - retention follows Accepted D04 and must exceed every supported retry window;
 - logs contain only hashed request correlation, not command payload.
+- a new idempotency key remains subject to duplicate-active, capacity, policy
+  and revision invariants and cannot bypass them.
+- every new attempt uses a fresh request ID; detected reuse of one request ID
+  with another key or semantic command is invalid and creates no mutation.
+- the logical and attempt records from §5.1 are checked and written in the same
+  transaction as every successful or stored deterministic domain result.
 
 ## 8. Security boundary
 
-1. Firestore Rules deny every direct mobile write to all eight collections.
+1. Firestore Rules deny every direct mobile write to all nine collections.
 2. ECL-03C also denies direct client reads; callable queries return minimized
    projections. A later direct-read design requires an explicit spec revision.
 3. Admin SDK bypasses Rules, therefore IAM/service-account least privilege is
@@ -353,6 +617,7 @@ plus mechanically generated lockfiles.
 | `apps/backend/functions/src/booking/booking_queries.ts` | Get/list owner projections |
 | `apps/backend/functions/src/booking/availability_query.ts` | Non-reserving authoritative availability |
 | `apps/backend/functions/src/inventory/ledger.ts` | General-capacity ledger invariants |
+| `apps/backend/functions/src/inventory/active_key.ts` | Deterministic duplicate-active scope key and validation |
 | `apps/backend/functions/src/policy/concurrency.ts` | D06 policy v1 and usage evidence |
 | `apps/backend/functions/src/audit/booking_audit.ts` | Append-only privacy-safe mutation facts |
 | `apps/backend/functions/src/notifications/outbox.ts` | Obligation record only; no delivery |
@@ -371,12 +636,15 @@ current runtime table lists Node 22 and 20 as supported:
 | `apps/backend/functions/test/support/fake_clock.ts` | Window/deadline determinism |
 | `apps/backend/functions/test/unit/contract_fixtures.test.ts` | Same ECL-03B valid/invalid/forward fixtures |
 | `apps/backend/functions/test/unit/idempotency.test.ts` | Canonical hash and replay matrix |
+| `apps/backend/functions/test/unit/booking_id.test.ts` | One server candidate per request, stable across callback retries and absent on refusal |
+| `apps/backend/functions/test/unit/active_key.test.ts` | Canonical tuple/hash, malformed and mismatch cases |
+| `apps/backend/functions/test/unit/outbox_disposition.test.ts` | Suppressed record is immutable, non-dispatchable and non-replayable |
 | `apps/backend/functions/test/unit/booking_domain.test.ts` | Finite/unlimited/cap/guest invariants |
 | `apps/backend/functions/test/emulator/create_booking.test.ts` | Atomic success/refusal/no-partial-write |
 | `apps/backend/functions/test/emulator/cancel_booking.test.ts` | Exact release and terminal retry |
 | `apps/backend/functions/test/emulator/booking_queries.test.ts` | Owner scope, pagination, minimized projection |
 | `apps/backend/functions/test/emulator/security_rules.test.ts` | Direct access denied and auth matrix |
-| `apps/backend/functions/test/emulator/contention.test.ts` | Parallel creates, cap and idempotency proof |
+| `apps/backend/functions/test/emulator/contention.test.ts` | Parallel same-scope creates, active-key uniqueness, cap and idempotency proof |
 
 Security tests use the Local Emulator Suite and
 `@firebase/rules-unit-testing`, the Firebase-supported mechanism for mocked
@@ -431,6 +699,9 @@ pass the shared fixtures before any command handler is exported.
 | Rules | unauthenticated/wrong-user/direct operational access denied |
 | Capacity contention | at least 100 parallel attempts into bounded pools; zero oversell |
 | Duplicate idempotency | 100 same-key retries; exactly one allocation/result |
+| Transaction retry ID | forced callback rerun preserves one server candidate and returns only the committed ID |
+| Duplicate active | 100 distinct-key parallel creates for one actor/scope; exactly one Booking/key, including explicit unlimited |
+| Outbox suppression | ECL-03C writes only immutable `suppressedPreActivation`; no dispatcher/replay path exists |
 | User cap contention | parallel events cannot create more than five active finite allocations |
 | Failure atomicity | injected failure at each write boundary leaves no partial mutation |
 | Query pagination | stable order, no duplicate/omitted item across bounded pages |
@@ -481,13 +752,43 @@ remain ECL-03H or later gates.
 31. Availability query is authoritative at response time but reserves nothing.
 32. Server time decides every window/deadline.
 33. Audit/log/metric records contain no participant contact or access secret.
-34. Outbox is an obligation record only; no delivery is claimed.
+34. ECL-03C outbox is immutable `suppressedPreActivation` evidence only: no
+    delivery is claimed, no dispatcher consumes it and later activation cannot
+    replay or upgrade it.
 35. All production mutation flags remain off after implementation.
 36. No mobile/Create/Event runtime file changes in ECL-03C.
 37. Backend, contract, emulator, boundary and full mobile regression gates are
     green with recorded commands/counts.
 38. ECL-03C may be marked Done only as a disabled authoritative core; internal
     Booking product/runtime remains not activated until later stages.
+39. The versioned duplicate-active tuple and SHA-256 encoding are canonical and
+    fixture-tested across the TypeScript implementation and test helpers.
+40. Create/cancel writes or deletes the exact active key atomically with the
+    Booking and every applicable ledger/usage/audit/outbox/idempotency record.
+41. One hundred parallel distinct-idempotency creates for the same actor/scope
+    commit exactly one Booking/key for both finite and explicit-unlimited paths.
+42. `bookingIdempotency` has closed logical-mutation and request-attempt record
+    kinds without creating a tenth operational collection.
+43. Both idempotency record kinds are read and written atomically with the
+    applicable domain mutation and reject request reuse conflicts fail closed.
+44. `booking_semantic_hash_v1` has one exact JCS/SHA-256 projection and requires
+    cross-language golden vectors before runtime.
+45. Callable region, 10/15/30-second deadlines and the amended semantic hash
+    are Accepted for Booking v1, while independent API Platform, Security and
+    BCK-05 evidence remains required before runtime.
+46. Accepted ECL03-D12 defines opaque bounded request IDs; command Schema/Dart
+    enforcement and disposable raw transport feasibility are proven, while
+    product endpoint/runtime parity remains blocked.
+47. Booking command schema correction was separately Approved and verified in
+    `BCK09-API-CORR-01 v0.3`; this plan still grants no runtime authority.
+48. BCK09-API-RAW-B-01 evidence is emulator/test-only and cannot authorize a
+    tracked product callable, Admin SDK initialization or Firestore access.
+49. BCK09-API-RAW-C-01 v0.1 received exact bounded implementation authority;
+    v0.3 records green local and hosted evidence and remains Inconclusive only
+    because independent specialist verdicts are Pending.
+50. All nine BCK-09 specialist signatures remain Pending after RAW-C local evidence.
+51. RAW-C cannot deploy, activate a market/cohort, process production data or
+    grant ECL-03D–H any inherited authority.
 
 ## 13. Rollback and stop conditions
 
@@ -510,15 +811,16 @@ ADR or edits production documents manually.
 
 ## 14. Handoff
 
-After this document is accepted and the external prerequisites are actually
-met, implementation proceeds in four reviewable commits:
+RAW-C local implementation has completed the following bounded work without
+deployment or activation:
 
-1. shared query contracts and TypeScript fixture consumer;
-2. backend scaffold, Rules and disabled callable queries;
-3. create/cancel transactions, ledger, usage, audit/outbox/idempotency;
+1. disabled product-adapter scaffold and fail-closed guards;
+2. create/cancel transactions, ledger, usage, audit/outbox/idempotency;
+3. owner queries and availability projection;
 4. emulator contention/security evidence and status reconciliation.
 
-ECL-03D remains the next product stage only after ECL-03C is verified. Until
+ECL-03D remains the next product stage only after RAW-C receives the remaining
+independent-review evidence and ECL-03C is verified. Until
 then Recharge continues to present provider handoff or an explicitly
 unavailable internal action; it must not display a local/mock Booking as
 confirmed.

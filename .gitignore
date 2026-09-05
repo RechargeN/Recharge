@@ -38,6 +38,19 @@ migrate_working_dir/
 tmp/
 workspace.xml
 
+# Backend R0 local-only generated artifacts
+apps/backend/functions/node_modules/
+apps/backend/functions/lib/
+apps/backend/.r0-tools/
+apps/backend/.firebase/
+apps/backend/**/.terraform/
+apps/backend/**/terraform.tfstate
+apps/backend/**/terraform.tfstate.*
+apps/backend/firebase-debug.log
+apps/backend/firestore-debug.log
+apps/backend/pubsub-debug.log
+apps/backend/ui-debug.log
+
 # Symbolication related
 app.*.symbols
 

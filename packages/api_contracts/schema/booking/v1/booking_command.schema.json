@@ -2,48 +2,261 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://recharge.app/schemas/booking/v1/booking_command.schema.json",
   "title": "Recharge Booking command envelope v1",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {
-    "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
-    "commandType": {
-      "type": "string",
-      "enum": [
-        "createBooking",
-        "cancelBooking",
-        "approveApplication",
-        "rejectApplication",
-        "joinWaitlist",
-        "leaveWaitlist",
-        "acceptWaitlistHold",
-        "declineWaitlistHold",
-        "reconfirmBooking"
-      ]
-    },
-    "requestId": { "$ref": "common.schema.json#/$defs/id" },
-    "idempotencyKey": { "$ref": "common.schema.json#/$defs/id" },
-    "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
-    "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
-    "payload": {
+  "oneOf": [
+    {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "bookingId": { "$ref": "common.schema.json#/$defs/id" },
-        "holdId": { "$ref": "common.schema.json#/$defs/id" },
-        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
-        "inventoryPoolId": { "$ref": "common.schema.json#/$defs/id" },
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "createBooking" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/createBookingPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "cancelBooking" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/cancelBookingPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "approveApplication" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/approveApplicationPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "rejectApplication" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/rejectApplicationPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "joinWaitlist" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/joinWaitlistPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "leaveWaitlist" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/bookingIdPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "acceptWaitlistHold" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/holdDecisionPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "declineWaitlistHold" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/holdDecisionPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "commandType": { "const": "reconfirmBooking" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
+        "expectedBookingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "occurredAgainstEventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "payload": { "$ref": "#/$defs/bookingIdPayload" }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "expectedBookingRevision", "payload"]
+    }
+  ],
+  "$defs": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?![\\s\\S]*[\\uD800-\\uDFFF])(?=[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000])[\\s\\S]+$"
+    },
+    "nonBlankId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?![\\s\\S]*[\\uD800-\\uDFFF])(?=[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000\\uFEFF])[\\s\\S]+$"
+    },
+    "createBookingPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "occurrenceId": { "$ref": "#/$defs/nonBlankId" },
+        "inventoryPoolId": { "$ref": "#/$defs/nonBlankId" },
         "channel": { "$ref": "common.schema.json#/$defs/channel" },
         "participantUnits": { "$ref": "common.schema.json#/$defs/positiveUnits" },
-        "auxiliaryTrackId": { "$ref": "common.schema.json#/$defs/id" },
         "namedGuests": {
           "type": "array",
           "maxItems": 20,
-          "items": { "$ref": "common.schema.json#/$defs/namedGuest" }
+          "items": { "$ref": "#/$defs/commandNamedGuest" }
         },
-        "applicationFields": { "type": "object" },
-        "reasonCode": { "type": "string", "minLength": 1, "maxLength": 64 }
+        "auxiliaryTrackId": { "$ref": "#/$defs/nonBlankId" },
+        "applicationFields": { "$ref": "#/$defs/safeJsonObject" }
+      },
+      "required": ["occurrenceId", "participantUnits"],
+      "dependentRequired": {
+        "inventoryPoolId": ["channel"],
+        "channel": ["inventoryPoolId"]
       }
+    },
+    "cancelBookingPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" },
+        "reasonCode": { "$ref": "#/$defs/reasonCode" }
+      },
+      "required": ["bookingId"]
+    },
+    "approveApplicationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" },
+        "inventoryPoolId": { "$ref": "#/$defs/nonBlankId" }
+      },
+      "required": ["bookingId"]
+    },
+    "rejectApplicationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" },
+        "reasonCode": { "$ref": "#/$defs/reasonCode" }
+      },
+      "required": ["bookingId", "reasonCode"]
+    },
+    "joinWaitlistPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "occurrenceId": { "$ref": "#/$defs/nonBlankId" },
+        "inventoryPoolId": { "$ref": "#/$defs/nonBlankId" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "participantUnits": { "$ref": "common.schema.json#/$defs/positiveUnits" }
+      },
+      "required": ["occurrenceId", "inventoryPoolId", "channel", "participantUnits"]
+    },
+    "bookingIdPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" }
+      },
+      "required": ["bookingId"]
+    },
+    "holdDecisionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" },
+        "holdId": { "$ref": "#/$defs/nonBlankId" }
+      },
+      "required": ["bookingId", "holdId"]
+    },
+    "commandNamedGuest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": { "$ref": "#/$defs/displayName" }
+      },
+      "required": ["displayName"]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^(?![\\s\\S]*[\\uD800-\\uDFFF])(?=[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000\\uFEFF])[\\s\\S]+$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^(?![\\s\\S]*[\\uD800-\\uDFFF])(?=[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000\\uFEFF])[\\s\\S]+$"
+    },
+    "safeJsonValue": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/safeJsonValue" }
+        },
+        { "$ref": "#/$defs/safeJsonObject" }
+      ]
+    },
+    "safeJsonObject": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^(?!(?:[aA][cC][tT][oO][rR][iI][dD]|[uU][sS][eE][rR][iI][dD]|[pP][uU][bB][lL][iI][sS][hH][eE][rR][iI][dD]|[pP][aA][gG][eE][iI][dD]|[cC][rR][eE][aA][tT][oO][rR][iI][dD]|[aA][dD][mM][iI][nN][iI][dD]|[cC][aA][pP][aA][bB][iI][lL][iI][tT][iI][eE][sS]|[rR][oO][lL][eE][sS])$).*$"
+      },
+      "additionalProperties": { "$ref": "#/$defs/safeJsonValue" }
     }
-  },
-  "required": ["schemaVersion", "commandType", "requestId", "idempotencyKey", "payload"]
+  }
 }

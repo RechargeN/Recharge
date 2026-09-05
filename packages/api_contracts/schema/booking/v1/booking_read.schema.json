@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_read.schema.json",
+  "title": "Recharge Booking single-read response v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "found" },
+        "booking": { "$ref": "booking.schema.json" }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "booking"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "notFound" }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "unsupportedContract" },
+        "unsupportedPayload": { "$ref": "#/$defs/boundedOpaquePayload" }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "unsupportedPayload"
+      ]
+    }
+  ],
+  "$defs": {
+    "boundedOpaquePayload": {
+      "type": "object",
+      "maxProperties": 16,
+      "additionalProperties": { "$ref": "#/$defs/opaque1" }
+    },
+    "opaque1": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque2" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque2" }
+        }
+      ]
+    },
+    "opaque2": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque3" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque3" }
+        }
+      ]
+    },
+    "opaque3": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque4" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque4" }
+        }
+      ]
+    },
+    "opaque4": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque5" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque5" }
+        }
+      ]
+    },
+    "opaque5": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque6" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque6" }
+        }
+      ]
+    },
+    "opaque6": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque7" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque7" }
+        }
+      ]
+    },
+    "opaque7": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 },
+        {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/opaque8" }
+        },
+        {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "$ref": "#/$defs/opaque8" }
+        }
+      ]
+    },
+    "opaque8": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "$ref": "common.schema.json#/$defs/safeInteger" },
+        { "type": "string", "maxLength": 512 }
+      ]
+    }
+  }
+}

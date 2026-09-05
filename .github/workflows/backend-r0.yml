@@ -1,0 +1,154 @@
+name: Backend R0 toolchain and emulator feasibility
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/backend-r0.yml"
+      - "apps/backend/**"
+      - "packages/api_contracts/schema/booking/v1/**"
+      - "docs/evidence/backend/r0/**"
+      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md"
+      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md"
+      - "docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md"
+      - "docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md"
+      - "docs/product/BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md"
+      - "docs/product/BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md"
+  push:
+    paths:
+      - ".github/workflows/backend-r0.yml"
+      - "apps/backend/**"
+      - "packages/api_contracts/schema/booking/v1/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-r0-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: R0 ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            # setup-java registry alias; resolves to the locked Temurin 21.0.12+8 build.
+            java_version: 21.0.12+8.0.LTS
+          - os: windows-2025
+            # setup-java exposes the same Temurin build with its Windows LTS suffix.
+            java_version: 21.0.12+8.0.LTS
+
+    steps:
+      - name: Checkout without persisted authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          clean: false
+          set-safe-directory: false
+          fetch-depth: 1
+          fetch-tags: false
+          lfs: false
+          submodules: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22.23.2
+          check-latest: false
+          package-manager-cache: false
+
+      - name: Set up exact emulator JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java_version }}
+          check-latest: false
+          verify-signature: true
+          overwrite-settings: false
+
+      - name: Record sanitized runner identity
+        run: >-
+          node -e "const fs=require('node:fs');const e=process.env;
+          const lines=['## Backend R0 runner','- runner OS: '+e.RUNNER_OS,
+          '- runner arch: '+e.RUNNER_ARCH,'- image OS: '+e.ImageOS,
+          '- image version: '+e.ImageVersion,'- runner version: '+e.RUNNER_VERSION];
+          fs.appendFileSync(e.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n');"
+
+      - name: Reject cloud context
+        run: node apps/backend/scripts/verify-no-cloud-context.mjs
+
+      - name: Install verified Terraform archive
+        run: node apps/backend/scripts/install-terraform.mjs
+
+      - name: Frozen dependency install without lifecycle scripts
+        working-directory: apps/backend/functions
+        run: npm ci --ignore-scripts --no-audit --fund=false
+
+      - name: Resolve dependency graph
+        working-directory: apps/backend/functions
+        run: npm ls --all
+
+      - name: Audit production dependency graph
+        working-directory: apps/backend/functions
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit complete dependency graph
+        working-directory: apps/backend/functions
+        run: npm audit --audit-level=high
+
+      - name: Verify exact toolchain and workflow
+        working-directory: apps/backend/functions
+        run: npm run verify:toolchain
+
+      - name: Check formatting
+        working-directory: apps/backend/functions
+        run: npm run format:check
+
+      - name: Lint
+        working-directory: apps/backend/functions
+        run: npm run lint
+
+      - name: Typecheck
+        working-directory: apps/backend/functions
+        run: npm run typecheck
+
+      - name: Unit tests
+        working-directory: apps/backend/functions
+        run: npm run test:unit
+
+      - name: Booking contract fixture parity
+        working-directory: apps/backend/functions
+        run: npm run test:contract
+
+      - name: Booking callable raw-body emulator probe
+        working-directory: apps/backend/functions
+        run: npm run test:emulator:raw-body
+
+      - name: RAW-C disabled Booking transactions, security, contention and cleanup
+        working-directory: apps/backend/functions
+        run: npm run test:emulator
+
+      - name: Generated output safety
+        working-directory: apps/backend/functions
+        run: npm run verify:generated
+
+      - name: Reproducible logical build
+        working-directory: apps/backend/functions
+        run: npm run verify:reproducibility
+
+      - name: Terraform format
+        working-directory: apps/backend/infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform backendless init
+        working-directory: apps/backend/infra/terraform
+        run: terraform init -backend=false -input=false -lockfile=readonly
+
+      - name: Terraform validate
+        working-directory: apps/backend/infra/terraform
+        run: terraform validate -no-color

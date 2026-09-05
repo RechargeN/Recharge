@@ -82,7 +82,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "01JREQUEST0000000000000001",
+      "requestId": "attempt:create:opaque",
       "idempotencyKey": "01JIDEMPOTENCY000000000001",
       "occurredAgainstEventRevision": 4,
       "payload": {
@@ -95,13 +95,142 @@
     },
     {
       "schemaVersion": 1,
+      "commandType": "cancelBooking",
+      "requestId": "attempt-cancel",
+      "idempotencyKey": "idempotency-cancel",
+      "expectedBookingRevision": 3,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000001",
+        "reasonCode": "user_cancelled"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "approveApplication",
+      "requestId": "attempt-approve",
+      "idempotencyKey": "idempotency-approve",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "inventoryPoolId": "01JPOOL000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "rejectApplication",
+      "requestId": "attempt-reject",
+      "idempotencyKey": "idempotency-reject",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "reasonCode": "eligibility_not_satisfied"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "joinWaitlist",
+      "requestId": "attempt-waitlist",
+      "idempotencyKey": "idempotency-waitlist",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "inventoryPoolId": "01JPOOL000000000000000001",
+        "channel": "onsite",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "leaveWaitlist",
+      "requestId": "attempt-leave",
+      "idempotencyKey": "idempotency-leave",
+      "expectedBookingRevision": 2,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002"
+      }
+    },
+    {
+      "schemaVersion": 1,
       "commandType": "acceptWaitlistHold",
-      "requestId": "01JREQUEST0000000000000002",
+      "requestId": "attempt-accept-hold",
       "idempotencyKey": "01JIDEMPOTENCY000000000002",
       "expectedBookingRevision": 1,
       "payload": {
         "bookingId": "01JBOOKING0000000000000002",
         "holdId": "01JHOLD000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "declineWaitlistHold",
+      "requestId": "attempt-decline-hold",
+      "idempotencyKey": "idempotency-decline-hold",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "holdId": "01JHOLD000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reconfirmBooking",
+      "requestId": "attempt-reconfirm",
+      "idempotencyKey": "idempotency-reconfirm",
+      "expectedBookingRevision": 3,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": " \u00a0opaque\u3000 ",
+      "idempotencyKey": "idempotency-retained-blanks",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1,
+        "applicationFields": {
+          "answer": ["yes", { "nested": true }]
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "é",
+      "idempotencyKey": "idempotency-nfc",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "e\u0301",
+      "idempotencyKey": "idempotency-nfd",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "idempotencyKey": "idempotency-128-scalars",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "attempt-😀",
+      "idempotencyKey": "idempotency-supplementary-scalar",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
       }
     }
   ],

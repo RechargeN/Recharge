@@ -1,6 +1,6 @@
 # Event Classification v2.2.3 — cumulative runtime coverage matrix
 
-- Версия аудита: 2026-08-09
+- Версия аудита: 2026-08-27
 - Статус: **ECL-00–ECL-03B Done; ECL-03C exact plan Review; runtime absent**
 - Канон: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md),
   Accepted v2.2.3, SHA-256
@@ -150,15 +150,15 @@ classification/configuration coverage.
 
 | Required capability | Current state | Runtime gate |
 |---|---|---|
-| Approved ECL-03 spec | Approved v1.1 | ECL-03A Done; staged implementation only |
+| Approved ECL-03 spec | Approved v1.3 | ECL-03A Done; D01–D12 normative; staged implementation only |
 | Backend architecture ADR | ADR 0019 Accepted | Physical creation only in Approved executable stage |
-| D01–D10 decision package | Accepted and normative | External readiness proof still required where specified |
+| D01–D12 decision package | Accepted and normative | D12 resolves request-ID semantics; artifact/runtime proof remains gated |
 | Backend module | Absent | Accepted target; post-stabilization implementation gate |
 | Production Viewer Auth | Mock only | IDP production/Firebase gate |
 | Creator/Page Booking capability | Local preview only | Server-owned exact scope |
 | Booking API schemas | Implemented in ECL-03B | Shared schema/fixture source; backend consumer still absent |
 | Pure Booking domain | Implemented in ECL-03B | No application/data/presentation or command execution |
-| ECL-03C exact plan | Review v1.0 | Docs/file plan only; external authorization and Identity/Platform prerequisites remain |
+| ECL-03C exact plan | Review v1.4 | Five callable surfaces, nine collections, atomic request binding and 47 AC; contract correction, external authorization and Identity/Platform prerequisites remain |
 | Atomic inventory ledger | Absent | Trusted backend transaction |
 | Idempotency store | Absent | Backend contract + retention |
 | Uniform cap policy catalog | Docs only | Approved version/value/counting rule |

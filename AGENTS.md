@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-08-10. Канонический файл инструкций репозитория.
+Версия: 2026-09-03. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -19,7 +19,7 @@ Accepted ADR — прав ADR; исправление кода оформляе�
 
 ```
 apps/mobile/               # Flutter-приложение
-apps/backend/              # Accepted ADR 0019 target; физически ещё не создан
+apps/backend/              # R0 tooling scaffold; product/Firebase runtime отсутствует
 packages/design_system/    # дизайн-токены, общие UI-компоненты
 packages/api_contracts/    # контракты данных
 docs/adr/                  # ADR (источник истины по решениям)
@@ -58,10 +58,13 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    отдельная capability-gated поверхность, не профиль, workspace или
    publisher. Термин `Pro generator` — legacy UI и не целевая модель.
    Guest mode более не является целевой продуктовой политикой.
-2. **ID** — по ADR: ULID/UUID, генерация на клиенте. Временные `loc_*`
-   допустимы ТОЛЬКО для несохранённых локальных черновиков и обязаны
-   заменяться постоянным ULID при публикации. Все связи между
-   сущностями — только по id, без ссылок по имени.
+2. **ID** — по ADR 0013: server IDs — immutable ULID/UUID-style IDs.
+   Permanent client-generated ID допустим только там, где это явно принимает
+   domain contract; иначе authoritative create возвращает permanent ID и
+   explicit mapping. Временные `loc_*` допустимы ТОЛЬКО для несохранённых
+   локальных черновиков и обязаны заменяться постоянным ID при authoritative
+   create/publish. Все связи между сущностями — только по id, без ссылок по
+   имени.
 3. **Firebase** — целевой бэкенд (Auth: Google/Apple, Firestore,
    Storage). Текущее состояние — mock datasources. Accepted ADR 0019
    разрешает целевую архитектуру authoritative Booking backend и staged
@@ -163,7 +166,7 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 |---|---|
 | Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract |
 | Create Hub: 10 типов | config-driven runtime; Place / Business, Event, Find People и Scenario имеют типизированные Create-блоки на mock; Place получил PLC-ADP-01: трёхшаговую адаптивную форму по профилю места, релевантные часы/вход/расходы/контакты и explicit local-demo Creator Assist без автоматической публикации; Event получил local-first пользовательские templates CRT-TPL-01 (несколько шаблонов, выбор, управление и новый независимый draft из последнего шаблона); видимый planning-slot занимает Scenario, `quickPlan` скрыт как legacy read-compatibility type |
-| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа, полное покрытие Category System v1.4.3 и provider-neutral roadmap. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 spec v1.1 Approved и D01-D10 Accepted. ECL-03B: shared Booking v1 JSON schemas/fixtures, immutable fixture-verified Dart DTOs и независимый pure mobile Booking domain/readiness/transition validation; package analyze 0 и 9 tests, mobile analyzer 0 и полный suite 659 passed, boundary 59 прежних suppressions без новых. ECL-03C-P exact transaction-core plan v1.0 в Review: пять callable surfaces, finite general-capacity/explicit unlimited instant-free paths, atomic ledger/usage/audit/outbox/idempotency, exact file map и 38 AC; runtime effect none. Нет client/network/repository/data/application/presentation/DI/Create/backend/Firebase runtime. Физическая ECL-03C реализация требует explicit plan acceptance, post-stabilization backend authorization и production Identity/Platform prerequisites; provider sync/Payments также не реализованы |
+| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа и Category System v1.4.3 coverage. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 v1.3 Approved и D01–D12 Accepted. Booking-v1 Schema/Dart/TypeScript parity и RAW-B Done. ECL-03C v1.11 / BCK-09 v1.13 / coverage v1.12 остаются Review. RAW-C v0.3 имеет ровно пять disabled Booking v1 callable exports и nine collections; exact head `75818f78c67e9bcfa06edbc12820424235c39627` проходит local gates и hosted push/PR matrices `33689696133` / `33689700189` на Ubuntu 24.04 и Windows 2025. Cloud/deployed/mobile runtime Absent. RAW-C формально Inconclusive только до independent reviews; BCK09-REV-01 v0.12 сохраняет Hold, все девять signatures Pending. Нет client/network/repository/data/application/presentation/DI/Create integration, cloud deployment или activation. ECL-03D–H, production Identity/Platform, provider sync и Payments не разрешены/не реализованы |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
 | Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only presentation preview Viewer/Creator/Professional Page реализован без смены authority; production shell скрывает legacy manual profile-mode selector; production verification НЕ реализована |

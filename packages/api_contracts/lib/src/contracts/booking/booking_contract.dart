@@ -3,6 +3,7 @@ import 'dart:collection';
 const int bookingContractSchemaVersion = 1;
 const int bookingPolicyVersion = 1;
 const int bookingMaxConcurrentFiniteAllocations = 5;
+const int bookingMaxSafeInteger = 9007199254740991;
 
 enum BookingAdmissionMode { rsvp, booking, application }
 
@@ -128,8 +129,10 @@ String requireNonBlankString(Object? raw, String field) {
 }
 
 int requireNonNegativeInt(Object? raw, String field) {
-  if (raw is! int || raw < 0) {
-    throw BookingContractFormatException('$field must be a non-negative int');
+  if (raw is! int || raw < 0 || raw > bookingMaxSafeInteger) {
+    throw BookingContractFormatException(
+      '$field must be a non-negative safe int',
+    );
   }
   return raw;
 }

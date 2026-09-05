@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/booking/v1/booking_page.schema.json",
+  "title": "Recharge Booking owner page response v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "listMyBookings" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "succeeded" },
+        "page": { "$ref": "#/$defs/page" }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "page"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "listMyBookings" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "unsupportedContract" },
+        "unsupportedPayload": {
+          "$ref": "booking_read.schema.json#/$defs/boundedOpaquePayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "unsupportedPayload"
+      ]
+    }
+  ],
+  "$defs": {
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": { "$ref": "booking.schema.json" }
+        },
+        "nextCursor": { "$ref": "common.schema.json#/$defs/cursor" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "sort": { "const": "createdAtDescIdDesc" },
+        "consistency": { "const": "liveKeyset" }
+      },
+      "required": ["items", "asOf", "sort", "consistency"]
+    }
+  }
+}

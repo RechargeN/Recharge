@@ -1,11 +1,12 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.3**
-- Date: **2026-08-14**
-- Spec status: **Draft — architecture review required**
-- Runtime status: **Absent**
+- Version: **0.4.49**
+- Date: **2026-08-28**
+- Spec status: **Review — owner evidence recorded; approval pending**
+- Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Architecture owner**
+- Review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
 - Runtime effect of this revision: **none**
 - Canonical repository path: `docs/product/RECHARGE_BACKEND_MASTER_SPEC.md`
@@ -13,6 +14,491 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.49 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done after 19/19 disposable Emulator
+  raw-body vectors passed on Ubuntu and Windows at `e043218`;
+- reconciled BCK-09 v1.11, ECL-03C v1.9, coverage v1.10, API review v0.8,
+  specialist package v0.10 and BCK-03 v0.3.7 without granting a signature;
+- registered BCK09-API-RAW-C-01 v0.1 as Proposed and retained product runtime,
+  Firestore/Admin access, callable exports, Firebase changes, deployment and
+  activation as blocked/Absent;
+- advanced BCK-02 factual traceability to v2.4.53.
+
+### v0.4.48 — 2026-08-28
+
+- registered hosted runs `33127684319` and `33127686757` as exact Node
+  22.23.2 Ubuntu/Windows evidence and promoted BCK09-API-PAR-01 v0.3 to Done;
+- reconciled BCK-09 v1.10, ECL-03C v1.8, coverage v1.9, API review v0.7,
+  specialist package v0.9 and BCK-03 v0.3.6 without granting a signature;
+- retained callable raw-body feasibility, independent evidence, Firebase,
+  deployment, product runtime and production activation as blocked/Absent;
+- advanced BCK-02 factual traceability to v2.4.52.
+
+### v0.4.47 — 2026-08-28
+
+- registered commit `a7296f5`, BCK09-API-PAR-01 v0.2 and
+  `api_contracts` v0.3.0 as contracts/test-only Booking parity evidence;
+- reconciled BCK-09 v1.9, ECL-03C v1.7, coverage v1.8, API review v0.6,
+  specialist package v0.8 and BCK-03 v0.3.5 without granting a signature;
+- closed the TypeScript/query/hash contract gap only; retained Node 22,
+  callable raw-body feasibility, independent evidence, Firebase, deployment,
+  product runtime and production activation as blocked/Absent;
+- advanced BCK-02 factual traceability to v2.4.51.
+
+### v0.4.46 — 2026-08-27
+
+- registered BCK09-API-NAMED-DEC-01 v0.2 as the Accepted Booking-v1
+  API-DEC-01/03 documentation decision with explicit no-runtime/Firebase controls;
+- reconciled BCK-09 v1.8, ECL-03C v1.6, coverage v1.7, API review v0.5 and
+  specialist package v0.7 while retaining all nine signatures Pending;
+- kept TypeScript/query/hash/runtime parity, independent evidence, Firebase,
+  deployment and production activation blocked; advanced BCK-02 to v2.4.50.
+
+### v0.4.45 — 2026-08-27
+
+- registered BCK09-API-CORR-01 v0.3 as Done after 13/13 package tests,
+  independent 14 valid / 38 invalid vectors, clean analyzer/boundaries and a
+  green 664/664 mobile suite;
+- kept BCK-09 v1.7, ECL-03C v1.5 and all specialist/API/runtime blockers in
+  Review/Hold without claiming Firebase or product backend authority;
+- advanced BCK-02 factual traceability to v2.4.49.
+
+### v0.4.44 — 2026-08-27
+
+- registered `api_contracts` v0.2.1 and BCK09-API-CORR-01 v0.3 as verified
+  pre-runtime command Schema/Dart/D12 correction in Review; unrelated Route
+  golden prevents repository Done;
+- reconciled BCK-09 v1.7, ECL-03C v1.5, coverage v1.6, API review v0.4 and
+  specialist package v0.6 without recording a specialist signature;
+- kept API-DEC-01/03, TypeScript/query/runtime parity, Firebase, deployment and
+  production activation blocked;
+- advanced BCK-02 factual traceability to v2.4.48.
+
+### v0.4.43 — 2026-08-27
+
+- registered ECL03-D12 and parent ECL-03 v1.3 as Accepted/Approved docs-only
+  request-ID semantics;
+- reconciled BCK-09 v1.6, ECL-03C v1.4, coverage v1.5 and API review chain
+  without treating semantic acceptance as contract/runtime evidence;
+- kept BCK09-API-CORR-01, named API decisions, specialist signatures,
+  Firebase, deployment and production runtime blocked;
+- advanced BCK-02 factual traceability to v2.4.47.
+
+### v0.4.42 — 2026-08-27
+
+- registered BCK09-API-DEC-01 v0.1 and BCK09-API-CORR-01 v0.1 as the
+  Product-selected API target and separately gated contract-correction plan;
+- reconciled BCK-09 v1.5, ECL-03C v1.3, coverage v1.4, API review v0.2 and
+  specialist package v0.4 without recording any named specialist signature;
+- kept command-schema correction, ECL03-D12, API-DEC-01/03, parity evidence,
+  Firebase, deployment and production runtime blocked;
+- advanced BCK-02 factual traceability to v2.4.46.
+
+### v0.4.41 — 2026-08-26
+
+- registered BCK09-API-REV-01 v0.1 and BCK09-REV-01 v0.3 as the first
+  specialist-phase evidence without recording a named signature;
+- recorded API technical Hold for the command-schema/DTO divergence, missing
+  atomic request-attempt binding, API-DEC-01/03, request-ID format decision and
+  absent TypeScript/query parity;
+- kept BCK-09/ECL-03C Review, all nine specialist signatures Pending and every
+  product/Firebase/deployment/production gate blocked;
+- advanced BCK-02 factual traceability to v2.4.45.
+
+### v0.4.40 — 2026-08-26
+
+- registered BCK-09 v1.4, ECL-03C v1.2, BCK-09-PRE v1.2 and specialist
+  review package v0.2 after resolving TR-09..11;
+- replaced unspecified duplicate-active evidence with one deterministic atomic
+  active key, reconciled BCK-19 repair ownership and made disabled outbox
+  obligations permanently non-replayable;
+- kept all nine specialist signatures Pending, BCK-09/ECL-03C Review and every
+  Firebase/product-runtime/production/deployment gate blocked;
+- advanced BCK-02 traceability to v2.4.44.
+
+### v0.4.39 — 2026-08-26
+
+- recorded BCK09-DEC-01 v0.2: the Product owner accepted
+  `BCK09-A1-STAGED-FREE-BOOKING-v1` with controls;
+- registered BCK-09 v1.3 and BCK-09-PRE v1.1 with six bounded Accepted design
+  dispositions and four Deferred/Open decisions;
+- kept BCK-09 Review, ECL-03C Review and all specialist, Firebase, product
+  runtime, production-data, deployment and activation gates blocked;
+- advanced BCK-02 traceability to v2.4.43.
+
+### v0.4.38 — 2026-08-26
+
+- registered reconciled BCK-09 v1.2 and BCK-09-PRE v1.0 as Review/Present with
+  runtime Absent and 22/22 mandatory coverage;
+- preserved Booking v1 wire semantics, exact ECL-03C record names and the
+  bounded ECL-03C versus conditional ECL-03D–H stage boundary;
+- reconciled Content, Discover, Notifications, Operations and Admin single
+  writers around Booking without promoting Draft/Review dependencies;
+- kept all ten BCK09 decisions, OD-09/OD-11, Firebase, product runtime,
+  deployment and `main` merge authority blocked;
+- advanced BCK-02 traceability to v2.4.42.
+
+### v0.4.37 — 2026-08-26
+
+- registered BCK-21 v0.2 and BCK-21-PRE v0.2 as Review/Present with runtime
+  Absent;
+- separated product analytics from BCK-05 telemetry, domain/audit facts and
+  BCK-22 enforcement authority;
+- recorded current 66 emitted literal names versus 27 catalog definitions,
+  unresolved owners and unsafe identifier debt as migration blockers;
+- kept OD-05, destination, retention/DSR, contracts, IAM and runtime blocked;
+- advanced BCK-02 traceability to v2.4.41.
+
+### v0.4.36 — 2026-08-26
+
+- registered BCK-12 v0.2 and BCK-12-PRE v0.2 as Review/Present with runtime
+  Absent;
+- preserved User Library and Reviews as separate bounded aggregates;
+- fixed the explicit Visit History, typed Favorite, review source and
+  rebuildable rating-projection boundaries;
+- kept BCK-22 cases, Firebase, migration and runtime blocked;
+- advanced BCK-02 traceability to v2.4.40.
+
+### v0.4.35 — 2026-08-26
+
+- added BCK-19 v0.2 Review and its v0.2 22/22 coverage evidence as the
+  single-writer Admin/Support case, privileged-read-audit and repair-workflow
+  contract;
+- preserved Identity/IAM, owning-domain, Privacy, T&S, Notifications and
+  Platform Operations authority and made direct data editing/impersonation
+  explicitly fail-closed;
+- advanced traceability to BCK-02 v2.4.39 while ten BCK19 decisions, domain
+  repair commands, staff access, RUN-03, Firebase and runtime remain absent.
+
+### v0.4.34 — 2026-08-25
+
+- added BCK-13 v0.2 Review and its v0.2 22/22 coverage evidence as the
+  single-writer inbox/preferences/push-registration/delivery contract;
+- separated source lifecycle, inbox/read state and channel attempt, made push
+  a privacy-minimized query hint and kept email disabled while OD-02 is Open;
+- advanced traceability to BCK-02 v2.4.38 while OD-02/09/10, ten BCK13
+  decisions, contracts, FCM/email, migration, Firebase and runtime remain
+  unresolved.
+
+### v0.4.33 — 2026-08-25
+
+- added BCK-08 v0.2 Review and its v0.2 22/22 coverage evidence as the one-writer
+  Catalog/Search/Feed/Map/Details/public-availability projection contract;
+- made shared query fingerprint, compatible projection-set revision, typed
+  map/feed membership reconciliation and data freshness normative;
+- advanced traceability to BCK-02 v2.4.37 while OD-01/03, BCK-07 runtime,
+  contracts, indexes, migration, Firebase and production remain unresolved.
+
+### v0.4.32 — 2026-08-25
+
+- added BCK-07 v0.2 Review and its v0.2 22/22 coverage evidence as the single
+  Content publication lifecycle/current-revision authority;
+- fixed the canonical ten-type registry around Scenario, left Quick Plan
+  legacy-read/private only and separated source-domain, Media and Catalog writers;
+- advanced traceability to BCK-02 v2.4.36 while OD-03/10/11, dependency
+  Approval, contracts, migration, Firebase and runtime remain unresolved.
+
+### v0.4.31 — 2026-08-25
+
+- added BCK-14 v0.2 Review and its v0.2 22/22 coverage evidence as the
+  single-writer Media asset/upload/object/variant/delivery contract;
+- separated Media readiness from the still-absent BCK-07 content attachment
+  and publication lifecycle, keeping integration fail-closed;
+- advanced traceability to BCK-02 v2.4.35 while all Storage, contracts,
+  workers, migration, provisioning, runtime and production gates remain absent.
+
+### v0.4.30 — 2026-08-25
+
+- added BCK-18 v0.2 Review and v0.2 coverage/reconciliation evidence as the
+  typed mobile/backend seam and import-orchestration contract;
+- recorded the BCK-03 split-key reconciliation, Mobile v3.1 AC-42 erratum and
+  blocking M2 Money prerequisite without changing mobile runtime;
+- advanced traceability to BCK-02 v2.4.34 while OD-04/08/10, BCK-18 Approval,
+  contracts, adapters, Firebase, migration and all R3 gates remain unresolved.
+
+### v0.4.29 — 2026-08-25
+
+- added BCK-06 v0.2 Review and its v0.3 22/22 coverage/reconciliation evidence
+  as the first D2 authority specification;
+- preserved OD-08/OD-11, session, verification, capability, retention,
+  Legal/Privacy, BCK-18 and every executable R2 gate as unresolved;
+- advanced traceability to BCK-02 v2.4.33 without Firebase, product backend,
+  mobile runtime, deployment, push or `main` merge authority.
+
+### v0.4.28 — 2026-08-25
+
+- recorded BCK05-OD-07 Accepted at `BCK05-REL-A1-DUAL-PROV-v1` with controls
+  through exact BCK05-OD07-DEC-01 v0.2 owner evidence;
+- retained BCK-04/BCK-05 Draft, complete D1/G1, separately Approved release
+  R0/R1 and every executable/cloud/product-runtime gate;
+- advanced traceability to BCK-02 v2.4.32, BCK-04 v0.4.16 and BCK-05 v0.2.23
+  without workflow, repository/cloud mutation, deployment or `main` merge
+  authority.
+
+### v0.4.27 — 2026-08-25
+
+- added decision-ready BCK05-OD-07 release/provenance candidate
+  `BCK05-REL-A1-DUAL-PROV-v1` and its unsigned owner-decision contract;
+- retained BCK05-OD-07 Proposed plus BCK-04/BCK-05 Draft, complete D1/G1,
+  exact R0/R1 authorization and all executable/cloud/product-runtime gates;
+- advanced traceability to BCK-02 v2.4.31, BCK-04 v0.4.15 and BCK-05 v0.2.22
+  without workflow, repository/cloud mutation, deployment or `main` merge
+  authority.
+
+### v0.4.26 — 2026-08-24
+
+- recorded BCK05-OD-02 Accepted at `BCK05-IAM-A1-ENV-WIF-v1` with controls
+  through the exact BCK05-OD02-DEC-01 v0.2 owner verdict;
+- retained BCK-04/BCK-05 Draft, complete D1/G1, exact R1 authorization and all
+  executable IAM/secret/product-runtime evidence gates;
+- advanced traceability to BCK-02 v2.4.30, BCK-04 v0.4.14 and BCK-05 v0.2.21
+  without provisioning or `main` merge authority.
+
+### v0.4.25 — 2026-08-24
+
+- added decision-ready IAM/workload-identity candidate
+  `BCK05-IAM-A1-ENV-WIF-v1` and unsigned BCK05-OD02-DEC-01 owner contract;
+- preserved BCK05-OD-02 Proposed, BCK-04/BCK-05 Draft, D1/G1/R1 and every
+  GitHub/GCP/IAM/secret/product-runtime gate;
+- advanced traceability to BCK-02 v2.4.29, BCK-04 v0.4.13 and BCK-05 v0.2.20
+  without provisioning or `main` merge authority.
+
+### v0.4.24 — 2026-08-24
+
+- recorded OD-07 Accepted at `OD07-A1-EU-MR-v1` with controls through the
+  exact OD07-DEC-01 v0.2 owner verdict and evidence v0.6;
+- retained BCK-04/BCK-05 Draft, qualified production Legal/Privacy review,
+  complete D1/G1, exact R1 approval and all cloud/product runtime gates;
+- advanced traceability to BCK-02 v2.4.28, BCK-04 v0.4.12 and BCK-05 v0.2.19
+  without provisioning or merge authority.
+
+### v0.4.23 — 2026-08-24
+
+- added review-ready `OD07-A1-EU-MR-v1` evidence and unsigned OD07-DEC-01,
+  including exact per-resource locations, Standard/Enterprise rationale,
+  global/US-service disclosure, thresholds and replacement/rollback boundary;
+- retained OD-07 Proposed, qualified production Legal/Privacy review, complete
+  D1/G1, R1 and all cloud/product runtime as blocked or absent;
+- advanced traceability to BCK-02 v2.4.27, BCK-04 v0.4.11 and BCK-05 v0.2.18.
+
+### v0.4.22 — 2026-08-24
+
+- recorded `BCK05-OD-01` Accepted at baseline v0.3.3 with controls through the
+  exact `BCK05-OD01-DEC-01 v0.2` owner verdict;
+- retained BCK-05 Draft, other operations decisions, complete D1/G1, R1 and
+  product/cloud runtime as blocked or unchanged;
+- D1 traceability updated to BCK-02 v2.4.26 and BCK-05 v0.2.17; BCK-01
+  remains Review.
+
+### v0.4.21 — 2026-08-24
+
+- reconciled bounded R0 Pass across the current D1 review, sign-off and owner
+  workbook instead of preserving the pre-execution snapshot as current fact;
+- added `BCK05-OD01-DEC-01` as a Review owner-decision candidate without
+  accepting OD-01 or opening G1/R1;
+- D1 traceability updated to BCK-02 v2.4.25 and BCK-05 v0.2.16; BCK-01
+  remains Review and product/cloud runtime remains Absent.
+
+### v0.4.20 — 2026-08-24
+
+- recorded bounded R0 Pass after explicit owner acceptance of
+  `BCK-R0-TCH-ADV-01` with expiring demo-only/no-cloud controls;
+- retained BCK05-OD-01 as Proposed, BCK-05 as Draft and product/cloud runtime,
+  R1/G1, credentials, provisioning and deployment as absent/blocked;
+- D1 traceability updated to BCK-02 v2.4.24 and BCK-05 v0.2.15; BCK-01
+  remains Review.
+
+### v0.4.19 — 2026-08-24
+
+- recorded successful hosted R0 parity on `ubuntu-24.04` and `windows-2025`
+  without claiming product/backend or cloud runtime;
+- retained the Moderate-advisory disposition as the remaining R0 Pass blocker;
+- D1 traceability updated to BCK-02 v2.4.23 and BCK-05 v0.2.14; BCK-01
+  remains Review.
+
+### v0.4.18 — 2026-08-24
+
+- reconciled the Approved and locally executed R0 tooling scaffold without
+  claiming product/backend or cloud runtime;
+- linked exact local build/emulator/Rules/Terraform/reproducibility evidence
+  and preserved hosted parity plus Moderate-advisory disposition as blockers;
+- D1 traceability updated to BCK-02 v2.4.22 and BCK-05 v0.2.13; BCK-01
+  remains Review.
+
+### v0.4.17 — 2026-08-23
+
+- added exact R0 full-SHA Action, runner and signed-archive Terraform evidence
+  plus the formal unsigned approval decision record;
+- rejected the unsigned reviewed Terraform Action without expanding scope;
+- D1 traceability updated to BCK-02 v2.4.21 and BCK-05 v0.2.12; BCK-01
+  remains Review and runtime remains Absent.
+
+### v0.4.16 — 2026-08-23
+
+- added BCK05-OD01-TCH-REV-01 technical pre-review and BCK-R0-TCH-01 exact
+  local toolchain/emulator slice plan;
+- recorded proposed exact SDK/JDK/lint/test candidates without converting
+  technical pre-review into owner/security sign-off or R0 authorization;
+- D1 traceability updated to BCK-02 v2.4.20 and BCK-05 v0.2.11; BCK-01 remains
+  Review and runtime remains Absent.
+
+### v0.4.15 — 2026-08-21
+
+- added BCK05-OD01-TCH-01 as the dated Node.js 22, TypeScript/npm, Firebase
+  CLI and Terraform candidate with deterministic build/emulator/IaC contracts;
+- BCK05-OD-01 advances from Open to Proposed, while exact remaining pins,
+  compatibility, owner/security and executable R0 evidence remain blocked;
+- D1 traceability updated to BCK-02 v2.4.19 and BCK-05 v0.2.10; BCK-01 remains
+  Review and runtime remains Absent.
+
+### v0.4.14 — 2026-08-21
+
+- added BCK05-OD02-IAM-01 and BCK05-OD07-REL-01 as complete Draft evidence for
+  keyless workload identity, least privilege, provenance, promotion and
+  component-aware rollback;
+- BCK05-OD-02/07 advance from Open to Proposed, while exact claims/roles,
+  toolchain/attestor, specialist and executable evidence remain blocked;
+- D1 traceability updated to BCK-02 v2.4.18 and BCK-05 v0.2.9; BCK-01 remains
+  Review and runtime remains Absent.
+
+### v0.4.13 — 2026-08-21
+
+- recorded the bounded Product-owner disposition for SLO v0.1, Cost v0.2 and
+  Recovery v0.1 as stage-validation baselines;
+- kept Operations/Security evidence conditions and Inconclusive Finance/Legal
+  scopes explicit; no broader D1 specialist signature is inferred;
+- D1 traceability updated to BCK-02 v2.4.17 and BCK-05 v0.2.8; OD-03/04/05
+  remain Proposed, BCK-01 remains Review and runtime remains Absent.
+
+### v0.4.12 — 2026-08-21
+
+- added BCK05-NUM-REV-01 exact-version owner-review evidence for SLO, cost and
+  recovery proposals;
+- corrected recovery-retention cost amplification and exposed L3 budget,
+  same-project recovery, representative RTO and Legal/Finance evidence gates;
+- D1 traceability updated to BCK-02 v2.4.16 and BCK-05 v0.2.7; OD-03/04/05
+  remain Proposed, BCK-01 remains Review and runtime remains Absent.
+
+### v0.4.11 — 2026-08-21
+
+- added independent `BCK05-OD03-SLO-01` and `BCK05-OD05-REC-01` evidence with
+  numerical user-journey SLO/error budgets and record-family RPO/RTO/restore
+  contracts;
+- `BCK05-OD-03` and `BCK05-OD-05` advance from Open to Proposed; owner verdicts,
+  representative stage/restore evidence, executable controls and runtime remain
+  absent;
+- D1 traceability updated to BCK-02 v2.4.15 and BCK-05 v0.2.6; BCK-01 remains
+  Review and runtime remains Absent.
+
+### v0.4.10 — 2026-08-21
+
+- added BCK05-OD04-COST-01 with dated price anchors, reproducible workload/cost
+  formulas, directional estimates and proposed EUR budget controls;
+- `BCK05-OD-04` advances from Open to Proposed, while OD-07, owner/Finance/
+  Operations verdict, EUR SKU/stage evidence, provisioning and runtime remain
+  blocked;
+- D1 traceability updated to BCK-02 v2.4.14 and BCK-05 v0.2.5;
+- BCK-01 remains Review and runtime remains Absent.
+
+### v0.4.9 — 2026-08-20
+
+- added the ready-but-unexecuted incident tabletop exercise package with an
+  honest blank execution/result record and 30 AC;
+- `BCK04-OD-09`/`BCK05-OD-08` remain Proposed; no tabletop, owner, Legal,
+  executable-route or runtime gate is closed by preparation alone;
+- D1 traceability updated to BCK-02 v2.4.13, BCK-04 v0.4.10 and BCK-05 v0.2.4;
+- BCK-01 remains Review and runtime remains Absent.
+
+### v0.4.8 — 2026-08-20
+
+- added shared Draft security/privacy incident-response evidence preserving the
+  canonical SEV-1/2/3 vocabulary;
+- BCK04-OD-09 and BCK05-OD-08 advance from Open to Proposed; owner, qualified
+  Legal/Privacy, route/tabletop and runtime evidence remain absent;
+- D1 traceability updated to BCK-02 v2.4.12, BCK-04 v0.4.9 and BCK-05 v0.2.3;
+- BCK-01 remains Review and runtime remains Absent.
+
+### v0.4.7 — 2026-08-20
+
+- added full Draft threat-model evidence `BCK04-OD01-TM-01`;
+- `BCK04-OD-01` is now Proposed, while owner verdict, independent review,
+  BCK-04 Approval and runtime remain blocked;
+- D1 traceability updated to BCK-02 v2.4.11 and BCK-04 v0.4.8;
+- all other BCK/OD statuses and runtime authority are unchanged.
+
+### v0.4.6 — 2026-08-20
+
+- recorded the explicit combined-owner assignment for all D1 review roles;
+- disclosed self-review/concentration risk and retained Pending verdicts plus
+  the qualified Legal/Privacy evidence boundary;
+- D1 traceability updated to BCK-02 v2.4.10, BCK-03 v0.3.3,
+  BCK-04 v0.4.7, BCK-05 v0.2.2 and BCK-20 v0.2.2;
+- BCK-01 remains Review, D1 exit remains blocked and runtime remains Absent.
+
+### v0.4.5 — 2026-08-20
+
+- completed D1-C technical pre-review and added the explicit
+  [owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
+- removed the BCK-03/BCK-18 sequencing cycle and the OD-07
+  evidence/provisioning cycle without weakening either gate;
+- D1 traceability updated to BCK-02 v2.4.9, BCK-03 v0.3.2,
+  BCK-04 v0.4.6, BCK-05 v0.2.1 and BCK-20 v0.2.1;
+- every specialist remains unassigned/pending, so BCK-01 remains Review, D1
+  exit remains blocked and runtime remains Absent.
+
+### v0.4.4 — 2026-08-20
+
+- added the D1 review evidence package and separate OD-07/09/10/11 evidence
+  artifacts without changing their decision statuses;
+- reconciled OD-11 consistently as Open: candidate constraints and Latvia's
+  consent-law evidence do not select a Recharge account/feature age;
+- D1 traceability updated to BCK-02 v2.4.8, BCK-03 v0.3.1,
+  BCK-04 v0.4.5, BCK-05 v0.2 and BCK-20 v0.2;
+- BCK-01 remains Review, D1 exit remains blocked and runtime remains Absent.
+
+### v0.4.3 — 2026-08-20
+
+- added accepted [D1 split-key reconciliation](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
+  and aligned ECL-03/BCK-09 with committed Booking v1 fixtures;
+- D1 traceability updated to BCK-02 v2.4.7, BCK-03 v0.3,
+  BCK-04 v0.4.4, BCK-05 v0.1.1 and BCK-20 v0.1.1;
+- OD-07/09/10 remain Proposed, OD-11 remains Open, and D1 exit is still
+  blocked by specialist/decision evidence;
+- architecture, Review status and runtime authority are unchanged.
+
+### v0.4.2 — 2026-08-20
+
+- BCK-05 Operations v0.1 and BCK-20 Reference Data v0.1 are now tracked
+  Draft/Present documents with runtime Absent;
+- current-state and next-package text now reflects their real presence and
+  remaining Review/Approval blockers;
+- D1 traceability updated to BCK-02 v2.4.6, BCK-03 v0.2.4 and BCK-04 v0.4.3;
+- target architecture, Review status and runtime semantics are unchanged.
+
+### v0.4.1 — 2026-08-20
+
+- entered `Review` after the Product owner assigned `RechargeN / Product
+  owner` as the interim review coordinator across the required perspectives;
+  combined review is sufficient only for Review entry and does not replace
+  independent Security/Privacy, Legal or Operations approval before G1;
+- current-state audit reconciled with tracked BCK-02 v2.4.5, BCK-03 v0.2.3,
+  BCK-04 v0.4.2 and their exact spec/runtime evidence;
+- non-Booking language-neutral schema paths are now explicitly conditional on
+  Accepted `API-DEC-05`, matching BCK-03 instead of implying authorization;
+- next package describes the actual Review sequence rather than asking to
+  create BCK-03/BCK-04 again;
+- added formal [BCK-01 reconciliation report](BACKEND_MASTER_RECONCILIATION_REPORT.md);
+- architecture/runtime semantics remain unchanged; runtime effect is none.
+
+### v0.4 — 2026-08-16
+
+- reconciled internal §8/§17 gap: `Privacy Orchestration`, already owned by
+  BCK-04 in bounded-module and authoritative-ownership tables, is now present
+  in the target `modules/privacy_orchestration/` map;
+- target root transport explicitly includes common middleware;
+- documentation/runtime effect remains none.
 
 ### v0.3 — 2026-08-14
 
@@ -158,7 +644,7 @@ Approval и требует reconciliation либо Accepted ADR.
 | Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
 | Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7 |
+| Backend sequencing | [BCK-02 v2.4.53](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, later 2.4.x revisions are traceability amendments |
 | Baltic rollout | [Latvia/Baltics roadmap](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
 | Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
 | Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
@@ -172,24 +658,26 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 
 ## 4. Первичный аудит текущего состояния
 
-Дата снимка: **2026-08-14**.
+Дата снимка: **2026-08-20**.
 
 | Область | Текущее evidence | Gap | Вывод |
 |---|---|---|---|
-| Mobile app | Flutter, layered features, local/mock datasources | Нет production remote authority | Не считать mock production backend |
-| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO | Нет общего backend API standard BCK-03 | Расширять один workflow, не создавать второй |
-| Backend application | `apps/backend` отсутствует | Нет functions, Rules, indexes, tests, deployment | Runtime **Absent** |
-| Firebase projects | В repository нет project/options/config evidence | Не приняты topology, edition и locations | OD-07 блокирует provisioning |
-| Identity | Target принят ADR 0015; ADR 0016/0017 разрешили bounded local/mock access snapshot, user-created ManagedPage, workspace/capability guards и Admin preview | Нет production Auth/capability/revocation authority; local exception не является production evidence | BCK-06 + BCK-18 до product migration; сохранить compatibility без переноса mock grants |
-| Content/Create | 10 типов local/config-driven | Нет trusted publication lifecycle и catalog source | BCK-07, затем BCK-08 |
-| Discover | Mock/local projections | Нет rebuildable server projections/search decision | BCK-08 + OD-01/03 |
-| Event Booking | ADR 0019 Accepted; BCK-09 Review v1.0; ECL-03B shared schemas/fixtures/mobile domain Done; ECL-03C exact transaction-core plan Review | Нет authoritative transaction runtime | Reconcile BCK-09 после platform set; затем только отдельный Approved ECL-03C runtime slice |
-| Media/Notifications | Local/mobile foundations | Нет protected storage pipeline и delivery authority | BCK-13/14 |
+| Mobile app | Flutter layered features and local/mock datasources; BCK-18 v0.2 Review/Present defines the 22/22 typed ports/adapters/cache/import/cutover seam | Нет production remote authority; M2 Money, OD-04/08/10, contract generation, mock-exclusion and executable adapters remain blocked | Не считать mock/provider HTTP production backend; BCK-18 Approval and per-domain slices precede cutover |
+| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO; BCK-03 v0.3.7 Draft/Present | Split-key/hash/RAW-B transport evidence closed at bounded test scope; independent verdicts pending | Расширять один workflow; non-Booking schemas запрещены до Accepted API-DEC-05 |
+| Backend application | локальный R0 scaffold существует в `apps/backend` | Есть только non-product probe, default-deny Rules, emulator tests, backendless Terraform и CI contract; нет доменных handlers/repositories/deployment authority | Tooling **Present locally**; product/cloud runtime **Absent** |
+| Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
+| Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions and executable evidence remain blocked | BCK-06 and BCK-18 Approval до product migration; сохранить compatibility без переноса mock grants |
+| Content/Create | Ten-type local/config-driven Create Hub; BCK-07 v0.2 Review/Present defines the 22/22 publication/revision/provenance contract | No backend authority; OD-03/10/11, missing type/source contracts, Money, Media, Identity and migration gates remain | BCK-07 Approval, then BCK-08; Quick Plan remains outside catalog |
+| Discover | Mock/local query/feed/map/details; BCK-08 v0.2 Review/Present defines 22/22 rebuildable catalog/search/parity/availability boundaries | No source/runtime/index; OD-01/03, typed ten-type projections, Money, quality/cost and migration remain blocked | BCK-08 Approval/G3 after BCK-07 runtime and accepted decisions |
+| Event Booking | ADR 0019 Accepted; ECL-03 v1.3/D01–D12 Approved/Accepted; BCK-09 v1.11 and coverage v1.10 Review/Present with 22/22 coverage; Booking-v1 API-DEC-01/03 Accepted with controls; BCK09-REV-01 v0.10 / API review v0.8 retain independent-evidence/runtime Hold; all nine signatures Pending; ECL-03B, BCK09-API-CORR-01, BCK09-API-PAR-01 v0.3 and RAW-B v0.1 Done; ECL-03C v1.9 exact nine-collection/51-AC plan Review; RAW-C v0.1 Proposed | D12 command parity, named Booking API decisions, bounded Dart/TypeScript query/hash evidence and disposable Emulator raw-body transport feasibility are resolved; product adapter, independent evidence, OD-09/11, Identity, Event projection, effects/repair seams and production evidence remain blocked; no authoritative runtime | Separately approve RAW-C only after its prerequisites and independent reviews; ECL-03C runtime remains separately gated |
+| Media | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime |
+| Notifications | Local secure-storage inbox/mark-read/string routes; BCK-13 v0.2 Review/Present defines 22/22 inbox/preferences/registration/delivery boundaries | No server inbox, FCM/email, token registry or worker; OD-02/09/10 and ten BCK13 decisions unresolved | BCK-13 Approval and R4 gate; push stays a hint and email stays disabled |
+| Admin/Support | Local mock Admin experience preview and Route moderation/safety UI; BCK-19 v0.2 Review/Present defines 22/22 case/read-audit/propose-approve-execute boundaries | No dedicated staff identity, server case, reveal audit, repair registry/command, RUN-03 or privileged runtime | BCK-19 Approval; implement bounded domain commands, then build/drill RUN-03 before persistent stage |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
-| Operations | Общие CI/env/runbook policies существуют | Нет backend SLO, budgets, IAM, backup/restore evidence | BCK-05 + actual runbooks |
-| Privacy | Общий policy baseline | Нет backend data inventory/retention/DSR orchestration | BCK-04 |
-| Baltic markets | Roadmap и target MarketConfig определены | Нет versioned backend reference distribution | BCK-20 + OD-10 |
+| Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Plan a separately Approved release R0; re-audit before R1 |
+| Privacy | BCK-04 v0.4.16 и coverage matrix v0.3.16 Draft/Present | OD-07 topology, BCK05-OD-02 IAM and BCK05-OD-07 release provenance policies are Accepted while EU-resource/global-service boundaries, threat/incident models and tabletop package remain explicit; owner/independent/qualified Legal verdicts, executable IAM and DSR runtime remain absent | Закрыть BCK-04 blockers; architecture policy Acceptance не является Legal approval/runtime evidence |
+| Baltic markets | BCK-20 v0.2.2 и coverage matrix v0.2.2 Draft/Present | Combined owner assigned; OD-10 remains Proposed and executable parity/distribution runtime remain absent | Закрыть BCK-20/OD-10 blockers без country forks |
 
 ### 4.1. Главный gap
 
@@ -609,6 +1097,7 @@ apps/backend/
         flags/
       modules/
         identity/
+        privacy_orchestration/
         reference_data/
         content/
         discover/
@@ -622,6 +1111,7 @@ apps/backend/
         trust_safety/
         analytics/
       transport/
+        middleware/
         callable/
         http/
       workers/
@@ -645,7 +1135,7 @@ packages/api_contracts/
       v1/
         *.schema.json
         fixtures/
-    <domain>/
+    <domain>/                    # conditional after Accepted API-DEC-05
       vN/
         *.schema.json
         fixtures/
@@ -674,9 +1164,11 @@ versions, dependency pins, Firebase project IDs, regions and deploy identities
 принадлежат Approved BCK-03/04/05 и executable slice.
 
 `packages/api_contracts/schema/booking/v1` уже существует и является
-compatibility anchor. BCK-03 расширяет versioned `schema/<domain>/vN` layout и
-не переименовывает `schema/` в `schemas/`, не переносит существующие fixtures и
-не создаёт второй contract source без отдельного Approved migration plan.
+compatibility anchor. BCK-03 сохраняет target pattern `schema/<domain>/vN`, но
+любая non-Booking language-neutral namespace остаётся запрещённой до Accepted
+`API-DEC-05`. После такого решения расширение не переименовывает `schema/` в
+`schemas/`, не переносит существующие fixtures и не создаёт второй contract
+source без отдельного Approved migration plan.
 
 Initial scaffold не создаёт пустые `ai/`, `providers/` или `payments/`
 directories «на будущее». AI/provider modules появляются только в собственном
@@ -751,6 +1243,10 @@ result, owner и known limitations. Timeout, skipped test или ручной ha
 | D4 | BCK-10/11 | Planning and Route cloud contracts |
 | D5 | BCK-15/16; BCK-17 only after ADR | Optional AI/providers/payments |
 | D6 | RUN-01–06 from actual topology | Incident, rollback, repair, privacy, DR, security/abuse |
+
+The D1 decision/review/evidence annexes (`BCK-D1-DEC-01`, `BCK-D1-REV-01`,
+`BCK-D1-SIG-01`, `BCK-D1-OD07/09/10/11`) are traceability records for these specifications, not
+new backend systems or additional BCK specifications.
 
 Итого baseline BCK-02: **22 BCK specs + 6 production runbooks**. Это не 28
 backend systems: это 28 контролируемых документов для одного backend.
@@ -864,13 +1360,14 @@ Rollback имеет три разных уровня:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.3
+## 25. Definition of Done BCK-01 v0.4.28
 
-BCK-01 может перейти из Draft в Review, когда:
+BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
 - все anchors существуют и ссылки валидны;
-- BCK-02 registry обновлён с `BCK-01 Planned/Absent` на фактический
-  `Draft v0.3/Present, runtime Absent`, а ownership reconciliation не содержит
+- BCK-02 registry отражает фактический
+  `Review v0.4.28/Present, local R0 tooling Present, product/cloud runtime Absent`,
+  а ownership reconciliation не содержит
   двойных writers;
 - target layers/modules не создают второго writer;
 - LV/EE/LT boundary согласована с roadmap;
@@ -879,7 +1376,8 @@ BCK-01 может перейти из Draft в Review, когда:
   Architecture и ключевых domains назначены;
 - conflicts записаны явно;
 - repository diff содержит только documentation changes;
-- runtime status остаётся `Absent`.
+- product/cloud runtime status остаётся `Absent`; bounded R0 tooling не
+  считается product/backend runtime.
 
 Approval требует reconciliation report и sign-off владельцев, но не требует
 создания backend runtime.
@@ -953,8 +1451,9 @@ Approval требует reconciliation report и sign-off владельцев, 
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4, BCK-02-A1 и BCK-09 представлены с их
-    фактическими status/evidence и не объявлены отсутствующими.
+46. **BCK-01-AC-46:** BCK-02 v2.4.53 (Approved v2.4 semantics), BCK-02-A1
+    Draft v1.0 и BCK-09 Review v1.11 представлены с их фактическими
+    status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
     architecture authority, implementation status и delivery coordination.
 48. **BCK-01-AC-48:** ownership matrix покрывает import, privacy orchestration,
@@ -974,12 +1473,13 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.3 не реализованы:
+На дату v0.4.49 не реализованы:
 
-- physical `apps/backend` application;
+- product/domain `apps/backend` application beyond the local R0 tooling probe;
 - Firebase projects/resources/configuration;
 - backend command/query/event runtime;
-- Firestore/Storage Rules and indexes;
+- production Firestore/Storage Rules and indexes beyond R0 default-deny/empty
+  scaffolding;
 - production Auth/capability/Publisher authority;
 - content publication/catalog/search backend;
 - authoritative Event Booking transaction core;
@@ -994,15 +1494,31 @@ Existing local/mock capability and docs/contracts do not change this list.
 
 ## 28. Следующий пакет
 
-После review BCK-01 работа остаётся документационной:
+Следующий formal step остаётся документационным:
 
-1. reconciliation report BCK-01 ↔ BCK-02 ↔ Architecture Baseline ↔ ADR;
-2. BCK-03 `BACKEND_API_CONTRACT_STANDARD.md`;
-3. BCK-04 `BACKEND_SECURITY_PRIVACY_SPEC.md`;
-4. BCK-05 `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md`;
-5. BCK-20 `REFERENCE_DATA_LOCALIZATION_SPEC.md`;
-6. initial proposals OD-07/09/10/11;
-7. обновление BCK-02 status/evidence до перевода BCK-01 в Review.
+1. провести named-owner review по
+   [BCK-D1-REV-01](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md) для
+   BCK-03/BCK-04/BCK-05/BCK-20 и записать evidence-based verdicts поверх уже
+   зафиксированных combined-role assignments в
+   [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
+2. принять или потребовать amendments к evidence packages
+   [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),
+   [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md),
+   [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md),
+   [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md),
+   [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md),
+   [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md),
+   [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md),
+   [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md),
+   [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md),
+   [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md),
+   [OD-09](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md),
+   [OD-10](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) and
+   [OD-11](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md), не повышая статус по
+   одному факту существования документов;
+3. завершить D1 sign-off поверх принятого BCK-D1-DEC-01 без runtime changes;
+4. получить независимые specialist approvals до BCK-01 Approval/G1 там, где
+   interim совмещение ролей недостаточно.
 
 До завершения этого пакета и отдельного разрешения backend code, Firebase
 provisioning, credentials, deployments и production data processing не
