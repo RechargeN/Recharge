@@ -1,13 +1,23 @@
 # BCK-09 — Event Booking Coverage and Reconciliation Matrix
 
 - ID: **BCK-09-PRE**
-- Version: **1.11**
-- Status: **Review — disabled RAW-C local evidence present**
+- Version: **1.12**
+- Status: **Review — disabled RAW-C local and hosted evidence present**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Date: **2026-09-03**
 - Target: [EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 
 ## 0. Changelog
+
+### v1.12 — 2026-09-03
+
+- recorded green push and pull-request RAW-C matrices on Ubuntu 24.04 and
+  Windows 2025 at exact head `75818f78c67e9bcfa06edbc12820424235c39627`
+  in runs `33689696133` and `33689700189`;
+- closed the exact hosted toolchain and cross-platform implementation-evidence
+  gap while preserving 22/22 design coverage and deployed runtime Absent;
+- kept BCK-09 in Review because all nine independent specialist signatures
+  remain Pending; no deployment, activation or later-stage authority follows.
 
 ### v1.11 — 2026-09-03
 
@@ -112,8 +122,8 @@
 ## 1. Verdict
 
 **Coverage: 22/22. Contract parity, RAW-B transport feasibility and bounded
-local RAW-C behavior have evidence; API review remains on an
-independent-evidence/runtime Hold. Keep BCK-09 v1.12 as Review / Present /
+local/hosted RAW-C behavior have evidence; API review remains on an
+independent-evidence/runtime Hold. Keep BCK-09 v1.13 as Review / Present /
 deployed runtime Absent.**
 
 The document is internally reconcilable and suitable for owner review. It is
@@ -129,21 +139,21 @@ is evidence only and has no cloud, activation or mobile authority.
 | ECL-03 v1.3 | Approved, activation gated | Parent implementation contract |
 | ECL03-D01–D12 | Accepted / normative | Product/architecture decisions including opaque bounded request ID |
 | ECL-03B v1.1 | Done, contracts/domain only | Committed wire and Dart evidence |
-| ECL-03C v1.10 | Review; disabled local source only | Exact transaction core with active key, atomic request binding and bounded RAW-C local Emulator evidence; deployment/activation remain unauthorized |
+| ECL-03C v1.11 | Review; disabled source only | Exact transaction core with active key, atomic request binding and bounded RAW-C local/hosted Emulator evidence; deployment/activation remain unauthorized |
 | BCK-01 v0.4.49 | Review | Parent modular/single-writer architecture |
 | BCK-02 v2.4.53 | Approved baseline + factual amendments | Registry, categories, OD/gates |
 | BCK-03 v0.3.7 | Draft | Common API proposal, Accepted Booking-v1 named decisions, bounded parity and RAW-B evidence |
 | BCK-04 v0.4.16 | Draft | Security/privacy/Legal activation blockers |
 | BCK-05 v0.2.23 | Draft | Environments, flags, operations and release controls |
 | BCK09-DEC-01 v0.3 | Accepted with controls | Product baseline reconciled with D12; ten dispositions; no runtime authority |
-| BCK09-REV-01 v0.11 | Specialist review in progress | RAW-C local evidence recorded; all nine named sign-offs remain Pending |
-| BCK09-API-REV-01 v0.9 | RAW-C local evidence; Hold | Hosted exact-toolchain and independent review evidence remain blockers |
+| BCK09-REV-01 v0.12 | Specialist review in progress | RAW-C hosted evidence recorded; all nine named sign-offs remain Pending |
+| BCK09-API-REV-01 v0.10 | RAW-C hosted pass; Hold | Independent review evidence remains the blocker |
 | BCK09-API-DEC-01 v0.4 | Reconciled | Product baseline now points to the Accepted Booking-v1 named decision |
 | BCK09-API-NAMED-DEC-01 v0.2 | Accepted with controls | Exact callable/hash targets; no specialist signature or runtime authority |
 | BCK09-API-CORR-01 v0.3 | Done | Closed command union, exact D12 Schema/Dart parity and repository gates verified; no runtime authority |
 | BCK09-API-PAR-01 v0.3 | Done | Query/read/page/availability schemas and independent Dart/TypeScript hash parity pass on exact Node 22.23.2; no runtime authority |
 | BCK09-API-RAW-B-01 v0.1 | Done | 19/19 disposable Functions Emulator raw-body vectors pass on Ubuntu/Windows; no product export, Firestore/Admin access or runtime authority |
-| BCK09-API-RAW-C-01 v0.2 | Review / Inconclusive | Disabled local adapter and boundary evidence present; hosted and independent-review gates pending |
+| BCK09-API-RAW-C-01 v0.3 | Hosted pass / Inconclusive | Disabled adapter passes local and hosted gates; independent-review verdicts pending |
 | BCK-06 v0.2 | Review | Identity/capability authority target |
 | BCK-07 v0.2 | Review | Published Event lifecycle/config writer target |
 | BCK-08 v0.2 | Review | Public composed availability writer target |
@@ -159,7 +169,7 @@ promote any dependency or owner decision.
 |---|---|---|
 | ECL-03A | Accepted/Approved documents only | Architecture is fixed; runtime absent |
 | ECL-03B | Booking v1 JSON schemas/fixtures and Dart DTO/domain tests | Contract evidence, not backend |
-| ECL-03C | v1.10 plan plus disabled RAW-C local adapter | Evidence present; deploy/activation unauthorized |
+| ECL-03C | v1.11 plan plus disabled RAW-C adapter | Local/hosted evidence present; deploy/activation unauthorized |
 | ECL-03D–H | Full target behavior only | Separate specs/evidence required |
 | Event runtime | Local/mock availability and external handoff | Never Booking authority |
 | Backend scaffold | R0 tooling plus disabled ECL-03C source and test-only callables | Cannot claim deployed Booking runtime |
@@ -235,7 +245,7 @@ writer path.
 
 | Gap | Severity | Closure evidence |
 |---|---|---|
-| RAW-C mandatory evidence incomplete | Blocks RAW-C Done and any later stage | Exact hosted toolchain and independent reviews |
+| RAW-C independent evidence incomplete | Blocks RAW-C Done and any later stage | Nine named specialist verdicts |
 | Callable raw-body transport feasibility | Closed at disposable Emulator/test-only scope | BCK09-API-RAW-B-01 v0.1 Done on Ubuntu/Windows; do not reinterpret as product-runtime evidence |
 | RAW-C deployment/activation not authorized | Blocks cloud/product runtime | Separate deployable-slice approval after production prerequisites and specialist verdicts |
 | API technical pre-review Hold | Blocks API signature | Independent API/Security/Operations evidence plus reviewed product-adapter/runtime controls |
@@ -296,7 +306,7 @@ writer path.
 32. **BCK-09-PRE-AC-32:** schema/DTO correction requires separate explicit slice approval.
 33. **BCK-09-PRE-AC-33:** RAW-B closes only disposable Emulator transport feasibility.
 34. **BCK-09-PRE-AC-34:** RAW-B creates no product callable, Firestore/Admin access or specialist signature.
-35. **BCK-09-PRE-AC-35:** RAW-C v0.1 authority was exact and bounded; v0.2 grants no broader permission.
+35. **BCK-09-PRE-AC-35:** RAW-C v0.1 authority was exact and bounded; v0.2–0.3 grant no broader permission.
 36. **BCK-09-PRE-AC-36:** all cloud runtime, deployment and activation gates remain fail-closed.
 
 ## 10. Evidence summary
@@ -308,14 +318,14 @@ writer path.
   all
   runtime-sensitive defaults remain fail-closed**;
 - disabled backend files: **Present only inside the exact RAW-C file map**;
-- runtime evidence: **local Emulator pass; hosted/independent evidence incomplete;
+- runtime evidence: **local and hosted Emulator pass; independent evidence incomplete;
   cloud/deployed/mobile runtime Absent**.
 
 ## 11. Recommendation
 
-Register BCK-09 v1.12 as **Review / Present / deployed runtime Absent**. The
+Register BCK-09 v1.13 as **Review / Present / deployed runtime Absent**. The
 Product baseline, exact Booking-v1 API decisions, bounded contract parity,
 RAW-B transport and local RAW-C behavior are recorded. RAW-C remains
-Inconclusive until hosted exact-toolchain and independent-review
-evidence is complete. No later work may begin through this status; ECL-03D–H,
+Inconclusive until independent-review evidence is complete. No later work may
+begin through this status; ECL-03D–H,
 deployment and activation each require their own approval and evidence.

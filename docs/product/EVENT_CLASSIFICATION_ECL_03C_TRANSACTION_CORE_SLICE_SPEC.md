@@ -1,6 +1,6 @@
 # ECL-03C — Authoritative Booking transaction core
 
-- Версия: 1.10
+- Версия: 1.11
 - Дата: 2026-09-03
 - Статус: **Review — disabled local implementation present; production runtime not authorized**
 - Parent:
@@ -26,9 +26,21 @@
 - Callable raw-body emulator evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 - Disabled-adapter evidence:
-  [BCK09-API-RAW-C-01 v0.2 — Review / Inconclusive](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+  [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 
 ## 0. Changelog
+
+### v1.11 — 2026-09-03
+
+- recorded successful push and pull-request RAW-C matrices at exact head
+  `75818f78c67e9bcfa06edbc12820424235c39627`: runs `33689696133` and
+  `33689700189` passed on Ubuntu 24.04 and Windows 2025;
+- confirmed exact toolchain, no-cloud-context, unit, contract, RAW-B, RAW-C,
+  cleanup, generated-output, reproducibility and Terraform safety gates on both
+  operating systems; PR #7 remains Draft;
+- kept ECL-03C in Review because all nine independent BCK-09 specialist
+  verdicts remain Pending; deployment, activation, mobile integration and
+  ECL-03D–H remain unauthorized.
 
 ### v1.10 — 2026-09-03
 
@@ -772,8 +784,8 @@ remain ECL-03H or later gates.
 48. BCK09-API-RAW-B-01 evidence is emulator/test-only and cannot authorize a
     tracked product callable, Admin SDK initialization or Firestore access.
 49. BCK09-API-RAW-C-01 v0.1 received exact bounded implementation authority;
-    v0.2 records disabled local evidence and remains Inconclusive pending all
-    mandatory gates.
+    v0.3 records green local and hosted evidence and remains Inconclusive only
+    because independent specialist verdicts are Pending.
 50. All nine BCK-09 specialist signatures remain Pending after RAW-C local evidence.
 51. RAW-C cannot deploy, activate a market/cohort, process production data or
     grant ECL-03D–H any inherited authority.
@@ -808,7 +820,7 @@ deployment or activation:
 4. emulator contention/security evidence and status reconciliation.
 
 ECL-03D remains the next product stage only after RAW-C receives the remaining
-hosted and independent-review evidence and ECL-03C is verified. Until
+independent-review evidence and ECL-03C is verified. Until
 then Recharge continues to present provider handoff or an explicitly
 unavailable internal action; it must not display a local/mock Booking as
 confirmed.

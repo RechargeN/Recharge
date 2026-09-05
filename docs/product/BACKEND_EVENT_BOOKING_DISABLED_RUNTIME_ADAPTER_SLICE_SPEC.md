@@ -1,9 +1,9 @@
 # Recharge Backend — Booking disabled runtime adapter slice
 
 - ID: **BCK09-API-RAW-C-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-09-03**
-- Status: **Review — approved v0.1 disabled implementation present; required evidence incomplete**
+- Status: **Review — disabled implementation and cross-platform hosted evidence present; independent verdicts pending**
 - Target: **ECL-03C disabled authoritative core / Booking wire v1**
 - Product status after this document: **disabled local source Present; deployed runtime Absent**
 - Firebase/Firestore/Admin effect of this document: **demo-recharge Emulator-only Rules/index/source and test evidence; no cloud effect**
@@ -12,11 +12,11 @@
 - Parent architecture:
   [ADR 0019 — Accepted](../adr/0019-authoritative-internal-booking-ledger.md)
 - Parent product plan:
-  [ECL-03C v1.10 — Review; disabled local source Present](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.11 — Review; disabled source and hosted evidence Present](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Backend contract:
-  [BCK-09 v1.12 — Review; deployed runtime Absent](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
+  [BCK-09 v1.13 — Review; deployed runtime Absent](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md)
 - API review:
-  [BCK09-API-REV-01 v0.9 — hosted/independent-evidence runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.10 — independent-evidence runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Required predecessor evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 
@@ -37,7 +37,7 @@ No broader RAW-C authority is implied by:
 - this evidence reconciliation;
 - an emulator pass, pull request, reviewer comment or green generic CI job.
 
-Version 0.2 records implementation evidence only. It changes no v0.1 scope,
+Versions 0.2–0.3 record implementation and hosted evidence only. They change no v0.1 scope,
 contract, runtime authority or activation boundary.
 
 ## 1. Outcome
@@ -65,8 +65,8 @@ Precedence is:
 
 1. Accepted ADR 0019;
 2. ECL-03 v1.3 and Accepted ECL03-D01–D12;
-3. ECL-03C v1.10;
-4. BCK-09 v1.12;
+3. ECL-03C v1.11;
+4. BCK-09 v1.13;
 5. Accepted BCK09-API-NAMED-DEC-01 v0.2;
 6. Booking wire v1 schemas, fixtures and semantic-hash vectors;
 7. this RAW-C plan.
@@ -411,13 +411,13 @@ The completion record must include:
 | Mobile regression | `flutter analyze --no-pub` pass; `flutter test --no-pub` 664/664 pass |
 | Protected diff | No mobile, frozen Booking schema or Accepted ADR edit |
 | Repository boundary gate | Pass: 380 files, 71/71 suppressed, 0 violations, 0 stale/expired exceptions |
-| Exact hosted toolchain | Pending: local npm 10.8.2 and JDK 21.0.6 do not satisfy the pinned npm 10.9.8 / JDK 21.0.12+8 evidence target |
-| Ubuntu/Windows hosted CI | Pending; push was not authorized |
+| Exact hosted toolchain | Pass on Ubuntu 24.04 and Windows 2025 with pinned Node/npm/JDK/workflow checks |
+| Ubuntu/Windows hosted CI | Pass at `75818f78c67e9bcfa06edbc12820424235c39627`; push run `33689696133` and pull-request run `33689700189` |
 | Independent specialist verdicts | Pending |
 
-Local implementation and Emulator behavior pass their bounded checks. The
-slice verdict remains **Inconclusive** until every mandatory §11 gate passes on
-the exact committed revision. No cloud project, credential, deployment,
+Local and hosted implementation/Emulator behavior pass their bounded checks.
+The slice verdict remains **Inconclusive** only because the mandatory
+independent specialist verdicts in §11 are Pending. No cloud project, credential, deployment,
 activation, mobile runtime integration or production data was used.
 
 ## 13. Stop conditions
@@ -478,7 +478,7 @@ production, activation, ECL-03D–H, mobile cutover or merge to `main`.
 
 ## 17. Acceptance criteria
 
-1. **BCK09-RAW-C-AC-01:** v0.1 scope received exact implementation approval; v0.2 only reconciles evidence.
+1. **BCK09-RAW-C-AC-01:** v0.1 scope received exact implementation approval; v0.2–0.3 only reconcile evidence.
 2. **BCK09-RAW-C-AC-02:** implementation authority is limited to the exact §18 permission.
 3. **BCK09-RAW-C-AC-03:** RAW-B is a prerequisite, not runtime authority.
 4. **BCK09-RAW-C-AC-04:** Booking wire v1 remains unchanged.

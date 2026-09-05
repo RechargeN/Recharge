@@ -1,7 +1,7 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.12**
+- Версия: **1.13**
 - Дата: **2026-09-03**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
@@ -15,15 +15,15 @@
 - Accepted decisions:
   [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.10](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.11](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Coverage evidence:
-  [BCK-09-PRE v1.11](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+  [BCK-09-PRE v1.12](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
 - Product decision:
   [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
 - Specialist review:
-  [BCK09-REV-01 v0.11 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+  [BCK09-REV-01 v0.12 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - API Platform pre-review:
-  [BCK09-API-REV-01 v0.9 — RAW-C local evidence; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+  [BCK09-API-REV-01 v0.10 — RAW-C hosted pass; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
 - Product API decision:
   [BCK09-API-DEC-01 v0.4 — reconciled](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
 - Named API decision:
@@ -35,10 +35,21 @@
 - Callable raw-body emulator evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 - Disabled-adapter evidence:
-  [BCK09-API-RAW-C-01 v0.2 — Review / Inconclusive](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+  [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 - Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.13 — 2026-09-03
+
+- recorded RAW-C success at head
+  `75818f78c67e9bcfa06edbc12820424235c39627` in push run `33689696133` and
+  pull-request run `33689700189`, each green on Ubuntu 24.04 and Windows 2025;
+- closed the exact hosted npm/JDK/toolchain and cross-platform RAW-C evidence
+  gap without creating cloud resources, deployment, activation or mobile
+  integration; all PR #7 checks pass and the PR remains Draft;
+- kept BCK-09 in Review and deployed runtime Absent because all nine
+  independent specialist signatures remain Pending.
 
 ### v1.12 — 2026-09-03
 
@@ -1461,8 +1472,8 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 87. RAW-B evidence cannot grant any specialist signature or satisfy independent
     Security, Operations, Identity, Content, Legal or production evidence.
 88. BCK09-API-RAW-C-01 v0.1 received exact bounded authority for disabled local
-    source and Emulator-only Firestore/Admin evidence; v0.2 remains
-    Inconclusive pending every mandatory gate.
+    source and Emulator-only Firestore/Admin evidence; v0.3 has green local and
+    hosted evidence but remains Inconclusive pending independent verdicts.
 89. Cloud runtime, deployment, activation, mobile integration and any authority
     beyond the exact five disabled exports remain prohibited until their own
     recorded gates and approvals pass.
@@ -1517,7 +1528,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Plan v1.10; RAW-C v0.2 local unit/contract/Emulator evidence | Review / Inconclusive | Disabled local source only; no deploy/activation |
+| ECL-03C | Plan v1.11; RAW-C v0.3 local and hosted cross-platform evidence | Review / Inconclusive | Disabled source only; no deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |

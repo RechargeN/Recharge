@@ -1,11 +1,11 @@
 # Recharge Backend — Event Booking API Platform Review
 
 - ID: **BCK09-API-REV-01**
-- Version: **0.9**
+- Version: **0.10**
 - Date: **2026-09-03**
-- Status: **RAW-C local evidence present — Hold for hosted and independent evidence**
-- Target: **BCK-09 v1.12 / ECL-03C v1.10 / Booking wire v1**
-- Parent review: [BCK09-REV-01 v0.11](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- Status: **RAW-C hosted pass — Hold for independent evidence and deployment authority**
+- Target: **BCK-09 v1.13 / ECL-03C v1.11 / Booking wire v1**
+- Parent review: [BCK09-REV-01 v0.12](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
 - Governing API draft: [BCK-03 v0.3.7](BACKEND_API_CONTRACT_STANDARD.md)
 - Runtime effect: **disabled local/Emulator source only; no deployment or activation**
 - Product API decision:
@@ -19,11 +19,11 @@
 - Raw-body transport evidence:
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 - Product-adapter evidence:
-  [BCK09-API-RAW-C-01 v0.2 — Review / Inconclusive](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+  [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
 
 ## 0. Verdict
 
-**Hold, narrowed to exact hosted-toolchain and independent evidence;
+**Hold, narrowed to independent evidence and deployment authority;
 deployed product runtime remains unauthorized.**
 BCK09-API-CORR-01 v0.3 closes the command-union and D12 Schema/Dart defects.
 BCK09-API-NAMED-DEC-01 v0.2 accepts the exact Booking-v1 callable and semantic
@@ -34,9 +34,10 @@ BCK09-API-RAW-B-01 v0.1 additionally proves 19/19 synthetic raw-body vectors
 through a disposable Functions Emulator callable on Ubuntu and Windows. RAW-C
 v0.1 now supplies disabled local adapter evidence: unit 13/13, contract 15/15
 and disposable Emulator 23/23 pass on local Node 22.23.2. A named independent
-API Platform reviewer still must not sign because exact hosted npm/JDK
-Ubuntu/Windows evidence and independent
-stage/Security evidence remain incomplete.
+Exact hosted npm/JDK Ubuntu/Windows evidence now passes at head
+`75818f78c67e9bcfa06edbc12820424235c39627`. An API Platform reviewer still
+must not sign because the evidence has not been independently reviewed together
+with stage/Security controls.
 
 This is a technical preparation record, not an independent specialist
 signature. `BCK09-SIG-API` remains `Pending`.
@@ -85,18 +86,19 @@ RAW-C local evidence on 2026-09-03 adds 13/13 unit, 15/15 contract and 23/23
 disposable Emulator checks, generated verification over 88 files and
 reproducibility digest
 `a5202fe025855d175c6c58add5614859fc568e48547717ad499ff7c4776ddecd`.
-The current RAW-C revision has not run in hosted CI. Its local boundary gate
-passes over 380 files with 0 violations and 71/71 tracked suppressions. These
-results are technical evidence, not this document's independent API signature.
+The current RAW-C revision passes push run `33689696133` and pull-request run
+`33689700189` on Ubuntu 24.04 and Windows 2025. Its boundary gate passes over
+380 files with 0 violations and 71/71 tracked suppressions. These results are
+technical evidence, not this document's independent API signature.
 
 ## 3. Findings
 
 | ID | Severity | Result | Finding | Required closure |
 |---|---|---|---|---|
 | `BCK09-API-TR-01` | Resolved | Pass | `booking_command.schema.json` contains nine closed command-local variants; Schema, bounded validator, Dart and TypeScript agree on all checked-in command fixtures | Preserve frozen fixture/hash evidence |
-| `BCK09-API-TR-02` | Local evidence present | Pass locally / independent Hold | RAW-C implements atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency`; local contention/idempotency suites pass | Confirm on exact hosted toolchains and independent review |
+| `BCK09-API-TR-02` | Hosted evidence present | Pass hosted / independent Hold | RAW-C implements atomic `m1_` logical and `r1_` request-attempt records inside `bookingIdempotency`; contention/idempotency suites pass on Ubuntu and Windows | Independent review remains required |
 | `BCK09-API-TR-03` | Named decision | Accepted for Booking v1 | Callable v2, `europe-west1` and 10/15/30-second deadlines are exact | Independent API Platform + BCK-05 stage evidence remains required before endpoint scaffold |
-| `BCK09-API-TR-04` | Local adapter evidence present | Pass locally / product runtime Hold | `booking_semantic_hash_v1` uses RFC 8785 JCS UTF-8, lowercase SHA-256 and includes applicable revision fields; independent Dart/TypeScript goldens agree; RAW-C validates raw input and all five local callable paths | Confirm exact hosted evidence and independent Security/API review before deployment |
+| `BCK09-API-TR-04` | Hosted adapter evidence present | Pass hosted / product runtime Hold | `booking_semantic_hash_v1` uses RFC 8785 JCS UTF-8, lowercase SHA-256 and includes applicable revision fields; RAW-C validates raw input and all five callable paths on Ubuntu and Windows | Independent Security/API review remains required before deployment |
 | `BCK09-API-TR-05` | Resolved | Pass | ECL03-D12 opaque request IDs are enforced identically in command Schema/Dart, including scalar bounds, blank set, no rewrite and surrogate rejection | Preserve frozen v0.3 fixtures; no hidden backend-only rule |
 | `BCK09-API-TR-06` | Resolved at contract/test scope | Pass / runtime absent | Closed query/read/page/availability schemas and a real TypeScript Draft 2020-12 consumer exist; shared Dart/TypeScript fixtures and hashes pass on Node 22.23.2 | Preserve evidence and keep ECL-03C runtime unauthorized until later runtime gates pass |
 
@@ -234,8 +236,8 @@ after:
 4. TR-05's Accepted ECL03-D12 semantics are implemented consistently across
    schema, Dart and fixtures;
 5. no unverified error value or transport envelope is introduced;
-6. RAW-C local adapter evidence is reviewed on exact hosted toolchains and
-   independent runtime/Security evidence is complete.
+6. RAW-C hosted adapter evidence is independently reviewed and runtime/Security
+   controls are accepted.
 
 ## 7. Review acceptance criteria
 
@@ -266,7 +268,7 @@ BCK-09 remains Review, ECL-03C deployed runtime remains unapproved and
 D12 command-artifact parity, Booking-v1 named API decisions and the bounded
 TypeScript/query/hash contract parity slice and canonical Node 22 confirmation
 are closed. Disposable callable raw-body transport feasibility is also closed
-by RAW-B, and disabled RAW-C local behavior is evidenced. Exact hosted RAW-C
-and independent specialist evidence plus runtime controls remain
+by RAW-B, and disabled RAW-C behavior passes exact hosted matrices. Independent
+specialist evidence plus runtime controls remain
 blockers. Further deployment, activation or later-stage edits require their
 own Approved slice.
