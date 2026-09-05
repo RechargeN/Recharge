@@ -247,6 +247,31 @@ The canonical implementation contract is
 
 Use this section as a running log (newest first).
 
+- 2026-09-05: Closed `TODO(route-golden-font-rendering)` in
+  `route_create_block_test.dart` (tracked since 2026-08-24). Reproduced the
+  2.52%/11229px diff on Flutter 3.44.9/Linux and confirmed with repeated
+  `--update-goldens` runs that the render is 100% deterministic run-to-run on
+  this machine — the diff was a fixed cross-environment divergence, not
+  flakiness. Pixel diffing the failure artifacts showed every differing
+  pixel was a whole text line shifted by exactly one device pixel: the
+  fixture rendered with no explicit `fontFamily`, so even the tofu
+  placeholder glyphs Flutter substitutes for unloaded fonts took their
+  vertical metrics from whichever font the host's fontconfig/Skia fallback
+  chain resolved, which differs by machine. Fixed by loading the real
+  Roboto/MaterialIcons fonts bundled with the Flutter SDK and forcing the
+  golden path's theme onto that fixed font, matching the existing
+  `object_offer_activity_visual_golden_test.dart` pattern — glyph metrics are
+  now pinned to bytes shipped with the SDK instead of host font fallback,
+  and the golden now renders real readable text/icons instead of tofu boxes.
+  No tolerance was widened and no baseline was accepted blindly; the fix
+  targets only this one test's font resolution. Verified in an isolated
+  worktree at clean `HEAD` (the live checkout had unrelated in-progress
+  changes at the time that did not compile, so gates were run against a
+  clean base instead): focused file 6 passed, full `flutter test --no-pub`
+  970 passed (0 skipped, up from 969 passed/1 skip), `flutter analyze
+  --no-pub` 0 issues, boundary gate 71/71 existing suppressions/0
+  violations, `git diff --check` clean.
+
 - 2026-08-29: Final `CLG-PST-02` crash-consistency audit closed the
   remaining cross-key visibility gaps that the earlier green suite did not
   exercise. Publish/removal now prepare immutable version data, durably
