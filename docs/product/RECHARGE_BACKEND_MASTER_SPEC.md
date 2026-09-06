@@ -1,10 +1,10 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.49**
-- Date: **2026-08-28**
+- Version: **0.4.50**
+- Date: **2026-09-06**
 - Spec status: **Review — owner evidence recorded; approval pending**
-- Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
+- Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Architecture owner**
 - Review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
@@ -14,6 +14,18 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.50 — 2026-09-06
+
+- reconciled BCK-09 v1.13, ECL-03C v1.11, coverage v1.12, API review v0.10,
+  specialist package v0.12 and RAW-C v0.3 after exact local and hosted evidence;
+- recorded exactly five disabled Emulator-only Booking v1 callable exports and
+  nine operational collections without claiming deployment or activation;
+- retained all nine BCK-09 specialist signatures as Pending and G1-G7/R1 as
+  blocked or absent;
+- advanced BCK-02 factual traceability to v2.4.54 and BCK-02-A1 to Draft v1.1;
+- fixed the physical-backend readiness wording so the existing bounded R0 and
+  RAW-C exceptions are not misrepresented as production/backend readiness.
 
 ### v0.4.49 — 2026-08-28
 
@@ -644,7 +656,7 @@ Approval и требует reconciliation либо Accepted ADR.
 | Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
 | Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4.53](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, later 2.4.x revisions are traceability amendments |
+| Backend sequencing | [BCK-02 v2.4.54](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, later 2.4.x revisions are traceability amendments |
 | Baltic rollout | [Latvia/Baltics roadmap](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
 | Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
 | Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
@@ -658,24 +670,24 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 
 ## 4. Первичный аудит текущего состояния
 
-Дата снимка: **2026-08-20**.
+Дата снимка: **2026-09-06**.
 
 | Область | Текущее evidence | Gap | Вывод |
 |---|---|---|---|
 | Mobile app | Flutter layered features and local/mock datasources; BCK-18 v0.2 Review/Present defines the 22/22 typed ports/adapters/cache/import/cutover seam | Нет production remote authority; M2 Money, OD-04/08/10, contract generation, mock-exclusion and executable adapters remain blocked | Не считать mock/provider HTTP production backend; BCK-18 Approval and per-domain slices precede cutover |
 | Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO; BCK-03 v0.3.7 Draft/Present | Split-key/hash/RAW-B transport evidence closed at bounded test scope; independent verdicts pending | Расширять один workflow; non-Booking schemas запрещены до Accepted API-DEC-05 |
-| Backend application | локальный R0 scaffold существует в `apps/backend` | Есть только non-product probe, default-deny Rules, emulator tests, backendless Terraform и CI contract; нет доменных handlers/repositories/deployment authority | Tooling **Present locally**; product/cloud runtime **Absent** |
+| Backend application | локальный R0 scaffold и disabled Emulator-only ECL-03C source существуют в `apps/backend` | RAW-C ограничен ровно пятью Booking v1 callable exports и девятью deny-by-default collections; нет cloud project, production Identity/Event projection, deployment, activation или mobile integration | Bounded tooling/Booking source **Present locally**; product/cloud runtime **Absent** |
 | Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
 | Identity | Target принят ADR 0015; BCK-06 v0.2 Review/Present defines the 22/22 account/session/access/verification/page/membership/publisher/consent authority contract; ADR 0016/0017 разрешили только bounded local/mock behavior | Нет production Auth/capability/revocation authority; OD-08/OD-11, exact session/capability/retention decisions and executable evidence remain blocked | BCK-06 and BCK-18 Approval до product migration; сохранить compatibility без переноса mock grants |
 | Content/Create | Ten-type local/config-driven Create Hub; BCK-07 v0.2 Review/Present defines the 22/22 publication/revision/provenance contract | No backend authority; OD-03/10/11, missing type/source contracts, Money, Media, Identity and migration gates remain | BCK-07 Approval, then BCK-08; Quick Plan remains outside catalog |
 | Discover | Mock/local query/feed/map/details; BCK-08 v0.2 Review/Present defines 22/22 rebuildable catalog/search/parity/availability boundaries | No source/runtime/index; OD-01/03, typed ten-type projections, Money, quality/cost and migration remain blocked | BCK-08 Approval/G3 after BCK-07 runtime and accepted decisions |
-| Event Booking | ADR 0019 Accepted; ECL-03 v1.3/D01–D12 Approved/Accepted; BCK-09 v1.11 and coverage v1.10 Review/Present with 22/22 coverage; Booking-v1 API-DEC-01/03 Accepted with controls; BCK09-REV-01 v0.10 / API review v0.8 retain independent-evidence/runtime Hold; all nine signatures Pending; ECL-03B, BCK09-API-CORR-01, BCK09-API-PAR-01 v0.3 and RAW-B v0.1 Done; ECL-03C v1.9 exact nine-collection/51-AC plan Review; RAW-C v0.1 Proposed | D12 command parity, named Booking API decisions, bounded Dart/TypeScript query/hash evidence and disposable Emulator raw-body transport feasibility are resolved; product adapter, independent evidence, OD-09/11, Identity, Event projection, effects/repair seams and production evidence remain blocked; no authoritative runtime | Separately approve RAW-C only after its prerequisites and independent reviews; ECL-03C runtime remains separately gated |
+| Event Booking | ADR 0019 Accepted; ECL-03 v1.3/D01–D12 Approved/Accepted; BCK-09 v1.13, coverage v1.12, ECL-03C v1.11, API review v0.10, specialist package v0.12 and RAW-C v0.3 are Review/Present; ECL-03B, contract correction/parity and RAW-B are Done | Exact local/hosted RAW-C behavior is green, but all nine independent signatures, OD-09/11, production Identity, revision-safe Event projection, effects/repair seams, cloud deployment and mobile integration remain blocked or absent | Preserve the disabled core; close D1/G1 and independent reviews before any staging, activation or ECL-03D work |
 | Media | Local/mobile foundations; BCK-14 v0.2.1 Review/Present defines 22/22 upload/session/blob/variant/protected-delivery/deletion boundaries | No Media runtime; BCK-07 Approval/runtime handoff and ten BCK14 owner decisions remain unresolved | BCK-14 and BCK-07 Approval before Media runtime |
 | Notifications | Local secure-storage inbox/mark-read/string routes; BCK-13 v0.2 Review/Present defines 22/22 inbox/preferences/registration/delivery boundaries | No server inbox, FCM/email, token registry or worker; OD-02/09/10 and ten BCK13 decisions unresolved | BCK-13 Approval and R4 gate; push stays a hint and email stays disabled |
 | Admin/Support | Local mock Admin experience preview and Route moderation/safety UI; BCK-19 v0.2 Review/Present defines 22/22 case/read-audit/propose-approve-execute boundaries | No dedicated staff identity, server case, reveal audit, repair registry/command, RUN-03 or privileged runtime | BCK-19 Approval; implement bounded domain commands, then build/drill RUN-03 before persistent stage |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
-| Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Plan a separately Approved release R0; re-audit before R1 |
+| Operations | BCK-05 v0.2.23 и coverage matrix v0.2.23 Draft/Present | Bounded R0 is Pass; BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted; BCK05-OD-03/04/05/08 and executable IAM/release/specialist/stage/restore/EUR/product-cloud evidence remain unresolved | Close D1/G1 and approve an exact R1 slice before environment provisioning |
 | Privacy | BCK-04 v0.4.16 и coverage matrix v0.3.16 Draft/Present | OD-07 topology, BCK05-OD-02 IAM and BCK05-OD-07 release provenance policies are Accepted while EU-resource/global-service boundaries, threat/incident models and tabletop package remain explicit; owner/independent/qualified Legal verdicts, executable IAM and DSR runtime remain absent | Закрыть BCK-04 blockers; architecture policy Acceptance не является Legal approval/runtime evidence |
 | Baltic markets | BCK-20 v0.2.2 и coverage matrix v0.2.2 Draft/Present | Combined owner assigned; OD-10 remains Proposed and executable parity/distribution runtime remain absent | Закрыть BCK-20/OD-10 blockers без country forks |
 
@@ -1340,9 +1352,10 @@ Rollback имеет три разных уровня:
 19. status `Done` без reproducible evidence;
 20. microservice split без Accepted ADR и измеримой необходимости.
 
-## 24. Definition of Ready для физического backend
+## 24. Definition of Ready для следующего physical backend stage
 
-Создание `apps/backend` не Ready, пока одновременно не выполнено:
+Переход от существующих bounded R0/RAW-C файлов к R1 или любому дополнительному
+product/cloud backend scope не Ready, пока одновременно не выполнено:
 
 - активный STABILIZATION slice из `AGENTS.md` завершён либо применимый новый
   Accepted ADR и Approved slice явно разрешают exact backend exception;
@@ -1360,13 +1373,14 @@ Rollback имеет три разных уровня:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.28
+## 25. Definition of Done BCK-01 v0.4.50
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
 - все anchors существуют и ссылки валидны;
 - BCK-02 registry отражает фактический
-  `Review v0.4.28/Present, local R0 tooling Present, product/cloud runtime Absent`,
+  `Review v0.4.50/Present, local R0 tooling plus disabled Emulator-only ECL-03C
+  source Present, product/cloud runtime Absent`,
   а ownership reconciliation не содержит
   двойных writers;
 - target layers/modules не создают второго writer;
@@ -1376,8 +1390,8 @@ BCK-01 перешёл из Draft в Review после выполнения сл�
   Architecture и ключевых domains назначены;
 - conflicts записаны явно;
 - repository diff содержит только documentation changes;
-- product/cloud runtime status остаётся `Absent`; bounded R0 tooling не
-  считается product/backend runtime.
+- product/cloud runtime status остаётся `Absent`; bounded R0 tooling и disabled
+  RAW-C source не считаются deployed/enabled product runtime.
 
 Approval требует reconciliation report и sign-off владельцев, но не требует
 создания backend runtime.
@@ -1438,21 +1452,23 @@ Approval требует reconciliation report и sign-off владельцев, 
 37. **BCK-01-AC-37:** BCK-01 does not replace BCK-03–22 or RUN-01–06.
 38. **BCK-01-AC-38:** open decisions retain owner, gate and disabled default.
 39. **BCK-01-AC-39:** documentation Approval does not imply runtime permission.
-40. **BCK-01-AC-40:** physical backend waits for G1 and a separate Approved
-    executable slice.
+40. **BCK-01-AC-40:** except for an explicitly Approved bounded no-cloud
+    feasibility slice, additional physical product/cloud backend waits for G1
+    and a separate Approved executable slice.
 41. **BCK-01-AC-41:** no `apps/backend`, Firebase config/resource, credential,
     deployment, production schema or application code is created by current
     documentation revision.
-42. **BCK-01-AC-42:** runtime status after acceptance remains `Absent` until
-    independently evidenced.
+42. **BCK-01-AC-42:** product/cloud runtime status after acceptance remains
+    `Absent` until independently evidenced; bounded local source is reported
+    separately and never implies deployment or activation.
 43. **BCK-01-AC-43:** schema/API/event evolution и minimum-client policy имеют
     versioning, compatibility fixtures, deprecation и typed rejection.
 44. **BCK-01-AC-44:** authoritative authorization re-evaluates current
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4.53 (Approved v2.4 semantics), BCK-02-A1
-    Draft v1.0 и BCK-09 Review v1.11 представлены с их фактическими
+46. **BCK-01-AC-46:** BCK-02 v2.4.54 (Approved v2.4 semantics), BCK-02-A1
+    Draft v1.1 и BCK-09 Review v1.13 представлены с их фактическими
     status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
     architecture authority, implementation status и delivery coordination.
@@ -1473,16 +1489,19 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.4.49 не реализованы:
+На дату v0.4.50 не реализованы:
 
-- product/domain `apps/backend` application beyond the local R0 tooling probe;
-- Firebase projects/resources/configuration;
-- backend command/query/event runtime;
+- product/domain `apps/backend` application beyond the local R0 tooling and
+  disabled Emulator-only ECL-03C source;
+- cloud Firebase projects/resources and environment-specific production
+  configuration;
+- deployed/enabled backend command/query/event runtime;
 - production Firestore/Storage Rules and indexes beyond R0 default-deny/empty
   scaffolding;
 - production Auth/capability/Publisher authority;
 - content publication/catalog/search backend;
-- authoritative Event Booking transaction core;
+- deployed/activated authoritative Event Booking runtime beyond the disabled
+  RAW-C transaction core;
 - media/notification/library/review/T&S/admin backend;
 - Scenario/Quick Plan/Route cloud backend;
 - privacy deletion/export orchestration;
@@ -1490,7 +1509,8 @@ Approval требует reconciliation report и sign-off владельцев, 
 - production AI/provider integrations/Payments;
 - production migrations and market activation.
 
-Existing local/mock capability and docs/contracts do not change this list.
+Existing local/mock capability, bounded R0, disabled RAW-C and docs/contracts do
+not change production readiness.
 
 ## 28. Следующий пакет
 

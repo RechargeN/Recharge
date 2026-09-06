@@ -1,19 +1,19 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.0
-- Дата: 2026-08-10
+- Версия: 1.1
+- Дата: 2026-09-06
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.54](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
 
 `BCK-02-A1` — execution annex к BCK-02, а не новый BCK-spec. Он не увеличивает
 checksum реестра `22 BCK + 6 RUN`, не заменяет документы BCK-01–22 и не
-разрешает создание `apps/backend`, Firebase resources, credentials, deployment
-или production data processing.
+расширяет существующие bounded R0/RAW-C permissions до Firebase cloud
+resources, credentials, deployment, activation или production data processing.
 
 ## 0. Решение и ожидаемый результат
 
@@ -40,6 +40,19 @@ production cohort и первым General Availability market. Estonia и Lithua
 Media, Notifications, Library, Reviews, Trust & Safety, Event Booking,
 Scenario, Quick Plan, Route, Admin/Support, analytics и optional gated
 Provider/AI/Payments integrations.
+
+### 0.1. Execution snapshot — 2026-09-06
+
+- G0 пройден; registry остаётся `22 BCK + 6 RUN`.
+- Bounded R0 local toolchain и hosted Ubuntu/Windows evidence имеют статус
+  `Pass`; cloud resources и production data не создавались.
+- Разрешённое исключение RAW-C v0.3 реализовало ровно пять disabled
+  Emulator-only Booking v1 callable exports и девять operational collections;
+  local/hosted gates зелёные, но все девять independent verdicts Pending.
+- RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
+  Review, production Identity/Event projection/mobile/deployment отсутствуют.
+- G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
+- Следующий последовательный этап — D1/G1 closure для BCK-01/03/04/05/20.
 
 ## 1. Приоритет и границы
 
@@ -395,7 +408,8 @@ Backend считается пригодным для приложения тол
 - OD-07 и OD-10 Accepted;
 - OD-09 и OD-11 минимум Proposed с запрещённым runtime;
 - BCK-02 и этот annex reconciled;
-- runtime остаётся Absent.
+- этот documentation stage не создаёт runtime; product/cloud runtime остаётся
+  Absent, а bounded R0/RAW-C существуют только по отдельным approvals.
 
 ### Rollback
 
@@ -446,6 +460,9 @@ Backend считается пригодным для приложения тол
 - no cloud resource/data;
 - rollback удаляет только bounded R0 scaffold;
 - отдельное разрешение R1 всё ещё требуется.
+
+**Current status:** bounded R0 `Pass`. Это не разрешает R1 и не превращает
+ранний disabled RAW-C implementation в пройденный G4/R5.
 
 ## 8. LV-BE-02 — Platform scaffold и environments (R1)
 
@@ -1214,7 +1231,7 @@ inconclusive.
 ## 27. Acceptance criteria
 
 1. Документ является annex BCK-02 и не создаёт новый BCK registry item.
-2. Runtime effect Draft v1.0 равен none.
+2. Runtime effect Draft v1.1 равен none.
 3. Latvia — first cohort, Estonia/Lithuania — parallel independent markets.
 4. Одна codebase/platform обслуживает LV/EE/LT без country forks.
 5. Environment и market являются разными axes.
@@ -1233,7 +1250,8 @@ inconclusive.
 18. EE/LT blocker не задерживает LV, если shared invariant не затронут.
 19. Shared security/privacy defect может остановить все markets.
 20. BCK-01 создаётся первым после BCK-02.
-21. D1 platform set предшествует R0/R1 provisioning.
+21. Кроме отдельно Approved no-cloud R0 feasibility, D1/G1 предшествует R1 и
+    любому product/cloud provisioning.
 22. OD-07 Accepted до создания location-bound resources.
 23. OD-10 задаёт locale wire/fallback policy.
 24. OD-11 versioned и validated для каждого enabled market.
@@ -1306,19 +1324,22 @@ inconclusive.
 
 До approval этого annex:
 
-- проверить traceability всех LV-BE stages к BCK-01–22;
+- завершить независимую проверку traceability всех LV-BE stages к BCK-01–22;
 - согласовать Latvia required/optional launch profile;
 - подтвердить parallel EE/LT scope и locale policy;
 - проверить, что новые Baltic requirements не требуют нового ADR;
 - исправить найденные conflicts, не создавая runtime.
 
-После approval следующий пакет остаётся документационным:
+Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 Draft с Baltic platform boundary.
-2. BCK-03/04/05/20 exact outlines.
-3. OD-07/09/10/11 initial proposals с Baltic evidence requirements.
-4. R0 exact file plan, но без реализации до отдельного разрешения.
-5. Reconciliation report с BCK-02, Architecture Baseline и LAUNCH_STATUS.
+1. BCK-01 v0.4.50 Review и reconciliation evidence.
+2. BCK-03/04/05/20 named-owner review и evidence-based verdicts.
+3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
+   выбора topology.
+4. BCK-D1 sign-off ledger и reconciliation report с BCK-02, Architecture
+   Baseline и LAUNCH_STATUS.
+5. Отдельный R1 exact file/rollback/evidence plan только после G1; существующие
+   R0/RAW-C файлы не дают R1 authority.
 
 ## 29. Официальные reference points
 
