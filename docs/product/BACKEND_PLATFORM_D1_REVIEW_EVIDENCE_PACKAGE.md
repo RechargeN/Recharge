@@ -1,10 +1,10 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.13**
-- Date: **2026-08-25**
+- Version: **1.14**
+- Date: **2026-09-07**
 - Package status: **Draft review evidence — D1 exit blocked**
-- Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
+- Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
 - Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
 - Accepted decision input: [BCK-D1-DEC-01 v0.2](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
@@ -13,6 +13,21 @@
 - Runtime effect: **none**
 
 ---
+
+## 0. Revision note — post-RAW-C D1-A audit
+
+This revision records a documentation-only audit after RAW-C v0.3 hosted
+evidence and BCK-01/BCK-02/BCK-02-A1 reconciliation. It changes no Accepted
+decision and grants no runtime authority.
+
+- canonical coordination is BCK-02 v2.4.54;
+- BCK-01 is Review v0.4.50 and BCK-02-A1 is Draft v1.1;
+- BCK-09 v1.13, ECL-03C v1.11 and RAW-C v0.3 are Present in Review with all
+  nine independent Booking signatures Pending;
+- bounded R0 remains Pass, but G1-G7, R1 and product/cloud runtime remain
+  blocked or absent;
+- current-version drift in the D1 child documents is now an explicit D1-B
+  reconciliation task rather than a silent assumption.
 
 ## 1. Verdict
 
@@ -26,9 +41,11 @@ none of G1–G7 or R1–R12 is opened by this package.
 - OD-11 remains `Open`.
 - BCK-D1-DEC-01 is Accepted and closes only the request/idempotency semantic
   contradiction; it does not close executable parity.
-- `apps/backend` contains only the bounded R0 tooling scaffold; Firebase cloud
-  resources, product handlers, deployment, credentials and production
-  processing remain absent and unauthorized.
+- `apps/backend` contains bounded R0 tooling plus exactly five disabled
+  Emulator-only Booking v1 callable exports and nine RAW-C operational
+  collections. Firebase cloud resources, deployment, activation, mobile
+  integration, credentials and production processing remain absent and
+  unauthorized.
 - `RechargeN / Product owner` is assigned to all D1 roles through
   BCK-D1-SIG-01 with a combined-role disclosure. The bounded numerical Product
   baseline is recorded, but every broader D1 role sign-off remains incomplete.
@@ -61,7 +78,7 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 | OD-09 event/outbox | at least Proposed for D1; Accepted before effects | Proposed | D1 minimum met; runtime blocked |
 | OD-11 minors/age | at least Proposed for D1 | Open | Blocked |
 | conflicts logged/reconciled | required | split-key conflict closed; remaining blockers explicit | Pass with blockers |
-| runtime authorization | forbidden by D1 docs | no runtime | Pass |
+| runtime authorization | forbidden by D1 docs | bounded R0/RAW-C exist only under separate approvals; this revision creates no runtime | Pass for D1-A; no G1/G4/R1 authority |
 
 ## 3. Evidence artifact registry
 
@@ -85,9 +102,10 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 | [Runtime/toolchain technical review](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) | findings, exact minimal package/supply-chain recommendation and 48 AC | v0.2.4; completed bounded technical review | separate owner verdict recorded |
 | [R0 toolchain/emulator slice](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) | exhaustive local-only file map, commands, CI, evidence, rollback and 60 AC | v0.2.2; Pass — bounded tooling feasibility only | no G1/R1/cloud authorization |
 | [R0 approval decision record](BACKEND_R0_APPROVAL_DECISION_RECORD.md) | execution approval, immutable supply-chain controls and advisory disposition | v0.2; bounded decisions Accepted | product/cloud scope explicitly excluded |
-| [OD-01 owner decision](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) | exact toolchain disposition and preserved R1/G1 gates | Accepted v0.2 | OD-01 closed; BCK-05/G1/R1 unchanged |
+| [BCK05-OD-01 owner decision](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) | exact toolchain disposition and preserved R1/G1 gates | Accepted v0.2 | BCK05-OD-01 closed; BCK-05/G1/R1 unchanged |
 | [IAM/workload identity model](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) and [owner decision](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) | exact OIDC/WIF topology/claims, identity catalogue, least privilege, approvals, lifecycle, break-glass and 60 AC | model v0.2.1 and decision v0.2 Accepted with controls | executable fixtures/permissions/bindings/JIT/runtime evidence pending; no cloud permission |
 | [Release provenance/promotion model](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) | separate manifest/plan/receipt/promotion records, dual provenance, immutable storage, Functions boundary, rollback and 65 AC | Accepted v0.2.1 with exact [owner decision v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) | executable policy/provider evidence pending |
+| [RAW-C disabled adapter v0.3](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md) | bounded Booking v1 transaction/adapter evidence outside D1 completion | local and hosted technical gates pass; independent verdicts Pending | does not satisfy BCK-03/04/05/20 Approval, G1 or R1 |
 
 Evidence being present is not the same as evidence being accepted. Each packet
 contains its own missing proofs and signatures.
@@ -252,6 +270,14 @@ The D1-C final documentation verification recorded:
 D1-C changes only Markdown. The existing golden failure must not be relabeled
 as a D1 pass or silently updated in a backend documentation slice.
 
+The post-RAW-C D1-A audit additionally records:
+
+- stage-0 reconciliation commit `7cc2d51c54a034a78185b6543b90b275b46ff86c`;
+- BCK-02 registry checksum remains 22 BCK specifications and 6 runbooks;
+- local links in the four stage-0 documents pass with zero broken targets;
+- `git diff --check` passed and no mobile/backend runtime file changed;
+- current source-version drift listed in §8.2 remains open for D1-B.
+
 ## 8.1 Technical pre-review reconciliation
 
 The D1-C technical pass closed the following documentation contradictions
@@ -267,6 +293,25 @@ without accepting any owner decision:
 | D1-TR-06 — OD-10 paper vectors could be mistaken for executable schema fixtures | Owner-approved documentation results are separated from later API-DEC-05 executable parity. |
 | D1-TR-07 — evidence presence could be mistaken for specialist acceptance | BCK-D1-SIG-01 separates assignment, bounded Product disposition, specialist verdict and signature; broader D1 rows remain incomplete. |
 
+### 8.2 Post-RAW-C source reconciliation audit
+
+The following drift is factual and must be corrected as one D1-B docs-only
+batch. Historical changelog references remain historical and are not rewritten.
+
+| Artifact | Current artifact version | Stale current anchor/status | D1-B action |
+|---|---|---|---|
+| BCK-03 | v0.3.7 Draft | parent BCK-01 v0.4.49; BCK-02 v2.4.53; runtime stated wholly Absent | point to BCK-01 v0.4.50/BCK-02 v2.4.54 and distinguish Booking contract/disabled-adapter evidence from production API runtime |
+| BCK-04 + coverage | v0.4.16 / v0.3.16 Draft | BCK-01 v0.4.28, BCK-02 v2.4.32, BCK-03 v0.3.3 and BCK-09 v1.1 references | reconcile current anchors without accepting Security/Legal decisions or cloud controls |
+| BCK-05 + coverage | v0.2.23 Draft | BCK-01 v0.4.28, BCK-02 v2.4.32 and BCK-03 v0.3.3 references; RAW-C omitted from local-only evidence boundary | reconcile current anchors; keep bounded R0 Pass and R1/product-cloud runtime blocked |
+| BCK-20 + coverage | v0.2.2 Draft | BCK-01 v0.4.17, BCK-02 v2.4.21, BCK-05 v0.2.12 and BCK-02-A1 v1.0 references | reconcile current anchors; keep OD-10 Proposed and runtime Absent |
+| BCK-01-REV-01 | v1.10 | subject BCK-01 v0.4.28 and BCK-02 v2.4.32 | update Review-entry evidence to BCK-01 v0.4.50/BCK-02 v2.4.54 without implying Approval |
+| BCK-D1-DEC-01 | v0.2 Accepted | parent BCK-01 v0.4.24 and BCK-02 v2.4.28 | add traceability-only revision preserving the Accepted split-key/OD-07 dispositions |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.12 / v1.10 Draft | ambiguous `OD-01/02/07` wording can be confused with global OD-01/02/07; incoming package version is stale | spell out BCK05-OD-01/02/07 versus cross-domain OD-07 and retain every incomplete signature |
+
+D1-B must update the affected specifications, matrices, review records, BCK-01,
+BCK-02 and LAUNCH_STATUS atomically. It must not modify `apps/backend`, mobile,
+shared contracts, Accepted ADR or any Firebase/cloud resource.
+
 The follow-up owner instruction assigns `RechargeN / Product owner` to all
 roles. The ledger records the bounded numeric Product baseline separately from
 still-incomplete broader D1 sign-offs. The lack of
@@ -275,8 +320,9 @@ required where the specifications depend on professional legal judgment.
 
 ## 9. Explicitly absent and unauthorized
 
-- product/domain backend modules beyond the bounded local R0 tooling scaffold;
-- Firebase/GCP projects, databases, buckets, Functions, Auth/App Check setup;
+- product/domain backend modules beyond bounded local R0 and disabled RAW-C;
+- deployed Firebase/GCP projects, databases, buckets or Functions, and cloud
+  Auth/App Check setup;
 - service accounts, credentials, billing/project IDs and production secrets;
 - schema/code generation beyond already accepted Booking assets;
 - event workers, dispatch, notification delivery or replay tooling;
@@ -306,12 +352,18 @@ required where the specifications depend on professional legal judgment.
 18. **D1-REV-AC-18:** Review comments use the stable template and named owner.
 19. **D1-REV-AC-19:** unresolved conflicts fail closed.
 20. **D1-REV-AC-20:** the next action is owner review, not implementation.
+21. **D1-REV-AC-21:** disabled RAW-C evidence does not satisfy G1, G4 or R1.
+22. **D1-REV-AC-22:** `BCK05-OD-*` IDs are never conflated with cross-domain
+    `OD-*` IDs.
+23. **D1-REV-AC-23:** post-RAW-C current-version drift is explicit and blocks
+    status promotion until the D1-B atomic reconciliation passes.
+24. **D1-REV-AC-24:** D1-A changes only this evidence package and creates no
+    runtime, contract, Firebase, deployment, push or merge authority.
 
 ## 11. Final statement
 
-D1-C has completed the technical pre-review and converted owner review into an
-explicit, auditable ledger. The combined owner is assigned, but it has not
-satisfied the missing verdicts, evidence or qualified Legal conclusions.
-The platform documentation is suitable to hand to specialists; the physical
-backend remains correctly blocked until those reviews and later executable
-gates are completed.
+D1-A has re-audited the technical pre-review after RAW-C and identified the
+exact current-version reconciliation required before owner review can rely on a
+single snapshot. The combined owner remains assigned, but it has not satisfied
+the missing verdicts, evidence or qualified Legal conclusions. D1-B is the next
+docs-only stage; the physical product/cloud backend remains correctly blocked.
