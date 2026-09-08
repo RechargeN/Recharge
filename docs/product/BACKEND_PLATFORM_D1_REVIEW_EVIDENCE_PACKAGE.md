@@ -1,20 +1,29 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.14**
+- Version: **1.15**
 - Date: **2026-09-07**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
 - Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
-- Accepted decision input: [BCK-D1-DEC-01 v0.2](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
-- Owner sign-off ledger: [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
-- Combined-owner review workbook: [BCK-D1-OWN-REV-01](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Accepted decision input: [BCK-D1-DEC-01 v0.3](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
+- Owner sign-off ledger: [BCK-D1-SIG-01 v1.13](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.11](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
 
-## 0. Revision note — post-RAW-C D1-A audit
+## 0. Revision notes
+
+### v1.15 — D1-B atomic reconciliation
+
+D1-B reconciles current parent/coordination/runtime anchors across BCK-03/04/05/20,
+their coverage matrices and the D1 decision/review/sign-off chain. It preserves
+every Draft, Review, Proposed, Open, Pending and Inconclusive status. No runtime,
+Firebase, contract, ADR, deployment, push or merge authority is created.
+
+### v1.14 — post-RAW-C D1-A audit
 
 This revision records a documentation-only audit after RAW-C v0.3 hosted
 evidence and BCK-01/BCK-02/BCK-02-A1 reconciliation. It changes no Accepted
@@ -84,13 +93,13 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
-| [BCK-D1-DEC-01 v0.2](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted | semantic conflict closed; OD-07 status reconciled without runtime authority |
+| [BCK-D1-DEC-01 v0.3](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted traceability amendment | semantic conflict closed; OD-07 status reconciled without runtime authority |
 | [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | exact owner verdict recorded | OD-07 Accepted with controls; no cloud permission |
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.12; toolchain/IAM/release/platform decisions recorded; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.10; toolchain/IAM/release/platform decisions recorded | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.13; toolchain/IAM/release/platform decisions recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recommended verdicts | Draft v1.11; toolchain/IAM/release/platform decisions recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -293,24 +302,24 @@ without accepting any owner decision:
 | D1-TR-06 — OD-10 paper vectors could be mistaken for executable schema fixtures | Owner-approved documentation results are separated from later API-DEC-05 executable parity. |
 | D1-TR-07 — evidence presence could be mistaken for specialist acceptance | BCK-D1-SIG-01 separates assignment, bounded Product disposition, specialist verdict and signature; broader D1 rows remain incomplete. |
 
-### 8.2 Post-RAW-C source reconciliation audit
+### 8.2 Post-RAW-C source reconciliation result
 
-The following drift is factual and must be corrected as one D1-B docs-only
-batch. Historical changelog references remain historical and are not rewritten.
+The factual drift identified by v1.14 is corrected by one D1-B docs-only batch.
+Historical changelog references remain historical and are not rewritten.
 
-| Artifact | Current artifact version | Stale current anchor/status | D1-B action |
-|---|---|---|---|
-| BCK-03 | v0.3.7 Draft | parent BCK-01 v0.4.49; BCK-02 v2.4.53; runtime stated wholly Absent | point to BCK-01 v0.4.50/BCK-02 v2.4.54 and distinguish Booking contract/disabled-adapter evidence from production API runtime |
-| BCK-04 + coverage | v0.4.16 / v0.3.16 Draft | BCK-01 v0.4.28, BCK-02 v2.4.32, BCK-03 v0.3.3 and BCK-09 v1.1 references | reconcile current anchors without accepting Security/Legal decisions or cloud controls |
-| BCK-05 + coverage | v0.2.23 Draft | BCK-01 v0.4.28, BCK-02 v2.4.32 and BCK-03 v0.3.3 references; RAW-C omitted from local-only evidence boundary | reconcile current anchors; keep bounded R0 Pass and R1/product-cloud runtime blocked |
-| BCK-20 + coverage | v0.2.2 Draft | BCK-01 v0.4.17, BCK-02 v2.4.21, BCK-05 v0.2.12 and BCK-02-A1 v1.0 references | reconcile current anchors; keep OD-10 Proposed and runtime Absent |
-| BCK-01-REV-01 | v1.10 | subject BCK-01 v0.4.28 and BCK-02 v2.4.32 | update Review-entry evidence to BCK-01 v0.4.50/BCK-02 v2.4.54 without implying Approval |
-| BCK-D1-DEC-01 | v0.2 Accepted | parent BCK-01 v0.4.24 and BCK-02 v2.4.28 | add traceability-only revision preserving the Accepted split-key/OD-07 dispositions |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.12 / v1.10 Draft | ambiguous `OD-01/02/07` wording can be confused with global OD-01/02/07; incoming package version is stale | spell out BCK05-OD-01/02/07 versus cross-domain OD-07 and retain every incomplete signature |
+| Artifact | Reconciled version | D1-B result |
+|---|---|---|
+| BCK-03 | v0.3.8 Draft | current BCK-01/BCK-02/BCK-09 anchors and bounded-versus-product runtime split recorded |
+| BCK-04 + coverage | v0.4.17 / v0.3.17 Draft | current platform/API/Booking anchors recorded; Security/Legal blockers unchanged |
+| BCK-05 + coverage | v0.2.24 Draft | current platform/API/Security/roadmap anchors and R0/RAW-C boundary recorded; R1 blocked |
+| BCK-20 + coverage | v0.2.3 Draft | current anchors recorded; OD-10 and runtime remain unresolved |
+| BCK-01-REV-01 | v1.11 | Review-entry evidence points to BCK-01 v0.4.51/BCK-02 v2.4.55 without implying Approval |
+| BCK-D1-DEC-01 | v0.3 Accepted traceability amendment | split-key and OD-07 dispositions unchanged |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.13 / v1.11 Draft | BCK05-OD namespace separated from global OD namespace; signatures unchanged |
 
-D1-B must update the affected specifications, matrices, review records, BCK-01,
-BCK-02 and LAUNCH_STATUS atomically. It must not modify `apps/backend`, mobile,
-shared contracts, Accepted ADR or any Firebase/cloud resource.
+D1-B updates the affected specifications, matrices, review records, BCK-01,
+BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It modifies no `apps/backend`,
+mobile, shared contract, Accepted ADR or Firebase/cloud resource.
 
 The follow-up owner instruction assigns `RechargeN / Product owner` to all
 roles. The ledger records the bounded numeric Product baseline separately from
@@ -355,15 +364,18 @@ required where the specifications depend on professional legal judgment.
 21. **D1-REV-AC-21:** disabled RAW-C evidence does not satisfy G1, G4 or R1.
 22. **D1-REV-AC-22:** `BCK05-OD-*` IDs are never conflated with cross-domain
     `OD-*` IDs.
-23. **D1-REV-AC-23:** post-RAW-C current-version drift is explicit and blocks
-    status promotion until the D1-B atomic reconciliation passes.
+23. **D1-REV-AC-23:** post-RAW-C current-version drift must block status
+    promotion until an atomic reconciliation passes; v1.15 records that pass
+    without promoting D1.
 24. **D1-REV-AC-24:** D1-A changes only this evidence package and creates no
     runtime, contract, Firebase, deployment, push or merge authority.
+25. **D1-REV-AC-25:** D1-B reconciles the exact source chain atomically while
+    preserving all unresolved owner, specialist, Legal, Finance and runtime gates.
 
 ## 11. Final statement
 
-D1-A has re-audited the technical pre-review after RAW-C and identified the
-exact current-version reconciliation required before owner review can rely on a
-single snapshot. The combined owner remains assigned, but it has not satisfied
-the missing verdicts, evidence or qualified Legal conclusions. D1-B is the next
-docs-only stage; the physical product/cloud backend remains correctly blocked.
+D1-B has reconciled the post-RAW-C source chain so owner review can use one
+current snapshot. The combined owner remains assigned, but it has not satisfied
+the missing verdicts, evidence or qualified Legal conclusions. The next stage
+is evidence-based D1 owner decision/amendment closure; physical product/cloud
+backend remains correctly blocked.

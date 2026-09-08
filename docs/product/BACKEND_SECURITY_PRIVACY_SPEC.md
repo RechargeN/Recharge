@@ -1,18 +1,18 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.16**
-- Date: **2026-08-25**
+- Version: **0.4.17**
+- Date: **2026-09-07**
 - Spec status: **Draft — architecture review required**
-- Runtime status: **Absent**
+- Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.28](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.32](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
-  [BCK-09 v1.1](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.16
+- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.8](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
+  [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.17
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
 - IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (BCK05-OD-02 Accepted with controls)
@@ -26,6 +26,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.17 — 2026-09-07
+
+- reconciled current anchors to BCK-01 v0.4.51, BCK-02 v2.4.55,
+  BCK-03 v0.3.8, BCK-09 v1.13 and coverage v0.3.17;
+- recorded bounded default-deny and RAW-C Emulator security evidence without
+  claiming cloud IAM, Rules, App Check, deployment or production processing;
+- retained Draft status, OD-11 Open, BCK04-OD-01/09 Proposed and every
+  Security/Privacy/qualified-Legal review blocker;
+- changed no runtime, Firebase resource, policy decision or Accepted ADR.
 
 ### v0.4.16 — 2026-08-25
 
@@ -632,7 +642,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.3, BCK-09 v1.1, ECL-03 v1.2 and ECL-03C v1.1:
+contract across BCK-03 v0.3.8, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -1336,7 +1346,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.17 Review:
+executable slice, согласованный с BCK-01 v0.4.51 Review:
 
 ```text
 docs/runbooks/
@@ -1404,7 +1414,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.8.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved

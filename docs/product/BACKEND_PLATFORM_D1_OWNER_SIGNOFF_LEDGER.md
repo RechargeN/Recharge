@@ -1,16 +1,23 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.12**
-- Date: **2026-08-25**
-- Status: **Draft ledger — OD-01/OD-02/OD-07 recorded; D1 sign-offs incomplete**
+- Version: **1.13**
+- Date: **2026-09-07**
+- Status: **Draft ledger — BCK05-OD-01/02/07 and cross-domain OD-07 recorded; D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.13](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.10](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.15](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.11](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Runtime effect: **none**
 
 ---
+
+## 0. D1-B reconciliation
+
+Current anchors and artifact versions are reconciled without changing a single
+review verdict. BCK05-OD-01/02/07 are explicitly distinct from cross-domain
+OD-01/02/07. Every incomplete specialist signature remains Pending and
+qualified Legal/Privacy evidence remains absent.
 
 ## 1. Purpose and verdict
 
@@ -90,10 +97,10 @@ accepts its accountability.
 
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
-| BCK-03 v0.3.3 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
-| BCK-04 v0.4.16 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 and BCK05-OD-02/07 Accepted with controls; broader review pending |
-| BCK-05 v0.2.23 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01/02/07 and cross-domain OD-07 Acceptance are Present; executable release/IAM and other OD/specialist/stage/product-cloud evidence remains pending |
-| BCK-20 v0.2.2 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; review pending |
+| BCK-03 v0.3.8 | D1-SIG-API | D1-SIG-OPS, D1-SIG-SEC, D1-SIG-MOBILE | Assigned; review pending |
+| BCK-04 v0.4.17 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Assigned; OD-07 and BCK05-OD-02/07 Accepted with controls; broader review pending |
+| BCK-05 v0.2.24 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01/02/07 and cross-domain OD-07 Acceptance are Present; executable release/IAM and other OD/specialist/stage/product-cloud evidence remains pending |
+| BCK-20 v0.2.3 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | Assigned; OD-10 Proposed; review pending |
 | BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |

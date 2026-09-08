@@ -1,11 +1,11 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.1
-- Дата: 2026-09-06
+- Версия: 1.2
+- Дата: 2026-09-07
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4.54](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
@@ -41,7 +41,7 @@ Media, Notifications, Library, Reviews, Trust & Safety, Event Booking,
 Scenario, Quick Plan, Route, Admin/Support, analytics и optional gated
 Provider/AI/Payments integrations.
 
-### 0.1. Execution snapshot — 2026-09-06
+### 0.1. Execution snapshot — 2026-09-07
 
 - G0 пройден; registry остаётся `22 BCK + 6 RUN`.
 - Bounded R0 local toolchain и hosted Ubuntu/Windows evidence имеют статус
@@ -52,7 +52,11 @@ Provider/AI/Payments integrations.
 - RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
   Review, production Identity/Event projection/mobile/deployment отсутствуют.
 - G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
-- Следующий последовательный этап — D1/G1 closure для BCK-01/03/04/05/20.
+- D1-B current-version reconciliation is complete: BCK-01 v0.4.51,
+  BCK-03 v0.3.8, BCK-04 v0.4.17, BCK-05 v0.2.24 and BCK-20 v0.2.3 form one
+  review snapshot. Their statuses and owner/signature blockers are unchanged.
+- Следующий последовательный этап — evidence-based D1 owner
+  decision/amendment closure; G1 остаётся blocked.
 
 ## 1. Приоритет и границы
 
@@ -1332,12 +1336,13 @@ inconclusive.
 
 Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 v0.4.50 Review и reconciliation evidence.
-2. BCK-03/04/05/20 named-owner review и evidence-based verdicts.
+1. BCK-01 v0.4.51 Review и BCK-01-REV-01 v1.11 evidence.
+2. BCK-03 v0.3.8, BCK-04 v0.4.17, BCK-05 v0.2.24 и BCK-20 v0.2.3
+   named-owner review и evidence-based verdicts.
 3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
    выбора topology.
-4. BCK-D1 sign-off ledger и reconciliation report с BCK-02, Architecture
-   Baseline и LAUNCH_STATUS.
+4. BCK-D1-REV-01 v1.15, sign-off ledger v1.13 и workbook v1.11 с
+   evidence-based responses; никаких inferred signatures.
 5. Отдельный R1 exact file/rollback/evidence plan только после G1; существующие
    R0/RAW-C файлы не дают R1 authority.
 

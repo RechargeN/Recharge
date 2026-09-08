@@ -1,19 +1,24 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.2**
-- Date: **2026-08-24**
+- Version: **0.3**
+- Date: **2026-09-07**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
-- Runtime status: **Absent**
+- Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.24](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.28](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
 
 ---
 
 ## 0. Revision note
+
+v0.3 is a traceability-only D1-B amendment. It points the existing Accepted
+split-key reconciliation and OD-07 disposition to BCK-01 v0.4.51/BCK-02
+v2.4.55. It does not alter any decision, approve a child BCK, close G1 or grant
+runtime/Firebase authority.
 
 v0.2 preserves the Accepted Booking split-key decision and reconciles the
 later exact [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md)

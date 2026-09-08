@@ -1,16 +1,16 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.23**
-- Date: **2026-08-25**
+- Version: **0.2.24**
+- Date: **2026-09-07**
 - Spec status: **Draft — Platform Operations review required**
-- Runtime status: **Local R0 tooling scaffold Present; product/cloud runtime Absent**
+- Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud operations runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.28](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.32](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Security/privacy boundary: [BCK-04 v0.4.16](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted)
+- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.8](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
+- Security/privacy boundary: [BCK-04 v0.4.17](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
@@ -30,13 +30,23 @@
 - R0 approval record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.2 (bounded execution and advisory disposition; no production approval)
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
 - Infrastructure input: [FIREBASE_ARCHITECTURE v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
-- Delivery annex: [BCK-02-A1 v1.0](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.2](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.24 — 2026-09-07
+
+- reconciled current anchors to BCK-01 v0.4.51, BCK-02 v2.4.55,
+  BCK-03 v0.3.8, BCK-04 v0.4.17 and BCK-02-A1 v1.2;
+- recorded bounded R0 and disabled RAW-C source evidence without claiming R1,
+  cloud resources, release execution, deployment or product runtime;
+- clarified BCK04-OD and BCK05-OD namespaces and retained every open specialist,
+  SLO, cost, recovery, incident and executable-control blocker;
+- changed no workflow, infrastructure, credential, Firebase or runtime file.
 
 ### v0.2.23 — 2026-08-25
 
@@ -977,7 +987,7 @@ therefore remains Draft.
 47. **BCK-05-AC-47:** runbooks derive from actual deployed topology.
 48. **BCK-05-AC-48:** target file map is not runtime authorization.
 49. **BCK-05-AC-49:** Approval still requires a separate executable slice/G1.
-50. **BCK-05-AC-50:** v0.2.3 creates no backend/Firebase/resource/runtime effect.
+50. **BCK-05-AC-50:** v0.2.24 creates no backend/Firebase/resource/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic removal/change requires a
 new revision and reference migration note.

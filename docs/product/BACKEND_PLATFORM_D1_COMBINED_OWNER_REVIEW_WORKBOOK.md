@@ -1,18 +1,24 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.10**
-- Date: **2026-08-25**
-- Status: **Draft workbook — OD-01/OD-02/OD-07 accepted; remaining D1 verdicts required**
+- Version: **1.11**
+- Date: **2026-09-07**
+- Status: **Draft workbook — BCK05-OD-01/02/07 and cross-domain OD-07 accepted; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
-- Runtime status: **Local R0 tooling Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
+- Parent review package: [BCK-D1-REV-01 v1.15](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.13](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Runtime effect: **none**
 
 ---
+
+## 0. D1-B reconciliation
+
+This revision synchronizes current artifact versions and decision namespaces.
+It records no new owner verdict: every Pending or Inconclusive row remains so,
+and qualified Legal/Privacy evidence remains absent.
 
 ## 1. What this workbook does
 
@@ -83,7 +89,7 @@ models or review evidence before an effective verdict.
 | Recovery targets | `BCK05-OD-05` | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) now supplies record-family RPO/RTO, protection, isolated restore, privacy reconciliation and drills | **Product baseline recorded; OD-05 Proposed; Platform/Privacy/domain verdict and restore evidence pending** |
 | Cost containment | `BCK05-OD-04` | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) now supplies five envelopes, formulas, directional estimates, EUR alert levels and safe containment actions | **Product baseline recorded; OD-04 Proposed; Finance Inconclusive; Operations/EUR SKU/stage evidence pending** |
 | Numeric cross-model review | `BCK05-OD-03/04/05` | [BCK05-NUM-REV-01 v0.2](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) reconciles exact SLO v0.1, cost v0.2 and recovery v0.1, including the backup-cost correction and bounded verdict | **Product baseline accepted for stage validation; Operations/Security require evidence; Finance/Legal Inconclusive; no status promotion** |
-| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain status record v0.3.4, technical review v0.2.4, R0 v0.2.2/result, OD-01 decision v0.2, IAM model v0.2.1, IAM decision v0.2, release model v0.2.1 and OD-07 release decision v0.2 | **BCK05-OD-01/02/07 Accepted with controls; executable release/IAM/cloud/runtime evidence remains absent** |
+| Runtime, identity and deployment controls | `BCK05-OD-01`, `BCK05-OD-02`, `BCK05-OD-07` | Toolchain status record v0.3.4, technical review v0.2.4, R0 v0.2.2/result, BCK05-OD-01 decision v0.2, IAM model v0.2.1, BCK05-OD-02 decision v0.2, release model v0.2.1 and BCK05-OD-07 release decision v0.2 | **BCK05-OD-01/02/07 Accepted with controls; executable release/IAM/cloud/runtime evidence remains absent** |
 | Localization decision record | `OD-10`, `BCK20-OD-01`–`07` | exact LV policy, EE/LT disabled policy, review workflow, distribution/deprecation choices | keep OD-10 Proposed until complete |
 
 The combined owner may approve the completed technical record, but the record
@@ -158,10 +164,10 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
-| BCK-03 v0.3.3 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
-| BCK-04 v0.4.16 | retain Draft | OD-07 and the BCK05-OD-02/07 policies are Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.23 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
-| BCK-20 v0.2.2 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
+| BCK-03 v0.3.8 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
+| BCK-04 v0.4.17 | retain Draft | OD-07 and the BCK05-OD-02/07 policies are Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.24 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-20 v0.2.3 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |

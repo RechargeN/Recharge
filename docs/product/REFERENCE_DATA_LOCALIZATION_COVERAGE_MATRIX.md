@@ -1,14 +1,21 @@
 # BCK-20 — Reference Data & Localization Coverage Matrix
 
 - ID: **BCK-20-PRE**
-- Version: **0.2.2**
-- Date: **2026-08-20**
+- Version: **0.2.3**
+- Date: **2026-09-07**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Reference Data owner**
-- Target: [BCK-20 v0.2.2](REFERENCE_DATA_LOCALIZATION_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-20 v0.2.3](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_COVERAGE_MATRIX.md`
+
+## 0. D1-B reconciliation
+
+Current anchors are BCK-01 v0.4.51, BCK-02 v2.4.55, BCK-03 v0.3.8,
+BCK-04 v0.4.17, BCK-05 v0.2.24, BCK-20 v0.2.3 and BCK-02-A1 v1.2.
+OD-10 and every specialist verdict remain unresolved; runtime remains Absent.
+This docs-only update promotes no decision.
 
 ## 1. Purpose
 
@@ -21,14 +28,14 @@ schemas, translations, datasets, Firebase resources, mobile adapters or runtime.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.17 | Review; runtime Absent | Parent market/reference boundary |
-| BCK-02 v2.4.21 | Approved semantic baseline | Registry/gates/template |
-| BCK-03 v0.3.3 | Draft; runtime Absent | Wire/version input; split-key reconciled, LocalizedText delegated |
-| BCK-04 v0.4.10 | Draft; runtime Absent; OD-01/OD-09 Proposed | Legal/privacy/retention/incident boundary |
-| BCK-05 v0.2.12 | Draft; runtime Absent; OD-01/02/03/04/05/07/08 Proposed | Distribution/operations input |
+| BCK-01 v0.4.51 | Review; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent market/reference boundary |
+| BCK-02 v2.4.55 | Approved semantic baseline | Registry/gates/template |
+| BCK-03 v0.3.8 | Draft; bounded Booking evidence Present, deployed/mobile API runtime Absent | Wire/version input; split-key reconciled, LocalizedText delegated |
+| BCK-04 v0.4.17 | Draft; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed | Legal/privacy/retention/incident boundary |
+| BCK-05 v0.2.24 | Draft; bounded R0/RAW-C local evidence boundary; BCK05-OD-01/02/07 Accepted and BCK05-OD-03/04/05/08 Proposed | Distribution/operations input |
 | Category System v1.4.3 | Accepted | Taxonomy identity/source invariant |
-| BCK-02-A1 v1.0 | Draft; docs only | Latvia/Baltics execution input |
-| BCK-20 v0.2.2 | Draft; runtime Absent | Single target Reference Data contract |
+| BCK-02-A1 v1.2 | Draft; docs only | Latvia/Baltics execution input |
+| BCK-20 v0.2.3 | Draft; runtime Absent | Single target Reference Data contract |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -122,6 +129,6 @@ evidence, not executable fixtures or decision acceptance.
 
 ## 8. Verdict
 
-BCK-20 v0.2.2 is structurally complete and preserves the accepted taxonomy. It
+BCK-20 v0.2.3 is structurally complete and preserves the accepted taxonomy. It
 remains Draft until §6 blockers and OD-10 evidence are resolved. No schema,
 dataset service, translation workflow, mobile adapter or runtime is authorized.

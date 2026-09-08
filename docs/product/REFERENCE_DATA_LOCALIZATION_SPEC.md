@@ -1,24 +1,33 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.2**
-- Date: **2026-08-20**
+- Version: **0.2.3**
+- Date: **2026-09-07**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.17](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.21](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.3](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Operations boundary: [BCK-05 v0.2.12](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.8](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
+- Operations boundary: [BCK-05 v0.2.24](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
-- Delivery annex: [BCK-02-A1 v1.0](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.2](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.3 — 2026-09-07
+
+- reconciled current anchors to BCK-01 v0.4.51, BCK-02 v2.4.55,
+  BCK-03 v0.3.8, BCK-05 v0.2.24 and BCK-02-A1 v1.2;
+- retained OD-10 Proposed, all Reference/Localization/API/Mobile/Content/Legal
+  verdicts Pending and runtime Absent;
+- changed no taxonomy, LocalizedText rule, dataset, schema, fixture, mobile
+  adapter, Firebase resource or runtime behavior.
 
 ### v0.2.2 — 2026-08-20
 
@@ -704,7 +713,7 @@ qualified Legal evidence remain absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.2 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.3 creates no backend/schema/mobile/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
