@@ -1,21 +1,28 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.16**
+- Version: **1.17**
 - Date: **2026-09-08**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
 - Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
 - Accepted decision input: [BCK-D1-DEC-01 v0.4](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
-- Owner sign-off ledger: [BCK-D1-SIG-01 v1.14](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
-- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.12](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Owner sign-off ledger: [BCK-D1-SIG-01 v1.15](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.13](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
+- Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Revision notes
+
+### v1.17 — BCK-03 Operations boundary verdict
+
+D1-SIG-OPS is recorded as Accept with required amendments for the BCK-03
+boundary only. Independent Operations evidence, BCK-05 Approval, stage proof,
+D1/G1 and runtime remain blocked.
 
 ### v1.16 — Owner Batch A evidence
 
@@ -102,14 +109,15 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
-| [BCK-D1-DEC-01 v0.4](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted traceability amendment | semantic conflict closed; OD-07 status reconciled without runtime authority |
+| [BCK-D1-DEC-01 v0.5](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted traceability amendment | semantic conflict closed; OD-07 status reconciled without runtime authority |
 | [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md) | bounded API dispositions and BCK-03 owner review verdict | Accepted with controls; documentation only | D1-SIG-API recorded; all peer/independent/runtime gates preserved |
+| [BCK03-OPS-REV-01 v0.2](BACKEND_API_OPERATIONS_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md) | bounded BCK-03 API/Operations seam and required amendments | owner verdict recorded; independent evidence pending | D1-SIG-OPS recorded for BCK-03 only; BCK-05/G1/R1 unchanged |
 | [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | exact owner verdict recorded | OD-07 Accepted with controls; no cloud permission |
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.14; Owner Batch A and prior bounded decisions recorded; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.12; Owner Batch A recorded | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.15; Owner Batch A and bounded D1-SIG-OPS recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.13; Owner Batch A and bounded D1-SIG-OPS recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -312,24 +320,27 @@ without accepting any owner decision:
 | D1-TR-06 — OD-10 paper vectors could be mistaken for executable schema fixtures | Owner-approved documentation results are separated from later API-DEC-05 executable parity. |
 | D1-TR-07 — evidence presence could be mistaken for specialist acceptance | BCK-D1-SIG-01 separates assignment, bounded Product disposition, specialist verdict and signature; broader D1 rows remain incomplete. |
 
-### 8.2 Post-RAW-C source reconciliation result
+### 8.2 Current source reconciliation result
 
-The factual drift identified by v1.14 is corrected by one D1-B docs-only batch.
-Historical changelog references remain historical and are not rewritten.
+The factual drift identified by v1.14 was corrected by the D1-B docs-only
+batch. Current versions below include the later bounded owner-verdict
+reconciliations. Historical changelog references remain historical and are not
+rewritten.
 
-| Artifact | Reconciled version | D1-B result |
+| Artifact | Reconciled version | Current result |
 |---|---|---|
-| BCK-03 | v0.3.9 Draft; owner review Accept with required amendments | broader API-DEC-01–05 scopes Deferred; Accepted Booking-v1 API-DEC-01/03 preserved; other boundary reviews Pending |
-| BCK-04 + coverage | v0.4.18 / v0.3.18 Draft | current platform/API/Booking anchors recorded; Security/Legal blockers unchanged |
-| BCK-05 + coverage | v0.2.25 Draft | current platform/API/Security/roadmap anchors and R0/RAW-C boundary recorded; R1 blocked |
-| BCK-20 + coverage | v0.2.4 Draft | current anchors recorded; OD-10 and runtime remain unresolved |
-| BCK-01-REV-01 | v1.12 | Review-entry evidence points to BCK-01 v0.4.52/BCK-02 v2.4.56 without implying Approval |
-| BCK-D1-DEC-01 | v0.3 Accepted traceability amendment | split-key and OD-07 dispositions unchanged |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.14 / v1.12 | Owner Batch A recorded; all other signatures unchanged |
+| BCK-03 | v0.3.10 Draft; API/Operations reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; Security/Mobile and independent evidence Pending |
+| BCK-04 + coverage | v0.4.19 / v0.3.19 Draft | current platform/API/Booking anchors recorded; Security/Legal blockers unchanged |
+| BCK-05 + coverage | v0.2.26 Draft | current platform/API/Security/roadmap anchors and R0/RAW-C boundary recorded; bounded BCK-03 Operations verdict does not accept BCK-05; R1 blocked |
+| BCK-20 + coverage | v0.2.5 Draft | current anchors recorded; OD-10 and runtime remain unresolved |
+| BCK-01-REV-01 | v1.13 | Review-entry evidence points to BCK-01 v0.4.53/BCK-02 v2.4.57 without implying Approval |
+| BCK-D1-DEC-01 | v0.5 Accepted traceability amendment | split-key and OD-07 dispositions unchanged |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.15 / v1.13 | Owner Batch A and bounded D1-SIG-OPS recorded; all other signatures unchanged |
 
-D1-B updates the affected specifications, matrices, review records, BCK-01,
-BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It modifies no `apps/backend`,
-mobile, shared contract, Accepted ADR or Firebase/cloud resource.
+The current reconciliation updates the affected specifications, matrices,
+review records, BCK-01, BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It
+modifies no `apps/backend`, mobile, shared contract, Accepted ADR or
+Firebase/cloud resource.
 
 The follow-up owner instruction assigns `RechargeN / Product owner` to all
 roles. The ledger records the bounded numeric Product baseline separately from
@@ -383,11 +394,13 @@ required where the specifications depend on professional legal judgment.
     preserving all unresolved owner, specialist, Legal, Finance and runtime gates.
 26. **D1-REV-AC-26:** Owner Batch A records only D1-SIG-API and the named API
     dispositions; it preserves every other signature and runtime gate.
+27. **D1-REV-AC-27:** BCK03-OPS-DEC-01 records only the BCK-03 Operations
+    boundary verdict and does not approve BCK-05 or runtime.
 
 ## 11. Final statement
 
 Owner Batch A is recorded against the reconciled post-RAW-C source chain.
-BCK-03 remains Draft because the Operations, Security/Privacy and Mobile
-boundary verdicts and required independent evidence are incomplete. The next
-stage is those evidence-based reviews plus the remaining BCK-04/BCK-05/BCK-20
+BCK-03 remains Draft because the Security/Privacy and Mobile boundary verdicts
+and required independent evidence are incomplete. The next stage is those
+reviews plus the remaining BCK-04/BCK-05/BCK-20
 owner decisions; physical product/cloud backend remains correctly blocked.

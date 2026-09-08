@@ -1,14 +1,15 @@
 # Recharge Backend — API Operations Boundary Review
 
 - ID: **BCK03-OPS-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-08**
-- Status: **Draft review evidence — D1-SIG-OPS verdict pending**
-- Review result: **Accept with required amendments — recommendation only**
+- Status: **Owner verdict recorded — independent evidence pending**
+- Review result: **Accept with required amendments**
 - Reviewer independence: **not evidenced**
-- Target: [BCK-03 v0.3.9](BACKEND_API_CONTRACT_STANDARD.md)
-- Operations baseline: [BCK-05 v0.2.25](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Target: [BCK-03 v0.3.10](BACKEND_API_CONTRACT_STANDARD.md)
+- Operations baseline: [BCK-05 v0.2.26](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
 - Owner API decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
+- Operations owner decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Scope
@@ -58,8 +59,9 @@ BCK-03 remains Draft. BCK-05 remains Draft. OD-09 remains Proposed.
 Runtime, Firebase, deployment, push and merge are not authorized.
 ```
 
-This recommendation becomes a recorded verdict only after explicit owner
-approval. Until then, `D1-SIG-OPS` remains Pending.
+The Product owner explicitly accepted this recommendation on 2026-09-08.
+`D1-SIG-OPS` is therefore recorded as Accept with required amendments, while
+independent Operations evidence and all protected runtime gates remain open.
 
 ## 5. Acceptance criteria
 
@@ -73,6 +75,6 @@ approval. Until then, `D1-SIG-OPS` remains Pending.
 8. **BCK03-OPS-AC-08:** OD-09 remains Proposed and effects disabled.
 9. **BCK03-OPS-AC-09:** BCK-03 and BCK-05 remain Draft.
 10. **BCK03-OPS-AC-10:** independent review is not claimed.
-11. **BCK03-OPS-AC-11:** D1-SIG-OPS stays Pending before explicit approval.
+11. **BCK03-OPS-AC-11:** D1-SIG-OPS records only the explicit bounded verdict.
 12. **BCK03-OPS-AC-12:** no runtime, Firebase, deployment, push or merge
     authority is created.
