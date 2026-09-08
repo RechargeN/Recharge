@@ -1,18 +1,19 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.19**
+- Version: **0.4.20**
 - Date: **2026-09-08**
 - Spec status: **Draft — architecture review required**
 - Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.53](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.57](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.10](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations reviews accepted with required amendments),
+- Parent architecture: [BCK-01 v0.4.54](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.11](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security boundary reviews accepted with required amendments),
   [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.19
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.20
+- API security boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
 - IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (BCK05-OD-02 Accepted with controls)
@@ -26,6 +27,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.20 — 2026-09-08
+
+- recorded bounded D1-SIG-SEC acceptance for the BCK-03 boundary and the ten
+  required API amendments through BCK03-SEC-DEC-01;
+- retained BCK-04 Draft, BCK04-OD-01/09 and OD-09 Proposed, OD-11 Open,
+  D1-SIG-LEGAL/Mobile/independent verdicts pending and runtime Absent;
+- reconciled BCK-01 v0.4.54, BCK-02 v2.4.58 and BCK-03 v0.3.11 without
+  claiming BCK-04, Legal or runtime approval.
 
 ### v0.4.19 — 2026-09-08
 
@@ -657,7 +667,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.10, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
+contract across BCK-03 v0.3.11, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -1361,7 +1371,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.53 Review:
+executable slice, согласованный с BCK-01 v0.4.54 Review:
 
 ```text
 docs/runbooks/
@@ -1429,7 +1439,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.10.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.11.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1489,11 +1499,10 @@ Client input schema для `actorContext` намеренно отсутству�
   decision remains Open until a qualified owner selects a policy.
 
 Current readiness: the BCK-01 and coverage prerequisites plus interim
-coordination are evidenced. D1-SIG-SEC and D1-SIG-LEGAL are assigned to the
-combined owner in
-[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md), but both verdicts
-remain Pending and qualified Legal/Privacy evidence is not established. BCK-04
-therefore remains Draft and cannot enter Review yet.
+coordination are evidenced. The combined owner accepted D1-SIG-SEC only for
+the BCK-03 API boundary through BCK03-SEC-DEC-01. BCK-04's own Security owner
+verdict, independent assessment, D1-SIG-LEGAL and qualified Legal/Privacy
+evidence remain absent. BCK-04 therefore remains Draft and cannot enter Review.
 
 ### 30.2 Definition of Done Approved BCK-04
 
@@ -1632,7 +1641,7 @@ therefore remains Draft and cannot enter Review yet.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.16 отсутствует:
+На момент v0.4.20 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

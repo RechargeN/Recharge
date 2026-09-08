@@ -1,25 +1,26 @@
 # BCK-04 — Security & Privacy Coverage Matrix
 
 - ID: **BCK-04-PRE**
-- Version: **0.3.19**
+- Version: **0.3.20**
 - Date: **2026-09-08**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Security/Privacy owner**
-- Target document: [BCK-04 v0.4.19](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.57](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target document: [BCK-04 v0.4.20](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md`
 
 ---
 
 ## 0. Назначение
 
-### v0.3.19 Operations-verdict reconciliation
+### v0.3.20 API Security-boundary reconciliation
 
-Current anchors are BCK-01 v0.4.53, BCK-02 v2.4.57, BCK-03 v0.3.10,
-BCK-04 v0.4.19 and BCK-09 v1.13. BCK-03's API/Operations verdicts do not
-supply a Security or independent signature. Product/cloud Security runtime,
-OD-11 and qualified evidence remain Absent/Open; no BCK-04 status is promoted.
+Current anchors are BCK-01 v0.4.54, BCK-02 v2.4.58, BCK-03 v0.3.11,
+BCK-04 v0.4.20 and BCK-09 v1.13. BCK03-SEC-DEC-01 accepts only the BCK-03
+Security/Privacy boundary amendments. It does not accept BCK-04, its threat or
+incident decisions, independent review or qualified Legal evidence.
+Product/cloud Security runtime remains Absent and no BCK-04 status is promoted.
 
 Эта матрица доказывает полноту BCK-04 относительно обязательной структуры
 `BCK-02 §14` и фиксирует reconciliation до перевода BCK-04 в Review. Она не
@@ -39,15 +40,15 @@ executed/passed tabletop evidence remain blocked.
 | Источник | Фактический статус в tracked checkout | Роль в reconciliation |
 |---|---|---|
 | Accepted ADR 0013, 0015, 0019 | Accepted | Непереопределяемые identity, capability и Booking authority invariants |
-| BCK-01 | Review v0.4.53, Present; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
-| BCK-02 | Approved v2.4.57; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
-| BCK-03 | Draft v0.3.10, Present; API/Operations reviews Accept with required amendments; Security/Mobile/independent reviews Pending | API envelope/versioning/idempotency input; Booking-v1 accepted scope preserved, broader decisions Deferred |
-| BCK-05 | Draft v0.2.26, Present; local R0 plus disabled RAW-C evidence boundary; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted | Operations/IAM/release/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
-| BCK-20 | Draft v0.2.5, Present; runtime Absent | Market/reference/localization input, ещё не Accepted |
+| BCK-01 | Review v0.4.54, Present; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
+| BCK-02 | Approved v2.4.58; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
+| BCK-03 | Draft v0.3.11, Present; API/Operations/Security boundary reviews Accept with required amendments; Mobile/independent reviews Pending | API envelope/versioning/idempotency input; Booking-v1 accepted scope preserved, broader decisions Deferred |
+| BCK-05 | Draft v0.2.27, Present; local R0 plus disabled RAW-C evidence boundary; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted | Operations/IAM/release/OD-07/SLO/cost/recovery/numeric-review/incident evidence input, ещё не Approved |
+| BCK-20 | Draft v0.2.6, Present; runtime Absent | Market/reference/localization input, ещё не Accepted |
 | BCK-09 | Review v1.13; disabled Emulator-only RAW-C Present, cloud/mobile runtime Absent | Booking-specific transaction/security input, ещё не Approved |
 | Identity/Publisher spec | Approved v1.3, bounded local/mock scope | Identity semantics; не production authority |
 | Firebase Architecture | Proposed v2.2 | Proposed input only; не наследуется как settled решение |
-| BCK-04 | Draft v0.4.19; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02/07 Accepted with controls | Единственный target security/privacy contract |
+| BCK-04 | Draft v0.4.20; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02/07 Accepted with controls | Единственный target security/privacy contract; BCK03-SEC-DEC-01 is API-boundary only |
 | BCK04-OD01-TM-01 | Draft v0.1; runtime N/A | Full threat-model evidence; OD-01 Proposed, not Accepted |
 | BCK04-OD09-IR-01 | Draft v0.1; runtime N/A | Incident/severity/privacy-risk evidence; OD-09/BCK05-OD-08 Proposed |
 | BCK04-OD09-TTX-01 | Ready v0.1; not executed; runtime N/A | Repeatable tabletop package; no result or gate closure |
@@ -58,7 +59,7 @@ executed/passed tabletop evidence remain blocked.
 
 ## 2. Coverage matrix — 22 обязательных пункта
 
-| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.19 | Evidence / остаток |
+| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.20 | Evidence / остаток |
 |---:|---|---|---|
 | 1 | ID/version/date/status/runtime/owner | Полное | Header |
 | 2 | Parent sources, anchors, conflict priority | Полное | §3; Accepted ADR выше Draft/Proposed inputs |
@@ -124,7 +125,7 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 ## 4. Decision/status reconciliation
 
-| Объект | Статус для BCK-04 v0.4.19 | Что запрещено утверждать |
+| Объект | Статус для BCK-04 v0.4.20 | Что запрещено утверждать |
 |---|---|---|
 | ADR 0013/0015/0019 | Accepted | Что BCK-04 может изменить их инварианты |
 | D05 Booking authoritative source | Accepted decision package input | Что BCK-04 создаёт новую Booking authority |
@@ -140,7 +141,7 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 Resolved prerequisites:
 
-- `PRE-01`: BCK-01 v0.4.53 remains in Review and BCK-02 v2.4.57 records the status;
+- `PRE-01`: BCK-01 v0.4.54 remains in Review and BCK-02 v2.4.58 records the status;
 - `PRE-02`: `RechargeN / Product owner` is recorded as interim review
   coordinator. This does not resolve the independent specialist ownership
   required for Legal/Privacy decisions or Approval/G1.
@@ -152,7 +153,7 @@ Resolved prerequisites:
 
 | ID | Блокер | Owner | Exit evidence |
 |---|---|---|---|
-| PRE-03B | Combined Security/Privacy and Legal/Privacy owner is assigned; verdicts and independent/qualified Legal evidence are absent | Assigned owner + qualified Legal/Privacy reviewer where required | Completed D1-SIG-SEC and D1-SIG-LEGAL review records in [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) |
+| PRE-03B | Bounded BCK-03 D1-SIG-SEC verdict recorded; BCK-04/independent/qualified Legal verdicts absent | Assigned BCK-04 owner + independent and qualified Legal/Privacy reviewers where required | Completed BCK-04 and D1-SIG-LEGAL review records in [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) |
 | PRE-03C | Full threat-model evidence is Present and OD-01 is Proposed; owner verdict and independent security review remain absent | Security/Privacy owner | Accepted review record against [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) exact version |
 | PRE-03D | Incident-response evidence and tabletop package are Present; OD-09 is Proposed, but owner/qualified Legal verdict and executed/passed result remain absent | Security/Privacy + Legal/Privacy + Operations | Accepted review plus completed [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) record against exact versions |
 | PRE-04 | ECL03-D04 product status reconciled; exact production retention/backup validation and rights interface remain open | Booking + Security/Privacy + Legal + API Platform | BCK04-OD-07/BCK04-OD-08 decisions and Legal/Privacy evidence |
@@ -175,6 +176,6 @@ Resolved prerequisites:
 
 ## 7. Итог
 
-BCK-04 v0.4.19 структурно покрывает обязательный template и готов к предметному
+BCK-04 v0.4.20 структурно покрывает обязательный template и готов к предметному
 architecture/legal review после устранения §5 blockers. Физическая реализация,
 provisioning и production processing по-прежнему не разрешены.

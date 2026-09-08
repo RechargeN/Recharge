@@ -1,22 +1,23 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.13**
+- Version: **1.14**
 - Date: **2026-09-08**
-- Status: **Owner Batch A and D1-SIG-OPS recorded; remaining D1 verdicts required**
+- Status: **Owner Batch A and D1-SIG-OPS/SEC recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.17](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.15](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.18](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.16](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
+- Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
-## 0. Owner Batch A reconciliation
+## 0. Owner verdict reconciliation
 
 Version 1.12 records the explicit 2026-09-08 Owner Batch A verdict. It closes
 only the combined-owner BCK-03/API disposition: D1-SIG-API is Accepted with
@@ -28,6 +29,11 @@ Legal/Privacy evidence remain unchanged.
 Version 1.13 records the bounded D1-SIG-OPS verdict from
 BCK03-OPS-DEC-01. It applies only to the BCK-03 operational boundary;
 independent Operations evidence and all BCK-05/runtime gates remain open.
+
+Version 1.14 records the bounded D1-SIG-SEC verdict from
+BCK03-SEC-DEC-01. It applies only to the BCK-03 Security/Privacy boundary;
+BCK-04, independent Security/Privacy, qualified Legal and runtime gates remain
+open.
 
 ## 1. What this workbook does
 
@@ -155,7 +161,7 @@ These are recommendations for the assigned owner, not signatures.
 |---|---|---|
 | `D1-SIG-API` | **Recorded: Accept with required amendments** | broader API-DEC-01–05 scopes Deferred; preserve Accepted Booking-v1 API-DEC-01/03 and independent boundary gates |
 | `D1-SIG-OPS` | **Recorded for BCK-03 boundary: Accept with required amendments** | preserve/revalidate OD-07; BCK-05, stage/restore/deployment and independent Operations evidence remain incomplete |
-| `D1-SIG-SEC` | Accept with required amendments | review the Proposed threat and incident models; run the tabletop and close Legal boundaries |
+| `D1-SIG-SEC` | **Recorded for BCK-03 boundary: Accept with required amendments** | BCK-04 owner/independent review, Proposed threat/incident decisions, tabletop and qualified Legal boundaries remain incomplete |
 | `D1-SIG-LEGAL` | Inconclusive | qualified Legal/Privacy evidence absent |
 | `D1-SIG-REF` | Accept with required amendments | complete OD-10 and reference distribution/deprecation decisions |
 | `D1-SIG-L10N` | Accept with required amendments | translation source/review workflow and exact locale policies |
@@ -171,10 +177,10 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
-| BCK-03 v0.3.10 | API and Operations owner reviews recorded as `Accept with required amendments`; spec remains Draft | Security/Privacy, Mobile and independent evidence remain Pending |
-| BCK-04 v0.4.19 | retain Draft | OD-07 and the BCK05-OD-02/07 policies are Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.26 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; the bounded BCK-03 Operations verdict does not accept BCK-05; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
-| BCK-20 v0.2.5 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
+| BCK-03 v0.3.11 | API, Operations and Security boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Mobile and independent evidence remain Pending |
+| BCK-04 v0.4.20 | retain Draft | bounded BCK-03 Security acceptance does not accept BCK-04; `BCK04-OD-01`/`BCK04-OD-09` remain Proposed/unsigned, tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.27 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; bounded BCK-03 verdicts do not accept BCK-05; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-20 v0.2.6 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -199,6 +205,10 @@ Date: 2026-09-08
 This confirmation authorizes only documentation disposition updates. It does
 not expand completed R0 or authorize D2, G1, R1, Firebase/cloud resources,
 product backend code, credentials or production data processing.
+
+The separate 2026-09-08 BCK03-SEC-DEC-01 confirmation records D1-SIG-SEC only
+for the BCK-03 boundary with required amendments. It does not accept BCK-04,
+independent Security/Privacy evidence or qualified Legal conclusions.
 
 ## 9. What happens after owner confirmation
 

@@ -1,11 +1,11 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.4
+- Версия: 1.5
 - Дата: 2026-09-08
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4.57](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
@@ -52,13 +52,13 @@ Provider/AI/Payments integrations.
 - RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
   Review, production Identity/Event projection/mobile/deployment отсутствуют.
 - G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
-- Current D1 snapshot is BCK-01 v0.4.53, BCK-03 v0.3.10, BCK-04 v0.4.19,
-  BCK-05 v0.2.26 and BCK-20 v0.2.5. D1-SIG-API and the bounded BCK-03
-  D1-SIG-OPS boundary are `Accept with required amendments`; BCK-03 remains
-  Draft, independent Operations evidence and every other pending
+- Current D1 snapshot is BCK-01 v0.4.54, BCK-03 v0.3.11, BCK-04 v0.4.20,
+  BCK-05 v0.2.27 and BCK-20 v0.2.6. D1-SIG-API and the bounded BCK-03
+  D1-SIG-OPS/SEC boundaries are `Accept with required amendments`; BCK-03
+  remains Draft, Mobile and independent evidence plus every other pending
   owner/signature blocker remain open, and G1 stays blocked.
-- Следующий последовательный этап — Security/Privacy, затем Mobile BCK-03
-  boundary review, followed by remaining BCK-04/05/20 owner decisions.
+- Следующий последовательный этап — Mobile BCK-03 boundary review, followed by
+  remaining BCK-04/05/20 owner decisions.
 
 ## 1. Приоритет и границы
 
@@ -1338,14 +1338,15 @@ inconclusive.
 
 Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 v0.4.53 Review и BCK-01-REV-01 v1.13 evidence.
-2. BCK-03 v0.3.10, BCK-04 v0.4.19, BCK-05 v0.2.26 и BCK-20 v0.2.5
+1. BCK-01 v0.4.54 Review и BCK-01-REV-01 v1.14 evidence.
+2. BCK-03 v0.3.11, BCK-04 v0.4.20, BCK-05 v0.2.27 и BCK-20 v0.2.6
    named-owner review и evidence-based verdicts; D1-SIG-API и bounded
-   D1-SIG-OPS уже recorded, Security/Privacy и Mobile остаются следующими.
+   D1-SIG-OPS/SEC уже recorded, Mobile остаётся следующим.
 3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
    выбора topology.
-4. BCK-D1-REV-01 v1.17, sign-off ledger v1.15, workbook v1.13,
-   BCK-D1-OWN-A-DEC-01 v0.1 и BCK03-OPS-DEC-01 v0.1 с
+4. BCK-D1-REV-01 v1.18, sign-off ledger v1.16, workbook v1.14,
+   BCK-D1-OWN-A-DEC-01 v0.1, BCK03-OPS-DEC-01 v0.1 и
+   BCK03-SEC-DEC-01 v0.1 с
    evidence-based responses; никаких inferred signatures.
 5. Отдельный R1 exact file/rollback/evidence plan только после G1; существующие
    R0/RAW-C файлы не дают R1 authority.

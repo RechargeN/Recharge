@@ -1,21 +1,32 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.10**
+- Version: **0.3.11**
 - Date: **2026-09-08**
-- Spec status: **Draft — owner review accepted with required amendments; independent boundary reviews pending**
+- Spec status: **Draft — API/Operations/Security boundary reviews accepted with required amendments; Mobile and independent reviews pending**
 - Runtime status: **Booking v1 contracts/test evidence and disabled Emulator-only adapter Present; deployed/mobile API runtime Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.53](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.57](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.54](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
+- Security/privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.11 — 2026-09-08
+
+- recorded bounded D1-SIG-SEC as Accept with required amendments through
+  BCK03-SEC-REV-01 v0.2 and BCK03-SEC-DEC-01 v0.1;
+- integrated replay reauthorization, ingress-order, anti-enumeration,
+  classification, tracing, external-boundary and emergency-change controls;
+- retained BCK-03/BCK-04 Draft, Mobile and independent reviews Pending,
+  qualified Legal evidence absent, OD-09 Proposed and OD-11 Open;
+- changed no schema, fixture, runtime, Firebase, deployment, push or merge state.
 
 ### v0.3.10 — 2026-09-08
 
@@ -255,9 +266,9 @@ rule` означает предлагаемое normative правило, а н�
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
 | Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
-| Reference data | BCK-20 v0.2.5 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
-| Security/privacy | BCK-04 v0.4.19 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |
-| Operations | BCK-05 v0.2.26 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
+| Reference data | BCK-20 v0.2.6 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
+| Security/privacy | BCK-04 v0.4.20 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions; bounded BCK-03 verdict does not accept BCK-04 |
+| Operations | BCK-05 v0.2.27 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
 | Mobile boundary | BCK-18 planned | Не импортировать Firebase schema/SDK в domain/presentation |
 
 Booking v1 split-key compatibility decision принят в
@@ -428,8 +439,12 @@ owner
 status: draft | review | approved | deprecated | retired
 minimumClientPolicyRef?
 dataClass
+dataHandlingProfile
+antiEnumerationProfile?
 idempotencyProfile?
 authProfile
+externalBoundaryProfile?
+observabilityProfile
 introducedAt
 deprecatedAt?
 retireAfter?
@@ -437,6 +452,11 @@ retireAfter?
 
 Registry — documentation/schema governance artifact, не runtime service и не
 способ динамически загрузить неизвестную business logic.
+
+The registry profiles are fail-closed declarations. Missing required
+authorization, classification, anti-enumeration, observability or external
+boundary metadata keeps the affected surface disabled. `dataClass` cannot
+reduce the handling required by any field in its schema.
 
 ## 9. Repository and schema conventions
 
@@ -602,6 +622,14 @@ Rules:
 - `marketId` required только когда operation market-scoped;
 - locale presentation preference не меняет persisted content language;
 - arbitrary headers/context maps запрещены.
+
+Each surface defines one stable ingress order: cheap transport byte and
+content-type bounds precede expensive work; required authenticity/App Check,
+schema normalization and current authorization complete before domain
+execution. Error precedence is stable and cannot expose resource existence or
+security-control detail. Every client-supplied context value remains untrusted;
+the server resolves current principal, session/account state, resource scope,
+market status and applicable policy revisions.
 
 ## 13. Result envelope
 
@@ -770,6 +798,12 @@ response echo использует `requestId` текущей попытки, а
 metadata может быть новой. Это сохраняет §13 request matching и не создаёт
 вторую domain mutation.
 
+Replay disclosure is separately authorized at retry time. The server rechecks
+the current session, actor, resource scope and disclosure policy before
+returning a protected stored result. Revocation never re-executes the committed
+mutation; it returns the registered anti-enumerating failure or a permitted
+redacted result.
+
 ## 17. Optimistic concurrency and revisions
 
 - `expectedRevision` проверяется в той же authoritative transaction/write
@@ -911,6 +945,11 @@ Exact fields/storage/security принадлежат BCK-04/BCK-06.
 Revocation checked for every new authoritative mutation. Cached mobile access
 state improves UX only.
 
+Each protected resource family registers one anti-enumeration profile. It
+covers common/domain code, details, revision, cursor, latency class and
+telemetry as one observable surface, not only the choice between
+`permission_denied` and `not_found`.
+
 ## 23. Data classification, privacy and redaction
 
 Every contract field declares or inherits:
@@ -932,6 +971,12 @@ Requirements:
 - private location, Booking, verification, access code and support evidence never
   enter public projection envelope.
 
+Classification is enforceable schema metadata, not prose alone: each field or
+explicitly inherited field group declares class, purpose and allowed
+consumers/sinks. Mixed results/events use the most restrictive applicable
+handling across their fields; ambiguous combinations are split or fail closed.
+Producer-supplied `dataClass` cannot lower effective handling.
+
 ## 24. Transport mapping
 
 Logical envelope is canonical; transport mapping must preserve it.
@@ -948,6 +993,11 @@ Logical envelope is canonical; transport mapping must preserve it.
   outside approved anti-enumeration profile;
 - transport-specific metadata stays outside domain payload.
 
+Webhook/callback registry profiles declare authenticity, freshness,
+replay/dedupe, content-type and size controls. Any outbound-fetch profile
+declares provider allowlist, redirect/IP/metadata-network guards, timeout and
+response-size bounds. Missing declarations keep the surface disabled.
+
 ## 25. Schema and API evolution
 
 ### 25.1. Change classes
@@ -963,6 +1013,11 @@ Logical envelope is canonical; transport mapping must preserve it.
 | Change enum behavior for existing value | Breaking |
 | Add enum value | Direction/profile-dependent; critical consumers may treat as breaking |
 | Change error/outcome semantics | Breaking |
+
+Security-emergency tightening remains a controlled breaking change: it records
+the named owner/reason, affected consumers, stable typed client outcome,
+effective and expiry times, rollback and post-event review. Emergency handling
+does not authorize a silent permanent contract fork.
 
 ### 25.2. Directional unknown policy
 
@@ -1019,7 +1074,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.3.10: **Proposed — not Accepted**
+- Status in BCK-03 v0.3.11: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -1185,6 +1240,11 @@ Prohibited in ordinary logs/metrics:
 - provider/payment sensitive material;
 - full stack trace returned to client.
 
+Client-controlled tracing values are bounded and validated before structured
+logging. They are never concatenated into log text or used as metric names,
+resource paths or authorization keys. Only the approved field allowlist and
+correlation references reach operational sinks.
+
 Operational telemetry belongs to BCK-05; product analytics to BCK-21. Common
 correlation does not merge their legal purpose or retention.
 
@@ -1288,7 +1348,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No runtime/schema file in this map is created by BCK-03 v0.3.10; this revision
+No runtime/schema file in this map is created by BCK-03 v0.3.11; this revision
 adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
@@ -1433,7 +1493,7 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.57 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
+- BCK-02 v2.4.58 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
 - BCK-09 compatibility decision and evidence listed;
 - BCK-04 Security/Privacy, BCK-05 Operations and a named Mobile Platform owner
@@ -1443,13 +1503,14 @@ BCK-03 may enter Review only when:
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.3.10 readiness: the combined Product owner recorded
+Current v0.3.11 readiness: the combined Product owner recorded
 `D1-SIG-API = Accept with required amendments` through
 [BCK-D1-OWN-A-DEC-01](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md), with an
-explicit single-owner independence disclosure. The bounded Operations verdict
-is also recorded by BCK03-OPS-DEC-01. Security/Privacy, Mobile and independent
-evidence remain Pending, so delegated reviews are incomplete and status remains
-**Draft**.
+explicit single-owner independence disclosure. The bounded Operations and
+Security/Privacy verdicts are also recorded by BCK03-OPS-DEC-01 and
+BCK03-SEC-DEC-01. Mobile and independent evidence remain Pending, qualified
+Legal evidence is not inferred, so delegated reviews are incomplete and status
+remains **Draft**.
 
 ## 42. Definition of Done BCK-03
 
@@ -1467,7 +1528,7 @@ Approval requires:
   owner, reason, review date and preserved gate); API-DEC-02/03 must be
   Accepted before their corresponding tooling/runtime activates;
 - OD-09 at least Proposed for D1 exit and Accepted before D3 effects/workers;
-- 64 AC reviewable and sequential;
+- 77 AC reviewable and sequential;
 - runtime remains Absent.
 
 `Approved` BCK-03 means contract design ready for bounded executable planning;
@@ -1547,17 +1608,35 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.3.10 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.3.11 leaves backend/Firebase/mobile runtime unchanged.
 65. **BCK-03-AC-65:** RAW-B closes only Booking-v1 disposable Emulator transport feasibility.
 66. **BCK-03-AC-66:** RAW-B grants no product adapter, Firebase access or specialist signature.
 67. **BCK-03-AC-67:** RAW-C requires separate explicit executable authorization and independent evidence.
+68. **BCK-03-AC-68:** protected idempotent replay rechecks current disclosure
+    authority without re-executing the committed mutation.
+69. **BCK-03-AC-69:** each surface has a bounded, stable and anti-enumerating
+    ingress decision order.
+70. **BCK-03-AC-70:** client market/context values never become authority.
+71. **BCK-03-AC-71:** anti-enumeration covers the complete observable response.
+72. **BCK-03-AC-72:** classification/purpose/sink metadata is enforceable and
+    mixed payloads cannot understate handling.
+73. **BCK-03-AC-73:** client tracing values cannot inject logs, metrics, paths
+    or authorization keys.
+74. **BCK-03-AC-74:** missing webhook/outbound security profiles keep the
+    external surface disabled.
+75. **BCK-03-AC-75:** security-emergency compatibility changes are bounded,
+    auditable and reversible.
+76. **BCK-03-AC-76:** BCK03-SEC-DEC-01 does not approve BCK-04 or satisfy
+    independent/qualified Legal review.
+77. **BCK-03-AC-77:** BCK03-SEC-DEC-01 creates no schema, runtime, Firebase,
+    deployment, push or merge authority.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.3.7 the following remain absent:
+At v0.3.11 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1579,8 +1658,8 @@ BCK-03 does not claim them as general backend runtime.
 
 Before BCK-03 Review:
 
-1. preserve the recorded D1-SIG-API/OPS verdicts and complete
-   D1-SIG-SEC/MOBILE bounded reviews without requiring D2 BCK-18;
+1. preserve the recorded D1-SIG-API/OPS/SEC verdicts and complete the
+   D1-SIG-MOBILE bounded review without requiring D2 BCK-18;
 2. resolve the Deferred API-DEC-01–05 scopes before their protected gates and
    preserve the Accepted Booking-v1 API-DEC-01/03 controls;
 3. preserve the completed Booking-v1 split-key, semantic-hash and RAW-B
@@ -1593,7 +1672,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.10 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.11 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

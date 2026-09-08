@@ -1,15 +1,16 @@
 # Recharge Backend — API Security & Privacy Boundary Review
 
 - ID: **BCK03-SEC-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-08**
-- Status: **Draft recommendation — owner verdict required**
-- Recommended result: **Accept with required amendments**
+- Status: **Owner verdict recorded — independent evidence pending**
+- Review result: **Accept with required amendments**
 - Reviewer independence: **not evidenced**
-- Target: [BCK-03 v0.3.10](BACKEND_API_CONTRACT_STANDARD.md)
-- Security/privacy baseline: [BCK-04 v0.4.19](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coverage baseline: [BCK-04-PRE v0.3.19](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md)
+- Target: [BCK-03 v0.3.11](BACKEND_API_CONTRACT_STANDARD.md)
+- Security/privacy baseline: [BCK-04 v0.4.20](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coverage baseline: [BCK-04-PRE v0.3.20](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md)
 - Threat-model input: [BCK04-OD01-TM-01 v0.1](BACKEND_SECURITY_THREAT_MODEL.md)
+- Security/privacy owner decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Scope
@@ -94,7 +95,7 @@ Draft, these amendments are mandatory:
 - BCK04-OD-01 and BCK04-OD-09 remain **Proposed**.
 - OD-09 remains **Proposed**; OD-11 remains **Open**.
 - D1-SIG-API and bounded D1-SIG-OPS remain recorded as already decided.
-- D1-SIG-SEC remains **Pending** until an explicit owner verdict is recorded.
+- D1-SIG-SEC is **Accept with required amendments — BCK-03 boundary only**.
 - D1-SIG-LEGAL remains **Pending**; qualification is not inferred.
 - No schema, fixture, runtime, Firebase, deployment, push or merge is authorized.
 
@@ -108,8 +109,10 @@ OD-09 remains Proposed and OD-11 remains Open. Runtime, Firebase, deployment,
 push and merge are not authorized.
 ```
 
-This text is a recommendation only. It must not be copied into the sign-off
-ledger as an owner verdict until the Product owner explicitly approves it.
+The Product owner explicitly accepted this recommendation on 2026-09-08.
+`D1-SIG-SEC` is therefore recorded as Accept with required amendments for the
+BCK-03 boundary only. Independent Security/Privacy evidence, qualified Legal
+evidence and every BCK-04/runtime gate remain open.
 
 ## 6. Acceptance criteria
 
@@ -132,12 +135,11 @@ ledger as an owner verdict until the Product owner explicitly approves it.
     auditable and reversible.
 12. **BCK03-SEC-AC-12:** OD-09/OD-11 and BCK04-OD-01/09 statuses are preserved.
 13. **BCK03-SEC-AC-13:** combined review is not called independent or Legal.
-14. **BCK03-SEC-AC-14:** D1-SIG-SEC remains Pending before explicit approval.
+14. **BCK03-SEC-AC-14:** D1-SIG-SEC records only the explicit bounded verdict.
 15. **BCK03-SEC-AC-15:** no runtime, Firebase, deployment, push or merge
     authority is created.
 
 ## 7. Next action
 
-Request the exact owner verdict from §5. Only after explicit approval may the
-required amendments be integrated into BCK-03 and reconciled through the D1
-ledger and canonical status documents.
+Complete the Mobile BCK-03 boundary review. D1 remains blocked until every
+required evidence item and verdict actually passes.
