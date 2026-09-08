@@ -1,21 +1,21 @@
 # BCK-05 — Deployment & Operations Coverage Matrix
 
 - ID: **BCK-05-PRE**
-- Version: **0.2.24**
-- Date: **2026-09-07**
+- Version: **0.2.25**
+- Date: **2026-09-08**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Platform Operations owner**
-- Target: [BCK-05 v0.2.24](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-05 v0.2.25](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.56](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_COVERAGE_MATRIX.md`
 
-## 0. D1-B reconciliation
+## 0. Owner Batch A reconciliation
 
-Current anchors are BCK-01 v0.4.51, BCK-02 v2.4.55, BCK-03 v0.3.8,
-BCK-04 v0.4.17, BCK-05 v0.2.24 and BCK-02-A1 v1.2. Bounded R0 is Pass and
-disabled RAW-C source is Present; R1, cloud operations and product runtime
-remain blocked or Absent. No decision or runtime status is promoted.
+Current anchors are BCK-01 v0.4.52, BCK-02 v2.4.56, BCK-03 v0.3.9,
+BCK-04 v0.4.18, BCK-05 v0.2.25 and BCK-02-A1 v1.3. BCK-03's combined-owner
+verdict does not supply an Operations signature. Bounded R0 is Pass; R1,
+cloud operations and product runtime remain blocked or Absent.
 
 ## 1. Purpose
 
@@ -28,15 +28,15 @@ select credentials, create runtime files or authorize production processing.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.51 | Review; local R0/disabled RAW-C source Present, product/cloud runtime Absent | Parent architecture |
-| BCK-02 v2.4.55 | Approved semantic baseline | Registry/gates/template |
-| BCK-03 v0.3.8 | Draft; bounded Booking evidence Present, deployed/mobile API runtime Absent | API/event input; split-key conflict closed, not Approved |
-| BCK-04 v0.4.17 | Draft; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted with controls | Security/privacy input; BCK-04 itself not Accepted |
-| BCK-20 v0.2.3 | Draft; runtime Absent | Market/reference revision input, not Accepted |
-| BCK-02-A1 v1.2 | Draft; docs only | Latvia/Baltics execution input |
+| BCK-01 v0.4.52 | Review; local R0/disabled RAW-C source Present, product/cloud runtime Absent | Parent architecture |
+| BCK-02 v2.4.56 | Approved semantic baseline | Registry/gates/template |
+| BCK-03 v0.3.9 | Draft; owner review Accept with required amendments, peer/independent reviews Pending | API/event input; Booking-v1 accepted scope preserved, broader decisions Deferred |
+| BCK-04 v0.4.18 | Draft; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted with controls | Security/privacy input; BCK-04 itself not Accepted |
+| BCK-20 v0.2.4 | Draft; runtime Absent | Market/reference revision input, not Accepted |
+| BCK-02-A1 v1.3 | Draft; docs only | Latvia/Baltics execution input |
 | Firebase Architecture v2.2 | Proposed | Candidate topology only |
 | ENV/CI policies | Accepted repository policy | Mandatory environment/CI constraints |
-| BCK-05 v0.2.24 | Draft; bounded R0 Pass and disabled RAW-C source boundary, product/cloud runtime Absent; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed | `BCK05-REL-A1-DUAL-PROV-v1` exact owner verdict is recorded; executable release/IAM/specialist evidence and every cloud/product gate remain pending |
+| BCK-05 v0.2.25 | Draft; bounded R0 Pass and disabled RAW-C source boundary, product/cloud runtime Absent; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed | `BCK05-REL-A1-DUAL-PROV-v1` exact owner verdict is recorded; executable release/IAM/specialist evidence and every cloud/product gate remain pending |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -127,6 +127,6 @@ contract are in
 
 ## 8. Verdict
 
-BCK-05 v0.2.24 is structurally complete enough for specialist review preparation.
+BCK-05 v0.2.25 is structurally complete enough for specialist review preparation.
 It remains Draft until §6 blockers are addressed. No project, resource,
 credential, deployment, backup or runtime is authorized.

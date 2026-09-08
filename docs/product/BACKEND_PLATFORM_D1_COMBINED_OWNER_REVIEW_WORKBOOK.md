@@ -1,24 +1,28 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.11**
-- Date: **2026-09-07**
-- Status: **Draft workbook — BCK05-OD-01/02/07 and cross-domain OD-07 accepted; remaining D1 verdicts required**
+- Version: **1.12**
+- Date: **2026-09-08**
+- Status: **Owner Batch A recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.15](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.13](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.16](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.14](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
-## 0. D1-B reconciliation
+## 0. Owner Batch A reconciliation
 
-This revision synchronizes current artifact versions and decision namespaces.
-It records no new owner verdict: every Pending or Inconclusive row remains so,
-and qualified Legal/Privacy evidence remains absent.
+Version 1.12 records the explicit 2026-09-08 Owner Batch A verdict. It closes
+only the combined-owner BCK-03/API disposition: D1-SIG-API is Accepted with
+required amendments, the broader API-DEC-01–05 scopes are Deferred, and OD-09
+remains Proposed. Existing Booking-v1 API-DEC-01/03 Acceptance is preserved.
+Every other Pending or Inconclusive row and the missing qualified
+Legal/Privacy evidence remain unchanged.
 
 ## 1. What this workbook does
 
@@ -54,9 +58,9 @@ create an endpoint, schema, project or database.
 
 | Decision | Recommended owner verdict | Reason | Preserved gate |
 |---|---|---|---|
-| `API-DEC-01` — exact callable/HTTPS mapping and deadlines | **Deferred** to executable API scaffold | choosing transport values before the scaffold/load evidence would be false precision | no endpoint until G1 and a separate Approved executable slice |
+| `API-DEC-01` — exact callable/HTTPS mapping and deadlines | **Deferred outside Accepted Booking v1** to executable API scaffold | the Booking-v1 choice remains Accepted; a general mapping before scaffold/load evidence would be false precision | no general endpoint until G1 and a separate Approved executable slice |
 | `API-DEC-02` — generator versus fixture-verified consumers | **Deferred** to codegen/tooling slice | Booking fixtures work today; no new generator is justified yet | no generator/tooling until separate Approval |
-| `API-DEC-03` — canonical request-hash algorithm/version | **Deferred** to first mutation contract slice | algorithm must be fixed with implementation/parity tests | no mutation runtime until Accepted decision |
+| `API-DEC-03` — canonical request-hash algorithm/version | **Deferred outside Accepted Booking v1** to the applicable mutation-contract slice | the Booking-v1 algorithm remains Accepted; broader adoption requires exact implementation/parity tests | no non-Booking mutation runtime until Accepted decision |
 | `API-DEC-04` — minimum-client bootstrap/offline behavior | **Deferred** to production client-gate slice | it requires actual client/config integration evidence | no production client enforcement until Accepted decision |
 | `API-DEC-05` — language-neutral schemas beyond Booking | **Deferred** to a new architecture decision | current authority covers Booking only | no platform/non-Booking schema creation |
 | `OD-09` — event/outbox delivery | **Retain Proposed** | D1 minimum is met; exact transport/retry/quarantine evidence belongs before effects | no worker/effect until OD-09 Accepted and D3 Approved |
@@ -66,14 +70,12 @@ Recommended review date for all deferred Batch A items: the start of the named
 blocking slice, or **2026-11-20**, whichever occurs first. A deferred decision
 that reaches its gate unresolved fails closed.
 
-### 3.1 Owner response required
+### 3.1 Recorded owner response
 
-Nothing in Batch A is accepted by document presence. The owner must explicitly
-record one of:
-
-- `Accept Batch A exactly as recommended`;
-- `Accept Batch A with these changes: ...`;
-- `Reject Batch A because: ...`.
+The Product owner selected `Accept Batch A exactly as recommended` on
+2026-09-08. The immutable scope and controls are recorded in
+[BCK-D1-OWN-A-DEC-01](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md). This does
+not convert any other recommendation into a verdict.
 
 ## 4. Decision batch B — technical evidence to prepare next
 
@@ -146,7 +148,7 @@ These are recommendations for the assigned owner, not signatures.
 
 | Sign-off ID | Recommended verdict now | Blocking amendment/evidence |
 |---|---|---|
-| `D1-SIG-API` | Accept with required amendments | accept/defer API-DEC-01–05 explicitly; preserve Booking parity gate |
+| `D1-SIG-API` | **Recorded: Accept with required amendments** | broader API-DEC-01–05 scopes Deferred; preserve Accepted Booking-v1 API-DEC-01/03 and independent boundary gates |
 | `D1-SIG-OPS` | Accept with required amendments | preserve/revalidate accepted OD-07 controls; review OD-03/04/05 proposals; complete stage/restore proof and deployment controls |
 | `D1-SIG-SEC` | Accept with required amendments | review the Proposed threat and incident models; run the tabletop and close Legal boundaries |
 | `D1-SIG-LEGAL` | Inconclusive | qualified Legal/Privacy evidence absent |
@@ -164,18 +166,19 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
-| BCK-03 v0.3.8 | owner may record `Accept with required amendments` | Batch A dispositions must be explicitly accepted |
-| BCK-04 v0.4.17 | retain Draft | OD-07 and the BCK05-OD-02/07 policies are Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.24 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
-| BCK-20 v0.2.3 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
+| BCK-03 v0.3.9 | owner review recorded as `Accept with required amendments`; spec remains Draft | Operations, Security/Privacy and Mobile boundary reviews remain Pending |
+| BCK-04 v0.4.18 | retain Draft | OD-07 and the BCK05-OD-02/07 policies are Accepted with controls, but `BCK04-OD-01`/`BCK04-OD-09` are Proposed/unsigned; tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.25 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-20 v0.2.4 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
 | OD-11 | retain Open | qualified Legal/Privacy policy not supplied |
 
-## 8. Exact owner confirmation block
+## 8. Recorded owner confirmation
 
-The lowest-risk next confirmation is:
+The following confirmation was supplied explicitly on 2026-09-08 and is
+preserved by BCK-D1-OWN-A-DEC-01:
 
 ```text
 Owner identity: RechargeN / Product owner
@@ -185,7 +188,7 @@ BCK-03 recommendation: accept with required amendments
 All other BCK/OD statuses: retain exactly as listed in §7
 Legal/Privacy qualification: not claimed
 Runtime authorization: none
-Date: 2026-08-20
+Date: 2026-09-08
 ```
 
 This confirmation authorizes only documentation disposition updates. It does
@@ -194,8 +197,10 @@ product backend code, credentials or production data processing.
 
 ## 9. What happens after owner confirmation
 
-1. Record Batch A dispositions and bounded role verdicts in BCK-D1-SIG-01.
-2. Reconcile BCK-03 and its matrices without opening a runtime gate.
+1. Keep the recorded Batch A dispositions and D1-SIG-API verdict reconciled in
+   BCK-D1-SIG-01 and BCK-03.
+2. Obtain the still-Pending Operations, Security/Privacy and Mobile boundary
+   verdicts without opening a runtime gate.
 3. Use the recorded SLO/cost/recovery baselines to define a separately
    authorized stage-validation slice and collect evidence-based specialist
    verdicts; separately schedule and actually perform BCK04-OD09-TTX-01 with

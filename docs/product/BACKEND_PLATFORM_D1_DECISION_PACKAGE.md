@@ -1,19 +1,25 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.3**
-- Date: **2026-09-07**
+- Version: **0.4**
+- Date: **2026-09-08**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.52](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.56](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
 
 ---
 
 ## 0. Revision note
+
+v0.4 reconciles this existing Accepted split-key/OD-07 record to BCK-01
+v0.4.52 and BCK-02 v2.4.56 after Owner Batch A. The separate
+BCK-D1-OWN-A-DEC-01 records API dispositions; this package does not absorb or
+expand that verdict and creates no runtime authority.
 
 v0.3 is a traceability-only D1-B amendment. It points the existing Accepted
 split-key reconciliation and OD-07 disposition to BCK-01 v0.4.51/BCK-02

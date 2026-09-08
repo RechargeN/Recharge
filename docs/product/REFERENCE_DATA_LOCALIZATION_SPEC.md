@@ -1,24 +1,34 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.3**
-- Date: **2026-09-07**
+- Version: **0.2.4**
+- Date: **2026-09-08**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.8](BACKEND_API_CONTRACT_STANDARD.md) (Draft)
-- Operations boundary: [BCK-05 v0.2.24](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent architecture: [BCK-01 v0.4.52](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.56](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.9](BACKEND_API_CONTRACT_STANDARD.md) (Draft; owner review accepted with required amendments)
+- Operations boundary: [BCK-05 v0.2.25](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
-- Delivery annex: [BCK-02-A1 v1.2](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.3](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.4 — 2026-09-08
+
+- reconciled BCK-01 v0.4.52, BCK-02 v2.4.56, BCK-03 v0.3.9, BCK-05
+  v0.2.25 and BCK-02-A1 v1.3 after Owner Batch A;
+- retained OD-10 Proposed and every Reference Data, Localization, Mobile,
+  Content and qualified Legal verdict Pending;
+- treated Deferred API-DEC-05 as the unchanged fail-closed blocker for any
+  language-neutral schema beyond Booking;
+- changed no taxonomy, locale policy, schema, dataset, adapter or runtime.
 
 ### v0.2.3 — 2026-09-07
 
@@ -713,7 +723,7 @@ qualified Legal evidence remain absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.3 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.4 creates no backend/schema/mobile/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.

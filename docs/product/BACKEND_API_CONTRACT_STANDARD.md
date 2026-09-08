@@ -1,19 +1,31 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.8**
-- Date: **2026-09-07**
-- Spec status: **Draft — review required**
+- Version: **0.3.9**
+- Date: **2026-09-08**
+- Spec status: **Draft — owner review accepted with required amendments; independent boundary reviews pending**
 - Runtime status: **Booking v1 contracts/test evidence and disabled Emulator-only adapter Present; deployed/mobile API runtime Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.51](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.55](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.52](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.56](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.9 — 2026-09-08
+
+- recorded the explicit D1 Owner Batch A verdict: BCK-03 owner review is
+  Accepted with required amendments while the specification remains Draft;
+- deferred platform-wide API-DEC-01/03 outside their existing Accepted Booking
+  v1 scope and deferred API-DEC-02/04/05 with fail-closed protected gates;
+- retained OD-09 Proposed and every independent Operations, Security/Privacy,
+  Mobile, D1/G1 and runtime blocker;
+- changed no schema, fixture, generated output, runtime, Firebase, deployment,
+  push or merge state.
 
 ### v0.3.8 — 2026-09-07
 
@@ -234,9 +246,9 @@ rule` означает предлагаемое normative правило, а н�
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
 | Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
-| Reference data | BCK-20 v0.2.3 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
-| Security/privacy | BCK-04 v0.4.17 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |
-| Operations | BCK-05 v0.2.24 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
+| Reference data | BCK-20 v0.2.4 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
+| Security/privacy | BCK-04 v0.4.18 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |
+| Operations | BCK-05 v0.2.25 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
 | Mobile boundary | BCK-18 planned | Не импортировать Firebase schema/SDK в domain/presentation |
 
 Booking v1 split-key compatibility decision принят в
@@ -998,7 +1010,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.3.8: **Proposed — not Accepted**
+- Status in BCK-03 v0.3.9: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -1267,7 +1279,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No runtime/schema file in this map is created by BCK-03 v0.3.8; this revision
+No runtime/schema file in this map is created by BCK-03 v0.3.9; this revision
 adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
@@ -1388,13 +1400,13 @@ Rollback:
 |---|---|---|---|---|
 | D1-DEC-01 / ECL03-D11 | Accepted | Product owner decision; API Platform + Booking affected owners | Separate request correlation from logical idempotency identity | Closed; executable parity remains gated |
 | OD-09 | Proposed in §27 | API Platform + Operations | Event transport, ordering, dedupe, replay, poison, retention | D3 effects/workers |
-| API-DEC-01 | Accepted — Booking v1 only | Combined owner; independent API Platform + BCK-05 evidence pending | `API01-BCK09-CALLABLE-V2-EU-10-15-30-v1` in BCK09-API-NAMED-DEC-01 v0.2 | Executable API scaffold remains blocked |
-| API-DEC-02 | Open | API Platform | Generator versus fixture-verified consumers per language/contract | Codegen/tooling slice |
-| API-DEC-03 | Accepted — Booking v1 only | Combined owner; independent API Platform + Security evidence pending | `API03-BCK09-JCS-SHA256-SEMANTIC-v1` with revision-field amendment in BCK09-API-NAMED-DEC-01 v0.2 | First mutation runtime remains blocked |
-| API-DEC-04 | Open | API Platform + Mobile | Exact minimum-client policy bootstrap surface and offline behavior | Production client gate |
-| API-DEC-05 | Open | Platform Architecture + API Platform | Accepted ADR/policy path for extending language-neutral schema beyond Booking | Any platform/non-Booking schema creation |
+| API-DEC-01 | Accepted — Booking v1 only; broader platform scope Deferred | Combined owner; independent API Platform + BCK-05 evidence pending | `API01-BCK09-CALLABLE-V2-EU-10-15-30-v1` remains intact; general mapping waits for executable API scaffold | Executable API scaffold remains blocked |
+| API-DEC-02 | Deferred | API Platform | Generator versus fixture-verified consumers; review by blocking slice start or 2026-11-20 | Codegen/tooling slice |
+| API-DEC-03 | Accepted — Booking v1 only; broader platform scope Deferred | Combined owner; independent API Platform + Security evidence pending | `API03-BCK09-JCS-SHA256-SEMANTIC-v1` remains intact; non-Booking adoption waits for exact contract/parity evidence | Non-Booking mutation runtime remains blocked |
+| API-DEC-04 | Deferred | API Platform + Mobile | Exact minimum-client bootstrap/offline behavior; review by blocking slice start or 2026-11-20 | Production client gate |
+| API-DEC-05 | Deferred | Platform Architecture + API Platform | Separate architecture decision for language-neutral schema beyond Booking; review by blocking slice start or 2026-11-20 | Any platform/non-Booking schema creation |
 
-Safe defaults while Open:
+Safe defaults while Deferred or Proposed:
 
 - no runtime endpoint/resource;
 - no new generator;
@@ -1412,7 +1424,7 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.55 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
+- BCK-02 v2.4.56 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
 - BCK-09 compatibility decision and evidence listed;
 - BCK-04 Security/Privacy, BCK-05 Operations and a named Mobile Platform owner
@@ -1422,11 +1434,12 @@ BCK-03 may enter Review only when:
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.3.3 readiness: reviewer identity is assigned for the required
-API/Operations/Security/Mobile perspectives in
-[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md), with an explicit
-single-owner independence disclosure. Every verdict remains Pending, so the
-delegated reviews are not complete and status remains **Draft**.
+Current v0.3.9 readiness: the combined Product owner recorded
+`D1-SIG-API = Accept with required amendments` through
+[BCK-D1-OWN-A-DEC-01](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md), with an
+explicit single-owner independence disclosure. Required Operations,
+Security/Privacy and Mobile boundary verdicts remain Pending, so delegated
+reviews are not complete and status remains **Draft**.
 
 ## 42. Definition of Done BCK-03
 
@@ -1524,7 +1537,7 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.3.8 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.3.9 leaves backend/Firebase/mobile runtime unchanged.
 65. **BCK-03-AC-65:** RAW-B closes only Booking-v1 disposable Emulator transport feasibility.
 66. **BCK-03-AC-66:** RAW-B grants no product adapter, Firebase access or specialist signature.
 67. **BCK-03-AC-67:** RAW-C requires separate explicit executable authorization and independent evidence.
@@ -1556,10 +1569,10 @@ BCK-03 does not claim them as general backend runtime.
 
 Before BCK-03 Review:
 
-1. complete D1-SIG-API/OPS/SEC/MOBILE bounded reviews under the recorded
-   combined-role disclosure without requiring the D2 BCK-18 artifact;
-2. develop evidence proposals for API-DEC-02/04/05 and preserve the Accepted
-   Booking-v1 API-DEC-01/03 controls;
+1. preserve the recorded combined-owner D1-SIG-API verdict and complete
+   D1-SIG-OPS/SEC/MOBILE bounded reviews without requiring D2 BCK-18;
+2. resolve the Deferred API-DEC-01–05 scopes before their protected gates and
+   preserve the Accepted Booking-v1 API-DEC-01/03 controls;
 3. preserve the completed Booking-v1 split-key, semantic-hash and RAW-B
    transport evidence; any RAW-C product adapter remains a separately Approved
    executable slice;
@@ -1570,7 +1583,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.8 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.9 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any
