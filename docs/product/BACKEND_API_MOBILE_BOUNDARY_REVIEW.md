@@ -1,18 +1,20 @@
 # Recharge Backend — API Mobile Boundary Review
 
 - ID: **BCK03-MOB-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-09**
-- Status: **Proposed owner review — verdict not recorded**
-- Recommended result: **Accept with required amendments**
+- Status: **Owner verdict recorded — independent evidence pending**
+- Review result: **Accept with required amendments**
 - Reviewer independence: **not evidenced**
-- Target: [BCK-03 v0.3.11](BACKEND_API_CONTRACT_STANDARD.md)
+- Target: [BCK-03 v0.3.12](BACKEND_API_CONTRACT_STANDARD.md)
 - Mobile architecture baseline:
-  [Recharge Mobile Architecture v3.1](../architecture/RECHARGE_MOBILE_ARCHITECTURE_V3.md)
+  [Recharge Mobile Architecture v3.1.1](../architecture/RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 - Integration evidence:
-  [BCK-18 v0.2](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
+  [BCK-18 v0.3](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
 - Coverage evidence:
-  [BCK-18-PRE v0.2](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
+  [BCK-18-PRE v0.3](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
+- Mobile owner decision:
+  [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Scope
@@ -33,10 +35,10 @@ from D1.
 - Booking v1 is the only implemented cross-language schema/DTO family.
 - No production Recharge backend transport, Firebase Auth, Firestore, Storage
   or App Check binding is present in the mobile application.
-- Mobile Architecture v3.1 fixes presentation/application/domain/data
+- Mobile Architecture v3.1.1 fixes presentation/application/domain/data
   ownership and requires typed stale, unsupported, cancelled and unknown
   outcome states.
-- BCK-18 v0.2 defines the target adapter/cache/cutover contract but remains
+- BCK-18 v0.3 defines the target adapter/cache/cutover contract but remains
   Review and grants no runtime authority.
 - Mobile Money normalization remains a prerequisite for remote writes.
 
@@ -114,7 +116,7 @@ leave Draft, the following amendments remain mandatory:
 - API-DEC-04 and API-DEC-05 remain **Deferred**.
 - OD-09 and OD-10 remain **Proposed**.
 - D1-SIG-API and bounded D1-SIG-OPS/SEC retain their recorded verdicts.
-- D1-SIG-MOBILE remains **Pending** until an explicit owner verdict is given.
+- D1-SIG-MOBILE is **Accept with required amendments — BCK-03 boundary only**.
 - Independent Mobile evidence remains absent.
 - No schema, generated file, mobile/backend runtime, Firebase, deployment,
   push or merge is authorized.
@@ -128,6 +130,11 @@ Platform evidence remains absent. BCK-03 remains Draft. BCK-18 remains Review.
 API-DEC-04/05 remain Deferred and OD-09/10 remain Proposed. Runtime, Firebase,
 deployment, push and merge are not authorized.
 ```
+
+The Product owner explicitly accepted this recommendation on 2026-09-09.
+`D1-SIG-MOBILE` is therefore recorded as Accept with required amendments for
+the BCK-03 boundary only. Independent Mobile evidence and all downstream
+integration/runtime gates remain open.
 
 ## 7. Acceptance criteria
 
@@ -153,5 +160,5 @@ an explicit revision and reconciliation note.
 
 ## 8. Next action
 
-Obtain the explicit Product-owner verdict for `D1-SIG-MOBILE` against this
-review. Do not amend BCK-03 or advance any executable stage before that verdict.
+Continue the remaining D1 owner/signature reviews. Do not advance an executable
+stage until its complete approval and evidence gates pass.

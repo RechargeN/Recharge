@@ -1,18 +1,19 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.14**
-- Date: **2026-09-08**
-- Status: **Owner Batch A and D1-SIG-OPS/SEC recorded; remaining D1 verdicts required**
+- Version: **1.15**
+- Date: **2026-09-09**
+- Status: **Owner Batch A and D1-SIG-OPS/SEC/MOBILE recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.18](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.16](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.19](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.17](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
@@ -34,6 +35,10 @@ Version 1.14 records the bounded D1-SIG-SEC verdict from
 BCK03-SEC-DEC-01. It applies only to the BCK-03 Security/Privacy boundary;
 BCK-04, independent Security/Privacy, qualified Legal and runtime gates remain
 open.
+
+Version 1.15 records the bounded D1-SIG-MOBILE verdict from
+BCK03-MOB-DEC-01. It applies only to the BCK-03 Mobile boundary; BCK-18,
+BCK-20, independent Mobile and runtime gates remain open.
 
 ## 1. What this workbook does
 
@@ -165,7 +170,7 @@ These are recommendations for the assigned owner, not signatures.
 | `D1-SIG-LEGAL` | Inconclusive | qualified Legal/Privacy evidence absent |
 | `D1-SIG-REF` | Accept with required amendments | complete OD-10 and reference distribution/deprecation decisions |
 | `D1-SIG-L10N` | Accept with required amendments | translation source/review workflow and exact locale policies |
-| `D1-SIG-MOBILE` | Accept | client/domain isolation and future BCK-18 boundary are coherent; runtime remains gated |
+| `D1-SIG-MOBILE` | **Recorded for BCK-03 boundary: Accept with required amendments** | BCK-18/BCK-20 Approval, independent Mobile evidence and runtime remain incomplete |
 | `D1-SIG-CONTENT` | Accept with required amendments | source-language/readiness behavior plus mandatory Legal-copy matrix |
 | `D1-SIG-FIN` | Inconclusive | cost proposal is Present, but Finance verdict, EUR SKU/tax treatment and measured reconciliation are absent |
 | `D1-SIG-BOOK` | Accept for D1 semantic boundary only | executable transaction/outbox parity remains later |
@@ -177,10 +182,10 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
-| BCK-03 v0.3.11 | API, Operations and Security boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Mobile and independent evidence remain Pending |
-| BCK-04 v0.4.20 | retain Draft | bounded BCK-03 Security acceptance does not accept BCK-04; `BCK04-OD-01`/`BCK04-OD-09` remain Proposed/unsigned, tabletop is not executed and qualified Legal evidence remains absent |
-| BCK-05 v0.2.27 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; bounded BCK-03 verdicts do not accept BCK-05; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
-| BCK-20 v0.2.6 | retain Draft | OD-10 and Legal/localization workflow evidence incomplete |
+| BCK-03 v0.3.12 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
+| BCK-04 v0.4.21 | retain Draft | bounded BCK-03 Security/Mobile acceptance does not accept BCK-04; `BCK04-OD-01`/`BCK04-OD-09` remain Proposed/unsigned, tabletop is not executed and qualified Legal evidence remains absent |
+| BCK-05 v0.2.28 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; bounded BCK-03 verdicts do not accept BCK-05; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
+| BCK-20 v0.2.7 | retain Draft | BCK-03 Mobile verdict does not cover BCK-20; OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -210,12 +215,16 @@ The separate 2026-09-08 BCK03-SEC-DEC-01 confirmation records D1-SIG-SEC only
 for the BCK-03 boundary with required amendments. It does not accept BCK-04,
 independent Security/Privacy evidence or qualified Legal conclusions.
 
+The separate 2026-09-09 BCK03-MOB-DEC-01 confirmation records D1-SIG-MOBILE
+only for the BCK-03 boundary. It does not accept BCK-18/BCK-20, replace
+independent Mobile evidence or authorize runtime.
+
 ## 9. What happens after owner confirmation
 
 1. Keep the recorded Batch A dispositions and D1-SIG-API verdict reconciled in
    BCK-D1-SIG-01 and BCK-03.
-2. Obtain the still-Pending Security/Privacy and Mobile boundary verdicts
-   without opening a runtime gate.
+2. Preserve the bounded Operations/Security/Mobile verdicts and complete the
+   remaining BCK-04/BCK-05/BCK-20 specialist evidence without opening runtime.
 3. Use the recorded SLO/cost/recovery baselines to define a separately
    authorized stage-validation slice and collect evidence-based specialist
    verdicts; separately schedule and actually perform BCK04-OD09-TTX-01 with

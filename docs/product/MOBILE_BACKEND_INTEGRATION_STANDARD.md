@@ -1,19 +1,30 @@
 # Recharge Backend — Mobile Integration Standard
 
 - ID: **BCK-18**
-- Version: **0.2**
-- Date: **2026-08-25**
-- Status: **Review — documentation only; approval and owner decisions pending**
+- Version: **0.3**
+- Date: **2026-09-09**
+- Status: **Review — BCK-03 Mobile boundary verdict recorded; BCK-18 approval pending**
 - Runtime status: **Absent — current product repositories remain local/mock**
 - Accountable owner: **Mobile Platform owner**
 - Required reviewers: **API Platform, Security/Privacy, Identity, Reference
   Data, affected domain owners and Platform Operations**
-- Coordination baseline: [BCK-02 v2.4.34](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
-  [BCK-18-PRE v0.2](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
+  [BCK-18-PRE v0.3](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
+- BCK-03 Mobile decision:
+  [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Canonical path: `docs/product/MOBILE_BACKEND_INTEGRATION_STANDARD.md`
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-09
+
+- recorded BCK03-MOB-DEC-01 only for the BCK-03 Mobile boundary;
+- reconciled to BCK-03 v0.3.12 and Mobile Architecture v3.1.1 request-ID
+  erratum while preserving all BCK-18 owner/runtime gates;
+- retained 22/22 design coverage, 60 AC and all eight BCK18 decisions;
+- changed no schema, adapter, mobile/backend runtime, Firebase, deployment,
+  push or merge state.
 
 ### v0.2 — 2026-08-25
 
@@ -66,7 +77,7 @@ Current facts:
 3. BCK-03 wire/API semantics and owning backend BCK specification at exact
    Approved status.
 4. This BCK-18 standard after Approval.
-5. Mobile Architecture v3.1 for mobile layering/state/cutover.
+5. Mobile Architecture v3.1.1 for mobile layering/state/cutover.
 6. API Contracts Workflow and BCK-04/BCK-20 overlays.
 7. Current runtime evidence.
 
@@ -76,18 +87,17 @@ mobile layer ownership.
 
 ### 2.2 Request-ID reconciliation
 
-Mobile Architecture v3.1 §19 and `MOB-ARCH-AC-42` describe unknown retry with
-the same `requestId`. BCK-03 contains the later Accepted D1 split-key rule:
+Mobile Architecture v3.1.1 and BCK-03 v0.3.12 now share one split-key rule:
 
 ```text
 requestId = one transport attempt/correlation
 idempotencyKey = one logical mutation identity
 ```
 
-At the backend seam BCK-03 wins: retry creates a fresh `requestId`, preserves
-the exact `idempotencyKey` and normalized semantic payload, and links attempts
-to one logical command. The mobile statement requires a future non-semantic
-erratum; its stable AC number is not reused or shifted.
+Retry creates a fresh `requestId`, preserves the exact `idempotencyKey` and
+normalized semantic payload, and links attempts to one logical command. The
+v3.1 wording is superseded through the documented v3.1.1 erratum without
+renumbering stable `MOB-ARCH-AC-42`.
 
 ### 2.3 Contract-source reconciliation
 
@@ -708,7 +718,7 @@ Cutover rules:
 | BCK18-OD-06 | Open | Per-domain cutover order/parity/rollback thresholds — Mobile + domains | M9/R3 | No cutover |
 | BCK18-OD-07 | Open | Secure local cache classification/encryption/retention — Mobile + Privacy/domains | Production personal data | No production cache |
 | OD-10 / BCK18-OD-08 | Proposed | LocalizedText/reference mapping — Reference + API + Mobile | Content/reference cutover | Unsupported/disabled |
-| Mobile v3.1 erratum | Open editorial | AC-42 request-ID wording — Mobile Architecture owner | Traceability clarity | BCK-03 split-key enforced at wire seam |
+| Mobile v3.1 erratum | Closed in v3.1.1 | AC-42 now preserves idempotency key/payload and uses a fresh request ID per attempt | Closed documentation conflict; no runtime authority | BCK-03 split-key enforced at wire seam |
 | M2 Money prerequisite | Incomplete | Normalize all authoritative Money before M8 — Mobile owners | Remote writes | Writes blocked |
 
 An owner decision requires exact version, alternatives, selected value,
@@ -779,7 +789,7 @@ reported separately.
 
 1. 22/22 mandatory categories are present.
 2. Current runtime inventory is verified.
-3. Request/idempotency conflict has one wire rule and explicit erratum.
+3. Request/idempotency conflict has one wire rule and a closed explicit erratum.
 4. M2 Money blocks M8 remote writes.
 5. OD-04/08/10 and local decisions have owners/gates/defaults.
 6. Import cannot write another aggregate.
@@ -889,7 +899,7 @@ useful evidence only and do not satisfy this list.
 
 ## 31. Final statement
 
-BCK-18 v0.2 is a complete Review standard pending owner decisions. It creates a reversible,
+BCK-18 v0.3 is a complete Review standard pending its owner decisions. It creates a reversible,
 typed seam between existing mobile feature architecture and future domain
 backends while prohibiting dual authority, hidden mock fallback and unsafe
 local import. No runtime work follows automatically from this document.

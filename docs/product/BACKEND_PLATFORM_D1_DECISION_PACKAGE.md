@@ -1,16 +1,17 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.6**
-- Date: **2026-09-08**
+- Version: **0.7**
+- Date: **2026-09-09**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.54](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
 
@@ -18,7 +19,9 @@
 
 ## 0. Revision note
 
-v0.6 reconciles this package to the bounded BCK03-SEC-DEC-01 verdict. It does
+v0.7 reconciles this package to the bounded BCK03-MOB-DEC-01 verdict. It does
+not accept BCK-18/BCK-20, replace independent Mobile evidence or authorize
+runtime. The v0.6 BCK03-SEC-DEC-01 reconciliation remains intact. It does
 not alter the existing split-key/OD-07 decisions or approve BCK-04, Legal,
 independent review, runtime or deployment.
 

@@ -1,8 +1,8 @@
-# Recharge Mobile Architecture v3.1
+# Recharge Mobile Architecture v3.1.1
 
 **ID:** MOB-ARCH-REC-01
-**Версия:** 3.1
-**Дата:** 2026-08-10
+**Версия:** 3.1.1
+**Дата:** 2026-09-09
 **Статус:** **Accepted — canonical mobile target supplement, documentation only**
 **Утверждено:** 2026-08-10, Product owner
 **Canonical integration:** linked from `ARCHITECTURE_BASELINE.md` on 2026-08-10
@@ -26,7 +26,21 @@
 иерархию из BCK-02/BCK-02-A1. Обе иерархии согласуются через Accepted ADR и
 contract boundaries, но не объединяются механически в одну общую лестницу.
 
-### 0.1 Review amendments v3.1
+### 0.1 Mobile/API identity erratum v3.1.1
+
+`D1-SIG-MOBILE` and BCK03-MOB-DEC-01 accepted a narrow documentation erratum:
+every physical query/command attempt uses a fresh `requestId`; an unknown
+command retry preserves the original `idempotencyKey` and normalized payload.
+This supersedes the v3.1 wording of MOB-ARCH-AC-42 without renumbering it.
+
+| v3.1 wording | v3.1.1 authoritative wording |
+|---|---|
+| same `requestId`/payload on unknown retry | same `idempotencyKey`/normalized payload, fresh attempt `requestId` |
+
+The erratum changes no mobile/backend runtime and does not approve BCK-18,
+Firebase or any integration slice.
+
+### 0.2 Review amendments v3.1
 
 После verdict **Accepted with amendments** в revision 3.1 добавлены:
 
@@ -536,8 +550,8 @@ sequenceDiagram
     participant UI as Mobile UI
     participant A as Application command
     participant B as Authoritative backend
-    UI->>A: Book(requestId, offerRef, quantity)
-    A->>B: authenticated + App Check command
+    UI->>A: Book(logicalCommandId, offerRef, quantity)
+    A->>B: requestId-1 + idempotencyKey + authenticated/App Check command
     alt committed
         B-->>A: authoritative receipt
         A-->>UI: Confirmed
@@ -546,14 +560,16 @@ sequenceDiagram
         A-->>UI: Not confirmed
     else timeout or unknown
         A-->>UI: Outcome unknown
-        UI->>A: Retry same requestId
+        UI->>A: Retry same idempotencyKey/payload
+        A->>B: requestId-2 + same idempotencyKey/payload
     end
 ```
 
 Правила:
 
-- каждая mutation получает собственный `requestId`/idempotency key;
-- повтор неизвестного результата использует тот же key и normalized payload;
+- каждый новый intent получает собственный logical command/idempotency key;
+- каждая физическая попытка получает свежий `requestId`;
+- повтор неизвестного результата использует тот же idempotency key и normalized payload;
 - другой payload с тем же key даёт `idempotency_conflict`;
 - новый пользовательский intent создаёт новый key;
 - client preflight advisory и не резервирует capacity;
@@ -666,7 +682,8 @@ toast и без success side effects. Если remote mutation уже могла
 `timeoutUnknownOutcome`, а не `cancelled`.
 
 UI показывает возможное действие: исправить поле, войти, сменить workspace,
-повторить с тем же requestId, обновить приложение или проверить у провайдера.
+повторить с тем же idempotency key и свежим requestId, обновить приложение или
+проверить у провайдера.
 Unknown outcome нельзя показывать как success либо повторять новой mutation.
 
 ## 20. Security, privacy и observability
@@ -709,7 +726,7 @@ reporting требуют отдельного privacy-approved slice.
 - controller state transitions;
 - double-submit и stale-response protection;
 - capability preflight;
-- unknown outcome retry с тем же requestId;
+- unknown outcome retry с тем же idempotency key/payload и свежим requestId;
 - workspace switch не меняет существующий publisher.
 
 ### Data/contracts
@@ -927,7 +944,7 @@ AC-01–AC-60 сохраняют исходную нумерацию revision 3.
 - **MOB-ARCH-AC-39:** Expansion создаёт новый Scenario ULID.
 - **MOB-ARCH-AC-40:** Client cache не подтверждает Booking.
 - **MOB-ARCH-AC-41:** Key принадлежит конкретной mutation.
-- **MOB-ARCH-AC-42:** Unknown retry использует тот же requestId/payload.
+- **MOB-ARCH-AC-42:** Unknown retry использует тот же idempotency key/payload и свежий requestId каждой попытки.
 - **MOB-ARCH-AC-43:** Payment/provider sync этим документом не разрешены.
 - **MOB-ARCH-AC-44:** Wire source of truth — `api_contracts`.
 - **MOB-ARCH-AC-45:** Generated outputs не редактируются вручную.
@@ -980,6 +997,6 @@ evidence. Следующий migration stage не запускается авт�
 
 ---
 
-**Итог:** v3.1 связывает полезные решения исходного документа с фактическим
+**Итог:** v3.1.1 связывает полезные решения исходного документа с фактическим
 monorepo Recharge, Accepted ADR, 10-type Create Hub, Event Classification
 v2.2.3 и staged Latvia/Baltics backend roadmap, не выдавая target за runtime.

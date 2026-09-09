@@ -1,22 +1,34 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.11**
-- Date: **2026-09-08**
-- Spec status: **Draft — API/Operations/Security boundary reviews accepted with required amendments; Mobile and independent reviews pending**
+- Version: **0.3.12**
+- Date: **2026-09-09**
+- Spec status: **Draft — API/Operations/Security/Mobile boundary reviews accepted with required amendments; independent reviews pending**
 - Runtime status: **Booking v1 contracts/test evidence and disabled Emulator-only adapter Present; deployed/mobile API runtime Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.54](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.58](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.12 — 2026-09-09
+
+- recorded bounded D1-SIG-MOBILE as Accept with required amendments through
+  BCK03-MOB-REV-01 v0.2 and BCK03-MOB-DEC-01 v0.1;
+- integrated per-attempt query identity, cancellation, unknown-outcome,
+  pagination, freshness, response-order and localized-failure controls;
+- retained BCK-03/BCK-18/BCK-20 statuses, independent evidence Pending,
+  API-DEC-04/05 Deferred and OD-09/10 Proposed;
+- changed no schema, generated file, mobile/backend runtime, Firebase,
+  deployment, push or merge state.
 
 ### v0.3.11 — 2026-09-08
 
@@ -266,9 +278,9 @@ rule` означает предлагаемое normative правило, а н�
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
 | Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
-| Reference data | BCK-20 v0.2.6 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
-| Security/privacy | BCK-04 v0.4.20 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions; bounded BCK-03 verdict does not accept BCK-04 |
-| Operations | BCK-05 v0.2.27 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
+| Reference data | BCK-20 v0.2.7 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
+| Security/privacy | BCK-04 v0.4.21 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions; bounded BCK-03 verdict does not accept BCK-04 |
+| Operations | BCK-05 v0.2.28 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
 | Mobile boundary | BCK-18 planned | Не импортировать Firebase schema/SDK в domain/presentation |
 
 Booking v1 split-key compatibility decision принят в
@@ -658,6 +670,9 @@ Invariants:
 - `success` содержит `result` по schema и не содержит `error`;
 - `failure` содержит `error` и не содержит success result;
 - `cancelled` — terminal non-success product outcome, не infrastructure error;
+- local user cancellation proven before send creates no backend result;
+- transport cancellation after a possible send is an unknown outcome until
+  reconciliation; it cannot fabricate authoritative `cancelled`;
 - `requestId` echo позволяет match retry/result;
 - `correlationId` server-generated/validated и используется в operations;
 - `serverTime` authoritative;
@@ -714,6 +729,10 @@ Rules:
 9. `retryAfterSeconds` используется только bounded rate/unavailable policy.
 10. Unknown internal exception map в `internal` с correlation ID; full detail
     остаётся в redacted operational log.
+11. `messageKey` and field paths are bounded hints, not executable/display
+    authority. Clients map known codes to bundled localized copy and use a safe
+    generic fallback for unknown keys; raw server/provider/SDK text is never
+    displayed.
 
 ## 15. Command contract
 
@@ -840,6 +859,8 @@ Rules:
 - authorization filters server-side;
 - filters and sort are registered enums/objects, not raw field/operator strings;
 - response declares source/projection revision and freshness where material;
+- material freshness is server-evidenced. Device time, offline state and
+  background resume cannot extend a server `freshUntilUtc`;
 - query cannot expose Firestore path/index/cursor encoding;
 - cursor opaque, tamper-evident or server-validatable and query-bound;
 - cross-market query explicit; disabled market fail closed;
@@ -856,6 +877,12 @@ Common v1 bounds:
 - cursor binds query type/version, actor visibility scope, market, normalized
   filters, sort and snapshot/projection revision where supported;
 - stable tie-breaker includes immutable ID;
+- absence/null of `nextCursor` means end-of-list; a non-null cursor means only
+  that another bounded request is permitted, not that results are guaranteed;
+- changed query/snapshot or expired cursor returns a registered typed stale/
+  invalid-cursor outcome and never silently restarts under the old page chain;
+- client page merge uses stable ID plus disclosed revision. Older pages cannot
+  overwrite newer items or mix incompatible snapshot/projection revisions;
 - client never constructs/decrements cursor;
 - offset pagination запрещена для mutable large feeds;
 - arbitrary full-text query remains BCK-08/OD-01, not common API feature.
@@ -889,7 +916,9 @@ session/finalize contracts. Batch mutation must define atomicity explicitly:
 - safe automatic retry allowed for transport failures with bounded exponential
   backoff, jitter and total deadline;
 - auth refresh at most through approved session flow;
-- retry preserves logical query/request identity where tracing requires.
+- every physical retry uses a fresh `requestId`; stable normalized query,
+  cursor and an optional registered logical query/generation reference provide
+  correlation without reusing attempt identity.
 
 ### 21.2. Commands
 
@@ -899,6 +928,15 @@ session/finalize contracts. Batch mutation must define atomicity explicitly:
 - client queries authoritative state or retries same command;
 - new key после timeout запрещён до reconciliation;
 - automatic retry limited by command/domain policy and user-visible state.
+- each enabled mutation registry profile declares same-command replay, status
+  query or another typed unknown-outcome recovery method, plus its safe result/
+  retry window and terminal expiry behavior; missing recovery semantics keep
+  the mutation disabled.
+
+For query and command results, network arrival order is not authority. The
+client matches the echoed attempt `requestId`, its local controller generation
+and disclosed resource/projection revisions. A late older result is ignored or
+reconciled and never overwrites newer state merely because it arrived last.
 
 ### 21.3. Server and workers
 
@@ -1074,7 +1112,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.3.11: **Proposed — not Accepted**
+- Status in BCK-03 v0.3.12: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -1348,7 +1386,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No runtime/schema file in this map is created by BCK-03 v0.3.11; this revision
+No runtime/schema file in this map is created by BCK-03 v0.3.12; this revision
 adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
@@ -1493,7 +1531,7 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.58 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
+- BCK-02 v2.4.59 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
 - BCK-09 compatibility decision and evidence listed;
 - BCK-04 Security/Privacy, BCK-05 Operations and a named Mobile Platform owner
@@ -1503,14 +1541,13 @@ BCK-03 may enter Review only when:
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.3.11 readiness: the combined Product owner recorded
+Current v0.3.12 readiness: the combined Product owner recorded
 `D1-SIG-API = Accept with required amendments` through
 [BCK-D1-OWN-A-DEC-01](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md), with an
 explicit single-owner independence disclosure. The bounded Operations and
-Security/Privacy verdicts are also recorded by BCK03-OPS-DEC-01 and
-BCK03-SEC-DEC-01. Mobile and independent evidence remain Pending, qualified
-Legal evidence is not inferred, so delegated reviews are incomplete and status
-remains **Draft**.
+Security/Privacy and Mobile verdicts are also recorded by BCK03-OPS-DEC-01,
+BCK03-SEC-DEC-01 and BCK03-MOB-DEC-01. Independent evidence remains Pending,
+qualified Legal evidence is not inferred, so status remains **Draft**.
 
 ## 42. Definition of Done BCK-03
 
@@ -1528,7 +1565,7 @@ Approval requires:
   owner, reason, review date and preserved gate); API-DEC-02/03 must be
   Accepted before their corresponding tooling/runtime activates;
 - OD-09 at least Proposed for D1 exit and Accepted before D3 effects/workers;
-- 77 AC reviewable and sequential;
+- 87 AC reviewable and sequential;
 - runtime remains Absent.
 
 `Approved` BCK-03 means contract design ready for bounded executable planning;
@@ -1608,7 +1645,7 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.3.11 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.3.12 leaves backend/Firebase/mobile runtime unchanged.
 65. **BCK-03-AC-65:** RAW-B closes only Booking-v1 disposable Emulator transport feasibility.
 66. **BCK-03-AC-66:** RAW-B grants no product adapter, Firebase access or specialist signature.
 67. **BCK-03-AC-67:** RAW-C requires separate explicit executable authorization and independent evidence.
@@ -1630,13 +1667,31 @@ it does not mean schemas/code/backend deployed.
     independent/qualified Legal review.
 77. **BCK-03-AC-77:** BCK03-SEC-DEC-01 creates no schema, runtime, Firebase,
     deployment, push or merge authority.
+78. **BCK-03-AC-78:** every physical query/command attempt uses a fresh request ID.
+79. **BCK-03-AC-79:** local pre-send cancellation, post-send ambiguity and
+    authoritative backend cancellation remain distinct.
+80. **BCK-03-AC-80:** every enabled mutation declares unknown-outcome recovery
+    and a safe result/retry window.
+81. **BCK-03-AC-81:** cursor pages expose unambiguous completion and typed
+    stale/invalid cursor behavior.
+82. **BCK-03-AC-82:** page merge cannot mix incompatible snapshots or overwrite
+    a newer item revision.
+83. **BCK-03-AC-83:** device time, offline state and background resume cannot
+    extend server freshness.
+84. **BCK-03-AC-84:** response arrival order cannot overwrite newer client state.
+85. **BCK-03-AC-85:** unknown message keys/paths use safe bundled fallback and
+    raw server/provider/SDK text is not displayed.
+86. **BCK-03-AC-86:** BCK03-MOB-DEC-01 does not approve BCK-18/BCK-20,
+    API-DEC-04/05 or independent Mobile evidence.
+87. **BCK-03-AC-87:** BCK03-MOB-DEC-01 creates no schema, generated file,
+    runtime, Firebase, deployment, push or merge authority.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.3.11 the following remain absent:
+At v0.3.12 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1658,8 +1713,9 @@ BCK-03 does not claim them as general backend runtime.
 
 Before BCK-03 Review:
 
-1. preserve the recorded D1-SIG-API/OPS/SEC verdicts and complete the
-   D1-SIG-MOBILE bounded review without requiring D2 BCK-18;
+1. preserve the recorded D1-SIG-API/OPS/SEC/MOBILE bounded verdicts and obtain
+   remaining owner/independent evidence without treating BCK-18 as a circular
+   D1 prerequisite;
 2. resolve the Deferred API-DEC-01–05 scopes before their protected gates and
    preserve the Accepted Booking-v1 API-DEC-01/03 controls;
 3. preserve the completed Booking-v1 split-key, semantic-hash and RAW-B
@@ -1672,7 +1728,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.11 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.12 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

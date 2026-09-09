@@ -1,16 +1,26 @@
 # BCK-18 — Mobile Backend Integration Coverage Matrix
 
 - ID: **BCK-18-PRE**
-- Version: **0.2**
-- Date: **2026-08-25**
+- Version: **0.3**
+- Date: **2026-09-09**
 - Status: **Review — coverage and reconciliation evidence**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Mobile Platform owner**
-- Target: [BCK-18 v0.2](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
-- Coordination baseline: [BCK-02 v2.4.34](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-18 v0.3](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
+- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md`
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-09
+
+- reconciled BCK-18 to BCK-03 v0.3.12, Mobile Architecture v3.1.1 and
+  BCK03-MOB-DEC-01 without accepting BCK-18 itself;
+- closed only the request-ID editorial conflict and preserved all eight BCK18
+  decisions plus Money/cutover/runtime blockers;
+- retained 22/22 design coverage and 60 sequential target AC;
+- changed no schema, adapter, mobile/backend runtime, Firebase, deployment,
+  push or merge state.
 
 ### v0.2 — 2026-08-25
 
@@ -27,7 +37,7 @@
 
 ## 1. Verdict
 
-BCK-18 v0.2 is Present in Review. Current mobile code provides useful
+BCK-18 v0.3 is Present in Review. Current mobile code provides useful
 local/mock ports, repositories, mappers, caches and one shared Booking contract
 family, but no production product-backend adapter or Firebase integration.
 
@@ -41,13 +51,13 @@ Firebase dependencies, imports, migrations, credentials or backend writes.
 | Source | Current status | BCK-18 treatment |
 |---|---|---|
 | Accepted ADR and Architecture Baseline | Accepted/Frozen | Layering, generated-code and authoritative backend boundaries cannot be weakened |
-| Mobile Architecture v3.1 | Accepted mobile target | Ports/adapters, states, M8/M9 and mobile UX semantics; one request-ID erratum logged below |
-| BCK-01 v0.4.29 | Review | Parent backend architecture; runtime claims remain Absent |
-| BCK-02 v2.4.34 | Approved coordination | Ownership, sequencing, gates and 22-section template |
-| BCK-03 v0.3.3 | Draft with Accepted split-key decision | Wire envelope, result/error, version, idempotency and retry semantics |
-| BCK-04 v0.4.16 | Draft | Mobile security/privacy overlay; no client authority |
+| Mobile Architecture v3.1.1 | Accepted mobile target | Ports/adapters, states, M8/M9 and corrected request/idempotency semantics |
+| BCK-01 v0.4.55 | Review | Parent backend architecture; runtime claims remain Absent |
+| BCK-02 v2.4.59 | Approved coordination | Ownership, sequencing, gates and 22-section template |
+| BCK-03 v0.3.12 | Draft; bounded Mobile verdict recorded | Wire envelope, result/error, version, idempotency and retry semantics; independent evidence Pending |
+| BCK-04 v0.4.21 | Draft | Mobile security/privacy overlay; no client authority |
 | BCK-06 v0.2 | Review | Identity/access/publisher authority input; runtime Absent |
-| BCK-20 v0.2.2 | Draft | Market/reference/localization input; OD-10 Proposed |
+| BCK-20 v0.2.7 | Draft | Market/reference/localization input; OD-10 Proposed |
 | API Contracts Workflow v1.1 | Accepted repository workflow | Booking-only cross-language schema exception until another Accepted authorization |
 | Current mobile runtime | Local/mock plus bounded provider HTTP | Evidence/debt only; not target backend authority |
 | OD-04 | Open | Import mapping/conflict/checkpoint/retry/dedupe/rollback unresolved |
@@ -85,7 +95,7 @@ Firebase dependencies, imports, migrations, credentials or backend writes.
 | 9 | AuthZ/revocation | §12 | Full target boundary; BCK-06/runtime absent |
 | 10 | Persistence/index/transactions | §13 and §16 | Full client boundary; import/runtime absent |
 | 11 | IDs/time/reference | §17 | Full; M2 Money and OD-10 block cutover |
-| 12 | Idempotency/concurrency/retry/failure | §9, §10 and §15 | Full; mobile erratum remains editorial debt |
+| 12 | Idempotency/concurrency/retry/failure | §9, §10 and §15 | Full; v3.1.1 closes the mobile request-ID editorial debt |
 | 13 | Offline/cache/freshness | §8, §13–14 | Full semantic contract; exact domain defaults open |
 | 14 | Migration/import/compat | §16 | Full fail-closed design; OD-04/08 block execution |
 | 15 | Outbox/replay/dedupe | §18 | Full mobile-consumer boundary; event runtime absent |
@@ -119,8 +129,8 @@ runtime completion are not claimed.
 
 | ID | Finding | Required disposition |
 |---|---|---|
-| BCK18-GAP-01 | Closed: BCK-18 v0.2 is Present in Review | Preserve runtime Absent and complete owner decisions before Approval |
-| BCK18-GAP-02 | Mobile Architecture §19/AC-42 says unknown retry keeps `requestId`; BCK-03 Accepted split-key requires fresh attempt `requestId` and stable logical `idempotencyKey` | BCK-03 wire rule wins at backend seam; record mobile v3.1 erratum without renumbering AC |
+| BCK18-GAP-01 | Closed: BCK-18 v0.3 is Present in Review | Preserve runtime Absent and complete owner decisions before Approval |
+| BCK18-GAP-02 | Closed in Mobile Architecture v3.1.1: AC-42 now uses fresh attempt `requestId` and stable logical `idempotencyKey`/payload | Preserve the stable AC ID and BCK-03 wire rule; no runtime inference |
 | BCK18-GAP-03 | M2 Money migration incomplete and normalized `double` fields remain | M8 remote writes blocked until minor-unit migration/fixtures pass |
 | BCK18-GAP-04 | API workflow authorizes cross-language schema source only for Booking | Non-Booking schema/codegen needs Accepted API decision; no hand-authored generated files |
 | BCK18-GAP-05 | Mock/local binding is centralized but production exclusion is not evidenced | Define build/runtime binding manifest and fail-closed startup |
