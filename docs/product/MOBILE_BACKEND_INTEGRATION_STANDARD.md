@@ -1,21 +1,31 @@
 # Recharge Backend — Mobile Integration Standard
 
 - ID: **BCK-18**
-- Version: **0.3**
-- Date: **2026-09-09**
+- Version: **0.4**
+- Date: **2026-09-12**
 - Status: **Review — BCK-03 Mobile boundary verdict recorded; BCK-18 approval pending**
 - Runtime status: **Absent — current product repositories remain local/mock**
 - Accountable owner: **Mobile Platform owner**
 - Required reviewers: **API Platform, Security/Privacy, Identity, Reference
   Data, affected domain owners and Platform Operations**
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
-  [BCK-18-PRE v0.3](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
+  [BCK-18-PRE v0.4](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
 - BCK-03 Mobile decision:
   [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
+- BCK-04 technical decision:
+  [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Canonical path: `docs/product/MOBILE_BACKEND_INTEGRATION_STANDARD.md`
 
 ## 0. Changelog
+
+### v0.4 — 2026-09-12
+
+- reconciled BCK-03 v0.3.13 and BCK-04 v0.4.22 owner-boundary evidence;
+- retained BCK-18 Review, all eight decisions, Money/generated-client/cutover
+  gates and runtime Absent;
+- changed no schema, adapter, mobile/backend runtime, Firebase, deployment,
+  push or merge state.
 
 ### v0.3 — 2026-09-09
 
@@ -87,7 +97,7 @@ mobile layer ownership.
 
 ### 2.2 Request-ID reconciliation
 
-Mobile Architecture v3.1.1 and BCK-03 v0.3.12 now share one split-key rule:
+Mobile Architecture v3.1.1 and BCK-03 v0.3.13 share one split-key rule:
 
 ```text
 requestId = one transport attempt/correlation
@@ -899,7 +909,7 @@ useful evidence only and do not satisfy this list.
 
 ## 31. Final statement
 
-BCK-18 v0.3 is a complete Review standard pending its owner decisions. It creates a reversible,
+BCK-18 v0.4 is a complete Review standard pending its owner decisions. It creates a reversible,
 typed seam between existing mobile feature architecture and future domain
 backends while prohibiting dual authority, hidden mock fallback and unsafe
 local import. No runtime work follows automatically from this document.

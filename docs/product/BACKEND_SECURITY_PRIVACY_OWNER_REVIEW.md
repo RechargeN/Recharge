@@ -1,19 +1,20 @@
 # Recharge Backend — Security & Privacy Architecture Owner Review
 
 - ID: **BCK04-SEC-REV-01**
-- Version: **0.1**
-- Date: **2026-09-11**
-- Status: **Proposed review — owner verdict pending**
-- Recommended result: **Accept with required amendments — technical documentation boundary only**
+- Version: **0.2**
+- Date: **2026-09-12**
+- Status: **Owner verdict recorded — independent and Legal evidence pending**
+- Review result: **Accept with required amendments — technical documentation boundary only**
 - Reviewer: **RechargeN / Product owner** (combined Security/Privacy role)
 - Independence: **not evidenced**
 - Legal qualification: **not evidenced**
-- Target: [BCK-04 v0.4.21](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coverage: [BCK-04-PRE v0.3.21](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md)
+- Target: [BCK-04 v0.4.22](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coverage: [BCK-04-PRE v0.3.22](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md)
 - Threat input: [BCK04-OD01-TM-01 v0.1](BACKEND_SECURITY_THREAT_MODEL.md)
 - Incident input: [BCK04-OD09-IR-01 v0.1](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md)
 - Tabletop input: [BCK04-OD09-TTX-01 v0.1](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md)
-- API baseline: [BCK-03 v0.3.12](BACKEND_API_CONTRACT_STANDARD.md)
+- API baseline: [BCK-03 v0.3.13](BACKEND_API_CONTRACT_STANDARD.md)
+- Owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Scope and verdict boundary
@@ -131,6 +132,11 @@ If approved, the next documentation-only change integrates the fourteen
 amendments, records the exact bounded owner verdict and reconciles the canonical
 D1/BCK registry. It still does not promote BCK-04 to Review or accept any OD.
 
+The Product owner explicitly accepted this recommendation on 2026-09-12.
+`BCK04-SEC-DEC-01` records the exact bounded verdict. All fourteen amendments
+are integrated in BCK-04 v0.4.22. Independent Security/Privacy evidence,
+qualified Legal evidence, BCK04-OD-01/09 and all runtime gates remain open.
+
 ## 6. Acceptance criteria
 
 1. **BCK04-SEC-REV-AC-01:** the review is limited to technical documentation.
@@ -153,5 +159,6 @@ D1/BCK registry. It still does not promote BCK-04 to Review or accept any OD.
 
 ## 7. Next action
 
-Obtain the exact owner verdict above. Do not integrate amendments, accept
-BCK04-OD-01/09, run the tabletop or begin executable work before that verdict.
+Continue the independent Security/Privacy and qualified Legal review path and
+the exact BCK04-OD-01/09 decisions. Do not run the tabletop or begin executable
+work without their separate gates.

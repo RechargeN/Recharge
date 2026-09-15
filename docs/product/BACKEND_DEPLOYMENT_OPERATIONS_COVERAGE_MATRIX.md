@@ -1,19 +1,19 @@
 # BCK-05 — Deployment & Operations Coverage Matrix
 
 - ID: **BCK-05-PRE**
-- Version: **0.2.28**
-- Date: **2026-09-09**
+- Version: **0.2.29**
+- Date: **2026-09-12**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Platform Operations owner**
-- Target: [BCK-05 v0.2.28](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-05 v0.2.29](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_COVERAGE_MATRIX.md`
 
 ## 0. Mobile-boundary reconciliation
 
-Current anchors are BCK-01 v0.4.55, BCK-02 v2.4.59, BCK-03 v0.3.12,
-BCK-04 v0.4.21, BCK-05 v0.2.28 and BCK-02-A1 v1.6. BCK03-OPS-DEC-01,
+Current anchors are BCK-01 v0.4.56, BCK-02 v2.4.60, BCK-03 v0.3.13,
+BCK-04 v0.4.22, BCK-05 v0.2.29 and BCK-02-A1 v1.7. BCK03-OPS-DEC-01,
 BCK03-SEC-DEC-01 and BCK03-MOB-DEC-01 cover only BCK-03 boundaries; BCK-05 and independent
 Operations/Security reviews remain open. Bounded R0 is Pass; R1 and
 product/cloud runtime remain blocked.
@@ -29,15 +29,15 @@ select credentials, create runtime files or authorize production processing.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.55 | Review; local R0/disabled RAW-C source Present, product/cloud runtime Absent | Parent architecture |
-| BCK-02 v2.4.59 | Approved semantic baseline | Registry/gates/template |
-| BCK-03 v0.3.12 | Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments; independent evidence Pending | API/event input; Booking-v1 accepted scope preserved, broader decisions Deferred |
-| BCK-04 v0.4.21 | Draft; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed; OD-07 and BCK05-OD-02 Accepted with controls | Security/privacy input; BCK-04 itself not Accepted |
-| BCK-20 v0.2.7 | Draft; BCK-03 Mobile verdict does not cover BCK-20; runtime Absent | Market/reference revision input, not Accepted |
-| BCK-02-A1 v1.6 | Draft; docs only | Latvia/Baltics execution input |
+| BCK-01 v0.4.56 | Review; local R0/disabled RAW-C source Present, product/cloud runtime Absent | Parent architecture |
+| BCK-02 v2.4.60 | Approved semantic baseline | Registry/gates/template |
+| BCK-03 v0.3.13 | Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments; independent evidence Pending | API/event input; Booking-v1 accepted scope preserved, broader decisions Deferred |
+| BCK-04 v0.4.22 | Draft; combined-owner technical verdict recorded; BCK04-OD-01/09 and independent/Legal evidence pending | Security/privacy input; BCK-04 itself not Accepted |
+| BCK-20 v0.2.8 | Draft; BCK-03 Mobile verdict does not cover BCK-20; runtime Absent | Market/reference revision input, not Accepted |
+| BCK-02-A1 v1.7 | Draft; docs only | Latvia/Baltics execution input |
 | Firebase Architecture v2.2 | Proposed | Candidate topology only |
 | ENV/CI policies | Accepted repository policy | Mandatory environment/CI constraints |
-| BCK-05 v0.2.28 | Draft; bounded R0 Pass and disabled RAW-C source boundary, product/cloud runtime Absent; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed | BCK03-OPS/SEC/MOB decisions do not approve BCK-05; executable specialist/cloud evidence remains pending |
+| BCK-05 v0.2.29 | Draft; bounded R0 Pass and disabled RAW-C source boundary, product/cloud runtime Absent; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed | BCK03 and BCK04 owner-boundary decisions do not approve BCK-05; executable specialist/cloud evidence remains pending |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -128,6 +128,6 @@ contract are in
 
 ## 8. Verdict
 
-BCK-05 v0.2.28 is structurally complete enough for specialist review preparation.
+BCK-05 v0.2.29 is structurally complete enough for specialist review preparation.
 It remains Draft until §6 blockers are addressed. No project, resource,
 credential, deployment, backup or runtime is authorized.

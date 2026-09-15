@@ -1,16 +1,23 @@
 # BCK-18 — Mobile Backend Integration Coverage Matrix
 
 - ID: **BCK-18-PRE**
-- Version: **0.3**
-- Date: **2026-09-09**
+- Version: **0.4**
+- Date: **2026-09-12**
 - Status: **Review — coverage and reconciliation evidence**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Mobile Platform owner**
-- Target: [BCK-18 v0.3](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-18 v0.4](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md`
 
 ## 0. Changelog
+
+### v0.4 — 2026-09-12
+
+- reconciled BCK-18 with BCK-03 v0.3.13 and BCK-04 v0.4.22;
+- recorded that BCK04-SEC-DEC-01 accepts only the combined-owner technical
+  BCK-04 boundary and does not accept BCK-18;
+- retained 22/22 design coverage, 60 AC and every runtime/cutover gate.
 
 ### v0.3 — 2026-09-09
 
@@ -37,7 +44,7 @@
 
 ## 1. Verdict
 
-BCK-18 v0.3 is Present in Review. Current mobile code provides useful
+BCK-18 v0.4 is Present in Review. Current mobile code provides useful
 local/mock ports, repositories, mappers, caches and one shared Booking contract
 family, but no production product-backend adapter or Firebase integration.
 
@@ -52,12 +59,12 @@ Firebase dependencies, imports, migrations, credentials or backend writes.
 |---|---|---|
 | Accepted ADR and Architecture Baseline | Accepted/Frozen | Layering, generated-code and authoritative backend boundaries cannot be weakened |
 | Mobile Architecture v3.1.1 | Accepted mobile target | Ports/adapters, states, M8/M9 and corrected request/idempotency semantics |
-| BCK-01 v0.4.55 | Review | Parent backend architecture; runtime claims remain Absent |
-| BCK-02 v2.4.59 | Approved coordination | Ownership, sequencing, gates and 22-section template |
-| BCK-03 v0.3.12 | Draft; bounded Mobile verdict recorded | Wire envelope, result/error, version, idempotency and retry semantics; independent evidence Pending |
-| BCK-04 v0.4.21 | Draft | Mobile security/privacy overlay; no client authority |
+| BCK-01 v0.4.56 | Review | Parent backend architecture; runtime claims remain Absent |
+| BCK-02 v2.4.60 | Approved coordination | Ownership, sequencing, gates and 22-section template |
+| BCK-03 v0.3.13 | Draft; bounded Mobile verdict recorded | Wire envelope, result/error, version, idempotency and retry semantics; independent evidence Pending |
+| BCK-04 v0.4.22 | Draft; combined-owner technical verdict recorded | Mobile security/privacy overlay; no client authority; independent/Legal/OD gates pending |
 | BCK-06 v0.2 | Review | Identity/access/publisher authority input; runtime Absent |
-| BCK-20 v0.2.7 | Draft | Market/reference/localization input; OD-10 Proposed |
+| BCK-20 v0.2.8 | Draft | Market/reference/localization input; OD-10 Proposed |
 | API Contracts Workflow v1.1 | Accepted repository workflow | Booking-only cross-language schema exception until another Accepted authorization |
 | Current mobile runtime | Local/mock plus bounded provider HTTP | Evidence/debt only; not target backend authority |
 | OD-04 | Open | Import mapping/conflict/checkpoint/retry/dedupe/rollback unresolved |
@@ -129,7 +136,7 @@ runtime completion are not claimed.
 
 | ID | Finding | Required disposition |
 |---|---|---|
-| BCK18-GAP-01 | Closed: BCK-18 v0.3 is Present in Review | Preserve runtime Absent and complete owner decisions before Approval |
+| BCK18-GAP-01 | Closed: BCK-18 v0.4 is Present in Review | Preserve runtime Absent and complete owner decisions before Approval |
 | BCK18-GAP-02 | Closed in Mobile Architecture v3.1.1: AC-42 now uses fresh attempt `requestId` and stable logical `idempotencyKey`/payload | Preserve the stable AC ID and BCK-03 wire rule; no runtime inference |
 | BCK18-GAP-03 | M2 Money migration incomplete and normalized `double` fields remain | M8 remote writes blocked until minor-unit migration/fixtures pass |
 | BCK18-GAP-04 | API workflow authorizes cross-language schema source only for Booking | Non-Booking schema/codegen needs Accepted API decision; no hand-authored generated files |

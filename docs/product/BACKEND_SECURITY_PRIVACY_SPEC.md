@@ -1,18 +1,20 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.21**
-- Date: **2026-09-09**
-- Spec status: **Draft — architecture review required**
+- Version: **0.4.22**
+- Date: **2026-09-12**
+- Spec status: **Draft — bounded owner verdict recorded; independent/Legal/OD gates pending**
 - Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.12](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
+- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.13](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
   [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.21
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.22
+- Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
+- Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - API security boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
@@ -27,6 +29,18 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.22 — 2026-09-12
+
+- recorded BCK04-SEC-DEC-01 `Accept with required amendments` for the combined-
+  owner technical documentation boundary only;
+- separated DSR attempt `requestId`, logical `idempotencyKey` and server-issued
+  `privacyRequestId`, and added current-read authorization, safe export,
+  monotonic state, cancellation and anti-resurrection controls;
+- superseded the stale BCK-04-AC-06 wording in place and appended AC-46–AC-59;
+- retained Draft status, independent/qualified Legal evidence, BCK04-OD-01/09,
+  OD-11, D1/G1 and every executable/runtime gate as unresolved;
+- created no runtime, Firebase resource, deployment, push or merge authority.
 
 ### v0.4.21 — 2026-09-09
 
@@ -603,12 +617,13 @@ publisher eligibility (`ADR 0017`, `BCK-01 §13.1`).
 | Admin/support principal | Explicit tool/case action only | Dedicated capability, reason/case, audit; two-person repair где требуется | Publisher/workspace impersonation и silent direct writes |
 | Service identity/worker | Exact scheduled/event task | Least-privilege IAM, accepted event/lease/idempotency contract | General user/domain access вне task |
 
-Revocation — fail-closed: любая authoritative mutation оценивает текущий
-server-owned access; устаревший mobile-снапшот роли/workspace никогда не
-авторизует команду. Суспензия session/verification/membership/capability/
-market делает связанный cached access недействительным и производит typed
-outcome, не раскрывая, существует ли недоступный ресурс (anti-enumeration,
-см. §11.2).
+Revocation — fail-closed: любая authoritative mutation, protected/sensitive
+query и раскрытие защищённого результата оценивают текущий server-owned access;
+устаревший mobile-снапшот роли/workspace, ранее выданная export capability или
+cache никогда не авторизуют операцию. Суспензия session/verification/
+membership/capability/market делает связанный cached access недействительным и
+производит typed outcome, не раскрывая, существует ли недоступный ресурс
+(anti-enumeration, см. §11.2).
 
 ### 9.3 Capability baseline (наследуется, не переопределяется)
 
@@ -674,7 +689,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.12, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
+contract across BCK-03 v0.3.13, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -801,6 +816,13 @@ BCK-04 задаёт только security-инвариант выше.
 - App Check failure никогда не даёт bypass другим security-контролям (§16);
 - recovery/emergency bypass policy — **Open**, не решено ни в одном
   найденном источнике (`BCK04-OD-04`).
+
+До принятия `BCK04-OD-04` emergency degradation может только оставить App
+Check в monitor/disabled состоянии. Она никогда не отключает AuthN, current
+AuthZ, schema/domain validation, rate limits или audit. Будущее исключение
+обязано быть узким по environment/surface, иметь owner, reason, start/expiry,
+monitoring, approval и revocation evidence; молчаливый permanent bypass
+запрещён.
 
 ## 15. Secrets и cryptographic material
 
@@ -1050,6 +1072,12 @@ lifecycle trigger и deletion/anonymization action. `ADR 0013` п.3 задаёт
   Legal обязаны зафиксировать до production (`BCK04-OD-07`, пересекается с
   §23).
 
+Каждый legal/security hold или Art. 17(3) exception имеет exact authorized/
+lawful basis reference, record-family scope, owner, start, review/expiry
+condition и release evidence. Hold не наследуется всей data class, не
+продлевается бессрочно по умолчанию и не выводится только из внутреннего срока
+retention.
+
 **Open:** Sensitive и Operational (audit) retention для non-Booking классов
 не имеют default вообще (§19.2) — каждый domain BCK-spec обязан предложить
 собственную Accepted таблицу с Legal/Privacy approval перед production
@@ -1092,13 +1120,13 @@ Statutory timing — не Open: по Article 12(3) ответ даётся бе�
 
 ```text
 verified request
-  -> SubmitPrivacyRequest(requestId, requestType, scope, market)
-    -> PrivacyRequest (authoritative coordinator source)
+  -> SubmitPrivacyRequest(requestId, idempotencyKey, requestType, scope, market)
+    -> PrivacyRequest privacyRequestId (authoritative coordinator source)
       -> PrivacyDomainTask per owning BCK module
         -> domain command executes only domain-owned records
         -> versioned completion/failure response or accepted OD-09 event
       -> PrivacyCompletionEvidence aggregates privacy-safe outcomes
-  -> GetPrivacyRequestStatus(requestId) returns revisioned user-safe status
+  -> GetPrivacyRequestStatus(privacyRequestId) returns revisioned user-safe status
 ```
 
 Ownership:
@@ -1112,19 +1140,31 @@ Ownership:
 
 Invariants:
 
+- каждый physical attempt получает новый `requestId`; retry той же logical
+  submission сохраняет `idempotencyKey` и canonical normalized payload;
+  successful submission возвращает отдельный server-issued
+  `privacyRequestId`, которым адресуются status/cancel/export operations;
 - requester identity проверяется server-side; authenticated session может
   требовать recent re-auth/step-up, а manual support channel — эквивалентную
   documented identity verification; client-declared actor не принимается;
+- client-supplied subject, publisher, workspace, domain и resource references
+  являются только untrusted filters: backend связывает scope с verified data
+  subject и никогда не расширяет его на чужие records;
 - existence/status другого пользователя не раскрывается; DSR endpoints
   наследуют anti-enumeration §11.2 и отдельные abuse limits;
 - IDs — ULID, timestamps — backend UTC, market — versioned stable value по
   `BCK-01 §11`; local/offline intent не считается submitted request;
-- повтор с тем же request ID и тем же canonical payload возвращает тот же
-  result/status; payload mismatch даёт typed `idempotency_conflict`;
+- повтор logical submission с тем же idempotency key и canonical payload
+  возвращает тот же receipt/result с текущим attempt request ID; key reuse с
+  другим payload даёт typed `idempotency_conflict`;
 - status transitions monotonic:
   `received -> verificationRequired | accepted -> dispatching ->
-  partiallyCompleted | completed | rejected`; user cancellation — отдельный
-  `cancelled` outcome до irreversible execution, не failure/success;
+  partiallyCompleted | completed | rejected`; local cancel до send означает,
+  что request не submitted; timeout после send даёт `unknownOutcome` и
+  reconciles через тот же idempotency key/receipt; authoritative cancellation
+  — отдельный `cancelled` outcome только до declared irreversible boundary;
+  после неё cancel возвращает typed state conflict и не делает вид, что
+  committed work отменено;
 - domain handlers исполняют только собственные record families; BCK-04 не
   пишет напрямую в чужие collections;
 - timeout/retry дают revisioned `partiallyCompleted` или `unavailable`,
@@ -1135,7 +1175,21 @@ Invariants:
 - rectification/erasure/restriction propagates каждому известному recipient
   по Article 19, кроме documented impossible/disproportionate-effort case;
   requester может получить recipient information по применимому запросу;
-- completion evidence — Operational/audit, без raw exported content.
+- completion evidence — Operational/audit, без raw exported content;
+- status/result содержит server revision/freshness; terminal state не
+  регрессирует, а late/cache/offline response не перезаписывает более новую
+  revision и не продлевает freshness.
+
+Export retrieval использует authenticated, short-lived, single-purpose,
+owner-bound capability с risk-based step-up, bounds, audit и revocation.
+Обычное письмо не содержит raw export attachment. Exact transport, lifetime и
+delivery channel остаются `BCK04-OD-08`, но не могут ослабить эти инварианты.
+
+Erasure/restriction completion evidence обязано предотвращать silent
+resurrection через late domain task, projection rebuild, local import или
+backup restore. Identity teardown выполняется после достаточного dispatch/
+reconciliation evidence, чтобы оставшиеся domain handlers могли завершить
+работу без восстановления пользовательской authority.
 
 ### 20.3 Erasure (Art. 17) не абсолютно — но и retention не абсолютен
 
@@ -1238,6 +1292,9 @@ restore tests"), `FIREBASE_ARCHITECTURE.md §22` п.10 (Proposed, явно
   access, не отдельная более широкая категория;
 - post-restore reconciliation обязательна для authoritative Booking/ledger
   данных (`BCK-01 §14` Booking-специфичное правило).
+- restore/import/projection rebuild проверяет актуальные erasure/restriction
+  markers и privacy completion revisions; восстановленная старая копия не
+  становится снова видимой или authoritative без повторной reconciliation.
 
 **Open:** backup schedule, encryption-at-rest detail, exact RTO/RPO —
 принадлежит `BCK-05`; BCK-04 фиксирует только privacy-инвариант выше
@@ -1378,7 +1435,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.55 Review:
+executable slice, согласованный с BCK-01 v0.4.56 Review:
 
 ```text
 docs/runbooks/
@@ -1446,7 +1503,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.12.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.13.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1487,8 +1544,8 @@ Client input schema для `actorContext` намеренно отсутству�
 | Security tabletop/incident drill | SEV path, Article 33/34 assessment, contacts, clocks, evidence | Quarterly по RUN-01/RUN-06 registry |
 | Legal/Privacy review | §17 per-market review завершён до release | Per market, до G1/G3 |
 
-Ни одна строка этой таблицы не имеет пройденного runtime evidence в v0.4.9 —
-таблица
+Ни одна строка этой таблицы не имеет пройденного runtime evidence в текущей
+ревизии — таблица
 фиксирует **что** будет проверяться, не заявляет прохождение.
 
 ## 30. Definition of Ready, Definition of Done, Acceptance Criteria, unimplemented list
@@ -1498,7 +1555,7 @@ Client input schema для `actorContext` намеренно отсутству�
 - `BCK-01` переведён в `Review` — выполнено 2026-08-20;
 - coverage matrix подтверждена актуальной;
 - interim coordination назначена `RechargeN / Product owner`; до Review
-  остаётся назначить независимого Security/Privacy или Legal/Privacy
+  остаётся назначить независимого Security/Privacy и qualified Legal/Privacy
   specialist owner для решений, требующих профессионального sign-off;
 - Legal/Privacy owner назначен для `OD-11`/`BCK04-OD-06`.
 - OD-11 questions and verified legal-source boundaries are reviewable through
@@ -1506,10 +1563,12 @@ Client input schema для `actorContext` намеренно отсутству�
   decision remains Open until a qualified owner selects a policy.
 
 Current readiness: the BCK-01 and coverage prerequisites plus interim
-coordination are evidenced. The combined owner accepted D1-SIG-SEC only for
-the BCK-03 API boundary through BCK03-SEC-DEC-01. BCK-04's own Security owner
-verdict, independent assessment, D1-SIG-LEGAL and qualified Legal/Privacy
-evidence remain absent. BCK-04 therefore remains Draft and cannot enter Review.
+coordination are evidenced. The combined owner accepted the technical BCK-03
+and BCK-04 boundaries with required amendments through BCK03-SEC-DEC-01 and
+BCK04-SEC-DEC-01. This is not independent Security/Privacy evidence or
+qualified Legal judgment. BCK04-OD-01/09, independent assessment,
+D1-SIG-LEGAL and qualified Legal/Privacy evidence remain absent. BCK-04
+therefore remains Draft and cannot enter Review.
 
 ### 30.2 Definition of Done Approved BCK-04
 
@@ -1544,8 +1603,10 @@ evidence remain absent. BCK-04 therefore remains Draft and cannot enter Review.
    процитированы без изменения значения.
 5. **BCK-04-AC-05:** `OD-11` не получает числового возраста в этой
    спецификации.
-6. **BCK-04-AC-06:** `idempotencyKey`/`requestId` расхождение не
-   представлено как решённое.
+6. **BCK-04-AC-06:** `requestId` per attempt, logical `idempotencyKey` и
+   server-issued `privacyRequestId` имеют разные роли и согласованы с
+   BCK-03 v0.3.13; это wording supersedes AC-06 revision v0.4.21 без
+   перенумерации stable ID.
 7. **BCK-04-AC-07:** anti-enumeration правило одинаково применяется к
    Booking, Page и verification-ресурсам.
 8. **BCK-04-AC-08:** retention matrix покрывает Booking (ECL03-D04 registry
@@ -1645,10 +1706,37 @@ evidence remain absent. BCK-04 therefore remains Draft and cannot enter Review.
 45. **BCK-04-AC-45:** release evidence включает transport/encryption/key,
     secret/static/dependency/vulnerability/provenance и SBOM-equivalent gates;
     exception всегда bounded owner/expiry/compensating control.
+46. **BCK-04-AC-46:** protected/sensitive read and result disclosure
+    re-evaluate current server-owned authority.
+47. **BCK-04-AC-47:** client DSR scope cannot widen the verified data subject's
+    server-resolved record scope.
+48. **BCK-04-AC-48:** local pre-send cancellation, post-send unknown outcome
+    and authoritative cancellation remain distinct.
+49. **BCK-04-AC-49:** authoritative cancellation is rejected after the
+    declared irreversible boundary without fabricating rollback.
+50. **BCK-04-AC-50:** DSR state is monotonic, revisioned and server-fresh;
+    response arrival order is not authority.
+51. **BCK-04-AC-51:** export retrieval is authenticated, short-lived,
+    purpose-bound, owner-bound, bounded, audited and revocable.
+52. **BCK-04-AC-52:** ordinary email never carries a raw privacy export
+    attachment.
+53. **BCK-04-AC-53:** late tasks, projection rebuilds, imports and restores
+    cannot silently resurrect erased or restricted data.
+54. **BCK-04-AC-54:** identity teardown preserves enough orchestration
+    authority to finish or honestly fail remaining domain tasks.
+55. **BCK-04-AC-55:** every legal/security hold records basis, scope, owner,
+    review/expiry and release evidence.
+56. **BCK-04-AC-56:** App Check recovery cannot bypass AuthN, AuthZ,
+    validation, rate limits or audit.
+57. **BCK-04-AC-57:** BCK04-SEC-DEC-01 does not accept BCK04-OD-01/09,
+    OD-11, independent review or qualified Legal evidence.
+58. **BCK-04-AC-58:** BCK-04 remains Draft until its full DoR and DoD pass.
+59. **BCK-04-AC-59:** this revision creates no code, Firebase resource,
+    deployment, push or merge authority.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.21 отсутствует:
+На момент v0.4.22 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

@@ -1,13 +1,13 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.12**
-- Date: **2026-09-09**
+- Version: **0.3.13**
+- Date: **2026-09-12**
 - Spec status: **Draft — API/Operations/Security/Mobile boundary reviews accepted with required amendments; independent reviews pending**
 - Runtime status: **Booking v1 contracts/test evidence and disabled Emulator-only adapter Present; deployed/mobile API runtime Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -18,6 +18,15 @@
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.13 — 2026-09-12
+
+- reconciled BCK04-SEC-DEC-01 and BCK-04 v0.4.22 without expanding the API
+  owner verdict or changing the 87 accepted contract criteria;
+- preserved BCK-04 Draft, BCK04-OD-01/09 Proposed, OD-11 Open and all
+  independent/Legal/runtime gates;
+- changed no schema, generated file, runtime, Firebase, deployment, push or
+  merge state.
 
 ### v0.3.12 — 2026-09-09
 
@@ -278,9 +287,9 @@ rule` означает предлагаемое normative правило, а н�
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
 | Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
-| Reference data | BCK-20 v0.2.7 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
-| Security/privacy | BCK-04 v0.4.21 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions; bounded BCK-03 verdict does not accept BCK-04 |
-| Operations | BCK-05 v0.2.28 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
+| Reference data | BCK-20 v0.2.8 Draft, OD-10 Proposed | Не изобретать LocalizedText/market dataset semantics и не считать proposal Accepted |
+| Security/privacy | BCK-04 v0.4.22 Draft | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions; bounded technical owner verdict does not satisfy independent/Legal/OD gates |
+| Operations | BCK-05 v0.2.29 Draft | BCK-03 не выбирает projects, regions, deploy/event transport или SLO values |
 | Mobile boundary | BCK-18 planned | Не импортировать Firebase schema/SDK в domain/presentation |
 
 Booking v1 split-key compatibility decision принят в
@@ -1112,7 +1121,7 @@ Rules:
 ## 27. OD-09 — Proposed cross-domain event/outbox contract
 
 - Decision ID: **OD-09**
-- Status in BCK-03 v0.3.12: **Proposed — not Accepted**
+- Status in current BCK-03: **Proposed — not Accepted**
 - Accountable owner: **API Platform owner**
 - Co-owners for acceptance: **Platform Operations, Notifications, Security/
   Privacy and producing domain owners**
@@ -1386,7 +1395,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No runtime/schema file in this map is created by BCK-03 v0.3.12; this revision
+No runtime/schema file in this map is created by BCK-03 v0.3.13; this revision
 adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
@@ -1531,7 +1540,7 @@ BCK-03 may enter Review only when:
 
 - BCK-01 is at least Review and its shared invariants are unchanged or
   reconciled;
-- BCK-02 v2.4.59 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
+- BCK-02 v2.4.60 registry reflects BCK-01/BCK-03/BCK-04/BCK-05/BCK-20 actual statuses;
 - API Contracts Workflow and Booking v1 read fully;
 - BCK-09 compatibility decision and evidence listed;
 - BCK-04 Security/Privacy, BCK-05 Operations and a named Mobile Platform owner
@@ -1541,7 +1550,7 @@ BCK-03 may enter Review only when:
 - artifact map contains no runtime authorization;
 - links, AC, version/status and unimplemented list pass audit.
 
-Current v0.3.12 readiness: the combined Product owner recorded
+Current v0.3.13 readiness: the combined Product owner recorded
 `D1-SIG-API = Accept with required amendments` through
 [BCK-D1-OWN-A-DEC-01](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md), with an
 explicit single-owner independence disclosure. The bounded Operations and
@@ -1645,7 +1654,7 @@ it does not mean schemas/code/backend deployed.
 61. **BCK-03-AC-61:** timeout/skipped/manual validation is inconclusive, not pass.
 62. **BCK-03-AC-62:** rollout supports server disable and previous compatible major.
 63. **BCK-03-AC-63:** BCK-03 Approval does not authorize runtime/schema creation.
-64. **BCK-03-AC-64:** v0.3.12 leaves backend/Firebase/mobile runtime unchanged.
+64. **BCK-03-AC-64:** v0.3.13 leaves backend/Firebase/mobile runtime unchanged.
 65. **BCK-03-AC-65:** RAW-B closes only Booking-v1 disposable Emulator transport feasibility.
 66. **BCK-03-AC-66:** RAW-B grants no product adapter, Firebase access or specialist signature.
 67. **BCK-03-AC-67:** RAW-C requires separate explicit executable authorization and independent evidence.
@@ -1691,7 +1700,7 @@ new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.3.12 the following remain absent:
+At v0.3.13 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1728,7 +1737,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.12 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.13 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

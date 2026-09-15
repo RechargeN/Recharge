@@ -1,24 +1,31 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.19**
-- Date: **2026-09-09**
+- Version: **1.20**
+- Date: **2026-09-12**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
 - Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
-- Accepted decision input: [BCK-D1-DEC-01 v0.7](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
-- Owner sign-off ledger: [BCK-D1-SIG-01 v1.17](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
-- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.15](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Accepted decision input: [BCK-D1-DEC-01 v0.8](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
+- Owner sign-off ledger: [BCK-D1-SIG-01 v1.18](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.16](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Revision notes
+
+### v1.20 — BCK-04 technical owner verdict
+
+BCK04-SEC-DEC-01 records the combined-owner technical BCK-04 verdict and
+fourteen amendments. BCK-04 remains Draft; independent Security/Privacy,
+qualified Legal, BCK04-OD-01/09, OD-11, D1/G1 and runtime remain blocked.
 
 ### v1.19 — BCK-03 Mobile boundary verdict
 
@@ -123,17 +130,18 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
-| [BCK-D1-DEC-01 v0.7](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD status ledger | Accepted traceability amendment | semantic conflict closed; OD-07 status reconciled without runtime authority |
+| [BCK-D1-DEC-01 v0.8](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency reconciliation plus current OD/status ledger | Accepted traceability amendment | BCK-04 technical verdict recorded without OD/Legal/runtime promotion |
 | [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md) | bounded API dispositions and BCK-03 owner review verdict | Accepted with controls; documentation only | D1-SIG-API recorded; all peer/independent/runtime gates preserved |
 | [BCK03-OPS-REV-01 v0.2](BACKEND_API_OPERATIONS_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md) | bounded BCK-03 API/Operations seam and required amendments | owner verdict recorded; independent evidence pending | D1-SIG-OPS recorded for BCK-03 only; BCK-05/G1/R1 unchanged |
 | [BCK03-SEC-REV-01 v0.2](BACKEND_API_SECURITY_PRIVACY_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md) | bounded BCK-03 Security/Privacy seam and ten required amendments | owner verdict recorded; independent/Legal evidence pending | D1-SIG-SEC recorded for BCK-03 only; BCK-04/G1/R1 unchanged |
+| [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md) + [owner decision v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md) | technical BCK-04 architecture boundary and fourteen amendments | combined-owner verdict recorded; independent/Legal/OD evidence pending | BCK-04 remains Draft; G1/R1/runtime unchanged |
 | [BCK03-MOB-REV-01 v0.2](BACKEND_API_MOBILE_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md) | bounded BCK-03 Mobile seam and ten required amendments | owner verdict recorded; independent Mobile evidence pending | D1-SIG-MOBILE recorded for BCK-03 only; BCK-18/BCK-20/G1/R1 unchanged |
 | [OD-07 evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) + [owner decision v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) | exact topology/resource matrix, source snapshot, thresholds, residency limits and rollback | exact owner verdict recorded | OD-07 Accepted with controls; no cloud permission |
 | [OD-09 evidence](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md) | Booking mapping and failure/recovery matrix | Draft evidence | OD-09 remains Proposed |
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.17; Owner Batch A and bounded D1-SIG-OPS/SEC/MOBILE recorded; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.15; Owner Batch A and bounded D1-SIG-OPS/SEC/MOBILE recorded | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.18; technical BCK-04 owner verdict recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.16; technical BCK-04 owner verdict recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | assets, actors, trust boundaries, 36 threats, controls and residual gates | Draft evidence; BCK04-OD-01 Proposed | owner/independent security verdict pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -345,13 +353,13 @@ rewritten.
 
 | Artifact | Reconciled version | Current result |
 |---|---|---|
-| BCK-03 | v0.3.12 Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; independent evidence Pending |
-| BCK-04 + coverage | v0.4.21 / v0.3.21 Draft | bounded BCK-03 Security/Mobile verdicts recorded; BCK-04 owner/independent/Legal blockers unchanged |
-| BCK-05 + coverage | v0.2.28 Draft | current platform/API/Security/Mobile/roadmap anchors and R0/RAW-C boundary recorded; bounded BCK-03 verdicts do not accept BCK-05; R1 blocked |
-| BCK-20 + coverage | v0.2.7 Draft | BCK-03 Mobile verdict does not cover BCK-20; OD-10 and runtime remain unresolved |
-| BCK-01-REV-01 | v1.15 | Review-entry evidence points to BCK-01 v0.4.55/BCK-02 v2.4.59 without implying Approval |
-| BCK-D1-DEC-01 | v0.7 Accepted traceability amendment | split-key and OD-07 dispositions unchanged |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.17 / v1.15 | Owner Batch A and bounded D1-SIG-OPS/SEC/MOBILE recorded; all other signatures unchanged |
+| BCK-03 | v0.3.13 Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; independent evidence Pending |
+| BCK-04 + coverage | v0.4.22 / v0.3.22 Draft | combined-owner technical verdict recorded; independent/Legal/BCK04-OD-01/09 blockers unchanged |
+| BCK-05 + coverage | v0.2.29 Draft | current platform/API/Security/Mobile/roadmap anchors and R0/RAW-C boundary recorded; owner-boundary verdicts do not accept BCK-05; R1 blocked |
+| BCK-20 + coverage | v0.2.8 Draft | BCK-03 Mobile/BCK-04 technical verdicts do not cover BCK-20; OD-10 and runtime remain unresolved |
+| BCK-01-REV-01 | v1.16 | Review-entry evidence points to BCK-01 v0.4.56/BCK-02 v2.4.60 without implying Approval |
+| BCK-D1-DEC-01 | v0.8 Accepted traceability amendment | BCK-04 technical verdict recorded; OD/runtime dispositions unchanged |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.18 / v1.16 | technical BCK-04 owner verdict recorded; all other signatures unchanged |
 
 The current reconciliation updates the affected specifications, matrices,
 review records, BCK-01, BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It
@@ -418,11 +426,15 @@ required where the specifications depend on professional legal judgment.
     runtime.
 29. **D1-REV-AC-29:** BCK03-MOB-DEC-01 records only the BCK-03 Mobile boundary
     and does not accept BCK-18/BCK-20 or replace independent Mobile evidence.
+30. **D1-REV-AC-30:** BCK04-SEC-DEC-01 records only the combined-owner
+    technical BCK-04 boundary and does not satisfy independent, qualified
+    Legal, BCK04-OD-01/09, OD-11 or runtime gates.
 
 ## 11. Final statement
 
-Owner Batch A and bounded Operations/Security/Mobile verdicts are recorded
-against the reconciled post-RAW-C source chain. BCK-03 remains Draft because
-required independent evidence is incomplete. The next stage is the remaining
-BCK-04/BCK-05/BCK-20
-owner decisions; physical product/cloud backend remains correctly blocked.
+Owner Batch A, bounded BCK-03 boundary verdicts and the combined-owner
+technical BCK-04 verdict are recorded against the reconciled post-RAW-C source
+chain. BCK-03 and BCK-04 remain Draft because required independent, qualified
+Legal and exact OD evidence is incomplete. The next stage is the remaining
+BCK-04/BCK-05/BCK-20 owner/specialist decisions; physical product/cloud backend
+remains correctly blocked.

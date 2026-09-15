@@ -1,14 +1,14 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **1.15**
-- Date: **2026-09-09**
+- Version: **1.16**
+- Date: **2026-09-12**
 - Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
 - Accountable owner: **Platform Architecture owner**
 - Review coordinator: **RechargeN / Product owner**
-- Subject: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Subject: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MASTER_RECONCILIATION_REPORT.md`
 
 ---
@@ -22,7 +22,7 @@ independent-Mobile or runtime authority.
 
 ## 1. Verdict
 
-BCK-01 v0.4.55 is internally consistent with the tracked Accepted ADR set,
+BCK-01 v0.4.56 is internally consistent with the tracked Accepted ADR set,
 Architecture Baseline and BCK-02 coordination model. Its module and
 authoritative-writer maps do not contain a confirmed double writer. All local
 anchors exist, 52 AC are sequential, and the revision creates no runtime.
@@ -40,24 +40,26 @@ normative sections:
 
 - `AGENTS.md` and `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - Accepted ADR 0012, 0013, 0015, 0016, 0017, 0018 and 0019;
-- BCK-02 v2.4.59 registry, ownership, §14 template, §15 reconciliation, gates
+- BCK-02 v2.4.60 registry, ownership, §14 template, §15 reconciliation, gates
   and next-package rules;
-- BCK-03 v0.3.12, BCK03-OPS-DEC-01 v0.1, BCK03-SEC-DEC-01 v0.1,
+- BCK-03 v0.3.13, BCK03-OPS-DEC-01 v0.1, BCK03-SEC-DEC-01 v0.1,
   BCK03-MOB-REV-01 v0.2, BCK03-MOB-DEC-01 v0.1 and API Contracts Workflow;
-- BCK-04 v0.4.21, coverage matrix v0.3.21, BCK04-OD01-TM-01,
+- BCK-04 v0.4.22, coverage matrix v0.3.22, BCK04-SEC-REV/DEC-01,
+  BCK04-OD01-TM-01,
   BCK04-OD09-IR-01 and ready-but-unexecuted BCK04-OD09-TTX-01;
-- BCK-05 v0.2.28, BCK05-OD01-TCH-01 v0.3.4,
+- BCK-05 v0.2.29, BCK05-OD01-TCH-01 v0.3.4,
   BCK05-OD01-TCH-REV-01 v0.2, BCK-R0-TCH-01 v0.2,
   BCK-R0-TCH-DEC-01, BCK05-OD02-IAM-01,
   BCK05-OD07-REL-01,
   BCK05-OD03-SLO-01, BCK05-OD04-COST-01 v0.2, BCK05-OD05-REC-01,
-  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.7 plus their
+  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.8 plus their
   coverage matrices;
 - BCK-09 v1.13, ECL-03 v1.3/ECL-03C v1.11, RAW-C v0.3,
-  BCK-D1-DEC-01 v0.7 and BCK-D1-OWN-A-DEC-01 v0.1;
-- BCK-D1-REV-01 v1.19, BCK-D1-SIG-01 v1.17,
-  BCK-D1-OWN-A-DEC-01 v0.1 and OD-07/09/10/11 review evidence packages;
-- BCK-02-A1 v1.6 Draft Latvia/Baltics roadmap;
+  BCK-D1-DEC-01 v0.8 and BCK-D1-OWN-A-DEC-01 v0.1;
+- BCK-D1-REV-01 v1.20, BCK-D1-SIG-01 v1.18,
+  BCK-D1-OWN-REV-01 v1.16, BCK-D1-OWN-A-DEC-01 v0.1 and OD-07/09/10/11
+  review evidence packages;
+- BCK-02-A1 v1.7 Draft Latvia/Baltics roadmap;
 - LAUNCH_STATUS current tracked facts.
 
 No source status is raised by citation. Draft/Review/Proposed inputs remain
@@ -114,17 +116,17 @@ must be repeated and refined by their owning BCK spec before schema approval.
 
 | Anchor | Repository fact | BCK-01 treatment | Result |
 |---|---|---|---|
-| BCK-02 | Approved v2.4 semantics; v2.4.59 traceability | Coordination authority only | Pass |
-| BCK-02-A1 | Draft v1.6, documentation only | Baltic rollout input, not Accepted authority | Pass |
-| BCK-03 | Draft v0.3.12; API/Operations/Security/Mobile boundary reviews Accept with required amendments; deployed/mobile API runtime Absent | Independent evidence Pending | Pass with blockers |
-| BCK-04 | Draft v0.4.21; bounded local evidence Present, product/cloud runtime Absent | BCK-03 boundary verdicts recorded; BCK-04 owner/independent/Legal verdicts and executed result remain | Pass with blockers |
-| BCK-05 | Draft v0.2.28; bounded R0/RAW-C local evidence boundary, product/cloud runtime Absent | BCK-03 Operations/Security/Mobile boundaries accepted with amendments; full BCK-05 specialist/stage/executable evidence remains | Pass with blockers |
+| BCK-02 | Approved v2.4 semantics; v2.4.60 traceability | Coordination authority only | Pass |
+| BCK-02-A1 | Draft v1.7, documentation only | Baltic rollout input, not Accepted authority | Pass |
+| BCK-03 | Draft v0.3.13; API/Operations/Security/Mobile boundary reviews Accept with required amendments; deployed/mobile API runtime Absent | Independent evidence Pending | Pass with blockers |
+| BCK-04 | Draft v0.4.22; combined-owner technical verdict and amendments recorded; product/cloud runtime Absent | Independent Security/Privacy, qualified Legal, BCK04-OD-01/09 and executed tabletop remain | Pass with blockers |
+| BCK-05 | Draft v0.2.29; bounded R0/RAW-C local evidence boundary, product/cloud runtime Absent | BCK-03/BCK-04 owner-boundary evidence recorded; full BCK-05 specialist/stage/executable evidence remains | Pass with blockers |
 | BCK-09 | Review v1.13; disabled RAW-C v0.3 Present, cloud/mobile runtime Absent | Booking rules and bounded local/hosted behavior reconciled; nine independent signatures Pending | Pass with blockers |
-| BCK-20 | Draft v0.2.7, runtime Absent | BCK-03 Mobile verdict does not cover BCK-20; OD-10 verdicts/executable parity absent | Pass with blockers |
+| BCK-20 | Draft v0.2.8, runtime Absent | BCK-03 Mobile/BCK-04 technical verdicts do not cover BCK-20; OD-10 verdicts/executable parity absent | Pass with blockers |
 | Firebase Architecture | Proposed | Infrastructure input only | Pass |
 | `apps/backend` | Bounded R0 plus disabled Emulator-only RAW-C source Present | Separate approvals only; no G1/G4/R1/cloud/mobile authority | Pass with blockers |
 
-## 6. Findings retained and resolved through v0.4.55
+## 6. Findings retained and resolved through v0.4.56
 
 | ID | Finding | Resolution |
 |---|---|---|
@@ -158,13 +160,14 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK01-F28 | A bounded BCK-03 Operations verdict could be read as BCK-05 or runtime approval | BCK03-OPS-DEC-01 explicitly limits the verdict to the API boundary and preserves BCK-05/D1/G1/runtime blockers |
 | BCK01-F29 | Idempotent replay could disclose a protected historic result after current access was revoked | BCK03-SEC-DEC-01 requires current disclosure authorization without re-executing the committed mutation and preserves anti-enumerating failure behavior |
 | BCK01-F30 | Query retry identity and Mobile v3.1 AC-42 could reuse one attempt request ID or conflate transport cancellation with a server result | BCK03-MOB-DEC-01 and Mobile Architecture v3.1.1 require a fresh request ID per attempt, stable logical idempotency identity and typed cancellation/unknown-outcome separation |
+| BCK01-F31 | BCK-04 DSR flow reused attempt request ID as logical and persistent request identity and its AC-06 retained a resolved contradiction | BCK04-SEC-DEC-01/BCK-04 v0.4.22 separate requestId, idempotencyKey and privacyRequestId and add current-read/export/restore safeguards without accepting Legal/OD/runtime gates |
 
 ## 7. Definition of Ready evidence
 
 | BCK-01 §25 condition | Evidence | State |
 |---|---|---|
 | Anchors exist and links are valid | Automated local-link audit | Pass |
-| BCK-02 reflects BCK-01 status | Registry: Review v0.4.55/Present; bounded local source separated from product/cloud runtime Absent | Pass |
+| BCK-02 reflects BCK-01 status | Registry: Review v0.4.56/Present; bounded local source separated from product/cloud runtime Absent | Pass |
 | No double writer | §4 writer reconciliation | Pass |
 | LV/EE/LT agrees with roadmap | Latvia first; EE/LT independently disabled | Pass |
 | Open decisions are not called Accepted | §5 status table and BCK-02 OD registry | Pass |
@@ -183,7 +186,7 @@ does not supply a verdict or independent review:
 |---|---|---|
 | Platform Architecture | Owns BCK-01 target and reconciliation | Assigned; BCK-01 Review entry already recorded |
 | API Platform | Accepts delegation to BCK-03 | Combined-owner verdict: Accept with required amendments; independent evidence and peer boundaries Pending |
-| Security/Privacy | Accepts BCK-03 security boundary and delegation to BCK-04 | BCK-03 boundary Accept with required amendments; BCK-04 owner/independent and qualified Legal evidence Pending |
+| Security/Privacy | Accepts bounded technical BCK-03/BCK-04 boundaries | Combined-owner verdicts recorded; BCK-04 remains Draft pending independent, qualified Legal, BCK04-OD-01/09 and tabletop evidence |
 | Legal/Privacy | Reviews legal conclusions and market obligations | Numeric scope Inconclusive; qualification not evidenced |
 | Platform Operations | Accepts BCK-03 operations boundary and BCK-05 ownership/G1 dependency | BCK-03 boundary Accept with required amendments; BCK-05 specialist/stage/restore evidence Pending |
 | Reference Data / Localization | Accepts BCK-20 and OD-10 boundaries | Assigned; verdicts Pending |
@@ -195,7 +198,7 @@ specialist evidence remain independently gated by BCK-04/BCK-05 and OD-07/11.
 
 ## 9. Review verdict and next action
 
-**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.55 remains
+**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.56 remains
 tracked as `Review`. Next:
 
 1. obtain delegated-owner evidence for BCK-03 Review;

@@ -1,16 +1,17 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.7**
-- Date: **2026-09-09**
+- Version: **0.8**
+- Date: **2026-09-12**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.55](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.59](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Related BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -18,6 +19,11 @@
 ---
 
 ## 0. Revision note
+
+v0.8 reconciles the combined-owner technical BCK-04 verdict and fourteen
+amendments through BCK04-SEC-DEC-01. BCK-04 remains Draft; independent
+Security/Privacy, qualified Legal, BCK04-OD-01/09, OD-11, D1/G1 and runtime
+remain blocked. Existing split-key and OD-07 decisions are unchanged.
 
 v0.7 reconciles this package to the bounded BCK03-MOB-DEC-01 verdict. It does
 not accept BCK-18/BCK-20, replace independent Mobile evidence or authorize
@@ -183,7 +189,7 @@ No Proposed or Open item is promoted by implication.
 |---|---|---|---|
 | BCK-01 | Review | D1 conflict/status traceability updated | Independent specialist Approval and complete D1 sign-off |
 | BCK-03 | Draft | Booking split-key conflict closed | Delegated BCK-04/05/18 reviews and API-DEC evidence |
-| BCK-04 | Draft | PRE-03 idempotency blocker closed; OD-07 engineering topology Accepted | Legal/Privacy ownership, OD-11 and recorded security/privacy decisions |
+| BCK-04 | Draft | split-key/DSR technical amendments and combined-owner verdict recorded; OD-07 engineering topology Accepted | independent/qualified Legal, BCK04-OD-01/09, OD-11 and tabletop evidence |
 | BCK-05 | Draft | API dependency reconciled; OD-07 architecture Accepted | Operations specialist, remaining BCK05 decisions, SLO/budget/IAM/recovery evidence |
 | BCK-20 | Draft | API dependency and OD-10 disposition clarified | OD-10 fixtures and Reference/API/Content/Mobile/Legal review |
 | BCK-09 | Review | Target idempotency semantics now match Booking v1 fixtures | Physical implementation remains separately gated |
@@ -233,7 +239,7 @@ Executable verification, only after a separately Approved slice, must include:
 - boundary checker: **380 Dart files, 71 findings, 71 allowed, 0 violations,
   0 stale, 0 expired**;
 - 16 changed Markdown files: local links and code fences pass;
-- AC sequences pass: D1 1–20, BCK-03 1–64, BCK-04 1–45, BCK-05 1–50,
+- AC sequences pass: D1 1–20, BCK-03 1–87, BCK-04 1–59, BCK-05 1–50,
   BCK-20 1–50 and ECL-03 1–51;
 - `git diff --check` passes and the tracked change scope is Markdown-only;
 - full Flutter suite is **not green**: 663 tests passed and one existing Route
