@@ -1,27 +1,34 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.22**
+- Version: **1.23**
 - Date: **2026-09-16**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
 - Coordination owner: **RechargeN / Product owner**
-- Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy and Reference Data**
-- Accepted decision input: [BCK-D1-DEC-01 v0.10](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
-- Owner sign-off ledger: [BCK-D1-SIG-01 v1.20](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
-- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.18](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Required accountable owners: **API Platform, Platform Operations, Security/Privacy, Legal/Privacy, Reference Data, Product Localization, Content and Mobile**
+- Accepted decision input: [BCK-D1-DEC-01 v0.11](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md)
+- Owner sign-off ledger: [BCK-D1-SIG-01 v1.21](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Combined-owner review workbook: [BCK-D1-OWN-REV-01 v1.19](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - BCK-20 technical decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
+- Translation-governance decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Revision notes
+
+### v1.23 — translation-governance technical verdict
+
+BCK20-OD02-DEC-01 records the amended combined-owner technical workflow v0.2.
+BCK20-OD-02 remains Open, BCK-20 Draft and OD-10 Proposed; specialist, Legal,
+schema, runtime and infrastructure gates are unchanged.
 
 ### v1.22 — BCK-20 owner decision triage
 
@@ -145,7 +152,7 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 
 | Artifact | Purpose | Status | Decision impact |
 |---|---|---|---|
-| [BCK-D1-DEC-01 v0.10](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency, threat-model and BCK-20 reconciliation plus current OD/status ledger | Accepted traceability amendment | BCK-20/OD-10 and all runtime gates remain unpromoted |
+| [BCK-D1-DEC-01 v0.11](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) | request/idempotency, threat-model and BCK-20 reconciliation plus current OD/status ledger | Accepted traceability amendment | BCK-20/OD-02/OD-10 and all runtime gates remain unpromoted |
 | [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md) | bounded API dispositions and BCK-03 owner review verdict | Accepted with controls; documentation only | D1-SIG-API recorded; all peer/independent/runtime gates preserved |
 | [BCK03-OPS-REV-01 v0.2](BACKEND_API_OPERATIONS_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md) | bounded BCK-03 API/Operations seam and required amendments | owner verdict recorded; independent evidence pending | D1-SIG-OPS recorded for BCK-03 only; BCK-05/G1/R1 unchanged |
 | [BCK03-SEC-REV-01 v0.2](BACKEND_API_SECURITY_PRIVACY_BOUNDARY_REVIEW.md) + [owner decision v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md) | bounded BCK-03 Security/Privacy seam and ten required amendments | owner verdict recorded; independent/Legal evidence pending | D1-SIG-SEC recorded for BCK-03 only; BCK-04/G1/R1 unchanged |
@@ -156,8 +163,8 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 | [OD-10 evidence](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md) | deterministic localization fixtures | Draft evidence | OD-10 remains Proposed |
 | [BCK20 owner decision](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md) | exact decision triage and twelve amendments | Accepted combined-owner technical boundary only | BCK-20 Draft; OD-10 Proposed; specialist/Legal/runtime gates unchanged |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.20; BCK-20 decision triage recorded; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.18; BCK-20 decision triage recorded | other owner/specialist responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.21; translation-governance technical verdict recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.19; translation-governance technical verdict recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | stable assets/actors/boundaries, 49 classified threats, per-threat owners/gates/residual states and checksum | Draft v0.2; combined-owner technical verdict Present; BCK04-OD-01 Proposed | independent Security/Privacy and cross-boundary confirmations pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -260,8 +267,9 @@ Ready for owner review of:
 - LocalizedText v1 and deterministic LV/EE/LT fixture vectors;
 - market-isolated activation and rollback.
 
-The next documentation artifact is the provider-neutral BCK20-OD-02
-translation governance workflow. This does not satisfy a specialist sign-off.
+The provider-neutral BCK20-OD-02 translation-governance workflow v0.2 and its
+bounded technical decision are recorded. Named specialist sign-offs remain
+required and are not inferred.
 
 Still blocking Approval:
 
@@ -376,10 +384,10 @@ rewritten.
 | BCK-03 | v0.3.14 Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; independent evidence Pending |
 | BCK-04 + coverage | v0.4.23 / v0.3.23 Draft | BCK-04/threat-model technical verdicts recorded; OD-01 remains Proposed pending independent/cross-boundary evidence; Legal/OD-09 gates unchanged |
 | BCK-05 + coverage | v0.2.30 Draft | current platform/API/Security/Mobile/roadmap anchors and R0/RAW-C boundary recorded; owner-boundary verdicts do not accept BCK-05; R1 blocked |
-| BCK-20 + coverage | v0.2.10 Draft | decision triage recorded; OD-02/05 Open, OD-10 Proposed and runtime unresolved |
-| BCK-01-REV-01 | v1.18 | Review-entry evidence points to BCK-01 v0.4.58/BCK-02 v2.4.62 without implying Approval |
-| BCK-D1-DEC-01 | v0.10 Accepted traceability amendment | BCK-20 triage recorded; OD/runtime dispositions unchanged |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.20 / v1.18 | BCK-20 decision triage recorded; specialist signatures unchanged |
+| BCK-20 + coverage | v0.2.11 Draft | amended technical workflow recorded; OD-02/05 Open, OD-10 Proposed and runtime unresolved |
+| BCK-01-REV-01 | v1.19 | Review-entry evidence points to BCK-01 v0.4.59/BCK-02 v2.4.63 without implying Approval |
+| BCK-D1-DEC-01 | v0.11 Accepted traceability amendment | translation-governance technical verdict recorded; OD/runtime dispositions unchanged |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.21 / v1.19 | technical workflow recorded; specialist signatures unchanged |
 
 The current reconciliation updates the affected specifications, matrices,
 review records, BCK-01, BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It
@@ -454,11 +462,15 @@ required where the specifications depend on professional legal judgment.
     independent and cross-boundary evidence.
 32. **D1-REV-AC-32:** BCK20-OWN-DEC-01 records only decision triage; BCK-20,
     OD-10, specialist, Legal and executable gates remain unaccepted.
+33. **D1-REV-AC-33:** BCK20-OD02-DEC-01 records only the amended technical
+    translation-governance boundary and does not close OD-02 or any named
+    specialist, Legal, schema or runtime gate.
 
 ## 11. Final statement
 
 Owner Batch A, bounded BCK-03 boundary verdicts and the combined-owner
-technical BCK-04, threat-model and BCK-20 triage verdicts are recorded against
+technical BCK-04, threat-model, BCK-20 triage and translation-governance
+verdicts are recorded against
 the reconciled post-RAW-C source chain. BCK04-OD-01 remains Proposed and
 BCK-03/BCK-04 remain
 Draft because required independent, cross-boundary, qualified Legal and exact

@@ -1,19 +1,20 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.10**
+- Version: **0.11**
 - Date: **2026-09-16**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.58](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.62](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.59](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.63](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Related BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Related threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Related BCK-20 technical decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
+- Related translation-governance decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -22,9 +23,10 @@
 
 ## 0. Revision note
 
-v0.10 reconciles BCK20-OWN-DEC-01 and BCK-20 v0.2.10 without accepting BCK-20
-or OD-10. Five BCK20 decisions are Deferred, OD-02/05 remain Open and all
-specialist, Legal, D1/G1 and runtime gates remain blocked.
+v0.11 reconciles BCK20-OD02-DEC-01, workflow v0.2 and BCK-20 v0.2.11 without
+accepting BCK-20, OD-02 or OD-10. Five BCK20 decisions remain Deferred,
+OD-02/05 remain Open and all specialist, Legal, D1/G1 and runtime gates remain
+blocked.
 
 v0.9 reconciles the combined-owner technical threat-model verdict and twenty
 amendments through BCK04-OD01-DEC-01 and exact model v0.2. BCK04-OD-01 remains
@@ -286,6 +288,9 @@ Executable verification, only after a separately Approved slice, must include:
     authorizing runtime.
 22. **BCK-D1-AC-22:** BCK20-OWN-DEC-01 records only decision triage and does
     not accept BCK-20, OD-10 or any specialist/Legal/runtime gate.
+23. **BCK-D1-AC-23:** BCK20-OD02-DEC-01 records only the amended technical
+    translation-governance boundary and does not close OD-02 or authorize
+    provider, schema, runtime or infrastructure work.
 
 ## 11. Rollback
 

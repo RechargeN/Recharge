@@ -1,12 +1,13 @@
 # BCK-20 — Translation Governance Owner Review
 
 - ID: **BCK20-OD02-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-16**
-- Status: **Proposed — owner decision required**
+- Status: **Owner verdict recorded — amendments integrated in workflow v0.2**
 - Review target: [BCK20-OD02-L10N-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
-- Parent specification: [BCK-20 v0.2.10](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent specification: [BCK-20 v0.2.11](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Parent decision: **BCK20-OD-02 remains Open**
+- Owner decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Review outcome
@@ -196,13 +197,17 @@ Missing evidence is `Pending` or `Inconclusive`, never `Pass`.
 
 ```text
 Одобряю BCK20-OD02-REV-01 v0.1:
-Accept with required amendments для combined-owner technical translation-
-governance boundary.
+Accept with required amendments для combined-owner technical translation-governance boundary.
 BCK20-OD-02 остаётся Open; OD-10 остаётся Proposed; BCK-20 остаётся Draft.
 Product Localization, Content, Mobile, Security/Privacy и qualified Legal
 verdicts, provider selection, schema, runtime, Firebase, deployment, push и
 merge не разрешаю.
 ```
 
-Until that explicit decision is recorded, this document is a Proposed review
-and changes no decision, specification or implementation status.
+## 8. Recorded owner verdict
+
+On 2026-09-16 the Product owner approved the exact §7 decision. The verdict is
+recorded in BCK20-OD02-DEC-01 v0.1 and all sixteen amendments are integrated in
+BCK20-OD02-L10N-01 v0.2. BCK20-OD-02 remains Open, OD-10 remains Proposed and
+BCK-20 remains Draft. No specialist/Legal verdict or implementation authority
+is inferred.

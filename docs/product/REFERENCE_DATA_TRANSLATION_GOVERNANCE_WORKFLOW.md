@@ -1,17 +1,32 @@
 # Recharge Backend — Translation Governance Workflow
 
 - ID: **BCK20-OD02-L10N-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-16**
-- Status: **Proposed — combined-owner technical review required**
+- Status: **Combined-owner technical baseline — specialist evidence pending**
 - Decision served: **BCK20-OD-02 — translation source/review workflow**
-- Decision status: **Open — this proposal does not accept it**
+- Decision status: **Open — technical decision does not close specialist gates**
 - Accountable owner: **Product Localization owner**
 - Required boundaries: **Reference Data, Content, Mobile, Security/Privacy and qualified Legal where applicable**
-- Parent specification: [BCK-20 v0.2.10](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent specification: [BCK-20 v0.2.11](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Owner decision input: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
+- Technical review: [BCK20-OD02-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_REVIEW.md)
+- Technical decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - LocalizedText input: [BCK-D1-OD10-EV-01 v0.1](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
 - Runtime effect: **none**
+
+## 0. Changelog
+
+### v0.2 — 2026-09-16
+
+- recorded BCK20-OD02-DEC-01 and integrated all sixteen owner-review
+  amendments;
+- added canonical locale/message identity, conflict and impact propagation,
+  approval freshness, atomic publication and safe rollback rules;
+- added exception, retention/deletion, portability, metric and withdrawal
+  controls while preserving AC-01–25 and appending AC-26–41;
+- retained BCK20-OD-02 Open, OD-10 Proposed, BCK-20 Draft and every specialist,
+  Legal, schema, runtime and infrastructure gate.
 
 ## 1. Purpose and boundary
 
@@ -57,6 +72,16 @@ It does not own:
 13. Withdrawal cannot silently expose an older unsafe translation.
 14. Missing mandatory copy disables the affected surface; it does not fall
     back unless the exact qualified policy explicitly allows it.
+15. Locale aliases are canonicalized before identity comparison; aliases
+    cannot create competing effective translations.
+16. Policy conflict, unknown change impact and invalid approval are blocking
+    states, never silent translator choices.
+17. Publication is an atomic immutable-manifest operation and does not itself
+    activate a market, feature or client rollout.
+18. Rollback cannot resurrect withdrawn, erased, restricted, expired or
+    otherwise invalid text.
+19. Temporary exceptions cannot bypass mandatory independence, Legal,
+    privacy, stable-ID or market-isolation controls.
 
 ## 3. Translation classes and review depth
 
@@ -70,6 +95,13 @@ It does not own:
 
 The source owner assigns a class before translation begins. Classification may
 only be raised during review, never silently lowered to reduce controls.
+High-impact and mandatory review applies to every unit. Sampling is permitted
+only for `reference_standard` under a separately approved sampling plan with
+thresholds, escalation and whole-batch failure rules.
+
+Any future translation of `user_authored` content requires an independent
+consent, provenance, moderation, privacy and deletion contract. It cannot enter
+reference-data authority or treat this workflow as implicit permission.
 
 ## 4. Roles and separation of duties
 
@@ -90,6 +122,8 @@ documentation, but the combination is disclosed. For `product_high_impact`
 and `legal_safety_mandatory`, translator and independent reviewer must be
 different attributable identities. Product-owner coordination or Codex review
 does not satisfy specialist or qualified Legal independence.
+Reviewers disclose conflicts of interest; a conflicted identity cannot satisfy
+the independent-review requirement.
 
 ## 5. Canonical records
 
@@ -103,6 +137,10 @@ TranslationSourceSnapshot {
   stableRecordId
   fieldId
   sourceLocale
+  canonicalSourceLocale
+  marketConfigRevision
+  messageFormatVersion
+  placeholderSchemaHash
   sourceRevision
   sourceHash
   sourceText
@@ -122,6 +160,10 @@ TranslationCandidate {
   sourceRevision
   sourceHash
   targetLocale
+  canonicalTargetLocale
+  marketConfigRevision
+  messageFormatVersion
+  placeholderSchemaHash
   translatedText
   method: human | human_assisted
   translatorIdentity
@@ -155,9 +197,17 @@ TranslationApprovalRecord {
   candidateId
   marketId
   locale
+  canonicalLocale
+  marketConfigRevision
+  messageFormatVersion
+  placeholderSchemaHash
   approvedScope
   requiredReviewIds[]
   legalPolicyRevision?
+  status: active | revoked | expired | superseded
+  reviewDueAtUtc?
+  expiresAtUtc?
+  revokedReason?
   approverIdentity
   approvedAtUtc
 }
@@ -170,11 +220,18 @@ TranslationPublicationManifest {
   manifestId
   marketId
   locale
+  canonicalLocale
+  marketConfigRevision
+  messageFormatVersion
+  placeholderSchemaHash
   datasetRevision
   sourceRevisionSetHash
+  manifestIntegrityHash
+  expectedCurrentManifestRevision
   approvalIds[]
   candidateIds[]
   publishedAtUtc
+  publicationCommitResult: committed | conflict | unknown
 }
 
 TranslationCorrectionRecord {
@@ -187,6 +244,33 @@ TranslationCorrectionRecord {
   action: supersede | withdraw | disable_surface
   approvedBy
   createdAtUtc
+}
+```
+
+### 5.5 Impact and exception records
+
+```text
+TranslationImpactSet {
+  impactSetId
+  causeType: source_change | glossary_change | policy_change
+  causeRevision
+  affectedCandidateIds[]
+  affectedManifestIds[]
+  analysisStatus: complete | incomplete | unknown
+  reReviewTaskIds[]
+  createdAtUtc
+}
+
+TranslationExceptionRecord {
+  exceptionId
+  boundedScope
+  accountableOwner
+  rationale
+  compensatingControls[]
+  approvedBy
+  expiresAtUtc
+  status: active | expired | revoked | closed
+  closureEvidenceIds[]
 }
 ```
 
@@ -211,9 +295,14 @@ Allowed return paths:
 - any review may return `changes_requested` to a new candidate revision;
 - `reject` closes the candidate without mutating its evidence;
 - `inconclusive` blocks progression until missing authority/evidence exists;
-- a source revision change invalidates every unapproved candidate tied to the
-  old source unless an attributable reviewer explicitly revalidates it;
+- a source revision change marks linked unpublished candidates, reviews and
+  approvals stale; prior text may seed a new candidate but no record is rebound
+  to the new source revision;
 - a glossary revision change triggers review according to affected term scope;
+- source, glossary or policy change creates an attributable impact set and
+  re-review queue; unknown impact blocks high-impact and mandatory publication;
+- revoked, expired or superseded approvals cannot publish, roll back or
+  authorize cached artifacts;
 - published text is never returned to Draft or edited in place.
 
 ## 7. Standard workflow
@@ -236,8 +325,10 @@ Allowed return paths:
 9. **Legal review if required:** bind approval to exact market, locale, source,
    candidate and policy revision.
 10. **Approve:** ensure every class-required review is accepted and current.
-11. **Publish manifest:** publish exact immutable candidate IDs; publication
-    cannot edit content or enable a market/feature.
+11. **Publish manifest:** compare the expected-current revision, verify
+    integrity and atomically publish the exact immutable candidate set.
+    Publication cannot edit content or activate a market, feature or client
+    rollout.
 12. **Observe:** collect missing/stale/rendering signals without logging text or
     personal data by default.
 13. **Correct or withdraw:** create a new candidate/correction record and
@@ -259,6 +350,11 @@ Allowed return paths:
   safety meaning;
 - bidi/control characters and suspicious Unicode are validated and surfaced.
 
+Source meaning, approved glossary, product/domain policy and qualified Legal
+policy are independent authorities. A contradiction becomes a typed blocking
+finding routed to the accountable owners. A translator cannot resolve it by
+choosing wording or silently changing source meaning.
+
 ## 9. Machine assistance and external providers
 
 Machine assistance may be used only when a later Approved tool/provider policy
@@ -274,6 +370,8 @@ Regardless of provider:
 - human review depth does not decrease;
 - provider/model/version and assistance disclosure are attributable;
 - kill switch and export/delete capability are required before production use;
+- a complete attributable portable export must preserve IDs, revisions,
+  provenance, findings and approval links without depending on one vendor;
 - no provider account, API key, upload or paid service is authorized here.
 
 If safe provider use is not approved, translation remains human/offline and the
@@ -285,6 +383,11 @@ workflow still functions.
 - screenshots/context are sanitized before leaving the owning team;
 - access is least-privilege by market, locale, record family and task;
 - exported work packages have bounded lifetime and attributable recipients;
+- source, candidate, review, approval, publication, correction, audit and
+  temporary work-package artifacts have distinct retention classes; exact
+  periods remain a later Security/Privacy/Legal decision;
+- temporary provider exports have deletion deadlines plus confirmed- or
+  failed-deletion evidence while the lawful minimum immutable audit remains;
 - logs contain IDs, revisions, verdicts and timing, not source/translated text
   by default;
 - audit records preserve who viewed, changed, reviewed, approved, published,
@@ -320,7 +423,9 @@ workflow still functions.
 2. Identify exact candidate, manifest, markets, locales and surfaces.
 3. Stop further publication of the affected revision.
 4. If safe fallback is explicitly allowed, activate only the approved prior
-   compatible candidate; otherwise withdraw or disable the affected surface.
+   compatible candidate after current compatibility and approval checks;
+   otherwise withdraw or disable the affected surface. Never restore
+   withdrawn, erased, restricted, expired or legally invalid text.
 5. Create a correction record and new immutable candidate where applicable.
 6. Apply the same mandatory review depth; an emergency may shorten timing but
    cannot erase attribution, Legal authority or post-review.
@@ -328,6 +433,10 @@ workflow still functions.
 8. Reconcile caches/search/projections and verify the unsafe revision no longer
    resolves.
 9. Record root cause, affected interval and preventive action.
+
+Candidate withdrawal, manifest revocation and surface disablement are distinct
+typed actions. The applicable incident and accountable owners are notified;
+exact response SLAs remain BCK-05 scope.
 
 For safety/legal copy, “show any available language” is not an emergency
 fallback. Fail closed unless exact policy permits otherwise.
@@ -340,12 +449,21 @@ fallback. Fail closed unless exact policy permits otherwise.
   candidate or conflict, never an overwrite;
 - approval checks current source, candidate, glossary, market and policy
   revisions atomically at its authority boundary;
+- canonical BCP 47 locale, effective `MarketConfig`, message-format version and
+  placeholder-schema hash participate in identity and freshness checks;
 - two approvals cannot make two candidates simultaneously effective for the
   same record/field/market/locale/revision;
 - late reviews against superseded input are stored as stale evidence and cannot
   publish;
 - timeout/unknown outcome is reconciled by querying the authoritative record,
   not by inventing success.
+- partial publication and expected-current mismatch return a typed conflict;
+  retry first reads the authoritative manifest state.
+
+Temporary exceptions use immutable `TranslationExceptionRecord` evidence.
+They expire fail-closed and cannot bypass stable IDs, market isolation,
+secrets/privacy restrictions, independent high-impact review or qualified
+Legal approval for mandatory copy.
 
 ## 14. Evidence and quality gates
 
@@ -358,8 +476,15 @@ Required documentation evidence before BCK20-OD-02 Acceptance:
 - EE/LT disabled-state examples;
 - provider-neutral privacy/security checklist;
 - emergency withdrawal and unsafe-fallback tabletop on paper;
+- approval revocation/expiry, policy conflict, unknown impact, atomic publish
+  conflict, exception expiry and provider-export deletion vectors;
 - BCK20-OD-05 boundary explicitly retained for mandatory Legal/safety copy;
 - migration/rollback statement and exact future executable gate.
+
+Workflow metrics may use privacy-safe IDs, state transitions, timing and
+validated defect counts. Raw product text and personal data are excluded by
+default. Metrics cannot auto-publish, reduce review depth or prove Legal
+correctness.
 
 Future executable evidence, separately authorized, includes contract fixtures,
 repository/provider adapter tests, role enforcement, immutable publication,
@@ -376,6 +501,8 @@ A skipped, timed-out, unattributable or non-reproducible check is Inconclusive.
 | `translation_missing` | no approved candidate; apply only allowed fallback or fail closed |
 | `translation_rejected` | candidate is immutable rejected evidence |
 | `translation_withdrawn` | candidate cannot resolve or republish |
+| `manifest_revoked` | manifest cannot resolve and prior text is not exposed |
+| `surface_disabled` | affected surface remains fail-closed |
 | `review_missing` | class-required review absent |
 | `review_inconclusive` | authority/evidence insufficient |
 | `legal_approval_required` | mandatory scope remains disabled |
@@ -385,22 +512,34 @@ A skipped, timed-out, unattributable or non-reproducible check is Inconclusive.
 | `publication_conflict` | competing current candidate/revision exists |
 | `unknown_outcome` | query authoritative state; do not report success |
 | `provider_disabled` | use approved human/offline route or stop |
+| `policy_conflict` | accountable authorities must reconcile meaning |
+| `approval_revoked` | candidate cannot publish, resolve or roll back |
+| `approval_expired` | fresh approval evidence is required |
+| `manifest_integrity_failed` | publication is rejected atomically |
+| `exception_expired` | exception scope fails closed |
+| `impact_unknown` | high-impact/mandatory scope remains blocked |
+| `deletion_unconfirmed` | provider artifact requires escalation/evidence |
 
 ## 16. Rollback and migration
 
 Before runtime exists, rollback is a new documentation revision superseding
-this proposal. No data migration exists.
+this baseline. No data migration exists.
 
 Future rollout must import only approved immutable records with provenance,
 dry-run validation, counts/hashes, checkpointing, reject report and rollback to
-a previously compatible manifest. Local/mock strings are migration candidates,
+a previously compatible, currently authorized manifest. Current approval,
+withdrawal, restriction and Legal-policy checks run before restoration; an
+older manifest is never assumed safe merely because it once published.
+Local/mock strings are migration candidates,
 not automatically approved translations. No existing app string is silently
 reclassified as Legal-approved or source-authoritative.
 
 ## 17. Open items retained
 
-- BCK20-OD-02 remains Open until an explicit owner decision and required
-  boundary reviews accept the exact workflow revision.
+- BCK20-OD02-DEC-01 accepts the v0.2 combined-owner technical workflow
+  boundary with amendments integrated; BCK20-OD-02 remains Open until required
+  Product Localization, Content, Mobile, Security/Privacy and applicable
+  qualified Legal evidence accepts the exact revision.
 - BCK20-OD-05 remains Open for mandatory copy and fallback-forbidden classes.
 - OD-10 remains Proposed.
 - API-DEC-05 and BCK20-OD-01 remain Deferred.
@@ -434,14 +573,41 @@ reclassified as Legal-approved or source-authoritative.
 22. **BCK20-OD02-AC-22:** local/mock strings are not automatically approved.
 23. **BCK20-OD02-AC-23:** provider/tool selection remains separately gated.
 24. **BCK20-OD02-AC-24:** OD-05/OD-10/API-DEC-05 remain unchanged.
-25. **BCK20-OD02-AC-25:** this proposal authorizes no schema, runtime,
+25. **BCK20-OD02-AC-25:** this baseline authorizes no schema, runtime,
     Firebase, deployment, push or merge.
+26. **BCK20-OD02-AC-26:** locale, MarketConfig, message format and placeholder
+    schema are canonical revision-bound identity inputs.
+27. **BCK20-OD02-AC-27:** policy conflicts block and route to accountable owners.
+28. **BCK20-OD02-AC-28:** source/glossary/policy changes create attributable
+    impact and re-review evidence.
+29. **BCK20-OD02-AC-29:** revoked, expired or superseded approvals cannot
+    publish or roll back.
+30. **BCK20-OD02-AC-30:** manifest publication is integrity-checked and atomic.
+31. **BCK20-OD02-AC-31:** publication cannot imply market, feature or client
+    activation.
+32. **BCK20-OD02-AC-32:** rollback cannot resurrect invalid text.
+33. **BCK20-OD02-AC-33:** exceptions are attributable, expiring and cannot
+    bypass mandatory controls.
+34. **BCK20-OD02-AC-34:** high-impact and mandatory review is per unit and
+    independently attributable.
+35. **BCK20-OD02-AC-35:** retention classes and provider-export deletion
+    require explicit policy and evidence.
+36. **BCK20-OD02-AC-36:** provider portability preserves complete governance
+    relationships without selecting a vendor schema.
+37. **BCK20-OD02-AC-37:** metrics cannot auto-publish, weaken review or prove
+    Legal correctness.
+38. **BCK20-OD02-AC-38:** candidate withdrawal, manifest revocation and surface
+    disablement are distinct.
+39. **BCK20-OD02-AC-39:** user-authored translation remains separately gated.
+40. **BCK20-OD02-AC-40:** the expanded typed-failure vocabulary never becomes
+    silent fallback.
+41. **BCK20-OD02-AC-41:** AC-01–25 retain their identifiers unchanged.
 
-## 19. Requested technical owner review
+## 19. Recorded technical owner decision
 
-Review whether the workflow direction and 25 AC should become a binding
-combined-owner technical baseline while BCK20-OD-02 remains Open pending
-Product Localization, Content, Mobile and applicable qualified Legal evidence.
-
-No verdict is prefilled. The next step is a bounded owner-review document, not
-implementation or provider selection.
+On 2026-09-16 the Product owner accepted BCK20-OD02-REV-01 v0.1 with required
+amendments for the combined-owner technical translation-governance boundary.
+This v0.2 integrates all sixteen amendments and records the bounded verdict in
+BCK20-OD02-DEC-01 v0.1. BCK20-OD-02 stays Open, OD-10 stays Proposed and BCK-20
+stays Draft. No specialist/Legal verdict, provider, schema, runtime, Firebase,
+deployment, push or merge authority is created.
