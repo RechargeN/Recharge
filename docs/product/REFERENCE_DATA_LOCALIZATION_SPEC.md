@@ -1,25 +1,35 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.9**
-- Date: **2026-09-15**
+- Version: **0.2.10**
+- Date: **2026-09-16**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.58](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.62](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
 - Security/privacy boundary: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK-04/threat-model technical verdicts recorded; independent/Legal/OD gates pending)
 - Operations boundary: [BCK-05 v0.2.30](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
-- Delivery annex: [BCK-02-A1 v1.8](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.9](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Owner review: [BCK20-OWN-REV-01 v0.2](REFERENCE_DATA_LOCALIZATION_OWNER_REVIEW.md)
+- Owner decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.10 — 2026-09-16
+
+- recorded BCK20-OWN-DEC-01 and integrated all twelve owner-review amendments;
+- deferred BCK20-OD-01/03/04/06/07 with exact later gates and fail-closed
+  defaults while retaining BCK20-OD-02/05 Open;
+- retained OD-10 Proposed, BCK-20 Draft and every specialist/Legal/runtime gate;
+- authorized no schema, dataset, Firebase, deployment, push or merge.
 
 ### v0.2.9 — 2026-09-15
 
@@ -607,7 +617,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.2:
+Future targets, absent and unauthorized in v0.2.10:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -670,16 +680,19 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 | ID | Status | Owner | Evidence/decision | Blocks |
 |---|---|---|---|---|
 | OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
-| BCK20-OD-01 | Open | Reference Data + API Platform | Dart-only vs cross-language artifact after API-DEC-05 | executable contract slice |
-| BCK20-OD-02 | Open | Product Localization | translation source/review workflow and reviewer independence | production locale content |
-| BCK20-OD-03 | Open | Reference Data + Operations | snapshot/delta distribution, cache TTL and artifact size | executable slice |
-| BCK20-OD-04 | Open | Market/Product owners | EE `ru` and any LT additional locale policy | EE/LT activation |
-| BCK20-OD-05 | Open | Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | market activation |
-| BCK20-OD-06 | Open | Category/Product owner | genres/music_genres/topics accepted sources | those dictionaries |
-| BCK20-OD-07 | Open | Reference Data + domains | deprecation support window/minimum-client policy | destructive retirement |
+| BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
+| BCK20-OD-02 | Open | Product Localization | provider-neutral source/review/approval/provenance/withdrawal/emergency-correction workflow | no production locale publication |
+| BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
+| BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
+| BCK20-OD-05 | Open | Qualified Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | affected market/legal surface disabled |
+| BCK20-OD-06 | Deferred until a required dictionary has an accepted source | Category/Product owner | genres/music_genres/topics source and governance per dictionary | dictionary absent; no ad-hoc free-text canonical IDs |
+| BCK20-OD-07 | Deferred until minimum-client/adoption evidence | Reference Data + domains | support window, observation period, destructive-retirement and rollback policy | additive/deprecated compatibility only; no destructive retirement |
 
-Each Open decision has a disabled/fail-closed default in this document and
-must record owner, evidence, decision date, migration and rollback.
+Each Open or Deferred decision has a disabled/fail-closed default and must
+record owner, evidence, decision date, migration and rollback before promotion.
+Deferred does not mean Accepted or optional and cannot bypass its named later
+gate. BCK20-OD-01 cannot reopen API-DEC-05 or introduce a private parallel
+schema toolchain.
 
 ## 25. Definition of Ready for Review
 
@@ -689,12 +702,13 @@ must record owner, evidence, decision date, migration and rollback.
 - named Reference Data and Product Localization reviewers are assigned;
 - OD-10 proposal is reviewed by API/Content/Mobile/Legal perspectives;
 - no schema/runtime/distribution/mobile implementation is created;
-- all Open Decisions have owner/gate/fail-closed default.
+- all Open/Deferred Decisions have owner/gate/fail-closed default.
 
-Current readiness: Reference Data/Product Localization and delegated API/
-Content/Mobile/Legal roles are assigned to the combined owner in
-[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). All verdicts and
-qualified Legal evidence remain absent, so BCK-20 remains Draft.
+Current readiness: BCK20-OWN-DEC-01 records only the combined-owner technical
+decision triage. Reference Data/Product Localization and delegated API/
+Content/Mobile/Legal roles remain unresolved in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). Qualified Legal
+evidence remains absent, so BCK-20 remains Draft.
 
 ## 26. Definition of Done for Approved BCK-20
 
@@ -708,7 +722,7 @@ qualified Legal evidence remain absent, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 50 AC are unique/sequential and unimplemented status is honest;
+- 57 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -762,14 +776,23 @@ qualified Legal evidence remain absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.9 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.10 creates no backend/schema/mobile/runtime effect.
+51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
+52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
+53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
+54. **BCK-20-AC-54:** BCK20-OD-05 remains qualified Legal/Product scope.
+55. **BCK-20-AC-55:** absent dictionaries cannot use ad-hoc canonical IDs.
+56. **BCK-20-AC-56:** destructive retirement remains prohibited until its
+    support, observation, minimum-client and rollback policy is Accepted.
+57. **BCK-20-AC-57:** BCK20-OWN-DEC-01 changes no specialist, runtime,
+    Firebase, deployment, push or merge authority.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.2 the following remain absent:
+At v0.2.10 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -781,11 +804,12 @@ At v0.2.2 the following remain absent:
 
 ## 29. Next action
 
-1. confirm BCK-20 coverage/reconciliation matrix;
-2. assign named Reference Data, Product Localization, API, Content, Mobile and
-   Legal reviewers;
-3. run OD-10 fixtures/decision review;
-4. reconcile BCK20-OD-01–07 with BCK-03/04/05;
-5. move BCK-20 to Review, then Approved only after §26;
-6. keep schema/runtime/distribution implementation blocked until G1 and a
+1. prepare the provider-neutral BCK20-OD-02 translation governance workflow;
+2. obtain qualified Legal/Product policy for BCK20-OD-05 later;
+3. assign named Reference Data, Product Localization, API, Content and Mobile
+   reviewers when the documentation set is stable;
+4. run OD-10 documentation-vector review without creating executable schema;
+5. keep every Deferred item closed until its exact later gate;
+6. move BCK-20 to Review, then Approved only after §26;
+7. keep schema/runtime/distribution implementation blocked until G1 and a
    separately Approved executable file plan.

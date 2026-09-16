@@ -1,12 +1,13 @@
 # BCK-20 — Reference Data & Localization Owner Review
 
 - ID: **BCK20-OWN-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-16**
-- Status: **Proposed — owner decision required**
+- Status: **Owner verdict recorded — amendments integrated in BCK-20 v0.2.10**
 - Review target: [BCK-20 v0.2.9](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Coverage input: [BCK-20-PRE v0.2.9](REFERENCE_DATA_LOCALIZATION_COVERAGE_MATRIX.md)
 - OD-10 evidence: [BCK-D1-OD10-EV-01 v0.1](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
+- Owner decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Review outcome
@@ -171,5 +172,12 @@ Specialist/Legal verdicts, schema, runtime, Firebase, deployment, push и merge
 не разрешаю.
 ```
 
-Until that explicit decision exists, this file is a Proposed recommendation
-only and changes no decision status.
+Before the explicit decision was recorded, §9 was a Proposed recommendation
+and changed no decision status.
+
+## 10. Recorded owner verdict
+
+On 2026-09-16 the Product owner approved the exact §9 decision. The verdict is
+recorded in `BCK20-OWN-DEC-01`, and the twelve amendments are integrated in
+BCK-20 v0.2.10. The bounded verdict does not accept BCK-20 or OD-10 and does
+not supply specialist, Legal or runtime authority.

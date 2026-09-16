@@ -1,11 +1,11 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.8
-- Дата: 2026-09-15
+- Версия: 1.9
+- Дата: 2026-09-16
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.62](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
@@ -41,7 +41,7 @@ Media, Notifications, Library, Reviews, Trust & Safety, Event Booking,
 Scenario, Quick Plan, Route, Admin/Support, analytics и optional gated
 Provider/AI/Payments integrations.
 
-### 0.1. Execution snapshot — 2026-09-12
+### 0.1. Execution snapshot — 2026-09-16
 
 - G0 пройден; registry остаётся `22 BCK + 6 RUN`.
 - Bounded R0 local toolchain и hosted Ubuntu/Windows evidence имеют статус
@@ -52,14 +52,16 @@ Provider/AI/Payments integrations.
 - RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
   Review, production Identity/Event projection/mobile/deployment отсутствуют.
 - G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
-- Current D1 snapshot is BCK-01 v0.4.57, BCK-03 v0.3.14, BCK-04 v0.4.23,
-  BCK-05 v0.2.30 and BCK-20 v0.2.9. BCK04-SEC-DEC-01 and
+- Current D1 snapshot is BCK-01 v0.4.58, BCK-03 v0.3.14, BCK-04 v0.4.23,
+  BCK-05 v0.2.30 and BCK-20 v0.2.10. BCK04-SEC-DEC-01 and
   BCK04-OD01-DEC-01 record the combined-owner technical BCK-04 and
   threat-model verdicts. BCK-04 remains Draft and BCK04-OD-01 remains
   Proposed pending independent/cross-boundary evidence; OD-09/OD-11/Legal,
   runtime and G1 gates stay blocked.
-- Следующий последовательный этап — remaining BCK-04/05/20 owner and
-  specialist decisions; BCK-18/BCK-20 Mobile scopes remain separately gated.
+- BCK20-OWN-DEC-01 records technical decision triage only: five decisions are
+  Deferred, OD-02/05 Open, OD-10 Proposed and BCK-20 Draft.
+- Следующий последовательный этап — BCK20-OD-02 translation governance
+  workflow; BCK-05 evidence and all specialist/Legal gates remain deferred.
 
 ## 1. Приоритет и границы
 
@@ -1339,13 +1341,13 @@ inconclusive.
 
 Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 v0.4.57 Review и BCK-01-REV-01 v1.17 evidence.
-2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.9
+1. BCK-01 v0.4.58 Review и BCK-01-REV-01 v1.18 evidence.
+2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.10
    named-owner review и evidence-based verdicts; D1-SIG-API и bounded
    D1-SIG-OPS/SEC/MOBILE уже recorded для границ BCK-03.
 3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
    выбора topology.
-4. BCK-D1-REV-01 v1.21, sign-off ledger v1.19, workbook v1.17,
+4. BCK-D1-REV-01 v1.22, sign-off ledger v1.20, workbook v1.18,
    BCK-D1-OWN-A-DEC-01 v0.1, BCK03-OPS-DEC-01 v0.1 и
    BCK03-SEC-DEC-01 v0.1, BCK03-MOB-DEC-01 v0.1 и
    BCK04-SEC-DEC-01 v0.1 и BCK04-OD01-DEC-01 v0.1 с
