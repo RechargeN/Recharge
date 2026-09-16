@@ -1,25 +1,26 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.22**
-- Date: **2026-09-12**
-- Spec status: **Draft — bounded owner verdict recorded; independent/Legal/OD gates pending**
+- Version: **0.4.23**
+- Date: **2026-09-15**
+- Spec status: **Draft — BCK-04 and threat-model technical owner verdicts recorded; independent/Legal/OD gates pending**
 - Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.13](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
+- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
   [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.22
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.23
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - API security boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Infrastructure evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
 - Infrastructure decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
 - IAM boundary evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (BCK05-OD-02 Accepted with controls)
-- Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.1 (Draft; OD-01 Proposed)
+- Threat-model evidence: [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) v0.2 (Draft; combined-owner technical verdict recorded; OD-01 Proposed)
+- Threat-model owner decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
@@ -29,6 +30,20 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.23 — 2026-09-15
+
+- recorded BCK04-OD01-DEC-01 for the combined-owner technical threat-model
+  boundary and integrated all twenty amendments in threat-model v0.2;
+- added explicit per-threat classification, ownership, evidence gates,
+  residual disposition, DSR/read/App Check/identity/ingress/supply-chain/
+  restore/market coverage and revision checksum;
+- retained BCK04-OD-01 Proposed pending independent Security/Privacy and
+  required cross-boundary confirmations;
+- retained BCK-04 Draft, BCK04-OD-09 Proposed, OD-11 Open and all Legal,
+  D1/G1 and executable/runtime blockers;
+- created no code, Firebase resource, credential, deployment, push or merge
+  authority.
 
 ### v0.4.22 — 2026-09-12
 
@@ -457,9 +472,12 @@ Mobile client (untrusted)
 ```
 
 **Proposed:** полный per-asset threat model с explicit attacker capabilities,
-36 threat records, control ownership, evidence gates and residual risks —
-[BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md). Owner verdict и
-independent security review отсутствуют, поэтому `BCK04-OD-01` не Accepted.
+49 classified threat records, per-threat ownership, evidence gates, residual
+dispositions and revision checksum —
+[BCK04-OD01-TM-01 v0.2](BACKEND_SECURITY_THREAT_MODEL.md). Combined-owner
+technical verdict is recorded through BCK04-OD01-DEC-01. Independent
+Security/Privacy review and required API/Operations/Identity/Mobile/domain
+confirmations remain absent, поэтому `BCK04-OD-01` не Accepted.
 
 ## 6. Backend data inventory
 
@@ -689,7 +707,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.13, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
+contract across BCK-03 v0.3.14, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -1406,7 +1424,7 @@ absent, so
 |---|---|---|---|:---:|
 | `OD-07` (внешний, `BCK-02 §16`) | Firebase topology/edition/regions | Platform (`BCK-04`+`BCK-05`) | R1 provisioning, §22 | Нет (R1) |
 | `OD-11` (внешний, `BCK-02 §16`) | Region-versioned minors/age policy | Security/Privacy | R2 account creation, Find People, age-restricted paths, applicable Booking, G6, §18 | Нет (R2/G6) |
-| `BCK04-OD-01` | **Proposed:** полный threat model по каждому asset/trust boundary; owner verdict/independent review pending | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
+| `BCK04-OD-01` | **Proposed:** v0.2 has 49 classified threats, per-threat ownership/gates/residual state and combined-owner technical verdict; independent review and cross-boundary confirmations pending | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
 | `BCK04-OD-02` | Полный подписанный data inventory по каждому domain | Каждый domain owner + Security/Privacy | Production personal data для этого domain | Да, per-domain, до production |
 | `BCK04-OD-03` | Session/token TTL, refresh cadence, deletion provider-revocation detail | Identity owner (`BCK-06`) | Executable Auth slice | Да, до executable slice |
 | `BCK04-OD-04` | App Check recovery/emergency bypass policy | Platform Operations (`BCK-05`) | App Check enforce rollout | Да, до enforce rollout |
@@ -1435,7 +1453,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.56 Review:
+executable slice, согласованный с BCK-01 v0.4.57 Review:
 
 ```text
 docs/runbooks/
@@ -1503,7 +1521,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.13.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.14.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1563,10 +1581,11 @@ Client input schema для `actorContext` намеренно отсутству�
   decision remains Open until a qualified owner selects a policy.
 
 Current readiness: the BCK-01 and coverage prerequisites plus interim
-coordination are evidenced. The combined owner accepted the technical BCK-03
-and BCK-04 boundaries with required amendments through BCK03-SEC-DEC-01 and
-BCK04-SEC-DEC-01. This is not independent Security/Privacy evidence or
-qualified Legal judgment. BCK04-OD-01/09, independent assessment,
+coordination are evidenced. The combined owner accepted the technical BCK-03,
+BCK-04 and BCK04-OD01 threat-model boundaries with required amendments through
+BCK03-SEC-DEC-01, BCK04-SEC-DEC-01 and BCK04-OD01-DEC-01. This is not
+independent Security/Privacy evidence, OD-01 Acceptance or qualified Legal
+judgment. BCK04-OD-01/09, independent assessment, cross-boundary confirmations,
 D1-SIG-LEGAL and qualified Legal/Privacy evidence remain absent. BCK-04
 therefore remains Draft and cannot enter Review.
 
@@ -1605,7 +1624,7 @@ therefore remains Draft and cannot enter Review.
    спецификации.
 6. **BCK-04-AC-06:** `requestId` per attempt, logical `idempotencyKey` и
    server-issued `privacyRequestId` имеют разные роли и согласованы с
-   BCK-03 v0.3.13; это wording supersedes AC-06 revision v0.4.21 без
+   BCK-03 v0.3.14; это wording supersedes AC-06 revision v0.4.21 без
    перенумерации stable ID.
 7. **BCK-04-AC-07:** anti-enumeration правило одинаково применяется к
    Booking, Page и verification-ресурсам.
@@ -1627,9 +1646,9 @@ therefore remains Draft and cannot enter Review.
     `BCK-02 §5`, не переопределяет их.
 15. **BCK-04-AC-15:** reconciliation с `BCK-03`/`BCK-09` не переписывает их
     содержимое, только фиксирует расхождения.
-16. **BCK-04-AC-16:** §5 links the full Proposed `BCK04-OD01-TM-01` evidence
-    and does not present its bounded trust-boundary summary as independent
-    acceptance or runtime proof.
+16. **BCK-04-AC-16:** §5 links exact Proposed `BCK04-OD01-TM-01 v0.2`, records
+    only its combined-owner technical verdict and does not present it as
+    independent acceptance or runtime proof.
 17. **BCK-04-AC-17:** §12 Firestore Rules/IAM не содержит ни одного
     разрешённого direct client write без явной пометки "делегировано
     domain-spec, safe default — запрещено" (§12.3).
@@ -1733,16 +1752,28 @@ therefore remains Draft and cannot enter Review.
 58. **BCK-04-AC-58:** BCK-04 remains Draft until its full DoR and DoD pass.
 59. **BCK-04-AC-59:** this revision creates no code, Firebase resource,
     deployment, push or merge authority.
+60. **BCK-04-AC-60:** threat-model v0.2 gives every threat explicit
+    classification, accountable owner, evidence gate and residual disposition.
+61. **BCK-04-AC-61:** protected-read, DSR, App Check, identity-lifecycle,
+    hostile-ingress, supply-chain, restore and market-isolation threats are
+    reconciled with this specification.
+62. **BCK-04-AC-62:** threat-model target controls are not presented as
+    implemented or verified product/cloud controls.
+63. **BCK-04-AC-63:** BCK04-OD01-DEC-01 does not accept BCK04-OD-01 or replace
+    independent/cross-boundary evidence.
+64. **BCK-04-AC-64:** OD-01 and OD-09 remain independently gated; neither
+    decision is inferred from the other.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.22 отсутствует:
+На момент v0.4.23 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет
   domain-specs);
-- Accepted owner/security verdict for the Proposed threat model
-  (`BCK04-OD-01`); the Draft evidence document is Present;
+- Accepted `BCK04-OD-01`; the combined-owner technical verdict and amended
+  Draft v0.2 evidence are Present, while independent Security/Privacy and
+  cross-boundary confirmations are absent;
 - DSR orchestration runtime (request families §20.1);
 - backend-specific RUN-01/RUN-06, accepted owner/Legal verdict and executed,
   passed tabletop evidence for the Proposed security-type→SEV/privacy-risk model

@@ -1,16 +1,18 @@
 # Recharge Backend — Security Threat Model Owner Review
 
 - ID: **BCK04-OD01-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-15**
-- Status: **Proposed review — owner verdict pending**
-- Recommended result: **Accept with required amendments — technical threat-model boundary only**
+- Status: **Owner verdict recorded — amendments integrated; independent/cross-boundary evidence pending**
+- Review result: **Accept with required amendments — technical threat-model boundary only**
 - Reviewer: **RechargeN / Product owner** (combined Security/Privacy role)
 - Independence: **not evidenced**
 - Legal qualification: **not applicable to this technical verdict; qualified Legal conclusions remain separate**
-- Target: [BCK04-OD01-TM-01 v0.1](BACKEND_SECURITY_THREAT_MODEL.md)
-- Parent specification: [BCK-04 v0.4.22](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Reviewed target: **BCK04-OD01-TM-01 v0.1**
+- Integrated target: [BCK04-OD01-TM-01 v0.2](BACKEND_SECURITY_THREAT_MODEL.md)
+- Parent specification: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md)
 - Technical-boundary decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Owner decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Scope and recommended verdict
@@ -154,6 +156,11 @@ BCK04-OD-09, OD-11, Legal, D1/G1, runtime, Firebase, deployment, push и merge
 не разрешаю.
 ```
 
+The Product owner explicitly approved this response on 2026-09-15.
+`BCK04-OD01-DEC-01` records the bounded verdict, and all twenty amendments are
+integrated in threat-model v0.2. `BCK04-OD-01` remains Proposed pending the
+independent and cross-boundary gates stated above.
+
 ## 6. Acceptance criteria
 
 1. **BCK04-OD01-REV-AC-01:** the review targets exact threat-model v0.1.
@@ -180,7 +187,6 @@ BCK04-OD-09, OD-11, Legal, D1/G1, runtime, Firebase, deployment, push и merge
 
 ## 7. Next action
 
-Obtain the exact owner response in §5. If approved, integrate the twenty
-amendments into a new threat-model revision and reconcile documentation only.
-Do not create the OD-01 acceptance decision until that revised model and the
-remaining independent/cross-boundary evidence satisfy its gate.
+Complete independent Security/Privacy review and API, Operations, Identity,
+Mobile and affected-domain contradiction checks against exact v0.2. Do not
+create the OD-01 acceptance decision until those gates pass.

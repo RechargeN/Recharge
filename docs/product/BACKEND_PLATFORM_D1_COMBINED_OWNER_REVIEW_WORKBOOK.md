@@ -1,19 +1,20 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.16**
-- Date: **2026-09-12**
-- Status: **Technical BCK-04 owner verdict recorded; remaining D1 verdicts required**
+- Version: **1.17**
+- Date: **2026-09-15**
+- Status: **Technical BCK-04/threat-model owner verdicts recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.20](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.18](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.21](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.19](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Recorded BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Recorded threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -106,7 +107,7 @@ models or review evidence before an effective verdict.
 
 | Work item | Decisions served | What must be produced | Current recommendation |
 |---|---|---|---|
-| Full backend threat model | `BCK04-OD-01` | [BCK04-OD01-TM-01](BACKEND_SECURITY_THREAT_MODEL.md) now provides assets, actors, trust boundaries, 36 threats, controls and residual risks | **Present as Draft; OD-01 Proposed; owner/independent verdict pending** |
+| Full backend threat model | `BCK04-OD-01` | [BCK04-OD01-TM-01 v0.2](BACKEND_SECURITY_THREAT_MODEL.md) provides stable assets/actors/boundaries, 49 classified threats, per-threat owners/gates/residual states and checksum | **Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary evidence** |
 | Incident risk/severity model | `BCK04-OD-09`, `BCK05-OD-08` | [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) defines the response model; [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) supplies Scenario A, injects, evaluator key and blank result record | **Package ready/not executed; both decisions Proposed; owner/Legal verdict and completed result pending** |
 | Infrastructure choice record | `OD-07` | [evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) completes the resource matrix, dated vendor facts, latency/cost thresholds, residency limits and export/rollback plan; [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) records the exact verdict | **Accepted at `OD07-A1-EU-MR-v1` with controls; no cloud or Legal authority** |
 | Service targets | `BCK05-OD-03` | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) now supplies journey SLIs/SLOs, error budgets, burn alerts and release rules | **Product baseline recorded; OD-03 Proposed; domain/Operations specialist verdict and stage evidence pending** |
@@ -188,10 +189,10 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
-| BCK-03 v0.3.13 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
-| BCK-04 v0.4.22 | retain Draft | combined-owner technical verdict recorded; `BCK04-OD-01`/`BCK04-OD-09` remain Proposed/unsigned, tabletop is not executed and independent/qualified Legal evidence remains absent |
-| BCK-05 v0.2.29 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; BCK05-OD-03/04/05/08 and executable release/IAM/platform/specialist/stage/product-cloud evidence remain incomplete |
-| BCK-20 v0.2.8 | retain Draft | BCK-03 Mobile/BCK-04 technical verdicts do not cover BCK-20; OD-10 and Legal/localization workflow evidence incomplete |
+| BCK-03 v0.3.14 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
+| BCK-04 v0.4.23 | retain Draft | BCK-04 and threat-model combined-owner technical verdicts recorded; `BCK04-OD-01` remains Proposed pending independent/cross-boundary evidence; OD-09/tabletop/Legal gates remain |
+| BCK-05 v0.2.30 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains incomplete |
+| BCK-20 v0.2.9 | retain Draft | BCK-03 Mobile/BCK-04/threat-model technical verdicts do not cover BCK-20; OD-10 and Legal/localization workflow evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -230,12 +231,18 @@ combined-owner technical BCK-04 boundary with required amendments. It does not
 accept BCK-04/BCK04-OD-01/09, replace independent or qualified Legal evidence,
 or authorize runtime.
 
+The separate 2026-09-15 BCK04-OD01-DEC-01 confirmation records only the
+combined-owner technical threat-model boundary and amended v0.2. BCK04-OD-01
+remains Proposed until independent Security/Privacy and required API,
+Operations, Identity, Mobile and affected-domain confirmations pass.
+
 ## 9. What happens after owner confirmation
 
 1. Keep the recorded Batch A dispositions and D1-SIG-API verdict reconciled in
    BCK-D1-SIG-01 and BCK-03.
-2. Preserve the bounded BCK-03 and technical BCK-04 owner verdicts and complete
-   the remaining BCK-04/BCK-05/BCK-20 specialist evidence without opening runtime.
+2. Preserve the bounded BCK-03, BCK-04 and threat-model owner verdicts; obtain
+   exact independent/cross-boundary threat-model confirmations and complete the
+   remaining BCK-04/BCK-05/BCK-20 evidence without opening runtime.
 3. Use the recorded SLO/cost/recovery baselines to define a separately
    authorized stage-validation slice and collect evidence-based specialist
    verdicts; separately schedule and actually perform BCK04-OD09-TTX-01 with
@@ -261,3 +268,6 @@ or authorize runtime.
 13. **D1-OWN-AC-13:** Booking v1 compatibility remains unchanged.
 14. **D1-OWN-AC-14:** status updates remain atomic after an explicit verdict.
 15. **D1-OWN-AC-15:** this workbook creates no runtime or cloud resource.
+16. **D1-OWN-AC-16:** BCK04-OD01-DEC-01 records only the technical threat-model
+    boundary; OD-01 remains Proposed until independent and cross-boundary
+    evidence passes.

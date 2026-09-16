@@ -1,17 +1,18 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.8**
-- Date: **2026-09-12**
+- Version: **0.9**
+- Date: **2026-09-15**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Related BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Related threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -19,6 +20,11 @@
 ---
 
 ## 0. Revision note
+
+v0.9 reconciles the combined-owner technical threat-model verdict and twenty
+amendments through BCK04-OD01-DEC-01 and exact model v0.2. BCK04-OD-01 remains
+Proposed pending independent/cross-boundary evidence; all Legal, D1/G1 and
+runtime gates remain blocked.
 
 v0.8 reconciles the combined-owner technical BCK-04 verdict and fourteen
 amendments through BCK04-SEC-DEC-01. BCK-04 remains Draft; independent
@@ -189,7 +195,7 @@ No Proposed or Open item is promoted by implication.
 |---|---|---|---|
 | BCK-01 | Review | D1 conflict/status traceability updated | Independent specialist Approval and complete D1 sign-off |
 | BCK-03 | Draft | Booking split-key conflict closed | Delegated BCK-04/05/18 reviews and API-DEC evidence |
-| BCK-04 | Draft | split-key/DSR technical amendments and combined-owner verdict recorded; OD-07 engineering topology Accepted | independent/qualified Legal, BCK04-OD-01/09, OD-11 and tabletop evidence |
+| BCK-04 | Draft | split-key/DSR amendments plus BCK-04 and threat-model combined-owner technical verdicts recorded; OD-07 engineering topology Accepted | BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; qualified Legal, OD-09/11 and tabletop remain |
 | BCK-05 | Draft | API dependency reconciled; OD-07 architecture Accepted | Operations specialist, remaining BCK05 decisions, SLO/budget/IAM/recovery evidence |
 | BCK-20 | Draft | API dependency and OD-10 disposition clarified | OD-10 fixtures and Reference/API/Content/Mobile/Legal review |
 | BCK-09 | Review | Target idempotency semantics now match Booking v1 fixtures | Physical implementation remains separately gated |
@@ -270,6 +276,9 @@ Executable verification, only after a separately Approved slice, must include:
 18. **BCK-D1-AC-18:** no runtime/schema/Firebase artifact is authorized.
 19. **BCK-D1-AC-19:** documentation and executable evidence are reported separately.
 20. **BCK-D1-AC-20:** rollback is the previous documentation revision; no data rollback exists.
+21. **BCK-D1-AC-21:** BCK04-OD01-DEC-01 and threat-model v0.2 are recorded
+    without accepting OD-01, satisfying independent/cross-boundary review or
+    authorizing runtime.
 
 ## 11. Rollback
 

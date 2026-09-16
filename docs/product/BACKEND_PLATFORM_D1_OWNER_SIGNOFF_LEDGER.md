@@ -1,17 +1,18 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.18**
-- Date: **2026-09-12**
+- Version: **1.19**
+- Date: **2026-09-15**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.20](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.16](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.21](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.17](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -19,13 +20,16 @@
 
 ## 0. Owner verdict reconciliation
 
-The explicit Product-owner verdicts through 2026-09-12 record D1-SIG-API and
+The explicit Product-owner verdicts through 2026-09-15 record D1-SIG-API and
 bounded D1-SIG-OPS/SEC/MOBILE as `Accept with required amendments`, defer the broader
 API-DEC-01–05 scopes and retain OD-09 Proposed. Existing Booking-v1
 API-DEC-01/03 Acceptance is not demoted.
 BCK04-SEC-DEC-01 extends the combined-owner D1-SIG-SEC evidence only to the
 technical BCK-04 documentation boundary; it does not provide independent or
 qualified Legal evidence and does not accept BCK-04 or its ODs.
+BCK04-OD01-DEC-01 additionally records the technical threat-model boundary and
+amended v0.2, but BCK04-OD-01 remains Proposed until independent and required
+cross-boundary evidence exists.
 BCK05-OD-01/02/07 remain distinct from cross-domain OD-01/02/07. Every other
 incomplete specialist signature remains Pending and qualified Legal/Privacy
 evidence remains absent.
@@ -108,11 +112,11 @@ accepts its accountability.
 
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
-| BCK-03 v0.3.13 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
-| BCK-04 v0.4.22 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | Combined-owner technical verdict recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain pending; spec remains Draft |
-| BCK-05 v0.2.29 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass, BCK05-OD-01/02/07 and cross-domain OD-07 Acceptance are Present; BCK-03/BCK-04 owner-boundary verdicts do not accept BCK-05; executable release/IAM and other OD/specialist/stage/product-cloud evidence remains pending |
-| BCK-20 v0.2.8 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | BCK-03 Mobile/BCK-04 technical verdicts do not cover BCK-20; OD-10 Proposed and review pending |
-| BCK04-OD01-TM-01 v0.1 | D1-SIG-SEC | D1-SIG-API, D1-SIG-OPS, D1-SIG-MOBILE and affected domains | Proposed; owner/independent security verdict pending |
+| BCK-03 v0.3.14 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
+| BCK-04 v0.4.23 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | BCK-04 and threat-model combined-owner technical verdicts recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain; spec remains Draft |
+| BCK-05 v0.2.30 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and accepted OD baselines Present; BCK-03/BCK-04/threat-model owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains pending |
+| BCK-20 v0.2.9 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-LEGAL | BCK-03 Mobile/BCK-04/threat-model technical verdicts do not cover BCK-20; OD-10 Proposed and review pending |
+| BCK04-OD01-TM-01 v0.2 | D1-SIG-SEC | independent Security/Privacy, D1-SIG-API, D1-SIG-OPS, Identity, D1-SIG-MOBILE and affected domains | Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary confirmations |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |
 | BCK05-OD04-COST-01 v0.4 | D1-SIG-FIN + D1-SIG-OPS | Product owner, D1-SIG-SEC and D1-SIG-LEGAL where applicable | OD-07 Accepted; BCK05-OD-04 Proposed; Finance Inconclusive; EUR SKU/stage evidence pending |
@@ -188,7 +192,7 @@ review record explicitly accepts the bounded follow-up diff.
 | Specification | Structural evidence | Owner evidence | Current status |
 |---|---|---|---|
 | BCK-03 | complete; technical circular dependency removed | API/Operations/Security/Mobile boundary verdicts recorded; independent evidence pending | Draft |
-| BCK-04 | complete; OD-11 status reconciled | combined-owner technical verdict recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop evidence pending | Draft |
+| BCK-04 | complete; OD-11 and threat-model v0.2 reconciled | BCK-04/threat-model combined-owner technical verdicts recorded; BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; Legal/OD-09/tabletop remain | Draft |
 | BCK-05 | complete; OD-07 evidence split; bounded R0 Pass and BCK05-OD-01/02 Acceptance recorded | full Operations/Finance/Security/Legal, executable IAM, remaining OD, stage and product-cloud evidence incomplete | Draft |
 | BCK-20 | complete; documentation/executable fixtures separated | combined owner assigned; verdicts and qualified Legal evidence pending | Draft |
 
@@ -241,12 +245,16 @@ returns a §6 review record.
 14. **D1-SIG-AC-14:** artifact changes invalidate stale signatures.
 15. **D1-SIG-AC-15:** status updates are atomic across canonical records.
 16. **D1-SIG-AC-16:** this ledger creates no runtime or cloud resource.
+17. **D1-SIG-AC-17:** a combined-owner threat-model verdict does not satisfy
+    independent Security/Privacy or cross-boundary signatures and does not
+    accept BCK04-OD-01.
 
 ## 11. Next action
 
 Owner Batch A, the bounded numerical baseline, R0 evidence and exact
-BCK05-OD-01/02/07, OD-07 and the bounded BCK-03 plus technical BCK-04 owner
-verdicts are recorded. Next, resolve the remaining BCK-04/BCK-05/BCK-20
+BCK05-OD-01/02/07, OD-07 and the bounded BCK-03, BCK-04 and threat-model owner
+verdicts are recorded. Next, obtain the exact independent/cross-boundary
+threat-model confirmations and resolve remaining BCK-04/BCK-05/BCK-20
 specialist evidence using §6. Qualified
 Legal/Privacy evidence remains an external prerequisite wherever legal
 judgment is required. D1 remains blocked and no new runtime gate opens.

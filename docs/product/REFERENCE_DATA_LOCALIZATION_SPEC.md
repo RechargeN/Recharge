@@ -1,25 +1,34 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.8**
-- Date: **2026-09-12**
+- Version: **0.2.9**
+- Date: **2026-09-15**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.56](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.13](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
-- Security/privacy boundary: [BCK-04 v0.4.22](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; combined-owner technical verdict recorded; independent/Legal/OD gates pending)
-- Operations boundary: [BCK-05 v0.2.29](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
+- Security/privacy boundary: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK-04/threat-model technical verdicts recorded; independent/Legal/OD gates pending)
+- Operations boundary: [BCK-05 v0.2.30](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
-- Delivery annex: [BCK-02-A1 v1.7](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.8](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.9 — 2026-09-15
+
+- reconciled BCK04-OD01-DEC-01, threat-model v0.2 and BCK-04 v0.4.23 without
+  accepting BCK-20 or OD-10;
+- preserved Reference Data, Localization, Mobile, Content, Legal and runtime
+  gates;
+- changed no schema, dataset, runtime, Firebase, deployment, push or merge
+  state.
 
 ### v0.2.8 — 2026-09-12
 
@@ -753,7 +762,7 @@ qualified Legal evidence remain absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.8 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.9 creates no backend/schema/mobile/runtime effect.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.

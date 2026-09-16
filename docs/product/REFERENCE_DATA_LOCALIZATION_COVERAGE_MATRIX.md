@@ -1,22 +1,22 @@
 # BCK-20 — Reference Data & Localization Coverage Matrix
 
 - ID: **BCK-20-PRE**
-- Version: **0.2.8**
-- Date: **2026-09-12**
+- Version: **0.2.9**
+- Date: **2026-09-15**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Reference Data owner**
-- Target: [BCK-20 v0.2.8](REFERENCE_DATA_LOCALIZATION_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.60](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target: [BCK-20 v0.2.9](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_COVERAGE_MATRIX.md`
 
-## 0. Mobile-boundary reconciliation
+## 0. Threat-model technical-verdict reconciliation
 
-Current anchors are BCK-01 v0.4.56, BCK-02 v2.4.60, BCK-03 v0.3.13,
-BCK-04 v0.4.22, BCK-05 v0.2.29, BCK-20 v0.2.8 and BCK-02-A1 v1.7.
-The bounded BCK-03 Mobile verdict changes no Reference/Localization status:
-API-DEC-05 remains Deferred, OD-10 Proposed and every specialist verdict
-unresolved; runtime remains Absent.
+Current anchors are BCK-01 v0.4.57, BCK-02 v2.4.61, BCK-03 v0.3.14,
+BCK-04 v0.4.23, BCK-05 v0.2.30, BCK-20 v0.2.9 and BCK-02-A1 v1.8.
+The bounded BCK04-OD01 technical verdict changes no Reference/Localization
+status: API-DEC-05 remains Deferred, OD-10 Proposed and every specialist
+verdict unresolved; runtime remains Absent.
 
 ## 1. Purpose
 
@@ -29,14 +29,14 @@ schemas, translations, datasets, Firebase resources, mobile adapters or runtime.
 | Source | Tracked status | Treatment |
 |---|---|---|
 | Accepted ADR / Architecture Baseline | Accepted/Frozen | Cannot be weakened |
-| BCK-01 v0.4.56 | Review; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent market/reference boundary |
-| BCK-02 v2.4.60 | Approved semantic baseline | Registry/gates/template |
-| BCK-03 v0.3.13 | Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments; API-DEC-05 Deferred | Wire/version input; no non-Booking language-neutral schema authority |
-| BCK-04 v0.4.22 | Draft; combined-owner technical verdict recorded; BCK04-OD-01/09 and independent/Legal evidence pending | Legal/privacy/retention/incident boundary |
-| BCK-05 v0.2.29 | Draft; bounded R0/RAW-C local evidence boundary; BCK05-OD-01/02/07 Accepted and BCK05-OD-03/04/05/08 Proposed | Distribution/operations input |
+| BCK-01 v0.4.57 | Review; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent market/reference boundary |
+| BCK-02 v2.4.61 | Approved semantic baseline | Registry/gates/template |
+| BCK-03 v0.3.14 | Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments; API-DEC-05 Deferred | Wire/version input; no non-Booking language-neutral schema authority |
+| BCK-04 v0.4.23 | Draft; BCK-04/threat-model technical verdicts recorded; BCK04-OD-01/09 and independent/Legal evidence pending | Legal/privacy/retention/incident boundary |
+| BCK-05 v0.2.30 | Draft; bounded R0/RAW-C local evidence boundary; BCK05-OD-01/02/07 Accepted and BCK05-OD-03/04/05/08 Proposed | Distribution/operations input |
 | Category System v1.4.3 | Accepted | Taxonomy identity/source invariant |
-| BCK-02-A1 v1.7 | Draft; docs only | Latvia/Baltics execution input |
-| BCK-20 v0.2.8 | Draft; runtime Absent | Single target Reference Data contract |
+| BCK-02-A1 v1.8 | Draft; docs only | Latvia/Baltics execution input |
+| BCK-20 v0.2.9 | Draft; runtime Absent | Single target Reference Data contract |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -130,6 +130,6 @@ evidence, not executable fixtures or decision acceptance.
 
 ## 8. Verdict
 
-BCK-20 v0.2.8 is structurally complete and preserves the accepted taxonomy. It
+BCK-20 v0.2.9 is structurally complete and preserves the accepted taxonomy. It
 remains Draft until §6 blockers and OD-10 evidence are resolved. No schema,
 dataset service, translation workflow, mobile adapter or runtime is authorized.
