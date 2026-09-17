@@ -1,15 +1,15 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.19**
-- Date: **2026-09-16**
+- Version: **1.20**
+- Date: **2026-09-17**
 - Status: **Technical owner verdicts recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.23](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.21](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.24](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.22](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -17,6 +17,7 @@
 - Recorded threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Recorded BCK-20 technical decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Recorded translation-governance decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Recorded Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -60,6 +61,10 @@ BCK20-OD-02/05 remain Open and specialist/Legal/runtime gates remain intact.
 Version 1.19 records BCK20-OD02-DEC-01 and amended workflow v0.2 for the
 combined-owner technical boundary only. OD-02 remains Open and no specialist,
 Legal, schema or runtime authority is inferred.
+
+Version 1.20 records BCK20-OD02-PC-PRE-DEC-01 and F-001–F-008 integration in
+workflow v0.3. It re-freezes specialist review without supplying either
+specialist verdict or changing OD-02, OD-10, BCK-20 or runtime status.
 
 ## 1. What this workbook does
 
@@ -206,7 +211,7 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | BCK-03 v0.3.14 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
 | BCK-04 v0.4.23 | retain Draft | BCK-04 and threat-model combined-owner technical verdicts recorded; `BCK04-OD-01` remains Proposed pending independent/cross-boundary evidence; OD-09/tabletop/Legal gates remain |
 | BCK-05 v0.2.30 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains incomplete |
-| BCK-20 v0.2.11 | retain Draft | amended technical workflow recorded; OD-10 Proposed, OD-02/05 Open and specialist/Legal evidence incomplete |
+| BCK-20 v0.2.12 | retain Draft | corrected workflow v0.3 recorded; OD-10 Proposed, OD-02/05 Open and specialist/Legal evidence incomplete |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -265,7 +270,7 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
    BCK-D1-SIG-01 and BCK-03.
 2. Preserve the bounded BCK-03, BCK-04, threat-model, BCK-20 triage and
    translation-governance verdicts; obtain named specialist reviews of
-   workflow v0.2 next. Keep independent reviews mandatory before their gates.
+   workflow v0.3 next. Keep independent reviews mandatory before their gates.
 3. Use the recorded SLO/cost/recovery baselines to define a separately
    authorized stage-validation slice and collect evidence-based specialist
    verdicts; separately schedule and actually perform BCK04-OD09-TTX-01 with
@@ -298,3 +303,6 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
     OD-10, specialist, Legal and runtime gates remain open.
 18. **D1-OWN-AC-18:** BCK20-OD02-DEC-01 records only the amended technical
     workflow and leaves OD-02 and all specialist/Legal/runtime gates open.
+19. **D1-OWN-AC-19:** BCK20-OD02-PC-PRE-DEC-01 integrates technical
+    corrections only; specialist identities/verdicts and source-authority
+    content remain absent.

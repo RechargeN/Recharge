@@ -1,29 +1,40 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.11**
-- Date: **2026-09-16**
+- Version: **0.2.12**
+- Date: **2026-09-17**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.59](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.63](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.60](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.64](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
 - Security/privacy boundary: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK-04/threat-model technical verdicts recorded; independent/Legal/OD gates pending)
 - Operations boundary: [BCK-05 v0.2.30](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
-- Delivery annex: [BCK-02-A1 v1.10](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Delivery annex: [BCK-02-A1 v1.11](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Owner review: [BCK20-OWN-REV-01 v0.2](REFERENCE_DATA_LOCALIZATION_OWNER_REVIEW.md)
 - Owner decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
-- Translation workflow: [BCK20-OD02-L10N-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
+- Translation workflow: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Translation technical decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Product/Content review package: [BCK20-OD02-PC-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_REVIEW_PACKAGE.md)
+- Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.12 — 2026-09-17
+
+- recorded BCK20-OD02-PC-PRE-DEC-01 and integrated F-001–F-008 in translation
+  workflow v0.3 before named specialist review;
+- re-froze Product/Content review package v0.2 against exact v0.3 while both
+  specialist signatures remain Pending and unnamed;
+- retained BCK20-OD-02 Open, OD-10 Proposed, BCK-20 Draft, empty source-
+  authority content and every specialist/Legal/provider/schema/runtime gate.
 
 ### v0.2.11 — 2026-09-16
 
@@ -628,7 +639,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.11:
+Future targets, absent and unauthorized in v0.2.12:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -692,7 +703,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 |---|---|---|---|---|
 | OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
-| BCK20-OD-02 | Open; combined-owner technical workflow v0.2 recorded | Product Localization | specialist review of source/review/approval/provenance/withdrawal/emergency-correction workflow | no production locale publication |
+| BCK20-OD-02 | Open; corrected technical workflow v0.3 and pending specialist package recorded | Product Localization | named SIG-L10N and SIG-CONTENT, then Mobile/Security/Privacy and applicable Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
 | BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
 | BCK20-OD-05 | Open | Qualified Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | affected market/legal surface disabled |
@@ -717,7 +728,8 @@ schema toolchain.
 
 Current readiness: BCK20-OWN-DEC-01 records decision triage and
 BCK20-OD02-DEC-01 records the amended combined-owner technical translation-
-governance boundary. Reference Data/Product Localization and delegated API/
+governance boundary. BCK20-OD02-PC-PRE-DEC-01 records eight documentation-only
+corrections before specialist review. Reference Data/Product Localization and delegated API/
 Content/Mobile/Security/Privacy/Legal roles remain unresolved in
 [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). Qualified Legal
 evidence remains absent, so BCK-20 remains Draft.
@@ -788,7 +800,7 @@ evidence remains absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.11 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.12 creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -801,13 +813,16 @@ evidence remains absent, so BCK-20 remains Draft.
 58. **BCK-20-AC-58:** BCK20-OD02-DEC-01 accepts only the amended technical
     translation-governance boundary; OD-02 and every specialist/Legal/runtime
     gate remain open.
+59. **BCK-20-AC-59:** BCK20-OD02-PC-PRE-DEC-01 integrates eight technical
+    corrections without supplying source-authority content, specialist/Legal
+    verdicts or implementation authority.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.11 the following remain absent:
+At v0.2.12 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -819,7 +834,7 @@ At v0.2.11 the following remain absent:
 
 ## 29. Next action
 
-1. obtain named Product Localization and Content review of workflow v0.2;
+1. obtain named Product Localization and Content review of workflow v0.3;
 2. obtain Mobile and Security/Privacy boundary review without runtime work;
 3. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
 4. run OD-10 documentation-vector review without creating executable schema;

@@ -1,11 +1,13 @@
 # BCK-20 — Translation Governance Product/Content Technical Pre-Review
 
 - ID: **BCK20-OD02-PC-PRE-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — technical findings require owner disposition**
+- Status: **Owner decision recorded — F-001–F-008 integrated in workflow v0.3**
 - Frozen target: [BCK20-OD02-L10N-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
-- Review package: [BCK20-OD02-PC-REV-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_REVIEW_PACKAGE.md)
+- Review package: [BCK20-OD02-PC-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_REVIEW_PACKAGE.md)
+- Owner decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
+- Integrated target: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target SHA-256: `f26e780cb8080404dc82afa5432fcb10db0005900f6f017ff2db13d063d81265`
 - Specialist verdicts: **SIG-L10N Pending — unnamed; SIG-CONTENT Pending — unnamed**
 - Runtime effect: **none**
@@ -54,7 +56,7 @@ semantic records or authority binding cannot yet prove it unambiguously.
     `sourceAuthorityEvidenceId` to the source snapshot;
   - bind every candidate to exact `sourceSnapshotId`;
   - require a documentation-only source-authority matrix by record family with
-    owner role, source locale, default/maximum class and policy references.
+    owner role, source locale, default/minimum review class and policy references.
 - Retained gate: physical schema remains API-DEC-05/BCK20-OD-01 scope.
 
 ### BCK20-OD02-PC-F-002 — manifest intent and publication outcome are conflated
@@ -218,5 +220,10 @@ Specialist/Legal verdicts, source-authority content, provider selection,
 schema, runtime, Firebase, deployment, push и merge не разрешаю.
 ```
 
-Until this exact decision is recorded, no accepted document is amended and the
-two specialist rows remain Pending against frozen workflow v0.2.
+## 8. Recorded disposition
+
+On 2026-09-17 the Product owner approved the exact §7 decision. The decision is
+recorded in BCK20-OD02-PC-PRE-DEC-01 v0.1 and F-001–F-008 are integrated in
+workflow v0.3. Both specialist rows remain `Pending — unnamed`; this technical
+pre-review does not supply Product Localization, Content, Mobile,
+Security/Privacy or qualified Legal evidence.

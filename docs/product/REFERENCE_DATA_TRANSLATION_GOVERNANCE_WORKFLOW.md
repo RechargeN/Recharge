@@ -1,8 +1,8 @@
 # Recharge Backend — Translation Governance Workflow
 
 - ID: **BCK20-OD02-L10N-01**
-- Version: **0.2**
-- Date: **2026-09-16**
+- Version: **0.3**
+- Date: **2026-09-17**
 - Status: **Combined-owner technical baseline — specialist evidence pending**
 - Decision served: **BCK20-OD-02 — translation source/review workflow**
 - Decision status: **Open — technical decision does not close specialist gates**
@@ -12,10 +12,26 @@
 - Owner decision input: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Technical review: [BCK20-OD02-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_REVIEW.md)
 - Technical decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Product/Content pre-review: [BCK20-OD02-PC-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW.md)
+- Pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - LocalizedText input: [BCK-D1-OD10-EV-01 v0.1](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-17
+
+- recorded BCK20-OD02-PC-PRE-DEC-01 and integrated F-001–F-008 before named
+  Product Localization/Content review;
+- completed the source snapshot/candidate ID chain and added an unpopulated
+  source-authority matrix template;
+- separated immutable publication manifest intent from attributable commit
+  receipt, completed revoke/correction/impact/exception audit fields and bound
+  locale-normalization profile revisions;
+- clarified mandatory Legal plus Product/domain approval semantics;
+- preserved AC-01–41 and appended AC-42–50;
+- retained both specialist signatures Pending, BCK20-OD-02 Open, OD-10
+  Proposed, BCK-20 Draft and all provider/schema/runtime gates.
 
 ### v0.2 — 2026-09-16
 
@@ -90,7 +106,7 @@ It does not own:
 | `identifier` | IDs, enum codes, schema keys, currency/market codes | not translatable | exact canonical value only |
 | `reference_standard` | category labels, filters, neutral taxonomy descriptions | translator plus Product Localization review | deterministic OD-10 fallback may apply |
 | `product_high_impact` | account, booking, payment-adjacent, privacy or destructive-action UI | translator, independent linguistic reviewer, owning-domain and Mobile review | fail closed where incorrect text could change informed action |
-| `legal_safety_mandatory` | terms, consent, age/safety, rights, emergency or mandatory notices | translator, independent reviewer, qualified Legal/Product approval and exact market/locale revision | `fallbackForbidden` unless qualified policy says otherwise |
+| `legal_safety_mandatory` | terms, consent, age/safety, rights, emergency or mandatory notices | translator, independent reviewer, qualified Legal approval plus Product/domain approval where exact policy requires it, bound to exact market/locale revision | `fallbackForbidden` unless qualified policy says otherwise |
 | `user_authored` | titles, descriptions, comments, messages | outside this workflow by default | no silent translation; explicit separate feature required |
 
 The source owner assigns a class before translation begins. Classification may
@@ -133,12 +149,14 @@ These are semantic records, not authorized database collections.
 
 ```text
 TranslationSourceSnapshot {
+  sourceSnapshotId
   recordFamily
   stableRecordId
   fieldId
   sourceLocale
   canonicalSourceLocale
   marketConfigRevision
+  localeNormalizationProfileRevision
   messageFormatVersion
   placeholderSchemaHash
   sourceRevision
@@ -147,6 +165,8 @@ TranslationSourceSnapshot {
   translationClass
   glossaryRevision
   owningDomain
+  sourceOwnerIdentity
+  sourceAuthorityEvidenceId
   changeReason
   createdAtUtc
 }
@@ -157,11 +177,13 @@ TranslationSourceSnapshot {
 ```text
 TranslationCandidate {
   candidateId
+  sourceSnapshotId
   sourceRevision
   sourceHash
   targetLocale
   canonicalTargetLocale
   marketConfigRevision
+  localeNormalizationProfileRevision
   messageFormatVersion
   placeholderSchemaHash
   translatedText
@@ -199,6 +221,7 @@ TranslationApprovalRecord {
   locale
   canonicalLocale
   marketConfigRevision
+  localeNormalizationProfileRevision
   messageFormatVersion
   placeholderSchemaHash
   approvedScope
@@ -208,6 +231,9 @@ TranslationApprovalRecord {
   reviewDueAtUtc?
   expiresAtUtc?
   revokedReason?
+  revokedBy?
+  revokedAtUtc?
+  revocationEvidenceId?
   approverIdentity
   approvedAtUtc
 }
@@ -222,6 +248,7 @@ TranslationPublicationManifest {
   locale
   canonicalLocale
   marketConfigRevision
+  localeNormalizationProfileRevision
   messageFormatVersion
   placeholderSchemaHash
   datasetRevision
@@ -230,18 +257,34 @@ TranslationPublicationManifest {
   expectedCurrentManifestRevision
   approvalIds[]
   candidateIds[]
-  publishedAtUtc
-  publicationCommitResult: committed | conflict | unknown
+  createdAtUtc
+}
+
+TranslationPublicationReceipt {
+  publicationAttemptId
+  logicalIdempotencyKey
+  manifestId
+  manifestIntegrityHash
+  expectedCurrentManifestRevision
+  publisherIdentity
+  result: committed | conflict | unknown
+  authoritativeCurrentManifestId?
+  authoritativeCurrentManifestRevision?
+  committedAtUtc?
+  observedAtUtc
 }
 
 TranslationCorrectionRecord {
   correctionId
-  supersededCandidateId
-  replacementCandidateId?
+  targetType: candidate | manifest | surface
+  targetId
+  replacementId?
   reason
   severity: normal | urgent | safety_critical
   affectedMarkets[]
-  action: supersede | withdraw | disable_surface
+  affectedLocales[]
+  affectedSurfaceIds[]
+  action: supersede | withdraw_candidate | revoke_manifest | disable_surface
   approvedBy
   createdAtUtc
 }
@@ -254,9 +297,15 @@ TranslationImpactSet {
   impactSetId
   causeType: source_change | glossary_change | policy_change
   causeRevision
+  affectedSourceSnapshotIds[]
+  affectedRecordFieldIds[]
+  affectedGlossaryTermIds[]
   affectedCandidateIds[]
   affectedManifestIds[]
   analysisStatus: complete | incomplete | unknown
+  completenessRationale
+  analyzerIdentity
+  analyzedAtUtc
   reReviewTaskIds[]
   createdAtUtc
 }
@@ -268,14 +317,49 @@ TranslationExceptionRecord {
   rationale
   compensatingControls[]
   approvedBy
+  createdAtUtc
   expiresAtUtc
   status: active | expired | revoked | closed
+  closedAtUtc?
+  closedBy?
+  closureReason?
   closureEvidenceIds[]
 }
 ```
 
+### 5.6 Source-authority matrix template
+
+```text
+TranslationSourceAuthorityEntry {
+  recordFamily
+  fieldScope
+  owningDomain
+  accountableSourceOwnerRole
+  sourceLocale
+  defaultTranslationClass
+  minimumReviewClass
+  policyReferenceIds[]
+  fallbackPolicyReference?
+}
+```
+
+This revision defines only the required template. It does not populate owner or
+policy values. Named Content/Product Localization owners supply and approve
+that content; missing entries remain blocked rather than inferred.
+
 Every ID is immutable and every relationship is ID-based. The future physical
 schema follows BCK-03/BCK-20 decisions and is not selected here.
+`manifestIntegrityHash` is calculated over the canonical immutable manifest
+payload excluding the hash field itself and every receipt/outcome field.
+For a revoked approval, `revokedReason`, `revokedBy`, `revokedAtUtc` and
+`revocationEvidenceId` are required together. For an exception, closure fields
+are required together only in `closed`; incoherent combinations fail closed.
+Correction target/action combinations are closed: `supersede` targets a
+candidate and requires a replacement candidate, `withdraw_candidate` targets a
+candidate, `revoke_manifest` targets a manifest and `disable_surface` targets
+a surface. Every other combination is rejected. For `product_high_impact` and
+`legal_safety_mandatory`, an `incomplete` or `unknown` impact set blocks
+approval and publication until a new attributable `complete` analysis exists.
 
 ## 6. Lifecycle state machine
 
@@ -307,8 +391,9 @@ Allowed return paths:
 
 ## 7. Standard workflow
 
-1. **Intake:** source owner supplies stable record/field IDs, source locale,
-   meaning, class, context, screenshots where safe, and change reason.
+1. **Intake:** resolve a specialist-approved source-authority matrix entry;
+   source owner supplies stable record/field IDs, source locale, meaning,
+   class, context, screenshots where safe, authority evidence and change reason.
 2. **Freeze source:** calculate immutable revision/hash and reject mutable or
    unidentified source input.
 3. **Prepare context:** attach glossary revision, character/layout constraints,
@@ -325,10 +410,11 @@ Allowed return paths:
 9. **Legal review if required:** bind approval to exact market, locale, source,
    candidate and policy revision.
 10. **Approve:** ensure every class-required review is accepted and current.
-11. **Publish manifest:** compare the expected-current revision, verify
-    integrity and atomically publish the exact immutable candidate set.
-    Publication cannot edit content or activate a market, feature or client
-    rollout.
+11. **Publish manifest:** create immutable manifest intent, compare the
+    expected-current revision, verify integrity and atomically publish the exact
+    candidate set. Record the authoritative outcome in a separate attributable
+    receipt. Publication cannot edit content or activate a market, feature or
+    client rollout.
 12. **Observe:** collect missing/stale/rendering signals without logging text or
     personal data by default.
 13. **Correct or withdraw:** create a new candidate/correction record and
@@ -449,8 +535,9 @@ fallback. Fail closed unless exact policy permits otherwise.
   candidate or conflict, never an overwrite;
 - approval checks current source, candidate, glossary, market and policy
   revisions atomically at its authority boundary;
-- canonical BCP 47 locale, effective `MarketConfig`, message-format version and
-  placeholder-schema hash participate in identity and freshness checks;
+- canonical BCP 47 locale, effective `MarketConfig`, locale-normalization
+  profile, message-format version and placeholder-schema hash participate in
+  identity and freshness checks;
 - two approvals cannot make two candidates simultaneously effective for the
   same record/field/market/locale/revision;
 - late reviews against superseded input are stored as stale evidence and cannot
@@ -458,7 +545,8 @@ fallback. Fail closed unless exact policy permits otherwise.
 - timeout/unknown outcome is reconciled by querying the authoritative record,
   not by inventing success.
 - partial publication and expected-current mismatch return a typed conflict;
-  retry first reads the authoritative manifest state.
+  timeout/unknown outcome and retry first reconcile the authoritative receipt
+  and manifest-pointer state.
 
 Temporary exceptions use immutable `TranslationExceptionRecord` evidence.
 They expire fail-closed and cannot bypass stable IDs, market isolation,
@@ -536,8 +624,9 @@ reclassified as Legal-approved or source-authoritative.
 
 ## 17. Open items retained
 
-- BCK20-OD02-DEC-01 accepts the v0.2 combined-owner technical workflow
-  boundary with amendments integrated; BCK20-OD-02 remains Open until required
+- BCK20-OD02-DEC-01 accepts the combined-owner technical workflow boundary;
+  BCK20-OD02-PC-PRE-DEC-01 integrates eight technical corrections in v0.3
+  before specialist review. BCK20-OD-02 remains Open until required
   Product Localization, Content, Mobile, Security/Privacy and applicable
   qualified Legal evidence accepts the exact revision.
 - BCK20-OD-05 remains Open for mandatory copy and fallback-forbidden classes.
@@ -551,7 +640,8 @@ reclassified as Legal-approved or source-authoritative.
 
 1. **BCK20-OD02-AC-01:** translation governance is separate from OD-10 fallback.
 2. **BCK20-OD02-AC-02:** stable IDs and enum values are never translated.
-3. **BCK20-OD02-AC-03:** every candidate binds immutable source revision/hash.
+3. **BCK20-OD02-AC-03:** every candidate binds exact immutable source snapshot
+   ID, revision and hash.
 4. **BCK20-OD02-AC-04:** published translations are immutable revisions.
 5. **BCK20-OD02-AC-05:** user-authored content is excluded by default.
 6. **BCK20-OD02-AC-06:** class determines minimum review depth.
@@ -575,8 +665,8 @@ reclassified as Legal-approved or source-authoritative.
 24. **BCK20-OD02-AC-24:** OD-05/OD-10/API-DEC-05 remain unchanged.
 25. **BCK20-OD02-AC-25:** this baseline authorizes no schema, runtime,
     Firebase, deployment, push or merge.
-26. **BCK20-OD02-AC-26:** locale, MarketConfig, message format and placeholder
-    schema are canonical revision-bound identity inputs.
+26. **BCK20-OD02-AC-26:** locale, normalization profile, MarketConfig, message
+    format and placeholder schema are canonical revision-bound identity inputs.
 27. **BCK20-OD02-AC-27:** policy conflicts block and route to accountable owners.
 28. **BCK20-OD02-AC-28:** source/glossary/policy changes create attributable
     impact and re-review evidence.
@@ -602,12 +692,31 @@ reclassified as Legal-approved or source-authoritative.
 40. **BCK20-OD02-AC-40:** the expanded typed-failure vocabulary never becomes
     silent fallback.
 41. **BCK20-OD02-AC-41:** AC-01–25 retain their identifiers unchanged.
+42. **BCK20-OD02-AC-42:** source snapshots and candidates form an immutable
+    ID-based authority chain.
+43. **BCK20-OD02-AC-43:** source-authority matrix content remains blocked until
+    named specialist owners supply it.
+44. **BCK20-OD02-AC-44:** immutable manifest intent is separate from
+    attributable publication receipt and unknown-outcome reconciliation.
+45. **BCK20-OD02-AC-45:** approval revocation records exact actor, time, reason
+    and evidence as a coherent set.
+46. **BCK20-OD02-AC-46:** correction actions use typed candidate, manifest or
+    surface targets.
+47. **BCK20-OD02-AC-47:** impact completeness covers source, record-field,
+    glossary, candidate and manifest identities with an attributable analyzer.
+48. **BCK20-OD02-AC-48:** mandatory Legal approval cannot be replaced by
+    Product/domain approval.
+49. **BCK20-OD02-AC-49:** exception closure is attributable and state-coherent.
+50. **BCK20-OD02-AC-50:** AC-01–41 retain their identifiers unchanged.
 
 ## 19. Recorded technical owner decision
 
 On 2026-09-16 the Product owner accepted BCK20-OD02-REV-01 v0.1 with required
 amendments for the combined-owner technical translation-governance boundary.
-This v0.2 integrates all sixteen amendments and records the bounded verdict in
-BCK20-OD02-DEC-01 v0.1. BCK20-OD-02 stays Open, OD-10 stays Proposed and BCK-20
-stays Draft. No specialist/Legal verdict, provider, schema, runtime, Firebase,
-deployment, push or merge authority is created.
+Version 0.2 integrated all sixteen amendments and recorded the bounded verdict
+in BCK20-OD02-DEC-01 v0.1. On 2026-09-17 the Product owner additionally
+approved BCK20-OD02-PC-PRE-01 v0.1; this v0.3 integrates F-001–F-008 through
+BCK20-OD02-PC-PRE-DEC-01. Both specialist rows remain Pending, BCK20-OD-02 stays
+Open, OD-10 stays Proposed and BCK-20 stays Draft. No specialist/Legal verdict,
+source-authority content, provider, schema, runtime, Firebase, deployment, push
+or merge authority is created.

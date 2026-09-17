@@ -1,12 +1,14 @@
 # BCK-20 — Translation Governance Product Localization and Content Review Package
 
 - ID: **BCK20-OD02-PC-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
 - Status: **Proposed — review package ready; both specialist verdicts Pending**
-- Exact review target: [BCK20-OD02-L10N-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
-- Parent specification: [BCK-20 v0.2.11](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Exact review target: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
+- Parent specification: [BCK-20 v0.2.12](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Technical owner decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Product/Content pre-review: [BCK20-OD02-PC-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW.md)
+- Pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Purpose and decision boundary
@@ -33,13 +35,14 @@ SHA-256 uses UTF-8 text normalized to LF line endings.
 
 | Input | Frozen version/status | SHA-256 |
 |---|---|---|
-| Translation workflow | `BCK20-OD02-L10N-01 v0.2`; technical baseline, specialist evidence pending | `f26e780cb8080404dc82afa5432fcb10db0005900f6f017ff2db13d063d81265` |
+| Translation workflow | `BCK20-OD02-L10N-01 v0.3`; corrected technical baseline, specialist evidence pending | `f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309` |
 | Technical decision | `BCK20-OD02-DEC-01 v0.1`; bounded technical decision | `0f073a89f03215e2eeeadebeb192c4d0b95d4089e68e6e597186c128a52f1fd1` |
-| Parent BCK-20 | `BCK-20 v0.2.11`; Draft | `7e2fe0431d98262fc85dc1bc26f07b6ac81c4208c78daf691ffb8db22f38ffc9` |
-| Coverage matrix | `BCK-20-PRE v0.2.11`; Draft | `c1eb3a8c5ccd836062a666a1c66b88b1ed3989c0d246a9d6cb6db0aad0c4ce56` |
+| Pre-review decision | `BCK20-OD02-PC-PRE-DEC-01 v0.1`; documentation-only corrections | `47cfa773d266cca17b40c315ae9a9d6501c8417f719a44f362156985c047578f` |
+| Parent BCK-20 | `BCK-20 v0.2.12`; Draft | `1dd872f5de0d72f2a7d5a828570523b4f49b2a4832ed028d1f00cae96d07fe77` |
+| Coverage matrix | `BCK-20-PRE v0.2.12`; Draft | `f5021c0e7f94edf3f3d179a789068a4d9322d211c77437919f4d52516207097e` |
 
-The workflow checksum is 19 sections, 41 sequential AC, five translation
-classes, nine named roles, eight semantic record types and 23 typed failures.
+The workflow checksum is 19 sections, 50 sequential AC, five translation
+classes, nine named roles, ten semantic record types and 23 typed failures.
 A checksum/version mismatch, excerpt-only review or changed normative target
 makes the verdict Inconclusive until this package is revised.
 
@@ -205,7 +208,7 @@ Organization/team:
 Reviewer role:
 Qualification or authority basis:
 Independence/conflict disclosure:
-Target: BCK20-OD02-L10N-01 v0.2
+Target: BCK20-OD02-L10N-01 v0.3
 Observed SHA-256:
 Verdict:
 Accepted scope:
@@ -223,11 +226,11 @@ dispositions or evidence reference makes the record Inconclusive.
 
 ## 11. Reconciliation sequence
 
-1. Freeze and verify the exact v0.2 target/hash.
+1. Freeze and verify the exact v0.3 target/hash.
 2. Assign named Product Localization and Content reviewers.
 3. Collect both independent signature records and findings.
 4. If either verdict is `Accept with amendments`, integrate amendments in a new
-   workflow revision without renumbering AC-01–41.
+   workflow revision without renumbering existing acceptance criteria.
 5. Recompute hashes, update this package and obtain exact-version re-review
    from every reviewer whose scope changed.
 6. Keep each row Pending until its effective verdict has no Open Blocking/Major
@@ -266,7 +269,7 @@ frozen hash, even if re-review scope may be documented as non-semantic.
 
 ## 14. Acceptance criteria
 
-1. **BCK20-OD02-PC-AC-01:** exact workflow v0.2 and normalized hash are frozen.
+1. **BCK20-OD02-PC-AC-01:** exact workflow v0.3 and normalized hash are frozen.
 2. **BCK20-OD02-PC-AC-02:** Product Localization and Content use separate
    attributable sign-off IDs.
 3. **BCK20-OD02-PC-AC-03:** both specialist verdicts start Pending and unnamed.

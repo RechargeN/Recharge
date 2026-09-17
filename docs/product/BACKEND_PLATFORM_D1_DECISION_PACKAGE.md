@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.11**
-- Date: **2026-09-16**
+- Version: **0.12**
+- Date: **2026-09-17**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.59](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.63](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.60](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.64](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -15,6 +15,7 @@
 - Related threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Related BCK-20 technical decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Related translation-governance decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Related Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -22,6 +23,11 @@
 ---
 
 ## 0. Revision note
+
+v0.12 reconciles BCK20-OD02-PC-PRE-DEC-01, workflow v0.3 and BCK-20 v0.2.12
+without accepting BCK-20, OD-02 or OD-10. Both specialist signatures remain
+Pending and no source-authority content, provider, schema, Legal or runtime
+authority is created.
 
 v0.11 reconciles BCK20-OD02-DEC-01, workflow v0.2 and BCK-20 v0.2.11 without
 accepting BCK-20, OD-02 or OD-10. Five BCK20 decisions remain Deferred,
@@ -291,6 +297,9 @@ Executable verification, only after a separately Approved slice, must include:
 23. **BCK-D1-AC-23:** BCK20-OD02-DEC-01 records only the amended technical
     translation-governance boundary and does not close OD-02 or authorize
     provider, schema, runtime or infrastructure work.
+24. **BCK-D1-AC-24:** BCK20-OD02-PC-PRE-DEC-01 integrates F-001–F-008 only
+    as documentation corrections and preserves every specialist, Legal,
+    source-authority, provider, schema and runtime gate.
 
 ## 11. Rollback
 
