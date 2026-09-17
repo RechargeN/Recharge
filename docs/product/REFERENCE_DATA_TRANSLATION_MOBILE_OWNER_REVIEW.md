@@ -1,15 +1,16 @@
 # BCK-20 — Translation Governance Mobile Owner Review
 
 - ID: **BCK20-OD02-MOB-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — owner verdict required**
+- Status: **Owner decision recorded — exact-v0.4 verdict effective with retained gates**
 - Sign-off ID: **BCK20-OD02-SIG-MOBILE**
 - Exact target: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Accepted pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Combined decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Mobile baseline: [BCK-18 v0.5](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
-- Proposed reviewer: **RechargeN / Product owner acting as interim Mobile owner**
+- Reviewer: **RechargeN / Product owner acting as interim Mobile owner**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; combined-owner technical review**
 - Runtime effect: **none**
@@ -20,7 +21,7 @@
 > hash above.
 
 The recommendation is limited to the Mobile semantic boundary. It is not
-effective until the Product owner records the exact decision in §7. It does not
+effective only for the frozen target through the combined decision. It does not
 approve BCK-18, BCK20-OD-03, schema, cache, adapter, runtime, Firebase,
 deployment, activation, push or merge.
 
@@ -33,7 +34,7 @@ deployment, activation, push or merge.
 | Workflow acceptance criteria | AC-01–62 sequential | Match |
 | Typed failures | 28 | Match |
 | Mobile/Security corrections | MS-F-001–MS-F-007 integrated | Match |
-| Product/Content v0.4 revalidation | Pending | Preserved |
+| Product/Content v0.4 revalidation | Two combined-owner verdicts recorded | Retained gates preserved |
 
 Any target version/hash change makes this review stale.
 
@@ -83,7 +84,7 @@ by this Mobile review.
 No Blocking or Major contradiction remains inside the documentation-only Mobile
 boundary after MS-F-001–MS-F-007. The observations above remain gates.
 
-## 6. Proposed signature record
+## 6. Recorded signature record
 
 ```text
 Sign-off ID: BCK20-OD02-SIG-MOBILE
@@ -94,7 +95,7 @@ Qualification or authority basis: founder/Product owner accountable for the mobi
 Independence/conflict disclosure: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.4
 Observed SHA-256: d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975
-Verdict: Accept design boundary with retained gates — not effective until owner confirmation
+Verdict: Accept design boundary with retained gates — recorded 2026-09-17
 Accepted scope: Mobile checklist 1–12 and MS-V01/02/03/04/07/08/09/12
 Finding IDs: none after integrated MS-F-001–MS-F-007
 Retained observations: BCK20-OD02-MOB-O-01–05
@@ -103,7 +104,7 @@ Date/timezone: supplied by recorded owner decision
 Evidence reference: BCK20-OD02-MOB-REV-01 v0.1 §§2–5
 ```
 
-## 7. Exact owner decision requested
+## 7. Historical exact decision request
 
 ```text
 Одобряю BCK20-OD02-MOB-REV-01 v0.1:
@@ -131,7 +132,9 @@ deployment, activation, push и merge не разрешаю.
 9. **BCK20-OD02-MOB-REV-AC-09:** target/hash change invalidates the review.
 10. **BCK20-OD02-MOB-REV-AC-10:** no schema/runtime/Firebase/deployment/push/merge authority is created.
 
-## 9. Next action
+## 9. Recorded disposition and next action
 
-Wait for the exact owner decision in §7. Do not record an effective Mobile
-verdict or start implementation before that decision.
+`BCK20-OD02-V04-COMB-DEC-01` freezes reviewed revision v0.1 at SHA-256
+`d9f9b76302f1b57e03e4577005448a2a59be359174c1f61565b774ffce9bccf2`.
+This v0.2 revision only records the bounded verdict. BCK20-OD-03, executable
+Mobile evidence and all runtime gates remain unresolved; do not implement.

@@ -1,24 +1,25 @@
 # BCK-20 — Reference Data & Localization Coverage Matrix
 
 - ID: **BCK-20-PRE**
-- Version: **0.2.14**
+- Version: **0.2.15**
 - Date: **2026-09-17**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Reference Data owner**
-- Target: [BCK-20 v0.2.14](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Target: [BCK-20 v0.2.15](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Coordination baseline: [BCK-02](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Translation decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_COVERAGE_MATRIX.md`
 
 ## 0. Owner-decision reconciliation
 
 Current anchors are BCK-01, BCK-02, BCK-03 v0.3.14, BCK-04 v0.4.23,
-BCK-05 v0.2.30, BCK-20 v0.2.14 and BCK-02-A1.
+BCK-05 v0.2.30, BCK-20 v0.2.15 and BCK-02-A1.
 BCK20-OWN-DEC-01 records the combined-owner technical decision triage:
 BCK20-OD-01/03/04/06/07 are Deferred, BCK20-OD-02/05 remain Open, OD-10
 remains Proposed and every specialist verdict remains unresolved.
@@ -27,8 +28,10 @@ governance boundary without closing OD-02. BCK20-OD02-PC-PRE-DEC-01 records
 eight technical corrections. BCK20-OD02-PC-COMB-DEC-01 records two historical
 exact-v0.3 Product/Content verdicts without independence.
 BCK20-OD02-MS-PRE-DEC-01 integrates seven Mobile/Security corrections in
-workflow v0.4; Product/Content v0.4 revalidation and both proposed
-Mobile/Security owner verdicts remain Pending. Runtime is Absent.
+workflow v0.4. BCK20-OD02-V04-COMB-DEC-01 records four separate exact-v0.4
+combined-owner verdicts with zero independence. Source-authority content,
+independent Security/Privacy and applicable qualified Legal evidence remain
+Pending. Runtime is Absent.
 
 ## 1. Purpose
 
@@ -48,7 +51,7 @@ schemas, translations, datasets, Firebase resources, mobile adapters or runtime.
 | BCK-05 v0.2.30 | Draft; bounded R0/RAW-C local evidence boundary; BCK05-OD-01/02/07 Accepted and BCK05-OD-03/04/05/08 Proposed | Distribution/operations input |
 | Category System v1.4.3 | Accepted | Taxonomy identity/source invariant |
 | BCK-02-A1 | Draft; docs only | Latvia/Baltics execution input |
-| BCK-20 v0.2.14 | Draft; workflow v0.4 corrected, all exact-v0.4 owner verdicts still incomplete; runtime Absent | Single target Reference Data contract |
+| BCK-20 v0.2.15 | Draft; four exact-v0.4 combined-owner verdicts recorded; retained authority/independence/Legal gates open; runtime Absent | Single target Reference Data contract |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -123,7 +126,7 @@ evidence, not executable fixtures or decision acceptance.
 | BCK20-PRE-02 | BCK-03/BCK-05 remain Draft | API + Operations | Reconciled review/approval evidence |
 | BCK20-PRE-03 | OD-10 only Proposed | Reference/API/Content/Mobile/Legal | Accepted documentation-vector results; executable parity after API-DEC-05 in a separately Approved slice |
 | BCK20-PRE-04 | Mandatory local Legal copy/fallback-forbidden matrix absent | Legal + Product | BCK20-OD-05 accepted matrix |
-| BCK20-PRE-05 | SIG-L10N/SIG-CONTENT are historical v0.3 evidence; exact-v0.4 Product/Content revalidation and SIG-MOBILE/SIG-SEC remain Pending; OD-02 Open | Product Localization + Content + Mobile + Security/Privacy + Legal where applicable | exact boundary reviews of BCK20-OD02-L10N-01 v0.4 |
+| BCK20-PRE-05 | four exact-v0.4 combined-owner verdicts are recorded with zero independence; source-authority, independent Security/Privacy and applicable qualified Legal evidence remain Pending; OD-02 Open | Reference Data + Security/Privacy + Legal where applicable | authoritative source records and required independent/qualified evidence |
 | BCK20-PRE-06 | Artifact/distribution choices Deferred behind API-DEC-05 and measured executable evidence | Reference + API + Operations | later BCK20-OD-01/03 decisions; no schema/distribution now |
 | BCK20-PRE-07 | EE/LT extra locale policy Deferred | Market/Product owners | later BCK20-OD-04 evidence; markets stay disabled with no LV fallback |
 | BCK20-PRE-08 | Auxiliary dictionaries Deferred without accepted source | Category/Product owner | later BCK20-OD-06 decision; dictionaries remain absent |
@@ -133,7 +136,7 @@ evidence, not executable fixtures or decision acceptance.
 
 1. All local links resolve.
 2. 22/22 mandatory sections have evidence.
-3. `BCK-20-AC-01…61` are unique and sequential.
+3. `BCK-20-AC-01…62` are unique and sequential.
 4. Taxonomy metrics and aliases match Accepted v1.4.3.
 5. OD-10 is visibly Proposed, never inferred Accepted.
 6. LV/EE/LT activation and locale policy are independent.
@@ -143,10 +146,10 @@ evidence, not executable fixtures or decision acceptance.
 
 ## 8. Verdict
 
-BCK-20 v0.2.14 is structurally complete and preserves the accepted taxonomy.
-Workflow v0.4 integrates the accepted documentation-only corrections. The two
-Product/Content verdicts remain historical exact-v0.3 evidence; exact-v0.4
-Product/Content revalidation, Mobile, Security/Privacy and applicable Legal
-evidence stay open. BCK20-OD-02/05 and OD-10 stay unaccepted, BCK-20 stays
-Draft, and no schema, dataset service, translation runtime, mobile adapter or
-infrastructure is authorized.
+BCK-20 v0.2.15 is structurally complete and preserves the accepted taxonomy.
+Workflow v0.4 integrates the accepted documentation-only corrections and four
+separate exact-v0.4 combined-owner verdicts are recorded with zero
+independence. Source-authority content, independent Security/Privacy and
+applicable qualified Legal evidence stay open. BCK20-OD-02/05 and OD-10 stay
+unaccepted, BCK-20 stays Draft, and no schema, dataset service, translation
+runtime, mobile adapter or infrastructure is authorized.

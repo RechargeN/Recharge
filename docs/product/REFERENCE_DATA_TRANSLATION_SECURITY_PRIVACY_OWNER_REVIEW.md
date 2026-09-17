@@ -1,15 +1,16 @@
 # BCK-20 — Translation Governance Security/Privacy Owner Review
 
 - ID: **BCK20-OD02-SEC-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — owner verdict required**
+- Status: **Owner decision recorded — exact-v0.4 technical verdict effective with retained gates**
 - Sign-off ID: **BCK20-OD02-SIG-SEC**
 - Exact target: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Accepted pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Combined decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Security/Privacy baseline: [BCK-04](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Proposed reviewer: **RechargeN / Product owner acting as interim Security/Privacy technical owner**
+- Reviewer: **RechargeN / Product owner acting as interim Security/Privacy technical owner**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; combined-owner technical review**
 - Security/Privacy/Legal qualification: **not claimed**
@@ -22,8 +23,8 @@
 
 The recommendation covers only the combined-owner technical Security/Privacy
 boundary. It is not independent, qualified Legal/Privacy advice or production
-processing approval, and is not effective until the Product owner records the
-exact decision in §7.
+processing approval. It is effective only for the frozen technical boundary
+through the combined decision.
 
 ## 2. Frozen-input verification
 
@@ -80,7 +81,7 @@ independent Security/Privacy execution test.
 | BCK20-OD02-SEC-O-01 | review is combined-owner and non-independent | preserve disclosure; do not claim professional Security/Privacy assurance |
 | BCK20-OD02-SEC-O-02 | legal basis, numeric retention, recipients/processors/transfers, ROPA and DPIA are unresolved | complete BCK-04 and qualified Legal/Privacy gates before production processing |
 | BCK20-OD02-SEC-O-03 | exact origin-authentication/signature mechanism is intentionally absent | select only under accepted threat/API/distribution design and executable slice |
-| BCK20-OD02-SEC-O-04 | Product/Content v0.3 verdicts do not cover v0.4 | require explicit exact-hash revalidation |
+| BCK20-OD02-SEC-O-04 | Product/Content v0.3 verdicts do not cover v0.4 | exact-v0.4 combined-owner revalidation recorded; retained gates remain |
 | BCK20-OD02-SEC-O-05 | no schema, IAM, provider, storage or runtime evidence exists | keep all production/executable gates closed |
 | BCK20-OD02-SEC-O-06 | applicable mandatory-copy Legal review is absent | keep BCK20-OD-05 Open and affected surfaces fail-closed |
 
@@ -88,7 +89,7 @@ No Blocking or Major contradiction remains inside the documentation-only
 combined-owner technical boundary after MS-F-001–MS-F-007. These observations
 remain production and independence gates.
 
-## 6. Proposed signature record
+## 6. Recorded signature record
 
 ```text
 Sign-off ID: BCK20-OD02-SIG-SEC
@@ -99,7 +100,7 @@ Qualification or authority basis: founder/Product owner accountable for technica
 Independence/conflict disclosure: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.4
 Observed SHA-256: d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975
-Verdict: Accept design boundary with retained gates — not effective until owner confirmation
+Verdict: Accept design boundary with retained gates — recorded 2026-09-17
 Accepted scope: Security/Privacy checklist 1–12 and MS-V03/04/05/06/07/08/09/10/11
 Finding IDs: none after integrated MS-F-001–MS-F-007
 Retained observations: BCK20-OD02-SEC-O-01–06
@@ -108,7 +109,7 @@ Date/timezone: supplied by recorded owner decision
 Evidence reference: BCK20-OD02-SEC-REV-01 v0.1 §§2–5
 ```
 
-## 7. Exact owner decision requested
+## 7. Historical exact decision request
 
 ```text
 Одобряю BCK20-OD02-SEC-REV-01 v0.1:
@@ -138,7 +139,10 @@ Provider, schema, IAM/runtime, Firebase, deployment, activation, push и merge
 9. **BCK20-OD02-SEC-REV-AC-09:** target/hash change invalidates the review.
 10. **BCK20-OD02-SEC-REV-AC-10:** no provider/schema/runtime/Firebase/deployment/push/merge authority is created.
 
-## 9. Next action
+## 9. Recorded disposition and next action
 
-Wait for the exact owner decision in §7. Do not record an effective
-Security/Privacy verdict or start implementation before that decision.
+`BCK20-OD02-V04-COMB-DEC-01` freezes reviewed revision v0.1 at SHA-256
+`1b0db67df34e54af5433e1e3cfd172717c7e4911267a6d1ab094b07b89c435a7`.
+This v0.2 revision only records the bounded technical verdict. Independent
+Security/Privacy and applicable qualified Legal evidence remain Pending; do
+not implement or process production data.

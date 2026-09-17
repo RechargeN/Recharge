@@ -1,7 +1,7 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.14**
+- Version: **0.2.15**
 - Date: **2026-09-17**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
@@ -24,14 +24,27 @@
 - Product/Content combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Mobile/Security pre-review: [BCK20-OD02-MS-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW.md)
 - Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
-- Proposed Mobile review: [BCK20-OD02-MOB-REV-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_OWNER_REVIEW.md)
-- Proposed Security/Privacy review: [BCK20-OD02-SEC-REV-01 v0.1](REFERENCE_DATA_TRANSLATION_SECURITY_PRIVACY_OWNER_REVIEW.md)
+- Product/Content v0.4 revalidation: [BCK20-OD02-PC-REVAL-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_V04_REVALIDATION.md)
+- Mobile review: [BCK20-OD02-MOB-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_MOBILE_OWNER_REVIEW.md)
+- Security/Privacy review: [BCK20-OD02-SEC-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_SECURITY_PRIVACY_OWNER_REVIEW.md)
+- Exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.15 — 2026-09-17
+
+- recorded four separately attributable exact-v0.4 verdicts through
+  BCK20-OD02-V04-COMB-DEC-01 with one disclosed owner and zero independence;
+- retained source-authority content, independent Security/Privacy and
+  applicable qualified Legal evidence as Pending;
+- retained BCK20-OD-02/05 Open, OD-10 Proposed, BCK-20 Draft and
+  BCK20-OD-03 Deferred;
+- authorized documentation reconciliation only; provider, schema,
+  IAM/runtime, Firebase, deployment, activation, push and merge stay closed.
 
 ### v0.2.14 — 2026-09-17
 
@@ -669,7 +682,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.13:
+Future targets, absent and unauthorized in v0.2.15:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -832,7 +845,7 @@ evidence remains absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.14 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.15 creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -849,19 +862,23 @@ evidence remains absent, so BCK-20 remains Draft.
     corrections without supplying source-authority content, specialist/Legal
     verdicts or implementation authority.
 60. **BCK-20-AC-60:** BCK20-OD02-PC-COMB-DEC-01 makes only the two separate
-    non-independent Product/Content verdicts effective; OD-02/05, OD-10,
-    Mobile/Security/Privacy/Legal and all implementation gates remain open.
+    non-independent Product/Content v0.3 verdicts effective; it does not itself
+    close OD-02/05, OD-10, Mobile/Security/Privacy/Legal or implementation gates.
 61. **BCK-20-AC-61:** BCK20-OD02-MS-PRE-DEC-01 integrates seven
-    documentation-only corrections in workflow v0.4; Product/Content
-    revalidation and both Mobile/Security owner verdicts remain Pending, while
-    BCK20-OD-03 stays Deferred and no implementation authority is created.
+    documentation-only corrections in workflow v0.4; it does not itself
+    supply Product/Content or Mobile/Security verdicts, BCK20-OD-03 stays
+    Deferred and no implementation authority is created.
+62. **BCK-20-AC-62:** BCK20-OD02-V04-COMB-DEC-01 records four separate
+    exact-v0.4 combined-owner verdicts with zero independence; source-authority,
+    independent Security/Privacy, applicable qualified Legal and every
+    provider/schema/IAM/runtime/Firebase/deployment gate remain open.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.14 the following remain absent:
+At v0.2.15 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -873,10 +890,9 @@ At v0.2.14 the following remain absent:
 
 ## 29. Next action
 
-1. obtain the proposed Mobile and Security/Privacy owner verdicts for exact
-   workflow v0.4 without runtime work;
-2. explicitly revalidate the combined-owner Product/Content evidence against
-   the v0.4 hash while retaining its zero-independence disclosure;
+1. obtain source-authority content for BCK20-OD-02 under the approved
+   governance boundary;
+2. obtain independent Security/Privacy and applicable qualified Legal evidence;
 3. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
 4. run OD-10 documentation-vector review without creating executable schema;
 5. keep every Deferred item closed until its exact later gate;

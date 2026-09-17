@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.24**
+- Version: **1.25**
 - Date: **2026-09-17**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.26](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.22](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.27](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.23](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -18,6 +18,7 @@
 - Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Product/Content combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -49,8 +50,10 @@ independence are explicit; they remain historical exact-hash evidence after
 workflow v0.4 and do not transfer automatically.
 BCK20-OD02-MS-PRE-DEC-01 then integrates seven documentation corrections in
 workflow v0.4. The v0.3 Product/Content verdicts remain historical exact-hash
-evidence; v0.4 Product/Content revalidation and proposed Mobile/Security
-verdicts remain Pending.
+evidence. BCK20-OD02-V04-COMB-DEC-01 records four separate exact-v0.4 design
+verdicts under the same disclosed owner with zero independence. Full D1,
+source-authority, independent Security/Privacy and qualified Legal evidence
+remain Pending.
 BCK05-OD-01/02/07 remain distinct from cross-domain OD-01/02/07. Every other
 incomplete specialist signature remains Pending and qualified Legal/Privacy
 evidence remains absent.
@@ -115,12 +118,12 @@ without turning it into an artificial D1 blocker.
 |---|---|---|:---:|---|---|---|
 | D1-SIG-API | API Platform | BCK-03; OD-09 semantic boundary; OD-10 wire review | Yes | `RechargeN / Product owner` | **Accept with required amendments — combined-owner verdict; independent review absent** | [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md), 2026-09-08 |
 | D1-SIG-OPS | Platform Operations | BCK-03 operational boundary; BCK-05; OD-07; OD-09 transport boundary | Yes | `RechargeN / Product owner` | **Accept with required amendments — BCK-03 boundary only; independent evidence absent** | [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md), 2026-09-08 |
-| D1-SIG-SEC | Security/Privacy | BCK-03 security boundary; BCK-04; OD-07 privacy boundary; OD-11 safeguards | Yes | `RechargeN / Product owner` | **Accept with required amendments — combined-owner technical BCK-03/BCK-04 boundaries only; independent/Legal evidence absent** | [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-08; [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-12 |
+| D1-SIG-SEC | Security/Privacy | BCK-03 security boundary; BCK-04; OD-07 privacy boundary; OD-11 safeguards | Yes | `RechargeN / Product owner` | **Accept with required amendments — combined-owner technical BCK-03/BCK-04 boundaries only; bounded BCK20 exact-v0.4 design verdict recorded; independent/Legal evidence absent** | [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-08; [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-12; [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
 | D1-SIG-LEGAL | Legal/Privacy | OD-07 processing/residency; OD-11; OD-10 mandatory Legal copy | Yes | `RechargeN / Product owner` | Pending; qualification not evidenced | — |
 | D1-SIG-REF | Reference Data | BCK-20; OD-10 revisions/fallback | Yes | `RechargeN / Product owner` | Pending | — |
-| D1-SIG-L10N | Product Localization | OD-10 LV/EE/LT locale and review workflow | Yes | `RechargeN / Product owner` | Pending for full D1 scope and exact-v0.4 revalidation; bounded v0.3 workflow verdict is historical with no independence | [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md), 2026-09-17 |
-| D1-SIG-MOBILE | Mobile Platform | BCK-03/BCK-20 client/cache/compatibility boundary | Yes | `RechargeN / Product owner` | **Accept with required amendments — BCK-03 boundary only; independent evidence absent** | [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md), 2026-09-09 |
-| D1-SIG-CONTENT | Content Platform | OD-10 source/content-language/readiness boundary | Yes for OD-10 Acceptance | `RechargeN / Product owner` | Pending for full D1 scope and exact-v0.4 revalidation; bounded v0.3 workflow verdict is historical with no independence | [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md), 2026-09-17 |
+| D1-SIG-L10N | Product Localization | OD-10 LV/EE/LT locale and review workflow | Yes | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 design verdict recorded with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
+| D1-SIG-MOBILE | Mobile Platform | BCK-03/BCK-20 client/cache/compatibility boundary | Yes | `RechargeN / Product owner` | **Accept with required amendments — BCK-03 boundary plus bounded BCK20 exact-v0.4 design verdict; independent evidence absent** | [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md), 2026-09-09; [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
+| D1-SIG-CONTENT | Content Platform | OD-10 source/content-language/readiness boundary | Yes for OD-10 Acceptance | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 design verdict recorded with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
 | D1-SIG-FIN | Product/Finance | OD-07/BCK-05 cost envelope and containment ownership | Yes for OD-07 Acceptance | `RechargeN / Product owner` | Pending | — |
 | D1-SIG-BOOK | Booking | OD-09 Booking compatibility and future effect contract | Later before OD-09 Acceptance/effects | `RechargeN / Product owner` | Pending | — |
 | D1-SIG-NOTIF | Notifications | OD-09 consumer/delivery/read semantics | Later before OD-09 Acceptance/effects | `RechargeN / Product owner` | Pending | — |
@@ -136,7 +139,7 @@ accepts its accountability.
 | BCK-03 v0.3.14 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
 | BCK-04 v0.4.23 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | BCK-04 and threat-model combined-owner technical verdicts recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain; spec remains Draft |
 | BCK-05 v0.2.30 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and accepted OD baselines Present; BCK-03/BCK-04/threat-model owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains pending |
-| BCK-20 v0.2.14 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | workflow v0.4 corrections integrated; exact-v0.4 Product/Content/Mobile/Security reviews incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
+| BCK-20 v0.2.15 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | four bounded exact-v0.4 verdicts recorded with zero independence; full D1, source-authority, independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
 | BCK04-OD01-TM-01 v0.2 | D1-SIG-SEC | independent Security/Privacy, D1-SIG-API, D1-SIG-OPS, Identity, D1-SIG-MOBILE and affected domains | Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary confirmations |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |
@@ -280,16 +283,19 @@ returns a §6 review record.
     not satisfy Mobile, Security/Privacy or qualified Legal gates.
 22. **D1-SIG-AC-22:** BCK20-OD02-MS-PRE-DEC-01 integrates documentation
     corrections only; no exact-v0.4 specialist verdict is inferred.
+23. **D1-SIG-AC-23:** BCK20-OD02-V04-COMB-DEC-01 records four bounded
+    exact-v0.4 combined-owner verdicts but does not complete D1-SIG-REF,
+    independent Security/Privacy, D1-SIG-LEGAL or full D1 exit.
 
 ## 11. Next action
 
 Owner Batch A, the bounded numerical baseline, R0 evidence and exact
 BCK05-OD-01/02/07, OD-07 and the bounded BCK-03, BCK-04 and threat-model owner
 verdicts, BCK-20 decision triage and the amended technical translation-
-governance workflow are recorded. Next, decide the Proposed Mobile and
-Security/Privacy reviews of workflow v0.4 and separately revalidate
-Product/Content against its exact v0.4 hash. Prior Product/Content verdicts
-remain historical evidence with no independence. Independent
+governance workflow and four bounded exact-v0.4 combined-owner verdicts are
+recorded. Next, obtain source-authority evidence, independent Security/Privacy
+and applicable qualified Legal review. Prior Product/Content verdicts remain
+historical evidence with no independence. Independent
 threat-model, BCK-04/BCK-05/BCK-20 specialist and qualified Legal/Privacy
 evidence remains deferred but required before its named gate. D1 remains
 blocked and no new runtime gate opens.

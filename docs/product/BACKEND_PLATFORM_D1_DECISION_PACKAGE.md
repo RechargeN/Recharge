@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.14**
+- Version: **0.15**
 - Date: **2026-09-17**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.62](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.66](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.63](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.67](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -18,6 +18,7 @@
 - Related Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Related Product/Content combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Related Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Related exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -25,6 +26,11 @@
 ---
 
 ## 0. Revision note
+
+v0.15 reconciles BCK20-OD02-V04-COMB-DEC-01 and BCK-20 v0.2.15. Four
+separate exact-v0.4 design verdicts are recorded under one disclosed owner
+with zero independence. Source-authority, independent Security/Privacy,
+qualified Legal, OD and runtime gates remain open; D1 exit remains blocked.
 
 v0.14 reconciles BCK20-OD02-MS-PRE-DEC-01, workflow v0.4 and BCK-20
 v0.2.14. The seven corrections are documentation-only. Product/Content v0.3
@@ -319,8 +325,12 @@ Executable verification, only after a separately Approved slice, must include:
     non-independent Product/Content verdicts effective and preserves every
     remaining OD, specialist, Legal and runtime gate.
 26. **BCK-D1-AC-26:** BCK20-OD02-MS-PRE-DEC-01 integrates seven
-    documentation corrections only; exact-v0.4 owner verdicts remain Pending
-    and no runtime or infrastructure authority is created.
+    documentation corrections only; it does not itself supply exact-v0.4
+    owner verdicts or runtime/infrastructure authority.
+27. **BCK-D1-AC-27:** BCK20-OD02-V04-COMB-DEC-01 records four separate
+    exact-v0.4 combined-owner design verdicts with zero independence without
+    closing source-authority, independent Security/Privacy, qualified Legal,
+    OD, D1 or implementation gates.
 
 ## 11. Rollback
 

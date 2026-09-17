@@ -1,15 +1,16 @@
 # BCK-20 — Translation Product/Content v0.4 Revalidation
 
 - ID: **BCK20-OD02-PC-REVAL-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — owner verdict required through consolidated package**
+- Status: **Owner decision recorded — two exact-v0.4 verdicts effective with retained gates**
 - Exact target: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Historical v0.3 decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Correction decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
-- Proposed sign-offs: **BCK20-OD02-SIG-L10N + BCK20-OD02-SIG-CONTENT**
-- Proposed reviewer: **RechargeN / Product owner**
+- Combined decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
+- Recorded sign-offs: **BCK20-OD02-SIG-L10N + BCK20-OD02-SIG-CONTENT**
+- Reviewer: **RechargeN / Product owner**
 - Combined roles: **interim Product Localization owner + interim Content/source-governance owner**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; combined-owner technical revalidation**
@@ -25,7 +26,8 @@ Workflow v0.4 changes Mobile/Security consumption and authority controls. It
 does not weaken or replace source meaning, translation classes, glossary,
 review depth, qualified Legal authority, market isolation or provider gates.
 The two verdicts remain separate even though one owner performs both reviews.
-They are not effective until the consolidated owner decision is recorded.
+They became effective for this exact target through
+`BCK20-OD02-V04-COMB-DEC-01`; every retained gate remains open.
 
 ## 2. Frozen-input verification
 
@@ -83,7 +85,7 @@ approval.
 | BCK20-OD02-PC-REVAL-O-04 | provider/schema/distribution/runtime evidence remains absent | keep all later executable gates closed |
 | BCK20-OD02-PC-REVAL-O-05 | Mobile/Security verdicts are separate | this revalidation cannot satisfy them |
 
-## 6. Proposed separate signature records
+## 6. Recorded separate signature records
 
 ### 6.1 Product Localization
 
@@ -94,7 +96,7 @@ Reviewer role: interim Product Localization owner
 Independence: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.4
 Observed SHA-256: d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975
-Verdict: Accept design boundary with retained gates — proposed
+Verdict: Accept design boundary with retained gates — recorded 2026-09-17
 Accepted scope: Product Localization checklist 1–12, PC-V01–PC-V14 and MS-F-001–MS-F-007 impact
 Retained observations: BCK20-OD02-PC-REVAL-O-01–05
 ```
@@ -108,7 +110,7 @@ Reviewer role: interim Content/source-governance owner
 Independence: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.4
 Observed SHA-256: d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975
-Verdict: Accept design boundary with retained gates — proposed
+Verdict: Accept design boundary with retained gates — recorded 2026-09-17
 Accepted scope: Content checklist 1–12, PC-V01–PC-V14 and MS-F-001–MS-F-007 impact
 Retained observations: BCK20-OD02-PC-REVAL-O-01–05
 ```
@@ -128,7 +130,9 @@ Retained observations: BCK20-OD02-PC-REVAL-O-01–05
 11. **BCK20-OD02-PC-REVAL-AC-11:** BCK20-OD-02/05 and OD-10 remain unaccepted.
 12. **BCK20-OD02-PC-REVAL-AC-12:** no provider/schema/runtime/Firebase/deployment/push/merge authority is created.
 
-## 8. Next action
+## 8. Recorded disposition and next action
 
-Freeze this document's hash in the consolidated v0.4 owner package. Do not
-make either verdict effective before the exact consolidated owner decision.
+`BCK20-OD02-V04-COMB-DEC-01` freezes reviewed revision v0.1 at SHA-256
+`799d8bb0ebad2683a0f61b25f6f1b6abf49ebcd0e807710ed7c285bcf66bedcd`.
+This v0.2 revision only records the resulting status. Obtain source-authority
+content and applicable qualified Legal evidence; do not start implementation.

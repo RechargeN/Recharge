@@ -1,15 +1,15 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.22**
+- Version: **1.23**
 - Date: **2026-09-17**
 - Status: **Technical owner verdicts recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.26](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.24](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.27](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.25](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -20,6 +20,7 @@
 - Recorded Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
 - Recorded Product/Content combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Recorded Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Recorded exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -76,6 +77,11 @@ Version 1.22 records BCK20-OD02-MS-PRE-DEC-01 and workflow v0.4. It integrates
 seven documentation corrections, keeps the v0.3 Product/Content verdicts as
 historical exact-hash evidence and leaves v0.4 Product/Content/Mobile/Security
 verdicts Pending. No implementation gate changes.
+
+Version 1.23 records BCK20-OD02-V04-COMB-DEC-01 and four separately
+attributable exact-v0.4 design verdicts under one owner with zero independence.
+Source-authority, independent Security/Privacy, qualified Legal, OD and
+runtime gates remain open.
 
 ## 1. What this workbook does
 
@@ -222,7 +228,7 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | BCK-03 v0.3.14 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
 | BCK-04 v0.4.23 | retain Draft | BCK-04 and threat-model combined-owner technical verdicts recorded; `BCK04-OD-01` remains Proposed pending independent/cross-boundary evidence; OD-09/tabletop/Legal gates remain |
 | BCK-05 v0.2.30 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains incomplete |
-| BCK-20 v0.2.14 | retain Draft | workflow v0.4 corrections integrated; exact-v0.4 owner verdicts incomplete; OD-10 Proposed and OD-02/05 Open |
+| BCK-20 v0.2.15 | retain Draft | four bounded exact-v0.4 combined-owner verdicts recorded; source-authority/independent/Legal evidence incomplete; OD-10 Proposed and OD-02/05 Open |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -323,4 +329,9 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
     combined-owner verdicts with zero independence and leaves all remaining
     specialist, Legal, source-authority and runtime gates open.
 21. **D1-OWN-AC-21:** BCK20-OD02-MS-PRE-DEC-01 integrates seven corrections
-    only; all exact-v0.4 owner verdicts remain Pending until explicit decisions.
+    only; it does not itself supply exact-v0.4 owner verdicts, which require a
+    separate explicit decision.
+22. **D1-OWN-AC-22:** BCK20-OD02-V04-COMB-DEC-01 records four separate
+    exact-v0.4 design verdicts with zero independence and leaves full D1,
+    source-authority, independent Security/Privacy, qualified Legal and
+    implementation gates incomplete.

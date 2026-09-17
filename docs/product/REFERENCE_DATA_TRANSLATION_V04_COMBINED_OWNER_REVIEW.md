@@ -1,9 +1,9 @@
 # BCK-20 — Translation Governance v0.4 Combined-Owner Review Package
 
 - ID: **BCK20-OD02-V04-COMB-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — exact owner decision required**
+- Status: **Owner decision recorded — four exact-v0.4 verdicts effective with retained gates**
 - Exact workflow: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Workflow normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Product/Content revalidation: [BCK20-OD02-PC-REVAL-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_V04_REVALIDATION.md)
@@ -12,11 +12,12 @@
 - Mobile review SHA-256: `d9f9b76302f1b57e03e4577005448a2a59be359174c1f61565b774ffce9bccf2`
 - Security/Privacy review: [BCK20-OD02-SEC-REV-01 v0.1](REFERENCE_DATA_TRANSLATION_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Security/Privacy review SHA-256: `1b0db67df34e54af5433e1e3cfd172717c7e4911267a6d1ab094b07b89c435a7`
-- Proposed owner: **RechargeN / Product owner**
+- Owner/signatory: **RechargeN / Product owner**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; one owner holds four disclosed interim roles**
 - Qualified Legal/Security/Privacy claim: **none**
 - Runtime effect: **none**
+- Decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 
 ## 1. Purpose
 
@@ -63,7 +64,7 @@ review hash invalidates the package before decision recording.
 
 ## 4. Effect of owner acceptance
 
-If §6 is accepted exactly:
+Under the exact decision recorded in §6:
 
 - the four verdict IDs become effective only for the frozen workflow v0.4
   hash and their stated bounded scopes;
@@ -76,9 +77,9 @@ If §6 is accepted exactly:
   documentation-only;
 - no implementation may start from this decision.
 
-## 5. Proposed signature summary
+## 5. Recorded signature summary
 
-| Sign-off ID | Reviewer role | Proposed verdict | Effective only for |
+| Sign-off ID | Reviewer role | Recorded verdict | Effective only for |
 |---|---|---|---|
 | `BCK20-OD02-SIG-L10N` | interim Product Localization owner | Accept design boundary with retained gates | workflow v0.4 + PC revalidation scope |
 | `BCK20-OD02-SIG-CONTENT` | interim Content/source-governance owner | Accept design boundary with retained gates | workflow v0.4 + PC revalidation scope |
@@ -89,7 +90,7 @@ Reviewer identity for every row is `RechargeN / Product owner`. None is an
 independent verdict, and `SIG-SEC` is not a qualified professional or Legal
 assurance claim.
 
-## 6. Exact owner decision requested
+## 6. Recorded exact owner decision
 
 ```text
 Одобряю BCK20-OD02-V04-COMB-REV-01 v0.1:
@@ -126,8 +127,10 @@ activation, push и merge не разрешаю.
 15. **BCK20-OD02-V04-COMB-AC-15:** acceptance authorizes documentation reconciliation only.
 16. **BCK20-OD02-V04-COMB-AC-16:** no provider/schema/runtime/Firebase/deployment/push/merge authority is created.
 
-## 8. Next action
+## 8. Recorded disposition and next action
 
-Wait for the exact owner decision in §6. After acceptance, create one immutable
-decision record, mark the four review verdicts effective for the exact v0.4
-hash and reconcile canonical documentation without starting implementation.
+`BCK20-OD02-V04-COMB-DEC-01` freezes reviewed package v0.1 at normalized-LF
+SHA-256 `33cf3205a497bee00a9cc684d62e7421acedf9209d27101d7f4a701e425ac41f`.
+This v0.2 revision records the result only. Reconcile canonical documentation,
+then obtain the still-Pending source-authority, independent Security/Privacy
+and applicable qualified Legal evidence. No implementation is authorized.
