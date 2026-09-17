@@ -1,33 +1,34 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **1.21**
+- Version: **1.22**
 - Date: **2026-09-17**
 - Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
 - Accountable owner: **Platform Architecture owner**
 - Review coordinator: **RechargeN / Product owner**
-- Subject: [BCK-01 v0.4.61](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.65](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Subject: [BCK-01 v0.4.62](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_MASTER_RECONCILIATION_REPORT.md`
 
 ---
 
-## 0. BCK-20 Product/Content combined-owner verdict traceability amendment
+## 0. BCK-20 Mobile/Security pre-review correction traceability amendment
 
-This revision records BCK20-OD02-PC-COMB-DEC-01, exact workflow v0.3 and
-BCK-20 v0.2.13
-against the reconciled post-RAW-C snapshot. It preserves the accepted BCK-01
-Review-entry verdict, keeps BCK20-OD-02 Open, BCK-20 Draft and OD-10 Proposed,
-records two separate non-independent Product/Content verdicts and creates no
-source-authority or runtime authority.
+This revision records BCK20-OD02-MS-PRE-DEC-01, exact workflow v0.4 and
+BCK-20 v0.2.14 against the reconciled post-RAW-C snapshot. It preserves the
+accepted BCK-01 Review-entry verdict, keeps BCK20-OD-02 Open, BCK-20 Draft,
+OD-10 Proposed and BCK20-OD-03 Deferred, and creates no source-authority or
+runtime authority. Product/Content v0.3 verdicts remain historical exact-hash
+evidence pending v0.4 revalidation; proposed Mobile/Security verdicts are not
+recorded as effective.
 
 ## 1. Verdict
 
-BCK-01 v0.4.61 is internally consistent with the tracked Accepted ADR set,
+BCK-01 v0.4.62 is internally consistent with the tracked Accepted ADR set,
 Architecture Baseline and BCK-02 coordination model. Its module and
 authoritative-writer maps do not contain a confirmed double writer. All local
-anchors exist, 56 AC are sequential, and the revision creates no runtime.
+anchors exist, 57 AC are sequential, and the revision creates no runtime.
 
 The Product owner assigned `RechargeN / Product owner` as interim review
 coordinator across all perspectives required by `BCK-01 §25`. This closes the
@@ -42,7 +43,7 @@ normative sections:
 
 - `AGENTS.md` and `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - Accepted ADR 0012, 0013, 0015, 0016, 0017, 0018 and 0019;
-- BCK-02 v2.4.65 registry, ownership, §14 template, §15 reconciliation, gates
+- BCK-02 v2.4.66 registry, ownership, §14 template, §15 reconciliation, gates
   and next-package rules;
 - BCK-03 v0.3.14, BCK03-OPS-DEC-01 v0.1, BCK03-SEC-DEC-01 v0.1,
   BCK03-MOB-REV-01 v0.2, BCK03-MOB-DEC-01 v0.1 and API Contracts Workflow;
@@ -54,13 +55,13 @@ normative sections:
   BCK-R0-TCH-DEC-01, BCK05-OD02-IAM-01,
   BCK05-OD07-REL-01,
   BCK05-OD03-SLO-01, BCK05-OD04-COST-01 v0.2, BCK05-OD05-REC-01,
-  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.13 plus their
+  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.14 plus their
   coverage matrices;
 - BCK-09 v1.13, ECL-03 v1.3/ECL-03C v1.11, RAW-C v0.3,
-  BCK-D1-DEC-01 v0.13, BCK-D1-OWN-A-DEC-01 v0.1, BCK20-OWN-DEC-01 v0.1,
+  BCK-D1-DEC-01 v0.14, BCK-D1-OWN-A-DEC-01 v0.1, BCK20-OWN-DEC-01 v0.1,
   BCK20-OD02-DEC-01 v0.1 and BCK20-OD02-PC-COMB-DEC-01 v0.1;
-- BCK-D1-REV-01 v1.25, BCK-D1-SIG-01 v1.23,
-  BCK-D1-OWN-REV-01 v1.21, BCK-D1-OWN-A-DEC-01 v0.1 and OD-07/09/10/11
+- BCK-D1-REV-01 v1.26, BCK-D1-SIG-01 v1.24,
+  BCK-D1-OWN-REV-01 v1.22, BCK-D1-OWN-A-DEC-01 v0.1 and OD-07/09/10/11
   review evidence packages;
 - BCK-02-A1 v1.12 Draft Latvia/Baltics roadmap;
 - LAUNCH_STATUS current tracked facts.
@@ -125,7 +126,7 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK-04 | Draft v0.4.23; BCK-04 and threat-model combined-owner technical verdicts recorded; product/cloud runtime Absent | BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; qualified Legal, OD-09 and tabletop remain | Pass with blockers |
 | BCK-05 | Draft v0.2.30; bounded R0/RAW-C local evidence boundary, product/cloud runtime Absent | BCK-03/BCK-04/threat-model owner-boundary evidence recorded; full BCK-05 specialist/stage/executable evidence remains | Pass with blockers |
 | BCK-09 | Review v1.13; disabled RAW-C v0.3 Present, cloud/mobile runtime Absent | Booking rules and bounded local/hosted behavior reconciled; nine independent signatures Pending | Pass with blockers |
-| BCK-20 | Draft v0.2.13, runtime Absent | Product/Content combined-owner verdicts effective; OD-10 Proposed, BCK20-OD-02/05 Open and remaining specialist/executable evidence absent | Pass with blockers |
+| BCK-20 | Draft v0.2.14, runtime Absent | workflow v0.4 corrections integrated; exact-v0.4 Product/Content revalidation and Mobile/Security/Legal evidence pending; OD-10 Proposed, BCK20-OD-02/05 Open | Pass with blockers |
 | Firebase Architecture | Proposed | Infrastructure input only | Pass |
 | `apps/backend` | Bounded R0 plus disabled Emulator-only RAW-C source Present | Separate approvals only; no G1/G4/R1/cloud/mobile authority | Pass with blockers |
 
@@ -169,6 +170,7 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK01-F34 | Translation governance lacked exact approval freshness, atomic publication, exception, safe rollback and retention/deletion controls | BCK20-OD02-DEC-01 records the bounded technical verdict and workflow v0.2 integrates sixteen amendments while OD-02 and specialist/Legal/runtime gates stay open |
 | BCK01-F35 | Product/Content pre-review found incomplete source authority, publication-outcome, revocation, correction-target, impact, approval-authority, exception-closure and locale-normalization semantics | BCK20-OD02-PC-PRE-DEC-01 integrates F-001–F-008 in workflow v0.3, re-freezes specialist review and leaves OD-02 Open, OD-10 Proposed, BCK-20 Draft and all specialist/Legal/runtime gates closed |
 | BCK01-F36 | The two-person team required attributable Product Localization and Content verdicts without fabricating independent specialists | BCK20-OD02-PC-COMB-DEC-01 records two separate combined-owner verdicts, discloses zero independence and preserves Mobile/Security/Privacy/Legal/source-authority/runtime gates |
+| BCK01-F37 | Mobile/Security pre-review found unresolved consumer compatibility, atomic install, monotonic invalidation, actor-authority, inventory, origin-authentication and safe-render boundaries | BCK20-OD02-MS-PRE-DEC-01 integrates MS-F-001–MS-F-007 in workflow v0.4, re-freezes exact-hash reviews and preserves every source-authority/provider/schema/runtime gate |
 
 ## 7. Definition of Ready evidence
 
@@ -206,7 +208,7 @@ specialist evidence remain independently gated by BCK-04/BCK-05 and OD-07/11.
 
 ## 9. Review verdict and next action
 
-**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.61 remains
+**Verdict: Review entry accepted; Approval blocked.** BCK-01 v0.4.62 remains
 tracked as `Review`. Next:
 
 1. obtain delegated-owner evidence for BCK-03 Review;

@@ -1,14 +1,14 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.65
+- Версия: 2.4.66
 - Дата: 2026-09-17
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
 - Registry amendments: **2026-08-15, 2026-08-16, 2026-08-20, 2026-08-21,
   2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28,
   2026-09-06, 2026-09-07, 2026-09-08, 2026-09-09, 2026-09-12 and
-  2026-09-15 and 2026-09-16, Product owner
+  2026-09-15, 2026-09-16 and 2026-09-17, Product owner
   instructions; documentation traceability only, semantics/gates/checksum
   unchanged**
 - Назначение: единая распределительная карта backend-работ Recharge
@@ -16,6 +16,20 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.66.** BCK20 Mobile/Security pre-review correction reconciliation
+without changing Approved v2.4 coordination semantics:
+
+- records BCK20-OD02-MS-PRE-DEC-01 and exact corrected workflow v0.4;
+- reconciles BCK-20/coverage v0.2.14, BCK-01 v0.4.62 and BCK-01-REV-01 v1.22;
+- reconciles D1 review v1.26, ledger v1.24, workbook v1.22, decision package
+  v0.14 and BCK-02-A1 v1.13;
+- records separate Proposed Mobile and Security/Privacy reviews without making
+  either verdict effective;
+- preserves Product/Content v0.3 verdicts as historical exact-hash evidence
+  pending v0.4 revalidation;
+- retains BCK20-OD-02/05 Open, OD-10 Proposed, BCK-20 Draft, BCK20-OD-03
+  Deferred and every provider/schema/runtime/Firebase/deployment gate.
 
 **v2.4.65.** BCK20 Product/Content combined-owner verdict reconciliation
 without changing Approved v2.4 coordination semantics:
@@ -936,7 +950,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-17 | `PAYMENTS_BACKEND_SPEC.md` | Payments owner | Payment authority, ledger, webhooks, refunds, disputes and compliance | Hard: new Accepted ADR, BCK-03, BCK-04, BCK-05, BCK-06; integration peer: BCK-13 | Planned, gated | Absent |
 | BCK-18 | `MOBILE_BACKEND_INTEGRATION_STANDARD.md` | Mobile Platform owner | Typed ports/adapters, shared fixtures, local/cache/server states, compatibility and import orchestration | BCK-03, BCK-04, BCK-06, BCK-20, API workflow, OD-04, OD-08, OD-10 | Review v0.5 — Present; BCK-03 Mobile and BCK-04/threat-model technical verdicts recorded only for their boundaries; 22/22 design coverage, 60 AC, eight BCK18 decisions; M2 Money and Approval blockers remain | Absent |
 | BCK-19 | `ADMIN_SUPPORT_BACKEND_SPEC.md` | Admin Operations owner | Privileged staff surface, cases, read audit, repair proposal/approval, emergency disable | BCK-03, BCK-04, BCK-05, BCK-06 | Review v0.2 | Absent |
-| BCK-20 | `REFERENCE_DATA_LOCALIZATION_SPEC.md` | Reference Data owner | Versioned distribution/governance for taxonomy, regions, currencies, languages and localized wire values | BCK-01, BCK-03, Category System v1.4.3, OD-10 | Draft v0.2.13 — Present; Product/Content combined-owner verdicts effective, OD-10 Proposed, BCK20-OD-02/05 Open and remaining review pending | Absent |
+| BCK-20 | `REFERENCE_DATA_LOCALIZATION_SPEC.md` | Reference Data owner | Versioned distribution/governance for taxonomy, regions, currencies, languages and localized wire values | BCK-01, BCK-03, Category System v1.4.3, OD-10 | Draft v0.2.14 — Present; workflow v0.4 corrections integrated, exact-v0.4 owner reviews incomplete, OD-10 Proposed and BCK20-OD-02/05 Open | Absent |
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Review v0.2 — Present; 22/22 coverage, 60 AC, ten BCK21 decisions; OD-05/privacy/destination/runtime blockers remain | Absent |
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Planned | Absent |
 
@@ -1454,7 +1468,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 
 ## 19. Acceptance criteria этой карты
 
-1. Ревизия v2.4.65 содержит 22 BCK-specs и 6 runbooks.
+1. Ревизия v2.4.66 содержит 22 BCK-specs и 6 runbooks.
 2. Count является versioned checksum, а не вечным fixed-count invariant.
 3. Каждый BCK/RUN/OD/RSK имеет уникальный ID и accountable owner.
 4. Spec status отделён от runtime status.
@@ -1527,14 +1541,17 @@ documentation package из §20, но не G1, runtime wave или provisioning.
     age-restricted publication/discovery и применимых Booking paths.
 66. Нерешённый OD-11 fail-closed для age-sensitive функций, но не создаёт
     ложный global blocker для disabled general Booking transaction core.
+67. BCK20-OD02-MS-PRE-DEC-01 изменяет только документационный workflow v0.4:
+    Product/Content revalidation и Mobile/Security verdicts остаются Pending,
+    BCK20-OD-03 Deferred и implementation authority отсутствует.
 
 ## 20. Следующий шаг после утверждения
 
-Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.61
+Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.62
 находится в Review с recorded interim coordinator evidence. Технический
-BCK20-OD-02 workflow v0.3 и Product/Content verdicts зафиксированы; следующий
-D1-шаг — Mobile/Security/Privacy review. Remaining specialist reviews
-остаются обязательными до их named gates.
+BCK20-OD-02 workflow v0.4 исправлен; следующий D1-шаг — решения по Proposed
+Mobile/Security/Privacy reviews и exact-v0.4 Product/Content revalidation.
+Remaining specialist reviews остаются обязательными до их named gates.
 
 ```text
 BCK-01 Review
@@ -1551,10 +1568,10 @@ production schemas, credentials или deployments.
 
 Следующий review package содержит только documentation evidence:
 
-1. BCK-01 v0.4.61 Review с traceability/reconciliation к §3 и
-   [`BCK-01-REV-01 v1.21`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
-2. BCK-02 v2.4.65 traceability/checksum;
-3. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.13
+1. BCK-01 v0.4.62 Review с traceability/reconciliation к §3 и
+   [`BCK-01-REV-01 v1.22`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
+2. BCK-02 v2.4.66 traceability/checksum;
+3. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.14
    coverage/blocker evidence без ложного повышения статуса;
 4. linked review evidence for
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),
@@ -1586,12 +1603,12 @@ production schemas, credentials или deployments.
      exact [BCK05-OD07-DEC-01 v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md):
      bounded R0 is Pass, BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted;
     R1 and product/cloud release evidence remain absent;
-11. accepted BCK-D1-DEC-01 v0.13 plus
+11. accepted BCK-D1-DEC-01 plus
    [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md) and
-    [BCK-D1-REV-01 v1.25](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md), whose
+    [BCK-D1-REV-01](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md), whose
    current verdict remains `D1 exit blocked`;
-12. [BCK-D1-SIG-01 v1.23](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) and
-    [BCK-D1-OWN-REV-01 v1.21](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+12. [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) and
+    [BCK-D1-OWN-REV-01](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
     with Owner Batch A, bounded
     [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md),
     [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md),
@@ -1602,6 +1619,7 @@ production schemas, credentials или deployments.
     [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md),
     [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md),
     [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md),
+    [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md),
     BCK05-OD-01/02/07 and cross-domain OD-07 verdicts, and incomplete broader
     D1 specialist sign-offs;
 13. доказательство отсутствия product/cloud runtime changes.

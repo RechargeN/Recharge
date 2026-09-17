@@ -1,23 +1,41 @@
 # Recharge Backend — Translation Governance Workflow
 
 - ID: **BCK20-OD02-L10N-01**
-- Version: **0.3**
+- Version: **0.4**
 - Date: **2026-09-17**
-- Status: **Combined-owner technical baseline — specialist evidence pending**
+- Status: **Corrected combined-owner technical baseline — owner review pending**
 - Decision served: **BCK20-OD-02 — translation source/review workflow**
 - Decision status: **Open — technical decision does not close specialist gates**
 - Accountable owner: **Product Localization owner**
 - Required boundaries: **Reference Data, Content, Mobile, Security/Privacy and qualified Legal where applicable**
-- Parent specification: [BCK-20 v0.2.11](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent specification: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Owner decision input: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Technical review: [BCK20-OD02-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_REVIEW.md)
 - Technical decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Product/Content pre-review: [BCK20-OD02-PC-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW.md)
 - Pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
+- Mobile/Security pre-review: [BCK20-OD02-MS-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW.md)
+- Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
 - LocalizedText input: [BCK-D1-OD10-EV-01 v0.1](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+### v0.4 — 2026-09-17
+
+- recorded BCK20-OD02-MS-PRE-DEC-01 and integrated MS-F-001–MS-F-007 before
+  Mobile and Security/Privacy owner review;
+- bound render-profile compatibility and current scoped actor authority to the
+  immutable evidence chain;
+- defined atomic consumer installation, monotonic invalidation precedence and
+  trusted-origin verification without selecting a distribution mechanism;
+- added a conservative BCK-04-aligned translation-artifact inventory and a
+  final-render safe rich-content contract;
+- preserved AC-01–50 and appended AC-51–62;
+- retained v0.3 Product/Content verdicts as historical exact-hash evidence,
+  with explicit v0.4 revalidation required;
+- retained BCK20-OD-02 Open, OD-10 Proposed, BCK-20 Draft, BCK20-OD-03
+  Deferred and every provider/schema/runtime/infrastructure gate.
 
 ### v0.3 — 2026-09-17
 
@@ -98,6 +116,21 @@ It does not own:
     otherwise invalid text.
 19. Temporary exceptions cannot bypass mandatory independence, Legal,
     privacy, stable-ID or market-isolation controls.
+20. Render capability is revision-bound; an unsupported render profile is an
+    atomic typed state, never permission to partially interpret content.
+21. A consumer activates one complete verified manifest revision atomically;
+    mixed-revision key merging is forbidden.
+22. Revoke, withdraw and disable markers are monotonic authority state and win
+    over cache, retry, restore and rollback.
+23. Actor identity and capability are resolved by a trusted authority and
+    revalidated for every privileged action; client or provider role claims are
+    never authority.
+24. Every translation artifact inherits an explicit BCK-04 data class and
+    remains non-public until a sanitized approved projection says otherwise.
+25. A matching integrity hash does not prove trusted origin, publisher,
+    environment, market or current authorization.
+26. Translated text remains untrusted through final rendering; raw executable
+    markup and arbitrary translator-supplied destinations are forbidden.
 
 ## 3. Translation classes and review depth
 
@@ -158,6 +191,7 @@ TranslationSourceSnapshot {
   marketConfigRevision
   localeNormalizationProfileRevision
   messageFormatVersion
+  renderProfileRevision
   placeholderSchemaHash
   sourceRevision
   sourceHash
@@ -185,6 +219,7 @@ TranslationCandidate {
   marketConfigRevision
   localeNormalizationProfileRevision
   messageFormatVersion
+  renderProfileRevision
   placeholderSchemaHash
   translatedText
   method: human | human_assisted
@@ -206,6 +241,7 @@ TranslationReviewRecord {
   reviewId
   candidateId
   reviewerIdentity
+  reviewerAuthorityEvidenceId
   reviewerRole
   reviewedSourceRevision
   reviewedGlossaryRevision
@@ -223,6 +259,7 @@ TranslationApprovalRecord {
   marketConfigRevision
   localeNormalizationProfileRevision
   messageFormatVersion
+  renderProfileRevision
   placeholderSchemaHash
   approvedScope
   requiredReviewIds[]
@@ -235,6 +272,7 @@ TranslationApprovalRecord {
   revokedAtUtc?
   revocationEvidenceId?
   approverIdentity
+  approverAuthorityEvidenceId
   approvedAtUtc
 }
 ```
@@ -250,6 +288,7 @@ TranslationPublicationManifest {
   marketConfigRevision
   localeNormalizationProfileRevision
   messageFormatVersion
+  renderProfileRevision
   placeholderSchemaHash
   datasetRevision
   sourceRevisionSetHash
@@ -267,6 +306,7 @@ TranslationPublicationReceipt {
   manifestIntegrityHash
   expectedCurrentManifestRevision
   publisherIdentity
+  publisherAuthorityEvidenceId
   result: committed | conflict | unknown
   authoritativeCurrentManifestId?
   authoritativeCurrentManifestRevision?
@@ -281,11 +321,14 @@ TranslationCorrectionRecord {
   replacementId?
   reason
   severity: normal | urgent | safety_critical
+  resolutionRevision
+  effectiveAtUtc
   affectedMarkets[]
   affectedLocales[]
   affectedSurfaceIds[]
   action: supersede | withdraw_candidate | revoke_manifest | disable_surface
   approvedBy
+  approvedByAuthorityEvidenceId
   createdAtUtc
 }
 ```
@@ -317,6 +360,7 @@ TranslationExceptionRecord {
   rationale
   compensatingControls[]
   approvedBy
+  approvedByAuthorityEvidenceId
   createdAtUtc
   expiresAtUtc
   status: active | expired | revoked | closed
@@ -347,10 +391,41 @@ This revision defines only the required template. It does not populate owner or
 policy values. Named Content/Product Localization owners supply and approve
 that content; missing entries remain blocked rather than inferred.
 
+### 5.7 Translation-artifact data inventory seed
+
+This seed applies BCK-04 conservatively without selecting storage or inventing
+Legal conclusions. Every future schema inventory must additionally complete
+all BCK-04 §6.1 fields, including data subjects, legal basis, recipients,
+processor/transfer references, retention trigger, rights handling, backup,
+region, ROPA and DPIA references.
+
+| Record/artifact family | Baseline class | Purpose/access boundary | Publication treatment |
+|---|---|---|---|
+| `TranslationSourceSnapshot` | Protected before publication | exact source meaning; task-scoped source/reviewer access | only sanitized approved field output may become Public |
+| `TranslationCandidate` | Protected before publication | translation/review task participants | never Public merely because a candidate exists |
+| `TranslationReviewRecord` | Operational | attributable reviewers and governance operators | no public projection |
+| `TranslationApprovalRecord` | Operational | approvers/publishers and audit operators | bounded status may accompany an authorized projection |
+| `TranslationPublicationManifest` | Operational | publication control plane and trusted consumers | manifest metadata is not automatically public copy |
+| `TranslationPublicationReceipt` | Operational | publisher, reconciliation and audit operators | no public projection |
+| `TranslationCorrectionRecord` | Operational | incident/governance operators and affected owners | only bounded withdrawal/disabled state is exposed |
+| `TranslationImpactSet` | Operational | source/glossary/policy owners and reviewers | no public projection |
+| `TranslationExceptionRecord` | Operational | accountable owner, approver and audit operators | no public projection |
+| `TranslationSourceAuthorityEntry` | Operational until approved | source-governance operators | separately approved reference fields may project Public |
+| temporary context, screenshot, work package or provider export | highest inherited field class | named task recipient only, bounded lifetime | never a public projection; undeclared personal/Sensitive content is rejected or separately authorized |
+
+Reviewer/translator identities, provenance and access/export evidence are not
+Public merely because the translated product copy may later be public. Exact
+legal basis, numeric retention, processor/transfer, ROPA and DPIA evidence
+remain BCK-04/qualified-owner gates before production processing.
+
 Every ID is immutable and every relationship is ID-based. The future physical
 schema follows BCK-03/BCK-20 decisions and is not selected here.
 `manifestIntegrityHash` is calculated over the canonical immutable manifest
 payload excluding the hash field itself and every receipt/outcome field.
+The hash proves deterministic payload integrity only; it does not authenticate
+the publisher or trusted origin. `renderProfileRevision` participates in
+identity, compatibility and freshness checks for source, candidate, approval
+and manifest.
 For a revoked approval, `revokedReason`, `revokedBy`, `revokedAtUtc` and
 `revocationEvidenceId` are required together. For an exception, closure fields
 are required together only in `closed`; incoherent combinations fail closed.
@@ -360,6 +435,15 @@ candidate, `revoke_manifest` targets a manifest and `disable_surface` targets
 a surface. Every other combination is rejected. For `product_high_impact` and
 `legal_safety_mandatory`, an `incomplete` or `unknown` impact set blocks
 approval and publication until a new attributable `complete` analysis exists.
+Each revoke, withdraw or disable action advances a strictly monotonic
+`resolutionRevision` at the owning authority boundary. A lower or missing
+revision cannot clear or replace a newer tombstone/disable marker.
+
+Every authority-evidence ID is immutable and refers to a trusted-system
+decision for the exact actor, scope, action and time. Reviewer, approver,
+publisher, corrector and exception authority is revalidated at the action;
+client-declared or provider-declared identities/capabilities are never trusted
+as authorization.
 
 ## 6. Lifecycle state machine
 
@@ -383,10 +467,14 @@ Allowed return paths:
   approvals stale; prior text may seed a new candidate but no record is rebound
   to the new source revision;
 - a glossary revision change triggers review according to affected term scope;
+- a render-profile revision change marks incompatible candidates, approvals
+  and manifests stale until explicit compatible review exists;
 - source, glossary or policy change creates an attributable impact set and
   re-review queue; unknown impact blocks high-impact and mandatory publication;
 - revoked, expired or superseded approvals cannot publish, roll back or
   authorize cached artifacts;
+- a newer revoke/withdraw/disable resolution always dominates an older cached,
+  restored or replayed manifest;
 - published text is never returned to Draft or edited in place.
 
 ## 7. Standard workflow
@@ -396,28 +484,35 @@ Allowed return paths:
    class, context, screenshots where safe, authority evidence and change reason.
 2. **Freeze source:** calculate immutable revision/hash and reject mutable or
    unidentified source input.
-3. **Prepare context:** attach glossary revision, character/layout constraints,
-   placeholders and prohibited substitutions without secrets or user data.
+3. **Prepare context:** attach glossary and render-profile revisions,
+   character/layout constraints, placeholders and prohibited substitutions
+   without secrets or user data.
 4. **Translate:** create one candidate per target locale with attributable
    translator and method/provenance.
-5. **Validate structure:** preserve placeholders, markup, plural/select syntax,
-   URLs/policy IDs and bounded length rules; never alter canonical IDs.
+5. **Validate structure:** preserve placeholders, canonical safe markup nodes,
+   plural/select syntax, approved target/policy IDs and bounded length rules;
+   reject raw executable markup, arbitrary URIs and altered canonical IDs.
 6. **Linguistic review:** compare against exact source, glossary and locale
    conventions; emit typed findings.
 7. **Domain review:** verify product meaning and consequence-sensitive wording.
-8. **Mobile review:** verify layout, accessibility, scaling, truncation,
-   right state/error meaning and screen-reader behavior.
+8. **Mobile review:** verify the exact render profile, layout, accessibility,
+   scaling, truncation, right state/error meaning and screen-reader behavior.
 9. **Legal review if required:** bind approval to exact market, locale, source,
    candidate and policy revision.
-10. **Approve:** ensure every class-required review is accepted and current.
+10. **Approve:** revalidate trusted actor authority and ensure every
+    class-required review is accepted and current.
 11. **Publish manifest:** create immutable manifest intent, compare the
     expected-current revision, verify integrity and atomically publish the exact
     candidate set. Record the authoritative outcome in a separate attributable
     receipt. Publication cannot edit content or activate a market, feature or
     client rollout.
-12. **Observe:** collect missing/stale/rendering signals without logging text or
+12. **Consumer handoff:** only a separately Approved distribution boundary may
+    stage a full compatible bundle, verify manifest/hash/revisions and trusted
+    origin, then atomically switch its active pointer. Partial activation and
+    cross-manifest key merging are forbidden.
+13. **Observe:** collect missing/stale/rendering signals without logging text or
     personal data by default.
-13. **Correct or withdraw:** create a new candidate/correction record and
+14. **Correct or withdraw:** create a new candidate/correction record and
     preserve full evidence; never overwrite published history.
 
 ## 8. Placeholders, formatting and terminology
@@ -425,9 +520,14 @@ Allowed return paths:
 - placeholders are named and typed; translation cannot add, remove or change
   their type;
 - plural/select branches must be complete for the chosen message format;
-- HTML/Markdown or rich-text capability is allowlisted by record family;
+- rich-text capability uses canonical structured nodes from the exact
+  `renderProfileRevision`; plain text is escaped and unknown nodes fail closed;
+- raw executable HTML, scripts, event handlers and arbitrary WebView rendering
+  are forbidden;
 - links use approved stable targets or policy references, never translator-
   supplied arbitrary destinations;
+- link resolution rejects unknown targets and arbitrary URI schemes at the
+  final render boundary;
 - glossary terms have stable IDs, source definition, allowed translations,
   prohibited variants, domain and revision;
 - a glossary conflict is a review finding, not an invitation to create a local
@@ -467,6 +567,9 @@ workflow still functions.
 
 - translation input is product/reference copy, not production database data;
 - screenshots/context are sanitized before leaving the owning team;
+- screenshots/context inherit the highest contained data class; undeclared
+  personal or Sensitive content is rejected/quarantined rather than entering
+  ordinary translation tooling;
 - access is least-privilege by market, locale, record family and task;
 - exported work packages have bounded lifetime and attributable recipients;
 - source, candidate, review, approval, publication, correction, audit and
@@ -481,6 +584,9 @@ workflow still functions.
 - suspicious links, markup, Unicode, instructions or embedded secrets are
   rejected/quarantined;
 - revoked users/providers lose access and cannot publish with cached approval;
+- every privileged review, approval, publication, correction, exception and
+  export action resolves actor and current scoped authority from the trusted
+  system and records immutable decision evidence;
 - old approval cannot authorize a changed source, glossary or target text.
 
 ## 11. Baltic market policy
@@ -515,9 +621,11 @@ workflow still functions.
 5. Create a correction record and new immutable candidate where applicable.
 6. Apply the same mandatory review depth; an emergency may shorten timing but
    cannot erase attribution, Legal authority or post-review.
-7. Publish a new manifest or explicit withdrawal marker.
-8. Reconcile caches/search/projections and verify the unsafe revision no longer
-   resolves.
+7. Publish a new manifest or explicit monotonic withdrawal/disable marker with
+   the next `resolutionRevision`.
+8. Reconcile caches/search/projections; the newest tombstone/disable marker
+   wins over cached, restored or replayed content, and the unsafe revision must
+   no longer resolve.
 9. Record root cause, affected interval and preventive action.
 
 Candidate withdrawal, manifest revocation and surface disablement are distinct
@@ -536,8 +644,8 @@ fallback. Fail closed unless exact policy permits otherwise.
 - approval checks current source, candidate, glossary, market and policy
   revisions atomically at its authority boundary;
 - canonical BCP 47 locale, effective `MarketConfig`, locale-normalization
-  profile, message-format version and placeholder-schema hash participate in
-  identity and freshness checks;
+  profile, message-format version, render-profile revision and
+  placeholder-schema hash participate in identity and freshness checks;
 - two approvals cannot make two candidates simultaneously effective for the
   same record/field/market/locale/revision;
 - late reviews against superseded input are stored as stale evidence and cannot
@@ -547,6 +655,13 @@ fallback. Fail closed unless exact policy permits otherwise.
 - partial publication and expected-current mismatch return a typed conflict;
   timeout/unknown outcome and retry first reconcile the authoritative receipt
   and manifest-pointer state.
+- a consumer stages and verifies a complete compatible manifest before atomic
+  active-pointer switch; interrupted installation leaves the prior complete,
+  currently authorized revision or typed unavailable/disabled state;
+- an unsupported render profile, trusted-origin mismatch or resolution gap
+  fails closed and never produces partial output;
+- a trusted-session authority check runs at every privileged action; cached or
+  client-declared roles cannot satisfy it.
 
 Temporary exceptions use immutable `TranslationExceptionRecord` evidence.
 They expire fail-closed and cannot bypass stable IDs, market isolation,
@@ -566,6 +681,9 @@ Required documentation evidence before BCK20-OD-02 Acceptance:
 - emergency withdrawal and unsafe-fallback tabletop on paper;
 - approval revocation/expiry, policy conflict, unknown impact, atomic publish
   conflict, exception expiry and provider-export deletion vectors;
+- unsupported render profile, interrupted atomic install, wrong-environment
+  manifest, stale actor authority, monotonic tombstone and unsafe rich-content
+  vectors;
 - BCK20-OD-05 boundary explicitly retained for mandatory Legal/safety copy;
 - migration/rollback statement and exact future executable gate.
 
@@ -607,6 +725,11 @@ A skipped, timed-out, unattributable or non-reproducible check is Inconclusive.
 | `exception_expired` | exception scope fails closed |
 | `impact_unknown` | high-impact/mandatory scope remains blocked |
 | `deletion_unconfirmed` | provider artifact requires escalation/evidence |
+| `render_profile_unsupported` | reject the manifest/bundle atomically; do not partially interpret |
+| `unsafe_render_content` | quarantine/reject unsafe node, markup, URI or final-render output |
+| `manifest_origin_untrusted` | integrity-valid payload lacks trusted environment/publisher authority |
+| `actor_authority_stale` | current scoped authority is absent/revoked; privileged action is denied |
+| `resolution_revision_gap` | refresh/reconcile authority state; do not expose older cached content |
 
 ## 16. Rollback and migration
 
@@ -618,6 +741,11 @@ dry-run validation, counts/hashes, checkpointing, reject report and rollback to
 a previously compatible, currently authorized manifest. Current approval,
 withdrawal, restriction and Legal-policy checks run before restoration; an
 older manifest is never assumed safe merely because it once published.
+Consumer migration stages one complete compatible bundle, verifies exact
+manifest integrity plus trusted origin and performs an atomic active-pointer
+switch. Rollback may select only a complete, compatible and currently
+authorized bundle after reconciling the latest `resolutionRevision`; partial
+key migration and revoked-cache restoration are forbidden.
 Local/mock strings are migration candidates,
 not automatically approved translations. No existing app string is silently
 reclassified as Legal-approved or source-authoritative.
@@ -629,6 +757,10 @@ reclassified as Legal-approved or source-authoritative.
   before specialist review. BCK20-OD-02 remains Open until required
   Product Localization, Content, Mobile, Security/Privacy and applicable
   qualified Legal evidence accepts the exact revision.
+- BCK20-OD02-MS-PRE-DEC-01 integrates seven Mobile/Security technical
+  corrections in v0.4. Product/Content verdicts remain historical evidence for
+  exact v0.3 and require explicit revalidation for this v0.4 hash; Mobile and
+  Security/Privacy verdicts remain Pending.
 - BCK20-OD-05 remains Open for mandatory copy and fallback-forbidden classes.
 - OD-10 remains Proposed.
 - API-DEC-05 and BCK20-OD-01 remain Deferred.
@@ -708,6 +840,29 @@ reclassified as Legal-approved or source-authoritative.
     Product/domain approval.
 49. **BCK20-OD02-AC-49:** exception closure is attributable and state-coherent.
 50. **BCK20-OD02-AC-50:** AC-01–41 retain their identifiers unchanged.
+51. **BCK20-OD02-AC-51:** the accepted Mobile/Security pre-review corrections
+    are integrated before owner verdicts.
+52. **BCK20-OD02-AC-52:** render-profile compatibility is revision-bound and an
+    unsupported profile fails atomically.
+53. **BCK20-OD02-AC-53:** consumer installation cannot expose mixed manifest
+    revisions or partial activation.
+54. **BCK20-OD02-AC-54:** monotonic resolution state makes revoke, withdrawal
+    and disablement dominate cache, retry, restore and rollback.
+55. **BCK20-OD02-AC-55:** actor identity and current scoped authority come from
+    trusted-system evidence for every privileged action.
+56. **BCK20-OD02-AC-56:** all translation artifacts have a conservative
+    BCK-04-aligned inventory boundary before physical schema work.
+57. **BCK20-OD02-AC-57:** manifest integrity is not treated as publisher,
+    environment, market or current-authority authentication.
+58. **BCK20-OD02-AC-58:** translated rich content stays untrusted through a
+    canonical allowlisted final-render boundary.
+59. **BCK20-OD02-AC-59:** typed failures cover unsupported render profile,
+    unsafe output, untrusted origin, stale authority and resolution gaps.
+60. **BCK20-OD02-AC-60:** Product/Content v0.3 verdicts are historical
+    exact-hash evidence and cannot silently authorize v0.4.
+61. **BCK20-OD02-AC-61:** BCK20-OD-03 remains Deferred and owns physical
+    distribution, cache and delta design.
+62. **BCK20-OD02-AC-62:** AC-01–50 retain their identifiers unchanged.
 
 ## 19. Recorded technical owner decision
 
@@ -720,3 +875,9 @@ BCK20-OD02-PC-PRE-DEC-01. Both specialist rows remain Pending, BCK20-OD-02 stays
 Open, OD-10 stays Proposed and BCK-20 stays Draft. No specialist/Legal verdict,
 source-authority content, provider, schema, runtime, Firebase, deployment, push
 or merge authority is created.
+On 2026-09-17 the Product owner approved BCK20-OD02-MS-PRE-01 v0.1. This v0.4
+integrates MS-F-001–MS-F-007 while keeping both Mobile and Security/Privacy
+verdicts Pending. The Product/Content v0.3 verdicts remain immutable historical
+evidence and require explicit v0.4 revalidation. BCK20-OD-02 remains Open,
+OD-10 Proposed, BCK-20 Draft and BCK20-OD-03 Deferred; no implementation or
+external-system authority is created.

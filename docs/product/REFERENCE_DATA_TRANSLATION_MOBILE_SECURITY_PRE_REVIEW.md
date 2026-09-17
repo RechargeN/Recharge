@@ -1,11 +1,15 @@
 # BCK-20 — Translation Governance Mobile/Security Technical Pre-Review
 
 - ID: **BCK20-OD02-MS-PRE-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — owner decision required**
+- Status: **Owner decision recorded — MS-F-001–MS-F-007 integrated in workflow v0.4**
 - Frozen target: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target normalized-LF SHA-256: `f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309`
+- Accepted v0.1 normalized-LF SHA-256: `e3edbf1c1ba495bca73c5c8ac3f5d40ac7dd77b574cd24f2047bcdfe8775651d`
+- Owner decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Integrated target: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
+- Integrated target normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Parent: [BCK-20 v0.2.13](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Mobile baseline: [BCK-18 v0.5](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
 - Security/Privacy baseline: [BCK-04](BACKEND_SECURITY_PRIVACY_SPEC.md)
@@ -271,8 +275,11 @@ Source-authority content, provider selection, schema, runtime, Firebase,
 deployment, push и merge не разрешаю.
 ```
 
-## 9. Next action
+## 9. Recorded disposition and next action
 
-Wait for the exact owner decision in §8. Do not edit the workflow, recompute its
-accepted-review hashes or prepare effective Mobile/Security signatures before
-that decision.
+On 2026-09-17 the Product owner approved the exact §8 decision. The decision is
+recorded in BCK20-OD02-MS-PRE-DEC-01 v0.1 and MS-F-001–MS-F-007 are integrated
+in workflow v0.4. Product/Content v0.3 verdicts remain historical exact-hash
+evidence and require v0.4 revalidation. Mobile and Security/Privacy verdicts
+remain separate and Pending. Prepare their proposed review records against the
+exact v0.4 hash; do not start implementation.
