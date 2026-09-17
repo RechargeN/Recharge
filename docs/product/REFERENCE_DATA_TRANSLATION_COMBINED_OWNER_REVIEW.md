@@ -1,18 +1,19 @@
 # BCK-20 — Translation Product Localization and Content Combined-Owner Review
 
 - ID: **BCK20-OD02-PC-COMB-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — exact owner confirmation required; no signature recorded**
-- Proposed reviewer: **RechargeN / Product owner**
-- Proposed combined roles: **interim Product Localization owner + interim Content/source-governance owner**
+- Status: **Owner decision recorded — two bounded verdicts effective**
+- Reviewer: **RechargeN / Product owner**
+- Combined roles: **interim Product Localization owner + interim Content/source-governance owner**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; combined-role founder review**
 - Legal qualification: **not claimed**
-- Review package: [BCK20-OD02-PC-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_REVIEW_PACKAGE.md)
+- Review package: [BCK20-OD02-PC-REV-01 v0.3](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_REVIEW_PACKAGE.md)
 - Exact target: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Target SHA-256: `f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309`
-- Parent: [BCK-20 v0.2.12](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent: [BCK-20 v0.2.13](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Purpose and authority boundary
@@ -30,9 +31,9 @@ It cannot replace Mobile, Security/Privacy or qualified Legal review and cannot
 authorize source-authority content, provider selection, schema, runtime,
 Firebase, deployment, push or merge.
 
-Until the exact §9 decision is explicitly confirmed, both
-`BCK20-OD02-SIG-L10N` and `BCK20-OD02-SIG-CONTENT` remain
-`Pending — owner confirmation required`.
+The exact §9 decision was confirmed on 2026-09-17 and recorded in
+BCK20-OD02-PC-COMB-DEC-01. Both bounded verdicts are effective for the frozen
+v0.3 hash; every retained gate in §§6 and 8 remains unchanged.
 
 ## 2. Frozen-input verification
 
@@ -67,8 +68,8 @@ The review becomes stale if the target version or normalized hash changes.
 | 12 | Accept | Human/offline operation remains required when every external provider is disabled |
 
 Recommended `BCK20-OD02-SIG-L10N` verdict:
-**Accept design boundary with retained gates**. This recommendation is not an
-effective signature until the owner confirms §9.
+**Accept design boundary with retained gates**. The owner confirmed this exact
+verdict in BCK20-OD02-PC-COMB-DEC-01 v0.1.
 
 ## 4. Content/source-governance checklist disposition
 
@@ -88,8 +89,8 @@ effective signature until the owner confirms §9.
 | 12 | Accept | Disabled EE/LT markets cannot inherit Latvia activation, glossary or approval evidence |
 
 Recommended `BCK20-OD02-SIG-CONTENT` verdict:
-**Accept design boundary with retained gates**. This recommendation is not an
-effective signature until the owner confirms §9.
+**Accept design boundary with retained gates**. The owner confirmed this exact
+verdict in BCK20-OD02-PC-COMB-DEC-01 v0.1.
 
 ## 5. Mandatory paper-vector disposition
 
@@ -139,12 +140,12 @@ Qualification or authority basis: founder/Product owner directly accountable for
 Independence/conflict disclosure: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.3
 Observed SHA-256: f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309
-Verdict: Accept design boundary with retained gates — proposed, not yet signed
+Verdict: Accept design boundary with retained gates — effective combined-owner verdict
 Accepted scope: Product Localization checklist 1–12 and PC-V01–PC-V14
 Finding IDs: none
 Retained observations: O-01–O-05
 Required amendments: none before this owner verdict
-Date/timezone: pending owner confirmation
+Date/timezone: 2026-09-17T11:48:46+03:00
 Evidence reference: BCK20-OD02-PC-COMB-REV-01 v0.1 §§2–6
 ```
 
@@ -159,18 +160,18 @@ Qualification or authority basis: founder/Product owner directly accountable for
 Independence/conflict disclosure: combined owner; no independent reviewer
 Target: BCK20-OD02-L10N-01 v0.3
 Observed SHA-256: f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309
-Verdict: Accept design boundary with retained gates — proposed, not yet signed
+Verdict: Accept design boundary with retained gates — effective combined-owner verdict
 Accepted scope: Content checklist 1–12 and PC-V01–PC-V14
 Finding IDs: none
 Retained observations: O-01–O-05
 Required amendments: none before this owner verdict
-Date/timezone: pending owner confirmation
+Date/timezone: 2026-09-17T11:48:46+03:00
 Evidence reference: BCK20-OD02-PC-COMB-REV-01 v0.1 §§2–6
 ```
 
-## 8. Effect of a future exact owner confirmation
+## 8. Effect of the recorded exact owner confirmation
 
-After explicit confirmation of §9:
+After the recorded confirmation of §9:
 
 - both Product/Content signature records become effective only for this exact
   v0.3 hash;
@@ -182,7 +183,7 @@ After explicit confirmation of §9:
 - OD-10 remains Proposed and BCK-20 remains Draft;
 - no implementation or external-system authority is created.
 
-## 9. Exact owner decision requested
+## 9. Exact owner decision recorded
 
 ```text
 Одобряю BCK20-OD02-PC-COMB-REV-01 v0.1:
@@ -215,8 +216,9 @@ Firebase, deployment, push и merge не разрешаю.
 14. **BCK20-OD02-PC-COMB-AC-14:** OD-10 remains Proposed and BCK-20 Draft.
 15. **BCK20-OD02-PC-COMB-AC-15:** no provider/schema/runtime/Firebase/deploy/push/merge authority is created.
 
-## 11. Next action
+## 11. Recorded disposition and next action
 
-Obtain the exact §9 owner decision. Do not update the canonical sign-off ledger,
-BCK-20 status or frozen review package until that decision is explicitly
-recorded.
+The exact §9 decision is recorded in BCK20-OD02-PC-COMB-DEC-01 v0.1. Reconcile
+the canonical sign-off ledger and BCK-20 traceability without promoting
+BCK20-OD-02, OD-10 or BCK-20. Then prepare separate Mobile and Security/Privacy
+review of the same frozen workflow; implementation remains blocked.

@@ -1,14 +1,16 @@
 # BCK-20 — Translation Governance Product Localization and Content Review Package
 
 - ID: **BCK20-OD02-PC-REV-01**
-- Version: **0.2**
+- Version: **0.3**
 - Date: **2026-09-17**
-- Status: **Proposed — review package ready; both specialist verdicts Pending**
+- Status: **Combined-owner Product/Content boundary complete with retained gates**
 - Exact review target: [BCK20-OD02-L10N-01 v0.3](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
-- Parent specification: [BCK-20 v0.2.12](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent specification: [BCK-20 v0.2.13](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Technical owner decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
 - Product/Content pre-review: [BCK20-OD02-PC-PRE-01 v0.2](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW.md)
 - Pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
+- Combined-owner review: [BCK20-OD02-PC-COMB-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_REVIEW.md)
+- Combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ## 1. Purpose and decision boundary
@@ -25,6 +27,11 @@ The package does not supply, infer or pre-approve either verdict. Document
 presence, Product-owner approval, Codex analysis or a generic “looks good” is
 not specialist evidence. `BCK20-OD-02` remains Open.
 
+BCK20-OD02-PC-COMB-DEC-01 is not generic Product-owner approval: it records two
+separate role-scoped verdicts, exact target/hash, checklist/vector evidence and
+zero-independence disclosure. Its validity remains limited to the
+Product/Content workflow boundary and does not expand to OD-10 or D1 scope.
+
 Mobile, Security/Privacy and applicable qualified Legal reviews remain later
 independent gates. This package does not select a provider or schema and does
 not authorize tooling, upload, credentials, runtime, Firebase or deployment.
@@ -38,8 +45,9 @@ SHA-256 uses UTF-8 text normalized to LF line endings.
 | Translation workflow | `BCK20-OD02-L10N-01 v0.3`; corrected technical baseline, specialist evidence pending | `f244b00bbd320de53e3edf8f076f5caa3fd09a962df37d079563d7cf25614309` |
 | Technical decision | `BCK20-OD02-DEC-01 v0.1`; bounded technical decision | `0f073a89f03215e2eeeadebeb192c4d0b95d4089e68e6e597186c128a52f1fd1` |
 | Pre-review decision | `BCK20-OD02-PC-PRE-DEC-01 v0.1`; documentation-only corrections | `47cfa773d266cca17b40c315ae9a9d6501c8417f719a44f362156985c047578f` |
-| Parent BCK-20 | `BCK-20 v0.2.12`; Draft | `1dd872f5de0d72f2a7d5a828570523b4f49b2a4832ed028d1f00cae96d07fe77` |
-| Coverage matrix | `BCK-20-PRE v0.2.12`; Draft | `f5021c0e7f94edf3f3d179a789068a4d9322d211c77437919f4d52516207097e` |
+| Combined-owner decision | `BCK20-OD02-PC-COMB-DEC-01 v0.1`; two bounded verdicts accepted | `96a2349941bd61a09c84f402741a596a8448cf4b699ee66ebdaa42eae0f635f6` |
+| Parent BCK-20 | `BCK-20 v0.2.13`; Draft | `d4a8725e9761cbff3723c48b29d4e1be4ac09487089ec9ad8ffdbc0ba04bd7d1` |
+| Coverage matrix | `BCK-20-PRE v0.2.13`; Draft | `0daca6dc6d882ac7b88b38fed0389c533c451f68d33b45e78a0829bdfe1aab5c` |
 
 The workflow checksum is 19 sections, 50 sequential AC, five translation
 classes, nine named roles, ten semantic record types and 23 typed failures.
@@ -65,13 +73,14 @@ qualification through that decision.
 
 ## 4. Required sign-off matrix
 
-| Sign-off ID | Required reviewer | Review scope | Initial status | Blocking result |
+| Sign-off ID | Required reviewer | Review scope | Current status | Blocking result |
 |---|---|---|---|---|
-| `BCK20-OD02-SIG-L10N` | Named Product Localization owner/reviewer | Classes, locales, glossary, provenance, review depth, provider neutrality, portability, approval/publication/correction workflow and quality evidence | Pending — unnamed | OD-02 remains Open; no production translation publication |
-| `BCK20-OD02-SIG-CONTENT` | Named Content/source-governance owner/reviewer | Source authority and meaning, record families, revision impact, policy conflicts, publication/withdrawal, user-authored exclusion and correction semantics | Pending — unnamed | OD-02 remains Open; no canonical localized content publication |
+| `BCK20-OD02-SIG-L10N` | RechargeN / Product owner acting as interim Product Localization owner | Classes, locales, glossary, provenance, review depth, provider neutrality, portability, approval/publication/correction workflow and quality evidence | **Accept design boundary with retained gates — combined owner; no independence** | OD-02 remains Open; no production translation publication |
+| `BCK20-OD02-SIG-CONTENT` | RechargeN / Product owner acting as interim Content/source-governance owner | Source authority and meaning, record families, revision impact, policy conflicts, publication/withdrawal, user-authored exclusion and correction semantics | **Accept design boundary with retained gates — combined owner; no independence** | OD-02 remains Open; no canonical localized content publication |
 
-Both rows are required. One accepted row cannot compensate for a Pending,
-Reject or Inconclusive row.
+Both rows are effective only for exact workflow v0.3/hash. Their shared human
+owner and lack of independence are permanent evidence. They do not satisfy
+Mobile, Security/Privacy or applicable qualified Legal gates.
 
 ## 5. Product Localization review checklist
 
@@ -302,6 +311,7 @@ frozen hash, even if re-review scope may be documented as non-semantic.
 
 ## 15. Immediate next action
 
-Assign named Product Localization and Content reviewers and provide each the
-complete frozen input plus this package. Do not prefill either verdict. Until
-both effective records exist, do not update BCK-20 or D1 status.
+Product Localization and Content combined-owner verdicts are recorded. Prepare
+separate Mobile and Security/Privacy review of exact workflow v0.3; attach
+qualified Legal review only where applicable. Keep BCK20-OD-02 Open, OD-10
+Proposed and BCK-20 Draft. Do not start schema or runtime work.
