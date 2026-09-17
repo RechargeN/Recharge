@@ -1,21 +1,22 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.14
+- Версия: 1.15
 - Дата: 2026-09-17
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4.67](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.68](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
 
-Revision 1.14 records BCK20-OD02-V04-COMB-DEC-01 and four separately
-attributable exact-v0.4 design verdicts under one disclosed owner with zero
-independence. BCK20-OD-02/05 remain Open, OD-10 Proposed, BCK-20 Draft and
-BCK20-OD-03 Deferred. Source-authority, independent Security/Privacy and
-applicable qualified Legal evidence remain Pending; no provider, schema,
-runtime or infrastructure work is authorized.
+Revision 1.15 records BCK20-OD02-SRC-AUTH-DEC-01 and accepts the frozen
+source-authority matrix only as a design boundary under six combined roles
+with zero independence. BCK20-OD-02/05 remain Open, OD-10 Proposed, BCK-20
+Draft and BCK20-OD-03 Deferred. Actual source records, external-source
+license/terms and pinned ingestion evidence, independent Security/Privacy and
+applicable qualified Legal evidence remain Pending/Blocked/Deferred; no
+provider, schema, runtime or infrastructure work is authorized.
 
 `BCK-02-A1` — execution annex к BCK-02, а не новый BCK-spec. Он не увеличивает
 checksum реестра `22 BCK + 6 RUN`, не заменяет документы BCK-01–22 и не
@@ -59,8 +60,8 @@ Provider/AI/Payments integrations.
 - RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
   Review, production Identity/Event projection/mobile/deployment отсутствуют.
 - G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
-- Current D1 snapshot is BCK-01 v0.4.63, BCK-03 v0.3.14, BCK-04 v0.4.23,
-  BCK-05 v0.2.30 and BCK-20 v0.2.15. BCK04-SEC-DEC-01 and
+- Current D1 snapshot is BCK-01 v0.4.64, BCK-03 v0.3.14, BCK-04 v0.4.23,
+  BCK-05 v0.2.30 and BCK-20 v0.2.16. BCK04-SEC-DEC-01 and
   BCK04-OD01-DEC-01 record the combined-owner technical BCK-04 and
   threat-model verdicts. BCK-04 remains Draft and BCK04-OD-01 remains
   Proposed pending independent/cross-boundary evidence; OD-09/OD-11/Legal,
@@ -69,7 +70,8 @@ Provider/AI/Payments integrations.
   Deferred, OD-02/05 Open, OD-10 Proposed and BCK-20 Draft.
 - BCK20-OD02-V04-COMB-DEC-01 records four separate exact-v0.4 design verdicts
   with zero independence; OD-02 remains Open.
-- Следующий последовательный этап — source-authority evidence, independent
+- Следующий последовательный этап — actual source records, external-source
+  license/terms и pinned ingestion evidence, independent
   Security/Privacy и applicable qualified Legal review; BCK-05 evidence and
   runtime gates remain deferred.
 
@@ -1351,19 +1353,20 @@ inconclusive.
 
 Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 v0.4.63 Review и BCK-01-REV-01 v1.23 evidence.
-2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.15
+1. BCK-01 v0.4.64 Review и BCK-01-REV-01 v1.24 evidence.
+2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.16
    named-owner review и evidence-based verdicts; D1-SIG-API и bounded
    D1-SIG-OPS/SEC/MOBILE уже recorded для границ BCK-03.
 3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
    выбора topology.
-4. BCK-D1-REV-01 v1.27, sign-off ledger v1.25, workbook v1.23,
+4. BCK-D1-REV-01 v1.28, sign-off ledger v1.26, workbook v1.24,
    BCK-D1-OWN-A-DEC-01 v0.1, BCK03-OPS-DEC-01 v0.1 и
    BCK03-SEC-DEC-01 v0.1, BCK03-MOB-DEC-01 v0.1 и
    BCK04-SEC-DEC-01 v0.1, BCK04-OD01-DEC-01 v0.1 и
    BCK20-OD02-DEC-01 v0.1, BCK20-OD02-PC-COMB-DEC-01 v0.1 и
    BCK20-OD02-MS-PRE-DEC-01 v0.1 и
-   BCK20-OD02-V04-COMB-DEC-01 v0.1 с
+   BCK20-OD02-V04-COMB-DEC-01 v0.1 и
+   BCK20-OD02-SRC-AUTH-DEC-01 v0.1 с
    evidence-based responses; никаких inferred signatures.
 5. Отдельный R1 exact file/rollback/evidence plan только после G1; существующие
    R0/RAW-C файлы не дают R1 authority.

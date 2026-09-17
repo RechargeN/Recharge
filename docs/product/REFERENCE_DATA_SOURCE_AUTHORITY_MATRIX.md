@@ -1,14 +1,15 @@
 # BCK-20 — Reference Data Source-Authority Matrix
 
 - ID: **BCK20-OD02-SRC-AUTH-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — exact owner decision required**
+- Status: **Owner decision recorded — source-authority design boundary accepted with retained gates**
 - Decision served: **BCK20-OD-02 — translation source/review workflow**
-- Parent: [BCK-20 v0.2.15](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent: [BCK-20 v0.2.16](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Exact workflow: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Workflow normalized-LF SHA-256: `d7cad4f1531005b02ee7c46028af03839be58985cd3285750084daa8293d6975`
 - Exact-v0.4 owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
+- Source-authority owner decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md)
 - Accountable owner: **Reference Data owner**
 - Required review perspectives: **Product Localization, Content/source governance, Mobile and Security/Privacy; qualified Legal where applicable**
@@ -23,7 +24,7 @@ without creating a dataset, schema, provider integration or runtime. It tells
 future reviewers where each value may come from, who owns its meaning and what
 must happen when evidence is missing or stale.
 
-Recommended verdict:
+Recorded verdict:
 
 > **Accept source-authority design boundary with retained gates** for this
 > exact document revision and hash.
@@ -190,7 +191,7 @@ translator, independent reviewer, qualified professional or signatory.
 
 ## 9. Review checklist
 
-| # | Check | Proposed result |
+| # | Check | Recorded result |
 |---:|---|---|
 | 1 | every BCK-20 included family has one source-authority disposition | Pass |
 | 2 | standard identity and Recharge product-policy authority are separated | Pass |
@@ -211,7 +212,7 @@ translator, independent reviewer, qualified professional or signatory.
 These are documentation results. They are not executable fixture results or
 independent review.
 
-## 10. Exact owner decision requested
+## 10. Historical exact owner decision request
 
 ```text
 Одобряю BCK20-OD02-SRC-AUTH-01 v0.1:
@@ -251,8 +252,15 @@ push и merge не разрешаю.
 17. **BCK20-OD02-SRC-AUTH-AC-17:** independent Security/Privacy and applicable qualified Legal evidence remain Pending.
 18. **BCK20-OD02-SRC-AUTH-AC-18:** no provider/schema/IAM/runtime/Firebase/deployment/activation/push/merge authority is created.
 
-## 12. Next action
+## 12. Recorded disposition and next action
 
-Freeze this v0.1 document by normalized-LF SHA-256 in a bounded owner-review
-package. Do not update BCK-20/D1 canonical statuses or create source data until
-the exact owner decision is recorded.
+BCK20-OD02-SRC-AUTH-DEC-01 accepts the frozen v0.1 matrix at normalized-LF
+SHA-256 `3b4701e0d285c4de076e7ae4f526b4f47942cd30f7f4383e3ef5de49c3a6eff6`
+as a source-authority design boundary with retained gates. This v0.2 revision
+adds status traceability only and does not change the accepted v0.1 source
+semantics.
+
+Next, create and review the actual Recharge-owned source records and complete
+license/terms plus pinned ingestion evidence for any external candidate source.
+No dataset, translation, ingestion or runtime may be inferred from this
+decision.

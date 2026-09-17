@@ -1,7 +1,7 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.15**
+- Version: **0.2.16**
 - Date: **2026-09-17**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
@@ -28,12 +28,26 @@
 - Mobile review: [BCK20-OD02-MOB-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_MOBILE_OWNER_REVIEW.md)
 - Security/Privacy review: [BCK20-OD02-SEC-REV-01 v0.2](REFERENCE_DATA_TRANSLATION_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
+- Source-authority matrix: [BCK20-OD02-SRC-AUTH-01 v0.2](REFERENCE_DATA_SOURCE_AUTHORITY_MATRIX.md)
+- Source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.16 — 2026-09-17
+
+- recorded BCK20-OD02-SRC-AUTH-DEC-01 and accepted the frozen source-authority
+  matrix v0.1 as a design boundary with retained gates;
+- kept official external registries as candidate authorities only within their
+  named field scope; license/terms, pinned ingestion evidence and executable
+  use remain Pending;
+- retained unresolved source records, independent Security/Privacy and
+  applicable qualified Legal evidence as Pending/Blocked/Deferred;
+- retained BCK20-OD-02/05 Open, OD-10 Proposed, BCK-20 Draft and
+  BCK20-OD-03 Deferred with no provider/schema/runtime authority.
 
 ### v0.2.15 — 2026-09-17
 
@@ -682,7 +696,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.15:
+Future targets, absent and unauthorized in v0.2.16:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -746,7 +760,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 |---|---|---|---|---|
 | OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
-| BCK20-OD-02 | Open; workflow v0.4 corrections integrated; Product/Content v0.3 verdicts are historical exact-hash evidence | Product Localization | v0.4 Product/Content revalidation plus Mobile/Security/Privacy and applicable qualified Legal review; source-authority content remains absent | no production locale publication |
+| BCK20-OD-02 | Open; workflow v0.4 verdicts and source-authority design boundary recorded | Product Localization | actual Recharge-owned source records, external-source license/terms and pinned ingestion evidence, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
 | BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
 | BCK20-OD-05 | Open | Qualified Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | affected market/legal surface disabled |
@@ -769,15 +783,13 @@ schema toolchain.
 - no schema/runtime/distribution/mobile implementation is created;
 - all Open/Deferred Decisions have owner/gate/fail-closed default.
 
-Current readiness: BCK20-OWN-DEC-01 records decision triage and
-BCK20-OD02-DEC-01 records the amended combined-owner technical translation-
-governance boundary. BCK20-OD02-MS-PRE-DEC-01 records seven documentation-only
-Mobile/Security corrections in workflow v0.4. The two Product/Content verdicts
-remain historical evidence for exact v0.3 and require v0.4 revalidation;
-Mobile and Security/Privacy proposed reviews are not yet effective. Reference
-Data and delegated API/Mobile/Security/Privacy/Legal roles remain unresolved in
-[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). Qualified Legal
-evidence remains absent, so BCK-20 remains Draft.
+Current readiness: the four exact-v0.4 design verdicts and the frozen
+source-authority design boundary are recorded under disclosed combined
+ownership with zero independence. Actual Recharge-owned source records,
+external-source license/terms and pinned ingestion evidence, independent
+Security/Privacy and applicable qualified Legal evidence remain unresolved in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). BCK20-OD-02/05
+remain Open, so BCK-20 remains Draft.
 
 ## 26. Definition of Done for Approved BCK-20
 
@@ -791,7 +803,7 @@ evidence remains absent, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 61 AC are unique/sequential and unimplemented status is honest;
+- 63 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -845,7 +857,7 @@ evidence remains absent, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.15 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.16 creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -872,13 +884,17 @@ evidence remains absent, so BCK-20 remains Draft.
     exact-v0.4 combined-owner verdicts with zero independence; source-authority,
     independent Security/Privacy, applicable qualified Legal and every
     provider/schema/IAM/runtime/Firebase/deployment gate remain open.
+63. **BCK-20-AC-63:** BCK20-OD02-SRC-AUTH-DEC-01 accepts only the frozen
+    source-authority design boundary; actual source records, external-source
+    license/terms, pinned ingestion evidence, independent/qualified review and
+    every provider/schema/IAM/runtime/Firebase/deployment gate remain open.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.15 the following remain absent:
+At v0.2.16 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -890,12 +906,15 @@ At v0.2.15 the following remain absent:
 
 ## 29. Next action
 
-1. obtain source-authority content for BCK20-OD-02 under the approved
-   governance boundary;
-2. obtain independent Security/Privacy and applicable qualified Legal evidence;
-3. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
-4. run OD-10 documentation-vector review without creating executable schema;
-5. keep every Deferred item closed until its exact later gate;
-6. move BCK-20 to Review, then Approved only after §26;
-7. keep schema/runtime/distribution implementation blocked until G1 and a
+1. define and approve actual internal source records for market policy and
+   policy references under the accepted source-authority boundary;
+2. decide external official-source license/terms and capture pinned ingestion
+   evidence before any executable use;
+3. prepare immutable source snapshots and translations only after those gates;
+4. obtain independent Security/Privacy and applicable qualified Legal evidence;
+5. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
+6. run OD-10 documentation-vector review without creating executable schema;
+7. keep every Deferred item closed until its exact later gate;
+8. move BCK-20 to Review, then Approved only after §26;
+9. keep schema/runtime/distribution implementation blocked until G1 and a
    separately Approved executable file plan.

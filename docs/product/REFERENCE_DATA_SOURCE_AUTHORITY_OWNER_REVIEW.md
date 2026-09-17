@@ -1,15 +1,16 @@
 # BCK-20 — Source-Authority Combined-Owner Review Package
 
 - ID: **BCK20-OD02-SRC-AUTH-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-17**
-- Status: **Proposed — exact owner decision required**
+- Status: **Owner decision recorded — accepted with retained gates**
 - Frozen target: [BCK20-OD02-SRC-AUTH-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_MATRIX.md)
 - Target normalized-LF SHA-256: `3b4701e0d285c4de076e7ae4f526b4f47942cd30f7f4383e3ef5de49c3a6eff6`
-- Parent: [BCK-20 v0.2.15](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent: [BCK-20 v0.2.16](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Workflow: [BCK20-OD02-L10N-01 v0.4](REFERENCE_DATA_TRANSLATION_GOVERNANCE_WORKFLOW.md)
 - Workflow decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
-- Proposed owner/signatory: **RechargeN / Product owner**
+- Decision record: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
+- Recorded owner/signatory: **RechargeN / Product owner**
 - Combined roles: **Reference Data + Product/Market + Product Localization + Content/source governance + Mobile + technical Security/Privacy**
 - Technical evidence author: **OpenAI Codex — analysis only, not a signatory**
 - Independence: **none; combined-owner review**
@@ -18,13 +19,13 @@
 
 ---
 
-## 1. Purpose and recommended verdict
+## 1. Purpose and recorded verdict
 
 This package reviews one exact source-authority matrix revision. It does not
 review changed content under the same filename and does not turn candidate
 external authorities into approved ingestion sources.
 
-Recommended verdict:
+Recorded verdict:
 
 > **Accept source-authority design boundary with retained gates** for
 > `BCK20-OD02-SRC-AUTH-01 v0.1` at the frozen hash above.
@@ -182,7 +183,7 @@ If §9 is accepted exactly:
 - provider selection, schema, IAM/runtime, Firebase, deployment, activation,
   push and merge: **unauthorized**.
 
-## 8. Proposed signature record
+## 8. Recorded signature record
 
 ```text
 Decision input: BCK20-OD02-SRC-AUTH-REV-01 v0.1
@@ -192,13 +193,13 @@ Named reviewer identity: RechargeN / Product owner
 Combined roles: Reference Data owner; Product/Market owner; Product Localization owner; Content/source-governance owner; Mobile owner; technical Security/Privacy owner
 Independence: none; combined-owner review
 Qualified Security/Privacy/Legal claim: none
-Proposed verdict: Accept source-authority design boundary with retained gates
+Recorded verdict: Accept source-authority design boundary with retained gates
 Accepted scope: §§2–5 of this package and all 20 matrix-family dispositions
 Retained observations: SRC-AUTH-O-01–08
 Runtime authority: none
 ```
 
-## 9. Exact owner decision requested
+## 9. Recorded exact owner decision
 
 ```text
 Одобряю BCK20-OD02-SRC-AUTH-REV-01 v0.1:
@@ -237,7 +238,11 @@ deployment, activation, push и merge не разрешаю.
 15. **BCK20-OD02-SRC-AUTH-REV-AC-15:** no provider/schema/IAM/runtime/Firebase/deployment/activation/push/merge authority is created.
 16. **BCK20-OD02-SRC-AUTH-REV-AC-16:** any target version/content/hash change requires a new review and owner decision.
 
-## 11. Next action
+## 11. Recorded disposition and next action
 
-Obtain the exact owner decision in §9. Before that decision, do not mark the
-matrix Accepted, reconcile canonical statuses or create source data/runtime.
+BCK20-OD02-SRC-AUTH-DEC-01 accepts this review's frozen v0.1 target and the
+review itself at normalized-LF SHA-256
+`0328af26c4d0ca9fdd2a5fd9a5b64a75b10c4daec03b696c593f518683561f6f`.
+The decision is limited to the source-authority design boundary. Actual source
+records, license/terms, pinned ingestion evidence, independent review,
+qualified evidence and runtime remain outside the accepted scope.
