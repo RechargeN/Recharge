@@ -1,12 +1,13 @@
 # BCK-20 — Internal Reference Source Records
 
 - ID: **BCK20-OD02-SRC-REC-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-18**
-- Status: **Proposed — exact owner decision required**
-- Parent: [BCK-20 v0.2.16](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Status: **Owner decision recorded — documentation source baseline accepted with retained gates**
+- Parent: [BCK-20 v0.2.17](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Authority boundary: [BCK20-OD02-SRC-AUTH-01 v0.2](REFERENCE_DATA_SOURCE_AUTHORITY_MATRIX.md)
 - Authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
+- Source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
 - Accountable owner: **RechargeN / Product owner acting as Product/Market and Reference Data owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled**
 - Runtime effect: **none**
@@ -218,8 +219,14 @@ validation result. A URL or official-domain observation is insufficient.
 19. **BCK20-OD02-SRC-REC-AC-19:** schema, provider, IAM/runtime, Firebase, deployment and activation remain unauthorized.
 20. **BCK20-OD02-SRC-REC-AC-20:** this document authorizes no push or merge.
 
-## 9. Next action
+## 9. Recorded disposition and next action
 
-Freeze this v0.1 document and the external evidence register by normalized-LF
-SHA-256 in one bounded combined-owner review package. Do not reconcile BCK-20,
-D1 or launch statuses until an exact owner decision is recorded.
+BCK20-OD02-SRC-REC-DEC-01 accepts the frozen v0.1 internal records at
+normalized-LF SHA-256
+`c4b0bcda3c55524354547b0b7596e96488086abf166cae76526ecfe7ba4a8555`
+as documentation source inputs with retained gates. This v0.2 revision adds
+status traceability only and does not change the accepted revision-1 meaning.
+
+Next, prepare external artifact/license evidence and the unresolved source
+families as separate reviewable packages. No network retrieval, ingestion,
+schema or runtime is authorized by this disposition.

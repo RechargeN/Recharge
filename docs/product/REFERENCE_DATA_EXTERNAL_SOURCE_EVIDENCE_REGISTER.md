@@ -1,12 +1,13 @@
 # BCK-20 — External Source Evidence Register
 
 - ID: **BCK20-OD02-EXT-EV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-18**
-- Status: **Proposed work register — no source approved for ingestion**
-- Parent: [BCK20-OD02-SRC-REC-01 v0.1](REFERENCE_DATA_INTERNAL_SOURCE_RECORDS.md)
+- Status: **Accepted evidence work queue — no source approved for ingestion**
+- Parent: [BCK20-OD02-SRC-REC-01 v0.2](REFERENCE_DATA_INTERNAL_SOURCE_RECORDS.md)
 - Authority boundary: [BCK20-OD02-SRC-AUTH-01 v0.2](REFERENCE_DATA_SOURCE_AUTHORITY_MATRIX.md)
 - Accountable owner: **Reference Data owner**
+- Owner decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
 - Legal/license disposition: **Pending for every external source**
 - Runtime effect: **none**
 
@@ -149,8 +150,12 @@ authorization.
 14. **BCK20-OD02-EXT-EV-AC-14:** Firebase, deployment, activation, push and merge remain unauthorized.
 15. **BCK20-OD02-EXT-EV-AC-15:** a future executable slice still requires explicit approval after evidence readiness.
 
-## 9. Next action
+## 9. Recorded disposition and next action
 
-Freeze this v0.1 register with the internal source-record document in a bounded
-combined-owner review package. Network revalidation and artifact retrieval
-remain separate work requiring explicit authorization.
+BCK20-OD02-SRC-REC-DEC-01 accepts the frozen v0.1 register at normalized-LF
+SHA-256 `faee6caaa2a65380c2e631c745669f32da20926502792560c657184bd3bf750d`
+as a work queue only. Every source remains unapproved for ingestion. This v0.2
+revision adds status traceability without changing the frozen work items.
+
+Network revalidation, artifact retrieval, terms/license disposition and
+validation evidence remain separate work requiring explicit authorization.

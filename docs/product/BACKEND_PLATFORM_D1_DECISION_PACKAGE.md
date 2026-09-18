@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Reconciliation and Decision Package
 
 - ID: **BCK-D1-DEC-01**
-- Version: **0.16**
+- Version: **0.17**
 - Date: **2026-09-17**
 - Status: **Accepted reconciliation record — D1 exit remains blocked**
 - Runtime status: **N/A; documentation decision evidence only**
 - Accountable coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.64](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.68](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.65](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.69](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -20,6 +20,7 @@
 - Related Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
 - Related exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Related source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
+- Related source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
 - Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
@@ -27,6 +28,12 @@
 ---
 
 ## 0. Revision note
+
+v0.17 reconciles BCK20-OD02-SRC-REC-DEC-01 and BCK-20 v0.2.17. Twenty-three
+internal records are accepted only as documentation inputs and eight external
+candidates only as a work queue under six combined roles with zero
+independence. All markets, external/source-copy/independent/qualified, OD and
+runtime gates remain closed; D1 exit remains blocked.
 
 v0.16 reconciles BCK20-OD02-SRC-AUTH-DEC-01 and BCK-20 v0.2.16. The
 source-authority matrix is accepted only as a design boundary under six
@@ -341,6 +348,10 @@ Executable verification, only after a separately Approved slice, must include:
 28. **BCK-D1-AC-28:** BCK20-OD02-SRC-AUTH-DEC-01 accepts only the frozen
     source-authority design boundary; actual source records, external evidence,
     independent/qualified review, OD, D1 and implementation gates remain open.
+29. **BCK-D1-AC-29:** BCK20-OD02-SRC-REC-DEC-01 accepts internal records only
+    as documentation inputs and external candidates only as a work queue; all
+    market, evidence, independent/qualified, OD, D1 and implementation gates
+    remain closed.
 
 ## 11. Rollback
 

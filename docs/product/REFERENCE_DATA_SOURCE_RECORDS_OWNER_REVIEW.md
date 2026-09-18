@@ -1,16 +1,17 @@
 # BCK-20 — Source Records Combined-Owner Review Package
 
 - ID: **BCK20-OD02-SRC-REC-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-18**
-- Status: **Proposed — exact owner decision required**
+- Status: **Owner decision recorded — accepted with retained gates**
 - Frozen internal records: [BCK20-OD02-SRC-REC-01 v0.1](REFERENCE_DATA_INTERNAL_SOURCE_RECORDS.md)
 - Internal-records normalized-LF SHA-256: `c4b0bcda3c55524354547b0b7596e96488086abf166cae76526ecfe7ba4a8555`
 - Frozen external register: [BCK20-OD02-EXT-EV-01 v0.1](REFERENCE_DATA_EXTERNAL_SOURCE_EVIDENCE_REGISTER.md)
 - External-register normalized-LF SHA-256: `faee6caaa2a65380c2e631c745669f32da20926502792560c657184bd3bf750d`
-- Parent: [BCK-20 v0.2.16](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Parent: [BCK-20 v0.2.17](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
-- Proposed owner/signatory: **RechargeN / Product owner**
+- Decision record: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- Recorded owner/signatory: **RechargeN / Product owner**
 - Combined roles: **Product/Market + Reference Data + Product Localization + Content/source governance + Mobile + technical Security/Privacy**
 - Independence: **none; combined-owner review**
 - Qualified Security/Privacy/Legal claim: **none**
@@ -18,7 +19,7 @@
 
 ---
 
-## 1. Purpose and recommended verdict
+## 1. Purpose and recorded verdict
 
 This package reviews two exact documentation artifacts:
 
@@ -27,7 +28,7 @@ This package reviews two exact documentation artifacts:
 2. an external-source evidence work register in which every source remains
    unapproved for ingestion.
 
-Recommended verdict:
+Recorded verdict:
 
 > **Accept internal source-record documentation baseline and external evidence
 > work queue with retained gates** for the exact frozen revisions and hashes.
@@ -150,7 +151,7 @@ If §8 is accepted exactly:
   remain unauthorized;
 - push and merge remain unauthorized.
 
-## 7. Proposed signature record
+## 7. Recorded signature record
 
 ```text
 Decision input: BCK20-OD02-SRC-REC-REV-01 v0.1
@@ -162,11 +163,11 @@ Named reviewer identity: RechargeN / Product owner
 Combined roles: Product/Market; Reference Data; Product Localization; Content/source governance; Mobile; technical Security/Privacy
 Independence: none; combined-owner review
 Qualified Security/Privacy/Legal claim: none
-Proposed verdict: Accept internal source-record documentation baseline and external evidence work queue with retained gates
+Recorded verdict: Accept internal source-record documentation baseline and external evidence work queue with retained gates
 Runtime authority: none
 ```
 
-## 8. Exact owner decision requested
+## 8. Recorded exact owner decision
 
 ```text
 Одобряю BCK20-OD02-SRC-REC-REV-01 v0.1:
@@ -210,8 +211,11 @@ selection, schema, IAM/runtime, Firebase, deployment, activation, push и merge
 17. **BCK20-OD02-SRC-REC-REV-AC-17:** any target content/version/hash change requires a new review and owner decision.
 18. **BCK20-OD02-SRC-REC-REV-AC-18:** canonical status reconciliation waits for the exact owner decision.
 
-## 10. Next action
+## 10. Recorded disposition and next action
 
-Obtain the exact owner decision in §8. Before that decision, do not mark either
-target Accepted, update BCK-20/D1 canonical statuses, retrieve external
-artifacts or create schema/runtime work.
+BCK20-OD02-SRC-REC-DEC-01 accepts this review's frozen v0.1 targets and this
+review at normalized-LF SHA-256
+`e0e41910be23b7848e6fb2a1b87701f877fa341d8e1b96babbed660bb9eaefe0`.
+The decision accepts documentation inputs and an evidence work queue only.
+External artifacts, terms, ingestion, unresolved families, independent/
+qualified evidence and runtime remain outside the accepted scope.
