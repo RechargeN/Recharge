@@ -1,13 +1,14 @@
 # BCK-20 — External Evidence Collection Plan Owner Review
 
 - ID: **BCK20-OD02-EXT-EV-PLAN-REV-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-18**
-- Status: **Proposed — exact owner decision required**
+- Status: **Owner decision recorded — EXT-G0 accepted with retained gates**
 - Frozen target: [BCK20-OD02-EXT-EV-PLAN-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_PLAN.md)
 - Target normalized-LF SHA-256: `f06d42f16fafbfe16dae0e0c546c71528fb4728c9045a5b54879c1767e4dd4ac`
 - Parent register: [BCK20-OD02-EXT-EV-01 v0.2](REFERENCE_DATA_EXTERNAL_SOURCE_EVIDENCE_REGISTER.md)
-- Proposed owner/signatory: **RechargeN / Product owner**
+- Decision record: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
+- Recorded owner/signatory: **RechargeN / Product owner**
 - Combined roles: **Reference Data + Product/Market + Product Localization/Content + Platform Operations + technical Security/Privacy**
 - Independence: **none; combined-owner review**
 - Qualified Security/Privacy/Legal claim: **none**
@@ -16,13 +17,13 @@
 
 ---
 
-## 1. Purpose and recommended verdict
+## 1. Purpose and recorded verdict
 
 This package reviews the exact docs-only collection plan. It does not review a
 live source, current license, downloaded artifact, parser, validation result or
 execution authorization.
 
-Recommended verdict:
+Recorded verdict:
 
 > **Accept docs-only external evidence collection plan with retained gates**
 > for the exact target revision and hash.
@@ -128,7 +129,7 @@ If §8 is accepted exactly:
 - provider selection, schema, IAM/runtime, Firebase, deployment, activation,
   push and merge remain unauthorized.
 
-## 7. Proposed signature record
+## 7. Recorded signature record
 
 ```text
 Decision input: BCK20-OD02-EXT-EV-PLAN-REV-01 v0.1
@@ -138,12 +139,12 @@ Named reviewer identity: RechargeN / Product owner
 Combined roles: Reference Data; Product/Market; Product Localization/Content; Platform Operations; technical Security/Privacy
 Independence: none; combined-owner review
 Qualified Security/Privacy/Legal claim: none
-Proposed verdict: Accept docs-only external evidence collection plan with retained gates
+Recorded verdict: Accept docs-only external evidence collection plan with retained gates
 Network authority: none
 Runtime authority: none
 ```
 
-## 8. Exact owner decision requested
+## 8. Recorded exact owner decision
 
 ```text
 Одобряю BCK20-OD02-EXT-EV-PLAN-REV-01 v0.1:
@@ -183,8 +184,11 @@ deployment, activation, push и merge не разрешаю.
 17. **BCK20-OD02-EXT-EV-PLAN-REV-AC-17:** any target content/version/hash change requires a new review and owner decision.
 18. **BCK20-OD02-EXT-EV-PLAN-REV-AC-18:** canonical status reconciliation waits for the exact owner decision.
 
-## 10. Next action
+## 10. Recorded disposition and next action
 
-Obtain the exact owner decision in §8. Until then, the plan remains Proposed,
-EXT-G0 is not satisfied and no network or execution authorization may be
-requested from this artifact.
+BCK20-OD02-EXT-EV-PLAN-DEC-01 accepts this review's frozen v0.1 target and the
+review itself at normalized-LF SHA-256
+`f23fcf6052fd02901319c072b29f1b4a263fbef0729c741d7cab3aed3664762b`.
+Only EXT-G0 is satisfied. EXT-G1–G6, network, terms capture, artifacts,
+parser/fixture work, repository data, ingestion and runtime remain outside the
+accepted scope.

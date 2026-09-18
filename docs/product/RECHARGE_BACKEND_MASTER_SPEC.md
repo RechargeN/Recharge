@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.65**
+- Version: **0.4.66**
 - Date: **2026-09-17**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
@@ -14,6 +14,14 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.66 — 2026-09-18
+
+- recorded BCK20-OD02-EXT-EV-PLAN-DEC-01 and EXT-G0 documentation plan;
+- reconciled BCK-20/coverage v0.2.18 while retaining EXT-G1–G6, all markets,
+  external evidence, independent/qualified and implementation gates closed;
+- created no network, download, parser, repository-data, ingestion, schema or
+  runtime authority.
 
 ### v0.4.65 — 2026-09-18
 
@@ -822,7 +830,7 @@ Approval и требует reconciliation либо Accepted ADR.
 | Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
 | AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
 | Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4.69](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, later 2.4.x revisions are traceability amendments |
+| Backend sequencing | [BCK-02 v2.4.70](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7; v2.4 остаётся Approved semantic baseline, later 2.4.x revisions are traceability amendments |
 | Baltic rollout | [Latvia/Baltics roadmap v1.12](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
 | Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
 | Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
@@ -855,7 +863,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
 | Operations | BCK-05 v0.2.30 и coverage matrix v0.2.30 Draft/Present | Bounded BCK-03/BCK-04/threat-model owner-boundary verdicts are recorded; BCK-05 specialist/stage/restore/executable evidence remains unresolved | Close D1/G1 and approve an exact R1 slice before environment provisioning |
 | Privacy | BCK-04 v0.4.23, coverage v0.3.23 and threat-model v0.2 Draft/Present | BCK-04 and threat-model combined-owner technical verdicts are recorded; OD-01 remains Proposed pending independent/cross-boundary evidence, while Legal/incident/tabletop/runtime blockers remain | Закрыть BCK-04 blockers; owner-boundary Acceptance не является BCK-04 Review/Legal/runtime approval |
-| Baltic markets | BCK-20/coverage v0.2.17 Draft/Present | 23 internal documentation records accepted; all markets disabled and external/source-copy/independent/qualified evidence incomplete | Закрыть retained evidence gates без country forks |
+| Baltic markets | BCK-20/coverage v0.2.18 Draft/Present | internal records and EXT-G0 plan accepted; EXT-G1–G6, all markets and external/source-copy/independent/qualified gates closed | Закрыть retained evidence gates без country forks |
 
 ### 4.1. Главный gap
 
@@ -1539,7 +1547,7 @@ product/cloud backend scope не Ready, пока одновременно не �
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.65
+## 25. Definition of Done BCK-01 v0.4.66
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
@@ -1633,8 +1641,8 @@ Approval требует reconciliation report и sign-off владельцев, 
     server-owned grants and revocation; cached client state не даёт authority.
 45. **BCK-01-AC-45:** root transport registry и module transport handlers имеют
     разные ответственности и не содержат domain/persistence shortcuts.
-46. **BCK-01-AC-46:** BCK-02 v2.4.69 (Approved v2.4 semantics), BCK-02-A1
-    Draft v1.16 и BCK-09 Review v1.13 представлены с их фактическими
+46. **BCK-01-AC-46:** BCK-02 v2.4.70 (Approved v2.4 semantics), BCK-02-A1
+    Draft v1.17 и BCK-09 Review v1.13 представлены с их фактическими
     status/evidence и не объявлены отсутствующими.
 47. **BCK-01-AC-47:** source reconciliation различает execution instructions,
     architecture authority, implementation status и delivery coordination.
@@ -1675,6 +1683,9 @@ Approval требует reconciliation report и sign-off владельцев, 
     documentation inputs and the external evidence work queue; all markets
     remain disabled and external/source-copy/independent/qualified/runtime
     gates remain open.
+61. **BCK-01-AC-61:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0;
+    EXT-G1–G6, network, terms, artifact, parser, repository-data, ingestion and
+    every independent/qualified/runtime gate remain closed.
 
 Номера AC этой ревизии стабильны: новые criteria добавляются в конец. Удаление
 или изменение смысла существующего AC требует новой version и migration note
@@ -1682,7 +1693,7 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.4.65 не реализованы:
+На дату v0.4.66 не реализованы:
 
 - product/domain `apps/backend` application beyond the local R0 tooling and
   disabled Emulator-only ECL-03C source;
@@ -1709,14 +1720,14 @@ not change production readiness.
 
 Следующий formal step остаётся документационным:
 
-1. после отдельного разрешения revalidate external candidates и зафиксировать
+1. отдельно запросить EXT-G1 для одного named batch, затем revalidate external candidates и зафиксировать
    exact artifacts, license/terms и pinned ingestion evidence; затем получить
    source copy, independent Security/Privacy и applicable qualified Legal evidence;
 2. позже провести named-owner review по
-   [BCK-D1-REV-01 v1.29](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md) для
+   [BCK-D1-REV-01 v1.30](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md) для
    BCK-03/BCK-04/BCK-05/BCK-20 и записать evidence-based verdicts поверх уже
    зафиксированных combined-role assignments в
-   [BCK-D1-SIG-01 v1.27](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
+   [BCK-D1-SIG-01 v1.28](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
 3. принять или потребовать amendments к evidence packages
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),
    [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md),

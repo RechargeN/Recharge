@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.29**
+- Version: **1.30**
 - Date: **2026-09-17**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
@@ -23,12 +23,20 @@
 - Exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
 - Source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- External-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
 - Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Revision notes
+
+### v1.30 — external-evidence EXT-G0 plan decision
+
+BCK20-OD02-EXT-EV-PLAN-DEC-01 accepts the frozen plan and satisfies EXT-G0
+only under five combined roles with zero independence. EXT-G1–G6, every market,
+network/external evidence/independent/qualified/OD/runtime gate remains closed;
+D1 exit remains blocked.
 
 ### v1.29 — internal source-record baseline decision
 
@@ -217,7 +225,7 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 | [BCK20 Mobile/Security pre-review decision](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md) | MS-F-001–MS-F-007 corrections and exact-v0.4 review re-freeze | Accepted documentation correction boundary only | Product/Content revalidation and Mobile/Security verdicts Pending; no runtime authority |
 | [BCK20 Product/Content combined-owner decision](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md) | two separate exact-hash L10N/Content verdicts | Accepted combined-owner boundary; no independence | OD-02 and remaining Mobile/Security/Privacy/Legal/runtime gates unchanged |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.27; source-record documentation decision recorded; D1 sign-offs incomplete | no D1 status promotion |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.28; EXT-G0 plan decision recorded; D1 sign-offs incomplete | no D1 status promotion |
 | [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.21; Product/Content verdicts recorded | other owner/specialist responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | stable assets/actors/boundaries, 49 classified threats, per-threat owners/gates/residual states and checksum | Draft v0.2; combined-owner technical verdict Present; BCK04-OD-01 Proposed | independent Security/Privacy and cross-boundary confirmations pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
@@ -440,10 +448,10 @@ rewritten.
 | BCK-03 | v0.3.14 Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; independent evidence Pending |
 | BCK-04 + coverage | v0.4.23 / v0.3.23 Draft | BCK-04/threat-model technical verdicts recorded; OD-01 remains Proposed pending independent/cross-boundary evidence; Legal/OD-09 gates unchanged |
 | BCK-05 + coverage | v0.2.30 Draft | current platform/API/Security/Mobile/roadmap anchors and R0/RAW-C boundary recorded; owner-boundary verdicts do not accept BCK-05; R1 blocked |
-| BCK-20 + coverage | v0.2.17 Draft | internal documentation records accepted; external/source-copy/independent/Legal, OD-02/05, OD-10 and runtime unresolved |
-| BCK-01-REV-01 | v1.25 | Review-entry evidence points to BCK-01 v0.4.65/BCK-02 v2.4.69 without implying Approval |
-| BCK-D1-DEC-01 | v0.17 Accepted traceability amendment | source-record documentation decision recorded; OD/runtime dispositions unchanged |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.27 / v1.25 | bounded source-record decision recorded with zero independence; full D1 sign-offs remain incomplete |
+| BCK-20 + coverage | v0.2.18 Draft | internal records and EXT-G0 plan accepted; EXT-G1–G6/external/source-copy/independent/Legal, OD-02/05, OD-10 and runtime unresolved |
+| BCK-01-REV-01 | v1.26 | Review-entry evidence points to BCK-01 v0.4.66/BCK-02 v2.4.70 without implying Approval |
+| BCK-D1-DEC-01 | v0.18 Accepted traceability amendment | EXT-G0 plan decision recorded; OD/runtime dispositions unchanged |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.28 / v1.26 | bounded EXT-G0 decision recorded with zero independence; full D1 sign-offs remain incomplete |
 
 The current reconciliation updates the affected specifications, matrices,
 review records, BCK-01, BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It
@@ -540,6 +548,9 @@ required where the specifications depend on professional legal judgment.
 39. **D1-REV-AC-39:** BCK20-OD02-SRC-REC-DEC-01 accepts only internal
     documentation inputs and an external evidence work queue; all markets and
     external/source-copy/independent/qualified/OD/runtime gates remain closed.
+40. **D1-REV-AC-40:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0;
+    EXT-G1–G6, network, external evidence, independent/qualified, OD and
+    runtime gates remain incomplete.
 
 ## 11. Final statement
 

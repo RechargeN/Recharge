@@ -1,7 +1,7 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.17**
+- Version: **0.2.18**
 - Date: **2026-09-17**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
@@ -32,12 +32,24 @@
 - Source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
 - Internal source records: [BCK20-OD02-SRC-REC-01 v0.2](REFERENCE_DATA_INTERNAL_SOURCE_RECORDS.md)
 - Source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- External-evidence plan: [BCK20-OD02-EXT-EV-PLAN-01 v0.2](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_PLAN.md)
+- External-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.18 — 2026-09-18
+
+- recorded BCK20-OD02-EXT-EV-PLAN-DEC-01 and accepted the frozen external-
+  evidence collection procedure as EXT-G0 documentation baseline only;
+- retained EXT-G1–G6 closed and every source artifact/terms/validation Pending;
+- retained all markets disabled, BCK20-OD-02/05 Open, OD-10 Proposed,
+  BCK-20 Draft and BCK20-OD-03 Deferred;
+- created no network, download, parser, repository-data, ingestion, schema or
+  runtime authority.
 
 ### v0.2.17 — 2026-09-18
 
@@ -711,7 +723,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.17:
+Future targets, absent and unauthorized in v0.2.18:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -775,7 +787,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 |---|---|---|---|---|
 | OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
-| BCK20-OD-02 | Open; internal source-record documentation baseline accepted; external evidence remains a work queue | Product Localization | pinned external artifacts, license/terms and ingestion evidence, source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
+| BCK20-OD-02 | Open; internal records accepted and EXT-G0 collection plan recorded; EXT-G1–G6 closed | Product Localization | separately authorized external evidence collection, pinned artifacts/license/terms/validation, source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
 | BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
 | BCK20-OD-05 | Open | Qualified Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | affected market/legal surface disabled |
@@ -799,7 +811,7 @@ schema toolchain.
 - all Open/Deferred Decisions have owner/gate/fail-closed default.
 
 Current readiness: the four exact-v0.4 design verdicts, frozen source-authority
-boundary and 23 internal documentation source records are recorded under
+boundary, 23 internal documentation source records and EXT-G0 collection plan are recorded under
 disclosed combined ownership with zero independence. All markets remain
 disabled. External artifacts/license/terms/pinned ingestion evidence, source
 snapshots/translations, independent Security/Privacy and applicable qualified
@@ -819,7 +831,7 @@ remain Open, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 64 AC are unique/sequential and unimplemented status is honest;
+- 65 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -873,7 +885,7 @@ remain Open, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.17 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.18 creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -908,13 +920,16 @@ remain Open, so BCK-20 remains Draft.
     only as documentation inputs and eight external candidates only as a work
     queue; all markets remain disabled and external/source-copy/independent/
     qualified/runtime gates remain open.
+65. **BCK-20-AC-65:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0;
+    EXT-G1–G6, network, terms capture, artifacts, parser/fixture, repository
+    data, ingestion, independent/qualified and runtime gates remain closed.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.17 the following remain absent:
+At v0.2.18 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -926,7 +941,8 @@ At v0.2.17 the following remain absent:
 
 ## 29. Next action
 
-1. revalidate external candidates only after explicit network authorization,
+1. request a separately bounded EXT-G1 authorization for one named batch, then
+   revalidate external candidates only within that authorization;
    then record exact artifacts, license/terms and pinned ingestion evidence;
 2. prepare immutable source snapshots and translations only after those gates;
 3. resolve service-area sources and policy-reference blockers separately;

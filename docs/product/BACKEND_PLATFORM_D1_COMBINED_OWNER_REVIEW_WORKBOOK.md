@@ -1,15 +1,15 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.25**
+- Version: **1.26**
 - Date: **2026-09-17**
 - Status: **Technical owner verdicts recorded; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.29](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.27](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.30](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.28](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -23,12 +23,18 @@
 - Recorded exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
 - Recorded source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
 - Recorded source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- Recorded external-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Owner verdict reconciliation
+
+Version 1.26 records BCK20-OD02-EXT-EV-PLAN-DEC-01. EXT-G0 is satisfied only
+for the frozen plan under five combined roles with zero independence.
+EXT-G1–G6, all markets, network/external evidence/independent/qualified and
+implementation gates remain closed.
 
 Version 1.25 records BCK20-OD02-SRC-REC-DEC-01. Twenty-three internal records
 are accepted only as documentation inputs and eight external candidates only
@@ -242,7 +248,7 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | BCK-03 v0.3.14 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
 | BCK-04 v0.4.23 | retain Draft | BCK-04 and threat-model combined-owner technical verdicts recorded; `BCK04-OD-01` remains Proposed pending independent/cross-boundary evidence; OD-09/tabletop/Legal gates remain |
 | BCK-05 v0.2.30 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains incomplete |
-| BCK-20 v0.2.17 | retain Draft | internal documentation inputs accepted with zero independence; external/source-copy/independent/Legal evidence incomplete; OD-10 Proposed and OD-02/05 Open |
+| BCK-20 v0.2.18 | retain Draft | internal inputs and EXT-G0 plan accepted with zero independence; EXT-G1–G6/external/source-copy/independent/Legal evidence incomplete; OD-10 Proposed and OD-02/05 Open |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
 | OD-10 | retain Proposed | exact market/legal-copy/distribution decisions incomplete |
@@ -355,3 +361,6 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
 24. **D1-OWN-AC-24:** BCK20-OD02-SRC-REC-DEC-01 accepts internal records only
     as documentation inputs and external candidates only as a work queue; all
     market, evidence, independent/qualified and implementation gates remain closed.
+25. **D1-OWN-AC-25:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies EXT-G0 only;
+    EXT-G1–G6, market, network/evidence, independent/qualified and
+    implementation gates remain closed.

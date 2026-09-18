@@ -1,11 +1,12 @@
 # BCK-20 — External Evidence Collection Plan
 
 - ID: **BCK20-OD02-EXT-EV-PLAN-01**
-- Version: **0.1**
+- Version: **0.2**
 - Date: **2026-09-18**
-- Status: **Proposed — documentation plan only; execution unauthorized**
+- Status: **Accepted EXT-G0 documentation plan — execution unauthorized**
 - Parent register: [BCK20-OD02-EXT-EV-01 v0.2](REFERENCE_DATA_EXTERNAL_SOURCE_EVIDENCE_REGISTER.md)
 - Source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- Plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
 - Accountable owner: **Reference Data owner**
 - Required reviewers: **Security/Privacy technical, Product/Market, Product Localization/Content and qualified license/Legal where applicable**
 - Network authority: **none**
@@ -288,8 +289,13 @@ terms change, hash mismatch or expired authorization closes the affected gate.
 19. **BCK20-OD02-EXT-EV-PLAN-AC-19:** Firebase, deployment, activation, push and merge remain unauthorized.
 20. **BCK20-OD02-EXT-EV-PLAN-AC-20:** any plan content/version/hash change requires a new owner review before execution.
 
-## 13. Next action
+## 13. Recorded disposition and next action
 
-Freeze this v0.1 plan by normalized-LF SHA-256 in a bounded combined-owner
-review package. Do not request network authorization or begin P0–P6 until the
-exact plan decision is recorded.
+BCK20-OD02-EXT-EV-PLAN-DEC-01 accepts the frozen v0.1 plan at normalized-LF
+SHA-256 `f06d42f16fafbfe16dae0e0c546c71528fb4728c9045a5b54879c1767e4dd4ac`
+and satisfies EXT-G0 only. This v0.2 revision adds status traceability without
+changing the frozen procedure.
+
+EXT-G1–G6 remain closed. A later EXT-G1 request must name exactly one batch and
+provide the complete bounded authorization envelope; no network activity may
+begin from this document alone.

@@ -1,23 +1,22 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: BCK-02-A1
-- Версия: 1.16
+- Версия: 1.17
 - Дата: 2026-09-17
 - Статус: **Draft — review required, documentation only**
 - Accountable owner: Platform Architecture
-- Parent: [BCK-02 v2.4.69](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.70](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
 
-Revision 1.16 records BCK20-OD02-SRC-REC-DEC-01 and accepts 23 internal records
-only as documentation inputs and eight external candidates only as an evidence
-work queue under six combined roles with zero independence. All markets remain
-disabled. BCK20-OD-02/05 remain Open, OD-10 Proposed, BCK-20 Draft and
-BCK20-OD-03 Deferred. External artifacts/license/terms/pinned evidence,
-source copy, independent Security/Privacy and applicable qualified Legal
-evidence remain Pending/Blocked/Deferred; no network, provider, schema,
-runtime or infrastructure work is authorized.
+Revision 1.17 records BCK20-OD02-EXT-EV-PLAN-DEC-01 and satisfies EXT-G0 only
+for the frozen external-evidence plan under five combined roles with zero
+independence. EXT-G1–G6 and all markets remain closed. BCK20-OD-02/05 remain
+Open, OD-10 Proposed, BCK-20 Draft and BCK20-OD-03 Deferred. External evidence,
+independent Security/Privacy and applicable qualified Legal evidence remain
+Pending/Blocked/Deferred; no network, provider, schema, runtime or
+infrastructure work is authorized.
 
 `BCK-02-A1` — execution annex к BCK-02, а не новый BCK-spec. Он не увеличивает
 checksum реестра `22 BCK + 6 RUN`, не заменяет документы BCK-01–22 и не
@@ -61,8 +60,8 @@ Provider/AI/Payments integrations.
 - RAW-C source не закрывает G4/R5 автоматически: BCK-09/ECL-03C остаются
   Review, production Identity/Event projection/mobile/deployment отсутствуют.
 - G1-G7, R1-R4 и R6-R12 не пройдены; ECL-03D-H не разрешены.
-- Current D1 snapshot is BCK-01 v0.4.65, BCK-03 v0.3.14, BCK-04 v0.4.23,
-  BCK-05 v0.2.30 and BCK-20 v0.2.17. BCK04-SEC-DEC-01 and
+- Current D1 snapshot is BCK-01 v0.4.66, BCK-03 v0.3.14, BCK-04 v0.4.23,
+  BCK-05 v0.2.30 and BCK-20 v0.2.18. BCK04-SEC-DEC-01 and
   BCK04-OD01-DEC-01 record the combined-owner technical BCK-04 and
   threat-model verdicts. BCK-04 remains Draft and BCK04-OD-01 remains
   Proposed pending independent/cross-boundary evidence; OD-09/OD-11/Legal,
@@ -71,7 +70,7 @@ Provider/AI/Payments integrations.
   Deferred, OD-02/05 Open, OD-10 Proposed and BCK-20 Draft.
 - BCK20-OD02-V04-COMB-DEC-01 records four separate exact-v0.4 design verdicts
   with zero independence; OD-02 remains Open.
-- Следующий последовательный этап — после отдельного network authorization
+- Следующий последовательный этап — после отдельного EXT-G1 network authorization
   exact external artifacts, license/terms и pinned ingestion evidence, source copy, independent
   Security/Privacy и applicable qualified Legal review; BCK-05 evidence and
   runtime gates remain deferred.
@@ -1354,13 +1353,13 @@ inconclusive.
 
 Следующий пакет остаётся документационным и закрывает D1/G1:
 
-1. BCK-01 v0.4.65 Review и BCK-01-REV-01 v1.25 evidence.
-2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.17
+1. BCK-01 v0.4.66 Review и BCK-01-REV-01 v1.26 evidence.
+2. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.18
    named-owner review и evidence-based verdicts; D1-SIG-API и bounded
    D1-SIG-OPS/SEC/MOBILE уже recorded для границ BCK-03.
 3. OD-09/10/11 required statuses; Accepted OD-07 revalidation без повторного
    выбора topology.
-4. BCK-D1-REV-01 v1.29, sign-off ledger v1.27, workbook v1.25,
+4. BCK-D1-REV-01 v1.30, sign-off ledger v1.28, workbook v1.26,
    BCK-D1-OWN-A-DEC-01 v0.1, BCK03-OPS-DEC-01 v0.1 и
    BCK03-SEC-DEC-01 v0.1, BCK03-MOB-DEC-01 v0.1 и
    BCK04-SEC-DEC-01 v0.1, BCK04-OD01-DEC-01 v0.1 и
@@ -1368,7 +1367,8 @@ inconclusive.
    BCK20-OD02-MS-PRE-DEC-01 v0.1 и
    BCK20-OD02-V04-COMB-DEC-01 v0.1 и
    BCK20-OD02-SRC-AUTH-DEC-01 v0.1 и
-   BCK20-OD02-SRC-REC-DEC-01 v0.1 с
+   BCK20-OD02-SRC-REC-DEC-01 v0.1 и
+   BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1 с
    evidence-based responses; никаких inferred signatures.
 5. Отдельный R1 exact file/rollback/evidence plan только после G1; существующие
    R0/RAW-C файлы не дают R1 authority.
