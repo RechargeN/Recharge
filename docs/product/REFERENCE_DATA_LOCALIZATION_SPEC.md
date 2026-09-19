@@ -1,8 +1,8 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.18**
-- Date: **2026-09-17**
+- Version: **0.2.19**
+- Date: **2026-09-19**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
 - Accountable owner: **Reference Data owner**
@@ -34,12 +34,26 @@
 - Source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
 - External-evidence plan: [BCK20-OD02-EXT-EV-PLAN-01 v0.2](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_PLAN.md)
 - External-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
+- EXT-A–D technical baseline decision: [BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 v0.1](REFERENCE_DATA_EXT_A_D_SOURCE_TERMS_OWNER_DECISION.md)
+- External source register: [BCK20-OD02-EXT-EV-01 v0.3](REFERENCE_DATA_EXTERNAL_SOURCE_EVIDENCE_REGISTER.md)
+- Qualified terms/access review package: [BCK20-OD02-EXT-AD-TERMS-ACCESS-REV-01 v0.1](REFERENCE_DATA_EXT_A_D_QUALIFIED_TERMS_ACCESS_REVIEW.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.19 — 2026-09-19
+
+- recorded the accepted EXT-A–D technical evidence baseline for the exact four
+  P6 hashes and reconciled the external source register to v0.3;
+- recorded bounded technical/partial/blocked evidence separately from lawful
+  allowed use, source acceptance and executable readiness;
+- prepared one consolidated qualified terms/access review package without
+  claiming a qualified verdict;
+- advanced no source to `eligible_for_slice_review`; retained EXT-G5/G6,
+  BCK20-OD-02/05, OD-10, BCK-20, all markets and runtime gates unchanged.
 
 ### v0.2.18 — 2026-09-18
 
@@ -723,7 +737,7 @@ fixtures.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.18:
+Future targets, absent and unauthorized in v0.2.19:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -787,7 +801,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 |---|---|---|---|---|
 | OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
-| BCK20-OD-02 | Open; internal records accepted and EXT-G0 collection plan recorded; EXT-G1–G6 closed | Product Localization | separately authorized external evidence collection, pinned artifacts/license/terms/validation, source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
+| BCK20-OD-02 | Open; internal records and exact EXT-A–D technical evidence recorded; no source eligible; EXT-G5/G6 closed | Product Localization | qualified terms/access and freshness dispositions, per-source owner decisions, approved source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
 | BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
 | BCK20-OD-05 | Open | Qualified Legal + Product | fallbackForbidden classes and mandatory local-copy matrix | affected market/legal surface disabled |
@@ -811,11 +825,12 @@ schema toolchain.
 - all Open/Deferred Decisions have owner/gate/fail-closed default.
 
 Current readiness: the four exact-v0.4 design verdicts, frozen source-authority
-boundary, 23 internal documentation source records and EXT-G0 collection plan are recorded under
-disclosed combined ownership with zero independence. All markets remain
-disabled. External artifacts/license/terms/pinned ingestion evidence, source
-snapshots/translations, independent Security/Privacy and applicable qualified
-Legal evidence remain unresolved in
+boundary, 23 internal documentation records, EXT-G0 plan and exact EXT-A–D
+technical evidence are recorded under disclosed combined ownership with zero
+independence. All markets remain disabled and no source is eligible. Qualified
+terms/access, freshness/source decisions, source snapshots/translations,
+independent Security/Privacy and applicable qualified Legal evidence remain
+unresolved in
 [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). BCK20-OD-02/05
 remain Open, so BCK-20 remains Draft.
 
@@ -831,7 +846,7 @@ remain Open, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 65 AC are unique/sequential and unimplemented status is honest;
+- 66 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -920,16 +935,21 @@ remain Open, so BCK-20 remains Draft.
     only as documentation inputs and eight external candidates only as a work
     queue; all markets remain disabled and external/source-copy/independent/
     qualified/runtime gates remain open.
-65. **BCK-20-AC-65:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0;
-    EXT-G1–G6, network, terms capture, artifacts, parser/fixture, repository
-    data, ingestion, independent/qualified and runtime gates remain closed.
+65. **BCK-20-AC-65:** at plan acceptance,
+    BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0 and grants no network,
+    evidence, parser/fixture, repository-data, ingestion,
+    independent/qualified or runtime authority.
+66. **BCK-20-AC-66:** BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 accepts exact
+    EXT-A–D technical evidence only; no source becomes
+    `eligible_for_slice_review`, EXT-G5/G6 stay closed and the prepared
+    qualified-review package supplies no qualified verdict.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.18 the following remain absent:
+At v0.2.19 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -941,15 +961,16 @@ At v0.2.18 the following remain absent:
 
 ## 29. Next action
 
-1. request a separately bounded EXT-G1 authorization for one named batch, then
-   revalidate external candidates only within that authorization;
-   then record exact artifacts, license/terms and pinned ingestion evidence;
-2. prepare immutable source snapshots and translations only after those gates;
-3. resolve service-area sources and policy-reference blockers separately;
-4. obtain independent Security/Privacy and applicable qualified Legal evidence;
-5. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
-6. run OD-10 documentation-vector review without creating executable schema;
-7. keep every Deferred item closed until its exact later gate;
-8. move BCK-20 to Review, then Approved only after §26;
-9. keep schema/runtime/distribution implementation blocked until G1 and a
+1. obtain named qualified terms/access verdicts against the exact consolidated
+   review package and preserve every inconclusive source fail-closed;
+2. record one explicit owner decision per source; advance none automatically;
+3. prepare immutable source snapshots and translations only for sources later
+   advanced to `eligible_for_slice_review`;
+4. resolve service-area sources and policy-reference blockers separately;
+5. obtain independent Security/Privacy and applicable qualified Legal evidence;
+6. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
+7. run OD-10 documentation-vector review without creating executable schema;
+8. keep every Deferred item closed until its exact later gate;
+9. move BCK-20 to Review, then Approved only after §26;
+10. keep schema/runtime/distribution implementation blocked until G1 and a
    separately Approved executable file plan.
