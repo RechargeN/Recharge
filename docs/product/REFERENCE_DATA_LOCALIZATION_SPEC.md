@@ -1,7 +1,7 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.19**
+- Version: **0.2.20**
 - Date: **2026-09-19**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
@@ -37,12 +37,25 @@
 - EXT-A–D technical baseline decision: [BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 v0.1](REFERENCE_DATA_EXT_A_D_SOURCE_TERMS_OWNER_DECISION.md)
 - External source register: [BCK20-OD02-EXT-EV-01 v0.3](REFERENCE_DATA_EXTERNAL_SOURCE_EVIDENCE_REGISTER.md)
 - Qualified terms/access review package: [BCK20-OD02-EXT-AD-TERMS-ACCESS-REV-01 v0.1](REFERENCE_DATA_EXT_A_D_QUALIFIED_TERMS_ACCESS_REVIEW.md)
+- OD-10 amended evidence: [BCK-D1-OD10-EV-01 v0.2](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
+- OD-10 documentation decision: [OD10-DOC-DEC-01 v0.1](BACKEND_OD_10_LOCALIZATION_OWNER_DECISION.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.20 — 2026-09-19
+
+- recorded OD10-DOC-DEC-01 and integrated F-001–F-012 into documentation
+  evidence v0.2;
+- corrected the `value_default` vector and distinguished unsupported viewer
+  reads from authoritative use;
+- added typed resolution union, revision-bound locale normalization,
+  duplicate-key, withdrawal/stale/integrity and content-free telemetry rules;
+- retained OD-10 Proposed, BCK-20 Draft, BCK20-OD-02/05 Open and every
+  Legal/schema/fixture/runtime/Firebase/deployment gate.
 
 ### v0.2.19 — 2026-09-19
 
@@ -686,15 +699,20 @@ text is prohibited in telemetry.
 ```text
 LocalizedTextV1 {
   defaultLocale: BCP47
-  values: Map<BCP47, non-empty normalized string>
+  values: Map<BCP47, non-empty Unicode string>
 }
 ```
 
 Constraints:
 
 - `defaultLocale` must exist in `values`;
+- `defaultLocale` resolves only when enabled by effective MarketConfig;
 - locale keys are canonicalized BCP 47; duplicate-equivalent keys rejected;
+- duplicate raw object members are rejected before map materialization;
+- locale identity carries `localeNormalizationProfileRevision`; unknown/newer
+  critical profiles fail closed;
 - empty/whitespace-only value is absent, not a translation;
+- approved text is not silently trimmed, Unicode-normalized or rewritten;
 - no arbitrary dynamic fields outside bounded locale/value rules;
 - `contentLocale` and `availableLocales` belong to the owning content record;
 - reference label and user content are distinct contracts;
@@ -710,9 +728,25 @@ For non-Legal presentation text:
 4. `defaultLocale` of the localized value;
 5. typed `translation_missing` — never empty success or arbitrary first key.
 
-Fallback steps are deduplicated and restricted to locales permitted by the
-effective MarketConfig. Legal/safety-critical copy may declare
-`fallbackForbidden`; missing required locale then fails closed.
+Fallback steps are canonicalized, deduplicated and restricted to locales
+permitted by the effective MarketConfig. V1 performs no recursive fallback
+graph traversal; self-reference, canonical duplicates and cyclic/recursive
+configuration fail closed. Candidate eligibility excludes withdrawn, revoked,
+expired, wrong-market, wrong-environment and disallowed stale values before
+lookup. Legal/safety-critical copy may declare `fallbackForbidden`; missing
+required locale then fails closed.
+
+An unsupported requested locale may use its configured fallback list and then
+market fallback only for a non-Legal viewer read, and the result remains
+marked as an unsupported request. Authoring, publication, mutation and
+fallback-forbidden resolution return typed `unsupported_locale`.
+
+Resolution is a discriminated `Resolved | Unresolved` result. Resolved results
+include requested-locale support, resolved locale, resolution kind and exact
+market/dataset revisions. Unresolved results carry a typed code such as
+`translation_missing`, `unsupported_locale`,
+`unsupported_contract_revision` or `stale_reference_data`, without a fake
+resolved locale or success kind.
 
 ### 21.3 Missing translation and content language
 
@@ -723,21 +757,25 @@ effective MarketConfig. Legal/safety-critical copy may declare
 - user-authored source language remains explicit and is not changed by viewer locale;
 - publication readiness separately checks required market locales by content type;
 - search may index declared translations but records locale/provenance.
+- diagnostics may record canonical locale/status/revision/freshness/timing but
+  never localized values, user-authored text or arbitrary raw locale input.
 
 ### 21.4 OD-10 status
 
-Status is **Proposed — not Accepted**. Acceptance requires API Platform,
+Status is **Proposed — not Accepted**. OD10-DOC-DEC-01 accepts only the amended
+documentation design direction. Acceptance still requires API Platform,
 Reference Data, Product Localization, Content, Mobile and Legal review,
 fixtures for LV/EE/LT and explicit migration/rollback evidence.
 
 The review vectors and owner checklist are maintained in
-[BCK-D1-OD10-EV-01](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md). They make the
-proposal testable on paper but do not constitute Accepted or executable
-fixtures.
+[BCK-D1-OD10-EV-01 v0.2](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md). They make
+the proposal testable on paper but do not constitute Accepted or executable
+fixtures. EE/LT vectors prove isolation only and do not decide future market
+locale policy.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.19:
+Future targets, absent and unauthorized in v0.2.20:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -799,7 +837,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 
 | ID | Status | Owner | Evidence/decision | Blocks |
 |---|---|---|---|---|
-| OD-10 | Proposed LocalizedText v1 | Reference Data + API Platform | wire/fallback/missing/content-language fixtures and owner sign-off | BCK-20/BCK-07 Approval, G1 |
+| OD-10 | Proposed LocalizedText v1; documentation design direction amended through OD10-DOC-DEC-01 | Reference Data + API Platform | attributable API/Reference/Localization/Content/Mobile verdicts, qualified Legal policy where applicable, migration/rollback and later executable parity | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
 | BCK20-OD-02 | Open; internal records and exact EXT-A–D technical evidence recorded; no source eligible; EXT-G5/G6 closed | Product Localization | qualified terms/access and freshness dispositions, per-source owner decisions, approved source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
@@ -846,7 +884,7 @@ remain Open, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 66 AC are unique/sequential and unimplemented status is honest;
+- 67 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -900,7 +938,7 @@ remain Open, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.18 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** v0.2.20 creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -943,13 +981,16 @@ remain Open, so BCK-20 remains Draft.
     EXT-A–D technical evidence only; no source becomes
     `eligible_for_slice_review`, EXT-G5/G6 stay closed and the prepared
     qualified-review package supplies no qualified verdict.
+67. **BCK-20-AC-67:** OD10-DOC-DEC-01 integrates only F-001–F-012
+    documentation semantics; OD-10 remains Proposed and no schema, executable
+    fixture, dataset, runtime or qualified Legal authority is created.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.19 the following remain absent:
+At v0.2.20 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -969,7 +1010,8 @@ At v0.2.19 the following remain absent:
 4. resolve service-area sources and policy-reference blockers separately;
 5. obtain independent Security/Privacy and applicable qualified Legal evidence;
 6. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
-7. run OD-10 documentation-vector review without creating executable schema;
+7. obtain attributable API/Reference/Localization/Content/Mobile verdicts for
+   OD-10 v0.2 and the applicable qualified Legal/Product policy;
 8. keep every Deferred item closed until its exact later gate;
 9. move BCK-20 to Review, then Approved only after §26;
 10. keep schema/runtime/distribution implementation blocked until G1 and a
