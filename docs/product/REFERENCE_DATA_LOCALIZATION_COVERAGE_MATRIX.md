@@ -1,12 +1,12 @@
 # BCK-20 — Reference Data & Localization Coverage Matrix
 
 - ID: **BCK-20-PRE**
-- Version: **0.2.20**
+- Version: **0.2.21**
 - Date: **2026-09-19**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Reference Data owner**
-- Target: [BCK-20 v0.2.20](REFERENCE_DATA_LOCALIZATION_SPEC.md)
+- Target: [BCK-20 v0.2.21](REFERENCE_DATA_LOCALIZATION_SPEC.md)
 - Coordination baseline: [BCK-02](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
 - Translation decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
@@ -20,12 +20,13 @@
 - EXT-A–D technical baseline decision: [BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 v0.1](REFERENCE_DATA_EXT_A_D_SOURCE_TERMS_OWNER_DECISION.md)
 - Qualified terms/access review package: [BCK20-OD02-EXT-AD-TERMS-ACCESS-REV-01 v0.1](REFERENCE_DATA_EXT_A_D_QUALIFIED_TERMS_ACCESS_REVIEW.md)
 - OD-10 documentation decision: [OD10-DOC-DEC-01 v0.1](BACKEND_OD_10_LOCALIZATION_OWNER_DECISION.md)
+- D1 Owner Batch B review: [BCK-D1-OWN-B-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_REVIEW_PACKAGE.md)
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_COVERAGE_MATRIX.md`
 
 ## 0. Owner-decision reconciliation
 
 Current anchors are BCK-01, BCK-02, BCK-03 v0.3.14, BCK-04 v0.4.23,
-BCK-05 v0.2.30, BCK-20 v0.2.20 and BCK-02-A1.
+BCK-05 v0.2.30, BCK-20 v0.2.21 and BCK-02-A1.
 BCK20-OWN-DEC-01 records the combined-owner technical decision triage:
 BCK20-OD-01/03/04/06/07 are Deferred, BCK20-OD-02/05 remain Open, OD-10
 remains Proposed and every specialist verdict remains unresolved.
@@ -44,9 +45,10 @@ reconciled, but lawful allowed use, freshness/per-source decisions, source
 copy, independent Security/Privacy and applicable qualified Legal evidence
 remain Pending/Blocked/Deferred. No source is eligible; EXT-G5/G6 remain
 closed and the qualified-review package contains no verdict. Runtime is
-Absent. OD10-DOC-DEC-01 separately integrates F-001–F-012 into amended
-documentation evidence v0.2 while keeping OD-10 Proposed and every
-specialist/Legal/executable gate open.
+Absent. OD10-DOC-DEC-01 integrates F-001–F-012 into amended evidence v0.2.
+BCK-D1-OWN-B-REV-01 now prepares five separate OD-10 perspective verdicts and
+one separate source-governance verdict, but all six remain Pending and every
+specialist/Legal/executable gate stays open.
 
 ## 1. Purpose
 
@@ -66,7 +68,7 @@ schemas, translations, datasets, Firebase resources, mobile adapters or runtime.
 | BCK-05 v0.2.30 | Draft; bounded R0/RAW-C local evidence boundary; BCK05-OD-01/02/07 Accepted and BCK05-OD-03/04/05/08 Proposed | Distribution/operations input |
 | Category System v1.4.3 | Accepted | Taxonomy identity/source invariant |
 | BCK-02-A1 | Draft; docs only | Latvia/Baltics execution input |
-| BCK-20 v0.2.20 | Draft; EXT-A–D technical baseline plus amended OD-10 documentation evidence recorded; no source eligible; OD-10 Proposed; specialist/Legal/EXT-G5/G6 gates closed; runtime Absent | Single target Reference Data contract |
+| BCK-20 v0.2.21 | Draft; EXT-A–D technical baseline and amended OD-10 evidence recorded; Batch B review prepared but unsigned; no source eligible; OD-10 Proposed; specialist/Legal/EXT-G5/G6 gates closed; runtime Absent | Single target Reference Data contract |
 
 ## 3. Coverage — BCK-02 §14
 
@@ -93,7 +95,7 @@ schemas, translations, datasets, Firebase resources, mobile adapters or runtime.
 | 19 | Flags/rollout/rollback | Full | §20 |
 | 20 | Exact file map | Full conditional | §22; API-DEC-05 guard |
 | 21 | Test matrix | Full | §23 |
-| 22 | AC/DoR/DoD/unimplemented | Full | §25–28; 67 AC |
+| 22 | AC/DoR/DoD/unimplemented | Full | §25–28; 68 AC |
 
 **Coverage verdict: 22/22 addressed; Approval readiness not claimed.**
 
@@ -151,7 +153,7 @@ evidence, not executable fixtures or decision acceptance.
 
 1. All local links resolve.
 2. 22/22 mandatory sections have evidence.
-3. `BCK-20-AC-01…67` are unique and sequential.
+3. `BCK-20-AC-01…68` are unique and sequential.
 4. Taxonomy metrics and aliases match Accepted v1.4.3.
 5. OD-10 is visibly Proposed, never inferred Accepted.
 6. LV/EE/LT activation and locale policy are independent.
@@ -161,7 +163,7 @@ evidence, not executable fixtures or decision acceptance.
 
 ## 8. Verdict
 
-BCK-20 v0.2.20 is structurally complete and preserves the accepted taxonomy.
+BCK-20 v0.2.21 is structurally complete and preserves the accepted taxonomy.
 Workflow v0.4 integrates the accepted documentation-only corrections and four
 separate exact-v0.4 combined-owner verdicts are recorded with zero
 independence. The frozen source-authority design boundary is accepted, while
@@ -171,7 +173,8 @@ recorded, while every market remains disabled, no source is eligible and
 EXT-G5/G6 stay closed. Lawful allowed use, freshness/per-source decisions,
 source copy, independent Security/Privacy and applicable qualified Legal
 evidence stay open.
-OD10-DOC-DEC-01 makes the corrected documentation design reviewable but does
-not accept OD-10. BCK20-OD-02/05 and OD-10 stay unaccepted, BCK-20 stays Draft,
+OD10-DOC-DEC-01 makes the corrected documentation design reviewable.
+BCK-D1-OWN-B-REV-01 consolidates the next six bounded verdicts without
+recording them. BCK20-OD-02/05 and OD-10 stay unaccepted, BCK-20 stays Draft,
 and no schema, dataset service, translation runtime, mobile adapter or
 infrastructure is authorized.

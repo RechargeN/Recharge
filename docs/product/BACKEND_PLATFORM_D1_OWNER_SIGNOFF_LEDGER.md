@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.30**
+- Version: **1.31**
 - Date: **2026-09-19**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.31](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.26](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.32](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.27](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -24,6 +24,9 @@
 - External-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
 - EXT-A–D technical baseline decision: [BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 v0.1](REFERENCE_DATA_EXT_A_D_SOURCE_TERMS_OWNER_DECISION.md)
 - OD-10 documentation decision: [OD10-DOC-DEC-01 v0.1](BACKEND_OD_10_LOCALIZATION_OWNER_DECISION.md)
+- Prepared OD-10 multi-owner review: [OD10-OWN-COMB-REV-01 v0.1](BACKEND_OD_10_MULTI_OWNER_REVIEW_PACKAGE.md)
+- Prepared source-governance review: [BCK20-OD02-SRC-GOV-REV-01 v0.1](REFERENCE_DATA_SOURCE_GOVERNANCE_OWNER_REVIEW.md)
+- Prepared D1 Owner Batch B review: [BCK-D1-OWN-B-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_REVIEW_PACKAGE.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -74,6 +77,9 @@ or runtime signature is completed.
 OD10-DOC-DEC-01 integrates F-001–F-012 into OD-10 documentation evidence v0.2.
 It records no D1 specialist signature, does not accept OD-10 and does not
 supply qualified Legal or executable evidence.
+BCK-D1-OWN-B-REV-01 prepares five separate OD-10 perspective verdicts and one
+source-governance verdict as one exact owner action. Preparation records no
+signature; every new verdict remains Pending.
 BCK05-OD-01/02/07 remain distinct from cross-domain OD-01/02/07. Every other
 incomplete specialist signature remains Pending and qualified Legal/Privacy
 evidence remains absent.
@@ -140,10 +146,10 @@ without turning it into an artificial D1 blocker.
 | D1-SIG-OPS | Platform Operations | BCK-03 operational boundary; BCK-05; OD-07; OD-09 transport boundary | Yes | `RechargeN / Product owner` | **Accept with required amendments — BCK-03 boundary only; independent evidence absent** | [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md), 2026-09-08 |
 | D1-SIG-SEC | Security/Privacy | BCK-03 security boundary; BCK-04; OD-07 privacy boundary; OD-11 safeguards | Yes | `RechargeN / Product owner` | **Accept with required amendments — combined-owner technical BCK-03/BCK-04 boundaries only; bounded BCK20 exact-v0.4 design verdict recorded; independent/Legal evidence absent** | [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-08; [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md), 2026-09-12; [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
 | D1-SIG-LEGAL | Legal/Privacy | OD-07 processing/residency; OD-11; OD-10 mandatory Legal copy | Yes | `RechargeN / Product owner` | Pending; qualification not evidenced | — |
-| D1-SIG-REF | Reference Data | BCK-20; OD-10 revisions/fallback | Yes | `RechargeN / Product owner` | Pending | — |
-| D1-SIG-L10N | Product Localization | OD-10 LV/EE/LT locale and review workflow | Yes | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 design verdict recorded with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
+| D1-SIG-REF | Reference Data | BCK-20; OD-10 revisions/fallback | Yes | `RechargeN / Product owner` | Pending; exact OD10-SIG-REF review prepared in Batch B | — |
+| D1-SIG-L10N | Product Localization | OD-10 LV/EE/LT locale and review workflow | Yes | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 verdict recorded and exact OD10-SIG-L10N review prepared, both with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
 | D1-SIG-MOBILE | Mobile Platform | BCK-03/BCK-20 client/cache/compatibility boundary | Yes | `RechargeN / Product owner` | **Accept with required amendments — BCK-03 boundary plus bounded BCK20 exact-v0.4 design verdict; independent evidence absent** | [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md), 2026-09-09; [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
-| D1-SIG-CONTENT | Content Platform | OD-10 source/content-language/readiness boundary | Yes for OD-10 Acceptance | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 design verdict recorded with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
+| D1-SIG-CONTENT | Content Platform | OD-10 source/content-language/readiness boundary | Yes for OD-10 Acceptance | `RechargeN / Product owner` | Pending for full D1 scope; bounded exact-v0.4 verdict recorded and exact OD10-SIG-CONTENT review prepared, both with no independence | [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md), 2026-09-17 |
 | D1-SIG-FIN | Product/Finance | OD-07/BCK-05 cost envelope and containment ownership | Yes for OD-07 Acceptance | `RechargeN / Product owner` | Pending | — |
 | D1-SIG-BOOK | Booking | OD-09 Booking compatibility and future effect contract | Later before OD-09 Acceptance/effects | `RechargeN / Product owner` | Pending | — |
 | D1-SIG-NOTIF | Notifications | OD-09 consumer/delivery/read semantics | Later before OD-09 Acceptance/effects | `RechargeN / Product owner` | Pending | — |
@@ -159,7 +165,7 @@ accepts its accountability.
 | BCK-03 v0.3.14 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
 | BCK-04 v0.4.23 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | BCK-04 and threat-model combined-owner technical verdicts recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain; spec remains Draft |
 | BCK-05 v0.2.30 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and accepted OD baselines Present; BCK-03/BCK-04/threat-model owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains pending |
-| BCK-20 v0.2.20 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | exact EXT-A–D technical evidence plus amended OD-10 documentation evidence recorded with zero independence; no source eligible; terms/source-copy/independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
+| BCK-20 v0.2.21 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | exact EXT-A–D technical evidence and amended OD-10 evidence recorded; Batch B prepares six bounded verdicts but none is signed; no source eligible; terms/source-copy/independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
 | BCK04-OD01-TM-01 v0.2 | D1-SIG-SEC | independent Security/Privacy, D1-SIG-API, D1-SIG-OPS, Identity, D1-SIG-MOBILE and affected domains | Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary confirmations |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |
@@ -321,6 +327,9 @@ returns a §6 review record.
 28. **D1-SIG-AC-28:** OD10-DOC-DEC-01 records amended documentation semantics
     only; OD-10 remains Proposed and no D1 signature, qualified verdict or
     executable gate is completed.
+29. **D1-SIG-AC-29:** BCK-D1-OWN-B-REV-01 preparation records no signature;
+    five OD-10 perspective verdicts and the separate source-governance verdict
+    remain Pending until exact owner acceptance.
 
 ## 11. Next action
 
@@ -330,9 +339,10 @@ verdicts, BCK-20 decision triage and the amended technical translation-
 governance workflow, four bounded exact-v0.4 combined-owner verdicts and the
 source-authority design boundary, internal documentation inputs, external work
 queue, EXT-G0 plan and exact EXT-A–D technical evidence are recorded. Next,
-obtain qualified exact-hash terms/access verdicts and per-source owner
-decisions, obtain attributable OD-10 API/Reference/Localization/Content/Mobile
-verdicts and applicable qualified policy, then source copy and independent Security/Privacy
+obtain one exact BCK-D1-OWN-B-REV-01 owner response for the five OD-10
+perspectives and source-governance boundary, then obtain qualified exact-hash
+terms/access verdicts, per-source decisions, applicable qualified policy,
+source copy and independent Security/Privacy
 and applicable qualified Legal review. Prior Product/Content verdicts remain
 historical evidence with no independence. Independent
 threat-model, BCK-04/BCK-05/BCK-20 specialist and qualified Legal/Privacy

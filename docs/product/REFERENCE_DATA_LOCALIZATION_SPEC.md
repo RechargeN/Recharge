@@ -1,7 +1,7 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.20**
+- Version: **0.2.21**
 - Date: **2026-09-19**
 - Spec status: **Draft — Reference Data review required**
 - Runtime status: **Absent**
@@ -39,12 +39,27 @@
 - Qualified terms/access review package: [BCK20-OD02-EXT-AD-TERMS-ACCESS-REV-01 v0.1](REFERENCE_DATA_EXT_A_D_QUALIFIED_TERMS_ACCESS_REVIEW.md)
 - OD-10 amended evidence: [BCK-D1-OD10-EV-01 v0.2](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md)
 - OD-10 documentation decision: [OD10-DOC-DEC-01 v0.1](BACKEND_OD_10_LOCALIZATION_OWNER_DECISION.md)
+- OD-10 multi-owner review: [OD10-OWN-COMB-REV-01 v0.1](BACKEND_OD_10_MULTI_OWNER_REVIEW_PACKAGE.md)
+- Source-governance owner review: [BCK20-OD02-SRC-GOV-REV-01 v0.1](REFERENCE_DATA_SOURCE_GOVERNANCE_OWNER_REVIEW.md)
+- D1 Owner Batch B review: [BCK-D1-OWN-B-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_REVIEW_PACKAGE.md)
 - Runtime effect: **none**
 - Canonical path: `docs/product/REFERENCE_DATA_LOCALIZATION_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.21 — 2026-09-19
+
+- prepared one exact Batch B owner action covering five separate OD-10
+  documentation perspectives and a separate EXT-A–D source-governance
+  boundary;
+- added bounded field-authority ceilings, freshness classes, future-review
+  thresholds, changed-hash, withdrawal and cross-source conflict rules as
+  Proposed owner-review input only;
+- recorded no verdict, qualified conclusion or source advancement;
+- retained OD-10 Proposed, BCK-20 Draft, BCK20-OD-02/05 Open, EXT-G5/G6
+  closed and every schema/fixture/runtime/Firebase/deployment gate.
 
 ### v0.2.20 — 2026-09-19
 
@@ -775,7 +790,7 @@ locale policy.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.20:
+Future targets, absent and unauthorized in v0.2.21:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -837,7 +852,7 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 
 | ID | Status | Owner | Evidence/decision | Blocks |
 |---|---|---|---|---|
-| OD-10 | Proposed LocalizedText v1; documentation design direction amended through OD10-DOC-DEC-01 | Reference Data + API Platform | attributable API/Reference/Localization/Content/Mobile verdicts, qualified Legal policy where applicable, migration/rollback and later executable parity | BCK-20/BCK-07 Approval, G1 |
+| OD-10 | Proposed LocalizedText v1; documentation direction amended; five-perspective Batch B review prepared but unsigned | Reference Data + API Platform | exact owner acceptance of OD10-OWN-COMB-REV-01, qualified Legal/Product policy where applicable, migration/rollback and later executable parity | BCK-20/BCK-07 Approval, G1 |
 | BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
 | BCK20-OD-02 | Open; internal records and exact EXT-A–D technical evidence recorded; no source eligible; EXT-G5/G6 closed | Product Localization | qualified terms/access and freshness dispositions, per-source owner decisions, approved source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
@@ -884,7 +899,7 @@ remain Open, so BCK-20 remains Draft.
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 67 AC are unique/sequential and unimplemented status is honest;
+- 68 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -938,7 +953,7 @@ remain Open, so BCK-20 remains Draft.
 47. **BCK-20-AC-47:** snapshot/query sizes and rates are bounded.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
-50. **BCK-20-AC-50:** v0.2.20 creates no backend/schema/mobile/runtime effect.
+50. **BCK-20-AC-50:** the current documentation revision creates no backend/schema/mobile/runtime effect.
 51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
@@ -984,13 +999,16 @@ remain Open, so BCK-20 remains Draft.
 67. **BCK-20-AC-67:** OD10-DOC-DEC-01 integrates only F-001–F-012
     documentation semantics; OD-10 remains Proposed and no schema, executable
     fixture, dataset, runtime or qualified Legal authority is created.
+68. **BCK-20-AC-68:** BCK-D1-OWN-B-REV-01, OD10-OWN-COMB-REV-01 and
+    BCK20-OD02-SRC-GOV-REV-01 are prepared review inputs only; their verdicts
+    remain Pending and no source, OD, D1/G1 or executable status advances.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.20 the following remain absent:
+At v0.2.21 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
@@ -1002,17 +1020,20 @@ At v0.2.20 the following remain absent:
 
 ## 29. Next action
 
-1. obtain named qualified terms/access verdicts against the exact consolidated
+1. obtain one exact BCK-D1-OWN-B-REV-01 response for five separate OD-10
+   perspectives and the source-governance boundary, then reconcile only the
+   accepted bounded verdicts;
+2. obtain named qualified terms/access verdicts against the exact consolidated
    review package and preserve every inconclusive source fail-closed;
-2. record one explicit owner decision per source; advance none automatically;
-3. prepare immutable source snapshots and translations only for sources later
+3. record one explicit owner decision per source; advance none automatically;
+4. prepare immutable source snapshots and translations only for sources later
    advanced to `eligible_for_slice_review`;
-4. resolve service-area sources and policy-reference blockers separately;
-5. obtain independent Security/Privacy and applicable qualified Legal evidence;
-6. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
-7. obtain attributable API/Reference/Localization/Content/Mobile verdicts for
-   OD-10 v0.2 and the applicable qualified Legal/Product policy;
-8. keep every Deferred item closed until its exact later gate;
-9. move BCK-20 to Review, then Approved only after §26;
-10. keep schema/runtime/distribution implementation blocked until G1 and a
+5. resolve service-area sources and policy-reference blockers separately;
+6. obtain independent Security/Privacy and applicable qualified Legal evidence;
+7. obtain qualified Legal/Product policy for BCK20-OD-05 where applicable;
+8. obtain the applicable qualified Legal/Product/terms decisions and later
+   executable parity without treating combined ownership as independence;
+9. keep every Deferred item closed until its exact later gate;
+10. move BCK-20 to Review, then Approved only after §26;
+11. keep schema/runtime/distribution implementation blocked until G1 and a
    separately Approved executable file plan.

@@ -1,7 +1,7 @@
 # BCK-01 — Architecture Reconciliation Report
 
 - ID: **BCK-01-REV-01**
-- Version: **1.28**
+- Version: **1.29**
 - Date: **2026-09-19**
 - Status: **Accepted evidence for Review entry — Approval evidence pending**
 - Runtime status: **N/A; documentation evidence only**
@@ -13,17 +13,15 @@
 
 ---
 
-## 0. BCK-20 EXT-A–D and OD-10 reconciliation
+## 0. BCK-20 Batch B review preparation
 
-This revision records BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01,
-OD10-DOC-DEC-01 and BCK-20 v0.2.20
-against the reconciled post-RAW-C snapshot. Exact EXT-A–D P6 evidence is
-accepted only as a technical baseline under combined ownership with zero
-independence. Amended OD-10 documentation evidence integrates F-001–F-012 but
-OD-10 remains Proposed. No source is eligible and the consolidated
-terms/access package contains no qualified verdict. The BCK-01 Review-entry
-verdict is unchanged; EXT-G5/G6, every market, source acceptance,
-independent/qualified, schema/fixture and runtime gates remain closed.
+This revision records BCK-D1-OWN-B-REV-01 and BCK-20 v0.2.21 against the
+reconciled post-RAW-C snapshot. The package prepares five separate OD-10
+documentation-perspective verdicts and a separate source-governance verdict
+as one exact owner action. All six remain Pending. No source is eligible and
+no independent/qualified conclusion exists. The BCK-01 Review-entry verdict
+is unchanged; EXT-G5/G6, every market, source acceptance, D1/G1,
+schema/fixture and runtime gates remain closed.
 
 ## 1. Verdict
 
@@ -45,7 +43,7 @@ normative sections:
 
 - `AGENTS.md` and `docs/architecture/ARCHITECTURE_BASELINE.md`;
 - Accepted ADR 0012, 0013, 0015, 0016, 0017, 0018 and 0019;
-- BCK-02 v2.4.71 registry, ownership, §14 template, §15 reconciliation, gates
+- BCK-02 v2.4.72 registry, ownership, §14 template, §15 reconciliation, gates
   and next-package rules;
 - BCK-03 v0.3.14, BCK03-OPS-DEC-01 v0.1, BCK03-SEC-DEC-01 v0.1,
   BCK03-MOB-REV-01 v0.2, BCK03-MOB-DEC-01 v0.1 and API Contracts Workflow;
@@ -57,13 +55,14 @@ normative sections:
   BCK-R0-TCH-DEC-01, BCK05-OD02-IAM-01,
   BCK05-OD07-REL-01,
   BCK05-OD03-SLO-01, BCK05-OD04-COST-01 v0.2, BCK05-OD05-REC-01,
-  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.20 plus their
+  BCK05-NUM-REV-01 v0.2 and BCK-20 v0.2.21 plus their
   coverage matrices;
 - BCK-09 v1.13, ECL-03 v1.3/ECL-03C v1.11, RAW-C v0.3,
   BCK-D1-DEC-01 v0.18, BCK-D1-OWN-A-DEC-01 v0.1, BCK20-OWN-DEC-01 v0.1,
   BCK20-OD02-DEC-01 v0.1 and BCK20-OD02-PC-COMB-DEC-01 v0.1;
-- BCK-D1-REV-01 v1.31, BCK-D1-SIG-01 v1.30,
-  BCK-D1-OWN-REV-01 v1.26, BCK-D1-OWN-A-DEC-01 v0.1 and OD-07/09/10/11
+- BCK-D1-REV-01 v1.32, BCK-D1-SIG-01 v1.31,
+  BCK-D1-OWN-REV-01 v1.27, BCK-D1-OWN-A-DEC-01 v0.1,
+  BCK-D1-OWN-B-REV-01 v0.1 and OD-07/09/10/11
   review evidence packages;
 - BCK-02-A1 v1.12 Draft Latvia/Baltics roadmap;
 - LAUNCH_STATUS current tracked facts.
@@ -122,13 +121,13 @@ must be repeated and refined by their owning BCK spec before schema approval.
 
 | Anchor | Repository fact | BCK-01 treatment | Result |
 |---|---|---|---|
-| BCK-02 | Approved v2.4 semantics; v2.4.71 traceability | Coordination authority only | Pass |
+| BCK-02 | Approved v2.4 semantics; v2.4.72 traceability | Coordination authority only | Pass |
 | BCK-02-A1 | Draft v1.12, documentation only | Baltic rollout input, not Accepted authority | Pass |
 | BCK-03 | Draft v0.3.14; API/Operations/Security/Mobile boundary reviews Accept with required amendments; deployed/mobile API runtime Absent | Independent evidence Pending | Pass with blockers |
 | BCK-04 | Draft v0.4.23; BCK-04 and threat-model combined-owner technical verdicts recorded; product/cloud runtime Absent | BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; qualified Legal, OD-09 and tabletop remain | Pass with blockers |
 | BCK-05 | Draft v0.2.30; bounded R0/RAW-C local evidence boundary, product/cloud runtime Absent | BCK-03/BCK-04/threat-model owner-boundary evidence recorded; full BCK-05 specialist/stage/executable evidence remains | Pass with blockers |
 | BCK-09 | Review v1.13; disabled RAW-C v0.3 Present, cloud/mobile runtime Absent | Booking rules and bounded local/hosted behavior reconciled; nine independent signatures Pending | Pass with blockers |
-| BCK-20 | Draft v0.2.20, runtime Absent | exact EXT-A–D technical baseline and amended OD-10 documentation evidence recorded with zero independence; no source eligible; EXT-G5/G6, terms/source-copy/independent/Legal/schema/fixture gates closed; OD-10 Proposed, BCK20-OD-02/05 Open | Pass with blockers |
+| BCK-20 | Draft v0.2.21, runtime Absent | Batch B review prepared over exact EXT-A–D/OD-10 evidence; six verdicts Pending with zero independence; no source eligible; EXT-G5/G6, terms/source-copy/independent/Legal/schema/fixture gates closed; OD-10 Proposed, BCK20-OD-02/05 Open | Pass with blockers |
 | Firebase Architecture | Proposed | Infrastructure input only | Pass |
 | `apps/backend` | Bounded R0 plus disabled Emulator-only RAW-C source Present | Separate approvals only; no G1/G4/R1/cloud/mobile authority | Pass with blockers |
 
@@ -179,6 +178,7 @@ must be repeated and refined by their owning BCK spec before schema approval.
 | BCK01-F41 | External evidence work required an exact safe procedure without treating plan approval as network authority | BCK20-OD02-EXT-EV-PLAN-DEC-01 accepted EXT-G0 only and granted no execution/runtime authority; later work required separate exact authorizations |
 | BCK01-F42 | Completed bounded EXT-A–D evidence was absent from canonical status and could be confused with source acceptance | BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 records exact technical evidence only; no source is eligible and qualified terms/access plus EXT-G5/G6 remain closed |
 | BCK01-F43 | OD-10 v0.1 contained an unreachable `value_default` vector and ambiguous unsupported-locale/result/normalization semantics | OD10-DOC-DEC-01 integrates F-001–F-012 into evidence v0.2 while keeping OD-10 Proposed and all specialist/Legal/executable gates open |
+| BCK01-F44 | Remaining OD-10 and source-governance owner reviews would otherwise require multiple serial approval rounds with duplicated scope and drift risk | BCK-D1-OWN-B-REV-01 freezes one exact owner action over six separate bounded verdicts while leaving every qualified, independent, source, D1/G1 and executable gate unchanged |
 
 ## 7. Definition of Ready evidence
 
