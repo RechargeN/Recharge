@@ -1,13 +1,15 @@
 # BCK-20 — External Source Evidence Register
 
 - ID: **BCK20-OD02-EXT-EV-01**
-- Version: **0.2**
-- Date: **2026-09-18**
-- Status: **Accepted evidence work queue — no source approved for ingestion**
+- Version: **0.3**
+- Date: **2026-09-19**
+- Status: **Accepted evidence register — EXT-A–D technical evidence reconciled; no source approved for ingestion**
 - Parent: [BCK20-OD02-SRC-REC-01 v0.2](REFERENCE_DATA_INTERNAL_SOURCE_RECORDS.md)
 - Authority boundary: [BCK20-OD02-SRC-AUTH-01 v0.2](REFERENCE_DATA_SOURCE_AUTHORITY_MATRIX.md)
 - Accountable owner: **Reference Data owner**
 - Owner decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- Technical baseline decision:
+  [BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 v0.1](REFERENCE_DATA_EXT_A_D_SOURCE_TERMS_OWNER_DECISION.md)
 - Legal/license disposition: **Pending for every external source**
 - Runtime effect: **none**
 
@@ -15,11 +17,10 @@
 
 ## 1. Purpose
 
-This register converts the accepted candidate-source list into a bounded
-evidence work queue. It does not repeat or upgrade the 2026-09-17 observations
-in the authority matrix. No network revalidation, artifact download, terms
-acceptance, license determination, parser choice or executable ingestion is
-claimed by this revision.
+This register reconciles the accepted candidate-source list with exact EXT-A–D
+technical evidence. It records evidence already collected under separately
+bounded authorizations; this revision performs no network work. It does not
+accept terms, determine lawful use, select a parser or authorize ingestion.
 
 ## 2. Evidence-state vocabulary
 
@@ -29,6 +30,12 @@ claimed by this revision.
 | `artifact_pending` | exact release/file and content hash are absent |
 | `terms_pending` | license/terms and allowed-use scope have no accepted disposition |
 | `validation_pending` | parser/extraction and deterministic validation evidence are absent |
+| `technical_evidence_captured` | exact artifact/response and bounded deterministic validation are pinned; terms and remaining gates still apply |
+| `partial_technical_evidence` | some exact source dimensions passed, while named required dimensions remain absent or blocked |
+| `access_blocked` | the authorized client could not obtain the required exact source or terms evidence without a new access decision |
+| `freshness_pending` | mutable or retrieval-dated evidence lacks an accepted maximum-age/update policy |
+| `spec_pin_pending` | the artifact is pinned but an associated normative specification version is not |
+| `integrity_evidence_pending` | local hashes exist but required provider checksum/signature evidence is absent |
 | `eligible_for_slice_review` | all required evidence exists; still not ingestion approval |
 | `blocked` | source must not be used until the named issue is resolved |
 
@@ -38,20 +45,19 @@ slice before repository data, parser code or runtime work.
 
 ## 3. External source work register
 
-All observations below are inherited from BCK20-OD02-SRC-AUTH-01 and are stale
-until deliberately rechecked. “Artifact required” describes the evidence to
-capture, not permission to download or redistribute it.
+The “evidence result” column is factual status for exact P6 records, not a
+source allowlist. Raw third-party content remains outside the repository.
 
-| Source ID | Bounded field authority | Last inherited observation | Artifact required | Terms/use evidence | Current state |
-|---|---|---|---|---|---|
-| `SRC-ISO-3166` | ISO country code elements | official ISO page observed 2026-09-17 | exact approved code-list release/file or licensed snapshot + hash | redistribution, storage, derivative and update rights | `artifact_pending`, `terms_pending` |
-| `SRC-UN-M49` | M49 numeric codes, UN short names and ISO mapping evidence | official UNSD page observed 2026-09-17 | dated downloadable table/snapshot + hash | reuse/attribution/redistribution terms | `artifact_pending`, `terms_pending` |
-| `SRC-ISO-4217` | alphabetic/numeric currency codes and minor-unit relationship | ISO standard page observed 2026-09-17 | exact standard/release evidence + hash where lawful | standard/data use and redistribution rights | `artifact_pending`, `terms_pending` |
-| `SRC-SIX-4217` | ISO 4217 maintenance/change evidence | official SIX maintenance role observed 2026-09-17 | dated maintenance-list artifact + hash | access, automation, storage and redistribution terms | `artifact_pending`, `terms_pending` |
-| `SRC-EU-EURO` | corroborating euro-adoption evidence | Commission page observed 2026-09-17 | dated page/document snapshot + hash | reuse/attribution terms | `artifact_pending`, `terms_pending` |
-| `SRC-IANA-LANG` | registered BCP 47 subtags/extensions | official registry observed 2026-09-17 | exact registry file with file date + hash | IANA terms/license disposition | `artifact_pending`, `terms_pending` |
-| `SRC-UNICODE-CLDR` | locale display/format data and algorithms | CLDR 48.2 / UTS #35 observed 2026-09-17 | exact CLDR release archive/module set + hash | Unicode license, notices, redistribution and modification obligations | `artifact_pending`, `terms_pending` |
-| `SRC-IANA-TZDB` | IANA zone IDs and transition data | release 2026d observed 2026-09-17 | exact release archive + signature/hash | IANA tzdb terms/notices and redistribution disposition | `artifact_pending`, `terms_pending` |
+| Source ID | Bounded field authority | Exact technical evidence | Remaining terms/access/freshness gate | Current state |
+|---|---|---|---|---|
+| `SRC-ISO-3166` | ISO country code elements | landing and copyright endpoints returned HTTP 403; no artifact acquired | lawful exact artifact/edition and terms evidence | `access_blocked`, `artifact_pending`, `terms_pending` |
+| `SRC-UN-M49` | M49 numeric codes, UN short names and ISO mapping evidence | exact full-view response; six 248-row tables; Baltic mappings Pass | qualified allowed-use decision and maximum-age/changed-hash policy for mutable undated response | `technical_evidence_captured`, `freshness_pending`, `terms_pending` |
+| `SRC-ISO-4217` | direct ISO standard identity/edition | standard and copyright endpoints returned HTTP 403; SIX does not replace direct ISO evidence | lawful exact edition/artifact and ISO terms evidence | `access_blocked`, `artifact_pending`, `terms_pending` |
+| `SRC-SIX-4217` | ISO 4217 maintenance/change evidence | authority page, List One dated `2026-09-17` and List Three dated `2026-01-01` Pass; List Two XML absent | current SIX terms, List Two disposition and provider integrity evidence | `partial_technical_evidence`, `integrity_evidence_pending`, `terms_pending` |
+| `SRC-EU-EURO` | corroborating euro-adoption evidence | exact Commission page and Baltic adoption years Pass | qualified legal-notice decision and freshness policy for retrieval-dated page | `technical_evidence_captured`, `freshness_pending`, `terms_pending` |
+| `SRC-IANA-LANG` | registered BCP 47 subtags/extensions | exact registry `File-Date` `2026-09-17`; structural and Baltic validation Pass | qualified IANA terms/use disposition | `technical_evidence_captured`, `terms_pending` |
+| `SRC-UNICODE-CLDR` | locale display/format data and algorithms | exact CLDR 48.2 archive/module inventory and selected validation Pass | qualified Unicode terms/notices decision; immutable UTS #35 48.2 pin; checksum filename anomaly retained | `technical_evidence_captured`, `spec_pin_pending`, `terms_pending` |
+| `SRC-IANA-TZDB` | IANA zone IDs and transition data | exact release `2026d`; archive inventory and Baltic validation Pass | qualified terms/notices decision and provider checksum/signature disposition | `technical_evidence_captured`, `integrity_evidence_pending`, `terms_pending` |
 
 ## 4. Required evidence record
 
@@ -123,9 +129,12 @@ authorization.
 
 ## 7. Retained gates
 
-- every row remains `artifact_pending` and `terms_pending`;
-- no external source is approved for download, redistribution, repository
-  storage, parser implementation or ingestion;
+- every row remains `terms_pending`; ISO 3166/direct ISO 4217 also remain
+  `access_blocked` and `artifact_pending`;
+- technical or partial evidence does not move any source to
+  `eligible_for_slice_review`;
+- no external source is approved for redistribution, repository storage,
+  parser implementation or ingestion;
 - qualified Legal/license review remains Pending where applicable;
 - BCK20-OD-02/05 remain Open, OD-10 Proposed, BCK-20 Draft and
   BCK20-OD-03 Deferred;
@@ -149,13 +158,21 @@ authorization.
 13. **BCK20-OD02-EXT-EV-AC-13:** no repository data, parser, schema or runtime ingestion is authorized.
 14. **BCK20-OD02-EXT-EV-AC-14:** Firebase, deployment, activation, push and merge remain unauthorized.
 15. **BCK20-OD02-EXT-EV-AC-15:** a future executable slice still requires explicit approval after evidence readiness.
+16. **BCK20-OD02-EXT-EV-AC-16:** every technical state is pinned to an exact EXT-A–D P6 record and remains separate from terms acceptance.
+17. **BCK20-OD02-EXT-EV-AC-17:** no source is `eligible_for_slice_review` after v0.3 reconciliation.
+18. **BCK20-OD02-EXT-EV-AC-18:** ISO access failures and SIX/CLDR/IANA/UN/EU limitations remain visible and fail closed.
 
 ## 9. Recorded disposition and next action
 
-BCK20-OD02-SRC-REC-DEC-01 accepts the frozen v0.1 register at normalized-LF
-SHA-256 `faee6caaa2a65380c2e631c745669f32da20926502792560c657184bd3bf750d`
-as a work queue only. Every source remains unapproved for ingestion. This v0.2
-revision adds status traceability without changing the frozen work items.
+BCK20-OD02-SRC-REC-DEC-01 continues to preserve the frozen v0.1 work queue.
+BCK20-OD02-EXT-AD-SRC-TERMS-DEC-01 accepts the exact EXT-A–D P6 documents,
+through package normalized-LF SHA-256
+`596873a51fd09839b4d63f80cdcb0cc5a2c21cfbe97ec377e7678f5173727bd1`,
+as the technical evidence baseline with retained gates.
 
-Network revalidation, artifact retrieval, terms/license disposition and
-validation evidence remain separate work requiring explicit authorization.
+This v0.3 revision is factual reconciliation only. Technical collection is
+complete for the exact pinned evidence, but terms/access, freshness,
+specification and integrity gaps remain as recorded. Every source remains
+unapproved for ingestion and outside `eligible_for_slice_review`. The next
+authorized action is the consolidated qualified terms/access review; network
+or executable work requires a new decision.
