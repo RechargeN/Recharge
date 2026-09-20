@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: BCK-02
-- Версия: 2.4.73
+- Версия: 2.4.74
 - Дата: 2026-09-20
 - Статус: **Approved — canonical coordination baseline, documentation only**
 - Утверждено: 2026-08-10, Product owner
@@ -16,6 +16,18 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.74.** D1 Owner Batch D and internal-blocker preparation without
+changing Approved v2.4 coordination semantics:
+
+- prepares one OD-11 Product boundary, one five-verdict Operations specialist
+  package and one factual internal blocker/work-order matrix;
+- freezes Batch D as three separate Pending verdicts while Batch B/C remain
+  separately Pending;
+- reconciles BCK-01 v0.4.68/review v1.31, BCK-04/coverage v0.4.24/v0.3.24,
+  BCK-05/coverage v0.2.31, D1 review v1.34, ledger v1.33 and workbook v1.29;
+- keeps OD-11 and BCK05-OD-06 Open, BCK05-OD-03/04/05/08 Proposed,
+  D1/G1 Blocked and all runtime/cloud gates closed.
 
 **v2.4.73.** D1 Owner Batch C and external-review handoff preparation without
 changing Approved v2.4 coordination semantics:
@@ -1010,15 +1022,15 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.73)
+## 5. Реестр проектных документов — 22 (v2.4.74)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
-| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.67 — Present | Local R0 tooling plus disabled Emulator-only ECL-03C source; product/cloud Absent |
-| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4 baseline; factual registry v2.4.73 | N/A |
+| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.68 — Present | Local R0 tooling plus disabled Emulator-only ECL-03C source; product/cloud Absent |
+| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4 baseline; factual registry v2.4.74 | N/A |
 | BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Draft v0.3.14 — D1-SIG-API and bounded D1-SIG-OPS/SEC/MOBILE Accept with required amendments; broader API decisions Deferred; Booking-v1 API-DEC-01/03 preserved | Deployed/mobile API runtime Absent; independent reviews Pending |
-| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.23 — Present; BCK-04 and threat-model combined-owner technical verdicts recorded; BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; OD-09/Legal blockers remain | Product/cloud Absent |
-| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.30 — Present; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted; BCK05-OD-03/04/05/08 Proposed; bounded R0 Pass | Local R0 and disabled RAW-C source boundary only; product/cloud Absent |
+| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Draft v0.4.24 — Present; OD-11 Product review/Batch D prepared but unsigned; no numeric age or qualified/cross-boundary evidence; OD-11 Open | Product/cloud Absent |
+| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Draft v0.2.31 — Present; BCK05-OPS-REV-02/Batch D prepared but unsigned; five specialist verdicts Pending; bounded R0 Pass | Local R0 and disabled RAW-C source boundary only; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, nine BCK06 decisions fail-closed; Approval blockers remain | Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK07 decisions; OD/dependency/Approval blockers remain | Absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.2 — Present; 22/22 design coverage, 60 AC, ten BCK08 decisions; OD/source/Approval blockers remain | Absent |
@@ -1551,7 +1563,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 
 ## 19. Acceptance criteria этой карты
 
-1. Ревизия v2.4.73 содержит 22 BCK-specs и 6 runbooks.
+1. Ревизия v2.4.74 содержит 22 BCK-specs и 6 runbooks.
 2. Count является versioned checksum, а не вечным fixed-count invariant.
 3. Каждый BCK/RUN/OD/RSK имеет уникальный ID и accountable owner.
 4. Spec status отделён от runtime status.
@@ -1653,18 +1665,22 @@ documentation package из §20, но не G1, runtime wave или provisioning.
     BCK-D1-G1-CLOSE-01 готовят Product copy boundary, четыре external-review
     lanes и factual blocked baseline: ни один внешний verdict, OD, BCK, D1/G1,
     market или runtime status не повышается.
+75. BCK-D1-OWN-D-REV-01, BCK-D1-OD11-PROD-REV-01,
+    BCK05-OPS-REV-02 и BCK-D1-INT-BLOCK-01 готовят только Product boundary,
+    specialist routing и factual work queue: все три Batch D verdict остаются
+    Pending, OD/BCK/D1/G1 и runtime statuses не повышаются.
 
 ## 20. Следующий шаг после утверждения
 
-Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.67
+Формальный prerequisite выполнен: `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.68
 находится в Review с recorded interim coordinator evidence. Технический
 BCK20-OD-02 workflow v0.4 исправлен и четыре exact-v0.4 combined-owner
 verdict записаны, source-authority design boundary и internal documentation
 records, EXT-G0 plan и exact EXT-A–D technical evidence приняты в своих
 ограниченных границах. OD-10 documentation vectors исправлены, но OD-10
-остаётся Proposed. Batch B/C готовят раздельные Product/technical owner
+остаётся Proposed. Batch B/C/D готовят раздельные Product/technical owner
 responses, а BCK-D1-XREV-HANDOFF-01 — четыре внешних review lanes.
-Следующий D1-шаг — exact Batch B/C owner responses при одобрении, назначение
+Следующий D1-шаг — exact Batch B/C/D owner responses при одобрении, назначение
 реальных eligible reviewers, затем qualified terms/copy/age verdicts,
 per-source decisions, independent Security/Privacy и cross-boundary review.
 Remaining specialist
@@ -1685,10 +1701,10 @@ production schemas, credentials или deployments.
 
 Следующий review package содержит только documentation evidence:
 
-1. BCK-01 v0.4.67 Review с traceability/reconciliation к §3 и
-   [`BCK-01-REV-01 v1.30`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
-2. BCK-02 v2.4.73 traceability/checksum;
-3. BCK-03 v0.3.14, BCK-04 v0.4.23, BCK-05 v0.2.30 и BCK-20 v0.2.22
+1. BCK-01 v0.4.68 Review с traceability/reconciliation к §3 и
+   [`BCK-01-REV-01 v1.31`](BACKEND_MASTER_RECONCILIATION_REPORT.md) owner evidence;
+2. BCK-02 v2.4.74 traceability/checksum;
+3. BCK-03 v0.3.14, BCK-04 v0.4.24, BCK-05 v0.2.31 и BCK-20 v0.2.22
    coverage/blocker evidence без ложного повышения статуса;
 4. linked review evidence for
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),

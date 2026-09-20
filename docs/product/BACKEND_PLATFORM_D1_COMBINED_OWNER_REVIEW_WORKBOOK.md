@@ -1,15 +1,15 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.28**
+- Version: **1.29**
 - Date: **2026-09-20**
-- Status: **Technical owner verdicts recorded; Batch B/C prepared; remaining D1 verdicts required**
+- Status: **Technical owner verdicts recorded; Batch B/C/D prepared; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.33](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.32](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.34](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.33](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -28,12 +28,19 @@
 - Recorded OD-10 documentation decision: [OD10-DOC-DEC-01 v0.1](BACKEND_OD_10_LOCALIZATION_OWNER_DECISION.md)
 - Prepared Batch B review: [BCK-D1-OWN-B-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_REVIEW_PACKAGE.md)
 - Prepared Batch C review: [BCK-D1-OWN-C-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_C_REVIEW_PACKAGE.md)
+- Prepared Batch D review: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Owner verdict reconciliation
+
+Version 1.29 prepares BCK-D1-OWN-D-REV-01 as one exact owner action over three
+separate boundaries: OD-11 Product semantics, BCK-05 specialist-review
+routing and the factual internal-blocker work queue. All three remain Pending;
+Batch B/C remain separately Pending. No numeric age, specialist, qualified,
+independent, OD, D1/G1 or executable state changes.
 
 Version 1.28 prepares BCK-D1-OWN-C-REV-01 as one exact owner action over three
 separate boundaries: Product mandatory-copy classification, external-review
@@ -262,8 +269,8 @@ No combined verdict may hide the `Inconclusive` Legal or Finance scopes.
 | Artifact | Recommendation | Why it cannot advance further now |
 |---|---|---|
 | BCK-03 v0.3.14 | API, Operations, Security and Mobile boundary reviews recorded as `Accept with required amendments`; spec remains Draft | Independent evidence remains Pending |
-| BCK-04 v0.4.23 | retain Draft | BCK-04 and threat-model combined-owner technical verdicts recorded; `BCK04-OD-01` remains Proposed pending independent/cross-boundary evidence; OD-09/tabletop/Legal gates remain |
-| BCK-05 v0.2.30 | retain Draft | BCK05-OD-01/02/07 and cross-domain OD-07 are Accepted and bounded R0 is Pass; owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains incomplete |
+| BCK-04 v0.4.24 | retain Draft | OD-11 Product review/Batch D prepared but unsigned; no numeric age, qualified Legal/Privacy or cross-boundary evidence; OD-11 Open |
+| BCK-05 v0.2.31 | retain Draft | BCK05-OPS-REV-02/Batch D prepared but unsigned; five specialist verdicts and executable/stage/product-cloud evidence remain incomplete |
 | BCK-20 v0.2.22 | retain Draft | exact technical/OD-10 evidence is recorded; Batch B/C reviews are prepared but unsigned; source/qualified/independent/executable gates remain incomplete; OD-10 Proposed and OD-02/05 Open |
 | OD-07 | retain Accepted with controls | exact `OD07-A1-EU-MR-v1` verdict is recorded; provisioning, qualified production Legal/Privacy and revalidation remain separate gates |
 | OD-09 | retain Proposed | sufficient for D1 minimum, insufficient for effects/runtime |
@@ -322,7 +329,7 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
 1. Keep the recorded Batch A dispositions and D1-SIG-API verdict reconciled in
    BCK-D1-SIG-01 and BCK-03.
 2. Preserve the bounded BCK-03, BCK-04, threat-model, BCK-20 triage and
-   translation-governance verdicts. Use the separate exact Batch B and Batch C
+   translation-governance verdicts. Use the separate exact Batch B, Batch C and Batch D
    owner responses only if accepted; neither is inferred from preparation.
    Route real qualified/independent review through
    BCK-D1-XREV-HANDOFF-01 and keep every external verdict mandatory.
@@ -386,3 +393,7 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
 27. **D1-OWN-AC-27:** BCK-D1-OWN-C-REV-01 is preparation only; its Product
     copy, review-routing and blocked-state verdicts remain Pending and cannot
     supply qualified/independent evidence, close any OD or pass D1/G1.
+28. **D1-OWN-AC-28:** BCK-D1-OWN-D-REV-01 is preparation only; its OD-11
+    Product, Operations-routing and blocker-baseline verdicts remain Pending
+    and cannot select a numeric age, satisfy a specialist/qualified review,
+    close any blocker or pass D1/G1.

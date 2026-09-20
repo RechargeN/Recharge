@@ -1,7 +1,7 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.67**
+- Version: **0.4.68**
 - Date: **2026-09-20**
 - Spec status: **Review — owner evidence recorded; approval pending**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
@@ -14,6 +14,18 @@
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.68 — 2026-09-20
+
+- prepared the OD-11 Product age-eligibility boundary without selecting a
+  numeric age, guardian model or qualified Legal/Privacy conclusion;
+- prepared a five-verdict BCK-05 Operations specialist package and a factual
+  internal blocker/work-order matrix;
+- froze Owner Batch D as three separate Pending verdicts while Batch B/C
+  remain separately Pending;
+- reconciled BCK-04/coverage v0.4.24/v0.3.24, BCK-05/coverage v0.2.31,
+  D1 review v1.34, ledger v1.33 and workbook v1.29;
+- retained all OD/BCK/D1/G1, market, schema, Firebase and runtime gates.
 
 ### v0.4.67 — 2026-09-20
 
@@ -873,8 +885,8 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Admin/Support | Local mock Admin experience preview and Route moderation/safety UI; BCK-19 v0.2 Review/Present defines 22/22 case/read-audit/propose-approve-execute boundaries | No dedicated staff identity, server case, reveal audit, repair registry/command, RUN-03 or privileged runtime | BCK-19 Approval; implement bounded domain commands, then build/drill RUN-03 before persistent stage |
 | Library/Reviews/T&S | Visit History local-first; reviews backend absent | Нет sync, rating aggregate, report/block/enforcement | BCK-12/22 |
 | Planning/Route | Mature local-first capability | Нет cloud sync/publication contracts | BCK-10/11 |
-| Operations | BCK-05 v0.2.30 и coverage matrix v0.2.30 Draft/Present | Bounded BCK-03/BCK-04/threat-model owner-boundary verdicts are recorded; BCK-05 specialist/stage/restore/executable evidence remains unresolved | Close D1/G1 and approve an exact R1 slice before environment provisioning |
-| Privacy | BCK-04 v0.4.23, coverage v0.3.23 and threat-model v0.2 Draft/Present | BCK-04 and threat-model combined-owner technical verdicts are recorded; OD-01 remains Proposed pending independent/cross-boundary evidence, while Legal/incident/tabletop/runtime blockers remain | Закрыть BCK-04 blockers; owner-boundary Acceptance не является BCK-04 Review/Legal/runtime approval |
+| Operations | BCK-05 v0.2.31 и coverage matrix v0.2.31 Draft/Present | BCK05-OPS-REV-02 and Batch D are prepared but unsigned; five specialist verdicts and stage/restore/executable evidence remain unresolved | Review the five design decisions, then close D1/G1 and approve an exact R1 slice before provisioning |
+| Privacy | BCK-04 v0.4.24, coverage v0.3.24 and threat-model v0.2 Draft/Present | OD-11 Product boundary/Batch D prepared but unsigned; no numeric age, qualified Legal/Privacy or cross-boundary evidence; OD-01/09 Proposed and OD-11 Open | Закрыть BCK-04 blockers; preparation не является Legal/OD/runtime approval |
 | Baltic markets | BCK-20/coverage v0.2.22 Draft/Present | exact EXT-A–D/OD-10 evidence recorded; Batch B/C prepared but unsigned; no source eligible; mandatory-copy, terms, independent/qualified and EXT-G5/G6 gates closed | Закрыть retained evidence gates без country forks |
 
 ### 4.1. Главный gap
@@ -1559,7 +1571,7 @@ product/cloud backend scope не Ready, пока одновременно не �
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.67
+## 25. Definition of Done BCK-01 v0.4.68
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
@@ -1705,7 +1717,7 @@ Approval требует reconciliation report и sign-off владельцев, 
 
 ## 27. Unimplemented list
 
-На дату v0.4.67 не реализованы:
+На дату v0.4.68 не реализованы:
 
 - product/domain `apps/backend` application beyond the local R0 tooling and
   disabled Emulator-only ECL-03C source;
@@ -1736,10 +1748,10 @@ not change production readiness.
    exact artifacts, license/terms и pinned ingestion evidence; затем получить
    source copy, independent Security/Privacy и applicable qualified Legal evidence;
 2. позже провести named-owner review по
-   [BCK-D1-REV-01 v1.33](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md) для
+   [BCK-D1-REV-01 v1.34](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md) для
    BCK-03/BCK-04/BCK-05/BCK-20 и записать evidence-based verdicts поверх уже
    зафиксированных combined-role assignments в
-   [BCK-D1-SIG-01 v1.32](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
+   [BCK-D1-SIG-01 v1.33](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md);
 3. принять или потребовать amendments к evidence packages
    [OD-07](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md),
    [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md),

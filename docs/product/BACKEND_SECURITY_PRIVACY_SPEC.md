@@ -1,18 +1,18 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.23**
-- Date: **2026-09-15**
+- Version: **0.4.24**
+- Date: **2026-09-20**
 - Spec status: **Draft — BCK-04 and threat-model technical owner verdicts recorded; independent/Legal/OD gates pending**
 - Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.68](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.74](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
   [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.23
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.24
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - API security boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -23,6 +23,8 @@
 - Threat-model owner decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft; OD-09 Proposed)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
+- OD-11 Product review: [BCK-D1-OD11-PROD-REV-01 v0.1](BACKEND_OD_11_PRODUCT_POLICY_REVIEW.md) (prepared; Product verdict Pending)
+- D1 Owner Batch D: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
 - Runtime effect of this revision: **none**
@@ -30,6 +32,17 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.24 — 2026-09-20
+
+- prepared a hash-pinned OD-11 Product boundary covering separate account,
+  feature, content, transaction, admission and Creator/Page eligibility;
+- prepared Batch D and the internal blocker matrix without selecting a numeric
+  age, guardian model or qualified Legal/Privacy conclusion;
+- retained OD-11 Open, age-sensitive surfaces fail-closed, BCK-04 Draft and
+  every independent/cross-boundary/Legal/runtime gate;
+- created no schema, data collection, Firebase resource, deployment, push or
+  merge authority.
 
 ### v0.4.23 — 2026-09-15
 
@@ -1453,7 +1466,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.57 Review:
+executable slice, согласованный с BCK-01 v0.4.68 Review:
 
 ```text
 docs/runbooks/
@@ -1763,10 +1776,13 @@ therefore remains Draft and cannot enter Review.
     independent/cross-boundary evidence.
 64. **BCK-04-AC-64:** OD-01 and OD-09 remain independently gated; neither
     decision is inferred from the other.
+65. **BCK-04-AC-65:** BCK-D1-OD11-PROD-REV-01 prepares only an unsigned
+    Product boundary; it selects no numeric age, supplies no qualified verdict
+    and leaves OD-11 Open and every dependent high-risk surface fail-closed.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.23 отсутствует:
+На момент v0.4.24 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

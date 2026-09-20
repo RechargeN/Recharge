@@ -1,16 +1,16 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.30**
-- Date: **2026-09-15**
+- Version: **0.2.31**
+- Date: **2026-09-20**
 - Spec status: **Draft — Platform Operations review required**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud operations runtime Absent**
 - Accountable owner: **Platform Operations owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.68](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
+- Coordination baseline: [BCK-02 v2.4.74](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
-- Security/privacy boundary: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK-04/threat-model technical verdicts recorded; BCK04-OD-01/09 and independent/Legal evidence pending)
+- Security/privacy boundary: [BCK-04 v0.4.24](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; OD-11 Product boundary and Batch D prepared but unsigned; independent/Legal evidence pending)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
@@ -19,6 +19,9 @@
 - Reliability evidence: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) v0.1 (Draft; OD-03 Proposed)
 - Recovery evidence: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) v0.1 (Draft; OD-05 Proposed)
 - Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
+- Operations specialist review: [BCK05-OPS-REV-02 v0.1](BACKEND_OPERATIONS_SPECIALIST_REVIEW_PACKAGE.md) (prepared; five verdicts Pending)
+- D1 internal blocker matrix: [BCK-D1-INT-BLOCK-01 v0.1](BACKEND_PLATFORM_D1_INTERNAL_BLOCKER_MATRIX.md) (prepared factual work queue)
+- D1 Owner Batch D: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
 - IAM/workload identity evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (Accepted baseline with controls)
 - IAM owner decision: [BCK05-OD02-DEC-01](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) v0.2 (Accepted)
 - Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.2.1 (Accepted baseline with controls)
@@ -37,6 +40,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.31 — 2026-09-20
+
+- prepared one hash-pinned specialist package for the five remaining
+  BCK05-OD-03/04/05/06/08 documentation decisions;
+- separated pre-G1 design verdicts from evidence that correctly requires a
+  separately Approved R1 environment;
+- prepared Batch D and the internal blocker matrix without recording any
+  specialist verdict or promoting an OD/BCK/gate;
+- retained BCK-05 Draft, D1/G1 Blocked and all runtime/cloud gates closed.
 
 ### v0.2.30 — 2026-09-15
 
@@ -1032,13 +1045,16 @@ therefore remains Draft.
 48. **BCK-05-AC-48:** target file map is not runtime authorization.
 49. **BCK-05-AC-49:** Approval still requires a separate executable slice/G1.
 50. **BCK-05-AC-50:** v0.2.30 creates no backend/Firebase/resource/runtime effect.
+51. **BCK-05-AC-51:** BCK05-OPS-REV-02 and Batch D prepare review routing
+    only; all five specialist verdicts remain Pending, OD-03/04/05/08 remain
+    Proposed, OD-06 remains Open and R1 remains separately unauthorized.
 
 AC numbers are stable; new criteria append. Semantic removal/change requires a
 new revision and reference migration note.
 
 ## 30. Explicitly unimplemented
 
-At v0.2.23 the following remain absent:
+At v0.2.31 the following remain absent:
 
 - product/domain backend modules and handlers beyond the local R0 scaffold;
 - Firebase/GCP projects, databases, buckets, functions and app registrations;
@@ -1052,9 +1068,10 @@ At v0.2.23 the following remain absent:
 ## 31. Next action
 
 1. confirm BCK-05 coverage/reconciliation matrix;
-2. assign named Platform Operations and specialist reviewers;
-3. revalidate OD-07 and BCK05-OD-02 before provisioning, then resolve
-   BCK05-OD-03/04/05/07/08 evidence;
+2. obtain the exact Batch D owner response if accepted, then assign named
+   Platform Operations, Finance, Security/Privacy, API and domain reviewers;
+3. resolve BCK05-OD-03/04/05/06/08 design verdicts; revalidate OD-07 and
+   BCK05-OD-02 only before separately authorized provisioning;
 4. reconcile with BCK-03/04/20;
 5. move BCK-05 to Review, then Approved only when DoD is satisfied;
 6. preserve hosted parity and monitor/re-audit the expiring

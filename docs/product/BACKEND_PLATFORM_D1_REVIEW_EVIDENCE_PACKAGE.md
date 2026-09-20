@@ -1,7 +1,7 @@
 # Recharge Backend — D1 Platform Review Evidence Package
 
 - Package ID: **BCK-D1-REV-01**
-- Version: **1.33**
+- Version: **1.34**
 - Date: **2026-09-20**
 - Package status: **Draft review evidence — D1 exit blocked**
 - Runtime status: **Local R0 tooling and disabled Emulator-only ECL-03C source Present; product/cloud runtime Absent**
@@ -30,12 +30,23 @@
 - Prepared D1 Owner Batch C review: [BCK-D1-OWN-C-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_C_REVIEW_PACKAGE.md)
 - External-review handoff: [BCK-D1-XREV-HANDOFF-01 v0.1](BACKEND_PLATFORM_D1_EXTERNAL_REVIEW_HANDOFF.md)
 - D1/G1 closure matrix: [BCK-D1-G1-CLOSE-01 v0.1](BACKEND_PLATFORM_D1_G1_CLOSURE_MATRIX.md)
+- OD-11 Product review: [BCK-D1-OD11-PROD-REV-01 v0.1](BACKEND_OD_11_PRODUCT_POLICY_REVIEW.md)
+- Operations specialist review: [BCK05-OPS-REV-02 v0.1](BACKEND_OPERATIONS_SPECIALIST_REVIEW_PACKAGE.md)
+- D1 internal blocker matrix: [BCK-D1-INT-BLOCK-01 v0.1](BACKEND_PLATFORM_D1_INTERNAL_BLOCKER_MATRIX.md)
+- Prepared D1 Owner Batch D review: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md)
 - Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Revision notes
+
+### v1.34 — D1 Owner Batch D and internal blocker preparation
+
+Batch D freezes three separate Pending verdicts over the OD-11 Product
+boundary, BCK-05 specialist-review routing and the factual internal blocker
+work queue. No numeric age, specialist/qualified/independent conclusion,
+OD/BCK promotion, D1/G1 closure or executable authority is created.
 
 ### v1.33 — D1 Owner Batch C and external-review handoff preparation
 
@@ -257,8 +268,8 @@ attestation, artifact, registry, cloud deploy or runtime is authorized.
 | [BCK20 Mobile/Security pre-review decision](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md) | MS-F-001–MS-F-007 corrections and exact-v0.4 review re-freeze | Accepted documentation correction boundary only | Product/Content revalidation and Mobile/Security verdicts Pending; no runtime authority |
 | [BCK20 Product/Content combined-owner decision](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md) | two separate exact-hash L10N/Content verdicts | Accepted combined-owner boundary; no independence | OD-02 and remaining Mobile/Security/Privacy/Legal/runtime gates unchanged |
 | [OD-11 legal brief](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md) | legal facts versus product decisions | Draft legal brief | OD-11 remains Open |
-| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.32; Batch B/C prepared but unsigned; D1 sign-offs incomplete | no D1 status promotion |
-| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.28; Batch B/C exact responses prepared | nine bounded verdicts and all qualified/independent responses still required |
+| [Owner sign-off ledger](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md) | bounded assignments, verdicts and signatures | Draft v1.33; Batch B/C/D prepared but unsigned; D1 sign-offs incomplete | no D1 status promotion |
+| [Combined-owner workbook](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md) | plain-language decision batches and recorded/recommended verdicts | v1.29; Batch B/C/D exact responses prepared | twelve bounded verdicts and all qualified/independent responses still required |
 | [Full threat model](BACKEND_SECURITY_THREAT_MODEL.md) | stable assets/actors/boundaries, 49 classified threats, per-threat owners/gates/residual states and checksum | Draft v0.2; combined-owner technical verdict Present; BCK04-OD-01 Proposed | independent Security/Privacy and cross-boundary confirmations pending |
 | [Incident-response model](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) | SEV-1/2/3, privacy-risk assessment, roles, timing, notification and exercise contract | Draft evidence; BCK04-OD-09/BCK05-OD-08 Proposed | owner/Legal verdict, executable routes and completed tabletop pending |
 | [Incident tabletop package](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) | Scenario A, optional rotations, injects, evaluator key, finding/result templates and 30 AC | Ready v0.1; explicitly not executed | participants, execution, result, owner/Legal verdict and runtime proof pending |
@@ -478,12 +489,12 @@ rewritten.
 | Artifact | Reconciled version | Current result |
 |---|---|---|
 | BCK-03 | v0.3.14 Draft; API/Operations/Security/Mobile boundary reviews Accept with required amendments | broader API-DEC-01–05 scopes Deferred; independent evidence Pending |
-| BCK-04 + coverage | v0.4.23 / v0.3.23 Draft | BCK-04/threat-model technical verdicts recorded; OD-01 remains Proposed pending independent/cross-boundary evidence; Legal/OD-09 gates unchanged |
-| BCK-05 + coverage | v0.2.30 Draft | current platform/API/Security/Mobile/roadmap anchors and R0/RAW-C boundary recorded; owner-boundary verdicts do not accept BCK-05; R1 blocked |
+| BCK-04 + coverage | v0.4.24 / v0.3.24 Draft | OD-11 Product boundary and Batch D prepared but unsigned; no numeric age or qualified/cross-boundary evidence; OD-11 Open and age-sensitive surfaces fail-closed |
+| BCK-05 + coverage | v0.2.31 Draft | BCK05-OPS-REV-02 and Batch D prepared but unsigned; five specialist verdicts Pending; R1 blocked |
 | BCK-20 + coverage | v0.2.22 Draft | exact technical/OD-10 evidence recorded; Batch B/C prepared but unsigned; no source eligible; OD-02/05, OD-10, independent/Legal and runtime unresolved |
-| BCK-01-REV-01 | v1.30 | Review-entry evidence points to BCK-01 v0.4.67 without implying Approval |
+| BCK-01-REV-01 | v1.31 | Review-entry evidence points to BCK-01 v0.4.68 without implying Approval |
 | BCK-D1-DEC-01 | v0.18 Accepted traceability amendment | EXT-G0 plan decision recorded; OD/runtime dispositions unchanged |
-| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.32 / v1.28 | Batch B/C exact owner responses prepared; nine verdicts remain Pending with zero independence; full D1 sign-offs remain incomplete |
+| BCK-D1-SIG-01 / BCK-D1-OWN-REV-01 | v1.33 / v1.29 | Batch B/C/D exact owner responses prepared; twelve verdicts remain Pending with zero independence; full D1 sign-offs remain incomplete |
 
 The current reconciliation updates the affected specifications, matrices,
 review records, BCK-01, BCK-02, BCK-02-A1 and LAUNCH_STATUS atomically. It
@@ -596,6 +607,10 @@ required where the specifications depend on professional legal judgment.
     BCK-D1-XREV-HANDOFF-01 prepare Product and external-review routing only;
     three Batch C verdicts and all four external lanes remain Pending, while
     BCK-D1-G1-CLOSE-01 truthfully retains D1/G1 Blocked.
+45. **D1-REV-AC-45:** BCK-D1-OWN-D-REV-01 prepares OD-11 Product,
+    Operations-review routing and internal-blocker verdicts only; all three
+    remain Pending and create no numeric-age, specialist, qualified,
+    independent, D1/G1 or runtime evidence.
 
 ## 11. Final statement
 

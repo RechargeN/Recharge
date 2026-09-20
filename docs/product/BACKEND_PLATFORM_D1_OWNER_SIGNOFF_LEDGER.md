@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.32**
+- Version: **1.33**
 - Date: **2026-09-20**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.33](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.28](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.34](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.29](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -31,6 +31,10 @@
 - Prepared external-review handoff: [BCK-D1-XREV-HANDOFF-01 v0.1](BACKEND_PLATFORM_D1_EXTERNAL_REVIEW_HANDOFF.md)
 - Prepared D1/G1 closure matrix: [BCK-D1-G1-CLOSE-01 v0.1](BACKEND_PLATFORM_D1_G1_CLOSURE_MATRIX.md)
 - Prepared D1 Owner Batch C review: [BCK-D1-OWN-C-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_C_REVIEW_PACKAGE.md)
+- Prepared OD-11 Product review: [BCK-D1-OD11-PROD-REV-01 v0.1](BACKEND_OD_11_PRODUCT_POLICY_REVIEW.md)
+- Prepared Operations specialist review: [BCK05-OPS-REV-02 v0.1](BACKEND_OPERATIONS_SPECIALIST_REVIEW_PACKAGE.md)
+- Prepared D1 internal blocker matrix: [BCK-D1-INT-BLOCK-01 v0.1](BACKEND_PLATFORM_D1_INTERNAL_BLOCKER_MATRIX.md)
+- Prepared D1 Owner Batch D review: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -88,6 +92,10 @@ BCK-D1-OWN-C-REV-01 prepares three more separate bounded verdicts for Product
 mandatory-copy classification, external-review routing and the factual D1/G1
 blocked-state matrix. Preparation records no signature or external evidence;
 Batch B/C remain independently Pending.
+BCK-D1-OWN-D-REV-01 prepares three further bounded verdicts for the OD-11
+Product boundary, Operations specialist routing and the internal blocker
+baseline. Preparation records no signature; Batch B/C/D remain independently
+Pending and no numeric-age, specialist, qualified or independent claim exists.
 BCK05-OD-01/02/07 remain distinct from cross-domain OD-01/02/07. Every other
 incomplete specialist signature remains Pending and qualified Legal/Privacy
 evidence remains absent.
@@ -171,8 +179,8 @@ accepts its accountability.
 | Artifact | Accountable sign-off | Required boundary reviews | Current disposition |
 |---|---|---|---|
 | BCK-03 v0.3.14 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
-| BCK-04 v0.4.23 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | BCK-04 and threat-model combined-owner technical verdicts recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain; spec remains Draft |
-| BCK-05 v0.2.30 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and accepted OD baselines Present; BCK-03/BCK-04/threat-model owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains pending |
+| BCK-04 v0.4.24 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | OD-11 Product review/Batch D prepared but unsigned; no numeric age or qualified/cross-boundary evidence; spec remains Draft |
+| BCK-05 v0.2.31 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | BCK05-OPS-REV-02/Batch D prepared but unsigned; five specialist verdicts and executable evidence remain pending |
 | BCK-20 v0.2.22 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | exact technical/OD-10 evidence recorded; Batch B/C prepare nine bounded verdicts but none is signed; no source eligible; terms/copy/independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
 | BCK04-OD01-TM-01 v0.2 | D1-SIG-SEC | independent Security/Privacy, D1-SIG-API, D1-SIG-OPS, Identity, D1-SIG-MOBILE and affected domains | Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary confirmations |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
@@ -342,6 +350,10 @@ returns a §6 review record.
 30. **D1-SIG-AC-30:** BCK-D1-OWN-C-REV-01 preparation records no signature;
     Product mandatory-copy, external handoff and D1/G1 baseline verdicts remain
     Pending and supply no qualified, independent, OD, D1/G1 or runtime proof.
+31. **D1-SIG-AC-31:** BCK-D1-OWN-D-REV-01 preparation records no signature;
+    its OD-11 Product, Operations-routing and blocker-baseline verdicts remain
+    Pending and supply no numeric-age, specialist, qualified, independent,
+    D1/G1 or runtime proof.
 
 ## 11. Next action
 
@@ -351,7 +363,7 @@ verdicts, BCK-20 decision triage and the amended technical translation-
 governance workflow, four bounded exact-v0.4 combined-owner verdicts and the
 source-authority design boundary, internal documentation inputs, external work
 queue, EXT-G0 plan and exact EXT-A–D technical evidence are recorded. Next,
-obtain separate exact Batch B and Batch C owner responses if accepted, then
+obtain separate exact Batch B, Batch C and Batch D owner responses if accepted, then
 assign real eligible reviewers through BCK-D1-XREV-HANDOFF-01 and obtain
 qualified exact-hash terms/access, mandatory-copy and age-policy verdicts,
 per-source decisions, source copy and independent Security/Privacy
