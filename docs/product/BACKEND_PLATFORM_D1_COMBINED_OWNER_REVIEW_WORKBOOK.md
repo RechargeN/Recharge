@@ -44,29 +44,33 @@ without combining scopes or satisfying specialist, independent or qualified
 review. No verdict or status changes until exact acceptance and atomic
 docs-only reconciliation.
 
-### Owner documentation-efficiency directive — 2026-09-20
+### Owner implementation-first directive — 2026-09-20
 
-Batch F is the final permitted consolidation wrapper for the current D1
-documentation cycle. It is retained because it replaces four owner-response
-actions, but it is not counted as backend implementation progress.
+Do not create intermediary consolidation wrappers, roll-ups, review batches or
+status-restatement packages as a normal delivery step. Batch F is retained only
+as historical process evidence and must not be copied, extended or treated as a
+required precedent. It is not backend progress.
 
-After the exact Batch F decision:
+From this point:
 
-- do not create Batch G/H or another intermediary roll-up merely to restate
-  existing statuses, queues, gates or approvals;
-- reconcile the accepted verdicts once, atomically, in existing canonical
-  documents and move directly to the substantive post-owner queue;
-- create a new document only when it introduces a new contract, owner
-  decision, externally attributable evidence, required immutable audit record
-  or executable slice boundary;
-- prefer updating the existing workbook, ledger, specification or delivery
-  map over adding a parallel tracking file;
-- report progress through closed material gates and verified runtime outcomes,
-  not document count or review-package count.
+- each work unit must produce substantive backend value: executable code,
+  contract/schema consumed by code, security rule, migration, test, operational
+  automation or verified runtime evidence;
+- documentation is updated inside that same implementation slice and must
+  explain the implemented contract, decision, rollback or evidence;
+- a standalone document is allowed only for a genuinely new owner decision,
+  mandatory immutable audit record or qualified Legal/Security finding that
+  cannot be represented in an existing canonical document;
+- do not create Batch G/H or any equivalent approval wrapper;
+- use the existing specification, ledger and delivery map for necessary status
+  updates instead of creating parallel tracking artifacts;
+- report progress through implemented capabilities, green tests and closed
+  material gates, never through document or review-package count.
 
-An exception requires an explicit owner request or a concrete traceability,
-Security/Privacy or qualified Legal need. This directive changes no current
-verdict, OD/BCK status, D1/G1 gate or runtime authority.
+The next planned result is a concrete authorized backend implementation slice,
+not another documentation-preparation cycle. Existing G1/R1, Firebase,
+deployment and production gates remain fail-closed until explicitly opened;
+this directive itself grants no runtime or cloud authority.
 
 Version 1.30 prepares BCK-D1-OWN-E-REV-01 as one exact owner action over three
 separate boundaries: BCK-03 parent-review routing, Security cross-boundary
