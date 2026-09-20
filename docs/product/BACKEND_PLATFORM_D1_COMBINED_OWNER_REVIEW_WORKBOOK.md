@@ -44,6 +44,30 @@ without combining scopes or satisfying specialist, independent or qualified
 review. No verdict or status changes until exact acceptance and atomic
 docs-only reconciliation.
 
+### Owner documentation-efficiency directive — 2026-09-20
+
+Batch F is the final permitted consolidation wrapper for the current D1
+documentation cycle. It is retained because it replaces four owner-response
+actions, but it is not counted as backend implementation progress.
+
+After the exact Batch F decision:
+
+- do not create Batch G/H or another intermediary roll-up merely to restate
+  existing statuses, queues, gates or approvals;
+- reconcile the accepted verdicts once, atomically, in existing canonical
+  documents and move directly to the substantive post-owner queue;
+- create a new document only when it introduces a new contract, owner
+  decision, externally attributable evidence, required immutable audit record
+  or executable slice boundary;
+- prefer updating the existing workbook, ledger, specification or delivery
+  map over adding a parallel tracking file;
+- report progress through closed material gates and verified runtime outcomes,
+  not document count or review-package count.
+
+An exception requires an explicit owner request or a concrete traceability,
+Security/Privacy or qualified Legal need. This directive changes no current
+verdict, OD/BCK status, D1/G1 gate or runtime authority.
+
 Version 1.30 prepares BCK-D1-OWN-E-REV-01 as one exact owner action over three
 separate boundaries: BCK-03 parent-review routing, Security cross-boundary
 assignment bookkeeping and the factual four-parent Approval preflight. All
