@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.31**
-- Date: **2026-09-19**
+- Version: **1.32**
+- Date: **2026-09-20**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.32](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.27](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.33](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.28](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -27,6 +27,10 @@
 - Prepared OD-10 multi-owner review: [OD10-OWN-COMB-REV-01 v0.1](BACKEND_OD_10_MULTI_OWNER_REVIEW_PACKAGE.md)
 - Prepared source-governance review: [BCK20-OD02-SRC-GOV-REV-01 v0.1](REFERENCE_DATA_SOURCE_GOVERNANCE_OWNER_REVIEW.md)
 - Prepared D1 Owner Batch B review: [BCK-D1-OWN-B-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_REVIEW_PACKAGE.md)
+- Prepared mandatory-copy policy review: [BCK20-OD05-POL-REV-01 v0.1](REFERENCE_DATA_MANDATORY_COPY_POLICY_REVIEW.md)
+- Prepared external-review handoff: [BCK-D1-XREV-HANDOFF-01 v0.1](BACKEND_PLATFORM_D1_EXTERNAL_REVIEW_HANDOFF.md)
+- Prepared D1/G1 closure matrix: [BCK-D1-G1-CLOSE-01 v0.1](BACKEND_PLATFORM_D1_G1_CLOSURE_MATRIX.md)
+- Prepared D1 Owner Batch C review: [BCK-D1-OWN-C-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_C_REVIEW_PACKAGE.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
@@ -80,6 +84,10 @@ supply qualified Legal or executable evidence.
 BCK-D1-OWN-B-REV-01 prepares five separate OD-10 perspective verdicts and one
 source-governance verdict as one exact owner action. Preparation records no
 signature; every new verdict remains Pending.
+BCK-D1-OWN-C-REV-01 prepares three more separate bounded verdicts for Product
+mandatory-copy classification, external-review routing and the factual D1/G1
+blocked-state matrix. Preparation records no signature or external evidence;
+Batch B/C remain independently Pending.
 BCK05-OD-01/02/07 remain distinct from cross-domain OD-01/02/07. Every other
 incomplete specialist signature remains Pending and qualified Legal/Privacy
 evidence remains absent.
@@ -165,7 +173,7 @@ accepts its accountability.
 | BCK-03 v0.3.14 | D1-SIG-API + D1-SIG-OPS | D1-SIG-SEC, D1-SIG-MOBILE | API/Operations/Security/Mobile boundary verdicts Accept with required amendments; independent evidence Pending; spec remains Draft |
 | BCK-04 v0.4.23 | D1-SIG-SEC + D1-SIG-LEGAL where legal judgment applies | D1-SIG-OPS, domain owners | BCK-04 and threat-model combined-owner technical verdicts recorded; independent/qualified Legal, BCK04-OD-01/09 and tabletop gates remain; spec remains Draft |
 | BCK-05 v0.2.30 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-LEGAL, D1-SIG-FIN and affected domains | Draft retained; bounded R0 Pass and accepted OD baselines Present; BCK-03/BCK-04/threat-model owner-boundary verdicts do not accept BCK-05; executable/specialist/stage/product-cloud evidence remains pending |
-| BCK-20 v0.2.21 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | exact EXT-A–D technical evidence and amended OD-10 evidence recorded; Batch B prepares six bounded verdicts but none is signed; no source eligible; terms/source-copy/independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
+| BCK-20 v0.2.22 | D1-SIG-REF + D1-SIG-L10N | D1-SIG-API, D1-SIG-MOBILE, D1-SIG-CONTENT, D1-SIG-SEC, D1-SIG-LEGAL | exact technical/OD-10 evidence recorded; Batch B/C prepare nine bounded verdicts but none is signed; no source eligible; terms/copy/independent/Legal evidence incomplete; BCK20-OD-02/05 Open and OD-10 Proposed |
 | BCK04-OD01-TM-01 v0.2 | D1-SIG-SEC | independent Security/Privacy, D1-SIG-API, D1-SIG-OPS, Identity, D1-SIG-MOBILE and affected domains | Combined-owner technical verdict recorded; OD-01 Proposed pending independent/cross-boundary confirmations |
 | BCK04-OD09-IR-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL where personal-data-breach judgment applies; domain owners | Proposed; owner/Legal verdict, executable routes and completed tabletop pending |
 | BCK04-OD09-TTX-01 v0.1 | D1-SIG-SEC + D1-SIG-OPS | D1-SIG-LEGAL, D1-SIG-BOOK, Communications and exercise evaluator | Ready/not executed; no result, signature or gate closure |
@@ -183,6 +191,7 @@ accepts its accountability.
 | OD-07 evidence v0.6 + OD07-DEC-01 v0.2 | D1-SIG-OPS | D1-SIG-SEC, D1-SIG-FIN; qualified D1-SIG-LEGAL remains mandatory before production processing | Accepted at `2026-08-24T17:51:38Z` with controls; no cloud permission |
 | OD-09 evidence | D1-SIG-API | D1-SIG-OPS; later D1-SIG-BOOK/NOTIF | Proposed retained by Owner Batch A; D1 minimum only |
 | OD-10 evidence v0.2 | D1-SIG-REF | D1-SIG-L10N/API/MOBILE/CONTENT/LEGAL | Design direction accepted with F-001–F-012 integrated; OD-10 Proposed; full-scope signatures and qualified Legal evidence absent |
+| BCK20-OD-05 policy review v0.1 | Product owner + D1-SIG-LEGAL | D1-SIG-REF/L10N/API/MOBILE/CONTENT as affected | Product classification prepared but unsigned; exact market/surface/purpose matrix and qualified verdict absent; OD-05 Open |
 | OD-11 brief | D1-SIG-SEC + D1-SIG-LEGAL | Product/domain owners per feature | Open; assigned; no policy selected |
 
 ### 4.1 Recorded numerical baseline disposition
@@ -330,6 +339,9 @@ returns a §6 review record.
 29. **D1-SIG-AC-29:** BCK-D1-OWN-B-REV-01 preparation records no signature;
     five OD-10 perspective verdicts and the separate source-governance verdict
     remain Pending until exact owner acceptance.
+30. **D1-SIG-AC-30:** BCK-D1-OWN-C-REV-01 preparation records no signature;
+    Product mandatory-copy, external handoff and D1/G1 baseline verdicts remain
+    Pending and supply no qualified, independent, OD, D1/G1 or runtime proof.
 
 ## 11. Next action
 
@@ -339,10 +351,10 @@ verdicts, BCK-20 decision triage and the amended technical translation-
 governance workflow, four bounded exact-v0.4 combined-owner verdicts and the
 source-authority design boundary, internal documentation inputs, external work
 queue, EXT-G0 plan and exact EXT-A–D technical evidence are recorded. Next,
-obtain one exact BCK-D1-OWN-B-REV-01 owner response for the five OD-10
-perspectives and source-governance boundary, then obtain qualified exact-hash
-terms/access verdicts, per-source decisions, applicable qualified policy,
-source copy and independent Security/Privacy
+obtain separate exact Batch B and Batch C owner responses if accepted, then
+assign real eligible reviewers through BCK-D1-XREV-HANDOFF-01 and obtain
+qualified exact-hash terms/access, mandatory-copy and age-policy verdicts,
+per-source decisions, source copy and independent Security/Privacy
 and applicable qualified Legal review. Prior Product/Content verdicts remain
 historical evidence with no independence. Independent
 threat-model, BCK-04/BCK-05/BCK-20 specialist and qualified Legal/Privacy
