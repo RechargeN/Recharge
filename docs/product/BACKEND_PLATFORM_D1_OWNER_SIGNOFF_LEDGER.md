@@ -1,13 +1,13 @@
 # Recharge Backend — D1 Owner Review and Sign-off Ledger
 
 - Ledger ID: **BCK-D1-SIG-01**
-- Version: **1.34**
+- Version: **1.35**
 - Date: **2026-09-20**
 - Status: **Draft ledger — D1-SIG-API/OPS/SEC/MOBILE recorded; remaining D1 sign-offs incomplete**
 - Runtime status: **N/A; documentation evidence only**
 - Coordination owner: **RechargeN / Product owner**
-- Review package: [BCK-D1-REV-01 v1.35](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.30](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
+- Review package: [BCK-D1-REV-01 v1.36](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Combined-owner workbook: [BCK-D1-OWN-REV-01 v1.31](BACKEND_PLATFORM_D1_COMBINED_OWNER_REVIEW_WORKBOOK.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -39,12 +39,21 @@
 - Prepared Security assignment manifest: [BCK04-OD01-XASSIGN-01 v0.1](BACKEND_SECURITY_CROSS_BOUNDARY_ASSIGNMENT_MANIFEST.md)
 - Prepared parent Approval preflight: [BCK-D1-PARENT-PREFLIGHT-01 v0.1](BACKEND_PLATFORM_D1_PARENT_APPROVAL_PREFLIGHT.md)
 - Prepared D1 Owner Batch E review: [BCK-D1-OWN-E-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_E_REVIEW_PACKAGE.md)
+- Batch B–E roll-up: [BCK-D1-OWN-BE-ROLLUP-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_B_E_ROLLUP.md)
+- Owner reconciliation plan: [BCK-D1-OWN-RECON-01 v0.1](BACKEND_PLATFORM_D1_OWNER_RECONCILIATION_PLAN.md)
+- Post-owner review queue: [BCK-D1-POST-OWN-QUEUE-01 v0.1](BACKEND_PLATFORM_D1_POST_OWNER_REVIEW_QUEUE.md)
+- Prepared consolidated Batch F review: [BCK-D1-OWN-F-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_F_REVIEW_PACKAGE.md)
 - Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Owner verdict reconciliation
+
+Version 1.35 prepares BCK-D1-OWN-F-REV-01 as one exact Product-owner response
+over the fifteen separate Pending verdicts in Batch B–E. Preparation records
+no verdict; each ID, scope and gate remains independent, and the post-owner
+queue still requires real specialist, independent and qualified evidence.
 
 The explicit Product-owner verdicts through 2026-09-16 record D1-SIG-API and
 bounded D1-SIG-OPS/SEC/MOBILE as `Accept with required amendments`, defer the broader
@@ -366,6 +375,9 @@ returns a §6 review record.
     reviewer assignment; its BCK-03 routing, Security manifest and parent
     preflight verdicts remain Pending and supply no parent, D1/G1 or runtime
     proof.
+33. **D1-SIG-AC-33:** BCK-D1-OWN-F-REV-01 preparation records no signature;
+    it preserves fifteen separately attributable Pending verdicts and permits
+    only a later exact atomic docs-only reconciliation.
 
 ## 11. Next action
 
@@ -375,7 +387,8 @@ verdicts, BCK-20 decision triage and the amended technical translation-
 governance workflow, four bounded exact-v0.4 combined-owner verdicts and the
 source-authority design boundary, internal documentation inputs, external work
 queue, EXT-G0 plan and exact EXT-A–D technical evidence are recorded. Next,
-obtain separate exact Batch B, Batch C, Batch D and Batch E owner responses if accepted, then
+obtain the exact consolidated Batch F owner response if accepted, reconcile
+all explicitly accepted verdict IDs atomically, then
 assign real eligible reviewers through BCK-D1-XREV-HANDOFF-01 and obtain
 qualified exact-hash terms/access, mandatory-copy and age-policy verdicts,
 per-source decisions, source copy and independent Security/Privacy

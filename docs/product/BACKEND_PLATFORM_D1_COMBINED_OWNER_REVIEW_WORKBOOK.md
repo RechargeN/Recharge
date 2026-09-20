@@ -1,15 +1,15 @@
 # Recharge Backend — D1 Combined Owner Review Workbook
 
 - Workbook ID: **BCK-D1-OWN-REV-01**
-- Version: **1.30**
+- Version: **1.31**
 - Date: **2026-09-20**
-- Status: **Technical owner verdicts recorded; Batch B/C/D/E prepared; remaining D1 verdicts required**
+- Status: **Technical owner verdicts recorded; consolidated Batch F prepared; remaining D1 verdicts required**
 - Assigned owner: **RechargeN / Product owner**
 - Independence: **combined-role self-review; no independent reviewer**
 - Legal qualification: **not evidenced**
 - Runtime status: **Local R0 tooling and disabled Emulator-only RAW-C source Present; product/cloud runtime Absent**
-- Parent review package: [BCK-D1-REV-01 v1.35](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
-- Sign-off ledger: [BCK-D1-SIG-01 v1.34](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
+- Parent review package: [BCK-D1-REV-01 v1.36](BACKEND_PLATFORM_D1_REVIEW_EVIDENCE_PACKAGE.md)
+- Sign-off ledger: [BCK-D1-SIG-01 v1.35](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md)
 - Recorded Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Recorded Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Recorded Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -30,12 +30,19 @@
 - Prepared Batch C review: [BCK-D1-OWN-C-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_C_REVIEW_PACKAGE.md)
 - Prepared Batch D review: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md)
 - Prepared Batch E review: [BCK-D1-OWN-E-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_E_REVIEW_PACKAGE.md)
+- Prepared consolidated Batch F review: [BCK-D1-OWN-F-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_F_REVIEW_PACKAGE.md)
 - Recorded Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
 - Runtime effect: **none**
 
 ---
 
 ## 0. Owner verdict reconciliation
+
+Version 1.31 prepares BCK-D1-OWN-F-REV-01 as one exact response over the
+fifteen separate Pending verdicts in Batch B–E. It reduces response logistics
+without combining scopes or satisfying specialist, independent or qualified
+review. No verdict or status changes until exact acceptance and atomic
+docs-only reconciliation.
 
 Version 1.30 prepares BCK-D1-OWN-E-REV-01 as one exact owner action over three
 separate boundaries: BCK-03 parent-review routing, Security cross-boundary
@@ -337,8 +344,8 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
 1. Keep the recorded Batch A dispositions and D1-SIG-API verdict reconciled in
    BCK-D1-SIG-01 and BCK-03.
 2. Preserve the bounded BCK-03, BCK-04, threat-model, BCK-20 triage and
-   translation-governance verdicts. Use the separate exact Batch B, Batch C, Batch D and Batch E
-   owner responses only if accepted; neither is inferred from preparation.
+   translation-governance verdicts. Use the exact consolidated Batch F owner
+   response only if accepted; no underlying verdict is inferred from preparation.
    Route real qualified/independent review through
    BCK-D1-XREV-HANDOFF-01 and keep every external verdict mandatory.
 3. Use the recorded SLO/cost/recovery baselines to define a separately
@@ -408,3 +415,6 @@ Product Localization, Content, Mobile, Security/Privacy or Legal verdict.
 29. **D1-OWN-AC-29:** BCK-D1-OWN-E-REV-01 is preparation only; its BCK-03
     routing, Security assignment and parent-preflight verdicts remain Pending
     and cannot fabricate a reviewer, approve a parent or pass D1/G1.
+30. **D1-OWN-AC-30:** BCK-D1-OWN-F-REV-01 replaces only four repetitive
+    response actions after exact acceptance; all fifteen verdict IDs retain
+    their own scope, gates and Pending status until atomic reconciliation.
