@@ -1,18 +1,18 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.24**
+- Version: **0.4.25**
 - Date: **2026-09-20**
 - Spec status: **Draft — BCK-04 and threat-model technical owner verdicts recorded; independent/Legal/OD gates pending**
 - Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.68](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.74](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments),
+- Parent architecture: [BCK-01 v0.4.69](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.75](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.15](BACKEND_API_CONTRACT_STANDARD.md) (Draft; parent closure review prepared, accountable/independent verdicts Pending),
   [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
-- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.24
+- Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.25
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
 - API security boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -25,6 +25,8 @@
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - OD-11 Product review: [BCK-D1-OD11-PROD-REV-01 v0.1](BACKEND_OD_11_PRODUCT_POLICY_REVIEW.md) (prepared; Product verdict Pending)
 - D1 Owner Batch D: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
+- Cross-boundary assignment manifest: [BCK04-OD01-XASSIGN-01 v0.1](BACKEND_SECURITY_CROSS_BOUNDARY_ASSIGNMENT_MANIFEST.md) (0/14 assigned; 0/14 verdicts)
+- D1 Owner Batch E: [BCK-D1-OWN-E-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_E_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
 - Runtime effect of this revision: **none**
@@ -32,6 +34,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.25 — 2026-09-20
+
+- prepared a hash-pinned assignment manifest for all fourteen independent and
+  cross-boundary threat-model sign-offs;
+- recorded the factual initial state as 0/14 assigned and 0/14 verdicts,
+  without fabricating reviewer identity, authority or independence;
+- prepared Batch E and the four-parent preflight while retaining
+  BCK04-OD-01 Proposed and BCK-04 Draft;
+- created no runtime, Firebase, credential, deployment, push or merge authority.
 
 ### v0.4.24 — 2026-09-20
 
@@ -720,7 +732,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.14, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
+contract across BCK-03 v0.3.15, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -1466,7 +1478,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.68 Review:
+executable slice, согласованный с BCK-01 v0.4.69 Review:
 
 ```text
 docs/runbooks/
@@ -1534,7 +1546,7 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.14.
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.15.
 2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
    `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
    (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
@@ -1637,7 +1649,7 @@ therefore remains Draft and cannot enter Review.
    спецификации.
 6. **BCK-04-AC-06:** `requestId` per attempt, logical `idempotencyKey` и
    server-issued `privacyRequestId` имеют разные роли и согласованы с
-   BCK-03 v0.3.14; это wording supersedes AC-06 revision v0.4.21 без
+   BCK-03 v0.3.15; это wording supersedes AC-06 revision v0.4.21 без
    перенумерации stable ID.
 7. **BCK-04-AC-07:** anti-enumeration правило одинаково применяется к
    Booking, Page и verification-ресурсам.
@@ -1779,10 +1791,13 @@ therefore remains Draft and cannot enter Review.
 65. **BCK-04-AC-65:** BCK-D1-OD11-PROD-REV-01 prepares only an unsigned
     Product boundary; it selects no numeric age, supplies no qualified verdict
     and leaves OD-11 Open and every dependent high-risk surface fail-closed.
+66. **BCK-04-AC-66:** BCK04-OD01-XASSIGN-01 and Batch E prepare assignment
+    routing only; all fourteen reviewers/verdicts remain unrecorded, OD-01
+    remains Proposed and no independent/cross-boundary evidence is inferred.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.24 отсутствует:
+На момент v0.4.25 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет

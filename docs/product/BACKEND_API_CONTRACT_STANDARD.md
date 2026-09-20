@@ -1,23 +1,36 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.14**
-- Date: **2026-09-15**
+- Version: **0.3.15**
+- Date: **2026-09-20**
 - Spec status: **Draft — API/Operations/Security/Mobile boundary reviews accepted with required amendments; independent reviews pending**
 - Runtime status: **Booking v1 contracts/test evidence and disabled Emulator-only adapter Present; deployed/mobile API runtime Absent**
 - Accountable owner: **API Platform owner**
-- Parent architecture: [BCK-01 v0.4.57](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.69](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.75](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
 - Mobile boundary decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
+- Parent closure review: [BCK03-PARENT-REV-01 v0.1](BACKEND_API_PARENT_CLOSURE_REVIEW.md) (prepared; accountable verdict Pending)
+- D1 Owner Batch E: [BCK-D1-OWN-E-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_E_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
 - Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 - Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.15 — 2026-09-20
+
+- prepared an exact-hash parent closure review over the integrated API,
+  Operations, Security/Privacy and Mobile boundary evidence;
+- audited API-DEC-01–05 and OD-09 dispositions without reopening Booking-v1
+  Acceptance or allowing a Deferred surface;
+- prepared Batch E and the four-parent D1 preflight without recording an API
+  Platform verdict or promoting BCK-03;
+- created no schema, generator, runtime, Firebase, deployment, push or merge
+  authority.
 
 ### v0.3.14 — 2026-09-15
 
@@ -1403,7 +1416,7 @@ apps/backend/functions/src/generated/    # only after backend authorization
 apps/backend/functions/test/contract/    # only after backend authorization
 ```
 
-No runtime/schema file in this map is created by BCK-03 v0.3.14; this revision
+No runtime/schema file in this map is created by BCK-03 v0.3.15; this revision
 adds only Markdown specification/evidence artifacts.
 Generator/tool version requires Approved tooling plan; generated files manual
 editing prohibited.
@@ -1702,13 +1715,16 @@ it does not mean schemas/code/backend deployed.
     API-DEC-04/05 or independent Mobile evidence.
 87. **BCK-03-AC-87:** BCK03-MOB-DEC-01 creates no schema, generated file,
     runtime, Firebase, deployment, push or merge authority.
+88. **BCK-03-AC-88:** BCK03-PARENT-REV-01 and Batch E prepare only accountable
+    parent-review routing; the verdict remains Pending, API-DEC Deferred gates
+    remain fail-closed and BCK-03 remains Draft.
 
 AC numbers are stable. New criteria append; semantic removal/change requires a
 new document version and reference migration note.
 
 ## 44. Explicitly unimplemented
 
-At v0.3.14 the following remain absent:
+At v0.3.15 the following remain absent:
 
 - platform common schemas and registry files;
 - generated common Dart/TypeScript DTOs/validators;
@@ -1730,9 +1746,9 @@ BCK-03 does not claim them as general backend runtime.
 
 Before BCK-03 Review:
 
-1. preserve the recorded D1-SIG-API/OPS/SEC/MOBILE bounded verdicts and obtain
-   remaining owner/independent evidence without treating BCK-18 as a circular
-   D1 prerequisite;
+1. obtain the exact Batch E coordination verdict if accepted, then route
+   BCK03-PARENT-REV-01 to a real accountable API Platform reviewer without
+   treating BCK-18 as a circular D1 prerequisite;
 2. resolve the Deferred API-DEC-01–05 scopes before their protected gates and
    preserve the Accepted Booking-v1 API-DEC-01/03 controls;
 3. preserve the completed Booking-v1 split-key, semantic-hash and RAW-B
@@ -1745,7 +1761,7 @@ generators, clients or backend runtime.
 
 ## 46. Final statement
 
-BCK-03 v0.3.14 defines how Recharge API contracts must be designed, versioned,
+BCK-03 v0.3.15 defines how Recharge API contracts must be designed, versioned,
 validated and evolved across one backend platform. It creates no endpoint or
 runtime. Its purpose is to prevent mobile/backend drift, duplicate mutations,
 silent incompatibility and parallel domain-specific wire standards before any

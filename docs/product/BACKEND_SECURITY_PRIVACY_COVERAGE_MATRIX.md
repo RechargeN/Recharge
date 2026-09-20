@@ -1,18 +1,26 @@
 # BCK-04 — Security & Privacy Coverage Matrix
 
 - ID: **BCK-04-PRE**
-- Version: **0.3.24**
+- Version: **0.3.25**
 - Date: **2026-09-20**
 - Status: **Draft — preparatory audit artifact**
 - Runtime status: **N/A; no runtime authority**
 - Accountable owner: **Security/Privacy owner**
-- Target document: [BCK-04 v0.4.24](BACKEND_SECURITY_PRIVACY_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.74](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Target document: [BCK-04 v0.4.25](BACKEND_SECURITY_PRIVACY_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.75](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md`
 
 ---
 
 ## 0. Назначение
+
+### v0.3.25 cross-boundary assignment preparation
+
+Current anchors are BCK-01 v0.4.69, BCK-02 v2.4.75, BCK-03 v0.3.15,
+BCK-04 v0.4.25 and BCK-05 v0.2.31. BCK04-OD01-XASSIGN-01 freezes fourteen
+separate assignment/verdict rows at 0/14 assigned and 0/14 complete. Batch E
+is prepared but unsigned; no independent, specialist, OD or runtime status
+advances.
 
 ### v0.3.24 OD-11 Product-boundary preparation
 
@@ -70,15 +78,15 @@ executed/passed tabletop evidence remain blocked.
 | Источник | Фактический статус в tracked checkout | Роль в reconciliation |
 |---|---|---|
 | Accepted ADR 0013, 0015, 0019 | Accepted | Непереопределяемые identity, capability и Booking authority invariants |
-| BCK-01 | Review v0.4.68, Present; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
-| BCK-02 | Approved v2.4.74; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
-| BCK-03 | Draft v0.3.14, Present; API/Operations/Security/Mobile boundary reviews Accept with required amendments; independent reviews Pending | API envelope/versioning/idempotency input; Booking-v1 accepted scope preserved, broader decisions Deferred |
+| BCK-01 | Review v0.4.69, Present; bounded R0/RAW-C local source, product/cloud runtime Absent | Parent backend architecture и cross-cutting invariants |
+| BCK-02 | Approved v2.4.75; runtime N/A | Registry, owners, dependencies, gates и обязательная структура |
+| BCK-03 | Draft v0.3.15, Present; parent closure review/Batch E prepared but unsigned; independent reviews Pending | API envelope/versioning/idempotency input; Booking-v1 accepted scope preserved, broader decisions Deferred |
 | BCK-05 | Draft v0.2.31, Present; local R0 plus disabled RAW-C evidence boundary; BCK05-OD-01/02/07 and cross-domain OD-07 Accepted | Operations review package prepared but unsigned; ещё не Approved |
 | BCK-20 | Draft v0.2.22, Present; Batch B/C prepared but unsigned; runtime Absent | Market/reference/localization input, ещё не Accepted |
 | BCK-09 | Review v1.13; disabled Emulator-only RAW-C Present, cloud/mobile runtime Absent | Booking-specific transaction/security input, ещё не Approved |
 | Identity/Publisher spec | Approved v1.3, bounded local/mock scope | Identity semantics; не production authority |
 | Firebase Architecture | Proposed v2.2 | Proposed input only; не наследуется как settled решение |
-| BCK-04 | Draft v0.4.24; BCK-04 and threat-model combined-owner technical verdicts recorded; OD-11 Product review/Batch D prepared but unsigned; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed and OD-11 Open | Единственный target security/privacy contract; owner verdict is not independent/Legal/OD acceptance |
+| BCK-04 | Draft v0.4.25; cross-boundary assignment manifest/Batch E prepared but unsigned; 0/14 assigned/verdicts; bounded local evidence Present, product/cloud runtime Absent; BCK04-OD-01/09 Proposed and OD-11 Open | Единственный target security/privacy contract; routing is not independent/Legal/OD acceptance |
 | BCK04-OD01-TM-01 | Draft v0.2; runtime N/A | 49 classified threats with owners/gates/residual states; combined-owner technical verdict Present; OD-01 Proposed pending independent/cross-boundary evidence |
 | BCK04-OD09-IR-01 | Draft v0.1; runtime N/A | Incident/severity/privacy-risk evidence; OD-09/BCK05-OD-08 Proposed |
 | BCK04-OD09-TTX-01 | Ready v0.1; not executed; runtime N/A | Repeatable tabletop package; no result or gate closure |
@@ -89,7 +97,7 @@ executed/passed tabletop evidence remain blocked.
 
 ## 2. Coverage matrix — 22 обязательных пункта
 
-| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.24 | Evidence / остаток |
+| № | Требование `BCK-02 §14` | Покрытие BCK-04 v0.4.25 | Evidence / остаток |
 |---:|---|---|---|
 | 1 | ID/version/date/status/runtime/owner | Полное | Header |
 | 2 | Parent sources, anchors, conflict priority | Полное | §3; Accepted ADR выше Draft/Proposed inputs |
@@ -112,7 +120,7 @@ executed/passed tabletop evidence remain blocked.
 | 19 | Flags/rollout/rollback/emergency disable | Полное | §22, §24–§26; no runtime enablement |
 | 20 | Exact implementation file map | Полное как target plan | §28; every path is future/conditional, not present-runtime evidence |
 | 21 | Test matrix | Полное как future evidence plan | §29 |
-| 22 | Sequential AC, DoR/DoD, unimplemented list | Полное | §30; AC-01…AC-65 sequential |
+| 22 | Sequential AC, DoR/DoD, unimplemented list | Полное | §30; AC-01…AC-66 sequential |
 
 **Coverage verdict:** 22/22 sections are addressed. This means the Draft is
 structurally complete; it does **not** mean its Open decisions are Accepted or
@@ -155,7 +163,7 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 ## 4. Decision/status reconciliation
 
-| Объект | Статус для BCK-04 v0.4.24 | Что запрещено утверждать |
+| Объект | Статус для BCK-04 v0.4.25 | Что запрещено утверждать |
 |---|---|---|
 | ADR 0013/0015/0019 | Accepted | Что BCK-04 может изменить их инварианты |
 | D05 Booking authoritative source | Accepted decision package input | Что BCK-04 создаёт новую Booking authority |
@@ -171,7 +179,7 @@ irreversible infrastructure или Accepted ADR является блокеро�
 
 Resolved prerequisites:
 
-- `PRE-01`: BCK-01 v0.4.68 remains in Review and BCK-02 v2.4.74 records the status;
+- `PRE-01`: BCK-01 v0.4.69 remains in Review and BCK-02 v2.4.75 records the status;
 - `PRE-02`: `RechargeN / Product owner` is recorded as interim review
   coordinator. This does not resolve the independent specialist ownership
   required for Legal/Privacy decisions or Approval/G1.
@@ -206,6 +214,6 @@ Resolved prerequisites:
 
 ## 7. Итог
 
-BCK-04 v0.4.24 структурно покрывает обязательный template и готов к предметному
+BCK-04 v0.4.25 структурно покрывает обязательный template и готов к предметному
 architecture/legal review после устранения §5 blockers. Физическая реализация,
 provisioning и production processing по-прежнему не разрешены.
