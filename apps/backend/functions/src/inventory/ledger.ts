@@ -18,6 +18,23 @@ export function allocateUnits(
   units: number,
   now: string,
 ): PoolLedger {
+  const current = reconcileCapacity(ledger, identity, now);
+  if (current.confirmedUnits + units > current.totalCapacity) {
+    throw new BookingDomainRefusal('sold_out');
+  }
+  return {
+    ...current,
+    confirmedUnits: current.confirmedUnits + units,
+    revision: current.revision + 1,
+    updatedAt: now,
+  };
+}
+
+export function reconcileCapacity(
+  ledger: PoolLedger | undefined,
+  identity: Omit<PoolLedger, 'confirmedUnits' | 'revision' | 'updatedAt' | 'schemaVersion'>,
+  now: string,
+): PoolLedger {
   const current: PoolLedger = ledger ?? {
     schemaVersion: 1,
     ...identity,
@@ -30,18 +47,14 @@ export function allocateUnits(
     current.occurrenceId !== identity.occurrenceId ||
     current.poolId !== identity.poolId ||
     current.channel !== identity.channel ||
-    current.totalCapacity !== identity.totalCapacity ||
-    current.confirmedUnits < 0 ||
-    current.confirmedUnits > current.totalCapacity
+    current.confirmedUnits < 0
   ) {
     throw new BookingDomainRefusal('event_unavailable');
   }
-  if (current.confirmedUnits + units > current.totalCapacity) {
-    throw new BookingDomainRefusal('sold_out');
-  }
+  if (current.totalCapacity === identity.totalCapacity) return current;
   return {
     ...current,
-    confirmedUnits: current.confirmedUnits + units,
+    totalCapacity: identity.totalCapacity,
     revision: current.revision + 1,
     updatedAt: now,
   };

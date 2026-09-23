@@ -15,9 +15,14 @@
     "channel": { "$ref": "common.schema.json#/$defs/channel" },
     "auxiliaryTrackId": { "$ref": "common.schema.json#/$defs/id" },
     "admissionMode": { "$ref": "common.schema.json#/$defs/admissionMode" },
-    "confirmationMode": { "$ref": "common.schema.json#/$defs/confirmationMode" },
+    "confirmationMode": {
+      "$ref": "common.schema.json#/$defs/confirmationMode"
+    },
     "state": { "$ref": "common.schema.json#/$defs/bookingState" },
     "participantUnits": { "$ref": "common.schema.json#/$defs/positiveUnits" },
+    "cancellationDeadlineSnapshot": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    },
     "namedGuests": {
       "type": "array",
       "maxItems": 20,
@@ -25,7 +30,9 @@
     },
     "eligibilitySnapshotRef": { "$ref": "common.schema.json#/$defs/id" },
     "activeHoldId": { "$ref": "common.schema.json#/$defs/id" },
-    "reconfirmationState": { "$ref": "common.schema.json#/$defs/reconfirmationState" },
+    "reconfirmationState": {
+      "$ref": "common.schema.json#/$defs/reconfirmationState"
+    },
     "terminalReason": { "$ref": "common.schema.json#/$defs/terminalReason" },
     "createdAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
     "updatedAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },

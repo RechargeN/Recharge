@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { assertGuestPolicy, assertSupportedEvent } from '../../src/booking/domain.js';
-import { allocateUnits, releaseUnits } from '../../src/inventory/ledger.js';
+import { allocateUnits, reconcileCapacity, releaseUnits } from '../../src/inventory/ledger.js';
 import { acquireFiniteSlot, releaseFiniteSlot } from '../../src/policy/concurrency.js';
 import { finiteEvent, fixedNow, unlimitedEvent } from '../support/booking_fixtures.js';
 
@@ -70,6 +70,38 @@ void test('finite ledger never oversells and release is exact', () => {
   assert.equal(allocated.confirmedUnits, 2);
   assert.throws(() => allocateUnits(allocated, identity, 1, fixedNow.toISOString()), /sold_out/u);
   assert.equal(releaseUnits(allocated, 2, fixedNow.toISOString()).confirmedUnits, 0);
+});
+
+void test('capacity changes preserve ledger identity and existing confirmed units', () => {
+  const original = {
+    eventId: 'event',
+    occurrenceId: 'occ',
+    poolId: 'pool',
+    channel: 'onsite',
+    totalCapacity: 2,
+  };
+  const full = allocateUnits(undefined, original, 2, fixedNow.toISOString());
+  const increased = allocateUnits(
+    full,
+    { ...original, totalCapacity: 3 },
+    1,
+    fixedNow.toISOString(),
+  );
+  assert.equal(increased.totalCapacity, 3);
+  assert.equal(increased.confirmedUnits, 3);
+
+  const decreased = reconcileCapacity(
+    increased,
+    { ...original, totalCapacity: 1 },
+    fixedNow.toISOString(),
+  );
+  assert.equal(decreased.totalCapacity, 1);
+  assert.equal(decreased.confirmedUnits, 3);
+  assert.throws(
+    () => allocateUnits(decreased, { ...original, totalCapacity: 1 }, 1, fixedNow.toISOString()),
+    /sold_out/u,
+  );
+  assert.equal(releaseUnits(decreased, 2, fixedNow.toISOString()).confirmedUnits, 1);
 });
 
 void test('finite user usage is capped at five and released once', () => {

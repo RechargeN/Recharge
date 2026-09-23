@@ -8,11 +8,12 @@ import {
   activeKeyMatches,
   type ActiveBookingKey,
 } from '../inventory/active_key.js';
-import { allocateUnits, type PoolLedger } from '../inventory/ledger.js';
+import { allocateUnits, reconcileCapacity, type PoolLedger } from '../inventory/ledger.js';
 import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
 import { acquireFiniteSlot, type UserUsage } from '../policy/concurrency.js';
 import {
   BookingDomainRefusal,
+  BookingRetryableFailure,
   rejected,
   retryable,
   succeeded,
@@ -90,7 +91,7 @@ export async function createInternalBooking(
       const attempt = attemptSnapshot.data() as IdempotencyRecord | undefined;
       assertAttemptCompatible(attempt, actorId, command.commandType, semanticHash, logicalId);
       if (attempt !== undefined) {
-        if (logical === undefined) throw new BookingDomainRefusal('temporarily_unavailable');
+        if (logical === undefined) throw new BookingRetryableFailure('temporarily_unavailable');
         assertLogicalCompatible(logical, actorId, command.commandType, semanticHash);
         return replayOutcome(logical);
       }
@@ -142,15 +143,28 @@ export async function createInternalBooking(
         if (ledgerSnapshot === undefined || usageSnapshot === undefined) {
           throw new Error('firestore_snapshot_count_mismatch');
         }
-        nextLedger = allocateUnits(
+        const ledgerIdentity = {
+          eventId: event.eventId,
+          occurrenceId: event.occurrenceId,
+          poolId,
+          channel,
+          totalCapacity: event.totalCapacity,
+        } as const;
+        const reconciledLedger = reconcileCapacity(
           ledgerSnapshot.data() as PoolLedger | undefined,
-          {
-            eventId: event.eventId,
-            occurrenceId: event.occurrenceId,
-            poolId,
-            channel,
-            totalCapacity: event.totalCapacity,
-          },
+          ledgerIdentity,
+          nowIso,
+        );
+        if (
+          reconciledLedger.confirmedUnits + command.payload.participantUnits >
+          reconciledLedger.totalCapacity
+        ) {
+          transaction.set(ledgerRef, reconciledLedger);
+          return rejected('sold_out');
+        }
+        nextLedger = allocateUnits(
+          reconciledLedger,
+          ledgerIdentity,
           command.payload.participantUnits,
           nowIso,
         );
@@ -174,6 +188,9 @@ export async function createInternalBooking(
         confirmationMode: 'instant',
         state: 'confirmed',
         participantUnits: command.payload.participantUnits,
+        ...(event.cancellationDeadline === undefined
+          ? {}
+          : { cancellationDeadlineSnapshot: event.cancellationDeadline }),
         reconfirmationState: 'notRequired',
         createdAt: nowIso,
         updatedAt: nowIso,
@@ -238,6 +255,7 @@ export async function createInternalBooking(
       return outcome;
     });
   } catch (error) {
+    if (error instanceof BookingRetryableFailure) return retryable(error.code);
     if (error instanceof BookingDomainRefusal) return rejected(error.code);
     return retryable('contention');
   }

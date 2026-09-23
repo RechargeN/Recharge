@@ -2,19 +2,20 @@ import type { Firestore } from 'firebase-admin/firestore';
 import type { CancelBookingCommand } from '../contracts/booking_v1.js';
 import { computeBookingSemanticHash } from '../contracts/booking_v1.js';
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
-import { activeBookingKeyId, activeKeyMatches } from '../inventory/active_key.js';
+import { activeBookingKeyId } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
 import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
 import { releaseFiniteSlot, type UserUsage } from '../policy/concurrency.js';
 import {
   BookingDomainRefusal,
+  BookingRetryableFailure,
   rejected,
   retryable,
   succeeded,
   type BookingResult,
 } from '../shared/failures.js';
 import type { ServerClock } from '../shared/server_clock.js';
-import { assertSupportedEvent, type BookingRecord } from './domain.js';
+import type { BookingRecord } from './domain.js';
 import {
   logicalMutationId,
   requestAttemptId,
@@ -70,7 +71,7 @@ export async function cancelInternalBooking(
       assertIdempotency(attempt, logical, actorId, semanticHash, logicalId);
       if (attempt !== undefined) {
         if (logical === undefined || logical.kind !== 'logicalMutation') {
-          throw new BookingDomainRefusal('temporarily_unavailable');
+          throw new BookingRetryableFailure('temporarily_unavailable');
         }
         return replayOutcome(logical);
       }
@@ -108,26 +109,12 @@ export async function cancelInternalBooking(
         throw new BookingDomainRefusal('revision_conflict');
       }
 
-      const eventRef = dependencies.firestore
-        .collection(bookingCollections.eventProjections)
-        .doc(booking.occurrenceId);
       const activeRef = dependencies.firestore
         .collection(bookingCollections.activeKeys)
         .doc(activeBookingKeyId(actorId, booking.occurrenceId));
-      const [eventSnapshot, activeSnapshot] = await transaction.getAll(eventRef, activeRef);
-      if (eventSnapshot === undefined || activeSnapshot === undefined) {
-        throw new Error('firestore_snapshot_count_mismatch');
-      }
       const now = dependencies.clock.now();
-      const event = assertSupportedEvent(
-        eventSnapshot.data(),
-        now,
-        booking.occurrenceId,
-        booking.inventoryPoolId,
-        booking.channel,
-      );
-      if (typeof event.cancellationDeadline === 'string') {
-        const cancellationDeadline = new Date(event.cancellationDeadline);
+      if (typeof booking.cancellationDeadlineSnapshot === 'string') {
+        const cancellationDeadline = new Date(booking.cancellationDeadlineSnapshot);
         if (!Number.isFinite(cancellationDeadline.getTime())) {
           throw new BookingDomainRefusal('event_unavailable');
         }
@@ -135,20 +122,14 @@ export async function cancelInternalBooking(
           throw new BookingDomainRefusal('cancellation_deadline_passed');
         }
       }
-      if (
-        !activeKeyMatches(activeSnapshot.data(), actorId, booking.occurrenceId) ||
-        activeSnapshot.data()?.bookingId !== booking.id
-      ) {
-        throw new BookingDomainRefusal('event_unavailable');
-      }
-
       let ledgerRef;
       let nextLedger: PoolLedger | undefined;
       let usageRef;
       let nextUsage: UserUsage | undefined;
-      if (event.capacityMode === 'finite') {
-        if (booking.inventoryPoolId === undefined || booking.channel === undefined)
-          throw new BookingDomainRefusal('event_unavailable');
+      const hasPool = booking.inventoryPoolId !== undefined;
+      const hasChannel = booking.channel !== undefined;
+      if (hasPool !== hasChannel) throw new BookingDomainRefusal('event_unavailable');
+      if (hasPool && hasChannel) {
         ledgerRef = dependencies.firestore
           .collection(bookingCollections.poolLedgers)
           .doc(finitePoolLedgerId(booking.occurrenceId, booking.inventoryPoolId, booking.channel));
@@ -218,6 +199,7 @@ export async function cancelInternalBooking(
       return outcome;
     });
   } catch (error) {
+    if (error instanceof BookingRetryableFailure) return retryable(error.code);
     if (error instanceof BookingDomainRefusal) return rejected(error.code);
     return retryable('contention');
   }

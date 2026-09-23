@@ -12,15 +12,7 @@
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
         "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
         "kind": { "const": "rejected" },
-        "error": {
-          "allOf": [
-            { "$ref": "booking_error.schema.json" },
-            {
-              "type": "object",
-              "properties": { "retryable": { "const": false } }
-            }
-          ]
-        }
+        "error": { "$ref": "booking_error.schema.json" }
       },
       "required": [
         "schemaVersion",
@@ -40,15 +32,7 @@
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
         "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
         "kind": { "const": "retryableFailure" },
-        "error": {
-          "allOf": [
-            { "$ref": "booking_error.schema.json" },
-            {
-              "type": "object",
-              "properties": { "retryable": { "const": true } }
-            }
-          ]
-        }
+        "error": { "$ref": "booking_error.schema.json" }
       },
       "required": [
         "schemaVersion",

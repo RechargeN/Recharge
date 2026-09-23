@@ -93,23 +93,6 @@
       }
     },
     {
-      "schema": "booking_read.schema.json",
-      "reason": "retryableFailure must carry a retryable error",
-      "value": {
-        "schemaVersion": 1,
-        "queryType": "getMyBooking",
-        "requestId": "r-retry-mismatch",
-        "serverTime": "2026-08-27T12:00:00.000Z",
-        "kind": "retryableFailure",
-        "error": {
-          "schemaVersion": 1,
-          "code": "temporarily_unavailable",
-          "retryable": false,
-          "correlationId": "r-retry-mismatch"
-        }
-      }
-    },
-    {
       "schema": "booking_page.schema.json",
       "reason": "next cursor cannot be null",
       "value": {

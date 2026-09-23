@@ -13,6 +13,7 @@
       "confirmationMode": "instant",
       "state": "confirmed",
       "participantUnits": 2,
+      "cancellationDeadlineSnapshot": "2026-08-10T08:00:00.000Z",
       "namedGuests": [{ "displayName": "Guest" }],
       "reconfirmationState": "notRequired",
       "createdAt": "2026-08-09T08:00:00.000Z",

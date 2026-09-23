@@ -43,6 +43,7 @@ export interface BookingRecord {
   readonly confirmationMode: 'instant';
   readonly state: BookingState;
   readonly participantUnits: number;
+  readonly cancellationDeadlineSnapshot?: string;
   readonly reconfirmationState: 'notRequired';
   readonly createdAt: string;
   readonly updatedAt: string;

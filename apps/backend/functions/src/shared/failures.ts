@@ -42,6 +42,13 @@ export class BookingDomainRefusal extends Error {
   }
 }
 
+export class BookingRetryableFailure extends Error {
+  constructor(readonly code: 'contention' | 'temporarily_unavailable') {
+    super(code);
+    this.name = 'BookingRetryableFailure';
+  }
+}
+
 export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown }>>(
   result: BookingResult<T>,
   requestId: string,

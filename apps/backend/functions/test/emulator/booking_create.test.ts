@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
+import { getEventAvailability } from '../../src/booking/availability_query.js';
+import { logicalMutationId, requestAttemptId } from '../../src/booking/idempotency.js';
 import { bookingCollections, finitePoolLedgerId } from '../../src/booking/transactions.js';
+import { computeBookingSemanticHash } from '../../src/contracts/booking_v1.js';
 import { FakeClock } from '../support/fake_clock.js';
 import {
   cleanupBookingEmulator,
@@ -95,4 +98,108 @@ void test('unknown capacity refuses without partial mutation', async () => {
   assert.deepEqual(result, { kind: 'rejected', code: 'event_unavailable' });
   assert.equal((await firestore.collection(bookingCollections.bookings).get()).empty, true);
   assert.equal((await firestore.collection(bookingCollections.idempotency).get()).empty, true);
+});
+
+void test('capacity decrease persists overbooked ledger and blocks new allocation', async () => {
+  await cleanupBookingEmulator(firestore);
+  await seedEvent(finiteEvent({ totalCapacity: 2 }), firestore);
+  const first = await createInternalBooking(
+    { firestore, clock, newBookingId: () => '01JRAWCCAPACITYFIRST000000' },
+    'actor-capacity-a',
+    createCommand({
+      idempotencyKey: 'idem_capacity_first',
+      requestId: 'req_capacity_first',
+      payload: { ...createCommand().payload, participantUnits: 2 },
+    }),
+  );
+  assert.equal(first.kind, 'succeeded');
+  await seedEvent(finiteEvent({ totalCapacity: 1 }), firestore);
+  const blocked = await createInternalBooking(
+    { firestore, clock, newBookingId: () => '01JRAWCCAPACITYBLOCK000000' },
+    'actor-capacity-b',
+    createCommand({
+      idempotencyKey: 'idem_capacity_blocked',
+      requestId: 'req_capacity_blocked',
+    }),
+  );
+  assert.deepEqual(blocked, { kind: 'rejected', code: 'sold_out' });
+  const ledger = await firestore
+    .collection(bookingCollections.poolLedgers)
+    .doc(finitePoolLedgerId(finiteEvent().occurrenceId, 'pool_general', 'onsite'))
+    .get();
+  assert.equal(ledger.get('totalCapacity'), 1);
+  assert.equal(ledger.get('confirmedUnits'), 2);
+  const availability = await getEventAvailability(firestore, clock, {
+    schemaVersion: 1,
+    queryType: 'getEventAvailability',
+    requestId: 'req_capacity_availability',
+    payload: {
+      eventId: finiteEvent().eventId,
+      occurrenceId: finiteEvent().occurrenceId,
+      channel: 'onsite',
+    },
+  });
+  assert.equal(availability.kind, 'succeeded');
+  if (availability.kind === 'succeeded') {
+    assert.equal(availability.data.status, 'soldOut');
+    assert.equal(availability.data.availableUnits, 0);
+  }
+});
+
+void test('capacity increase reuses the same ledger and permits the new units', async () => {
+  await cleanupBookingEmulator(firestore);
+  await seedEvent(finiteEvent({ totalCapacity: 2 }), firestore);
+  await createInternalBooking(
+    { firestore, clock, newBookingId: () => '01JRAWCCAPACITYBASE0000000' },
+    'actor-increase-a',
+    createCommand({
+      idempotencyKey: 'idem_increase_base',
+      requestId: 'req_increase_base',
+      payload: { ...createCommand().payload, participantUnits: 2 },
+    }),
+  );
+  await seedEvent(finiteEvent({ totalCapacity: 3 }), firestore);
+  const result = await createInternalBooking(
+    { firestore, clock, newBookingId: () => '01JRAWCCAPACITYPLUS0000000' },
+    'actor-increase-b',
+    createCommand({ idempotencyKey: 'idem_increase_plus', requestId: 'req_increase_plus' }),
+  );
+  assert.equal(result.kind, 'succeeded');
+  const ledger = await firestore
+    .collection(bookingCollections.poolLedgers)
+    .doc(finitePoolLedgerId(finiteEvent().occurrenceId, 'pool_general', 'onsite'))
+    .get();
+  assert.equal(ledger.get('totalCapacity'), 3);
+  assert.equal(ledger.get('confirmedUnits'), 3);
+});
+
+void test('dangling request attempt returns retryable temporary failure', async () => {
+  await cleanupBookingEmulator(firestore);
+  await seedEvent(finiteEvent(), firestore);
+  const actorId = 'actor-damaged-attempt';
+  const command = createCommand({
+    requestId: 'req_damaged_attempt',
+    idempotencyKey: 'idem_damaged_attempt',
+  });
+  const logicalId = logicalMutationId(actorId, command.commandType, command.idempotencyKey);
+  const attemptId = requestAttemptId(actorId, command.requestId);
+  await firestore
+    .collection(bookingCollections.idempotency)
+    .doc(attemptId)
+    .set({
+      schemaVersion: 1,
+      kind: 'requestAttempt',
+      actorId,
+      commandType: command.commandType,
+      semanticHash: computeBookingSemanticHash(command, actorId),
+      logicalMutationId: logicalId,
+      requestAttemptId: attemptId,
+      bookingId: '01JRAWCUNCOMMITTED00000000',
+      createdAt: fixedNow.toISOString(),
+    });
+  assert.deepEqual(await createInternalBooking({ firestore, clock }, actorId, command), {
+    kind: 'retryableFailure',
+    code: 'temporarily_unavailable',
+  });
+  assert.equal((await firestore.collection(bookingCollections.bookings).get()).empty, true);
 });

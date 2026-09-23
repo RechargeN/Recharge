@@ -70,8 +70,8 @@ export async function getEventAvailability(
       .get();
     const ledger = ledgerSnapshot.data() as PoolLedger | undefined;
     const allocated = ledger?.confirmedUnits ?? 0;
-    if (allocated < 0 || allocated > event.totalCapacity) return rejected('event_unavailable');
-    const availableUnits = event.totalCapacity - allocated;
+    if (allocated < 0) return rejected('event_unavailable');
+    const availableUnits = Math.max(0, event.totalCapacity - allocated);
     return succeeded({
       eventId: event.eventId,
       occurrenceId: event.occurrenceId,
