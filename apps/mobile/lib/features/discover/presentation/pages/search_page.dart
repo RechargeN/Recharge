@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -163,7 +164,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               );
             },
             onForTwo: () => controller.stageSearchConditions(peopleCount: 2),
-            onLowBudget: () => controller.stageSearchConditions(budgetMax: 10),
+            onLowBudget: () => controller.stageSearchConditions(
+              budgetMax: Money(
+                minorUnits: 1000,
+                currencyCode: controller.marketCurrencyCode,
+              ),
+            ),
             onOneHour: () =>
                 controller.stageSearchConditions(availableDurationMinutes: 60),
             onCalmEvening: () {
@@ -265,11 +271,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
           builder: (BuildContext context) =>
-              _QuickBudgetSheet(selected: query.budgetMax),
+              _QuickBudgetSheet(selected: query.budgetMax?.round()),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
-      budgetMax: selection.budgetMax,
+      budgetMax: selection.budgetMax == null
+          ? null
+          : Money(
+              minorUnits: selection.budgetMax! * 100,
+              currencyCode: controller.marketCurrencyCode,
+            ),
       clearBudgetMax: selection.budgetMax == null,
     );
   }
@@ -310,7 +321,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
-      budgetMax: selection.budgetMax,
+      budgetMax: selection.budgetMax == null
+          ? null
+          : Money(
+              minorUnits: selection.budgetMax! * 100,
+              currencyCode: controller.marketCurrencyCode,
+            ),
       clearBudgetMax: selection.budgetMax == null,
       dateFrom: selection.dateWindow?.from,
       clearDateFrom: selection.dateWindow == null,
@@ -432,7 +448,7 @@ class _SearchConditionChips extends StatelessWidget {
         icon: Icons.payments_outlined,
         label: query.budgetMax == null
             ? 'Any budget'
-            : query.budgetMax == 0
+            : query.budgetMax!.minorUnits == 0
             ? 'Free'
             : '€${query.budgetMax!.round()}',
         onTap: onBudget,
@@ -524,7 +540,7 @@ class _QuickPeopleSelection {
 class _QuickBudgetSelection {
   const _QuickBudgetSelection(this.budgetMax);
 
-  final double? budgetMax;
+  final int? budgetMax;
 }
 
 class _QuickRadiusSelection {
@@ -677,7 +693,7 @@ class _QuickPeopleSheet extends StatelessWidget {
 class _QuickBudgetSheet extends StatelessWidget {
   const _QuickBudgetSheet({required this.selected});
 
-  final double? selected;
+  final int? selected;
 
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
@@ -686,21 +702,21 @@ class _QuickBudgetSheet extends StatelessWidget {
     onReset: () => Navigator.of(context).pop(const _QuickBudgetSelection(null)),
     child: _FilterPillWrap(
       children: <Widget>[
-        for (final double? value in <double?>[null, 0, 10, 20, 50])
+        for (final int? value in <int?>[null, 0, 10, 20, 50])
           _FilterPill(
-            key: value == null ? null : Key('quick-budget-${value.round()}'),
+            key: value == null ? null : Key('quick-budget-$value'),
             label: value == null
                 ? 'Any budget'
                 : value == 0
                 ? 'Free'
-                : 'Up to €${value.round()}',
+                : 'Up to €$value',
             selected: selected == value,
             onTap: () =>
                 Navigator.of(context).pop(_QuickBudgetSelection(value)),
           ),
         _FilterPill(
           key: const Key('quick-budget-custom'),
-          label: _isCustom ? 'Custom · €${selected!.round()}' : 'Custom',
+          label: _isCustom ? 'Custom · €$selected' : 'Custom',
           selected: _isCustom,
           onTap: () => _editCustom(context),
         ),
@@ -709,17 +725,17 @@ class _QuickBudgetSheet extends StatelessWidget {
   );
 
   bool get _isCustom =>
-      selected != null && !<double>[0, 10, 20, 50].contains(selected);
+      selected != null && !<int>[0, 10, 20, 50].contains(selected);
 
   Future<void> _editCustom(BuildContext context) async {
-    final double? result = await showDialog<double>(
+    final int? result = await showDialog<int>(
       context: context,
-      builder: (BuildContext context) => _NumberInputDialog<double>(
+      builder: (BuildContext context) => _NumberInputDialog<int>(
         title: 'Budget per person',
         hint: 'Amount in EUR',
-        initialValue: _isCustom ? '${selected!.round()}' : '',
-        parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
-        isValid: (double value) => value >= 0 && value <= 10000,
+        initialValue: _isCustom ? '$selected' : '',
+        parser: (String value) => int.tryParse(value),
+        isValid: (int value) => value >= 0 && value <= 10000,
         errorMessage: 'Enter an amount from €0 to €10,000',
       ),
     );
@@ -1381,7 +1397,7 @@ class _SearchFiltersSheet extends StatefulWidget {
 
 class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late int? _peopleCount = widget.query.peopleCount;
-  late double? _budgetMax = widget.query.budgetMax;
+  late int? _budgetMax = widget.query.budgetMax?.round();
   late double _radiusMeters = widget.query.radiusMeters;
   late bool _unlimited = widget.query.unlimitedRadius;
   late bool _openNow = widget.query.openNow;
@@ -1536,22 +1552,16 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
-                        for (final double? value in <double?>[
-                          null,
-                          0,
-                          10,
-                          20,
-                          40,
-                        ])
+                        for (final int? value in <int?>[null, 0, 10, 20, 40])
                           _FilterPill(
-                            label: value == null ? 'Any' : '€${value.round()}',
+                            label: value == null ? 'Any' : '€$value',
                             selected: _budgetMax == value,
                             onTap: () => setState(() => _budgetMax = value),
                           ),
                         _FilterPill(
                           key: const Key('budget-custom'),
                           label: _isCustomBudget
-                              ? 'Custom · €${_budgetMax!.round()}'
+                              ? 'Custom · €$_budgetMax'
                               : 'Custom',
                           selected: _isCustomBudget,
                           onTap: _editBudget,
@@ -1657,7 +1667,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       _peopleCount != null && !<int>[1, 2, 4].contains(_peopleCount);
 
   bool get _isCustomBudget =>
-      _budgetMax != null && !<double>[0, 10, 20, 40].contains(_budgetMax);
+      _budgetMax != null && !<int>[0, 10, 20, 40].contains(_budgetMax);
 
   Future<void> _pickFilterTime({required bool isStart}) async {
     final DateTime initial = isStart ? _startLocal : _endLocal;
@@ -1700,12 +1710,12 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   }
 
   Future<void> _editBudget() async {
-    final double? result = await _showNumberDialog<double>(
+    final int? result = await _showNumberDialog<int>(
       title: 'Budget per person',
       hint: 'Amount in EUR',
-      initialValue: _isCustomBudget ? '${_budgetMax!.round()}' : '',
-      parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
-      isValid: (double value) => value >= 0 && value <= 10000,
+      initialValue: _isCustomBudget ? '$_budgetMax' : '',
+      parser: (String value) => int.tryParse(value),
+      isValid: (int value) => value >= 0 && value <= 10000,
       errorMessage: 'Enter an amount from €0 to €10,000',
     );
     if (result != null && mounted) setState(() => _budgetMax = result);
@@ -2880,7 +2890,7 @@ class _SearchFilterSelection {
     required this.includeReturnTrip,
   });
   final int? peopleCount;
-  final double? budgetMax;
+  final int? budgetMax;
   final _DateWindow? dateWindow;
   final double radiusMeters;
   final bool unlimitedRadius;

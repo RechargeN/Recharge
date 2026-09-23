@@ -6,6 +6,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -17,6 +18,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -575,6 +577,12 @@ class _SearchLandingTestApp extends StatelessWidget {
         ),
         discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 56.9496,
+          originLng: 24.1052,
+          currencyCode: 'EUR',
+        ),
       );
 
   final DiscoverFeedController _controller;
@@ -645,6 +653,12 @@ class _SearchTestApp extends StatelessWidget {
              discoverPreferencesRepository:
                  _FakeDiscoverPreferencesRepository(),
              analyticsService: _NoopAnalyticsService(),
+             runtimeDefaults: const DiscoverRuntimeDefaults(
+               timezoneId: 'Europe/Riga',
+               originLat: 56.9496,
+               originLng: 24.1052,
+               currencyCode: 'EUR',
+             ),
            );
 
   final String initialLocation;
@@ -799,7 +813,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.8,
@@ -813,7 +827,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.8,
       isFree: true,
       relevanceScore: 0.7,
@@ -827,7 +841,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 8,
+      priceAmount: const Money(minorUnits: 800, currencyCode: 'EUR'),
       distanceKm: 1.4,
       isFree: false,
       relevanceScore: 0.75,

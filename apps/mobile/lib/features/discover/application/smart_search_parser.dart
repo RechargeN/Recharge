@@ -1,4 +1,5 @@
 import '../../../core/config/recharge_taxonomy.dart';
+import '../../../shared/primitives/money/money.dart';
 
 class SmartSearchParseResult {
   const SmartSearchParseResult({
@@ -18,7 +19,7 @@ class SmartSearchParseResult {
   final String queryText;
   final List<String> selectedCategoryIds;
   final bool? freeOnly;
-  final double? budgetMax;
+  final Money? budgetMax;
   final SmartSearchDatePreset? datePreset;
   final double? radiusMeters;
   final bool? unlimitedRadius;
@@ -46,7 +47,7 @@ class SmartRouteIntent {
 
 enum SmartSearchDatePreset { today, tonight }
 
-SmartSearchParseResult parseSmartSearch(String input) {
+SmartSearchParseResult parseSmartSearch(String input, {String? currencyCode}) {
   final String normalized = input.trim().toLowerCase();
   final List<String> chips = <String>[];
   final Set<String> categories = <String>{};
@@ -103,9 +104,13 @@ SmartSearchParseResult parseSmartSearch(String input) {
     }
   }
 
-  double? budgetMax = _parseBudgetMax(working);
+  // Budget text is intentionally ignored when no explicit currency context is
+  // available. Market/device inference is not authoritative.
+  final Money? budgetMax = currencyCode == null
+      ? null
+      : _parseBudgetMax(working, currencyCode: currencyCode);
   if (budgetMax != null) {
-    chips.add('up to ${budgetMax.toStringAsFixed(0)}');
+    chips.add('up to ${budgetMax.formatMajor()}');
     working = working.replaceAll(RegExp(r'(under|до|up to)\s*\d+'), ' ');
     working = working.replaceAll(RegExp(r'\d+\s*(eur|euro)'), ' ');
   }
@@ -359,18 +364,18 @@ bool _containsTaxonomySignal(String source, String signal) {
   ).hasMatch(source);
 }
 
-double? _parseBudgetMax(String source) {
+Money? _parseBudgetMax(String source, {required String currencyCode}) {
   final RegExpMatch? explicit = RegExp(
     r'(under|до|up to)\s*(\d+)',
   ).firstMatch(source);
   if (explicit != null) {
-    return double.parse(explicit.group(2)!);
+    return Money.tryParseMajor(explicit.group(2)!, currencyCode: currencyCode);
   }
   final RegExpMatch? currency = RegExp(
     r'(\d+)\s*(eur|euro)',
   ).firstMatch(source);
   if (currency != null) {
-    return double.parse(currency.group(1)!);
+    return Money.tryParseMajor(currency.group(1)!, currencyCode: currencyCode);
   }
   return null;
 }

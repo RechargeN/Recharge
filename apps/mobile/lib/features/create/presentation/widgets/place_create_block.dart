@@ -949,7 +949,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-from',
                         errorFieldId: 'entryPriceFrom',
                         label: 'Entry from, ${pricing.currencyCode} *',
-                        value: pricing.entryPriceFrom?.toString() ?? '',
+                        value: pricing.entryPriceFrom?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(entryFrom: value),
@@ -961,7 +961,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-to',
                         errorFieldId: 'entryPriceTo',
                         label: 'Entry to, ${pricing.currencyCode}',
-                        value: pricing.entryPriceTo?.toString() ?? '',
+                        value: pricing.entryPriceTo?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(entryTo: value),
@@ -978,7 +978,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-from',
                         label: 'Typical spend from',
-                        value: pricing.typicalSpendFrom?.toString() ?? '',
+                        value: pricing.typicalSpendFrom?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(spendFrom: value),
@@ -989,7 +989,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-to',
                         label: 'Typical spend to',
-                        value: pricing.typicalSpendTo?.toString() ?? '',
+                        value: pricing.typicalSpendTo?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
                             .updatePlacePricing(spendTo: value),

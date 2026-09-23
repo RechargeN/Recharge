@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../../domain/entities/create_availability.dart';
@@ -2377,18 +2378,22 @@ class CreateController extends ChangeNotifier {
     String? pricingUrl,
   }) {
     _updatePlace((PlaceDraftData place) {
+      final String currencyCode = place.pricing.currencyCode;
+      Money? parseMoney(String? value) => value == null
+          ? null
+          : Money.tryParseMajor(value, currencyCode: currencyCode);
       return place.copyWith(
         pricing: place.pricing.copyWith(
-          entryPriceFrom: entryFrom == null ? null : _parseDouble(entryFrom),
+          entryPriceFrom: parseMoney(entryFrom),
           clearEntryPriceFrom:
-              entryFrom != null && _parseDouble(entryFrom) == null,
-          entryPriceTo: entryTo == null ? null : _parseDouble(entryTo),
-          clearEntryPriceTo: entryTo != null && _parseDouble(entryTo) == null,
-          typicalSpendFrom: spendFrom == null ? null : _parseDouble(spendFrom),
+              entryFrom != null && parseMoney(entryFrom) == null,
+          entryPriceTo: parseMoney(entryTo),
+          clearEntryPriceTo: entryTo != null && parseMoney(entryTo) == null,
+          typicalSpendFrom: parseMoney(spendFrom),
           clearTypicalSpendFrom:
-              spendFrom != null && _parseDouble(spendFrom) == null,
-          typicalSpendTo: spendTo == null ? null : _parseDouble(spendTo),
-          clearTypicalSpendTo: spendTo != null && _parseDouble(spendTo) == null,
+              spendFrom != null && parseMoney(spendFrom) == null,
+          typicalSpendTo: parseMoney(spendTo),
+          clearTypicalSpendTo: spendTo != null && parseMoney(spendTo) == null,
           pricingNote: note == null ? null : _nullableText(note),
           clearPricingNote: note != null && _nullableText(note) == null,
           officialPricingUrl: pricingUrl == null
@@ -2691,7 +2696,10 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateBasePrice(String value) {
-    final double? parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final Money? parsed = Money.tryParseMajor(
+      value,
+      currencyCode: _state.draft.currency,
+    );
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,

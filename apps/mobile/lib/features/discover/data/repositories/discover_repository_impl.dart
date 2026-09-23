@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
@@ -111,10 +112,14 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
     if (query.freeOnly && !item.isFree) return false;
 
-    if (query.budgetMin != null && item.priceAmount < query.budgetMin!) {
+    if (query.budgetMin != null &&
+        (item.priceAmount.currencyCode != query.budgetMin!.currencyCode ||
+            item.priceAmount.compareTo(query.budgetMin!) < 0)) {
       return false;
     }
-    if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+    if (query.budgetMax != null &&
+        (item.priceAmount.currencyCode != query.budgetMax!.currencyCode ||
+            item.priceAmount.compareTo(query.budgetMax!) > 0)) {
       return false;
     }
 
@@ -200,7 +205,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
         startsAtUtc: route.publishedAtUtc,
         latitude: route.startPoint.latitude,
         longitude: route.startPoint.longitude,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'XXX'),
         distanceKm: 0,
         isFree: true,
         coverImageUrl: route.coverImage,

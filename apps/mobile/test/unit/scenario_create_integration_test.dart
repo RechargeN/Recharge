@@ -9,7 +9,7 @@ import 'package:recharge/features/create/domain/entities/scenario_item_draft.dar
 import 'package:recharge/features/create/domain/entities/scenario_logistics_draft.dart';
 
 void main() {
-  test('Scenario persists through Create draft schema v8', () {
+  test('Scenario persists through Create draft schema v9', () {
     final ScenarioCreateCoordinator coordinator = ScenarioCreateCoordinator(
       idGenerator: _SequentialIdGenerator(),
     );
@@ -49,7 +49,7 @@ void main() {
       json,
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(json['objectType'], 'scenario');
     expect(restored.objectType, CreateObjectType.scenario);
     expect(restored.scenarioData!.items, hasLength(2));

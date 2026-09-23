@@ -1,4 +1,5 @@
 import 'publisher_ref.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 export 'publisher_ref.dart';
 
@@ -277,10 +278,10 @@ class PlacePricingDraft {
   });
 
   final PlaceEntryType? entryType;
-  final double? entryPriceFrom;
-  final double? entryPriceTo;
-  final double? typicalSpendFrom;
-  final double? typicalSpendTo;
+  final Money? entryPriceFrom;
+  final Money? entryPriceTo;
+  final Money? typicalSpendFrom;
+  final Money? typicalSpendTo;
   final String currencyCode;
   final String? pricingNote;
   final String? officialPricingUrl;
@@ -288,13 +289,13 @@ class PlacePricingDraft {
   PlacePricingDraft copyWith({
     PlaceEntryType? entryType,
     bool clearEntryType = false,
-    double? entryPriceFrom,
+    Money? entryPriceFrom,
     bool clearEntryPriceFrom = false,
-    double? entryPriceTo,
+    Money? entryPriceTo,
     bool clearEntryPriceTo = false,
-    double? typicalSpendFrom,
+    Money? typicalSpendFrom,
     bool clearTypicalSpendFrom = false,
-    double? typicalSpendTo,
+    Money? typicalSpendTo,
     bool clearTypicalSpendTo = false,
     String? currencyCode,
     String? pricingNote,
@@ -411,7 +412,7 @@ class PlaceDraftData {
     this.unknownFields = const <String, Object?>{},
   });
 
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
 
   final int schemaVersion;
   final int revision;

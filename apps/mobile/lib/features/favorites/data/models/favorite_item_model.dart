@@ -1,4 +1,5 @@
 import '../../domain/entities/favorite_item_entity.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class FavoriteItemModel {
   const FavoriteItemModel({
@@ -23,13 +24,16 @@ class FavoriteItemModel {
   final String category;
   final String startsAtUtcIso;
   final double distanceKm;
-  final double priceAmount;
+  final Money priceAmount;
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
   final String coverImageUrl;
 
-  factory FavoriteItemModel.fromJson(Map<String, dynamic> json) {
+  factory FavoriteItemModel.fromJson(
+    Map<String, dynamic> json, {
+    required String defaultCurrencyCode,
+  }) {
     return FavoriteItemModel(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -38,7 +42,16 @@ class FavoriteItemModel {
       category: json['category'] as String,
       startsAtUtcIso: json['startsAtUtcIso'] as String,
       distanceKm: (json['distanceKm'] as num).toDouble(),
-      priceAmount: (json['priceAmount'] as num).toDouble(),
+      priceAmount:
+          Money.fromJsonOrNull(
+            json['price'],
+            legacyCurrencyCode: defaultCurrencyCode,
+          ) ??
+          Money.fromJsonOrNull(
+            json['priceAmount'],
+            legacyCurrencyCode: defaultCurrencyCode,
+          ) ??
+          (throw const FormatException('Favorite Money is invalid')),
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
@@ -55,7 +68,7 @@ class FavoriteItemModel {
       'category': category,
       'startsAtUtcIso': startsAtUtcIso,
       'distanceKm': distanceKm,
-      'priceAmount': priceAmount,
+      'price': priceAmount.toJson(),
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,

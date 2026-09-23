@@ -607,7 +607,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     controller.updateCoverImage(seed.coverImage);
     controller.updateIsFree(seed.isFree);
     if (!seed.isFree && seed.basePrice != null) {
-      controller.updateBasePrice(seed.basePrice!.toStringAsFixed(0));
+      controller.updateBasePrice(seed.basePrice!);
     }
     if (createBlockConfigFor(seed.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(seed.startDateTimeUtc.toIso8601String());
@@ -1911,7 +1911,7 @@ class _CreateSeed {
     );
     final String title = _seedTitle(rawTitle, prompt, taxonomy.categoryId);
     final CreateObjectType objectType = _seedObjectType(params);
-    final double? basePrice = _seedPrice(params);
+    final String? basePrice = _seedPrice(params);
     final bool isFree = _seedIsFree(params, basePrice);
 
     return _CreateSeed(
@@ -1951,7 +1951,7 @@ class _CreateSeed {
   final String addressLine1;
   final String coverImage;
   final bool isFree;
-  final double? basePrice;
+  final String? basePrice;
   final DateTime startDateTimeUtc;
 }
 
@@ -2220,17 +2220,20 @@ String _seedCoverImage(Map<String, String> params, String categoryId) {
   }
 }
 
-double? _seedPrice(Map<String, String> params) {
+String? _seedPrice(Map<String, String> params) {
   final String value = _seedParam(params, <String>[
     'price',
     'budgetMax',
     'basePrice',
   ]);
   if (value.isEmpty) return null;
-  return double.tryParse(value.replaceAll(',', '.'));
+  final String normalized = value.replaceAll(',', '.');
+  return RegExp(r'^\d+(?:\.\d{1,2})?$').hasMatch(normalized)
+      ? normalized
+      : null;
 }
 
-bool _seedIsFree(Map<String, String> params, double? basePrice) {
+bool _seedIsFree(Map<String, String> params, String? basePrice) {
   final String value = _seedParam(params, <String>[
     'free',
     'isFree',
@@ -2238,7 +2241,13 @@ bool _seedIsFree(Map<String, String> params, double? basePrice) {
   ]).toLowerCase();
   if (value == '1' || value == 'true' || value == 'yes') return true;
   if (value == '0' || value == 'false' || value == 'no') return false;
-  return basePrice == null || basePrice <= 0;
+  if (basePrice == null) return true;
+  final List<String> parts = basePrice.split('.');
+  final int whole = int.parse(parts.first);
+  final int fraction = parts.length == 1
+      ? 0
+      : int.parse(parts.last.padRight(2, '0'));
+  return whole == 0 && fraction == 0;
 }
 
 DateTime _seedStartDateTime(Map<String, String> params) {

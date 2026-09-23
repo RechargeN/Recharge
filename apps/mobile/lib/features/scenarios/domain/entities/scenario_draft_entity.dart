@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 enum ScenarioMood { calm, social, active }
 
 class ScenarioStepEntity {
@@ -20,7 +22,7 @@ class ScenarioStepEntity {
   final String category;
   final int durationMinutes;
   final double distanceKm;
-  final double priceAmount;
+  final Money priceAmount;
   final bool isFree;
   final double latitude;
   final double longitude;
@@ -50,6 +52,7 @@ class ScenarioDraftEntity {
     required this.freeOnly,
     required this.walkingOnly,
     required this.sourcePrompt,
+    required this.currencyCode,
     required this.steps,
   });
 
@@ -60,6 +63,7 @@ class ScenarioDraftEntity {
   final bool freeOnly;
   final bool walkingOnly;
   final String sourcePrompt;
+  final String currencyCode;
   final List<ScenarioStepEntity> steps;
 
   int get totalDurationMinutes {
@@ -76,10 +80,10 @@ class ScenarioDraftEntity {
     );
   }
 
-  double get totalPriceAmount {
-    return steps.fold<double>(
-      0,
-      (double total, ScenarioStepEntity step) => total + step.priceAmount,
+  Money get totalPriceAmount {
+    return steps.fold<Money>(
+      Money.zero(currencyCode),
+      (Money total, ScenarioStepEntity step) => total + step.priceAmount,
     );
   }
 
@@ -91,6 +95,7 @@ class ScenarioDraftEntity {
     bool? freeOnly,
     bool? walkingOnly,
     String? sourcePrompt,
+    String? currencyCode,
     List<ScenarioStepEntity>? steps,
   }) {
     return ScenarioDraftEntity(
@@ -101,6 +106,7 @@ class ScenarioDraftEntity {
       freeOnly: freeOnly ?? this.freeOnly,
       walkingOnly: walkingOnly ?? this.walkingOnly,
       sourcePrompt: sourcePrompt ?? this.sourcePrompt,
+      currencyCode: currencyCode ?? this.currencyCode,
       steps: steps ?? this.steps,
     );
   }

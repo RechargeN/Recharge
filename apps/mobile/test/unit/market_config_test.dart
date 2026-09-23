@@ -6,7 +6,7 @@ import 'package:recharge/features/discover/domain/entities/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
 
 void main() {
-  test('active market is Riga and query defaults are v2', () {
+  test('active market is Riga and query defaults are v3', () {
     const MarketConfig market = MarketConfig.riga;
     final DiscoverQuery query = DiscoverQuery.defaults(
       marketCityId: market.marketCityId,
@@ -17,7 +17,7 @@ void main() {
     expect(query.marketCityId, 'riga');
     expect(query.centerLat, 56.9496);
     expect(query.centerLng, 24.1052);
-    expect(query.queryVersion, 2);
+    expect(query.queryVersion, 3);
   });
 
   test(
@@ -35,16 +35,18 @@ void main() {
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
+        defaultCurrencyCode: 'EUR',
       );
       final DiscoverQuery manual = DiscoverQuery.fromMap(
         <String, Object?>{...legacy, 'manual_area_selected': true},
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
+        defaultCurrencyCode: 'EUR',
       );
 
       expect(migrated.marketCityId, 'riga');
-      expect(migrated.queryVersion, 2);
+      expect(migrated.queryVersion, 3);
       expect(migrated.timeWindow, isNull);
       expect(manual.marketCityId, 'rezekne');
       expect(manual.centerLat, 56.5099);
@@ -65,7 +67,7 @@ void main() {
     );
   });
 
-  test('query v2 round-trip preserves time and travel contracts', () {
+  test('query v3 round-trip preserves time, travel, and Money contracts', () {
     final DiscoverQuery source =
         DiscoverQuery.defaults(
           marketCityId: 'riga',
@@ -93,9 +95,10 @@ void main() {
       defaultMarketCityId: 'riga',
       defaultCenterLat: 56.9496,
       defaultCenterLng: 24.1052,
+      defaultCurrencyCode: 'EUR',
     );
 
-    expect(restored.queryVersion, 2);
+    expect(restored.queryVersion, 3);
     expect(restored.timeWindow!.mode, TimeWindowMode.flexible);
     expect(
       restored.timeWindow!.effectiveStartAtUtc,

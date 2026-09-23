@@ -46,7 +46,14 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     super.initState();
     final String prompt = widget.seedParameters['prompt']?.trim() ?? '';
     _promptController = TextEditingController(text: prompt);
-    _parseResult = prompt.isEmpty ? null : parseSmartSearch(prompt);
+    _parseResult = prompt.isEmpty
+        ? null
+        : parseSmartSearch(
+            prompt,
+            currencyCode: ref
+                .read(discoverFeedControllerProvider)
+                .marketCurrencyCode,
+          );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(discoverFeedControllerProvider).ensureSmartSearchHistoryLoaded();
     });
@@ -231,7 +238,14 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
 
   void _parsePrompt(String value) {
     setState(() {
-      _parseResult = value.trim().isEmpty ? null : parseSmartSearch(value);
+      _parseResult = value.trim().isEmpty
+          ? null
+          : parseSmartSearch(
+              value,
+              currencyCode: ref
+                  .read(discoverFeedControllerProvider)
+                  .marketCurrencyCode,
+            );
     });
   }
 
@@ -252,7 +266,10 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
       return;
     }
 
-    final SmartSearchParseResult parsed = parseSmartSearch(prompt);
+    final SmartSearchParseResult parsed = parseSmartSearch(
+      prompt,
+      currencyCode: controller.marketCurrencyCode,
+    );
     final _DateWindow? window = switch (parsed.datePreset) {
       SmartSearchDatePreset.today => _todayWindow(),
       SmartSearchDatePreset.tonight => _tonightWindow(),

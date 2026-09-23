@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 enum FindPeopleScheduleMode { single, timePoll, recurring }
 
 enum FindPeopleMeetingMode { inPerson, online, hybrid }
@@ -85,7 +87,7 @@ class FindPeopleExpenseItemDraft {
 
   final String id;
   final String category;
-  final double amount;
+  final Money amount;
   final String payerNote;
 
   FindPeopleExpenseItemDraft copyWith({String? id}) {
@@ -230,7 +232,7 @@ class FindPeopleDraftData {
   final String guestPolicy;
 
   final FindPeopleCostType costType;
-  final double? expectedSpendAmount;
+  final Money? expectedSpendAmount;
   final String currencyCode;
   final String? costNote;
   final FindPeopleExpenseSplitMode expenseSplitMode;
@@ -407,7 +409,7 @@ class FindPeopleDraftData {
     bool? attendanceConfirmationRequired,
     String? guestPolicy,
     FindPeopleCostType? costType,
-    double? expectedSpendAmount,
+    Money? expectedSpendAmount,
     bool clearExpectedSpendAmount = false,
     String? currencyCode,
     String? costNote,

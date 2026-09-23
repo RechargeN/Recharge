@@ -3,6 +3,7 @@ import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_object_intake.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -55,7 +56,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 8, 19),
       latitude: 56.95,
       longitude: 24.11,
-      priceAmount: 5,
+      priceAmount: const Money(minorUnits: 500, currencyCode: 'EUR'),
       distanceKm: 2,
       isFree: false,
       objectKind: DiscoverObjectKind.activity,
@@ -98,7 +99,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 3),
       latitude: 95,
       longitude: 24.1,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 0,
       isFree: true,
       objectKind: DiscoverObjectKind.place,
@@ -117,7 +118,7 @@ DiscoverItemEntity _item({required DiscoverObjectKind kind}) =>
       startsAtUtc: DateTime.utc(2026, 8, 8, 17),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 12,
+      priceAmount: const Money(minorUnits: 1200, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: false,
       objectKind: kind,

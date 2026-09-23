@@ -217,6 +217,7 @@ Future<void> setupDependencies() async {
         timezoneId: sl<MarketConfig>().timezoneId,
         originLat: sl<MarketConfig>().centerLat,
         originLng: sl<MarketConfig>().centerLng,
+        currencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
@@ -493,6 +494,7 @@ Future<void> setupDependencies() async {
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
+        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<DiscoverRepository>(
@@ -523,7 +525,10 @@ Future<void> setupDependencies() async {
       () => ExploreRepositoryImpl(localDataSource: sl()),
     )
     ..registerLazySingleton<FavoritesLocalDataSource>(
-      () => FavoritesLocalDataSource(sl()),
+      () => FavoritesLocalDataSource(
+        sl(),
+        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
+      ),
     )
     ..registerLazySingleton<FavoritesRepository>(
       () => FavoritesRepositoryImpl(localDataSource: sl()),

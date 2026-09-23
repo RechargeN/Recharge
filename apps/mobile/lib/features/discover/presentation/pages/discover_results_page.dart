@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/primitives/money/money.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -208,7 +209,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               controller.applySearchConditions(
                 freeOnly: false,
                 clearBudgetMin: true,
-                budgetMax: 10,
+                budgetMax: Money(
+                  minorUnits: 1000,
+                  currencyCode: controller.marketCurrencyCode,
+                ),
                 clearDateFrom: true,
                 clearDateTo: true,
               );
@@ -283,7 +287,12 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onBudgetSelected: (double? value) {
               controller.applySearchConditions(
                 freeOnly: false,
-                budgetMax: value,
+                budgetMax: value == null
+                    ? null
+                    : Money.fromLegacyMajor(
+                        value,
+                        currencyCode: controller.marketCurrencyCode,
+                      ),
                 clearBudgetMin: true,
                 clearBudgetMax: value == null,
               );
@@ -404,7 +413,13 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final String? rawBudgetMax = seedParameters['budgetMax'];
+    final Money? budgetMax = rawBudgetMax == null
+        ? null
+        : Money.tryParseMajor(
+            rawBudgetMax,
+            currencyCode: controller.marketCurrencyCode,
+          );
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
@@ -1153,12 +1168,12 @@ class _ConditionPanel extends StatelessWidget {
                 ),
                 ChoiceChip(
                   label: const Text('Under 10'),
-                  selected: query.budgetMax == 10,
+                  selected: query.budgetMax?.minorUnits == 1000,
                   onSelected: (_) => onBudgetSelected(10),
                 ),
                 ChoiceChip(
                   label: const Text('Under 15'),
-                  selected: query.budgetMax == 15,
+                  selected: query.budgetMax?.minorUnits == 1500,
                   onSelected: (_) => onBudgetSelected(15),
                 ),
               ],

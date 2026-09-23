@@ -1,4 +1,5 @@
 import 'time_window.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum DiscoverSortMode { geoFreshness }
 
@@ -64,7 +65,7 @@ class DiscoverQuery {
     manualAreaSelected: false,
     searchAreaDirty: false,
     sourceScreen: 'discover',
-    queryVersion: 2,
+    queryVersion: 3,
     appliedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
   );
 
@@ -76,8 +77,8 @@ class DiscoverQuery {
   final int? peopleCount;
   final int? availableDurationMinutes;
   final String? mood;
-  final double? budgetMin;
-  final double? budgetMax;
+  final Money? budgetMin;
+  final Money? budgetMax;
   final bool freeOnly;
   final double centerLat;
   final double centerLng;
@@ -126,9 +127,9 @@ class DiscoverQuery {
     bool clearAvailableDurationMinutes = false,
     String? mood,
     bool clearMood = false,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     bool? freeOnly,
     double? centerLat,
@@ -191,8 +192,8 @@ class DiscoverQuery {
     'people_count': peopleCount,
     'available_duration_minutes': availableDurationMinutes,
     'mood': mood,
-    'budget_min': budgetMin,
-    'budget_max': budgetMax,
+    'budget_min': budgetMin?.toJson(),
+    'budget_max': budgetMax?.toJson(),
     'free_only': freeOnly,
     'center_lat': centerLat,
     'center_lng': centerLng,
@@ -205,7 +206,7 @@ class DiscoverQuery {
     'manual_area_selected': manualAreaSelected,
     'search_area_dirty': searchAreaDirty,
     'source_screen': sourceScreen,
-    'query_version': 2,
+    'query_version': 3,
     'applied_at_utc': appliedAtUtc.toIso8601String(),
     'time_window': timeWindow?.toMap(),
     'travel_context': travelContext?.toMap(),
@@ -216,6 +217,7 @@ class DiscoverQuery {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required String defaultCurrencyCode,
   }) {
     final int sourceVersion = (map['query_version'] as num?)?.toInt() ?? 1;
     final bool manualAreaSelected =
@@ -252,8 +254,14 @@ class DiscoverQuery {
       availableDurationMinutes: (map['available_duration_minutes'] as num?)
           ?.toInt(),
       mood: map['mood'] as String?,
-      budgetMin: (map['budget_min'] as num?)?.toDouble(),
-      budgetMax: (map['budget_max'] as num?)?.toDouble(),
+      budgetMin: Money.fromJsonOrNull(
+        map['budget_min'],
+        legacyCurrencyCode: defaultCurrencyCode,
+      ),
+      budgetMax: Money.fromJsonOrNull(
+        map['budget_max'],
+        legacyCurrencyCode: defaultCurrencyCode,
+      ),
       freeOnly: (map['free_only'] as bool?) ?? false,
       centerLat: centerLat,
       centerLng: centerLng,
@@ -269,7 +277,7 @@ class DiscoverQuery {
       manualAreaSelected: manualAreaSelected,
       searchAreaDirty: (map['search_area_dirty'] as bool?) ?? false,
       sourceScreen: (map['source_screen'] as String?) ?? 'discover',
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc:
           _dateOrNull(map['applied_at_utc']) ?? DateTime.now().toUtc(),
       timeWindow: sourceVersion < 2 || timeWindowMap == null

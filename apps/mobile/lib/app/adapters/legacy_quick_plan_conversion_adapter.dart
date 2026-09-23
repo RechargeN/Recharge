@@ -29,9 +29,7 @@ class LegacyQuickPlanConversionAdapter {
               latitude: step.latitude,
               longitude: step.longitude,
               isFree: step.isFree,
-              priceMinorUnits: step.isFree
-                  ? 0
-                  : (step.priceAmount * 100).round(),
+              priceMinorUnits: step.isFree ? 0 : step.priceAmount.minorUnits,
               available: true,
             ),
           )

@@ -235,6 +235,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'latitude': lat,
         'longitude': lng,
         'price_amount': template['price_amount'],
+        'currency_code': 'EUR',
         'distance_km': 0.0,
         'is_free': template['is_free'],
         'object_kind': template['object_kind'],

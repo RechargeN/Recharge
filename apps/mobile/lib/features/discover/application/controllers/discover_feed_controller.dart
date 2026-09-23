@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/geo_point.dart';
@@ -29,6 +30,7 @@ class DiscoverFeedController extends ChangeNotifier {
       timezoneId: 'UTC',
       originLat: 0,
       originLng: 0,
+      currencyCode: 'XXX',
     ),
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
@@ -48,6 +50,7 @@ class DiscoverFeedController extends ChangeNotifier {
   final DiscoverRuntimeDefaults _runtimeDefaults;
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
+  String get marketCurrencyCode => _runtimeDefaults.currencyCode;
 
   DiscoverFeedState _state;
   DiscoverFeedState get state => _state;
@@ -64,7 +67,7 @@ class DiscoverFeedController extends ChangeNotifier {
     String? queryText,
     int? peopleCount,
     bool clearPeopleCount = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -414,8 +417,8 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> setBudgetRange({
-    required double? min,
-    required double? max,
+    required Money? min,
+    required Money? max,
   }) async {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
@@ -550,9 +553,9 @@ class DiscoverFeedController extends ChangeNotifier {
     List<String>? selectedCategoryIds,
     List<String>? selectedSubcategoryIds,
     bool? freeOnly,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,

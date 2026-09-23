@@ -12,6 +12,7 @@ import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -125,7 +126,7 @@ class CreateDraftModel {
   final bool petFriendly;
   final bool wheelchairAccessible;
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
   final bool registrationRequired;
@@ -192,7 +193,7 @@ class CreateDraftModel {
       );
     }
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: entity.id,
       basedOnPublishedVersionId: entity.basedOnPublishedVersionId,
       objectType: entity.objectType.taxonomyId,
@@ -299,8 +300,8 @@ class CreateDraftModel {
           price: isFree || basePrice == null
               ? null
               : EventMoneyDraft(
-                  amountMinor: (basePrice! * 100).round(),
-                  currencyCode: currency,
+                  amountMinor: basePrice!.minorUnits,
+                  currencyCode: basePrice!.currencyCode,
                 ),
           capacityMode: maxParticipants == null
               ? EventCapacityMode.unknown
@@ -522,7 +523,7 @@ class CreateDraftModel {
       }
     }
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: json['id'] as String,
       basedOnPublishedVersionId: json['basedOnPublishedVersionId'] as String?,
       objectType: json['objectType'] as String,
@@ -574,7 +575,10 @@ class CreateDraftModel {
       petFriendly: json['petFriendly'] as bool? ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] as bool? ?? false,
       isFree: json['isFree'] as bool? ?? true,
-      basePrice: (json['basePrice'] as num?)?.toDouble(),
+      basePrice: Money.fromJsonOrNull(
+        json['basePrice'],
+        legacyCurrencyCode: json['currency'] as String? ?? 'EUR',
+      ),
       currency: json['currency'] as String? ?? 'EUR',
       pricingModel: json['pricingModel'] as String? ?? 'fixed',
       registrationRequired: json['registrationRequired'] as bool? ?? true,
@@ -607,7 +611,7 @@ class CreateDraftModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'schemaVersion': 8,
+      'schemaVersion': 9,
       'id': id,
       'basedOnPublishedVersionId': basedOnPublishedVersionId,
       'objectType': objectType,
@@ -650,7 +654,7 @@ class CreateDraftModel {
       'petFriendly': petFriendly,
       'wheelchairAccessible': wheelchairAccessible,
       'isFree': isFree,
-      'basePrice': basePrice,
+      'basePrice': basePrice?.toJson(),
       'currency': currency,
       'pricingModel': pricingModel,
       'registrationRequired': registrationRequired,

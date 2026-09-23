@@ -12,6 +12,7 @@ import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/geo/geometry_encoding.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
@@ -585,7 +586,13 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final String? rawBudgetMax = seedParameters['budgetMax'];
+    final Money? budgetMax = rawBudgetMax == null
+        ? null
+        : Money.tryParseMajor(
+            rawBudgetMax,
+            currencyCode: controller.marketCurrencyCode,
+          );
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
@@ -944,7 +951,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       startsAtUtc: now,
       distanceKm: route.totalDistanceKm,
       priceAmount: route.totalPriceAmount,
-      isFree: route.totalPriceAmount == 0,
+      isFree: route.totalPriceAmount.minorUnits == 0,
       savedAtUtc: now,
       targetRoute: route.builderLocation,
     );
@@ -2952,10 +2959,11 @@ class _ScenarioMapRoute {
     );
   }
 
-  double get totalPriceAmount {
-    return stops.fold<double>(
-      0,
-      (double total, ScenarioStepEntity step) => total + step.priceAmount,
+  Money get totalPriceAmount {
+    final String currencyCode = stops.first.priceAmount.currencyCode;
+    return stops.fold<Money>(
+      Money.zero(currencyCode),
+      (Money total, ScenarioStepEntity step) => total + step.priceAmount,
     );
   }
 
@@ -2976,8 +2984,9 @@ class _ScenarioMapRoute {
   }
 
   String get priceLabel {
-    if (totalPriceAmount == 0) return 'Free';
-    return '${totalPriceAmount.toStringAsFixed(0)} €';
+    if (totalPriceAmount.minorUnits == 0) return 'Free';
+    return '${totalPriceAmount.toStringAsFixed(0)} '
+        '${totalPriceAmount.currencyCode}';
   }
 
   String get moodLabel {
@@ -3029,7 +3038,7 @@ class _ScenarioMapRoute {
     final Map<String, String> params = <String, String>{
       'q': promptLabel,
       if (category != null) 'category': category,
-      'free': totalPriceAmount == 0 ? '1' : '0',
+      'free': totalPriceAmount.minorUnits == 0 ? '1' : '0',
       'radius': '5000',
       'unlimited': '0',
     };

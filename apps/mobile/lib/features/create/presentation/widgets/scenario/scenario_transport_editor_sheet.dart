@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
+import '../../../../../shared/primitives/money/money.dart';
 
 class ScenarioPlannedTransportInput {
   const ScenarioPlannedTransportInput({
@@ -182,6 +183,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
 Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   BuildContext context, {
   required ScenarioTravelMode initialMode,
+  required String currencyCode,
   ScenarioLegDraft? current,
 }) {
   ScenarioTravelMode mode = current?.mode ?? initialMode;
@@ -270,10 +272,10 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Parking / ticket / other cost (optional)',
-                  suffixText: 'EUR',
-                  border: OutlineInputBorder(),
+                  suffixText: currencyCode,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => otherCost = value,
               ),
@@ -282,12 +284,17 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                 onPressed: () {
                   final int? minutes = int.tryParse(duration.trim());
                   final double? km = _number(distance);
-                  final double? cost = _number(otherCost);
+                  final Money? cost = otherCost.trim().isEmpty
+                      ? null
+                      : Money.tryParseMajor(
+                          otherCost,
+                          currencyCode: currencyCode,
+                        );
                   if (minutes == null ||
                       minutes <= 0 ||
                       km == null ||
                       km < 0 ||
-                      (cost != null && cost < 0)) {
+                      (otherCost.trim().isNotEmpty && cost == null)) {
                     return;
                   }
                   Navigator.of(context).pop(
@@ -295,9 +302,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       mode: mode,
                       durationMinutes: minutes,
                       distanceKm: km,
-                      otherCostMinorUnits: cost == null
-                          ? null
-                          : (cost * 100).round(),
+                      otherCostMinorUnits: cost?.minorUnits,
                     ),
                   );
                 },

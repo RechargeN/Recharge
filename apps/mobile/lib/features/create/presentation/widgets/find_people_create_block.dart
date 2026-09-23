@@ -8,6 +8,7 @@ import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class FindPeopleCreateBlock extends StatefulWidget {
   const FindPeopleCreateBlock({
@@ -896,13 +897,14 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           if (data.costType == FindPeopleCostType.estimated)
             _DraftTextField(
               label: 'Expected spend per person (${data.currencyCode}) *',
-              value: data.expectedSpendAmount?.toString() ?? '',
+              value: data.expectedSpendAmount?.formatMajor() ?? '',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               onChanged: (String value) {
-                final double? amount = double.tryParse(
-                  value.replaceAll(',', '.'),
+                final Money? amount = Money.tryParseMajor(
+                  value,
+                  currencyCode: data.currencyCode,
                 );
                 _update(
                   data.copyWith(
@@ -977,7 +979,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(item.category),
                 subtitle: Text(
-                  '${item.amount.toStringAsFixed(2)} ${data.currencyCode} • ${item.payerNote}',
+                  '${item.amount.formatMajor()} ${item.amount.currencyCode} • ${item.payerNote}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -1460,10 +1462,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   void _addExpense(FindPeopleDraftData data) {
     final String? category = _text(_expenseCategory.text);
-    final double? amount = double.tryParse(
-      _expenseAmount.text.replaceAll(',', '.'),
+    final Money? amount = Money.tryParseMajor(
+      _expenseAmount.text,
+      currencyCode: data.currencyCode,
     );
-    if (category == null || amount == null || amount <= 0) return;
+    if (category == null || amount == null || amount.minorUnits <= 0) return;
     _update(
       data.copyWith(
         plannedExpenseItems: <FindPeopleExpenseItemDraft>[

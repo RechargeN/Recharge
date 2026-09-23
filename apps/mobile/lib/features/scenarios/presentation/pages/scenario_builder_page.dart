@@ -431,7 +431,7 @@ class _ScenarioPreview extends StatelessWidget {
                     ),
                     _PreviewStat(
                       icon: Icons.payments_outlined,
-                      value: draft.totalPriceAmount == 0
+                      value: draft.totalPriceAmount.minorUnits == 0
                           ? 'Free'
                           : '€${draft.totalPriceAmount.toStringAsFixed(0)}',
                       label: 'budget',
@@ -961,7 +961,7 @@ class _ScenarioHero extends StatelessWidget {
                   label: '${draft.totalDistanceKm.toStringAsFixed(1)} km',
                 ),
                 _HeroPill(
-                  label: draft.totalPriceAmount == 0
+                  label: draft.totalPriceAmount.minorUnits == 0
                       ? 'Free'
                       : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
                 ),
@@ -1610,7 +1610,7 @@ class _RouteFitPanel extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   label: draft.freeOnly
                       ? 'Free only'
-                      : draft.totalPriceAmount == 0
+                      : draft.totalPriceAmount.minorUnits == 0
                       ? 'Free'
                       : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
                 ),
@@ -2069,7 +2069,7 @@ FavoriteItemEntity _favoriteFromScenario(ScenarioDraftEntity draft) {
     startsAtUtc: now,
     distanceKm: draft.totalDistanceKm,
     priceAmount: draft.totalPriceAmount,
-    isFree: draft.totalPriceAmount == 0,
+    isFree: draft.totalPriceAmount.minorUnits == 0,
     savedAtUtc: now,
     targetRoute: _targetRouteForScenario(draft),
   );
@@ -2416,7 +2416,7 @@ String _scenarioSummary(ScenarioDraftEntity draft) {
     '${_moodLabel(draft.mood)} recharge scenario',
     '${draft.steps.length} stops · ${draft.totalDurationMinutes} min · '
         '${draft.totalDistanceKm.toStringAsFixed(1)} km',
-    draft.totalPriceAmount == 0
+    draft.totalPriceAmount.minorUnits == 0
         ? 'Free'
         : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
     '',

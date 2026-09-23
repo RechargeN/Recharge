@@ -1,4 +1,5 @@
 import '../../domain/entities/place_draft_data.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class PlaceDraftMapper {
   const PlaceDraftMapper._();
@@ -132,10 +133,10 @@ class PlaceDraftMapper {
       'amenityUnknownIds': value.amenityUnknownIds.toList(growable: false),
       'pricing': <String, Object?>{
         'entryType': value.pricing.entryType?.name,
-        'entryPriceFrom': value.pricing.entryPriceFrom,
-        'entryPriceTo': value.pricing.entryPriceTo,
-        'typicalSpendFrom': value.pricing.typicalSpendFrom,
-        'typicalSpendTo': value.pricing.typicalSpendTo,
+        'entryPriceFrom': value.pricing.entryPriceFrom?.toJson(),
+        'entryPriceTo': value.pricing.entryPriceTo?.toJson(),
+        'typicalSpendFrom': value.pricing.typicalSpendFrom?.toJson(),
+        'typicalSpendTo': value.pricing.typicalSpendTo?.toJson(),
         'currencyCode': value.pricing.currencyCode,
         'pricingNote': value.pricing.pricingNote,
         'officialPricingUrl': value.pricing.officialPricingUrl,
@@ -286,13 +287,27 @@ class PlaceDraftMapper {
 
   static PlacePricingDraft _pricing(Object? raw, String defaultCurrency) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
+    final String currencyCode =
+        _string(json['currencyCode']) ?? defaultCurrency;
     return PlacePricingDraft(
       entryType: _enumValue(PlaceEntryType.values, json['entryType']),
-      entryPriceFrom: _double(json['entryPriceFrom']),
-      entryPriceTo: _double(json['entryPriceTo']),
-      typicalSpendFrom: _double(json['typicalSpendFrom']),
-      typicalSpendTo: _double(json['typicalSpendTo']),
-      currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      entryPriceFrom: Money.fromJsonOrNull(
+        json['entryPriceFrom'],
+        legacyCurrencyCode: currencyCode,
+      ),
+      entryPriceTo: Money.fromJsonOrNull(
+        json['entryPriceTo'],
+        legacyCurrencyCode: currencyCode,
+      ),
+      typicalSpendFrom: Money.fromJsonOrNull(
+        json['typicalSpendFrom'],
+        legacyCurrencyCode: currencyCode,
+      ),
+      typicalSpendTo: Money.fromJsonOrNull(
+        json['typicalSpendTo'],
+        legacyCurrencyCode: currencyCode,
+      ),
+      currencyCode: currencyCode,
       pricingNote: _string(json['pricingNote']),
       officialPricingUrl: _string(json['officialPricingUrl']),
     );

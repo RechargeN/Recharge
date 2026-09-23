@@ -27,6 +27,7 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
@@ -203,6 +204,7 @@ void main() {
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -439,6 +441,7 @@ void main() {
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -479,7 +482,7 @@ void main() {
     expect(draft.subcategory, 'museum');
     expect(draft.city, 'Rezekne');
     expect(draft.isFree, isFalse);
-    expect(draft.basePrice, 10);
+    expect(draft.basePrice, const Money(minorUnits: 1000, currencyCode: 'EUR'));
     expect(draft.media.coverImage, isNotEmpty);
     expect(
       draft.startDateTimeUtc?.toIso8601String(),

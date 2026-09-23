@@ -1,4 +1,5 @@
 import '../../domain/entities/scenario_draft_entity.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum ScenarioBuilderStatus { ready }
 
@@ -19,6 +20,7 @@ class ScenarioBuilderState {
         freeOnly: false,
         walkingOnly: true,
         sourcePrompt: '',
+        currencyCode: 'EUR',
         steps:
             scenarioStepsFor(
                   mood: ScenarioMood.calm,
@@ -102,7 +104,7 @@ ScenarioRouteFit scenarioRouteFitFor(ScenarioDraftEntity draft) {
   if (draft.freeOnly && hasPaidStep) {
     score -= 28;
     insights.add('Remove paid stops for free-only mode');
-  } else if (draft.totalPriceAmount == 0) {
+  } else if (draft.totalPriceAmount.minorUnits == 0) {
     insights.add('Free route');
   } else {
     insights.add('${draft.totalPriceAmount.toStringAsFixed(0)} EUR total');
@@ -265,7 +267,7 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'food_drinks.coffee',
     durationMinutes: 35,
     distanceKm: 0.4,
-    priceAmount: 4,
+    priceAmount: Money(minorUnits: 400, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5097,
     longitude: 27.3352,
@@ -276,7 +278,7 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'wellness_recharge.calm_walk',
     durationMinutes: 55,
     distanceKm: 1.6,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5112,
     longitude: 27.3304,
@@ -287,7 +289,7 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'art_culture_museums.museum',
     durationMinutes: 50,
     distanceKm: 0.9,
-    priceAmount: 6,
+    priceAmount: Money(minorUnits: 600, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5069,
     longitude: 27.3318,
@@ -301,7 +303,7 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'games_indoor.board_games',
     durationMinutes: 70,
     distanceKm: 1.2,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5108,
     longitude: 27.3385,
@@ -312,7 +314,7 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'music_nightlife.afterwork_drinks',
     durationMinutes: 55,
     distanceKm: 0.7,
-    priceAmount: 12,
+    priceAmount: Money(minorUnits: 1200, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5086,
     longitude: 27.3401,
@@ -323,7 +325,7 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'music_nightlife.live_music',
     durationMinutes: 75,
     distanceKm: 1.8,
-    priceAmount: 10,
+    priceAmount: Money(minorUnits: 1000, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5074,
     longitude: 27.3430,
@@ -337,7 +339,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'sport.tennis',
     durationMinutes: 60,
     distanceKm: 1.5,
-    priceAmount: 8,
+    priceAmount: Money(minorUnits: 800, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5134,
     longitude: 27.3290,
@@ -348,7 +350,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'outdoor_nature_walking.city_walk',
     durationMinutes: 35,
     distanceKm: 1.1,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5161,
     longitude: 27.3262,
@@ -359,7 +361,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'food_drinks.brunch',
     durationMinutes: 55,
     distanceKm: 0.8,
-    priceAmount: 14,
+    priceAmount: Money(minorUnits: 1400, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5118,
     longitude: 27.3360,

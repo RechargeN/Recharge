@@ -103,7 +103,7 @@ void main() {
       activeCity: 'Riga',
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.eventData!.format, EventFormat.online);
     expect(restored.eventData!.publicOnlineUrl, 'https://events.example/live');
     expect(restored.eventData!.unknownFields['futureEventField'], 42);

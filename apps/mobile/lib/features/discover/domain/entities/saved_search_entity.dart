@@ -30,6 +30,7 @@ class SavedSearchEntity {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required String defaultCurrencyCode,
   }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
@@ -51,6 +52,7 @@ class SavedSearchEntity {
         defaultMarketCityId: defaultMarketCityId,
         defaultCenterLat: defaultCenterLat,
         defaultCenterLng: defaultCenterLng,
+        defaultCurrencyCode: defaultCurrencyCode,
       ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()

@@ -7,6 +7,7 @@ import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -18,6 +19,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -892,6 +894,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currencyCode: 'EUR',
+    ),
   );
 }
 
@@ -903,7 +911,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -918,7 +926,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -959,7 +967,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,

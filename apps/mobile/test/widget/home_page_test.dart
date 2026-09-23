@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -16,6 +17,7 @@ import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/auth/presentation/pages/discover_hub_page.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -584,6 +586,12 @@ class _HomeTestApp extends StatelessWidget {
         ),
         discoverPreferencesRepository: _discoverPreferencesRepository,
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 56.9496,
+          originLng: 24.1052,
+          currencyCode: 'EUR',
+        ),
       );
 
   late final FavoritesController _favoritesController = FavoritesController(
@@ -772,7 +780,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -792,7 +800,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -807,7 +815,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 2.1,
         isFree: true,
         relevanceScore: 0.75,
@@ -901,7 +909,7 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
@@ -917,7 +925,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -932,7 +940,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

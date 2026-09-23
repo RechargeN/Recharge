@@ -8,6 +8,7 @@ import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -466,7 +467,7 @@ DiscoverItemEntity _detailsItem({
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,

@@ -4,6 +4,7 @@ import 'find_people_draft_data.dart';
 import 'place_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum CreateObjectType {
   event,
@@ -211,7 +212,7 @@ class CreateDraftEntity {
   final bool wheelchairAccessible;
 
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
 
@@ -266,10 +267,7 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
-        publisherRef: PublisherRef(
-          type: PublisherType.user,
-          id: organizerId,
-        ),
+        publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,
       findPeopleData: null,
@@ -395,7 +393,7 @@ class CreateDraftEntity {
     bool? petFriendly,
     bool? wheelchairAccessible,
     bool? isFree,
-    double? basePrice,
+    Money? basePrice,
     bool clearBasePrice = false,
     String? currency,
     String? pricingModel,

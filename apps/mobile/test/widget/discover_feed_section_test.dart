@@ -12,6 +12,7 @@ import 'package:recharge/features/discover/domain/repositories/discover_preferen
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
 import 'package:recharge/features/discover/presentation/widgets/discover_feed_section.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   testWidgets('renders feed cards in success state', (tester) async {
@@ -56,7 +57,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -75,7 +76,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
