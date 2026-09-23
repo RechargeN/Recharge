@@ -222,6 +222,42 @@
     {
       "schemaVersion": 1,
       "queryType": "getEventAvailability",
+      "requestId": "not-open",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "notOpen",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationOpensAt": "2026-08-28T12:00:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "closed",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "closed",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationClosesAt": "2026-08-26T12:00:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
       "requestId": "stale",
       "serverTime": "2026-08-27T12:00:00.000Z",
       "kind": "succeeded",

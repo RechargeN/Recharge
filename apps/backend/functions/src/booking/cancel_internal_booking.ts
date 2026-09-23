@@ -14,6 +14,10 @@ import {
   succeeded,
   type BookingResult,
 } from '../shared/failures.js';
+import {
+  classifyFirestoreFailure,
+  type FirestoreFailureLogger,
+} from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
 import type { BookingRecord } from './domain.js';
 import {
@@ -28,6 +32,7 @@ import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from '.
 export interface CancelBookingDependencies {
   readonly firestore: Firestore;
   readonly clock: ServerClock;
+  readonly failureLogger?: FirestoreFailureLogger;
 }
 
 export interface CancelBookingOutput {
@@ -201,7 +206,11 @@ export async function cancelInternalBooking(
   } catch (error) {
     if (error instanceof BookingRetryableFailure) return retryable(error.code);
     if (error instanceof BookingDomainRefusal) return rejected(error.code);
-    return retryable('contention');
+    return classifyFirestoreFailure(error, {
+      correlationId: command.requestId,
+      operationName: 'cancel_internal_booking',
+      ...(dependencies.failureLogger === undefined ? {} : { logger: dependencies.failureLogger }),
+    });
   }
 }
 

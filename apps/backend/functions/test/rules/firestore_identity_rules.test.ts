@@ -6,6 +6,7 @@ const identityCollections = [
   'identityAccounts',
   'identityProviderLinks',
   'identitySessions',
+  'identityAccessSnapshots',
   'identityCreatorVerifications',
   'identityManagedPages',
   'identityPageMemberships',

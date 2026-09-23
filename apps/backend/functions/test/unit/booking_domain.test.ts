@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { assertGuestPolicy, assertSupportedEvent } from '../../src/booking/domain.js';
+import {
+  assertBookingEventProjection,
+  assertGuestPolicy,
+  assertSupportedEvent,
+} from '../../src/booking/domain.js';
 import { allocateUnits, reconcileCapacity, releaseUnits } from '../../src/inventory/ledger.js';
 import { acquireFiniteSlot, releaseFiniteSlot } from '../../src/policy/concurrency.js';
 import { finiteEvent, fixedNow, unlimitedEvent } from '../support/booking_fixtures.js';
@@ -55,6 +59,22 @@ void test('enforces registration and guest policy fail closed', () => {
   assert.throws(
     () => assertGuestPolicy(finiteEvent(), 2, [{ displayName: 'Guest' }]),
     /unsupported_flow/u,
+  );
+});
+
+void test('availability projection validation does not apply registration-window admission', () => {
+  const future = finiteEvent({
+    registrationWindow: { opensAt: '2026-09-01T00:00:00.000Z' },
+  });
+  assert.equal(
+    assertBookingEventProjection(future, future.occurrenceId, future.poolId, future.channel)
+      .eventId,
+    future.eventId,
+  );
+  assert.throws(
+    () =>
+      assertSupportedEvent(future, fixedNow, future.occurrenceId, future.poolId, future.channel),
+    /registration_not_open/u,
   );
 });
 

@@ -20,6 +20,10 @@ import {
   unsupported,
   type BookingResult,
 } from '../shared/failures.js';
+import {
+  classifyFirestoreFailure,
+  type FirestoreFailureLogger,
+} from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
 import {
   assertGuestPolicy,
@@ -40,6 +44,7 @@ export interface CreateBookingDependencies {
   readonly firestore: Firestore;
   readonly clock: ServerClock;
   readonly newBookingId?: () => string;
+  readonly failureLogger?: FirestoreFailureLogger;
 }
 
 export interface CreateBookingOutput {
@@ -257,7 +262,11 @@ export async function createInternalBooking(
   } catch (error) {
     if (error instanceof BookingRetryableFailure) return retryable(error.code);
     if (error instanceof BookingDomainRefusal) return rejected(error.code);
-    return retryable('contention');
+    return classifyFirestoreFailure(error, {
+      correlationId: command.requestId,
+      operationName: 'create_internal_booking',
+      ...(dependencies.failureLogger === undefined ? {} : { logger: dependencies.failureLogger }),
+    });
   }
 }
 

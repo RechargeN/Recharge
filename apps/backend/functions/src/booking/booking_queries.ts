@@ -1,24 +1,39 @@
 import { FieldPath, type Firestore } from 'firebase-admin/firestore';
 import type { GetMyBookingQuery, ListMyBookingsQuery } from '../contracts/booking_v1.js';
-import { rejected, retryable, succeeded, type BookingResult } from '../shared/failures.js';
+import { rejected, succeeded, type BookingResult } from '../shared/failures.js';
+import {
+  classifyFirestoreFailure,
+  type FirestoreFailureLogger,
+} from '../shared/firestore_failure.js';
+import type { ServerClock } from '../shared/server_clock.js';
 import type { BookingRecord } from './domain.js';
 import { bookingCollections } from './transactions.js';
 
+export interface BookingQueryDependencies {
+  readonly firestore: Firestore;
+  readonly clock: ServerClock;
+  readonly failureLogger?: FirestoreFailureLogger;
+}
+
 export async function getMyBooking(
-  firestore: Firestore,
+  dependencies: BookingQueryDependencies,
   actorId: string,
   query: GetMyBookingQuery,
 ): Promise<BookingResult<Readonly<{ booking: BookingRecord }>>> {
   try {
-    const snapshot = await firestore
+    const snapshot = await dependencies.firestore
       .collection(bookingCollections.bookings)
       .doc(query.payload.bookingId)
       .get();
     const booking = snapshot.data() as BookingRecord | undefined;
     if (booking === undefined || booking.userId !== actorId) return rejected('permission_denied');
     return succeeded({ booking });
-  } catch {
-    return retryable('temporarily_unavailable');
+  } catch (error) {
+    return classifyFirestoreFailure(error, {
+      correlationId: query.requestId,
+      operationName: 'get_my_booking',
+      ...(dependencies.failureLogger === undefined ? {} : { logger: dependencies.failureLogger }),
+    });
   }
 }
 
@@ -31,13 +46,13 @@ export interface BookingPage {
 }
 
 export async function listMyBookings(
-  firestore: Firestore,
+  dependencies: BookingQueryDependencies,
   actorId: string,
   query: ListMyBookingsQuery,
 ): Promise<BookingResult<BookingPage>> {
   try {
     const size = query.payload.pageSize ?? 20;
-    let builder = firestore
+    let builder = dependencies.firestore
       .collection(bookingCollections.bookings)
       .where('userId', '==', actorId)
       .orderBy('createdAt', 'desc')
@@ -57,15 +72,19 @@ export async function listMyBookings(
     const last = page.at(-1);
     return succeeded({
       items,
-      asOf: new Date().toISOString(),
+      asOf: dependencies.clock.now().toISOString(),
       sort: 'createdAtDescIdDesc',
       consistency: 'liveKeyset',
       ...(hasMore && last !== undefined
         ? { nextCursor: encodeCursor(String(last.get('createdAt')), last.id) }
         : {}),
     });
-  } catch {
-    return retryable('temporarily_unavailable');
+  } catch (error) {
+    return classifyFirestoreFailure(error, {
+      correlationId: query.requestId,
+      operationName: 'list_my_bookings',
+      ...(dependencies.failureLogger === undefined ? {} : { logger: dependencies.failureLogger }),
+    });
   }
 }
 

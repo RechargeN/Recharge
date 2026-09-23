@@ -73,6 +73,15 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       retentionPolicyId: 'identity.session',
     },
     {
+      dataClassId: 'identity.access-snapshot',
+      classification: 'restricted',
+      containsDirectIdentifiers: true,
+      containsSecrets: false,
+      exportEligible: true,
+      deletionEligible: true,
+      retentionPolicyId: 'identity.access-snapshot',
+    },
+    {
       dataClassId: 'identity.creator-verification',
       classification: 'sensitive',
       containsDirectIdentifiers: true,
@@ -117,6 +126,33 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       deletionEligible: false,
       retentionPolicyId: 'security.audit',
     },
+    {
+      dataClassId: 'booking.idempotency',
+      classification: 'restricted',
+      containsDirectIdentifiers: true,
+      containsSecrets: false,
+      exportEligible: false,
+      deletionEligible: true,
+      retentionPolicyId: 'booking.idempotency.retry-window',
+    },
+    {
+      dataClassId: 'booking.outbox',
+      classification: 'restricted',
+      containsDirectIdentifiers: true,
+      containsSecrets: false,
+      exportEligible: false,
+      deletionEligible: true,
+      retentionPolicyId: 'booking.outbox.delivery-reconciliation',
+    },
+    {
+      dataClassId: 'booking.audit',
+      classification: 'restricted',
+      containsDirectIdentifiers: true,
+      containsSecrets: false,
+      exportEligible: false,
+      deletionEligible: false,
+      retentionPolicyId: 'booking.audit.legal-security',
+    },
   ]);
   const retention = new RetentionRegistry([
     { policyId: 'privacy.request', status: 'unresolved', legalHoldSupported: true },
@@ -126,12 +162,32 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
     { policyId: 'identity.provider-link', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.session', status: 'unresolved', legalHoldSupported: true },
     {
+      policyId: 'identity.access-snapshot',
+      status: 'unresolved',
+      legalHoldSupported: true,
+    },
+    {
       policyId: 'identity.creator-verification',
       status: 'unresolved',
       legalHoldSupported: true,
     },
     { policyId: 'identity.managed-page', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.page-membership', status: 'unresolved', legalHoldSupported: true },
+    {
+      policyId: 'booking.idempotency.retry-window',
+      status: 'unresolved',
+      legalHoldSupported: true,
+    },
+    {
+      policyId: 'booking.outbox.delivery-reconciliation',
+      status: 'unresolved',
+      legalHoldSupported: true,
+    },
+    {
+      policyId: 'booking.audit.legal-security',
+      status: 'unresolved',
+      legalHoldSupported: true,
+    },
   ]);
 
   return Object.freeze({

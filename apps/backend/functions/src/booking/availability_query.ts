@@ -4,54 +4,93 @@ import { type PoolLedger } from '../inventory/ledger.js';
 import {
   BookingDomainRefusal,
   rejected,
-  retryable,
   succeeded,
   type BookingResult,
 } from '../shared/failures.js';
+import {
+  classifyFirestoreFailure,
+  type FirestoreFailureLogger,
+} from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
-import { assertSupportedEvent } from './domain.js';
+import { assertBookingEventProjection } from './domain.js';
 import { bookingCollections, finitePoolLedgerId } from './transactions.js';
 
 export interface EventAvailability {
   readonly eventId: string;
   readonly occurrenceId: string;
-  readonly capacityMode: 'finite' | 'unlimited';
+  readonly capacityMode: 'finite' | 'unlimited' | 'notApplicable';
   readonly channel?: 'onsite' | 'online' | 'any';
   readonly asOf: string;
   readonly eventRevision: number;
-  readonly status: 'available' | 'limited' | 'soldOut';
+  readonly status: 'notOpen' | 'available' | 'limited' | 'soldOut' | 'closed';
   readonly authority: 'authoritative';
   readonly ledgerRevision?: number;
   readonly availableUnits?: number;
+  readonly registrationOpensAt?: string;
+  readonly registrationClosesAt?: string;
 }
 
 export async function getEventAvailability(
   firestore: Firestore,
   clock: ServerClock,
   query: GetEventAvailabilityQuery,
+  failureLogger?: FirestoreFailureLogger,
 ): Promise<BookingResult<EventAvailability>> {
   try {
+    const now = clock.now();
+    const nowIso = now.toISOString();
     const eventSnapshot = await firestore
       .collection(bookingCollections.eventProjections)
       .doc(query.payload.occurrenceId)
       .get();
     const raw = eventSnapshot.data();
     const rawPoolId = typeof raw?.poolId === 'string' ? raw.poolId : undefined;
-    const event = assertSupportedEvent(
+    const event = assertBookingEventProjection(
       raw,
-      clock.now(),
       query.payload.occurrenceId,
       rawPoolId,
       query.payload.channel,
     );
     if (event.eventId !== query.payload.eventId) return rejected('event_unavailable');
+    if (
+      event.registrationWindow.opensAt !== undefined &&
+      now < new Date(event.registrationWindow.opensAt)
+    ) {
+      return succeeded({
+        eventId: event.eventId,
+        occurrenceId: event.occurrenceId,
+        capacityMode: 'notApplicable',
+        ...(event.channel === undefined ? {} : { channel: event.channel }),
+        asOf: nowIso,
+        eventRevision: event.materialRevision,
+        status: 'notOpen',
+        authority: 'authoritative',
+        registrationOpensAt: event.registrationWindow.opensAt,
+      });
+    }
+    if (
+      event.registrationWindow.closesAt !== undefined &&
+      now >= new Date(event.registrationWindow.closesAt)
+    ) {
+      return succeeded({
+        eventId: event.eventId,
+        occurrenceId: event.occurrenceId,
+        capacityMode: 'notApplicable',
+        ...(event.channel === undefined ? {} : { channel: event.channel }),
+        asOf: nowIso,
+        eventRevision: event.materialRevision,
+        status: 'closed',
+        authority: 'authoritative',
+        registrationClosesAt: event.registrationWindow.closesAt,
+      });
+    }
     if (event.capacityMode === 'unlimited') {
       return succeeded({
         eventId: event.eventId,
         occurrenceId: event.occurrenceId,
         capacityMode: 'unlimited',
         ...(event.channel === undefined ? {} : { channel: event.channel }),
-        asOf: clock.now().toISOString(),
+        asOf: nowIso,
         eventRevision: event.materialRevision,
         status: 'available',
         authority: 'authoritative',
@@ -77,7 +116,7 @@ export async function getEventAvailability(
       occurrenceId: event.occurrenceId,
       capacityMode: 'finite',
       channel: event.channel,
-      asOf: clock.now().toISOString(),
+      asOf: nowIso,
       eventRevision: event.materialRevision,
       status:
         availableUnits === 0
@@ -91,6 +130,10 @@ export async function getEventAvailability(
     });
   } catch (error) {
     if (error instanceof BookingDomainRefusal) return rejected(error.code);
-    return retryable('temporarily_unavailable');
+    return classifyFirestoreFailure(error, {
+      correlationId: query.requestId,
+      operationName: 'get_event_availability',
+      ...(failureLogger === undefined ? {} : { logger: failureLogger }),
+    });
   }
 }

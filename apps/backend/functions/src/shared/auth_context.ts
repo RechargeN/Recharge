@@ -5,22 +5,34 @@ export interface CallableAuthLike {
 
 export interface BookingActor {
   readonly actorId: string;
+  readonly sessionId: string;
+  readonly accessSnapshotRevision: number;
 }
 
 export type ActorResolution =
   | Readonly<{ ok: true; actor: BookingActor }>
   | Readonly<{ ok: false; code: 'unauthenticated' | 'permission_denied' }>;
 
-const requiredCapability = 'booking.self_service';
-
 export function resolveBookingActor(auth: CallableAuthLike | undefined): ActorResolution {
   if (auth === undefined || auth.uid.length < 1) return { ok: false, code: 'unauthenticated' };
-  if (auth.token.accountState !== 'active') return { ok: false, code: 'permission_denied' };
-  const capabilities = auth.token.capabilities;
-  if (!Array.isArray(capabilities) || !capabilities.includes(requiredCapability)) {
+  const sessionId = auth.token.sessionId;
+  const accessSnapshotRevision = auth.token.accessSnapshotRevision;
+  if (
+    typeof sessionId !== 'string' ||
+    !/^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(sessionId) ||
+    !Number.isSafeInteger(accessSnapshotRevision) ||
+    Number(accessSnapshotRevision) < 1
+  ) {
     return { ok: false, code: 'permission_denied' };
   }
-  return { ok: true, actor: { actorId: auth.uid } };
+  return {
+    ok: true,
+    actor: {
+      actorId: auth.uid,
+      sessionId,
+      accessSnapshotRevision: Number(accessSnapshotRevision),
+    },
+  };
 }
 
 export function isEmulatorAppCheckAllowed(

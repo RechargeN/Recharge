@@ -4,6 +4,7 @@ import { cancelInternalBooking } from '../../src/booking/cancel_internal_booking
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
 import { logicalMutationId, requestAttemptId } from '../../src/booking/idempotency.js';
 import { bookingCollections } from '../../src/booking/transactions.js';
+import { finitePoolLedgerId } from '../../src/booking/transactions.js';
 import {
   computeBookingSemanticHash,
   type CancelBookingCommand,
@@ -112,6 +113,150 @@ void test('wrong owner cannot infer or cancel the booking', async () => {
     kind: 'rejected',
     code: 'permission_denied',
   });
+});
+
+void test('cancel uses immutable Booking facts after event lifecycle and inventory changes', async () => {
+  const scenarios = [
+    {
+      name: 'registration_closed',
+      mutate: (event: ReturnType<typeof finiteEvent>) => ({
+        ...event,
+        registrationWindow: { closesAt: '2026-08-29T11:59:59.000Z' },
+      }),
+    },
+    {
+      name: 'booking_disabled',
+      mutate: (event: ReturnType<typeof finiteEvent>) => ({ ...event, bookingEnabled: false }),
+    },
+    {
+      name: 'event_unpublished',
+      mutate: (event: ReturnType<typeof finiteEvent>) => ({ ...event, lifecycle: 'draft' }),
+    },
+    {
+      name: 'pool_channel_changed',
+      mutate: (event: ReturnType<typeof finiteEvent>) => ({
+        ...event,
+        poolId: 'pool_replacement',
+        channel: 'online',
+      }),
+    },
+  ] as const;
+
+  for (const [index, scenario] of scenarios.entries()) {
+    await cleanupBookingEmulator(firestore);
+    const occurrenceId = `occ_cancel_${scenario.name}`;
+    const event = finiteEvent({ occurrenceId });
+    await seedEvent(event, firestore);
+    const actorId = `actor_${scenario.name}`;
+    const bookingId = `booking_cancel_${scenario.name}`;
+    const createResult = await createInternalBooking(
+      { firestore, clock, newBookingId: () => bookingId },
+      actorId,
+      createCommand({
+        requestId: `req_create_${index}`,
+        idempotencyKey: `idem_create_${index}`,
+        payload: {
+          occurrenceId,
+          inventoryPoolId: 'pool_general',
+          channel: 'onsite',
+          participantUnits: 1,
+          namedGuests: [],
+        },
+      }),
+    );
+    assert.equal(createResult.kind, 'succeeded', scenario.name);
+    await firestore
+      .collection(bookingCollections.eventProjections)
+      .doc(occurrenceId)
+      .set(scenario.mutate(event));
+
+    const cancelResult = await cancelInternalBooking({ firestore, clock }, actorId, {
+      schemaVersion: 1,
+      commandType: 'cancelBooking',
+      requestId: `req_cancel_${index}`,
+      idempotencyKey: `idem_cancel_${index}`,
+      expectedBookingRevision: 1,
+      payload: { bookingId },
+    });
+    assert.equal(cancelResult.kind, 'succeeded', scenario.name);
+    assert.equal(
+      (
+        await firestore
+          .collection(bookingCollections.poolLedgers)
+          .doc(finitePoolLedgerId(occurrenceId, 'pool_general', 'onsite'))
+          .get()
+      ).get('confirmedUnits'),
+      0,
+      scenario.name,
+    );
+    assert.equal(
+      (await firestore.collection(bookingCollections.userUsage).doc(actorId).get()).get(
+        'activeFiniteBookings',
+      ),
+      0,
+      scenario.name,
+    );
+  }
+});
+
+void test('cancel rejects a stale expected Booking revision without releasing inventory', async () => {
+  await cleanupBookingEmulator(firestore);
+  await seedEvent(finiteEvent(), firestore);
+  const bookingId = '01JRAWCSTALECANCEL00000000';
+  await createInternalBooking(
+    { firestore, clock, newBookingId: () => bookingId },
+    'actor-stale-cancel',
+    createCommand({ requestId: 'req_stale_seed', idempotencyKey: 'idem_stale_seed' }),
+  );
+  const result = await cancelInternalBooking({ firestore, clock }, 'actor-stale-cancel', {
+    schemaVersion: 1,
+    commandType: 'cancelBooking',
+    requestId: 'req_stale_cancel',
+    idempotencyKey: 'idem_stale_cancel',
+    expectedBookingRevision: 2,
+    payload: { bookingId },
+  });
+  assert.deepEqual(result, { kind: 'rejected', code: 'revision_conflict' });
+  assert.equal(
+    (
+      await firestore
+        .collection(bookingCollections.poolLedgers)
+        .doc(finitePoolLedgerId(finiteEvent().occurrenceId, 'pool_general', 'onsite'))
+        .get()
+    ).get('confirmedUnits'),
+    1,
+  );
+});
+
+void test('cancel releases the original ledger after capacity decreases below confirmed units', async () => {
+  await cleanupBookingEmulator(firestore);
+  const event = finiteEvent({ totalCapacity: 1 });
+  await seedEvent(event, firestore);
+  const bookingId = '01JRAWCCAPACITYCANCEL000000';
+  await createInternalBooking(
+    { firestore, clock, newBookingId: () => bookingId },
+    'actor-capacity-cancel',
+    createCommand({ requestId: 'req_capacity_seed', idempotencyKey: 'idem_capacity_seed' }),
+  );
+  await seedEvent({ ...event, totalCapacity: 0 }, firestore);
+  const result = await cancelInternalBooking({ firestore, clock }, 'actor-capacity-cancel', {
+    schemaVersion: 1,
+    commandType: 'cancelBooking',
+    requestId: 'req_capacity_cancel',
+    idempotencyKey: 'idem_capacity_cancel',
+    expectedBookingRevision: 1,
+    payload: { bookingId },
+  });
+  assert.equal(result.kind, 'succeeded');
+  assert.equal(
+    (
+      await firestore
+        .collection(bookingCollections.poolLedgers)
+        .doc(finitePoolLedgerId(event.occurrenceId, 'pool_general', 'onsite'))
+        .get()
+    ).get('confirmedUnits'),
+    0,
+  );
 });
 
 void test('cancellation deadline uses immutable Booking snapshot', async () => {

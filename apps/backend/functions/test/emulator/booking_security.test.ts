@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { exactBookingCollectionNames } from '../../src/booking/transactions.js';
+import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
 import {
   cleanupBookingEmulator,
   callBookingFunction,
@@ -168,6 +169,58 @@ void test('test-only flags enable exactly the real callable path in disposable e
   assert.equal(
     registry.validator('booking_availability.schema.json')(availability.body.result),
     true,
+  );
+});
+
+void test('server authority immediately rejects revoked sessions and stale capability snapshots', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setBookingFlags(true, firestore);
+  const event = finiteEvent({
+    registrationWindow: {
+      opensAt: '2020-01-01T00:00:00.000Z',
+      closesAt: '2099-01-01T00:00:00.000Z',
+    },
+  });
+  await seedEvent(event, firestore);
+  const uid = 'revoked-actor';
+  const sessionId = `session-${uid}`;
+  const token = await createAuthorizedActor(uid);
+  const sessionRef = firestore.collection(bookingIdentityCollections.sessions).doc(sessionId);
+  await sessionRef.update({ status: 'revoked', revision: 2 });
+  const revoked = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_revoked', idempotencyKey: 'idem_revoked' }),
+    token,
+  );
+  assert.equal(
+    ((revoked.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
+    'not_authorized',
+  );
+
+  await sessionRef.update({ status: 'active' });
+  const stale = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_stale_access', idempotencyKey: 'idem_stale_access' }),
+    token,
+  );
+  assert.equal(
+    ((stale.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
+    'not_authorized',
+  );
+
+  await firestore
+    .collection(bookingIdentityCollections.accessSnapshots)
+    .doc(sessionId)
+    .update({ sessionRevision: 2, capabilityIds: [] });
+  const deniedCapability = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_capability_denied', idempotencyKey: 'idem_capability_denied' }),
+    token,
+  );
+  assert.equal(
+    ((deniedCapability.body.result as Record<string, unknown>).error as Record<string, unknown>)
+      .code,
+    'not_authorized',
   );
 });
 

@@ -1,5 +1,6 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { error as logError } from 'firebase-functions/logger';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
 import {
   inspectBookingCommand,
@@ -12,6 +13,7 @@ import { getEventAvailability } from './booking/availability_query.js';
 import { getMyBooking, listMyBookings } from './booking/booking_queries.js';
 import { cancelInternalBooking } from './booking/cancel_internal_booking.js';
 import { createInternalBooking } from './booking/create_internal_booking.js';
+import { FirestoreBookingAccessAuthority } from './booking/firestore_booking_access_authority.js';
 import { isEmulatorAppCheckAllowed, resolveBookingActor } from './shared/auth_context.js';
 import {
   bookingFlagIds,
@@ -26,6 +28,8 @@ import {
   type BookingResult,
 } from './shared/failures.js';
 import { systemServerClock } from './shared/server_clock.js';
+import type { FirestoreFailureLogRecord } from './shared/firestore_failure.js';
+import { classifyFirestoreFailure } from './shared/firestore_failure.js';
 
 // Preserve the non-product R0 probe while RAW-C adds exactly five Booking exports.
 // R1 platform composition is internal-only and intentionally has no transport export.
@@ -38,12 +42,22 @@ const callableOptions = Object.freeze({
   cors: false,
 });
 
+const bookingFailureLogger = Object.freeze({
+  error(record: FirestoreFailureLogRecord): void {
+    logError(record.eventName, record);
+  },
+});
+
 export const createInternalBookingV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareCommand(request, bookingFlagIds.create, 'createBooking');
   const result = !prepared.ok
     ? prepared.result
     : await createInternalBooking(
-        { firestore: prepared.firestore, clock: systemServerClock },
+        {
+          firestore: prepared.firestore,
+          clock: systemServerClock,
+          failureLogger: bookingFailureLogger,
+        },
         prepared.actorId,
         prepared.command,
       );
@@ -59,7 +73,11 @@ export const cancelInternalBookingV1 = onCall<unknown>(callableOptions, async (r
   const result = !prepared.ok
     ? prepared.result
     : await cancelInternalBooking(
-        { firestore: prepared.firestore, clock: systemServerClock },
+        {
+          firestore: prepared.firestore,
+          clock: systemServerClock,
+          failureLogger: bookingFailureLogger,
+        },
         prepared.actorId,
         prepared.command,
       );
@@ -74,7 +92,15 @@ export const getMyBookingV1 = onCall<unknown>(callableOptions, async (request) =
   const prepared = await prepareQuery(request, bookingFlagIds.read, 'getMyBooking');
   const result = !prepared.ok
     ? prepared.result
-    : await getMyBooking(prepared.firestore, prepared.actorId, prepared.query);
+    : await getMyBooking(
+        {
+          firestore: prepared.firestore,
+          clock: systemServerClock,
+          failureLogger: bookingFailureLogger,
+        },
+        prepared.actorId,
+        prepared.query,
+      );
   return toBookingQueryWireResult('getMyBooking', prepared.requestId, result);
 });
 
@@ -82,7 +108,15 @@ export const listMyBookingsV1 = onCall<unknown>(callableOptions, async (request)
   const prepared = await prepareQuery(request, bookingFlagIds.read, 'listMyBookings');
   const result = !prepared.ok
     ? prepared.result
-    : await listMyBookings(prepared.firestore, prepared.actorId, prepared.query);
+    : await listMyBookings(
+        {
+          firestore: prepared.firestore,
+          clock: systemServerClock,
+          failureLogger: bookingFailureLogger,
+        },
+        prepared.actorId,
+        prepared.query,
+      );
   return toBookingQueryWireResult('listMyBookings', prepared.requestId, result);
 });
 
@@ -90,7 +124,12 @@ export const getEventAvailabilityV1 = onCall<unknown>(callableOptions, async (re
   const prepared = await prepareQuery(request, bookingFlagIds.read, 'getEventAvailability');
   const result = !prepared.ok
     ? prepared.result
-    : await getEventAvailability(prepared.firestore, systemServerClock, prepared.query);
+    : await getEventAvailability(
+        prepared.firestore,
+        systemServerClock,
+        prepared.query,
+        bookingFailureLogger,
+      );
   return toBookingQueryWireResult('getEventAvailability', prepared.requestId, result);
 });
 
@@ -100,7 +139,7 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
   commandType: T,
 ) {
   const hint = bookingTransportHint(request.data);
-  const access = await prepareAccess(request, flagId);
+  const access = await prepareAccess(request, flagId, hint.requestId);
   if (!access.ok) return { ...access, requestId: hint.requestId };
   const inspected = inspectBookingCommand(request.rawRequest.rawBody, request.data);
   if (!inspected.ok) {
@@ -132,7 +171,7 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
   queryType: T,
 ) {
   const hint = bookingTransportHint(request.data);
-  const access = await prepareAccess(request, flagId);
+  const access = await prepareAccess(request, flagId, hint.requestId);
   if (!access.ok) return { ...access, requestId: hint.requestId };
   const inspected = inspectBookingQuery(request.rawRequest.rawBody, request.data);
   if (!inspected.ok) {
@@ -158,15 +197,40 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
   };
 }
 
-async function prepareAccess(request: CallableRequest<unknown>, flagId: BookingFlagId) {
+async function prepareAccess(
+  request: CallableRequest<unknown>,
+  flagId: BookingFlagId,
+  correlationId: string,
+) {
   const actor = resolveBookingActor(request.auth);
   if (!actor.ok) return { ok: false as const, result: rejected(actor.code) };
   if (!isEmulatorAppCheckAllowed(request.app)) {
     return { ok: false as const, result: rejected('feature_disabled') };
   }
   const firestore = emulatorFirestore();
-  if (firestore === undefined || !(await isBookingFlagEnabled(firestore, undefined, flagId))) {
+  if (firestore === undefined) {
     return { ok: false as const, result: rejected('feature_disabled') };
+  }
+  try {
+    const decision = await new FirestoreBookingAccessAuthority(firestore).authorize(
+      actor.actor,
+      systemServerClock.now(),
+    );
+    if (!decision.allowed) {
+      return { ok: false as const, result: rejected('permission_denied') };
+    }
+    if (!(await isBookingFlagEnabled(firestore, undefined, flagId))) {
+      return { ok: false as const, result: rejected('feature_disabled') };
+    }
+  } catch (error) {
+    return {
+      ok: false as const,
+      result: classifyFirestoreFailure(error, {
+        correlationId,
+        operationName: 'booking_access_authority',
+        logger: bookingFailureLogger,
+      }),
+    };
   }
   return { ok: true as const, actorId: actor.actor.actorId, firestore };
 }

@@ -5,6 +5,9 @@ import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { bookingCollections, exactBookingCollectionNames } from '../../src/booking/transactions.js';
 import { bookingFlagIds } from '../../src/shared/feature_flags.js';
 import type { BookingEventProjection } from '../../src/booking/domain.js';
+import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
+
+const bookingAccessCollectionNames = Object.freeze(Object.values(bookingIdentityCollections));
 
 export function emulatorFirestore(): Firestore {
   assert.equal(process.env.GCLOUD_PROJECT, 'demo-recharge');
@@ -15,7 +18,7 @@ export function emulatorFirestore(): Firestore {
 }
 
 export async function cleanupBookingEmulator(firestore = emulatorFirestore()): Promise<void> {
-  for (const collectionName of exactBookingCollectionNames) {
+  for (const collectionName of [...exactBookingCollectionNames, ...bookingAccessCollectionNames]) {
     while (true) {
       const snapshot = await firestore.collection(collectionName).limit(200).get();
       if (snapshot.empty) break;
@@ -69,6 +72,42 @@ export async function createAuthorizedActor(
     capabilities: ['booking.self_service'],
   },
 ): Promise<string> {
+  const firestore = emulatorFirestore();
+  const sessionId = `session-${uid}`;
+  const accessSnapshotRevision = 1;
+  const accountActive = claims.accountState === undefined || claims.accountState === 'active';
+  const capabilityIds = Array.isArray(claims.capabilities)
+    ? claims.capabilities.filter((value): value is string => typeof value === 'string')
+    : ['booking.self_service'];
+  const batch = firestore.batch();
+  batch.set(firestore.collection(bookingIdentityCollections.accounts).doc(uid), {
+    schemaVersion: 1,
+    userId: uid,
+    status: accountActive ? 'active' : 'blocked',
+    revision: 1,
+    revokeAllBeforeUtc: '2025-01-01T00:00:00.000Z',
+  });
+  batch.set(firestore.collection(bookingIdentityCollections.sessions).doc(sessionId), {
+    schemaVersion: 1,
+    sessionId,
+    userId: uid,
+    status: 'active',
+    revision: 1,
+    authzRevision: 1,
+    issuedAtUtc: '2026-01-01T00:00:00.000Z',
+  });
+  batch.set(firestore.collection(bookingIdentityCollections.accessSnapshots).doc(sessionId), {
+    schemaVersion: 1,
+    revision: accessSnapshotRevision,
+    userId: uid,
+    sessionId,
+    accountRevision: 1,
+    sessionRevision: 1,
+    authzRevision: 1,
+    capabilityIds,
+    expiresAtUtc: '2099-01-01T00:00:00.000Z',
+  });
+  await batch.commit();
   const auth = getAuth();
   const email = `${uid}@example.invalid`;
   const password = 'emulator-only-password-123';
@@ -77,7 +116,7 @@ export async function createAuthorizedActor(
   } catch (error) {
     if (!String(error).includes('uid-already-exists')) throw error;
   }
-  await auth.setCustomUserClaims(uid, claims);
+  await auth.setCustomUserClaims(uid, { ...claims, sessionId, accessSnapshotRevision });
   const host = process.env.FIREBASE_AUTH_EMULATOR_HOST;
   assert.match(host ?? '', /^(127\.0\.0\.1|localhost):\d+$/u);
   const response = await fetch(

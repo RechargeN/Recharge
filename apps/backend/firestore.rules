@@ -23,6 +23,7 @@ service cloud.firestore {
     match /identityAccounts/{document} { allow read, write: if false; }
     match /identityProviderLinks/{document} { allow read, write: if false; }
     match /identitySessions/{document} { allow read, write: if false; }
+    match /identityAccessSnapshots/{document} { allow read, write: if false; }
     match /identityCreatorVerifications/{document} { allow read, write: if false; }
     match /identityManagedPages/{document} { allow read, write: if false; }
     match /identityPageMemberships/{document} { allow read, write: if false; }

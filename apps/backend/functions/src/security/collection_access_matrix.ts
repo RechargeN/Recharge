@@ -85,6 +85,7 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
     ['identityAccounts', 'identity.account'],
     ['identityProviderLinks', 'identity.provider-link'],
     ['identitySessions', 'identity.session'],
+    ['identityAccessSnapshots', 'identity.access-snapshot'],
     ['identityCreatorVerifications', 'identity.creator-verification'],
     ['identityManagedPages', 'identity.managed-page'],
     ['identityPageMemberships', 'identity.page-membership'],

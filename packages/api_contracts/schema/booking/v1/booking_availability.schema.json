@@ -98,6 +98,7 @@
         "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
         "status": {
           "enum": [
+            "notOpen",
             "available",
             "limited",
             "soldOut",
@@ -115,6 +116,12 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "registrationOpensAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
+        "registrationClosesAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
         "reasonCode": {
           "enum": [
             "source_stale",
@@ -128,6 +135,7 @@
     },
     "availability": {
       "oneOf": [
+        { "$ref": "#/$defs/notOpen" },
         { "$ref": "#/$defs/finiteAvailable" },
         { "$ref": "#/$defs/finiteLimited" },
         { "$ref": "#/$defs/finiteSoldOut" },
@@ -140,6 +148,7 @@
         { "$ref": "#/$defs/unsupportedChannel" }
       ]
     },
+    "notOpen": { "$ref": "#/$defs/notOpenShape" },
     "finiteAvailable": { "$ref": "#/$defs/finiteAvailableShape" },
     "finiteLimited": { "$ref": "#/$defs/finiteLimitedShape" },
     "finiteSoldOut": { "$ref": "#/$defs/finiteSoldOutShape" },
@@ -150,6 +159,33 @@
     "unknownTemporary": { "$ref": "#/$defs/unknownTemporaryShape" },
     "unsupportedFlow": { "$ref": "#/$defs/unsupportedFlowShape" },
     "unsupportedChannel": { "$ref": "#/$defs/unsupportedChannelShape" },
+    "notOpenShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "common.schema.json#/$defs/id" },
+        "occurrenceId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "asOf": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "status": { "const": "notOpen" },
+        "authority": { "const": "authoritative" },
+        "capacityMode": { "const": "notApplicable" },
+        "registrationOpensAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        }
+      },
+      "required": [
+        "eventId",
+        "occurrenceId",
+        "asOf",
+        "eventRevision",
+        "status",
+        "authority",
+        "capacityMode",
+        "registrationOpensAt"
+      ]
+    },
     "finiteAvailableShape": {
       "type": "object",
       "additionalProperties": false,
@@ -273,7 +309,10 @@
         "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
         "status": { "const": "closed" },
         "authority": { "const": "authoritative" },
-        "capacityMode": { "const": "notApplicable" }
+        "capacityMode": { "const": "notApplicable" },
+        "registrationClosesAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        }
       },
       "required": [
         "eventId",
@@ -282,7 +321,8 @@
         "eventRevision",
         "status",
         "authority",
-        "capacityMode"
+        "capacityMode",
+        "registrationClosesAt"
       ]
     },
     "staleShape": {

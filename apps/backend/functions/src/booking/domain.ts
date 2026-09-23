@@ -59,6 +59,28 @@ export function assertSupportedEvent(
   poolId: string | undefined,
   channel: Channel | undefined,
 ): BookingEventProjection {
+  const event = assertBookingEventProjection(value, occurrenceId, poolId, channel);
+  if (
+    typeof event.registrationWindow.opensAt === 'string' &&
+    now < parseInstant(event.registrationWindow.opensAt)
+  ) {
+    throw new BookingDomainRefusal('registration_not_open');
+  }
+  if (
+    typeof event.registrationWindow.closesAt === 'string' &&
+    now >= parseInstant(event.registrationWindow.closesAt)
+  ) {
+    throw new BookingDomainRefusal('registration_closed');
+  }
+  return event;
+}
+
+export function assertBookingEventProjection(
+  value: unknown,
+  occurrenceId: string,
+  poolId: string | undefined,
+  channel: Channel | undefined,
+): BookingEventProjection {
   if (!isRecord(value)) throw new BookingDomainRefusal('event_unavailable');
   if (
     value.schemaVersion !== 1 ||
@@ -90,18 +112,9 @@ export function assertSupportedEvent(
   if (value.poolId !== poolId || value.channel !== channel) {
     throw new BookingDomainRefusal('event_unavailable');
   }
-  if (
-    typeof value.registrationWindow.opensAt === 'string' &&
-    now < parseInstant(value.registrationWindow.opensAt)
-  ) {
-    throw new BookingDomainRefusal('registration_not_open');
-  }
-  if (
-    typeof value.registrationWindow.closesAt === 'string' &&
-    now >= parseInstant(value.registrationWindow.closesAt)
-  ) {
-    throw new BookingDomainRefusal('registration_closed');
-  }
+  assertOptionalInstant(value.registrationWindow.opensAt);
+  assertOptionalInstant(value.registrationWindow.closesAt);
+  assertOptionalInstant(value.cancellationDeadline);
   return value as unknown as BookingEventProjection;
 }
 
@@ -127,6 +140,12 @@ function parseInstant(value: string): Date {
   const instant = new Date(value);
   if (!Number.isFinite(instant.getTime())) throw new BookingDomainRefusal('event_unavailable');
   return instant;
+}
+
+function assertOptionalInstant(value: unknown): void {
+  if (value === undefined) return;
+  if (typeof value !== 'string') throw new BookingDomainRefusal('event_unavailable');
+  parseInstant(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

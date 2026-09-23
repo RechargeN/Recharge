@@ -13,6 +13,7 @@ const collections = [
   'identityAccounts',
   'identityProviderLinks',
   'identitySessions',
+  'identityAccessSnapshots',
   'identityCreatorVerifications',
   'identityManagedPages',
   'identityPageMemberships',
