@@ -1,0 +1,23 @@
+{
+  "account": {
+    "schemaVersion": 2,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "active",
+    "systemRoles": ["User"],
+    "revision": 1,
+    "securityRevision": 1,
+    "revokeAllBeforeUtc": "2026-09-22T00:00:00.000Z",
+    "createdAtUtc": "2026-09-22T00:00:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:00:00.000Z"
+  },
+  "session": {
+    "schemaVersion": 1,
+    "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "futureState",
+    "revision": 1,
+    "authzRevision": 1,
+    "issuedAtUtc": "2026-09-22T00:00:01.000Z",
+    "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
+  }
+}

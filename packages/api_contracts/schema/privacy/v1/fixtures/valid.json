@@ -1,0 +1,40 @@
+{
+  "privacyRequest": {
+    "schemaVersion": 1,
+    "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "subjectId": "01BX5ZZKBKACTAV9WEVGEMMVRZ",
+    "requestType": "erasure",
+    "status": "submitted",
+    "revision": 1,
+    "idempotencyKey": "privacy-001",
+    "semanticHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "requiredDomainIds": ["identity", "booking"],
+    "createdAtUtc": "2026-09-22T10:00:00.000Z",
+    "updatedAtUtc": "2026-09-22T10:00:00.000Z",
+    "terminalEvidenceIds": []
+  },
+  "privacyRequestStatus": {
+    "schemaVersion": 1,
+    "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "status": "dispatched",
+    "revision": 3,
+    "requiredTaskCount": 2,
+    "completedTaskCount": 0,
+    "failedTaskCount": 0,
+    "updatedAtUtc": "2026-09-22T10:02:00.000Z"
+  },
+  "privacyDomainTask": {
+    "schemaVersion": 1,
+    "taskId": "01BX5ZZKBKACTAV9WEVGEMMVS0",
+    "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "subjectId": "01BX5ZZKBKACTAV9WEVGEMMVRZ",
+    "domainId": "identity",
+    "marketId": null,
+    "targetRevision": 1,
+    "status": "pending",
+    "revision": 1,
+    "attempts": 0,
+    "evidenceId": null,
+    "updatedAtUtc": "2026-09-22T10:02:00.000Z"
+  }
+}

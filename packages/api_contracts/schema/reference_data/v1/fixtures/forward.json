@@ -1,0 +1,14 @@
+{
+  "localizedText": {
+    "schemaVersion": 2,
+    "defaultLocale": "lv-LV",
+    "values": { "lv-LV": "Nosaukums" }
+  },
+  "marketConfigRevision": {
+    "schemaVersion": 2,
+    "revisionId": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+  },
+  "mandatoryCopyReference": { "schemaVersion": 2 },
+  "sourceRecord": { "schemaVersion": 2 },
+  "activationPointer": { "schemaVersion": 2 }
+}

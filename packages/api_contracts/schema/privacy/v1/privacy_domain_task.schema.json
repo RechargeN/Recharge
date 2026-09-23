@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/privacy/v1/privacy_domain_task.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "taskId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "requestId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "subjectId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "domainId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,63}$" },
+    "marketId": {
+      "anyOf": [{ "enum": ["LV", "EE", "LT"] }, { "type": "null" }]
+    },
+    "targetRevision": { "type": "integer", "minimum": 0 },
+    "status": {
+      "enum": ["pending", "dispatched", "succeeded", "failed", "cancelled"]
+    },
+    "revision": { "type": "integer", "minimum": 1 },
+    "attempts": { "type": "integer", "minimum": 0 },
+    "evidenceId": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "updatedAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" }
+  },
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "requestId",
+    "subjectId",
+    "domainId",
+    "marketId",
+    "targetRevision",
+    "status",
+    "revision",
+    "attempts",
+    "evidenceId",
+    "updatedAtUtc"
+  ]
+}

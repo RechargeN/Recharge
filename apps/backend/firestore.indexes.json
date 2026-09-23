@@ -18,6 +18,35 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" },
         { "fieldPath": "__name__", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "platformReleaseManifests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "environmentId", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "capabilityId", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "platformFeatureFlagRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "environmentId", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "capabilityId", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "referenceMarketConfigRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "publishedAtUtc", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

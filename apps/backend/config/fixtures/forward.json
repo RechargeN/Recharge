@@ -1,0 +1,45 @@
+{
+  "cases": [
+    {
+      "target": "environment",
+      "expectedValid": false,
+      "reason": "new environment requires a schema revision",
+      "value": {
+        "schemaVersion": 1,
+        "environmentId": "sandbox",
+        "identity": {
+          "logicalName": "recharge-sandbox",
+          "bindingState": "unbound"
+        },
+        "cloudAllowed": false
+      }
+    },
+    {
+      "target": "marketCapability",
+      "expectedValid": false,
+      "reason": "new market remains disabled until explicitly supported",
+      "value": {
+        "schemaVersion": 1,
+        "configId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "revision": 1,
+        "environmentId": "local",
+        "marketId": "FI",
+        "capabilityId": "platform.foundation",
+        "status": "disabled",
+        "currency": "EUR",
+        "defaultTimezone": "Europe/Helsinki",
+        "supportedLocales": ["fi-FI"],
+        "defaultLocale": "fi-FI",
+        "policyPointers": {
+          "mandatoryCopyManifestRevision": null,
+          "privacyPolicyRevision": null,
+          "minorsPolicyRevision": null,
+          "trustSafetyPolicyRevision": null,
+          "retentionDsrPolicyRevision": null,
+          "supportPolicyRevision": null
+        },
+        "createdAtUtc": "2026-09-21T10:00:00.000Z"
+      }
+    }
+  ]
+}

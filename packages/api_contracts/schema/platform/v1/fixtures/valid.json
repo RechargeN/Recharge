@@ -1,0 +1,201 @@
+{
+  "cases": [
+    {
+      "target": "requestContext",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "lv-LV",
+        "marketId": "lv",
+        "payload": { "probe": true }
+      }
+    },
+    {
+      "target": "entityReference",
+      "value": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+    },
+    {
+      "target": "entityReference",
+      "value": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "target": "money",
+      "value": { "minorUnits": 1250, "currency": "EUR" }
+    },
+    {
+      "target": "utcInstant",
+      "value": "2026-09-21T10:00:00.000Z"
+    },
+    {
+      "target": "ianaTimezone",
+      "value": "Europe/Riga"
+    },
+    {
+      "target": "commandEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "commandType": "profile.update",
+        "commandVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "idempotencyKey": "profile-update-0001",
+        "expectedRevision": 3,
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "ios",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "en-LV",
+        "marketId": "lv",
+        "payload": { "displayName": "Synthetic User" }
+      }
+    },
+    {
+      "target": "queryEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "queryType": "discover.search",
+        "queryVersion": 1,
+        "requestId": "550e8400-e29b-41d4-a716-446655440000",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "ru-LV",
+        "marketId": "lv",
+        "filters": { "categoryId": "outdoors" },
+        "sort": "default",
+        "page": { "limit": 20, "cursor": null }
+      }
+    },
+    {
+      "target": "minimumClientPolicy",
+      "value": {
+        "policyRevision": 4,
+        "platform": "android",
+        "minSupportedBuild": 90,
+        "recommendedBuild": 100,
+        "supportedContractMajors": [1],
+        "effectiveAt": "2026-09-21T10:00:00.000Z"
+      }
+    },
+    {
+      "target": "error",
+      "value": {
+        "code": "stale_revision",
+        "domainCode": "profile.revision_conflict",
+        "messageKey": "profile.revisionConflict",
+        "retryable": false,
+        "fieldViolations": [],
+        "details": { "currentRevision": 4 }
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "success",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "resourceRevision": 4,
+        "result": { "entityId": "01ARZ3NDEKTSV4RRFFQ69G5FAV" }
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "failure",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "error": {
+          "code": "permission_denied",
+          "retryable": false,
+          "fieldViolations": [],
+          "details": {}
+        }
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "cancelled",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "cancelReasonCode": "user_cancelled_before_execution"
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "unknown",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "unknownReason": "transportTimeout",
+        "reconciliation": {
+          "idempotencyKey": "profile-update-0001",
+          "semanticPayloadHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "statusQuerySupported": true
+        }
+      }
+    },
+    {
+      "target": "cursorPage",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "items": [{ "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV", "revision": 4 }],
+        "nextCursor": null,
+        "sourceRevision": 7,
+        "projectionRevision": 11,
+        "queryRevision": "550e8400-e29b-41d4-a716-446655440000",
+        "freshness": "fresh",
+        "fetchedAt": "2026-09-21T10:00:00.000Z",
+        "freshUntilUtc": "2026-09-21T10:05:00.000Z"
+      }
+    },
+    {
+      "target": "eventEnvelope",
+      "value": {
+        "eventId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "eventType": "booking.confirmed",
+        "eventVersion": 1,
+        "producer": "booking",
+        "aggregateType": "booking",
+        "aggregateId": "550e8400-e29b-41d4-a716-446655440000",
+        "aggregateRevision": 4,
+        "occurredAt": "2026-09-21T10:00:00.000Z",
+        "correlationId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "marketId": "lv",
+        "dataClass": "operational",
+        "payload": { "bookingState": "confirmed" }
+      }
+    },
+    {
+      "target": "asyncOperation",
+      "value": {
+        "operationId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "operationType": "media.process",
+        "state": "succeeded",
+        "submittedAt": "2026-09-21T09:59:00.000Z",
+        "updatedAt": "2026-09-21T10:00:00.000Z",
+        "resultRef": "550e8400-e29b-41d4-a716-446655440000",
+        "revision": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "environments": [
+    {
+      "schemaVersion": 1,
+      "environmentId": "local",
+      "identity": {
+        "logicalName": "recharge-local",
+        "bindingState": "unbound"
+      },
+      "cloudAllowed": false
+    },
+    {
+      "schemaVersion": 1,
+      "environmentId": "dev",
+      "identity": { "logicalName": "recharge-dev", "bindingState": "unbound" },
+      "cloudAllowed": false
+    },
+    {
+      "schemaVersion": 1,
+      "environmentId": "stage",
+      "identity": {
+        "logicalName": "recharge-stage",
+        "bindingState": "unbound"
+      },
+      "cloudAllowed": false
+    },
+    {
+      "schemaVersion": 1,
+      "environmentId": "prod",
+      "identity": { "logicalName": "recharge-prod", "bindingState": "unbound" },
+      "cloudAllowed": false
+    }
+  ],
+  "regionPolicies": [
+    {
+      "schemaVersion": 1,
+      "policyId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "revision": 1,
+      "environmentId": "local",
+      "firestoreLocation": "eur3",
+      "functionsRegion": "europe-west1",
+      "storageRegion": "europe-west1",
+      "exportLocation": "EU",
+      "activationState": "disabled"
+    }
+  ],
+  "marketCapabilities": [
+    {
+      "schemaVersion": 1,
+      "configId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "revision": 1,
+      "environmentId": "local",
+      "marketId": "LV",
+      "capabilityId": "platform.foundation",
+      "status": "disabled",
+      "currency": "EUR",
+      "defaultTimezone": "Europe/Riga",
+      "supportedLocales": ["lv-LV", "en-LV", "ru-LV"],
+      "defaultLocale": "lv-LV",
+      "policyPointers": {
+        "mandatoryCopyManifestRevision": null,
+        "privacyPolicyRevision": null,
+        "minorsPolicyRevision": null,
+        "trustSafetyPolicyRevision": null,
+        "retentionDsrPolicyRevision": null,
+        "supportPolicyRevision": null
+      },
+      "createdAtUtc": "2026-09-21T10:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "configId": "01BX5ZZKBKACTAV9WEVGEMMVRZ",
+      "revision": 1,
+      "environmentId": "local",
+      "marketId": "EE",
+      "capabilityId": "platform.foundation",
+      "status": "disabled",
+      "currency": "EUR",
+      "defaultTimezone": "Europe/Tallinn",
+      "supportedLocales": ["et-EE", "en-EE", "ru-EE"],
+      "defaultLocale": "et-EE",
+      "policyPointers": {
+        "mandatoryCopyManifestRevision": null,
+        "privacyPolicyRevision": null,
+        "minorsPolicyRevision": null,
+        "trustSafetyPolicyRevision": null,
+        "retentionDsrPolicyRevision": null,
+        "supportPolicyRevision": null
+      },
+      "createdAtUtc": "2026-09-21T10:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "configId": "01BX5ZZKBKACTAV9WEVGEMMVS0",
+      "revision": 1,
+      "environmentId": "local",
+      "marketId": "LT",
+      "capabilityId": "platform.foundation",
+      "status": "disabled",
+      "currency": "EUR",
+      "defaultTimezone": "Europe/Vilnius",
+      "supportedLocales": ["lt-LT", "en-LT", "ru-LT"],
+      "defaultLocale": "lt-LT",
+      "policyPointers": {
+        "mandatoryCopyManifestRevision": null,
+        "privacyPolicyRevision": null,
+        "minorsPolicyRevision": null,
+        "trustSafetyPolicyRevision": null,
+        "retentionDsrPolicyRevision": null,
+        "supportPolicyRevision": null
+      },
+      "createdAtUtc": "2026-09-21T10:00:00.000Z"
+    }
+  ],
+  "releaseManifests": [
+    {
+      "schemaVersion": 1,
+      "manifestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "revision": 1,
+      "environmentId": "local",
+      "marketId": "LV",
+      "capabilityId": "platform.foundation",
+      "status": "disabled",
+      "artifactDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "apiSchemaRevision": "platform-v1",
+      "marketConfigRevision": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "securityPrivacyEvidenceRevision": "synthetic-r1",
+      "retentionDsrRevision": "synthetic-r1",
+      "residencyTransferRevision": "synthetic-r1",
+      "observabilityPolicyRevision": "synthetic-r1",
+      "rollbackTargetManifestId": null,
+      "createdAtUtc": "2026-09-21T10:00:00.000Z",
+      "effectiveAtUtc": "2026-09-21T10:00:00.000Z",
+      "approvedBy": []
+    }
+  ],
+  "secretReferences": [
+    {
+      "schemaVersion": 1,
+      "environmentId": "local",
+      "logicalName": "PROVIDER_API_KEY",
+      "provider": "gcpSecretManager",
+      "referenceName": "provider-api-key",
+      "bindingState": "unbound"
+    }
+  ]
+}

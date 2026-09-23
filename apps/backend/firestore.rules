@@ -2,6 +2,31 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // R1 platform records are server-owned. Local Admin SDK tests may exercise
+    // them, but no mobile/client identity has direct access.
+    match /platformReleaseManifests/{document} { allow read, write: if false; }
+    match /platformActiveReleasePointers/{document} { allow read, write: if false; }
+    match /platformFeatureFlagRevisions/{document} { allow read, write: if false; }
+    match /referenceMarketConfigRevisions/{document} { allow read, write: if false; }
+    match /referenceActivationPointers/{document} { allow read, write: if false; }
+
+    // Security/Privacy foundation records are server-owned. The actor-owned
+    // direct-client allowlist is intentionally empty until an owning domain
+    // approves an exact record contract and Rules slice.
+    match /privacyRequests/{document} { allow read, write: if false; }
+    match /privacyDomainTasks/{document} { allow read, write: if false; }
+    match /securityAuditEvents/{document} { allow read, write: if false; }
+
+    // Identity/Publisher local authority is in-memory only. Future persistence
+    // remains server-owned and no client role, page or provider assertion is
+    // accepted as authority.
+    match /identityAccounts/{document} { allow read, write: if false; }
+    match /identityProviderLinks/{document} { allow read, write: if false; }
+    match /identitySessions/{document} { allow read, write: if false; }
+    match /identityCreatorVerifications/{document} { allow read, write: if false; }
+    match /identityManagedPages/{document} { allow read, write: if false; }
+    match /identityPageMemberships/{document} { allow read, write: if false; }
+
     // RAW-C authoritative records are Admin-SDK-only. There is deliberately no
     // client exception, including for owners, flags, projections or outbox.
     match /bookingEventProjections/{document} { allow read, write: if false; }

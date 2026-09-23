@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/r1/market-capability.schema.json",
+  "title": "Recharge R1 market capability revision",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "configId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "environmentId": { "enum": ["local", "dev", "stage", "prod"] },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "capabilityId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "status": { "const": "disabled" },
+    "currency": { "const": "EUR" },
+    "defaultTimezone": {
+      "type": "string",
+      "enum": ["Europe/Riga", "Europe/Tallinn", "Europe/Vilnius"]
+    },
+    "supportedLocales": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+      }
+    },
+    "defaultLocale": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "policyPointers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mandatoryCopyManifestRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "privacyPolicyRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "minorsPolicyRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "trustSafetyPolicyRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "retentionDsrPolicyRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "supportPolicyRevision": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        }
+      },
+      "required": [
+        "mandatoryCopyManifestRevision",
+        "privacyPolicyRevision",
+        "minorsPolicyRevision",
+        "trustSafetyPolicyRevision",
+        "retentionDsrPolicyRevision",
+        "supportPolicyRevision"
+      ]
+    },
+    "createdAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "configId",
+    "revision",
+    "environmentId",
+    "marketId",
+    "capabilityId",
+    "status",
+    "currency",
+    "defaultTimezone",
+    "supportedLocales",
+    "defaultLocale",
+    "policyPointers",
+    "createdAtUtc"
+  ]
+}

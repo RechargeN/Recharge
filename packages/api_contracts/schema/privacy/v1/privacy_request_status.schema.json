@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/privacy/v1/privacy_request_status.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "requestId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "status": {
+      "enum": [
+        "submitted",
+        "verified",
+        "dispatched",
+        "partially_completed",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "revision": { "type": "integer", "minimum": 1 },
+    "requiredTaskCount": { "type": "integer", "minimum": 1, "maximum": 32 },
+    "completedTaskCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "failedTaskCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "updatedAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "status",
+    "revision",
+    "requiredTaskCount",
+    "completedTaskCount",
+    "failedTaskCount",
+    "updatedAtUtc"
+  ]
+}

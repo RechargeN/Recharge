@@ -1,0 +1,165 @@
+{
+  "cases": [
+    {
+      "target": "entityReference",
+      "reason": "temporary local IDs never cross the authoritative boundary",
+      "value": "loc_profile_1"
+    },
+    {
+      "target": "money",
+      "reason": "minor units must be an integer",
+      "value": { "minorUnits": 12.5, "currency": "EUR" }
+    },
+    {
+      "target": "money",
+      "reason": "currency is explicit and never inferred from market",
+      "value": { "minorUnits": 1250 }
+    },
+    {
+      "target": "money",
+      "reason": "currency is uppercase ISO 4217",
+      "value": { "minorUnits": 1250, "currency": "eur" }
+    },
+    {
+      "target": "utcInstant",
+      "reason": "authoritative instants use normalized UTC Z",
+      "value": "2026-09-21T13:00:00+03:00"
+    },
+    {
+      "target": "ianaTimezone",
+      "reason": "an offset is not an IANA timezone",
+      "value": "+03:00"
+    },
+    {
+      "target": "requestContext",
+      "reason": "client-declared authority is forbidden",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "lv-LV",
+        "payload": {},
+        "capabilities": ["admin"]
+      }
+    },
+    {
+      "target": "commandEnvelope",
+      "reason": "mutations require an idempotency key",
+      "value": {
+        "contractVersion": 1,
+        "commandType": "profile.update",
+        "commandVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "lv-LV",
+        "payload": {}
+      }
+    },
+    {
+      "target": "queryEnvelope",
+      "reason": "the platform maximum page size is 100",
+      "value": {
+        "contractVersion": 1,
+        "queryType": "discover.search",
+        "queryVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "lv-LV",
+        "filters": {},
+        "sort": "default",
+        "page": { "limit": 101, "cursor": null }
+      }
+    },
+    {
+      "target": "error",
+      "reason": "unknown critical common error codes fail closed",
+      "value": {
+        "code": "provider_magic_failure",
+        "retryable": false,
+        "fieldViolations": [],
+        "details": {}
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "reason": "an unknown result outcome cannot become success",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "partiallySuccessful",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "result": {}
+      }
+    },
+    {
+      "target": "cursorPage",
+      "reason": "unknown freshness cannot silently map to fresh",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "items": [],
+        "nextCursor": null,
+        "queryRevision": "550e8400-e29b-41d4-a716-446655440000",
+        "freshness": "live",
+        "fetchedAt": "2026-09-21T10:00:00.000Z"
+      }
+    },
+    {
+      "target": "eventEnvelope",
+      "reason": "unknown data class is security critical",
+      "value": {
+        "eventId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "eventType": "booking.confirmed",
+        "eventVersion": 1,
+        "producer": "booking",
+        "aggregateType": "booking",
+        "aggregateId": "550e8400-e29b-41d4-a716-446655440000",
+        "aggregateRevision": 4,
+        "occurredAt": "2026-09-21T10:00:00.000Z",
+        "correlationId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "dataClass": "partnerDefined",
+        "payload": {}
+      }
+    },
+    {
+      "target": "asyncOperation",
+      "reason": "unknown operation state fails closed",
+      "value": {
+        "operationId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "operationType": "media.process",
+        "state": "paused",
+        "submittedAt": "2026-09-21T09:59:00.000Z",
+        "updatedAt": "2026-09-21T10:00:00.000Z",
+        "revision": 2
+      }
+    },
+    {
+      "target": "minimumClientPolicy",
+      "reason": "unknown client platform is critical",
+      "value": {
+        "policyRevision": 4,
+        "platform": "desktop",
+        "minSupportedBuild": 90,
+        "recommendedBuild": 100,
+        "supportedContractMajors": [1],
+        "effectiveAt": "2026-09-21T10:00:00.000Z"
+      }
+    }
+  ]
+}

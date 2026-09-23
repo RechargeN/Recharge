@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/publisher_eligibility.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "publisherRef",
+    "eligible",
+    "reason",
+    "authorityRevision",
+    "evaluatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "publisherRef": {
+      "$ref": "identity_common.schema.json#/$defs/publisherRef"
+    },
+    "eligible": { "type": "boolean" },
+    "reason": {
+      "enum": [
+        "eligible",
+        "account_inactive",
+        "creator_verification_required",
+        "creator_verification_unavailable",
+        "membership_inactive",
+        "capability_denied",
+        "publisher_not_accessible",
+        "snapshot_stale"
+      ]
+    },
+    "authorityRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "evaluatedAtUtc": {
+      "$ref": "identity_common.schema.json#/$defs/utcInstant"
+    }
+  }
+}

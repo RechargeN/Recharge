@@ -1,0 +1,92 @@
+name: Backend R1 local platform foundation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/backend-r1.yml"
+      - "apps/backend/**"
+      - "packages/api_contracts/schema/platform/v1/**"
+      - "packages/api_contracts/schema/reference_data/v1/**"
+      - "packages/api_contracts/schema/privacy/v1/**"
+      - "packages/api_contracts/schema/identity/v1/**"
+      - "docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-r1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Credential-free R1 ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            java_version: 21.0.12+8.0.LTS
+          - os: windows-2025
+            java_version: 21.0.12+8.0.LTS
+
+    steps:
+      - name: Checkout without persisted authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          clean: false
+          set-safe-directory: false
+          fetch-depth: 1
+          fetch-tags: false
+          lfs: false
+          submodules: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22.23.2
+          check-latest: false
+          package-manager-cache: false
+
+      - name: Set up exact emulator JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java_version }}
+          check-latest: false
+          verify-signature: true
+          overwrite-settings: false
+
+      - name: Reject cloud and credential context
+        run: node apps/backend/scripts/verify-no-cloud-context.mjs
+
+      - name: Install verified Terraform archive
+        run: node apps/backend/scripts/install-terraform.mjs
+
+      - name: Frozen dependency install
+        working-directory: apps/backend/functions
+        run: npm ci --ignore-scripts --no-audit --fund=false
+
+      - name: Verify exact R1 layout, config and exports
+        working-directory: apps/backend/functions
+        run: npm run verify:r1:layout && npm run verify:r1:config && npm run verify:r1:exports && npm run verify:reference-data:layout && npm run verify:security-privacy:layout && npm run verify:identity-publisher:layout
+
+      - name: Type, format, lint and local tests
+        working-directory: apps/backend/functions
+        run: npm run test:r1 && npm run test:reference-data && npm run test:security-privacy && npm run test:identity-publisher
+
+      - name: Emulator, Rules and RAW-C regression
+        working-directory: apps/backend/functions
+        run: npm run test:r1:emulator
+
+      - name: Terraform format and backendless validation
+        working-directory: apps/backend/functions
+        run: npm run infra:r1:validate
+
+      - name: Empty unbound Terraform plan
+        working-directory: apps/backend/functions
+        run: npm run infra:r1:plan

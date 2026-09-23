@@ -1,0 +1,87 @@
+{
+  "account": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "active",
+    "systemRoles": ["User", "Creator"],
+    "revision": 1,
+    "securityRevision": 1,
+    "revokeAllBeforeUtc": "2026-09-22T00:00:00.000Z",
+    "createdAtUtc": "2026-09-22T00:00:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:00:00.000Z"
+  },
+  "authIdentity": {
+    "schemaVersion": 1,
+    "identityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YB",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "provider": "google",
+    "providerTenant": "consumer",
+    "subjectHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "active",
+    "revision": 1,
+    "linkedAtUtc": "2026-09-22T00:00:00.000Z"
+  },
+  "session": {
+    "schemaVersion": 1,
+    "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "active",
+    "revision": 1,
+    "authzRevision": 1,
+    "issuedAtUtc": "2026-09-22T00:00:01.000Z",
+    "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
+  },
+  "accessSnapshot": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+    "accountRevision": 1,
+    "sessionRevision": 1,
+    "authzRevision": 1,
+    "capabilityPolicyRevision": 1,
+    "capabilityIds": ["content.publish"],
+    "evaluatedAtUtc": "2026-09-22T00:00:01.000Z",
+    "expiresAtUtc": "2026-09-22T00:05:01.000Z"
+  },
+  "creatorVerification": {
+    "schemaVersion": 1,
+    "verificationId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "verified",
+    "revision": 2,
+    "submittedAtUtc": "2026-09-22T00:00:00.000Z",
+    "decidedAtUtc": "2026-09-22T00:02:00.000Z",
+    "evidenceRefIds": ["018FQ2Z8Q9N4M7K2T6V3W1X5YE"]
+  },
+  "managedPage": {
+    "schemaVersion": 1,
+    "pageId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+    "ownerUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "marketId": "LV",
+    "status": "pendingReview",
+    "verificationStatus": "unverified",
+    "revision": 1,
+    "createdAtUtc": "2026-09-22T00:03:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:03:00.000Z"
+  },
+  "pageMembership": {
+    "schemaVersion": 1,
+    "membershipId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+    "pageId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "role": "owner",
+    "status": "active",
+    "capabilityIds": ["manage_page", "content.publish"],
+    "revision": 1,
+    "createdAtUtc": "2026-09-22T00:03:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:03:00.000Z"
+  },
+  "publisherEligibility": {
+    "schemaVersion": 1,
+    "publisherRef": { "type": "page", "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YF" },
+    "eligible": true,
+    "reason": "eligible",
+    "authorityRevision": 2,
+    "evaluatedAtUtc": "2026-09-22T00:04:00.000Z"
+  }
+}

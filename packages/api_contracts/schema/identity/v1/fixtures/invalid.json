@@ -1,0 +1,26 @@
+{
+  "account": {
+    "schemaVersion": 1,
+    "userId": "loc_user",
+    "status": "active",
+    "revision": -1
+  },
+  "authIdentity": {
+    "schemaVersion": 1,
+    "provider": "email",
+    "subjectHash": "raw-subject"
+  },
+  "session": {
+    "schemaVersion": 1,
+    "status": "active",
+    "rawToken": "forbidden"
+  },
+  "accessSnapshot": { "schemaVersion": 1, "capabilityIds": ["ADMIN"] },
+  "creatorVerification": { "schemaVersion": 1, "status": "approved" },
+  "managedPage": { "schemaVersion": 1, "pageId": "by-name" },
+  "pageMembership": { "schemaVersion": 1, "role": "admin" },
+  "publisherEligibility": {
+    "schemaVersion": 1,
+    "publisherRef": { "type": "admin", "id": "loc_admin" }
+  }
+}

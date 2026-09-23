@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "target": "resultEnvelope",
+      "expectedValid": true,
+      "reason": "new domain payload fields remain inside the owning typed result payload",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "success",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "result": { "knownField": true, "futurePresentationHint": "synthetic" }
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "expectedValid": false,
+      "reason": "unknown critical outcome fails closed",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "deferredByProvider",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "result": {}
+      }
+    },
+    {
+      "target": "requestContext",
+      "expectedValid": false,
+      "reason": "unknown envelope major requires explicit compatibility support",
+      "value": {
+        "contractVersion": 2,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "2.0.0",
+          "buildNumber": 200
+        },
+        "locale": "lv-LV",
+        "payload": {}
+      }
+    },
+    {
+      "target": "requestContext",
+      "expectedValid": false,
+      "reason": "unknown critical platform fails closed",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "wearable",
+          "appVersion": "1.0.0",
+          "buildNumber": 100
+        },
+        "locale": "lv-LV",
+        "payload": {}
+      }
+    }
+  ]
+}

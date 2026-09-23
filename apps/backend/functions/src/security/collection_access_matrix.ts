@@ -1,0 +1,102 @@
+import { deepFreeze, type DeepReadonly } from '../shared/immutable.js';
+
+export interface CollectionAccessRule {
+  readonly collectionId: string;
+  readonly dataClassId: string;
+  readonly singleWriter: string;
+  readonly serverReaders: readonly string[];
+  readonly clientRead: 'deny' | 'actor_owned';
+  readonly clientWrite: 'deny' | 'actor_owned';
+  readonly marketScoped: boolean;
+  readonly pageScoped: boolean;
+}
+
+export class CollectionAccessMatrix {
+  readonly #rules: ReadonlyMap<string, DeepReadonly<CollectionAccessRule>>;
+
+  constructor(rules: readonly CollectionAccessRule[]) {
+    const map = new Map<string, DeepReadonly<CollectionAccessRule>>();
+    for (const rule of rules) {
+      if (
+        !/^[A-Za-z][A-Za-z0-9]{0,95}$/.test(rule.collectionId) ||
+        map.has(rule.collectionId) ||
+        rule.singleWriter.trim().length === 0
+      )
+        throw new TypeError('collection_access_rule_invalid');
+      map.set(
+        rule.collectionId,
+        deepFreeze({ ...rule, serverReaders: [...new Set(rule.serverReaders)].sort() }),
+      );
+    }
+    this.#rules = map;
+  }
+
+  decision(collectionId: string):
+    | DeepReadonly<CollectionAccessRule>
+    | {
+        readonly collectionId: string;
+        readonly clientRead: 'deny';
+        readonly clientWrite: 'deny';
+        readonly reason: 'collection_unknown';
+      } {
+    return (
+      this.#rules.get(collectionId) ?? {
+        collectionId,
+        clientRead: 'deny',
+        clientWrite: 'deny',
+        reason: 'collection_unknown',
+      }
+    );
+  }
+}
+
+export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
+  {
+    collectionId: 'privacyRequests',
+    dataClassId: 'privacy.request',
+    singleWriter: 'privacy-orchestration',
+    serverReaders: ['privacy-orchestration', 'audited-support'],
+    clientRead: 'deny',
+    clientWrite: 'deny',
+    marketScoped: false,
+    pageScoped: false,
+  },
+  {
+    collectionId: 'privacyDomainTasks',
+    dataClassId: 'privacy.task',
+    singleWriter: 'privacy-orchestration',
+    serverReaders: ['privacy-orchestration', 'domain-task-handler'],
+    clientRead: 'deny',
+    clientWrite: 'deny',
+    marketScoped: true,
+    pageScoped: false,
+  },
+  {
+    collectionId: 'securityAuditEvents',
+    dataClassId: 'security.audit',
+    singleWriter: 'security-audit',
+    serverReaders: ['security-privacy', 'incident-response'],
+    clientRead: 'deny',
+    clientWrite: 'deny',
+    marketScoped: true,
+    pageScoped: true,
+  },
+  ...[
+    ['identityAccounts', 'identity.account'],
+    ['identityProviderLinks', 'identity.provider-link'],
+    ['identitySessions', 'identity.session'],
+    ['identityCreatorVerifications', 'identity.creator-verification'],
+    ['identityManagedPages', 'identity.managed-page'],
+    ['identityPageMemberships', 'identity.page-membership'],
+  ].map(([collectionId, dataClassId]) => ({
+    collectionId: collectionId ?? '',
+    dataClassId: dataClassId ?? '',
+    singleWriter: 'identity-publisher',
+    serverReaders: ['identity-publisher', 'security-privacy'],
+    clientRead: 'deny' as const,
+    clientWrite: 'deny' as const,
+    marketScoped: collectionId === 'identityManagedPages',
+    pageScoped:
+      collectionId === 'identityManagedPages' || collectionId === 'identityPageMemberships',
+  })),
+]);

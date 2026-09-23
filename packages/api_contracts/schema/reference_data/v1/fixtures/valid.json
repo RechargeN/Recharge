@@ -1,0 +1,88 @@
+{
+  "localizedText": {
+    "schemaVersion": 1,
+    "defaultLocale": "lv-LV",
+    "values": { "lv-LV": "Nosaukums", "en": "Title" }
+  },
+  "marketConfigRevision": {
+    "schemaVersion": 1,
+    "revisionId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "revisionNumber": 1,
+    "environmentId": "local",
+    "marketId": "LV",
+    "countryCode": "LV",
+    "status": "disabled",
+    "primaryLocale": "lv-LV",
+    "supportedLocales": ["lv-LV", "en"],
+    "fallbackLocaleOrder": ["en"],
+    "languageFallbacks": { "lv-LV": ["en"] },
+    "currencyCodes": ["EUR"],
+    "defaultIanaZone": "Europe/Riga",
+    "allowedIanaZones": ["Europe/Riga"],
+    "taxonomyRevisionRef": {
+      "taxonomyId": "category-system",
+      "revision": "1.4.3"
+    },
+    "mandatoryCopyManifestRevision": null,
+    "sourceRecordIds": [],
+    "policyPointers": {
+      "mandatoryCopyManifestRevision": null,
+      "privacyPolicyRevision": null,
+      "minorsPolicyRevision": null,
+      "trustSafetyPolicyRevision": null,
+      "retentionDsrPolicyRevision": null,
+      "supportPolicyRevision": null
+    },
+    "capabilityMatrix": [
+      {
+        "capabilityId": "platform.foundation",
+        "status": "disabled",
+        "requiresMandatoryCopy": false,
+        "mandatoryCopyPurposeId": null,
+        "requiresEligibleSources": false
+      }
+    ],
+    "compatibilityKey": "reference-data-v1",
+    "contentHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "supersedesRevisionId": null,
+    "createdAtUtc": "2026-09-21T10:00:00.000Z"
+  },
+  "mandatoryCopyReference": {
+    "schemaVersion": 1,
+    "referenceId": "01BX5ZZKBKACTAV9WEVGEMMVRZ",
+    "marketId": "LV",
+    "capabilityId": "booking.create",
+    "purposeId": "booking.terms",
+    "locale": "lv-LV",
+    "copyId": "01BX5ZZKBKACTAV9WEVGEMMVS0",
+    "copyRevision": 1,
+    "contentSha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "approvalState": "accepted",
+    "approvalEvidenceRevision": "legal-demo-v1",
+    "effectiveAtUtc": "2026-09-21T10:00:00.000Z",
+    "expiresAtUtc": null,
+    "fallbackPolicy": "forbidden"
+  },
+  "sourceRecord": {
+    "schemaVersion": 1,
+    "sourceRecordId": "01BX5ZZKBKACTAV9WEVGEMMVS0",
+    "sourceKind": "internal",
+    "sourceRevision": "synthetic-v1",
+    "originUri": null,
+    "evidenceSha256": null,
+    "licenseDecision": "pending",
+    "licenseEvidenceRevision": null,
+    "eligibility": "candidate",
+    "marketScope": ["LV"],
+    "capturedAtUtc": "2026-09-21T10:00:00.000Z",
+    "expiresAtUtc": null
+  },
+  "activationPointer": {
+    "schemaVersion": 1,
+    "environmentId": "local",
+    "marketId": "LV",
+    "capabilityId": "reference-data.bootstrap",
+    "activeRevisionId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "pointerRevision": 1
+  }
+}

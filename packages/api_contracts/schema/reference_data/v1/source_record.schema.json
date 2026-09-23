@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/reference-data/v1/source_record.schema.json",
+  "title": "Reference source record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sourceRecordId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "sourceKind": { "enum": ["internal", "external"] },
+    "sourceRevision": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "originUri": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        { "type": "null" }
+      ]
+    },
+    "evidenceSha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "licenseDecision": { "enum": ["pending", "accepted", "rejected"] },
+    "licenseEvidenceRevision": {
+      "anyOf": [
+        { "type": "string", "minLength": 1, "maxLength": 128 },
+        { "type": "null" }
+      ]
+    },
+    "eligibility": { "enum": ["candidate", "eligible", "rejected"] },
+    "marketScope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": { "enum": ["LV", "EE", "LT"] }
+    },
+    "capturedAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "expiresAtUtc": {
+      "anyOf": [
+        { "type": "string", "format": "date-time", "pattern": "Z$" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sourceRecordId",
+    "sourceKind",
+    "sourceRevision",
+    "originUri",
+    "evidenceSha256",
+    "licenseDecision",
+    "licenseEvidenceRevision",
+    "eligibility",
+    "marketScope",
+    "capturedAtUtc",
+    "expiresAtUtc"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "privacyRequest": {
+    "schemaVersion": 1,
+    "status": "done",
+    "subjectId": "client-name"
+  },
+  "privacyRequestStatus": { "schemaVersion": 1, "completedTaskCount": -1 },
+  "privacyDomainTask": {
+    "schemaVersion": 1,
+    "marketId": "EU",
+    "status": "running"
+  }
+}

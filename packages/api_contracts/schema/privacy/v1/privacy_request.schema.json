@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/privacy/v1/privacy_request.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "requestId": { "$ref": "#/$defs/entityId" },
+    "subjectId": { "$ref": "#/$defs/entityId" },
+    "requestType": {
+      "enum": ["access", "erasure", "restriction", "rectification", "objection"]
+    },
+    "status": { "$ref": "#/$defs/status" },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "semanticHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "requiredDomainIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,63}$" }
+    },
+    "createdAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "updatedAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "terminalEvidenceIds": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/entityId" }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "subjectId",
+    "requestType",
+    "status",
+    "revision",
+    "idempotencyKey",
+    "semanticHash",
+    "requiredDomainIds",
+    "createdAtUtc",
+    "updatedAtUtc",
+    "terminalEvidenceIds"
+  ],
+  "$defs": {
+    "entityId": {
+      "type": "string",
+      "anyOf": [{ "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "format": "uuid" }]
+    },
+    "status": {
+      "enum": [
+        "submitted",
+        "verified",
+        "dispatched",
+        "partially_completed",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    }
+  }
+}

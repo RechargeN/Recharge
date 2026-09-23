@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/reference-data/v1/market_config_revision.schema.json",
+  "title": "MarketConfig revision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "revisionId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "revisionNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "environmentId": { "enum": ["local", "dev", "stage", "prod"] },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "countryCode": { "enum": ["LV", "EE", "LT"] },
+    "status": { "const": "disabled" },
+    "primaryLocale": { "type": "string", "minLength": 2, "maxLength": 35 },
+    "supportedLocales": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 2, "maxLength": 35 }
+    },
+    "fallbackLocaleOrder": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 2, "maxLength": 35 }
+    },
+    "languageFallbacks": {
+      "type": "object",
+      "maxProperties": 8,
+      "additionalProperties": {
+        "type": "array",
+        "maxItems": 4,
+        "uniqueItems": true,
+        "items": { "type": "string", "minLength": 2, "maxLength": 35 }
+      }
+    },
+    "currencyCodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "iso-4217-currency",
+        "pattern": "^[A-Z]{3}$"
+      }
+    },
+    "defaultIanaZone": {
+      "type": "string",
+      "format": "iana-time-zone",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "allowedIanaZones": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "iana-time-zone",
+        "minLength": 3,
+        "maxLength": 64
+      }
+    },
+    "taxonomyRevisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "taxonomyId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "revision": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "required": ["taxonomyId", "revision"]
+    },
+    "mandatoryCopyManifestRevision": {
+      "anyOf": [
+        { "type": "string", "minLength": 1, "maxLength": 128 },
+        { "type": "null" }
+      ]
+    },
+    "sourceRecordIds": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }
+    },
+    "policyPointers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mandatoryCopyManifestRevision": { "$ref": "#/$defs/policyRevision" },
+        "privacyPolicyRevision": { "$ref": "#/$defs/policyRevision" },
+        "minorsPolicyRevision": { "$ref": "#/$defs/policyRevision" },
+        "trustSafetyPolicyRevision": { "$ref": "#/$defs/policyRevision" },
+        "retentionDsrPolicyRevision": { "$ref": "#/$defs/policyRevision" },
+        "supportPolicyRevision": { "$ref": "#/$defs/policyRevision" }
+      },
+      "required": [
+        "mandatoryCopyManifestRevision",
+        "privacyPolicyRevision",
+        "minorsPolicyRevision",
+        "trustSafetyPolicyRevision",
+        "retentionDsrPolicyRevision",
+        "supportPolicyRevision"
+      ]
+    },
+    "capabilityMatrix": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "capabilityId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]{0,95}$"
+          },
+          "status": { "const": "disabled" },
+          "requiresMandatoryCopy": { "type": "boolean" },
+          "mandatoryCopyPurposeId": {
+            "anyOf": [
+              { "type": "string", "minLength": 1, "maxLength": 96 },
+              { "type": "null" }
+            ]
+          },
+          "requiresEligibleSources": { "type": "boolean" }
+        },
+        "required": [
+          "capabilityId",
+          "status",
+          "requiresMandatoryCopy",
+          "mandatoryCopyPurposeId",
+          "requiresEligibleSources"
+        ]
+      }
+    },
+    "compatibilityKey": { "const": "reference-data-v1" },
+    "contentHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "supersedesRevisionId": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "createdAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" }
+  },
+  "required": [
+    "schemaVersion",
+    "revisionId",
+    "revisionNumber",
+    "environmentId",
+    "marketId",
+    "countryCode",
+    "status",
+    "primaryLocale",
+    "supportedLocales",
+    "fallbackLocaleOrder",
+    "languageFallbacks",
+    "currencyCodes",
+    "defaultIanaZone",
+    "allowedIanaZones",
+    "taxonomyRevisionRef",
+    "mandatoryCopyManifestRevision",
+    "sourceRecordIds",
+    "policyPointers",
+    "capabilityMatrix",
+    "compatibilityKey",
+    "contentHash",
+    "supersedesRevisionId",
+    "createdAtUtc"
+  ],
+  "$defs": {
+    "policyRevision": {
+      "anyOf": [
+        { "type": "string", "minLength": 1, "maxLength": 128 },
+        { "type": "null" }
+      ]
+    }
+  }
+}

@@ -27,6 +27,7 @@ import {
 import { systemServerClock } from './shared/server_clock.js';
 
 // Preserve the non-product R0 probe while RAW-C adds exactly five Booking exports.
+// R1 platform composition is internal-only and intentionally has no transport export.
 export { r0ToolchainProbe } from './r0_toolchain_probe.js';
 
 const callableOptions = Object.freeze({
