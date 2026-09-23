@@ -180,7 +180,7 @@ void main() {
     expect(seen, BookingCommandType.values.map((value) => value.name).toSet());
   });
 
-  test('D12 request IDs preserve exact opaque Unicode identity', () {
+  test('Booking request IDs use the safe opaque identifier whitelist', () {
     BookingCommandDto command(String requestId) => BookingCommandDto(
       schemaVersion: 1,
       commandType: BookingCommandType.createBooking,
@@ -189,31 +189,15 @@ void main() {
       payload: const {'occurrenceId': 'occurrence-1', 'participantUnits': 1},
     );
 
-    expect(command(' Request-A ').requestId, ' Request-A ');
+    expect(command('Request-A_1').requestId, 'Request-A_1');
     expect(
       command('Request-A').requestId,
       isNot(command('request-a').requestId),
     );
-    expect(command('é').requestId, isNot(command('e\u0301').requestId));
-    expect(
-      command(List<String>.filled(128, '😀').join()).requestId.runes.length,
-      128,
-    );
-
-    final d12BlankSet = String.fromCharCodes(<int>[
-      ...List<int>.generate(5, (index) => 0x0009 + index),
-      0x0020,
-      0x0085,
-      0x00A0,
-      0x1680,
-      ...List<int>.generate(11, (index) => 0x2000 + index),
-      0x2028,
-      0x2029,
-      0x202F,
-      0x205F,
-      0x3000,
-    ]);
-    expect(() => command(d12BlankSet), throwsFormatException);
+    expect(command(List<String>.filled(128, 'a').join()).requestId.length, 128);
+    for (final invalid in [' Request-A ', 'é', 'e\u0301', '😀', '/', '.', '..', '__name__']) {
+      expect(() => command(invalid), throwsFormatException, reason: invalid);
+    }
     expect(
       () => command(List<String>.filled(129, 'a').join()),
       throwsFormatException,

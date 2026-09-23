@@ -228,7 +228,12 @@ class BookingCommandDto {
   }
 
   static void _requireBoundedId(Object? raw, String field) {
-    _requireBoundedNonBlankString(raw, field, 128);
+    if (raw is! String ||
+        !RegExp(r'^(?!__name__$)[A-Za-z0-9_-]{1,128}$').hasMatch(raw)) {
+      throw BookingContractFormatException(
+        '$field must be a safe opaque identifier using A-Z, a-z, 0-9, _ or -',
+      );
+    }
   }
 
   static void _validateExpectedRevision(
@@ -249,17 +254,7 @@ class BookingCommandDto {
   }
 
   static void _validateRequestId(String value) {
-    final scalars = _unicodeScalarValues(value, 'requestId');
-    if (scalars.isEmpty || scalars.length > 128) {
-      throw const BookingContractFormatException(
-        'requestId must contain 1 to 128 Unicode scalar values',
-      );
-    }
-    if (scalars.every(_isBookingRequestIdBlankScalar)) {
-      throw const BookingContractFormatException(
-        'requestId must contain a non-blank Unicode scalar value',
-      );
-    }
+    _requireBoundedId(value, 'requestId');
   }
 
   static void _requireBoundedNonBlankString(

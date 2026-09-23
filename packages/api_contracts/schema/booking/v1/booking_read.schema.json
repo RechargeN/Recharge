@@ -11,6 +11,62 @@
         "queryType": { "const": "getMyBooking" },
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
         "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "rejected" },
+        "error": {
+          "allOf": [
+            { "$ref": "booking_error.schema.json" },
+            {
+              "type": "object",
+              "properties": { "retryable": { "const": false } }
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "error"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+        "kind": { "const": "retryableFailure" },
+        "error": {
+          "allOf": [
+            { "$ref": "booking_error.schema.json" },
+            {
+              "type": "object",
+              "properties": { "retryable": { "const": true } }
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "error"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+        "queryType": { "const": "getMyBooking" },
+        "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
         "kind": { "const": "found" },
         "booking": { "$ref": "booking.schema.json" }
       },

@@ -18,7 +18,13 @@ before(async () => cleanupBookingEmulator(firestore));
 after(async () => cleanupBookingEmulator(firestore));
 
 void test('missing auth denies before disabled flag and performs no write', async () => {
-  const response = await callBookingFunction('createInternalBookingV1', createCommand());
+  const response = await callBookingFunction('createInternalBookingV1', {
+    schemaVersion: 1,
+    commandType: 'createBooking',
+    requestId: 'req_auth_first',
+    idempotencyKey: 'idem_auth_first',
+    payload: { occurrenceId: 'bad/path' },
+  });
   assert.equal(response.status, 200);
   const result = response.body.result as Record<string, unknown>;
   assert.equal(result.kind, 'rejected');
@@ -43,13 +49,34 @@ void test('inactive identity and missing flag fail closed', async () => {
   const activeToken = await createAuthorizedActor('active-actor');
   const disabled = await callBookingFunction(
     'createInternalBookingV1',
-    createCommand(),
+    {
+      schemaVersion: 1,
+      commandType: 'createBooking',
+      requestId: 'req_flag_first',
+      idempotencyKey: 'idem_flag_first',
+      payload: { occurrenceId: 'bad/path' },
+    },
     activeToken,
   );
   assert.equal(
     ((disabled.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
     'feature_disabled',
   );
+  const queryDisabled = await callBookingFunction(
+    'listMyBookingsV1',
+    {
+      schemaVersion: 1,
+      queryType: 'listMyBookings',
+      requestId: 'req_query_disabled',
+      payload: {},
+    },
+    activeToken,
+  );
+  const queryResult = queryDisabled.body.result as Record<string, unknown>;
+  assert.equal(queryResult.kind, 'rejected');
+  assert.equal((queryResult.error as Record<string, unknown>).code, 'feature_disabled');
+  const registry = await createBookingSchemaRegistry();
+  assert.equal(registry.validator('booking_page.schema.json')(queryResult), true);
 });
 
 void test('test-only flags enable exactly the real callable path in disposable emulator', async () => {
@@ -63,6 +90,21 @@ void test('test-only flags enable exactly the real callable path in disposable e
   await seedEvent(callableEvent, firestore);
   await setBookingFlags(true, firestore);
   const token = await createAuthorizedActor('callable-actor');
+  const invalid = await callBookingFunction(
+    'createInternalBookingV1',
+    {
+      schemaVersion: 1,
+      commandType: 'createBooking',
+      requestId: 'req_invalid_after_auth',
+      idempotencyKey: 'idem_invalid_after_auth',
+      payload: { occurrenceId: 'bad/path' },
+    },
+    token,
+  );
+  assert.equal(
+    ((invalid.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
+    'invalid_contract',
+  );
   const response = await callBookingFunction('createInternalBookingV1', createCommand(), token);
   assert.equal(response.status, 200);
   const createResult = response.body.result as Record<string, unknown>;

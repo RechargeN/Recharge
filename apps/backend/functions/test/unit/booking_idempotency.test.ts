@@ -9,6 +9,7 @@ import {
   logicalMutationId,
   requestAttemptId,
 } from '../../src/booking/idempotency.js';
+import { finitePoolLedgerId } from '../../src/booking/transactions.js';
 import { createCommand } from '../support/booking_fixtures.js';
 import { asRecord, readBookingJson } from '../support/booking_schema_registry.js';
 
@@ -24,6 +25,31 @@ void test('split logical and attempt identities are deterministic and domain-sep
 
 void test('length prefixes prevent concatenation ambiguity', () => {
   assert.notEqual(lengthPrefixedHash('ab', 'c'), lengthPrefixedHash('a', 'bc'));
+});
+
+void test('finite ledger ids are fixed-width and tuple collision resistant', () => {
+  const first = finitePoolLedgerId('a', 'b__c', 'onsite');
+  const second = finitePoolLedgerId('a__b', 'c', 'onsite');
+  assert.match(first, /^bpl2_[0-9a-f]{64}$/u);
+  assert.notEqual(first, second);
+  assert.equal(first, finitePoolLedgerId('a', 'b__c', 'onsite'));
+  assert.notEqual(first, finitePoolLedgerId('a', 'b__c', 'online'));
+});
+
+void test('runtime contract rejects path-like and reserved identifiers', () => {
+  for (const occurrenceId of ['events/occurrence', '.', '..', '__name__']) {
+    const command = createCommand({
+      payload: {
+        ...createCommand().payload,
+        occurrenceId,
+      },
+    });
+    const inspected = inspectBookingCommand(
+      Buffer.from(JSON.stringify({ data: command }), 'utf8'),
+      command,
+    );
+    assert.deepEqual(inspected, { ok: false, reason: 'invalid_contract' });
+  }
 });
 
 void test('semantic hash ignores transport identity but includes domain meaning', () => {

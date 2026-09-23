@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
 
 export const bookingCollections = Object.freeze({
@@ -22,5 +23,11 @@ export function runBookingTransaction<T>(
 }
 
 export function finitePoolLedgerId(occurrenceId: string, poolId: string, channel: string): string {
-  return `${occurrenceId}__${poolId}__${channel}`;
+  const canonical = [occurrenceId, poolId, channel]
+    .map((part) => `${Buffer.byteLength(part, 'utf8')}:${part}`)
+    .join('|');
+  const digest = createHash('sha256')
+    .update(`booking_pool_ledger_v2|${canonical}`, 'utf8')
+    .digest('hex');
+  return `bpl2_${digest}`;
 }

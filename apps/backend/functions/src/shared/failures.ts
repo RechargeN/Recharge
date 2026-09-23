@@ -58,7 +58,7 @@ export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown
   if (result.kind === 'unsupportedContract') {
     return { ...base, unsupportedPayload: { reason: result.code } };
   }
-  const code = wireErrorCode(result.code);
+  const code = bookingWireErrorCode(result.code);
   return {
     ...base,
     error: {
@@ -70,7 +70,7 @@ export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown
   };
 }
 
-function wireErrorCode(code: BookingFailureCode): string {
+export function bookingWireErrorCode(code: BookingFailureCode): string {
   if (code === 'unauthenticated') return 'not_authenticated';
   if (code === 'permission_denied') return 'not_authorized';
   return code;

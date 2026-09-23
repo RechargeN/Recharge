@@ -51,6 +51,36 @@
       }
     },
     {
+      "schema": "booking_query.schema.json",
+      "reason": "request id cannot contain a path separator",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getMyBooking",
+        "requestId": "bad/request",
+        "payload": { "bookingId": "booking-1" }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "document id cannot be dot",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getMyBooking",
+        "requestId": "q-dot",
+        "payload": { "bookingId": "." }
+      }
+    },
+    {
+      "schema": "booking_query.schema.json",
+      "reason": "document id cannot be reserved firestore name",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "requestId": "q-reserved",
+        "payload": { "eventId": "__name__", "occurrenceId": "occurrence-1" }
+      }
+    },
+    {
       "schema": "booking_read.schema.json",
       "reason": "notFound cannot carry booking",
       "value": {
@@ -60,6 +90,23 @@
         "serverTime": "2026-08-27T12:00:00.000Z",
         "kind": "notFound",
         "booking": {}
+      }
+    },
+    {
+      "schema": "booking_read.schema.json",
+      "reason": "retryableFailure must carry a retryable error",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getMyBooking",
+        "requestId": "r-retry-mismatch",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "retryableFailure",
+        "error": {
+          "schemaVersion": 1,
+          "code": "temporarily_unavailable",
+          "retryable": false,
+          "correlationId": "r-retry-mismatch"
+        }
       }
     },
     {

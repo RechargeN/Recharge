@@ -19,6 +19,7 @@ import {
   type BookingFlagId,
 } from './shared/feature_flags.js';
 import {
+  bookingWireErrorCode,
   rejected,
   toBookingCommandWireResult,
   unsupported,
@@ -98,11 +99,14 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
   flagId: BookingFlagId,
   commandType: T,
 ) {
+  const hint = bookingTransportHint(request.data);
+  const access = await prepareAccess(request, flagId);
+  if (!access.ok) return { ...access, requestId: hint.requestId };
   const inspected = inspectBookingCommand(request.rawRequest.rawBody, request.data);
   if (!inspected.ok) {
     return {
       ok: false as const,
-      requestId: 'invalid_request',
+      requestId: hint.requestId,
       result: rawFailure(inspected.reason),
     };
   }
@@ -113,8 +117,6 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
       result: unsupported('unsupported_flow'),
     };
   }
-  const access = await prepareAccess(request, flagId);
-  if (!access.ok) return { ...access, requestId: inspected.value.requestId };
   return {
     ok: true as const,
     actorId: access.actorId,
@@ -129,11 +131,14 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
   flagId: BookingFlagId,
   queryType: T,
 ) {
+  const hint = bookingTransportHint(request.data);
+  const access = await prepareAccess(request, flagId);
+  if (!access.ok) return { ...access, requestId: hint.requestId };
   const inspected = inspectBookingQuery(request.rawRequest.rawBody, request.data);
   if (!inspected.ok) {
     return {
       ok: false as const,
-      requestId: 'invalid_request',
+      requestId: hint.requestId,
       result: rawFailure(inspected.reason),
     };
   }
@@ -144,8 +149,6 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
       result: unsupported('unsupported_flow'),
     };
   }
-  const access = await prepareAccess(request, flagId);
-  if (!access.ok) return { ...access, requestId: inspected.value.requestId };
   return {
     ok: true as const,
     actorId: access.actorId,
@@ -181,8 +184,27 @@ function emulatorFirestore() {
 }
 
 function rawFailure(reason: RawBookingFailureReason) {
+  if (reason === 'unsupported_schema') return unsupported('unsupported_schema');
   if (reason === 'unsupported_flow') return unsupported('unsupported_flow');
   return rejected('invalid_contract');
+}
+
+function bookingTransportHint(value: unknown): Readonly<{
+  requestId: string;
+  schemaVersion?: number;
+}> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return { requestId: 'invalid_request' };
+  }
+  const record = value as Record<string, unknown>;
+  const requestId =
+    typeof record.requestId === 'string' &&
+    /^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(record.requestId)
+      ? record.requestId
+      : 'invalid_request';
+  return Number.isSafeInteger(record.schemaVersion)
+    ? { requestId, schemaVersion: Number(record.schemaVersion) }
+    : { requestId };
 }
 
 function toBookingQueryWireResult(
@@ -204,8 +226,19 @@ function toBookingQueryWireResult(
     ) {
       return { ...base, kind: 'notFound' };
     }
-    const reason = 'code' in result ? result.code : 'temporarily_unavailable';
-    return { ...base, kind: 'unsupportedContract', unsupportedPayload: { reason } };
+    if (result.kind === 'unsupportedContract') {
+      return { ...base, kind: 'unsupportedContract', unsupportedPayload: { reason: result.code } };
+    }
+    return {
+      ...base,
+      kind: result.kind,
+      error: {
+        schemaVersion: 1,
+        code: bookingWireErrorCode(result.code),
+        retryable: result.kind === 'retryableFailure',
+        correlationId: requestId,
+      },
+    };
   }
   const data = result.data as Record<string, unknown>;
   if (queryType === 'getMyBooking') return { ...base, kind: 'found', booking: data.booking };

@@ -77,6 +77,7 @@ export type RawBookingFailureReason =
   | 'unsupported_protocol_value'
   | 'callable_decode_mismatch'
   | 'invalid_contract'
+  | 'unsupported_schema'
   | 'unsupported_flow';
 
 const maxCallableBodyBytes = 64 * 1024;
@@ -151,8 +152,13 @@ function inspectRawInput<T>(
 }
 
 function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
-  if (!isObject(value) || value.schemaVersion !== 1 || !isBoundedId(value.requestId)) {
+  if (!isObject(value) || !isBoundedId(value.requestId)) {
     return failure('invalid_contract');
+  }
+  if (value.schemaVersion !== 1) {
+    return failure(
+      Number.isSafeInteger(value.schemaVersion) ? 'unsupported_schema' : 'invalid_contract',
+    );
   }
   if (!isBoundedId(value.idempotencyKey) || !isObject(value.payload)) {
     return failure('invalid_contract');
@@ -223,12 +229,16 @@ function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
 function parseBookingQuery(value: unknown): RawBookingInput<BookingQuery> {
   if (
     !isObject(value) ||
-    value.schemaVersion !== 1 ||
     !isBoundedId(value.requestId) ||
     !isObject(value.payload) ||
     !hasOnlyKeys(value, ['schemaVersion', 'queryType', 'requestId', 'payload'])
   ) {
     return failure('invalid_contract');
+  }
+  if (value.schemaVersion !== 1) {
+    return failure(
+      Number.isSafeInteger(value.schemaVersion) ? 'unsupported_schema' : 'invalid_contract',
+    );
   }
   if (value.queryType === 'getMyBooking') {
     if (!hasExactKeys(value.payload, ['bookingId']) || !isBoundedId(value.payload.bookingId)) {
@@ -295,13 +305,7 @@ function hasExactKeys(value: JsonObject, keys: readonly string[]): boolean {
 }
 
 function isBoundedId(value: unknown): value is string {
-  if (typeof value !== 'string' || [...value].length < 1 || [...value].length > 128) return false;
-  try {
-    validateUnicode(value);
-  } catch {
-    return false;
-  }
-  return /[^\s\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]/u.test(value);
+  return typeof value === 'string' && /^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(value);
 }
 
 function optionalId(value: unknown): boolean {

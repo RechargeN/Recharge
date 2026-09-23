@@ -4,12 +4,17 @@
   "title": "Recharge Booking v1 common definitions",
   "$defs": {
     "schemaVersion": { "type": "integer", "const": 1 },
-    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9_-]+$"
+    },
     "requestId": {
       "type": "string",
       "minLength": 1,
       "maxLength": 128,
-      "pattern": "^(?![\\s\\S]*[\\uD800-\\uDFFF])(?=[\\s\\S]*[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000])[\\s\\S]+$"
+      "pattern": "^(?!__name__$)[A-Za-z0-9_-]+$"
     },
     "safeInteger": {
       "type": "integer",

@@ -66,6 +66,32 @@
     {
       "schemaVersion": 1,
       "queryType": "getMyBooking",
+      "requestId": "read-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "not_authenticated",
+        "retryable": false,
+        "correlationId": "read-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "temporarily_unavailable",
+        "retryable": true,
+        "correlationId": "read-retryable"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
       "requestId": "read-forward",
       "serverTime": "2026-08-27T12:00:00.000Z",
       "kind": "unsupportedContract",
@@ -128,6 +154,32 @@
         "sort": "createdAtDescIdDesc",
         "consistency": "liveKeyset"
       }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "feature_disabled",
+        "retryable": false,
+        "correlationId": "page-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "contention",
+        "retryable": true,
+        "correlationId": "page-retryable"
+      }
     }
   ],
   "availability": [
@@ -182,6 +234,32 @@
         "authority": "nonAuthoritative",
         "capacityMode": "notApplicable",
         "reasonCode": "source_stale"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "availability-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "event_unavailable",
+        "retryable": false,
+        "correlationId": "availability-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "availability-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "temporarily_unavailable",
+        "retryable": true,
+        "correlationId": "availability-retryable"
       }
     }
   ]

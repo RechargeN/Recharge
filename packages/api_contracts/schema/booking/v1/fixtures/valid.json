@@ -82,7 +82,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "attempt:create:opaque",
+      "requestId": "attempt_create_opaque",
       "idempotencyKey": "01JIDEMPOTENCY000000000001",
       "occurredAgainstEventRevision": 4,
       "payload": {
@@ -183,7 +183,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": " \u00a0opaque\u3000 ",
+      "requestId": "opaque_request",
       "idempotencyKey": "idempotency-retained-blanks",
       "payload": {
         "occurrenceId": "01JOCCURRENCE000000000001",
@@ -196,7 +196,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "é",
+      "requestId": "unicode_nfc",
       "idempotencyKey": "idempotency-nfc",
       "payload": {
         "occurrenceId": "01JOCCURRENCE000000000001",
@@ -206,7 +206,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "e\u0301",
+      "requestId": "unicode_nfd",
       "idempotencyKey": "idempotency-nfd",
       "payload": {
         "occurrenceId": "01JOCCURRENCE000000000001",
@@ -226,7 +226,7 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "attempt-😀",
+      "requestId": "attempt_supplementary",
       "idempotencyKey": "idempotency-supplementary-scalar",
       "payload": {
         "occurrenceId": "01JOCCURRENCE000000000001",
