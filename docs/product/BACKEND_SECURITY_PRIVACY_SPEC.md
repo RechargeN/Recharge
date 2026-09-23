@@ -1,17 +1,19 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.25**
-- Date: **2026-09-20**
-- Spec status: **Draft — BCK-04 and threat-model technical owner verdicts recorded; independent/Legal/OD gates pending**
-- Runtime status: **Bounded local default-deny/RAW-C Emulator evidence Present; product/cloud security runtime Absent**
+- Version: **0.4.31**
+- Date: **2026-09-23**
+- Spec status: **Review — D1 security/privacy technical baseline closed; independent/qualified/production gates retained**
+- Runtime status: **Local R1 security/privacy ports, default-deny Rules and disposable Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Interim review coordinator: **RechargeN / Product owner**
+- Local R1 technical decision: **Accepted and verified locally — independent/qualified and cloud gates retained**
+- Production Security/Privacy/Legal approval: **Pending**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.69](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.75](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.15](BACKEND_API_CONTRACT_STANDARD.md) (Draft; parent closure review prepared, accountable/independent verdicts Pending),
-  [BCK-09 v1.13](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+- Parent architecture: [BCK-01 v0.4.83](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.20](BACKEND_API_CONTRACT_STANDARD.md) (Review; local-R1 verified),
+  [BCK-09 v1.15](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
 - Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.25
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -34,6 +36,66 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.31 — 2026-09-23
+
+- records the completed local R1 security/privacy foundation: typed guards
+  and ports, fail-closed policy decisions, default-deny Rules and disposable
+  Emulator negative evidence are present and verified;
+- removes stale owner-approval-pending wording without claiming independent
+  Security/Privacy, qualified Legal, cloud or production approval;
+- aligns BCK-01/BCK-02/BCK-03 references with the Stage 8 reconciliation and
+  changes no policy, data-class or acceptance-criteria semantics.
+
+### v0.4.30 — 2026-09-21
+
+- reconciles the security boundary to BCK-01 v0.4.81, BCK-03 v0.3.19 and the
+  sole BCK-02 v2.4.87 exact R1 manifest;
+- separates local default-deny technical acceptance from production,
+  independent Security/Privacy and qualified Legal approval;
+- preserves logical IAM, secret references, App Check, data classes,
+  retention/DSR, age fail-closed policy and exact European location controls;
+- delegates exact owner approval to BCK-02 §29 and changes no Rules/IAM/runtime.
+
+### v0.4.29 — 2026-09-21
+
+- added the Stage 7 exact R1 security/Rules/IAM file and ownership map;
+- fixed default-deny ports, direct-client collection posture, logical identities
+  and negative test locations without inventing grants or cloud principals;
+- kept Identity, DSR, T&S and product authorization outside R1;
+- created no Rules/source/IAM/runtime/Firebase/deployment authority.
+
+### v0.4.28 — 2026-09-21
+
+- added the Stage 6 per-market/per-capability compliance evidence contract;
+- separated processing/Legal, residency/transfer, age, UGC/DSA,
+  retention/DSR and support evidence from MarketConfig and deployment state;
+- required subject-wide DSR scope and smallest-safe capability containment;
+- retained every independent Security/Privacy and qualified Legal gate and
+  added no runtime, Firebase, deployment or market activation authority.
+
+### v0.4.27 — 2026-09-20
+
+- added the Stage 2 normalized security/privacy entity inventory;
+- separated Privacy Orchestration authority from domain deletion handlers,
+  Identity authority and Operations incident/deployment records;
+- aligned authorization, retention, audit and evidence semantics with BCK-01
+  §30 and the BCK-02 writer ledger without claiming qualified approval.
+
+### v0.4.26 — 2026-09-20
+
+- closed the D1 technical security/privacy boundary for R1 planning without
+  claiming independent Security/Privacy or qualified Legal conclusions;
+- aligned data classes, server-resolved actor context, Rules/IAM, secrets,
+  retention/deletion orchestration and incident/rollback boundaries with the
+  closed BCK-03/05 technical contracts;
+- recorded OD-11 as Proposed without selecting a numeric age: only the exact
+  age-sensitive market/surface remains disabled until an Accepted policy;
+- retained non-Booking retention values, DPIA, ROPA, transfers, qualified
+  legal basis and production personal-data processing as later fail-closed gates;
+- advanced the specification to Review for exact R1 planning only; no Auth,
+  App Check, Rules/IAM deployment, secrets, Firebase or personal-data runtime
+  is authorized.
 
 ### v0.4.25 — 2026-09-20
 
@@ -399,7 +461,7 @@ Draft/Review spec регистрируется и reconciled owners, а не р�
 | 5 | Aggregate, record writer и consumer ownership | Покрыт для собственного module | Privacy Orchestration владеет `PrivacyRequest`, `PrivacyDomainTask`, `PrivacyCompletionEvidence`; writers/consumers — §20.2 и §28 |
 | 6 | Data classification и public/protected/private projections | Покрыт | §7 |
 | 7 | Commands, queries, events и typed error envelope | Покрыт на semantic level | Privacy commands/queries/events — §20.2; envelope/error vocabulary наследуют `BCK-03` |
-| 8 | Schema/API/event versions, evolution, minimum supported client | Покрыт границей | Privacy wire/event `v1`, additive evolution и minimum-client policy наследуют `BCK-03 §25–27`; artifact conditional до `API-DEC-05`, §28 |
+| 8 | Schema/API/event versions, evolution, minimum supported client | Покрыт границей | Privacy wire/event `v1`, additive evolution и minimum-client policy наследуют `BCK-03 §25–27`; canonical schema path follows Accepted `API-DEC-05`, physical artifacts remain slice-gated, §28 |
 | 9 | Authorization/capability matrix и revocation behavior | Покрыт | §9 |
 | 10 | Persistence, indexes, source/projection, transaction boundaries | Покрыт | Privacy Orchestration source records и domain-owned handlers разделены; §20.2, §28 |
 | 11 | IDs, references, UTC/IANA, reference-data semantics | Покрыт наследованием | ULID/UTC/IANA/market semantics — `BCK-01 §11`; Privacy records не создают альтернативные primitives, §20.2 |
@@ -428,7 +490,7 @@ Draft/Review spec регистрируется и reconciled owners, а не р�
 - secrets/crypto material policy;
 - abuse/rate limiting принципы и numeric defaults, унаследованные из ADR 0013;
 - privacy processing: purpose, legal basis, consent, minimization;
-- `OD-11` minors/age Open-decision constraints and Legal review brief;
+- `OD-11` Proposed technical minors/age constraints and Legal review brief;
 - retention/deletion/export/DSR модель;
 - logging/audit redaction правила;
 - data residency принципы (`OD-07` boundary, без самостоятельного выбора или
@@ -732,7 +794,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
 
 [BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md) and ECL03-D11 resolve
 the former Review-contract-vs-fixture contradiction. Booking v1 now has one
-contract across BCK-03 v0.3.15, BCK-09 v1.13, ECL-03 v1.3 and ECL-03C v1.11:
+contract across BCK-03 v0.3.19, BCK-09 v1.15, ECL-03 v1.3 and ECL-03C v1.11:
 
 - `requestId` correlates one request attempt;
 - `idempotencyKey` identifies one logical mutation across retries;
@@ -1015,16 +1077,15 @@ readiness не требует, чтобы ROPA/DPIA уже существова�
 
 ## 18. OD-11 — minors/age eligibility
 
-`OD-11` уже зарегистрирован (`BCK-02 §16`, строка реестра `OD-11`) как
-`Open`, owner
-Security/Privacy, блокирует R2 production account creation, Find People,
-age-restricted publication/discovery, applicable Booking paths, G6. BCK-04
-не создаёт это решение с нуля — добавляет candidate constraints как материал
-для решения владельца. Юридические источники, purpose-by-purpose вопросы и
-fail-closed review contract собраны в
+`OD-11` зарегистрирован (`BCK-02 §16`, строка реестра `OD-11`) как
+`Proposed`, owner Security/Privacy. Proposal намеренно не выбирает числовой
+возраст: он задаёт versioned policy contract и fail-closed поведение для
+R2 production account creation, Find People, age-restricted
+publication/discovery, applicable Booking paths и G6. Юридические источники,
+purpose-by-purpose вопросы и qualified-review contract собраны в
 [BCK-D1-OD11-LGL-01](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md).
 
-### 18.1 Candidate constraints (decision remains Open)
+### 18.1 Proposed constraints
 
 - политика версионируется **отдельно для LV, EE и LT** — единого глобального
   возраста нет;
@@ -1034,9 +1095,16 @@ fail-closed review contract собраны в
   такого review;
 - **client-declared age не является authority** — совпадает со сквозным
   принципом §8/§9;
-- до Accepted решения по конкретному рынку: production account creation,
-  Find People, age-restricted публикация/discovery, applicable Booking paths
-  — **server-disabled и fail-closed** для этого рынка;
+- policy key is `(market, surface, purpose, policyRevision)`; missing, stale,
+  unsupported or non-Accepted policy disables only the affected age-sensitive
+  surface for that market;
+- до Accepted решения по конкретному рынку: Find People, age-restricted
+  публикация/discovery и applicable Booking paths — **server-disabled и
+  fail-closed**; general local/dev backend work and non-age-sensitive surfaces
+  are not globally blocked;
+- production account creation may proceed only if the Accepted Identity/Legal
+  policy explicitly declares the account path age-neutral or defines its
+  compliant eligibility flow; otherwise that path is disabled;
 - disabled Booking Emulator core (`BCK-09`/`G4`) **не блокируется
   глобально** — age-sensitive paths внутри него остаются server-disabled
   индивидуально, пока их конкретный scope не Accepted;
@@ -1045,12 +1113,11 @@ fail-closed review contract собраны в
 
 ### 18.2 Статус
 
-`Open — no Recharge age policy selected`. Candidate constraints and the Legal
-brief do not by themselves satisfy the `Open -> Proposed` transition. It
-requires a qualified Legal/Privacy owner, one concrete per-market proposal and
-the evidence named in the brief. Реализация (age-gate UI, guardian flow,
-verification backend) не разрешается этой спецификацией — действует только
-fail-closed поведение до Accepted.
+`Proposed — no numeric Recharge age selected`. D1 accepts only the technical
+policy shape and scoped fail-closed behavior. `Proposed -> Accepted` requires
+qualified Legal/Privacy evidence and a concrete per-market/per-surface policy.
+Age-gate UI, guardian flow and verification backend are not authorized by this
+specification.
 
 ## 19. Retention matrix (Retention/Deletion Matrix)
 
@@ -1448,7 +1515,7 @@ absent, so
 | ID | Вопрос | Owner | Блокирует | Deferrable без изменения scope? |
 |---|---|---|---|:---:|
 | `OD-07` (внешний, `BCK-02 §16`) | Firebase topology/edition/regions | Platform (`BCK-04`+`BCK-05`) | R1 provisioning, §22 | Нет (R1) |
-| `OD-11` (внешний, `BCK-02 §16`) | Region-versioned minors/age policy | Security/Privacy | R2 account creation, Find People, age-restricted paths, applicable Booking, G6, §18 | Нет (R2/G6) |
+| `OD-11` (внешний, `BCK-02 §16`) | **Proposed:** market/surface/purpose-versioned minors/age policy without numeric age | Security/Privacy + qualified Legal | affected R2 account, Find People, age-restricted and applicable Booking paths, G6, §18 | Нет для affected production surface; не блокирует D1/R1 design |
 | `BCK04-OD-01` | **Proposed:** v0.2 has 49 classified threats, per-threat ownership/gates/residual state and combined-owner technical verdict; independent review and cross-boundary confirmations pending | Security/Privacy | **Approved BCK-04 напрямую** | **Нет** |
 | `BCK04-OD-02` | Полный подписанный data inventory по каждому domain | Каждый domain owner + Security/Privacy | Production personal data для этого domain | Да, per-domain, до production |
 | `BCK04-OD-03` | Session/token TTL, refresh cadence, deletion provider-revocation detail | Identity owner (`BCK-06`) | Executable Auth slice | Да, до executable slice |
@@ -1467,7 +1534,7 @@ absent, so
 Формат соответствует `BCK-02 §16`: `Open -> Proposed -> Accepted | Deferred
 | Superseded`; `Deferred` требует owner/причину/срок пересмотра. **Но**: OD,
 блокирующие `Approved BCK-04` напрямую (`BCK04-OD-01`, `BCK04-OD-09`) или G1
-(`BCK04-OD-06`, `OD-07`, `OD-11`), нельзя перевести в `Deferred` без **изменения их
+(`BCK04-OD-06`, `OD-07`), нельзя перевести в `Deferred` без **изменения их
 собственного blocking scope** — Deferred с сохранением "блокирует Approved
 BCK-04" логически противоречиво: если решение отложено, Approval не может
 одновременно считаться готовым. Только OD с blocking scope ниже уровня самого
@@ -1478,7 +1545,7 @@ BCK-04 Approval (`BCK04-OD-02`–`BCK04-OD-05`, `BCK04-OD-07`–`08`,
 ## 28. Exact future artifact map
 
 Не создаётся этой версией. Это exact target plan для отдельного Approved
-executable slice, согласованный с BCK-01 v0.4.69 Review:
+executable slice, согласованный с BCK-01 v0.4.78 Review:
 
 ```text
 docs/runbooks/
@@ -1490,7 +1557,7 @@ apps/backend/
   firestore.indexes.json
   storage.rules
   functions/src/
-    shared/
+    platform/
       auth/
         auth_guard.ts
         capability_check.ts
@@ -1514,12 +1581,12 @@ apps/backend/
           privacy_domain_task_repository.ts
         transport/
           privacy_callable_handlers.ts
-    transport/
-      middleware/
-        app_check_guard.ts
-        rate_limit_guard.ts
-      callable/
-      http/
+      transport/
+        middleware/
+          app_check_guard.ts
+          rate_limit_guard.ts
+        callable/
+        http/
   functions/test/
     unit/security/
     unit/privacy_orchestration/
@@ -1530,15 +1597,17 @@ apps/backend/
     integration/privacy_dsr_test.ts
 
 packages/api_contracts/
-  schema/privacy/v1/               # conditional: only after Accepted API-DEC-05
+  schema/privacy/v1/               # canonical under Accepted API-DEC-05;
+                                   # physical files require Approved slice
     privacy_request.schema.json
     privacy_request_status.schema.json
     fixtures/
 ```
 
 `RUN-04`/`RUN-06` пока существуют только в реестре BCK-02. Contract schemas
-остаются conditional до Accepted `API-DEC-05`; наличие пути в target plan не
-разрешает создать его раньше. Generated files вручную не редактируются.
+use the Accepted `API-DEC-05` canonical location; наличие пути в target plan не
+разрешает создать их до exact Approved executable slice. Generated files
+вручную не редактируются.
 
 ### 28.1 Server-resolved actor context
 
@@ -1546,10 +1615,10 @@ Client input schema для `actorContext` намеренно отсутству�
 
 1. **Неверное имя пути.** Реальный BCK-03 target для платформенных схем —
    `schema/platform/v1/`, не `schema/common/v1/`; последний вообще не
-   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.15.
-2. **Концептуальная ошибка.** `schema/platform/v1` и любой non-Booking
-   `schema/<domain>/vN` прямо запрещены до Accepted `API-DEC-05`
-   (`BCK-03 §35`). Даже после его принятия, `actorContext` — server-resolved
+   существует ни как Accepted, ни как conditional target в BCK-03 v0.3.19.
+2. **Концептуальная ошибка.** Accepted `API-DEC-05` задаёт
+   `schema/<domain>/vN` как canonical wire location, но physical artifacts
+   remain executable-slice gated. Кроме того, `actorContext` — server-resolved
    (`BCK-03 §12`: "акторContext клиент не заполняет") и никогда не является
    client wire payload — значит ему в принципе не место в списке *input*
    wire-схем. Если понадобится типизировать server-internal actor context
@@ -1600,10 +1669,11 @@ Client input schema для `actorContext` намеренно отсутству�
 - interim coordination назначена `RechargeN / Product owner`; до Review
   остаётся назначить независимого Security/Privacy и qualified Legal/Privacy
   specialist owner для решений, требующих профессионального sign-off;
-- Legal/Privacy owner назначен для `OD-11`/`BCK04-OD-06`.
+- qualified Legal/Privacy ownership remains required for `OD-11` Acceptance
+  and `BCK04-OD-06`; combined Product-owner coordination is disclosed;
 - OD-11 questions and verified legal-source boundaries are reviewable through
-  [BCK-D1-OD11-LGL-01](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md), but the
-  decision remains Open until a qualified owner selects a policy.
+  [BCK-D1-OD11-LGL-01](BACKEND_OD_11_AGE_POLICY_LEGAL_BRIEF.md); the technical
+  proposal is fixed, while numeric/per-market policy remains unaccepted.
 
 Current readiness: the BCK-01 and coverage prerequisites plus interim
 coordination are evidenced. The combined owner accepted the technical BCK-03,
@@ -1611,8 +1681,9 @@ BCK-04 and BCK04-OD01 threat-model boundaries with required amendments through
 BCK03-SEC-DEC-01, BCK04-SEC-DEC-01 and BCK04-OD01-DEC-01. This is not
 independent Security/Privacy evidence, OD-01 Acceptance or qualified Legal
 judgment. BCK04-OD-01/09, independent assessment, cross-boundary confirmations,
-D1-SIG-LEGAL and qualified Legal/Privacy evidence remain absent. BCK-04
-therefore remains Draft and cannot enter Review.
+D1-SIG-LEGAL and qualified Legal/Privacy evidence remain absent. The D1
+technical boundary is nevertheless closed and BCK-04 is Review; those retained
+gates still block Approved/production status.
 
 ### 30.2 Definition of Done Approved BCK-04
 
@@ -1633,6 +1704,7 @@ therefore remains Draft and cannot enter Review.
   датой пересмотра и сохранённым (более узким) blocking scope;
 - reconciliation с `BCK-03`/`BCK-09` подтверждена через
   BCK-D1-DEC-01/ECL03-D11; executable parity evidence остаётся runtime gate;
+- 90 AC are unique and sequential;
 - runtime остаётся Absent.
 
 ### 30.3 Acceptance criteria
@@ -1649,7 +1721,7 @@ therefore remains Draft and cannot enter Review.
    спецификации.
 6. **BCK-04-AC-06:** `requestId` per attempt, logical `idempotencyKey` и
    server-issued `privacyRequestId` имеют разные роли и согласованы с
-   BCK-03 v0.3.15; это wording supersedes AC-06 revision v0.4.21 без
+    BCK-03 v0.3.19; это wording supersedes AC-06 revision v0.4.21 без
    перенумерации stable ID.
 7. **BCK-04-AC-07:** anti-enumeration правило одинаково применяется к
    Booking, Page и verification-ресурсам.
@@ -1774,7 +1846,8 @@ therefore remains Draft and cannot enter Review.
     validation, rate limits or audit.
 57. **BCK-04-AC-57:** BCK04-SEC-DEC-01 does not accept BCK04-OD-01/09,
     OD-11, independent review or qualified Legal evidence.
-58. **BCK-04-AC-58:** BCK-04 remains Draft until its full DoR and DoD pass.
+58. **BCK-04-AC-58:** BCK-04 may be Review after D1 technical closure, but
+    remains unapproved until its full DoD and retained independent/qualified gates pass.
 59. **BCK-04-AC-59:** this revision creates no code, Firebase resource,
     deployment, push or merge authority.
 60. **BCK-04-AC-60:** threat-model v0.2 gives every threat explicit
@@ -1790,14 +1863,78 @@ therefore remains Draft and cannot enter Review.
     decision is inferred from the other.
 65. **BCK-04-AC-65:** BCK-D1-OD11-PROD-REV-01 prepares only an unsigned
     Product boundary; it selects no numeric age, supplies no qualified verdict
-    and leaves OD-11 Open and every dependent high-risk surface fail-closed.
+    and leaves numeric/per-market OD-11 policy unaccepted and every dependent
+    high-risk surface fail-closed.
 66. **BCK-04-AC-66:** BCK04-OD01-XASSIGN-01 and Batch E prepare assignment
     routing only; all fourteen reviewers/verdicts remain unrecorded, OD-01
     remains Proposed and no independent/cross-boundary evidence is inferred.
+67. **BCK-04-AC-67:** OD-11 is Proposed only as a versioned
+    market/surface/purpose policy shape; no numeric age is selected.
+68. **BCK-04-AC-68:** an absent, stale, unsupported or non-Accepted age policy
+    disables the affected age-sensitive surface, not unrelated backend work.
+69. **BCK-04-AC-69:** D1 technical closure does not claim independent
+    Security/Privacy or qualified Legal approval.
+70. **BCK-04-AC-70:** Accepted API-DEC-05 supplies the canonical schema
+    location, while physical schema and generated files remain slice-gated.
+71. **BCK-04-AC-71:** BCK-04 Review permits exact R1 design only and grants no
+    IAM, Rules, secret, Firebase, deployment or production-data authority.
+72. **BCK-04-AC-72:** retention, deletion, incident and backup controls keep
+    their narrower production gates even when the technical boundary is closed.
+73. **BCK-04-AC-73:** compliance readiness is evaluated for an exact
+    environment, market, capability, purpose and policy revision tuple.
+74. **BCK-04-AC-74:** MarketConfig and a server feature flag cannot substitute
+    for accepted Security/Privacy and applicable qualified Legal evidence.
+75. **BCK-04-AC-75:** residency and transfer evidence inventories every
+    applicable resource/processor/location; an EU-labelled primary resource is
+    not proof about backups, logs, support access or subprocessors.
+76. **BCK-04-AC-76:** missing age or UGC/DSA evidence disables only affected
+    surfaces unless a shared protection defect requires broader containment.
+77. **BCK-04-AC-77:** mandatory privacy, age and safety copy is bound to exact
+    market/locale/revision and cannot use an unapproved localization fallback.
+78. **BCK-04-AC-78:** DSR verification and dispatch cover the data subject
+    across every applicable market and owning handler, independent of
+    home/current market or device locale.
+79. **BCK-04-AC-79:** every enabled capability has explicit retention,
+    deletion/export handler, hold behavior, support/escalation route and audit
+    evidence, or a reviewed not-applicable decision.
+80. **BCK-04-AC-80:** current official authority/contact references are
+    evidence inputs only and never represent a qualified legal conclusion.
+81. **BCK-04-AC-81:** v0.4.28 is documentation-only and grants no independent
+    verdict, runtime, IAM, Rules, Firebase, deployment or market activation.
+82. **BCK-04-AC-82:** BCK-02 §26 enumerates every R1 security/config/Rules and
+    negative-test path; no alternative middleware or policy file is allowed.
+83. **BCK-04-AC-83:** R1 security files define ports and default-deny behavior,
+    not Identity records, grants, verification or product authorization.
+84. **BCK-04-AC-84:** every R1 platform/reference collection denies direct
+    client read/write and has one server writer plus exact reader scope.
+85. **BCK-04-AC-85:** App Check and rate-limit ports cannot authorize a request
+    or replace fresh actor/capability/market policy evaluation.
+86. **BCK-04-AC-86:** secret config contains identifiers/references only and
+    tests reject secret values, tokens, credentials and key material.
+87. **BCK-04-AC-87:** R1 uses logical identities only; real service accounts,
+    IAM bindings and break-glass grants remain execution/provisioning-gated.
+88. **BCK-04-AC-88:** structured logs, metrics and security audit ports use
+    allowlisted low-cardinality metadata and reject payload/PII/secret leakage.
+89. **BCK-04-AC-89:** R1 rollback cannot relax Rules, resurrect grants/data or
+    remove RAW-C deny coverage; unsafe state remains disabled.
+90. **BCK-04-AC-90:** v0.4.29 is documentation-only and creates no security
+    source, Rules change, IAM binding, secret, Firebase resource or deployment.
+91. **BCK-04-AC-91:** v0.4.30 is reconciled to the sole BCK-02 v2.4.87 §26
+    path/action manifest and cannot introduce an alternate security path.
+92. **BCK-04-AC-92:** local-R1 acceptance covers only fail-closed ports,
+    synthetic negative evidence and default-deny Rules intent.
+93. **BCK-04-AC-93:** logical IAM identities and secret references create no
+    account, binding, credential, secret value or standing privilege.
+94. **BCK-04-AC-94:** retention/DSR and age-policy contracts remain technical;
+    numeric age and qualified production policy stay Pending and fail closed.
+95. **BCK-04-AC-95:** accepted location architecture is revalidated before
+    provisioning and does not constitute a residency or Legal conclusion.
+96. **BCK-04-AC-96:** this preflight creates no Rules/IAM change, Emulator run,
+    Firebase resource, deployment, activation, push or merge.
 
 ### 30.4 Unimplemented list (честно)
 
-На момент v0.4.25 отсутствует:
+На момент v0.4.30 отсутствует:
 
 - любой `.rules`/`firestore.indexes.json`/Cloud Function файл;
 - data inventory за пределами формата §6.1 (сам инвентарь — предмет
@@ -1819,3 +1956,190 @@ therefore remains Draft and cannot enter Review.
   и automated-decision policies (`BCK04-OD-10`…`OD-14`).
 
 Runtime status остаётся **Absent** по всему документу.
+
+### 30.5 Next executable step
+
+Prepare one exact R1 security/platform slice that enumerates files, default-deny
+Rules, workload identities, secret references, negative tests, rollback and
+evidence commands. It must use synthetic data and keep production projects,
+credentials, personal data, age-sensitive surfaces and retained Legal gates
+disabled. No target artifact is authorized until that slice and G1 are
+separately approved.
+
+### 30.6 Stage 2 normalized security/privacy entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| PrivacyRequest | Privacy owner / Privacy Orchestration | requester status projection, domain task coordinators, audited Support | immutable requestId; verified subjectId and server-resolved scope references |
+| PrivacyDomainTask | Privacy owner / Privacy Orchestration task handler; owning domain mutates only its own separate records | orchestration/reconciliation projection | taskId, requestId, domain, target revision; never raw client scope |
+| SecurityPolicyRevision | Security/Privacy / policy registry | Rules/IAM/config evaluators and Operations | immutable policyId/revision/hash; market/purpose/surface references where applicable |
+| Consent/LegalPolicyReference | policy owner named by BCK-04 / that policy registry; Identity writes separate subject acceptance evidence | authorized product/domain checks | policyId/revision/locale/acceptedAt evidence; consent is not the only legal basis |
+| SecurityAuditEvent | Security/Privacy / append-only security audit store; source controls only emit inputs | Security/Privacy and authorized incident response | eventId, actor/subject/resource IDs, UTC instant; no secret/raw payload |
+| SecurityIncidentPrivacyAssessment | Platform Operations / BCK-05 incident handler records qualified Privacy input | incident timeline and statutory workflow | incidentId and assessment revision; BCK-04 defines criteria, not a second incident ledger |
+
+Privacy requests are submitted → verified → dispatched → partially/fully
+completed or honestly failed/cancelled; terminal evidence is immutable.
+Forbidden transitions include client-scoped widening, resurrection after
+erasure and completion before all required task evidence. Command idempotency is
+subject/request-type scoped; task concurrency uses expected revision; each
+domain mutation is its own transaction and orchestration never performs a
+distributed write. Classification, capability matrix, holds, retention and
+deletion follow §§7–20. Migration is dry-run/reconcilable; rollback never
+reopens access or restores erased data without re-deletion. Security-relevant
+flags fail closed. Tests include negative Rules/IAM, DSR retry/partial failure,
+retention/hold, restore-resurrection, audit redaction and incident evidence.
+Telemetry is privacy-safe control metadata only and is never a shadow audit or
+payload store.
+
+## 31. Stage 6 per-market compliance evidence
+
+### 31.1 Evidence key and ownership
+
+Compliance evidence is immutable and keyed by:
+
+```text
+environmentId
+marketId: LV | EE | LT
+capabilityId
+purposeId
+dataInventoryRevision
+securityPrivacyPolicyRevision
+legalDecisionRevision?
+effectiveAtUtc
+supersedesRevisionId?
+status: pending | accepted | rejected | expired | suspended
+```
+
+BCK-04 owns the evidence format and Security/Privacy disposition. Qualified
+Legal owns legal conclusions; BCK-22 owns T&S enforcement meaning; BCK-05 owns
+traffic and deployment state; BCK-20 only publishes exact pointers. Missing or
+expired evidence is not equivalent to `not_applicable`. A not-applicable result
+must name reviewer, scope, rationale, revision and review/expiry trigger.
+
+### 31.2 Required evidence lanes
+
+For each enabled `market × capability`, record or explicitly disposition:
+
+| Lane | Minimum evidence | Safe default |
+|---|---|---|
+| Processing | purpose, data classes, lawful-basis/consent decision, notices and processors | processing disabled |
+| Residency/transfer | primary/replica/backup/log/support/subprocessor locations and transfer mechanism where applicable | personal-data path disabled |
+| Age | OD-11 market/surface/purpose revision, guardian/verification decision and age-copy revision where applicable | age-sensitive surface disabled |
+| UGC/DSA | qualified service-scope decision; reporting/contact/language/reason/appeal/transparency obligations mapped to BCK-22 | affected UGC create/publication disabled |
+| Retention/DSR | retention/hold schedule, export/delete/restrict/rectify handlers, restore re-deletion and completion evidence | mutation disabled or data minimized until resolved |
+| Support/regulatory | localized user contact, privacy/security/T&S escalation and current authority-reference source | cohort/feature disabled |
+| Incident | market impact, notification/communication decision owners, evidence retention and exercised route | cohort stopped |
+
+The matrix does not choose a numeric minimum age, declare DSA service
+classification, or provide national legal advice. Those decisions remain
+versioned and owner-gated. Current authority-reference discovery uses primary
+sources such as the [EDPB national authority directory](https://www.edpb.europa.eu/about-edpb/our-members_en),
+the [European Commission Digital Services Coordinator directory](https://digital-strategy.ec.europa.eu/en/policies/dsa-dscs)
+and the [official DSA text](https://eur-lex.europa.eu/eli/reg/2022/2065); copied
+names/contacts require checked-at evidence and revalidation before cohort.
+
+### 31.3 DSR and cross-market subjects
+
+A verified subject's request is not partitioned by `homeMarketId`, active
+market, content locale or current location. Privacy Orchestration discovers all
+applicable owning handlers and returns typed per-handler/per-market receipts.
+Market-specific policy controls notice language, support route and lawful
+exceptions; it cannot hide records from discovery or mark a partial operation
+complete. Legal holds and statutory exceptions remain record-specific and
+evidenced.
+
+### 31.4 Isolation and containment
+
+An absent/stale/non-Accepted market policy disables the smallest affected
+capability. A shared IAM/Rules defect, credential exposure, schema confusion,
+cross-market authorization leak, restore-resurrection risk or integrity defect
+requires all affected markets to stop. BCK-05 records the actual containment
+scope and rollback evidence. Security rollback never weakens Rules, restores
+erased data or revives revoked grants.
+
+This section defines reviewable controls only. It creates no qualified verdict,
+production contact, account policy, processor agreement, runtime, Rules/IAM,
+Firebase resource, deployment or activation.
+
+## 32. Stage 7 exact R1 security, Rules and IAM map
+
+### 32.1 Exact source ownership
+
+BCK-02 §26.3 is authoritative for R1 paths. `security/actor_context.ts` defines
+the server-resolved evidence shape; `authorizer.ts` is the decision port;
+`default_deny_authorizer.ts` is the only R1 implementation and rejects absent,
+stale, unsupported or unaccepted evidence. `app_check_port.ts`,
+`rate_limit_port.ts` and `security_audit_port.ts` are supplementary ports and
+cannot return product authorization.
+
+No R1 file creates User, session, capability, verification, ManagedPage,
+membership, age, consent, DSR, T&S or Admin authority. Those remain with their
+owning BCKs and later exact implementation maps.
+
+### 32.2 Rules and collection posture
+
+`firestore.rules` retains the nine explicit RAW-C denies and the final recursive
+deny. It adds explicit deny entries for the five R1 collections only to make
+intent reviewable; Admin SDK access remains IAM-controlled and is not a Rules
+exception. `storage.rules` remains deny-all because R1 creates no media path.
+
+| Record family | Writer | Authorized server readers | Client |
+|---|---|---|---|
+| release manifests/active pointers/flag revisions | logical release/config publisher | runtime platform config reader, authorized audit/rollback | deny read/write |
+| market-config revisions/activation pointers | logical reference publisher | runtime platform config reader, authorized audit/rollback | deny read/write |
+
+No R1 collection stores end-user personal data, payload narratives, provider
+credentials or secret values. Config and manifest records are Protected
+operational metadata; audit/log fields are separately minimized.
+
+### 32.3 Logical IAM ownership
+
+The documentation names roles, not real accounts:
+
+| Logical identity | Allowed future R1 action | Explicitly forbidden |
+|---|---|---|
+| `ci-build` | install, lint, typecheck, schema/test/plan validation | deploy, secret access, Firestore write |
+| `ci-deploy` | later promote approved immutable artifact/config | runtime data access, secret read beyond deploy references |
+| `runtime-platform` | read exact active config/manifest; emit minimized operations signals | publish config, grant capability, access product collections |
+| `config-publisher` | write release/flag revision and expected pointer transaction | domain, Identity, Reference Data writes |
+| `reference-publisher` | write MarketConfig revision and expected activation pointer transaction | release/flag/domain writes |
+| `break-glass` | no standing access; later TTL incident grant only | permanent/wildcard grant |
+
+Actual principal IDs, Workload Identity Federation bindings and project IAM are
+absent until G1/R1 execution with real environment inputs. Human console edits
+and shared dev/stage/prod principals are prohibited.
+
+### 32.4 Exact negative evidence
+
+The exact tests in BCK-02 §26.5 cover unauthenticated/direct client denial,
+cross-environment and cross-market config reads, stale actor/config revisions,
+unsupported schema, App Check without AuthZ, secret-value injection, log
+redaction and storage deny-all. Emulator Admin access used by tests is scoped to
+`demo-recharge` and is not production IAM evidence.
+
+Rollback restores only a previously verified Rules/config/artifact set and
+reruns all negative tests. A rollback that would reopen access, remove an
+explicit RAW-C deny or restore erased/revoked authority is rejected; the
+capability remains disabled.
+
+This section adds no qualified Security/Privacy/Legal verdict and no physical
+Rules, IAM, secret, source, Firebase or deployment change.
+
+## 33. Local R1 technical-approval preflight
+
+BCK-04 is technically consistent with the security, Rules, collection and
+logical-IAM rows in BCK-02 v2.4.87 §26. Local R1 may implement only typed
+security ports, fail-closed in-memory decisions, explicit deny Rules entries
+and synthetic negative tests. It may not create a principal, grant, secret,
+provider configuration, personal-data flow or production policy.
+
+The owner subsequently accepted `BCK-R1-FOUNDATION-TECH-DEC-01`; Stage 8
+verified the bounded local security ports, policy decisions, Rules and
+disposable Emulator evidence. This closes only the local technical boundary.
+Independent Security/Privacy, qualified Legal, OD-11 numeric policy,
+residency/processor, real IAM/secrets and production gates remain Pending.
+BCK-02 §30 is the evidence record and §31 requires every product domain to
+reapply this boundary in its own exact slice.

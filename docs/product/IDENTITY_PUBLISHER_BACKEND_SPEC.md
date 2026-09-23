@@ -1,19 +1,58 @@
 # Recharge Backend — Identity & Publisher Specification
 
 - ID: **BCK-06**
-- Version: **0.2**
-- Date: **2026-08-25**
-- Status: **Review — documentation only; approval and owner decisions pending**
-- Runtime status: **Absent — local/mock mobile behavior is not backend authority**
+- Version: **0.4**
+- Date: **2026-09-22**
+- Spec status: **Review — local implementation evidence; production decisions pending**
+- Runtime status: **Present locally — in-memory authority only; cloud/production absent**
 - Accountable owner: **Identity owner**
 - Required reviewers: **API Platform, Security/Privacy, Mobile Platform,
   Content Platform, Trust & Safety, Legal/Privacy for applicable decisions**
-- Coordination baseline: [BCK-02 v2.4.33](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.88](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
   [BCK-06-PRE v0.2](BACKEND_IDENTITY_PUBLISHER_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/IDENTITY_PUBLISHER_BACKEND_SPEC.md`
 
 ## 0. Changelog
+
+### v0.4 — 2026-09-22
+
+- records the owner-authorized local Identity/Publisher slice built on R1;
+- adds canonical Identity v1 JSON Schemas, TypeScript consumers and
+  valid/invalid/forward fixtures;
+- adds an atomic in-memory Account/provider-link/Session authority, revocation
+  fence, AccessSnapshot, Creator and ManagedPage verification, exact-page
+  membership and PublisherRef eligibility;
+- adds synthetic Google/Apple verifier ports, default-disabled composition,
+  explicit deny-all future Firestore collections and credential-free tests;
+- retains OD-08/OD-11, production provider/session/verification/retention,
+  Firebase Auth, Firestore persistence, deployment and activation gates.
+
+### v0.3.1 — 2026-09-21
+
+- normalized internal session and verification lifecycle enum values to the
+  BCK-03 lowerCamelCase wire rule;
+- retained snake_case only for registered typed error/reason codes;
+- changed no owner, lifecycle meaning, status, runtime or production gate.
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 3 Identity seam for provider linking, sessions,
+  revocation, capability freshness, Creator verification and page-scoped
+  PublisherRef resolution;
+- fixed typed commands, queries, events and failure propagation consumed by
+  BCK-18 and BCK-07 without exposing token/provider internals;
+- reconciled OD-11 as Proposed without a numeric age and limited its
+  fail-closed effect to applicable age-sensitive account/surface paths;
+- preserved OD-08, OD-11, session policy, qualified review and every runtime
+  gate as fail-closed dependencies.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Identity/Publisher entity inventory and
+  canonical User/Creator/Admin/Profile/Page/PublisherRef terminology;
+- clarified one writer, lifecycle and retained Security/Privacy/Legal gates;
+- no Auth/Firebase/runtime authority is created.
 
 ### v0.2 — 2026-08-25
 
@@ -64,7 +103,8 @@ state automatically.
 ### 2.1 Normative source order
 
 1. Accepted ADR 0013, as superseded where explicitly stated.
-2. Accepted ADR 0015 — mandatory authenticated Viewer and verified Creator.
+2. Accepted ADR 0015 — mandatory authenticated User (legacy ADR wording:
+   Viewer) and verified Creator.
 3. Accepted ADR 0016 and ADR 0017 — bounded stabilization exceptions.
 4. This active BCK-06 specification after owner Approval.
 5. BCK-02 coordination, BCK-03 API, BCK-04 Security/Privacy and BCK-05
@@ -172,7 +212,7 @@ The backend derives trusted execution context. Payload fields such as
 
 | Term | Meaning |
 |---|---|
-| User | Authenticated Recharge account; Viewer is its UI/product term |
+| User | Authenticated Recharge account; legacy Viewer is presentation wording only |
 | Creator | User with Accepted additional identity verification and required grants |
 | ManagedPage | Professional Page aggregate; not a Place or role |
 | Membership | Exact relation between one user and one page |
@@ -184,7 +224,7 @@ The backend derives trusted execution context. Payload fields such as
 
 Core invariants:
 
-1. Every production Viewer is authenticated.
+1. Every production User is authenticated.
 2. Google and Apple are the only Accepted production sign-in providers.
 3. Authentication, Creator verification and page verification are separate.
 4. A personal Creator grant never implies page authority.
@@ -254,8 +294,10 @@ eligibilityPending | active | restricted | suspended | deletionPending | deleted
 
 - one permanent ULID/UUID `userId` identifies the Recharge account;
 - provider subjects are stored as protected links and never used as public IDs;
-- production creation remains disabled until `OD-11` supplies an Accepted
-  applicable market policy;
+- production creation paths that require age/guardian eligibility remain
+  disabled until `OD-11` supplies an Accepted applicable market policy;
+- OD-11 does not create a global blocker for ordinary account creation where
+  the affected age-sensitive policy is not invoked;
 - `deleted` is terminal for access; any exceptional retained audit uses a
   pseudonymous reference under approved policy.
 
@@ -427,7 +469,7 @@ All commands use the BCK-03 envelope, client/request correlation,
 
 | Command | Caller | Transaction result | Notes |
 |---|---|---|---|
-| `identity.ensureAccount` | Trusted auth adapter | Existing account or one new eligible account | Disabled until OD-08/OD-11 and Auth gates; provider subject server-derived |
+| `identity.ensureAccount` | Trusted auth adapter | Existing account or one new eligible account | Disabled until OD-08/Auth gates and any applicable OD-11 age gate; provider subject server-derived |
 | `identity.linkProvider` | Active user with recent re-auth | New provider link | No email-based auto merge; OD-08 |
 | `identity.unlinkProvider` | Active user with recent re-auth | Provider link disabled/unlinked | Cannot remove last usable provider without approved recovery path |
 | `identity.revokeSession` | Account owner or privileged audited security action | Exact session revoked | Current-session handling explicit |
@@ -488,7 +530,7 @@ the client attempts to set them.
 | `identity.getCreatorVerificationStatus` | Applicant | Status, safe reason and allowed next action |
 | `identity.listMyManagedPages` | Active user | Exact accessible page summaries and membership revisions |
 | `identity.getManagedPageManagementView` | Exact member | Management projection permitted by capability |
-| `identity.getPublicPublisherProfile` | Authenticated eligible viewer | Allowlisted active public projection or anti-enumerating absence |
+| `identity.getPublicPublisherProfile` | Authenticated eligible User | Allowlisted active public projection or anti-enumerating absence |
 | `identity.listPageMembers` | Exact-page authorized member | Paginated bounded membership projections |
 | `identity.getPublisherEligibility` | Active Creator/domain service | Eligible personal/pages for content type/action/market with policy revision |
 | `identity.getConsentStatus` | Subject | Purpose/policy/version/status; no raw evidence |
@@ -862,10 +904,11 @@ Security/Privacy/Legal and BCK-04.
 
 ### 22.3 OD-11
 
-While OD-11 is Open:
+While OD-11 is Proposed and not Accepted:
 
 - no numerical minimum age is stated here;
-- production account creation is disabled;
+- account-creation steps requiring age/guardian eligibility are disabled;
+- general account creation is not globally blocked solely by OD-11;
 - Find People publication, matching and contact disclosure are disabled;
 - age-sensitive content/Booking paths are disabled;
 - unknown market or policy revision denies processing;
@@ -1006,7 +1049,7 @@ mutation, publisher and Find People surfaces independently.
 | BCK06-OD-04 | Open | Page transfer, slug, invitation, lifecycle, quota escalation — Identity | Production Page mutations | Disabled |
 | BCK06-OD-05 | Open | Exact capability registry and access snapshot freshness — Identity + API/Security | Authoritative mutations | Unknown/stale deny |
 | BCK06-OD-06 | Open | Ten-type PublisherRef migration/reconciliation — Identity + Content + Mobile | BCK-07/BCK-18/R3 | No cloud publish |
-| OD-11 / BCK06-OD-07 | Open | Market minors/age and Find People consent eligibility — Security/Privacy + Legal + Identity | Account creation/Find People/age-sensitive paths | Disabled |
+| OD-11 / BCK06-OD-07 | Proposed technical policy shape; no numeric age | Market minors/age and Find People consent eligibility — Security/Privacy + qualified Legal + Identity | age-sensitive account paths/Find People/age-sensitive features | Affected scope disabled; unrelated account creation not globally blocked |
 | BCK04-OD-08 / BCK06-OD-08 | Open | DSR verification, SLA, propagation and tombstone evidence — Privacy + Identity | Production DSR | No production data |
 | BCK06-OD-09 | Open | Identity record retention, backup propagation and holds — Security/Privacy + Legal + Identity | Production personal data | No production data |
 | BCK04-OD-09 / BCK05-OD-08 | Proposed | Event transport/effects topology — API + Operations | Async effects | Semantic events only |
@@ -1028,31 +1071,32 @@ Owner-decision records are created only when accountable owners provide actual
 decisions. BCK-02/BCK-01/LAUNCH_STATUS change only after a verified lifecycle
 transition.
 
-### 27.2 Future API contracts — not authorized by v0.1
+### 27.2 Local API contracts — implemented by the authorized v0.4 slice
 
 ```text
-packages/api_contracts/schema/identity/v1/*.schema.json
+packages/api_contracts/schema/identity/v1/{identity_common,account,auth_identity,session,access_snapshot,creator_verification,managed_page,page_membership,publisher_eligibility}.schema.json
 packages/api_contracts/schema/identity/v1/fixtures/{valid,invalid,forward}.json
-packages/api_contracts/lib/src/contracts/identity/*
-packages/api_contracts/lib/src/dto/identity/*
-packages/api_contracts/test/identity_*_test.dart
+apps/backend/functions/src/contracts/{identity_v1,identity_schema_registry,validate_identity_contract}.ts
 ```
 
-### 27.3 Future backend — not authorized by v0.1
+### 27.3 Local backend — implemented in-memory by the authorized v0.4 slice
 
 ```text
-apps/backend/functions/src/identity/domain/*
-apps/backend/functions/src/identity/application/commands/*
-apps/backend/functions/src/identity/application/queries/*
-apps/backend/functions/src/identity/data/*
-apps/backend/functions/src/identity/presentation/callables/*
-apps/backend/functions/src/identity/presentation/workers/*
-apps/backend/functions/test/unit/identity/*
-apps/backend/functions/test/contract/identity/*
-apps/backend/functions/test/emulator/identity/*
+apps/backend/functions/src/modules/identity_publisher/domain/*
+apps/backend/functions/src/modules/identity_publisher/application/*
+apps/backend/functions/src/modules/identity_publisher/infrastructure/*
+apps/backend/functions/test/unit/identity_publisher/*
+apps/backend/functions/test/contract/identity_fixture_parity.test.ts
+apps/backend/functions/test/integration/identity_publisher_authority.test.ts
+apps/backend/functions/test/rules/firestore_identity_rules.test.ts
 apps/backend/firestore.rules
-apps/backend/firestore.indexes.json
+apps/backend/scripts/verify-identity-publisher-{layout,contracts}.mjs
 ```
+
+The exact 44 required paths and the prohibition on cloud SDK dependencies,
+Identity indexes and direct-client access are executable in
+`verify-identity-publisher-layout.mjs`. Firestore repositories, indexes,
+callables, workers and schedules remain absent.
 
 ### 27.4 Future mobile integration — BCK-18-owned and not authorized
 
@@ -1062,7 +1106,8 @@ apps/mobile/lib/features/identity/{domain,data,application,presentation}/*
 apps/mobile/test/{unit,widget,integration}/identity_*
 ```
 
-No runtime file is created or changed by BCK-06 v0.2.
+No mobile file, callable export, Firebase Auth adapter, Firestore repository,
+credential, cloud resource or deployment is created by BCK-06 v0.4.
 
 ## 28. Test and evidence matrix
 
@@ -1098,7 +1143,7 @@ BCK-06 entered Review after:
 3. all commands, queries, events, errors and owners are reviewed;
 4. every record family has classification, projection and retention owner;
 5. all Open decisions have owner, gate and fail-closed default;
-6. OD-08 and OD-11 are not presented as decided;
+6. OD-08 remains Open and OD-11 remains Proposed, not Accepted;
 7. exact file/test plans remain conditional;
 8. links, numbering, fences, whitespace and coverage checks pass.
 
@@ -1140,7 +1185,7 @@ Runtime Done requires, separately:
 4. **BCK-06-AC-04:** BCK-06 is the single writer for ManagedPage membership and capabilities.
 5. **BCK-06-AC-05:** Content publication remains BCK-07-owned.
 6. **BCK-06-AC-06:** DSR orchestration remains BCK-04-owned.
-7. **BCK-06-AC-07:** Every production Viewer has a valid authenticated session.
+7. **BCK-06-AC-07:** Every production User has a valid authenticated session.
 8. **BCK-06-AC-08:** Google and Apple are the only Accepted production sign-in providers.
 9. **BCK-06-AC-09:** Guest/email-password runtime is migration evidence, not target authority.
 10. **BCK-06-AC-10:** Provider authentication never grants Creator.
@@ -1170,8 +1215,10 @@ Runtime Done requires, separately:
 34. **BCK-06-AC-34:** Find People consent is purpose-specific and versioned.
 35. **BCK-06-AC-35:** Consent withdrawal disables new dependent processing immediately at authority.
 36. **BCK-06-AC-36:** Find People private source and public/protected projections are distinct.
-37. **BCK-06-AC-37:** OD-11 remains Open and no numerical age is invented.
-38. **BCK-06-AC-38:** Account creation and Find People remain disabled until applicable OD-11 Acceptance.
+37. **BCK-06-AC-37:** OD-11 remains Proposed and no numerical age is invented.
+38. **BCK-06-AC-38:** only account paths requiring age/guardian eligibility
+    and Find People remain disabled until applicable OD-11 Acceptance; OD-11 is
+    not a global blocker for unrelated account creation.
 39. **BCK-06-AC-39:** OD-08 forbids automatic provider merge and email-based identity mapping.
 40. **BCK-06-AC-40:** Mock roles, verification, grants, pages, quota approvals and consent are never imported as authority.
 41. **BCK-06-AC-41:** Temporary `loc_*` IDs are rejected by authoritative boundaries.
@@ -1191,9 +1238,9 @@ Runtime Done requires, separately:
 55. **BCK-06-AC-55:** Server flags are false until their exact gates pass.
 56. **BCK-06-AC-56:** Rollback never restores guest mode or revoked/mock authority.
 57. **BCK-06-AC-57:** Documentation, emulator, shared-cloud and production evidence remain distinct.
-58. **BCK-06-AC-58:** All runtime paths in the artifact map remain conditional on separate authorization.
+58. **BCK-06-AC-58:** Runtime outside the exact owner-authorized local in-memory slice remains conditional on separate authorization.
 59. **BCK-06-AC-59:** The specification covers every mandatory BCK-02 §14 category.
-60. **BCK-06-AC-60:** Runtime status remains Absent until measured executable evidence exists.
+60. **BCK-06-AC-60:** Runtime status is evidence-specific: local in-memory authority may be Present while cloud, deployed and production authority remain Absent.
 
 ## 32. Explicit unimplemented list
 
@@ -1201,28 +1248,206 @@ As of this version, the following are not implemented:
 
 - production Google/Apple Auth integration;
 - production account creation/linking/recovery/deletion;
-- session registry, refresh and revocation authority;
-- access snapshot backend and policy registry;
-- Creator verification provider/review workflow;
-- ManagedPage/membership/quota backend;
+- production session issuance, token refresh and provider revocation adapter;
+- production access policy registry and Accepted snapshot TTL;
+- production Creator verification provider/evidence review workflow;
+- production ManagedPage quota, transfer, invitation and persistence;
 - production workspace/publisher eligibility;
 - full ten-type PublisherRef migration;
-- identity API schemas, fixtures and DTOs;
-- identity Cloud Functions, collections, indexes and Rules;
+- identity callable/mobile adapters;
+- Identity Firestore repositories, indexes and deployed Rules;
 - outbox workers and consumers;
 - consent evidence and Find People profile projections;
-- Accepted OD-08, OD-11 and exact identity retention;
+- Accepted OD-08, applicable qualified OD-11 for affected scope and exact
+  identity retention;
 - production DSR integration;
-- emulator, two-device, load, security and production evidence;
+- two-device, load, independent Security and production evidence;
 - Firebase projects, credentials, deployment and production data processing.
 
-The only present implementation evidence is bounded local/mock mobile behavior
-and non-product backend R0 feasibility. Neither is production authority.
+Present evidence is bounded local/mock mobile behavior plus a credential-free
+in-memory backend authority with schema, domain, integration and deny-all Rules
+tests. None is Firebase Auth, deployed cloud or production authority.
 
 ## 33. Final statement
 
-BCK-06 v0.2 is a complete Review contract pending owner/qualified decisions. It prevents identity,
+BCK-06 v0.4 is a Review contract with bounded local implementation evidence and
+pending production owner/qualified decisions. It prevents identity,
 publisher and consent authority from being duplicated across Flutter,
 Firestore Rules and feature backends. It intentionally keeps all unresolved
 Legal, session, provider-linking, verification, retention and rollout choices
-fail-closed. No runtime implementation may begin from this document alone.
+fail-closed. No cloud, persistence, mobile cutover or production runtime may
+begin from this document or the local evidence alone.
+
+## 34. Stage 2 normalized Identity and Publisher entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| Account | Identity / account command handler | self profile, access resolver, bounded Support | immutable userId; provider subjects are mapped references, never account IDs |
+| Session | Identity / session authority | current actor resolver and security audit | sessionId + userId + issued/revoked revisions; token is not the record ID |
+| AccessSnapshot | Identity / capability policy evaluator | every protected command/query | userId, optional pageId, capability/policy revision and freshness |
+| VerificationCase | Identity owner / verification handler | Creator eligibility, audited Admin/T&S | caseId + userId; evidence refs protected and purpose-bound |
+| ManagedPage | Identity/Publisher / page command handler | membership, Content, Discover and workspace projection | pageId; Professional Page is not a second account |
+| PageMembership | Identity/Publisher / membership handler | capability resolver and page workspace | membershipId + userId + pageId + revision |
+| PublisherEligibility | Identity/Publisher owner / eligibility evaluator | Content Create/publish and mobile workspace | server-resolved `PublisherRef(type=user|page,id)` plus capability revision |
+| ConsentEvidence | Identity owner / consent-evidence handler; policy meaning remains with BCK-04/owning purpose | authorized purpose checks and DSR | evidenceId + userId + policyId/revision + UTC instant |
+
+Account/session/membership/verification states have monotonic explicit
+transitions; client role switching, self-grant, cross-page reuse, revoked
+session resurrection and verification-by-provider-login are forbidden.
+Mutations use actor/scope/intent idempotency and expected revision; account,
+page and membership invariants are separate transactions and cross-domain work
+uses events/commands. Identity and verification data classification,
+authorization, retention/deletion and holds follow BCK-04. Audit records every
+grant/revoke/verification/page-membership change without raw evidence;
+telemetry is limited to typed result, latency and policy revision. Migration
+requires provider-subject and local-ID reconciliation; rollback never restores
+revoked authority. Identity/page/verification flags are server-owned and
+safe-off. Tests include cross-user/page denial, revocation freshness,
+idempotency/concurrency, recovery/linking, deletion and migration evidence.
+
+## 35. Stage 3 Identity, access and Publisher seam
+
+This section is the exact BCK-06 boundary consumed by BCK-18 mobile adapters
+and BCK-07 publication commands. It does not select an Auth provider, token
+TTL, verification vendor or physical persistence layout.
+
+### 35.1 Account and provider linking
+
+The authoritative provider identity key is the server-observed tuple
+`{providerId, providerTenant, providerSubject}`. Email, display name, phone,
+device identifier and client-supplied provider subject are never account-link
+proof.
+
+| Operation | Required proof | Atomic result | Fail-closed result |
+|---|---|---|---|
+| Ensure account | trusted provider assertion, accepted market/account policy | existing account or one new Account plus ProviderLink | `account_creation_disabled`, `provider_subject_conflict`, `policy_unavailable` |
+| Link provider | active session, recent re-auth, provider proof, idempotency key | one unique ProviderLink attached to the same userId | `reauth_required`, `provider_already_linked`, `link_collision` |
+| Unlink provider | active session, recent re-auth, usable recovery path | link becomes terminally disabled and sessions are re-evaluated | `last_usable_provider`, `link_not_found`, `reauth_required` |
+| Recover account | separately accepted recovery policy and protected evidence | recovery case/decision only | `recovery_not_available`; never email auto-merge |
+
+Concurrent link attempts for the same provider tuple serialize on the unique
+provider-subject key. A collision never reveals the other account. Same
+idempotency key plus same semantic hash replays the original result; a
+different hash returns conflict with no mutation. OD-08 remaining Open keeps
+production ensure/link/import disabled but does not make the contract
+ambiguous.
+
+### 35.2 Sessions and revocation fence
+
+`Session` is the server authority; an access/refresh token is only a credential
+referring to it. Session states are `active`, `stepUpRequired`, `revoked`,
+`expired` or `compromised`; no terminal state can return to active.
+
+Every protected command evaluates all of:
+
+```text
+account.status == active
+session.status == active
+session.issuedAt > account.revokeAllBefore
+session.authzRevision >= requiredAuthzRevision
+current capability and page-membership revision
+resource and market policy
+```
+
+Revoking one session increments its revision. Revoking all sessions advances
+`revokeAllBefore`/account security revision atomically and emits one semantic
+revocation event. Token refresh cannot resurrect a revoked, expired,
+compromised or deleted session. Offline/cached access snapshots may shape UI,
+but cannot authorize a mutation after revocation.
+
+### 35.3 Capability and page-scoped authorization
+
+Capabilities are stable registry IDs evaluated against current grants and
+policy. They are never inferred from `Creator`, `Admin`, workspace selection or
+client booleans.
+
+| Scope | Required authority | Explicit prohibition |
+|---|---|---|
+| Personal profile | userId plus personal capability and current account policy | page grant reused as personal grant |
+| Professional Page | exact pageId, active membership and exact page capability | grant from another page or stale membership |
+| Creator action | current verified Creator state plus action capability | provider login or local profile mode grants Creator |
+| Admin action | dedicated scoped Admin capability, step-up and case/reason where required | Admin as universal domain writer or PublisherRef |
+
+An `AccessSnapshot` returns source revisions, `evaluatedAt`, bounded
+freshness/expiry and a safe list of currently effective capabilities. Unknown,
+stale, newer or revoked authority is deny for commands. Queries may return a
+typed stale/reauth state but never protected data optimistically.
+
+### 35.4 Creator verification boundary
+
+The lifecycle is `notSubmitted → pending → verified | rejected | cancelled`,
+with later `expired` or `revoked` transitions from verified where the accepted
+policy permits. Evidence bytes belong to BCK-14 protected Media; BCK-06 stores
+purpose-bound references and the decision trail. Submitter, automated checks
+and decision authority are distinct. Client `verified=true`, Google/Apple
+login, payment/provider success and Professional Page ownership never create a
+verification grant.
+
+Until BCK06-OD-03 and applicable qualified reviews are Accepted, Creator-only
+commands return `creator_verification_unavailable`. Existing local/mock
+verification is never imported as authority.
+
+### 35.5 PublisherRef resolution
+
+`PublisherRef(type=user,id=userId)` is eligible only when the actor has the
+required personal capability. `PublisherRef(type=page,id=pageId)` additionally
+requires active exact-page membership and page-scoped capability. The server
+resolves the ref from the requested ID and current authority; it never trusts a
+client role/workspace assertion.
+
+Workspace switching changes only the preferred authoring context. It cannot
+rewrite a saved draft, submission or published revision. Loss of membership or
+capability blocks future commands and triggers projection re-evaluation, but
+does not rewrite historical authorship.
+
+### 35.6 Typed seam for Mobile and Content
+
+| Contract | Consumer | Required result fields |
+|---|---|---|
+| `identity.getSessionState` | BCK-18 | session state/revision, account security revision, freshness, allowed next action |
+| `identity.getAccessSnapshot` | BCK-18 and protected domains | userId, optional pageId, capability/policy revisions, evaluatedAt/expiry |
+| `identity.getPublisherEligibility` | BCK-07 | exact PublisherRef, action/type/market, verification/membership revisions, allow/deny reason |
+| `identity.listPublisherChoices` | BCK-18 Create UI | personal/page refs currently eligible for requested action; no hidden grants |
+| `IdentityAuthorityChanged` | BCK-07/08/18 consumers | user/page scope, new authority revision, reason category, occurredAt |
+| `SessionRevoked` | BCK-18 | session/account revision and safe re-auth action; no raw token |
+| `PublisherEligibilityChanged` | BCK-07/08 | PublisherRef, capability/policy revision and typed effect request |
+
+Required failures include `unauthenticated`, `session_revoked`,
+`reauth_required`, `account_restricted`, `creator_verification_required`,
+`creator_verification_unavailable`, `membership_inactive`,
+`capability_denied`, `publisher_not_eligible`, `policy_unavailable`,
+`conflict`, `unsupported_version` and `unknown_outcome`. Anti-enumeration maps
+foreign/hidden identities to the same safe surface response.
+
+### 35.7 Stage 3 acceptance addendum
+
+61. **BCK-06-AC-61:** provider subject tuple, not email/profile data, is the
+    unique linking key.
+62. **BCK-06-AC-62:** concurrent linking cannot attach one provider identity to
+    two accounts or disclose the existing account.
+63. **BCK-06-AC-63:** unlink cannot remove the final usable recovery path.
+64. **BCK-06-AC-64:** session revocation and account revocation fence prevent
+    refresh or cached snapshots from restoring authority.
+65. **BCK-06-AC-65:** every protected mutation evaluates current authority,
+    scope, resource and policy revisions.
+66. **BCK-06-AC-66:** page capability from one page never authorizes another.
+67. **BCK-06-AC-67:** Creator verification is independent from provider login,
+    page ownership, payment and mobile profile mode.
+68. **BCK-06-AC-68:** verification evidence bytes remain protected BCK-14
+    assets; BCK-06 stores references and decisions only.
+69. **BCK-06-AC-69:** PublisherRef is server-resolved and exact-scope.
+70. **BCK-06-AC-70:** workspace switching never rewrites existing PublisherRef.
+71. **BCK-06-AC-71:** AccessSnapshot always includes source revision and
+    freshness; stale/unknown authority denies mutations.
+72. **BCK-06-AC-72:** authority-change events carry no token, raw evidence or
+    unnecessary personal data.
+73. **BCK-06-AC-73:** typed Mobile/Content failures cannot be collapsed into
+    generic success, empty state or silent local fallback.
+74. **BCK-06-AC-74:** local/mock roles, grants, pages and verification are never
+    imported as backend authority.
+75. **BCK-06-AC-75:** OD-08, OD-11, production session/provider policy and
+    qualified reviews remain explicit gates; v0.4 grants only bounded local
+    in-memory authority.

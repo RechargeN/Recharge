@@ -1,15 +1,31 @@
 # Recharge Backend — Product Analytics & Telemetry Specification
 
 - ID: **BCK-21**
-- Version: **0.2**
-- Status: **Review — documentation only; approval and owner decisions pending**
+- Version: **0.3**
+- Spec status: **Review — documentation only; approval and owner decisions pending**
 - Runtime status: **Absent**
-- Date: **2026-08-26**
-- Owner: **Data Platform owner**
+- Date: **2026-09-20**
+- Accountable owner: **Data Platform owner**
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **Security/Privacy, Legal/Privacy, Product, API Platform,
   Mobile Platform, Platform Operations, Identity and domain owners**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 4 product-analytics boundary and governed effect chain;
+- separated product events/datasets from domain audit, security evidence and
+  BCK-05 operational telemetry;
+- added consent/reference revisions, deletion tombstones, bounded replay,
+  retention and rollback while OD-05 remains fail-closed.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Analytics entity inventory;
+- separated governed product analytics from operational telemetry and domain
+  audit authorities;
+- normalized consent/purpose, retention, deletion, flags and evidence.
 
 ### v0.2 — 2026-08-26
 
@@ -29,7 +45,7 @@
 
 ## 1. Verdict and status semantics
 
-BCK-21 v0.2 is a complete **Review contract**, not implementation authority.
+BCK-21 v0.3 is a complete **Review contract**, not implementation authority.
 
 - **Present** means this file exists;
 - **Review** means contradictions and owner decisions are reviewable;
@@ -706,7 +722,87 @@ Acceptance.
 
 ## 32. Final statement
 
-BCK-21 v0.2 is a production-grade Review design for privacy-safe product
+BCK-21 v0.3 is a production-grade Review design for privacy-safe product
 analytics, not permission to collect data. It deliberately blocks the existing
 untyped console telemetry from becoming production history and keeps Recharge
 fully functional with analytics disabled.
+
+## 33. Stage 2 normalized Analytics and Telemetry entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| AnalyticsEvent | Data Platform / governed ingestion | approved datasets only | eventId + taxonomy event/revision + pseudonymous subject/session where allowed |
+| AnalyticsDatasetRevision | Data Platform / dataset builder | authorized analysts/product aggregates | datasetId + immutable schema/purpose/revision |
+| AnalyticsAggregate | Data Platform / aggregation job | authorized product dashboards | aggregateId + dataset/window/metric revision; never domain authority |
+| ConsentPurposeSnapshot | Data Platform / analytics snapshot handler; Identity/BCK-04 write separate acceptance/policy records | ingestion eligibility | subject/purpose/policy revision reference, not parallel consent truth |
+| AnalyticsDeletionTombstone | Data Platform / deletion handler | ingestion/aggregation/rebuild jobs | tombstoneId + governed subject scope + request/task revision |
+| OperationalMetric | Platform Operations / BCK-05 metrics pipeline; BCK-21 is not a writer | alerts/SLO only | service/signal/revision; never mixed into product dataset silently |
+
+The analytics lifecycle accepts, rejects or quarantines events under a versioned taxonomy;
+datasets/aggregates are buildable, published, superseded or deleted. Missing
+purpose/consent where required, arbitrary payload, retroactive purpose change,
+domain decision from analytics and product/ops data mixing are forbidden.
+Event ingestion is idempotent by eventId/semantic key; dataset build concurrency
+uses immutable input watermarks and atomic publish pointers. Classification, purpose access,
+retention/deletion and DSR follow BCK-04; raw identifiers/content/location are
+minimized. Audit records schema/purpose/access/build revisions; telemetry about
+analytics is operational and separate. Migration uses versioned taxonomy and
+rebuild; rollback disables ingestion and selects prior compatible dataset,
+never revives deleted subjects. Destination/purpose/market/event flags default
+off. Evidence covers schema rejection, consent/purpose, dedupe, deletion,
+retention, access, aggregation correctness, cost and analytics-disabled product behavior.
+
+## 34. Stage 4 governed product analytics chain
+
+### 34.1 Authority boundary
+
+Product analytics observes accepted domain facts; it never decides user,
+Booking, payment, moderation, content, availability or repair state. Domain
+audit remains with the owning BCK, security/privacy evidence with BCK-04 and
+operational logs/metrics/traces/alerts with BCK-05. BCK-21 owns only accepted
+product-event ingestion, governed datasets and product aggregates.
+
+### 34.2 Ingestion envelope and disposition
+
+Every candidate event declares eventId, taxonomy/schema revision, producer,
+occurred/received UTC instants, market, purpose, consent/legal-basis reference
+where applicable, subject-key class, data classification and bounded properties.
+BCK-21 validates allowlist, versions, purpose, consent reference, minimization
+and retention before returning `accepted`, `duplicate`, `rejected_schema`,
+`rejected_policy` or `quarantined`. Client timestamps and identifiers are never
+used as domain authority.
+
+Dataset builds pin input watermark, schema/taxonomy/policy revisions and code
+artifact. Publication uses an atomic pointer; rerun is deterministic and
+idempotent. Late or corrected domain facts are new versioned inputs, not silent
+raw-event rewrites.
+
+### 34.3 Deletion, replay and rollback
+
+Deletion/consent withdrawal produces a versioned suppression/tombstone command
+that applies to raw events, derived datasets and future rebuilds. Aggregates
+below accepted privacy thresholds are withheld. Replay preserves original
+purpose and cannot broaden use retroactively. Rollback disables ingestion or
+selects a prior compatible dataset revision while keeping suppression state;
+it never restores deleted subjects from raw/archive/backup data.
+
+### 34.4 Additional acceptance criteria
+
+61. **BCK-21-AC-61:** Analytics never decides or repairs a source-domain lifecycle.
+62. **BCK-21-AC-62:** Domain audit, security evidence and operational telemetry remain separate authorities.
+63. **BCK-21-AC-63:** Every event pins producer, schema/taxonomy, market, purpose and classification.
+64. **BCK-21-AC-64:** Applicable consent/legal-basis reference is validated before acceptance.
+65. **BCK-21-AC-65:** Unknown events/properties/versions fail closed or quarantine.
+66. **BCK-21-AC-66:** Ingestion returns a typed durable disposition receipt.
+67. **BCK-21-AC-67:** Client time and identifiers never become business authority.
+68. **BCK-21-AC-68:** Dataset builds pin watermark, policy, schema and artifact revisions.
+69. **BCK-21-AC-69:** Dataset publication is atomic, deterministic and rebuildable.
+70. **BCK-21-AC-70:** Corrections are versioned inputs and never silent event rewrites.
+71. **BCK-21-AC-71:** Withdrawal/deletion suppression applies to raw and derived data.
+72. **BCK-21-AC-72:** Replay cannot broaden the original purpose or bypass suppression.
+73. **BCK-21-AC-73:** Rollback cannot resurrect deleted subjects from archives/backups.
+74. **BCK-21-AC-74:** Product works with analytics disabled and OD-05 fail-closed.
+75. **BCK-21-AC-75:** v0.3 authorizes no destination, IAM, Firebase, ingestion or deployment.

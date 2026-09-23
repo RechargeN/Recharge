@@ -1,15 +1,29 @@
 # Recharge Backend — User Library & Reviews Specification
 
 - ID: **BCK-12**
-- Version: **0.2**
-- Status: **Review — documentation only; approval and owner decisions pending**
+- Version: **0.3**
+- Spec status: **Review — documentation only; approval and owner decisions pending**
 - Runtime status: **Absent**
-- Date: **2026-08-26**
-- Owner: **User Platform owner**
+- Date: **2026-09-20**
+- Accountable owner: **User Platform owner**
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Identity, Discover,
   Mobile Platform, Trust & Safety, Legal/Privacy and Operations**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 4 user-library/review effect and privacy contract;
+- fixed explicit Visit History, Review-to-T&S handoff and rating rebuild
+  semantics without merging moderation cases into Reviews;
+- added replay, rollback, retention/deletion and cross-domain receipt rules.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Library/Reviews entity inventory;
+- preserved explicit-only Visit History and separated reviews from T&S cases;
+- normalized ownership, lifecycle, privacy, flags and evidence.
 
 ### v0.2 — 2026-08-26
 
@@ -28,7 +42,7 @@
 
 ## 1. Verdict and status semantics
 
-BCK-12 v0.2 is a complete **Review contract**, not an Approved implementation
+BCK-12 v0.3 is a complete **Review contract**, not an Approved implementation
 slice. It defines intended backend behavior while preserving current local data.
 
 - **Present**: this document exists;
@@ -124,7 +138,7 @@ projection does not become authority over its source facts.
 |---|---|---|
 | Authenticated User | Own library/review commands | Foreign private library |
 | Review author | Own draft/edit/remove under policy | Publish/moderation authority |
-| Eligible Viewer | Public review/rating reads | Protected draft/notes |
+| Eligible User | Public review/rating reads | Protected draft/notes |
 | BCK-22 service | Typed enforcement instruction | Direct persistence write |
 | Projection worker | Derived public projections | Source mutation |
 | Support/Admin | BCK-19 audited workflow | Impersonation/direct write |
@@ -285,7 +299,7 @@ Authorization is re-evaluated server-side at execution.
 |---|---|
 | `library.listFavorites` / `listVisits` | Exact owner |
 | `reviews.getOwnReview` / `listOwnReviews` | Exact author |
-| `reviews.listPublicForTarget` | Eligible viewer |
+| `reviews.listPublicForTarget` | Eligible User |
 | `reviews.getRatingAggregate` | Same visibility as target |
 
 Opaque cursors bind actor/scope, normalized query, limit and compatible
@@ -603,6 +617,87 @@ rollout and rollback. Listing it here is not acceptance.
 
 ## 32. Final statement
 
-BCK-12 v0.2 provides a coherent privacy-safe target without converting local
+BCK-12 v0.3 provides a coherent privacy-safe target without converting local
 demo state into cloud truth. It is ready for owner contradiction review, not
 implementation, provisioning, deployment or production processing.
+
+## 33. Stage 2 normalized User Library and Reviews entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| Favorite | User Platform / favorite handler | user's Library and aggregate count projection | favoriteId or stable `(userId,objectId)` key; object by canonical ID |
+| VisitHistoryEntry | User Platform / explicit visit command handler | user's history only unless separately aggregated | visitId + userId + placeId + local calendar date interpreted in place IANA zone |
+| Review | User Platform / review handler | author view, Discover public projection, T&S consumer | reviewId + authorId + objectId; report case remains BCK-22 |
+| RatingAggregate | User Platform / rebuildable aggregator | Discover/details | objectId + source review revision/watermark; never accepts client totals |
+
+Favorites toggle explicitly; Visit History is created only by explicit user
+action—never view, GPS, favorite or Booking; Reviews move draft/submitted/
+published/edited/withdrawn with T&S visibility disposition. Cross-user mutation,
+duplicate active review outside policy and aggregate-as-source are forbidden.
+Commands use user/object/date-or-review idempotency and expected revision;
+review write and outbox are atomic, aggregates are replayable projections.
+Authorization is owner/capability based; history and drafts are protected and
+review visibility follows BCK-04/22. Retention/deletion preserves lawful audit
+without public resurrection. Audit/telemetry excludes review body/history
+location. Migration dedupes legacy IDs/dates; rollback hides/rebuilds projections.
+Library/review/rating flags fail closed. Tests cover explicit-visit invariant,
+timezone dates, idempotency, rating replay, deletion, T&S handoff and privacy.
+
+## 34. Stage 4 user effects and moderation separation
+
+### 34.1 Owned effects
+
+| User action | BCK-12 authoritative result | Downstream effect |
+|---|---|---|
+| Add/remove Favorite | owner-scoped Favorite revision/tombstone | optional minimized aggregate event; never a visit |
+| Mark visited/remove visit | VisitHistoryEntry created or tombstoned by explicit command | private Library read only unless separately approved aggregation exists |
+| Submit/edit/withdraw Review | Review revision plus outbox fact | BCK-08 rating/public projection and BCK-21 catalogued analytics |
+| Report Review | no Review mutation | new confidential BCK-22 report command/reference |
+| Apply T&S decision | visibility disposition pinned to BCK-22 decision/revision | public projection removal/restoration and rating rebuild receipt |
+
+Favorite, Visit History, Review and moderation case remain four different
+meanings. Viewing, GPS presence, Favorite, Booking confirmation or provider
+signal never creates Visit History. The user-selected local calendar date is
+interpreted in the Place IANA timezone and validated as today/past under the
+accepted market clock policy.
+
+### 34.2 Review and Trust & Safety handoff
+
+BCK-12 owns Review content and author transitions. BCK-22 owns the confidential
+report, investigation, sanction and appeal. A report references the exact
+Review revision without copying unrestricted Review text into the case event.
+BCK-22 sends a typed, revision-bound visibility instruction; BCK-12 applies it
+idempotently and returns applied/stale/already_applied/rejected evidence.
+Reversal uses a compensating instruction and rebuilds rating/public projections
+without rewriting Review history.
+
+### 34.3 Retention, deletion and rollback
+
+Private Favorites and Visit History, public Review revisions, rating
+projections, restricted audit, T&S references and analytics events use separate
+BCK-04 classes. User deletion removes or pseudonymizes each class according to
+its purpose while preventing public resurrection from cache, backup or replay.
+Rollback disables new remote writes, preserves explicit user receipts, hides or
+rebuilds public projections and leaves local/mock data in a labelled isolated
+namespace; it never imports local seeds as authority.
+
+### 34.4 Additional acceptance criteria
+
+61. **BCK-12-AC-61:** Favorite never implies visit, attendance or endorsement.
+62. **BCK-12-AC-62:** Visit History is written only by explicit owner command.
+63. **BCK-12-AC-63:** Visit date uses the Place IANA timezone and accepted date policy.
+64. **BCK-12-AC-64:** Booking, GPS, view, provider and Favorite signals cannot auto-create a visit.
+65. **BCK-12-AC-65:** Review content and T&S cases retain separate writers and lifecycles.
+66. **BCK-12-AC-66:** Reporting a Review creates a BCK-22 command, not a Review transition.
+67. **BCK-12-AC-67:** T&S instructions pin decision, target Review revision, scope and policy revision.
+68. **BCK-12-AC-68:** BCK-12 returns a typed receipt for every enforcement instruction.
+69. **BCK-12-AC-69:** Stale enforcement cannot widen or resurrect visibility.
+70. **BCK-12-AC-70:** Reversal is compensating and rebuilds rating/public projections.
+71. **BCK-12-AC-71:** Rating is rebuildable and never authoritative Review storage.
+72. **BCK-12-AC-72:** Private library, Review, audit, T&S reference and analytics retention are distinct.
+73. **BCK-12-AC-73:** Deletion/backup replay cannot resurrect public or private user state.
+74. **BCK-12-AC-74:** Local/demo library data never becomes backend authority implicitly.
+75. **BCK-12-AC-75:** v0.3 authorizes no Firebase, import, deployment or activation.

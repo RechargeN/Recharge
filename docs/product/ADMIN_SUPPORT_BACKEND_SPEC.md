@@ -1,20 +1,36 @@
 # Recharge Backend — Admin & Support Specification
 
 - ID: **BCK-19**
-- Version: **0.2**
-- Date: **2026-08-26**
+- Version: **0.3**
+- Date: **2026-09-20**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Admin Operations owner**
 - Review owners: **Security/Privacy, Platform Operations, Identity, API
   Platform, owning-domain owners, Trust & Safety, Mobile, Support and Legal/Privacy**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.39](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-19-PRE v0.2](BACKEND_ADMIN_SUPPORT_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/ADMIN_SUPPORT_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 4 privileged read and domain-repair orchestration
+  contract;
+- fixed propose/approve/execute separation and required owning-domain commands
+  for every repair;
+- added effect receipts, reconciliation, rollback and retention/privacy rules
+  without granting direct domain-storage access.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Admin/Support entity inventory;
+- preserved owning-domain mutation authority and separated staff access,
+  repair workflow and T&S enforcement;
+- normalized lifecycle, privacy, rollback, flags and evidence.
 
 ### v0.2 — 2026-08-26
 
@@ -78,7 +94,7 @@ Normative inputs:
 - [BCK-18](MOBILE_BACKEND_INTEGRATION_STANDARD.md): typed client seam and no
   direct Firestore authority.
 
-BCK-22 remains Planned and owns reports, sanctions, block/mute, appeals and
+BCK-22 v0.3 remains Draft/Review-gated and owns reports, sanctions, block/mute, appeals and
 moderation enforcement. BCK-19 may host a staff-facing navigation shell or
 reference a BCK-22 case, but cannot decide or duplicate Trust & Safety state.
 
@@ -864,7 +880,96 @@ Production Enabled requires separate owner/Legal/Security/Operations approval.
 
 ## 32. Final statement
 
-BCK-19 v0.2 is a complete Review contract for a production-grade Admin &
+BCK-19 v0.3 is a complete Review contract for a production-grade Admin &
 Support subsystem design. It provides tools and evidence without creating a
 superuser or bypassing any owning domain. It is deliberately fail-closed and
 neither claims nor authorizes implementation, staff access or persistent data.
+
+## 33. Stage 2 normalized Admin and Support entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| SupportCase | Admin Operations / case handler | assigned staff, subject-visible status where allowed | caseId + subject/resource/domain refs; no display-name linking |
+| PrivilegedReadRecord | Admin Operations / access gateway audit | Security/Privacy and case review | readRecordId + staffId + caseId + resource/scope + UTC instant |
+| RepairProposal | Admin Operations / proposal handler | approver and owning domain adapter | proposalId + caseId + target ID/revision + typed command/expected effect |
+| RepairApproval | Admin Operations / independent approval handler | execution gate and audit | approvalId + proposalId + approverId + expiry/revision |
+| RepairExecutionRecord | Admin Operations / execution-evidence handler; owning domain writes only its separate mutation | case/audit/reconciliation | executionId + proposal/approval + domain command/result IDs |
+| BreakGlassSession | Identity/Platform / BCK-05/06 session authority; Admin is read-only consumer | Security/incident audit | sessionId + principal/scope/reason/expiry; never permanent Admin grant |
+
+Cases and repair records have explicit monotonic states; propose/approve/execute
+separation is mandatory where policy requires it. Direct console/database edit,
+self-approval, approval reuse, silent privileged read and Admin-as-domain-writer
+are forbidden. Commands use case/proposal/target revision idempotency and
+expected revision; Admin records commit separately from owning-domain command
+in distinct transaction boundaries and reconcile typed outcome. Classification,
+step-up/capabilities, retention,
+deletion/holds and audit follow BCK-04/06. Telemetry excludes case payload.
+Migration preserves immutable evidence; rollback disables access/new repair and
+uses owning-domain compensating command, not record rewrite. Staff/read/repair/
+break-glass flags fail closed. Evidence covers least privilege, cross-scope
+denial, dual control, expiry/revocation, idempotency, partial failure, audit
+redaction, domain reconciliation and rollback.
+
+## 34. Stage 4 privileged operations and domain repair protocol
+
+### 34.1 Repair lifecycle
+
+```text
+case opened -> evidence/read scope granted -> proposal drafted
+  -> independent approval -> owning-domain execute command
+  -> typed receipt -> verification -> case closed or reconciled
+```
+
+BCK-19 owns the case, privileged-read evidence, repair proposal, approval and
+execution coordination. The owning BCK alone owns the mutation. A proposal
+contains target domain/IDs, observed and expected revisions, invariant impact,
+bounded patch intent, reason/ticket, expiry, proposer and required approver
+classes. It contains no database path or arbitrary update document.
+
+### 34.2 Execution boundary
+
+After approval, BCK-19 invokes a named owning-domain command with the immutable
+proposal hash and current staff context. The domain rechecks authorization,
+separation of duties, proposal expiry, target revision, business invariants,
+feature flag and idempotency. It returns `applied`, `no_change`, `conflict`,
+`expired`, `denied` or `failed_reconciliation` plus a receipt. BCK-19 records
+the receipt but cannot translate failure into a direct console/Firestore write.
+
+### 34.3 Privileged reads, emergency action and rollback
+
+Every privileged read is purpose-limited, field-scoped, time-bound and audited
+before data is returned. Break-glass grants expire, notify the independent
+review owner and require retrospective review; they do not remove domain
+invariants. Emergency disable may close an operation or surface but cannot
+silently rewrite source truth. Rollback disables new privileged operations,
+revokes sessions/grants and requests compensating domain commands; Admin case
+history and prior receipts remain immutable.
+
+### 34.4 Privacy and retention
+
+Support case narrative, restricted evidence, privileged-read audit, proposal,
+approval, execution receipt and operational metrics use separate classes.
+Case notes must not duplicate secrets, tokens, full media, payment data or T&S
+reporter evidence. Retention/hold/deletion is purpose-specific and propagated
+to backups; product analytics receives only catalogued aggregate events.
+
+### 34.5 Additional acceptance criteria
+
+61. **BCK-19-AC-61:** Every repair starts from a scoped case and immutable proposal.
+62. **BCK-19-AC-62:** Proposal contains domain intent and revisions, never storage paths/arbitrary patches.
+63. **BCK-19-AC-63:** Required proposer/approver separation is enforced server-side.
+64. **BCK-19-AC-64:** Owning-domain command rechecks authority, expiry, revision and invariants.
+65. **BCK-19-AC-65:** Only owning domain mutates its authoritative records.
+66. **BCK-19-AC-66:** Domain returns a typed immutable execution receipt.
+67. **BCK-19-AC-67:** Conflict/denial never falls back to console or direct Firestore repair.
+68. **BCK-19-AC-68:** Privileged reads are purpose/field/time scoped and audited before return.
+69. **BCK-19-AC-69:** Break-glass expires, alerts and requires retrospective review.
+70. **BCK-19-AC-70:** Emergency disable does not rewrite domain history.
+71. **BCK-19-AC-71:** Rollback revokes access and uses compensating domain commands.
+72. **BCK-19-AC-72:** Case, evidence, read audit, proposal and receipt retention are distinct.
+73. **BCK-19-AC-73:** Notes exclude secrets, tokens, full media/payment and reporter evidence.
+74. **BCK-19-AC-74:** Admin operational evidence never becomes product analytics authority.
+75. **BCK-19-AC-75:** v0.3 authorizes no staff runtime, Firebase, repair execution or deployment.

@@ -1,11 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.13**
-- Дата: **2026-09-03**
+- Версия: **1.15**
+- Дата: **2026-09-20**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Accountable owner: **Booking owner**
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -39,6 +40,21 @@
 - Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.15 — 2026-09-20
+
+- completed the Stage 4 Booking effect, reconciliation and operational handoff
+  contract without changing the accepted ECL-03C transaction core;
+- fixed the Booking-to-Notifications receipt boundary and the
+  Admin-proposal-to-Booking-repair command boundary;
+- added cross-domain effect identity, replay, rollback, retention and privacy
+  requirements while preserving every independent/runtime gate.
+
+### v1.14 — 2026-09-20
+
+- added the Stage 2 normalized Booking entity inventory and reconciled the
+  single-writer boundary with Discover, Provider, Payments and Notifications;
+- preserved ECL-03 lifecycle authority and all runtime/independent-review gates.
 
 ### v1.13 — 2026-09-03
 
@@ -404,7 +420,7 @@ Body не может задавать или повышать эти значе�
 
 | Операция | Authority |
 |---|---|
-| Public-safe availability | Authenticated active Viewer |
+| Public-safe availability | Authenticated active User |
 | Create application/Booking | Actor создаёт только для себя |
 | Read/cancel/reconfirm own Booking | Exact `booking.userId == actorId` |
 | Read Creator queue | Publisher owner или exact-page `manage_bookings` |
@@ -547,7 +563,7 @@ activeKeyId = lowercaseHex(SHA-256(
 ))
 ```
 
-Для Viewer `actorId` является authoritative `userId`. Length-prefix encoding
+For a User, `actorId` is authoritative `userId`. Length-prefix encoding
 исключает ambiguous tuple; fixtures фиксируют exact UTF-8 bytes/hash.
 Exact key record читается до любой write и создаётся/удаляется в той же
 transaction, что Booking. Он содержит ссылку на один non-terminal Booking и
@@ -605,7 +621,7 @@ Writer projection:
 
 ## 10. API v1
 
-### 10.1. Viewer queries
+### 10.1. User queries
 
 ```text
 GetEventBookingReadiness(eventId, occurrenceId)
@@ -614,7 +630,7 @@ GetMyBooking(bookingId)
 ListMyBookings(cursor, stateFilter?, pageSize?)
 ```
 
-### 10.2. Viewer commands
+### 10.2. User commands
 
 ```text
 CreateInternalBooking(requestId, idempotencyKey, occurrenceId, poolId?, guestPayload?)
@@ -1563,3 +1579,116 @@ stated design boundaries and four remain Deferred/Open. It supplies neither
 independent specialist verdicts nor executable integration, ECL-03C runtime or
 activation authority; every remaining closure requires a versioned verdict and
 evidence link.
+
+## 32. Stage 2 normalized Booking entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| Booking | Booking / Booking command handler | owner/participant/Admin projection and Notifications events | bookingId; eventId/occurrenceId/publisherRef by immutable ID |
+| Hold | Booking / hold handler | availability projection and authorized actor | holdId + inventoryKey + expiresAt UTC; never client-clock authority |
+| InventoryLedger | Booking / inventory transaction | availability projection and reconciliation | inventoryKey + monotonic revision; source of capacity truth |
+| UsageRecord | Booking / check-in/use command handler | owner/Admin audit projection | usageId + bookingId + actor + UTC instant |
+| BookingPolicySnapshot | Booking / policy snapshot handler consuming accepted Event/market/reference revisions | eligibility and command handlers | policyId/revision plus exact source revisions |
+| BookingIdempotencyRecord | Booking / Booking command handler | command retry/reconciliation | actor + operation + semantic key/hash + retained result |
+| BookingOutboxRecord | Booking / Booking transaction handler | BCK-13/other accepted consumers | eventId + bookingId/revision; payload minimized and versioned |
+
+Booking lifecycle and forbidden transitions remain ECL-03 authoritative.
+Create/cancel/use/hold commands use same-key/same-hash replay and reject key
+reuse with different meaning; inventory mutation uses one Firestore transaction
+with expected revision and never trusts public/provider availability. Booking,
+hold, inventory, usage, idempotency and outbox data classes, capabilities,
+retention/deletion/holds and audit follow BCK-04. Telemetry contains IDs/codes/
+latency, not attendee payload. Migration is dry-run/reconcilable; rollback
+disables new mutations and reconciles ledger state rather than restoring a
+projection. Booking and effect flags are server-owned/default-off. Required
+evidence includes contract parity, Rules denial, contention/no-oversell,
+idempotency, expiry, replay/gap, privacy, repair and rollback. Provider result
+and Payment result remain separate BCK-16/17 records.
+
+## 33. Stage 4 Booking effects, receipts and reconciliation
+
+Stage 4 does not change the accepted Booking transaction invariant. It makes
+every result after that transaction explicit and recoverable. A successful
+authoritative transition atomically commits the Booking/hold/inventory/usage
+changes, audit fact, idempotency result and any required minimized outbox
+obligation. Notification delivery, analytics ingestion and public availability
+projection occur after commit and cannot confirm, reject or roll back Booking.
+
+### 33.1 Effect ledger
+
+| Effect | Writer | Consumer | Required identity and terminal evidence |
+|---|---|---|---|
+| Booking domain transition | BCK-09 | authorized Booking reads | bookingId, revision, command receipt and audit fact |
+| Notification obligation | BCK-09 outbox | BCK-13 | effectId, bookingId/revision, recipient purpose, template intent; acknowledged, terminally suppressed or dead-lettered receipt |
+| Internal availability change | BCK-09 outbox | BCK-08 compositor | effectId, inventoryKey/revision and source freshness; projection receipt |
+| Product analytics proposal | BCK-09 outbox | BCK-21 | catalogued event name/revision and minimized properties; accepted/rejected ingestion receipt |
+| Approved repair request | BCK-19 | BCK-09 repair command | repairId, caseId, two-person approval, expected ledger revision and execution receipt |
+
+Every consumer deduplicates `effectId` and validates producer, schema, market,
+source revision and purpose. Delivery is at-least-once with idempotent effects,
+not a claim of exactly-once transport. `suppressed` is terminal and never
+replayed automatically; `dead_lettered` requires an audited operator decision.
+
+### 33.2 Booking-to-Notifications contract
+
+BCK-09 owns whether a Booking fact requires communication. BCK-13 owns inbox
+materialization, preferences, templates, registrations and channel attempts.
+A BCK-13 receipt may be `inbox_created`, `policy_suppressed`,
+`permanently_failed` or `dead_lettered`; provider acceptance is only an attempt
+result. Missing acknowledgement raises reconciliation work but never changes a
+confirmed/cancelled Booking. A user opening or dismissing a notification is not
+Booking usage, attendance or cancellation evidence.
+
+### 33.3 Repair and rollback
+
+BCK-19 can create and approve a repair proposal but cannot mutate Booking
+storage. `ExecuteApprovedBookingRepair` revalidates current authority, proposal
+hash, approvers, expected revisions, invariant impact and feature flag inside
+BCK-09. It returns a typed no-op/conflict/applied receipt and emits compensating
+effects when a prior projection or inbox item must be corrected. Rollback first
+disables new mutations, preserves cancel/safe-release where proven, drains or
+quarantines effects, reconciles the ledger and then rebuilds projections. A
+database restore never substitutes for ledger reconciliation.
+
+### 33.4 Retention and privacy boundary
+
+Booking business records, restricted audit, idempotency results, outbox/effect
+receipts, delivery attempts and analytics events are different data classes.
+Each receives a policy revision, purpose, access scope, retention trigger,
+legal-hold behavior, deletion/pseudonymization action and backup-expiry proof.
+Outbox and notification payloads contain stable IDs and bounded reason/template
+codes, never attendee free text, raw contact data or staff notes. No production
+persistence begins before the applicable BCK-04 and qualified Legal/Privacy
+schedule is accepted.
+
+### 33.5 Additional acceptance criteria
+
+90. A committed Booking transition and its required outbox obligations share
+    one atomic authoritative boundary.
+91. Notification, analytics and Discover consumers never decide Booking state.
+92. Every post-commit effect has stable effectId, source revision, purpose,
+    schema revision and a terminal/reconcilable receipt.
+93. At-least-once delivery is handled by consumer deduplication and never
+    described as exactly-once transport.
+94. Missing or failed notification delivery never rolls back Booking.
+95. Push/provider acceptance never proves user receipt, attendance or usage.
+96. Suppressed effects are terminal and are not silently replayed after flag or
+    policy changes.
+97. Dead-letter replay requires an audited decision and preserves original
+    effect identity and history.
+98. BCK-19 proposes and approves repair; only BCK-09 executes Booking mutation.
+99. Repair revalidates current authority, proposal hash, approvers and expected
+    ledger revision.
+100. Repair returns typed no-op/conflict/applied evidence and emits bounded
+     compensating effects where required.
+101. Rollback disables mutations before effect draining and ledger
+     reconciliation; blind restore is forbidden.
+102. Booking, audit, idempotency, outbox, delivery and analytics data use
+     distinct retention/privacy classes.
+103. Outbox payloads exclude attendee free text, contacts, staff notes and
+     unrestricted personal data.
+104. BCK-09 v1.15 preserves RAW-C, independent-review, Firebase, deployment,
+     activation and mobile-integration gates.

@@ -1,20 +1,35 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.2.1**
-- Date: **2026-08-25**
+- Version: **0.3**
+- Date: **2026-09-20**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Media Platform owner**
 - Review owners: **Security/Privacy, Platform Operations, Content, Identity,
   Mobile, Trust & Safety, Route and Legal/Privacy**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.36](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-14-PRE v0.2.1](BACKEND_MEDIA_STORAGE_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/MEDIA_STORAGE_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 4 upload-to-deletion operational contract;
+- fixed quarantine, scan, finalize, immutable variant and owner-domain
+  attachment boundaries against BCK-07 v0.3;
+- added replay-safe processing, deletion receipts, retention classes and
+  fail-closed rollback without authorizing Storage runtime.
+
+### v0.2.2 — 2026-09-20
+
+- added the Stage 2 normalized Media entity inventory;
+- fixed Media metadata/blob authority without taking Content, Route, Identity
+  or T&S lifecycle ownership;
+- normalized access, retention, deletion, rollback and evidence.
 
 ### v0.2.1 — 2026-08-25
 
@@ -44,7 +59,7 @@
 BCK-14 defines the target Media authority for Recharge. The design is ready for
 cross-owner Review, not Approval or implementation. Runtime is Absent.
 
-BCK-07 v0.2 is now Present in Review. Media may own upload sessions, bytes,
+BCK-07 v0.3 is now Present in Review. Media may own upload sessions, bytes,
 technical validation, variants and cleanup, but **cannot attach an asset to
 published content, publish/restore/archive content or decide its visibility**.
 Those effects remain disabled until BCK-07 is Approved, implemented and its
@@ -835,6 +850,96 @@ recovery and owner sign-off. `Approved`, `Done` and `Enabled` are not synonyms.
 
 ## 31. Final statement
 
-BCK-14 v0.2.1 is a complete Review contract for a production-grade Media
+BCK-14 v0.3 is a complete Review contract for a production-grade Media
 subsystem design. It is intentionally fail-closed where ownership, policy or
 runtime evidence is absent. It neither claims nor authorizes implementation.
+
+## 32. Stage 2 normalized Media entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| UploadSession | Media Platform / upload-init/finalize handler | authorized uploader and cleanup worker | uploadSessionId + owner PublisherRef/userId + purpose + expiry |
+| MediaAsset | Media Platform / finalize handler | owning content/route/profile references and delivery | mediaAssetId + immutable blob generation/checksum; no filename identity |
+| MediaVariant | Media Platform / transform worker | authorized delivery/CDN manifest | variantId + mediaAssetId + transform revision/checksum |
+| MediaAccessGrant | Media Platform / access evaluator | short-lived authorized requester | grantId + subject/resource/purpose/expiry; URL is not authority |
+| MediaDeletionState | Media Platform / deletion worker | owning domain, Privacy Orchestration, audit | mediaAssetId + deletion revision/tombstone/hold refs |
+
+Upload sessions expire or finalize once; assets move pending-scan → ready/
+quarantined/rejected → deleted, while variants derive only from a ready source.
+Direct blob-as-published-content, owner rewrite, unscanned delivery and delete
+that ignores holds are forbidden. Init/finalize/delete commands are idempotent
+by owner/purpose/checksum and expected revision; metadata transition is atomic,
+blob/provider work is reconciled. Media data classification, capability checks,
+signed access, retention/deletion and holds follow BCK-04/06. Audit stores
+IDs/checksums/decisions, not media bytes or URLs; telemetry is bounded.
+Migration verifies generations/checksums; rollback revokes delivery or restores
+metadata only when policy permits. Upload/delivery/transform flags fail closed.
+Evidence covers ownership, hostile content, scan/transform failure, orphan
+cleanup, signed-access expiry, deletion, restore and cross-market isolation.
+
+## 33. Stage 4 upload, processing and deletion chain
+
+### 33.1 Authoritative processing pipeline
+
+```text
+init upload -> upload bytes -> finalize checksum/generation
+  -> quarantine -> malware/type/safety scans -> ready or rejected
+  -> immutable variants -> owner-domain attach -> delivery
+  -> detach/retention decision -> delete bytes/variants -> deletion receipt
+```
+
+The Media module owns upload/asset/variant metadata and bytes. Content, Route,
+Identity and T&S own why a media reference is attached, visible, held or
+removed. A source domain may attach only a `ready` asset whose owner, purpose,
+market, policy and immutable generation match the command. It stores an opaque
+media reference, not bucket path or signed URL.
+
+### 33.2 Processing idempotency and reconciliation
+
+Finalize is idempotent by upload session, expected object generation, byte
+length and checksum. Each scanner/transformer records tool/policy revision,
+input generation and immutable result; retry cannot overwrite a different
+input. Variant publication uses an atomic manifest pointer after every required
+variant is verified. Missing blob, orphan upload, partial variant set and stale
+attachment become typed reconciliation work. No worker silently marks an asset
+ready or deletes owner-domain references.
+
+### 33.3 Deletion and rollback
+
+Deletion evaluates active attachments, retention class, legal/safety hold and
+replacement state. BCK-14 tombstones delivery first, then removes variants and
+source bytes with provider-generation preconditions and returns a versioned
+receipt to every owning domain. Delayed provider/backup erasure remains visible
+until proven. Rollback revokes delivery and selects a prior safe processing
+policy/variant manifest where allowed; rejected/quarantined bytes are never
+made public merely because code or configuration rolled back.
+
+### 33.4 Privacy boundary
+
+Upload session, original bytes, derived variants, scan findings, access grants,
+delivery logs, audit and deletion receipts are separate classes. Logs and
+analytics contain stable IDs, sizes, media class and result codes—not signed
+URLs, raw bytes, extracted sensitive content or unrestricted scanner output.
+Retention starts from explicit lifecycle triggers and includes backup expiry,
+holds and DSR propagation.
+
+### 33.5 Additional acceptance criteria
+
+61. **BCK-14-AC-61:** Only finalized generation/checksum-matched bytes enter quarantine.
+62. **BCK-14-AC-62:** Quarantine precedes delivery and owner-domain attachment.
+63. **BCK-14-AC-63:** Scan/transform results pin input, tool and policy revisions.
+64. **BCK-14-AC-64:** Retry cannot overwrite a result for different input bytes.
+65. **BCK-14-AC-65:** Variant manifest activates only after required variants verify.
+66. **BCK-14-AC-66:** Source domains attach opaque ready media references, never bucket paths/URLs.
+67. **BCK-14-AC-67:** Media does not decide Content, Route, Identity or T&S lifecycle.
+68. **BCK-14-AC-68:** Missing/orphan/partial/stale media states become typed reconciliation work.
+69. **BCK-14-AC-69:** Deletion validates attachments, holds, policy and provider generation.
+70. **BCK-14-AC-70:** Delivery is revoked before destructive byte removal.
+71. **BCK-14-AC-71:** Deletion remains pending until variants/source/backup evidence completes.
+72. **BCK-14-AC-72:** Rollback never republishes quarantined or rejected media.
+73. **BCK-14-AC-73:** Bytes, findings, access, audit and deletion receipts have distinct retention classes.
+74. **BCK-14-AC-74:** Signed URLs, bytes and unrestricted scan output never enter logs/analytics.
+75. **BCK-14-AC-75:** v0.3 authorizes no Storage, scanner, processor, Firebase or deployment runtime.

@@ -1,14 +1,14 @@
 # Recharge Backend — Mobile Integration Standard
 
 - ID: **BCK-18**
-- Version: **0.5**
-- Date: **2026-09-15**
-- Status: **Review — BCK-03 Mobile boundary verdict recorded; BCK-18 approval pending**
-- Runtime status: **Absent — current product repositories remain local/mock**
+- Version: **0.7**
+- Date: **2026-09-22**
+- Spec status: **Approved — technical local/test-only boundary; production gates retained**
+- Runtime status: **Present locally — Money foundation, transport-neutral seam and import orchestration; product remote cutover absent**
 - Accountable owner: **Mobile Platform owner**
 - Required reviewers: **API Platform, Security/Privacy, Identity, Reference
   Data, affected domain owners and Platform Operations**
-- Coordination baseline: [BCK-02 v2.4.61](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.89](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
   [BCK-18-PRE v0.5](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
 - BCK-03 Mobile decision:
@@ -18,6 +18,37 @@
 - Canonical path: `docs/product/MOBILE_BACKEND_INTEGRATION_STANDARD.md`
 
 ## 0. Changelog
+
+### v0.7 — 2026-09-22
+
+- recorded the owner-approved local/test-only BCK-18 boundary and implemented
+  the transport-neutral command/query/result seam without Firebase SDKs;
+- completed authoritative mobile Money normalization to integer minor units
+  plus explicit currency, including versioned legacy reads and schema v9
+  writes;
+- added immutable request/binding/import snapshots, split attempt and
+  idempotency identities, retry/cancellation/unknown-outcome behavior,
+  local/cache/server state algebra and reversible bindings;
+- added dry-run owner/PublisherRef validation, mock-authority rejection,
+  semantic hash, permanent-ID receipt and resumable in-memory checkpoints;
+- retained every Firebase, cloud, deployment, production activation,
+  durable persistence, domain cutover, push and merge gate.
+
+### v0.6 — 2026-09-20
+
+- completed the Stage 3 typed mobile seam for Identity, Content, Catalog and
+  Discover without exposing transport/Firebase shapes to domain or UI;
+- fixed the local/cache/server read and command state algebra, import protocol,
+  adapter binding modes and reversible remote-to-local/mock rollback;
+- prohibited mock/local success from impersonating committed server truth and
+  retained all contract, Privacy, Money, Firebase and execution gates.
+
+### v0.5.1 — 2026-09-20
+
+- added the Stage 2 normalized mobile-integration entity inventory;
+- fixed BCK-18 as import/sync orchestration writer only, never writer of domain
+  aggregates or server authority;
+- normalized IDs, offline outcomes, migration, rollback, flags and evidence.
 
 ### v0.5 — 2026-09-15
 
@@ -72,19 +103,22 @@
 
 BCK-18 defines how Recharge mobile features will consume approved backend
 contracts without moving business authority into Flutter, transport or cache.
-The standard is complete enough for contradiction review, but it is not
-Approved and no executable cutover is authorized.
+The standard is approved only as a technical local/test-only boundary. The
+shared foundation is executable locally, but no product-domain remote cutover,
+Firebase dependency, cloud resource or production processing is authorized.
 
 Current facts:
 
 - product repositories are local/mock;
-- Booking v1 is the only implemented cross-language schema/fixture family;
+- Booking v1 and platform v1 are implemented cross-language schema/fixture
+  families; product-domain mobile adapters remain absent;
 - Auth uses a mock remote datasource and local secure session;
 - direct GTFS HTTP is an external reference/provider integration, not Recharge
   product backend;
 - Firebase Auth, Firestore, Storage and App Check are not mobile dependencies;
-- Money normalization debt blocks M8 remote writes;
-- product/backend runtime remains Absent.
+- authoritative mobile Money values are normalized to integer minor units and
+  explicit currency; presentation-only numeric inputs do not persist money;
+- product/backend remote runtime and mobile domain cutover remain Absent.
 
 ## 2. Parents, priority and conflict resolution
 
@@ -151,8 +185,9 @@ BCK-18 does not:
 - create one mega repository for all features;
 - require every feature to use one concrete cache/UI state class;
 - generate contracts before Accepted workflow authorization;
-- resolve OD-04, OD-08 or OD-10 by prose;
-- complete M2 Money migration;
+- resolve OD-04/OD-08 or treat OD-10 technical acceptance as executable/source
+  approval by prose;
+- activate any product-domain remote adapter;
 - add Firebase, deploy backend or process production data.
 
 ## 4. Scope and integration boundary
@@ -575,7 +610,8 @@ failedTerminal
 - market/locale/timezone/currency are independent values;
 - reference/taxonomy values use stable ID + revision from BCK-20;
 - unknown market/policy/reference revision fails closed for mutation;
-- LocalizedText/fallback uses OD-10 only after Acceptance.
+- LocalizedText/fallback uses the Accepted OD-10 technical contract only after
+  its source/content/Legal/fixture/runtime gates for the target slice pass.
 
 ## 18. Event consumption, replay and push hints
 
@@ -735,13 +771,13 @@ Cutover rules:
 | BCK18-OD-05 | Open | Binding manifest/flavor/mock exclusion evidence — Mobile + Ops/Security | Production build | Required remote feature disabled |
 | BCK18-OD-06 | Open | Per-domain cutover order/parity/rollback thresholds — Mobile + domains | M9/R3 | No cutover |
 | BCK18-OD-07 | Open | Secure local cache classification/encryption/retention — Mobile + Privacy/domains | Production personal data | No production cache |
-| OD-10 / BCK18-OD-08 | Proposed | LocalizedText/reference mapping — Reference + API + Mobile | Content/reference cutover | Unsupported/disabled |
+| OD-10 / BCK18-OD-08 | Accepted technical contract; source/content/Legal/runtime gates retained | LocalizedText/reference mapping — Reference + API + Mobile | Content/reference cutover | Unsupported/disabled until retained gates pass |
 | Mobile v3.1 erratum | Closed in v3.1.1 | AC-42 now preserves idempotency key/payload and uses a fresh request ID per attempt | Closed documentation conflict; no runtime authority | BCK-03 split-key enforced at wire seam |
-| M2 Money prerequisite | Incomplete | Normalize all authoritative Money before M8 — Mobile owners | Remote writes | Writes blocked |
+| M2 Money prerequisite | Complete for local mobile boundary | Authoritative mobile Money uses integer minor units + explicit currency; legacy numeric reads are versioned | M8 product remote writes still require owning schemas/adapters | Writes remain blocked |
 
 An owner decision requires exact version, alternatives, selected value,
-evidence, controls, affected documents, rollout and rollback. BCK-18 Review
-does not promote any row.
+evidence, controls, affected documents, rollout and rollback. Approval of the
+local/test foundation does not promote any open decision or product cutover.
 
 ## 25. Exact conditional artifact map
 
@@ -761,13 +797,28 @@ packages/api_contracts/lib/src/dto/<domain>/*
 packages/api_contracts/test/<domain>_*_test.dart
 ```
 
-Future mobile foundation, only in an Approved executable slice:
+Implemented local/test-only mobile foundation:
 
 ```text
+apps/mobile/lib/shared/primitives/money/money.dart
+apps/mobile/lib/core/network/backend_contract.dart
+apps/mobile/lib/core/network/backend_payload.dart
 apps/mobile/lib/core/network/backend_transport.dart
 apps/mobile/lib/core/network/backend_request_context.dart
 apps/mobile/lib/core/network/backend_result_mapper.dart
+apps/mobile/lib/core/network/backend_clients.dart
+apps/mobile/lib/core/network/local_test_backend_datasource.dart
+apps/mobile/lib/core/sync/backend_sync_state.dart
+apps/mobile/lib/core/sync/backend_import.dart
 apps/mobile/lib/app/di/backend_binding_manifest.dart
+apps/mobile/lib/app/adapters/reversible_backend_repository_adapter.dart
+apps/mobile/test/unit/money_test.dart
+apps/mobile/test/unit/backend_mobile_seam_test.dart
+```
+
+Future per-domain adapters, only in separately approved cutover slices:
+
+```text
 apps/mobile/lib/features/<feature>/data/datasources/<feature>_remote_datasource.dart
 apps/mobile/lib/features/<feature>/data/models/<feature>_dto_mapper.dart
 apps/mobile/lib/features/<feature>/data/repositories/<feature>_repository_impl.dart
@@ -776,9 +827,10 @@ apps/mobile/test/unit/backend_integration/*
 apps/mobile/test/integration/backend_integration/*
 ```
 
-Actual filenames must be reconciled with existing feature structure before each
-slice. This map does not authorize creation and generated paths remain
-generator-only.
+The implemented foundation has no HTTP/Firebase dependency and its only
+backend datasource is explicitly local/test-only. Future filenames must be
+reconciled with existing feature structure before each cutover slice and
+generated paths remain generator-only.
 
 ## 26. Test and evidence matrix
 
@@ -802,6 +854,19 @@ generator-only.
 
 Documentation, emulator, shared-cloud stage and production evidence are
 reported separately.
+
+Current v0.7 local evidence (2026-09-22):
+
+- `flutter analyze --no-pub`: 0 issues;
+- `flutter test --no-pub`: 680 passed;
+- boundary checker: 380 Dart files, 71/71 existing suppressions, 0 violations,
+  0 stale and 0 expired exceptions;
+- `git diff --check`: passed;
+- monetary `double`/`num` declaration scan in mobile `lib`: no matches;
+- Firebase SDK/import scan across the BCK-18 foundation: no matches.
+
+This is local/test evidence only. It is not Emulator, shared-cloud, deployment,
+production Security/Legal or market-activation evidence.
 
 ## 27. Definition of Ready for Review
 
@@ -877,7 +942,8 @@ Runtime Done is per-domain and additionally requires:
 40. **BCK-18-AC-40:** Money remote writes wait for completed M2 minor-unit migration.
 41. **BCK-18-AC-41:** UTC/IANA schedule semantics survive mapping.
 42. **BCK-18-AC-42:** Market/reference values use stable IDs and revisions.
-43. **BCK-18-AC-43:** OD-10-dependent cutover stays disabled until Accepted.
+43. **BCK-18-AC-43:** OD-10-dependent cutover stays disabled until its retained
+    source/content/Legal/fixture/runtime gates pass.
 44. **BCK-18-AC-44:** External GTFS transport is not Recharge backend authority.
 45. **BCK-18-AC-45:** Owner/workspace/market cache namespaces prevent leakage.
 46. **BCK-18-AC-46:** Tombstone wins over stale cached entity.
@@ -898,16 +964,14 @@ Runtime Done is per-domain and additionally requires:
 
 ## 30. Explicit unimplemented list
 
-- general backend transport/client;
+- production HTTP/Firebase transport and product remote clients;
 - non-Booking schemas/DTOs/codegen;
 - Firebase Auth/Firestore/Storage/App Check mobile dependencies;
 - production binding manifest;
 - identity/content/discover/library/media/notification remote adapters;
-- common cache/read-state implementation;
-- pending-command receipt store;
-- import session/checkpoint/dispatcher;
+- durable/encrypted production cache and pending-command receipt store;
+- persistent import session/checkpoint/dispatcher;
 - OD-04/OD-08/OD-10 decisions;
-- M2 Money completion;
 - M8/M9 executable slices;
 - emulator/shared-cloud/two-device/cutover/rollback evidence;
 - production personal-data cache/retention approval.
@@ -917,7 +981,220 @@ useful evidence only and do not satisfy this list.
 
 ## 31. Final statement
 
-BCK-18 v0.5 is a complete Review standard pending its owner decisions. It creates a reversible,
-typed seam between existing mobile feature architecture and future domain
-backends while prohibiting dual authority, hidden mock fallback and unsafe
-local import. No runtime work follows automatically from this document.
+BCK-18 v0.7 is the Approved technical local/test-only boundary. It provides a
+reversible typed seam between existing mobile feature architecture and future
+domain backends while prohibiting dual authority, hidden mock fallback and
+unsafe local import. Product-domain adapters, Firebase and any remote cutover
+still require separate approval and evidence.
+
+## 32. Stage 2 normalized Mobile Integration entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| ImportSession | Mobile Integration / import orchestrator | mobile progress and owning domain command adapters | importSessionId + user/device/source revision; no aggregate authority |
+| ImportCheckpoint | Mobile Integration / import orchestrator | resume/reconciliation | checkpointId + sessionId + sequence/hash; monotonic |
+| IdMapping | Mobile Integration / mapping handler after owning domain success | mobile repositories and reconciliation | mappingId + local `loc_*` + permanent domain ID; immutable once confirmed |
+| SyncCursor | Mobile Integration / owning remote query adapter state handler | mobile cache synchronization | opaque cursor + domain/query/schema revision; not authority |
+| AdapterCapabilityState | Mobile Integration / adapter-config consumer | application controllers and diagnostics | adapter/domain/environment/config revision; server policy remains authoritative |
+
+Import is prepared → dry-run → applying → partially applied/reconciling →
+completed or honestly failed/cancelled. A local draft never becomes server
+success without owning-domain response; offline mutation queues cannot confirm
+Booking/capacity/authority. Domain commands own aggregate transactions;
+BCK-18 atomically stores checkpoints/mappings only after typed results.
+Idempotency preserves the same key/hash across retry and treats timeout as
+unknown. Authorization is current server-owned access, not cached role.
+Classification, cache retention/deletion, audit and telemetry follow BCK-04;
+payloads stay out of logs. Migration is resumable/dry-run/reconcilable; rollback switches
+adapter or abandons unconfirmed import without deleting authoritative data.
+Domain/import/remote-adapter flags fail closed. Evidence covers fixture parity,
+offline/stale/newer states, retry/unknown outcome, permanent-ID replacement,
+partial resume, mock exclusion and rollback.
+
+## 33. Stage 3 typed mobile seam and reversible adapter contract
+
+This section binds the target contract chain. The v0.7 provider-neutral
+local/test foundation implements the shared seam; product remote adapters and
+backend/cloud runtime remain absent. Feature presentation continues to depend
+on application state and domain ports only; remote/cache/local implementations
+remain data-layer and composition-root concerns.
+
+### 33.1 Required typed ports
+
+| Port family | Owned consumer operations | Prohibited leakage |
+|---|---|---|
+| `IdentitySessionPort` | observe session state, re-auth requirement, revoke current/other sessions | raw token/provider SDK object, inferred role |
+| `PublisherAccessPort` | read current AccessSnapshot, list eligible PublisherRefs for action/type/market | client-created grant, workspace-as-authority |
+| `ContentDraftPort<T>` | create/read/update typed draft and reconcile permanent ID/revision | raw DTO map, Firestore document, generic Event fallback |
+| `PublicationCommandPort` | submit, publish/activate where authorized, withdraw, reconcile unknown outcome | local boolean as published truth |
+| `CatalogObjectPort` | resolve exact object/published revision and typed missing/stale state | mutation or visibility authority |
+| `DiscoverQueryPort` | execute immutable applied query, page Feed, load Map clusters/leaves, Search and Details | surface-specific filter drift |
+| `LocalImportPort` | inventory, dry-run, dispatch owning-domain commands, checkpoint and reconcile | direct remote collection write or grant import |
+| `AdapterControlPort` | expose effective binding/flag state and safe diagnostic reason | local override of server flag |
+
+Every port returns immutable domain values and typed outcomes. Data adapters
+own DTO mapping, transport retry and technical cache metadata; application
+controllers own user-visible retry/cancel/reconcile decisions.
+
+### 33.2 Read-state algebra
+
+All Identity/Content/Catalog/Discover reads map into one closed algebra:
+
+```text
+ReadState<T> =
+  idle
+  | loading(previous?)
+  | data(value, provenance, revision, freshness)
+  | empty(provenance, revision, freshness)
+  | stale(previous, reason, observedAt)
+  | offline(previous?)
+  | unauthenticated(nextAction)
+  | forbidden(reasonCode)
+  | notFound
+  | unsupported(contractOrSchemaVersion)
+  | failure(code, retryability)
+```
+
+`provenance` is exactly `localDraft`, `cache`, `serverProjection` or
+`demoFixture`. Cache/demo/local never imply server confirmation. `empty` is an
+authoritative result only when it carries server projection revision and
+freshness; otherwise it is local/cache empty. Tombstone or revoked visibility
+wins over stale cache. Protected cache is namespace-isolated by environment,
+userId, active page scope, market and contract major.
+
+### 33.3 Command-state algebra
+
+```text
+CommandState<R> =
+  idle
+  | submitting(commandId)
+  | accepted(receipt, serverRevision)
+  | unknown(commandId, reconciliationKey)
+  | reconciling(commandId)
+  | rejected(typedFailure)
+  | cancelled
+```
+
+Timeout is `unknown`, not rejected and not accepted. Retry preserves the same
+logical idempotency key and semantic payload hash but uses a fresh request
+correlation ID. Double submit is suppressed in application state. Cancellation
+stops local waiting where possible; it does not claim cancellation of a
+committed server command. Reconciliation queries the owning domain receipt.
+
+### 33.4 Binding and cutover modes
+
+Each `{environment, market, feature, operation}` has an effective server-owned
+binding mode:
+
+| Mode | Reads | Commands | User-visible truth |
+|---|---|---|---|
+| `localOnly` | local/demo namespace only | local draft operations only | explicitly local/demo |
+| `remoteShadow` | local remains primary; remote parity sampled outside product decisions | remote mutations off | local plus diagnostic evidence only |
+| `remoteReadPrimary` | server projection primary; bounded cache fallback | remote mutations off except separately enabled command | cached state labelled stale/offline |
+| `remoteWriteEnabled` | server projection/cache | named remote commands only | accepted only from server receipt |
+| `disabled` | safe unavailable state | rejected | typed disabled reason |
+
+Modes for query and command are independent. A remote read flag cannot enable
+write; a write flag requires remote identity/access and compatible contracts.
+Newer/unknown binding, schema, policy or minimum-client state fails closed.
+
+### 33.5 Local import protocol
+
+Import proceeds only after authentication and accepted mapping policy:
+
+```text
+inventory -> classify -> dry-run -> user review -> dispatch typed domain
+commands -> store permanent ID/revision mapping -> reconcile -> finalize
+```
+
+The inventory records source namespace, local ID, type, owner context,
+PublisherRef proposal, schema/content hash and dependency IDs. Dry-run returns
+`create`, `alreadyMapped`, `conflict`, `unsupported`, `requiresUserChoice` or
+`blocked`. Dispatch invokes BCK-06 or BCK-07 commands; BCK-18 never writes their
+records. A checkpoint is stored only after a typed receipt or honest unknown
+outcome. Restart is idempotent and resolves dependencies before dependants.
+
+Mock roles, Creator verification, capabilities, memberships, moderation,
+publication status, analytics history and demo records are not importable as
+authority. Failed/partial import leaves local source intact and produces a
+reconciliation queue; it never deletes local data automatically.
+
+### 33.6 Safe rollback to local/mock
+
+Rollback changes adapter bindings; it does not roll back authoritative server
+history.
+
+1. Disable affected remote commands first.
+2. Preserve receipts, idempotency keys, pending mappings and unknown outcomes.
+3. Stop remote subscription/query refresh and seal the last compatible cache.
+4. Render that cache as `stale/offline`, never local or current server truth.
+5. Re-enable local authoring only in a separate local-draft namespace.
+6. Never copy server grants, PublisherRefs, published state, catalog visibility
+   or Booking status into mock authority.
+7. On recovery, reconcile server receipts/tombstones before any local import or
+   remote mutation is re-enabled.
+
+Emergency rollback may therefore preserve useful local UX, but it cannot
+pretend that a local action was published, indexed or authorized remotely.
+
+### 33.7 End-to-end mapping
+
+| Backend contract | Domain/mobile value | Application state |
+|---|---|---|
+| BCK-06 session/access/publisher result | `SessionState`, `AccessSnapshot`, `PublisherRef` | authenticated/reauth/denied and eligible publisher choices |
+| BCK-07 draft/submission/published receipt | typed draft/revision/publication receipt | editing/submitting/unknown/published/withdrawn |
+| BCK-08 query/snapshot/cursor result | applied query, catalog objects and surface pages | loading/data/stale/offline/unsupported |
+| Authority/catalog tombstone | typed unavailable/withdrawn marker | remove or mark unavailable; stale cache cannot resurrect |
+
+### 33.8 Stage 3 acceptance addendum
+
+61. **BCK-18-AC-61:** UI and domain receive no Firebase/provider/DTO shape.
+62. **BCK-18-AC-62:** all four chain domains use typed ports and closed
+    read/command state unions.
+63. **BCK-18-AC-63:** local, cache, server projection and demo provenance are
+    distinguishable in every state.
+64. **BCK-18-AC-64:** empty cache/local state is never reported as authoritative
+    server empty.
+65. **BCK-18-AC-65:** timeout becomes unknown and reconciles with the same
+    logical idempotency identity.
+66. **BCK-18-AC-66:** cancellation never reverses an already committed server
+    command implicitly.
+67. **BCK-18-AC-67:** binding modes independently gate reads and commands.
+68. **BCK-18-AC-68:** remote write requires current BCK-06 authority and
+    compatible contract/minimum client.
+69. **BCK-18-AC-69:** import uses owning-domain commands and never direct remote
+    persistence.
+70. **BCK-18-AC-70:** mock grants, verification, moderation and publication are
+    non-importable.
+71. **BCK-18-AC-71:** partial/unknown import preserves source data and receipts.
+72. **BCK-18-AC-72:** rollback never deletes or overwrites committed server
+    truth.
+73. **BCK-18-AC-73:** local fallback uses an isolated draft namespace and cannot
+    impersonate published/indexed state.
+74. **BCK-18-AC-74:** server tombstone/revocation wins over stale cache on
+    recovery.
+75. **BCK-18-AC-75:** v0.6 defined contracts only and preserved all
+    Money/Privacy/Firebase/execution gates.
+76. **BCK-18-AC-76:** v0.7 implements only a provider-neutral local/test seam;
+    no product remote adapter is bound.
+77. **BCK-18-AC-77:** authoritative mobile Money stores integer minor units and
+    explicit ISO currency; no monetary `double` remains in mobile `lib`.
+78. **BCK-18-AC-78:** retry preserves idempotency key and semantic hash while
+    issuing a fresh attempt request ID.
+79. **BCK-18-AC-79:** possibly-sent transport failure returns typed unknown
+    outcome and never fabricates retry success.
+80. **BCK-18-AC-80:** request payloads, binding manifests and import candidates
+    are immutable snapshots.
+81. **BCK-18-AC-81:** import revalidates semantic hash, owner/PublisherRef
+    eligibility and rejects every mock authority claim.
+82. **BCK-18-AC-82:** confirmed import stores permanent-ID mapping/checkpoint
+    and repeat execution does not create a duplicate.
+83. **BCK-18-AC-83:** rollback binding defaults to disabled and cannot turn a
+    cache/local value into server-confirmed truth.
+84. **BCK-18-AC-84:** mobile foundation imports no Firebase SDK and uses no
+    cloud credential or project context.
+85. **BCK-18-AC-85:** Firebase, cloud, deployment, activation, push and merge
+    remain unauthorized by this approval.

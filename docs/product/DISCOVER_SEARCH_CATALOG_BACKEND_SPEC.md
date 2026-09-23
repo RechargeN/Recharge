@@ -1,20 +1,35 @@
 # Recharge Backend — Discover, Search and Catalog Specification
 
 - ID: **BCK-08**
-- Version: **0.2**
-- Date: **2026-08-25**
+- Version: **0.3**
+- Date: **2026-09-20**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Discover owner**
 - Review owners: **Content, API, Security/Privacy, Mobile, Reference Data,
   Booking, Integrations, Media, Product, Operations and Legal/Privacy**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.37](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.80](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-08-PRE v0.2](BACKEND_DISCOVER_CATALOG_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 3 committed-Content→Catalog→Discover→Mobile contract;
+- fixed one applied-query/snapshot token across Feed, Map and Search, component
+  freshness, geo/ranking disclosure and typed availability composition;
+- defined rebuild/dual-read/rollback semantics while retaining OD-01/03,
+  source-runtime, privacy, infrastructure and activation gates.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Discover/projection inventory;
+- fixed one projection writer and shared query-revision/freshness contract for
+  feed, map and search;
+- kept Content, Booking, Provider and T&S authority outside Discover.
 
 ### v0.2 — 2026-08-25
 
@@ -67,7 +82,8 @@ Inputs:
 - [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md): internal availability
   authority, not Catalog mutation authority;
 - [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md): versioned market/taxonomy/
-  locale values and non-Accepted OD-10 proposal;
+  locale values and the OD-10 technical contract with retained
+  source/content/Legal/runtime gates;
 - [S2-DISC-02](S2_DISC_02_MAP_SPEC.md): local one-query map/list behavior;
 - [Vision](VISION.md): distinct Search/Smart Search entry UX and shared applied
   query across results/map/feed/details.
@@ -445,7 +461,8 @@ batch cadence to stop serving promptly, then reconcile all surfaces.
 - exact distance follows candidate retrieval;
 - Money uses integer minor units + ISO currency; M2 precedes remote filtering;
 - category/market/language/currency pin BCK-20 revisions;
-- OD-10 fallback/localized indexing is not assumed Accepted.
+- OD-10 technical acceptance does not by itself authorize source ingestion,
+  localized indexing, mandatory copy or runtime activation.
 
 ## 16. Idempotency, concurrency and rebuild safety
 
@@ -604,7 +621,8 @@ Before Approval:
 
 - BCK-03/04/07/20 dependency compatibility and owner review;
 - OD-01 and OD-03 Accepted with evidence;
-- applicable OD-10/OD-11 disposition for enabled language/age scope;
+- OD-10 retained source/content/Legal/fixture gates for enabled languages and
+  applicable qualified OD-11 Acceptance for age-sensitive scope;
 - all ten BCK08 decisions resolved or formally deferred with controls;
 - typed public projection contract for every enabled type;
 - Booking/Provider/Media/Rating source handoffs reconciled where enabled;
@@ -810,7 +828,8 @@ Legal/Privacy, relevance/cost and incident/recovery verdicts.
 - BCK-07 Content runtime source;
 - BCK-09 internal and BCK-16 provider availability runtime;
 - BCK-14 Media and BCK-12 rating integration;
-- accepted OD-01/03 and applicable OD-10/11 decisions;
+- accepted OD-01/03, OD-10 retained source/content/Legal/fixture gates and
+  applicable qualified OD-11 decision for age-sensitive scope;
 - mobile remote adapters, cursor/cache/cutover and migration;
 - Money minor-unit price/budget query;
 - relevance golden datasets, numeric SLO/cost/read budgets;
@@ -818,6 +837,197 @@ Legal/Privacy, relevance/cost and incident/recovery verdicts.
 
 ## 31. Final statement
 
-BCK-08 v0.2 is a production-grade Review design for one coherent Discover
+BCK-08 v0.3 is a production-grade Review design for one coherent Discover
 catalog. It makes projection consistency and availability honesty testable
 while keeping every unapproved engine, source and runtime surface disabled.
+
+## 32. Stage 2 normalized Discover entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| CatalogObjectProjection | Discover / projection builder | feed/map/search/details readers | projectionId + source contentId/publishedRevisionId + projectionRevision/freshness |
+| DiscoverQueryRevision | Discover / query service | feed/map/search/cluster result builders | queryHash + queryRevision + market/policy/reference revisions |
+| FeedProjection | Discover / feed projection builder | mobile feed | queryRevision, ordered object IDs, cursor/snapshot |
+| MapProjection | Discover / map projection builder | mobile map/clusters | same queryRevision, object IDs or reversible cluster membership |
+| SearchProjection | Discover / search projection builder | Smart/ordinary Search | same queryRevision, result IDs, ranking/explanation revision |
+| AvailabilityProjection | Discover / availability composer; Booking/Provider write only separate source records | feed/map/details hints | objectId + source type/id/revision + observedAt/expiresAt |
+| SearchIndexDocument | Discover / indexer | search engine only | objectId + publishedRevisionId + locale/reference revisions; rebuildable |
+
+The projection lifecycle is absent/building/fresh/stale/unsupported/withdrawn and never
+become source authority. Feed/map/search for one query share query revision and
+freshness; unexplained divergence is typed stale, not success. Query retries
+are side-effect free; projection consumption is idempotently deduped by source
+revision and concurrency uses expected projection revision. Source facts commit
+before outbox; each projection write is its own replayable transaction.
+BCK-04 classification applies before public/protected visibility is
+re-evaluated from BCK-06/07/22, and availability never authorizes Booking.
+Retention removes obsolete rebuildable projections without deleting source
+records. Audit/telemetry records IDs/revisions/ranking version, never protected
+content. Migration supports dual-read/rebuild; rollback selects prior index or
+disables search. Engine, market and availability-source flags fail closed.
+Evidence covers parity, cursor stability, replay/gaps, visibility withdrawal,
+locale/market isolation, relevance, load/cost and rollback.
+
+## 33. Stage 3 Catalog and unified Discover query contract
+
+This section is the exact read-chain boundary after BCK-07 publication. BCK-08
+owns rebuildable projections and result membership only; it never becomes
+Content, Identity, Booking, Provider, Review or Media authority.
+
+### 33.1 Catalog ingestion and activation
+
+Catalog workers consume committed BCK-07 events using eventId dedupe and the
+monotonic `{contentId,publishedRevisionId}` source revision. A projection item
+pins source publication revision, type/mapper schema, visibility,
+PublisherRef-safe projection, MarketConfig/reference/localization revisions,
+media generation refs and projection build revision.
+
+`ContentPublished`/`ContentRevisionActivated` creates or replaces a candidate
+projection. `ContentWithdrawn`, `ContentVisibilityRestricted` and
+`ContentDeleted` create a higher-priority tombstone/effect. No out-of-order old
+event can resurrect a withdrawn/deleted object. A projection set becomes query
+eligible only through an atomic activation manifest after completeness,
+compatibility and policy validation.
+
+### 33.2 Canonical applied query
+
+`DiscoverQueryV1` is immutable after Apply/Search-this-area. Canonicalization
+normalizes field order/sets, units, typed IDs and explicit absent values before
+calculating `queryFingerprint`. The semantic membership fields are:
+
+```text
+marketId / serviceAreaRevision
+requested surface capability
+literal text or reviewed Smart Search normalized intent
+type/category/subcategory IDs
+UTC interval plus IANA zone for local-time intent
+geo area: center/radius or bounded polygon reference
+group size, duration, accessibility and declared facets
+Money min/max in integer minor units plus currency
+availability filter and source policy
+sort mode
+reference/localization/policy contract majors
+requester visibility scope revision
+```
+
+Pagination cursor, viewport rendering state, map zoom, analytics entry source
+and client clock are not membership fields. Changing an applied membership
+field creates a new query fingerprint and snapshot; it never mutates a running
+query silently.
+
+### 33.3 DiscoverSnapshotToken
+
+Every Feed/Map/Search response carries one opaque token binding:
+
+```text
+queryFingerprint
+projectionSetRevision
+visibilityPolicyRevision
+referenceDatasetRevision
+rankingPolicyRevision
+availabilityCompositionRevision
+snapshotIssuedAt / snapshotExpiresAt
+```
+
+Surface responses additionally carry `surfaceProjectionRevision`, generatedAt,
+component freshness and cursor/cluster metadata. A token is incompatible when
+any required revision is absent/newer/withdrawn or outside the declared
+compatibility manifest. The response is then typed `stale`/`unsupported`, not
+quietly combined with another snapshot.
+
+### 33.4 Feed, Map and Search consistency
+
+For one token:
+
+- Feed defines the ordered eligible object set and stable cursor sequence.
+- Map leaf objects are members of that same eligible set, optionally clipped by
+  the explicit viewport and represented by reversible cluster membership.
+- Search uses the same base filters/snapshot and adds the declared text-match
+  scoring component; it cannot bypass visibility/type/market filters.
+- Details resolves the exact object and source published revision selected by
+  the result, then reports changed/withdrawn state explicitly.
+- A map leaf missing from reachable Feed under the same token, or an object
+  differing across surfaces without a declared reason, returns
+  `projection_inconsistent` and initiates rebuild/quarantine.
+
+Surface pagination may load different subsets, but never different authority
+snapshots. Cluster counts are rendering summaries, not independent objects.
+
+### 33.5 Freshness algebra
+
+Freshness is component-wise:
+
+| Component | Required metadata | Stale behavior |
+|---|---|---|
+| Content projection | source published revision and projectedAt | object marked changed/stale or removed by tombstone |
+| Reference/localization | dataset/policy revision and effective window | query unsupported or stale; no label-as-ID fallback |
+| Ranking | policy/model/rules revision and evaluatedAt | preserve membership; label ordering stale unless policy forbids |
+| Internal availability | BCK-09 source revision, observedAt/expiresAt | unavailable/unknown for capacity filtering; never confirm Booking |
+| Provider availability | BCK-16 provenance, observedAt/expiresAt/status | stale/unknown with handoff disclosure; never internal inventory |
+| Review/rating | BCK-12 watermark/revision | rating may be stale-labelled; cannot change source visibility |
+
+Overall freshness is the strictest component required by the requested filter
+or surface. `onlyAvailable` admits only explicitly supported, fresh and
+positive availability. Unknown/stale/unsupported is excluded with typed reason,
+not treated as unlimited/available.
+
+### 33.6 Geo and ranking
+
+Only policy-approved public geometry enters Catalog. Protected/private precise
+locations remain in their source domain. Geo query uses server-bounded area,
+stable coordinate semantics and declared distance unit; invalid/oversized area
+returns typed failure. Cross-border results retain actual market/service-area
+and IANA timezone; device locale or map center never activates a market.
+
+Ranking is deterministic for the same token and explicit personalization
+scope. It records rankingPolicyRevision and stable tie-breaker by immutable ID.
+Ranking may order eligible objects but cannot include hidden/ineligible objects,
+invent availability or silently relax filters. Zero-result relaxation is a new
+reviewable query proposal, never an implicit response mutation.
+
+### 33.7 Mobile response and rollback
+
+BCK-18 receives immutable query/token/cursor objects and typed
+`fresh`, `stale`, `offline`, `unsupported`, `projection_inconsistent`,
+`market_disabled`, `forbidden` or `failure` outcomes. Cached pages from
+different tokens cannot be merged. A tombstone or authority revocation defeats
+cached content.
+
+Projection rollback activates a previously compatible complete projection set
+or disables the affected query/type/market. It never edits Content or source
+events. During remote rollback BCK-18 may show last compatible cache as stale
+or return to isolated local/mock discovery, but mock objects are visibly demo/
+local and cannot impersonate current server Catalog membership.
+
+### 33.8 Stage 3 acceptance addendum
+
+61. **BCK-08-AC-61:** Catalog consumes only committed versioned BCK-07 events
+    and is rebuildable from source history.
+62. **BCK-08-AC-62:** old/out-of-order events cannot resurrect a tombstoned or
+    withdrawn object.
+63. **BCK-08-AC-63:** one applied query has one fingerprint and one compatible
+    DiscoverSnapshotToken.
+64. **BCK-08-AC-64:** Feed, Map and Search never combine incompatible
+    projection sets or visibility/reference revisions.
+65. **BCK-08-AC-65:** every Map leaf is Feed-eligible under the same token or
+    returns typed inconsistency.
+66. **BCK-08-AC-66:** Search text semantics cannot bypass common filters,
+    visibility or market policy.
+67. **BCK-08-AC-67:** component freshness and provenance are explicit and
+    overall freshness uses the strictest required component.
+68. **BCK-08-AC-68:** stale/unknown/provider availability never confirms
+    internal Booking or passes `onlyAvailable`.
+69. **BCK-08-AC-69:** private/protected precise geo never enters public Catalog.
+70. **BCK-08-AC-70:** ranking orders eligible membership only and uses stable
+    version/tie-break semantics.
+71. **BCK-08-AC-71:** zero-result relaxation requires a new reviewable query.
+72. **BCK-08-AC-72:** cached pages with different snapshot tokens are not
+    merged and tombstones defeat cache.
+73. **BCK-08-AC-73:** projection rollback never mutates Content/source records.
+74. **BCK-08-AC-74:** local/mock fallback remains explicitly local/demo and
+    cannot claim server Catalog freshness.
+75. **BCK-08-AC-75:** v0.3 grants no engine/index/schema/runtime/Firebase,
+    deployment or market activation authority.

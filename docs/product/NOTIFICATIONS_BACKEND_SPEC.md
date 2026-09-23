@@ -1,20 +1,35 @@
 # Recharge Backend — Notifications Specification
 
 - ID: **BCK-13**
-- Version: **0.2**
-- Date: **2026-08-25**
+- Version: **0.3**
+- Date: **2026-09-20**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Notifications owner**
 - Review owners: **API Platform, Security/Privacy, Platform Operations,
   Identity, Mobile, Product domain owners, Legal/Privacy and Support**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.38](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-13-PRE v0.2](BACKEND_NOTIFICATIONS_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/NOTIFICATIONS_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 4 inbox/effect/delivery reconciliation contract;
+- separated authoritative inbox receipt from push/email provider attempts and
+  from source-domain lifecycle;
+- added bounded retry, dead-letter, replay, terminal receipt, privacy and
+  rollback rules for Booking and other accepted producers.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Notifications entity inventory;
+- preserved source-domain authority and separated inbox truth from push/email
+  delivery attempts;
+- normalized lifecycle, privacy, retention, rollback, flags and evidence.
 
 ### v0.2 — 2026-08-25
 
@@ -863,7 +878,95 @@ Legal/Privacy, recovery and owner sign-off. `Review`, `Approved`, `Done`,
 
 ## 32. Final statement
 
-BCK-13 v0.2 is a complete Review contract for a production-grade Notifications
+BCK-13 v0.3 is a complete Review contract for a production-grade Notifications
 subsystem design. It is deliberately inbox-first, provider-neutral and
 fail-closed where event, channel, privacy, localization or runtime evidence is
 absent. It neither claims nor authorizes implementation.
+
+## 33. Stage 2 normalized Notifications entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| InboxItem | Notifications / inbox handler consuming accepted source event | recipient inbox and Support metadata | notificationId + recipientId + source event/domain/object IDs |
+| NotificationPreference | Notifications / preference handler | channel policy evaluator | preferenceId or user/topic/channel key + revision |
+| PushRegistration | Notifications / token registration handler | delivery worker only | registrationId + user/device reference; raw token protected/rotatable |
+| DeliveryAttempt | Notifications / channel worker | retry/reconciliation and Support projection | attemptId + notificationId + channel/provider message reference |
+| TemplateRevision | Notifications / template registry after Content/Localization approval | render worker | templateId + immutable locale/revision/hash |
+
+Inbox state and channel delivery state are separate. Source events create at
+most one logical item; push/email is only a delivery hint and never source
+lifecycle authority. Commands/events use source-event/recipient/template
+idempotency; delivery attempts use bounded retry and expected state. Inbox item
+creation plus local outbox state is atomic; concurrency uses the current item,
+preference and token revision; provider calls are outside the
+transaction and reconciled. Authorization protects recipient preferences/items;
+tokens and delivery metadata follow BCK-04 retention/deletion. Audit/telemetry
+contains codes/IDs/latency, not message bodies or tokens. Migration supports
+token invalidation and template revisioning; rollback disables channel while
+inbox remains usable. Channel/topic/market flags default off. Evidence covers
+dedupe, out-of-order events, token revocation, preference race, localization,
+provider outage, privacy and rollback.
+
+## 34. Stage 4 inbox, delivery and effect receipts
+
+### 34.1 Producer-to-inbox protocol
+
+An accepted source domain emits a minimized versioned intent only after its
+authoritative transaction commits. BCK-13 validates producer identity,
+recipient/purpose, source revision, template intent, market/policy revisions
+and effectId. It materializes at most one logical InboxItem per accepted
+effect/recipient and returns a durable receipt to the producer reconciliation
+stream. It never reconstructs or decides the source-domain lifecycle.
+
+| Layer | Authority | States/evidence |
+|---|---|---|
+| Source obligation | owning domain | effect recorded, suppressed or revoked |
+| Inbox | BCK-13 | created, read/unread, archived, expired or corrected |
+| Channel decision | BCK-13 policy evaluator | eligible, user-suppressed, policy-suppressed or unavailable |
+| Delivery attempt | BCK-13 worker | queued, provider-accepted, transient-failed, permanent-failed or dead-lettered |
+| User interaction | BCK-13 | opened/dismissed action receipt; source domain reauthorizes deep link |
+
+Provider acceptance and device transport are hints, never proof that a human
+received or acted on a message. Booking confirmation/cancellation remains true
+even if every channel fails. Mandatory safety/legal communication requires an
+accepted purpose-specific policy and cannot be bypassed by ordinary preference.
+
+### 34.2 Retry, replay and correction
+
+Attempts are bounded by immutable policy/TTL, lease and attempt identity.
+Transient retry preserves notification/effect/template identities. Permanent
+failure and dead-letter are terminal until an audited replay decision. Replay
+does not resend expired, withdrawn, policy-suppressed or already terminal
+effects. Source correction/reversal creates a compensating instruction that
+updates or supersedes the inbox item; it never rewrites attempt history.
+
+### 34.3 Privacy and retention
+
+Inbox content, device tokens, provider references, preference/consent evidence,
+attempt metadata and operational logs have separate access/retention classes.
+Tokens are encrypted/revocable and excluded from analytics/support notes.
+Templates receive bounded typed variables; free-form source payload and
+sensitive evidence are forbidden. DSR removes or severs user-facing records
+while required restricted evidence expires under its own accepted schedule and
+backup propagation proof.
+
+### 34.4 Additional acceptance criteria
+
+61. **BCK-13-AC-61:** Only committed accepted source facts may create inbox intents.
+62. **BCK-13-AC-62:** Producer, recipient, purpose, revision, template and effect identity are validated.
+63. **BCK-13-AC-63:** One source effect creates at most one logical item per recipient.
+64. **BCK-13-AC-64:** BCK-13 returns durable created/suppressed/dead-letter receipts.
+65. **BCK-13-AC-65:** Inbox, channel decision and delivery attempt are distinct states.
+66. **BCK-13-AC-66:** Provider acceptance is not human delivery or source-domain completion.
+67. **BCK-13-AC-67:** Deep links reauthorize against current source-domain state.
+68. **BCK-13-AC-68:** Retry is bounded and preserves effect/notification/template identity.
+69. **BCK-13-AC-69:** Replay excludes expired, revoked, suppressed and terminal effects.
+70. **BCK-13-AC-70:** Corrections use compensating instructions and preserve attempt history.
+71. **BCK-13-AC-71:** Push failure never rolls back Booking or another source fact.
+72. **BCK-13-AC-72:** Tokens, inbox, preferences, attempts and logs use separate retention classes.
+73. **BCK-13-AC-73:** Raw tokens, sensitive evidence and unrestricted source payloads never enter analytics/logs.
+74. **BCK-13-AC-74:** OD-02 keeps email disabled until its exact accepted policy and provider gates.
+75. **BCK-13-AC-75:** v0.3 authorizes no FCM/email runtime, Firebase, deployment or activation.

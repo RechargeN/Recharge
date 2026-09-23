@@ -1,17 +1,19 @@
 # Recharge Backend — Reference Data & Localization Specification
 
 - ID: **BCK-20**
-- Version: **0.2.22**
-- Date: **2026-09-20**
-- Spec status: **Draft — Reference Data review required**
-- Runtime status: **Absent**
+- Version: **0.2.29**
+- Date: **2026-09-23**
+- Spec status: **Review — D1 reference/localization technical baseline closed; source/legal/market gates retained**
+- Runtime status: **Local synthetic disabled LV/EE/LT schemas, repositories, activation pointers and compatibility evidence Present; external-source and production localization runtime Absent**
 - Accountable owner: **Reference Data owner**
 - Interim review coordinator: **RechargeN / Product owner**
-- Parent architecture: [BCK-01](RECHARGE_BACKEND_MASTER_SPEC.md) (Review)
-- Coordination baseline: [BCK-02](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.14](BACKEND_API_CONTRACT_STANDARD.md) (Draft; API/Operations/Security/Mobile boundary reviews accepted with required amendments)
-- Security/privacy boundary: [BCK-04 v0.4.23](BACKEND_SECURITY_PRIVACY_SPEC.md) (Draft; BCK-04/threat-model technical verdicts recorded; independent/Legal/OD gates pending)
-- Operations boundary: [BCK-05 v0.2.30](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Draft)
+- Local R1 technical decision: **Accepted and verified locally — every market/capability remains disabled**
+- Production source/content/Legal approval: **Pending**
+- Parent architecture: [BCK-01 v0.4.83](RECHARGE_BACKEND_MASTER_SPEC.md) (Review; local foundation verified)
+- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.20](BACKEND_API_CONTRACT_STANDARD.md) (Review; local platform contracts verified)
+- Security/privacy boundary: [BCK-04 v0.4.31](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; production gates retained)
+- Operations boundary: [BCK-05 v0.2.37](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) (Review; local R1 verified)
 - Canonical taxonomy: [Category System v1.4.3](CATEGORY_SYSTEM.md) (Accepted)
 - Delivery annex: [BCK-02-A1](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
 - Owner review: [BCK20-OWN-REV-01 v0.2](REFERENCE_DATA_LOCALIZATION_OWNER_REVIEW.md)
@@ -50,6 +52,73 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.29 — 2026-09-23
+
+- records the implemented and verified local synthetic LV/EE/LT reference
+  schemas, immutable repositories, activation pointers and compatible
+  rollback while every market/capability remains disabled;
+- keeps external datasets, source/license eligibility, translations,
+  mandatory policy copy, qualified review and production activation absent;
+- aligns the platform/API/security/operations references with the Stage 8
+  local foundation and changes no OD-10 or acceptance-criteria semantics.
+
+### v0.2.28 — 2026-09-21
+
+- reconciles Reference Data to BCK-01 v0.4.81, BCK-03 v0.3.19, BCK-04
+  v0.4.30, BCK-05 v0.2.36 and the sole BCK-02 v2.4.87 R1 manifest;
+- separates synthetic local MarketConfig implementation from external-source,
+  content, qualified Legal and market-activation approval;
+- confirms the two Reference Data collection writers, explicit Money/timezone,
+  LV/EE/LT default-off fixtures and compatible-pointer rollback;
+- delegates exact owner approval to BCK-02 §29 and changes no schema/runtime.
+
+### v0.2.27 — 2026-09-21
+
+- normalized Reference Data freshness-state enum values to the BCK-03
+  lowerCamelCase rule;
+- retained snake_case only for registered typed error/reason codes;
+- changed no source eligibility, owner, Review status, runtime or market gate.
+
+### v0.2.26 — 2026-09-21
+
+- bound Reference Data to the sole exact R1 manifest in BCK-02 §26;
+- specified the exact MarketCapability schema, disabled synthetic fixtures,
+  collection writers, indexes, activation-pointer and rollback boundaries;
+- retained all external-source, mandatory-copy, translation, Legal, runtime,
+  Firebase, deployment and market-activation gates.
+
+### v0.2.25 — 2026-09-21
+
+- hardened `MarketConfigRevision` as a pointer manifest for independent LV/EE/LT
+  locale/copy, residency, provider, age, UGC/DSA, retention/DSR and support data;
+- defined mandatory-copy no-fallback behavior and currency/timezone semantics;
+- separated Reference Data publication from BCK-04 compliance decisions and
+  BCK-05 operational release state;
+- retained all source/copy/Legal/schema/runtime/activation gates.
+
+### v0.2.24 — 2026-09-20
+
+- added the Stage 2 normalized Reference Data entity inventory;
+- made the single writer/readers/revision/activation split explicit for source
+  records, datasets, MarketConfig and localization policy;
+- aligned Money/time/market/locale terminology and all operational controls
+  with BCK-01 §30 and the BCK-02 writer ledger.
+
+### v0.2.23 — 2026-09-20
+
+- accepted LocalizedText v1, deterministic fallback, MarketConfig and
+  reference-revision semantics as the D1 technical OD-10 contract;
+- separated technical contract readiness from external source eligibility,
+  license/terms, qualified mandatory-copy, translation and market-activation
+  evidence, all of which remain fail-closed;
+- aligned language-neutral schemas with Accepted API-DEC-05 and removed the
+  obsolete schema prohibition and stale D1-review routing;
+- reconciled BCK-01 v0.4.72, BCK-03 v0.3.16, BCK-04 v0.4.26 and BCK-05
+  v0.2.32; fixed the conditional implementation map and next action;
+- advanced the specification to Review for exact R1 planning only; no dataset,
+  schema artifact, ingestion, Firebase, mobile adapter or market activation is
+  authorized.
 
 ### v0.2.22 — 2026-09-20
 
@@ -470,6 +539,10 @@ contentPolicyRevision
 privacyPolicyRevision
 minorsPolicyRevision
 trustSafetyPolicyRevision
+mandatoryCopyManifestRevision
+residencyTransferPolicyRevision
+retentionDsrPolicyRevision
+ugcDsaPolicyRevision
 providerRegistryRevision
 supportPolicyRevision
 featureFlagsRevision
@@ -624,7 +697,7 @@ Mobile/backend consumers may cache the last verified supported snapshot with:
 - market/environment scope;
 - source and fallback policy revision.
 
-States: `fresh`, `stale_usable_for_read`, `stale_blocked_for_mutation`,
+States: `fresh`, `staleUsableForRead`, `staleBlockedForMutation`,
 `unavailable`, `unsupported`, `integrity_failed`, `market_disabled`.
 
 Stale taxonomy may support browsing already-loaded objects when the domain
@@ -765,7 +838,7 @@ lookup. Legal/safety-critical copy may declare `fallbackForbidden`; missing
 required locale then fails closed.
 
 An unsupported requested locale may use its configured fallback list and then
-market fallback only for a non-Legal viewer read, and the result remains
+market fallback only for a non-Legal requester read, and the result remains
 marked as an unsupported request. Authoring, publication, mutation and
 fallback-forbidden resolution return typed `unsupported_locale`.
 
@@ -782,7 +855,7 @@ resolved locale or success kind.
   requires it;
 - backend never fabricates/machine-translates text in v1;
 - missing optional label is typed and observable without logging the text;
-- user-authored source language remains explicit and is not changed by viewer locale;
+- user-authored source language remains explicit and is not changed by requester locale;
 - publication readiness separately checks required market locales by content type;
 - search may index declared translations but records locale/provenance.
 - diagnostics may record canonical locale/status/revision/freshness/timing but
@@ -790,10 +863,18 @@ resolved locale or success kind.
 
 ### 21.4 OD-10 status
 
-Status is **Proposed — not Accepted**. OD10-DOC-DEC-01 accepts only the amended
-documentation design direction. Acceptance still requires API Platform,
-Reference Data, Product Localization, Content, Mobile and Legal review,
-fixtures for LV/EE/LT and explicit migration/rollback evidence.
+Status is **Accepted technical contract with retained gates**. D1 accepts the
+versioned `LocalizedText v1`, deterministic market-scoped fallback,
+`MarketConfig`, immutable revision and typed unresolved-state semantics defined
+in this document. This is a design decision, not source, translation, Legal,
+schema-runtime, publication or market-activation approval.
+
+`OD10-DOC-DEC-01` remains the historical documentation decision that integrated
+F-001–F-012. The D1 closure supersedes its `Proposed` routing status for the
+technical contract only. Product Localization, Content and Mobile evidence,
+qualified Legal review where applicable, approved source/license records,
+executable fixtures and migration/rollback evidence remain required by their
+named gates before production use.
 
 The review vectors and owner checklist are maintained in
 [BCK-D1-OD10-EV-01 v0.2](BACKEND_OD_10_LOCALIZATION_EVIDENCE.md). They make
@@ -803,7 +884,7 @@ locale policy.
 
 ## 22. Exact conditional implementation map
 
-Future targets, absent and unauthorized in v0.2.22:
+Future targets, absent and unauthorized in v0.2.28:
 
 ```text
 apps/backend/functions/src/modules/reference_data/
@@ -822,7 +903,8 @@ apps/backend/functions/test/reference_data/
 packages/api_contracts/lib/src/contracts/reference_data/
 packages/api_contracts/test/reference_data/
 
-# Only after Accepted API-DEC-05:
+# Canonical under Accepted API-DEC-05; physical files require an Approved
+# executable slice:
 packages/api_contracts/schema/reference_data/v1/
   *.schema.json
   fixtures/valid/
@@ -865,8 +947,8 @@ date, command, owner, result and limitations. Hand review alone is not pass.
 
 | ID | Status | Owner | Evidence/decision | Blocks |
 |---|---|---|---|---|
-| OD-10 | Proposed LocalizedText v1; documentation direction amended; five-perspective Batch B review prepared but unsigned | Reference Data + API Platform | exact owner acceptance of OD10-OWN-COMB-REV-01, qualified Legal/Product policy where applicable, migration/rollback and later executable parity | BCK-20/BCK-07 Approval, G1 |
-| BCK20-OD-01 | Deferred until API-DEC-05 | Reference Data + API Platform | choose Dart-only versus cross-language artifact only after the shared contract-toolchain gate | no schema/code generation; executable contract slice |
+| OD-10 | Accepted technical `LocalizedText v1`/fallback/MarketConfig contract; source, copy, Legal and executable gates retained | Reference Data + API Platform | approved source/license and mandatory-copy records, applicable qualified Legal/Product evidence, migration/rollback and executable parity | production publication/activation only; not D1 or exact-R1 planning |
+| BCK20-OD-01 | Accepted/reconciled with API-DEC-05 | Reference Data + API Platform | canonical JSON Schema plus generated consumers where the pinned generator exists; otherwise maintained consumers must pass the same canonical fixtures | physical schema/generation remains in the Approved executable contract slice |
 | BCK20-OD-02 | Open; internal records and exact EXT-A–D technical evidence recorded; no source eligible; EXT-G5/G6 closed | Product Localization | qualified terms/access and freshness dispositions, per-source owner decisions, approved source snapshots/translations, independent Security/Privacy and applicable qualified Legal review | no production locale publication |
 | BCK20-OD-03 | Deferred to executable distribution slice | Reference Data + Operations | measure snapshot size, change frequency, client storage and stale-read requirements before snapshot/delta/TTL choice | no distribution/cache contract |
 | BCK20-OD-04 | Deferred to EE/LT activation | Market/Product owners | decide EE `ru` and any LT additional locale only with market evidence | EE/LT stay disabled; no LV activation fallback |
@@ -882,11 +964,12 @@ schema toolchain.
 
 ## 25. Definition of Ready for Review
 
-- BCK-01 is Review and BCK-02 lists BCK-20 Present/Draft;
+- BCK-01 is Review and BCK-02 lists BCK-20 Present/Review;
 - Category System v1.4.3 integrity is reconciled without ID changes;
 - 22/22 coverage matrix and local-link checks pass;
 - named Reference Data and Product Localization reviewers are assigned;
-- OD-10 proposal is reviewed by API/Content/Mobile/Legal perspectives;
+- OD-10 technical contract is reconciled with API/Content/Mobile/Security and
+  applicable Legal boundaries without claiming their retained production evidence;
 - no schema/runtime/distribution/mobile implementation is created;
 - all Open/Deferred Decisions have owner/gate/fail-closed default.
 
@@ -898,21 +981,22 @@ terms/access, freshness/source decisions, source snapshots/translations,
 independent Security/Privacy and applicable qualified Legal evidence remain
 unresolved in
 [BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). BCK20-OD-02/05
-remain Open, so BCK-20 remains Draft.
+remain Open, so production reference/localization activation remains blocked;
+BCK-20 may nevertheless remain Review with its D1 technical boundary closed.
 
-## 26. Definition of Done for Approved BCK-20
+## 26. Definition of Done for D1 Review and later Approved BCK-20
 
-- BCK-03, BCK-04 and BCK-05 applicable boundaries are ready and
-  Approved/reconciled atomically as the D1 platform set;
-- OD-10 is Accepted with approved expected results for the LV/EE/LT
-  documentation vectors and migration/rollback evidence; executable
-  schema/fixture parity remains gated by API-DEC-05 and a later Approved slice;
+- BCK-03, BCK-04 and BCK-05 applicable technical boundaries are
+  Review/reconciled atomically as the D1 platform set;
+- OD-10 is Accepted as a technical contract; production publication still
+  requires approved source/copy/Legal evidence and executable
+  schema/fixture/migration/rollback parity in a later Approved slice;
 - Category System 28/530 integrity and legacy migration fixtures pass;
 - market/locale/currency/timezone/service-area/policy references are versioned;
 - LocalizedText, fallback, missing and content-language rules are exact;
 - EE/LT remain independently disabled until their gates;
 - BCK20-OD-01–07 are Accepted or explicitly Deferred without bypassing gates;
-- 69 AC are unique/sequential and unimplemented status is honest;
+- 93 AC are unique/sequential and unimplemented status is honest;
 - runtime remains Absent until a separate Approved executable slice.
 
 ## 27. Acceptance criteria
@@ -944,7 +1028,8 @@ remain Open, so BCK-20 remains Draft.
 25. **BCK-20-AC-25:** unknown/newer critical schema/policy fails closed.
 26. **BCK-20-AC-26:** stale cache may support bounded reads, never authority.
 27. **BCK-20-AC-27:** cache carries schema/revision/hash/freshness/scope.
-28. **BCK-20-AC-28:** cross-language schema waits for Accepted API-DEC-05.
+28. **BCK-20-AC-28:** Accepted API-DEC-05 defines canonical cross-language
+    schema architecture; physical artifacts wait for an Approved executable slice.
 29. **BCK-20-AC-29:** generated contract files are not manually edited.
 30. **BCK-20-AC-30:** LocalizedText v1 requires non-empty defaultLocale value.
 31. **BCK-20-AC-31:** locale keys use canonical BCP 47 normalization.
@@ -952,7 +1037,7 @@ remain Open, so BCK-20 remains Draft.
 33. **BCK-20-AC-33:** fallback order is deterministic and market-scoped.
 34. **BCK-20-AC-34:** no arbitrary-first-locale fallback exists.
 35. **BCK-20-AC-35:** Legal/safety copy can forbid fallback and fail closed.
-36. **BCK-20-AC-36:** contentLocale remains independent from viewer locale.
+36. **BCK-20-AC-36:** contentLocale remains independent from requester locale.
 37. **BCK-20-AC-37:** v1 performs no silent/machine translation.
 38. **BCK-20-AC-38:** fallback/missing state is typed and observable.
 39. **BCK-20-AC-39:** user-facing text is absent from telemetry by default.
@@ -967,7 +1052,8 @@ remain Open, so BCK-20 remains Draft.
 48. **BCK-20-AC-48:** target file map does not authorize runtime.
 49. **BCK-20-AC-49:** Approval still requires G1 and an executable slice.
 50. **BCK-20-AC-50:** the current documentation revision creates no backend/schema/mobile/runtime effect.
-51. **BCK-20-AC-51:** BCK20-OD-01 cannot bypass Deferred API-DEC-05.
+51. **BCK-20-AC-51:** BCK20-OD-01 is reconciled with Accepted API-DEC-05 and
+    cannot introduce a private schema source or bypass executable-slice gates.
 52. **BCK-20-AC-52:** BCK20-OD-03 waits for measured distribution evidence.
 53. **BCK-20-AC-53:** disabled EE/LT cannot activate through Latvia fallback.
 54. **BCK-20-AC-54:** BCK20-OD-05 remains qualified Legal/Product scope.
@@ -984,7 +1070,8 @@ remain Open, so BCK-20 remains Draft.
     verdicts or implementation authority.
 60. **BCK-20-AC-60:** BCK20-OD02-PC-COMB-DEC-01 makes only the two separate
     non-independent Product/Content v0.3 verdicts effective; it does not itself
-    close OD-02/05, OD-10, Mobile/Security/Privacy/Legal or implementation gates.
+    close OD-02/05, Mobile/Security/Privacy/Legal or implementation gates; its
+    earlier OD-10 routing limitation is superseded only by the D1 technical decision.
 61. **BCK-20-AC-61:** BCK20-OD02-MS-PRE-DEC-01 integrates seven
     documentation-only corrections in workflow v0.4; it does not itself
     supply Product/Content or Mobile/Security verdicts, BCK20-OD-03 stays
@@ -1009,51 +1096,299 @@ remain Open, so BCK-20 remains Draft.
     EXT-A–D technical evidence only; no source becomes
     `eligible_for_slice_review`, EXT-G5/G6 stay closed and the prepared
     qualified-review package supplies no qualified verdict.
-67. **BCK-20-AC-67:** OD10-DOC-DEC-01 integrates only F-001–F-012
-    documentation semantics; OD-10 remains Proposed and no schema, executable
-    fixture, dataset, runtime or qualified Legal authority is created.
+67. **BCK-20-AC-67:** OD10-DOC-DEC-01 historically integrates F-001–F-012;
+    D1 separately accepts the technical OD-10 contract without creating schema,
+    executable fixture, dataset, runtime or qualified Legal authority.
 68. **BCK-20-AC-68:** BCK-D1-OWN-B-REV-01, OD10-OWN-COMB-REV-01 and
     BCK20-OD02-SRC-GOV-REV-01 are prepared review inputs only; their verdicts
     remain Pending and no source, OD, D1/G1 or executable status advances.
 69. **BCK-20-AC-69:** BCK20-OD05-POL-REV-01 and BCK-D1-OWN-C-REV-01 are
     prepared inputs only; BCK20-OD-05 remains Open, all external lanes remain
     Pending and no copy, market, OD, D1/G1 or executable status advances.
+70. **BCK-20-AC-70:** OD-10 is Accepted only as the versioned technical
+    `LocalizedText v1`, fallback, `MarketConfig` and revision contract.
+71. **BCK-20-AC-71:** API-DEC-05 makes JSON Schema the canonical wire source;
+    generated and maintained consumers prove parity against the same fixtures.
+72. **BCK-20-AC-72:** technical OD-10 acceptance does not make any external
+    source, license, translation or mandatory policy copy eligible.
+73. **BCK-20-AC-73:** every market and risky mutation remains independently
+    server-flagged and fail-closed when required policy/source revisions are absent.
+74. **BCK-20-AC-74:** D1 closure permits exact R1 design only; schema files,
+    datasets, runtime, Firebase, deployment and activation remain unauthorized.
+75. **BCK-20-AC-75:** retained Product Localization, Content,
+    Security/Privacy and applicable qualified Legal gates are not represented as
+    independent or production approval.
+76. **BCK-20-AC-76:** MarketConfig carries immutable pointers and never
+    approves Legal/Security policy, provider terms or operational traffic.
+77. **BCK-20-AC-77:** every MarketConfig and policy pointer is independently
+    versioned for LV, EE and LT; no Baltic-wide activation shortcut exists.
+78. **BCK-20-AC-78:** mandatory copy is keyed by market, capability, purpose,
+    locale and revision, with explicit fallback prohibition/allowance.
+79. **BCK-20-AC-79:** missing or unapproved mandatory copy disables the
+    affected capability and cannot fall back to ordinary product text.
+80. **BCK-20-AC-80:** currency remains explicit on Money and market currency
+    configuration never rewrites historical values.
+81. **BCK-20-AC-81:** default market timezone is bootstrap/display metadata;
+    owning-object IANA timezone controls calendar interpretation.
+82. **BCK-20-AC-82:** residency, retention/DSR, age, UGC/DSA, provider and
+    support pointers require exact compatible revisions or explicit reviewed
+    not-applicable dispositions.
+83. **BCK-20-AC-83:** a MarketConfig publication cannot change BCK-05 release
+    status or activate a capability.
+84. **BCK-20-AC-84:** a Latvia source/copy/policy revision cannot satisfy,
+    overwrite or fallback-enable Estonia or Lithuania.
+85. **BCK-20-AC-85:** one shared schema supports LV/EE/LT; market-specific
+    values remain data/config and do not create country forks.
+86. **BCK-20-AC-86:** v0.2.25 is documentation-only and creates no schema,
+    dataset, copy, runtime, Firebase, deployment, activation, push or merge.
+87. **BCK-20-AC-87:** BCK-02 §26 is the sole exact R1 path/action manifest;
+    BCK-20 cannot create alternate schema, config, fixture or repository paths.
+88. **BCK-20-AC-88:** R1's canonical bounded MarketCapability configuration
+    source is exactly `apps/backend/config/market-capability.schema.json`.
+89. **BCK-20-AC-89:** `referenceMarketConfigRevisions` and
+    `referenceActivationPointers` have Reference Data as their only writer and
+    remain denied to direct clients.
+90. **BCK-20-AC-90:** all R1 LV/EE/LT fixtures are synthetic, internally
+    bounded and disabled; they contain no external dataset or mandatory copy.
+91. **BCK-20-AC-91:** R1 activation-pointer swap uses expected revision and
+    cannot activate an unsupported/newer/incomplete market configuration.
+92. **BCK-20-AC-92:** R1 rollback selects a previously verified compatible
+    immutable pointer or leaves the market/capability disabled.
+93. **BCK-20-AC-93:** v0.2.27 and its exact map are documentation-only and
+    create no schema file, fixture, dataset, runtime, Firebase resource,
+    deployment, activation, push or merge authority.
+94. **BCK-20-AC-94:** v0.2.28 is reconciled to BCK-02 v2.4.87 §26 as the sole
+    exact R1 path/action manifest.
+95. **BCK-20-AC-95:** local R1 uses only synthetic disabled LV/EE/LT fixtures;
+    external sources, translations and mandatory policy copy remain excluded.
+96. **BCK-20-AC-96:** Reference Data remains the sole writer of market-config
+    revisions and activation pointers; Operations is a reader/validator only.
+97. **BCK-20-AC-97:** Money carries integer minor units plus explicit currency,
+    and timezone follows the owning object rather than market/device inference.
+98. **BCK-20-AC-98:** local technical acceptance and production source/content/
+    qualified Legal/market activation approval remain separate decisions.
+99. **BCK-20-AC-99:** this preflight creates no schema, fixture, dataset,
+    parser, Firebase resource, deployment, activation, push or merge.
 
 AC numbers are stable; new criteria append. Semantic change/removal requires a
 new revision and migration note.
 
 ## 28. Explicitly unimplemented
 
-At v0.2.22 the following remain absent:
+At v0.2.28 the following remain absent:
 
 - Reference Data backend module, persistence, API or distribution;
 - LocalizedText/MarketConfig executable schema or generated clients;
-- accepted OD-10 and specialist-accepted Product Localization workflow;
+- executable OD-10 schemas/fixtures and specialist-accepted production
+  Product Localization workflow;
 - backend/mobile reference cache, deltas or activation pointers;
 - production taxonomy/reference snapshots and service-area datasets;
+- executable LV/EE/LT policy-pointer manifests and market release evidence;
 - EE/LT locale/legal/content activation;
 - runtime migrations, traffic, credentials or Firebase resources.
 
-## 29. Next action
+## 29. Next executable step
 
-1. obtain exact BCK-D1-OWN-B-REV-01 and BCK-D1-OWN-C-REV-01 responses if the
-   Product owner accepts the separate bounded verdicts;
-2. reconcile only the explicitly accepted bounded verdicts without changing
-   external, OD, D1/G1 or executable status;
-3. assign named qualified/independent reviewers through
-   BCK-D1-XREV-HANDOFF-01;
-4. obtain named qualified terms/access verdicts against the exact consolidated
-   review package and preserve every inconclusive source fail-closed;
-5. record one explicit owner decision per source; advance none automatically;
-6. prepare immutable source snapshots and translations only for sources later
-   advanced to `eligible_for_slice_review`;
-7. resolve service-area sources and policy-reference blockers separately;
-8. obtain independent Security/Privacy and applicable qualified Legal evidence;
-9. complete the qualified Latvia market/surface/purpose matrix for
-   BCK20-OD-05; keep EE/LT separate;
-10. obtain the applicable qualified Legal/Product/terms decisions and later
-   executable parity without treating combined ownership as independence;
-11. keep every Deferred item closed until its exact later gate;
-12. move BCK-20 to Review, then Approved only after §26;
-13. keep schema/runtime/distribution implementation blocked until G1 and a
-   separately Approved executable file plan.
+Design one exact R1 platform/reference-data slice that uses only the internal
+Category System, technical `MarketConfig` and bounded `LocalizedText` fixtures.
+It must enumerate exact files, pinned tools, negative fixtures, server flags,
+rollback and evidence commands. External datasets, production translations,
+mandatory policy copy and all markets remain disabled until their retained
+source, terms, specialist and Legal gates pass. No file in this target map may
+be created before that slice and G1 are separately approved.
+
+## 30. Stage 2 normalized Reference Data entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| SourceRecord | Reference Data / source registry | ingestion review, Security/Privacy, Legal and dataset publisher | sourceId + immutable evidence/license/freshness revision; candidate is not eligible |
+| DatasetRevision | Reference Data / dataset publisher | all domains and cached client snapshots | datasetId + immutable revision/content hash; stable item IDs never labels |
+| MarketConfigRevision | Reference Data / market-config publisher | all market-aware modules and mobile bootstrap | marketId + immutable revision; locale/currency/timezone/policy refs by ID |
+| LocalizationPolicyRevision | Reference Data / localization policy publisher after Product/Content/Legal gates | backend resolvers and mobile rendering | policyId/revision, supported locales and deterministic fallback graph |
+| LocalizedText | owning domain / owning domain command handler; BCK-20 validates policy only | locale resolver/search index | defaultLocale plus canonical BCP 47 value map; not a standalone authority |
+| ActivationPointer | Reference Data / activation command handler | bootstrap, domains, clients and rollback controller | market/dataset/policy → one compatible immutable revision |
+
+Source records move candidate → reviewed → eligible or rejected; dataset and
+policy revisions move draft → validated → published → activated/superseded or
+withdrawn. Published revisions never mutate. Forbidden transitions include
+candidate-to-active without evidence, partial publication, LV activation that
+enables EE/LT and locale fallback used as Legal copy. Publish/activate commands
+use idempotency hash and expected pointer revision; revision publication and
+pointer swap are separate atomic transactions. Public reference data remains
+Public, while drafts/source/license evidence follow BCK-04 classification and
+capabilities. Retention preserves provenance/deprecation history; deletion or
+withdrawal never reuses meaning. Audit/telemetry records IDs/revisions/fallback
+kind, not text. Migrations are alias-mapped and reversible; rollback selects a
+compatible immutable revision. Market and mutation flags are server-owned and
+safe-off. Tests cover integrity, fixtures, fallback, market isolation,
+concurrency, migration, rollback and source/license evidence.
+
+## 31. Stage 6 Baltic market policy-pointer contract
+
+### 31.1 MarketConfig is a manifest, not an approval
+
+`MarketConfigRevision` publishes exact immutable references needed to resolve
+a market experience. It does not approve the referenced policy, select legal
+meaning, accept provider terms or switch traffic. BCK-04 owns compliance
+evidence and BCK-05 owns `MarketCapabilityReleaseManifest` state.
+
+For every market-capability tuple, pointers cover or explicitly disposition:
+
+```text
+mandatoryCopyManifestRevision
+privacyPolicyRevision
+minorsPolicyRevision
+trustSafetyPolicyRevision
+ugcDsaPolicyRevision
+residencyTransferPolicyRevision
+retentionDsrPolicyRevision
+providerRegistryRevision
+supportPolicyRevision
+featureFlagsRevision
+```
+
+An omitted pointer is not `not_applicable`. The owning reviewer must publish a
+bounded not-applicable decision with scope, rationale and review/expiry trigger.
+Unknown/newer/incompatible pointers fail closed in authoritative commands.
+
+### 31.2 Mandatory-copy manifest
+
+Mandatory product, privacy, age, safety, transactional and support copy is
+resolved by an immutable manifest entry containing:
+
+```text
+marketId
+capabilityId
+purposeId
+locale
+copyId
+copyRevision
+contentHash
+approvalReference
+effectiveAtUtc
+fallbackPolicy: forbidden | exact_allowlist
+allowedFallbackLocales[]
+supersedesRevisionId?
+```
+
+Ordinary `LocalizedText` fallback cannot satisfy mandatory copy. If the exact
+entry is missing, expired, unsupported or not approved, the affected action is
+disabled with a typed availability state. Existing immutable receipts keep the
+copy/policy revision actually shown; later publication does not rewrite them.
+
+### 31.3 Currency and timezone
+
+- `EUR` is initial configuration for LV/EE/LT, not a derivation rule;
+- every Money value carries ISO 4217 currency and integer minor units;
+- changing market currency support cannot reinterpret stored Money;
+- default market zone is bootstrap/display metadata only;
+- Place, Event occurrence, Booking obligation, Visit History and Route/Scenario
+  calendar semantics use their owning-object IANA timezone;
+- device timezone and current market never silently rewrite UTC instants or
+  local-calendar dates.
+
+### 31.4 Independent market publication
+
+LV, EE and LT have separate draft, validated, published and activation
+pointers. Publishing or activating a Latvia dataset/copy/policy pointer cannot
+advance, overwrite or act as fallback for Estonia or Lithuania. Shared source
+artifacts may be referenced by multiple markets only through independent
+market manifests and evidence.
+
+Reference Data withdrawal invalidates new resolution but does not mutate
+historical domain facts. BCK-05 disables affected traffic or selects a previous
+compatible manifest; if compatibility or safety is unproven, the capability
+stays disabled. No country-specific schema or module fork is created.
+
+This section is documentation-only. Actual copy, translations, approvals,
+provider/source terms, schemas, datasets, runtime and market activation remain
+behind their existing gates.
+
+## 32. Stage 7 exact R1 Reference Data/config map
+
+### 32.1 Exact artifacts and ownership
+
+[BCK-02 §26](RECHARGE_BACKEND_DELIVERY_MAP.md) is the sole exact R1
+file/action manifest. BCK-20 owns the meaning and write policy of these R1
+artifacts, but does not add alternate paths:
+
+- `apps/backend/config/market-capability.schema.json` is the canonical
+  configuration source for the bounded R1 market-capability envelope;
+- `apps/backend/functions/src/config/market_capability.ts` validates and
+  resolves that envelope and never becomes a second schema source;
+- `referenceMarketConfigRevisions` stores immutable validated revisions;
+- `referenceActivationPointers` stores the current compatible pointer by
+  exact environment, market and capability;
+- BCK-20/Reference Data is the only writer of both collection families;
+  Platform Operations reads and validates them when composing a release.
+
+Both collections deny direct client reads and writes in R1. Server access is
+through the typed repository boundary and logical `reference-publisher`
+identity only; documenting the identity creates no grant or credential.
+`referenceMarketConfigRevisions` has the one exact composite index specified
+in BCK-02 §26.7. Pointer reads use exact document lookup and need no composite
+index.
+
+### 32.2 R1 fixture boundary
+
+The exact configuration fixture paths are those in BCK-02 §26.2; shared
+platform-envelope parity fixtures remain separately owned by BCK-03 in §26.4.
+Fixture content is synthetic and bounded to schema/parity/negative evidence.
+It may exercise:
+
+- exact `LV`, `EE` and `LT` identifiers;
+- explicit `EUR` currency and valid IANA timezone identifiers;
+- supported locale identifiers and deterministic fallback structure;
+- immutable revision/hash, schema version and expected-pointer revision;
+- `disabled` capability state and missing/newer/incompatible failure cases.
+
+Every market and capability remains disabled. R1 fixtures contain no downloaded
+CLDR/IANA/ISO/ECB/SIX data, production service area, translation, mandatory
+policy copy, provider terms, Legal approval or production endpoint. They are
+not seed data and cannot be promoted or ingested.
+
+### 32.3 Write, activation and rollback semantics
+
+Publication validates canonical schema, content hash, market scope and all
+references, then creates one immutable revision idempotently. Activation is a
+separate expected-revision pointer transaction. Missing, stale, unsupported,
+newer or incomplete dependencies return typed fail-closed outcomes and leave
+the pointer unchanged. Publishing a revision never changes BCK-05 release
+state or enables traffic.
+
+Rollback may select only a previously verified, schema-compatible immutable
+revision for the same environment/market/capability. If none exists, the
+pointer remains unchanged or the capability remains disabled. Rollback never
+copies Latvia values into Estonia/Lithuania, rewrites historical Money/time,
+reuses retired IDs, or treats ordinary localized text as mandatory copy.
+
+### 32.4 Dependencies and exclusions
+
+BCK-03 owns schema generation/parity, BCK-04 owns authorization/data-class
+policy, and BCK-05 owns release/rollback operations. No R1 Reference Data file
+may import a product-domain module or RAW-C Booking source. Product modules may
+later consume only the typed config/read boundary after their own Approved
+slice.
+
+This map is documentation only. It does not authorize creating its target
+files, external-source acquisition, parser/fixtures beyond the synthetic R1
+set, datasets, localization runtime, Firebase changes, deployment, activation,
+push or merge.
+
+## 33. Local R1 technical-approval preflight
+
+BCK-20 is technically consistent with the config/schema/fixture/collection
+rows in BCK-02 v2.4.87 §26. Local R1 is limited to synthetic, disabled
+MarketCapability evidence for LV/EE/LT and the two Reference Data-owned
+collection families. It cannot ingest an external source, translation,
+mandatory policy copy, service area or production identifier.
+
+The owner subsequently accepted `BCK-R1-FOUNDATION-TECH-DEC-01`; Stage 8
+verified the bounded synthetic schemas/config repositories, independent
+disabled LV/EE/LT revisions and compatible rollback. Source/license, Product
+Localization, mandatory copy, qualified Legal, market activation and
+production runtime remain Pending. BCK07-LOCAL-01 may pin these local synthetic
+revisions only for tests and cannot make any source, copy or market eligible.
