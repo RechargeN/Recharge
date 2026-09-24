@@ -1,8 +1,8 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.15**
-- Дата: **2026-09-20**
+- Версия: **1.16**
+- Дата: **2026-09-24**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Accountable owner: **Booking owner**
@@ -40,6 +40,17 @@
 - Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.16 — 2026-09-24
+
+- records `BCK09-RETENTION-DEC-01` as the technical owner baseline for
+  Booking idempotency, outbox and audit retention without claiming a
+  qualified Legal/Privacy verdict;
+- adds real local `expiresAt` timestamps, Firestore TTL field configuration,
+  hold-safe cleanup/restore planning, account-deletion pseudonymization and
+  deterministic unit/Emulator evidence;
+- keeps all markets and cloud deployment disabled; an LV, EE or LT override
+  requires its own accepted versioned decision.
 
 ### v1.15 — 2026-09-20
 
@@ -1065,20 +1076,40 @@ anonymization, backup propagation и exceptional hold.
 | Application fields | 30 days | Delete content, retain decision code |
 | Eligibility evidence ref | 30 days | Delete/revoke protected ref |
 | Resolved hold payload | 30 days | Delete; retain bounded audit |
-| Idempotency result | 30 days | Delete after retry window |
-| Notification payload/outbox | 30 days | Delete private/rendered arguments |
+| Booking idempotency | 7 days from `createdAt` | Delete after retry/dedupe window |
+| Booking outbox | 30 days after both delivery and reconciliation complete | Do not set `expiresAt` while either completion is missing |
 | Delivery metadata | 90 days | Aggregate/anonymize |
-| Booking audit | 180 days | Pseudonymize/delete by approved policy |
+| Booking audit | 365 days from `occurredAt` | Retain minimum audit; pseudonymize direct account identifiers after account deletion |
 | Security/support repair audit | 180 days | Restricted archive/delete |
 | Operational logs | 30 days | Delete |
 | Dead-letter payload | <=30 days | Delete after resolution |
 
-Каждый документ получает versioned `retentionClass` и `expireAt`, но TTL —
-только cleanup mechanism. Firebase TTL не удаляет мгновенно, обычно удаление
-происходит в пределах 24 часов, не является транзакционным и тарифицируется как
-delete operation. Поэтому user-deletion workflow обязан немедленно закрывать
-доступ и отдельно отслеживать завершение:
+`BCK09-RETENTION-DEC-01` является техническим owner-решением, а не qualified
+Legal/Privacy verdict. Это общий baseline для LV/EE/LT, но каждый рынок
+включается независимо; иной срок допустим только через принятый versioned
+market override. Наличие baseline не включает рынок и не разрешает production
+personal data.
+
+Каждый применимый документ получает versioned `retentionClass` и Firestore
+Timestamp `expiresAt`, но TTL — только cleanup mechanism. Для outbox retention
+anchor равен более позднему из `deliveredAt` и `reconciledAt`; пока любой из
+этих фактов отсутствует, `expiresAt` отсутствует и автоматическое удаление
+запрещено. Legal/security hold удаляет TTL-field и приостанавливает любое
+удаление до явного снятия. После снятия срок пересчитывается от исходного
+policy anchor; уже истёкшая запись сразу становится deletion-eligible.
+
+Firebase TTL не удаляет мгновенно, не является транзакционным и тарифицируется
+как delete operation. Поэтому user-deletion workflow обязан немедленно
+закрывать доступ и отдельно отслеживать завершение. Operational target:
+физическое удаление завершается не позднее 72 часов после наступления TTL;
+нарушение target создаёт reconciliation/alert, но не продлевает retention.
 [Firestore TTL](https://firebase.google.com/docs/firestore/ttl).
+
+При account deletion прямые account/actor identifiers удаляются или заменяются
+scope-bound pseudonym; минимальный Booking audit сохраняется только до своего
+исходного `expiresAt`. Restore всегда выполняется изолированно: истёкшая запись
+не возвращается в active dataset, hold сохраняется, а re-deletion и
+reconciliation завершаются до cutover.
 
 ## 18. Observability, SLO and alerts
 
@@ -1544,7 +1575,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Plan v1.11; RAW-C v0.3 local and hosted cross-platform evidence | Review / Inconclusive | Disabled source only; no deploy/activation |
+| ECL-03C | Plan v1.11; RAW-C v0.3 plus local Booking lifecycle/retention hardening | Review / local evidence present | Disabled source only; no deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1567,7 +1598,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 | BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
 | BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
 | BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |
-| BCK09-OD-06 | Accepted — D04 design baseline; Legal gate retained | Legal/Privacy + Security + Booking | Retention classes/targets are the design baseline | No production personal data before qualified per-market Legal/Privacy validation |
+| BCK09-OD-06 | Accepted technical owner baseline via `BCK09-RETENTION-DEC-01`; Legal gate retained | Legal/Privacy + Security + Booking | 7-day idempotency, completed-and-reconciled outbox +30 days, 365-day audit, hold, pseudonymization and restore controls | No production personal data before qualified per-market Legal/Privacy validation; no implicit market enablement |
 | BCK09-OD-07 | Deferred/Open | Security/Privacy + Identity + Legal | Preserve OD-11 ownership and market versioning | Applicable paths server-disabled |
 | BCK09-OD-08 | Accepted — thresholds; proof deferred | Operations + Booking | SLO/zero-tolerance/automatic-stop values are test targets | No cohort/GA before cost, DR, load and restore evidence |
 | BCK09-OD-09 | Accepted — repair seam; runtime deferred | Admin Operations + Booking + Security | BCK-19 owns case/proposal/approval; BCK-09 executes an invariant-safe command | Drifted pool blocked; no console/manual repair |
@@ -1692,3 +1723,24 @@ schedule is accepted.
      unrestricted personal data.
 104. BCK-09 v1.15 preserves RAW-C, independent-review, Firebase, deployment,
      activation and mobile-integration gates.
+105. `BCK09-RETENTION-DEC-01` is the sole technical owner baseline for the
+     three implemented Booking retention classes.
+106. Booking idempotency receives `expiresAt = createdAt + 7 days` as a
+     Firestore Timestamp and cannot infer its duration from market or client.
+107. Booking outbox receives no `expiresAt` until delivery and reconciliation
+     are both complete; its 30-day period starts at the later completion.
+108. Booking audit receives `expiresAt = occurredAt + 365 days` and retains
+     only the minimum approved audit shape.
+109. Legal/security hold removes or suppresses TTL eligibility until explicit
+     release, including during backup restore.
+110. Account deletion removes or pseudonymizes direct identifiers without
+     resetting or extending the existing audit retention deadline.
+111. LV, EE and LT inherit the same disabled baseline but activate
+     independently; any market override is versioned and separately accepted.
+112. Physical deletion has a 72-hour operational target after expiry and
+     overdue work remains visible to reconciliation/alerting.
+113. Restore into isolation blocks expired records and preserves active holds
+     before any destination cutover.
+114. BCK-09 v1.16 and its local TTL configuration claim neither qualified
+     Legal/Privacy approval nor cloud deployment, production activation, push
+     or merge authority.

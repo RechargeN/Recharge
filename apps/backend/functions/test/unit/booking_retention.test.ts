@@ -2,8 +2,15 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   BookingRetentionPlanner,
+  acceptedBookingRetentionPolicies,
+  auditExpiresAt,
   bookingRetentionCandidate,
+  bookingRetentionBaselineMarkets,
+  bookingRetentionDecisionId,
+  bookingRetentionDurationDays,
   bookingRetentionPolicyIds,
+  idempotencyExpiresAt,
+  outboxExpiresAt,
   unresolvedBookingRetentionPolicies,
 } from '../../src/booking/retention.js';
 import type { RetentionPolicy } from '../../src/security/retention_registry.js';
@@ -18,7 +25,10 @@ void test('unaccepted Booking retention durations fail closed for every record f
         retentionClass,
         createdAtUtc: '2026-01-01T00:00:00.000Z',
         ...(retentionClass === 'outbox'
-          ? { deliveryCompleted: true, reconciliationCompleted: true }
+          ? {
+              deliveredAtUtc: '2026-01-01T00:00:00.000Z',
+              reconciledAtUtc: '2026-01-01T00:00:00.000Z',
+            }
           : {}),
       }),
       parseUtcInstant('2026-09-24T00:00:00.000Z'),
@@ -47,8 +57,7 @@ void test('outbox cannot expire before delivery and reconciliation complete', ()
       recordId: 'outbox-1',
       retentionClass: 'outbox',
       createdAtUtc: '2026-01-01T00:00:00.000Z',
-      deliveryCompleted: true,
-      reconciliationCompleted: false,
+      deliveredAtUtc: '2026-01-02T00:00:00.000Z',
     }),
     parseUtcInstant('2026-09-24T00:00:00.000Z'),
   );
@@ -56,6 +65,64 @@ void test('outbox cannot expire before delivery and reconciliation complete', ()
     action: 'retain_delivery_pending',
     policyId: bookingRetentionPolicyIds.outbox,
     recordId: 'outbox-1',
+  });
+});
+
+void test('accepted owner decision fixes exact Baltics baseline durations', () => {
+  assert.deepEqual(bookingRetentionBaselineMarkets, ['LV', 'EE', 'LT']);
+  assert.deepEqual(bookingRetentionDurationDays, { idempotency: 7, outbox: 30, audit: 365 });
+  assert.deepEqual(
+    acceptedBookingRetentionPolicies().map((policy) =>
+      policy.status === 'accepted'
+        ? [policy.policyId, policy.durationDays, policy.evidenceRevision]
+        : [policy.policyId, policy.status],
+    ),
+    [
+      [bookingRetentionPolicyIds.idempotency, 7, bookingRetentionDecisionId],
+      [bookingRetentionPolicyIds.outbox, 30, bookingRetentionDecisionId],
+      [bookingRetentionPolicyIds.audit, 365, bookingRetentionDecisionId],
+    ],
+  );
+});
+
+void test('accepted policy derives idempotency, audit and completed-outbox TTL timestamps', () => {
+  assert.equal(
+    idempotencyExpiresAt('2026-09-24T10:00:00.000Z').toISOString(),
+    '2026-10-01T10:00:00.000Z',
+  );
+  assert.equal(
+    auditExpiresAt('2026-09-24T10:00:00.000Z').toISOString(),
+    '2027-09-24T10:00:00.000Z',
+  );
+  assert.equal(
+    outboxExpiresAt('2026-09-24T10:00:00.000Z', '2026-09-25T12:00:00.000Z', false)?.toISOString(),
+    '2026-10-25T12:00:00.000Z',
+  );
+  assert.equal(outboxExpiresAt('2026-09-24T10:00:00.000Z', undefined, false), undefined);
+  assert.equal(
+    outboxExpiresAt('2026-09-24T10:00:00.000Z', '2026-09-25T12:00:00.000Z', true),
+    undefined,
+  );
+});
+
+void test('completed outbox expires from the later delivery/reconciliation timestamp', () => {
+  const planner = new BookingRetentionPlanner(acceptedBookingRetentionPolicies());
+  const decision = planner.plan(
+    bookingRetentionCandidate({
+      recordId: 'outbox-complete',
+      retentionClass: 'outbox',
+      createdAtUtc: '2025-01-01T00:00:00.000Z',
+      deliveredAtUtc: '2026-01-02T00:00:00.000Z',
+      reconciledAtUtc: '2026-01-03T00:00:00.000Z',
+    }),
+    parseUtcInstant('2026-02-03T00:00:00.000Z'),
+  );
+  assert.deepEqual(decision, {
+    action: 'dispatch_deletion',
+    policyId: bookingRetentionPolicyIds.outbox,
+    recordId: 'outbox-complete',
+    expiredAtUtc: '2026-02-02T00:00:00.000Z',
+    physicalDeletionDueByUtc: '2026-02-05T00:00:00.000Z',
   });
 });
 
@@ -134,6 +201,41 @@ void test('backup restore cannot bypass an unresolved retention policy', () => {
       action: 'restore_blocked_policy_unavailable',
       policyId: bookingRetentionPolicyIds.idempotency,
       recordId: 'booking-from-backup',
+    },
+  );
+});
+
+void test('backup restore preserves legal hold and blocks expired accepted records', () => {
+  const planner = new BookingRetentionPlanner(acceptedBookingRetentionPolicies());
+  assert.deepEqual(
+    planner.planRestore(
+      bookingRetentionCandidate({
+        recordId: 'held-audit',
+        retentionClass: 'audit',
+        createdAtUtc: '2020-01-01T00:00:00.000Z',
+        legalHold: true,
+      }),
+      parseUtcInstant('2026-09-24T00:00:00.000Z'),
+    ),
+    {
+      action: 'restore_allowed_legal_hold',
+      policyId: bookingRetentionPolicyIds.audit,
+      recordId: 'held-audit',
+    },
+  );
+  assert.deepEqual(
+    planner.planRestore(
+      bookingRetentionCandidate({
+        recordId: 'expired-idempotency',
+        retentionClass: 'idempotency',
+        createdAtUtc: '2026-09-01T00:00:00.000Z',
+      }),
+      parseUtcInstant('2026-09-24T00:00:00.000Z'),
+    ),
+    {
+      action: 'restore_blocked_expired',
+      policyId: bookingRetentionPolicyIds.idempotency,
+      recordId: 'expired-idempotency',
     },
   );
 });

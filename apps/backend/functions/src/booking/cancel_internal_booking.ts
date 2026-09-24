@@ -27,6 +27,7 @@ import {
   type IdempotencyRecord,
   type LogicalIdempotencyRecord,
 } from './idempotency.js';
+import { auditExpiresAt, idempotencyExpiresAt } from './retention.js';
 import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from './transactions.js';
 
 export interface CancelBookingDependencies {
@@ -105,6 +106,9 @@ export async function cancelInternalBooking(
           bookingId: booking.id,
           outcome,
           createdAt: nowIso,
+          retentionClass: 'bookingIdempotency',
+          legalHold: false,
+          expiresAt: idempotencyExpiresAt(nowIso),
         };
         transaction.create(logicalRef, idempotency);
         transaction.create(attemptRef, toRequestAttemptRecord(idempotency, attemptId));
@@ -171,6 +175,9 @@ export async function cancelInternalBooking(
         bookingId: booking.id,
         outcome,
         createdAt: now.toISOString(),
+        retentionClass: 'bookingIdempotency',
+        legalHold: false,
+        expiresAt: idempotencyExpiresAt(now.toISOString()),
       };
       const audit: BookingAuditFact = {
         schemaVersion: 1,
@@ -181,6 +188,9 @@ export async function cancelInternalBooking(
         occurrenceId: booking.occurrenceId,
         bookingRevision: nextBooking.revision,
         occurredAt: now.toISOString(),
+        retentionClass: 'bookingAudit',
+        legalHold: false,
+        expiresAt: auditExpiresAt(now.toISOString()),
       };
       transaction.set(bookingRef, nextBooking);
       transaction.delete(activeRef);

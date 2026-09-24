@@ -23,7 +23,11 @@ export type RetentionDecision =
       readonly policyId: string;
       readonly deleteAfterUtc: UtcInstant;
     }
-  | { readonly action: 'dispatch_deletion'; readonly policyId: string };
+  | {
+      readonly action: 'dispatch_deletion';
+      readonly policyId: string;
+      readonly deleteAfterUtc: UtcInstant;
+    };
 
 export class RetentionRegistry {
   readonly #policies: ReadonlyMap<string, DeepReadonly<RetentionPolicy>>;
@@ -59,7 +63,7 @@ export class RetentionRegistry {
     const deleteAfterEpoch = Date.parse(createdAtUtc) + policy.durationDays * 86_400_000;
     const deleteAfterUtc = new Date(deleteAfterEpoch).toISOString() as UtcInstant;
     return Date.parse(nowUtc) >= deleteAfterEpoch
-      ? { action: 'dispatch_deletion', policyId }
+      ? { action: 'dispatch_deletion', policyId, deleteAfterUtc }
       : { action: 'retain_until', policyId, deleteAfterUtc };
   }
 }

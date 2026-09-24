@@ -9,6 +9,9 @@ interface IdempotencyBase {
   readonly requestAttemptId: string;
   readonly bookingId: string;
   readonly createdAt: string;
+  readonly retentionClass: 'bookingIdempotency';
+  readonly legalHold: false;
+  readonly expiresAt: Date;
 }
 
 export interface LogicalIdempotencyRecord extends IdempotencyBase {
@@ -36,6 +39,9 @@ export function toRequestAttemptRecord(
     requestAttemptId: nextRequestAttemptId,
     bookingId: logical.bookingId,
     createdAt: logical.createdAt,
+    retentionClass: logical.retentionClass,
+    legalHold: logical.legalHold,
+    expiresAt: logical.expiresAt,
   };
 }
 

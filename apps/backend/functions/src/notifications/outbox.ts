@@ -8,6 +8,8 @@ export interface SuppressedBookingOutboxRecord {
   readonly bookingId: string;
   readonly actorId: string;
   readonly createdAt: string;
+  readonly retentionClass: 'bookingOutbox';
+  readonly legalHold: false;
 }
 
 export function suppressedOutboxId(bookingId: string, revision: number): string {
@@ -30,5 +32,7 @@ export function createSuppressedOutbox(
     bookingId,
     actorId,
     createdAt,
+    retentionClass: 'bookingOutbox',
+    legalHold: false,
   };
 }

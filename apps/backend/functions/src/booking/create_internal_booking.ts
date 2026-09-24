@@ -38,6 +38,7 @@ import {
   type IdempotencyRecord,
   type LogicalIdempotencyRecord,
 } from './idempotency.js';
+import { auditExpiresAt, idempotencyExpiresAt } from './retention.js';
 import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from './transactions.js';
 
 export interface CreateBookingDependencies {
@@ -213,6 +214,9 @@ export async function createInternalBooking(
         bookingId,
         outcome,
         createdAt: nowIso,
+        retentionClass: 'bookingIdempotency',
+        legalHold: false,
+        expiresAt: idempotencyExpiresAt(nowIso),
       };
       const activeKey: ActiveBookingKey = {
         schemaVersion: 1,
@@ -234,6 +238,9 @@ export async function createInternalBooking(
         occurrenceId: event.occurrenceId,
         bookingRevision: 1,
         occurredAt: nowIso,
+        retentionClass: 'bookingAudit',
+        legalHold: false,
+        expiresAt: auditExpiresAt(nowIso),
       };
       transaction.create(
         dependencies.firestore.collection(bookingCollections.bookings).doc(bookingId),

@@ -7,6 +7,15 @@ export const bookingRetentionPolicyIds = Object.freeze({
   audit: 'booking.audit.legal-security',
 });
 
+export const bookingRetentionDecisionId = 'BCK09-RETENTION-DEC-01';
+export const bookingRetentionBaselineMarkets = Object.freeze(['LV', 'EE', 'LT'] as const);
+export const bookingRetentionDurationDays = Object.freeze({
+  idempotency: 7,
+  outbox: 30,
+  audit: 365,
+});
+export const bookingPhysicalDeletionTargetHours = 72;
+
 export type BookingRetentionClass = keyof typeof bookingRetentionPolicyIds;
 
 export interface BookingRetentionCandidate {
@@ -14,8 +23,8 @@ export interface BookingRetentionCandidate {
   readonly retentionClass: BookingRetentionClass;
   readonly createdAtUtc: UtcInstant;
   readonly legalHold: boolean;
-  readonly deliveryCompleted?: boolean;
-  readonly reconciliationCompleted?: boolean;
+  readonly deliveredAtUtc?: UtcInstant;
+  readonly reconciledAtUtc?: UtcInstant;
 }
 
 export type BookingCleanupDecision =
@@ -28,10 +37,17 @@ export type BookingCleanupDecision =
       recordId: string;
       expiresAtUtc: UtcInstant;
     }>
-  | Readonly<{ action: 'dispatch_deletion'; policyId: string; recordId: string }>;
+  | Readonly<{
+      action: 'dispatch_deletion';
+      policyId: string;
+      recordId: string;
+      expiredAtUtc: UtcInstant;
+      physicalDeletionDueByUtc: UtcInstant;
+    }>;
 
 export type BookingRestoreDecision =
   | Readonly<{ action: 'restore_allowed'; policyId: string; recordId: string }>
+  | Readonly<{ action: 'restore_allowed_legal_hold'; policyId: string; recordId: string }>
   | Readonly<{ action: 'restore_blocked_policy_unavailable'; policyId: string; recordId: string }>
   | Readonly<{ action: 'restore_blocked_expired'; policyId: string; recordId: string }>;
 
@@ -48,11 +64,15 @@ export class BookingRetentionPlanner {
       return { action: 'retain_legal_hold', policyId, recordId: candidate.recordId };
     if (
       candidate.retentionClass === 'outbox' &&
-      (candidate.deliveryCompleted !== true || candidate.reconciliationCompleted !== true)
+      (candidate.deliveredAtUtc === undefined || candidate.reconciledAtUtc === undefined)
     ) {
       return { action: 'retain_delivery_pending', policyId, recordId: candidate.recordId };
     }
-    const decision = this.#registry.decide(policyId, candidate.createdAtUtc, nowUtc, false);
+    const retentionAnchorUtc =
+      candidate.retentionClass === 'outbox'
+        ? laterInstant(candidate.deliveredAtUtc, candidate.reconciledAtUtc)
+        : candidate.createdAtUtc;
+    const decision = this.#registry.decide(policyId, retentionAnchorUtc, nowUtc, false);
     if (decision.action === 'policy_unavailable') {
       return { ...decision, recordId: candidate.recordId };
     }
@@ -65,13 +85,29 @@ export class BookingRetentionPlanner {
       };
     }
     if (decision.action === 'dispatch_deletion') {
-      return { action: 'dispatch_deletion', policyId, recordId: candidate.recordId };
+      return {
+        action: 'dispatch_deletion',
+        policyId,
+        recordId: candidate.recordId,
+        expiredAtUtc: decision.deleteAfterUtc,
+        physicalDeletionDueByUtc: addHoursUtc(
+          decision.deleteAfterUtc,
+          bookingPhysicalDeletionTargetHours,
+        ),
+      };
     }
     return { action: 'retain_legal_hold', policyId, recordId: candidate.recordId };
   }
 
   planRestore(candidate: BookingRetentionCandidate, nowUtc: UtcInstant): BookingRestoreDecision {
     const cleanup = this.plan(candidate, nowUtc);
+    if (cleanup.action === 'retain_legal_hold') {
+      return {
+        action: 'restore_allowed_legal_hold',
+        policyId: cleanup.policyId,
+        recordId: cleanup.recordId,
+      };
+    }
     if (cleanup.action === 'policy_unavailable') {
       return {
         action: 'restore_blocked_policy_unavailable',
@@ -94,6 +130,18 @@ export class BookingRetentionPlanner {
   }
 }
 
+export function acceptedBookingRetentionPolicies(): readonly RetentionPolicy[] {
+  return Object.freeze(
+    (Object.keys(bookingRetentionPolicyIds) as BookingRetentionClass[]).map((retentionClass) => ({
+      policyId: bookingRetentionPolicyIds[retentionClass],
+      status: 'accepted' as const,
+      durationDays: bookingRetentionDurationDays[retentionClass],
+      legalHoldSupported: true,
+      evidenceRevision: bookingRetentionDecisionId,
+    })),
+  );
+}
+
 export function unresolvedBookingRetentionPolicies(): readonly RetentionPolicy[] {
   return Object.freeze(
     Object.values(bookingRetentionPolicyIds).map((policyId) => ({
@@ -109,19 +157,55 @@ export function bookingRetentionCandidate(input: {
   readonly retentionClass: BookingRetentionClass;
   readonly createdAtUtc: string;
   readonly legalHold?: boolean;
-  readonly deliveryCompleted?: boolean;
-  readonly reconciliationCompleted?: boolean;
+  readonly deliveredAtUtc?: string;
+  readonly reconciledAtUtc?: string;
 }): BookingRetentionCandidate {
   return {
     recordId: input.recordId,
     retentionClass: input.retentionClass,
     createdAtUtc: parseUtcInstant(input.createdAtUtc),
     legalHold: input.legalHold ?? false,
-    ...(input.deliveryCompleted === undefined
+    ...(input.deliveredAtUtc === undefined
       ? {}
-      : { deliveryCompleted: input.deliveryCompleted }),
-    ...(input.reconciliationCompleted === undefined
+      : { deliveredAtUtc: parseUtcInstant(input.deliveredAtUtc) }),
+    ...(input.reconciledAtUtc === undefined
       ? {}
-      : { reconciliationCompleted: input.reconciliationCompleted }),
+      : { reconciledAtUtc: parseUtcInstant(input.reconciledAtUtc) }),
   };
+}
+
+export function idempotencyExpiresAt(createdAtUtc: string): Date {
+  return new Date(retentionExpiryUtc('idempotency', parseUtcInstant(createdAtUtc)));
+}
+
+export function auditExpiresAt(occurredAtUtc: string): Date {
+  return new Date(retentionExpiryUtc('audit', parseUtcInstant(occurredAtUtc)));
+}
+
+export function outboxExpiresAt(
+  deliveredAtUtc: string | undefined,
+  reconciledAtUtc: string | undefined,
+  legalHold: boolean,
+): Date | undefined {
+  if (legalHold || deliveredAtUtc === undefined || reconciledAtUtc === undefined) return undefined;
+  const anchor = laterInstant(parseUtcInstant(deliveredAtUtc), parseUtcInstant(reconciledAtUtc));
+  return new Date(retentionExpiryUtc('outbox', anchor));
+}
+
+function retentionExpiryUtc(
+  retentionClass: BookingRetentionClass,
+  anchorUtc: UtcInstant,
+): UtcInstant {
+  return addHoursUtc(anchorUtc, bookingRetentionDurationDays[retentionClass] * 24);
+}
+
+function addHoursUtc(value: UtcInstant, hours: number): UtcInstant {
+  return new Date(Date.parse(value) + hours * 3_600_000).toISOString() as UtcInstant;
+}
+
+function laterInstant(first: UtcInstant | undefined, second: UtcInstant | undefined): UtcInstant {
+  if (first === undefined || second === undefined) {
+    throw new TypeError('outbox_completion_evidence_required');
+  }
+  return Date.parse(first) >= Date.parse(second) ? first : second;
 }

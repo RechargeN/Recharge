@@ -7,6 +7,9 @@ export interface BookingAuditFact {
   readonly occurrenceId: string;
   readonly bookingRevision: number;
   readonly occurredAt: string;
+  readonly retentionClass: 'bookingAudit';
+  readonly legalHold: false;
+  readonly expiresAt: Date;
 }
 
 export function bookingAuditId(bookingId: string, revision: number): string {

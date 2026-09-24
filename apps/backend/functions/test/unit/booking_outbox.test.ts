@@ -19,6 +19,9 @@ void test('pre-activation outbox is explicitly suppressed and non-replayable', (
     bookingId: 'booking',
     actorId: 'actor',
     createdAt: '2026-08-29T00:00:00Z',
+    retentionClass: 'bookingOutbox',
+    legalHold: false,
   });
+  assert.equal('expiresAt' in record, false);
   assert.equal(suppressedOutboxId('booking', 2), 'booking__r2');
 });

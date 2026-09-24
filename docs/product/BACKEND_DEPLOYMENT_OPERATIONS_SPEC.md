@@ -1,8 +1,8 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.37**
-- Date: **2026-09-23**
+- Version: **0.2.38**
+- Date: **2026-09-24**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
 - Accountable owner: **Platform Operations owner**
@@ -36,12 +36,22 @@
 - Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
 - Infrastructure input: [FIREBASE_ARCHITECTURE v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
 - Delivery annex: [BCK-02-A1 v1.28](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
-- Runtime effect: **none**
+- Runtime effect: **local Booking TTL configuration and tests only; no cloud/deployment effect**
 - Canonical repository path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md`
 
 ---
 
 ## 0. Changelog
+
+### v0.2.38 — 2026-09-24
+
+- integrates the technical owner decision `BCK09-RETENTION-DEC-01` for local
+  Booking TTL configuration, cleanup/reconciliation and restore evidence;
+- fixes the 72-hour physical-deletion target, hold precedence and
+  restore-time re-deletion rule without claiming general OD-05 recovery or a
+  qualified Legal/Privacy verdict;
+- keeps cloud provisioning, deployment, market activation, push and merge
+  outside the decision.
 
 ### v0.2.37 — 2026-09-23
 
@@ -737,6 +747,20 @@ exact Approved slice proves the controls above.
 - stage uses synthetic/anonymized data unless a separately approved exception
   provides legal basis, minimization, TTL and deletion evidence.
 
+For Booking only, `BCK09-RETENTION-DEC-01` is an Accepted technical owner
+baseline: `bookingIdempotency` expires 7 days from `createdAt`;
+`bookingOutbox` expires 30 days after both delivery and reconciliation finish,
+anchored to the later completion; `bookingAudit` expires 365 days from
+`occurredAt`. Undelivered or unreconciled outbox has no TTL timestamp. An
+active legal/security hold removes or suppresses TTL eligibility until
+explicit release. Account deletion removes or pseudonymizes direct identifiers
+while minimum audit keeps its original deadline. Physical deletion target is
+72 hours after expiry and requires overdue monitoring/reconciliation.
+
+The baseline applies to LV/EE/LT without enabling any market. A market-specific
+override requires a separate accepted revision. This owner decision is not a
+qualified Legal/Privacy verdict and does not accept general `BCK05-OD-05`.
+
 ## 18. Abuse, rate, App Check and supply-chain controls
 
 App Check is defense-in-depth for exposed Firebase surfaces; it is not IAM,
@@ -898,6 +922,12 @@ Required contract:
 - quarterly restore drill before source-of-truth production and after major
   topology changes;
 - delete/retire procedure only after verified export, observation and owner approval.
+
+Booking restore additionally re-evaluates `BCK09-RETENTION-DEC-01` before
+cutover: expired records are not reintroduced, overdue records are queued for
+deletion, and legal/security hold state is preserved rather than cleared by
+the restore. Local tests prove the decision logic only; no backup service,
+schedule, cloud restore or production evidence exists.
 
 Exact RPO/RTO/retention are `BCK05-OD-05`; no invented value is called Accepted.
 The concrete Draft proposal is
@@ -1215,6 +1245,17 @@ Approved/provisioned/production status.
     until separate project, region revalidation, IAM, billing and deploy approval.
 86. **BCK-05-AC-86:** this preflight runs no tool, creates no file/resource,
     changes no lock, and performs no deployment, push or merge.
+87. **BCK-05-AC-87:** `BCK09-RETENTION-DEC-01` fixes the local Booking TTL
+    baseline at 7 days for idempotency, completion-and-reconciliation plus 30
+    days for outbox, and 365 days for audit.
+88. **BCK-05-AC-88:** undelivered/unreconciled outbox and every active
+    legal/security hold remain ineligible for automatic TTL deletion.
+89. **BCK-05-AC-89:** Booking physical deletion is monitored against a
+    72-hour post-expiry target; delay never silently extends policy.
+90. **BCK-05-AC-90:** isolated restore blocks expired Booking records,
+    preserves holds and completes re-deletion/reconciliation before cutover.
+91. **BCK-05-AC-91:** the Booking owner decision neither accepts general
+    BCK05-OD-05 nor claims qualified Legal/Privacy, cloud or production proof.
 
 AC numbers are stable; new criteria append. Semantic removal/change requires a
 new revision and reference migration note.

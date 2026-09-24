@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
+import { Timestamp } from 'firebase-admin/firestore';
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
 import { getEventAvailability } from '../../src/booking/availability_query.js';
 import { logicalMutationId, requestAttemptId } from '../../src/booking/idempotency.js';
@@ -54,6 +55,25 @@ void test('finite create atomically writes booking, key, ledger, usage, audit, o
     ),
     'suppressedPreActivation',
   );
+  const idempotencyRecords = await firestore.collection(bookingCollections.idempotency).get();
+  assert.equal(idempotencyRecords.size, 2);
+  for (const record of idempotencyRecords.docs) {
+    assert.equal(record.get('retentionClass'), 'bookingIdempotency');
+    const expiresAt = record.get('expiresAt') as unknown;
+    assert.ok(expiresAt instanceof Timestamp);
+    assert.equal(expiresAt.toDate().toISOString(), '2026-09-05T12:00:00.000Z');
+  }
+  const auditRecord = (await firestore.collection(bookingCollections.audit).limit(1).get()).docs[0];
+  assert.ok(auditRecord);
+  assert.equal(auditRecord.get('retentionClass'), 'bookingAudit');
+  const auditExpiresAt = auditRecord.get('expiresAt') as unknown;
+  assert.ok(auditExpiresAt instanceof Timestamp);
+  assert.equal(auditExpiresAt.toDate().toISOString(), '2027-08-29T12:00:00.000Z');
+  const outboxRecord = (await firestore.collection(bookingCollections.outbox).limit(1).get())
+    .docs[0];
+  assert.ok(outboxRecord);
+  assert.equal(outboxRecord.get('retentionClass'), 'bookingOutbox');
+  assert.equal(outboxRecord.get('expiresAt'), undefined);
 });
 
 void test('idempotent replay returns the original booking without a second allocation', async () => {
