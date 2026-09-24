@@ -152,7 +152,18 @@ process.stdout.write(
 
 // Both Windows cmd.exe and POSIX sh support this form. Running from the
 // package root keeps fixture/schema resolution identical to standalone gates.
-const insideCommand = "cd functions && npm run test:emulator:inside";
+const loadEvidenceMode = process.argv.includes("--booking-load-evidence");
+if (
+  process.argv.some(
+    (argument) =>
+      argument.startsWith("--") && argument !== "--booking-load-evidence",
+  )
+) {
+  throw new Error("unsupported emulator runner option");
+}
+const insideCommand = loadEvidenceMode
+  ? "cd functions && npm run test:booking:load:inside"
+  : "cd functions && npm run test:emulator:inside";
 
 const child = spawn(
   process.execPath,
@@ -203,5 +214,7 @@ if (exitCode !== 0) {
 }
 
 process.stdout.write(
-  "Firebase emulator R0, RAW-C transaction, contention, security, cleanup and default-deny gates passed.\n",
+  loadEvidenceMode
+    ? "Firebase Emulator Booking load evidence completed; production capacity remains unproven.\n"
+    : "Firebase emulator R0, RAW-C transaction, contention, security, cleanup and default-deny gates passed.\n",
 );

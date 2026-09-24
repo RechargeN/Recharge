@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.16**
+- Версия: **1.17**
 - Дата: **2026-09-24**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.92](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -40,6 +40,18 @@
 - Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.17 — 2026-09-24
+
+- fixes the owner-approved normal/popular/mass peak profiles and records one
+  bounded local Emulator load run for the current single-ledger implementation;
+- records zero oversell together with unacceptable popular/mass contention,
+  so the single ledger remains limited to small disabled development evidence;
+- selects a fixed-capacity escrow model with 16 popular or 64 mass shards and
+  adds a default-off pure migration/reconciliation model without changing
+  Firestore schema, exports, deployment or activation;
+- publishes separate local, Emulator, dev, staging, production and market
+  readiness verdicts without promoting any independent or qualified gate.
 
 ### v1.16 — 2026-09-24
 
@@ -1575,7 +1587,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 |---|---|---|---|
 | ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
-| ECL-03C | Plan v1.11; RAW-C v0.3 plus local Booking lifecycle/retention hardening | Review / local evidence present | Disabled source only; no deploy/activation |
+| ECL-03C | Plan v1.11; RAW-C v0.3 plus local lifecycle, retention and single-ledger load hardening | Review / local evidence present | Disabled source plus pure default-off escrow model; no persistent escrow/deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
 | ECL-03E | Notifications/reconfirmation | Target only | None |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
@@ -1600,7 +1612,7 @@ source evidence; `currentParticipants` is never migrated into capacity.
 | BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |
 | BCK09-OD-06 | Accepted technical owner baseline via `BCK09-RETENTION-DEC-01`; Legal gate retained | Legal/Privacy + Security + Booking | 7-day idempotency, completed-and-reconciled outbox +30 days, 365-day audit, hold, pseudonymization and restore controls | No production personal data before qualified per-market Legal/Privacy validation; no implicit market enablement |
 | BCK09-OD-07 | Deferred/Open | Security/Privacy + Identity + Legal | Preserve OD-11 ownership and market versioning | Applicable paths server-disabled |
-| BCK09-OD-08 | Accepted — thresholds; proof deferred | Operations + Booking | SLO/zero-tolerance/automatic-stop values are test targets | No cohort/GA before cost, DR, load and restore evidence |
+| BCK09-OD-08 | Accepted — thresholds; local characterization present, cloud proof deferred | Operations + Booking | Single-ledger local evidence selects escrow; dev/staging SLO, cost and operations still require proof | No cohort/GA before persistent escrow, cost, DR, load and restore evidence |
 | BCK09-OD-09 | Accepted — repair seam; runtime deferred | Admin Operations + Booking + Security | BCK-19 owns case/proposal/approval; BCK-09 executes an invariant-safe command | Drifted pool blocked; no console/manual repair |
 | BCK09-OD-10 | Accepted — staged sequence | Booking + Product + Mobile | ECL-03C → D → E → F → G → H; every stage remains bounded | No stage inherits executable authority |
 
@@ -1744,3 +1756,121 @@ schedule is accepted.
 114. BCK-09 v1.16 and its local TTL configuration claim neither qualified
      Legal/Privacy approval nor cloud deployment, production activation, push
      or merge authority.
+
+## 34. Stage 7 popular-pool scalability boundary
+
+### 34.1 Approved demand profiles and transition rule
+
+The accountable owner fixes the following planning profiles per exact
+`occurrenceId + poolId + channel`. They are capacity-planning inputs, not a
+promise of achieved cloud throughput:
+
+| Profile | Sustained target | Burst target |
+|---|---:|---:|
+| Normal | 5 requests/s | 20 requests |
+| Popular | 25 requests/s | 100 requests |
+| Mass | 100 requests/s | 500 requests |
+
+The current single-ledger implementation may be considered only for a bounded
+small dev rollout when evidence is below 25 sustained requests/s and 100 burst
+requests, p95 is at most 1500 ms, success ratio is at least 99.9% and oversell
+is zero. Reaching any threshold, exceeding latency, missing the success ratio
+or observing any oversell requires sharded escrow. Emulator evidence can make
+the single ledger eligible only for small dev; dev/staging cloud evidence is
+still required before any production decision.
+
+### 34.2 Local single-ledger evidence
+
+One disposable `demo-recharge` Emulator run used unique actors against one
+exact finite pool per scenario. Capacity exceeded requested units, therefore
+failure represents transaction contention rather than a sold-out pool.
+
+| Profile/mode | Requests | Successful | Retryable | p95 | Oversell |
+|---|---:|---:|---:|---:|---:|
+| Normal sustained | 5 | 5 | 0 | 101.25 ms | 0 |
+| Normal burst | 20 | 20 | 0 | 12142.70 ms | 0 |
+| Popular sustained | 25 | 25 | 0 | 55.55 ms | 0 |
+| Popular burst | 100 | 6 | 94 | 55164.60 ms | 0 |
+| Mass sustained | 100 | 2 | 98 | 55968.12 ms | 0 |
+| Mass burst | 500 | 2 | 498 | 93033.26 ms | 0 |
+
+The no-oversell invariant held in all six scenarios, but the single ledger did
+not meet the agreed burst latency or popular/mass success requirements. It is
+therefore not eligible for popular or mass production pools. These figures are
+local architectural evidence, not a Firebase cloud benchmark or SLO proof.
+
+### 34.3 Selected escrow model
+
+`booking_fixed_escrow_v1` divides one immutable pool capacity across fixed
+escrow shards. Popular pools use 16 shards; mass pools use 64; the maximum
+supported plan is 128. Every shard stores its own capacity, confirmed units
+and revision. The sum of shard capacities must equal the root pool capacity;
+allocation commits against exactly one shard and stores that exact shard ID in
+the Booking. A deterministic hash selects the first candidate and bounded
+probing may try another shard. Moving capacity between shards is an explicit,
+revisioned operation and may transfer only currently unallocated units.
+
+The root and shard model is currently `disabled`. The repository contains a
+pure planner, allocation/release/transfer logic and reconciliation tests only.
+It does not add a Firestore collection, dual writer, callable export, mobile
+path or runtime activation.
+
+### 34.4 Migration, reconciliation and rollback
+
+Migration from a single ledger is fail-closed and ordered:
+
+1. keep the single ledger authoritative and disable new mutations;
+2. create a shadow escrow root for the exact inventory identity and revision;
+3. place all existing confirmed units in a dedicated `legacy` shard and pin
+   existing Bookings to it; distribute only remaining capacity to new shards;
+4. verify capacity sum, confirmed-unit sum, unique shard IDs and every Booking
+   allocation; over-capacity state is `cancel_only`, not data loss;
+5. run a bounded shadow comparison and an isolated restore/reconciliation
+   drill;
+6. activate only through one atomic, compatible pointer swap after separate
+   dev/staging approval; never run two authoritative allocators;
+7. on rollback, stop new allocations, preserve cancellation/release, drain and
+   reconcile, then switch to a rebuilt compatible single-ledger revision or
+   the last compatible escrow revision. Blind document restore is forbidden.
+
+Any duplicate/missing shard, invalid unit value, capacity-sum mismatch,
+Booking-to-shard mismatch or unexplained confirmed-unit drift marks the pool
+`corrupt`, blocks new allocation and opens audited reconciliation. A legitimate
+capacity reduction below existing confirmed units is `over_capacity`: new
+allocations return sold out while cancellations continue to release units.
+
+### 34.5 Readiness verdict
+
+| Level | BCK-09 verdict after Stage 7 |
+|---|---|
+| Local implementation | Approximately 75–82% of bounded R5 Booking; Ready with controls for further disabled local work |
+| Emulator evidence | Present for current single-ledger correctness and load characterization; not cloud performance proof |
+| Dev cloud | Not Ready; escrow persistence/transactions, real IAM, budgets and measured cloud evidence absent |
+| Staging | Not Ready; no migration/rollback/load/restore drill on provisioned infrastructure |
+| Production | Not Ready; independent Security and applicable qualified Legal/Privacy plus SLO/cost/DR evidence absent |
+| Enabled markets | None; LV, EE and LT remain independently disabled |
+
+115. Normal, popular and mass profiles are fixed at 5/20, 25/100 and 100/500
+     sustained-RPS/burst targets per exact inventory identity.
+116. The single-ledger transition boundary is 25 sustained requests/s, 100
+     burst requests, p95 1500 ms, success ratio 99.9% and zero oversell.
+117. Local Emulator evidence preserves zero oversell but proves the current
+     single ledger unsuitable for popular and mass pools.
+118. Local Emulator timing is architectural evidence only and cannot satisfy
+     dev, staging or production SLO/load proof.
+119. `booking_fixed_escrow_v1` is the selected target with 16 popular and 64
+     mass shards, a hard maximum of 128 and default-off activation.
+120. Escrow shard capacities sum exactly to pool capacity; allocation mutates
+     one revisioned shard and persists its exact ID in the Booking.
+121. Existing Booking allocations migrate to a dedicated legacy shard while
+     the single ledger remains authoritative until one atomic pointer swap.
+122. Over-capacity state blocks new allocations but preserves cancellation;
+     structural mismatch is corrupt and blocks all new allocation.
+123. Migration, capacity transfer, reconciliation and rollback are bounded,
+     revisioned, auditable and cannot use two authoritative writers.
+124. The present pure escrow model adds no Firestore schema, callable export,
+     runtime activation or market enablement.
+125. Production popular/mass activation requires provisioned dev/staging load,
+     migration, rollback, restore, Security and operational evidence.
+126. BCK-09 v1.17 preserves every cloud, independent-review, Legal/Privacy,
+     deployment, activation, push and merge gate.

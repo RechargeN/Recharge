@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.91**
-- Date: **2026-09-23**
+- Version: **2.4.92**
+- Date: **2026-09-24**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -21,6 +21,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.92.** Records Booking Stages 7–8 without widening cloud authority:
+
+- fixes owner-approved normal/popular/mass demand profiles and records bounded
+  single-ledger Emulator load evidence with zero oversell but unacceptable
+  popular/mass contention;
+- selects a disabled fixed-capacity escrow target with 16/64 shards and pure
+  migration/reconciliation tests, without adding persistence or activation;
+- reconciles BCK-09 v1.17, BCK-05 v0.2.38, backend README, AGENTS and
+  LAUNCH_STATUS into separate local/Emulator/dev/staging/production/market
+  verdicts; no cloud, deployment, activation, push or merge is authorized.
 
 **v2.4.91.** Reconciles the preserved Stage 8 implementation and defines the
 next product boundary without expanding runtime:
@@ -1212,7 +1223,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.88)
+## 5. Реестр проектных документов — 22 (v2.4.92)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
@@ -1220,11 +1231,11 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.88 coordination baseline; local Identity evidence reconciled without cloud authority | N/A |
 | BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.20 — local platform schemas/validators/parity verified; 110 AC; product/cloud evidence retained | Local platform contract runtime Present; deployed/product API runtime Absent |
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.31 — local fail-closed foundation verified; 96 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
-| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.37 — local credential-free R1 verified; 86 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
+| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.38 — local credential-free R1 plus Booking retention/restore controls verified; 91 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.4 — bounded local authority evidence; production decisions remain gated | Present locally — in-memory only; cloud/production Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.4 — BCK07-LOCAL-01 approved as next disabled local/test-only slice; production/dependency gates retained; 82 AC | Absent; implementation not started |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.3 — Stage 3 unified query/snapshot/freshness contract complete; OD/source/Approval blockers remain | Absent |
-| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.15 — Stage 4 transaction/effect/receipt/reconciliation contract; RAW-C and all independent/runtime gates preserved | Exactly five disabled Emulator-only callable exports and nine collections; cloud/deployed/mobile runtime Absent |
+| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.17 — local lifecycle/retention hardening and Stage 7 scalability evidence; fixed escrow selected but disabled; all independent/runtime gates preserved | Exactly five disabled Emulator-only callable exports and nine collections; pure escrow model only; cloud/deployed/mobile runtime Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
@@ -1239,7 +1250,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Review v0.3 — Stage 4 governed analytics chain; OD-05/privacy/destination/runtime blockers remain | Absent |
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Draft v0.3.1 — Stage 4 contract; lifecycle/outcome vocabulary normalized; OD-06/OD-11, independent/qualified and runtime gates pending | Absent |
 
-BCK-09 v1.15 и его 22/22 coverage matrix v1.12 существуют как Review-документы:
+BCK-09 v1.17 и его 22/22 coverage matrix v1.12 существуют как Review-документы:
 [Event Booking Backend/Firebase full spec](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md).
 Design reconciliation с BCK-01/03/04/05/06/07/08/13/19 завершена без
 переписывания принятых Event/Booking инвариантов. BCK09-DEC-01 v0.3 сохраняет
@@ -1477,7 +1488,7 @@ persistent staff repair access — до BCK-19 и RUN-03 proof.
 | R2 | Production Identity/capability authority | R1 complete; G2, OD-08, OD-11, privacy/session migration | Auth/account/age-eligibility/capability/revocation tests; mock grants excluded |
 | R3 | Typed mobile adapters, content publication, read catalog | R2 complete; G3, BCK-18 import contract; OD-11 for enabled age-sensitive surfaces | Contract/mock/emulator parity; provenance, age-policy enforcement, freshness and rollback proof |
 | R4 | Library, notifications and media foundations | R2 complete; BCK-12, BCK-13 и BCK-14 Approved; relevant ODs closed | Actor ownership, delivery idempotency, storage access/deletion tests |
-| R5 | Disabled Event Booking Emulator core | G4 and explicit ECL-03C authorization | Contention/idempotency/Rules/invariant suites green; flags off |
+| R5 | Disabled Event Booking Emulator core | G4 and explicit ECL-03C authorization | Lifecycle/idempotency/Rules/retention suites green; single-ledger load characterized; fixed escrow remains default-off; flags off |
 | R6 | Persistent staging mutations and Booking extensions | R5 complete; G5; BCK-19 and RUN-03; BCK-13 for enabled effects; OD-11 for age-sensitive paths | Staff-only cohort, eligibility/repair/reconciliation/load/alert evidence |
 | R7 | Scenario/Route sync and publication | R3 complete; BCK-10 and BCK-11 Approved; BCK-18/domain migrations | Conflict/import/privacy/rollback evidence per aggregate |
 | R8 | Reviews and Trust & Safety | R4 complete; BCK-12 and BCK-22, OD-06, OD-11 where minors or age-restricted content are in scope, applicable store/legal policy | Report/block/filter/enforcement/appeal, age-policy and abuse tests |
@@ -2794,3 +2805,58 @@ runtime, Media processing, Catalog indexing, workers, cloud resources,
 deployment or activation. Its implementation requires a separate execution
 turn and must land as its own reviewable commit; this documentation decision
 does not implement it.
+
+## 32. Booking Stage 7–8 scalability and readiness reconciliation
+
+### 32.1 Factual local evidence
+
+The Booking owner accepted capacity-planning profiles per exact inventory
+identity: normal 5 sustained requests/s and 20 burst, popular 25/100, mass
+100/500. One disposable local Emulator run preserved zero oversell in all six
+sustained/burst scenarios. The current single ledger nevertheless produced
+94 retryable failures at popular burst and 98/498 at mass sustained/burst,
+with p95 up to 93 seconds. It is not eligible for popular or mass production.
+
+This evidence selects `booking_fixed_escrow_v1`: fixed capacity divided across
+16 popular or 64 mass shards, an explicit legacy shard for migrated Bookings,
+revisioned capacity transfer, fail-closed reconciliation and an atomic
+activation pointer. Only the pure/default-off model and tests are present.
+Firestore persistence, dual-write migration, callable activation and cloud
+load evidence were not added and are not authorized.
+
+### 32.2 Honest R5 verdict
+
+| Dimension | Verdict | Missing before the next level |
+|---|---|---|
+| Local implementation | Ready with controls; bounded R5 Booking is approximately 75–82% | Persistent escrow adapter and separately approved ECL-03D–H work |
+| Emulator | Present for single-ledger correctness, retention and load characterization | Escrow transaction/Rules evidence after its exact implementation approval |
+| Dev cloud | Not Ready | Project, billing/budgets, IAM/secrets, deployment approval and measured cloud evidence |
+| Staging | Not Ready | Migration/rollback/restore/incident drills, independent Security/Privacy review and SLO/cost evidence |
+| Production | Not Ready | Qualified applicable Legal/Privacy, operational proof and explicit go/no-go |
+| Markets | None enabled | Independent LV/EE/LT evidence and activation decision |
+
+The percentage describes only the bounded local R5 implementation, not the
+whole backend and not production readiness. The historical 45–50% estimate
+described the pre-hardening implementation; Stages 2–5 raised it to about
+65–75%, and retention/revocation plus Stage 7 evidence now support the
+75–82% range. No numeric estimate overrides a named gate.
+
+### 32.3 Additional acceptance criteria
+
+157. Booking peak profiles are recorded as owner inputs, not achieved SLOs.
+158. Zero oversell in a local Emulator does not prove cloud throughput.
+159. The measured single-ledger implementation is ineligible for popular and
+     mass production pools.
+160. Fixed escrow is selected with 16 popular and 64 mass shards but remains
+     default-off and has no persistent writer.
+161. Existing allocations migrate to one explicit legacy shard; the current
+     ledger remains authority until a separately approved atomic cutover.
+162. No migration may run two authoritative inventory writers.
+163. Reconciliation distinguishes legitimate over-capacity/cancel-only state
+     from structural corruption and blocks new allocation fail closed.
+164. Local, Emulator, dev, staging, production and market readiness remain
+     separate verdicts and cannot promote one another.
+165. R5 percentage applies only to bounded local Booking implementation and
+     cannot be presented as whole-backend or production readiness.
+166. Stage 7–8 adds no cloud project, credential, deployment, activation,
+     enabled market, push or merge authority.

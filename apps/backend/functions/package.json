@@ -2,7 +2,7 @@
   "name": "@recharge/backend-r0-functions",
   "version": "0.0.0-r0",
   "private": true,
-  "description": "Non-product Firebase Emulator feasibility probe for Recharge R0",
+  "description": "Local R1 platform and disabled Booking Emulator foundation for Recharge",
   "type": "module",
   "main": "lib/src/index.js",
   "engines": {
@@ -24,6 +24,8 @@
     "test:emulator:booking:inside": "npm run build --silent && node lib/test/emulator/booking_create.test.js && node lib/test/emulator/booking_cancel.test.js && node lib/test/emulator/booking_queries.test.js && node lib/test/emulator/booking_contention.test.js && node lib/test/emulator/booking_security.test.js",
     "test:emulator:inside": "npm run build --silent && node lib/test/emulator/r0_emulator_isolation.test.js && node lib/test/emulator/rules_default_deny.test.js && node lib/test/emulator/booking_create.test.js && node lib/test/emulator/booking_cancel.test.js && node lib/test/emulator/booking_queries.test.js && node lib/test/emulator/booking_contention.test.js && node lib/test/emulator/booking_security.test.js && node --test --experimental-test-isolation=none \"lib/test/emulator/r1_*.test.js\" \"lib/test/rules/*.test.js\" \"lib/test/reference_data/emulator/*.test.js\"",
     "test:emulator": "node ../scripts/run-emulator-tests.mjs",
+    "test:booking:load:inside": "npm run build --silent && node --test --experimental-test-isolation=none lib/test/emulator/booking_load_evidence.test.js",
+    "test:booking:load:local": "node ../scripts/run-emulator-tests.mjs --booking-load-evidence",
     "verify:generated": "node ../scripts/verify-generated-clean.mjs",
     "verify:reproducibility": "node ../scripts/verify-reproducibility.mjs",
     "verify:r1:layout": "node ../scripts/verify-r1-layout.mjs",

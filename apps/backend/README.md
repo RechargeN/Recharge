@@ -1,13 +1,14 @@
 # Recharge backend — local platform and bounded domain foundations
 
-Status: **local R1 platform, Reference Data, Security/Privacy and an in-memory
-Identity/Publisher authority; all cloud and market activation disabled**.
+Status: **local R1 platform, Reference Data, Security/Privacy,
+Identity/Publisher and disabled Booking foundations; all cloud and market
+activation disabled**.
 
 R1 adds a provider-neutral local platform skeleton on top of the retained R0
 and disabled RAW-C compatibility evidence. It contains typed logical
 environments, immutable release/config revisions, optimistic activation
 pointers, default-deny security ports, bounded telemetry and in-memory
-adapters. It does not add or activate a product domain.
+adapters. Product domains remain separately gated.
 
 The BCK-20 foundation adds immutable, schema-validated LV/EE/LT market
 configuration, explicit locale fallback outcomes, currency and IANA-timezone
@@ -29,6 +30,28 @@ fences, Creator and ManagedPage verification lifecycles, exact-page membership,
 fresh AccessSnapshot evaluation and ID-based PublisherRef eligibility. It is
 in-memory and test-only: no OAuth credential, Firebase Auth adapter, Firestore
 repository, callable export or production grant exists.
+
+The BCK-09 local slice contains five disabled Emulator-only Booking callables,
+typed command/query results, finite and unlimited inventory transactions,
+idempotency, cancellation, access-revocation, retention and reconciliation
+evidence. It is not connected to mobile and is not deployed. A local
+single-ledger load probe preserved the zero-oversell invariant but failed the
+accepted popular and mass latency/success targets. A fixed-capacity escrow
+model is therefore selected for the later scalability migration: 16 shards
+for popular pools and 64 for mass pools. The model, migration planner and
+reconciliation tests are pure/default-off code; no Firestore schema, runtime
+switch or activation was added.
+
+## Readiness matrix
+
+| Level | Current verdict |
+|---|---|
+| Local implementation | Ready with controls for the implemented R1, Identity and disabled Booking scope |
+| Emulator evidence | Present for default-deny Rules and current single-ledger Booking invariants; not cloud performance proof |
+| Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
+| Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
+| Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |
+| Enabled markets | None; LV, EE and LT remain independently disabled |
 
 ## Safety boundary
 
@@ -82,7 +105,13 @@ npm run test:r1:emulator
 npm run test:reference-data
 npm run test:security-privacy
 npm run test:identity-publisher
+npm run test:booking:load:local
 ```
+
+`test:booking:load:local` is a deliberately long disposable-Emulator probe. It
+checks the agreed normal/popular/mass profiles and records latency, outcomes
+and oversell. It is evidence for architecture selection, not a release gate or
+production benchmark.
 
 From `apps/backend/infra/terraform`, after the verified R0 Terraform installer:
 
