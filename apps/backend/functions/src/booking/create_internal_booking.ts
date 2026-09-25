@@ -38,8 +38,13 @@ import {
   type IdempotencyRecord,
   type LogicalIdempotencyRecord,
 } from './idempotency.js';
-import { auditExpiresAt, idempotencyExpiresAt } from './retention.js';
-import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from './transactions.js';
+import { auditExpiresAt, coreBookingExpiresAt, idempotencyExpiresAt } from './retention.js';
+import {
+  bookingCollections,
+  bookingUserUsageId,
+  finitePoolLedgerId,
+  runBookingTransaction,
+} from './transactions.js';
 import {
   assertBookingMutationAuthorized,
   type BookingMutationAuthorization,
@@ -156,7 +161,9 @@ export async function createInternalBooking(
         ledgerRef = dependencies.firestore
           .collection(bookingCollections.poolLedgers)
           .doc(finitePoolLedgerId(event.occurrenceId, poolId, channel));
-        usageRef = dependencies.firestore.collection(bookingCollections.userUsage).doc(actorId);
+        usageRef = dependencies.firestore
+          .collection(bookingCollections.userUsage)
+          .doc(bookingUserUsageId(actorId));
         const [ledgerSnapshot, usageSnapshot] = await transaction.getAll(ledgerRef, usageRef);
         if (ledgerSnapshot === undefined || usageSnapshot === undefined) {
           throw new Error('firestore_snapshot_count_mismatch');
@@ -256,7 +263,19 @@ export async function createInternalBooking(
       };
       transaction.create(
         dependencies.firestore.collection(bookingCollections.bookings).doc(bookingId),
-        booking,
+        {
+          ...booking,
+          ...(event.occurrenceEndsAt === undefined
+            ? {}
+            : { occurrenceEndSnapshot: event.occurrenceEndsAt }),
+          retentionClass: 'bookingCore',
+          legalHold: false,
+          ...(event.occurrenceEndsAt === undefined
+            ? {}
+            : {
+                expiresAt: coreBookingExpiresAt(event.occurrenceEndsAt, nowIso, false)!,
+              }),
+        },
       );
       transaction.create(activeRef, activeKey);
       if (ledgerRef !== undefined && nextLedger !== undefined)

@@ -33,6 +33,7 @@ service cloud.firestore {
     // client exception, including for owners, flags, projections or outbox.
     match /bookingEventProjections/{document} { allow read, write: if false; }
     match /bookings/{document} { allow read, write: if false; }
+    match /bookingHolds/{document} { allow read, write: if false; }
     match /bookingPoolLedgers/{document} { allow read, write: if false; }
     match /bookingUserUsage/{document} { allow read, write: if false; }
     match /bookingActiveKeys/{document} { allow read, write: if false; }

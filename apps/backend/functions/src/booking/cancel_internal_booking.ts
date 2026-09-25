@@ -19,7 +19,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
-import type { BookingRecord } from './domain.js';
+import { publicBookingRecord, type BookingRecord, type StoredBookingRecord } from './domain.js';
 import {
   logicalMutationId,
   requestAttemptId,
@@ -27,8 +27,13 @@ import {
   type IdempotencyRecord,
   type LogicalIdempotencyRecord,
 } from './idempotency.js';
-import { auditExpiresAt, idempotencyExpiresAt } from './retention.js';
-import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from './transactions.js';
+import { auditExpiresAt, coreBookingExpiresAt, idempotencyExpiresAt } from './retention.js';
+import {
+  bookingCollections,
+  bookingUserUsageId,
+  finitePoolLedgerId,
+  runBookingTransaction,
+} from './transactions.js';
 import {
   assertBookingMutationAuthorized,
   type BookingMutationAuthorization,
@@ -101,7 +106,8 @@ export async function cancelInternalBooking(
         transaction.create(attemptRef, toRequestAttemptRecord(logical, attemptId));
         return replay;
       }
-      const booking = bookingSnapshot.data() as BookingRecord | undefined;
+      const storedBooking = bookingSnapshot.data() as StoredBookingRecord | undefined;
+      const booking = storedBooking === undefined ? undefined : publicBookingRecord(storedBooking);
       if (booking === undefined || booking.userId !== actorId)
         throw new BookingDomainRefusal('permission_denied');
       if (booking.state === 'cancelled') {
@@ -154,7 +160,9 @@ export async function cancelInternalBooking(
         ledgerRef = dependencies.firestore
           .collection(bookingCollections.poolLedgers)
           .doc(finitePoolLedgerId(booking.occurrenceId, booking.inventoryPoolId, booking.channel));
-        usageRef = dependencies.firestore.collection(bookingCollections.userUsage).doc(actorId);
+        usageRef = dependencies.firestore
+          .collection(bookingCollections.userUsage)
+          .doc(bookingUserUsageId(actorId));
         const [ledgerSnapshot, usageSnapshot] = await transaction.getAll(ledgerRef, usageRef);
         if (ledgerSnapshot === undefined || usageSnapshot === undefined) {
           throw new Error('firestore_snapshot_count_mismatch');
@@ -204,7 +212,20 @@ export async function cancelInternalBooking(
         legalHold: false,
         expiresAt: auditExpiresAt(now.toISOString()),
       };
-      transaction.set(bookingRef, nextBooking);
+      const expiresAt = coreBookingExpiresAt(
+        storedBooking?.occurrenceEndSnapshot,
+        now.toISOString(),
+        storedBooking?.legalHold ?? false,
+      );
+      transaction.set(bookingRef, {
+        ...nextBooking,
+        ...(storedBooking?.occurrenceEndSnapshot === undefined
+          ? {}
+          : { occurrenceEndSnapshot: storedBooking.occurrenceEndSnapshot }),
+        retentionClass: 'bookingCore',
+        legalHold: storedBooking?.legalHold ?? false,
+        ...(expiresAt === undefined ? {} : { expiresAt }),
+      });
       transaction.delete(activeRef);
       if (ledgerRef !== undefined && nextLedger !== undefined)
         transaction.set(ledgerRef, nextLedger);

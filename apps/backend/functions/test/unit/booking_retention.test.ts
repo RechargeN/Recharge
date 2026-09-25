@@ -18,7 +18,7 @@ import { parseUtcInstant } from '../../src/shared/utc_instant.js';
 
 void test('unaccepted Booking retention durations fail closed for every record family', () => {
   const planner = new BookingRetentionPlanner(unresolvedBookingRetentionPolicies());
-  for (const retentionClass of ['idempotency', 'outbox', 'audit'] as const) {
+  for (const retentionClass of ['core', 'idempotency', 'outbox', 'audit'] as const) {
     const decision = planner.plan(
       bookingRetentionCandidate({
         recordId: `record-${retentionClass}`,
@@ -70,7 +70,12 @@ void test('outbox cannot expire before delivery and reconciliation complete', ()
 
 void test('accepted owner decision fixes exact Baltics baseline durations', () => {
   assert.deepEqual(bookingRetentionBaselineMarkets, ['LV', 'EE', 'LT']);
-  assert.deepEqual(bookingRetentionDurationDays, { idempotency: 7, outbox: 30, audit: 365 });
+  assert.deepEqual(bookingRetentionDurationDays, {
+    core: 90,
+    idempotency: 7,
+    outbox: 30,
+    audit: 365,
+  });
   assert.deepEqual(
     acceptedBookingRetentionPolicies().map((policy) =>
       policy.status === 'accepted'
@@ -78,6 +83,7 @@ void test('accepted owner decision fixes exact Baltics baseline durations', () =
         : [policy.policyId, policy.status],
     ),
     [
+      [bookingRetentionPolicyIds.core, 90, bookingRetentionDecisionId],
       [bookingRetentionPolicyIds.idempotency, 7, bookingRetentionDecisionId],
       [bookingRetentionPolicyIds.outbox, 30, bookingRetentionDecisionId],
       [bookingRetentionPolicyIds.audit, 365, bookingRetentionDecisionId],
@@ -127,11 +133,12 @@ void test('completed outbox expires from the later delivery/reconciliation times
 });
 
 void test('legal hold overrides cleanup while accepted test policies derive exact expiry', () => {
+  const testDays = { core: 4, idempotency: 1, outbox: 2, audit: 3 } as const;
   const policies: readonly RetentionPolicy[] = Object.entries(bookingRetentionPolicyIds).map(
-    ([retentionClass, policyId], index) => ({
+    ([retentionClass, policyId]) => ({
       policyId,
       status: 'accepted' as const,
-      durationDays: index + 1,
+      durationDays: testDays[retentionClass as keyof typeof testDays],
       legalHoldSupported: true,
       evidenceRevision: `test-only-${retentionClass}`,
     }),

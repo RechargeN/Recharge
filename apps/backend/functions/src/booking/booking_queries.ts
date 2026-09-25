@@ -6,7 +6,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
-import type { BookingRecord } from './domain.js';
+import { publicBookingRecord, type BookingRecord, type StoredBookingRecord } from './domain.js';
 import { bookingCollections } from './transactions.js';
 
 export interface BookingQueryDependencies {
@@ -25,9 +25,10 @@ export async function getMyBooking(
       .collection(bookingCollections.bookings)
       .doc(query.payload.bookingId)
       .get();
-    const booking = snapshot.data() as BookingRecord | undefined;
-    if (booking === undefined || booking.userId !== actorId) return rejected('permission_denied');
-    return succeeded({ booking });
+    const storedBooking = snapshot.data() as StoredBookingRecord | undefined;
+    if (storedBooking === undefined || storedBooking.userId !== actorId)
+      return rejected('permission_denied');
+    return succeeded({ booking: publicBookingRecord(storedBooking) });
   } catch (error) {
     return classifyFirestoreFailure(error, {
       correlationId: query.requestId,
@@ -67,7 +68,9 @@ export async function listMyBookings(
     }
     const snapshot = await builder.limit(size + 1).get();
     const page = snapshot.docs.slice(0, size);
-    const items = page.map((document) => document.data() as BookingRecord);
+    const items = page.map((document) =>
+      publicBookingRecord(document.data() as StoredBookingRecord),
+    );
     const hasMore = snapshot.size > size;
     const last = page.at(-1);
     return succeeded({

@@ -1,3 +1,5 @@
+import { suppressedOutboxExpiresAt } from '../booking/retention.js';
+
 export interface SuppressedBookingOutboxRecord {
   readonly schemaVersion: 1;
   readonly effectDisposition: 'suppressedPreActivation';
@@ -8,8 +10,10 @@ export interface SuppressedBookingOutboxRecord {
   readonly bookingId: string;
   readonly actorId: string;
   readonly createdAt: string;
+  readonly suppressedAt: string;
   readonly retentionClass: 'bookingOutbox';
   readonly legalHold: false;
+  readonly expiresAt: Date;
 }
 
 export function suppressedOutboxId(bookingId: string, revision: number): string {
@@ -22,6 +26,8 @@ export function createSuppressedOutbox(
   actorId: string,
   createdAt: string,
 ): SuppressedBookingOutboxRecord {
+  const expiresAt = suppressedOutboxExpiresAt(createdAt, false);
+  if (expiresAt === undefined) throw new TypeError('suppressed_outbox_expiry_missing');
   return {
     schemaVersion: 1,
     effectDisposition: 'suppressedPreActivation',
@@ -32,7 +38,9 @@ export function createSuppressedOutbox(
     bookingId,
     actorId,
     createdAt,
+    suppressedAt: createdAt,
     retentionClass: 'bookingOutbox',
     legalHold: false,
+    expiresAt,
   };
 }

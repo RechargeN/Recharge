@@ -2,6 +2,7 @@ import { RetentionRegistry, type RetentionPolicy } from '../security/retention_r
 import { parseUtcInstant, type UtcInstant } from '../shared/utc_instant.js';
 
 export const bookingRetentionPolicyIds = Object.freeze({
+  core: 'booking.core.post-occurrence',
   idempotency: 'booking.idempotency.retry-window',
   outbox: 'booking.outbox.delivery-reconciliation',
   audit: 'booking.audit.legal-security',
@@ -10,6 +11,7 @@ export const bookingRetentionPolicyIds = Object.freeze({
 export const bookingRetentionDecisionId = 'BCK09-RETENTION-DEC-01';
 export const bookingRetentionBaselineMarkets = Object.freeze(['LV', 'EE', 'LT'] as const);
 export const bookingRetentionDurationDays = Object.freeze({
+  core: 90,
   idempotency: 7,
   outbox: 30,
   audit: 365,
@@ -25,6 +27,7 @@ export interface BookingRetentionCandidate {
   readonly legalHold: boolean;
   readonly deliveredAtUtc?: UtcInstant;
   readonly reconciledAtUtc?: UtcInstant;
+  readonly terminalAtUtc?: UtcInstant;
 }
 
 export type BookingCleanupDecision =
@@ -71,7 +74,9 @@ export class BookingRetentionPlanner {
     const retentionAnchorUtc =
       candidate.retentionClass === 'outbox'
         ? laterInstant(candidate.deliveredAtUtc, candidate.reconciledAtUtc)
-        : candidate.createdAtUtc;
+        : candidate.retentionClass === 'core' && candidate.terminalAtUtc !== undefined
+          ? laterInstant(candidate.createdAtUtc, candidate.terminalAtUtc)
+          : candidate.createdAtUtc;
     const decision = this.#registry.decide(policyId, retentionAnchorUtc, nowUtc, false);
     if (decision.action === 'policy_unavailable') {
       return { ...decision, recordId: candidate.recordId };
@@ -159,6 +164,7 @@ export function bookingRetentionCandidate(input: {
   readonly legalHold?: boolean;
   readonly deliveredAtUtc?: string;
   readonly reconciledAtUtc?: string;
+  readonly terminalAtUtc?: string;
 }): BookingRetentionCandidate {
   return {
     recordId: input.recordId,
@@ -171,6 +177,9 @@ export function bookingRetentionCandidate(input: {
     ...(input.reconciledAtUtc === undefined
       ? {}
       : { reconciledAtUtc: parseUtcInstant(input.reconciledAtUtc) }),
+    ...(input.terminalAtUtc === undefined
+      ? {}
+      : { terminalAtUtc: parseUtcInstant(input.terminalAtUtc) }),
   };
 }
 
@@ -190,6 +199,28 @@ export function outboxExpiresAt(
   if (legalHold || deliveredAtUtc === undefined || reconciledAtUtc === undefined) return undefined;
   const anchor = laterInstant(parseUtcInstant(deliveredAtUtc), parseUtcInstant(reconciledAtUtc));
   return new Date(retentionExpiryUtc('outbox', anchor));
+}
+
+export function suppressedOutboxExpiresAt(
+  suppressedAtUtc: string,
+  legalHold: boolean,
+): Date | undefined {
+  if (legalHold) return undefined;
+  return new Date(retentionExpiryUtc('outbox', parseUtcInstant(suppressedAtUtc)));
+}
+
+export function coreBookingExpiresAt(
+  occurrenceEndUtc: string | undefined,
+  terminalAtUtc: string,
+  legalHold: boolean,
+): Date | undefined {
+  if (legalHold) return undefined;
+  const terminal = parseUtcInstant(terminalAtUtc);
+  const anchor =
+    occurrenceEndUtc === undefined
+      ? terminal
+      : laterInstant(parseUtcInstant(occurrenceEndUtc), terminal);
+  return new Date(retentionExpiryUtc('core', anchor));
 }
 
 function retentionExpiryUtc(

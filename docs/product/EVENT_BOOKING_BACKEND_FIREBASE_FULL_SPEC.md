@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.18**
-- Дата: **2026-09-24**
+- Версия: **1.19**
+- Дата: **2026-09-25**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
-- Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
+- Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.94](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -37,9 +37,21 @@
   [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
 - Disabled-adapter evidence:
   [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
-- Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
+- Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
 
 ## 0. Changelog
+
+### v1.19 — 2026-09-25
+
+- implements the bounded Event→Booking projection consumer and verifies its
+  deterministic rebuild suite without starting the BCK-07 Content aggregate;
+- adds a disabled mobile Booking callable adapter, persistent local receipts/
+  checkpoints, seven-day automatic retry boundary and explicit reconciliation;
+- registers all nine Booking collections, domain-separated user-usage IDs,
+  atomic Privacy dispatch, five-attempt tasks, Booking DSR handling and the
+  accepted 90/7/30/365-day technical owner retention policies;
+- retains qualified Legal/Privacy, cloud, deployment, production binding and
+  every market activation as Pending/disabled.
 
 ### v1.18 — 2026-09-24
 
@@ -488,7 +500,7 @@ this capability as a visibility grant.
 | `bookings` | `bookingId` | Booking aggregate |
 | `bookingHolds` | `holdId` | Future ECL-03D TTL offer/allocation |
 | `bookingPoolLedgers` | occurrence/pool/channel hash | Capacity counters and revision |
-| `bookingUserUsage` | `userId` | Uniform cap evidence and policy version |
+| `bookingUserUsage` | domain-separated hash of exact `userId` | Uniform cap evidence and policy version; raw UID is not the document key |
 | `bookingActiveKeys` | versioned actor/occurrence/admission-track hash | One non-terminal Booking lock per duplicate-active scope |
 | `bookingIdempotency` | domain-separated `m1_` logical or `r1_` attempt hash | Payload/result or atomic request-attempt binding |
 | `bookingAudit` | `auditId` | Append-only mutation facts |
@@ -499,14 +511,14 @@ this capability as a visibility grant.
 | `bookingReconciliationRuns` | `runId` | Drift findings and resolution state |
 | `bookingRetentionJobs` | `jobId` | Deletion/pseudonymization checkpoint |
 
-Только восемь Booking-owned ECL-03C records (`bookingEventProjections`, `bookings`,
-`bookingPoolLedgers`, `bookingUserUsage`, `bookingActiveKeys`,
+Все девять Booking-owned records (`bookingEventProjections`, `bookings`,
+`bookingHolds`, `bookingPoolLedgers`, `bookingUserUsage`, `bookingActiveKeys`,
 `bookingIdempotency`, `bookingAudit`, `bookingOutbox`) нормативны для первого
 executable plan. Common R1 feature-flag records are read atomically but remain
 Platform-owned and are not duplicated under a Booking collection.
-`bookingHolds` и остальные operational records выше являются conditional
-target names: их physical schema/index/ownership фиксирует соответствующий
-Approved ECL-03D–H/BCK-05 slice.
+`bookingHolds` пока default-deny и не получает hold runtime до отдельного
+Approved ECL-03D slice; остальные operational records выше являются
+conditional target names.
 
 Repair proposal/case/approval records в эту таблицу намеренно не входят: ими
 владеет BCK-19. BCK-09 владеет только валидируемой repair command, Booking
@@ -1778,8 +1790,9 @@ schedule is accepted.
      unrestricted personal data.
 104. BCK-09 v1.15 preserves RAW-C, independent-review, Firebase, deployment,
      activation and mobile-integration gates.
-105. `BCK09-RETENTION-DEC-01` is the sole technical owner baseline for the
-     three implemented Booking retention classes.
+105. `BCK09-RETENTION-DEC-01` plus the accepted v1.18 core-Booking rule form
+     the technical owner baseline for the four implemented retention classes;
+     neither is a qualified Legal/Privacy verdict.
 106. Booking idempotency receives `expiresAt = createdAt + 7 days` as a
      Firestore Timestamp and cannot infer its duration from market or client.
 107. Booking outbox receives no `expiresAt` until delivery and reconciliation
@@ -1887,7 +1900,7 @@ allocations return sold out while cancellations continue to release units.
 | Level | BCK-09 verdict after Stage 7 |
 |---|---|
 | Local implementation | Approximately 75–82% of bounded R5 Booking; Ready with controls for further disabled local work |
-| Emulator evidence | Present for current single-ledger correctness and load characterization; not cloud performance proof |
+| Emulator evidence | Present for single-ledger correctness/load and the new Event projection/retention regression suite; the current rerun used Java 21 with Node 24 compatibility mode, not exact Node 22.23.2 parity and not cloud performance proof |
 | Dev cloud | Not Ready; escrow persistence/transactions, real IAM, budgets and measured cloud evidence absent |
 | Staging | Not Ready; no migration/rollback/load/restore drill on provisioned infrastructure |
 | Production | Not Ready; independent Security and applicable qualified Legal/Privacy plus SLO/cost/DR evidence absent |
@@ -1940,3 +1953,28 @@ allocations return sold out while cancellations continue to release units.
      idempotency and Booking/Event/inventory authority in the same Firestore
      transaction as mutation. Unknown/stale authority fails closed and the kill
      switch is not cached.
+135. BCK-07 immutable Event facts are the only input to the BCK-09 projection
+     consumer; its exact key is `occurrenceId` and stale revisions never win.
+136. Unpublish and occurrence cancellation create typed non-bookable
+     tombstones; material reschedule replaces only a newer compatible view.
+137. The mobile Booking adapter maps Booking `kind`, `error.code` and
+     `error.retryable`; a post-dispatch unavailable/deadline outcome is unknown
+     until an explicit read/reconciliation proves the result.
+138. Automatic command retry is bounded to seven days from first attempt;
+     receipts and import/checkpoint state survive process restart, while mock
+     capabilities never become server authority.
+139. All nine Booking collections have one writer, data class, readers and a
+     default-deny client boundary; `bookingUserUsage` uses a domain-separated
+     hash document key rather than raw UID.
+140. Privacy request dispatch and domain-task creation share one atomic
+     repository operation; task identity excludes `occurredAt` and a task has
+     at most five dispatch attempts.
+141. A terminal task rejects later outcomes and a Privacy request becomes
+     terminal only after every required domain task is terminal; any terminal
+     domain failure makes the request failed with retained success evidence.
+142. Core Booking, idempotency, terminally suppressed outbox and audit use the
+     accepted technical owner durations 90/7/30/365 days; legal/security hold
+     wins over TTL and isolated restore rejects expired records.
+143. `BCK09-RETENTION-DEC-01` and the 90-day core rule are technical owner
+     baselines only. Applicable qualified Legal/Privacy review remains Pending
+     before any staging, production or market activation.

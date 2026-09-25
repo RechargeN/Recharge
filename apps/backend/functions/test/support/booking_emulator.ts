@@ -3,9 +3,10 @@ import { createHash } from 'node:crypto';
 import { getApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
-import { bookingCollections, exactBookingCollectionNames } from '../../src/booking/transactions.js';
+import { exactBookingCollectionNames } from '../../src/booking/transactions.js';
 import { bookingFlagIds } from '../../src/shared/feature_flags.js';
 import type { BookingEventProjection } from '../../src/booking/domain.js';
+import { consumeEventForBookingProjection } from '../../src/booking/event_projection_consumer.js';
 import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
 import {
   featureFlagKey,
@@ -65,10 +66,16 @@ export async function seedEvent(
   event: BookingEventProjection,
   firestore = emulatorFirestore(),
 ): Promise<void> {
-  await firestore
-    .collection(bookingCollections.eventProjections)
-    .doc(event.occurrenceId)
-    .set(event);
+  const result = await consumeEventForBookingProjection(firestore, {
+    kind: 'EventRevisionPublished',
+    eventId: event.eventId,
+    occurrenceId: event.occurrenceId,
+    publicationRevision: event.materialRevision,
+    materialRevision: event.materialRevision,
+    occurredAt: '2026-08-01T00:00:00.000Z',
+    projection: event,
+  });
+  assert.ok(result.kind === 'applied' || result.kind === 'ignoredDuplicate');
 }
 
 export async function setBookingFlags(

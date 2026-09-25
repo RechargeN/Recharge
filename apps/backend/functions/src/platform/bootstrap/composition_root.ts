@@ -5,8 +5,11 @@ import { privacyTargetRefs } from '../../contracts/privacy_schema_registry.js';
 import { identityTargetRefs } from '../../contracts/identity_schema_registry.js';
 import { createLocalIdentityPublisherAuthority } from '../../modules/identity_publisher/application/identity_publisher_authority.js';
 import { PrivacyOrchestrationService } from '../../modules/privacy_orchestration/application/privacy_orchestration_service.js';
-import { InMemoryPrivacyRequestRepository } from '../../modules/privacy_orchestration/infrastructure/in_memory_privacy_request_repository.js';
-import { InMemoryPrivacyTaskRepository } from '../../modules/privacy_orchestration/infrastructure/in_memory_privacy_task_repository.js';
+import { InMemoryPrivacyOrchestrationRepository } from '../../modules/privacy_orchestration/infrastructure/in_memory_privacy_orchestration_repository.js';
+import {
+  acceptedBookingRetentionPolicies,
+  bookingRetentionPolicyIds,
+} from '../../booking/retention.js';
 import { LocalUnavailableAgePolicyPort } from '../../security/age_policy_port.js';
 import { LocalDenyAuthenticationGuard } from '../../security/authentication_guard.js';
 import { securityPrivacyCollectionAccess } from '../../security/collection_access_matrix.js';
@@ -32,8 +35,7 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
   const featureFlags = new InMemoryFeatureFlagRepository();
   const marketConfigs = new InMemoryMarketConfigRepository();
   const releaseManifests = new InMemoryReleaseManifestRepository();
-  const privacyRequests = new InMemoryPrivacyRequestRepository();
-  const privacyTasks = new InMemoryPrivacyTaskRepository();
+  const privacy = new InMemoryPrivacyOrchestrationRepository();
   const identity = createLocalIdentityPublisherAuthority();
   const dataClasses = new DataClassRegistry([
     {
@@ -126,6 +128,30 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       deletionEligible: false,
       retentionPolicyId: 'security.audit',
     },
+    ...[
+      ['booking.event-projection', 'internal', false, false, 'booking.event-projection'],
+      ['booking.core', 'personal', true, true, bookingRetentionPolicyIds.core],
+      ['booking.hold', 'personal', true, true, 'booking.hold'],
+      ['booking.pool-ledger', 'internal', false, false, 'booking.pool-ledger'],
+      ['booking.user-usage', 'personal', true, true, 'booking.user-usage'],
+      ['booking.active-key', 'restricted', true, true, 'booking.active-key'],
+    ].map(
+      ([
+        dataClassId,
+        classification,
+        containsDirectIdentifiers,
+        exportEligible,
+        retentionPolicyId,
+      ]) => ({
+        dataClassId: dataClassId as string,
+        classification: classification as 'internal' | 'personal' | 'restricted',
+        containsDirectIdentifiers: containsDirectIdentifiers as boolean,
+        containsSecrets: false as const,
+        exportEligible: exportEligible as boolean,
+        deletionEligible: true,
+        retentionPolicyId: retentionPolicyId as string,
+      }),
+    ),
     {
       dataClassId: 'booking.idempotency',
       classification: 'restricted',
@@ -150,7 +176,7 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       containsDirectIdentifiers: true,
       containsSecrets: false,
       exportEligible: false,
-      deletionEligible: false,
+      deletionEligible: true,
       retentionPolicyId: 'booking.audit.legal-security',
     },
   ]);
@@ -173,21 +199,18 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
     },
     { policyId: 'identity.managed-page', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.page-membership', status: 'unresolved', legalHoldSupported: true },
-    {
-      policyId: 'booking.idempotency.retry-window',
-      status: 'unresolved',
+    ...acceptedBookingRetentionPolicies(),
+    ...[
+      'booking.event-projection',
+      'booking.hold',
+      'booking.pool-ledger',
+      'booking.user-usage',
+      'booking.active-key',
+    ].map((policyId) => ({
+      policyId,
+      status: 'unresolved' as const,
       legalHoldSupported: true,
-    },
-    {
-      policyId: 'booking.outbox.delivery-reconciliation',
-      status: 'unresolved',
-      legalHoldSupported: true,
-    },
-    {
-      policyId: 'booking.audit.legal-security',
-      status: 'unresolved',
-      legalHoldSupported: true,
-    },
+    })),
   ]);
 
   return Object.freeze({
@@ -213,7 +236,7 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
     services: Object.freeze({
       config: new ConfigService(featureFlags),
       referenceData: new ReferenceDataService(marketConfigs),
-      privacy: new PrivacyOrchestrationService(privacyRequests, privacyTasks),
+      privacy: new PrivacyOrchestrationService(privacy, privacy, privacy),
       identityPublisher: identity.authority,
       release: new ReleaseService(releaseManifests),
       rollback: new RollbackGuard(releaseManifests),
@@ -222,8 +245,8 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       featureFlags,
       marketConfigs,
       releaseManifests,
-      privacyRequests,
-      privacyTasks,
+      privacyRequests: privacy,
+      privacyTasks: privacy,
       identityAuthority: identity.repository,
     }),
     security: Object.freeze({

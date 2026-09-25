@@ -9,7 +9,7 @@ import {
   logicalMutationId,
   requestAttemptId,
 } from '../../src/booking/idempotency.js';
-import { finitePoolLedgerId } from '../../src/booking/transactions.js';
+import { bookingUserUsageId, finitePoolLedgerId } from '../../src/booking/transactions.js';
 import { createCommand } from '../support/booking_fixtures.js';
 import { asRecord, readBookingJson } from '../support/booking_schema_registry.js';
 
@@ -34,6 +34,14 @@ void test('finite ledger ids are fixed-width and tuple collision resistant', () 
   assert.notEqual(first, second);
   assert.equal(first, finitePoolLedgerId('a', 'b__c', 'onsite'));
   assert.notEqual(first, finitePoolLedgerId('a', 'b__c', 'online'));
+});
+
+void test('user usage document key is deterministic and never exposes raw UID', () => {
+  const id = bookingUserUsageId('firebase-user-123');
+  assert.match(id, /^buu1_[0-9a-f]{64}$/u);
+  assert.equal(id, bookingUserUsageId('firebase-user-123'));
+  assert.notEqual(id, bookingUserUsageId('firebase-user-124'));
+  assert.equal(id.includes('firebase-user-123'), false);
 });
 
 void test('runtime contract rejects path-like and reserved identifiers', () => {

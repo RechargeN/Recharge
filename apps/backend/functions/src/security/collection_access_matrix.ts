@@ -100,4 +100,24 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
     pageScoped:
       collectionId === 'identityManagedPages' || collectionId === 'identityPageMemberships',
   })),
+  ...[
+    ['bookingEventProjections', 'booking.event-projection', 'event-booking-projection-consumer'],
+    ['bookings', 'booking.core', 'booking-authority'],
+    ['bookingHolds', 'booking.hold', 'booking-authority'],
+    ['bookingPoolLedgers', 'booking.pool-ledger', 'booking-authority'],
+    ['bookingUserUsage', 'booking.user-usage', 'booking-authority'],
+    ['bookingActiveKeys', 'booking.active-key', 'booking-authority'],
+    ['bookingIdempotency', 'booking.idempotency', 'booking-authority'],
+    ['bookingAudit', 'booking.audit', 'booking-authority'],
+    ['bookingOutbox', 'booking.outbox', 'booking-authority'],
+  ].map(([collectionId, dataClassId, singleWriter]) => ({
+    collectionId: collectionId ?? '',
+    dataClassId: dataClassId ?? '',
+    singleWriter: singleWriter ?? '',
+    serverReaders: ['booking-authority', 'privacy-orchestration', 'audited-support'],
+    clientRead: 'deny' as const,
+    clientWrite: 'deny' as const,
+    marketScoped: true,
+    pageScoped: false,
+  })),
 ]);

@@ -1,20 +1,31 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.4**
-- Date: **2026-09-23**
+- Version: **0.5**
+- Date: **2026-09-25**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
-- Runtime status: **Absent**
+- Runtime status: **Content aggregate Absent; bounded Event→Booking projection handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
 - Review owners: **Identity, API, Security/Privacy, Mobile, Reference Data,
   Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.94](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-07-PRE v0.2](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.5 — 2026-09-25
+
+- adds the bounded BCK-07/BCK-09 `EventRevisionPublished` handoff without
+  starting BCK07-LOCAL-01 or creating a second Content aggregate;
+- keeps Event as publication-state writer and gives the BCK-09 consumer sole
+  write ownership of the minimal operational `bookingEventProjections` view;
+- verifies duplicate/out-of-order delivery, unpublish, occurrence cancellation,
+  material reschedule and deterministic rebuild in the local Emulator; the
+  current run used Java 21 and Node 24 compatibility mode, while exact Node
+  22.23.2 parity remains a separate reproducibility gate.
 
 ### v0.4 — 2026-09-23
 
@@ -1177,3 +1188,27 @@ Firebase/GCP resources, credentials, deployment, activation, push or merge.
     typed ports and remain owned by BCK-14/22/08/03 respectively.
 82. **BCK-07-AC-82:** implementation evidence, product activation, cloud,
     deployment, push and merge remain separate decisions after v0.4.
+
+## 35. Bounded Event to Booking projection handoff
+
+BCK-07 emits immutable, revisioned `EventRevisionPublished`, `EventUnpublished`,
+`EventOccurrenceCancelled` and `EventMateriallyRescheduled` facts. It never
+writes Booking storage. BCK-09 alone consumes these facts into
+`bookingEventProjections/{occurrenceId}`. The projection contains only the
+operational fields required to authorize free internal Booking; drafts,
+moderation evidence, private copy and general Content state are excluded.
+
+The consumer is idempotent, ignores lower `materialRevision`, rejects an exact
+revision with conflicting meaning and preserves a typed non-bookable tombstone
+for unpublish/cancellation. Rebuild replays immutable facts in deterministic
+revision order. This local/Emulator seam is separate from BCK07-LOCAL-01 and
+does not authorize Content persistence, workers, cloud or market activation.
+
+83. **BCK-07-AC-83:** Event is the sole writer of publication state and BCK-09
+    is the sole writer of `bookingEventProjections`.
+84. **BCK-07-AC-84:** Projection identity is the exact `occurrenceId`; stale,
+    duplicate and conflicting revisions have typed deterministic outcomes.
+85. **BCK-07-AC-85:** Unpublish, occurrence cancellation and material
+    reschedule are explicit immutable events, never inferred from missing data.
+86. **BCK-07-AC-86:** The implemented handoff remains local/Emulator-only and
+    does not start the broader Content aggregate slice.

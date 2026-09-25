@@ -17,6 +17,10 @@ export function reconcilePrivacyRequest(
   )
     throw new TypeError('privacy_reconciliation_scope_invalid');
   const succeeded = tasks.filter((task) => task.status === 'succeeded');
+  const terminal = tasks.filter((task) =>
+    ['succeeded', 'failed', 'cancelled'].includes(task.status),
+  );
+  if (terminal.length !== tasks.length) return request;
   if (succeeded.length === tasks.length) {
     return transitionPrivacyRequest({
       request,
@@ -25,10 +29,10 @@ export function reconcilePrivacyRequest(
       terminalEvidenceIds: succeeded.map((task) => task.evidenceId!).filter(Boolean),
     });
   }
-  if (succeeded.length > 0 || tasks.some((task) => task.status === 'failed')) {
+  if (tasks.some((task) => task.status === 'failed' || task.status === 'cancelled')) {
     return transitionPrivacyRequest({
       request,
-      nextStatus: 'partially_completed',
+      nextStatus: 'failed',
       occurredAtUtc,
       terminalEvidenceIds: succeeded.map((task) => task.evidenceId!).filter(Boolean),
     });

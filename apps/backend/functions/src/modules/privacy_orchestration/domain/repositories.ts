@@ -24,3 +24,11 @@ export interface PrivacyTaskRepository {
     expectedRevision: number,
   ): Promise<'saved' | 'revision_conflict' | 'not_found'>;
 }
+
+export interface PrivacyDispatchRepository {
+  dispatchAtomically(
+    request: PrivacyRequest,
+    expectedRevision: number,
+    tasks: readonly PrivacyDomainTask[],
+  ): Promise<'saved' | 'revision_conflict' | 'not_found'>;
+}

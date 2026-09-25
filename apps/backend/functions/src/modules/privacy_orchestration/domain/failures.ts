@@ -7,7 +7,8 @@ export type PrivacyFailureCode =
   | 'task_evidence_missing'
   | 'retention_policy_unavailable'
   | 'legal_hold'
-  | 'scope_widening_forbidden';
+  | 'scope_widening_forbidden'
+  | 'task_retry_exhausted';
 
 export interface PrivacyFailure {
   readonly ok: false;

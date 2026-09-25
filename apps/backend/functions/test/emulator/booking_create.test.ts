@@ -4,7 +4,11 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
 import { getEventAvailability } from '../../src/booking/availability_query.js';
 import { logicalMutationId, requestAttemptId } from '../../src/booking/idempotency.js';
-import { bookingCollections, finitePoolLedgerId } from '../../src/booking/transactions.js';
+import {
+  bookingCollections,
+  bookingUserUsageId,
+  finitePoolLedgerId,
+} from '../../src/booking/transactions.js';
 import { computeBookingSemanticHash } from '../../src/contracts/booking_v1.js';
 import { FakeClock } from '../support/fake_clock.js';
 import {
@@ -38,15 +42,25 @@ void test('finite create atomically writes booking, key, ledger, usage, audit, o
     const registry = await createBookingSchemaRegistry();
     assert.equal(registry.validator('booking.schema.json')(result.data.booking), true);
   }
+  const storedBooking = (await firestore.collection(bookingCollections.bookings).limit(1).get())
+    .docs[0];
+  assert.ok(storedBooking);
+  assert.equal(storedBooking.get('retentionClass'), 'bookingCore');
+  const coreExpiresAt = storedBooking.get('expiresAt') as unknown;
+  assert.ok(coreExpiresAt instanceof Timestamp);
+  assert.equal(coreExpiresAt.toDate().toISOString(), '2026-11-27T14:00:00.000Z');
   const ledger = await firestore
     .collection(bookingCollections.poolLedgers)
     .doc(finitePoolLedgerId(finiteEvent().occurrenceId, 'pool_general', 'onsite'))
     .get();
   assert.equal(ledger.get('confirmedUnits'), 1);
   assert.equal(
-    (await firestore.collection(bookingCollections.userUsage).doc('actor-a').get()).get(
-      'activeFiniteBookings',
-    ),
+    (
+      await firestore
+        .collection(bookingCollections.userUsage)
+        .doc(bookingUserUsageId('actor-a'))
+        .get()
+    ).get('activeFiniteBookings'),
     1,
   );
   assert.equal(
@@ -73,7 +87,7 @@ void test('finite create atomically writes booking, key, ledger, usage, audit, o
     .docs[0];
   assert.ok(outboxRecord);
   assert.equal(outboxRecord.get('retentionClass'), 'bookingOutbox');
-  assert.equal(outboxRecord.get('expiresAt'), undefined);
+  assert.ok(outboxRecord.get('expiresAt') instanceof Timestamp);
 });
 
 void test('idempotent replay returns the original booking without a second allocation', async () => {
@@ -133,11 +147,12 @@ void test('capacity decrease persists overbooked ledger and blocks new allocatio
     }),
   );
   assert.equal(first.kind, 'succeeded');
-  await seedEvent(finiteEvent({ totalCapacity: 1 }), firestore);
+  await seedEvent(finiteEvent({ materialRevision: 8, totalCapacity: 1 }), firestore);
   const blocked = await createInternalBooking(
     { firestore, clock, newBookingId: () => '01JRAWCCAPACITYBLOCK000000' },
     'actor-capacity-b',
     createCommand({
+      occurredAgainstEventRevision: 8,
       idempotencyKey: 'idem_capacity_blocked',
       requestId: 'req_capacity_blocked',
     }),
@@ -178,11 +193,15 @@ void test('capacity increase reuses the same ledger and permits the new units', 
       payload: { ...createCommand().payload, participantUnits: 2 },
     }),
   );
-  await seedEvent(finiteEvent({ totalCapacity: 3 }), firestore);
+  await seedEvent(finiteEvent({ materialRevision: 8, totalCapacity: 3 }), firestore);
   const result = await createInternalBooking(
     { firestore, clock, newBookingId: () => '01JRAWCCAPACITYPLUS0000000' },
     'actor-increase-b',
-    createCommand({ idempotencyKey: 'idem_increase_plus', requestId: 'req_increase_plus' }),
+    createCommand({
+      occurredAgainstEventRevision: 8,
+      idempotencyKey: 'idem_increase_plus',
+      requestId: 'req_increase_plus',
+    }),
   );
   assert.equal(result.kind, 'succeeded');
   const ledger = await firestore

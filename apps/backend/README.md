@@ -38,7 +38,10 @@ typed command/query results, finite and unlimited inventory transactions,
 idempotency, cancellation, access-revocation, retention and reconciliation
 evidence. Booking mutations resolve Account, Session, AccessSnapshot and the
 common R1 feature flag inside the same Firestore transaction; query authority
-is separately revision-aware. It is not connected to mobile and is not
+is separately revision-aware. A provider-neutral mobile adapter is present but
+bound only to an explicitly loopback dev Emulator; production binding remains
+disabled. Immutable Event facts feed the sole Booking projection consumer, and
+all nine Booking collections remain direct-client default-deny. It is not
 deployed. A local
 single-ledger load probe preserved the zero-oversell invariant but failed the
 accepted popular and mass latency/success targets. A fixed-capacity escrow
@@ -52,7 +55,7 @@ switch or activation was added.
 | Level | Current verdict |
 |---|---|
 | Local implementation | Ready with controls for the implemented R1, Identity and disabled Booking scope |
-| Emulator evidence | Present for default-deny Rules and current single-ledger Booking invariants; not cloud performance proof |
+| Emulator evidence | Default-deny Rules, single-ledger and new Event projection/retention regressions pass locally; latest run used Java 21 with Node 24 compatibility mode and is not cloud performance proof |
 | Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
 | Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
 | Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |

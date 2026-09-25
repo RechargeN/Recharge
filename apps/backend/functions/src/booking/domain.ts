@@ -9,6 +9,9 @@ export interface BookingEventProjection {
   readonly occurrenceId: string;
   readonly publisherRef: Readonly<{ type: 'user' | 'page'; id: string }>;
   readonly materialRevision: number;
+  readonly publicationRevision?: number;
+  readonly occurrenceStartsAt?: string;
+  readonly occurrenceEndsAt?: string;
   readonly lifecycle: 'published';
   readonly bookingEnabled: true;
   readonly registrationMode: 'internal';
@@ -50,6 +53,22 @@ export interface BookingRecord {
   readonly confirmedAt: string;
   readonly cancelledAt?: string;
   readonly terminalReason?: 'userCancelled';
+}
+
+export interface StoredBookingRecord extends BookingRecord {
+  readonly occurrenceEndSnapshot?: string;
+  readonly retentionClass: 'bookingCore';
+  readonly legalHold: boolean;
+  readonly expiresAt?: Date;
+}
+
+export function publicBookingRecord(record: StoredBookingRecord): BookingRecord {
+  const booking = { ...record } as Record<string, unknown>;
+  delete booking.occurrenceEndSnapshot;
+  delete booking.retentionClass;
+  delete booking.legalHold;
+  delete booking.expiresAt;
+  return booking as unknown as BookingRecord;
 }
 
 export function assertSupportedEvent(
@@ -115,6 +134,8 @@ export function assertBookingEventProjection(
   assertOptionalInstant(value.registrationWindow.opensAt);
   assertOptionalInstant(value.registrationWindow.closesAt);
   assertOptionalInstant(value.cancellationDeadline);
+  assertOptionalInstant(value.occurrenceStartsAt);
+  assertOptionalInstant(value.occurrenceEndsAt);
   return value as unknown as BookingEventProjection;
 }
 

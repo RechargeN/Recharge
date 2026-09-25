@@ -6,6 +6,8 @@ import type { MarketId } from '../../reference_data/domain/identifiers.js';
 export type PrivacyDomainTaskStatus =
   'pending' | 'dispatched' | 'succeeded' | 'failed' | 'cancelled';
 
+export const privacyDomainTaskMaxAttempts = 5;
+
 export interface PrivacyDomainTask {
   readonly schemaVersion: 1;
   readonly taskId: EntityId;
@@ -62,11 +64,14 @@ export function transitionPrivacyDomainTask(input: {
     pending: ['dispatched', 'cancelled'],
     dispatched: ['dispatched', 'succeeded', 'failed', 'cancelled'],
     succeeded: [],
-    failed: ['dispatched', 'cancelled'],
+    failed: [],
     cancelled: [],
   };
   if (!allowed[input.task.status].includes(input.nextStatus))
     throw new TypeError('privacy_task_transition_invalid');
+  if (input.nextStatus === 'dispatched' && input.task.attempts >= privacyDomainTaskMaxAttempts) {
+    throw new TypeError('privacy_task_retry_exhausted');
+  }
   const evidenceId = input.evidenceId === undefined ? null : parseEntityId(input.evidenceId);
   if (input.nextStatus === 'succeeded' && evidenceId === null)
     throw new TypeError('privacy_task_evidence_missing');

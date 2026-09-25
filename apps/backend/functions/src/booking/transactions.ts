@@ -4,6 +4,7 @@ import type { Firestore, Transaction } from 'firebase-admin/firestore';
 export const bookingCollections = Object.freeze({
   eventProjections: 'bookingEventProjections',
   bookings: 'bookings',
+  holds: 'bookingHolds',
   poolLedgers: 'bookingPoolLedgers',
   userUsage: 'bookingUserUsage',
   activeKeys: 'bookingActiveKeys',
@@ -32,4 +33,12 @@ export function finitePoolLedgerId(occurrenceId: string, poolId: string, channel
     .update(`booking_pool_ledger_v2|${canonical}`, 'utf8')
     .digest('hex');
   return `bpl2_${digest}`;
+}
+
+export function bookingUserUsageId(actorId: string): string {
+  const canonical = `${Buffer.byteLength(actorId, 'utf8')}:${actorId}`;
+  const digest = createHash('sha256')
+    .update(`booking_user_usage_v1|${canonical}`, 'utf8')
+    .digest('hex');
+  return `buu1_${digest}`;
 }

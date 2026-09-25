@@ -51,6 +51,12 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "bookings",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "bookingIdempotency",
       "fieldPath": "expiresAt",
       "ttl": true,

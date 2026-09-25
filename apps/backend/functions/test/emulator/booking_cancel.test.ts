@@ -3,7 +3,7 @@ import { after, before, test } from 'node:test';
 import { cancelInternalBooking } from '../../src/booking/cancel_internal_booking.js';
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
 import { logicalMutationId, requestAttemptId } from '../../src/booking/idempotency.js';
-import { bookingCollections } from '../../src/booking/transactions.js';
+import { bookingCollections, bookingUserUsageId } from '../../src/booking/transactions.js';
 import { finitePoolLedgerId } from '../../src/booking/transactions.js';
 import {
   computeBookingSemanticHash,
@@ -70,9 +70,12 @@ void test('cancel atomically changes state and releases key ledger and usage exa
   );
   assert.equal((await firestore.collection(bookingCollections.activeKeys).get()).empty, true);
   assert.equal(
-    (await firestore.collection(bookingCollections.userUsage).doc('actor-c').get()).get(
-      'activeFiniteBookings',
-    ),
+    (
+      await firestore
+        .collection(bookingCollections.userUsage)
+        .doc(bookingUserUsageId('actor-c'))
+        .get()
+    ).get('activeFiniteBookings'),
     0,
   );
   const replay = await cancelInternalBooking({ firestore, clock }, 'actor-c', {
@@ -190,9 +193,12 @@ void test('cancel uses immutable Booking facts after event lifecycle and invento
       scenario.name,
     );
     assert.equal(
-      (await firestore.collection(bookingCollections.userUsage).doc(actorId).get()).get(
-        'activeFiniteBookings',
-      ),
+      (
+        await firestore
+          .collection(bookingCollections.userUsage)
+          .doc(bookingUserUsageId(actorId))
+          .get()
+      ).get('activeFiniteBookings'),
       0,
       scenario.name,
     );
@@ -238,7 +244,7 @@ void test('cancel releases the original ledger after capacity decreases below co
     'actor-capacity-cancel',
     createCommand({ requestId: 'req_capacity_seed', idempotencyKey: 'idem_capacity_seed' }),
   );
-  await seedEvent({ ...event, totalCapacity: 0 }, firestore);
+  await seedEvent({ ...event, materialRevision: 8, totalCapacity: 0 }, firestore);
   const result = await cancelInternalBooking({ firestore, clock }, 'actor-capacity-cancel', {
     schemaVersion: 1,
     commandType: 'cancelBooking',
@@ -268,7 +274,10 @@ void test('cancellation deadline uses immutable Booking snapshot', async () => {
     'actor-deadline',
     createCommand({ idempotencyKey: 'idem_deadline_create', requestId: 'req_deadline_create' }),
   );
-  await seedEvent({ ...event, cancellationDeadline: '2099-01-01T00:00:00.000Z' }, firestore);
+  await seedEvent(
+    { ...event, materialRevision: 8, cancellationDeadline: '2099-01-01T00:00:00.000Z' },
+    firestore,
+  );
   const result = await cancelInternalBooking({ firestore, clock }, 'actor-deadline', {
     schemaVersion: 1,
     commandType: 'cancelBooking',

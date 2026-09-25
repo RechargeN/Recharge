@@ -1,0 +1,106 @@
+import type { BookingRecord } from './domain.js';
+import { pseudonymizeBookingIdentity, type BookingIdentityBearingRecord } from './privacy.js';
+
+export type BookingPrivacyTaskType = 'access' | 'erasure' | 'restriction';
+
+export type BookingPrivacyTaskResult =
+  | Readonly<{
+      kind: 'succeeded';
+      evidence: Readonly<{ recordCount: number; pseudonymizedCount: number }>;
+    }>
+  | Readonly<{
+      kind: 'retryableFailure';
+      code: 'active_future_booking_cancellation_required' | 'temporarily_unavailable';
+    }>
+  | Readonly<{ kind: 'failed'; code: 'invalid_task' | 'invalid_record' }>;
+
+export interface BookingPrivacyRecordStore {
+  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): T;
+}
+
+export class InMemoryBookingPrivacyRecordStore implements BookingPrivacyRecordStore {
+  readonly #records: BookingIdentityBearingRecord[];
+
+  constructor(records: readonly BookingIdentityBearingRecord[]) {
+    this.#records = records.map((record) => ({ ...record }));
+  }
+
+  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): T {
+    const working = this.#records.map((record) => ({ ...record }));
+    const result = operation(working);
+    this.#records.splice(0, this.#records.length, ...working);
+    return result;
+  }
+
+  snapshot(): readonly BookingIdentityBearingRecord[] {
+    return Object.freeze(this.#records.map((record) => Object.freeze({ ...record })));
+  }
+}
+
+export class BookingPrivacyTaskHandler {
+  constructor(private readonly store: BookingPrivacyRecordStore) {}
+
+  handle(input: {
+    readonly taskType: BookingPrivacyTaskType;
+    readonly subjectId: string;
+    readonly pseudonymousActorId?: string;
+    readonly nowUtc: string;
+  }): BookingPrivacyTaskResult {
+    try {
+      if (!Number.isFinite(Date.parse(input.nowUtc)) || input.subjectId.trim().length === 0) {
+        return { kind: 'failed', code: 'invalid_task' };
+      }
+      return this.store.runAtomic((records) => {
+        const indexes = records
+          .map((record, index) => ({ record, index }))
+          .filter(({ record }) => actorId(record) === input.subjectId);
+        if (input.taskType === 'access' || input.taskType === 'restriction') {
+          return {
+            kind: 'succeeded',
+            evidence: { recordCount: indexes.length, pseudonymizedCount: 0 },
+          } as const;
+        }
+        if (input.pseudonymousActorId === undefined) {
+          return { kind: 'failed', code: 'invalid_task' } as const;
+        }
+        const hasActiveFutureBooking = indexes.some(({ record }) =>
+          isActiveFutureBooking(record, input.nowUtc),
+        );
+        if (hasActiveFutureBooking) {
+          return {
+            kind: 'retryableFailure',
+            code: 'active_future_booking_cancellation_required',
+          } as const;
+        }
+        for (const { record, index } of indexes) {
+          records[index] = pseudonymizeBookingIdentity(record, input.pseudonymousActorId);
+        }
+        return {
+          kind: 'succeeded',
+          evidence: { recordCount: indexes.length, pseudonymizedCount: indexes.length },
+        } as const;
+      });
+    } catch (error) {
+      return error instanceof TypeError
+        ? { kind: 'failed', code: 'invalid_record' }
+        : { kind: 'retryableFailure', code: 'temporarily_unavailable' };
+    }
+  }
+}
+
+function actorId(record: BookingIdentityBearingRecord): string {
+  return 'userId' in record ? record.userId : record.actorId;
+}
+
+function isActiveFutureBooking(
+  record: BookingIdentityBearingRecord,
+  nowUtc: string,
+): record is BookingRecord {
+  return (
+    'userId' in record &&
+    record.state === 'confirmed' &&
+    (!('occurrenceEndSnapshot' in record) ||
+      typeof record.occurrenceEndSnapshot !== 'string' ||
+      Date.parse(record.occurrenceEndSnapshot) > Date.parse(nowUtc))
+  );
+}

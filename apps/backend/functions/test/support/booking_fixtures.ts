@@ -12,6 +12,8 @@ export function finiteEvent(
     occurrenceId: 'occ_01JTESTOCCURRENCE0000000',
     publisherRef: { type: 'page', id: 'page_01JTESTPUBLISHER00000000' },
     materialRevision: 7,
+    occurrenceStartsAt: '2026-08-29T11:00:00.000Z',
+    occurrenceEndsAt: '2026-08-29T14:00:00.000Z',
     lifecycle: 'published',
     bookingEnabled: true,
     registrationMode: 'internal',

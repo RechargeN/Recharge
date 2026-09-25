@@ -98,3 +98,46 @@ void test('domain task retry is revisioned and success requires evidence', () =>
     'succeeded',
   );
 });
+
+void test('domain task permits at most five dispatch attempts and terminal tasks reject outcomes', () => {
+  let task = createPrivacyDomainTask({
+    taskId,
+    requestId: fixtureIds.first,
+    subjectId: fixtureIds.second,
+    domainId: 'identity',
+    marketId: null,
+    targetRevision: 1,
+    occurredAtUtc: '2026-09-22T10:00:00.000Z',
+  });
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    task = transitionPrivacyDomainTask({
+      task,
+      nextStatus: 'dispatched',
+      occurredAtUtc: `2026-09-22T10:0${attempt}:00.000Z`,
+    });
+  }
+  assert.throws(
+    () =>
+      transitionPrivacyDomainTask({
+        task,
+        nextStatus: 'dispatched',
+        occurredAtUtc: '2026-09-22T10:06:00.000Z',
+      }),
+    /retry_exhausted/,
+  );
+  const succeeded = transitionPrivacyDomainTask({
+    task,
+    nextStatus: 'succeeded',
+    evidenceId,
+    occurredAtUtc: '2026-09-22T10:07:00.000Z',
+  });
+  assert.throws(
+    () =>
+      transitionPrivacyDomainTask({
+        task: succeeded,
+        nextStatus: 'failed',
+        occurredAtUtc: '2026-09-22T10:08:00.000Z',
+      }),
+    /transition_invalid/,
+  );
+});
