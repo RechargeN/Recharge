@@ -41,11 +41,13 @@ const approvedSecurityPrivacyExtensionPaths = [
   "apps/backend/functions/test/integration/privacy_orchestration.test.ts",
   "apps/backend/functions/test/rules/firestore_identity_rules.test.ts",
   "apps/backend/functions/test/integration/identity_publisher_authority.test.ts",
+  "apps/backend/functions/src/platform/config/firestore_feature_flag_gate.ts",
+  "apps/backend/functions/src/platform/bootstrap/booking_composition_root.ts",
 ];
 
-if (manifestPaths.length !== 120) {
+if (manifestPaths.length !== 122) {
   throw new Error(
-    `R1 manifest must contain 120 unique paths; found ${manifestPaths.length}`,
+    `R1 manifest must contain 122 unique paths; found ${manifestPaths.length}`,
   );
 }
 for (const relativePath of manifestPaths) {

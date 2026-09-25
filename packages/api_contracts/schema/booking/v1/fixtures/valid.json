@@ -84,6 +84,11 @@
       "schemaVersion": 1,
       "commandType": "createBooking",
       "requestId": "attempt_create_opaque",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "idempotencyKey": "01JIDEMPOTENCY000000000001",
       "occurredAgainstEventRevision": 4,
       "payload": {
@@ -98,6 +103,11 @@
       "schemaVersion": 1,
       "commandType": "cancelBooking",
       "requestId": "attempt-cancel",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "idempotencyKey": "idempotency-cancel",
       "expectedBookingRevision": 3,
       "payload": {

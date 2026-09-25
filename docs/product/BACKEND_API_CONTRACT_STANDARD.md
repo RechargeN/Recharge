@@ -1,15 +1,15 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.20**
-- Date: **2026-09-23**
+- Version: **0.3.21**
+- Date: **2026-09-24**
 - Spec status: **Review — D1 API technical baseline closed; independent/production evidence pending**
 - Runtime status: **Local platform v1 schemas, validators, registry and parity evidence Present; Booking v1 disabled Emulator-only evidence Present; deployed/product API runtime Absent**
 - Accountable owner: **API Platform owner**
 - Local R1 technical decision: **Accepted and verified locally — no cloud or product-runtime authority**
 - Production approval: **Pending — independent/qualified and executable evidence retained**
-- Parent architecture: [BCK-01 v0.4.83](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Owner Batch A decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
 - Operations boundary decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
 - Security/privacy boundary decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -22,6 +22,16 @@
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
+
+### v0.3.21 — 2026-09-24
+
+- adds the opaque Booking Session transport context shared by TypeScript,
+  JSON Schema, fixtures and Dart DTOs without treating it as authorization;
+- keeps the context outside the semantic idempotency payload and requires the
+  callable boundary to bind it server-side to Firebase UID, installation and
+  the persisted Session;
+- records auth/flag-first command handling while retaining detailed contract
+  failures only after those coarse gates.
 
 ### v0.3.20 — 2026-09-23
 

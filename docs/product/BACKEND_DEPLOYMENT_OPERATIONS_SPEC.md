@@ -1,7 +1,7 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.38**
+- Version: **0.2.39**
 - Date: **2026-09-24**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
@@ -9,10 +9,10 @@
 - Interim review coordinator: **RechargeN / Product owner**
 - Local R1 technical decision: **Accepted and verified locally — no cloud authority**
 - Dev-cloud and production approval: **Pending**
-- Parent architecture: [BCK-01 v0.4.83](RECHARGE_BACKEND_MASTER_SPEC.md) (Review; local foundation verified)
-- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- API boundary: [BCK-03 v0.3.20](BACKEND_API_CONTRACT_STANDARD.md) (Review; local platform contracts verified)
-- Security/privacy boundary: [BCK-04 v0.4.31](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; local foundation verified; production gates retained)
+- Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md) (Review; local foundation verified)
+- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local platform contracts verified)
+- Security/privacy boundary: [BCK-04 v0.4.32](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; local foundation verified; production gates retained)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
@@ -42,6 +42,15 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.39 — 2026-09-24
+
+- records the common R1 immutable feature-flag revision plus activation-pointer
+  adapter now used by disabled local Booking instead of a domain-owned flag
+  collection;
+- records transaction-time flag reads with no kill-switch cache and preserves
+  the default-off/no-cloud posture;
+- changes no project, credential, deployment, worker, schedule or market gate.
 
 ### v0.2.38 — 2026-09-24
 

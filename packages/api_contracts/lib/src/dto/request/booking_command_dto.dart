@@ -7,9 +7,13 @@ class BookingCommandDto {
     required this.requestId,
     required this.idempotencyKey,
     required Map<String, Object?> payload,
+    Map<String, Object?>? sessionContext,
     this.expectedBookingRevision,
     this.occurredAgainstEventRevision,
-  }) : payload = freezeJsonMap(payload, 'payload') {
+  }) : payload = freezeJsonMap(payload, 'payload'),
+       sessionContext = sessionContext == null
+           ? null
+           : freezeJsonMap(sessionContext, 'sessionContext') {
     if (schemaVersion != bookingContractSchemaVersion) {
       throw BookingContractFormatException(
         'Unsupported command schemaVersion: $schemaVersion',
@@ -27,6 +31,9 @@ class BookingCommandDto {
       );
     }
     _validateRequestId(requestId);
+    if (this.sessionContext != null) {
+      _validateSessionContext(this.sessionContext!);
+    }
     _requireBoundedId(idempotencyKey, 'idempotencyKey');
     _validateExpectedRevision(commandType, expectedBookingRevision);
     _validatePayload(commandType, this.payload);
@@ -46,6 +53,7 @@ class BookingCommandDto {
         ...required,
         'expectedBookingRevision',
         'occurredAgainstEventRevision',
+        'sessionContext',
       },
       required: required,
       objectName: 'BookingCommand',
@@ -62,6 +70,9 @@ class BookingCommandDto {
       ),
       requestId: _requireString(json['requestId'], 'requestId'),
       idempotencyKey: _requireString(json['idempotencyKey'], 'idempotencyKey'),
+      sessionContext: !json.containsKey('sessionContext')
+          ? null
+          : freezeJsonMap(json['sessionContext'], 'sessionContext'),
       expectedBookingRevision: !json.containsKey('expectedBookingRevision')
           ? null
           : requireNonNegativeInt(
@@ -85,6 +96,7 @@ class BookingCommandDto {
   final String idempotencyKey;
   final int? expectedBookingRevision;
   final int? occurredAgainstEventRevision;
+  final Map<String, Object?>? sessionContext;
   final Map<String, Object?> payload;
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -92,12 +104,34 @@ class BookingCommandDto {
     'commandType': commandType.name,
     'requestId': requestId,
     'idempotencyKey': idempotencyKey,
+    if (sessionContext != null) 'sessionContext': thawJsonMap(sessionContext!),
     if (expectedBookingRevision != null)
       'expectedBookingRevision': expectedBookingRevision,
     if (occurredAgainstEventRevision != null)
       'occurredAgainstEventRevision': occurredAgainstEventRevision,
     'payload': thawJsonMap(payload),
   };
+
+  static void _validateSessionContext(Map<String, Object?> value) {
+    requireExactKeys(
+      value,
+      allowed: const {'sessionId', 'sessionHandle', 'installationId'},
+      required: const {'sessionId', 'sessionHandle', 'installationId'},
+      objectName: 'sessionContext',
+    );
+    _requireBoundedId(value['sessionId'], 'sessionContext.sessionId');
+    final handle = _requireString(value['sessionHandle'], 'sessionContext.sessionHandle');
+    if (!RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(handle)) {
+      throw const BookingContractFormatException('Invalid session handle');
+    }
+    final installation = _requireString(
+      value['installationId'],
+      'sessionContext.installationId',
+    );
+    if (!RegExp(r'^(?!__name__$)[A-Za-z0-9._:-]{1,128}$').hasMatch(installation)) {
+      throw const BookingContractFormatException('Invalid installation id');
+    }
+  }
 
   static const Map<BookingCommandType, Set<String>> _requiredPayloadKeys = {
     BookingCommandType.createBooking: {'occurrenceId', 'participantUnits'},

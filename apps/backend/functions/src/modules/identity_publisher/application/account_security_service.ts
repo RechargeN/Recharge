@@ -11,12 +11,14 @@ export class AccountSecurityService {
     readonly status: 'active' | 'restricted' | 'blocked' | 'deleted';
     readonly nowUtc: string;
   }): Promise<void> {
-    return this.repository.transact((transaction) => {
-      const account = transaction.account(input.userId);
+    return this.repository.transact(async (transaction) => {
+      const account = await transaction.account(input.userId);
       if (account === null) throw new IdentityFailure('not_found_or_not_accessible');
+      const sessions =
+        input.status === 'active' ? [] : await transaction.sessionsForUser(input.userId);
       transaction.putAccount(changeAccountStatus(account, input.status, input.nowUtc));
       if (input.status !== 'active') {
-        for (const session of transaction.sessionsForUser(input.userId)) {
+        for (const session of sessions) {
           if (session.status === 'active' || session.status === 'stepUpRequired')
             transaction.putSession(changeSessionStatus(session, 'revoked', input.nowUtc));
         }

@@ -13,6 +13,8 @@ import { InMemoryIdentityAuthorityRepository } from '../infrastructure/in_memory
 import { LocalPageCreationPolicy } from '../infrastructure/local_page_creation_policy.js';
 import { LocalVerificationDecisionAdapter } from '../infrastructure/local_verification_decision_adapter.js';
 import { SyntheticProviderIdentityVerifier } from '../infrastructure/synthetic_provider_identity_verifier.js';
+import { LocalPageCapabilityGrantPolicy } from '../infrastructure/local_page_capability_grant_policy.js';
+import type { PageCapabilityGrantPolicyPort } from './ports/page_capability_grant_policy_port.js';
 
 export class IdentityPublisherAuthority {
   readonly accounts: AccountLinkingService;
@@ -28,6 +30,7 @@ export class IdentityPublisherAuthority {
     readonly providerVerifier: ProviderIdentityVerifier;
     readonly verificationDecisions: VerificationDecisionPort;
     readonly pagePolicy: PageCreationPolicyPort;
+    readonly pageCapabilityGrantPolicy?: PageCapabilityGrantPolicyPort;
   }) {
     this.accounts = new AccountLinkingService(input.repository, input.providerVerifier);
     this.sessions = new SessionAuthorityService(input.repository);
@@ -40,6 +43,7 @@ export class IdentityPublisherAuthority {
       input.repository,
       input.pagePolicy,
       input.verificationDecisions,
+      input.pageCapabilityGrantPolicy ?? new LocalPageCapabilityGrantPolicy(),
     );
     this.access = new AccessSnapshotService(input.repository);
     this.publishers = new PublisherEligibilityService(input.repository);

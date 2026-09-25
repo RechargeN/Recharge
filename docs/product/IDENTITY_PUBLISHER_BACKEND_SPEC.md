@@ -1,19 +1,33 @@
 # Recharge Backend — Identity & Publisher Specification
 
 - ID: **BCK-06**
-- Version: **0.4**
-- Date: **2026-09-22**
+- Version: **0.5**
+- Date: **2026-09-24**
 - Spec status: **Review — local implementation evidence; production decisions pending**
-- Runtime status: **Present locally — in-memory authority only; cloud/production absent**
+- Runtime status: **Present locally — in-memory plus Emulator-only Firestore authority; callable/cloud/production absent**
 - Accountable owner: **Identity owner**
 - Required reviewers: **API Platform, Security/Privacy, Mobile Platform,
   Content Platform, Trust & Safety, Legal/Privacy for applicable decisions**
-- Coordination baseline: [BCK-02 v2.4.88](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
   [BCK-06-PRE v0.2](BACKEND_IDENTITY_PUBLISHER_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/IDENTITY_PUBLISHER_BACKEND_SPEC.md`
 
 ## 0. Changelog
+
+### v0.5 — 2026-09-24
+
+- accepts the local technical invariants for the baseline
+  `booking.self_service` User capability, revision-based Session fences,
+  opaque Session handles and persisted AccessSnapshot records;
+- prevents removal of the last active ManagedPage owner, routes grants through
+  a role-bounded grant policy, restricts suspended/revoked Pages and excludes
+  rejected/restricted Pages from active quota usage;
+- records the Emulator-only Firestore Identity repository and atomic
+  Session+AccessSnapshot persistence without enabling an Identity callable,
+  cloud Auth, deployment or any market;
+- forbids Session IDs, handle material and snapshot revisions in Firebase
+  custom claims; production provider/session policy remains Pending.
 
 ### v0.4 — 2026-09-22
 
@@ -661,6 +675,19 @@ capability, exact membership, resource ownership/lifecycle and policy.
 Privileged review additionally requires dedicated tool context, capability,
 case/reason and audit.
 
+Every active `User` receives the baseline personal capability
+`booking.self_service`. It authorizes only authoritative Booking create/cancel
+after current Session and AccessSnapshot validation; it does not grant Creator,
+Page, Admin or content authority. Booking read/availability uses AuthN,
+ownership/visibility and current revisions without requiring this capability.
+
+ManagedPage capability changes pass a separately versioned grant policy. An
+active owner may grant only capabilities allowed for the target membership
+role. The final active owner cannot revoke self, be revoked by another actor or
+lose the `manage_page` capability. Every Page retains at least one active
+owner. A suspended or revoked Page is `restricted` immediately, and only
+`pendingReview`/`active` Pages consume the owned-page quota.
+
 ### 15.3 Revocation
 
 Revocable authorities:
@@ -689,7 +716,7 @@ Future physical mapping must preserve these independently addressable records:
 accounts/{userId}
 providerLinks/{providerSubjectKey}
 sessions/{sessionId}
-accessSnapshots/{userId}
+accessSnapshots/{sessionId}
 creatorVerifications/{userId}
 managedPages/{pageId}
 pageMemberships/{pageId_userId}
@@ -1106,8 +1133,9 @@ apps/mobile/lib/features/identity/{domain,data,application,presentation}/*
 apps/mobile/test/{unit,widget,integration}/identity_*
 ```
 
-No mobile file, callable export, Firebase Auth adapter, Firestore repository,
-credential, cloud resource or deployment is created by BCK-06 v0.4.
+No mobile file, callable export, Firebase Auth adapter, credential, cloud
+resource or deployment is created by BCK-06 v0.5. Its Firestore repository is
+Emulator-only and fail-closed outside `demo-recharge` local evidence.
 
 ## 28. Test and evidence matrix
 
@@ -1264,13 +1292,14 @@ As of this version, the following are not implemented:
 - two-device, load, independent Security and production evidence;
 - Firebase projects, credentials, deployment and production data processing.
 
-Present evidence is bounded local/mock mobile behavior plus a credential-free
-in-memory backend authority with schema, domain, integration and deny-all Rules
-tests. None is Firebase Auth, deployed cloud or production authority.
+Present evidence is bounded local/mock mobile behavior plus credential-free
+in-memory and Emulator-only Firestore backend authorities with schema, domain,
+integration and deny-all Rules tests. None is Firebase Auth, deployed cloud or
+production authority.
 
 ## 33. Final statement
 
-BCK-06 v0.4 is a Review contract with bounded local implementation evidence and
+BCK-06 v0.5 is a Review contract with bounded local implementation evidence and
 pending production owner/qualified decisions. It prevents identity,
 publisher and consent authority from being duplicated across Flutter,
 Firestore Rules and feature backends. It intentionally keeps all unresolved
@@ -1346,17 +1375,25 @@ Every protected command evaluates all of:
 ```text
 account.status == active
 session.status == active
-session.issuedAt > account.revokeAllBefore
-session.authzRevision >= requiredAuthzRevision
+session.authzRevision >= account.revokeBeforeSecurityRevision
+session.authzRevision == account.securityRevision
 current capability and page-membership revision
 resource and market policy
 ```
 
 Revoking one session increments its revision. Revoking all sessions advances
-`revokeAllBefore`/account security revision atomically and emits one semantic
+`revokeBeforeSecurityRevision`/account security revision atomically and emits one semantic
 revocation event. Token refresh cannot resurrect a revoked, expired,
 compromised or deleted session. Offline/cached access snapshots may shape UI,
 but cannot authorize a mutation after revocation.
+
+The client receives a server-generated 256-bit base64url opaque Session handle
+once. Storage keeps only its SHA-256 hash and binds the Session to exact
+`firebaseUid`, `installationId` and `sessionId`. Firebase custom claims may
+carry stable coarse transport hints only; they never contain Session IDs,
+handles, per-Session revisions, Page IDs or mutable capabilities. A Session
+and its initial personal AccessSnapshot are persisted atomically, and every
+rights/security revision makes the previous Session/snapshot stale.
 
 ### 35.3 Capability and page-scoped authorization
 
@@ -1451,3 +1488,22 @@ foreign/hidden identities to the same safe surface response.
 75. **BCK-06-AC-75:** OD-08, OD-11, production session/provider policy and
     qualified reviews remain explicit gates; v0.4 grants only bounded local
     in-memory authority.
+76. **BCK-06-AC-76:** every active User receives only the baseline personal
+    `booking.self_service` capability; it grants Booking create/cancel and no
+    Creator, Page, Admin, visibility or content authority.
+77. **BCK-06-AC-77:** self-revoke, removal or capability change cannot leave a
+    ManagedPage without at least one active owner with `manage_page`.
+78. **BCK-06-AC-78:** page capabilities are granted only through a versioned,
+    role-bounded grant policy to an active target membership.
+79. **BCK-06-AC-79:** suspended/revoked Pages are immediately restricted and
+    only `pendingReview`/`active` Pages consume creation quota.
+80. **BCK-06-AC-80:** Account security revision, Session authorization revision
+    and AccessSnapshot source revisions form a monotonic revocation fence;
+    stale authority fails closed even at equal wall-clock timestamps.
+81. **BCK-06-AC-81:** a Session is issued with a one-time opaque handle bound to
+    Firebase UID and installation; only its hash is stored and Session plus
+    AccessSnapshot persist atomically. Per-Session authority is absent from
+    custom claims.
+82. **BCK-06-AC-82:** the Firestore Identity repository and all persisted
+    authority evidence are Emulator-only/default-off; no callable, cloud Auth,
+    deployment or market activation follows from v0.5.

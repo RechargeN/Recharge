@@ -24,15 +24,15 @@ export class AccountLinkingService {
     const assertion = await this.verifier.verify(input.proof, input.nowUtc);
     if (assertion === null) throw new IdentityFailure('provider_assertion_invalid');
     const subjectHash = providerSubjectKey(assertion);
-    return this.repository.transact((transaction) => {
-      const existingIdentity = transaction.identityBySubjectHash(subjectHash);
+    return this.repository.transact(async (transaction) => {
+      const existingIdentity = await transaction.identityBySubjectHash(subjectHash);
       if (existingIdentity !== null) {
-        const existingAccount = transaction.account(existingIdentity.userId);
+        const existingAccount = await transaction.account(existingIdentity.userId);
         if (existingAccount === null) throw new IdentityFailure('not_found_or_not_accessible');
         return existingAccount;
       }
       if (!input.accountCreationEnabled) throw new IdentityFailure('account_creation_disabled');
-      if (transaction.account(input.proposedUserId) !== null)
+      if ((await transaction.account(input.proposedUserId)) !== null)
         throw new IdentityFailure('provider_subject_conflict');
       const account = createAccount(input.proposedUserId, input.nowUtc);
       transaction.putAccount(account);
@@ -57,11 +57,11 @@ export class AccountLinkingService {
     const assertion = await this.verifier.verify(input.proof, input.nowUtc);
     if (assertion === null) throw new IdentityFailure('provider_assertion_invalid');
     const subjectHash = providerSubjectKey(assertion);
-    await this.repository.transact((transaction) => {
-      const account = transaction.account(input.actorUserId);
+    await this.repository.transact(async (transaction) => {
+      const account = await transaction.account(input.actorUserId);
       if (account === null || account.status !== 'active')
         throw new IdentityFailure('not_found_or_not_accessible');
-      const existing = transaction.identityBySubjectHash(subjectHash);
+      const existing = await transaction.identityBySubjectHash(subjectHash);
       if (existing !== null) {
         if (existing.userId === account.userId) return;
         throw new IdentityFailure('provider_subject_conflict');

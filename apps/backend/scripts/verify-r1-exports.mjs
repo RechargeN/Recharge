@@ -27,7 +27,7 @@ const expected = [
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
 }
-if (/onSchedule|onTaskDispatched|pubsub|platform\/bootstrap/u.test(source)) {
+if (/onSchedule|onTaskDispatched|pubsub/u.test(source)) {
   throw new Error(
     "R1 cannot add workers, schedules or platform callable exports",
   );

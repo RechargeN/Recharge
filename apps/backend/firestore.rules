@@ -7,6 +7,7 @@ service cloud.firestore {
     match /platformReleaseManifests/{document} { allow read, write: if false; }
     match /platformActiveReleasePointers/{document} { allow read, write: if false; }
     match /platformFeatureFlagRevisions/{document} { allow read, write: if false; }
+    match /platformActiveFeatureFlagPointers/{document} { allow read, write: if false; }
     match /referenceMarketConfigRevisions/{document} { allow read, write: if false; }
     match /referenceActivationPointers/{document} { allow read, write: if false; }
 
@@ -17,9 +18,9 @@ service cloud.firestore {
     match /privacyDomainTasks/{document} { allow read, write: if false; }
     match /securityAuditEvents/{document} { allow read, write: if false; }
 
-    // Identity/Publisher local authority is in-memory only. Future persistence
-    // remains server-owned and no client role, page or provider assertion is
-    // accepted as authority.
+    // Identity/Publisher local authority may be exercised through the
+    // Emulator-only Admin repository. It remains server-owned and no client
+    // role, page, provider assertion or session handle is accepted directly.
     match /identityAccounts/{document} { allow read, write: if false; }
     match /identityProviderLinks/{document} { allow read, write: if false; }
     match /identitySessions/{document} { allow read, write: if false; }
@@ -38,7 +39,6 @@ service cloud.firestore {
     match /bookingIdempotency/{document} { allow read, write: if false; }
     match /bookingAudit/{document} { allow read, write: if false; }
     match /bookingOutbox/{document} { allow read, write: if false; }
-    match /bookingFeatureFlags/{document} { allow read, write: if false; }
 
     match /{document=**} {
       allow read, write: if false;

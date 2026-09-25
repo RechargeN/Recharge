@@ -16,7 +16,7 @@ export interface AccountV1 {
   readonly systemRoles: readonly ('User' | 'Creator' | 'Admin')[];
   readonly revision: number;
   readonly securityRevision: number;
-  readonly revokeAllBeforeUtc: UtcInstant;
+  readonly revokeBeforeSecurityRevision: number;
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
 }
@@ -40,6 +40,9 @@ export interface IdentitySessionV1 {
   readonly status: IdentitySessionStatus;
   readonly revision: number;
   readonly authzRevision: number;
+  readonly firebaseUid: string;
+  readonly installationId: string;
+  readonly handleHash: string;
   readonly issuedAtUtc: UtcInstant;
   readonly lastActiveAtUtc: UtcInstant;
   readonly revokedAtUtc?: UtcInstant;

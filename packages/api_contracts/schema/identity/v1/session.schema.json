@@ -10,6 +10,9 @@
     "status",
     "revision",
     "authzRevision",
+    "firebaseUid",
+    "installationId",
+    "handleHash",
     "issuedAtUtc",
     "lastActiveAtUtc"
   ],
@@ -22,6 +25,22 @@
     },
     "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
     "authzRevision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "firebaseUid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+    },
+    "installationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+    },
+    "handleHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "issuedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
     "lastActiveAtUtc": {
       "$ref": "identity_common.schema.json#/$defs/utcInstant"

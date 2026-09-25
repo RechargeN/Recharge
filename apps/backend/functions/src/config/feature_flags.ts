@@ -9,7 +9,7 @@ export interface FeatureFlagRevision {
   readonly environmentId: EnvironmentId;
   readonly marketId: MarketId;
   readonly capabilityId: string;
-  readonly enabled: false;
+  readonly enabled: boolean;
   readonly createdAtUtc: UtcInstant;
 }
 
@@ -18,6 +18,17 @@ export function createDisabledFeatureFlag(input: {
   readonly environmentId: EnvironmentId;
   readonly marketId: MarketId;
   readonly capabilityId: string;
+  readonly createdAtUtc: string;
+}): DeepReadonly<FeatureFlagRevision> {
+  return createFeatureFlag({ ...input, enabled: false });
+}
+
+export function createFeatureFlag(input: {
+  readonly revision: number;
+  readonly environmentId: EnvironmentId;
+  readonly marketId: MarketId;
+  readonly capabilityId: string;
+  readonly enabled: boolean;
   readonly createdAtUtc: string;
 }): DeepReadonly<FeatureFlagRevision> {
   if (!Number.isSafeInteger(input.revision) || input.revision < 0) {
@@ -32,12 +43,11 @@ export function createDisabledFeatureFlag(input: {
     environmentId: input.environmentId,
     marketId: input.marketId,
     capabilityId: input.capabilityId,
-    enabled: false,
+    enabled: input.enabled,
     createdAtUtc: parseUtcInstant(input.createdAtUtc),
   });
 }
 
-export function isFeatureEnabled(revision: FeatureFlagRevision | undefined): false {
-  void revision;
-  return false;
+export function isFeatureEnabled(revision: FeatureFlagRevision | undefined): boolean {
+  return revision?.enabled === true;
 }

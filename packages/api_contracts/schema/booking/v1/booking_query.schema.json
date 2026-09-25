@@ -10,6 +10,9 @@
         "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
         "queryType": { "const": "getMyBooking" },
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "sessionContext": {
+          "$ref": "common.schema.json#/$defs/sessionContext"
+        },
         "payload": { "$ref": "#/$defs/getMyBookingPayload" }
       },
       "required": ["schemaVersion", "queryType", "requestId", "payload"]
@@ -21,6 +24,9 @@
         "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
         "queryType": { "const": "listMyBookings" },
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "sessionContext": {
+          "$ref": "common.schema.json#/$defs/sessionContext"
+        },
         "payload": { "$ref": "#/$defs/listMyBookingsPayload" }
       },
       "required": ["schemaVersion", "queryType", "requestId", "payload"]
@@ -32,6 +38,9 @@
         "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
         "queryType": { "const": "getEventAvailability" },
         "requestId": { "$ref": "common.schema.json#/$defs/requestId" },
+        "sessionContext": {
+          "$ref": "common.schema.json#/$defs/sessionContext"
+        },
         "payload": { "$ref": "#/$defs/getEventAvailabilityPayload" }
       },
       "required": ["schemaVersion", "queryType", "requestId", "payload"]

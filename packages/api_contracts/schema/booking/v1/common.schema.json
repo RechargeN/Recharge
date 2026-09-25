@@ -16,6 +16,24 @@
       "maxLength": 128,
       "pattern": "^(?!__name__$)[A-Za-z0-9_-]+$"
     },
+    "sessionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "$ref": "#/$defs/id" },
+        "sessionHandle": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "installationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+        }
+      },
+      "required": ["sessionId", "sessionHandle", "installationId"]
+    },
     "safeInteger": {
       "type": "integer",
       "minimum": -9007199254740991,

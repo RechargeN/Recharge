@@ -4,6 +4,7 @@ import { deepFreeze } from '../../../shared/immutable.js';
 import { parseUtcInstant } from '../../../shared/utc_instant.js';
 import type { Account } from './account.js';
 import { IdentityFailure } from './failures.js';
+import { createHash } from 'node:crypto';
 
 export type IdentitySession = IdentitySessionV1;
 
@@ -14,6 +15,9 @@ export function createSession(input: {
   readonly userId: string;
   readonly issuedAtUtc: string;
   readonly authzRevision: number;
+  readonly firebaseUid: string;
+  readonly installationId: string;
+  readonly sessionHandle: string;
 }): IdentitySession {
   const issuedAtUtc = parseUtcInstant(input.issuedAtUtc);
   return deepFreeze({
@@ -23,6 +27,9 @@ export function createSession(input: {
     status: 'active',
     revision: 1,
     authzRevision: input.authzRevision,
+    firebaseUid: parseTransportBinding(input.firebaseUid, 'firebase_uid_invalid'),
+    installationId: parseTransportBinding(input.installationId, 'installation_id_invalid'),
+    handleHash: hashSessionHandle(input.sessionHandle),
     issuedAtUtc,
     lastActiveAtUtc: issuedAtUtc,
   });
@@ -48,10 +55,22 @@ export function assertCurrentSession(session: IdentitySession, account: Account)
   if (session.status === 'revoked' || session.status === 'compromised')
     throw new IdentityFailure('session_revoked');
   if (session.status !== 'active') throw new IdentityFailure('session_expired');
-  if (Date.parse(session.issuedAtUtc) <= Date.parse(account.revokeAllBeforeUtc))
+  if (session.authzRevision < account.revokeBeforeSecurityRevision)
     throw new IdentityFailure('session_revoked');
+  if (session.authzRevision !== account.securityRevision)
+    throw new IdentityFailure('snapshot_stale');
   if (account.status === 'restricted') throw new IdentityFailure('account_restricted');
   if (account.status !== 'active') throw new IdentityFailure('account_blocked');
+}
+
+export function hashSessionHandle(value: string): string {
+  if (!/^[A-Za-z0-9_-]{43}$/u.test(value)) throw new TypeError('session_handle_invalid');
+  return createHash('sha256').update(value, 'utf8').digest('hex');
+}
+
+function parseTransportBinding(value: string, code: string): string {
+  if (!/^(?!__name__$)[A-Za-z0-9._:-]{1,128}$/u.test(value)) throw new TypeError(code);
+  return value;
 }
 
 export function refreshSessionAuthorization(

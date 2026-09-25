@@ -6,7 +6,7 @@
     "systemRoles": ["User"],
     "revision": 1,
     "securityRevision": 1,
-    "revokeAllBeforeUtc": "2026-09-22T00:00:00.000Z",
+    "revokeBeforeSecurityRevision": 0,
     "createdAtUtc": "2026-09-22T00:00:00.000Z",
     "updatedAtUtc": "2026-09-22T00:00:00.000Z"
   },
@@ -17,6 +17,9 @@
     "status": "futureState",
     "revision": 1,
     "authzRevision": 1,
+    "firebaseUid": "firebase-user-1",
+    "installationId": "install-1",
+    "handleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "issuedAtUtc": "2026-09-22T00:00:01.000Z",
     "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
   }

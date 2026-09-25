@@ -1,8 +1,16 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { exactBookingCollectionNames } from '../../src/booking/transactions.js';
-import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
 import {
+  bookingIdentityCollections,
+  FirestoreBookingAccessAuthority,
+} from '../../src/booking/firestore_booking_access_authority.js';
+import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
+import { cancelInternalBooking } from '../../src/booking/cancel_internal_booking.js';
+import { bookingFlagIds } from '../../src/shared/feature_flags.js';
+import { FirestoreFeatureFlagGate } from '../../src/platform/config/firestore_feature_flag_gate.js';
+import {
+  bookingSessionContextFor,
   cleanupBookingEmulator,
   callBookingFunction,
   createAuthorizedActor,
@@ -12,6 +20,7 @@ import {
 } from '../support/booking_emulator.js';
 import { createCommand, finiteEvent } from '../support/booking_fixtures.js';
 import { createBookingSchemaRegistry } from '../support/booking_schema_registry.js';
+import { FakeClock } from '../support/fake_clock.js';
 
 const firestore = emulatorFirestore();
 
@@ -34,6 +43,7 @@ void test('missing auth denies before disabled flag and performs no write', asyn
 });
 
 void test('inactive identity and missing flag fail closed', async () => {
+  await setBookingFlags(true, firestore);
   const inactiveToken = await createAuthorizedActor('inactive-actor', {
     accountState: 'inactive',
     capabilities: ['booking.self_service'],
@@ -47,6 +57,7 @@ void test('inactive identity and missing flag fail closed', async () => {
     ((inactive.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
     'not_authorized',
   );
+  await setBookingFlags(false, firestore);
   const activeToken = await createAuthorizedActor('active-actor');
   const disabled = await callBookingFunction(
     'createInternalBookingV1',
@@ -222,9 +233,24 @@ void test('server authority immediately rejects revoked sessions and stale capab
       .code,
     'not_authorized',
   );
+
+  await firestore
+    .collection(bookingIdentityCollections.accessSnapshots)
+    .doc(sessionId)
+    .update({ capabilityIds: ['booking.self_service'] });
+  await sessionRef.update({ firebaseUid: 'different-firebase-uid' });
+  const uidMismatch = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_uid_mismatch', idempotencyKey: 'idem_uid_mismatch' }),
+    token,
+  );
+  assert.equal(
+    ((uidMismatch.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
+    'not_authorized',
+  );
 });
 
-void test('direct unauthenticated client reads and writes deny for all nine collections', async () => {
+void test('direct unauthenticated client reads and writes deny for all Booking collections', async () => {
   const host = process.env.FIRESTORE_EMULATOR_HOST;
   assert.ok(host);
   for (const collectionName of exactBookingCollectionNames) {
@@ -242,4 +268,149 @@ void test('direct unauthenticated client reads and writes deny for all nine coll
     );
     assert.equal(write.status, 403, `write ${collectionName}`);
   }
+});
+
+void test('create and account revocation are serialized by one authority transaction', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setBookingFlags(true, firestore);
+  const event = finiteEvent();
+  await seedEvent(event, firestore);
+  const uid = 'racing-create-actor';
+  await createAuthorizedActor(uid);
+  const accessHint = { actorId: uid, ...bookingSessionContextFor(uid) };
+  const createPromise = createInternalBooking(
+    {
+      firestore,
+      clock: new FakeClock(new Date('2026-08-29T12:00:00.000Z')),
+      mutationAuthorization: {
+        hint: accessHint,
+        flagId: bookingFlagIds.create,
+        authority: new FirestoreBookingAccessAuthority(firestore),
+        featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+      },
+    },
+    uid,
+    createCommand(),
+  );
+  const revokePromise = firestore.runTransaction(async (transaction) => {
+    const accountRef = firestore.collection(bookingIdentityCollections.accounts).doc(uid);
+    const account = await transaction.get(accountRef);
+    assert.equal(account.exists, true);
+    transaction.update(accountRef, {
+      status: 'blocked',
+      revision: 2,
+      securityRevision: 2,
+      revokeBeforeSecurityRevision: 2,
+    });
+  });
+  const [result] = await Promise.all([createPromise, revokePromise]);
+  const bookings = await firestore.collection('bookings').get();
+  if (result.kind === 'succeeded') {
+    assert.equal(bookings.size, 1);
+  } else {
+    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied', retryable: false });
+    assert.equal(bookings.empty, true);
+  }
+  assert.equal(
+    (await firestore.collection(bookingIdentityCollections.accounts).doc(uid).get()).get('status'),
+    'blocked',
+  );
+});
+
+void test('cancel and session revocation are serialized by one authority transaction', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setBookingFlags(true, firestore);
+  const event = finiteEvent();
+  await seedEvent(event, firestore);
+  const uid = 'racing-cancel-actor';
+  await createAuthorizedActor(uid);
+  const created = await createInternalBooking(
+    { firestore, clock: new FakeClock(new Date('2026-08-29T12:00:00.000Z')) },
+    uid,
+    createCommand(),
+  );
+  assert.equal(created.kind, 'succeeded');
+  if (created.kind !== 'succeeded') return;
+  const accessHint = { actorId: uid, ...bookingSessionContextFor(uid) };
+  const cancelPromise = cancelInternalBooking(
+    {
+      firestore,
+      clock: new FakeClock(new Date('2026-08-29T12:01:00.000Z')),
+      mutationAuthorization: {
+        hint: accessHint,
+        flagId: bookingFlagIds.cancel,
+        authority: new FirestoreBookingAccessAuthority(firestore),
+        featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+      },
+    },
+    uid,
+    {
+      schemaVersion: 1,
+      commandType: 'cancelBooking',
+      requestId: 'req-racing-cancel',
+      idempotencyKey: 'idem-racing-cancel',
+      expectedBookingRevision: created.data.booking.revision,
+      payload: { bookingId: created.data.booking.id },
+    },
+  );
+  const revokePromise = firestore.runTransaction(async (transaction) => {
+    const sessionRef = firestore
+      .collection(bookingIdentityCollections.sessions)
+      .doc(accessHint.sessionId);
+    const session = await transaction.get(sessionRef);
+    assert.equal(session.exists, true);
+    transaction.update(sessionRef, { status: 'revoked', revision: 2 });
+  });
+  const [result] = await Promise.all([cancelPromise, revokePromise]);
+  const booking = await firestore.collection('bookings').doc(created.data.booking.id).get();
+  if (result.kind === 'succeeded') {
+    assert.equal(booking.get('state'), 'cancelled');
+  } else {
+    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied', retryable: false });
+    assert.equal(booking.get('state'), 'confirmed');
+  }
+});
+
+void test('feature disable and mutation are serialized without a stale-authority commit', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setBookingFlags(true, firestore);
+  await seedEvent(finiteEvent(), firestore);
+  const uid = 'racing-flag-actor';
+  await createAuthorizedActor(uid);
+  const createPromise = createInternalBooking(
+    {
+      firestore,
+      clock: new FakeClock(new Date('2026-08-29T12:00:00.000Z')),
+      mutationAuthorization: {
+        hint: { actorId: uid, ...bookingSessionContextFor(uid) },
+        flagId: bookingFlagIds.create,
+        authority: new FirestoreBookingAccessAuthority(firestore),
+        featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+      },
+    },
+    uid,
+    createCommand({ requestId: 'req-racing-flag', idempotencyKey: 'idem-racing-flag' }),
+  );
+  const key = `local:LV:${bookingFlagIds.create}`;
+  const disablePromise = firestore.runTransaction(async (transaction) => {
+    const revisionRef = firestore.collection('platformFeatureFlagRevisions').doc(`${key}:1`);
+    const revision = await transaction.get(revisionRef);
+    assert.equal(revision.exists, true);
+    transaction.update(revisionRef, { enabled: false });
+  });
+  const [result] = await Promise.all([createPromise, disablePromise]);
+  const bookings = await firestore.collection('bookings').get();
+  if (result.kind === 'succeeded') {
+    assert.equal(bookings.size, 1);
+  } else {
+    assert.equal(result.kind, 'rejected');
+    assert.equal(result.code, 'feature_disabled');
+    assert.equal(bookings.empty, true);
+  }
+  assert.equal(
+    (await firestore.collection('platformFeatureFlagRevisions').doc(`${key}:1`).get()).get(
+      'enabled',
+    ),
+    false,
+  );
 });

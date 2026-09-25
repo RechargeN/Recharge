@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { getApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
@@ -6,8 +7,24 @@ import { bookingCollections, exactBookingCollectionNames } from '../../src/booki
 import { bookingFlagIds } from '../../src/shared/feature_flags.js';
 import type { BookingEventProjection } from '../../src/booking/domain.js';
 import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
+import {
+  featureFlagKey,
+  featureFlagPointerCollection,
+  featureFlagRevisionCollection,
+} from '../../src/platform/config/feature_flag_repository.js';
+import { featureFlagRevisionDocumentId } from '../../src/platform/config/firestore_feature_flag_gate.js';
 
 const bookingAccessCollectionNames = Object.freeze(Object.values(bookingIdentityCollections));
+const sessionContexts = new Map<
+  string,
+  Readonly<{ sessionId: string; sessionHandle: string; installationId: string }>
+>();
+
+export function bookingSessionContextFor(uid: string) {
+  const installationId = `install-${uid}`;
+  const sessionHandle = createHash('sha256').update(`handle:${uid}`).digest('base64url');
+  return Object.freeze({ sessionId: `session-${uid}`, sessionHandle, installationId });
+}
 
 export function emulatorFirestore(): Firestore {
   assert.equal(process.env.GCLOUD_PROJECT, 'demo-recharge');
@@ -18,7 +35,12 @@ export function emulatorFirestore(): Firestore {
 }
 
 export async function cleanupBookingEmulator(firestore = emulatorFirestore()): Promise<void> {
-  for (const collectionName of [...exactBookingCollectionNames, ...bookingAccessCollectionNames]) {
+  for (const collectionName of [
+    ...exactBookingCollectionNames,
+    ...bookingAccessCollectionNames,
+    featureFlagRevisionCollection,
+    featureFlagPointerCollection,
+  ]) {
     while (true) {
       const snapshot = await firestore.collection(collectionName).limit(200).get();
       if (snapshot.empty) break;
@@ -54,12 +76,26 @@ export async function setBookingFlags(
   firestore = emulatorFirestore(),
 ): Promise<void> {
   const batch = firestore.batch();
-  for (const [kind, flagId] of Object.entries(bookingFlagIds)) {
-    batch.set(firestore.collection(bookingCollections.featureFlags).doc(flagId), {
-      schemaVersion: 1,
-      enabled,
-      environment: 'emulator',
-      kind,
+  for (const flagId of Object.values(bookingFlagIds)) {
+    const key = featureFlagKey('local', 'LV', flagId);
+    batch.set(
+      firestore
+        .collection(featureFlagRevisionCollection)
+        .doc(featureFlagRevisionDocumentId(key, 1)),
+      {
+        schemaVersion: 1,
+        revision: 1,
+        environmentId: 'local',
+        marketId: 'LV',
+        capabilityId: flagId,
+        enabled,
+        createdAtUtc: '2026-09-24T00:00:00.000Z',
+      },
+    );
+    batch.set(firestore.collection(featureFlagPointerCollection).doc(key), {
+      key,
+      activeRevision: 1,
+      pointerRevision: 1,
     });
   }
   await batch.commit();
@@ -73,8 +109,8 @@ export async function createAuthorizedActor(
   },
 ): Promise<string> {
   const firestore = emulatorFirestore();
-  const sessionId = `session-${uid}`;
-  const accessSnapshotRevision = 1;
+  const { sessionId, installationId, sessionHandle } = bookingSessionContextFor(uid);
+  const handleHash = createHash('sha256').update(sessionHandle).digest('hex');
   const accountActive = claims.accountState === undefined || claims.accountState === 'active';
   const capabilityIds = Array.isArray(claims.capabilities)
     ? claims.capabilities.filter((value): value is string => typeof value === 'string')
@@ -85,7 +121,10 @@ export async function createAuthorizedActor(
     userId: uid,
     status: accountActive ? 'active' : 'blocked',
     revision: 1,
-    revokeAllBeforeUtc: '2025-01-01T00:00:00.000Z',
+    securityRevision: 1,
+    revokeBeforeSecurityRevision: 0,
+    createdAtUtc: '2026-01-01T00:00:00.000Z',
+    updatedAtUtc: '2026-01-01T00:00:00.000Z',
   });
   batch.set(firestore.collection(bookingIdentityCollections.sessions).doc(sessionId), {
     schemaVersion: 1,
@@ -94,17 +133,21 @@ export async function createAuthorizedActor(
     status: 'active',
     revision: 1,
     authzRevision: 1,
+    firebaseUid: uid,
+    installationId,
+    handleHash,
     issuedAtUtc: '2026-01-01T00:00:00.000Z',
   });
   batch.set(firestore.collection(bookingIdentityCollections.accessSnapshots).doc(sessionId), {
     schemaVersion: 1,
-    revision: accessSnapshotRevision,
     userId: uid,
     sessionId,
     accountRevision: 1,
     sessionRevision: 1,
     authzRevision: 1,
+    capabilityPolicyRevision: 1,
     capabilityIds,
+    evaluatedAtUtc: '2026-01-01T00:00:00.000Z',
     expiresAtUtc: '2099-01-01T00:00:00.000Z',
   });
   await batch.commit();
@@ -116,7 +159,6 @@ export async function createAuthorizedActor(
   } catch (error) {
     if (!String(error).includes('uid-already-exists')) throw error;
   }
-  await auth.setCustomUserClaims(uid, { ...claims, sessionId, accessSnapshotRevision });
   const host = process.env.FIREBASE_AUTH_EMULATOR_HOST;
   assert.match(host ?? '', /^(127\.0\.0\.1|localhost):\d+$/u);
   const response = await fetch(
@@ -130,7 +172,9 @@ export async function createAuthorizedActor(
   const body = (await response.json()) as Record<string, unknown>;
   assert.equal(response.ok, true, JSON.stringify(body));
   assert.equal(typeof body.idToken, 'string');
-  return String(body.idToken);
+  const idToken = String(body.idToken);
+  sessionContexts.set(idToken, { sessionId, sessionHandle, installationId });
+  return idToken;
 }
 
 export async function callBookingFunction(
@@ -140,10 +184,15 @@ export async function callBookingFunction(
 ): Promise<Readonly<{ status: number; body: Record<string, unknown> }>> {
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (idToken !== undefined) headers.authorization = `Bearer ${idToken}`;
+  const context = idToken === undefined ? undefined : sessionContexts.get(idToken);
+  const callableData =
+    context === undefined || typeof data !== 'object' || data === null || Array.isArray(data)
+      ? data
+      : { ...(data as Record<string, unknown>), sessionContext: context };
   const response = await fetch(`http://127.0.0.1:5001/demo-recharge/europe-west1/${functionName}`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ data }),
+    body: JSON.stringify({ data: callableData }),
   });
   return { status: response.status, body: (await response.json()) as Record<string, unknown> };
 }

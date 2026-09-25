@@ -27,14 +27,19 @@ handler.
 The BCK-06 local slice adds provider-neutral Google/Apple assertion ports,
 hashed provider-subject linking, Account and Session authority with revocation
 fences, Creator and ManagedPage verification lifecycles, exact-page membership,
-fresh AccessSnapshot evaluation and ID-based PublisherRef eligibility. It is
-in-memory and test-only: no OAuth credential, Firebase Auth adapter, Firestore
-repository, callable export or production grant exists.
+fresh AccessSnapshot evaluation and ID-based PublisherRef eligibility. It has
+in-memory and disposable-Emulator Firestore adapters, including opaque Session
+handles and revision-fenced AccessSnapshots. It remains local/test-only: no
+OAuth credential, Firebase Auth adapter, callable export or production grant
+exists.
 
 The BCK-09 local slice contains five disabled Emulator-only Booking callables,
 typed command/query results, finite and unlimited inventory transactions,
 idempotency, cancellation, access-revocation, retention and reconciliation
-evidence. It is not connected to mobile and is not deployed. A local
+evidence. Booking mutations resolve Account, Session, AccessSnapshot and the
+common R1 feature flag inside the same Firestore transaction; query authority
+is separately revision-aware. It is not connected to mobile and is not
+deployed. A local
 single-ledger load probe preserved the zero-oversell invariant but failed the
 accepted popular and mass latency/success targets. A fixed-capacity escrow
 model is therefore selected for the later scalability migration: 16 shards
@@ -123,13 +128,13 @@ terraform validate -no-color
 
 The exact R1 collection families are `platformReleaseManifests`,
 `platformActiveReleasePointers`, `platformFeatureFlagRevisions`,
-`referenceMarketConfigRevisions` and `referenceActivationPointers`. Direct
-client access is denied. Only the local Emulator/Admin test context may write
+`platformActiveFeatureFlagPointers`, `referenceMarketConfigRevisions` and
+`referenceActivationPointers`. Identity uses the explicitly deny-all
+`identityAccounts`, `identityProviderLinks`, `identitySessions`,
+`identityAccessSnapshots`, `identityCreatorVerifications`,
+`identityManagedPages` and `identityPageMemberships` families. Direct client
+access is denied. Only the local Emulator/Admin test context may write
 synthetic records, and every test removes them.
-
-Future Identity collections are also enumerated in `firestore.rules` as
-explicit client deny-all. They have no Firestore repository or index; the
-current Identity authority exists only inside the local composition root.
 
 A missing exact tool, network outage or command that did not execute is
 `Inconclusive`, never Pass. Current hosted parity and Moderate transitive

@@ -4,11 +4,18 @@ export type JsonObject = Record<string, unknown>;
 
 export type BookingCommand = CreateBookingCommand | CancelBookingCommand;
 
+export interface BookingSessionContext {
+  readonly sessionId: string;
+  readonly sessionHandle: string;
+  readonly installationId: string;
+}
+
 export interface CreateBookingCommand {
   readonly schemaVersion: 1;
   readonly commandType: 'createBooking';
   readonly requestId: string;
   readonly idempotencyKey: string;
+  readonly sessionContext?: BookingSessionContext;
   readonly occurredAgainstEventRevision?: number;
   readonly payload: Readonly<{
     occurrenceId: string;
@@ -26,6 +33,7 @@ export interface CancelBookingCommand {
   readonly commandType: 'cancelBooking';
   readonly requestId: string;
   readonly idempotencyKey: string;
+  readonly sessionContext?: BookingSessionContext;
   readonly expectedBookingRevision: number;
   readonly occurredAgainstEventRevision?: number;
   readonly payload: Readonly<{ bookingId: string; reasonCode?: string }>;
@@ -37,6 +45,7 @@ export interface GetMyBookingQuery {
   readonly schemaVersion: 1;
   readonly queryType: 'getMyBooking';
   readonly requestId: string;
+  readonly sessionContext?: BookingSessionContext;
   readonly payload: Readonly<{ bookingId: string }>;
 }
 
@@ -44,6 +53,7 @@ export interface ListMyBookingsQuery {
   readonly schemaVersion: 1;
   readonly queryType: 'listMyBookings';
   readonly requestId: string;
+  readonly sessionContext?: BookingSessionContext;
   readonly payload: Readonly<{
     pageSize?: number;
     cursor?: string;
@@ -55,6 +65,7 @@ export interface GetEventAvailabilityQuery {
   readonly schemaVersion: 1;
   readonly queryType: 'getEventAvailability';
   readonly requestId: string;
+  readonly sessionContext?: BookingSessionContext;
   readonly payload: Readonly<{
     eventId: string;
     occurrenceId: string;
@@ -169,10 +180,15 @@ function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
       'commandType',
       'requestId',
       'idempotencyKey',
+      'sessionContext',
       'occurredAgainstEventRevision',
       'payload',
     ];
-    if (!hasOnlyKeys(value, allowed) || !optionalRevision(value.occurredAgainstEventRevision)) {
+    if (
+      !hasOnlyKeys(value, allowed) ||
+      !optionalSessionContext(value.sessionContext) ||
+      !optionalRevision(value.occurredAgainstEventRevision)
+    ) {
       return failure('invalid_contract');
     }
     const payload = value.payload;
@@ -205,6 +221,7 @@ function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
       'commandType',
       'requestId',
       'idempotencyKey',
+      'sessionContext',
       'expectedBookingRevision',
       'occurredAgainstEventRevision',
       'payload',
@@ -212,6 +229,7 @@ function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
     const payload = value.payload;
     if (
       !hasOnlyKeys(value, allowed) ||
+      !optionalSessionContext(value.sessionContext) ||
       !isRevision(value.expectedBookingRevision) ||
       !optionalRevision(value.occurredAgainstEventRevision) ||
       !hasOnlyKeys(payload, ['bookingId', 'reasonCode']) ||
@@ -231,7 +249,8 @@ function parseBookingQuery(value: unknown): RawBookingInput<BookingQuery> {
     !isObject(value) ||
     !isBoundedId(value.requestId) ||
     !isObject(value.payload) ||
-    !hasOnlyKeys(value, ['schemaVersion', 'queryType', 'requestId', 'payload'])
+    !hasOnlyKeys(value, ['schemaVersion', 'queryType', 'requestId', 'sessionContext', 'payload']) ||
+    !optionalSessionContext(value.sessionContext)
   ) {
     return failure('invalid_contract');
   }
@@ -281,6 +300,22 @@ function parseBookingQuery(value: unknown): RawBookingInput<BookingQuery> {
     return { ok: true, value: value as unknown as GetEventAvailabilityQuery };
   }
   return failure(typeof value.queryType === 'string' ? 'unsupported_flow' : 'invalid_contract');
+}
+
+function isSessionContext(value: unknown): value is BookingSessionContext {
+  return (
+    isObject(value) &&
+    hasExactKeys(value, ['sessionId', 'sessionHandle', 'installationId']) &&
+    isBoundedId(value.sessionId) &&
+    typeof value.sessionHandle === 'string' &&
+    /^[A-Za-z0-9_-]{43}$/u.test(value.sessionHandle) &&
+    typeof value.installationId === 'string' &&
+    /^(?!__name__$)[A-Za-z0-9._:-]{1,128}$/u.test(value.installationId)
+  );
+}
+
+function optionalSessionContext(value: unknown): boolean {
+  return value === undefined || isSessionContext(value);
 }
 
 function failure<T>(reason: RawBookingFailureReason): RawBookingInput<T> {

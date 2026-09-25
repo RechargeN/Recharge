@@ -4,18 +4,33 @@
       "schemaVersion": 1,
       "queryType": "getMyBooking",
       "requestId": "read-1",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "payload": { "bookingId": "booking-1" }
     },
     {
       "schemaVersion": 1,
       "queryType": "listMyBookings",
       "requestId": "list-first",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "payload": {}
     },
     {
       "schemaVersion": 1,
       "queryType": "listMyBookings",
       "requestId": "list-filtered",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "payload": {
         "pageSize": 50,
         "cursor": "v1.opaque-token",
@@ -26,6 +41,11 @@
       "schemaVersion": 1,
       "queryType": "getEventAvailability",
       "requestId": "availability-1",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "payload": {
         "eventId": "event-1",
         "occurrenceId": "occurrence-1",

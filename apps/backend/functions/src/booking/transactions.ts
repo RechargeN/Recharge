@@ -10,7 +10,6 @@ export const bookingCollections = Object.freeze({
   idempotency: 'bookingIdempotency',
   audit: 'bookingAudit',
   outbox: 'bookingOutbox',
-  featureFlags: 'bookingFeatureFlags',
 });
 
 export const exactBookingCollectionNames = Object.freeze(Object.values(bookingCollections));
@@ -19,7 +18,10 @@ export function runBookingTransaction<T>(
   firestore: Firestore,
   operation: (transaction: Transaction) => Promise<T>,
 ): Promise<T> {
-  return firestore.runTransaction(operation, { maxAttempts: 8 });
+  // Same-scope dedupe and inventory allocation deliberately serialize on one
+  // authoritative record. A bounded 100-way burst can exhaust Firestore's
+  // small default retry budget before the winning commit becomes visible.
+  return firestore.runTransaction(operation, { maxAttempts: 16 });
 }
 
 export function finitePoolLedgerId(occurrenceId: string, poolId: string, channel: string): string {

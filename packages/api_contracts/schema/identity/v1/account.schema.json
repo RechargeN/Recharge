@@ -10,7 +10,7 @@
     "systemRoles",
     "revision",
     "securityRevision",
-    "revokeAllBeforeUtc",
+    "revokeBeforeSecurityRevision",
     "createdAtUtc",
     "updatedAtUtc"
   ],
@@ -29,8 +29,10 @@
     "securityRevision": {
       "$ref": "identity_common.schema.json#/$defs/revision"
     },
-    "revokeAllBeforeUtc": {
-      "$ref": "identity_common.schema.json#/$defs/utcInstant"
+    "revokeBeforeSecurityRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
     },
     "createdAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
     "updatedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" }

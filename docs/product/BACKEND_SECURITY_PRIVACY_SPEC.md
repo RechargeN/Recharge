@@ -1,8 +1,8 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.31**
-- Date: **2026-09-23**
+- Version: **0.4.32**
+- Date: **2026-09-24**
 - Spec status: **Review — D1 security/privacy technical baseline closed; independent/qualified/production gates retained**
 - Runtime status: **Local R1 security/privacy ports, default-deny Rules and disposable Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
@@ -10,10 +10,10 @@
 - Local R1 technical decision: **Accepted and verified locally — independent/qualified and cloud gates retained**
 - Production Security/Privacy/Legal approval: **Pending**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Parent architecture: [BCK-01 v0.4.83](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Reconciles with: [BCK-03 v0.3.20](BACKEND_API_CONTRACT_STANDARD.md) (Review; local-R1 verified),
-  [BCK-09 v1.15](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+- Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Reconciles with: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local-R1 verified),
+  [BCK-09 v1.18](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
 - Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.25
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -36,6 +36,14 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.32 — 2026-09-24
+
+- forbids per-Session authority, Session IDs, opaque handles and mutable
+  AccessSnapshot revisions in Firebase custom claims;
+- requires server-side handle hashing, UID/installation/Session binding and
+  revision-aware source reads for protected Booking mutations;
+- changes no independent/qualified review, cloud, deployment or market gate.
 
 ### v0.4.31 — 2026-09-23
 

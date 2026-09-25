@@ -10,6 +10,9 @@
         "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
         "commandType": { "const": "createBooking" },
         "requestId": { "$ref": "#/$defs/requestId" },
+        "sessionContext": {
+          "$ref": "common.schema.json#/$defs/sessionContext"
+        },
         "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
         "occurredAgainstEventRevision": {
           "$ref": "common.schema.json#/$defs/revision"
@@ -31,6 +34,9 @@
         "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
         "commandType": { "const": "cancelBooking" },
         "requestId": { "$ref": "#/$defs/requestId" },
+        "sessionContext": {
+          "$ref": "common.schema.json#/$defs/sessionContext"
+        },
         "idempotencyKey": { "$ref": "#/$defs/nonBlankId" },
         "expectedBookingRevision": {
           "$ref": "common.schema.json#/$defs/revision"

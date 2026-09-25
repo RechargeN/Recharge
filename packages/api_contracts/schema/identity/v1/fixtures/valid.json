@@ -6,7 +6,7 @@
     "systemRoles": ["User", "Creator"],
     "revision": 1,
     "securityRevision": 1,
-    "revokeAllBeforeUtc": "2026-09-22T00:00:00.000Z",
+    "revokeBeforeSecurityRevision": 0,
     "createdAtUtc": "2026-09-22T00:00:00.000Z",
     "updatedAtUtc": "2026-09-22T00:00:00.000Z"
   },
@@ -28,6 +28,9 @@
     "status": "active",
     "revision": 1,
     "authzRevision": 1,
+    "firebaseUid": "firebase-user-1",
+    "installationId": "install-1",
+    "handleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "issuedAtUtc": "2026-09-22T00:00:01.000Z",
     "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
   },
@@ -39,7 +42,7 @@
     "sessionRevision": 1,
     "authzRevision": 1,
     "capabilityPolicyRevision": 1,
-    "capabilityIds": ["content.publish"],
+    "capabilityIds": ["booking.self_service", "content.publish"],
     "evaluatedAtUtc": "2026-09-22T00:00:01.000Z",
     "expiresAtUtc": "2026-09-22T00:05:01.000Z"
   },

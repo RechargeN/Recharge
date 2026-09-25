@@ -43,8 +43,7 @@ export function decideManagedPage(
   if (!allowed.has(decision)) throw new IdentityFailure('invalid_transition');
   return deepFreeze({
     ...page,
-    status:
-      decision === 'verified' ? 'active' : decision === 'rejected' ? 'restricted' : page.status,
+    status: decision === 'verified' ? 'active' : 'restricted',
     verificationStatus: decision,
     revision: page.revision + 1,
     updatedAtUtc: parseUtcInstant(nowUtc),

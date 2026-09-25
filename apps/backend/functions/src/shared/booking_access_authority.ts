@@ -3,7 +3,8 @@ export const bookingAccessCapability = 'booking.self_service' as const;
 export interface BookingAccessHint {
   readonly actorId: string;
   readonly sessionId: string;
-  readonly accessSnapshotRevision: number;
+  readonly sessionHandle: string;
+  readonly installationId: string;
 }
 
 export type BookingAccessDecision =
@@ -14,5 +15,9 @@ export type BookingAccessDecision =
     }>;
 
 export interface BookingAccessAuthority {
-  authorize(hint: BookingAccessHint, now: Date): Promise<BookingAccessDecision>;
+  authorize(
+    hint: BookingAccessHint,
+    now: Date,
+    requiredCapability?: typeof bookingAccessCapability,
+  ): Promise<BookingAccessDecision>;
 }

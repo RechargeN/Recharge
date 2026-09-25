@@ -4,6 +4,8 @@ import test from 'node:test';
 import { createLocalIdentityPublisherAuthority } from '../../src/modules/identity_publisher/application/identity_publisher_authority.js';
 import { createAccount } from '../../src/modules/identity_publisher/domain/account.js';
 import { IdentityFailure } from '../../src/modules/identity_publisher/domain/failures.js';
+import { parseEntityId } from '../../src/shared/ids.js';
+import { parseUtcInstant } from '../../src/shared/utc_instant.js';
 
 const ids = {
   user1: '018FQ2Z8Q9N4M7K2T6V3W1X5YA',
@@ -109,6 +111,9 @@ void test('verified Creator obtains exact personal and page Publisher authority 
     userId: ids.user1,
     sessionId: ids.session1,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
   const unverifiedSnapshot = await authority.access.create({
     userId: ids.user1,
@@ -136,9 +141,17 @@ void test('verified Creator obtains exact personal and page Publisher authority 
     status: 'verified',
     nowUtc: '2026-09-22T00:00:04.000Z',
   });
+  await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session2,
+    issuedAtUtc: '2026-09-22T00:00:04.500Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-2',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:04.500Z',
+  });
   const personalSnapshot = await authority.access.create({
     userId: ids.user1,
-    sessionId: ids.session1,
+    sessionId: ids.session2,
     capabilityPolicyRevision: 1,
     evaluatedAtUtc: '2026-09-22T00:00:05.000Z',
     expiresAtUtc: '2026-09-22T00:05:05.000Z',
@@ -176,7 +189,7 @@ void test('verified Creator obtains exact personal and page Publisher authority 
   });
   const pageSnapshot = await authority.access.create({
     userId: ids.user1,
-    sessionId: ids.session1,
+    sessionId: ids.session2,
     pageId: ids.page1,
     capabilityPolicyRevision: 1,
     evaluatedAtUtc: '2026-09-22T00:00:10.000Z',
@@ -219,6 +232,9 @@ void test('membership and account revocation invalidate cached authority', async
     userId: ids.user1,
     sessionId: ids.session1,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
   await authority.creatorVerification.submit({
     userId: ids.user1,
@@ -232,6 +248,14 @@ void test('membership and account revocation invalidate cached authority', async
     status: 'verified',
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
+  await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session2,
+    issuedAtUtc: '2026-09-22T00:00:03.500Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-2',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:03.500Z',
+  });
   await authority.pages.create({
     userId: ids.user1,
     pageId: ids.page1,
@@ -241,30 +265,22 @@ void test('membership and account revocation invalidate cached authority', async
   });
   const snapshot = await authority.access.create({
     userId: ids.user1,
-    sessionId: ids.session1,
+    sessionId: ids.session2,
     pageId: ids.page1,
     capabilityPolicyRevision: 1,
     evaluatedAtUtc: '2026-09-22T00:00:05.000Z',
     expiresAtUtc: '2026-09-22T00:05:05.000Z',
   });
-  await authority.pages.revokeMembership({
-    actorUserId: ids.user1,
-    pageId: ids.page1,
-    targetUserId: ids.user1,
-    nowUtc: '2026-09-22T00:00:06.000Z',
-  });
-  await assert.rejects(authority.access.assertFresh(snapshot, '2026-09-22T00:00:07.000Z'));
   await assert.rejects(
-    authority.access.create({
-      userId: ids.user1,
-      sessionId: ids.session1,
+    authority.pages.revokeMembership({
+      actorUserId: ids.user1,
       pageId: ids.page1,
-      capabilityPolicyRevision: 1,
-      evaluatedAtUtc: '2026-09-22T00:00:07.000Z',
-      expiresAtUtc: '2026-09-22T00:05:07.000Z',
+      targetUserId: ids.user1,
+      nowUtc: '2026-09-22T00:00:06.000Z',
     }),
-    (error: unknown) => error instanceof IdentityFailure && error.code === 'membership_inactive',
+    (error: unknown) => error instanceof IdentityFailure && error.code === 'invalid_transition',
   );
+  await assert.doesNotReject(authority.access.assertFresh(snapshot, '2026-09-22T00:00:07.000Z'));
   await authority.accountSecurity.setStatus({
     userId: ids.user1,
     status: 'blocked',
@@ -286,11 +302,17 @@ void test('logout-all and restriction revoke every active local session', async 
     userId: ids.user1,
     sessionId: ids.session1,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
   await first.authority.sessions.issue({
     userId: ids.user1,
     sessionId: ids.session2,
     issuedAtUtc: '2026-09-22T00:00:02.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-2',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:02.000Z',
   });
   await first.authority.sessions.logoutAll({
     actorUserId: ids.user1,
@@ -312,6 +334,9 @@ void test('logout-all and restriction revoke every active local session', async 
     userId: ids.user1,
     sessionId: ids.session1,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
   await second.authority.accountSecurity.setStatus({
     userId: ids.user1,
@@ -330,6 +355,9 @@ void test('Admin role is never sufficient Publisher authority', async () => {
     userId: ids.user1,
     sessionId: ids.session1,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
   const snapshot = await authority.access.create({
     userId: ids.user1,
@@ -346,4 +374,154 @@ void test('Admin role is never sufficient Publisher authority', async () => {
   });
   assert.equal(decision.eligible, false);
   assert.equal(decision.reason, 'creator_verification_required');
+});
+
+void test('page grants are role-bounded and suspended pages become restricted', async () => {
+  const { authority, repository } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('grant-owner'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  await authority.creatorVerification.submit({
+    userId: ids.user1,
+    verificationId: ids.verification1,
+    evidenceRefIds: [ids.evidence1],
+    nowUtc: '2026-09-22T00:00:01.000Z',
+  });
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: ids.user1,
+    status: 'verified',
+    nowUtc: '2026-09-22T00:00:02.000Z',
+  });
+  await authority.pages.create({
+    userId: ids.user1,
+    pageId: ids.page1,
+    membershipId: ids.membership1,
+    marketId: 'LV',
+    nowUtc: '2026-09-22T00:00:03.000Z',
+  });
+  await authority.pages.decidePage({
+    reviewerId: 'reviewer',
+    pageId: ids.page1,
+    decision: 'verified',
+    nowUtc: '2026-09-22T00:00:04.000Z',
+  });
+  await repository.transact((transaction) => {
+    transaction.putMembership({
+      schemaVersion: 1,
+      membershipId: parseEntityId(ids.membership2),
+      pageId: parseEntityId(ids.page1),
+      userId: parseEntityId(ids.user2),
+      role: 'analyst',
+      status: 'active',
+      capabilityIds: ['view_insights'],
+      revision: 1,
+      createdAtUtc: parseUtcInstant('2026-09-22T00:00:04.000Z'),
+      updatedAtUtc: parseUtcInstant('2026-09-22T00:00:04.000Z'),
+    });
+  });
+  await assert.rejects(
+    authority.pages.setCapabilities({
+      actorUserId: ids.user1,
+      pageId: ids.page1,
+      targetUserId: ids.user2,
+      capabilityIds: ['manage_page'],
+      nowUtc: '2026-09-22T00:00:05.000Z',
+    }),
+    (error: unknown) =>
+      error instanceof IdentityFailure && error.code === 'not_found_or_not_accessible',
+  );
+  const granted = await authority.pages.setCapabilities({
+    actorUserId: ids.user1,
+    pageId: ids.page1,
+    targetUserId: ids.user2,
+    capabilityIds: ['view_insights'],
+    nowUtc: '2026-09-22T00:00:06.000Z',
+  });
+  assert.deepEqual(granted.capabilityIds, ['view_insights']);
+  await repository.transact((transaction) => {
+    transaction.putMembership({
+      ...granted,
+      status: 'revoked',
+      revision: granted.revision + 1,
+      updatedAtUtc: parseUtcInstant('2026-09-22T00:00:06.500Z'),
+    });
+  });
+  await assert.rejects(
+    authority.pages.setCapabilities({
+      actorUserId: ids.user1,
+      pageId: ids.page1,
+      targetUserId: ids.user2,
+      capabilityIds: ['view_insights'],
+      nowUtc: '2026-09-22T00:00:06.750Z',
+    }),
+    (error: unknown) =>
+      error instanceof IdentityFailure && error.code === 'not_found_or_not_accessible',
+  );
+  const suspended = await authority.pages.decidePage({
+    reviewerId: 'reviewer',
+    pageId: ids.page1,
+    decision: 'suspended',
+    nowUtc: '2026-09-22T00:00:07.000Z',
+  });
+  assert.equal(suspended.status, 'restricted');
+  const revoked = await authority.pages.decidePage({
+    reviewerId: 'reviewer',
+    pageId: ids.page1,
+    decision: 'revoked',
+    nowUtc: '2026-09-22T00:00:08.000Z',
+  });
+  assert.equal(revoked.status, 'restricted');
+});
+
+void test('restricted pages do not consume active page creation quota', async () => {
+  const { authority } = createLocalIdentityPublisherAuthority({
+    reviewerIds: new Set(['reviewer']),
+    pageCreationEnabled: true,
+    maximumOwnedPages: 1,
+  });
+  await authority.accounts.ensureAccount({
+    proof: googleProof('quota-owner'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  await authority.creatorVerification.submit({
+    userId: ids.user1,
+    verificationId: ids.verification1,
+    evidenceRefIds: [ids.evidence1],
+    nowUtc: '2026-09-22T00:00:01.000Z',
+  });
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: ids.user1,
+    status: 'verified',
+    nowUtc: '2026-09-22T00:00:02.000Z',
+  });
+  await authority.pages.create({
+    userId: ids.user1,
+    pageId: ids.page1,
+    membershipId: ids.membership1,
+    marketId: 'LV',
+    nowUtc: '2026-09-22T00:00:03.000Z',
+  });
+  await authority.pages.decidePage({
+    reviewerId: 'reviewer',
+    pageId: ids.page1,
+    decision: 'rejected',
+    nowUtc: '2026-09-22T00:00:04.000Z',
+  });
+  const replacement = await authority.pages.create({
+    userId: ids.user1,
+    pageId: ids.page2,
+    membershipId: ids.membership2,
+    marketId: 'LV',
+    nowUtc: '2026-09-22T00:00:05.000Z',
+  });
+  assert.equal(replacement.page.status, 'pendingReview');
 });

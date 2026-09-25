@@ -6,22 +6,40 @@ export interface CallableAuthLike {
 export interface BookingActor {
   readonly actorId: string;
   readonly sessionId: string;
-  readonly accessSnapshotRevision: number;
+  readonly sessionHandle: string;
+  readonly installationId: string;
 }
 
 export type ActorResolution =
   | Readonly<{ ok: true; actor: BookingActor }>
   | Readonly<{ ok: false; code: 'unauthenticated' | 'permission_denied' }>;
 
-export function resolveBookingActor(auth: CallableAuthLike | undefined): ActorResolution {
+export function resolveBookingActor(
+  auth: CallableAuthLike | undefined,
+  sessionContext: unknown,
+): ActorResolution {
   if (auth === undefined || auth.uid.length < 1) return { ok: false, code: 'unauthenticated' };
-  const sessionId = auth.token.sessionId;
-  const accessSnapshotRevision = auth.token.accessSnapshotRevision;
+  if (
+    typeof sessionContext !== 'object' ||
+    sessionContext === null ||
+    Array.isArray(sessionContext)
+  ) {
+    return { ok: false, code: 'permission_denied' };
+  }
+  const record = sessionContext as Record<string, unknown>;
+  const sessionId = record.sessionId;
+  const sessionHandle = record.sessionHandle;
+  const installationId = record.installationId;
   if (
     typeof sessionId !== 'string' ||
     !/^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(sessionId) ||
-    !Number.isSafeInteger(accessSnapshotRevision) ||
-    Number(accessSnapshotRevision) < 1
+    typeof sessionHandle !== 'string' ||
+    !/^[A-Za-z0-9_-]{43}$/u.test(sessionHandle) ||
+    typeof installationId !== 'string' ||
+    !/^(?!__name__$)[A-Za-z0-9._:-]{1,128}$/u.test(installationId) ||
+    Object.keys(record).some(
+      (key) => !['sessionId', 'sessionHandle', 'installationId'].includes(key),
+    )
   ) {
     return { ok: false, code: 'permission_denied' };
   }
@@ -30,7 +48,8 @@ export function resolveBookingActor(auth: CallableAuthLike | undefined): ActorRe
     actor: {
       actorId: auth.uid,
       sessionId,
-      accessSnapshotRevision: Number(accessSnapshotRevision),
+      sessionHandle,
+      installationId,
     },
   };
 }

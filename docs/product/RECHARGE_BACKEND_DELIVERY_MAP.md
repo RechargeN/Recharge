@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.92**
+- Version: **2.4.93**
 - Date: **2026-09-24**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.93.** Records the bounded Identity/Booking authority hardening without
+widening runtime scope:
+
+- reconciles BCK-01 v0.4.84, BCK-03 v0.3.21, BCK-04 v0.4.32, BCK-05
+  v0.2.39, BCK-06 v0.5 and BCK-09 v1.18;
+- records role-bounded ManagedPage grants, last-owner protection, revision
+  fences, opaque Session handles and Emulator-only Firestore persistence;
+- records common R1 feature flags and atomic Booking authorization/mutation,
+  with Identity callables, cloud, deployment, activation, push and merge still
+  closed.
 
 **v2.4.92.** Records Booking Stages 7–8 without widening cloud authority:
 
@@ -1223,19 +1234,19 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.92)
+## 5. Реестр проектных документов — 22 (v2.4.93)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
-| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.83 — local integrated foundation verified; item 6 bounded; production gates retained; 146 AC | Local R0/R1 platform, reference, security, identity and mobile-seam foundations Present; product/cloud runtime Absent |
+| BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.84 — local integrated foundation plus atomic Identity/Booking authority seam verified; production gates retained; 146 AC | Local R0/R1 platform, reference, security, identity and mobile-seam foundations Present; product/cloud runtime Absent |
 | BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.88 coordination baseline; local Identity evidence reconciled without cloud authority | N/A |
-| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.20 — local platform schemas/validators/parity verified; 110 AC; product/cloud evidence retained | Local platform contract runtime Present; deployed/product API runtime Absent |
-| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.31 — local fail-closed foundation verified; 96 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
-| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.38 — local credential-free R1 plus Booking retention/restore controls verified; 91 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
-| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.4 — bounded local authority evidence; production decisions remain gated | Present locally — in-memory only; cloud/production Absent |
+| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.21 — local platform schemas/validators/parity and opaque Session transport verified; 110 AC; product/cloud evidence retained | Local platform contract runtime Present; deployed/product API runtime Absent |
+| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.32 — local fail-closed foundation and server-side Session binding verified; 96 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
+| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.39 — common R1 feature-flag authority and local controls verified; 91 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
+| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.5 — bounded in-memory and Emulator-only Firestore authority evidence; 82 AC; production decisions remain gated | Present locally — in-memory and Emulator-only Firestore; callable/cloud/production Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.4 — BCK07-LOCAL-01 approved as next disabled local/test-only slice; production/dependency gates retained; 82 AC | Absent; implementation not started |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.3 — Stage 3 unified query/snapshot/freshness contract complete; OD/source/Approval blockers remain | Absent |
-| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.17 — local lifecycle/retention hardening and Stage 7 scalability evidence; fixed escrow selected but disabled; all independent/runtime gates preserved | Exactly five disabled Emulator-only callable exports and nine collections; pure escrow model only; cloud/deployed/mobile runtime Absent |
+| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.18 — local authority, retention and Stage 7 scalability evidence; 134 AC; fixed escrow selected but disabled; all independent/runtime gates preserved | Exactly five disabled Emulator-only callable exports, eight Booking-owned collections and shared platform flags; cloud/deployed/mobile runtime Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
@@ -1250,7 +1261,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Review v0.3 — Stage 4 governed analytics chain; OD-05/privacy/destination/runtime blockers remain | Absent |
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Draft v0.3.1 — Stage 4 contract; lifecycle/outcome vocabulary normalized; OD-06/OD-11, independent/qualified and runtime gates pending | Absent |
 
-BCK-09 v1.17 и его 22/22 coverage matrix v1.12 существуют как Review-документы:
+BCK-09 v1.18 и его 22/22 coverage matrix v1.12 существуют как Review-документы:
 [Event Booking Backend/Firebase full spec](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md).
 Design reconciliation с BCK-01/03/04/05/06/07/08/13/19 завершена без
 переписывания принятых Event/Booking инвариантов. BCK09-DEC-01 v0.3 сохраняет
@@ -2033,7 +2044,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 149. The local-R1 preflight reconciles exactly BCK-01 v0.4.81, BCK-02
      v2.4.87, BCK-03 v0.3.19, BCK-04 v0.4.30, BCK-05 v0.2.36 and BCK-20
      v0.2.28; another version set requires a new reconciliation revision.
-150. The sole §26 manifest contains exactly 120 unique literal paths: 90
+150. The sole §26 manifest contains exactly 122 unique literal paths: 92
      create, 6 modify and 24 retain/compatibility rows, with no wildcard or
      duplicate path.
 151. R1 has one module and file structure: the exact §26 manifest; examples,
@@ -2437,6 +2448,8 @@ generalized, deleted or counted as R1 product readiness.
 | C | `apps/backend/functions/src/platform/observability/structured_logger.ts` | BCK-05 / infrastructure | allowlisted structured operational log fields | `unit/platform/structured_logger.test.ts` |
 | C | `apps/backend/functions/src/platform/observability/metrics.ts` | BCK-05 / infrastructure | bounded metric names/dimensions | `unit/platform/metrics.test.ts` |
 | C | `apps/backend/functions/src/platform/config/feature_flag_repository.ts` | BCK-05 / infrastructure | immutable flag revisions and exact active reads | `emulator/r1_config_repository.test.ts` |
+| C | `apps/backend/functions/src/platform/config/firestore_feature_flag_gate.ts` | BCK-05 / infrastructure | transaction-aware active flag resolution; no kill-switch cache | Booking security Emulator tests |
+| C | `apps/backend/functions/src/platform/bootstrap/booking_composition_root.ts` | BCK-01 / composition | wires disabled local Booking to shared flag and Identity authority adapters | layout/export/no-cloud plus Booking security tests |
 | C | `apps/backend/functions/src/platform/config/market_config_repository.ts` | BCK-20 / infrastructure | immutable market revisions and expected-revision pointer swap | `emulator/r1_config_repository.test.ts` |
 | C | `apps/backend/functions/src/platform/config/config_service.ts` | BCK-05 + BCK-20 / application | validate/publish/resolve config through owning repositories | `unit/platform/config_service.test.ts` |
 | C | `apps/backend/functions/src/platform/release/release_manifest_repository.ts` | BCK-05 / infrastructure | release manifest/pointer persistence only | `emulator/r1_release_repository.test.ts` |
@@ -2561,6 +2574,7 @@ them again and prove behavior-preserving movement before any physical change.
 | `platformReleaseManifests` | BCK-05 release controller | release/rollback controller, authorized audit | `environmentId ASC, marketId ASC, capabilityId ASC, createdAtUtc DESC` | deny read/write |
 | `platformActiveReleasePointers` | BCK-05 activation controller | platform bootstrap and rollback controller | none; exact document lookup only | deny read/write |
 | `platformFeatureFlagRevisions` | BCK-05 config publisher | platform config reader | `environmentId ASC, marketId ASC, capabilityId ASC, createdAtUtc DESC` | deny read/write |
+| `platformActiveFeatureFlagPointers` | BCK-05 config activation controller | platform config reader and transaction-time gates | none; exact document lookup only | deny read/write |
 | `referenceMarketConfigRevisions` | BCK-20 market-config publisher | platform config reader | `marketId ASC, status ASC, publishedAtUtc DESC` | deny read/write |
 | `referenceActivationPointers` | BCK-20 activation controller | platform bootstrap and rollback controller | none; exact document lookup only | deny read/write |
 
@@ -2669,7 +2683,7 @@ Latvia approval cannot enable Estonia or Lithuania.
 | Operations | BCK-05 v0.2.36, Review; logical dev/stage/prod topology, no-cloud CI, migration and rollback | No project, billing, credential, resource or deployment is authorized |
 | Reference data | BCK-20 v0.2.28, Review; disabled synthetic LV/EE/LT config and explicit Money/time/localization contracts | External sources, mandatory copy and market activation remain Pending |
 | Coordination | BCK-02 v2.4.87, Approved coordination baseline | Approval of this map is not R1 execution authority |
-| Exact files | §26: 120 unique literal paths — 90 C, 6 M and 24 R/K; zero duplicates/wildcards | Any path change requires a versioned reconciliation |
+| Exact files | Historical v2.4.87 preflight: 120 paths; current v2.4.93 §26: 122 unique literal paths — 92 C, 6 M and 24 R/K; zero duplicates/wildcards | Any path change requires a versioned reconciliation |
 | Storage writers | Five §26.7 collection families, five named single writers | Direct client access remains denied |
 | Migration/rollback | Additive §26.9 order; exact repository/config rollback; non-destructive infra posture | RAW-C deletion, broad data rollback and `terraform destroy` remain forbidden |
 

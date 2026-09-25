@@ -1,9 +1,10 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import {
+import type { Firestore, Transaction } from 'firebase-admin/firestore';
+import { hashSessionHandle } from '../modules/identity_publisher/domain/session.js';
+import type {
   bookingAccessCapability,
-  type BookingAccessAuthority,
-  type BookingAccessDecision,
-  type BookingAccessHint,
+  BookingAccessAuthority,
+  BookingAccessDecision,
+  BookingAccessHint,
 } from '../shared/booking_access_authority.js';
 
 export const bookingIdentityCollections = Object.freeze({
@@ -15,8 +16,30 @@ export const bookingIdentityCollections = Object.freeze({
 export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
   constructor(private readonly firestore: Firestore) {}
 
-  async authorize(hint: BookingAccessHint, now: Date): Promise<BookingAccessDecision> {
-    const [accountSnapshot, sessionSnapshot, accessSnapshot] = await this.firestore.getAll(
+  async authorize(
+    hint: BookingAccessHint,
+    now: Date,
+    requiredCapability?: typeof bookingAccessCapability,
+  ): Promise<BookingAccessDecision> {
+    return this.authorizeWithReader(this.firestore, hint, now, requiredCapability);
+  }
+
+  authorizeTransaction(
+    transaction: Transaction,
+    hint: BookingAccessHint,
+    now: Date,
+    requiredCapability: typeof bookingAccessCapability,
+  ): Promise<BookingAccessDecision> {
+    return this.authorizeWithReader(transaction, hint, now, requiredCapability);
+  }
+
+  private async authorizeWithReader(
+    reader: Pick<Firestore, 'getAll'> | Pick<Transaction, 'getAll'>,
+    hint: BookingAccessHint,
+    now: Date,
+    requiredCapability?: typeof bookingAccessCapability,
+  ): Promise<BookingAccessDecision> {
+    const [accountSnapshot, sessionSnapshot, accessSnapshot] = await reader.getAll(
       this.firestore.collection(bookingIdentityCollections.accounts).doc(hint.actorId),
       this.firestore.collection(bookingIdentityCollections.sessions).doc(hint.sessionId),
       this.firestore.collection(bookingIdentityCollections.accessSnapshots).doc(hint.sessionId),
@@ -37,10 +60,15 @@ export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
     if (
       !isRecord(session) ||
       session.userId !== hint.actorId ||
+      session.firebaseUid !== hint.actorId ||
+      session.installationId !== hint.installationId ||
+      session.handleHash !== hashSessionHandle(hint.sessionHandle) ||
       session.status !== 'active' ||
-      !validInstant(session.issuedAtUtc) ||
-      !validInstant(account.revokeAllBeforeUtc) ||
-      Date.parse(String(session.issuedAtUtc)) <= Date.parse(String(account.revokeAllBeforeUtc))
+      !Number.isSafeInteger(session.authzRevision) ||
+      !Number.isSafeInteger(account.securityRevision) ||
+      !Number.isSafeInteger(account.revokeBeforeSecurityRevision) ||
+      Number(session.authzRevision) < Number(account.revokeBeforeSecurityRevision) ||
+      session.authzRevision !== account.securityRevision
     ) {
       return { allowed: false, reason: 'session_revoked' };
     }
@@ -48,7 +76,6 @@ export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
       !isRecord(access) ||
       access.userId !== hint.actorId ||
       access.sessionId !== hint.sessionId ||
-      access.revision !== hint.accessSnapshotRevision ||
       access.accountRevision !== account.revision ||
       access.sessionRevision !== session.revision ||
       access.authzRevision !== session.authzRevision ||
@@ -58,8 +85,8 @@ export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
       return { allowed: false, reason: 'snapshot_stale' };
     }
     if (
-      !Array.isArray(access.capabilityIds) ||
-      !access.capabilityIds.includes(bookingAccessCapability)
+      requiredCapability !== undefined &&
+      (!Array.isArray(access.capabilityIds) || !access.capabilityIds.includes(requiredCapability))
     ) {
       return { allowed: false, reason: 'capability_denied' };
     }

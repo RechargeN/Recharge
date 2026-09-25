@@ -9,12 +9,14 @@ import {
 import type { IdentityAuthorityRepository } from '../domain/repositories.js';
 import type { PageCreationPolicyPort } from './ports/page_creation_policy_port.js';
 import type { VerificationDecisionPort } from './ports/verification_decision_port.js';
+import type { PageCapabilityGrantPolicyPort } from './ports/page_capability_grant_policy_port.js';
 
 export class ManagedPageService {
   constructor(
     private readonly repository: IdentityAuthorityRepository,
     private readonly pagePolicy: PageCreationPolicyPort,
     private readonly decisionPort: VerificationDecisionPort,
+    private readonly grantPolicy: PageCapabilityGrantPolicyPort,
   ) {}
 
   async create(input: {
@@ -25,19 +27,23 @@ export class ManagedPageService {
     readonly nowUtc: string;
   }): Promise<{ readonly page: ManagedPage; readonly membership: PageMembership }> {
     return this.repository.transact(async (transaction) => {
+      const ownedPages = await transaction.pagesForOwner(input.userId);
       const policy = await this.pagePolicy.evaluate({
         userId: input.userId,
-        ownedPageCount: transaction.pagesForOwner(input.userId).length,
+        ownedPageCount: ownedPages.filter(
+          (page) => page.status === 'pendingReview' || page.status === 'active',
+        ).length,
         marketId: input.marketId,
       });
       if (policy !== 'allowed') throw new IdentityFailure('policy_unavailable');
-      const account = transaction.account(input.userId);
-      const verification = transaction.verificationForUser(input.userId);
+      const account = await transaction.account(input.userId);
+      const verification = await transaction.verificationForUser(input.userId);
       if (account === null || account.status !== 'active')
         throw new IdentityFailure('not_found_or_not_accessible');
       if (verification?.status !== 'verified')
         throw new IdentityFailure('creator_verification_required');
-      if (transaction.page(input.pageId) !== null) throw new IdentityFailure('revision_conflict');
+      if ((await transaction.page(input.pageId)) !== null)
+        throw new IdentityFailure('revision_conflict');
       const page = createManagedPage({
         pageId: input.pageId,
         ownerUserId: input.userId,
@@ -64,8 +70,8 @@ export class ManagedPageService {
   }): Promise<ManagedPage> {
     if (!(await this.decisionPort.mayDecide(input.reviewerId)))
       throw new IdentityFailure('not_found_or_not_accessible');
-    return this.repository.transact((transaction) => {
-      const page = transaction.page(input.pageId);
+    return this.repository.transact(async (transaction) => {
+      const page = await transaction.page(input.pageId);
       if (page === null) throw new IdentityFailure('not_found_or_not_accessible');
       const next = decideManagedPage(page, input.decision, input.nowUtc);
       transaction.putPage(next);
@@ -80,13 +86,19 @@ export class ManagedPageService {
     readonly capabilityIds: readonly string[];
     readonly nowUtc: string;
   }): Promise<PageMembership> {
-    return this.repository.transact((transaction) => {
-      const actor = transaction.membership(input.pageId, input.actorUserId);
-      const target = transaction.membership(input.pageId, input.targetUserId);
+    return this.repository.transact(async (transaction) => {
+      const page = await transaction.page(input.pageId);
+      const actor = await transaction.membership(input.pageId, input.actorUserId);
+      const target = await transaction.membership(input.pageId, input.targetUserId);
       if (
+        page?.status !== 'active' ||
         actor?.status !== 'active' ||
-        !actor.capabilityIds.includes('manage_page') ||
-        target === null
+        target?.status !== 'active' ||
+        !(await this.grantPolicy.mayGrant({
+          actor,
+          target,
+          requestedCapabilityIds: input.capabilityIds,
+        }))
       )
         throw new IdentityFailure('not_found_or_not_accessible');
       const next = setMembershipCapabilities(target, input.capabilityIds, input.nowUtc);
@@ -101,15 +113,19 @@ export class ManagedPageService {
     readonly targetUserId: string;
     readonly nowUtc: string;
   }): Promise<void> {
-    return this.repository.transact((transaction) => {
-      const actor = transaction.membership(input.pageId, input.actorUserId);
-      const target = transaction.membership(input.pageId, input.targetUserId);
-      if (
-        actor?.status !== 'active' ||
-        !actor.capabilityIds.includes('manage_page') ||
-        target === null
-      )
+    return this.repository.transact(async (transaction) => {
+      const page = await transaction.page(input.pageId);
+      const actor = await transaction.membership(input.pageId, input.actorUserId);
+      const target = await transaction.membership(input.pageId, input.targetUserId);
+      if (actor?.status !== 'active' || actor.role !== 'owner' || target?.status !== 'active')
         throw new IdentityFailure('not_found_or_not_accessible');
+      if (target.role === 'owner') {
+        const activeOwners = (await transaction.membershipsForPage(input.pageId)).filter(
+          (membership) => membership.status === 'active' && membership.role === 'owner',
+        );
+        if (activeOwners.length <= 1) throw new IdentityFailure('invalid_transition');
+      }
+      if (page?.status !== 'active') throw new IdentityFailure('not_found_or_not_accessible');
       transaction.putMembership(revokeMembership(target, input.nowUtc));
     });
   }

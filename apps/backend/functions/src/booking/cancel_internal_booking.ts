@@ -29,11 +29,16 @@ import {
 } from './idempotency.js';
 import { auditExpiresAt, idempotencyExpiresAt } from './retention.js';
 import { bookingCollections, finitePoolLedgerId, runBookingTransaction } from './transactions.js';
+import {
+  assertBookingMutationAuthorized,
+  type BookingMutationAuthorization,
+} from './mutation_authorizer.js';
 
 export interface CancelBookingDependencies {
   readonly firestore: Firestore;
   readonly clock: ServerClock;
   readonly failureLogger?: FirestoreFailureLogger;
+  readonly mutationAuthorization?: BookingMutationAuthorization;
 }
 
 export interface CancelBookingOutput {
@@ -51,6 +56,13 @@ export async function cancelInternalBooking(
   const attemptId = requestAttemptId(actorId, command.requestId);
   try {
     return await runBookingTransaction(dependencies.firestore, async (transaction) => {
+      if (dependencies.mutationAuthorization !== undefined) {
+        await assertBookingMutationAuthorized(
+          transaction,
+          dependencies.mutationAuthorization,
+          dependencies.clock.now(),
+        );
+      }
       const logicalRef = dependencies.firestore
         .collection(bookingCollections.idempotency)
         .doc(logicalId);

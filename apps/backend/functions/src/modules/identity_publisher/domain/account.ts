@@ -19,7 +19,7 @@ export function createAccount(
     systemRoles: [...new Set(['User' as const, ...systemRoles])],
     revision: 1,
     securityRevision: 1,
-    revokeAllBeforeUtc: instant,
+    revokeBeforeSecurityRevision: 0,
     createdAtUtc: instant,
     updatedAtUtc: instant,
   });
@@ -45,23 +45,26 @@ export function changeAccountStatus(
 ): Account {
   if (account.status === 'deleted') throw new IdentityFailure('invalid_transition');
   if (account.status === status) return account;
+  const nextSecurityRevision = account.securityRevision + 1;
   return deepFreeze({
     ...account,
     status,
     revision: account.revision + 1,
-    securityRevision: account.securityRevision + 1,
-    revokeAllBeforeUtc: parseUtcInstant(nowUtc),
+    securityRevision: nextSecurityRevision,
+    revokeBeforeSecurityRevision:
+      status === 'active' ? account.revokeBeforeSecurityRevision : nextSecurityRevision,
     updatedAtUtc: parseUtcInstant(nowUtc),
   });
 }
 
 export function advanceRevocationFence(account: Account, nowUtc: string): Account {
   if (account.status === 'deleted') throw new IdentityFailure('account_blocked');
+  const nextSecurityRevision = account.securityRevision + 1;
   return deepFreeze({
     ...account,
     revision: account.revision + 1,
-    securityRevision: account.securityRevision + 1,
-    revokeAllBeforeUtc: parseUtcInstant(nowUtc),
+    securityRevision: nextSecurityRevision,
+    revokeBeforeSecurityRevision: nextSecurityRevision,
     updatedAtUtc: parseUtcInstant(nowUtc),
   });
 }

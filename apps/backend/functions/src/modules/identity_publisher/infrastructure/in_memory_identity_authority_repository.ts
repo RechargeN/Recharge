@@ -8,11 +8,13 @@ import type { CreatorVerification } from '../domain/creator_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
 import type { PageMembership } from '../domain/page_membership.js';
 import type { IdentitySession } from '../domain/session.js';
+import type { AccessSnapshot } from '../domain/access_snapshot.js';
 
 interface Store {
   readonly accounts: Map<string, Account>;
   readonly identities: Map<string, AuthIdentity>;
   readonly sessions: Map<string, IdentitySession>;
+  readonly accessSnapshots: Map<string, AccessSnapshot>;
   readonly verifications: Map<string, CreatorVerification>;
   readonly pages: Map<string, ManagedPage>;
   readonly memberships: Map<string, PageMembership>;
@@ -47,6 +49,7 @@ function emptyStore(): Store {
     accounts: new Map(),
     identities: new Map(),
     sessions: new Map(),
+    accessSnapshots: new Map(),
     verifications: new Map(),
     pages: new Map(),
     memberships: new Map(),
@@ -58,6 +61,7 @@ function cloneStore(source: Store): Store {
     accounts: new Map(source.accounts),
     identities: new Map(source.identities),
     sessions: new Map(source.sessions),
+    accessSnapshots: new Map(source.accessSnapshots),
     verifications: new Map(source.verifications),
     pages: new Map(source.pages),
     memberships: new Map(source.memberships),
@@ -70,24 +74,45 @@ function membershipKey(pageId: string, userId: string): string {
 
 function transactionFor(store: Store): IdentityAuthorityTransaction {
   return {
-    account: (userId) => store.accounts.get(userId) ?? null,
+    account: (userId) => Promise.resolve(store.accounts.get(userId) ?? null),
     putAccount: (account) => store.accounts.set(account.userId, account),
-    identityBySubjectHash: (subjectHash) => store.identities.get(subjectHash) ?? null,
+    identityBySubjectHash: (subjectHash) =>
+      Promise.resolve(store.identities.get(subjectHash) ?? null),
     putIdentity: (identity) => store.identities.set(identity.subjectHash, identity),
-    session: (sessionId) => store.sessions.get(sessionId) ?? null,
+    session: (sessionId) => Promise.resolve(store.sessions.get(sessionId) ?? null),
+    sessionByHandleHash: (handleHash) =>
+      Promise.resolve(
+        [...store.sessions.values()].find((session) => session.handleHash === handleHash) ?? null,
+      ),
     sessionsForUser: (userId) =>
-      [...store.sessions.values()].filter((session) => session.userId === userId),
+      Promise.resolve([...store.sessions.values()].filter((session) => session.userId === userId)),
     putSession: (session) => store.sessions.set(session.sessionId, session),
-    verificationForUser: (userId) => store.verifications.get(userId) ?? null,
+    accessSnapshot: (sessionId) => Promise.resolve(store.accessSnapshots.get(sessionId) ?? null),
+    putAccessSnapshot: (snapshot) =>
+      store.accessSnapshots.set(accessSnapshotKey(snapshot), snapshot),
+    verificationForUser: (userId) => Promise.resolve(store.verifications.get(userId) ?? null),
     putVerification: (verification) => store.verifications.set(verification.userId, verification),
-    page: (pageId) => store.pages.get(pageId) ?? null,
+    page: (pageId) => Promise.resolve(store.pages.get(pageId) ?? null),
     pagesForOwner: (userId) =>
-      [...store.pages.values()].filter((page) => page.ownerUserId === userId),
+      Promise.resolve([...store.pages.values()].filter((page) => page.ownerUserId === userId)),
     putPage: (page) => store.pages.set(page.pageId, page),
-    membership: (pageId, userId) => store.memberships.get(membershipKey(pageId, userId)) ?? null,
+    membership: (pageId, userId) =>
+      Promise.resolve(store.memberships.get(membershipKey(pageId, userId)) ?? null),
+    membershipsForPage: (pageId) =>
+      Promise.resolve(
+        [...store.memberships.values()].filter((membership) => membership.pageId === pageId),
+      ),
     membershipsForUser: (userId) =>
-      [...store.memberships.values()].filter((membership) => membership.userId === userId),
+      Promise.resolve(
+        [...store.memberships.values()].filter((membership) => membership.userId === userId),
+      ),
     putMembership: (membership) =>
       store.memberships.set(membershipKey(membership.pageId, membership.userId), membership),
   };
+}
+
+function accessSnapshotKey(snapshot: AccessSnapshot): string {
+  return snapshot.pageId === undefined
+    ? snapshot.sessionId
+    : `${snapshot.sessionId}__page__${snapshot.pageId}`;
 }

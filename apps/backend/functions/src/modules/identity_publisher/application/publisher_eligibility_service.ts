@@ -29,8 +29,8 @@ export class PublisherEligibilityService {
         input.nowUtc,
       );
     }
-    return this.repository.transact((transaction) => {
-      const account = transaction.account(input.snapshot.userId);
+    return this.repository.transact(async (transaction) => {
+      const account = await transaction.account(input.snapshot.userId);
       if (account?.status !== 'active')
         return result(
           input.requestedPublisher,
@@ -39,7 +39,7 @@ export class PublisherEligibilityService {
           input.snapshot.authzRevision,
           input.nowUtc,
         );
-      const verification = transaction.verificationForUser(input.snapshot.userId);
+      const verification = await transaction.verificationForUser(input.snapshot.userId);
       if (verification?.status !== 'verified' || !account.systemRoles.includes('Creator'))
         return result(
           input.requestedPublisher,
@@ -81,8 +81,11 @@ export class PublisherEligibilityService {
           account.securityRevision,
           input.nowUtc,
         );
-      const membership = transaction.membership(input.requestedPublisher.id, input.snapshot.userId);
-      const page = transaction.page(input.requestedPublisher.id);
+      const membership = await transaction.membership(
+        input.requestedPublisher.id,
+        input.snapshot.userId,
+      );
+      const page = await transaction.page(input.requestedPublisher.id);
       if (membership?.status !== 'active')
         return result(
           input.requestedPublisher,

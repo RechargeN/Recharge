@@ -14,7 +14,7 @@ import {
   fixtureIds,
 } from '../../support/platform_fixtures.js';
 
-void test('config service publishes immutable disabled revisions and resolves pointers', async () => {
+void test('config service publishes immutable default-off revisions and resolves pointers', async () => {
   const flags = new InMemoryFeatureFlagRepository();
   const markets = new InMemoryMarketConfigRepository();
   const service = new ConfigService(flags);

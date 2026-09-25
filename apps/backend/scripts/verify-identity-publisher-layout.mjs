@@ -44,21 +44,29 @@ const required = [
   "apps/backend/functions/src/modules/identity_publisher/application/ports/provider_identity_verifier.ts",
   "apps/backend/functions/src/modules/identity_publisher/application/ports/verification_decision_port.ts",
   "apps/backend/functions/src/modules/identity_publisher/application/ports/page_creation_policy_port.ts",
+  "apps/backend/functions/src/modules/identity_publisher/application/ports/page_capability_grant_policy_port.ts",
   "apps/backend/functions/src/modules/identity_publisher/infrastructure/in_memory_identity_authority_repository.ts",
   "apps/backend/functions/src/modules/identity_publisher/infrastructure/synthetic_provider_identity_verifier.ts",
   "apps/backend/functions/src/modules/identity_publisher/infrastructure/local_verification_decision_adapter.ts",
   "apps/backend/functions/src/modules/identity_publisher/infrastructure/local_page_creation_policy.ts",
+  "apps/backend/functions/src/modules/identity_publisher/infrastructure/local_page_capability_grant_policy.ts",
+  "apps/backend/functions/src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.ts",
   "apps/backend/functions/test/unit/identity_publisher/identity_domain.test.ts",
   "apps/backend/functions/test/contract/identity_fixture_parity.test.ts",
   "apps/backend/functions/test/integration/identity_publisher_authority.test.ts",
   "apps/backend/functions/test/rules/firestore_identity_rules.test.ts",
+  "apps/backend/functions/test/emulator/identity_authority_repository.test.ts",
 ];
 
 for (const relative of required) {
   if (!existsSync(path.join(repoRoot, relative)))
     throw new Error(`Identity/Publisher path absent: ${relative}`);
 }
-for (const relative of required.filter((item) => item.endsWith(".ts"))) {
+for (const relative of required.filter(
+  (item) =>
+    item.endsWith(".ts") &&
+    !item.endsWith("firestore_identity_authority_repository.ts"),
+)) {
   const source = readFileSync(path.join(repoRoot, relative), "utf8");
   if (/firebase-(?:admin|functions)|@google-cloud/u.test(source))
     throw new Error(`Identity/Publisher core imports cloud SDK: ${relative}`);
@@ -68,6 +76,7 @@ const collections = [
   "identityAccounts",
   "identityProviderLinks",
   "identitySessions",
+  "identityAccessSnapshots",
   "identityCreatorVerifications",
   "identityManagedPages",
   "identityPageMemberships",
@@ -83,12 +92,13 @@ for (const collection of collections) {
 const indexes = JSON.parse(
   readFileSync(path.join(backendRoot, "firestore.indexes.json"), "utf8"),
 );
-if (
-  indexes.indexes.some((entry) => collections.includes(entry.collectionGroup))
-)
+const identityIndexes = indexes.indexes.filter((entry) =>
+  collections.includes(entry.collectionGroup),
+);
+if (identityIndexes.length !== 0)
   throw new Error(
-    "Identity indexes are forbidden before a Firestore repository slice",
+    "Unexpected composite Identity index; single-field indexes are sufficient",
   );
 process.stdout.write(
-  `Identity/Publisher layout gate passed: ${required.length} required paths, six explicit denies, zero cloud dependency or premature indexes.\n`,
+  `Identity/Publisher layout gate passed: ${required.length} required paths, seven explicit denies, cloud SDK isolated to the Emulator repository, zero premature composite indexes.\n`,
 );

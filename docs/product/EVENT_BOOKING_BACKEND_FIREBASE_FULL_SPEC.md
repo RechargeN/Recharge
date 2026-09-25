@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.17**
+- Версия: **1.18**
 - Дата: **2026-09-24**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/mobile Absent; local Emulator-only adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.92](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -40,6 +40,17 @@
 - Runtime effect: **disabled local/Emulator source only; no cloud, deployment, activation or mobile integration**
 
 ## 0. Changelog
+
+### v1.18 — 2026-09-24
+
+- fixes the remaining owner decisions for baseline self-service authority,
+  authenticated visibility-safe availability, unlimited RSVP caps, primary
+  Booking retention, suppressed outbox terminal retention and account erasure;
+- moves Booking activation checks to the common R1 feature-flag authority and
+  requires create/cancel Identity, Session, AccessSnapshot and flag reads in
+  the same Firestore transaction as the mutation;
+- records opaque Session transport and the Emulator-only Firestore Identity
+  authority without enabling cloud, deployment, callable Identity or markets.
 
 ### v1.17 — 2026-09-24
 
@@ -439,11 +450,16 @@ authRevision
 
 Body не может задавать или повышать эти значения.
 
+Transport carries a server-issued opaque Session handle plus `sessionId` and
+`installationId`; Firebase Auth supplies the UID. The server stores only the
+handle hash and validates all four bindings. Firebase custom claims never
+carry per-Session IDs, handles, AccessSnapshot revisions or mutable grants.
+
 ### 7.2. Матрица полномочий
 
 | Операция | Authority |
 |---|---|
-| Public-safe availability | Authenticated active User |
+| Public-safe availability | Authenticated active User + permission to view exact published Event; no `booking.self_service` requirement |
 | Create application/Booking | Actor создаёт только для себя |
 | Read/cancel/reconfirm own Booking | Exact `booking.userId == actorId` |
 | Read Creator queue | Publisher owner или exact-page `manage_bookings` |
@@ -455,6 +471,11 @@ Body не может задавать или повышать эти значе�
 
 Page A никогда не даёт доступ к Page B. Revoked/disabled/unknown identity
 fail closed. Deep link повторяет Auth и authorization.
+
+`booking.self_service` — базовая personal capability каждого active User и
+требуется только для create/cancel. Read-own Booking и availability требуют
+current AuthN, exact ownership/visibility and revision checks, but do not use
+this capability as a visibility grant.
 
 ## 8. Firestore data model
 
@@ -473,15 +494,16 @@ fail closed. Deep link повторяет Auth и authorization.
 | `bookingAudit` | `auditId` | Append-only mutation facts |
 | `bookingOutbox` | deterministic obligation ID | Booking-owned post-commit notification need |
 | `bookingPlatformPolicies` | policy/version | Concurrency/reschedule/retention policy |
-| `bookingFeatureFlags` | environment/flag | BCK-05-owned server flag input consumed by Booking |
+| `platformFeatureFlagRevisions` + `platformActiveFeatureFlagPointers` | environment/market/capability/revision | Common R1 server flag authority consumed by Booking; not a Booking writer |
 | `bookingWorkerLeases` | worker/scope | Bounded overlapping-worker protection |
 | `bookingReconciliationRuns` | `runId` | Drift findings and resolution state |
 | `bookingRetentionJobs` | `jobId` | Deletion/pseudonymization checkpoint |
 
-Только девять ECL-03C records (`bookingEventProjections`, `bookings`,
+Только восемь Booking-owned ECL-03C records (`bookingEventProjections`, `bookings`,
 `bookingPoolLedgers`, `bookingUserUsage`, `bookingActiveKeys`,
-`bookingIdempotency`, `bookingAudit`, `bookingOutbox`, `bookingFeatureFlags`)
-нормативны для первого executable plan.
+`bookingIdempotency`, `bookingAudit`, `bookingOutbox`) нормативны для первого
+executable plan. Common R1 feature-flag records are read atomically but remain
+Platform-owned and are not duplicated under a Booking collection.
 `bookingHolds` и остальные operational records выше являются conditional
 target names: их physical schema/index/ownership фиксирует соответствующий
 Approved ECL-03D–H/BCK-05 slice.
@@ -504,6 +526,11 @@ attempts. Booking не создаёт второй notification-delivery source 
 BCK-09 не меняет inbox/delivery state. Старые suppressed records нельзя
 `replay` после включения notifications, поэтому активация не создаёт запоздалые
 или неожиданные сообщения.
+
+`suppressedPreActivation` is a terminal delivery and reconciliation outcome.
+It records `suppressedAt`; its 30-day outbox TTL starts from that instant and
+does not wait for impossible delivery/reconciliation receipts. Legal/security
+hold still removes TTL and wins over deletion.
 
 ### 8.1. Booking
 
@@ -557,6 +584,15 @@ remaining = totalUnits - confirmedUnits - activeHoldUnits
 unlimited: no finite counters or user concurrency usage
 unknown capacity != unlimited
 ```
+
+Unlimited Booking has a separate abuse/concurrency policy: at most **50**
+active future unlimited Bookings per User across the enabled market. It never
+consumes finite inventory usage. Independent request limits are **10 create
+attempts/minute**, **20 cancel attempts/minute** and **120 authenticated
+read/availability requests/minute** per actor+installation, with a bounded
+network-risk key as a secondary signal. Market overrides require a separately
+accepted revision; unknown policy fails closed. Cancel remains available when
+the active unlimited cap is reached.
 
 ### 8.4. UserBookingUsage
 
@@ -1083,7 +1119,7 @@ anonymization, backup propagation и exceptional hold.
 
 | Data | Terminal retention target | Action |
 |---|---:|---|
-| Booking core IDs/state | 90 days | Remove user linkage/anonymize if justified |
+| Booking core IDs/state | 90 days after the later of occurrence end or terminal cancellation/expiry | Active/future Booking has no TTL; remove user linkage/anonymize when eligible |
 | Named guests | 30 days | Delete |
 | Application fields | 30 days | Delete content, retain decision code |
 | Eligibility evidence ref | 30 days | Delete/revoke protected ref |
@@ -1101,6 +1137,13 @@ Legal/Privacy verdict. Это общий baseline для LV/EE/LT, но кажд
 включается независимо; иной срок допустим только через принятый versioned
 market override. Наличие baseline не включает рынок и не разрешает production
 personal data.
+
+The 90-day core Booking baseline is independently versioned per market and is
+overridden by legal/security hold. Account erasure immediately blocks access
+and new mutations, creates a cancellation/privacy workflow for active future
+Bookings, safely cancels/releases inventory, then completes erasure and
+pseudonymization. Erasure never abandons active allocations or delays access
+revocation while cancellation work is pending.
 
 Каждый применимый документ получает versioned `retentionClass` и Firestore
 Timestamp `expiresAt`, но TTL — только cleanup mechanism. Для outbox retention
@@ -1874,3 +1917,26 @@ allocations return sold out while cancellations continue to release units.
      migration, rollback, restore, Security and operational evidence.
 126. BCK-09 v1.17 preserves every cloud, independent-review, Legal/Privacy,
      deployment, activation, push and merge gate.
+127. Authenticated Event availability requires current Event visibility but
+     never `booking.self_service`; create/cancel require the capability.
+128. `booking.self_service` is a baseline active-User personal capability and
+     cannot imply Creator, Page, Admin or content authority.
+129. Unlimited Booking has an independent cap of 50 active future records per
+     User/market and request limits of 10 create, 20 cancel and 120 read/
+     availability attempts per minute per actor+installation; unknown policy
+     fails closed and cancel remains available at the cap.
+130. Core Booking retention is 90 days after the later occurrence-end or
+     terminal cancellation/expiry anchor, with versioned market override and
+     legal/security hold precedence.
+131. Account erasure closes access immediately, safely cancels future active
+     Booking and releases allocation through a privacy workflow before final
+     erasure/pseudonymization.
+132. A suppressed outbox record is a terminal delivery/reconciliation outcome;
+     its TTL starts at `suppressedAt`, while legal/security hold still wins.
+133. Booking transport uses a server-issued opaque Session handle bound to UID,
+     installation and persisted Session; per-Session authority and mutable
+     snapshot revisions are forbidden in Firebase custom claims.
+134. Create/cancel read Account, Session, AccessSnapshot, common R1 flag,
+     idempotency and Booking/Event/inventory authority in the same Firestore
+     transaction as mutation. Unknown/stale authority fails closed and the kill
+     switch is not cached.

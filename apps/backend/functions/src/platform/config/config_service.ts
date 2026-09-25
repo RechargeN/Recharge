@@ -9,7 +9,6 @@ export class ConfigService {
   constructor(private readonly featureFlags: FeatureFlagRepository) {}
 
   async publishFeatureFlag(revision: FeatureFlagRevision): Promise<void> {
-    if (revision.enabled !== false) throw new TypeError('r1_feature_flag_must_be_disabled');
     await this.featureFlags.publish(revision);
   }
 
@@ -17,7 +16,6 @@ export class ConfigService {
     revision: FeatureFlagRevision,
     expectedPointerRevision: number,
   ): Promise<PointerSwapResult> {
-    if (revision.enabled !== false) throw new TypeError('r1_feature_flag_must_be_disabled');
     return this.featureFlags.swapActivePointer(
       featureFlagKey(revision.environmentId, revision.marketId, revision.capabilityId),
       revision.revision,

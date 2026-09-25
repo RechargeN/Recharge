@@ -5,6 +5,7 @@ const collections = [
   'platformReleaseManifests',
   'platformActiveReleasePointers',
   'platformFeatureFlagRevisions',
+  'platformActiveFeatureFlagPointers',
   'referenceMarketConfigRevisions',
   'referenceActivationPointers',
   'privacyRequests',

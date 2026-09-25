@@ -5,6 +5,7 @@ export const localIdentityCapabilities = [
   'manage_page',
   'manage_bookings',
   'view_insights',
+  'booking.self_service',
 ] as const;
 
 export type LocalIdentityCapability = (typeof localIdentityCapabilities)[number];

@@ -16,7 +16,8 @@ export type IdentityFailureCode =
   | 'not_found_or_not_accessible'
   | 'revision_conflict'
   | 'invalid_transition'
-  | 'policy_unavailable';
+  | 'policy_unavailable'
+  | 'temporarily_unavailable';
 
 export class IdentityFailure extends Error {
   constructor(readonly code: IdentityFailureCode) {

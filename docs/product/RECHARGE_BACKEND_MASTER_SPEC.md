@@ -1,8 +1,8 @@
 # Recharge Backend — Master Specification and Initial Architecture Audit
 
 - ID: **BCK-01**
-- Version: **0.4.83**
-- Date: **2026-09-23**
+- Version: **0.4.84**
+- Date: **2026-09-24**
 - Spec status: **Review — local integrated foundation verified; dev/staging/production approvals pending**
 - Runtime status: **Local R0/R1 platform, reference, security, identity and mobile-seam foundations Present; product/cloud runtime Absent**
 - Accountable owner: **Platform Architecture owner**
@@ -10,12 +10,23 @@
 - Local R1 technical decision: **Accepted and verified locally — no cloud authority**
 - Production Security/Legal/readiness approval: **Pending**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
-- Runtime effect of this revision: **none**
+- Runtime effect of this revision: **local/test-only Identity persistence and atomic Booking authorization; no cloud effect**
 - Canonical repository path: `docs/product/RECHARGE_BACKEND_MASTER_SPEC.md`
 - Link base: all relative links resolve from repository directory
   `docs/product/`, even when a review copy is distributed through Downloads
 
 ## 0. Changelog
+
+### v0.4.84 — 2026-09-24
+
+- records the Emulator-only Firestore Identity authority, opaque Session
+  transport and revision-fenced AccessSnapshot source as the local BCK-06
+  authority used by protected Booking operations;
+- routes Booking through the R1 composition root and common immutable
+  feature-flag revision/pointer authority, with authorization and mutation in
+  one Firestore transaction;
+- retains all callable Identity, cloud, deployment, production and market
+  activation gates.
 
 ### v0.4.83 — 2026-09-23
 
@@ -1042,7 +1053,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Область | Текущее evidence | Gap | Вывод |
 |---|---|---|---|
 | Mobile app | Flutter layered features and local/mock datasources; BCK-18 v0.6 Review/Present defines the Stage 3 typed ports, state algebra, import, cutover and rollback seam | Нет production remote authority; BCK-18 Approval, M2 Money, OD-04/08/10, contract generation, mock-exclusion and executable adapters remain blocked | Не считать mock/provider HTTP production backend; BCK-18 Approval and per-domain slices precede cutover |
-| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO and verified platform/identity/privacy/reference schemas; BCK-03 v0.3.20 Review/Present | Product-domain schemas and independent/production evidence remain Pending | Extend only the canonical schema workflow through each exact slice |
+| Shared contracts | `packages/api_contracts`, Booking schemas/fixtures/DTO and verified platform/identity/privacy/reference schemas; BCK-03 v0.3.21 Review/Present | Product-domain schemas and independent/production evidence remain Pending | Extend only the canonical schema workflow through each exact slice |
 | Backend application | local R0/R1 platform, Reference Data, Security/Privacy and Identity/Publisher foundations plus disabled Emulator-only ECL-03C source exist in `apps/backend` | No cloud project, product publication/catalog runtime, deployment, activation or production mobile cutover | Local integrated foundation **Present**; product/cloud runtime **Absent** |
 | Firebase projects | `OD07-A1-EU-MR-v1` is Accepted with controls through evidence v0.6 and OD07-DEC-01 v0.2; no provider project/config/resource exists | Revalidation, G1, exact R1 approval and every remaining platform/security/legal gate are absent | Accepted topology does not authorize provisioning |
 | Identity | ADR 0015 target; BCK-06 v0.3.1 fixes Stage 3 linking/session/revocation/capability/verification/PublisherRef seam | Production Auth/capability/revocation and retained OD/Legal evidence absent | Approve BCK-06/18 before cutover; never migrate mock grants as authority |
@@ -1056,7 +1067,7 @@ mobile M8 adapter preparation не равен backend R8. Ссылка всег�
 | Planning/Route | BCK-10/BCK-11 v0.3.1 fix separate aggregates, sync/conflict, GPX/Media and publication/privacy boundaries | No cloud sync/publication runtime | Independent approval before R7 |
 | AI/Providers/Payments | BCK-15 v0.3 and BCK-16/17 v0.3.1 fix gateway/provenance/financial ledgers | No provider/secret/financial runtime; Payments hard-blocked by new ADR | Optional exact approval chains only |
 | Operations | BCK-05 v0.2.37 Review/Present | Local credential-free R1 verified; measured/cloud evidence unresolved | Separate owner-authorized cloud gate |
-| Privacy | BCK-04 v0.4.31 Review/Present | Local fail-closed foundation verified; independent/qualified gates retained | Fail closed per affected surface |
+| Privacy | BCK-04 v0.4.32 Review/Present | Local fail-closed foundation verified; independent/qualified gates retained | Fail closed per affected surface |
 | Baltic markets | BCK-20 v0.2.29 Review/Present | Synthetic disabled R1 config verified; no external source eligible | Retained source/copy/Legal gates without country forks |
 
 ### 4.1. Главный gap
@@ -1774,13 +1785,13 @@ of the following hold:
 
 Для ECL-03 Booking дополнительно действуют ADR 0019, BCK-09 и ECL-03 gates.
 
-## 25. Definition of Done BCK-01 v0.4.83
+## 25. Definition of Done BCK-01 v0.4.84
 
 BCK-01 перешёл из Draft в Review после выполнения следующих условий:
 
 - все anchors существуют и ссылки валидны;
 - BCK-02 registry отражает фактический
-  `Review v0.4.83/Present, local R0/R1 platform/reference/security/identity/
+  `Review v0.4.84/Present, local R0/R1 platform/reference/security/identity/
   mobile-seam foundation Present, product/cloud runtime Absent`,
   а ownership reconciliation не содержит
   двойных writers;

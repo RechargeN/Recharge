@@ -4,6 +4,7 @@ import { marketIds, type MarketId } from '../../config/market_capability.js';
 import { deepFreeze, type DeepReadonly } from '../../shared/immutable.js';
 
 export const featureFlagRevisionCollection = 'platformFeatureFlagRevisions';
+export const featureFlagPointerCollection = 'platformActiveFeatureFlagPointers';
 
 export function featureFlagKey(
   environmentId: EnvironmentId,
@@ -44,7 +45,6 @@ export class InMemoryFeatureFlagRepository implements FeatureFlagRepository {
   readonly #pointers = new Map<string, DeepReadonly<FeatureFlagPointer>>();
 
   publish(revision: FeatureFlagRevision): Promise<void> {
-    if (revision.enabled !== false) throw new TypeError('r1_feature_flag_must_be_disabled');
     const key = revisionStorageKey(
       revision.environmentId,
       revision.marketId,

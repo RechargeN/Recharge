@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   createAccount,
   advanceRevocationFence,
+  setCreatorRole,
 } from '../../../src/modules/identity_publisher/domain/account.js';
 import {
   decideCreatorVerification,
@@ -28,6 +29,9 @@ void test('session and account revocation fences are monotonic', () => {
     userId,
     issuedAtUtc: '2026-09-22T00:00:01.000Z',
     authzRevision: account.securityRevision,
+    firebaseUid: userId,
+    installationId: 'install-1',
+    sessionHandle: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   });
   assert.doesNotThrow(() => assertCurrentSession(session, account));
   assert.throws(
@@ -50,4 +54,22 @@ void test('Creator verification cannot be granted by skipping pending review', (
   const suspended = decideCreatorVerification(verified, 'suspended', '2026-09-22T00:02:00.000Z');
   assert.equal(suspended.status, 'suspended');
   assert.throws(() => decideCreatorVerification(pending, 'suspended', '2026-09-22T00:03:00.000Z'));
+});
+
+void test('revision fences allow same-instant issuance and stale changed authority', () => {
+  const account = createAccount(userId, '2026-09-22T00:00:00.000Z');
+  const session = createSession({
+    sessionId,
+    userId,
+    issuedAtUtc: '2026-09-22T00:00:00.000Z',
+    authzRevision: account.securityRevision,
+    firebaseUid: userId,
+    installationId: 'install-same-instant',
+    sessionHandle: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+  });
+  assert.doesNotThrow(() => assertCurrentSession(session, account));
+  assert.throws(
+    () => assertCurrentSession(session, setCreatorRole(account, true, '2026-09-22T00:00:01.000Z')),
+    (error: unknown) => error instanceof IdentityFailure && error.code === 'snapshot_stale',
+  );
 });
