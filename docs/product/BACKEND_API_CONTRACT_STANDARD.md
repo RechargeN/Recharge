@@ -1,10 +1,10 @@
 # Recharge Backend — API Contract Standard
 
 - ID: **BCK-03**
-- Version: **0.3.21**
+- Version: **0.3.22**
 - Date: **2026-09-24**
 - Spec status: **Review — D1 API technical baseline closed; independent/production evidence pending**
-- Runtime status: **Local platform v1 schemas, validators, registry and parity evidence Present; Booking v1 disabled Emulator-only evidence Present; deployed/product API runtime Absent**
+- Runtime status: **Local platform/Identity v1 schemas, validators, registry and parity evidence Present; Booking and Identity Session callables disabled Emulator-only; deployed/product API runtime Absent**
 - Accountable owner: **API Platform owner**
 - Local R1 technical decision: **Accepted and verified locally — no cloud or product-runtime authority**
 - Production approval: **Pending — independent/qualified and executable evidence retained**
@@ -1971,3 +1971,15 @@ remains Pending until each domain slice, independent/environment evidence and
 cloud gate required by this specification exists. BCK-02 §30 is the canonical
 local evidence record; §31 prevents that evidence from authorizing item 6 by
 implication.
+
+111. **BCK-03-AC-111:** `establishIdentitySession` is a versioned command with
+     strict request/result JSON Schemas; AuthN is checked before detailed
+     validation and unsupported critical versions fail closed.
+112. **BCK-03-AC-112:** Firebase UID is transport identity only. The command
+     returns an opaque Session context that resolves to a distinct immutable
+     domain `User.id`; clients never choose or substitute that domain ID.
+113. **BCK-03-AC-113:** Identity Session failures use typed rejected or
+     retryable outcomes with correlation ID; storage failures are not reported
+     as ordinary disabled state.
+114. **BCK-03-AC-114:** the callable remains loopback Emulator-only,
+     server-flagged default-off and grants no cloud/deployment authority.

@@ -1,10 +1,10 @@
 # Recharge Backend — Identity & Publisher Specification
 
 - ID: **BCK-06**
-- Version: **0.5**
+- Version: **0.6**
 - Date: **2026-09-24**
 - Spec status: **Review — local implementation evidence; production decisions pending**
-- Runtime status: **Present locally — in-memory plus Emulator-only Firestore authority; callable/cloud/production absent**
+- Runtime status: **Present locally — in-memory plus Emulator-only Firestore authority and disabled Session callable; cloud/production absent**
 - Accountable owner: **Identity owner**
 - Required reviewers: **API Platform, Security/Privacy, Mobile Platform,
   Content Platform, Trust & Safety, Legal/Privacy for applicable decisions**
@@ -14,6 +14,14 @@
 - Canonical path: `docs/product/IDENTITY_PUBLISHER_BACKEND_SPEC.md`
 
 ## 0. Changelog
+
+### v0.6 — 2026-09-25
+
+- adds the disabled Emulator-only `establishIdentitySessionV1` bridge;
+- keeps Firebase UID as transport identity and returns a server-issued opaque
+  Session bound to a separate immutable domain User ID and installation;
+- persists Session and baseline AccessSnapshot atomically and keeps the
+  callable behind the common server-owned default-off flag.
 
 ### v0.5 — 2026-09-24
 
@@ -1507,3 +1515,17 @@ foreign/hidden identities to the same safe surface response.
 82. **BCK-06-AC-82:** the Firestore Identity repository and all persisted
     authority evidence are Emulator-only/default-off; no callable, cloud Auth,
     deployment or market activation follows from v0.5.
+
+83. **BCK-06-AC-83:** Firebase UID never becomes `Account.userId`, Booking
+    owner ID or PublisherRef ID; only persisted Session authority resolves the
+    mapping.
+84. **BCK-06-AC-84:** Session establishment creates or reuses the verified
+    provider link, generates server IDs and returns the opaque handle once.
+85. **BCK-06-AC-85:** baseline `booking.self_service` is present only in the
+    server-created AccessSnapshot and cannot be supplied through custom claims
+    or command payload.
+86. **BCK-06-AC-86:** the Session callable validates AuthN and common server
+    flag before detailed payload processing and remains unavailable outside
+    the disposable Emulator.
+87. **BCK-06-AC-87:** real Google/Apple provider verification, cloud Auth,
+    deployment and production session policy remain separately gated.

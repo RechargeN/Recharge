@@ -7,6 +7,11 @@ import {
   type EventBookingProjectionEvent,
 } from '../../src/booking/event_projection_consumer.js';
 import { bookingCollections } from '../../src/booking/transactions.js';
+import {
+  deliverEventBookingProjection,
+  enqueueEventBookingProjection,
+  eventBookingDeliveryCollections,
+} from '../../src/booking/event_projection_delivery.js';
 import { cleanupBookingEmulator, emulatorFirestore } from '../support/booking_emulator.js';
 import { createCommand, finiteEvent, fixedNow } from '../support/booking_fixtures.js';
 import { FakeClock } from '../support/fake_clock.js';
@@ -125,4 +130,67 @@ void test('deterministic rebuild orders revisions and converges on the newest pr
     .doc(finiteEvent().occurrenceId)
     .get();
   assert.equal(stored.get('materialRevision'), 9);
+});
+
+void test('Event outbox delivery cancels active Booking and releases finite inventory', async () => {
+  await consumeEventForBookingProjection(firestore, published());
+  const created = await createInternalBooking(
+    {
+      firestore,
+      clock: new FakeClock(fixedNow),
+      newBookingId: () => '01JEVENTCANCELBOOKING00000000',
+    },
+    'actor-event-cancel',
+    createCommand({ occurredAgainstEventRevision: 7 }),
+  );
+  assert.equal(created.kind, 'succeeded');
+  if (created.kind !== 'succeeded') return;
+  const cancellation: EventBookingProjectionEvent = {
+    kind: 'EventOccurrenceCancelled',
+    eventId: finiteEvent().eventId,
+    occurrenceId: finiteEvent().occurrenceId,
+    materialRevision: 8,
+    publicationRevision: 8,
+    occurredAt: '2026-08-20T11:00:00.000Z',
+  };
+  assert.equal(
+    await enqueueEventBookingProjection(firestore, {
+      schemaVersion: 1,
+      outboxId: 'event-outbox-cancel-1',
+      event: cancellation,
+      createdAtUtc: cancellation.occurredAt,
+    }),
+    'created',
+  );
+  assert.equal(
+    await deliverEventBookingProjection(
+      firestore,
+      'event-outbox-cancel-1',
+      '2026-08-20T11:00:01.000Z',
+    ),
+    'delivered',
+  );
+  assert.equal(
+    (
+      await firestore.collection(bookingCollections.bookings).doc(created.data.booking.id).get()
+    ).get('terminalReason'),
+    'occurrenceCancelled',
+  );
+  assert.equal(
+    (
+      await firestore
+        .collection(eventBookingDeliveryCollections.deliveries)
+        .doc('event-outbox-cancel-1')
+        .get()
+    ).get('status'),
+    'delivered',
+  );
+  assert.equal(
+    await deliverEventBookingProjection(
+      firestore,
+      'event-outbox-cancel-1',
+      '2026-08-20T11:00:02.000Z',
+    ),
+    'replayed',
+  );
 });

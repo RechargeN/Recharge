@@ -23,6 +23,8 @@ export interface TransactionalFeatureFlagGate {
 
 export interface BookingMutationAuthorization {
   readonly hint: BookingAccessHint;
+  /** Domain User id resolved from the same opaque Session before command parsing. */
+  readonly expectedUserId: string;
   readonly flagId: BookingFlagId;
   readonly authority: TransactionalBookingAccessAuthority;
   readonly featureFlags: TransactionalFeatureFlagGate;
@@ -40,6 +42,9 @@ export async function assertBookingMutationAuthorized(
     bookingAccessCapability,
   );
   if (!decision.allowed) throw new BookingDomainRefusal('permission_denied');
+  if (decision.userId !== authorization.expectedUserId) {
+    throw new BookingDomainRefusal('permission_denied');
+  }
   if (!(await authorization.featureFlags.isEnabled(authorization.flagId, transaction))) {
     throw new BookingDomainRefusal('feature_disabled');
   }

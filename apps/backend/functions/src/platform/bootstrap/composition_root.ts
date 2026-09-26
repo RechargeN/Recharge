@@ -135,6 +135,8 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       ['booking.pool-ledger', 'internal', false, false, 'booking.pool-ledger'],
       ['booking.user-usage', 'personal', true, true, 'booking.user-usage'],
       ['booking.active-key', 'restricted', true, true, 'booking.active-key'],
+      ['event.booking-outbox', 'internal', false, false, 'event.booking-outbox'],
+      ['booking.projection-delivery', 'internal', false, false, 'booking.projection-delivery'],
     ].map(
       ([
         dataClassId,
@@ -206,6 +208,8 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       'booking.pool-ledger',
       'booking.user-usage',
       'booking.active-key',
+      'event.booking-outbox',
+      'booking.projection-delivery',
     ].map((policyId) => ({
       policyId,
       status: 'unresolved' as const,

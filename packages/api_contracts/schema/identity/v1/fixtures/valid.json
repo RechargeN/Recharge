@@ -79,6 +79,28 @@
     "createdAtUtc": "2026-09-22T00:03:00.000Z",
     "updatedAtUtc": "2026-09-22T00:03:00.000Z"
   },
+  "identitySessionCommand": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "installationId": "install-1"
+  },
+  "identitySessionResult": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "serverTime": "2026-09-22T00:04:00.000Z",
+    "kind": "succeeded",
+    "data": {
+      "sessionContext": {
+        "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1",
+        "expiresAtUtc": "2026-09-22T00:19:00.000Z"
+      }
+    }
+  },
   "publisherEligibility": {
     "schemaVersion": 1,
     "publisherRef": { "type": "page", "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YF" },

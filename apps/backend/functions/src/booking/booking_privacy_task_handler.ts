@@ -15,7 +15,7 @@ export type BookingPrivacyTaskResult =
   | Readonly<{ kind: 'failed'; code: 'invalid_task' | 'invalid_record' }>;
 
 export interface BookingPrivacyRecordStore {
-  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): T;
+  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): Promise<T>;
 }
 
 export class InMemoryBookingPrivacyRecordStore implements BookingPrivacyRecordStore {
@@ -25,11 +25,11 @@ export class InMemoryBookingPrivacyRecordStore implements BookingPrivacyRecordSt
     this.#records = records.map((record) => ({ ...record }));
   }
 
-  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): T {
+  runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): Promise<T> {
     const working = this.#records.map((record) => ({ ...record }));
     const result = operation(working);
     this.#records.splice(0, this.#records.length, ...working);
-    return result;
+    return Promise.resolve(result);
   }
 
   snapshot(): readonly BookingIdentityBearingRecord[] {
@@ -40,17 +40,17 @@ export class InMemoryBookingPrivacyRecordStore implements BookingPrivacyRecordSt
 export class BookingPrivacyTaskHandler {
   constructor(private readonly store: BookingPrivacyRecordStore) {}
 
-  handle(input: {
+  async handle(input: {
     readonly taskType: BookingPrivacyTaskType;
     readonly subjectId: string;
     readonly pseudonymousActorId?: string;
     readonly nowUtc: string;
-  }): BookingPrivacyTaskResult {
+  }): Promise<BookingPrivacyTaskResult> {
     try {
       if (!Number.isFinite(Date.parse(input.nowUtc)) || input.subjectId.trim().length === 0) {
         return { kind: 'failed', code: 'invalid_task' };
       }
-      return this.store.runAtomic((records) => {
+      return await this.store.runAtomic((records) => {
         const indexes = records
           .map((record, index) => ({ record, index }))
           .filter(({ record }) => actorId(record) === input.subjectId);

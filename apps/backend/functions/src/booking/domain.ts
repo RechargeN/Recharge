@@ -47,12 +47,12 @@ export interface BookingRecord {
   readonly state: BookingState;
   readonly participantUnits: number;
   readonly cancellationDeadlineSnapshot?: string;
-  readonly reconfirmationState: 'notRequired';
+  readonly reconfirmationState: 'notRequired' | 'required';
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly confirmedAt: string;
   readonly cancelledAt?: string;
-  readonly terminalReason?: 'userCancelled';
+  readonly terminalReason?: 'userCancelled' | 'occurrenceCancelled';
 }
 
 export interface StoredBookingRecord extends BookingRecord {

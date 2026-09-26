@@ -110,6 +110,12 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
     ['bookingIdempotency', 'booking.idempotency', 'booking-authority'],
     ['bookingAudit', 'booking.audit', 'booking-authority'],
     ['bookingOutbox', 'booking.outbox', 'booking-authority'],
+    ['eventBookingOutbox', 'event.booking-outbox', 'content-publication'],
+    [
+      'bookingProjectionDeliveries',
+      'booking.projection-delivery',
+      'event-booking-projection-consumer',
+    ],
   ].map(([collectionId, dataClassId, singleWriter]) => ({
     collectionId: collectionId ?? '',
     dataClassId: dataClassId ?? '',

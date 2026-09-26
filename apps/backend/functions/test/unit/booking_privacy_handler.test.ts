@@ -24,16 +24,21 @@ const booking: BookingRecord & { readonly occurrenceEndSnapshot: string } = {
   occurrenceEndSnapshot: '2026-10-01T00:00:00.000Z',
 };
 
-void test('access succeeds while erasure waits for future Booking cancellation', () => {
+void test('access succeeds while erasure waits for future Booking cancellation', async () => {
   const store = new InMemoryBookingPrivacyRecordStore([booking]);
   const handler = new BookingPrivacyTaskHandler(store);
   assert.equal(
-    handler.handle({ taskType: 'access', subjectId: 'user-1', nowUtc: '2026-09-25T00:00:00.000Z' })
-      .kind,
+    (
+      await handler.handle({
+        taskType: 'access',
+        subjectId: 'user-1',
+        nowUtc: '2026-09-25T00:00:00.000Z',
+      })
+    ).kind,
     'succeeded',
   );
   assert.deepEqual(
-    handler.handle({
+    await handler.handle({
       taskType: 'erasure',
       subjectId: 'user-1',
       pseudonymousActorId: `anon_${'a'.repeat(64)}`,
@@ -43,11 +48,11 @@ void test('access succeeds while erasure waits for future Booking cancellation',
   );
 });
 
-void test('erasure pseudonymizes terminal Booking atomically', () => {
+void test('erasure pseudonymizes terminal Booking atomically', async () => {
   const store = new InMemoryBookingPrivacyRecordStore([
     { ...booking, state: 'cancelled', cancelledAt: '2026-09-25T00:00:00.000Z' },
   ]);
-  const result = new BookingPrivacyTaskHandler(store).handle({
+  const result = await new BookingPrivacyTaskHandler(store).handle({
     taskType: 'erasure',
     subjectId: 'user-1',
     pseudonymousActorId: `anon_${'b'.repeat(64)}`,

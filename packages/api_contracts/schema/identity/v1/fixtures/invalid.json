@@ -19,6 +19,20 @@
   "creatorVerification": { "schemaVersion": 1, "status": "approved" },
   "managedPage": { "schemaVersion": 1, "pageId": "by-name" },
   "pageMembership": { "schemaVersion": 1, "role": "admin" },
+  "identitySessionCommand": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "bad/path",
+    "installationId": "install-1"
+  },
+  "identitySessionResult": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "serverTime": "not-an-instant",
+    "kind": "succeeded",
+    "data": {}
+  },
   "publisherEligibility": {
     "schemaVersion": 1,
     "publisherRef": { "type": "admin", "id": "loc_admin" }

@@ -1,7 +1,7 @@
 # Recharge Backend — Mobile Integration Standard
 
 - ID: **BCK-18**
-- Version: **0.7**
+- Version: **0.8**
 - Date: **2026-09-22**
 - Spec status: **Approved — technical local/test-only boundary; production gates retained**
 - Runtime status: **Present locally — Money foundation, transport-neutral seam and import orchestration; product remote cutover absent**
@@ -18,6 +18,14 @@
 - Canonical path: `docs/product/MOBILE_BACKEND_INTEGRATION_STANDARD.md`
 
 ## 0. Changelog
+
+### v0.8 — 2026-09-25
+
+- fixes the mobile/backend identity seam: Firebase UID stays transport-only;
+- requires mobile to persist and send only the server-issued opaque
+  `sessionId + sessionHandle + installationId` context;
+- keeps production binding disabled and adds no Flutter runtime in this
+  revision.
 
 ### v0.7 — 2026-09-22
 
@@ -1198,3 +1206,11 @@ pretend that a local action was published, indexed or authorized remotely.
     cloud credential or project context.
 85. **BCK-18-AC-85:** Firebase, cloud, deployment, activation, push and merge
     remain unauthorized by this approval.
+
+86. **BCK-18-AC-86:** mobile never supplies a domain User ID, capability list,
+    AccessSnapshot revision or per-Session custom claim as authority.
+87. **BCK-18-AC-87:** Session context is obtained from the typed Identity
+    command, stored as sensitive local state and bound to the exact Firebase
+    UID plus installation server-side.
+88. **BCK-18-AC-88:** this contract reconciliation adds no mobile screen,
+    Firebase SDK binding, production cutover or automatic fallback success.

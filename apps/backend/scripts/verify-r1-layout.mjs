@@ -45,9 +45,9 @@ const approvedSecurityPrivacyExtensionPaths = [
   "apps/backend/functions/src/platform/bootstrap/booking_composition_root.ts",
 ];
 
-if (manifestPaths.length !== 122) {
+if (manifestPaths.length !== 133) {
   throw new Error(
-    `R1 manifest must contain 122 unique paths; found ${manifestPaths.length}`,
+    `R1 manifest must contain 133 unique paths; found ${manifestPaths.length}`,
   );
 }
 for (const relativePath of manifestPaths) {

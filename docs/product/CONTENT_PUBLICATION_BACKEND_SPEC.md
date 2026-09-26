@@ -1,20 +1,29 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.5**
+- Version: **0.6**
 - Date: **2026-09-25**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
-- Runtime status: **Content aggregate Absent; bounded Event→Booking projection handoff Present locally/Emulator-only**
+- Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
 - Review owners: **Identity, API, Security/Privacy, Mobile, Reference Data,
   Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.94](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.95](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-07-PRE v0.2](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.6 — 2026-09-25
+
+- adds the immutable local Event Booking outbox and idempotent Booking delivery
+  checkpoint with bounded retry/dead-letter evidence;
+- adds Booking-owned occurrence cancellation and material-reschedule effects
+  without giving Booking write authority over Event publication state.
+- records exact Node 22.23.2/Java 21 focused delivery/lifecycle evidence while
+  retaining the bounded 100-way contention caveat in BCK-09.
 
 ### v0.5 — 2026-09-25
 
@@ -23,9 +32,9 @@
 - keeps Event as publication-state writer and gives the BCK-09 consumer sole
   write ownership of the minimal operational `bookingEventProjections` view;
 - verifies duplicate/out-of-order delivery, unpublish, occurrence cancellation,
-  material reschedule and deterministic rebuild in the local Emulator; the
-  current run used Java 21 and Node 24 compatibility mode, while exact Node
-  22.23.2 parity remains a separate reproducibility gate.
+  material reschedule and deterministic rebuild in the local Emulator; that
+  v0.5 evidence used Java 21 and Node 24 compatibility mode and is superseded
+  for the v0.6 delivery/lifecycle paths by the exact-toolchain focused rerun.
 
 ### v0.4 — 2026-09-23
 
@@ -1212,3 +1221,17 @@ does not authorize Content persistence, workers, cloud or market activation.
     reschedule are explicit immutable events, never inferred from missing data.
 86. **BCK-07-AC-86:** The implemented handoff remains local/Emulator-only and
     does not start the broader Content aggregate slice.
+
+87. **BCK-07-AC-87:** Event remains the sole writer of immutable
+    `eventBookingOutbox` source records; Booking writes only its projection,
+    delivery checkpoint and Booking-owned effects.
+88. **BCK-07-AC-88:** duplicate delivery is replay-safe, older material
+    revisions cannot win and malformed/conflicting facts enter explicit
+    dead-letter state.
+89. **BCK-07-AC-89:** occurrence cancellation creates a non-bookable tombstone
+    and cancels active Booking while atomically releasing active key, finite
+    ledger and user usage.
+90. **BCK-07-AC-90:** material reschedule marks affected active Booking as
+    requiring reconfirmation and records a suppressed pre-activation effect.
+91. **BCK-07-AC-91:** local delivery services add no cloud trigger, worker,
+    Content aggregate, market activation or deployment permission.

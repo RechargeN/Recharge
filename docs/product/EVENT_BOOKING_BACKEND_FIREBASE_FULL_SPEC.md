@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.19**
+- Версия: **1.20**
 - Дата: **2026-09-25**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.94](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.95](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -1900,7 +1900,7 @@ allocations return sold out while cancellations continue to release units.
 | Level | BCK-09 verdict after Stage 7 |
 |---|---|
 | Local implementation | Approximately 75–82% of bounded R5 Booking; Ready with controls for further disabled local work |
-| Emulator evidence | Present for single-ledger correctness/load and the new Event projection/retention regression suite; the current rerun used Java 21 with Node 24 compatibility mode, not exact Node 22.23.2 parity and not cloud performance proof |
+| Emulator evidence | Present for single-ledger correctness/load and the new Event/Identity/Privacy paths. Exact Node 22.23.2/Java 21 rerun passed all suites before the pre-existing 100-way unlimited contention case exceeded 120 seconds; focused Identity/Booking and Firestore Privacy reruns passed. This remains local evidence, not cloud performance proof |
 | Dev cloud | Not Ready; escrow persistence/transactions, real IAM, budgets and measured cloud evidence absent |
 | Staging | Not Ready; no migration/rollback/load/restore drill on provisioned infrastructure |
 | Production | Not Ready; independent Security and applicable qualified Legal/Privacy plus SLO/cost/DR evidence absent |
@@ -1978,3 +1978,24 @@ allocations return sold out while cancellations continue to release units.
 143. `BCK09-RETENTION-DEC-01` and the 90-day core rule are technical owner
      baselines only. Applicable qualified Legal/Privacy review remains Pending
      before any staging, production or market activation.
+144. Firebase UID is never a Booking owner ID; opaque Session authority maps it
+     to the immutable domain User ID before command/query execution.
+145. Create/cancel repeat that mapping inside the mutation transaction and
+     reject any mismatch with the pre-resolved User ID.
+146. The disabled Emulator Identity callable is the only implemented issuer of
+     Booking Session context; its common server flag defaults off.
+147. Feature-flag repository failure is typed operational failure and cannot be
+     silently reclassified as an ordinary disabled capability.
+148. Event publication delivery uses immutable `eventBookingOutbox` records and
+     idempotent `bookingProjectionDeliveries` checkpoints with five-attempt
+     retry/dead-letter state.
+149. Occurrence cancellation atomically cancels each active Booking and releases
+     its active key, finite ledger allocation and user usage exactly once.
+150. Material reschedule marks active Booking `reconfirmationState=required`
+     and records only a suppressed pre-activation effect until Notifications is
+     separately enabled.
+151. Firestore Privacy orchestration atomically persists request dispatch and
+     Booking task creation; the Booking handler pseudonymizes terminal records
+     across core/idempotency/audit/outbox storage.
+152. The new callable, delivery and DSR services are local/Emulator-only and
+     authorize no worker, cloud, deployment, market activation, push or merge.

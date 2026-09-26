@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/identity_session_result.schema.json",
+  "title": "EstablishIdentitySessionResultV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "requestId", "serverTime", "kind", "data"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "establishIdentitySession" },
+        "requestId": { "type": "string" },
+        "serverTime": { "type": "string", "format": "date-time" },
+        "kind": { "const": "succeeded" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sessionContext"],
+          "properties": {
+            "sessionContext": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["userId", "sessionId", "sessionHandle", "installationId", "expiresAtUtc"],
+              "properties": {
+                "userId": { "type": "string" },
+                "sessionId": { "type": "string" },
+                "sessionHandle": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+                "installationId": { "type": "string" },
+                "expiresAtUtc": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "requestId", "serverTime", "kind", "error"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "establishIdentitySession" },
+        "requestId": { "type": "string" },
+        "serverTime": { "type": "string", "format": "date-time" },
+        "kind": { "enum": ["rejected", "retryableFailure"] },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schemaVersion", "code", "retryable", "correlationId"],
+          "properties": {
+            "schemaVersion": { "const": 1 },
+            "code": { "type": "string", "minLength": 1 },
+            "retryable": { "type": "boolean" },
+            "correlationId": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}

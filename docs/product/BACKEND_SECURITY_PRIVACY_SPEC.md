@@ -1,7 +1,7 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.32**
+- Version: **0.4.33**
 - Date: **2026-09-24**
 - Spec status: **Review — D1 security/privacy technical baseline closed; independent/qualified/production gates retained**
 - Runtime status: **Local R1 security/privacy ports, default-deny Rules and disposable Emulator evidence Present; product/cloud security runtime Absent**
@@ -2151,3 +2151,18 @@ Independent Security/Privacy, qualified Legal, OD-11 numeric policy,
 residency/processor, real IAM/secrets and production gates remain Pending.
 BCK-02 §30 is the evidence record and §31 requires every product domain to
 reapply this boundary in its own exact slice.
+
+97. **BCK-04-AC-97:** Firebase UID, opaque Session handle and internal User ID
+    are separate identifiers; Booking authorization resolves the User only
+    from the persisted Session bound to exact UID and installation.
+98. **BCK-04-AC-98:** `privacyRequests` and `privacyDomainTasks` have one
+    Firestore orchestration writer with revision CAS and atomic dispatch.
+99. **BCK-04-AC-99:** Booking DSR access/restriction/erasure is executed by a
+    domain handler; active future Booking blocks erasure until the cancellation
+    workflow completes, and terminal records are pseudonymized atomically.
+100. **BCK-04-AC-100:** Privacy tasks remain bounded to five attempts; terminal
+     tasks reject later outcomes and request reconciliation requires all domain
+     tasks to be terminal.
+101. **BCK-04-AC-101:** all new Identity, Event-delivery and Privacy collections
+     remain explicit client default-deny; this local evidence is not a
+     qualified Legal/Privacy or production Security verdict.

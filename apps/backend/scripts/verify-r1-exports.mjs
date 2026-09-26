@@ -21,6 +21,7 @@ const expected = [
   "createInternalBookingV1",
   "getEventAvailabilityV1",
   "getMyBookingV1",
+  "establishIdentitySessionV1",
   "listMyBookingsV1",
   "r0ToolchainProbe",
 ].sort();
@@ -33,5 +34,5 @@ if (/onSchedule|onTaskDispatched|pubsub/u.test(source)) {
   );
 }
 process.stdout.write(
-  "R1 export gate passed: R0 plus five disabled RAW-C callables only.\n",
+  "R1 export gate passed: R0 plus five disabled Booking and one disabled Identity callable.\n",
 );

@@ -6,7 +6,8 @@ export interface SuppressedBookingOutboxRecord {
   readonly policyRevision: 1;
   readonly dispatchable: false;
   readonly replayable: false;
-  readonly obligationType: 'booking_confirmation' | 'booking_cancellation';
+  readonly obligationType:
+    'booking_confirmation' | 'booking_cancellation' | 'booking_reconfirmation';
   readonly bookingId: string;
   readonly actorId: string;
   readonly createdAt: string;

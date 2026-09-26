@@ -22,5 +22,19 @@
     "handleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "issuedAtUtc": "2026-09-22T00:00:01.000Z",
     "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
+  },
+  "identitySessionCommand": {
+    "schemaVersion": 2,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_2",
+    "installationId": "install-1"
+  },
+  "identitySessionResult": {
+    "schemaVersion": 2,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_2",
+    "serverTime": "2026-09-22T00:04:00.000Z",
+    "kind": "succeeded",
+    "data": {}
   }
 }

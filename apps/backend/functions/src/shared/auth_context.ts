@@ -4,7 +4,7 @@ export interface CallableAuthLike {
 }
 
 export interface BookingActor {
-  readonly actorId: string;
+  readonly firebaseUid: string;
   readonly sessionId: string;
   readonly sessionHandle: string;
   readonly installationId: string;
@@ -46,7 +46,7 @@ export function resolveBookingActor(
   return {
     ok: true,
     actor: {
-      actorId: auth.uid,
+      firebaseUid: auth.uid,
       sessionId,
       sessionHandle,
       installationId,

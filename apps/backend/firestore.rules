@@ -40,6 +40,8 @@ service cloud.firestore {
     match /bookingIdempotency/{document} { allow read, write: if false; }
     match /bookingAudit/{document} { allow read, write: if false; }
     match /bookingOutbox/{document} { allow read, write: if false; }
+    match /eventBookingOutbox/{document} { allow read, write: if false; }
+    match /bookingProjectionDeliveries/{document} { allow read, write: if false; }
 
     match /{document=**} {
       allow read, write: if false;

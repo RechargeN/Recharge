@@ -22,7 +22,7 @@ void test('transport auth provides identity hints but cannot provide Booking cap
     {
       ok: true,
       actor: {
-        actorId: 'actor-1',
+        firebaseUid: 'actor-1',
         sessionId: 'session-1',
         sessionHandle: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
         installationId: 'install-1',

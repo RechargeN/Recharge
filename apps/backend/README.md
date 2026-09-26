@@ -20,28 +20,32 @@ The BCK-04 local foundation adds server-resolved actor/session/market/workspace
 checks, default-deny authentication and capability decisions, App Check and
 rate-limit ports, privacy-safe audit/redaction controls, data-class/access/
 retention registries, unavailable-by-default age policy, emergency-disable
-flags and an in-memory DSR task lifecycle. It stores no secret values, chooses
-no numeric age, performs no physical deletion and exposes no client or cloud
-handler.
+flags and both in-memory and Emulator-only Firestore DSR repositories. Booking
+DSR tasks run through the domain handler with bounded attempts and atomic
+pseudonymization. It stores no secret values, chooses no numeric age and
+exposes no client or cloud handler.
 
 The BCK-06 local slice adds provider-neutral Google/Apple assertion ports,
 hashed provider-subject linking, Account and Session authority with revocation
 fences, Creator and ManagedPage verification lifecycles, exact-page membership,
 fresh AccessSnapshot evaluation and ID-based PublisherRef eligibility. It has
 in-memory and disposable-Emulator Firestore adapters, including opaque Session
-handles and revision-fenced AccessSnapshots. It remains local/test-only: no
-OAuth credential, Firebase Auth adapter, callable export or production grant
-exists.
+handles and revision-fenced AccessSnapshots. One disabled Emulator-only
+Session callable maps Firebase transport UID to a distinct domain User ID. It
+remains local/test-only: no OAuth credential, production Firebase Auth adapter
+or production grant exists.
 
-The BCK-09 local slice contains five disabled Emulator-only Booking callables,
+The BCK-09 local slice contains five disabled Emulator-only Booking callables
+plus the bounded Identity Session callable,
 typed command/query results, finite and unlimited inventory transactions,
 idempotency, cancellation, access-revocation, retention and reconciliation
 evidence. Booking mutations resolve Account, Session, AccessSnapshot and the
 common R1 feature flag inside the same Firestore transaction; query authority
 is separately revision-aware. A provider-neutral mobile adapter is present but
 bound only to an explicitly loopback dev Emulator; production binding remains
-disabled. Immutable Event facts feed the sole Booking projection consumer, and
-all nine Booking collections remain direct-client default-deny. It is not
+disabled. Immutable Event outbox records feed the sole Booking projection
+consumer; delivery checkpoints, cancellation/reschedule effects and all
+Booking/support collections remain direct-client default-deny. It is not
 deployed. A local
 single-ledger load probe preserved the zero-oversell invariant but failed the
 accepted popular and mass latency/success targets. A fixed-capacity escrow
@@ -55,7 +59,7 @@ switch or activation was added.
 | Level | Current verdict |
 |---|---|
 | Local implementation | Ready with controls for the implemented R1, Identity and disabled Booking scope |
-| Emulator evidence | Default-deny Rules, single-ledger and new Event projection/retention regressions pass locally; latest run used Java 21 with Node 24 compatibility mode and is not cloud performance proof |
+| Emulator evidence | R0, Rules, Identity, Event delivery/lifecycle, create/cancel/query passed with exact Node 22/Java 21; the full run is inconclusive because the pre-existing 100-way unlimited contention test timed out at 120 seconds before later suites |
 | Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
 | Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
 | Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |
@@ -68,8 +72,8 @@ switch or activation was added.
 - no Firebase/Google project creation, API enablement, billing or deployment;
 - no Terraform backend, stateful resource, plan or apply;
 - Firestore and Storage client access deny all;
-- R1 has no Function export; the existing R0 plus five disabled RAW-C exports
-  remain unchanged and refuse non-emulator use;
+- the exact export allowlist is R0 plus five disabled Booking callables and one
+  disabled Identity Session callable; all refuse non-emulator use;
 - all `local/dev/stage/prod` identities are logical and `unbound`;
 - every market, capability, feature flag and release is `disabled`;
 - Terraform has no resources, backend, real project or credential input;

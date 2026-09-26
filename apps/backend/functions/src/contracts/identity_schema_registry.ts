@@ -31,6 +31,8 @@ export const identitySchemaFiles = [
   'managed_page.schema.json',
   'page_membership.schema.json',
   'publisher_eligibility.schema.json',
+  'identity_session_command.schema.json',
+  'identity_session_result.schema.json',
 ] as const;
 export const identityTargetRefs = {
   account: 'https://recharge.app/schemas/identity/v1/account.schema.json',
@@ -42,6 +44,10 @@ export const identityTargetRefs = {
   pageMembership: 'https://recharge.app/schemas/identity/v1/page_membership.schema.json',
   publisherEligibility:
     'https://recharge.app/schemas/identity/v1/publisher_eligibility.schema.json',
+  identitySessionCommand:
+    'https://recharge.app/schemas/identity/v1/identity_session_command.schema.json',
+  identitySessionResult:
+    'https://recharge.app/schemas/identity/v1/identity_session_result.schema.json',
 } as const;
 export type IdentityContractTarget = keyof typeof identityTargetRefs;
 

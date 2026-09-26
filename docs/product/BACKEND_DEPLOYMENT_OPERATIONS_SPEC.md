@@ -1,7 +1,7 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.39**
+- Version: **0.2.40**
 - Date: **2026-09-24**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
@@ -1539,3 +1539,19 @@ local implementation. Dev-cloud project creation, billing, IAM bindings,
 secrets, deployment, persistent staging, measured backup/restore, traffic and
 production remain separately Pending. No item-6 product slice inherits cloud
 authority from this result.
+
+92. **BCK-05-AC-92:** local R1 exposes exactly the R0 probe, five disabled
+    Booking callables and one disabled Identity Session callable; no schedule,
+    task queue or cloud trigger is added.
+93. **BCK-05-AC-93:** Event→Booking delivery uses an immutable Event outbox,
+    an idempotent Booking consumer checkpoint, five-attempt retry and explicit
+    dead-letter state.
+94. **BCK-05-AC-94:** feature-flag absence or invalid revision means disabled,
+    while Firestore transport failure propagates to typed operational failure
+    and safe logging rather than being silently converted to disabled.
+95. **BCK-05-AC-95:** local Event delivery and DSR runners are manually invoked
+    test/application services; no worker, schedule, deployment or activation
+    is implied.
+96. **BCK-05-AC-96:** exact Node 22/Java 21 evidence must be reported separately
+    from a timed-out contention run; inconclusive evidence cannot be called
+    green.

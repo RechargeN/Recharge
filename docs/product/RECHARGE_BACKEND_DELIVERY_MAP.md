@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.94**
+- Version: **2.4.95**
 - Date: **2026-09-25**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -13,7 +13,7 @@
   2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28,
   2026-09-06, 2026-09-07, 2026-09-08, 2026-09-09, 2026-09-12 and
   2026-09-15, 2026-09-16, 2026-09-17, 2026-09-19, 2026-09-20 and
-  2026-09-21 and 2026-09-23, Product owner
+  2026-09-21, 2026-09-23 and 2026-09-25, Product owner
   instructions; documentation traceability only, semantics/gates/checksum
   unchanged**
 - Назначение: единая распределительная карта backend-работ Recharge
@@ -21,6 +21,18 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.95.** Records the approved local Booking closure pass, without cloud or
+market authority:
+
+- reconciles BCK-03/04/05/06/07/09/18 to the implemented Firebase UID→opaque
+  Session→domain User bridge and disabled Identity callable;
+- records the immutable Event outbox, idempotent Booking delivery checkpoint,
+  occurrence lifecycle effects and Firestore Privacy/DSR repositories;
+- keeps workers, schedules, real provider Auth, dev cloud, deployment,
+  activation, production, push and merge closed; the full Emulator gate is
+  currently inconclusive only because the pre-existing 100-way unlimited
+  contention test exceeded its 120-second timeout.
 
 **v2.4.94.** Records the bounded Booking integration/privacy completion without
 widening cloud or market authority:
@@ -1244,19 +1256,19 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.94)
+## 5. Реестр проектных документов — 22 (v2.4.95)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
 | BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.84 — local integrated foundation plus atomic Identity/Booking authority seam verified; production gates retained; 146 AC | Local R0/R1 platform, reference, security, identity and mobile-seam foundations Present; product/cloud runtime Absent |
 | BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.88 coordination baseline; local Identity evidence reconciled without cloud authority | N/A |
-| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.21 — local platform schemas/validators/parity and opaque Session transport verified; 110 AC; product/cloud evidence retained | Local platform contract runtime Present; deployed/product API runtime Absent |
-| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.32 — local fail-closed foundation and server-side Session binding verified; 96 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
-| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.39 — common R1 feature-flag authority and local controls verified; 91 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
-| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.5 — bounded in-memory and Emulator-only Firestore authority evidence; 82 AC; production decisions remain gated | Present locally — in-memory and Emulator-only Firestore; callable/cloud/production Absent |
-| BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.5 — bounded Event→Booking handoff Present; broader BCK07-LOCAL-01 remains gated; 86 AC | Event projection facts only; Content aggregate absent |
+| BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.22 — Identity Session request/result schemas and UID/User separation added; 114 AC; product/cloud evidence retained | Local platform/Identity contract runtime Present; deployed/product API runtime Absent |
+| BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.33 — persisted Session authority and Firestore DSR orchestration verified locally; 101 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
+| BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.40 — exact callable allowlist and Event delivery retry/dead-letter controls; 96 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
+| BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.6 — disabled Emulator Session callable plus persisted UID→User authority; 87 AC; production decisions remain gated | Present locally — in-memory and Emulator-only Firestore/callable; cloud/production Absent |
+| BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.6 — bounded Event outbox→Booking delivery/lifecycle handoff Present; broader BCK07-LOCAL-01 remains gated; 91 AC | Event delivery facts/effects only; Content aggregate absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.3 — Stage 3 unified query/snapshot/freshness contract complete; OD/source/Approval blockers remain | Absent |
-| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.19 — local Event/mobile/privacy/retention integration; 143 AC; fixed escrow selected but disabled; qualified/cloud gates preserved | Five disabled Emulator callables, nine default-deny collections and disabled mobile adapter; cloud/deployed production binding Absent |
+| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.20 — Identity bridge, Event delivery/lifecycle and Firestore DSR integrated locally; 152 AC; fixed escrow selected but disabled; qualified/cloud gates preserved | Six disabled Emulator callables, default-deny domain/support collections and disabled mobile adapter; cloud/deployed production binding Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
@@ -1265,7 +1277,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-15 | `AI_BACKEND_SPEC.md` | AI Platform owner | Provider-neutral server proxy, quota, redaction, prompts/evals and kill switches | ADR 0018, BCK-03, BCK-04, BCK-05, BCK-06 | Draft v0.3 — Stage 5 provider-neutral gateway/fallback/evaluation contract; all production gates pending | Absent |
 | BCK-16 | `PROVIDER_INTEGRATION_BACKEND_SPEC.md` | Integrations owner | Provider adapters, provider availability source, provenance/freshness, cache, live-check/handoff | BCK-03, BCK-04, BCK-05, BCK-08, BCK-20 | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; all provider gates pending | Absent |
 | BCK-17 | `PAYMENTS_BACKEND_SPEC.md` | RechargeN / Product owner (interim); permanent Payments owner assigned by new Accepted ADR | Payment authority, ledger, webhooks, refunds, disputes and compliance | Hard: new Accepted ADR, BCK-03, BCK-04, BCK-05, BCK-06; integration peer: BCK-13 | Draft v0.3.1 — complete design with normalized lifecycle vocabulary; still hard-blocked pending new Accepted Payments ADR | Absent |
-| BCK-18 | `MOBILE_BACKEND_INTEGRATION_STANDARD.md` | Mobile Platform owner | Typed ports/adapters, shared fixtures, local/cache/server states, compatibility and import orchestration | BCK-03, BCK-04, BCK-06, BCK-20, API workflow, OD-04, OD-08, OD-10 | Approved v0.7 — technical local/test-only boundary; Money, typed seam, reversible binding and resumable import foundation are implemented; product cutover remains gated | Present locally; remote product adapters/Firebase/cloud absent |
+| BCK-18 | `MOBILE_BACKEND_INTEGRATION_STANDARD.md` | Mobile Platform owner | Typed ports/adapters, shared fixtures, local/cache/server states, compatibility and import orchestration | BCK-03, BCK-04, BCK-06, BCK-20, API workflow, OD-04, OD-08, OD-10 | Approved v0.8 — opaque Session context and UID/User separation added; 88 AC; no new mobile runtime or product cutover | Present locally; remote product adapters/Firebase/cloud absent |
 | BCK-19 | `ADMIN_SUPPORT_BACKEND_SPEC.md` | Admin Operations owner | Privileged staff surface, cases, read audit, repair proposal/approval, emergency disable | BCK-03, BCK-04, BCK-05, BCK-06 | Review v0.3 — Stage 4 privileged-read/domain-repair protocol; runtime gates remain | Absent |
 | BCK-20 | `REFERENCE_DATA_LOCALIZATION_SPEC.md` | Reference Data owner | Versioned distribution/governance for taxonomy, regions, currencies, languages and localized wire values | BCK-01, BCK-03, Category System v1.4.3, OD-10 | Review v0.2.29 — synthetic disabled local-R1 config verified; 99 AC; source/production gates retained | Local synthetic disabled LV/EE/LT foundation Present; external-source/production runtime Absent |
 | BCK-21 | `ANALYTICS_TELEMETRY_BACKEND_SPEC.md` | Data Platform owner | Privacy-safe product-event ingestion, governed datasets, aggregation and retention | BCK-03, BCK-04, BCK-05, existing analytics taxonomy/catalog, OD-05 | Review v0.3 — Stage 4 governed analytics chain; OD-05/privacy/destination/runtime blockers remain | Absent |
@@ -2401,7 +2413,7 @@ generalized, deleted or counted as R1 product readiness.
 | M | `apps/backend/functions/package.json` | BCK-05 / tooling | exact R1 scripts; no provider/product dependency | lock/script parity; revert commit |
 | R | `apps/backend/functions/package-lock.json` | BCK-05 / tooling | reproducible existing dependencies; changes only if separately approved dependency is added | `npm ci`; lock diff rejection |
 | R | `apps/backend/functions/tsconfig.json` | BCK-05 / tooling | strict NodeNext compilation | typecheck |
-| M | `apps/backend/functions/src/index.ts` | BCK-05 / transport registry | preserve R0 plus five disabled RAW-C exports; register no new product export | export snapshot test; revert commit |
+| M | `apps/backend/functions/src/index.ts` | BCK-05 / transport registry | preserve R0 plus five disabled Booking exports and one disabled Identity Session export; register no other product export | export snapshot test; revert commit |
 | R | `apps/backend/functions/src/r0_toolchain_probe.ts` | BCK-05 / R0 | historical non-product probe | existing unit test |
 | R | `apps/backend/functions/test/unit/r0_toolchain_probe.test.ts` | BCK-05 / R0 | historical probe evidence | existing unit gate |
 | R | `apps/backend/functions/test/emulator/r0_emulator_isolation.test.ts` | BCK-05 / R0 | disposable-project isolation evidence | existing emulator gate |
@@ -2465,6 +2477,13 @@ generalized, deleted or counted as R1 product readiness.
 | C | `apps/backend/functions/src/platform/release/release_manifest_repository.ts` | BCK-05 / infrastructure | release manifest/pointer persistence only | `emulator/r1_release_repository.test.ts` |
 | C | `apps/backend/functions/src/platform/release/release_service.ts` | BCK-05 / application | validate/publish/activate release with expected revision | `unit/platform/release_service.test.ts` |
 | C | `apps/backend/functions/src/platform/recovery/rollback_guard.ts` | BCK-05 / application | compatible-target and unsafe-downgrade rejection | `unit/platform/rollback_guard.test.ts` |
+| C | `apps/backend/functions/src/contracts/identity_session_v1.ts` | BCK-03 + BCK-06 / contract boundary | strict Emulator-only Session command inspection and typed result mapping | Identity contract fixtures + Emulator Identity flow |
+| C | `apps/backend/functions/src/modules/identity_publisher/application/emulator_identity_session_service.ts` | BCK-06 / local application | server-issued opaque Session and atomic AccessSnapshot creation; no custom-claim authority | Identity repository + end-to-end Emulator tests |
+| C | `apps/backend/functions/src/booking/event_projection_delivery.ts` | BCK-07 + BCK-09 / delivery application | idempotent Event outbox delivery, revision checkpoint and explicit dead-letter outcome | Event projection Emulator tests |
+| C | `apps/backend/functions/src/booking/occurrence_lifecycle.ts` | BCK-09 / domain application | occurrence cancellation and material-reschedule Booking effects | Event lifecycle Emulator tests |
+| C | `apps/backend/functions/src/booking/firestore_booking_privacy_record_store.ts` | BCK-09 + BCK-04 / data adapter | transactional Booking DSR access/erase/restrict operations | Firestore Privacy Emulator tests |
+| C | `apps/backend/functions/src/modules/privacy_orchestration/application/privacy_domain_task_runner.ts` | BCK-04 / application | bounded task attempts, evidence and terminal reconciliation | Firestore Privacy Emulator tests |
+| C | `apps/backend/functions/src/modules/privacy_orchestration/infrastructure/firestore_privacy_orchestration_repository.ts` | BCK-04 / data adapter | atomic request/task dispatch and revision-checked outcome persistence | Firestore Privacy Emulator tests |
 
 `shared` imports no Firebase SDK, config, security, platform or product code.
 `contracts` imports only shared/generated artifacts. `config` imports shared and
@@ -2487,6 +2506,8 @@ registry. No new file imports a RAW-C `booking`, `audit`, `inventory`,
 | C | `packages/api_contracts/schema/platform/v1/fixtures/invalid.json` | type/required/bounds/authority rejection cases |
 | C | `packages/api_contracts/schema/platform/v1/fixtures/forward.json` | unknown additive-field behavior |
 | C | `packages/api_contracts/schema/platform/v1/fixtures/backward.json` | supported prior-minor behavior |
+| C | `packages/api_contracts/schema/identity/v1/identity_session_command.schema.json` | strict Emulator-only Session command envelope; Firebase UID is transport evidence, not domain User ID |
+| C | `packages/api_contracts/schema/identity/v1/identity_session_result.schema.json` | typed opaque Session handle, domain User reference and AccessSnapshot revision result |
 
 The schemas above are the only R1 wire sources. `platform_v1.ts`, validators
 and any future generated output are consumers; R1 creates no Dart output, no
@@ -2526,6 +2547,8 @@ does not alter `packages/api_contracts/schema/booking/v1` or its fixtures.
 | C | `apps/backend/functions/test/rules/storage_platform_rules.test.ts` | Storage remains deny-all |
 | C | `apps/backend/functions/test/integration/r1_composition_root.test.ts` | only allowlisted R1 services composed |
 | C | `apps/backend/functions/test/support/platform_fixtures.ts` | immutable test builders only; no authority |
+| C | `apps/backend/functions/test/unit/config/firestore_feature_flag_gate.test.ts` | missing/invalid flags deny while Firestore operational failures remain typed and observable |
+| C | `apps/backend/functions/test/emulator/r1_privacy_firestore.test.ts` | atomic Privacy dispatch, Booking pseudonymization and terminal reconciliation |
 
 ### 26.6 Existing disabled RAW-C compatibility paths
 
@@ -2693,7 +2716,7 @@ Latvia approval cannot enable Estonia or Lithuania.
 | Operations | BCK-05 v0.2.36, Review; logical dev/stage/prod topology, no-cloud CI, migration and rollback | No project, billing, credential, resource or deployment is authorized |
 | Reference data | BCK-20 v0.2.28, Review; disabled synthetic LV/EE/LT config and explicit Money/time/localization contracts | External sources, mandatory copy and market activation remain Pending |
 | Coordination | BCK-02 v2.4.87, Approved coordination baseline | Approval of this map is not R1 execution authority |
-| Exact files | Historical v2.4.87 preflight: 120 paths; current v2.4.94 retains §26 at 122 unique literal paths — 92 C, 6 M and 24 R/K; zero duplicates/wildcards | Any path change requires a versioned reconciliation |
+| Exact files | Historical v2.4.87 preflight: 120 paths; current v2.4.95 fixes §26 at 133 unique literal paths — 103 C, 6 M and 24 R/K; zero duplicates/wildcards | Any path change requires a versioned reconciliation |
 | Storage writers | Five §26.7 collection families, five named single writers | Direct client access remains denied |
 | Migration/rollback | Additive §26.9 order; exact repository/config rollback; non-destructive infra posture | RAW-C deletion, broad data rollback and `terraform destroy` remain forbidden |
 

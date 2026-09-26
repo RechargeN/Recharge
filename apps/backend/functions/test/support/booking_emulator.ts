@@ -4,10 +4,12 @@ import { getApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { exactBookingCollectionNames } from '../../src/booking/transactions.js';
-import { bookingFlagIds } from '../../src/shared/feature_flags.js';
+import { bookingFlagIds, identityFlagIds } from '../../src/shared/feature_flags.js';
 import type { BookingEventProjection } from '../../src/booking/domain.js';
 import { consumeEventForBookingProjection } from '../../src/booking/event_projection_consumer.js';
 import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
+import { identityAuthorityCollections } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { eventBookingDeliveryCollections } from '../../src/booking/event_projection_delivery.js';
 import {
   featureFlagKey,
   featureFlagPointerCollection,
@@ -15,7 +17,12 @@ import {
 } from '../../src/platform/config/feature_flag_repository.js';
 import { featureFlagRevisionDocumentId } from '../../src/platform/config/firestore_feature_flag_gate.js';
 
-const bookingAccessCollectionNames = Object.freeze(Object.values(bookingIdentityCollections));
+const bookingAccessCollectionNames = Object.freeze([
+  ...new Set([
+    ...Object.values(bookingIdentityCollections),
+    ...Object.values(identityAuthorityCollections),
+  ]),
+]);
 const sessionContexts = new Map<
   string,
   Readonly<{ sessionId: string; sessionHandle: string; installationId: string }>
@@ -39,6 +46,7 @@ export async function cleanupBookingEmulator(firestore = emulatorFirestore()): P
   for (const collectionName of [
     ...exactBookingCollectionNames,
     ...bookingAccessCollectionNames,
+    ...Object.values(eventBookingDeliveryCollections),
     featureFlagRevisionCollection,
     featureFlagPointerCollection,
   ]) {
@@ -108,12 +116,40 @@ export async function setBookingFlags(
   await batch.commit();
 }
 
+export async function setIdentitySessionFlag(
+  enabled: boolean,
+  firestore = emulatorFirestore(),
+): Promise<void> {
+  const capabilityId = identityFlagIds.establishSession;
+  const key = featureFlagKey('local', 'LV', capabilityId);
+  const batch = firestore.batch();
+  batch.set(
+    firestore.collection(featureFlagRevisionCollection).doc(featureFlagRevisionDocumentId(key, 1)),
+    {
+      schemaVersion: 1,
+      revision: 1,
+      environmentId: 'local',
+      marketId: 'LV',
+      capabilityId,
+      enabled,
+      createdAtUtc: '2026-09-24T00:00:00.000Z',
+    },
+  );
+  batch.set(firestore.collection(featureFlagPointerCollection).doc(key), {
+    key,
+    activeRevision: 1,
+    pointerRevision: 1,
+  });
+  await batch.commit();
+}
+
 export async function createAuthorizedActor(
   uid: string,
   claims: Readonly<Record<string, unknown>> = {
     accountState: 'active',
     capabilities: ['booking.self_service'],
   },
+  domainUserId = uid,
 ): Promise<string> {
   const firestore = emulatorFirestore();
   const { sessionId, installationId, sessionHandle } = bookingSessionContextFor(uid);
@@ -123,9 +159,9 @@ export async function createAuthorizedActor(
     ? claims.capabilities.filter((value): value is string => typeof value === 'string')
     : ['booking.self_service'];
   const batch = firestore.batch();
-  batch.set(firestore.collection(bookingIdentityCollections.accounts).doc(uid), {
+  batch.set(firestore.collection(bookingIdentityCollections.accounts).doc(domainUserId), {
     schemaVersion: 1,
-    userId: uid,
+    userId: domainUserId,
     status: accountActive ? 'active' : 'blocked',
     revision: 1,
     securityRevision: 1,
@@ -136,7 +172,7 @@ export async function createAuthorizedActor(
   batch.set(firestore.collection(bookingIdentityCollections.sessions).doc(sessionId), {
     schemaVersion: 1,
     sessionId,
-    userId: uid,
+    userId: domainUserId,
     status: 'active',
     revision: 1,
     authzRevision: 1,
@@ -147,7 +183,7 @@ export async function createAuthorizedActor(
   });
   batch.set(firestore.collection(bookingIdentityCollections.accessSnapshots).doc(sessionId), {
     schemaVersion: 1,
-    userId: uid,
+    userId: domainUserId,
     sessionId,
     accountRevision: 1,
     sessionRevision: 1,
@@ -158,6 +194,12 @@ export async function createAuthorizedActor(
     expiresAtUtc: '2099-01-01T00:00:00.000Z',
   });
   await batch.commit();
+  const idToken = await createFirebaseActor(uid);
+  sessionContexts.set(idToken, { sessionId, sessionHandle, installationId });
+  return idToken;
+}
+
+export async function createFirebaseActor(uid: string): Promise<string> {
   const auth = getAuth();
   const email = `${uid}@example.invalid`;
   const password = 'emulator-only-password-123';
@@ -179,9 +221,14 @@ export async function createAuthorizedActor(
   const body = (await response.json()) as Record<string, unknown>;
   assert.equal(response.ok, true, JSON.stringify(body));
   assert.equal(typeof body.idToken, 'string');
-  const idToken = String(body.idToken);
-  sessionContexts.set(idToken, { sessionId, sessionHandle, installationId });
-  return idToken;
+  return String(body.idToken);
+}
+
+export function registerSessionContext(
+  idToken: string,
+  context: Readonly<{ sessionId: string; sessionHandle: string; installationId: string }>,
+): void {
+  sessionContexts.set(idToken, context);
 }
 
 export async function callBookingFunction(

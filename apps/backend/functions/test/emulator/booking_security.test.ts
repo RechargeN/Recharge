@@ -14,9 +14,12 @@ import {
   cleanupBookingEmulator,
   callBookingFunction,
   createAuthorizedActor,
+  createFirebaseActor,
   emulatorFirestore,
   seedEvent,
   setBookingFlags,
+  setIdentitySessionFlag,
+  registerSessionContext,
 } from '../support/booking_emulator.js';
 import { createCommand, finiteEvent } from '../support/booking_fixtures.js';
 import { createBookingSchemaRegistry } from '../support/booking_schema_registry.js';
@@ -183,6 +186,84 @@ void test('test-only flags enable exactly the real callable path in disposable e
   );
 });
 
+void test('Firebase UID resolves through Session to a distinct domain User id', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setBookingFlags(true, firestore);
+  await seedEvent(
+    finiteEvent({
+      registrationWindow: {
+        opensAt: '2020-01-01T00:00:00.000Z',
+        closesAt: '2099-01-01T00:00:00.000Z',
+      },
+      cancellationDeadline: '2099-01-01T00:00:00.000Z',
+    }),
+    firestore,
+  );
+  const firebaseUid = 'firebase-transport-user';
+  const domainUserId = '018F4Z6M7N8P9Q0R1S2T3V4W5X';
+  const token = await createAuthorizedActor(firebaseUid, undefined, domainUserId);
+  const response = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_uid_bridge', idempotencyKey: 'idem_uid_bridge' }),
+    token,
+  );
+  const result = response.body.result as Record<string, unknown>;
+  assert.equal(result.kind, 'succeeded');
+  const booking = result.booking as Record<string, unknown>;
+  assert.equal(booking.userId, domainUserId);
+  assert.notEqual(booking.userId, firebaseUid);
+});
+
+void test('Emulator Identity callable issues an opaque Session used by Booking', async () => {
+  await cleanupBookingEmulator(firestore);
+  await setIdentitySessionFlag(true, firestore);
+  await setBookingFlags(true, firestore);
+  await seedEvent(
+    finiteEvent({
+      registrationWindow: {
+        opensAt: '2020-01-01T00:00:00.000Z',
+        closesAt: '2099-01-01T00:00:00.000Z',
+      },
+      cancellationDeadline: '2099-01-01T00:00:00.000Z',
+    }),
+    firestore,
+  );
+  const token = await createFirebaseActor('firebase-session-callable-user');
+  const identityResponse = await callBookingFunction(
+    'establishIdentitySessionV1',
+    {
+      schemaVersion: 1,
+      commandType: 'establishIdentitySession',
+      requestId: 'req_establish_session',
+      installationId: 'install-callable-1',
+    },
+    token,
+  );
+  const identityResult = identityResponse.body.result as Record<string, unknown>;
+  assert.equal(identityResult.kind, 'succeeded');
+  const identityData = identityResult.data as Record<string, unknown>;
+  const sessionContext = identityData.sessionContext as Record<string, string>;
+  assert.equal(typeof sessionContext.sessionId, 'string');
+  assert.equal(typeof sessionContext.sessionHandle, 'string');
+  assert.equal(typeof sessionContext.installationId, 'string');
+  assert.equal(typeof sessionContext.userId, 'string');
+  assert.notEqual(sessionContext.userId, 'firebase-session-callable-user');
+  registerSessionContext(token, {
+    sessionId: sessionContext.sessionId!,
+    sessionHandle: sessionContext.sessionHandle!,
+    installationId: sessionContext.installationId!,
+  });
+  const bookingResponse = await callBookingFunction(
+    'createInternalBookingV1',
+    createCommand({ requestId: 'req_session_booking', idempotencyKey: 'idem_session_booking' }),
+    token,
+  );
+  const bookingResult = bookingResponse.body.result as Record<string, unknown>;
+  assert.equal(bookingResult.kind, 'succeeded');
+  const booking = bookingResult.booking as Record<string, unknown>;
+  assert.equal(booking.userId, sessionContext.userId);
+});
+
 void test('server authority immediately rejects revoked sessions and stale capability snapshots', async () => {
   await cleanupBookingEmulator(firestore);
   await setBookingFlags(true, firestore);
@@ -277,13 +358,14 @@ void test('create and account revocation are serialized by one authority transac
   await seedEvent(event, firestore);
   const uid = 'racing-create-actor';
   await createAuthorizedActor(uid);
-  const accessHint = { actorId: uid, ...bookingSessionContextFor(uid) };
+  const accessHint = { firebaseUid: uid, ...bookingSessionContextFor(uid) };
   const createPromise = createInternalBooking(
     {
       firestore,
       clock: new FakeClock(new Date('2026-08-29T12:00:00.000Z')),
       mutationAuthorization: {
         hint: accessHint,
+        expectedUserId: uid,
         flagId: bookingFlagIds.create,
         authority: new FirestoreBookingAccessAuthority(firestore),
         featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
@@ -308,7 +390,7 @@ void test('create and account revocation are serialized by one authority transac
   if (result.kind === 'succeeded') {
     assert.equal(bookings.size, 1);
   } else {
-    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied', retryable: false });
+    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied' });
     assert.equal(bookings.empty, true);
   }
   assert.equal(
@@ -331,13 +413,14 @@ void test('cancel and session revocation are serialized by one authority transac
   );
   assert.equal(created.kind, 'succeeded');
   if (created.kind !== 'succeeded') return;
-  const accessHint = { actorId: uid, ...bookingSessionContextFor(uid) };
+  const accessHint = { firebaseUid: uid, ...bookingSessionContextFor(uid) };
   const cancelPromise = cancelInternalBooking(
     {
       firestore,
       clock: new FakeClock(new Date('2026-08-29T12:01:00.000Z')),
       mutationAuthorization: {
         hint: accessHint,
+        expectedUserId: uid,
         flagId: bookingFlagIds.cancel,
         authority: new FirestoreBookingAccessAuthority(firestore),
         featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
@@ -366,7 +449,7 @@ void test('cancel and session revocation are serialized by one authority transac
   if (result.kind === 'succeeded') {
     assert.equal(booking.get('state'), 'cancelled');
   } else {
-    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied', retryable: false });
+    assert.deepEqual(result, { kind: 'rejected', code: 'permission_denied' });
     assert.equal(booking.get('state'), 'confirmed');
   }
 });
@@ -382,7 +465,8 @@ void test('feature disable and mutation are serialized without a stale-authority
       firestore,
       clock: new FakeClock(new Date('2026-08-29T12:00:00.000Z')),
       mutationAuthorization: {
-        hint: { actorId: uid, ...bookingSessionContextFor(uid) },
+        hint: { firebaseUid: uid, ...bookingSessionContextFor(uid) },
+        expectedUserId: uid,
         flagId: bookingFlagIds.create,
         authority: new FirestoreBookingAccessAuthority(firestore),
         featureFlags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),

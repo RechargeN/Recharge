@@ -25,34 +25,30 @@ export class FirestoreFeatureFlagGate {
     }
     const key = featureFlagKey(this.environmentId, this.marketId, capabilityId);
     const pointerRef = this.firestore.collection(featureFlagPointerCollection).doc(key);
-    try {
-      const pointerSnapshot =
-        transaction === undefined ? await pointerRef.get() : await transaction.get(pointerRef);
-      const pointer = pointerSnapshot.data();
-      if (
-        pointer?.key !== key ||
-        !Number.isSafeInteger(pointer.activeRevision) ||
-        Number(pointer.activeRevision) < 1
-      ) {
-        return false;
-      }
-      const revisionRef = this.firestore
-        .collection(featureFlagRevisionCollection)
-        .doc(featureFlagRevisionDocumentId(key, Number(pointer.activeRevision)));
-      const revisionSnapshot =
-        transaction === undefined ? await revisionRef.get() : await transaction.get(revisionRef);
-      const revision = revisionSnapshot.data();
-      return (
-        revision?.schemaVersion === 1 &&
-        revision.environmentId === this.environmentId &&
-        revision.marketId === this.marketId &&
-        revision.capabilityId === capabilityId &&
-        revision.revision === pointer.activeRevision &&
-        revision.enabled === true
-      );
-    } catch {
+    const pointerSnapshot =
+      transaction === undefined ? await pointerRef.get() : await transaction.get(pointerRef);
+    const pointer = pointerSnapshot.data();
+    if (
+      pointer?.key !== key ||
+      !Number.isSafeInteger(pointer.activeRevision) ||
+      Number(pointer.activeRevision) < 1
+    ) {
       return false;
     }
+    const revisionRef = this.firestore
+      .collection(featureFlagRevisionCollection)
+      .doc(featureFlagRevisionDocumentId(key, Number(pointer.activeRevision)));
+    const revisionSnapshot =
+      transaction === undefined ? await revisionRef.get() : await transaction.get(revisionRef);
+    const revision = revisionSnapshot.data();
+    return (
+      revision?.schemaVersion === 1 &&
+      revision.environmentId === this.environmentId &&
+      revision.marketId === this.marketId &&
+      revision.capabilityId === capabilityId &&
+      revision.revision === pointer.activeRevision &&
+      revision.enabled === true
+    );
   }
 }
 

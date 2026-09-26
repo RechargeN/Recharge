@@ -131,19 +131,23 @@ clearTimeout(loadTimeout);
 if (typeof loadedFunctions.r0ToolchainProbe !== "function") {
   throw new Error("R0 function entry does not export r0ToolchainProbe");
 }
-const bookingExports = Object.keys(loadedFunctions)
+const boundedCallableExports = Object.keys(loadedFunctions)
   .filter((name) => name.endsWith("V1") && name !== "r0ToolchainProbe")
   .sort();
-const expectedBookingExports = [
+const expectedBoundedCallableExports = [
   "cancelInternalBookingV1",
   "createInternalBookingV1",
   "getEventAvailabilityV1",
   "getMyBookingV1",
+  "establishIdentitySessionV1",
   "listMyBookingsV1",
-];
-if (JSON.stringify(bookingExports) !== JSON.stringify(expectedBookingExports)) {
+].sort();
+if (
+  JSON.stringify(boundedCallableExports) !==
+  JSON.stringify(expectedBoundedCallableExports)
+) {
   throw new Error(
-    `RAW-C must expose exactly five Booking v1 callables: ${bookingExports.join(",")}`,
+    `Emulator must expose exactly the approved bounded v1 callables: ${boundedCallableExports.join(",")}`,
   );
 }
 process.stdout.write(
