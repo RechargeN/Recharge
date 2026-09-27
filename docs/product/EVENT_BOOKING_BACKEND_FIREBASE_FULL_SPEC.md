@@ -1,8 +1,8 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.23**
-- Дата: **2026-09-27**
+- Версия: **1.24**
+- Дата: **2026-09-28**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
@@ -40,6 +40,22 @@
 - Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
 
 ## 0. Changelog
+
+### v1.24 — 2026-09-28
+
+- accepts the bounded local/Emulator `2A` reconfirmation policy before code:
+  a materially rescheduled Booking remains active, retains its allocation and
+  counts against the applicable finite or unlimited active-Booking cap;
+- binds a user reconfirmation to the exact Booking revision and Event
+  `materialRevision`, persists a deadline no later than the rescheduled
+  occurrence start, and invalidates the prior response on every later material
+  reschedule;
+- keeps owner cancellation available while reconfirmation is required, makes
+  retries idempotent and leaves every notification obligation suppressed until
+  BCK-13 activation;
+- authorizes only the manual local/Emulator command slice. Automatic deadline
+  release belongs to separately gated `2B`; cloud, deployment, market
+  activation, push and merge remain unauthorized.
 
 ### v1.23 — 2026-09-27
 
@@ -1006,10 +1022,36 @@ ledger/usage и outbox obligations. Частично обработанный ba
 
 ### 12.7. Reconfirmation
 
-Открытие окна записывает authoritative state и outbox. User command отмечает
-confirmed response. Missed deadline может auto-release только после отдельного
-delivery/fairness approval; иначе allocation остаётся confirmed и оператор
-получает alert. Notification acceptance by FCM не считается прочтением.
+Для bounded local/Emulator slice `2A` действует следующий owner baseline:
+
+- material reschedule оставляет Booking `confirmed`, сохраняет allocation и
+  active key и продолжает учитывать Booking в соответствующем finite или
+  unlimited active cap;
+- lifecycle записывает `reconfirmationState=required`, точную
+  `reconfirmationRequiredForRevision` и immutable для этой ревизии
+  `reconfirmationDeadlineUtc`;
+- дедлайн вычисляется сервером из принятой policy и никогда не позже нового
+  `occurrenceStartsAt`; отсутствие валидного нового начала или вычислимого
+  дедлайна является fail-closed lifecycle failure;
+- user может подтвердить только собственную активную Booking, предъявив
+  `expectedBookingRevision` и точную текущую `materialRevision`, либо отменить
+  её независимо от обычного cancellation deadline;
+- успешная команда переводит состояние в `confirmed` только для этой material
+  revision, увеличивает Booking revision, но не меняет active key, ledger или
+  user usage;
+- повторный material reschedule всегда записывает новую required revision и
+  новый дедлайн, поэтому старое подтверждение не переносится на новое изменение;
+- нематериальное изменение не открывает reconfirmation и не изменяет его
+  authoritative state;
+- same idempotency key и тот же semantic payload возвращают сохранённый
+  результат; тот же ключ с другим payload отклоняется;
+- notification outbox остаётся suppressed до отдельного включения BCK-13 и не
+  является доказательством доставки или прочтения.
+
+Истечение дедлайна в `2A` возвращает typed
+`reconfirmation_deadline_passed`, но само по себе ещё не освобождает место.
+Автоматическая отмена, lease/pagination worker и terminal deadline
+reconciliation входят только в отдельно разрешаемый slice `2B`.
 
 ## 13. Idempotency
 
@@ -2106,3 +2148,25 @@ allocations return sold out while cancellations continue to release units.
 161. Legal-hold release does not restore TTL or silently delete data. It creates
      one linked, idempotent follow-up erasure request, and deletion eligibility
      changes only after that request completes.
+162. A materially rescheduled active Booking remains confirmed, retains its
+     allocation and counts against the applicable finite or unlimited active
+     Booking cap until user cancellation or a separately authorized terminal
+     deadline action.
+163. Reconfirmation stores the exact required Event material revision and a
+     server-computed UTC deadline no later than the rescheduled occurrence
+     start; invalid or missing authority fails closed.
+164. A later material reschedule always replaces the required revision and
+     deadline, invalidating every response tied to an earlier material
+     revision, while a non-material change does not open reconfirmation.
+165. The owner may reconfirm only their own active Booking with the exact
+     expected Booking revision and current material revision; cancellation
+     remains available while reconfirmation is required.
+166. Successful reconfirmation changes only Booking reconfirmation metadata and
+     Booking revision. It never increments or releases active key, finite
+     ledger allocation or finite/unlimited user usage.
+167. Reconfirmation replay with the same idempotency key and semantic payload
+     is stable; a changed payload under the same key is rejected.
+168. Reconfirmation effects remain suppressed until BCK-13 activation and do
+     not claim notification delivery, reading or production evidence.
+169. Slice `2A` authorizes only the manual default-off local/Emulator command.
+     Automatic deadline release and its worker remain outside scope in `2B`.
