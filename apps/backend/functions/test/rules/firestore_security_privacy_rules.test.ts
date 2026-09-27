@@ -4,7 +4,14 @@ import test from 'node:test';
 
 void test('security/privacy collections are explicit deny and unknown collections remain denied', async () => {
   const rules = await readFile('../firestore.rules', 'utf8');
-  for (const collection of ['privacyRequests', 'privacyDomainTasks', 'securityAuditEvents']) {
+  for (const collection of [
+    'privacyRequests',
+    'privacyDomainTasks',
+    'securityAuditEvents',
+    'securityRateLimitCounters',
+    'securityRateLimitAttempts',
+    'securityAudit',
+  ]) {
     assert.match(
       rules,
       new RegExp(`match /${collection}/\\{document\\} \\{ allow read, write: if false; \\}`),

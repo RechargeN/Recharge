@@ -53,7 +53,15 @@ export async function deliverEventBookingProjection(
   }
   if (!sourceSnapshot.exists) return 'not_found';
   const previous = deliverySnapshot.data() as
-    { status?: string; attempts?: number; eventDigest?: string } | undefined;
+    | {
+        status?: string;
+        attempts?: number;
+        eventDigest?: string;
+        lifecycleCursor?: string;
+        lifecycleAffected?: number;
+        lifecycleProcessed?: number;
+      }
+    | undefined;
   if (previous?.status === 'delivered') return 'replayed';
   if (previous?.status === 'deadLetter') return 'dead_letter';
   const record = sourceSnapshot.data() as EventBookingOutboxRecord;
@@ -71,8 +79,33 @@ export async function deliverEventBookingProjection(
       });
       return 'dead_letter';
     }
+    let lifecycleAffected = previous?.lifecycleAffected ?? 0;
+    let lifecycleProcessed = previous?.lifecycleProcessed ?? 0;
+    let lifecycleCursor = previous?.lifecycleCursor;
     if (projection.kind !== 'ignoredStale') {
-      await applyOccurrenceLifecycleEffects(firestore, record.event);
+      const lifecycle = await applyOccurrenceLifecycleEffects(firestore, record.event, {
+        ...(lifecycleCursor === undefined ? {} : { startAfterBookingId: lifecycleCursor }),
+        pageSize: 200,
+        afterPage: async (progress) => {
+          lifecycleCursor = progress.cursor;
+          lifecycleAffected = (previous?.lifecycleAffected ?? 0) + progress.affected;
+          lifecycleProcessed = (previous?.lifecycleProcessed ?? 0) + progress.processed;
+          await deliveryRef.set(
+            {
+              schemaVersion: 1,
+              outboxId,
+              status: 'processing',
+              attempts,
+              lifecycleCursor,
+              lifecycleAffected,
+              lifecycleProcessed,
+              updatedAtUtc: nowUtc,
+            },
+            { merge: true },
+          );
+        },
+      });
+      if (lifecycle.cursor !== undefined) lifecycleCursor = lifecycle.cursor;
     }
     await deliveryRef.set({
       schemaVersion: 1,
@@ -80,6 +113,9 @@ export async function deliverEventBookingProjection(
       status: 'delivered',
       attempts,
       projectionResult: projection.kind,
+      ...(lifecycleCursor === undefined ? {} : { lifecycleCursor }),
+      lifecycleAffected,
+      lifecycleProcessed,
       deliveredAtUtc: nowUtc,
       updatedAtUtc: nowUtc,
     });
@@ -92,10 +128,41 @@ export async function deliverEventBookingProjection(
       status: terminal ? 'deadLetter' : 'retryPending',
       attempts,
       reason: safeErrorType(error),
+      ...(!terminal
+        ? { nextAttemptAtUtc: new Date(Date.parse(nowUtc) + retryDelayMs(attempts)).toISOString() }
+        : {}),
       updatedAtUtc: nowUtc,
     });
     return terminal ? 'dead_letter' : 'retry_scheduled';
   }
+}
+
+function retryDelayMs(attempts: number): number {
+  return [60_000, 5 * 60_000, 15 * 60_000, 60 * 60_000][Math.min(Math.max(attempts - 1, 0), 3)]!;
+}
+
+export async function replayDeadLetterEventBookingProjection(
+  firestore: Firestore,
+  outboxId: string,
+  nowUtc: string,
+): Promise<'requeued' | 'not_found' | 'not_dead_letter'> {
+  const ref = firestore.collection(eventBookingDeliveryCollections.deliveries).doc(outboxId);
+  return firestore.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) return 'not_found' as const;
+    if (snapshot.get('status') !== 'deadLetter') return 'not_dead_letter' as const;
+    transaction.set(
+      ref,
+      {
+        status: 'retryPending',
+        attempts: 0,
+        manualReplayRequestedAtUtc: nowUtc,
+        updatedAtUtc: nowUtc,
+      },
+      { merge: true },
+    );
+    return 'requeued' as const;
+  });
 }
 
 function safeErrorType(error: unknown): string {

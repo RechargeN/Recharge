@@ -45,7 +45,9 @@ export interface IdentitySessionV1 {
   readonly handleHash: string;
   readonly issuedAtUtc: UtcInstant;
   readonly lastActiveAtUtc: UtcInstant;
+  readonly idleExpiresAtUtc: UtcInstant;
   readonly revokedAtUtc?: UtcInstant;
+  readonly revocationReason?: 'replaced' | 'recovery' | 'logoutAll' | 'manual';
 }
 
 export interface PublisherRefV1 {

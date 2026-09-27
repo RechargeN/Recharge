@@ -2,6 +2,8 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   inspectBookingCommand,
   inspectBookingQuery,
@@ -13,13 +15,18 @@ import { getEventAvailability } from './booking/availability_query.js';
 import { getMyBooking, listMyBookings } from './booking/booking_queries.js';
 import { cancelInternalBooking } from './booking/cancel_internal_booking.js';
 import { createInternalBooking } from './booking/create_internal_booking.js';
-import { isEmulatorAppCheckAllowed, resolveBookingActor } from './shared/auth_context.js';
-import { bookingFlagIds, type BookingFlagId } from './shared/feature_flags.js';
+import { resolveBookingActor } from './shared/auth_context.js';
+import {
+  abuseEmergencySwitchIds,
+  bookingFlagIds,
+  type BookingFlagId,
+} from './shared/feature_flags.js';
 import { identityFlagIds } from './shared/feature_flags.js';
 import { createEmulatorBookingCompositionRoot } from './platform/bootstrap/booking_composition_root.js';
 import {
   bookingWireErrorCode,
   rejected,
+  retryable,
   toBookingCommandWireResult,
   unsupported,
   type BookingResult,
@@ -27,11 +34,24 @@ import {
 import { systemServerClock } from './shared/server_clock.js';
 import type { FirestoreFailureLogRecord } from './shared/firestore_failure.js';
 import { classifyFirestoreFailure } from './shared/firestore_failure.js';
-import { bookingAccessCapability } from './shared/booking_access_authority.js';
+import {
+  bookingAccessCapability,
+  type BookingAccessDecision,
+} from './shared/booking_access_authority.js';
 import { inspectIdentitySessionCommand } from './contracts/identity_session_v1.js';
-import { establishEmulatorIdentitySession } from './modules/identity_publisher/application/emulator_identity_session_service.js';
+import {
+  establishEmulatorIdentitySession,
+  recoverEmulatorIdentitySessions,
+  rotateEmulatorIdentitySession,
+} from './modules/identity_publisher/application/emulator_identity_session_service.js';
 import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
 import { IdentityFailure } from './modules/identity_publisher/domain/failures.js';
+import { decideAppCheck } from './security/app_check_policy.js';
+import { localNetworkRiskHash } from './platform/security/firestore_abuse_rate_limiter.js';
+import {
+  processEventBookingOutboxDocument,
+  runPendingEventBookingDeliveries,
+} from './booking/event_projection_runtime.js';
 
 // Preserve R0 while exposing only the explicitly approved, Emulator-only callables.
 // R1 platform composition is internal-only and intentionally has no transport export.
@@ -53,23 +73,53 @@ const bookingFailureLogger = Object.freeze({
 export const establishIdentitySessionV1 = onCall<unknown>(callableOptions, async (request) => {
   const requestId = bookingTransportHint(request.data).requestId;
   if (request.auth === undefined || request.auth.uid.length === 0) {
-    return identitySessionFailure(requestId, 'unauthenticated', false);
+    return identitySessionFailure(requestId, 'establishIdentitySession', 'unauthenticated', false);
   }
-  if (!isEmulatorAppCheckAllowed(request.app)) {
-    return identitySessionFailure(requestId, 'feature_disabled', false);
+  const appCheck = localAppCheckDecision(request.app);
+  if (!appCheck.allowed) {
+    return identitySessionFailure(
+      requestId,
+      'establishIdentitySession',
+      appCheck.code === 'app_check_required' ? 'app_check_required' : 'temporarily_unavailable',
+      appCheck.code !== 'app_check_required',
+      appCheck.code === 'policy_unavailable' ? 60 : undefined,
+    );
   }
   const firestore = emulatorFirestore();
-  if (firestore === undefined) return identitySessionFailure(requestId, 'feature_disabled', false);
+  if (firestore === undefined)
+    return identitySessionFailure(requestId, 'establishIdentitySession', 'feature_disabled', false);
   try {
     const flags = new FirestoreFeatureFlagGate(firestore, 'local', 'LV');
     if (!(await flags.isEnabled(identityFlagIds.establishSession))) {
-      return identitySessionFailure(requestId, 'feature_disabled', false);
+      return identitySessionFailure(
+        requestId,
+        'establishIdentitySession',
+        'feature_disabled',
+        false,
+      );
+    }
+    if (await flags.isEnabled(abuseEmergencySwitchIds.identitySessionIssue)) {
+      return identitySessionFailure(
+        requestId,
+        'establishIdentitySession',
+        'feature_disabled',
+        false,
+      );
     }
     const inspected = inspectIdentitySessionCommand(request.data);
     if (!inspected.ok) {
       return identitySessionFailure(
         requestId,
+        'establishIdentitySession',
         inspected.reason === 'unsupported_schema' ? 'unsupported_schema' : 'invalid_contract',
+        false,
+      );
+    }
+    if (inspected.value.commandType !== 'establishIdentitySession') {
+      return identitySessionFailure(
+        requestId,
+        'establishIdentitySession',
+        'invalid_contract',
         false,
       );
     }
@@ -77,6 +127,12 @@ export const establishIdentitySessionV1 = onCall<unknown>(callableOptions, async
       firestore,
       firebaseUid: request.auth.uid,
       installationId: inspected.value.installationId,
+      attemptRequestId: inspected.value.requestId,
+      ...(localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now()) === undefined
+        ? {}
+        : {
+            networkRiskHash: localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now())!,
+          }),
       now: systemServerClock.now(),
     });
     return {
@@ -89,8 +145,14 @@ export const establishIdentitySessionV1 = onCall<unknown>(callableOptions, async
     };
   } catch (error) {
     if (error instanceof IdentityFailure) {
-      const retryable = error.code === 'temporarily_unavailable';
-      return identitySessionFailure(requestId, error.code, retryable);
+      const retryable = error.code === 'temporarily_unavailable' || error.code === 'rate_limited';
+      return identitySessionFailure(
+        requestId,
+        'establishIdentitySession',
+        error.code,
+        retryable,
+        error.retryAfterSeconds,
+      );
     }
     const classified = classifyFirestoreFailure(error, {
       correlationId: requestId,
@@ -98,15 +160,159 @@ export const establishIdentitySessionV1 = onCall<unknown>(callableOptions, async
       logger: bookingFailureLogger,
     });
     if (classified.kind === 'succeeded') {
-      return identitySessionFailure(requestId, 'temporarily_unavailable', false);
+      return identitySessionFailure(
+        requestId,
+        'establishIdentitySession',
+        'temporarily_unavailable',
+        false,
+      );
     }
     return identitySessionFailure(
       requestId,
+      'establishIdentitySession',
       classified.code,
       classified.kind === 'retryableFailure',
     );
   }
 });
+
+export const refreshIdentitySessionV1 = onCall<unknown>(callableOptions, async (request) => {
+  const requestId = bookingTransportHint(request.data).requestId;
+  const commandType = 'refreshIdentitySession' as const;
+  if (request.auth === undefined || request.auth.uid.length === 0) {
+    return identitySessionFailure(requestId, commandType, 'unauthenticated', false);
+  }
+  const appCheck = localAppCheckDecision(request.app);
+  if (!appCheck.allowed) {
+    return identitySessionFailure(
+      requestId,
+      commandType,
+      appCheck.code === 'app_check_required' ? 'app_check_required' : 'temporarily_unavailable',
+      appCheck.code !== 'app_check_required',
+      appCheck.code === 'policy_unavailable' ? 60 : undefined,
+    );
+  }
+  const firestore = emulatorFirestore();
+  if (firestore === undefined) {
+    return identitySessionFailure(requestId, commandType, 'feature_disabled', false);
+  }
+  try {
+    const flags = new FirestoreFeatureFlagGate(firestore, 'local', 'LV');
+    if (!(await flags.isEnabled(identityFlagIds.establishSession))) {
+      return identitySessionFailure(requestId, commandType, 'feature_disabled', false);
+    }
+    const inspected = inspectIdentitySessionCommand(request.data);
+    if (!inspected.ok || inspected.value.commandType !== commandType) {
+      return identitySessionFailure(
+        requestId,
+        commandType,
+        !inspected.ok && inspected.reason === 'unsupported_schema'
+          ? 'unsupported_schema'
+          : 'invalid_contract',
+        false,
+      );
+    }
+    const session = await rotateEmulatorIdentitySession({
+      firestore,
+      sessionId: inspected.value.sessionContext.sessionId,
+      sessionHandle: inspected.value.sessionContext.sessionHandle,
+      firebaseUid: request.auth.uid,
+      installationId: inspected.value.sessionContext.installationId,
+      attemptRequestId: inspected.value.requestId,
+      now: systemServerClock.now(),
+    });
+    return identitySessionSuccess(commandType, inspected.value.requestId, {
+      userId: session.session.userId,
+      sessionId: session.session.sessionId,
+      sessionHandle: session.sessionHandle,
+      installationId: session.session.installationId,
+      expiresAtUtc: session.accessSnapshot.expiresAtUtc,
+    });
+  } catch (error) {
+    return mapIdentitySessionError(error, requestId, commandType, 'refresh_identity_session');
+  }
+});
+
+export const recoverIdentitySessionsV1 = onCall<unknown>(callableOptions, async (request) => {
+  const requestId = bookingTransportHint(request.data).requestId;
+  const commandType = 'recoverIdentitySessions' as const;
+  if (request.auth === undefined || request.auth.uid.length === 0) {
+    return identitySessionFailure(requestId, commandType, 'unauthenticated', false);
+  }
+  if (!hasRecentFirebaseAuthentication(request.auth.token.auth_time, systemServerClock.now())) {
+    return identitySessionFailure(requestId, commandType, 'recent_auth_required', false);
+  }
+  const appCheck = localAppCheckDecision(request.app);
+  if (!appCheck.allowed) {
+    return identitySessionFailure(
+      requestId,
+      commandType,
+      appCheck.code === 'app_check_required' ? 'app_check_required' : 'temporarily_unavailable',
+      appCheck.code !== 'app_check_required',
+      appCheck.code === 'policy_unavailable' ? 60 : undefined,
+    );
+  }
+  const firestore = emulatorFirestore();
+  if (firestore === undefined) {
+    return identitySessionFailure(requestId, commandType, 'feature_disabled', false);
+  }
+  try {
+    const flags = new FirestoreFeatureFlagGate(firestore, 'local', 'LV');
+    if (!(await flags.isEnabled(identityFlagIds.establishSession))) {
+      return identitySessionFailure(requestId, commandType, 'feature_disabled', false);
+    }
+    const inspected = inspectIdentitySessionCommand(request.data);
+    if (!inspected.ok || inspected.value.commandType !== commandType) {
+      return identitySessionFailure(
+        requestId,
+        commandType,
+        !inspected.ok && inspected.reason === 'unsupported_schema'
+          ? 'unsupported_schema'
+          : 'invalid_contract',
+        false,
+      );
+    }
+    const now = systemServerClock.now();
+    const networkRiskHash = localNetworkRiskHash(request.rawRequest.ip, now);
+    const session = await recoverEmulatorIdentitySessions({
+      firestore,
+      firebaseUid: request.auth.uid,
+      installationId: inspected.value.installationId,
+      attemptRequestId: inspected.value.requestId,
+      ...(networkRiskHash === undefined ? {} : { networkRiskHash }),
+      now,
+    });
+    return identitySessionSuccess(commandType, inspected.value.requestId, session);
+  } catch (error) {
+    return mapIdentitySessionError(error, requestId, commandType, 'recover_identity_sessions');
+  }
+});
+
+export const consumeEventBookingOutboxV1 = onDocumentCreated(
+  {
+    document: 'eventBookingOutbox/{outboxId}',
+    region: 'europe-west1',
+    retry: false,
+  },
+  async (event) => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await processEventBookingOutboxDocument(
+      firestore,
+      event.params.outboxId,
+      systemServerClock.now().toISOString(),
+    );
+  },
+);
+
+export const retryEventBookingProjectionDeliveriesV1 = onSchedule(
+  { schedule: 'every 5 minutes', region: 'europe-west1', retryCount: 0 },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await runPendingEventBookingDeliveries(firestore, systemServerClock.now().toISOString(), 20);
+  },
+);
 
 export const createInternalBookingV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareCommand(request, bookingFlagIds.create, 'createBooking');
@@ -226,7 +432,7 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
       return {
         ok: false as const,
         requestId: hint.requestId,
-        result: rejected('permission_denied'),
+        result: bookingAccessFailure(decision.reason),
       };
     }
     actorId = decision.userId;
@@ -237,7 +443,48 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
         result: rejected('feature_disabled'),
       };
     }
+    const incidentSwitch =
+      commandType === 'createBooking'
+        ? abuseEmergencySwitchIds.bookingCreate
+        : abuseEmergencySwitchIds.bookingCancel;
+    if (await access.composition.featureFlags.isEnabled(incidentSwitch)) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: rejected('feature_disabled'),
+      };
+    }
+    const rateDecision = await access.composition.abuseRateLimiter.consume({
+      operation: commandType === 'createBooking' ? 'booking.create' : 'booking.cancel',
+      attemptRequestId: hint.requestId,
+      accountId: actorId,
+      installationId: access.accessHint.installationId,
+      sessionId: access.accessHint.sessionId,
+      ...(localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now()) === undefined
+        ? {}
+        : {
+            networkRiskHash: localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now())!,
+          }),
+      environmentId: 'local',
+      marketId: 'LV',
+      now: systemServerClock.now(),
+      correlationId: hint.requestId,
+    });
+    if (!rateDecision.allowed) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: retryable('rate_limited', rateDecision.retryAfterSeconds),
+      };
+    }
   } catch (error) {
+    if (error instanceof Error && error.message === 'abuse_policy_unavailable') {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: retryable('temporarily_unavailable', 60),
+      };
+    }
     return {
       ok: false as const,
       requestId: hint.requestId,
@@ -282,6 +529,75 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
   const hint = bookingTransportHint(request.data);
   const access = prepareTransport(request);
   if (!access.ok) return { ...access, requestId: hint.requestId };
+  let actorId: string;
+  try {
+    const decision = await access.composition.accessAuthority.authorize(
+      access.accessHint,
+      systemServerClock.now(),
+    );
+    if (!decision.allowed) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: bookingAccessFailure(decision.reason),
+      };
+    }
+    actorId = decision.userId;
+    if (!(await access.composition.featureFlags.isEnabled(flagId))) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: rejected('feature_disabled'),
+      };
+    }
+    if (await access.composition.featureFlags.isEnabled(abuseEmergencySwitchIds.bookingQuery)) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: rejected('feature_disabled'),
+      };
+    }
+    const rateDecision = await access.composition.abuseRateLimiter.consume({
+      operation: 'booking.query',
+      attemptRequestId: hint.requestId,
+      accountId: actorId,
+      installationId: access.accessHint.installationId,
+      sessionId: access.accessHint.sessionId,
+      ...(localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now()) === undefined
+        ? {}
+        : {
+            networkRiskHash: localNetworkRiskHash(request.rawRequest.ip, systemServerClock.now())!,
+          }),
+      environmentId: 'local',
+      marketId: 'LV',
+      now: systemServerClock.now(),
+      correlationId: hint.requestId,
+    });
+    if (!rateDecision.allowed) {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: retryable('rate_limited', rateDecision.retryAfterSeconds),
+      };
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === 'abuse_policy_unavailable') {
+      return {
+        ok: false as const,
+        requestId: hint.requestId,
+        result: retryable('temporarily_unavailable', 60),
+      };
+    }
+    return {
+      ok: false as const,
+      requestId: hint.requestId,
+      result: classifyFirestoreFailure(error, {
+        correlationId: hint.requestId,
+        operationName: 'booking_query_access_authority',
+        logger: bookingFailureLogger,
+      }),
+    };
+  }
   const inspected = inspectBookingQuery(request.rawRequest.rawBody, request.data);
   if (!inspected.ok) {
     return {
@@ -297,38 +613,6 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
       result: unsupported('unsupported_flow'),
     };
   }
-  let actorId: string;
-  try {
-    const decision = await access.composition.accessAuthority.authorize(
-      access.accessHint,
-      systemServerClock.now(),
-    );
-    if (!decision.allowed) {
-      return {
-        ok: false as const,
-        requestId: hint.requestId,
-        result: rejected('permission_denied'),
-      };
-    }
-    actorId = decision.userId;
-    if (!(await access.composition.featureFlags.isEnabled(flagId))) {
-      return {
-        ok: false as const,
-        requestId: hint.requestId,
-        result: rejected('feature_disabled'),
-      };
-    }
-  } catch (error) {
-    return {
-      ok: false as const,
-      requestId: hint.requestId,
-      result: classifyFirestoreFailure(error, {
-        correlationId: hint.requestId,
-        operationName: 'booking_query_access_authority',
-        logger: bookingFailureLogger,
-      }),
-    };
-  }
   return {
     ok: true as const,
     actorId,
@@ -341,8 +625,15 @@ async function prepareQuery<T extends BookingQuery['queryType']>(
 function prepareTransport(request: CallableRequest<unknown>) {
   const actor = resolveBookingActor(request.auth, sessionContextFrom(request.data));
   if (!actor.ok) return { ok: false as const, result: rejected(actor.code) };
-  if (!isEmulatorAppCheckAllowed(request.app)) {
-    return { ok: false as const, result: rejected('feature_disabled') };
+  const appCheck = localAppCheckDecision(request.app);
+  if (!appCheck.allowed) {
+    return {
+      ok: false as const,
+      result:
+        appCheck.code === 'app_check_required'
+          ? rejected('app_check_required')
+          : retryable('temporarily_unavailable', 60),
+    };
   }
   const firestore = emulatorFirestore();
   if (firestore === undefined) {
@@ -350,6 +641,16 @@ function prepareTransport(request: CallableRequest<unknown>) {
   }
   const composition = createEmulatorBookingCompositionRoot(firestore);
   return { ok: true as const, accessHint: actor.actor, firestore, composition };
+}
+
+function localAppCheckDecision(app: unknown) {
+  return decideAppCheck({
+    environmentId: 'local',
+    projectId: process.env.GCLOUD_PROJECT,
+    functionsEmulator: process.env.FUNCTIONS_EMULATOR,
+    firestoreEmulatorHost: process.env.FIRESTORE_EMULATOR_HOST,
+    evidenceState: app === undefined ? 'missing' : 'valid',
+  });
 }
 
 function sessionContextFrom(value: unknown): unknown {
@@ -366,8 +667,10 @@ function emulatorFirestore() {
   ) {
     return undefined;
   }
-  if (getApps().length === 0) initializeApp({ projectId: 'demo-recharge' });
-  return getFirestore();
+  const defaultApp =
+    getApps().find((app) => app.name === '[DEFAULT]') ??
+    initializeApp({ projectId: 'demo-recharge' });
+  return getFirestore(defaultApp);
 }
 
 function rawFailure(reason: RawBookingFailureReason) {
@@ -376,10 +679,25 @@ function rawFailure(reason: RawBookingFailureReason) {
   return rejected('invalid_contract');
 }
 
-function identitySessionFailure(requestId: string, code: string, retryable: boolean) {
+function bookingAccessFailure(
+  reason: Extract<BookingAccessDecision, { allowed: false }>['reason'],
+) {
+  if (reason === 'snapshot_stale') return retryable('session_refresh_required');
+  if (reason === 'session_revoked') return rejected('session_revoked');
+  if (reason === 'session_expired') return rejected('session_expired');
+  return rejected('permission_denied');
+}
+
+function identitySessionFailure(
+  requestId: string,
+  commandType: 'establishIdentitySession' | 'refreshIdentitySession' | 'recoverIdentitySessions',
+  code: string,
+  retryable: boolean,
+  retryAfterSeconds?: number,
+) {
   return {
     schemaVersion: 1,
-    commandType: 'establishIdentitySession',
+    commandType,
     requestId,
     serverTime: systemServerClock.now().toISOString(),
     kind: retryable ? 'retryableFailure' : 'rejected',
@@ -388,8 +706,59 @@ function identitySessionFailure(requestId: string, code: string, retryable: bool
       code,
       retryable,
       correlationId: requestId,
+      ...(retryAfterSeconds === undefined ? {} : { details: { retryAfterSeconds } }),
     },
   } as const;
+}
+
+function identitySessionSuccess(
+  commandType: 'establishIdentitySession' | 'refreshIdentitySession' | 'recoverIdentitySessions',
+  requestId: string,
+  sessionContext: Readonly<Record<string, unknown>>,
+) {
+  return {
+    schemaVersion: 1,
+    commandType,
+    requestId,
+    serverTime: systemServerClock.now().toISOString(),
+    kind: 'succeeded',
+    data: { sessionContext },
+  } as const;
+}
+
+function mapIdentitySessionError(
+  error: unknown,
+  requestId: string,
+  commandType: 'refreshIdentitySession' | 'recoverIdentitySessions',
+  operationName: string,
+) {
+  if (error instanceof IdentityFailure) {
+    const retryable = error.code === 'temporarily_unavailable' || error.code === 'rate_limited';
+    return identitySessionFailure(
+      requestId,
+      commandType,
+      error.code,
+      retryable,
+      error.retryAfterSeconds,
+    );
+  }
+  const classified = classifyFirestoreFailure(error, {
+    correlationId: requestId,
+    operationName,
+    logger: bookingFailureLogger,
+  });
+  return identitySessionFailure(
+    requestId,
+    commandType,
+    classified.kind === 'succeeded' ? 'temporarily_unavailable' : classified.code,
+    classified.kind === 'retryableFailure',
+  );
+}
+
+function hasRecentFirebaseAuthentication(authTime: unknown, now: Date): boolean {
+  if (typeof authTime !== 'number' || !Number.isFinite(authTime)) return false;
+  const ageSeconds = Math.floor(now.getTime() / 1000) - authTime;
+  return ageSeconds >= -60 && ageSeconds <= 5 * 60;
 }
 
 function bookingTransportHint(value: unknown): Readonly<{
@@ -440,6 +809,9 @@ function toBookingQueryWireResult(
         code: bookingWireErrorCode(result.code),
         retryable: result.kind === 'retryableFailure',
         correlationId: requestId,
+        ...(result.kind === 'retryableFailure' && result.retryAfterSeconds !== undefined
+          ? { details: { retryAfterSeconds: result.retryAfterSeconds } }
+          : {}),
       },
     };
   }

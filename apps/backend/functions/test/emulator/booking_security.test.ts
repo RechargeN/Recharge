@@ -95,13 +95,7 @@ void test('inactive identity and missing flag fail closed', async () => {
 });
 
 void test('test-only flags enable exactly the real callable path in disposable emulator', async () => {
-  const callableEvent = finiteEvent({
-    registrationWindow: {
-      opensAt: '2020-01-01T00:00:00.000Z',
-      closesAt: '2099-01-01T00:00:00.000Z',
-    },
-    cancellationDeadline: '2099-01-01T00:00:00.000Z',
-  });
+  const callableEvent = futureCallableEvent();
   await seedEvent(callableEvent, firestore);
   await setBookingFlags(true, firestore);
   const token = await createAuthorizedActor('callable-actor');
@@ -189,16 +183,7 @@ void test('test-only flags enable exactly the real callable path in disposable e
 void test('Firebase UID resolves through Session to a distinct domain User id', async () => {
   await cleanupBookingEmulator(firestore);
   await setBookingFlags(true, firestore);
-  await seedEvent(
-    finiteEvent({
-      registrationWindow: {
-        opensAt: '2020-01-01T00:00:00.000Z',
-        closesAt: '2099-01-01T00:00:00.000Z',
-      },
-      cancellationDeadline: '2099-01-01T00:00:00.000Z',
-    }),
-    firestore,
-  );
+  await seedEvent(futureCallableEvent(), firestore);
   const firebaseUid = 'firebase-transport-user';
   const domainUserId = '018F4Z6M7N8P9Q0R1S2T3V4W5X';
   const token = await createAuthorizedActor(firebaseUid, undefined, domainUserId);
@@ -218,16 +203,7 @@ void test('Emulator Identity callable issues an opaque Session used by Booking',
   await cleanupBookingEmulator(firestore);
   await setIdentitySessionFlag(true, firestore);
   await setBookingFlags(true, firestore);
-  await seedEvent(
-    finiteEvent({
-      registrationWindow: {
-        opensAt: '2020-01-01T00:00:00.000Z',
-        closesAt: '2099-01-01T00:00:00.000Z',
-      },
-      cancellationDeadline: '2099-01-01T00:00:00.000Z',
-    }),
-    firestore,
-  );
+  await seedEvent(futureCallableEvent(), firestore);
   const token = await createFirebaseActor('firebase-session-callable-user');
   const identityResponse = await callBookingFunction(
     'establishIdentitySessionV1',
@@ -498,3 +474,15 @@ void test('feature disable and mutation are serialized without a stale-authority
     false,
   );
 });
+
+function futureCallableEvent() {
+  return finiteEvent({
+    occurrenceStartsAt: '2098-08-29T11:00:00.000Z',
+    occurrenceEndsAt: '2098-08-29T14:00:00.000Z',
+    registrationWindow: {
+      opensAt: '2020-01-01T00:00:00.000Z',
+      closesAt: '2099-01-01T00:00:00.000Z',
+    },
+    cancellationDeadline: '2099-01-01T00:00:00.000Z',
+  });
+}

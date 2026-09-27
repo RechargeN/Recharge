@@ -32,7 +32,8 @@
     "installationId": "install-1",
     "handleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "issuedAtUtc": "2026-09-22T00:00:01.000Z",
-    "lastActiveAtUtc": "2026-09-22T00:00:01.000Z"
+    "lastActiveAtUtc": "2026-09-22T00:00:01.000Z",
+    "idleExpiresAtUtc": "2026-10-22T00:00:01.000Z"
   },
   "accessSnapshot": {
     "schemaVersion": 1,

@@ -140,6 +140,10 @@ const expectedBoundedCallableExports = [
   "getEventAvailabilityV1",
   "getMyBookingV1",
   "establishIdentitySessionV1",
+  "refreshIdentitySessionV1",
+  "recoverIdentitySessionsV1",
+  "consumeEventBookingOutboxV1",
+  "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",
 ].sort();
 if (

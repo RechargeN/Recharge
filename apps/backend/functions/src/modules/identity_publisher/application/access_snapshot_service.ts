@@ -24,7 +24,7 @@ export class AccessSnapshotService {
       const account = await transaction.account(input.userId);
       const session = await transaction.session(input.sessionId);
       if (account === null || session === null) throw new IdentityFailure('unauthenticated');
-      assertCurrentSession(session, account);
+      assertCurrentSession(session, account, input.evaluatedAtUtc);
       const verification = await transaction.verificationForUser(input.userId);
       const personalCapabilityIds =
         verification?.status === 'verified' && account.systemRoles.includes('Creator')
@@ -57,7 +57,7 @@ export class AccessSnapshotService {
       const account = await transaction.account(snapshot.userId);
       const session = await transaction.session(snapshot.sessionId);
       if (account === null || session === null) throw new IdentityFailure('unauthenticated');
-      assertCurrentSession(session, account);
+      assertCurrentSession(session, account, nowUtc);
       if (
         account.revision !== snapshot.accountRevision ||
         session.revision !== snapshot.sessionRevision ||

@@ -5,7 +5,7 @@ import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js
 import { activeBookingKeyId } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
 import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
-import { releaseFiniteSlot, type UserUsage } from '../policy/concurrency.js';
+import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import {
   BookingDomainRefusal,
   BookingRetryableFailure,
@@ -151,8 +151,10 @@ export async function cancelInternalBooking(
       }
       let ledgerRef;
       let nextLedger: PoolLedger | undefined;
-      let usageRef;
-      let nextUsage: UserUsage | undefined;
+      const usageRef = dependencies.firestore
+        .collection(bookingCollections.userUsage)
+        .doc(bookingUserUsageId(actorId, booking.marketId));
+      let usageSnapshot;
       const hasPool = booking.inventoryPoolId !== undefined;
       const hasChannel = booking.channel !== undefined;
       if (hasPool !== hasChannel) throw new BookingDomainRefusal('event_unavailable');
@@ -160,10 +162,9 @@ export async function cancelInternalBooking(
         ledgerRef = dependencies.firestore
           .collection(bookingCollections.poolLedgers)
           .doc(finitePoolLedgerId(booking.occurrenceId, booking.inventoryPoolId, booking.channel));
-        usageRef = dependencies.firestore
-          .collection(bookingCollections.userUsage)
-          .doc(bookingUserUsageId(actorId));
-        const [ledgerSnapshot, usageSnapshot] = await transaction.getAll(ledgerRef, usageRef);
+        const snapshots = await transaction.getAll(ledgerRef, usageRef);
+        const ledgerSnapshot = snapshots[0];
+        usageSnapshot = snapshots[1];
         if (ledgerSnapshot === undefined || usageSnapshot === undefined) {
           throw new Error('firestore_snapshot_count_mismatch');
         }
@@ -172,8 +173,19 @@ export async function cancelInternalBooking(
         if (ledger === undefined || usage === undefined)
           throw new BookingDomainRefusal('event_unavailable');
         nextLedger = releaseUnits(ledger, booking.participantUnits, now.toISOString());
-        nextUsage = releaseFiniteSlot(usage, actorId, now.toISOString());
+      } else {
+        usageSnapshot = await transaction.get(usageRef);
       }
+      const usage = usageSnapshot.data() as UserUsage | undefined;
+      if (usage === undefined) throw new BookingDomainRefusal('event_unavailable');
+      const nextUsage = releaseBookingSlot(
+        usage,
+        actorId,
+        booking.marketId,
+        hasPool ? 'finite' : 'unlimited',
+        booking.id,
+        now.toISOString(),
+      );
 
       const nextBooking: BookingRecord = {
         ...booking,
@@ -229,7 +241,7 @@ export async function cancelInternalBooking(
       transaction.delete(activeRef);
       if (ledgerRef !== undefined && nextLedger !== undefined)
         transaction.set(ledgerRef, nextLedger);
-      if (usageRef !== undefined && nextUsage !== undefined) transaction.set(usageRef, nextUsage);
+      transaction.set(usageRef, nextUsage);
       transaction.create(logicalRef, idempotency);
       transaction.create(attemptRef, toRequestAttemptRecord(idempotency, attemptId));
       transaction.create(

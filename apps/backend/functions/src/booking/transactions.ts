@@ -35,10 +35,12 @@ export function finitePoolLedgerId(occurrenceId: string, poolId: string, channel
   return `bpl2_${digest}`;
 }
 
-export function bookingUserUsageId(actorId: string): string {
-  const canonical = `${Buffer.byteLength(actorId, 'utf8')}:${actorId}`;
+export function bookingUserUsageId(actorId: string, marketId: 'LV' | 'EE' | 'LT'): string {
+  const canonical = [actorId, marketId]
+    .map((part) => `${Buffer.byteLength(part, 'utf8')}:${part}`)
+    .join('|');
   const digest = createHash('sha256')
-    .update(`booking_user_usage_v1|${canonical}`, 'utf8')
+    .update(`booking_user_usage_v2|${canonical}`, 'utf8')
     .digest('hex');
-  return `buu1_${digest}`;
+  return `buu2_${digest}`;
 }

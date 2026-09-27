@@ -10,7 +10,8 @@ import {
 } from '../inventory/active_key.js';
 import { allocateUnits, reconcileCapacity, type PoolLedger } from '../inventory/ledger.js';
 import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
-import { acquireFiniteSlot, type UserUsage } from '../policy/concurrency.js';
+import { acquireBookingSlot, type UserUsage } from '../policy/concurrency.js';
+import { bookingCompletionGraceMinutes } from '../security/abuse_policy.js';
 import {
   BookingDomainRefusal,
   BookingRetryableFailure,
@@ -141,6 +142,12 @@ export async function createInternalBooking(
         throw new BookingDomainRefusal('revision_conflict');
       }
       assertGuestPolicy(event, command.payload.participantUnits, command.payload.namedGuests);
+      if (event.occurrenceEndsAt === undefined) {
+        throw new BookingDomainRefusal('event_unavailable');
+      }
+      const usageExpiresAtUtc = new Date(
+        Date.parse(event.occurrenceEndsAt) + bookingCompletionGraceMinutes * 60_000,
+      ).toISOString();
       if (activeSnapshot.exists) {
         if (!activeKeyMatches(activeSnapshot.data(), actorId, event.occurrenceId)) {
           throw new BookingDomainRefusal('event_unavailable');
@@ -150,8 +157,10 @@ export async function createInternalBooking(
 
       let ledgerRef;
       let nextLedger: PoolLedger | undefined;
-      let usageRef;
-      let nextUsage: UserUsage | undefined;
+      const usageRef = dependencies.firestore
+        .collection(bookingCollections.userUsage)
+        .doc(bookingUserUsageId(actorId, event.marketId));
+      let usageSnapshot;
       if (event.capacityMode === 'finite') {
         const poolId = event.poolId;
         const channel = event.channel;
@@ -161,10 +170,9 @@ export async function createInternalBooking(
         ledgerRef = dependencies.firestore
           .collection(bookingCollections.poolLedgers)
           .doc(finitePoolLedgerId(event.occurrenceId, poolId, channel));
-        usageRef = dependencies.firestore
-          .collection(bookingCollections.userUsage)
-          .doc(bookingUserUsageId(actorId));
-        const [ledgerSnapshot, usageSnapshot] = await transaction.getAll(ledgerRef, usageRef);
+        const snapshots = await transaction.getAll(ledgerRef, usageRef);
+        const ledgerSnapshot = snapshots[0];
+        usageSnapshot = snapshots[1];
         if (ledgerSnapshot === undefined || usageSnapshot === undefined) {
           throw new Error('firestore_snapshot_count_mismatch');
         }
@@ -193,18 +201,26 @@ export async function createInternalBooking(
           command.payload.participantUnits,
           nowIso,
         );
-        nextUsage = acquireFiniteSlot(
-          usageSnapshot.data() as UserUsage | undefined,
-          actorId,
-          nowIso,
-        );
+      } else {
+        usageSnapshot = await transaction.get(usageRef);
       }
+      if (usageSnapshot === undefined) throw new Error('firestore_snapshot_count_mismatch');
+      const nextUsage = acquireBookingSlot(
+        usageSnapshot.data() as UserUsage | undefined,
+        actorId,
+        event.marketId,
+        event.capacityMode,
+        bookingId,
+        usageExpiresAtUtc,
+        nowIso,
+      );
 
       const booking: BookingRecord = {
         schemaVersion: 1,
         id: bookingId,
         revision: 1,
         userId: actorId,
+        marketId: event.marketId,
         eventId: event.eventId,
         occurrenceId: event.occurrenceId,
         ...(event.poolId === undefined ? {} : { inventoryPoolId: event.poolId }),
@@ -280,7 +296,7 @@ export async function createInternalBooking(
       transaction.create(activeRef, activeKey);
       if (ledgerRef !== undefined && nextLedger !== undefined)
         transaction.set(ledgerRef, nextLedger);
-      if (usageRef !== undefined && nextUsage !== undefined) transaction.set(usageRef, nextUsage);
+      transaction.set(usageRef, nextUsage);
       transaction.create(logicalRef, idempotency);
       transaction.create(attemptRef, toRequestAttemptRecord(idempotency, attemptId));
       transaction.create(

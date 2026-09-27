@@ -16,6 +16,17 @@ export type BookingPrivacyTaskResult =
 
 export interface BookingPrivacyRecordStore {
   runAtomic<T>(operation: (records: BookingIdentityBearingRecord[]) => T): Promise<T>;
+  runPagedErasure?(input: {
+    readonly pseudonymousActorId: string;
+    readonly nowUtc: string;
+  }): Promise<
+    Readonly<{
+      recordCount: number;
+      pseudonymizedCount: number;
+      activeFutureBookingCount: number;
+      legalHoldCount: number;
+    }>
+  >;
 }
 
 export class InMemoryBookingPrivacyRecordStore implements BookingPrivacyRecordStore {
@@ -49,6 +60,32 @@ export class BookingPrivacyTaskHandler {
     try {
       if (!Number.isFinite(Date.parse(input.nowUtc)) || input.subjectId.trim().length === 0) {
         return { kind: 'failed', code: 'invalid_task' };
+      }
+      if (
+        input.taskType === 'erasure' &&
+        input.pseudonymousActorId !== undefined &&
+        this.store.runPagedErasure !== undefined
+      ) {
+        const evidence = await this.store.runPagedErasure({
+          pseudonymousActorId: input.pseudonymousActorId,
+          nowUtc: input.nowUtc,
+        });
+        if (evidence.activeFutureBookingCount > 0 || evidence.legalHoldCount > 0) {
+          return {
+            kind: 'retryableFailure',
+            code:
+              evidence.activeFutureBookingCount > 0
+                ? 'active_future_booking_cancellation_required'
+                : 'temporarily_unavailable',
+          };
+        }
+        return {
+          kind: 'succeeded',
+          evidence: {
+            recordCount: evidence.recordCount,
+            pseudonymizedCount: evidence.pseudonymizedCount,
+          },
+        };
       }
       return await this.store.runAtomic((records) => {
         const indexes = records

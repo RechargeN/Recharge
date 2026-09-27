@@ -73,7 +73,7 @@ void test('cancel atomically changes state and releases key ledger and usage exa
     (
       await firestore
         .collection(bookingCollections.userUsage)
-        .doc(bookingUserUsageId('actor-c'))
+        .doc(bookingUserUsageId('actor-c', 'LV'))
         .get()
     ).get('activeFiniteBookings'),
     0,
@@ -196,7 +196,7 @@ void test('cancel uses immutable Booking facts after event lifecycle and invento
       (
         await firestore
           .collection(bookingCollections.userUsage)
-          .doc(bookingUserUsageId(actorId))
+          .doc(bookingUserUsageId(actorId, 'LV'))
           .get()
       ).get('activeFiniteBookings'),
       0,
@@ -289,7 +289,7 @@ void test('cancellation deadline uses immutable Booking snapshot', async () => {
   assert.deepEqual(result, { kind: 'rejected', code: 'cancellation_deadline_passed' });
 });
 
-void test('unlimited booking cancels after event removal without ledger or usage', async () => {
+void test('unlimited booking cancels after event removal and releases its usage slot', async () => {
   await cleanupBookingEmulator(firestore);
   const event = unlimitedEvent();
   await seedEvent(event, firestore);
@@ -314,7 +314,10 @@ void test('unlimited booking cancels after event removal without ledger or usage
   });
   assert.equal(result.kind, 'succeeded');
   assert.equal((await firestore.collection(bookingCollections.poolLedgers).get()).empty, true);
-  assert.equal((await firestore.collection(bookingCollections.userUsage).get()).empty, true);
+  const usage = await firestore.collection(bookingCollections.userUsage).limit(1).get();
+  assert.equal(usage.size, 1);
+  assert.equal(usage.docs[0]?.get('activeFiniteBookings'), 0);
+  assert.equal(usage.docs[0]?.get('activeUnlimitedBookings'), 0);
 });
 
 void test('dangling cancellation attempt returns retryable temporary failure', async () => {

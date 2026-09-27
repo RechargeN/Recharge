@@ -37,10 +37,11 @@ void test('finite ledger ids are fixed-width and tuple collision resistant', () 
 });
 
 void test('user usage document key is deterministic and never exposes raw UID', () => {
-  const id = bookingUserUsageId('firebase-user-123');
-  assert.match(id, /^buu1_[0-9a-f]{64}$/u);
-  assert.equal(id, bookingUserUsageId('firebase-user-123'));
-  assert.notEqual(id, bookingUserUsageId('firebase-user-124'));
+  const id = bookingUserUsageId('firebase-user-123', 'LV');
+  assert.match(id, /^buu2_[0-9a-f]{64}$/u);
+  assert.equal(id, bookingUserUsageId('firebase-user-123', 'LV'));
+  assert.notEqual(id, bookingUserUsageId('firebase-user-124', 'LV'));
+  assert.notEqual(id, bookingUserUsageId('firebase-user-123', 'EE'));
   assert.equal(id.includes('firebase-user-123'), false);
 });
 

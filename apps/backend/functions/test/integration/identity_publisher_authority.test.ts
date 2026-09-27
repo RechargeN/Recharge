@@ -98,6 +98,170 @@ void test('concurrent duplicate provider assertions create one account only', as
   assert.equal(new Set(results.map((account) => account.userId)).size, 1);
 });
 
+void test('fourth active Session is rejected and rotation preserves Session identity', async () => {
+  const { authority } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('session-cap'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  const sessionIds = [
+    '018FQ2Z8Q9N4M7K2T6V3W1X5YP',
+    '018FQ2Z8Q9N4M7K2T6V3W1X5YQ',
+    '018FQ2Z8Q9N4M7K2T6V3W1X5YR',
+  ] as const;
+  const issuedSessions = [];
+  for (const [index, sessionId] of sessionIds.entries()) {
+    issuedSessions.push(
+      await authority.sessions.issue({
+        userId: ids.user1,
+        sessionId,
+        issuedAtUtc: `2026-09-22T00:00:0${index + 1}.000Z`,
+        firebaseUid: ids.user1,
+        installationId: `install-${index + 1}`,
+        snapshotExpiresAtUtc: '2026-09-22T00:20:00.000Z',
+      }),
+    );
+  }
+  await assert.rejects(
+    authority.sessions.issue({
+      userId: ids.user1,
+      sessionId: '018FQ2Z8Q9N4M7K2T6V3W1X5YS',
+      issuedAtUtc: '2026-09-22T00:00:05.000Z',
+      firebaseUid: ids.user1,
+      installationId: 'install-4',
+      snapshotExpiresAtUtc: '2026-09-22T00:20:00.000Z',
+    }),
+    (error: unknown) => error instanceof IdentityFailure && error.code === 'session_limit_reached',
+  );
+
+  const before = await authority.sessions.getCurrent(ids.user1, sessionIds[0]);
+  const rotated = await authority.sessions.rotate({
+    sessionId: sessionIds[0],
+    sessionHandle: issuedSessions[0]!.sessionHandle,
+    firebaseUid: ids.user1,
+    installationId: 'install-1',
+    nowUtc: '2026-09-22T00:00:06.000Z',
+    snapshotExpiresAtUtc: '2026-09-22T00:20:06.000Z',
+  });
+  assert.equal(rotated.session.sessionId, before.sessionId);
+  assert.equal(rotated.session.revision, before.revision + 1);
+  assert.equal(rotated.accessSnapshot.sessionRevision, rotated.session.revision);
+  assert.match(rotated.sessionHandle, /^[A-Za-z0-9_-]{43}$/u);
+});
+
+void test('same installation replaces its Session and twelve refreshes retain one live authority', async () => {
+  const { authority } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('refresh-chain'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  const first = await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session1,
+    issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: 'firebase-refresh-chain',
+    installationId: 'install-refresh',
+    snapshotExpiresAtUtc: '2026-09-22T01:00:01.000Z',
+  });
+  const replacement = await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session2,
+    issuedAtUtc: '2026-09-22T00:00:02.000Z',
+    firebaseUid: 'firebase-refresh-chain',
+    installationId: 'install-refresh',
+    snapshotExpiresAtUtc: '2026-09-22T01:00:02.000Z',
+  });
+  await assert.rejects(
+    authority.sessions.getCurrent(ids.user1, first.session.sessionId, '2026-09-22T00:00:03.000Z'),
+    (error: unknown) => error instanceof IdentityFailure && error.code === 'session_revoked',
+  );
+  let current = replacement;
+  for (let index = 0; index < 12; index += 1) {
+    const hour = String(Math.floor(index / 4)).padStart(2, '0');
+    const minute = String((index % 4) * 15 + 1).padStart(2, '0');
+    const nowUtc = `2026-09-22T${hour}:${minute}:00.000Z`;
+    current = await authority.sessions.rotate({
+      sessionId: ids.session2,
+      sessionHandle: current.sessionHandle,
+      firebaseUid: 'firebase-refresh-chain',
+      installationId: 'install-refresh',
+      nowUtc,
+      snapshotExpiresAtUtc: new Date(Date.parse(nowUtc) + 60 * 60 * 1000).toISOString(),
+    });
+  }
+  assert.equal(current.session.revision, 13);
+  assert.equal(current.accessSnapshot.expiresAtUtc, '2026-09-22T03:46:00.000Z');
+});
+
+void test('recent-auth recovery revokes three prior Sessions and issues a usable replacement', async () => {
+  const { authority } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('recover-chain'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  const issued = [];
+  for (const [index, sessionId] of [ids.session1, ids.session2, ids.verification1].entries()) {
+    issued.push(
+      await authority.sessions.issue({
+        userId: ids.user1,
+        sessionId,
+        issuedAtUtc: `2026-09-22T00:00:0${index + 1}.000Z`,
+        firebaseUid: 'firebase-recover-chain',
+        installationId: `recover-install-${index + 1}`,
+        snapshotExpiresAtUtc: '2026-09-22T01:00:00.000Z',
+      }),
+    );
+  }
+  await assert.rejects(
+    authority.sessions.issue({
+      userId: ids.user1,
+      sessionId: ids.evidence1,
+      issuedAtUtc: '2026-09-22T00:00:05.000Z',
+      firebaseUid: 'firebase-recover-chain',
+      installationId: 'recover-install-4',
+      snapshotExpiresAtUtc: '2026-09-22T01:00:05.000Z',
+    }),
+    (error: unknown) => error instanceof IdentityFailure && error.code === 'session_limit_reached',
+  );
+  const recovered = await authority.sessions.recover({
+    userId: ids.user1,
+    sessionId: ids.evidence1,
+    firebaseUid: 'firebase-recover-chain',
+    installationId: 'recover-install-4',
+    nowUtc: '2026-09-22T00:00:06.000Z',
+    snapshotExpiresAtUtc: '2026-09-22T01:00:06.000Z',
+  });
+  for (const previous of issued) {
+    await assert.rejects(
+      authority.sessions.getCurrent(
+        ids.user1,
+        previous.session.sessionId,
+        '2026-09-22T00:00:07.000Z',
+      ),
+      (error: unknown) => error instanceof IdentityFailure && error.code === 'session_revoked',
+    );
+  }
+  assert.equal(
+    (
+      await authority.sessions.getCurrent(
+        ids.user1,
+        recovered.session.sessionId,
+        '2026-09-22T00:00:07.000Z',
+      )
+    ).sessionId,
+    recovered.session.sessionId,
+  );
+});
+
 void test('verified Creator obtains exact personal and page Publisher authority only', async () => {
   const { authority } = setup();
   await authority.accounts.ensureAccount({

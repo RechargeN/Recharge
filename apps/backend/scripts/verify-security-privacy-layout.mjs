@@ -18,6 +18,8 @@ const required = [
   "apps/backend/functions/src/security/age_policy_port.ts",
   "apps/backend/functions/src/security/security_flags.ts",
   "apps/backend/functions/src/security/security_redaction_policy.ts",
+  "apps/backend/functions/src/security/abuse_policy.ts",
+  "apps/backend/functions/src/security/app_check_policy.ts",
   "apps/backend/functions/src/modules/privacy_orchestration/domain/privacy_request.ts",
   "apps/backend/functions/src/modules/privacy_orchestration/domain/privacy_domain_task.ts",
   "apps/backend/functions/src/modules/privacy_orchestration/domain/privacy_evidence.ts",
@@ -39,6 +41,9 @@ for (const collection of [
   "privacyRequests",
   "privacyDomainTasks",
   "securityAuditEvents",
+  "securityRateLimitCounters",
+  "securityRateLimitAttempts",
+  "securityAudit",
 ]) {
   if (
     !rules.includes(
@@ -56,9 +61,14 @@ const indexes = JSON.parse(
 );
 if (
   indexes.indexes.some((entry) =>
-    ["privacyRequests", "privacyDomainTasks", "securityAuditEvents"].includes(
-      entry.collectionGroup,
-    ),
+    [
+      "privacyRequests",
+      "privacyDomainTasks",
+      "securityAuditEvents",
+      "securityRateLimitCounters",
+      "securityRateLimitAttempts",
+      "securityAudit",
+    ].includes(entry.collectionGroup),
   )
 )
   throw new Error(

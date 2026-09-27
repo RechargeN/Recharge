@@ -6,10 +6,23 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "requestId", "serverTime", "kind", "data"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "data"
+      ],
       "properties": {
         "schemaVersion": { "const": 1 },
-        "commandType": { "const": "establishIdentitySession" },
+        "commandType": {
+          "enum": [
+            "establishIdentitySession",
+            "refreshIdentitySession",
+            "recoverIdentitySessions"
+          ]
+        },
         "requestId": { "type": "string" },
         "serverTime": { "type": "string", "format": "date-time" },
         "kind": { "const": "succeeded" },
@@ -21,11 +34,20 @@
             "sessionContext": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["userId", "sessionId", "sessionHandle", "installationId", "expiresAtUtc"],
+              "required": [
+                "userId",
+                "sessionId",
+                "sessionHandle",
+                "installationId",
+                "expiresAtUtc"
+              ],
               "properties": {
                 "userId": { "type": "string" },
                 "sessionId": { "type": "string" },
-                "sessionHandle": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+                "sessionHandle": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{43}$"
+                },
                 "installationId": { "type": "string" },
                 "expiresAtUtc": { "type": "string", "format": "date-time" }
               }
@@ -37,10 +59,23 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "requestId", "serverTime", "kind", "error"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "serverTime",
+        "kind",
+        "error"
+      ],
       "properties": {
         "schemaVersion": { "const": 1 },
-        "commandType": { "const": "establishIdentitySession" },
+        "commandType": {
+          "enum": [
+            "establishIdentitySession",
+            "refreshIdentitySession",
+            "recoverIdentitySessions"
+          ]
+        },
         "requestId": { "type": "string" },
         "serverTime": { "type": "string", "format": "date-time" },
         "kind": { "enum": ["rejected", "retryableFailure"] },
@@ -52,7 +87,14 @@
             "schemaVersion": { "const": 1 },
             "code": { "type": "string", "minLength": 1 },
             "retryable": { "type": "boolean" },
-            "correlationId": { "type": "string" }
+            "correlationId": { "type": "string" },
+            "details": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "retryAfter": { "type": "integer", "minimum": 1 }
+              }
+            }
           }
         }
       }

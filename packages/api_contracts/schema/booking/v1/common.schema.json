@@ -89,6 +89,7 @@
         "organizerCancelled",
         "applicationRejected",
         "occurrenceCancelled",
+        "privacyErasure",
         "eventCancelled",
         "missedReconfirmation",
         "waitlistOfferDeclined",

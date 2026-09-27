@@ -6,10 +6,14 @@ import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { exactBookingCollectionNames } from '../../src/booking/transactions.js';
 import { bookingFlagIds, identityFlagIds } from '../../src/shared/feature_flags.js';
 import type { BookingEventProjection } from '../../src/booking/domain.js';
-import { consumeEventForBookingProjection } from '../../src/booking/event_projection_consumer.js';
 import { bookingIdentityCollections } from '../../src/booking/firestore_booking_access_authority.js';
 import { identityAuthorityCollections } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
-import { eventBookingDeliveryCollections } from '../../src/booking/event_projection_delivery.js';
+import {
+  deliverEventBookingProjection,
+  enqueueEventBookingProjection,
+  eventBookingDeliveryCollections,
+} from '../../src/booking/event_projection_delivery.js';
+import { abuseCollections } from '../../src/platform/security/firestore_abuse_rate_limiter.js';
 import {
   featureFlagKey,
   featureFlagPointerCollection,
@@ -47,6 +51,7 @@ export async function cleanupBookingEmulator(firestore = emulatorFirestore()): P
     ...exactBookingCollectionNames,
     ...bookingAccessCollectionNames,
     ...Object.values(eventBookingDeliveryCollections),
+    ...Object.values(abuseCollections),
     featureFlagRevisionCollection,
     featureFlagPointerCollection,
   ]) {
@@ -74,7 +79,10 @@ export async function seedEvent(
   event: BookingEventProjection,
   firestore = emulatorFirestore(),
 ): Promise<void> {
-  const result = await consumeEventForBookingProjection(firestore, {
+  const outboxId = createHash('sha256')
+    .update(`test-seed-event-v1|${event.eventId}|${event.occurrenceId}|${event.materialRevision}`)
+    .digest('hex');
+  const eventFact = {
     kind: 'EventRevisionPublished',
     eventId: event.eventId,
     occurrenceId: event.occurrenceId,
@@ -82,8 +90,16 @@ export async function seedEvent(
     materialRevision: event.materialRevision,
     occurredAt: '2026-08-01T00:00:00.000Z',
     projection: event,
+  } as const;
+  const enqueued = await enqueueEventBookingProjection(firestore, {
+    schemaVersion: 1,
+    outboxId,
+    event: eventFact,
+    createdAtUtc: eventFact.occurredAt,
   });
-  assert.ok(result.kind === 'applied' || result.kind === 'ignoredDuplicate');
+  assert.ok(enqueued === 'created' || enqueued === 'replayed');
+  const delivered = await deliverEventBookingProjection(firestore, outboxId, eventFact.occurredAt);
+  assert.ok(delivered === 'delivered' || delivered === 'replayed');
 }
 
 export async function setBookingFlags(

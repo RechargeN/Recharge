@@ -6,7 +6,7 @@ import {
   assertSupportedEvent,
 } from '../../src/booking/domain.js';
 import { allocateUnits, reconcileCapacity, releaseUnits } from '../../src/inventory/ledger.js';
-import { acquireFiniteSlot, releaseFiniteSlot } from '../../src/policy/concurrency.js';
+import { acquireBookingSlot, releaseBookingSlot } from '../../src/policy/concurrency.js';
 import { finiteEvent, fixedNow, unlimitedEvent } from '../support/booking_fixtures.js';
 
 void test('accepts only finite or explicit unlimited internal free instant events', () => {
@@ -124,14 +124,103 @@ void test('capacity changes preserve ledger identity and existing confirmed unit
   assert.equal(releaseUnits(decreased, 2, fixedNow.toISOString()).confirmedUnits, 1);
 });
 
-void test('finite user usage is capped at five and released once', () => {
-  let usage = acquireFiniteSlot(undefined, 'user', fixedNow.toISOString());
-  for (let index = 1; index < 5; index += 1)
-    usage = acquireFiniteSlot(usage, 'user', fixedNow.toISOString());
+void test('finite and unlimited user usage are independent, market-scoped and bounded', () => {
+  const expiry = '2026-08-29T16:00:00.000Z';
+  let usage = acquireBookingSlot(
+    undefined,
+    'user',
+    'LV',
+    'finite',
+    'booking-finite-0',
+    expiry,
+    fixedNow.toISOString(),
+  );
+  for (let index = 1; index < 5; index += 1) {
+    usage = acquireBookingSlot(
+      usage,
+      'user',
+      'LV',
+      'finite',
+      `booking-finite-${index}`,
+      expiry,
+      fixedNow.toISOString(),
+    );
+  }
   assert.equal(usage.activeFiniteBookings, 5);
   assert.throws(
-    () => acquireFiniteSlot(usage, 'user', fixedNow.toISOString()),
-    /concurrency_cap_reached/u,
+    () =>
+      acquireBookingSlot(
+        usage,
+        'user',
+        'LV',
+        'finite',
+        'booking-finite-5',
+        expiry,
+        fixedNow.toISOString(),
+      ),
+    /active_booking_limit_reached/u,
   );
-  assert.equal(releaseFiniteSlot(usage, 'user', fixedNow.toISOString()).activeFiniteBookings, 4);
+  assert.equal(
+    releaseBookingSlot(usage, 'user', 'LV', 'finite', 'booking-finite-0', fixedNow.toISOString())
+      .activeFiniteBookings,
+    4,
+  );
+
+  let unlimited = acquireBookingSlot(
+    undefined,
+    'user',
+    'LV',
+    'unlimited',
+    'booking-unlimited-0',
+    expiry,
+    fixedNow.toISOString(),
+  );
+  for (let index = 1; index < 50; index += 1) {
+    unlimited = acquireBookingSlot(
+      unlimited,
+      'user',
+      'LV',
+      'unlimited',
+      `booking-unlimited-${index}`,
+      expiry,
+      fixedNow.toISOString(),
+    );
+  }
+  assert.equal(unlimited.activeUnlimitedBookings, 50);
+  assert.throws(
+    () =>
+      acquireBookingSlot(
+        unlimited,
+        'user',
+        'LV',
+        'unlimited',
+        'booking-unlimited-50',
+        expiry,
+        fixedNow.toISOString(),
+      ),
+    /active_booking_limit_reached/u,
+  );
+  assert.throws(
+    () =>
+      releaseBookingSlot(
+        unlimited,
+        'user',
+        'EE',
+        'unlimited',
+        'booking-unlimited-0',
+        fixedNow.toISOString(),
+      ),
+    /event_unavailable/u,
+  );
+
+  const pruned = acquireBookingSlot(
+    unlimited,
+    'user',
+    'LV',
+    'unlimited',
+    'booking-after-grace',
+    '2026-08-29T20:00:00.000Z',
+    '2026-08-29T17:00:00.000Z',
+  );
+  assert.equal(pruned.activeUnlimitedBookings, 1);
 });

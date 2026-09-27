@@ -22,17 +22,27 @@ const expected = [
   "getEventAvailabilityV1",
   "getMyBookingV1",
   "establishIdentitySessionV1",
+  "refreshIdentitySessionV1",
+  "recoverIdentitySessionsV1",
+  "consumeEventBookingOutboxV1",
+  "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",
   "r0ToolchainProbe",
 ].sort();
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
 }
-if (/onSchedule|onTaskDispatched|pubsub/u.test(source)) {
+const schedules = [...source.matchAll(/export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onSchedule/gu)].map(
+  (match) => match[1],
+);
+if (
+  JSON.stringify(schedules.sort()) !==
+  JSON.stringify(["retryEventBookingProjectionDeliveriesV1"])
+) {
   throw new Error(
-    "R1 cannot add workers, schedules or platform callable exports",
+    `Only the approved disabled Event retry schedule is allowed: ${schedules.join(", ")}`,
   );
 }
 process.stdout.write(
-  "R1 export gate passed: R0 plus five disabled Booking and one disabled Identity callable.\n",
+  "R1 export gate passed: bounded Booking, Session lifecycle and disabled Event delivery surface.\n",
 );

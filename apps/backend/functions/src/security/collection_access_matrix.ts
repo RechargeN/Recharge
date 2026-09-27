@@ -82,6 +82,20 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
     pageScoped: true,
   },
   ...[
+    ['securityRateLimitCounters', 'security.rate-limit-counter'],
+    ['securityRateLimitAttempts', 'security.rate-limit-attempt'],
+    ['securityAudit', 'security.abuse-audit'],
+  ].map(([collectionId, dataClassId]) => ({
+    collectionId: collectionId ?? '',
+    dataClassId: dataClassId ?? '',
+    singleWriter: 'security-abuse-control',
+    serverReaders: ['security-abuse-control', 'incident-response'],
+    clientRead: 'deny' as const,
+    clientWrite: 'deny' as const,
+    marketScoped: true,
+    pageScoped: false,
+  })),
+  ...[
     ['identityAccounts', 'identity.account'],
     ['identityProviderLinks', 'identity.provider-link'],
     ['identitySessions', 'identity.session'],
@@ -116,6 +130,7 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
       'booking.projection-delivery',
       'event-booking-projection-consumer',
     ],
+    ['bookingPrivacyProgress', 'booking.privacy-progress', 'privacy-orchestration'],
   ].map(([collectionId, dataClassId, singleWriter]) => ({
     collectionId: collectionId ?? '',
     dataClassId: dataClassId ?? '',

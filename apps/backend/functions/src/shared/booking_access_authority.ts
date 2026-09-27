@@ -12,7 +12,12 @@ export type BookingAccessDecision =
   | Readonly<{ allowed: true; userId: string }>
   | Readonly<{
       allowed: false;
-      reason: 'account_inactive' | 'session_revoked' | 'snapshot_stale' | 'capability_denied';
+      reason:
+        | 'account_inactive'
+        | 'session_revoked'
+        | 'session_expired'
+        | 'snapshot_stale'
+        | 'capability_denied';
     }>;
 
 export interface BookingAccessAuthority {

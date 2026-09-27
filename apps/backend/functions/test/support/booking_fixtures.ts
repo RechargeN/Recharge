@@ -10,6 +10,7 @@ export function finiteEvent(
     schemaVersion: 1,
     eventId: 'evt_01JTESTEVENT0000000000000',
     occurrenceId: 'occ_01JTESTOCCURRENCE0000000',
+    marketId: 'LV',
     publisherRef: { type: 'page', id: 'page_01JTESTPUBLISHER00000000' },
     materialRevision: 7,
     occurrenceStartsAt: '2026-08-29T11:00:00.000Z',

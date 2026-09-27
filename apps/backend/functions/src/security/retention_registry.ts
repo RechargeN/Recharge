@@ -39,8 +39,8 @@ export class RetentionRegistry {
         !/^[a-z][a-z0-9._-]{0,95}$/.test(policy.policyId) ||
         map.has(policy.policyId) ||
         (policy.status === 'accepted' &&
-          (!Number.isSafeInteger(policy.durationDays) ||
-            policy.durationDays < 0 ||
+          (!Number.isFinite(policy.durationDays) ||
+            policy.durationDays <= 0 ||
             policy.durationDays > 36_600 ||
             policy.evidenceRevision.trim().length === 0))
       )

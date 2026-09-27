@@ -8,6 +8,7 @@
     "schemaVersion": { "type": "integer", "const": 1 },
     "policyVersion": { "type": "integer", "const": 1 },
     "maxConcurrentFiniteAllocations": { "type": "integer", "const": 5 },
+    "maxActiveUnlimitedBookings": { "type": "integer", "const": 50 },
     "countingRule": { "type": "string", "const": "onePerBookingOrActiveHold" },
     "unlimitedBookingCounts": { "type": "boolean", "const": false }
   },
@@ -15,6 +16,7 @@
     "schemaVersion",
     "policyVersion",
     "maxConcurrentFiniteAllocations",
+    "maxActiveUnlimitedBookings",
     "countingRule",
     "unlimitedBookingCounts"
   ]

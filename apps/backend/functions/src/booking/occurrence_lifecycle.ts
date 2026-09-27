@@ -1,9 +1,9 @@
-import type { Firestore } from 'firebase-admin/firestore';
+import { FieldPath, type Firestore } from 'firebase-admin/firestore';
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
 import { activeBookingKeyId } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
 import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
-import { releaseFiniteSlot, type UserUsage } from '../policy/concurrency.js';
+import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import { auditExpiresAt, coreBookingExpiresAt } from './retention.js';
 import type { StoredBookingRecord } from './domain.js';
 import {
@@ -15,7 +15,8 @@ import {
 import type { EventBookingProjectionEvent } from './event_projection_consumer.js';
 
 interface OccurrenceLifecycleEvent {
-  readonly kind: 'EventOccurrenceCancelled' | 'EventMateriallyRescheduled';
+  readonly kind:
+    'EventOccurrenceCancelled' | 'EventMateriallyRescheduled' | 'PrivacyErasureCancellation';
   readonly eventId: string;
   readonly occurrenceId: string;
   readonly materialRevision: number;
@@ -23,12 +24,41 @@ interface OccurrenceLifecycleEvent {
   readonly occurredAt: string;
 }
 
+export async function cancelBookingForPrivacyErasure(
+  firestore: Firestore,
+  bookingId: string,
+  occurredAt: string,
+): Promise<boolean> {
+  const snapshot = await firestore.collection(bookingCollections.bookings).doc(bookingId).get();
+  const booking = snapshot.data() as StoredBookingRecord | undefined;
+  if (booking === undefined || booking.state !== 'confirmed') return false;
+  return applyOne(firestore, bookingId, {
+    kind: 'PrivacyErasureCancellation',
+    eventId: booking.eventId,
+    occurrenceId: booking.occurrenceId,
+    materialRevision: 1,
+    publicationRevision: 1,
+    occurredAt,
+  });
+}
+
 export async function applyOccurrenceLifecycleEffects(
   firestore: Firestore,
   event: EventBookingProjectionEvent,
-): Promise<Readonly<{ affected: number }>> {
+  options: Readonly<{
+    startAfterBookingId?: string;
+    pageSize?: number;
+    afterPage?: (
+      progress: Readonly<{
+        cursor: string;
+        affected: number;
+        processed: number;
+      }>,
+    ) => Promise<void>;
+  }> = {},
+): Promise<Readonly<{ affected: number; processed: number; cursor?: string }>> {
   if (event.kind !== 'EventOccurrenceCancelled' && event.kind !== 'EventMateriallyRescheduled') {
-    return { affected: 0 };
+    return { affected: 0, processed: 0 };
   }
   const lifecycleEvent: OccurrenceLifecycleEvent = {
     kind: event.kind,
@@ -38,16 +68,32 @@ export async function applyOccurrenceLifecycleEffects(
     publicationRevision: event.publicationRevision,
     occurredAt: event.occurredAt,
   };
-  const snapshot = await firestore
-    .collection(bookingCollections.bookings)
-    .where('occurrenceId', '==', event.occurrenceId)
-    .get();
-  let affected = 0;
-  for (const document of snapshot.docs.sort((left, right) => left.id.localeCompare(right.id))) {
-    const changed = await applyOne(firestore, document.id, lifecycleEvent);
-    if (changed) affected += 1;
+  const pageSize = options.pageSize ?? 200;
+  if (!Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 200) {
+    throw new TypeError('occurrence_lifecycle_page_size_invalid');
   }
-  return { affected };
+  let affected = 0;
+  let processed = 0;
+  let cursor = options.startAfterBookingId;
+  while (true) {
+    let query = firestore
+      .collection(bookingCollections.bookings)
+      .where('occurrenceId', '==', event.occurrenceId)
+      .orderBy(FieldPath.documentId())
+      .limit(pageSize);
+    if (cursor !== undefined) query = query.startAfter(cursor);
+    const snapshot = await query.get();
+    if (snapshot.empty) break;
+    for (const document of snapshot.docs) {
+      const changed = await applyOne(firestore, document.id, lifecycleEvent);
+      if (changed) affected += 1;
+      processed += 1;
+    }
+    cursor = snapshot.docs.at(-1)!.id;
+    await options.afterPage?.({ cursor, affected, processed });
+    if (snapshot.size < pageSize) break;
+  }
+  return { affected, processed, ...(cursor === undefined ? {} : { cursor }) };
 }
 
 async function applyOne(
@@ -77,36 +123,50 @@ async function applyOne(
     let usageRef;
     let nextLedger: PoolLedger | undefined;
     let nextUsage: UserUsage | undefined;
-    if (
-      event.kind === 'EventOccurrenceCancelled' &&
-      booking.inventoryPoolId !== undefined &&
-      booking.channel !== undefined
-    ) {
-      ledgerRef = firestore
-        .collection(bookingCollections.poolLedgers)
-        .doc(finitePoolLedgerId(booking.occurrenceId, booking.inventoryPoolId, booking.channel));
+    if (event.kind !== 'EventMateriallyRescheduled') {
       usageRef = firestore
         .collection(bookingCollections.userUsage)
-        .doc(bookingUserUsageId(booking.userId));
-      const [ledgerSnapshot, usageSnapshot] = await transaction.getAll(ledgerRef, usageRef);
-      const ledger = ledgerSnapshot?.data() as PoolLedger | undefined;
+        .doc(bookingUserUsageId(booking.userId, booking.marketId));
+      const finite = booking.inventoryPoolId !== undefined && booking.channel !== undefined;
+      let usageSnapshot;
+      if (finite) {
+        ledgerRef = firestore
+          .collection(bookingCollections.poolLedgers)
+          .doc(finitePoolLedgerId(booking.occurrenceId, booking.inventoryPoolId, booking.channel));
+        const snapshots = await transaction.getAll(ledgerRef, usageRef);
+        const ledgerSnapshot = snapshots[0];
+        usageSnapshot = snapshots[1];
+        const ledger = ledgerSnapshot?.data() as PoolLedger | undefined;
+        if (ledger === undefined) throw new Error('booking_inventory_inconsistent');
+        nextLedger = releaseUnits(ledger, booking.participantUnits, event.occurredAt);
+      } else {
+        usageSnapshot = await transaction.get(usageRef);
+      }
       const usage = usageSnapshot?.data() as UserUsage | undefined;
-      if (ledger === undefined || usage === undefined)
-        throw new Error('booking_inventory_inconsistent');
-      nextLedger = releaseUnits(ledger, booking.participantUnits, event.occurredAt);
-      nextUsage = releaseFiniteSlot(usage, booking.userId, event.occurredAt);
+      if (usage === undefined) throw new Error('booking_inventory_inconsistent');
+      nextUsage = releaseBookingSlot(
+        usage,
+        booking.userId,
+        booking.marketId,
+        finite ? 'finite' : 'unlimited',
+        booking.id,
+        event.occurredAt,
+      );
     }
 
     const revision = booking.revision + 1;
     const next =
-      event.kind === 'EventOccurrenceCancelled'
+      event.kind !== 'EventMateriallyRescheduled'
         ? {
             ...booking,
             revision,
             state: 'cancelled',
             updatedAt: event.occurredAt,
             cancelledAt: event.occurredAt,
-            terminalReason: 'occurrenceCancelled',
+            terminalReason:
+              event.kind === 'PrivacyErasureCancellation'
+                ? 'privacyErasure'
+                : 'occurrenceCancelled',
             ...(coreBookingExpiresAt(
               booking.occurrenceEndSnapshot,
               event.occurredAt,
@@ -144,7 +204,7 @@ async function applyOne(
       expiresAt: auditExpiresAt(event.occurredAt),
     };
     transaction.set(bookingRef, next);
-    if (event.kind === 'EventOccurrenceCancelled') transaction.delete(activeRef);
+    if (event.kind !== 'EventMateriallyRescheduled') transaction.delete(activeRef);
     if (ledgerRef !== undefined && nextLedger !== undefined) transaction.set(ledgerRef, nextLedger);
     if (usageRef !== undefined && nextUsage !== undefined) transaction.set(usageRef, nextUsage);
     transaction.create(
@@ -154,7 +214,7 @@ async function applyOne(
     transaction.create(
       firestore.collection(bookingCollections.outbox).doc(suppressedOutboxId(bookingId, revision)),
       createSuppressedOutbox(
-        event.kind === 'EventOccurrenceCancelled'
+        event.kind !== 'EventMateriallyRescheduled'
           ? 'booking_cancellation'
           : 'booking_reconfirmation',
         bookingId,

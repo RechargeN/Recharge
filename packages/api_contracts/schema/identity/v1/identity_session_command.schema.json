@@ -1,17 +1,75 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://recharge.app/schemas/identity/v1/identity_session_command.schema.json",
-  "title": "EstablishIdentitySessionCommandV1",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["schemaVersion", "commandType", "requestId", "installationId"],
-  "properties": {
-    "schemaVersion": { "const": 1 },
-    "commandType": { "const": "establishIdentitySession" },
-    "requestId": { "type": "string", "pattern": "^(?!__name__$)[A-Za-z0-9_-]{1,128}$" },
+  "title": "IdentitySessionCommandV1",
+  "$defs": {
+    "requestId": {
+      "type": "string",
+      "pattern": "^(?!__name__$)[A-Za-z0-9_-]{1,128}$"
+    },
     "installationId": {
       "type": "string",
       "pattern": "^(?!__name__$)[A-Za-z0-9._:-]{1,128}$"
+    },
+    "sessionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "sessionHandle", "installationId"],
+      "properties": {
+        "sessionId": { "$ref": "#/$defs/requestId" },
+        "sessionHandle": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+        "installationId": { "$ref": "#/$defs/installationId" }
+      }
     }
-  }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "installationId"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "establishIdentitySession" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "installationId": { "$ref": "#/$defs/installationId" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "sessionContext"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "refreshIdentitySession" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "sessionContext": { "$ref": "#/$defs/sessionContext" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "installationId"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "recoverIdentitySessions" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "installationId": { "$ref": "#/$defs/installationId" }
+      }
+    }
+  ]
 }

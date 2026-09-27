@@ -1,7 +1,11 @@
 export type BookingFailureCode =
   | 'feature_disabled'
+  | 'app_check_required'
   | 'unauthenticated'
   | 'permission_denied'
+  | 'session_refresh_required'
+  | 'session_revoked'
+  | 'session_expired'
   | 'invalid_contract'
   | 'unsupported_schema'
   | 'unsupported_flow'
@@ -12,6 +16,8 @@ export type BookingFailureCode =
   | 'sold_out'
   | 'already_active'
   | 'concurrency_cap_reached'
+  | 'active_booking_limit_reached'
+  | 'rate_limited'
   | 'revision_conflict'
   | 'idempotency_conflict'
   | 'contention'
@@ -20,7 +26,11 @@ export type BookingFailureCode =
 export type BookingResult<T> =
   | Readonly<{ kind: 'succeeded'; data: T }>
   | Readonly<{ kind: 'rejected'; code: BookingFailureCode }>
-  | Readonly<{ kind: 'retryableFailure'; code: 'contention' | 'temporarily_unavailable' }>
+  | Readonly<{
+      kind: 'retryableFailure';
+      code: 'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required';
+      retryAfterSeconds?: number;
+    }>
   | Readonly<{ kind: 'unsupportedContract'; code: 'unsupported_schema' | 'unsupported_flow' }>;
 
 export const succeeded = <T>(data: T): BookingResult<T> => ({ kind: 'succeeded', data });
@@ -29,8 +39,13 @@ export const rejected = <T = never>(code: BookingFailureCode): BookingResult<T> 
   code,
 });
 export const retryable = <T = never>(
-  code: 'contention' | 'temporarily_unavailable',
-): BookingResult<T> => ({ kind: 'retryableFailure', code });
+  code: 'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required',
+  retryAfterSeconds?: number,
+): BookingResult<T> => ({
+  kind: 'retryableFailure',
+  code,
+  ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }),
+});
 export const unsupported = <T = never>(
   code: 'unsupported_schema' | 'unsupported_flow',
 ): BookingResult<T> => ({ kind: 'unsupportedContract', code });
@@ -43,7 +58,10 @@ export class BookingDomainRefusal extends Error {
 }
 
 export class BookingRetryableFailure extends Error {
-  constructor(readonly code: 'contention' | 'temporarily_unavailable') {
+  constructor(
+    readonly code:
+      'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required',
+  ) {
     super(code);
     this.name = 'BookingRetryableFailure';
   }
@@ -73,6 +91,9 @@ export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown
       code,
       retryable: result.kind === 'retryableFailure',
       correlationId: requestId,
+      ...(result.kind === 'retryableFailure' && result.retryAfterSeconds !== undefined
+        ? { details: { retryAfterSeconds: result.retryAfterSeconds } }
+        : {}),
     },
   };
 }

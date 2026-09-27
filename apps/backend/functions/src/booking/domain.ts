@@ -7,6 +7,7 @@ export interface BookingEventProjection {
   readonly schemaVersion: 1;
   readonly eventId: string;
   readonly occurrenceId: string;
+  readonly marketId: 'LV' | 'EE' | 'LT';
   readonly publisherRef: Readonly<{ type: 'user' | 'page'; id: string }>;
   readonly materialRevision: number;
   readonly publicationRevision?: number;
@@ -20,7 +21,7 @@ export interface BookingEventProjection {
   readonly confirmationMode: 'instant';
   readonly inventoryAuthority: 'internal';
   readonly inventoryShape: 'general';
-  readonly capacityMode: 'finite' | 'unlimited' | 'unknown';
+  readonly capacityMode: 'finite' | 'unlimited';
   readonly totalCapacity?: number;
   readonly poolId?: string;
   readonly channel?: Channel;
@@ -38,6 +39,7 @@ export interface BookingRecord {
   readonly id: string;
   readonly revision: number;
   readonly userId: string;
+  readonly marketId: 'LV' | 'EE' | 'LT';
   readonly eventId: string;
   readonly occurrenceId: string;
   readonly inventoryPoolId?: string;
@@ -52,7 +54,7 @@ export interface BookingRecord {
   readonly updatedAt: string;
   readonly confirmedAt: string;
   readonly cancelledAt?: string;
-  readonly terminalReason?: 'userCancelled' | 'occurrenceCancelled';
+  readonly terminalReason?: 'userCancelled' | 'occurrenceCancelled' | 'privacyErasure';
 }
 
 export interface StoredBookingRecord extends BookingRecord {
@@ -104,6 +106,7 @@ export function assertBookingEventProjection(
   if (
     value.schemaVersion !== 1 ||
     value.occurrenceId !== occurrenceId ||
+    !['LV', 'EE', 'LT'].includes(String(value.marketId)) ||
     value.lifecycle !== 'published' ||
     value.bookingEnabled !== true ||
     value.registrationMode !== 'internal' ||

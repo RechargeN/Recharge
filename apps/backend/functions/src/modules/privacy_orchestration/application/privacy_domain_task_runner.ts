@@ -4,6 +4,11 @@ import { BookingPrivacyTaskHandler } from '../../../booking/booking_privacy_task
 import { FirestoreBookingPrivacyRecordStore } from '../../../booking/firestore_booking_privacy_record_store.js';
 import type { PrivacyTaskRepository } from '../domain/repositories.js';
 import type { PrivacyOrchestrationService } from './privacy_orchestration_service.js';
+import { AccountSecurityService } from '../../identity_publisher/application/account_security_service.js';
+import {
+  FirestoreIdentityAuthorityRepository,
+  identityAuthorityCollections,
+} from '../../identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 
 export class PrivacyDomainTaskRunner {
   constructor(
@@ -55,8 +60,19 @@ export class PrivacyDomainTaskRunner {
       });
       return 'failed';
     }
+    if (requestType === 'erasure') {
+      const account = await this.firestore
+        .collection(identityAuthorityCollections.accounts)
+        .doc(task.subjectId)
+        .get();
+      if (account.exists && account.get('status') !== 'restricted') {
+        await new AccountSecurityService(
+          new FirestoreIdentityAuthorityRepository(this.firestore),
+        ).setStatus({ userId: task.subjectId, status: 'restricted', nowUtc: input.nowUtc });
+      }
+    }
     const handler = new BookingPrivacyTaskHandler(
-      new FirestoreBookingPrivacyRecordStore(this.firestore, task.subjectId),
+      new FirestoreBookingPrivacyRecordStore(this.firestore, task.subjectId, task.taskId),
     );
     const result = await handler.handle({
       taskType: requestType,

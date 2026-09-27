@@ -17,6 +17,9 @@ service cloud.firestore {
     match /privacyRequests/{document} { allow read, write: if false; }
     match /privacyDomainTasks/{document} { allow read, write: if false; }
     match /securityAuditEvents/{document} { allow read, write: if false; }
+    match /securityRateLimitCounters/{document} { allow read, write: if false; }
+    match /securityRateLimitAttempts/{document} { allow read, write: if false; }
+    match /securityAudit/{document} { allow read, write: if false; }
 
     // Identity/Publisher local authority may be exercised through the
     // Emulator-only Admin repository. It remains server-owned and no client
@@ -40,6 +43,7 @@ service cloud.firestore {
     match /bookingIdempotency/{document} { allow read, write: if false; }
     match /bookingAudit/{document} { allow read, write: if false; }
     match /bookingOutbox/{document} { allow read, write: if false; }
+    match /bookingPrivacyProgress/{document} { allow read, write: if false; }
     match /eventBookingOutbox/{document} { allow read, write: if false; }
     match /bookingProjectionDeliveries/{document} { allow read, write: if false; }
 

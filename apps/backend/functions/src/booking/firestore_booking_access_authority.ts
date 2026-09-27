@@ -48,15 +48,27 @@ export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
     }
     const session = sessionSnapshot.data();
     const access = accessSnapshot.data();
+    if (!isRecord(session)) {
+      return { allowed: false, reason: 'session_revoked' };
+    }
     if (
-      !isRecord(session) ||
       typeof session.userId !== 'string' ||
       session.firebaseUid !== hint.firebaseUid ||
       session.installationId !== hint.installationId ||
       session.handleHash !== hashSessionHandle(hint.sessionHandle) ||
-      session.status !== 'active'
+      session.status !== 'active' ||
+      !validInstant(session.idleExpiresAtUtc) ||
+      now.getTime() >= Date.parse(String(session.idleExpiresAtUtc))
     ) {
-      return { allowed: false, reason: 'session_revoked' };
+      return {
+        allowed: false,
+        reason:
+          session.status === 'active' &&
+          (!validInstant(session.idleExpiresAtUtc) ||
+            now.getTime() >= Date.parse(String(session.idleExpiresAtUtc)))
+            ? 'session_expired'
+            : 'session_revoked',
+      };
     }
     const [accountSnapshot] = await reader.getAll(
       this.firestore.collection(bookingIdentityCollections.accounts).doc(session.userId),

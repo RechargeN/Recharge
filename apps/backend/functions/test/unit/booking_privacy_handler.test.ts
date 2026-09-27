@@ -11,6 +11,7 @@ const booking: BookingRecord & { readonly occurrenceEndSnapshot: string } = {
   id: 'booking-1',
   revision: 1,
   userId: 'user-1',
+  marketId: 'LV',
   eventId: 'event-1',
   occurrenceId: 'occurrence-1',
   admissionMode: 'booking',

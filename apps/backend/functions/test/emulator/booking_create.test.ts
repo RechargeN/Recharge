@@ -58,7 +58,7 @@ void test('finite create atomically writes booking, key, ledger, usage, audit, o
     (
       await firestore
         .collection(bookingCollections.userUsage)
-        .doc(bookingUserUsageId('actor-a'))
+        .doc(bookingUserUsageId('actor-a', 'LV'))
         .get()
     ).get('activeFiniteBookings'),
     1,
@@ -105,7 +105,7 @@ void test('idempotent replay returns the original booking without a second alloc
   assert.equal(bookings.size, 1);
 });
 
-void test('explicit unlimited creates no ledger or usage allocation', async () => {
+void test('explicit unlimited creates no inventory ledger but reserves an unlimited usage slot', async () => {
   await cleanupBookingEmulator(firestore);
   const event = unlimitedEvent();
   await seedEvent(event, firestore);
@@ -119,7 +119,10 @@ void test('explicit unlimited creates no ledger or usage allocation', async () =
   );
   assert.equal(result.kind, 'succeeded');
   assert.equal((await firestore.collection(bookingCollections.poolLedgers).get()).empty, true);
-  assert.equal((await firestore.collection(bookingCollections.userUsage).get()).empty, true);
+  const usage = await firestore.collection(bookingCollections.userUsage).limit(1).get();
+  assert.equal(usage.size, 1);
+  assert.equal(usage.docs[0]?.get('activeFiniteBookings'), 0);
+  assert.equal(usage.docs[0]?.get('activeUnlimitedBookings'), 1);
 });
 
 void test('unknown capacity refuses without partial mutation', async () => {

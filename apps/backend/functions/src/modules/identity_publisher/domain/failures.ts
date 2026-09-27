@@ -7,6 +7,8 @@ export type IdentityFailureCode =
   | 'account_blocked'
   | 'session_revoked'
   | 'session_expired'
+  | 'session_limit_reached'
+  | 'rate_limited'
   | 'snapshot_stale'
   | 'creator_verification_required'
   | 'creator_verification_unavailable'
@@ -20,7 +22,10 @@ export type IdentityFailureCode =
   | 'temporarily_unavailable';
 
 export class IdentityFailure extends Error {
-  constructor(readonly code: IdentityFailureCode) {
+  constructor(
+    readonly code: IdentityFailureCode,
+    readonly retryAfterSeconds?: number,
+  ) {
     super(code);
     this.name = 'IdentityFailure';
   }
