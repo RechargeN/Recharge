@@ -6,6 +6,7 @@ class BookingDto {
     required this.schemaVersion,
     required this.revision,
     required this.userId,
+    required this.marketId,
     required this.eventId,
     required this.occurrenceId,
     required this.admissionMode,
@@ -52,6 +53,7 @@ class BookingDto {
       'schemaVersion',
       'revision',
       'userId',
+      'marketId',
       'eventId',
       'occurrenceId',
       'admissionMode',
@@ -102,6 +104,7 @@ class BookingDto {
       ),
       revision: requireNonNegativeInt(json['revision'], 'revision'),
       userId: requireNonBlankString(json['userId'], 'userId'),
+      marketId: _requireMarketId(json['marketId']),
       eventId: requireNonBlankString(json['eventId'], 'eventId'),
       occurrenceId: requireNonBlankString(json['occurrenceId'], 'occurrenceId'),
       inventoryPoolId: optionalNonBlankString(
@@ -171,6 +174,7 @@ class BookingDto {
   final int schemaVersion;
   final int revision;
   final String userId;
+  final String marketId;
   final String eventId;
   final String occurrenceId;
   final String? inventoryPoolId;
@@ -197,6 +201,7 @@ class BookingDto {
     'schemaVersion': schemaVersion,
     'revision': revision,
     'userId': userId,
+    'marketId': marketId,
     'eventId': eventId,
     'occurrenceId': occurrenceId,
     if (inventoryPoolId != null) 'inventoryPoolId': inventoryPoolId,
@@ -223,4 +228,12 @@ class BookingDto {
     if (cancelledAt != null) 'cancelledAt': utcTimestamp(cancelledAt!),
     if (expiredAt != null) 'expiredAt': utcTimestamp(expiredAt!),
   };
+}
+
+String _requireMarketId(Object? raw) {
+  final value = requireNonBlankString(raw, 'marketId');
+  if (value != 'LV' && value != 'EE' && value != 'LT') {
+    throw BookingContractFormatException('Unsupported marketId: $value');
+  }
+  return value;
 }

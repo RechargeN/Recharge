@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +29,10 @@ import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
+import '../../features/booking/data/booking_callable_adapter.dart';
+import '../../features/booking/data/booking_firebase_auth_emulator.dart';
+import '../../features/booking/data/booking_functions_transport.dart';
+import '../../features/booking/data/booking_transport_runtime.dart';
 import '../../features/create/data/datasources/create_local_datasource.dart';
 import '../../features/create/data/datasources/create_template_local_datasource.dart';
 import '../../features/create/data/datasources/event_mock_inventory_datasource.dart';
@@ -223,6 +228,43 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
     ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
     ..registerLazySingleton<http.Client>(http.Client.new)
+    ..registerLazySingleton<BookingBackendEndpoint>(_bookingBackendEndpoint)
+    ..registerLazySingleton<BookingIdentitySessionStore>(
+      () => SecureBookingIdentitySessionStore(sl()),
+    )
+    ..registerLazySingleton<BookingFirebaseIdTokenProvider>(
+      () {
+        final endpoint = sl<BookingBackendEndpoint>();
+        return bookingFirebaseTokenProviderFor(
+          endpoint: endpoint,
+          emulator: endpoint.binding == BookingBackendBinding.devEmulator
+              ? BookingAuthEmulatorConfig(
+                  host: endpoint.uri!.host,
+                  port: const int.fromEnvironment(
+                    'RECHARGE_BOOKING_AUTH_EMULATOR_PORT',
+                    defaultValue: 9099,
+                  ),
+                )
+              : null,
+        );
+      },
+    )
+    ..registerLazySingleton<BookingInstallationIdProvider>(
+      () => SecureBookingInstallationIdProvider(sl()),
+    )
+    ..registerLazySingleton<BookingTransportRuntimeFactory>(
+      () => BookingTransportRuntimeFactory(
+        endpoint: sl(),
+        client: sl(),
+        tokens: sl(),
+        sessions: sl(),
+        installations: sl(),
+        supportDirectory: getApplicationSupportDirectory,
+      ),
+    )
+    ..registerLazySingletonAsync<BookingTransportRuntime>(
+      () => sl<BookingTransportRuntimeFactory>().create(),
+    )
     ..registerLazySingleton<RouteRecordingSecureStore>(
       () => EncryptedFileRouteRecordingStore(
         secureStorage: sl(),
@@ -645,4 +687,17 @@ Future<void> setupDependencies() async {
       () => RecordPlaceVisitUseCase(repository: sl(), idGenerator: sl()),
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
+}
+
+BookingBackendEndpoint _bookingBackendEndpoint() {
+  if (kReleaseMode) {
+    return const BookingBackendEndpoint.productionDisabled();
+  }
+  const emulatorBase = String.fromEnvironment(
+    'RECHARGE_BOOKING_EMULATOR_FUNCTIONS_BASE',
+  );
+  if (emulatorBase.isEmpty) {
+    return const BookingBackendEndpoint.localMock();
+  }
+  return BookingBackendEndpoint.devEmulator(Uri.parse(emulatorBase));
 }

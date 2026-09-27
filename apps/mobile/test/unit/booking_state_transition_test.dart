@@ -87,6 +87,7 @@ Booking _booking(BookingState state, {required int revision}) {
     id: 'booking-1',
     revision: revision,
     userId: 'user-1',
+    marketId: 'LV',
     eventId: 'event-1',
     occurrenceId: 'occurrence-1',
     inventoryPoolId: 'pool-1',

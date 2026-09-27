@@ -5,6 +5,7 @@ class BookingPolicyDto {
     required this.schemaVersion,
     required this.policyVersion,
     required this.maxConcurrentFiniteAllocations,
+    required this.maxActiveUnlimitedBookings,
     required this.countingRule,
     required this.unlimitedBookingCounts,
   });
@@ -14,6 +15,7 @@ class BookingPolicyDto {
       'schemaVersion',
       'policyVersion',
       'maxConcurrentFiniteAllocations',
+      'maxActiveUnlimitedBookings',
       'countingRule',
       'unlimitedBookingCounts',
     };
@@ -36,6 +38,10 @@ class BookingPolicyDto {
         json['maxConcurrentFiniteAllocations'],
         'maxConcurrentFiniteAllocations',
       ),
+      maxActiveUnlimitedBookings: requirePositiveInt(
+        json['maxActiveUnlimitedBookings'],
+        'maxActiveUnlimitedBookings',
+      ),
       countingRule: parseWireEnum(
         json['countingRule'],
         BookingCountingRule.values,
@@ -51,6 +57,7 @@ class BookingPolicyDto {
         dto.policyVersion != bookingPolicyVersion ||
         dto.maxConcurrentFiniteAllocations !=
             bookingMaxConcurrentFiniteAllocations ||
+        dto.maxActiveUnlimitedBookings != bookingMaxActiveUnlimitedBookings ||
         dto.countingRule != BookingCountingRule.onePerBookingOrActiveHold ||
         dto.unlimitedBookingCounts) {
       throw const BookingContractFormatException(
@@ -63,14 +70,16 @@ class BookingPolicyDto {
   final int schemaVersion;
   final int policyVersion;
   final int maxConcurrentFiniteAllocations;
+  final int maxActiveUnlimitedBookings;
   final BookingCountingRule countingRule;
   final bool unlimitedBookingCounts;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'schemaVersion': schemaVersion,
-        'policyVersion': policyVersion,
-        'maxConcurrentFiniteAllocations': maxConcurrentFiniteAllocations,
-        'countingRule': countingRule.name,
-        'unlimitedBookingCounts': unlimitedBookingCounts,
-      };
+    'schemaVersion': schemaVersion,
+    'policyVersion': policyVersion,
+    'maxConcurrentFiniteAllocations': maxConcurrentFiniteAllocations,
+    'maxActiveUnlimitedBookings': maxActiveUnlimitedBookings,
+    'countingRule': countingRule.name,
+    'unlimitedBookingCounts': unlimitedBookingCounts,
+  };
 }

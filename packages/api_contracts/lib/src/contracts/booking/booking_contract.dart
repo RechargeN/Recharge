@@ -3,6 +3,7 @@ import 'dart:collection';
 const int bookingContractSchemaVersion = 1;
 const int bookingPolicyVersion = 1;
 const int bookingMaxConcurrentFiniteAllocations = 5;
+const int bookingMaxActiveUnlimitedBookings = 50;
 const int bookingMaxSafeInteger = 9007199254740991;
 
 enum BookingAdmissionMode { rsvp, booking, application }
@@ -50,6 +51,10 @@ enum BookingErrorCode {
   notAuthenticated('not_authenticated'),
   notAuthorized('not_authorized'),
   featureDisabled('feature_disabled'),
+  appCheckRequired('app_check_required'),
+  sessionRefreshRequired('session_refresh_required'),
+  sessionRevoked('session_revoked'),
+  sessionExpired('session_expired'),
   eventUnavailable('event_unavailable'),
   occurrenceCancelled('occurrence_cancelled'),
   registrationNotOpen('registration_not_open'),
@@ -61,6 +66,8 @@ enum BookingErrorCode {
   soldOut('sold_out'),
   alreadyActive('already_active'),
   concurrencyCapReached('concurrency_cap_reached'),
+  activeBookingLimitReached('active_booking_limit_reached'),
+  rateLimited('rate_limited'),
   revisionConflict('revision_conflict'),
   holdExpired('hold_expired'),
   cancellationDeadlinePassed('cancellation_deadline_passed'),
@@ -81,6 +88,7 @@ enum BookingTerminalReason {
   organizerCancelled,
   applicationRejected,
   occurrenceCancelled,
+  privacyErasure,
   eventCancelled,
   missedReconfirmation,
   waitlistOfferDeclined,

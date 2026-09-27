@@ -33,6 +33,7 @@ class Booking {
     required this.id,
     required this.revision,
     required this.userId,
+    required this.marketId,
     required this.eventId,
     required this.occurrenceId,
     required this.admissionMode,
@@ -58,6 +59,7 @@ class Booking {
   final String id;
   final int revision;
   final String userId;
+  final String marketId;
   final String eventId;
   final String occurrenceId;
   final String? inventoryPoolId;

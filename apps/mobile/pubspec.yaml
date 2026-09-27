@@ -43,6 +43,8 @@ dependencies:
   crypto: ^3.0.7
   cryptography: ^2.9.0
   cupertino_icons: ^1.0.8
+  firebase_auth: 6.7.0
+  firebase_core: 4.15.0
   flutter_riverpod: ^2.6.1
   file_selector: ^1.0.4
   share_plus: ^10.1.4

@@ -92,10 +92,12 @@ void main() {
       'schemaVersion': 1,
       'policyVersion': 1,
       'maxConcurrentFiniteAllocations': 5,
+      'maxActiveUnlimitedBookings': 50,
       'countingRule': 'onePerBookingOrActiveHold',
       'unlimitedBookingCounts': false,
     });
     expect(policy.maxConcurrentFiniteAllocations, 5);
+    expect(policy.maxActiveUnlimitedBookings, 50);
     expect(policy.unlimitedBookingCounts, isFalse);
     expect(
       () => BookingPolicyDto.fromJson({
@@ -195,7 +197,16 @@ void main() {
       isNot(command('request-a').requestId),
     );
     expect(command(List<String>.filled(128, 'a').join()).requestId.length, 128);
-    for (final invalid in [' Request-A ', 'é', 'e\u0301', '😀', '/', '.', '..', '__name__']) {
+    for (final invalid in [
+      ' Request-A ',
+      'é',
+      'e\u0301',
+      '😀',
+      '/',
+      '.',
+      '..',
+      '__name__',
+    ]) {
       expect(() => command(invalid), throwsFormatException, reason: invalid);
     }
     expect(

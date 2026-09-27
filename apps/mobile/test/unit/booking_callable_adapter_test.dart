@@ -31,6 +31,7 @@ void main() {
     String kind, {
     String code = 'temporarily_unavailable',
     bool retryable = true,
+    int? retryAfterSeconds,
   }) => <String, Object?>{
     'schemaVersion': 1,
     'kind': kind,
@@ -43,6 +44,8 @@ void main() {
         'code': code,
         'retryable': retryable,
         'correlationId': 'correlation_booking_001',
+        if (retryAfterSeconds != null)
+          'details': <String, Object?>{'retryAfterSeconds': retryAfterSeconds},
       },
     if (kind == 'unsupportedContract')
       'unsupportedPayload': <String, Object?>{'schemaVersion': 99},
@@ -70,6 +73,36 @@ void main() {
       );
       expect(mapped.runtimeType, entry.$2);
     }
+  });
+
+  test('duplicate success is served from the persistent receipt', () async {
+    final port = _CountingPort(result('succeeded'));
+    final receipts = InMemoryBackendReceiptStore();
+    final adapter = BookingCallableAdapter(
+      port: port,
+      operations: InMemoryBookingOperationStore(),
+      receipts: receipts,
+      clock: () => now,
+    );
+    final bookingCommand = command('idem_duplicate');
+
+    expect(
+      await adapter.execute(
+        'createInternalBookingV1',
+        bookingCommand,
+        cancellationToken: BackendCancellationToken(),
+      ),
+      isA<BackendSuccess<BookingResultDto>>(),
+    );
+    expect(
+      await adapter.execute(
+        'createInternalBookingV1',
+        bookingCommand,
+        cancellationToken: BackendCancellationToken(),
+      ),
+      isA<BackendSuccess<BookingResultDto>>(),
+    );
+    expect(port.calls, 1);
   });
 
   test(
@@ -116,6 +149,111 @@ void main() {
     },
   );
 
+  test('all ambiguous post-dispatch failures remain unknown', () async {
+    for (final code in const <String>{
+      'internal',
+      'unknown',
+      'aborted',
+      'cancelled',
+    }) {
+      final adapter = BookingCallableAdapter(
+        port: _FakePort(
+          failure: BookingCallableFailure(code: code, dispatched: true),
+        ),
+        operations: InMemoryBookingOperationStore(),
+        clock: () => now,
+      );
+      expect(
+        await adapter.execute(
+          'createInternalBookingV1',
+          command('idem_$code'),
+          cancellationToken: BackendCancellationToken(),
+        ),
+        isA<BackendUnknownOutcome<BookingResultDto>>(),
+      );
+    }
+  });
+
+  test(
+    'cancellation before send is terminal but after dispatch is unknown',
+    () async {
+      final beforeToken = BackendCancellationToken()..cancel();
+      final beforeStore = InMemoryBookingOperationStore();
+      final before = BookingCallableAdapter(
+        port: _FakePort(response: result('succeeded')),
+        operations: beforeStore,
+        clock: () => now,
+      );
+      expect(
+        await before.execute(
+          'createInternalBookingV1',
+          command('idem_cancel_before'),
+          cancellationToken: beforeToken,
+        ),
+        isA<BackendCancelled<BookingResultDto>>(),
+      );
+      expect(
+        beforeStore.read('idem_cancel_before')?.state,
+        BookingOperationState.cancelled,
+      );
+
+      final afterToken = BackendCancellationToken();
+      final afterStore = InMemoryBookingOperationStore();
+      final after = BookingCallableAdapter(
+        port: _CancellingPort(afterToken, result('succeeded')),
+        operations: afterStore,
+        clock: () => now,
+      );
+      expect(
+        await after.execute(
+          'createInternalBookingV1',
+          command('idem_cancel_after'),
+          cancellationToken: afterToken,
+        ),
+        isA<BackendUnknownOutcome<BookingResultDto>>(),
+      );
+      expect(
+        afterStore.read('idem_cancel_after')?.state,
+        BookingOperationState.unknownOutcome,
+      );
+    },
+  );
+
+  test(
+    'rate limit preserves retryAfter and reconciliation cadence is fixed',
+    () async {
+      final adapter = BookingCallableAdapter(
+        port: _FakePort(
+          response: result(
+            'retryableFailure',
+            code: 'rate_limited',
+            retryAfterSeconds: 10,
+          ),
+        ),
+        operations: InMemoryBookingOperationStore(),
+        clock: () => now,
+      );
+      final mapped = await adapter.execute(
+        'createInternalBookingV1',
+        command('idem_rate_limited'),
+        cancellationToken: BackendCancellationToken(),
+      );
+      expect(mapped, isA<BackendRejected<BookingResultDto>>());
+      expect(
+        (mapped as BackendRejected<BookingResultDto>).failure.retryAfter,
+        const Duration(seconds: 10),
+      );
+      expect(BookingCallableAdapter.reconciliationSchedule, const <Duration>[
+        Duration.zero,
+        Duration(minutes: 1),
+        Duration(minutes: 5),
+        Duration(minutes: 15),
+        Duration(hours: 1),
+        Duration(hours: 6),
+      ]);
+    },
+  );
+
   test(
     'persistent operation survives restart and seven-day retry window fails closed',
     () async {
@@ -146,6 +284,10 @@ void main() {
         ),
         isA<BackendUnknownOutcome<BookingResultDto>>(),
       );
+      final expired = restarted.operationStore.read('idem_expired');
+      expect(expired?.operationId, 'idem_expired');
+      expect(expired?.state, BookingOperationState.expiredUnknownAfter7d);
+      expect(expired?.isTerminal, isTrue);
     },
   );
 
@@ -180,6 +322,92 @@ void main() {
     expect(restarted.importStore.read('local-1')?.serverId, 'server-1');
   });
 
+  test(
+    'persisted unknown outcome reconciles through getMyBooking query',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'recharge_booking_reconcile_',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final fixture =
+          jsonDecode(
+                await File(
+                  '../../packages/api_contracts/schema/booking/v1/fixtures/valid.json',
+                ).readAsString(),
+              )
+              as Map<String, dynamic>;
+      final booking = Map<String, Object?>.from(
+        (fixture['bookings']! as List<dynamic>).first as Map,
+      );
+      final file = File('${directory.path}/booking-state.json');
+      final first = FileBookingPersistenceStore(file, clock: () => now);
+      final reconciliation = BookingReconciliationRequest(
+        callableName: 'getMyBookingV1',
+        query: const <String, Object?>{
+          'schemaVersion': 1,
+          'queryType': 'getMyBooking',
+          'requestId': 'reconcile_request_001',
+          'payload': <String, Object?>{
+            'bookingId': '01JBOOKING0000000000000001',
+          },
+        },
+      );
+      first.operationStore.write(
+        BookingOperationRecord(
+          idempotencyKey: 'idem_reconcile',
+          firstAttemptAtUtc: now,
+          state: BookingOperationState.unknownOutcome,
+          reconciliationCallableName: reconciliation.callableName,
+          reconciliationQuery: reconciliation.query,
+        ),
+      );
+      final restarted = FileBookingPersistenceStore(file, clock: () => now);
+      final adapter = BookingCallableAdapter(
+        port: _FakePort(
+          response: <String, Object?>{
+            'schemaVersion': 1,
+            'queryType': 'getMyBooking',
+            'requestId': 'reconcile_request_001',
+            'serverTime': nowText,
+            'kind': 'found',
+            'booking': booking,
+          },
+        ),
+        operations: restarted.operationStore,
+        clock: () => now,
+      );
+
+      expect(
+        await adapter.reconcileStored('idem_reconcile'),
+        isA<BackendSuccess<BookingResultDto>>(),
+      );
+      expect(
+        restarted.operationStore.read('idem_reconcile')?.state,
+        BookingOperationState.succeeded,
+      );
+    },
+  );
+
+  test('reconciliation refuses client authority and non-read callables', () {
+    expect(
+      () => BookingReconciliationRequest(
+        callableName: 'createInternalBookingV1',
+        query: const <String, Object?>{'queryType': 'createBooking'},
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => BookingReconciliationRequest(
+        callableName: 'getMyBookingV1',
+        query: const <String, Object?>{
+          'queryType': 'getMyBooking',
+          'capabilities': <String>['booking.self_service'],
+        },
+      ),
+      throwsArgumentError,
+    );
+  });
+
   test('shared Booking fixture remains parseable by Dart DTOs', () async {
     final fixture =
         jsonDecode(
@@ -204,7 +432,7 @@ void main() {
   test('dev binding accepts loopback only and production remains disabled', () {
     expect(
       BookingBackendEndpoint.devEmulator(
-        Uri.parse('http://127.0.0.1:5001'),
+        Uri.parse('http://127.0.0.1:5001/demo-recharge/europe-west1'),
       ).enabled,
       isTrue,
     );
@@ -214,6 +442,7 @@ void main() {
           BookingBackendEndpoint.devEmulator(Uri.parse('https://example.com')),
       throwsArgumentError,
     );
+    expect(const BookingBackendEndpoint.localMock().enabled, isFalse);
   });
 }
 
@@ -229,5 +458,36 @@ final class _FakePort implements BookingCallablePort {
   ) async {
     if (failure case final value?) throw value;
     return response!;
+  }
+}
+
+final class _CancellingPort implements BookingCallablePort {
+  const _CancellingPort(this.token, this.response);
+
+  final BackendCancellationToken token;
+  final Map<String, Object?> response;
+
+  @override
+  Future<Map<String, Object?>> invoke(
+    String callableName,
+    Map<String, Object?> command,
+  ) async {
+    token.cancel();
+    return response;
+  }
+}
+
+final class _CountingPort implements BookingCallablePort {
+  _CountingPort(this.response);
+  final Map<String, Object?> response;
+  int calls = 0;
+
+  @override
+  Future<Map<String, Object?>> invoke(
+    String callableName,
+    Map<String, Object?> command,
+  ) async {
+    calls++;
+    return response;
   }
 }
