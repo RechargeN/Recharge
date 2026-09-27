@@ -55,6 +55,14 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "publishedAtUtc", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "bookingProjectionDeliveries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -90,6 +98,18 @@
     },
     {
       "collectionGroup": "securityRateLimitCounters",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingProjectionDeliveries",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingProjectionOperatorAudit",
       "fieldPath": "expiresAt",
       "ttl": true,
       "indexes": []

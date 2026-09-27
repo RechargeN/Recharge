@@ -9,10 +9,10 @@ import {
 import { bookingCollections } from '../../src/booking/transactions.js';
 import {
   deliverEventBookingProjection,
-  enqueueEventBookingProjection,
   eventBookingDeliveryCollections,
 } from '../../src/booking/event_projection_delivery.js';
 import { cleanupBookingEmulator, emulatorFirestore } from '../support/booking_emulator.js';
+import { seedEventBookingOutbox } from '../support/event_outbox_seed.js';
 import { createCommand, finiteEvent, fixedNow } from '../support/booking_fixtures.js';
 import { FakeClock } from '../support/fake_clock.js';
 
@@ -154,11 +154,9 @@ void test('Event outbox delivery cancels active Booking and releases finite inve
     occurredAt: '2026-08-20T11:00:00.000Z',
   };
   assert.equal(
-    await enqueueEventBookingProjection(firestore, {
-      schemaVersion: 1,
+    await seedEventBookingOutbox(firestore, {
       outboxId: 'event-outbox-cancel-1',
       event: cancellation,
-      createdAtUtc: cancellation.occurredAt,
     }),
     'created',
   );

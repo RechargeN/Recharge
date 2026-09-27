@@ -10,9 +10,9 @@ import { bookingIdentityCollections } from '../../src/booking/firestore_booking_
 import { identityAuthorityCollections } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import {
   deliverEventBookingProjection,
-  enqueueEventBookingProjection,
   eventBookingDeliveryCollections,
 } from '../../src/booking/event_projection_delivery.js';
+import { seedEventBookingOutbox } from './event_outbox_seed.js';
 import { abuseCollections } from '../../src/platform/security/firestore_abuse_rate_limiter.js';
 import {
   featureFlagKey,
@@ -91,15 +91,26 @@ export async function seedEvent(
     occurredAt: '2026-08-01T00:00:00.000Z',
     projection: event,
   } as const;
-  const enqueued = await enqueueEventBookingProjection(firestore, {
-    schemaVersion: 1,
+  const enqueued = await seedEventBookingOutbox(firestore, {
     outboxId,
     event: eventFact,
-    createdAtUtc: eventFact.occurredAt,
   });
   assert.ok(enqueued === 'created' || enqueued === 'replayed');
-  const delivered = await deliverEventBookingProjection(firestore, outboxId, eventFact.occurredAt);
-  assert.ok(delivered === 'delivered' || delivered === 'replayed');
+  const deliveryNowUtc = new Date().toISOString();
+  let delivered = await deliverEventBookingProjection(firestore, outboxId, deliveryNowUtc);
+  for (
+    let attempt = 0;
+    (delivered === 'lease_held' || delivered === 'lease_lost') && attempt < 100;
+    attempt += 1
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const status: unknown = (
+      await firestore.collection(eventBookingDeliveryCollections.deliveries).doc(outboxId).get()
+    ).get('status');
+    if (status === 'delivered') delivered = 'replayed';
+    if (status === 'deadLetter') delivered = 'dead_letter';
+  }
+  assert.ok(delivered === 'delivered' || delivered === 'replayed', String(delivered));
 }
 
 export async function setBookingFlags(
@@ -174,6 +185,10 @@ export async function createAuthorizedActor(
   const capabilityIds = Array.isArray(claims.capabilities)
     ? claims.capabilities.filter((value): value is string => typeof value === 'string')
     : ['booking.self_service'];
+  const issuedAt = new Date();
+  const issuedAtUtc = issuedAt.toISOString();
+  const idleExpiresAtUtc = new Date(issuedAt.getTime() + 30 * 86_400_000).toISOString();
+  const snapshotExpiresAtUtc = new Date(issuedAt.getTime() + 60 * 60_000).toISOString();
   const batch = firestore.batch();
   batch.set(firestore.collection(bookingIdentityCollections.accounts).doc(domainUserId), {
     schemaVersion: 1,
@@ -182,8 +197,8 @@ export async function createAuthorizedActor(
     revision: 1,
     securityRevision: 1,
     revokeBeforeSecurityRevision: 0,
-    createdAtUtc: '2026-01-01T00:00:00.000Z',
-    updatedAtUtc: '2026-01-01T00:00:00.000Z',
+    createdAtUtc: issuedAtUtc,
+    updatedAtUtc: issuedAtUtc,
   });
   batch.set(firestore.collection(bookingIdentityCollections.sessions).doc(sessionId), {
     schemaVersion: 1,
@@ -195,7 +210,9 @@ export async function createAuthorizedActor(
     firebaseUid: uid,
     installationId,
     handleHash,
-    issuedAtUtc: '2026-01-01T00:00:00.000Z',
+    issuedAtUtc,
+    lastSeenAtUtc: issuedAtUtc,
+    idleExpiresAtUtc,
   });
   batch.set(firestore.collection(bookingIdentityCollections.accessSnapshots).doc(sessionId), {
     schemaVersion: 1,
@@ -206,8 +223,8 @@ export async function createAuthorizedActor(
     authzRevision: 1,
     capabilityPolicyRevision: 1,
     capabilityIds,
-    evaluatedAtUtc: '2026-01-01T00:00:00.000Z',
-    expiresAtUtc: '2099-01-01T00:00:00.000Z',
+    evaluatedAtUtc: issuedAtUtc,
+    expiresAtUtc: snapshotExpiresAtUtc,
   });
   await batch.commit();
   const idToken = await createFirebaseActor(uid);

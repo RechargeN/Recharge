@@ -32,9 +32,9 @@ const expected = [
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
 }
-const schedules = [...source.matchAll(/export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onSchedule/gu)].map(
-  (match) => match[1],
-);
+const schedules = [
+  ...source.matchAll(/export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onSchedule/gu),
+].map((match) => match[1]);
 if (
   JSON.stringify(schedules.sort()) !==
   JSON.stringify(["retryEventBookingProjectionDeliveriesV1"])

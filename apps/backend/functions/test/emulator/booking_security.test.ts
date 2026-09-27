@@ -262,7 +262,7 @@ void test('server authority immediately rejects revoked sessions and stale capab
   );
   assert.equal(
     ((revoked.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
-    'not_authorized',
+    'session_revoked',
   );
 
   await sessionRef.update({ status: 'active' });
@@ -273,7 +273,7 @@ void test('server authority immediately rejects revoked sessions and stale capab
   );
   assert.equal(
     ((stale.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
-    'not_authorized',
+    'session_refresh_required',
   );
 
   await firestore
@@ -303,7 +303,7 @@ void test('server authority immediately rejects revoked sessions and stale capab
   );
   assert.equal(
     ((uidMismatch.body.result as Record<string, unknown>).error as Record<string, unknown>).code,
-    'not_authorized',
+    'session_revoked',
   );
 });
 

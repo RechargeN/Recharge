@@ -4,10 +4,10 @@ import { after, beforeEach, test } from 'node:test';
 import { createInternalBooking } from '../../src/booking/create_internal_booking.js';
 import {
   deliverEventBookingProjection,
-  enqueueEventBookingProjection,
   eventBookingDeliveryCollections,
 } from '../../src/booking/event_projection_delivery.js';
 import type { EventBookingProjectionEvent } from '../../src/booking/event_projection_consumer.js';
+import { seedEventBookingOutbox } from '../support/event_outbox_seed.js';
 import {
   acceptedBookingRetentionPolicies,
   bookingRetentionCandidate,
@@ -53,7 +53,7 @@ void test(
   { timeout: 120_000 },
   async () => {
     await setIdentitySessionFlag(true, firestore);
-    await setBookingFlags(true, firestore);
+    await setBookingFlags(false, firestore);
 
     const event = futureEvent();
     const publication: EventBookingProjectionEvent = {
@@ -66,11 +66,9 @@ void test(
       projection: event,
     };
     assert.equal(
-      await enqueueEventBookingProjection(firestore, {
-        schemaVersion: 1,
+      await seedEventBookingOutbox(firestore, {
         outboxId: 'stage8-publication-1',
         event: publication,
-        createdAtUtc: publishedAt,
       }),
       'created',
     );
@@ -82,6 +80,7 @@ void test(
       ),
       'delivered',
     );
+    await setBookingFlags(true, firestore);
 
     const firebaseUid = 'stage8-firebase-transport-user';
     const idToken = await createFirebaseActor(firebaseUid);
@@ -293,6 +292,7 @@ void test(
 );
 
 void test('Event projection retries a transient lifecycle inconsistency and converges', async () => {
+  await setBookingFlags(false, firestore);
   const event = finiteEvent();
   const publication: EventBookingProjectionEvent = {
     kind: 'EventRevisionPublished',
@@ -303,11 +303,9 @@ void test('Event projection retries a transient lifecycle inconsistency and conv
     occurredAt: publishedAt,
     projection: event,
   };
-  await enqueueEventBookingProjection(firestore, {
-    schemaVersion: 1,
+  await seedEventBookingOutbox(firestore, {
     outboxId: 'stage8-retry-publication',
     event: publication,
-    createdAtUtc: publishedAt,
   });
   assert.equal(
     await deliverEventBookingProjection(
@@ -348,11 +346,9 @@ void test('Event projection retries a transient lifecycle inconsistency and conv
     publicationRevision: event.materialRevision + 1,
     occurredAt: '2026-09-26T10:21:00.000Z',
   };
-  await enqueueEventBookingProjection(firestore, {
-    schemaVersion: 1,
+  await seedEventBookingOutbox(firestore, {
     outboxId: 'stage8-retry-cancellation',
     event: cancelled,
-    createdAtUtc: cancelled.occurredAt,
   });
   assert.equal(
     await deliverEventBookingProjection(
