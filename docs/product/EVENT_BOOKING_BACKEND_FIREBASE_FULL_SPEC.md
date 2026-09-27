@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.22**
-- Дата: **2026-09-26**
+- Версия: **1.23**
+- Дата: **2026-09-27**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.97](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.99](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -40,6 +40,24 @@
 - Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
 
 ## 0. Changelog
+
+### v1.23 — 2026-09-27
+
+- requires the immutable Event outbox `createdAt` to be a Firestore
+  server-owned commit `Timestamp`; caller-supplied strings are quarantined and
+  cannot advance the delivery cursor;
+- closes the trigger-only delivery gap with a durable ordered discovery cursor,
+  fenced renewable leases, bounded retry, explicit dead-letter state and an
+  audited idempotent manual replay decision;
+- keeps source facts and unresolved dead letters outside TTL, applies a 90-day
+  TTL only to terminal delivered metadata and retains operator decisions for
+  180 days;
+- makes paged Booking erasure advance past held records, report
+  `completedWithRetention`, and require an idempotent linked follow-up after
+  legal-hold release before deletion eligibility is restored;
+- passes 93 unit, 28 contract, 16 integration and 73 Emulator/Rules tests on
+  the exact local toolchain. Cloud, deployment, activation and market readiness
+  remain unchanged and absent.
 
 ### v1.22 — 2026-09-26
 
@@ -2070,3 +2088,21 @@ allocations return sold out while cancellations continue to release units.
      the bounded slice `Ready for physical dev backend` only as a separately
      authorized next step; dev cloud, staging, production and all markets stay
      Not Ready/disabled.
+156. Every `eventBookingOutbox.createdAt` is a Firestore server commit
+     `Timestamp` written by BCK-07; application strings and client-owned time
+     are invalid, quarantined input and never cursor authority.
+157. Event delivery combines the document-created trigger with an ordered
+     `createdAt + documentId` discovery cursor, so missed triggers and source
+     batches larger than one scheduler page converge idempotently.
+158. Processing uses fenced renewable leases and durable lifecycle checkpoints;
+     a stale worker cannot finish a newer lease, exact duplicate facts resume,
+     and older material revisions cannot affect newer state.
+159. Manual dead-letter replay requires an idempotent audited operator decision.
+     Immutable source facts and unresolved dead letters have no TTL; only
+     terminal delivered metadata receives the 90-day retention timestamp.
+160. Booking erasure skips legally held records without stalling pagination,
+     continues through all other records and terminates as
+     `completedWithRetention` with the retained count.
+161. Legal-hold release does not restore TTL or silently delete data. It creates
+     one linked, idempotent follow-up erasure request, and deletion eligibility
+     changes only after that request completes.

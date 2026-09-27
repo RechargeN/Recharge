@@ -65,7 +65,7 @@ switch or activation was added.
 | Level | Current verdict |
 |---|---|
 | Local implementation | Ready for physical dev backend, with controls. The verdict covers the implemented R1, Identity, Event projection, disabled Booking, mobile transport seam and Privacy/retention scope; it does not authorize project creation or deployment |
-| Emulator evidence | Present on Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8: 92 unit, 28 contract, 13 integration and 66 Emulator/Rules tests pass. The disposable full-flow covers Auth UID → distinct User ULID → opaque Session/AccessSnapshot → Event projection → callable create/read/list/availability/cancel → notification obligations → Privacy/DSR → retention/legal hold, including deterministic projection retry |
+| Emulator evidence | Present on Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8: 93 unit, 28 contract, 16 integration and 73 Emulator/Rules tests pass. Evidence covers Auth UID → opaque Session → Event projection → callable Booking → Privacy/DSR, plus missed-trigger discovery, fenced delivery, audited replay and legal-hold-safe follow-up |
 | Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
 | Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
 | Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |

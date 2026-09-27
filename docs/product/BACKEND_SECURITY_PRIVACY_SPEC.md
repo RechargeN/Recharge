@@ -1,8 +1,8 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.34**
-- Date: **2026-09-26**
+- Version: **0.4.35**
+- Date: **2026-09-27**
 - Spec status: **Review — D1 security/privacy technical baseline closed; independent/qualified/production gates retained**
 - Runtime status: **Local R1 security/privacy ports, default-deny Rules and disposable Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
@@ -11,9 +11,9 @@
 - Production Security/Privacy/Legal approval: **Pending**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
 - Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.97](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.99](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local-R1 verified),
-  [BCK-09 v1.22](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+  [BCK-09 v1.23](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
 - Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.25
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -37,6 +37,16 @@
 ---
 
 ## 0. Changelog
+
+### v0.4.35 — 2026-09-27
+
+- requires domain erasure to advance around legally held records and preserve
+  an exact retained count instead of stalling or falsely reporting complete
+  deletion;
+- adds `completedWithRetention` and an idempotent linked follow-up erasure after
+  legal-hold release; release alone never restores TTL eligibility;
+- records green local contract, integration and disposable Emulator evidence
+  without claiming qualified Legal/Privacy, cloud or production approval.
 
 ### v0.4.34 — 2026-09-26
 
@@ -2177,3 +2187,10 @@ reapply this boundary in its own exact slice.
 101. **BCK-04-AC-101:** all new Identity, Event-delivery and Privacy collections
      remain explicit client default-deny; this local evidence is not a
      qualified Legal/Privacy or production Security verdict.
+102. **BCK-04-AC-102:** a domain erasure handler skips held records, advances its
+     durable cursor, processes all eligible records and reports terminal
+     `completedWithRetention` with a retained count; it may not claim full
+     erasure while data remains under hold.
+103. **BCK-04-AC-103:** releasing a legal/security hold leaves deletion TTL
+     disabled until one linked idempotent follow-up request completes; duplicate
+     release processing cannot create parallel erasure work.

@@ -1,8 +1,8 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.40**
-- Date: **2026-09-24**
+- Version: **0.2.41**
+- Date: **2026-09-27**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
 - Accountable owner: **Platform Operations owner**
@@ -10,9 +10,9 @@
 - Local R1 technical decision: **Accepted and verified locally — no cloud authority**
 - Dev-cloud and production approval: **Pending**
 - Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md) (Review; local foundation verified)
-- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.99](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - API boundary: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local platform contracts verified)
-- Security/privacy boundary: [BCK-04 v0.4.32](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; local foundation verified; production gates retained)
+- Security/privacy boundary: [BCK-04 v0.4.35](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; local foundation verified; production gates retained)
 - Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
 - Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
 - Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
@@ -42,6 +42,25 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.41 — 2026-09-27
+
+- closes the local Event delivery operational gap with a durable ordered
+  discovery cursor, fenced renewable worker leases, retry/dead-letter state and
+  audited idempotent manual replay;
+- fixes retention ownership: immutable Event source facts and unresolved dead
+  letters have no TTL, terminal delivered metadata has 90 days and operator
+  replay decisions have 180 days;
+- records exact local evidence only. No scheduler deployment, cloud worker,
+  project, credential, activation or production operations claim is added.
+
+### v0.2.40 — 2026-09-24
+
+- records the bounded local callable surface, immutable Event outbox delivery,
+  five-attempt retry/dead-letter behavior and truthful feature-flag failures;
+- keeps Event delivery and DSR local/Emulator-only and separates exact
+  Node/Java evidence from inconclusive timed-out runs;
+- creates no cloud worker, schedule deployment or market activation.
 
 ### v0.2.39 — 2026-09-24
 
@@ -1541,17 +1560,31 @@ production remain separately Pending. No item-6 product slice inherits cloud
 authority from this result.
 
 92. **BCK-05-AC-92:** local R1 exposes exactly the R0 probe, five disabled
-    Booking callables and one disabled Identity Session callable; no schedule,
-    task queue or cloud trigger is added.
+    Booking callables, three disabled Identity Session callables, one Event
+    outbox trigger and one retry schedule. Product handlers resolve only the
+    loopback `demo-recharge` Emulator and remain default-off; no deployment or
+    cloud activation is implied.
 93. **BCK-05-AC-93:** Event→Booking delivery uses an immutable Event outbox,
     an idempotent Booking consumer checkpoint, five-attempt retry and explicit
     dead-letter state.
 94. **BCK-05-AC-94:** feature-flag absence or invalid revision means disabled,
     while Firestore transport failure propagates to typed operational failure
     and safe logging rather than being silently converted to disabled.
-95. **BCK-05-AC-95:** local Event delivery and DSR runners are manually invoked
-    test/application services; no worker, schedule, deployment or activation
-    is implied.
+95. **BCK-05-AC-95:** local Event delivery has Emulator-only trigger/scheduler
+    entry points and DSR remains a test/application service. Their source
+    presence does not imply a deployed worker, cloud schedule or activation.
 96. **BCK-05-AC-96:** exact Node 22/Java 21 evidence must be reported separately
     from a timed-out contention run; inconclusive evidence cannot be called
     green.
+97. **BCK-05-AC-97:** Event delivery discovery persists one ordered
+    `createdAt + documentId` cursor and can recover source facts missed by the
+    document-created trigger without duplicating delivery.
+98. **BCK-05-AC-98:** every delivery worker owns a fenced renewable lease and
+    durable lifecycle checkpoint; an expired or superseded worker cannot
+    commit terminal state.
+99. **BCK-05-AC-99:** immutable source outbox facts and unresolved dead letters
+    have no TTL. Only terminal delivered metadata receives a 90-day
+    `expiresAt`; a replay makes it non-terminal and removes that eligibility.
+100. **BCK-05-AC-100:** manual dead-letter replay requires an immutable,
+     idempotent operator-audit record retained for 180 days; reason, actor,
+     correlation and exact target are mandatory.
