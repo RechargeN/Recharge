@@ -3,6 +3,10 @@ import test from 'node:test';
 
 import { PrivacyOrchestrationService } from '../../src/modules/privacy_orchestration/application/privacy_orchestration_service.js';
 import { privacyDomainTaskId } from '../../src/modules/privacy_orchestration/application/dispatch_privacy_tasks.js';
+import {
+  createPrivacyRequest,
+  transitionPrivacyRequest,
+} from '../../src/modules/privacy_orchestration/domain/privacy_request.js';
 import { InMemoryPrivacyOrchestrationRepository } from '../../src/modules/privacy_orchestration/infrastructure/in_memory_privacy_orchestration_repository.js';
 import { fixtureIds } from '../support/platform_fixtures.js';
 
@@ -135,3 +139,55 @@ void test('request fails only after every domain task is terminal and duplicate 
   const failed = await service.reconcile(fixtureIds.third, 3, '2026-09-22T11:05:00.000Z');
   assert.equal(failed.ok && failed.request.status, 'failed');
 });
+
+void test('legal-hold release creates one linked idempotent erasure follow-up', async () => {
+  const repository = new InMemoryPrivacyOrchestrationRepository();
+  const service = new PrivacyOrchestrationService(repository, repository, repository);
+  const original = createCompletedWithRetentionRequest();
+  await repository.create(original);
+
+  const input = {
+    originalRequestId: original.requestId,
+    requestId: fixtureIds.third,
+    subjectId: original.subjectId,
+    holdReleaseRevision: 2,
+    semanticHash: `sha256:${'d'.repeat(64)}`,
+    requiredDomainIds: ['booking'],
+    occurredAtUtc: '2026-09-22T12:00:00.000Z',
+  } as const;
+  const first = await service.submitLegalHoldReleaseFollowUp(input);
+  const replay = await service.submitLegalHoldReleaseFollowUp({
+    ...input,
+    requestId: '01BX5ZZKBKACTAV9WEVGEMMVS5',
+  });
+  assert.equal(first.ok && first.request.followUpOfRequestId, original.requestId);
+  assert.equal(replay.ok && replay.request.requestId, fixtureIds.third);
+});
+
+function createCompletedWithRetentionRequest() {
+  const submitted = createPrivacyRequest({
+    requestId: fixtureIds.first,
+    subjectId: fixtureIds.second,
+    requestType: 'erasure',
+    idempotencyKey: 'privacy-held-001',
+    semanticHash: `sha256:${'e'.repeat(64)}`,
+    requiredDomainIds: ['booking'],
+    occurredAtUtc: '2026-09-22T10:00:00.000Z',
+  });
+  const verified = transitionPrivacyRequest({
+    request: submitted,
+    nextStatus: 'verified',
+    occurredAtUtc: '2026-09-22T10:01:00.000Z',
+  });
+  const dispatched = transitionPrivacyRequest({
+    request: verified,
+    nextStatus: 'dispatched',
+    occurredAtUtc: '2026-09-22T10:02:00.000Z',
+  });
+  return transitionPrivacyRequest({
+    request: dispatched,
+    nextStatus: 'completedWithRetention',
+    occurredAtUtc: '2026-09-22T10:05:00.000Z',
+    terminalEvidenceIds: [ids.evidenceA],
+  });
+}

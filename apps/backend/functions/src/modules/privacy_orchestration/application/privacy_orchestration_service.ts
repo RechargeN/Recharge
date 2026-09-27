@@ -35,6 +35,7 @@ export class PrivacyOrchestrationService {
     readonly semanticHash: string;
     readonly requiredDomainIds: readonly string[];
     readonly occurredAtUtc: string;
+    readonly followUpOfRequestId?: string;
   }): Promise<PrivacyOperationResult> {
     const request = createPrivacyRequest(input);
     const result = await this.requests.create(request);
@@ -50,6 +51,39 @@ export class PrivacyOrchestrationService {
         : { ok: true, request: replay };
     }
     return { ok: true, request };
+  }
+
+  async submitLegalHoldReleaseFollowUp(input: {
+    readonly originalRequestId: string;
+    readonly requestId: string;
+    readonly subjectId: string;
+    readonly holdReleaseRevision: number;
+    readonly semanticHash: string;
+    readonly requiredDomainIds: readonly string[];
+    readonly occurredAtUtc: string;
+  }): Promise<PrivacyOperationResult> {
+    const original = await this.requests.get(input.originalRequestId);
+    if (original === null) return { ok: false, code: 'request_not_found' };
+    if (
+      original.subjectId !== input.subjectId ||
+      original.requestType !== 'erasure' ||
+      original.status !== 'completedWithRetention'
+    ) {
+      return { ok: false, code: 'invalid_transition' };
+    }
+    if (!Number.isSafeInteger(input.holdReleaseRevision) || input.holdReleaseRevision < 1) {
+      return { ok: false, code: 'invalid_transition' };
+    }
+    return this.submit({
+      requestId: input.requestId,
+      subjectId: input.subjectId,
+      requestType: 'erasure',
+      idempotencyKey: `hold-release-${input.originalRequestId}-${input.holdReleaseRevision}`,
+      semanticHash: input.semanticHash,
+      requiredDomainIds: input.requiredDomainIds,
+      occurredAtUtc: input.occurredAtUtc,
+      followUpOfRequestId: input.originalRequestId,
+    });
   }
 
   async verify(
@@ -101,6 +135,8 @@ export class PrivacyOrchestrationService {
     readonly expectedTaskRevision: number;
     readonly nextStatus: PrivacyDomainTaskStatus;
     readonly evidenceId?: string;
+    readonly completionOutcome?: 'completed' | 'retained_legal_hold';
+    readonly retainedCount?: number;
     readonly occurredAtUtc: string;
   }): Promise<
     'saved' | 'revision_conflict' | 'not_found' | 'invalid_transition' | 'task_retry_exhausted'
@@ -117,6 +153,10 @@ export class PrivacyOrchestrationService {
           nextStatus: input.nextStatus,
           occurredAtUtc: input.occurredAtUtc,
           ...(input.evidenceId === undefined ? {} : { evidenceId: input.evidenceId }),
+          ...(input.completionOutcome === undefined
+            ? {}
+            : { completionOutcome: input.completionOutcome }),
+          ...(input.retainedCount === undefined ? {} : { retainedCount: input.retainedCount }),
         }),
         input.expectedTaskRevision,
       );

@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import type { BookingAuditFact } from '../../src/audit/booking_audit.js';
 import {
   applyBookingLegalHold,
+  completeBookingLegalHoldRelease,
   pseudonymizeBookingIdentity,
   releaseBookingLegalHold,
 } from '../../src/booking/privacy.js';
@@ -29,15 +30,28 @@ void test('account deletion pseudonymizes direct actor identity but preserves mi
   assert.equal(fact.actorId, 'account-direct-id');
 });
 
-void test('legal hold patch removes TTL and explicit release restores an exact expiry', () => {
-  assert.deepEqual(applyBookingLegalHold(), { legalHold: true, removeExpiresAt: true });
-  const expiresAt = new Date('2027-09-24T00:00:00.000Z');
-  assert.deepEqual(releaseBookingLegalHold(expiresAt), {
+void test('legal hold release keeps TTL disabled until follow-up erasure completes', () => {
+  assert.deepEqual(applyBookingLegalHold(), {
+    legalHold: true,
+    deletionPending: false,
+    removeExpiresAt: true,
+  });
+  assert.deepEqual(releaseBookingLegalHold(), {
     legalHold: false,
+    deletionPending: true,
+    removeExpiresAt: true,
+  });
+  const expiresAt = new Date('2027-09-24T00:00:00.000Z');
+  assert.deepEqual(completeBookingLegalHoldRelease(expiresAt), {
+    legalHold: false,
+    deletionPending: false,
     removeExpiresAt: false,
     expiresAt,
   });
-  assert.throws(() => releaseBookingLegalHold(new Date(Number.NaN)), /booking_expires_at_invalid/u);
+  assert.throws(
+    () => completeBookingLegalHoldRelease(new Date(Number.NaN)),
+    /booking_expires_at_invalid/u,
+  );
 });
 
 void test('pseudonymization rejects raw or malformed replacement identifiers', () => {

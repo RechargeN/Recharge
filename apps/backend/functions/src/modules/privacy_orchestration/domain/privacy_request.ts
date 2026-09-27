@@ -15,6 +15,7 @@ export type PrivacyRequestStatus =
   | 'dispatched'
   | 'partially_completed'
   | 'completed'
+  | 'completedWithRetention'
   | 'failed'
   | 'cancelled';
 
@@ -31,6 +32,7 @@ export interface PrivacyRequest {
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
   readonly terminalEvidenceIds: readonly EntityId[];
+  readonly followUpOfRequestId: EntityId | null;
 }
 
 export function createPrivacyRequest(input: {
@@ -41,6 +43,7 @@ export function createPrivacyRequest(input: {
   readonly semanticHash: string;
   readonly requiredDomainIds: readonly string[];
   readonly occurredAtUtc: string;
+  readonly followUpOfRequestId?: string;
 }): DeepReadonly<PrivacyRequest> {
   if (!/^sha256:[0-9a-f]{64}$/.test(input.semanticHash))
     throw new TypeError('privacy_semantic_hash_invalid');
@@ -59,6 +62,8 @@ export function createPrivacyRequest(input: {
     createdAtUtc: occurredAtUtc,
     updatedAtUtc: occurredAtUtc,
     terminalEvidenceIds: [],
+    followUpOfRequestId:
+      input.followUpOfRequestId === undefined ? null : parseEntityId(input.followUpOfRequestId),
   });
 }
 
@@ -71,16 +76,32 @@ export function transitionPrivacyRequest(input: {
   const allowed: Readonly<Record<PrivacyRequestStatus, readonly PrivacyRequestStatus[]>> = {
     submitted: ['verified', 'cancelled', 'failed'],
     verified: ['dispatched', 'cancelled', 'failed'],
-    dispatched: ['partially_completed', 'completed', 'failed', 'cancelled'],
-    partially_completed: ['partially_completed', 'completed', 'failed', 'cancelled'],
+    dispatched: [
+      'partially_completed',
+      'completed',
+      'completedWithRetention',
+      'failed',
+      'cancelled',
+    ],
+    partially_completed: [
+      'partially_completed',
+      'completed',
+      'completedWithRetention',
+      'failed',
+      'cancelled',
+    ],
     completed: [],
+    completedWithRetention: [],
     failed: [],
     cancelled: [],
   };
   if (!allowed[input.request.status].includes(input.nextStatus))
     throw new TypeError('privacy_request_transition_invalid');
   const evidence = (input.terminalEvidenceIds ?? []).map(parseEntityId);
-  if (input.nextStatus === 'completed' && evidence.length < input.request.requiredDomainIds.length)
+  if (
+    (input.nextStatus === 'completed' || input.nextStatus === 'completedWithRetention') &&
+    evidence.length < input.request.requiredDomainIds.length
+  )
     throw new TypeError('privacy_request_terminal_evidence_missing');
   return deepFreeze({
     ...input.request,

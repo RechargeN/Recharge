@@ -61,8 +61,42 @@ void test('erasure pseudonymizes terminal Booking atomically', async () => {
   });
   assert.deepEqual(result, {
     kind: 'succeeded',
-    evidence: { recordCount: 1, pseudonymizedCount: 1 },
+    evidence: {
+      recordCount: 1,
+      pseudonymizedCount: 1,
+      retainedCount: 0,
+      outcome: 'completed',
+    },
   });
   assert.equal('userId' in store.snapshot()[0]!, true);
   assert.equal((store.snapshot()[0] as BookingRecord).userId, `anon_${'b'.repeat(64)}`);
+});
+
+void test('erasure completes with explicit retention evidence for legal hold', async () => {
+  const store = new InMemoryBookingPrivacyRecordStore([
+    {
+      ...booking,
+      state: 'cancelled',
+      cancelledAt: '2026-09-25T00:00:00.000Z',
+      legalHold: true,
+    },
+  ]);
+  assert.deepEqual(
+    await new BookingPrivacyTaskHandler(store).handle({
+      taskType: 'erasure',
+      subjectId: 'user-1',
+      pseudonymousActorId: `anon_${'c'.repeat(64)}`,
+      nowUtc: '2026-09-25T00:00:00.000Z',
+    }),
+    {
+      kind: 'succeeded',
+      evidence: {
+        recordCount: 1,
+        pseudonymizedCount: 0,
+        retainedCount: 1,
+        outcome: 'retained_legal_hold',
+      },
+    },
+  );
+  assert.equal((store.snapshot()[0] as BookingRecord).userId, 'user-1');
 });

@@ -87,6 +87,8 @@ export class PrivacyDomainTaskRunner {
         expectedTaskRevision: task.revision,
         nextStatus: 'succeeded',
         evidenceId: randomUUID(),
+        completionOutcome: result.evidence.outcome,
+        retainedCount: result.evidence.retainedCount,
         occurredAtUtc: input.nowUtc,
       });
       return saved === 'saved' ? 'succeeded' : 'failed';

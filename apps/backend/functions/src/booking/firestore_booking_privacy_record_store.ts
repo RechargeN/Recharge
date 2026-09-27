@@ -49,7 +49,7 @@ export class FirestoreBookingPrivacyRecordStore implements BookingPrivacyRecordS
     let cursor = typeof prior.get('cursor') === 'string' ? String(prior.get('cursor')) : undefined;
     let recordCount = Number(prior.get('recordCount') ?? 0);
     let pseudonymizedCount = Number(prior.get('pseudonymizedCount') ?? 0);
-    let activeFutureBookingCount = Number(prior.get('activeFutureBookingCount') ?? 0);
+    let activeFutureBookingCount = 0;
     let legalHoldCount = Number(prior.get('legalHoldCount') ?? 0);
     while (collectionIndex < descriptors.length) {
       const [collectionName, identityField] = descriptors[collectionIndex]!;
@@ -87,31 +87,42 @@ export class FirestoreBookingPrivacyRecordStore implements BookingPrivacyRecordS
         });
         if (activeFuture.length > 0) {
           for (const booking of activeFuture) {
-            await cancelBookingForPrivacyErasure(this.firestore, booking.id, input.nowUtc);
+            if (!(await cancelBookingForPrivacyErasure(this.firestore, booking.id, input.nowUtc))) {
+              activeFutureBookingCount += 1;
+            }
+          }
+          if (activeFutureBookingCount > 0) {
+            await progressRef.set(
+              progressRecord(
+                collectionIndex,
+                cursor,
+                recordCount,
+                pseudonymizedCount,
+                activeFutureBookingCount,
+                legalHoldCount,
+                input.nowUtc,
+              ),
+            );
+            return {
+              recordCount,
+              pseudonymizedCount,
+              activeFutureBookingCount,
+              legalHoldCount,
+            };
           }
           continue;
         }
       }
       const batch = this.firestore.batch();
-      let pageBlockedByActiveBooking = false;
-      let pageBlockedByLegalHold = false;
       for (const document of snapshot.docs) {
         const record = document.data() as Record<string, unknown>;
+        recordCount += 1;
         if (record.legalHold === true) {
-          pageBlockedByLegalHold = true;
+          legalHoldCount += 1;
           continue;
         }
-        recordCount += 1;
         batch.update(document.ref, { [identityField]: input.pseudonymousActorId });
         pseudonymizedCount += 1;
-      }
-      if (pageBlockedByActiveBooking || pageBlockedByLegalHold) {
-        return {
-          recordCount,
-          pseudonymizedCount,
-          activeFutureBookingCount: pageBlockedByActiveBooking ? 1 : 0,
-          legalHoldCount: pageBlockedByLegalHold ? 1 : 0,
-        };
       }
       cursor = snapshot.docs.at(-1)!.id;
       batch.set(

@@ -6,7 +6,12 @@ export type BookingPrivacyTaskType = 'access' | 'erasure' | 'restriction';
 export type BookingPrivacyTaskResult =
   | Readonly<{
       kind: 'succeeded';
-      evidence: Readonly<{ recordCount: number; pseudonymizedCount: number }>;
+      evidence: Readonly<{
+        recordCount: number;
+        pseudonymizedCount: number;
+        retainedCount: number;
+        outcome: 'completed' | 'retained_legal_hold';
+      }>;
     }>
   | Readonly<{
       kind: 'retryableFailure';
@@ -70,13 +75,10 @@ export class BookingPrivacyTaskHandler {
           pseudonymousActorId: input.pseudonymousActorId,
           nowUtc: input.nowUtc,
         });
-        if (evidence.activeFutureBookingCount > 0 || evidence.legalHoldCount > 0) {
+        if (evidence.activeFutureBookingCount > 0) {
           return {
             kind: 'retryableFailure',
-            code:
-              evidence.activeFutureBookingCount > 0
-                ? 'active_future_booking_cancellation_required'
-                : 'temporarily_unavailable',
+            code: 'active_future_booking_cancellation_required',
           };
         }
         return {
@@ -84,6 +86,8 @@ export class BookingPrivacyTaskHandler {
           evidence: {
             recordCount: evidence.recordCount,
             pseudonymizedCount: evidence.pseudonymizedCount,
+            retainedCount: evidence.legalHoldCount,
+            outcome: evidence.legalHoldCount > 0 ? 'retained_legal_hold' : 'completed',
           },
         };
       }
@@ -94,7 +98,12 @@ export class BookingPrivacyTaskHandler {
         if (input.taskType === 'access' || input.taskType === 'restriction') {
           return {
             kind: 'succeeded',
-            evidence: { recordCount: indexes.length, pseudonymizedCount: 0 },
+            evidence: {
+              recordCount: indexes.length,
+              pseudonymizedCount: 0,
+              retainedCount: 0,
+              outcome: 'completed',
+            },
           } as const;
         }
         if (input.pseudonymousActorId === undefined) {
@@ -109,12 +118,19 @@ export class BookingPrivacyTaskHandler {
             code: 'active_future_booking_cancellation_required',
           } as const;
         }
+        const retained = indexes.filter(({ record }) => hasLegalHold(record));
         for (const { record, index } of indexes) {
+          if (hasLegalHold(record)) continue;
           records[index] = pseudonymizeBookingIdentity(record, input.pseudonymousActorId);
         }
         return {
           kind: 'succeeded',
-          evidence: { recordCount: indexes.length, pseudonymizedCount: indexes.length },
+          evidence: {
+            recordCount: indexes.length,
+            pseudonymizedCount: indexes.length - retained.length,
+            retainedCount: retained.length,
+            outcome: retained.length > 0 ? 'retained_legal_hold' : 'completed',
+          },
         } as const;
       });
     } catch (error) {
@@ -123,6 +139,10 @@ export class BookingPrivacyTaskHandler {
         : { kind: 'retryableFailure', code: 'temporarily_unavailable' };
     }
   }
+}
+
+function hasLegalHold(record: BookingIdentityBearingRecord): boolean {
+  return record.legalHold === true;
 }
 
 function actorId(record: BookingIdentityBearingRecord): string {

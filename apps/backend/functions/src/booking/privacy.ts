@@ -3,8 +3,18 @@ import type { SuppressedBookingOutboxRecord } from '../notifications/outbox.js';
 import type { BookingRecord } from './domain.js';
 import type { IdempotencyRecord } from './idempotency.js';
 
+/**
+ * Persistence-facing Booking shape used by privacy processing. Older local
+ * Emulator fixtures may predate the hold field, so its absence is treated as
+ * `false`; authoritative writers always persist the field explicitly.
+ */
+export type PrivacyBookingRecord = BookingRecord & {
+  readonly occurrenceEndSnapshot?: string;
+  readonly legalHold?: boolean;
+};
+
 export type BookingIdentityBearingRecord =
-  BookingRecord | IdempotencyRecord | BookingAuditFact | SuppressedBookingOutboxRecord;
+  PrivacyBookingRecord | IdempotencyRecord | BookingAuditFact | SuppressedBookingOutboxRecord;
 
 const pseudonymousActorIdPattern = /^anon_[0-9a-f]{64}$/u;
 
@@ -27,16 +37,21 @@ export function pseudonymizeBookingIdentity<T extends BookingIdentityBearingReco
 
 export interface BookingLegalHoldPatch {
   readonly legalHold: boolean;
+  readonly deletionPending: boolean;
   /** `true` means the persistence adapter must delete the TTL field. */
   readonly removeExpiresAt: boolean;
   readonly expiresAt?: Date;
 }
 
 export function applyBookingLegalHold(): BookingLegalHoldPatch {
-  return { legalHold: true, removeExpiresAt: true };
+  return { legalHold: true, deletionPending: false, removeExpiresAt: true };
 }
 
-export function releaseBookingLegalHold(expiresAt: Date): BookingLegalHoldPatch {
+export function releaseBookingLegalHold(): BookingLegalHoldPatch {
+  return { legalHold: false, deletionPending: true, removeExpiresAt: true };
+}
+
+export function completeBookingLegalHoldRelease(expiresAt: Date): BookingLegalHoldPatch {
   if (!Number.isFinite(expiresAt.getTime())) throw new TypeError('booking_expires_at_invalid');
-  return { legalHold: false, removeExpiresAt: false, expiresAt };
+  return { legalHold: false, deletionPending: false, removeExpiresAt: false, expiresAt };
 }

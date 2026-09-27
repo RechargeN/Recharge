@@ -24,6 +24,13 @@
         { "type": "null" }
       ]
     },
+    "completionOutcome": {
+      "anyOf": [
+        { "enum": ["completed", "retained_legal_hold"] },
+        { "type": "null" }
+      ]
+    },
+    "retainedCount": { "type": "integer", "minimum": 0 },
     "updatedAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" }
   },
   "required": [
@@ -38,6 +45,8 @@
     "revision",
     "attempts",
     "evidenceId",
+    "completionOutcome",
+    "retainedCount",
     "updatedAtUtc"
   ]
 }

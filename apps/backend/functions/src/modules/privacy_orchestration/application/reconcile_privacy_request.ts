@@ -22,9 +22,12 @@ export function reconcilePrivacyRequest(
   );
   if (terminal.length !== tasks.length) return request;
   if (succeeded.length === tasks.length) {
+    const retained = succeeded.some(
+      (task) => task.completionOutcome === 'retained_legal_hold' && task.retainedCount > 0,
+    );
     return transitionPrivacyRequest({
       request,
-      nextStatus: 'completed',
+      nextStatus: retained ? 'completedWithRetention' : 'completed',
       occurredAtUtc,
       terminalEvidenceIds: succeeded.map((task) => task.evidenceId!).filter(Boolean),
     });

@@ -20,6 +20,8 @@ export interface PrivacyDomainTask {
   readonly revision: number;
   readonly attempts: number;
   readonly evidenceId: EntityId | null;
+  readonly completionOutcome: 'completed' | 'retained_legal_hold' | null;
+  readonly retainedCount: number;
   readonly updatedAtUtc: UtcInstant;
 }
 
@@ -50,6 +52,8 @@ export function createPrivacyDomainTask(input: {
     revision: 1,
     attempts: 0,
     evidenceId: null,
+    completionOutcome: null,
+    retainedCount: 0,
     updatedAtUtc: parseUtcInstant(input.occurredAtUtc),
   });
 }
@@ -59,6 +63,8 @@ export function transitionPrivacyDomainTask(input: {
   readonly nextStatus: PrivacyDomainTaskStatus;
   readonly occurredAtUtc: string;
   readonly evidenceId?: string;
+  readonly completionOutcome?: 'completed' | 'retained_legal_hold';
+  readonly retainedCount?: number;
 }): DeepReadonly<PrivacyDomainTask> {
   const allowed: Readonly<Record<PrivacyDomainTaskStatus, readonly PrivacyDomainTaskStatus[]>> = {
     pending: ['dispatched', 'cancelled'],
@@ -75,12 +81,25 @@ export function transitionPrivacyDomainTask(input: {
   const evidenceId = input.evidenceId === undefined ? null : parseEntityId(input.evidenceId);
   if (input.nextStatus === 'succeeded' && evidenceId === null)
     throw new TypeError('privacy_task_evidence_missing');
+  const completionOutcome =
+    input.nextStatus === 'succeeded' ? (input.completionOutcome ?? 'completed') : null;
+  const retainedCount = input.nextStatus === 'succeeded' ? (input.retainedCount ?? 0) : 0;
+  if (
+    !Number.isSafeInteger(retainedCount) ||
+    retainedCount < 0 ||
+    (completionOutcome === 'completed' && retainedCount !== 0) ||
+    (completionOutcome === 'retained_legal_hold' && retainedCount < 1)
+  ) {
+    throw new TypeError('privacy_task_retention_evidence_invalid');
+  }
   return deepFreeze({
     ...input.task,
     status: input.nextStatus,
     revision: input.task.revision + 1,
     attempts: input.nextStatus === 'dispatched' ? input.task.attempts + 1 : input.task.attempts,
     evidenceId,
+    completionOutcome,
+    retainedCount,
     updatedAtUtc: parseUtcInstant(input.occurredAtUtc),
   });
 }
