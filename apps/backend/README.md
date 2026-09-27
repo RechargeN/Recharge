@@ -46,7 +46,13 @@ bound only to an explicitly loopback dev Emulator; production binding remains
 disabled. Immutable Event outbox records feed the sole Booking projection
 consumer; delivery checkpoints, cancellation/reschedule effects and all
 Booking/support collections remain direct-client default-deny. It is not
-deployed. A local
+deployed. `BCK09-ABUSE-DEC-01 v1.0` adds separate transaction-atomic finite
+`5` and unlimited `50` active caps per User+market, layered rolling
+actor/account/installation limits, request dedupe, typed retry-after, a
+three-active-Session ceiling, atomic opaque-handle rotation and exact-local
+App Check bypass. Network identity is a day-rotated secondary hash and never
+the sole authenticated-cancel authority. Scoped incident switches and
+minimized audit are server-owned; no global security bypass exists. A local
 single-ledger load probe preserved the zero-oversell invariant but failed the
 accepted popular and mass latency/success targets. A fixed-capacity escrow
 model is therefore selected for the later scalability migration: 16 shards
@@ -58,8 +64,8 @@ switch or activation was added.
 
 | Level | Current verdict |
 |---|---|
-| Local implementation | Ready with controls for the implemented R1, Identity and disabled Booking scope |
-| Emulator evidence | R0, Rules, Identity, Event delivery/lifecycle, create/cancel/query passed with exact Node 22/Java 21; the full run is inconclusive because the pre-existing 100-way unlimited contention test timed out at 120 seconds before later suites |
+| Local implementation | Ready for physical dev backend, with controls. The verdict covers the implemented R1, Identity, Event projection, disabled Booking, mobile transport seam and Privacy/retention scope; it does not authorize project creation or deployment |
+| Emulator evidence | Present on Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8: 92 unit, 28 contract, 13 integration and 66 Emulator/Rules tests pass. The disposable full-flow covers Auth UID → distinct User ULID → opaque Session/AccessSnapshot → Event projection → callable create/read/list/availability/cancel → notification obligations → Privacy/DSR → retention/legal hold, including deterministic projection retry |
 | Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
 | Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
 | Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |

@@ -1,20 +1,29 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.6**
-- Date: **2026-09-25**
+- Version: **0.7**
+- Date: **2026-09-27**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
 - Review owners: **Identity, API, Security/Privacy, Mobile, Reference Data,
   Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
-- Coordination baseline: [BCK-02 v2.4.95](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.98](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-07-PRE v0.2](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.7 — 2026-09-27
+
+- reserves additive delegated-import command inputs for a future governed Event
+  Ingestion module without granting it Content collection write authority;
+- keeps `ownerImport` provenance, exact origin binding, change classification
+  and non-session actor idempotency inside ordinary validation/moderation;
+- authorizes no Event Ingestion schema, fetcher, worker, callable, resource,
+  network access, cloud deployment or publication bypass.
 
 ### v0.6 — 2026-09-25
 
@@ -302,12 +311,26 @@ ContentProvenance {
   acquiredAt + checkedAt?
   correctionRemovalPolicyRef
   importer/actorRef
+  originBinding {
+    kind: directAuthoring | delegatedImport
+    delegatedActorRef?
+    externalBindingRef?
+  }
 }
 ```
 
 Raw URLs and UI seed labels are not sufficient. A licensed/official seed does
 not impersonate a user/page. Until OD-03 defines eligible publisher/attribution,
 seeded public activation is disabled.
+
+`delegatedImport` is an additive command origin, not a PublisherRef and not a
+staff impersonation mechanism. Its actor reference identifies the approved
+server module and operation; the requested PublisherRef is revalidated by
+BCK-06 and bound only by BCK-07. Imported Event submissions carry a typed
+change class through the same validation and moderation path as manual
+content. For a non-session server actor, semantic idempotency binds module
+actor, source/binding, logical operation, normalized payload hash and expected
+revision; absence of a mobile Session never weakens authorization or audit.
 
 ## 8. State machines and revision semantics
 
@@ -1235,3 +1258,15 @@ does not authorize Content persistence, workers, cloud or market activation.
     requiring reconfirmation and records a suppressed pre-activation effect.
 91. **BCK-07-AC-91:** local delivery services add no cloud trigger, worker,
     Content aggregate, market activation or deployment permission.
+92. **BCK-07-AC-92:** delegated import invokes only BCK-07 commands and never
+    writes Content, Booking, projection or outbox collections directly.
+93. **BCK-07-AC-93:** `ownerImport` provenance preserves exact source/binding,
+    importer actor and logical operation without fabricating missing fields.
+94. **BCK-07-AC-94:** imported content passes the same domain validation,
+    moderation and publisher eligibility checks as manual content.
+95. **BCK-07-AC-95:** staff review cannot submit or publish an Event while
+    impersonating the owning Page.
+96. **BCK-07-AC-96:** non-session actor idempotency is stable across retry and
+    restart and rejects the same key with a different semantic payload.
+97. **BCK-07-AC-97:** this additive boundary creates no Event Ingestion
+    runtime, network permission, callable export, resource or activation.

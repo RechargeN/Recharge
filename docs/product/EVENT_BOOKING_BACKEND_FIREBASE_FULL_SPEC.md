@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.20**
-- Дата: **2026-09-25**
+- Версия: **1.22**
+- Дата: **2026-09-26**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.95](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.97](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -40,6 +40,40 @@
 - Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
 
 ## 0. Changelog
+
+### v1.22 — 2026-09-26
+
+- adds one credential-free full Emulator flow from Auth UID through opaque
+  Identity Session, AccessSnapshot, immutable Event outbox/projection, all five
+  Booking callable paths, notification obligations and Firestore Privacy/DSR;
+- proves idempotent mobile-wire replay, query/availability/cancel behavior,
+  terminal retention facts and legal-hold precedence in the same disposable
+  `demo-recharge` execution;
+- adds a real projection-delivery retry where a transient lifecycle
+  inconsistency becomes `retryPending`, is repaired and converges without a
+  duplicate Booking transition;
+- passes the complete R0/Rules/Identity/Event/Booking/Abuse suite on exact
+  Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8, plus 92 unit, 28 contract,
+  13 integration and 699 Flutter tests;
+- records `Ready for physical dev backend` only as permission readiness for a
+  separately authorized dev-infrastructure slice. No project, credential,
+  deployment, activation or production readiness is claimed.
+
+### v1.21 — 2026-09-26
+
+- implements `BCK09-ABUSE-DEC-01 v1.0` locally: transaction-atomic finite
+  `5` and separate unlimited `50` active-Booking caps per User+market;
+- adds request-deduped rolling actor+installation/account/installation
+  rate limits with typed `rate_limited` and `retryAfterSeconds`, while IP is
+  hashed, secondary and never the sole cancel/account authority;
+- limits active Sessions to three, rejects the fourth explicitly, rotates the
+  same Session atomically and keeps opaque Session handles out of custom claims;
+- makes App Check exact-local-bypass/fail-closed, adds scoped incident-disable
+  contracts and persists minimized abuse audit without payload, token or raw IP;
+- makes the mobile logical operation identity restart-stable, bounds automatic
+  retry to seven days and records terminal reconciliation outcomes;
+- keeps every market disabled and retains Java 21 Emulator evidence, cloud,
+  deployment, activation and independent Security/Legal gates as Pending.
 
 ### v1.19 — 2026-09-25
 
@@ -593,7 +627,7 @@ confirmedUnits >= 0
 activeHoldUnits >= 0
 finite: confirmedUnits + activeHoldUnits <= totalUnits
 remaining = totalUnits - confirmedUnits - activeHoldUnits
-unlimited: no finite counters or user concurrency usage
+unlimited: no finite counters; separate unlimited user usage applies
 unknown capacity != unlimited
 ```
 
@@ -608,16 +642,23 @@ the active unlimited cap is reached.
 
 ### 8.4. UserBookingUsage
 
-Policy `booking_concurrency_lv_v1`:
+Policy `bck09_abuse_v1`, revision `1`:
 
 ```text
 maxConcurrentBookings: 5
+maxActiveUnlimitedBookings: 50
 count finite confirmed Booking: yes, once per Booking
 count active hold: yes, once per Booking
-count pending application/plain waitlist/unlimited RSVP: no
+count unlimited confirmed future Booking: yes, in the separate unlimited counter
+count pending application/plain waitlist without allocation: no
 completion grace: 120 minutes
 personal/publisher/category override: forbidden
 ```
+
+Cap read, usage increment, Booking create, active key, idempotency and outbox
+write are one transaction. Cancel and occurrence cancellation release the
+matching finite/unlimited usage in the same transaction as the terminal
+Booking transition. `active_booking_limit_reached` never prevents cancel.
 
 ### 8.5. Duplicate-active key
 
@@ -1108,12 +1149,30 @@ dispatcher/FCM effect не включается и поздний replay зап�
 
 ### 16.3. App Check and abuse protection
 
-- dev/staging сначала observe missing/invalid tokens;
-- production mutation enforcement включается после legitimate traffic proof;
-- high-risk replay protection включается только после latency test;
+- local bypass допустим только при одновременных `local`, `demo-recharge`,
+  Functions Emulator и loopback Firestore Emulator; эта ветка конструктивно
+  недоступна dev/stage/prod;
+- dev/stage/prod требуют valid App Check evidence и fail closed;
 - App Check дополняет, но не заменяет Auth/domain/idempotency;
 - per-actor/resource rate limits не создают hidden product discrimination;
 - security errors не позволяют probe существование чужого Booking.
+
+Exact rolling limits use server time and a deduplicated `attemptRequestId`:
+
+| Scope | create | cancel | query |
+|---|---:|---:|---:|
+| actor+installation burst | 5/10 s | 10/10 s | 30/10 s |
+| actor+installation | 10/min | 20/min | 120/min |
+| account ceiling | 20/min | 40/min | 240/min |
+| installation ceiling | 20/min | 40/min | 240/min |
+| hashed network-risk signal | 60/min, non-authoritative | never sole blocker | 600/min, non-authoritative |
+
+Session issue is `5/15 min` per account and `10/15 min` per installation;
+rotation is `6/hour` per Session and `20/hour` per account. Policy storage
+unavailability returns retryable `temporarily_unavailable` with 60 seconds.
+Scoped incident switches exist separately for create, cancel, query, Session
+issue and rotation; their activation requires environment, actor, reason,
+revision and timestamp audit. There is no global security-disable switch.
 
 Age-sensitive eligibility, age-restricted Booking и guardian/consent evidence
 server-disabled, пока OD-11 не Accepted для конкретного рынка и BCK-04/BCK-06
@@ -1897,10 +1956,11 @@ allocations return sold out while cancellations continue to release units.
 
 ### 34.5 Readiness verdict
 
-| Level | BCK-09 verdict after Stage 7 |
+| Level | BCK-09 verdict after Booking Stage 8 |
 |---|---|
-| Local implementation | Approximately 75–82% of bounded R5 Booking; Ready with controls for further disabled local work |
-| Emulator evidence | Present for single-ledger correctness/load and the new Event/Identity/Privacy paths. Exact Node 22.23.2/Java 21 rerun passed all suites before the pre-existing 100-way unlimited contention case exceeded 120 seconds; focused Identity/Booking and Firestore Privacy reruns passed. This remains local evidence, not cloud performance proof |
+| Local implementation | Approximately 85–90% of bounded R5 Booking; Ready with controls for further disabled local work |
+| Emulator evidence | Present on exact Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8. The full 66-test R0/Rules/Identity/Event/Booking/Abuse matrix passes, including the end-to-end Auth→Identity→Event→Booking→outbox→Privacy/retention flow, projection retry, 100-request contention, exact 49→50 unlimited-cap concurrency and default-deny Rules |
+| Physical dev backend | Ready to start only through a separately authorized project/IAM/budget/deploy slice; no physical dev resource exists yet |
 | Dev cloud | Not Ready; escrow persistence/transactions, real IAM, budgets and measured cloud evidence absent |
 | Staging | Not Ready; no migration/rollback/load/restore drill on provisioned infrastructure |
 | Production | Not Ready; independent Security and applicable qualified Legal/Privacy plus SLO/cost/DR evidence absent |
@@ -1999,3 +2059,14 @@ allocations return sold out while cancellations continue to release units.
      across core/idempotency/audit/outbox storage.
 152. The new callable, delivery and DSR services are local/Emulator-only and
      authorize no worker, cloud, deployment, market activation, push or merge.
+153. One credential-free disposable Emulator flow proves Auth UID to distinct
+     User ULID, opaque Session/AccessSnapshot, Event outbox/projection, mobile
+     callable create/read/list/availability/cancel, notification obligations
+     and terminal Booking Privacy/DSR reconciliation without cloud context.
+154. Event projection delivery records a retryable lifecycle inconsistency,
+     preserves the immutable source fact and converges after repair without a
+     duplicate Booking transition.
+155. Exact Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8 local evidence makes
+     the bounded slice `Ready for physical dev backend` only as a separately
+     authorized next step; dev cloud, staging, production and all markets stay
+     Not Ready/disabled.

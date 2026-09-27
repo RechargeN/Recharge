@@ -1,8 +1,8 @@
 # Recharge Backend — Security & Privacy Specification
 
 - ID: **BCK-04**
-- Version: **0.4.33**
-- Date: **2026-09-24**
+- Version: **0.4.34**
+- Date: **2026-09-26**
 - Spec status: **Review — D1 security/privacy technical baseline closed; independent/qualified/production gates retained**
 - Runtime status: **Local R1 security/privacy ports, default-deny Rules and disposable Emulator evidence Present; product/cloud security runtime Absent**
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
@@ -11,9 +11,9 @@
 - Production Security/Privacy/Legal approval: **Pending**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
 - Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.97](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local-R1 verified),
-  [BCK-09 v1.18](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
+  [BCK-09 v1.22](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
 - Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.3.25
 - Technical owner review: [BCK04-SEC-REV-01 v0.2](BACKEND_SECURITY_PRIVACY_OWNER_REVIEW.md)
 - Technical owner decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
@@ -31,11 +31,22 @@
 - D1 Owner Batch E: [BCK-D1-OWN-E-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_E_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
 - Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
-- Runtime effect of this revision: **none**
+- Runtime effect of this revision: **local/Emulator-only abuse-policy,
+  App Check and rate-limit mechanisms; no cloud or activation**
 
 ---
 
 ## 0. Changelog
+
+### v0.4.34 — 2026-09-26
+
+- integrates the owner-approved BCK-09 numeric abuse policy as a bounded local
+  implementation: layered actor/account/installation limits, secondary
+  day-rotated network hash, request dedupe and minimized audit;
+- makes App Check bypass exact to the local demo Emulator and fail-closed in
+  every non-local environment;
+- registers all new security collections as direct-client deny and retains
+  independent Security/Privacy, qualified Legal and production evidence.
 
 ### v0.4.32 — 2026-09-24
 

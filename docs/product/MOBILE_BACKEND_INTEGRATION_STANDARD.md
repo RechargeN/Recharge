@@ -1,14 +1,14 @@
 # Recharge Backend — Mobile Integration Standard
 
 - ID: **BCK-18**
-- Version: **0.8**
-- Date: **2026-09-22**
+- Version: **1.1**
+- Date: **2026-09-27**
 - Spec status: **Approved — technical local/test-only boundary; production gates retained**
-- Runtime status: **Present locally — Money foundation, transport-neutral seam and import orchestration; product remote cutover absent**
+- Runtime status: **Present locally — default-off loopback Emulator transport, durable operation journal and reversible local/mock binding; UI cutover absent**
 - Accountable owner: **Mobile Platform owner**
 - Required reviewers: **API Platform, Security/Privacy, Identity, Reference
   Data, affected domain owners and Platform Operations**
-- Coordination baseline: [BCK-02 v2.4.89](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.98](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
   [BCK-18-PRE v0.5](BACKEND_MOBILE_INTEGRATION_COVERAGE_MATRIX.md)
 - BCK-03 Mobile decision:
@@ -18,6 +18,43 @@
 - Canonical path: `docs/product/MOBILE_BACKEND_INTEGRATION_STANDARD.md`
 
 ## 0. Changelog
+
+### v1.1 — 2026-09-27
+
+- adds lazy `firebase_core`/`firebase_auth` only to the exact dev Auth Emulator
+  binding; release and non-Emulator configuration never initialize Firebase;
+- adds one forced ID-token refresh after transport `unauthenticated` and one
+  typed Identity Session refresh/recovery path;
+- retries the logical Booking command with the same idempotency key and a new
+  request ID, while production binding and UI cutover remain disabled.
+
+### v1.0 — 2026-09-26
+
+- adds the real Firebase Functions callable protocol behind an exact
+  `demo-recharge/europe-west1` loopback-only development binding;
+- obtains and securely persists only the server-issued opaque
+  `sessionId + sessionHandle + installationId` Identity context; mock tokens,
+  User IDs, roles, capabilities and AccessSnapshot data never become authority;
+- persists operations, receipts and checkpoints with an exclusive file lock,
+  atomic replacement, one-MiB bound, bounded compaction and seven-day receipt
+  cleanup while retaining unresolved-operation tombstones fail closed;
+- treats post-dispatch `deadline-exceeded`, `unavailable`, `internal`,
+  `unknown`, `aborted` and `cancelled` as unknown outcomes and reconciles only
+  through the authoritative `getMyBookingV1` query;
+- registers the lazy adapter factory in DI, defaults debug to local/mock and
+  makes release binding unconditionally production-disabled; no UI cutover,
+  Firebase SDK, cloud resource, deployment or market activation is added.
+
+### v0.9 — 2026-09-26
+
+- persists one stable logical `operationId` equal to the v1 idempotency
+  identity across restart while every network attempt keeps a distinct
+  request ID;
+- adds explicit `failedFinal`, `cancelled` and `expiredUnknownAfter7d`
+  terminal states and stops automatic retry after seven days;
+- fixes the reconciliation cadence at immediate, 1, 5, 15 and 60 minutes,
+  then every 6 hours, while preserving server `retryAfterSeconds`;
+- maps typed rate-limit failures without enabling production binding.
 
 ### v0.8 — 2026-09-25
 
@@ -1202,8 +1239,9 @@ pretend that a local action was published, indexed or authorized remotely.
     and repeat execution does not create a duplicate.
 83. **BCK-18-AC-83:** rollback binding defaults to disabled and cannot turn a
     cache/local value into server-confirmed truth.
-84. **BCK-18-AC-84:** mobile foundation imports no Firebase SDK and uses no
-    cloud credential or project context.
+84. **BCK-18-AC-84:** domain, application and presentation import no Firebase
+    SDK; the data-layer Auth adapter is lazy, dev-Emulator-only and uses no
+    cloud credential or real project context.
 85. **BCK-18-AC-85:** Firebase, cloud, deployment, activation, push and merge
     remain unauthorized by this approval.
 
@@ -1213,4 +1251,32 @@ pretend that a local action was published, indexed or authorized remotely.
     command, stored as sensitive local state and bound to the exact Firebase
     UID plus installation server-side.
 88. **BCK-18-AC-88:** this contract reconciliation adds no mobile screen,
-    Firebase SDK binding, production cutover or automatic fallback success.
+    production Firebase binding, production cutover or automatic fallback
+    success.
+89. **BCK-18-AC-89:** the callable adapter resolves only the exact loopback
+    `demo-recharge/europe-west1` Emulator base and an explicit callable
+    allowlist.
+90. **BCK-18-AC-90:** release builds cannot activate the Emulator binding;
+    production transport remains absent and disabled.
+91. **BCK-18-AC-91:** Booking commands and queries receive only an opaque
+    server-issued Session context; client/mock authority fields fail closed.
+92. **BCK-18-AC-92:** ambiguous post-dispatch failures remain unknown and are
+    never converted to a safe retry or fabricated success.
+93. **BCK-18-AC-93:** reconciliation uses `getMyBookingV1`, persists its query
+    across restart and never invokes a mutation as a read substitute.
+94. **BCK-18-AC-94:** the operation journal uses exclusive locking, atomic
+    replacement, bounded file/entry sizes and deterministic compaction.
+95. **BCK-18-AC-95:** successful duplicate commands reuse the persisted exact
+    operation/semantic-hash receipt without a second network dispatch.
+96. **BCK-18-AC-96:** adapter rollback returns to the isolated local/mock
+    binding without importing mock capabilities or overwriting server truth.
+97. **BCK-18-AC-97:** release and non-Emulator configuration never invoke
+    `Firebase.initializeApp` and always use the disabled token provider.
+98. **BCK-18-AC-98:** dev Auth Emulator configuration is loopback-only and
+    supplies no production Firebase options or credentials.
+99. **BCK-18-AC-99:** transport performs at most one forced Firebase ID-token
+    refresh after `unauthenticated`.
+100. **BCK-18-AC-100:** Session refresh preserves the logical idempotency key
+    and changes only the attempt request ID.
+101. **BCK-18-AC-101:** revoked/expired Session state clears local authority
+    before a bounded establish/recovery path; no mock grant is copied.

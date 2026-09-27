@@ -1,19 +1,38 @@
 # Recharge Backend — Identity & Publisher Specification
 
 - ID: **BCK-06**
-- Version: **0.6**
-- Date: **2026-09-24**
+- Version: **0.8**
+- Date: **2026-09-27**
 - Spec status: **Review — local implementation evidence; production decisions pending**
 - Runtime status: **Present locally — in-memory plus Emulator-only Firestore authority and disabled Session callable; cloud/production absent**
 - Accountable owner: **Identity owner**
 - Required reviewers: **API Platform, Security/Privacy, Mobile Platform,
   Content Platform, Trust & Safety, Legal/Privacy for applicable decisions**
-- Coordination baseline: [BCK-02 v2.4.93](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.98](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Preparatory audit:
   [BCK-06-PRE v0.2](BACKEND_IDENTITY_PUBLISHER_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/IDENTITY_PUBLISHER_BACKEND_SPEC.md`
 
 ## 0. Changelog
+
+### v0.8 — 2026-09-27
+
+- fixes Session lifecycle at one live Session per installation, a 60-minute
+  AccessSnapshot and a 30-day idle expiry; expired Sessions do not consume the
+  three-installation ceiling;
+- adds typed refresh plus recent-auth recovery: recovery atomically advances
+  the security fence, revokes prior Sessions and issues one replacement;
+- distinguishes refresh-required, revoked, expired, limit and rate-limit
+  outcomes without storing per-Session authority in Firebase custom claims.
+
+### v0.7 — 2026-09-26
+
+- implements the local three-active-Session ceiling; the fourth issue returns
+  `session_limit_reached` and never silently logs out another device;
+- adds rate-limited issue/rotation application paths and atomic same-Session
+  opaque-handle rotation with a matching AccessSnapshot revision;
+- keeps installation/Session state server-side and forbids per-Session custom
+  claims; production Auth/App Check/cloud binding remains disabled.
 
 ### v0.6 — 2026-09-25
 
@@ -1529,3 +1548,17 @@ foreign/hidden identities to the same safe surface response.
     the disposable Emulator.
 87. **BCK-06-AC-87:** real Google/Apple provider verification, cloud Auth,
     deployment and production session policy remain separately gated.
+88. **BCK-06-AC-88:** at most one live Session exists per installation; a new
+    issue for that installation revokes and replaces the prior Session.
+89. **BCK-06-AC-89:** AccessSnapshot expires after 60 minutes and Session idle
+    authority after 30 days; expired Sessions do not consume the active cap.
+90. **BCK-06-AC-90:** refresh rotates the opaque handle and AccessSnapshot
+    atomically while preserving Session identity and the authorization fence.
+91. **BCK-06-AC-91:** a fourth installation returns `session_limit_reached`
+    and does not silently log out another device.
+92. **BCK-06-AC-92:** recovery requires Firebase `auth_time` no older than five
+    minutes, advances the security fence and invalidates all older handles.
+93. **BCK-06-AC-93:** bootstrap rate limiting runs before account creation and
+    account-level limiting runs after provider linking.
+94. **BCK-06-AC-94:** refresh/recovery remain local Emulator-only and do not
+    authorize production Auth, cloud deployment or market activation.
