@@ -7,7 +7,7 @@
 - Runtime status: **Absent**
 - Owner: API Platform (secondary: Security/Privacy owner — по реестру BCK-02
   §5, именно он owner будущего BCK-04)
-- Target document: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md` (BCK-04
+- Target document: `docs/product/backend/BACKEND_SECURITY_PRIVACY_SPEC.md` (BCK-04
   v0.1 — ещё не создан; точное имя файла подтверждено BCK-02 §5, строка
   реестра `BCK-04`)
 - Runtime effect: none
@@ -19,10 +19,10 @@ v0.1 этого документа был построен на устаревш
 отсутствовали — хотя на `origin/main` (реальный GitHub-репозиторий) они уже
 существовали через смерженный PR другой агентской сессии. v0.2 переписан
 после того, как эти файлы подтянуты в рабочую копию (`git checkout
-origin/main -- docs/product/RECHARGE_BACKEND_MASTER_SPEC.md
+origin/main -- docs/product/backend/RECHARGE_BACKEND_MASTER_SPEC.md
 docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md
-docs/product/EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md
-docs/product/BACKEND_API_CONTRACT_STANDARD.md
+docs/product/backend/EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md
+docs/product/backend/BACKEND_API_CONTRACT_STANDARD.md
 docs/product/RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md`).
 
 ### 0.1 Явное исправление ошибки v0.1
@@ -72,7 +72,7 @@ BCK-spec"` действительно существует и действите
 
 | Тема BCK-04 | Источник | Метка | Что подтверждено |
 |---|---|---|---|
-| Точное имя, owner и обязательные зависимости BCK-04 | [`RECHARGE_BACKEND_DELIVERY_MAP.md`](RECHARGE_BACKEND_DELIVERY_MAP.md) §5, строка `BCK-04` | **EA** | Файл `BACKEND_SECURITY_PRIVACY_SPEC.md`; owner Security/Privacy; scope "AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits"; hard-зависимости `BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11` |
+| Точное имя, owner и обязательные зависимости BCK-04 | [`RECHARGE_BACKEND_DELIVERY_MAP.md`](../RECHARGE_BACKEND_DELIVERY_MAP.md) §5, строка `BCK-04` | **EA** | Файл `BACKEND_SECURITY_PRIVACY_SPEC.md`; owner Security/Privacy; scope "AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits"; hard-зависимости `BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11` |
 | Обязательная 22-пунктовая структура каждого BCK-spec | `RECHARGE_BACKEND_DELIVERY_MAP.md` §14 | **EA** | `not applicable`/`TBD` без owner блокируют Approved; список 22 пунктов — прямая основа для §4 этого документа |
 | Cross-document reconciliation checklist | `RECHARGE_BACKEND_DELIVERY_MAP.md` §15 | **EA** | Отдельная проверка перед Approved: единый writer на authoritative record, единая retention-классификация, OD-11 fail-closed, security = Auth+App Check+Rules/IAM+rate limits вместе |
 | Open decision governance и статусы OD | `RECHARGE_BACKEND_DELIVERY_MAP.md` §16 | **EA** | `Open -> Proposed -> Accepted \| Deferred \| Superseded`; `Deferred` требует owner/причину/срок |
@@ -82,11 +82,11 @@ BCK-spec"` действительно существует и действите
 | Persistence/transaction boundary для security | `RECHARGE_BACKEND_MASTER_SPEC.md` §14 | **EA** | Aggregate transaction принадлежит одному module; cross-module прямые записи запрещены; Booking сохраняет более строгие правила ADR 0019 |
 | Open decisions и fail-closed default по каждому OD | `RECHARGE_BACKEND_MASTER_SPEC.md` §21 | **EA** | OD-07 (topology) и OD-11 (minors) явно закреплены за `BCK-04` (совместно с `BCK-05`/`BCK-06`/`BCK-07`/`BCK-09`/`BCK-22` для OD-11) |
 | OD-11 — полный текст решения | `RECHARGE_BACKEND_DELIVERY_MAP.md` §16, строка `OD-11` (line 612) | **EA** | Region-versioned minors/age policy; owner Security/Privacy; блокирует R2 production account creation, Find People, age-restricted publication/discovery, applicable Booking paths, G6; explicitly "не устанавливает юридический возраст... до Accepted — server-disabled и fail-closed" |
-| Backend topology target (Auth/Firestore/Storage/Functions/App Check) | [`FIREBASE_ARCHITECTURE.md`](../architecture/FIREBASE_ARCHITECTURE.md) v2.2 | **EP** (Proposed, не Accepted) | Полная целевая модель — используется только как cited input, не authority (см. §6 п.1 ниже) |
-| Исполняемый identity/capability/publisher контракт (local/mock) | [`IDENTITY_PUBLISHER_SLICE_SPEC.md`](IDENTITY_PUBLISHER_SLICE_SPEC.md) v1.3.1 | **EAB** | §10 Capability baseline, §13 Security and privacy |
-| Booking authoritative ledger, audit, idempotency | [`ADR 0019`](../adr/0019-authoritative-internal-booking-ledger.md) | **EA** | D01–D10 Accepted |
-| Retention/deletion table (Booking-scoped) | [`EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md`](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md) §6 (D04) | **EA** | Единственная реально Accepted retention-таблица, 30/90/180 дней по классам |
-| Env/flavor/secret separation, rotation, leak response | [`ENV_FLAVORS_SECRETS.md`](../architecture/ENV_FLAVORS_SECRETS.md), `secrets-rotation.md`, `secret-leak-response.md` | **EA** | dev/stage/prod separation, rotation policy, leak runbook |
+| Backend topology target (Auth/Firestore/Storage/Functions/App Check) | [`FIREBASE_ARCHITECTURE.md`](../../architecture/FIREBASE_ARCHITECTURE.md) v2.2 | **EP** (Proposed, не Accepted) | Полная целевая модель — используется только как cited input, не authority (см. §6 п.1 ниже) |
+| Исполняемый identity/capability/publisher контракт (local/mock) | [`IDENTITY_PUBLISHER_SLICE_SPEC.md`](../IDENTITY_PUBLISHER_SLICE_SPEC.md) v1.3.1 | **EAB** | §10 Capability baseline, §13 Security and privacy |
+| Booking authoritative ledger, audit, idempotency | [`ADR 0019`](../../adr/0019-authoritative-internal-booking-ledger.md) | **EA** | D01–D10 Accepted |
+| Retention/deletion table (Booking-scoped) | [`EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md`](../EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md) §6 (D04) | **EA** | Единственная реально Accepted retention-таблица, 30/90/180 дней по классам |
+| Env/flavor/secret separation, rotation, leak response | [`ENV_FLAVORS_SECRETS.md`](../../architecture/ENV_FLAVORS_SECRETS.md), `secrets-rotation.md`, `secret-leak-response.md` | **EA** | dev/stage/prod separation, rotation policy, leak runbook |
 | API envelope/error/idempotency семантика | `BACKEND_API_CONTRACT_STANDARD.md` (BCK-03 v0.2) | **EP** (Draft) | anti-enumeration, typed error dictionary; §34 честно фиксирует расхождение `idempotencyKey`/`requestId` с реальной Booking v1 схемой |
 | Booking v1 wire schema (факт) | `packages/api_contracts/schema/booking/v1/*.schema.json` + `fixtures/valid.json` | **EA** (implemented artifact) | `requestId` и `idempotencyKey` — независимые обязательные поля; в валидном fixture имеют разные значения |
 | `BCK-05` (Operations) | — | **RA** | Реестр `BCK-02 §5` подтверждает `Planned/Absent`; файла `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` нет |

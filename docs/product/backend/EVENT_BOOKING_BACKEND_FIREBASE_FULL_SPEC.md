@@ -4,13 +4,13 @@
 - Дата: 2026-08-09
 - Статус: **Review — documentation only; implementation and deployment absent**
 - Область: authoritative internal free Event Booking, ECL-03C–H
-- Канон: [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md)
-- Parent slice: [ECL-03 v1.1](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
-- Architecture: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
+- Канон: [Event Classification v2.2.3](../EVENT_CLASSIFICATION_SPEC.md)
+- Parent slice: [ECL-03 v1.1](../EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
+- Architecture: [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md)
 - Accepted decisions:
-  [ECL-03 D01–D10](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
+  [ECL-03 D01–D10](../EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.0](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+  [ECL-03C v1.0](../event/EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
 - Runtime effect: **none**
 
 ## 1. Назначение документа

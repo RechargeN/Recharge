@@ -6,7 +6,7 @@
 - Approval evidence: явное «поехали» от product owner 2026-08-08 до
   runtime-изменений
 - Parent canon:
-  [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md), Accepted
+  [EVENT_CLASSIFICATION_SPEC.md](../EVENT_CLASSIFICATION_SPEC.md), Accepted
   v2.2.3
 - Reconciliation:
   [EVENT_CLASSIFICATION_ECL_00_RECONCILIATION_SPEC.md](EVENT_CLASSIFICATION_ECL_00_RECONCILIATION_SPEC.md),

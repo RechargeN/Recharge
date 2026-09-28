@@ -8,7 +8,7 @@
 - Accountable owner: **Platform Architecture owner**
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
 - Runtime effect of this revision: **none**
-- Canonical repository path: `docs/product/RECHARGE_BACKEND_MASTER_SPEC.md`
+- Canonical repository path: `docs/product/backend/RECHARGE_BACKEND_MASTER_SPEC.md`
 - Link base: all relative links resolve from repository directory
   `docs/product/`, even when a review copy is distributed through Downloads
 
@@ -125,17 +125,17 @@ identity, IDs, time, money, market, API и ownership semantics.
 1. Accepted ADR побеждает при архитектурном конфликте.
 2. Approved spec текущего domain/runtime slice побеждает внутри своего bounded
    scope, если не противоречит Accepted ADR.
-3. [Architecture Baseline](../architecture/ARCHITECTURE_BASELINE.md) и
+3. [Architecture Baseline](../../architecture/ARCHITECTURE_BASELINE.md) и
    cross-cutting policies владеют module/layer boundaries.
-4. [LAUNCH_STATUS](../architecture/LAUNCH_STATUS.md) владеет фактическим
+4. [LAUNCH_STATUS](../../architecture/LAUNCH_STATUS.md) владеет фактическим
    implementation/runtime status, но не переписывает target architecture.
-5. [BCK-02 Backend Delivery Map](RECHARGE_BACKEND_DELIVERY_MAP.md) владеет
+5. [BCK-02 Backend Delivery Map](../RECHARGE_BACKEND_DELIVERY_MAP.md) владеет
    registry, accountable owners, dependencies, waves, OD/risks и gates.
 6. Этот BCK-01 владеет shared backend target, layers, module boundaries и
    cross-domain invariants, которых нет в более высоком источнике.
 7. Product vision и Draft/Review proposals не переопределяют пункты выше.
 
-[AGENTS.md](../../AGENTS.md) является канонической repository-level
+[AGENTS.md](../../../AGENTS.md) является канонической repository-level
 инструкцией для выполнения работы: он определяет активный slice, разрешённые
 изменения и обязательные проверки. Это execution authority для coding-agent,
 а не параллельный product/architecture spec.
@@ -149,22 +149,22 @@ Approval и требует reconciliation либо Accepted ADR.
 
 | Область | Источник | Обязательство BCK-01 |
 |---|---|---|
-| Repository execution | [AGENTS.md](../../AGENTS.md) | Не расширять активный slice и не считать documentation runtime-разрешением |
-| Monorepo и layers | [Architecture Baseline](../architecture/ARCHITECTURE_BASELINE.md) | Сохранить frozen boundaries; backend target создаётся только разрешённым slice |
-| Implementation status | [LAUNCH_STATUS](../architecture/LAUNCH_STATUS.md) | Различать target, docs/contracts, implemented, deployed и enabled evidence |
-| Technology defaults | [ADR 0012](../adr/0012-tech-stack-defaults.md) | Не вводить параллельный mobile stack; backend deviations документировать |
-| Domain/security policy | [ADR 0013](../adr/0013-domain-policy-baseline.md) | Сохранить IDs, lifecycle, UTC/IANA, privacy, audit с учётом superseding ADR |
-| Identity/Publisher | [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Mandatory Auth, verified Creator, exact-page capabilities, PublisherRef |
-| Bounded local Identity/workspace | [ADR 0016](../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
-| AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
-| Booking authority | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
-| Backend sequencing | [BCK-02 v2.4](RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7 |
-| Baltic rollout | [Latvia/Baltics roadmap](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
-| Firebase target | [Firebase Architecture](../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
-| Shared contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
-| Event/Booking | [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md), [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md), [ECL-03C plan](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md) | Не создавать вторую Event/Booking модель; BCK-09 до Approval reconciles с exact ECL-03B/C groundwork |
-| Scenario | [Scenario Builder](SCENARIO_BUILDER_SPEC.md) | Scenario не равен Route или Quick Plan |
-| Route | [Route Builder](ROUTE_BUILDER_SPEC.md) | Route остаётся continuous track/GPX aggregate |
+| Repository execution | [AGENTS.md](../../../AGENTS.md) | Не расширять активный slice и не считать documentation runtime-разрешением |
+| Monorepo и layers | [Architecture Baseline](../../architecture/ARCHITECTURE_BASELINE.md) | Сохранить frozen boundaries; backend target создаётся только разрешённым slice |
+| Implementation status | [LAUNCH_STATUS](../../architecture/LAUNCH_STATUS.md) | Различать target, docs/contracts, implemented, deployed и enabled evidence |
+| Technology defaults | [ADR 0012](../../adr/0012-tech-stack-defaults.md) | Не вводить параллельный mobile stack; backend deviations документировать |
+| Domain/security policy | [ADR 0013](../../adr/0013-domain-policy-baseline.md) | Сохранить IDs, lifecycle, UTC/IANA, privacy, audit с учётом superseding ADR |
+| Identity/Publisher | [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Mandatory Auth, verified Creator, exact-page capabilities, PublisherRef |
+| Bounded local Identity/workspace | [ADR 0016](../../adr/0016-bounded-identity-workspace-during-stabilization.md), [ADR 0017](../../adr/0017-admin-experience-preview-and-user-created-pages.md) | Не выдавать local/mock access snapshot, ManagedPage или Admin preview за production authority |
+| AI boundary | [ADR 0018](../../adr/0018-provider-neutral-ai-assistance-capability.md) | Сохранить horizontal provider-neutral facade; production proxy/provider остаётся gated |
+| Booking authority | [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md) | Trusted commands, ledger, online authority, separate aggregates |
+| Backend sequencing | [BCK-02 v2.4](../RECHARGE_BACKEND_DELIVERY_MAP.md) | Сохранить registry, owners, OD, risks, D/R waves и G0–G7 |
+| Baltic rollout | [Latvia/Baltics roadmap](../RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) | Latvia-first, EE/LT prepared and disabled independently |
+| Firebase target | [Firebase Architecture](../../architecture/FIREBASE_ARCHITECTURE.md) | Использовать как Proposed infrastructure input, не как runtime evidence |
+| Shared contracts | [API Contracts Workflow](../../api/API_CONTRACTS_WORKFLOW.md) | Language-neutral source, fixtures, generated/verified consumers |
+| Event/Booking | [Event Classification v2.2.3](../EVENT_CLASSIFICATION_SPEC.md), [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md), [ECL-03C plan](../event/EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md) | Не создавать вторую Event/Booking модель; BCK-09 до Approval reconciles с exact ECL-03B/C groundwork |
+| Scenario | [Scenario Builder](../SCENARIO_BUILDER_SPEC.md) | Scenario не равен Route или Quick Plan |
+| Route | [Route Builder](../ROUTE_BUILDER_SPEC.md) | Route остаётся continuous track/GPX aggregate |
 
 Mobile- и backend-дорожные карты имеют независимые namespaces. Например,
 mobile M8 adapter preparation не равен backend R8. Ссылка всегда содержит

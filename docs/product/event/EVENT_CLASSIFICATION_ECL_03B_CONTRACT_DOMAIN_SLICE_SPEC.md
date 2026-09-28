@@ -4,15 +4,15 @@
 - Дата: 2026-08-09
 - Статус: **Done — contracts/pure domain only; no Booking runtime**
 - Parent:
-  [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
+  [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](../EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
   Approved v1.1
 - Architecture:
-  [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
+  [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
-  [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
+  [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](../EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
   Accepted D01-D10
 - API governance:
-  [API_CONTRACTS_WORKFLOW.md](../api/API_CONTRACTS_WORKFLOW.md)
+  [API_CONTRACTS_WORKFLOW.md](../../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
 
 ## 1. Goal
@@ -284,7 +284,7 @@ The user confirmed this plan on 2026-08-09 by instructing the work to continue.
 
 | Action | Path | Purpose |
 |---|---|---|
-| Modify | `docs/product/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | Mark only contract/domain coverage actually proven |
+| Modify | `docs/product/event/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | Mark only contract/domain coverage actually proven |
 | Modify | `docs/architecture/LAUNCH_STATUS.md` | ECL-03B factual status/evidence |
 | Modify | `AGENTS.md` | Current Event status; runtime still absent |
 

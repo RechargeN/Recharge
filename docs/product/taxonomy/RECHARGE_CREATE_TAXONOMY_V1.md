@@ -5,7 +5,7 @@ Last updated: 2026-07-18
 Owner: Recharge product and engineering
 
 The accepted category model and canonical 28/530 registry are defined in
-[`CATEGORY_SYSTEM.md`](CATEGORY_SYSTEM.md). This document is retained only to
+[`CATEGORY_SYSTEM.md`](../CATEGORY_SYSTEM.md). This document is retained only to
 explain historical 22/434 IDs and Create-block contracts handled by the
 compatibility migration.
 

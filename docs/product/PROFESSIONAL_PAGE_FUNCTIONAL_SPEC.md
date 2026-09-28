@@ -1576,7 +1576,7 @@ At minimum, implementation slices cover:
 ## 20. Decisions required before implementation
 
 These are deliberately not hidden as settled facts.
-[`PROFESSIONAL_PAGE_DECISION_PACKAGE.md`](./PROFESSIONAL_PAGE_DECISION_PACKAGE.md)
+[`PROFESSIONAL_PAGE_DECISION_PACKAGE.md`](identity/PROFESSIONAL_PAGE_DECISION_PACKAGE.md)
 (same directory) proposes a recommended resolution for each one, in the
 same spirit as `EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md` did for
 ECL-03 — accepting a recommendation there is what actually moves a

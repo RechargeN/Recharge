@@ -4,12 +4,12 @@
 - Дата: 2026-08-09
 - Статус: **Review — exact implementation plan; runtime not authorized**
 - Parent:
-  [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
+  [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](../EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md),
   Approved v1.1
 - Architecture:
-  [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
+  [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md), Accepted
 - Decisions:
-  [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
+  [EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md](../EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md),
   Accepted D01–D10
 - Dependency:
   [EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md),
@@ -406,7 +406,7 @@ pass the shared fixtures before any command handler is exported.
 |---|---|
 | `docs/api/BOOKING_API_V1.md` | Five surfaces, schemas, errors and examples |
 | `docs/architecture/BOOKING_SECURITY_MATRIX.md` | Auth/App Check/Rules/IAM/flags evidence |
-| `docs/product/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | ECL-03C evidence only after tests |
+| `docs/product/event/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | ECL-03C evidence only after tests |
 | `docs/architecture/LAUNCH_STATUS.md` | Honest stage status and command evidence |
 | `AGENTS.md` | Current ECL status only after verified implementation |
 

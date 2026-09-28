@@ -4,7 +4,7 @@
 - Дата: 2026-08-05
 - Статус: **Done — docs alignment и repository gate завершены**
 - Parent canon:
-  [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md), Accepted
+  [EVENT_CLASSIFICATION_SPEC.md](../EVENT_CLASSIFICATION_SPEC.md), Accepted
   v2.2.3
 - Coverage evidence:
   [EVENT_CLASSIFICATION_COVERAGE_MATRIX.md](EVENT_CLASSIFICATION_COVERAGE_MATRIX.md)

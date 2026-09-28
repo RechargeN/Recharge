@@ -62,7 +62,7 @@ consent или age gate для Find People/Booking.
 **Ответ:** A — Recommendation-style, без числового возраста.
 
 Источник уже существует: [`RECHARGE_BACKEND_DELIVERY_MAP.md` §16, строка
-OD-11 (line 612)](RECHARGE_BACKEND_DELIVERY_MAP.md). В BCK-04 следует
+OD-11 (line 612)](../RECHARGE_BACKEND_DELIVERY_MAP.md). В BCK-04 следует
 предложить Draft policy:
 
 - политика версионируется отдельно для LV, EE и LT;
@@ -100,7 +100,7 @@ Rules/Storage/App Check разделов BCK-04.
 
 **Ответ:** A.
 
-[`FIREBASE_ARCHITECTURE.md` v2.2](../architecture/FIREBASE_ARCHITECTURE.md)
+[`FIREBASE_ARCHITECTURE.md` v2.2](../../architecture/FIREBASE_ARCHITECTURE.md)
 использовать только как `Proposed architecture input`. Правила:
 
 - ничего не наследовать тихо;

@@ -6,7 +6,7 @@
 - Канон: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md),
   Accepted v2.2.3
 - Предыдущий обязательный slice:
-  [EVENT_CLASSIFICATION_ECL_02_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_02_SLICE_SPEC.md),
+  [EVENT_CLASSIFICATION_ECL_02_SLICE_SPEC.md](event/EVENT_CLASSIFICATION_ECL_02_SLICE_SPEC.md),
   Done
 - Architecture proposal:
   [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), Accepted
@@ -1006,7 +1006,7 @@ repair runbook. It never guesses that capacity is available.
 
 This parent map defines ownership, not permission to implement every path.
 ECL-03B has a separate bounded exact plan in
-[EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md).
+[EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md](event/EVENT_CLASSIFICATION_ECL_03B_CONTRACT_DOMAIN_SLICE_SPEC.md).
 Every later stage requires its own confirmed exact file plan. No listed runtime
 file was authorized or added by ECL-03A.
 
@@ -1091,7 +1091,7 @@ Paths are relative to `apps/mobile/lib/`.
 | `docs/runbooks/booking-rollback.md` | Flag/degraded-mode rollback |
 | `docs/runbooks/booking-reconciliation.md` | Drift detection/repair |
 | `docs/architecture/LAUNCH_STATUS.md` | Evidence only after gates |
-| `docs/product/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | Cumulative AC status |
+| `docs/product/event/EVENT_CLASSIFICATION_COVERAGE_MATRIX.md` | Cumulative AC status |
 
 ### 25.6. Do not modify for ECL-03
 

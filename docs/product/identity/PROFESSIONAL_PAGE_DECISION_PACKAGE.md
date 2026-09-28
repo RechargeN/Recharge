@@ -12,7 +12,7 @@
   business/legal/planning calls this package declines to default, still
   `Open` there pending your actual decision.
 - Parent spec:
-  [PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md](./PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md) v2.27
+  [PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md](../PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md) v2.27
 - Runtime effect: none
 
 ## 0. Changes from v1.0

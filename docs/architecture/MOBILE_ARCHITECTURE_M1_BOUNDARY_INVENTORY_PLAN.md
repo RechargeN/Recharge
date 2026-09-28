@@ -314,7 +314,7 @@ comparison. Generated inventory имеет явный header и не редак�
 | `docs/architecture/RECHARGE_MOBILE_ARCHITECTURE_V3.md` | обновить M1 roadmap status после approved implementation |
 | `docs/architecture/RECHARGE_ARCHITECTURE.md` | заменить текущую legacy-allowlist policy на structured registry governance |
 | `docs/architecture/PLATFORM_FOUNDATION_SPEC.md` | заменить текущую remediation-ссылку на structured registry budget |
-| `docs/product/S3_REL_01_RELEASE_READINESS_SPEC.md` | сохранить historical evidence и явно отметить M1 supersession |
+| `docs/product/archive/S3_REL_01_RELEASE_READINESS_SPEC.md` | сохранить historical evidence и явно отметить M1 supersession |
 | `AGENTS.md` | обновить дату и canonical local/CI boundary command |
 
 ### 5.3 Удаляемый файл после parity

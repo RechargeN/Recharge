@@ -195,11 +195,11 @@ Canonical supporting sources:
 - `docs/product/SCENARIO_CONNECTED_PLANNING_SPEC.md` (Approved — the
   canonical source of Scenario's `ScenarioAccessGrant` role model this
   document renders, §5.1);
-- `docs/product/SCENARIO_QUICK_PLAN_BOUNDARY_MIGRATION_SLICE_SPEC.md`;
-- `docs/product/VISIT_HISTORY_SLICE_SPEC.md`;
+- `docs/product/scenario/SCENARIO_QUICK_PLAN_BOUNDARY_MIGRATION_SLICE_SPEC.md`;
+- `docs/product/discover/VISIT_HISTORY_SLICE_SPEC.md`;
 - `docs/product/EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md`;
-- `docs/product/S3_NOTIF_01_NOTIFICATIONS_SPEC.md`;
-- `docs/product/FIND_PEOPLE_CREATE_BLOCK_SPEC.md` (the canonical `find_people`
+- `docs/product/archive/S3_NOTIF_01_NOTIFICATIONS_SPEC.md`;
+- `docs/product/create/FIND_PEOPLE_CREATE_BLOCK_SPEC.md` (the canonical `find_people`
   Create type — publishing one is Creator-gated, responding to one is not;
   §5.1, §11).
 
@@ -220,7 +220,7 @@ backing:
 - `VIS-HIST-01` is Done in `LAUNCH_STATUS.md`: self-reported, place-only Visit
   History with idempotent owner+place+day records, descending canonical sort,
   month/day filters and per-record removal
-  (`docs/product/VISIT_HISTORY_SLICE_SPEC.md`); missing/corrupt local storage
+  (`docs/product/discover/VISIT_HISTORY_SLICE_SPEC.md`); missing/corrupt local storage
   is an Approved exception to this document's general partial-load rule —
   see §4.3(8);
 - canonical personal Scenario exists in the config-driven Create runtime and
@@ -231,7 +231,7 @@ backing:
   action and collapses to nothing (`SizedBox.shrink()`) on an empty or
   failed load — this document's §5.4 treats that collapse as a defect;
 - Quick Plan is a separate legacy runtime
-  (`docs/product/SCENARIO_QUICK_PLAN_BOUNDARY_MIGRATION_SLICE_SPEC.md`) with
+  (`docs/product/scenario/SCENARIO_QUICK_PLAN_BOUNDARY_MIGRATION_SLICE_SPEC.md`) with
   no dedicated personal-library surface in Profile, and its full
   invited-membership/collaboration schema is explicitly deferred to a future
   specification by `SCENARIO_BUILDER_SPEC.md`'s own "Scenario и Quick Plan"

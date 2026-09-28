@@ -4,7 +4,7 @@
 - Дата: 2026-08-08
 - Статус: **Done**
 - Parent canon:
-  [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md), Accepted
+  [EVENT_CLASSIFICATION_SPEC.md](../EVENT_CLASSIFICATION_SPEC.md), Accepted
   v2.2.3
 - Предыдущий обязательный slice:
   [EVENT_CLASSIFICATION_ECL_01_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_01_SLICE_SPEC.md),

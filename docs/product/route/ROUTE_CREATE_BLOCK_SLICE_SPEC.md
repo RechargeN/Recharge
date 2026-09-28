@@ -17,13 +17,13 @@ Android/iOS device-проверка foreground/background/restart.
 проверки прав автора и постановки точек на outdoor-карте до сохранения
 версии геометрии, публикации поисковой проекции и показа готового маршрута
 поверх Google Maps. Продуктовый контракт и полная доменная модель заданы в
-[ROUTE_BUILDER_SPEC.md](ROUTE_BUILDER_SPEC.md) v3.2; при конфликте он имеет
+[ROUTE_BUILDER_SPEC.md](../ROUTE_BUILDER_SPEC.md) v3.2; при конфликте он имеет
 приоритет над этим планом реализации.
 
 Платформенные зависимости, investor-demo и правила контроля стоимости заданы
-в [PLATFORM_FOUNDATION_SPEC.md](../architecture/PLATFORM_FOUNDATION_SPEC.md).
+в [PLATFORM_FOUNDATION_SPEC.md](../../architecture/PLATFORM_FOUNDATION_SPEC.md).
 Порядок небольших slices и investor-ready milestone зафиксированы в
-[ROUTE_IMPLEMENTATION_ROADMAP.md](ROUTE_IMPLEMENTATION_ROADMAP.md).
+[ROUTE_IMPLEMENTATION_ROADMAP.md](../ROUTE_IMPLEMENTATION_ROADMAP.md).
 Первый поставляемый результат — полностью работающая локальная вертикаль без
 тарифицируемых API-вызовов; adapters меняются по мере готовности, но Route-
 контракт и Create flow не упрощаются.

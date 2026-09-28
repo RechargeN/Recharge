@@ -63,7 +63,7 @@ Rental обязана использовать отдельное имя `Rental
 - [CREATE_TEMPLATES_SLICE_SPEC.md](CREATE_TEMPLATES_SLICE_SPEC.md) —
   local-first template materialization и sanitization;
 - [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — общий Create pipeline;
-- [BACKEND_API_CONTRACT_STANDARD.md](BACKEND_API_CONTRACT_STANDARD.md) —
+- [BACKEND_API_CONTRACT_STANDARD.md](backend/BACKEND_API_CONTRACT_STANDARD.md) —
   Money, stable metadata, idempotency и concurrency;
 - [ADR 0013](../adr/0013-domain-policy-baseline.md) — lifecycle, moderation,
   offline, IDs, privacy, abuse и audit;

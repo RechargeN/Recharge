@@ -8,12 +8,12 @@
 - Accountable owner: **Security/Privacy owner** (per `BCK-02 §5` registry row `BCK-04`)
 - Markets: **Latvia first; Estonia and Lithuania prepared but disabled independently**
 - Parent architecture: [BCK-01 v0.3](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.2](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.2](../RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Reconciles with: [BCK-03 v0.2](BACKEND_API_CONTRACT_STANDARD.md) (Draft),
   [BCK-09 v1.0](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) (Review)
 - Preparatory input: [BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md](BACKEND_SECURITY_PRIVACY_COVERAGE_MATRIX.md) v0.2
 - Hard dependencies (per `BCK-02 §5`): `BCK-01`, `ADR 0013`, `ADR 0015`, environment policy, `OD-07`, `OD-11`
-- Canonical repository path: `docs/product/BACKEND_SECURITY_PRIVACY_SPEC.md`
+- Canonical repository path: `docs/product/backend/BACKEND_SECURITY_PRIVACY_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ---
@@ -182,9 +182,9 @@ executable slice и post-stabilization authorization остаются обяза
    `ADR 0015`, `ADR 0016` bounded, `ADR 0017` bounded, `ADR 0019`);
 2. Approved spec применимого domain/runtime slice побеждает внутри своего
    bounded scope (`IDENTITY_PUBLISHER_SLICE_SPEC.md` v1.3.1, Approved bounded);
-3. [Architecture Baseline](../architecture/ARCHITECTURE_BASELINE.md) и
+3. [Architecture Baseline](../../architecture/ARCHITECTURE_BASELINE.md) и
    cross-cutting policies владеют module/layer boundaries;
-4. [LAUNCH_STATUS](../architecture/LAUNCH_STATUS.md) владеет фактическим
+4. [LAUNCH_STATUS](../../architecture/LAUNCH_STATUS.md) владеет фактическим
    implementation/runtime status, но не переписывает target architecture;
 5. `BCK-02` (registry, accountable owners, dependencies, waves, OD/risks,
    gates);
@@ -201,14 +201,14 @@ executable slice и post-stabilization authorization остаются обяза
 | Область | Источник | Обязательство BCK-04 |
 |---|---|---|
 | Backend architecture/data classes | [`BCK-01`](RECHARGE_BACKEND_MASTER_SPEC.md) §12–14, §21 | Не вводить параллельную классификацию или authorization matrix |
-| Registry/gates/OD governance | [`BCK-02`](RECHARGE_BACKEND_DELIVERY_MAP.md) §5, §14–18 | Соблюсти 22-пунктовую структуру §14 и reconciliation checklist §15 |
-| Domain policy baseline | [`ADR 0013`](../adr/0013-domain-policy-baseline.md) | Использовать существующие numeric defaults (retention 30 дней, auto-hide ≥5/24h, 3 сессии, 100 publish/day, EU opt-in/non-EU opt-out), не переопределять их без нового ADR |
-| Identity mandatory auth | [`ADR 0015`](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Нет unauthenticated режима; Google/Apple — единственные production providers |
-| Bounded local/mock identity | [`ADR 0016`](../adr/0016-bounded-identity-workspace-during-stabilization.md), [`ADR 0017`](../adr/0017-admin-experience-preview-and-user-created-pages.md) | Admin — capability-gated preview, не superuser; local/mock scope не выдаётся за production authority |
-| Booking authoritative ledger | [`ADR 0019`](../adr/0019-authoritative-internal-booking-ledger.md), [`BCK-09`](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Booking сохраняет более строгие transaction/idempotency правила, BCK-04 их не ослабляет |
+| Registry/gates/OD governance | [`BCK-02`](../RECHARGE_BACKEND_DELIVERY_MAP.md) §5, §14–18 | Соблюсти 22-пунктовую структуру §14 и reconciliation checklist §15 |
+| Domain policy baseline | [`ADR 0013`](../../adr/0013-domain-policy-baseline.md) | Использовать существующие numeric defaults (retention 30 дней, auto-hide ≥5/24h, 3 сессии, 100 publish/day, EU opt-in/non-EU opt-out), не переопределять их без нового ADR |
+| Identity mandatory auth | [`ADR 0015`](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Нет unauthenticated режима; Google/Apple — единственные production providers |
+| Bounded local/mock identity | [`ADR 0016`](../../adr/0016-bounded-identity-workspace-during-stabilization.md), [`ADR 0017`](../../adr/0017-admin-experience-preview-and-user-created-pages.md) | Admin — capability-gated preview, не superuser; local/mock scope не выдаётся за production authority |
+| Booking authoritative ledger | [`ADR 0019`](../../adr/0019-authoritative-internal-booking-ledger.md), [`BCK-09`](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Booking сохраняет более строгие transaction/idempotency правила, BCK-04 их не ослабляет |
 | API wire contract | [`BCK-03`](BACKEND_API_CONTRACT_STANDARD.md) | Envelope/error/idempotency semantics не дублируются здесь — только security overlay |
-| Firebase target architecture | [`FIREBASE_ARCHITECTURE.md`](../architecture/FIREBASE_ARCHITECTURE.md) v2.2 | Cited `Proposed input` only; §8/§11 не settled |
-| Environment/secrets policy | [`ENV_FLAVORS_SECRETS.md`](../architecture/ENV_FLAVORS_SECRETS.md), runbooks | Нормативно для §15 |
+| Firebase target architecture | [`FIREBASE_ARCHITECTURE.md`](../../architecture/FIREBASE_ARCHITECTURE.md) v2.2 | Cited `Proposed input` only; §8/§11 не settled |
+| Environment/secrets policy | [`ENV_FLAVORS_SECRETS.md`](../../architecture/ENV_FLAVORS_SECRETS.md), runbooks | Нормативно для §15 |
 
 Конфликт между этим документом и Accepted ADR блокирует Approved BCK-04 до
 принятого решения; Accepted ADR не переписывается нижестоящим документом
@@ -528,7 +528,7 @@ BCK-04 не дублирует wire-контракт — он задаёт secur
   "Для client v1: `idempotencyKey == requestId`. Mismatch — invalid
   command.";
 - [`EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md` строки
-  263–264](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md): "In
+  263–264](../event/EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md): "In
   v1 the explicit derivation is `idempotencyKey == requestId`; a mismatch is
   an invalid command."
 
@@ -632,9 +632,9 @@ detail).
 
 ## 15. Secrets и cryptographic material
 
-Источник: [`ENV_FLAVORS_SECRETS.md`](../architecture/ENV_FLAVORS_SECRETS.md),
-[`secrets-rotation.md`](../runbooks/secrets-rotation.md),
-[`secret-leak-response.md`](../runbooks/secret-leak-response.md) — все три
+Источник: [`ENV_FLAVORS_SECRETS.md`](../../architecture/ENV_FLAVORS_SECRETS.md),
+[`secrets-rotation.md`](../../runbooks/secrets-rotation.md),
+[`secret-leak-response.md`](../../runbooks/secret-leak-response.md) — все три
 реально существуют как действующая repository policy. `LAUNCH_STATUS`
 отмечает "Env / Flavors / Secrets" как `Done` — это статус завершённости
 документации/процесса в стадийном трекере, не формальный ADR-уровня
@@ -1035,7 +1035,7 @@ user disclosure — это `OD-04`, owner Mobile Platform, закрываетс�
 
 ## 26. Incident response и security-event escalation
 
-Источники: [`secret-leak-response.md`](../runbooks/secret-leak-response.md)
+Источники: [`secret-leak-response.md`](../../runbooks/secret-leak-response.md)
 — реален, но покрывает только secret leak; `BCK-02 §6` строка `RUN-06`
 (зависит от `BCK-04`) — реально уже фиксирует "Уведомление supervisory
 authority в течение 72 часов применяется только при условиях Article 33

@@ -7,7 +7,7 @@
   реализации; см. «Что изменилось в v2» перед §1.
 - Статус: **Audit — documentation only; no runtime claim; не отменяет ни
   одного Accepted решения**
-- Канон: [DISCOVER_DETAILS_SYSTEM_SPEC.md](DISCOVER_DETAILS_SYSTEM_SPEC.md)
+- Канон: [DISCOVER_DETAILS_SYSTEM_SPEC.md](../DISCOVER_DETAILS_SYSTEM_SPEC.md)
   v0.3 (Accepted) — целевая архитектура, которой этот аудит измеряет
   фактическое отставание; см. её Этап 4 для статуса slice'ов
 - Следующий gate: не блокирует ничего сам по себе; используется для выбора

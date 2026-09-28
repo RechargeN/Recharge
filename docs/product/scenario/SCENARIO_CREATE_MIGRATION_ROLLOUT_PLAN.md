@@ -4,7 +4,7 @@
 Slice: **SCN-SB-00**. Реализация runtime в этот документ не входит.
 
 Каноническая продуктовая спецификация:
-[SCENARIO_BUILDER_SPEC.md](SCENARIO_BUILDER_SPEC.md) v1.3.
+[SCENARIO_BUILDER_SPEC.md](../SCENARIO_BUILDER_SPEC.md) v1.3.
 
 ## 1. Цель
 
@@ -46,7 +46,7 @@ moderation runtime.
 | `features/scenarios/**` | существующий builder по форме ближе к Quick Plan и содержит `ScenarioRoute*` naming | не считать канонической Scenario domain model; извлекать только проверенные UX-паттерны |
 | `core/config/recharge_taxonomy*.dart` | `RechargeContentType.quickPlan`, `quick_plan` и `private_plan` compatibility | Quick Plan identity сохранить; расширение core/shared contract допускается только в рамках frozen baseline/ADR |
 | Discover Map/Create/Success/tests | присутствуют `mode=scenario`, `scenario route`, `Publish route` handoffs | классифицировать на входной границе; не выполнять глобальный rename |
-| `docs/product/RECHARGE_CREATE_TAXONOMY_V1.md` | фиксирует старый Quick Plan Create-slot | оставить legacy implementation reference; target задают Category System v1.4.2 и Accepted Scenario spec |
+| `docs/product/taxonomy/RECHARGE_CREATE_TAXONOMY_V1.md` | фиксирует старый Quick Plan Create-slot | оставить legacy implementation reference; target задают Category System v1.4.2 и Accepted Scenario spec |
 
 ## 4. Классификация legacy данных
 

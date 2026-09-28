@@ -14,7 +14,7 @@ conversion или публичного template. AI entry формирует п�
 
 Bounded local/mock contract `SCN-AI-01` разрешён как mature extension
 существующего Scenario Create-типа по
-[SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md](SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md).
+[SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md](scenario/SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md).
 Он не подключает внешнюю модель и не выдаётся за production AI.
 
 Обязательный follow-up после текущей стабилизации — `SCN-AI-02`: выбрать
@@ -27,7 +27,7 @@ evaluation fixtures и автоматическим fallback на `SCN-AI-01`. �
 
 - [AI_PRODUCT_STRATEGY.md](AI_PRODUCT_STRATEGY.md);
 - [SCENARIO_BUILDER_SPEC.md](SCENARIO_BUILDER_SPEC.md);
-- [SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md](SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md);
+- [SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md](scenario/SCENARIO_AI_LOCAL_MOCK_SLICE_SPEC.md);
 - [SCENARIO_CONNECTED_PLANNING_SPEC.md](SCENARIO_CONNECTED_PLANNING_SPEC.md);
 - [VISION.md](VISION.md);
 - `docs/architecture/ARCHITECTURE_BASELINE.md`;

@@ -2,7 +2,7 @@
 
 - Версия аудита: 2026-08-09
 - Статус: **ECL-00–ECL-03B Done; ECL-03C exact plan Review; runtime absent**
-- Канон: [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md),
+- Канон: [EVENT_CLASSIFICATION_SPEC.md](../EVENT_CLASSIFICATION_SPEC.md),
   Accepted v2.2.3, SHA-256
   `62EC444B74CD737AE8AEC9D5E140F31DD5E2660577D8D15940F180D54ED05BFB`
 - Следующий gate: explicit acceptance of

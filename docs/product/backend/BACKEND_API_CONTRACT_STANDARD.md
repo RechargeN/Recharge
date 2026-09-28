@@ -7,10 +7,10 @@
 - Runtime status: **Absent**
 - Accountable owner: **API Platform owner**
 - Parent architecture: [BCK-01 v0.3](RECHARGE_BACKEND_MASTER_SPEC.md)
-- Coordination baseline: [BCK-02 v2.4.2](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Canonical workflow: [API Contracts Workflow v1.1](../api/API_CONTRACTS_WORKFLOW.md)
+- Coordination baseline: [BCK-02 v2.4.2](../RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Canonical workflow: [API Contracts Workflow v1.1](../../api/API_CONTRACTS_WORKFLOW.md)
 - Runtime effect: **none**
-- Canonical repository path: `docs/product/BACKEND_API_CONTRACT_STANDARD.md`
+- Canonical repository path: `docs/product/backend/BACKEND_API_CONTRACT_STANDARD.md`
 - Link base: relative links resolve from `docs/product/`
 
 ## 0. Changelog
@@ -111,9 +111,9 @@ rule` означает предлагаемое normative правило, а н�
 
 1. Accepted ADR.
 2. Approved spec применимого domain/runtime slice.
-3. [Architecture Baseline](../architecture/ARCHITECTURE_BASELINE.md) и
+3. [Architecture Baseline](../../architecture/ARCHITECTURE_BASELINE.md) и
    cross-cutting policies.
-4. [LAUNCH_STATUS](../architecture/LAUNCH_STATUS.md) для фактического runtime.
+4. [LAUNCH_STATUS](../../architecture/LAUNCH_STATUS.md) для фактического runtime.
 5. BCK-02 для registry, owners, waves, OD и gates.
 6. BCK-01 для shared backend architecture/invariants.
 7. Этот BCK-03 для wire/API/schema/event compatibility semantics.
@@ -122,11 +122,11 @@ rule` означает предлагаемое normative правило, а н�
 
 | Область | Источник | Обязательство BCK-03 |
 |---|---|---|
-| Repository execution | [AGENTS.md](../../AGENTS.md) | Documentation не разрешает runtime; активный stabilization scope соблюдается |
-| API workflow | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Не создавать второй source/codegen/change workflow |
-| Identity | [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Client identity/capability claims не authoritative |
-| AI boundary | [ADR 0018](../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
-| Booking | [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
+| Repository execution | [AGENTS.md](../../../AGENTS.md) | Documentation не разрешает runtime; активный stabilization scope соблюдается |
+| API workflow | [API Contracts Workflow](../../api/API_CONTRACTS_WORKFLOW.md) | Не создавать второй source/codegen/change workflow |
+| Identity | [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) | Client identity/capability claims не authoritative |
+| AI boundary | [ADR 0018](../../adr/0018-provider-neutral-ai-assistance-capability.md) | Provider payload не становится product-domain contract |
+| Booking | [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md), [BCK-09](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md) | Сохранить language-neutral Booking schemas, typed results и idempotency |
 | Existing schema | `packages/api_contracts/schema/booking/v1/` | Единственный текущий ADR-authorized cross-language namespace; не переименовывать, не задваивать и не ломать fixtures |
 | Reference data | BCK-20 planned, OD-10 | Не изобретать LocalizedText/market dataset semantics |
 | Security/privacy | BCK-04 planned | Envelope не заменяет AuthZ, Rules/IAM, retention и Legal decisions |

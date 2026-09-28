@@ -164,7 +164,7 @@ authority над источниками.
 | API contracts | [API Contracts Workflow](../api/API_CONTRACTS_WORKFLOW.md) | Расширять source/codegen/fixture policy; не создавать второй workflow |
 | Category/reference data | [Category System v1.4.3](CATEGORY_SYSTEM.md) | Распространять versioned canonical IDs; не переименовывать и не дублировать taxonomy |
 | Event classification | [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md) | Расширять принятые 34 archetypes и aggregate boundaries |
-| Booking | [Booking full spec](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md), ADR 0019 | Сохранять authoritative ledger, online mutation и staged activation |
+| Booking | [Booking full spec](backend/EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md), ADR 0019 | Сохранять authoritative ledger, online mutation и staged activation |
 | Scenario | [Scenario Builder spec](SCENARIO_BUILDER_SPEC.md) | Не превращать Scenario в Route или Quick Plan |
 | Route | [Route Builder spec](ROUTE_BUILDER_SPEC.md) | Сохранять Route-only track/GPX semantics |
 | Analytics naming/catalog | [Analytics Taxonomy](../analytics/ANALYTICS_TAXONOMY.md), [Event Catalog](../analytics/EVENT_CATALOG.md) | BCK-21 добавляет backend transport/governance, но не переизобретает event names |
@@ -232,7 +232,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-22 | `TRUST_SAFETY_MODERATION_BACKEND_SPEC.md` | Trust & Safety owner | UGC reports, block/mute, spam controls, sanctions, appeals and enforcement audit | Hard: BCK-03, BCK-04, BCK-06, BCK-07, BCK-12, OD-06; policy gate: OD-11; integration peer: BCK-19 | Planned | Absent |
 
 BCK-09 уже существует как Review-документ:
-[Event Booking Backend/Firebase full spec](EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md).
+[Event Booking Backend/Firebase full spec](backend/EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md).
 Перед `Approved` он проходит reconciliation с BCK-01, BCK-03, BCK-04, BCK-05,
 BCK-06 и BCK-07, но его
 принятые Event/Booking инварианты не переписываются этой картой.
@@ -815,7 +815,7 @@ documentation package из §20, но не G1, runtime wave или provisioning.
 Первым создаётся:
 
 ```text
-docs/product/RECHARGE_BACKEND_MASTER_SPEC.md
+docs/product/backend/RECHARGE_BACKEND_MASTER_SPEC.md
 ```
 
 BCK-01 фиксирует target contracts и reconciliation anchors, не дублируя domain

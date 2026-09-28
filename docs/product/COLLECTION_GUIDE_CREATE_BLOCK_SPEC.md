@@ -61,7 +61,7 @@ Hub в [VISION.md:358](VISION.md), секция `ItemsPickerSection` анонс�
 
 Ближайший архитектурный прецедент внутри репозитория — механизм добавления
 существующих каталожных объектов в черновик, уже принятый и реализованный для
-Scenario: [SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md](SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md)
+Scenario: [SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md](scenario/SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md)
 (`ScenarioObjectRef`, `ScenarioIntakeCandidate`, typed outcomes, revision-safe
 Apply). Этот документ переиспользует те же принципы (id-only связи, снапшот +
 live resolution, явные duplicate/unavailable guard), но не копирует контракт
@@ -240,7 +240,7 @@ GetYourGuide guide-страница по отношению к своим bookab
    наборы категорий приходят из
    конфигурации блока (`collection_create_config.dart`, см. §15), не
    зашиваются в UI — тот же принцип, что и у Route (решение №12 в
-   [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](ROUTE_CREATE_BLOCK_SLICE_SPEC.md),
+   [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md),
    далее по документу — «RCB»).
 10. Минимальный порог пунктов (§11) — это **publish-time gate**, не
     постоянно поддерживаемый инвариант. Объекты внутри уже опубликованной
