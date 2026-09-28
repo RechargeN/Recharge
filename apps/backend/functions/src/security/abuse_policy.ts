@@ -4,6 +4,7 @@ export const abusePolicyRevision = 1 as const;
 export type AbuseOperation =
   | 'booking.create'
   | 'booking.cancel'
+  | 'booking.reconfirm'
   | 'booking.query'
   | 'identity.session.bootstrap'
   | 'identity.session.issue'
@@ -33,6 +34,12 @@ const bookingRules = Object.freeze({
     rule('networkRisk', 60, 60, false),
   ]),
   'booking.cancel': Object.freeze([
+    rule('actorInstallation', 10, 10),
+    rule('actorInstallation', 60, 20),
+    rule('account', 60, 40),
+    rule('installation', 60, 40),
+  ]),
+  'booking.reconfirm': Object.freeze([
     rule('actorInstallation', 10, 10),
     rule('actorInstallation', 60, 20),
     rule('account', 60, 40),

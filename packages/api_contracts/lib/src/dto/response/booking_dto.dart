@@ -23,6 +23,8 @@ class BookingDto {
     this.eligibilitySnapshotRef,
     this.activeHoldId,
     this.cancellationDeadlineSnapshot,
+    this.reconfirmationRequiredForRevision,
+    this.reconfirmationDeadlineUtc,
     this.terminalReason,
     this.confirmedAt,
     this.cancelledAt,
@@ -43,6 +45,17 @@ class BookingDto {
     if (state != BookingState.waitlisted && activeHoldId != null) {
       throw const BookingContractFormatException(
         'Only waitlisted Booking may reference an active hold',
+      );
+    }
+    final requiresReconfirmationAuthority =
+        reconfirmationState == BookingReconfirmationState.required ||
+        reconfirmationState == BookingReconfirmationState.confirmed;
+    if (requiresReconfirmationAuthority !=
+            (reconfirmationRequiredForRevision != null) ||
+        requiresReconfirmationAuthority !=
+            (reconfirmationDeadlineUtc != null)) {
+      throw const BookingContractFormatException(
+        'Required or confirmed reconfirmation must carry revision and deadline',
       );
     }
   }
@@ -73,6 +86,8 @@ class BookingDto {
       'eligibilitySnapshotRef',
       'activeHoldId',
       'cancellationDeadlineSnapshot',
+      'reconfirmationRequiredForRevision',
+      'reconfirmationDeadlineUtc',
       'terminalReason',
       'confirmedAt',
       'cancelledAt',
@@ -155,6 +170,17 @@ class BookingDto {
         BookingReconfirmationState.values,
         field: 'reconfirmationState',
       ),
+      reconfirmationRequiredForRevision:
+          json['reconfirmationRequiredForRevision'] == null
+          ? null
+          : requirePositiveInt(
+              json['reconfirmationRequiredForRevision'],
+              'reconfirmationRequiredForRevision',
+            ),
+      reconfirmationDeadlineUtc: optionalUtcTimestamp(
+        json['reconfirmationDeadlineUtc'],
+        'reconfirmationDeadlineUtc',
+      ),
       terminalReason: json['terminalReason'] == null
           ? null
           : parseWireEnum(
@@ -189,6 +215,8 @@ class BookingDto {
   final String? activeHoldId;
   final DateTime? cancellationDeadlineSnapshot;
   final BookingReconfirmationState reconfirmationState;
+  final int? reconfirmationRequiredForRevision;
+  final DateTime? reconfirmationDeadlineUtc;
   final BookingTerminalReason? terminalReason;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -221,6 +249,10 @@ class BookingDto {
         cancellationDeadlineSnapshot!,
       ),
     'reconfirmationState': reconfirmationState.name,
+    if (reconfirmationRequiredForRevision != null)
+      'reconfirmationRequiredForRevision': reconfirmationRequiredForRevision,
+    if (reconfirmationDeadlineUtc != null)
+      'reconfirmationDeadlineUtc': utcTimestamp(reconfirmationDeadlineUtc!),
     if (terminalReason != null) 'terminalReason': terminalReason!.name,
     'createdAt': utcTimestamp(createdAt),
     'updatedAt': utcTimestamp(updatedAt),

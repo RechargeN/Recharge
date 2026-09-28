@@ -54,6 +54,7 @@ void main() {
         'policy' => () => BookingPolicyDto.fromJson(value),
         'command' => () => BookingCommandDto.fromJson(value),
         'error' => () => BookingErrorDto.fromJson(value),
+        'result' => () => BookingResultDto.fromJson(value),
         _ => throw StateError('Unknown fixture target $target'),
       };
       expect(

@@ -1,6 +1,10 @@
 export interface BookingAuditFact {
   readonly schemaVersion: 1;
-  readonly factType: 'booking_created' | 'booking_cancelled' | 'booking_reconfirmation_required';
+  readonly factType:
+    | 'booking_created'
+    | 'booking_cancelled'
+    | 'booking_reconfirmation_required'
+    | 'booking_reconfirmed';
   readonly bookingId: string;
   readonly actorId: string;
   readonly eventId: string;

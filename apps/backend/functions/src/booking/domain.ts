@@ -49,7 +49,9 @@ export interface BookingRecord {
   readonly state: BookingState;
   readonly participantUnits: number;
   readonly cancellationDeadlineSnapshot?: string;
-  readonly reconfirmationState: 'notRequired' | 'required';
+  readonly reconfirmationState: 'notRequired' | 'required' | 'confirmed';
+  readonly reconfirmationRequiredForRevision?: number;
+  readonly reconfirmationDeadlineUtc?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly confirmedAt: string;

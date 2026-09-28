@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 
 export type JsonObject = Record<string, unknown>;
 
-export type BookingCommand = CreateBookingCommand | CancelBookingCommand;
+export type BookingCommand = CreateBookingCommand | CancelBookingCommand | ReconfirmBookingCommand;
 
 export interface BookingSessionContext {
   readonly sessionId: string;
@@ -37,6 +37,16 @@ export interface CancelBookingCommand {
   readonly expectedBookingRevision: number;
   readonly occurredAgainstEventRevision?: number;
   readonly payload: Readonly<{ bookingId: string; reasonCode?: string }>;
+}
+
+export interface ReconfirmBookingCommand {
+  readonly schemaVersion: 1;
+  readonly commandType: 'reconfirmBooking';
+  readonly requestId: string;
+  readonly idempotencyKey: string;
+  readonly sessionContext?: BookingSessionContext;
+  readonly expectedBookingRevision: number;
+  readonly payload: Readonly<{ bookingId: string; materialRevision: number }>;
 }
 
 export type BookingQuery = GetMyBookingQuery | ListMyBookingsQuery | GetEventAvailabilityQuery;
@@ -116,7 +126,8 @@ export function computeBookingSemanticHash(command: BookingCommand, actorId: str
     ...(!('expectedBookingRevision' in command)
       ? {}
       : { expectedBookingRevision: command.expectedBookingRevision }),
-    ...(command.occurredAgainstEventRevision === undefined
+    ...(!('occurredAgainstEventRevision' in command) ||
+    command.occurredAgainstEventRevision === undefined
       ? {}
       : { occurredAgainstEventRevision: command.occurredAgainstEventRevision }),
     payload: command.payload,
@@ -240,6 +251,29 @@ function parseBookingCommand(value: unknown): RawBookingInput<BookingCommand> {
     }
     return { ok: true, value: value as unknown as CancelBookingCommand };
   }
+  if (value.commandType === 'reconfirmBooking') {
+    const allowed = [
+      'schemaVersion',
+      'commandType',
+      'requestId',
+      'idempotencyKey',
+      'sessionContext',
+      'expectedBookingRevision',
+      'payload',
+    ];
+    const payload = value.payload;
+    if (
+      !hasOnlyKeys(value, allowed) ||
+      !optionalSessionContext(value.sessionContext) ||
+      !isRevision(value.expectedBookingRevision) ||
+      !hasOnlyKeys(payload, ['bookingId', 'materialRevision']) ||
+      !isBoundedId(payload.bookingId) ||
+      !isMaterialRevision(payload.materialRevision)
+    ) {
+      return failure('invalid_contract');
+    }
+    return { ok: true, value: value as unknown as ReconfirmBookingCommand };
+  }
   if (typeof value.commandType === 'string') return failure('unsupported_flow');
   return failure('invalid_contract');
 }
@@ -349,6 +383,10 @@ function optionalId(value: unknown): boolean {
 
 function isRevision(value: unknown): value is number {
   return Number.isSafeInteger(value) && Number(value) >= 0;
+}
+
+function isMaterialRevision(value: unknown): value is number {
+  return isRevision(value) && value >= 1;
 }
 
 function optionalRevision(value: unknown): boolean {

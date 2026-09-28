@@ -15,6 +15,7 @@ import { getEventAvailability } from './booking/availability_query.js';
 import { getMyBooking, listMyBookings } from './booking/booking_queries.js';
 import { cancelInternalBooking } from './booking/cancel_internal_booking.js';
 import { createInternalBooking } from './booking/create_internal_booking.js';
+import { reconfirmInternalBooking } from './booking/reconfirm_internal_booking.js';
 import { resolveBookingActor } from './shared/auth_context.js';
 import {
   abuseEmergencySwitchIds,
@@ -368,6 +369,33 @@ export const cancelInternalBookingV1 = onCall<unknown>(callableOptions, async (r
   );
 });
 
+export const reconfirmInternalBookingV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareCommand(request, bookingFlagIds.reconfirm, 'reconfirmBooking');
+  const result = !prepared.ok
+    ? prepared.result
+    : await reconfirmInternalBooking(
+        {
+          firestore: prepared.firestore,
+          clock: systemServerClock,
+          failureLogger: bookingFailureLogger,
+          mutationAuthorization: {
+            hint: prepared.accessHint,
+            expectedUserId: prepared.actorId,
+            flagId: bookingFlagIds.reconfirm,
+            authority: prepared.composition.accessAuthority,
+            featureFlags: prepared.composition.featureFlags,
+          },
+        },
+        prepared.actorId,
+        prepared.command,
+      );
+  return toBookingCommandWireResult(
+    result,
+    prepared.requestId,
+    systemServerClock.now().toISOString(),
+  );
+});
+
 export const getMyBookingV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareQuery(request, bookingFlagIds.read, 'getMyBooking');
   const result = !prepared.ok
@@ -446,7 +474,9 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
     const incidentSwitch =
       commandType === 'createBooking'
         ? abuseEmergencySwitchIds.bookingCreate
-        : abuseEmergencySwitchIds.bookingCancel;
+        : commandType === 'cancelBooking'
+          ? abuseEmergencySwitchIds.bookingCancel
+          : abuseEmergencySwitchIds.bookingReconfirm;
     if (await access.composition.featureFlags.isEnabled(incidentSwitch)) {
       return {
         ok: false as const,
@@ -455,7 +485,12 @@ async function prepareCommand<T extends BookingCommand['commandType']>(
       };
     }
     const rateDecision = await access.composition.abuseRateLimiter.consume({
-      operation: commandType === 'createBooking' ? 'booking.create' : 'booking.cancel',
+      operation:
+        commandType === 'createBooking'
+          ? 'booking.create'
+          : commandType === 'cancelBooking'
+            ? 'booking.cancel'
+            : 'booking.reconfirm',
       attemptRequestId: hint.requestId,
       accountId: actorId,
       installationId: access.accessHint.installationId,

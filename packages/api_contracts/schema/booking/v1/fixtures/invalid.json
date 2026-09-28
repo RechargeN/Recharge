@@ -191,6 +191,88 @@
     },
     {
       "target": "command",
+      "reason": "reconfirmBooking requires materialRevision",
+      "value": {
+        "schemaVersion": 1,
+        "commandType": "reconfirmBooking",
+        "requestId": "r-reconfirm-revision",
+        "idempotencyKey": "k-reconfirm-revision",
+        "expectedBookingRevision": 1,
+        "payload": { "bookingId": "booking-1" }
+      }
+    },
+    {
+      "target": "command",
+      "reason": "reconfirmBooking materialRevision must be positive",
+      "value": {
+        "schemaVersion": 1,
+        "commandType": "reconfirmBooking",
+        "requestId": "r-reconfirm-zero",
+        "idempotencyKey": "k-reconfirm-zero",
+        "expectedBookingRevision": 1,
+        "payload": { "bookingId": "booking-1", "materialRevision": 0 }
+      }
+    },
+    {
+      "target": "booking",
+      "reason": "required reconfirmation must carry revision and deadline",
+      "value": {
+        "schemaVersion": 1,
+        "id": "booking-required-1",
+        "revision": 2,
+        "userId": "user-1",
+        "marketId": "LV",
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "confirmed",
+        "participantUnits": 1,
+        "reconfirmationState": "required",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "updatedAt": "2026-08-09T08:01:00.000Z"
+      }
+    },
+    {
+      "target": "booking",
+      "reason": "notRequired reconfirmation cannot retain stale authority",
+      "value": {
+        "schemaVersion": 1,
+        "id": "booking-not-required-1",
+        "revision": 2,
+        "userId": "user-1",
+        "marketId": "LV",
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "confirmed",
+        "participantUnits": 1,
+        "reconfirmationState": "notRequired",
+        "reconfirmationRequiredForRevision": 3,
+        "reconfirmationDeadlineUtc": "2026-08-10T08:00:00.000Z",
+        "createdAt": "2026-08-09T08:00:00.000Z",
+        "updatedAt": "2026-08-09T08:01:00.000Z"
+      }
+    },
+    {
+      "target": "result",
+      "reason": "non-success result cannot carry a reconfirmation outcome",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "rejected",
+        "requestId": "request-rejected-outcome",
+        "correlationId": "correlation-rejected-outcome",
+        "serverTime": "2026-08-09T08:00:00.000Z",
+        "outcome": "reconfirmed",
+        "error": {
+          "code": "reconfirmation_not_required",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "target": "command",
       "reason": "createBooking cannot use bookingId payload",
       "value": {
         "schemaVersion": 1,

@@ -1,5 +1,8 @@
 import type { BookingEventProjection } from '../../src/booking/domain.js';
-import type { CreateBookingCommand } from '../../src/contracts/booking_v1.js';
+import type {
+  CreateBookingCommand,
+  ReconfirmBookingCommand,
+} from '../../src/contracts/booking_v1.js';
 
 export const fixedNow = new Date('2026-08-29T12:00:00.000Z');
 
@@ -63,6 +66,21 @@ export function createCommand(overrides: Partial<CreateBookingCommand> = {}): Cr
       participantUnits: 1,
       namedGuests: [],
     },
+    ...overrides,
+  };
+}
+
+export function reconfirmCommand(
+  bookingId: string,
+  overrides: Partial<ReconfirmBookingCommand> = {},
+): ReconfirmBookingCommand {
+  return {
+    schemaVersion: 1,
+    commandType: 'reconfirmBooking',
+    requestId: 'req_reconfirm',
+    idempotencyKey: 'idem_reconfirm',
+    expectedBookingRevision: 2,
+    payload: { bookingId, materialRevision: 8 },
     ...overrides,
   };
 }

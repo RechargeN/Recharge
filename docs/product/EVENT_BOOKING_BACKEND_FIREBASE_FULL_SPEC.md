@@ -56,6 +56,14 @@
 - authorizes only the manual local/Emulator command slice. Automatic deadline
   release belongs to separately gated `2B`; cloud, deployment, market
   activation, push and merge remain unauthorized.
+- implements the default-off `reconfirmInternalBookingV1` callable and one
+  transaction for Identity/Session/AccessSnapshot, Booking revision, exact
+  Event material revision, deadline and semantic idempotency checks. The
+  command changes only Booking reconfirmation metadata and suppressed
+  notification/audit facts; inventory and usage are untouched;
+- verifies the bounded slice with 28 TypeScript contract tests, 14 Dart
+  DTO/schema tests and 5 exact-toolchain Emulator tests. This is local evidence
+  only and does not claim BCK-13 delivery or automatic deadline processing.
 
 ### v1.23 — 2026-09-27
 
@@ -1030,9 +1038,9 @@ ledger/usage и outbox obligations. Частично обработанный ba
 - lifecycle записывает `reconfirmationState=required`, точную
   `reconfirmationRequiredForRevision` и immutable для этой ревизии
   `reconfirmationDeadlineUtc`;
-- дедлайн вычисляется сервером из принятой policy и никогда не позже нового
-  `occurrenceStartsAt`; отсутствие валидного нового начала или вычислимого
-  дедлайна является fail-closed lifecycle failure;
+- в `2A` дедлайн равен новому `occurrenceStartsAt`; более ранний дедлайн
+  потребует отдельной принятой policy revision. Отсутствие валидного нового
+  начала является fail-closed lifecycle failure;
 - user может подтвердить только собственную активную Booking, предъявив
   `expectedBookingRevision` и точную текущую `materialRevision`, либо отменить
   её независимо от обычного cancellation deadline;
@@ -1763,7 +1771,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
 | ECL-03C | Plan v1.11; RAW-C v0.3 plus local lifecycle, retention and single-ledger load hardening | Review / local evidence present | Disabled source plus pure default-off escrow model; no persistent escrow/deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
-| ECL-03E | Notifications/reconfirmation | Target only | None |
+| ECL-03E | Notifications/reconfirmation | Review / manual `2A` local evidence present | Default-off Emulator reconfirm callable with suppressed outbox; automatic deadline worker and BCK-13 delivery absent |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
 | ECL-03G | Mobile remote integration/cutover | Target only | None |
 | ECL-03H | Production security/load/operations proof | Target only | None |

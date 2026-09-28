@@ -19,6 +19,7 @@ const exports = [
 const expected = [
   "cancelInternalBookingV1",
   "createInternalBookingV1",
+  "reconfirmInternalBookingV1",
   "getEventAvailabilityV1",
   "getMyBookingV1",
   "establishIdentitySessionV1",

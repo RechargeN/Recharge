@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 interface IdempotencyBase {
   readonly schemaVersion: 1;
   readonly actorId: string;
-  readonly commandType: 'createBooking' | 'cancelBooking';
+  readonly commandType: 'createBooking' | 'cancelBooking' | 'reconfirmBooking';
   readonly semanticHash: string;
   readonly logicalMutationId: string;
   readonly requestAttemptId: string;

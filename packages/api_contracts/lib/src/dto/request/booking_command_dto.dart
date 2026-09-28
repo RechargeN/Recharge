@@ -120,7 +120,10 @@ class BookingCommandDto {
       objectName: 'sessionContext',
     );
     _requireBoundedId(value['sessionId'], 'sessionContext.sessionId');
-    final handle = _requireString(value['sessionHandle'], 'sessionContext.sessionHandle');
+    final handle = _requireString(
+      value['sessionHandle'],
+      'sessionContext.sessionHandle',
+    );
     if (!RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(handle)) {
       throw const BookingContractFormatException('Invalid session handle');
     }
@@ -128,7 +131,9 @@ class BookingCommandDto {
       value['installationId'],
       'sessionContext.installationId',
     );
-    if (!RegExp(r'^(?!__name__$)[A-Za-z0-9._:-]{1,128}$').hasMatch(installation)) {
+    if (!RegExp(
+      r'^(?!__name__$)[A-Za-z0-9._:-]{1,128}$',
+    ).hasMatch(installation)) {
       throw const BookingContractFormatException('Invalid installation id');
     }
   }
@@ -146,7 +151,7 @@ class BookingCommandDto {
     BookingCommandType.leaveWaitlist: {'bookingId'},
     BookingCommandType.acceptWaitlistHold: {'bookingId', 'holdId'},
     BookingCommandType.declineWaitlistHold: {'bookingId', 'holdId'},
-    BookingCommandType.reconfirmBooking: {'bookingId'},
+    BookingCommandType.reconfirmBooking: {'bookingId', 'materialRevision'},
   };
 
   static const Map<BookingCommandType, Set<String>> _allowedPayloadKeys = {
@@ -171,7 +176,7 @@ class BookingCommandDto {
     BookingCommandType.leaveWaitlist: {'bookingId'},
     BookingCommandType.acceptWaitlistHold: {'bookingId', 'holdId'},
     BookingCommandType.declineWaitlistHold: {'bookingId', 'holdId'},
-    BookingCommandType.reconfirmBooking: {'bookingId'},
+    BookingCommandType.reconfirmBooking: {'bookingId', 'materialRevision'},
   };
 
   static const Set<BookingCommandType> _commandsRequiringExpectedRevision = {
@@ -233,6 +238,17 @@ class BookingCommandDto {
     }
     if (payload.containsKey('reasonCode')) {
       _requireBoundedNonBlankString(payload['reasonCode'], 'reasonCode', 64);
+    }
+    if (payload.containsKey('materialRevision')) {
+      final revision = requireNonNegativeInt(
+        payload['materialRevision'],
+        'materialRevision',
+      );
+      if (revision < 1) {
+        throw const BookingContractFormatException(
+          'materialRevision must be positive',
+        );
+      }
     }
     if (payload.containsKey('namedGuests')) {
       _validateNamedGuests(payload['namedGuests']);

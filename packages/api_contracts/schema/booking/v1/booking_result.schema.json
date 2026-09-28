@@ -8,16 +8,47 @@
     "schemaVersion": { "$ref": "common.schema.json#/$defs/schemaVersion" },
     "kind": {
       "type": "string",
-      "enum": ["succeeded", "rejected", "retryableFailure", "unsupportedContract"]
+      "enum": [
+        "succeeded",
+        "rejected",
+        "retryableFailure",
+        "unsupportedContract"
+      ]
     },
     "requestId": { "$ref": "common.schema.json#/$defs/id" },
     "correlationId": { "$ref": "common.schema.json#/$defs/id" },
     "serverTime": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
+    "outcome": { "type": "string", "enum": ["reconfirmed"] },
     "booking": { "$ref": "booking.schema.json" },
     "hold": { "$ref": "booking_hold.schema.json" },
     "policy": { "$ref": "booking_policy.schema.json" },
     "error": { "$ref": "booking_error.schema.json" },
     "unsupportedPayload": { "type": "object" }
   },
-  "required": ["schemaVersion", "kind", "requestId", "correlationId", "serverTime"]
+  "required": [
+    "schemaVersion",
+    "kind",
+    "requestId",
+    "correlationId",
+    "serverTime"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "kind": { "const": "succeeded" }
+      },
+      "required": ["kind"]
+    },
+    {
+      "properties": {
+        "kind": {
+          "enum": ["rejected", "retryableFailure", "unsupportedContract"]
+        }
+      },
+      "propertyNames": {
+        "pattern": "^(?!outcome$).+$"
+      },
+      "required": ["kind"]
+    }
+  ]
 }

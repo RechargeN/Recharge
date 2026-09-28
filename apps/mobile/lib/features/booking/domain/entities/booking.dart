@@ -49,6 +49,8 @@ class Booking {
     this.auxiliaryTrackId,
     this.eligibilitySnapshotRef,
     this.activeHoldId,
+    this.reconfirmationRequiredForRevision,
+    this.reconfirmationDeadlineUtc,
     this.terminalReason,
     this.confirmedAtUtc,
     this.cancelledAtUtc,
@@ -73,6 +75,8 @@ class Booking {
   final String? eligibilitySnapshotRef;
   final String? activeHoldId;
   final BookingReconfirmationState reconfirmationState;
+  final int? reconfirmationRequiredForRevision;
+  final DateTime? reconfirmationDeadlineUtc;
   final BookingTerminalReason? terminalReason;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;

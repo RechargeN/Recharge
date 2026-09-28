@@ -191,7 +191,8 @@
       "idempotencyKey": "idempotency-reconfirm",
       "expectedBookingRevision": 3,
       "payload": {
-        "bookingId": "01JBOOKING0000000000000001"
+        "bookingId": "01JBOOKING0000000000000001",
+        "materialRevision": 5
       }
     },
     {
@@ -264,6 +265,7 @@
       "requestId": "01JREQUEST0000000000000001",
       "correlationId": "01JCORRELATION000000000002",
       "serverTime": "2026-08-09T08:01:00.000Z",
+      "outcome": "reconfirmed",
       "booking": {
         "schemaVersion": 1,
         "id": "01JBOOKING0000000000000001",
@@ -278,7 +280,9 @@
         "confirmationMode": "instant",
         "state": "confirmed",
         "participantUnits": 2,
-        "reconfirmationState": "notRequired",
+        "reconfirmationState": "confirmed",
+        "reconfirmationRequiredForRevision": 5,
+        "reconfirmationDeadlineUtc": "2026-08-10T08:00:00.000Z",
         "createdAt": "2026-08-09T08:00:00.000Z",
         "updatedAt": "2026-08-09T08:01:00.000Z",
         "confirmedAt": "2026-08-09T08:01:00.000Z"

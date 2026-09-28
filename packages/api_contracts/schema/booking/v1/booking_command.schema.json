@@ -215,7 +215,7 @@
         "occurredAgainstEventRevision": {
           "$ref": "common.schema.json#/$defs/revision"
         },
-        "payload": { "$ref": "#/$defs/bookingIdPayload" }
+        "payload": { "$ref": "#/$defs/reconfirmBookingPayload" }
       },
       "required": [
         "schemaVersion",
@@ -316,6 +316,17 @@
         "bookingId": { "$ref": "#/$defs/nonBlankId" }
       },
       "required": ["bookingId"]
+    },
+    "reconfirmBookingPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bookingId": { "$ref": "#/$defs/nonBlankId" },
+        "materialRevision": {
+          "$ref": "common.schema.json#/$defs/materialRevision"
+        }
+      },
+      "required": ["bookingId", "materialRevision"]
     },
     "holdDecisionPayload": {
       "type": "object",

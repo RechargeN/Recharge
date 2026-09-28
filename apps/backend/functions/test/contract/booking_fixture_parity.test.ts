@@ -47,6 +47,7 @@ void test('existing invalid and forward fixtures retain fail-closed verdicts', a
     policy: 'booking_policy.schema.json',
     command: 'booking_command.schema.json',
     error: 'booking_error.schema.json',
+    result: 'booking_result.schema.json',
   };
   for (const raw of invalid.cases) {
     const fixture = asRecord(raw);

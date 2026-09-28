@@ -47,6 +47,8 @@ enum BookingResultKind {
   unsupportedContract,
 }
 
+enum BookingCommandOutcome { reconfirmed }
+
 enum BookingErrorCode {
   notAuthenticated('not_authenticated'),
   notAuthorized('not_authorized'),
@@ -71,6 +73,9 @@ enum BookingErrorCode {
   revisionConflict('revision_conflict'),
   holdExpired('hold_expired'),
   cancellationDeadlinePassed('cancellation_deadline_passed'),
+  reconfirmationNotRequired('reconfirmation_not_required'),
+  reconfirmationDeadlinePassed('reconfirmation_deadline_passed'),
+  materialRevisionMismatch('material_revision_mismatch'),
   idempotencyConflict('idempotency_conflict'),
   contention('contention'),
   forbidden('forbidden'),

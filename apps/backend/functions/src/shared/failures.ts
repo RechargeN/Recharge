@@ -13,6 +13,9 @@ export type BookingFailureCode =
   | 'registration_not_open'
   | 'registration_closed'
   | 'cancellation_deadline_passed'
+  | 'reconfirmation_not_required'
+  | 'reconfirmation_deadline_passed'
+  | 'material_revision_mismatch'
   | 'sold_out'
   | 'already_active'
   | 'concurrency_cap_reached'
@@ -67,7 +70,9 @@ export class BookingRetryableFailure extends Error {
   }
 }
 
-export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown }>>(
+export function toBookingCommandWireResult<
+  T extends Readonly<{ booking: unknown; outcome?: 'reconfirmed' }>,
+>(
   result: BookingResult<T>,
   requestId: string,
   serverTime: string,
@@ -79,7 +84,13 @@ export function toBookingCommandWireResult<T extends Readonly<{ booking: unknown
     correlationId: requestId,
     serverTime,
   } as const;
-  if (result.kind === 'succeeded') return { ...base, booking: result.data.booking };
+  if (result.kind === 'succeeded') {
+    return {
+      ...base,
+      booking: result.data.booking,
+      ...(result.data.outcome === undefined ? {} : { outcome: result.data.outcome }),
+    };
+  }
   if (result.kind === 'unsupportedContract') {
     return { ...base, unsupportedPayload: { reason: result.code } };
   }

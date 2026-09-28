@@ -34,6 +34,12 @@
     "reconfirmationState": {
       "$ref": "common.schema.json#/$defs/reconfirmationState"
     },
+    "reconfirmationRequiredForRevision": {
+      "$ref": "common.schema.json#/$defs/materialRevision"
+    },
+    "reconfirmationDeadlineUtc": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    },
     "terminalReason": { "$ref": "common.schema.json#/$defs/terminalReason" },
     "createdAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
     "updatedAt": { "$ref": "common.schema.json#/$defs/utcTimestamp" },
@@ -56,5 +62,34 @@
     "reconfirmationState",
     "createdAt",
     "updatedAt"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "reconfirmationState": { "enum": ["required", "confirmed"] },
+        "reconfirmationRequiredForRevision": {
+          "$ref": "common.schema.json#/$defs/materialRevision"
+        },
+        "reconfirmationDeadlineUtc": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        }
+      },
+      "required": [
+        "reconfirmationState",
+        "reconfirmationRequiredForRevision",
+        "reconfirmationDeadlineUtc"
+      ]
+    },
+    {
+      "properties": {
+        "reconfirmationState": {
+          "enum": ["notRequired", "notOpen", "missed"]
+        }
+      },
+      "propertyNames": {
+        "pattern": "^(?!reconfirmationRequiredForRevision$|reconfirmationDeadlineUtc$).+$"
+      },
+      "required": ["reconfirmationState"]
+    }
   ]
 }

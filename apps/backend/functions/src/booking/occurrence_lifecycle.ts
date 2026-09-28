@@ -22,6 +22,7 @@ interface OccurrenceLifecycleEvent {
   readonly materialRevision: number;
   readonly publicationRevision: number;
   readonly occurredAt: string;
+  readonly reconfirmationDeadlineUtc?: string;
 }
 
 export async function cancelBookingForPrivacyErasure(
@@ -67,6 +68,13 @@ export async function applyOccurrenceLifecycleEffects(
     materialRevision: event.materialRevision,
     publicationRevision: event.publicationRevision,
     occurredAt: event.occurredAt,
+    ...(event.kind === 'EventMateriallyRescheduled'
+      ? {
+          reconfirmationDeadlineUtc: requireReconfirmationDeadline(
+            event.projection.occurrenceStartsAt,
+          ),
+        }
+      : {}),
   };
   const pageSize = options.pageSize ?? 200;
   if (!Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 200) {
@@ -112,9 +120,12 @@ async function applyOne(
     ) {
       return false;
     }
-    if (event.kind === 'EventMateriallyRescheduled' && booking.reconfirmationState === 'required') {
+    if (
+      event.kind === 'EventMateriallyRescheduled' &&
+      booking.reconfirmationRequiredForRevision !== undefined &&
+      booking.reconfirmationRequiredForRevision >= event.materialRevision
+    )
       return false;
-    }
 
     const activeRef = firestore
       .collection(bookingCollections.activeKeys)
@@ -186,6 +197,8 @@ async function applyOne(
             revision,
             updatedAt: event.occurredAt,
             reconfirmationState: 'required',
+            reconfirmationRequiredForRevision: event.materialRevision,
+            reconfirmationDeadlineUtc: event.reconfirmationDeadlineUtc!,
           };
     const audit: BookingAuditFact = {
       schemaVersion: 1,
@@ -224,4 +237,11 @@ async function applyOne(
     );
     return true;
   });
+}
+
+function requireReconfirmationDeadline(value: string | undefined): string {
+  if (value === undefined || !value.endsWith('Z') || !Number.isFinite(Date.parse(value))) {
+    throw new TypeError('reconfirmation_deadline_unavailable');
+  }
+  return value;
 }

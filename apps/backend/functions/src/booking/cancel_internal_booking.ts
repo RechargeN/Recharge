@@ -140,7 +140,10 @@ export async function cancelInternalBooking(
         .collection(bookingCollections.activeKeys)
         .doc(activeBookingKeyId(actorId, booking.occurrenceId));
       const now = dependencies.clock.now();
-      if (typeof booking.cancellationDeadlineSnapshot === 'string') {
+      if (
+        booking.reconfirmationState !== 'required' &&
+        typeof booking.cancellationDeadlineSnapshot === 'string'
+      ) {
         const cancellationDeadline = new Date(booking.cancellationDeadlineSnapshot);
         if (!Number.isFinite(cancellationDeadline.getTime())) {
           throw new BookingDomainRefusal('event_unavailable');
