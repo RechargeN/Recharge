@@ -1,12 +1,12 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
 - ID: **BCK-09**
-- Версия: **1.24**
+- Версия: **1.25**
 - Дата: **2026-09-28**
 - Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
 - Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
 - Accountable owner: **Booking owner**
-- Coordination baseline: [BCK-02 v2.4.99](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coordination baseline: [BCK-02 v2.4.100](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
   Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
@@ -40,6 +40,25 @@
 - Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
 
 ## 0. Changelog
+
+### v1.25 — 2026-09-28
+
+- completes bounded local/Emulator slice `2B`: expired `required`
+  reconfirmations are cancelled transactionally and release active key,
+  finite ledger or unlimited usage exactly once;
+- adds the default-off `releaseMissedReconfirmationsV1` schedule with bounded
+  discovery, stable pagination, fenced lease, durable checkpoint, retry/backoff,
+  five-attempt dead-letter state and audited idempotent manual replay;
+- rechecks active state, exact material revision and deadline inside the
+  cancellation transaction, so reconfirm, manual cancel, repeated workers and
+  later reschedules cannot double-release allocation or usage;
+- records the full exact-toolchain gate at commit `8946cbb`: 93 unit, 28
+  contract, 16 integration, 84 Emulator/Rules and 701 Flutter tests; Flutter
+  analyzer, boundary, layout/export/no-cloud/reproducibility and diff checks
+  are green;
+- declares the bounded verdict `Local Booking vertical complete`. BCK-13
+  delivery, persistent escrow, dev cloud, staging, production, market
+  activation, independent Security and qualified Legal/Privacy remain absent.
 
 ### v1.24 — 2026-09-28
 
@@ -1771,7 +1790,7 @@ internal-coming-later state и никогда не выдаёт local/mock ре�
 | ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
 | ECL-03C | Plan v1.11; RAW-C v0.3 plus local lifecycle, retention and single-ledger load hardening | Review / local evidence present | Disabled source plus pure default-off escrow model; no persistent escrow/deploy/activation |
 | ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
-| ECL-03E | Notifications/reconfirmation | Review / manual `2A` local evidence present | Default-off Emulator reconfirm callable with suppressed outbox; automatic deadline worker and BCK-13 delivery absent |
+| ECL-03E | Notifications/reconfirmation | Review / local `2A` and `2B` evidence present | Default-off Emulator reconfirm callable and deadline worker with suppressed outbox; BCK-13 delivery absent |
 | ECL-03F | Auxiliary/concurrency extensions | Target only | None |
 | ECL-03G | Mobile remote integration/cutover | Target only | None |
 | ECL-03H | Production security/load/operations proof | Target only | None |
@@ -2176,5 +2195,25 @@ allocations return sold out while cancellations continue to release units.
      is stable; a changed payload under the same key is rejected.
 168. Reconfirmation effects remain suppressed until BCK-13 activation and do
      not claim notification delivery, reading or production evidence.
-169. Slice `2A` authorizes only the manual default-off local/Emulator command.
-     Automatic deadline release and its worker remain outside scope in `2B`.
+169. Slice `2A` authorizes only the manual default-off local/Emulator command;
+     slice `2B` separately authorizes only the default-off deadline worker.
+170. An expired Booking is auto-cancelled only when it remains active,
+     `reconfirmationState=required`, its material revision is unchanged and its
+     stored deadline has passed in the transaction that performs cancellation.
+171. Automatic cancellation releases the active key and the applicable finite
+     ledger or unlimited usage exactly once and emits only Booking-owned audit
+     and suppressed outbox facts.
+172. Deadline discovery is bounded and stably paginated; processing uses a
+     fenced lease, durable checkpoint and bounded retry/backoff. Five failed
+     attempts produce an explicit dead letter.
+173. Manual replay requires an audited idempotent operator decision and cannot
+     reopen a terminal job or bypass current Booking invariants.
+174. Concurrent reconfirmation, owner cancellation, later material reschedule
+     and duplicate workers resolve through transaction preconditions; exactly
+     one terminal transition may release allocation and usage.
+175. The exact-toolchain gate at commit `8946cbb` passes 93 unit, 28 contract,
+     16 integration, 84 Emulator/Rules and 701 Flutter tests, plus analyzer,
+     boundary, layout/export/no-cloud/reproducibility and diff checks.
+176. `Local Booking vertical complete` is a local/Emulator verdict only. It
+     authorizes no BCK-13 delivery, persistent escrow, cloud project,
+     deployment, market activation, staging, production, push or merge.

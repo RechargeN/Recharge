@@ -1,8 +1,8 @@
 # Recharge backend — local platform and bounded domain foundations
 
 Status: **local R1 platform, Reference Data, Security/Privacy,
-Identity/Publisher and disabled Booking foundations; all cloud and market
-activation disabled**.
+Identity/Publisher and complete bounded local Booking vertical; all cloud and
+market activation disabled**.
 
 R1 adds a provider-neutral local platform skeleton on top of the retained R0
 and disabled RAW-C compatibility evidence. It contains typed logical
@@ -35,8 +35,8 @@ Session callable maps Firebase transport UID to a distinct domain User ID. It
 remains local/test-only: no OAuth credential, production Firebase Auth adapter
 or production grant exists.
 
-The BCK-09 local slice contains five disabled Emulator-only Booking callables
-plus the bounded Identity Session callable,
+The BCK-09 local slice contains six disabled Emulator-only Booking callables,
+three bounded Identity Session callables, one Event trigger and two schedules,
 typed command/query results, finite and unlimited inventory transactions,
 idempotency, cancellation, access-revocation, retention and reconciliation
 evidence. Booking mutations resolve Account, Session, AccessSnapshot and the
@@ -60,12 +60,20 @@ for popular pools and 64 for mass pools. The model, migration planner and
 reconciliation tests are pure/default-off code; no Firestore schema, runtime
 switch or activation was added.
 
+Materially rescheduled Bookings retain allocation and can be reconfirmed only
+for the exact Booking and Event material revisions. The default-off deadline
+worker cancels expired unconfirmed Bookings transactionally, releases active
+key and finite/unlimited usage exactly once, and uses bounded discovery,
+stable pagination, fenced leases, durable checkpoints, retry/backoff,
+dead-letter and audited replay. Notification effects remain suppressed until
+BCK-13 is separately implemented and enabled.
+
 ## Readiness matrix
 
 | Level | Current verdict |
 |---|---|
-| Local implementation | Ready for physical dev backend, with controls. The verdict covers the implemented R1, Identity, Event projection, disabled Booking, mobile transport seam and Privacy/retention scope; it does not authorize project creation or deployment |
-| Emulator evidence | Present on Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8: 93 unit, 28 contract, 16 integration and 73 Emulator/Rules tests pass. Evidence covers Auth UID → opaque Session → Event projection → callable Booking → Privacy/DSR, plus missed-trigger discovery, fenced delivery, audited replay and legal-hold-safe follow-up |
+| Local implementation | `Local Booking vertical complete`, with controls, for the bounded free-Booking scope. This verdict covers R1, Identity, Event projection, disabled Booking, exact-revision reconfirmation/deadline release, mobile transport seam and Privacy/retention; it does not authorize project creation or deployment |
+| Emulator evidence | Present on Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8: 93 unit, 28 contract, 16 integration and 84 Emulator/Rules tests pass. Evidence covers Auth UID → opaque Session → Event projection → callable Booking → reconfirmation/deadline release → Privacy/DSR, plus missed-trigger discovery, fenced delivery, audited replay and legal-hold-safe follow-up |
 | Dev cloud | Not Ready; no project, billing, credentials, deployment or measured cloud load evidence |
 | Staging | Not Ready; no independent Security/Privacy review, restore/incident drill or staged rollout evidence |
 | Production | Not Ready; no qualified Legal/Privacy, SLO/cost/DR or escrow runtime evidence |
@@ -78,8 +86,9 @@ switch or activation was added.
 - no Firebase/Google project creation, API enablement, billing or deployment;
 - no Terraform backend, stateful resource, plan or apply;
 - Firestore and Storage client access deny all;
-- the exact export allowlist is R0 plus five disabled Booking callables and one
-  disabled Identity Session callable; all refuse non-emulator use;
+- the exact export allowlist is R0 plus six disabled Booking callables, three
+  disabled Identity Session callables, one Event trigger and two schedules;
+  all refuse non-emulator use;
 - all `local/dev/stage/prod` identities are logical and `unbound`;
 - every market, capability, feature flag and release is `disabled`;
 - Terraform has no resources, backend, real project or credential input;

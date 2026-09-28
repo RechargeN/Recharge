@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.99**
-- Date: **2026-09-27**
+- Version: **2.4.100**
+- Date: **2026-09-28**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -21,6 +21,20 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.100.** Reconciles the bounded Booking reconfirmation `2A/2B` vertical
+without widening cloud or market authority:
+
+- records BCK-09 v1.25 manual exact-revision reconfirmation and the default-off
+  deadline worker with transaction-safe release, fenced leases, bounded retry,
+  dead-letter and audited replay;
+- records the exact-toolchain gate at commit `8946cbb`: 93 unit, 28 contract,
+  16 integration, 84 Emulator/Rules and 701 Flutter tests, with analyzer,
+  boundary, layout/export/no-cloud/reproducibility and diff checks green;
+- sets the bounded verdict `Local Booking vertical complete`; BCK-13 delivery,
+  persistent escrow, dev cloud, staging, production and all markets remain
+  absent or disabled;
+- keeps deployment, activation, push and merge closed.
 
 **v2.4.99.** Reconciles the bounded Stage-1 Event delivery and Privacy repair
 without widening cloud or market authority:
@@ -1305,19 +1319,19 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 - timeout, незапущенная проверка или proposal не являются pass;
 - документационный BCK-02 имеет runtime status `N/A`.
 
-## 5. Реестр проектных документов — 22 (v2.4.99)
+## 5. Реестр проектных документов — 22 (v2.4.100)
 
 | ID | Файл | Accountable owner | Уникальная область | Основные зависимости | Spec | Runtime |
 |---|---|---|---|---|---|---|
 | BCK-01 | `RECHARGE_BACKEND_MASTER_SPEC.md` | Platform Architecture | Target architecture, module boundaries, shared invariants | Accepted ADR, BCK-02, §3 anchors | Review v0.4.84 — local integrated foundation plus atomic Identity/Booking authority seam verified; production gates retained; 146 AC | Local R0/R1 platform, reference, security, identity and mobile-seam foundations Present; product/cloud runtime Absent |
-| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.99 coordination baseline; local Event-delivery and Privacy repairs reconciled without cloud authority | N/A |
+| BCK-02 | `RECHARGE_BACKEND_DELIVERY_MAP.md` | Architecture owner | Registry, ownership, dependencies, waves, risks and gates | Current repository facts | Approved v2.4.100 coordination baseline; local Booking reconfirmation vertical reconciled without cloud authority | N/A |
 | BCK-03 | `BACKEND_API_CONTRACT_STANDARD.md` | API Platform | Envelopes, typed errors, versioning, pagination, idempotency, event envelope, schema evolution, minimum client | BCK-01, API Contracts Workflow, OD-09 | Review v0.3.22 — Identity Session request/result schemas and UID/User separation added; 114 AC; product/cloud evidence retained | Local platform/Identity contract runtime Present; deployed/product API runtime Absent |
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.35 — legal-hold-safe paged erasure and linked follow-up added; 103 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.41 — durable Event discovery, fenced delivery and audited replay; 100 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.8 — establish/refresh/recovery, three-installation ceiling, idle expiry and persisted UID→User authority; production decisions remain gated | Present locally — in-memory and Emulator-only Firestore/callables; cloud/production Absent |
 | BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.7 — Event delivery handoff plus additive delegated-import inputs; broader BCK07-LOCAL-01 remains gated; 97 AC | Event delivery facts/effects only; Content/Event Ingestion aggregates absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.3 — Stage 3 unified query/snapshot/freshness contract complete; OD/source/Approval blockers remain | Absent |
-| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.23 — durable Event delivery and legal-hold-safe Privacy follow-up verified on exact toolchain; fixed escrow selected but disabled; qualified/cloud gates pending | Eight disabled Emulator callables plus Event trigger/scheduler, default-deny collections and disabled mobile adapter; cloud/deployed production binding Absent |
+| BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.25 — manual reconfirmation and transaction-safe deadline release verified on exact toolchain; fixed escrow selected but disabled; qualified/cloud gates pending | Six disabled Booking callables, Event trigger plus two schedules, default-deny collections and disabled mobile adapter; cloud/deployed production binding Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
@@ -2462,7 +2476,7 @@ generalized, deleted or counted as R1 product readiness.
 | M | `apps/backend/functions/package.json` | BCK-05 / tooling | exact R1 scripts; no provider/product dependency | lock/script parity; revert commit |
 | R | `apps/backend/functions/package-lock.json` | BCK-05 / tooling | reproducible existing dependencies; changes only if separately approved dependency is added | `npm ci`; lock diff rejection |
 | R | `apps/backend/functions/tsconfig.json` | BCK-05 / tooling | strict NodeNext compilation | typecheck |
-| M | `apps/backend/functions/src/index.ts` | BCK-05 / transport registry | preserve R0 plus five disabled Booking exports and one disabled Identity Session export; register no other product export | export snapshot test; revert commit |
+| M | `apps/backend/functions/src/index.ts` | BCK-05 / transport registry | preserve R0 plus six disabled Booking callables, three disabled Identity Session callables, one Event trigger and two schedules; register no other product export | export snapshot test; revert commit |
 | R | `apps/backend/functions/src/r0_toolchain_probe.ts` | BCK-05 / R0 | historical non-product probe | existing unit test |
 | R | `apps/backend/functions/test/unit/r0_toolchain_probe.test.ts` | BCK-05 / R0 | historical probe evidence | existing unit gate |
 | R | `apps/backend/functions/test/emulator/r0_emulator_isolation.test.ts` | BCK-05 / R0 | disposable-project isolation evidence | existing emulator gate |
@@ -2530,6 +2544,7 @@ generalized, deleted or counted as R1 product readiness.
 | C | `apps/backend/functions/src/modules/identity_publisher/application/emulator_identity_session_service.ts` | BCK-06 / local application | server-issued opaque Session and atomic AccessSnapshot creation; no custom-claim authority | Identity repository + end-to-end Emulator tests |
 | C | `apps/backend/functions/src/booking/event_projection_delivery.ts` | BCK-07 + BCK-09 / delivery application | idempotent Event outbox delivery, revision checkpoint and explicit dead-letter outcome | Event projection Emulator tests |
 | C | `apps/backend/functions/src/booking/occurrence_lifecycle.ts` | BCK-09 / domain application | occurrence cancellation and material-reschedule Booking effects | Event lifecycle Emulator tests |
+| C | `apps/backend/functions/src/booking/reconfirmation_deadline_worker.ts` | BCK-09 / application + infrastructure | bounded expired-reconfirmation discovery, fenced execution, exact-once release, dead-letter and audited replay | Reconfirmation deadline Emulator tests |
 | C | `apps/backend/functions/src/booking/firestore_booking_privacy_record_store.ts` | BCK-09 + BCK-04 / data adapter | transactional Booking DSR access/erase/restrict operations | Firestore Privacy Emulator tests |
 | C | `apps/backend/functions/src/modules/privacy_orchestration/application/privacy_domain_task_runner.ts` | BCK-04 / application | bounded task attempts, evidence and terminal reconciliation | Firestore Privacy Emulator tests |
 | C | `apps/backend/functions/src/modules/privacy_orchestration/infrastructure/firestore_privacy_orchestration_repository.ts` | BCK-04 / data adapter | atomic request/task dispatch and revision-checked outcome persistence | Firestore Privacy Emulator tests |
@@ -2953,8 +2968,8 @@ load evidence were not added and are not authorized.
 
 | Dimension | Verdict | Missing before the next level |
 |---|---|---|
-| Local implementation | Ready with controls; bounded R5 Booking is approximately 75–82% | Persistent escrow adapter and separately approved ECL-03D–H work |
-| Emulator | Present for single-ledger correctness, retention and load characterization | Escrow transaction/Rules evidence after its exact implementation approval |
+| Local implementation | `Local Booking vertical complete` for the bounded free-Booking scope, with controls | Persistent escrow adapter and separately approved ECL-03D–H work remain outside this vertical |
+| Emulator | Present for Identity/Event/Booking/reconfirmation/Privacy correctness, retention and single-ledger load characterization | Escrow transaction/Rules evidence after its exact implementation approval |
 | Dev cloud | Not Ready | Project, billing/budgets, IAM/secrets, deployment approval and measured cloud evidence |
 | Staging | Not Ready | Migration/rollback/restore/incident drills, independent Security/Privacy review and SLO/cost evidence |
 | Production | Not Ready | Qualified applicable Legal/Privacy, operational proof and explicit go/no-go |
