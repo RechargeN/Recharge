@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import '../presentation/class_workshop_details_page.dart';
+import '../../features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,10 +24,17 @@ import '../../features/create/presentation/pages/create_hub_page.dart';
 import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/create/presentation/pages/create_success_page.dart';
 import '../../features/create/presentation/pages/route_moderation_page.dart';
+import '../../features/discover/domain/entities/published_bookable_session_discovery_entity.dart';
+import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
+import '../../features/discover/domain/entities/published_find_people_discovery_entity.dart';
 import '../../features/discover/domain/entities/published_rental_discovery_entity.dart';
+import '../../features/discover/domain/repositories/timezone_repository.dart';
 import '../../features/discover/presentation/pages/collection_details_page.dart';
 import '../../features/discover/presentation/pages/rental_details_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
+import '../presentation/event_details_page.dart';
+import '../presentation/bookable_session_details_page.dart';
+import '../presentation/find_people_details_page.dart';
 import '../../features/discover/presentation/pages/categories_page.dart';
 import '../../features/discover/presentation/pages/category_page.dart';
 import '../../features/discover/presentation/pages/discover_map_page.dart';
@@ -426,41 +435,93 @@ class ResolvedDetailsRoute extends ConsumerWidget {
           );
         }
         return switch (resolvedRef.objectType) {
-          CatalogObjectType.event ||
           CatalogObjectType.activity ||
           CatalogObjectType.place ||
           CatalogObjectType.route => DiscoverDetailsPage(
             itemId: resolvedRef.objectId,
             favoriteApplied: false,
           ),
+          // `DTL-EVT-01` §3: Event resolves through its own typed
+          // projection now, same shape as Rental below — it no longer
+          // shares `DiscoverDetailsPage`'s legacy `DiscoverItemEntity`
+          // path with Activity/Place/Route.
+          CatalogObjectType.event =>
+            result.projection != null
+                ? EventDetailsPage(
+                    projection:
+                        result.projection! as PublishedEventDiscoveryEntity,
+                  )
+                : const DetailsShell(
+                    state: DetailsScreenUnavailable(
+                      reason: DetailsUnavailableReason.notFound,
+                    ),
+                  ),
+          CatalogObjectType.findPeople => switch (result.projection) {
+            final PublishedFindPeopleDiscoveryEntity projection =>
+              FindPeopleDetailsPage(
+                projection: projection,
+                analyticsService: sl<AnalyticsService>(),
+                timezoneRepository: sl<TimezoneRepository>(),
+              ),
+            _ => const DetailsShell(
+              state: DetailsScreenUnavailable(
+                reason: DetailsUnavailableReason.notFound,
+              ),
+            ),
+          },
+          CatalogObjectType.session => switch (result.projection) {
+            final PublishedBookableSessionDiscoveryEntity projection =>
+              BookableSessionDetailsPage(
+                projection: projection,
+                analyticsService: sl<AnalyticsService>(),
+                timezoneRepository: sl<TimezoneRepository>(),
+              ),
+            _ => const DetailsShell(
+              state: DetailsScreenUnavailable(
+                reason: DetailsUnavailableReason.notFound,
+              ),
+            ),
+          },
           CatalogObjectType.collection => CollectionDetailsPage(
             collectionId: resolvedRef.objectId,
           ),
+          CatalogObjectType.classWorkshop => switch (result.projection) {
+            final PublishedClassWorkshopDiscoveryEntity projection =>
+              ClassWorkshopDetailsPage(
+                projection: projection,
+                analyticsService: sl<AnalyticsService>(),
+                timezoneRepository: sl<TimezoneRepository>(),
+              ),
+            _ => const DetailsShell(
+              state: DetailsScreenUnavailable(
+                reason: DetailsUnavailableReason.notFound,
+              ),
+            ),
+          },
           // DTL-OBJ-01 §4: unlike Collection above, RentalDetailsPage takes
           // the already-resolved projection directly instead of
           // re-fetching it through a second provider by id — the resolver
           // just loaded it one line above via RentalDetailsLookup, so a
           // second fetch would be redundant, not merely a style choice.
-          CatalogObjectType.rental => result.projection != null
-              ? RentalDetailsPage(
-                  projection: result.projection! as PublishedRentalDiscoveryEntity,
-                )
-              : const DetailsShell(
-                  state: DetailsScreenUnavailable(
-                    reason: DetailsUnavailableReason.notFound,
+          CatalogObjectType.rental =>
+            result.projection != null
+                ? RentalDetailsPage(
+                    projection:
+                        result.projection! as PublishedRentalDiscoveryEntity,
+                  )
+                : const DetailsShell(
+                    state: DetailsScreenUnavailable(
+                      reason: DetailsUnavailableReason.notFound,
+                    ),
                   ),
-                ),
           // Unreachable today: detailsLookupRegistryProvider
           // (`app/application/details_resolution_providers.dart`)
-          // registers no loader for these four types, so
+          // registers no loader for Scenario, so
           // ResolveDetailsUseCase always returns notFound for them first.
           // A later slice that registers one of these must add its own
           // branch here too — this fallback is a safe default, not a
           // silent substitute for that.
-          CatalogObjectType.session ||
-          CatalogObjectType.scenario ||
-          CatalogObjectType.findPeople ||
-          CatalogObjectType.classWorkshop => const DetailsShell(
+          CatalogObjectType.scenario => const DetailsShell(
             state: DetailsScreenUnavailable(
               reason: DetailsUnavailableReason.notFound,
             ),

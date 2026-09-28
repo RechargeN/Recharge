@@ -16,7 +16,10 @@ class FavoritesLocalDataSource {
     try {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
-          .map((dynamic item) => FavoriteItemModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (dynamic item) =>
+                FavoriteItemModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(growable: false);
     } on FormatException {
       return const <FavoriteItemModel>[];
@@ -25,7 +28,9 @@ class FavoritesLocalDataSource {
 
   Future<void> writeFavorites(List<FavoriteItemModel> items) {
     final String raw = jsonEncode(
-      items.map((FavoriteItemModel item) => item.toJson()).toList(growable: false),
+      items
+          .map((FavoriteItemModel item) => item.toJson())
+          .toList(growable: false),
     );
     return _storage.write(key: _favoritesKey, value: raw);
   }

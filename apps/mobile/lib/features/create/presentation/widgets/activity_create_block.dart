@@ -75,7 +75,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         _ActivityProgressHeader(
           steps: activityCreateSteps,
           currentIndex: widget.state.activityStep,
-          onStepTapped: (int index) => widget.controller.goToActivityStep(index),
+          onStepTapped: (int index) =>
+              widget.controller.goToActivityStep(index),
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -117,9 +118,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         .firstOrNull;
     final CreateTaxonomySubcategory? selectedSubcategory = selectedCategory
         ?.subcategories
-        .where(
-          (CreateTaxonomySubcategory item) => item.id == draft.subcategory,
-        )
+        .where((CreateTaxonomySubcategory item) => item.id == draft.subcategory)
         .firstOrNull;
     return _StepCard(
       title: 'About this activity',
@@ -132,12 +131,16 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomyCategory>(
           initialValue: selectedCategory,
+          // Long category titles at 150% text scale overflow the default
+          // shrink-wrapped dropdown Row (AC-14 accessibility gate) — expand
+          // to the field width so the label ellipsizes instead.
+          isExpanded: true,
           decoration: const InputDecoration(labelText: 'Category'),
           items: <DropdownMenuItem<CreateTaxonomyCategory>>[
             for (final CreateTaxonomyCategory category in categories)
               DropdownMenuItem<CreateTaxonomyCategory>(
                 value: category,
-                child: Text(category.title),
+                child: Text(category.title, overflow: TextOverflow.ellipsis),
               ),
           ],
           onChanged: (CreateTaxonomyCategory? category) {
@@ -148,6 +151,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomySubcategory>(
           initialValue: selectedSubcategory,
+          isExpanded: true,
           decoration: const InputDecoration(labelText: 'Subcategory'),
           items: <DropdownMenuItem<CreateTaxonomySubcategory>>[
             for (final CreateTaxonomySubcategory sub
@@ -155,7 +159,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                     const <CreateTaxonomySubcategory>[])
               DropdownMenuItem<CreateTaxonomySubcategory>(
                 value: sub,
-                child: Text(sub.title),
+                child: Text(sub.title, overflow: TextOverflow.ellipsis),
               ),
           ],
           onChanged: selectedCategory == null
@@ -219,8 +223,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   signed: true,
                   decimal: true,
                 ),
-                onChanged: (String value) => widget.controller
-                    .updateActivityCoordinates(
+                onChanged: (String value) =>
+                    widget.controller.updateActivityCoordinates(
                       latitude: value,
                       longitude: _fields['longitude']?.text ?? '',
                     ),
@@ -238,8 +242,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   signed: true,
                   decimal: true,
                 ),
-                onChanged: (String value) => widget.controller
-                    .updateActivityCoordinates(
+                onChanged: (String value) =>
+                    widget.controller.updateActivityCoordinates(
                       latitude: _fields['latitude']?.text ?? '',
                       longitude: value,
                     ),
@@ -258,8 +262,13 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         ),
         const SizedBox(height: 12),
         TextFormField(
-          controller: _field('addressLine', activity.location.addressLine ?? ''),
-          decoration: const InputDecoration(labelText: 'Address line (optional)'),
+          controller: _field(
+            'addressLine',
+            activity.location.addressLine ?? '',
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Address line (optional)',
+          ),
           onChanged: widget.controller.updateActivityAddressLine,
         ),
         const SizedBox(height: 12),
@@ -272,10 +281,11 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         SwitchListTile(
           title: const Text('This is not an official spot'),
           value: isInformal,
-          onChanged: (bool value) => widget.controller.updateActivityAccessCaution(
-            isInformal: value,
-            note: caution?.note,
-          ),
+          onChanged: (bool value) =>
+              widget.controller.updateActivityAccessCaution(
+                isInformal: value,
+                note: caution?.note,
+              ),
         ),
         if (isInformal)
           TextFormField(
@@ -289,7 +299,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           ),
         const SizedBox(height: 12),
         TextFormField(
-          controller: _field('linkedPlaceId', activity.location.linkedPlaceId ?? ''),
+          controller: _field(
+            'linkedPlaceId',
+            activity.location.linkedPlaceId ?? '',
+          ),
           decoration: const InputDecoration(
             labelText: 'Linked Place id (optional)',
           ),
@@ -341,8 +354,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             decoration: const InputDecoration(
               labelText: 'e.g. "Coffee on the counter, optional"',
             ),
-            onChanged: (String value) => widget.controller
-                .updateActivityOptionalContribution(
+            onChanged: (String value) =>
+                widget.controller.updateActivityOptionalContribution(
                   kind: contribution.kind,
                   note: value,
                   amountMinor: contribution.amountHint?.amountMinor,
@@ -353,12 +366,17 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               'contributionAmountHint',
               contribution.amountHint == null
                   ? ''
-                  : (contribution.amountHint!.amountMinor / 100).toStringAsFixed(2),
+                  : (contribution.amountHint!.amountMinor / 100)
+                        .toStringAsFixed(2),
             ),
-            decoration: const InputDecoration(labelText: 'Approximate amount (optional)'),
+            decoration: const InputDecoration(
+              labelText: 'Approximate amount (optional)',
+            ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
-              final double? parsed = double.tryParse(value.replaceAll(',', '.'));
+              final double? parsed = double.tryParse(
+                value.replaceAll(',', '.'),
+              );
               widget.controller.updateActivityOptionalContribution(
                 kind: contribution.kind,
                 note: contribution.note,
@@ -378,6 +396,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
       ],
     );
   }
+
   Widget _whenForStep(ActivityDraftData activity, CreateDraftEntity draft) {
     final CategoryCriteriaResult? criteria = const GetCategoryCriteriaUseCase()(
       draft.subcategory,
@@ -410,7 +429,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         DropdownButtonFormField<ActivitySeason>(
           initialValue: activity.bestTime?.season,
-          decoration: const InputDecoration(labelText: 'Best season (optional)'),
+          decoration: const InputDecoration(
+            labelText: 'Best season (optional)',
+          ),
           items: <DropdownMenuItem<ActivitySeason>>[
             for (final ActivitySeason value in ActivitySeason.values)
               DropdownMenuItem<ActivitySeason>(
@@ -610,15 +631,23 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             )
           else
             const SizedBox.shrink(),
-          FilledButton(
-            onPressed: isLast
-                ? () async {
-                    final bool published = await widget.controller
-                        .publishDraft();
-                    if (published) widget.onPublished();
-                  }
-                : () => widget.controller.goToActivityStep(step + 1),
-            child: Text(isLast ? 'Send for review' : 'Save & continue'),
+          // Flexible so long labels ("Send for review") wrap instead of
+          // overflowing the Row at 360 dp / 150% text scale (accessibility
+          // gate, RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md v1.4 AC-14).
+          Flexible(
+            child: FilledButton(
+              onPressed: isLast
+                  ? () async {
+                      final bool published = await widget.controller
+                          .publishDraft();
+                      if (published) widget.onPublished();
+                    }
+                  : () => widget.controller.goToActivityStep(step + 1),
+              child: Text(
+                isLast ? 'Send for review' : 'Save & continue',
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ],
       ),
@@ -686,7 +715,9 @@ class _ActivityProgressHeader extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 2),
                       color: i <= currentIndex
                           ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                          : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),

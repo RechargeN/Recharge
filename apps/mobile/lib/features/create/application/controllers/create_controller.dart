@@ -102,6 +102,17 @@ import '../get_category_criteria_usecase.dart';
 import '../state/collection_create_state.dart';
 import '../state/create_state.dart';
 import '../state/route_create_state.dart';
+import '../session_create_coordinator.dart';
+import '../session_create_config.dart';
+import '../location_search_config.dart';
+import '../../domain/entities/session_draft_data.dart';
+import '../../domain/entities/session_slot_projection.dart';
+import '../../domain/entities/session_price_disclosure.dart';
+import '../../domain/entities/session_availability_exception.dart';
+import '../../domain/entities/session_validation_issue.dart';
+import '../../domain/entities/location_search_suggestion.dart';
+import '../../domain/repositories/location_search_repository.dart';
+import '../../domain/usecases/validate_session_draft_usecase.dart';
 
 class CreateController extends ChangeNotifier {
   CreateController({
@@ -120,6 +131,10 @@ class CreateController extends ChangeNotifier {
     ScenarioCreateCoordinator? scenarioCreateCoordinator,
     ScenarioGenerationCoordinator? scenarioGenerationCoordinator,
     PlaceEnrichmentCoordinator? placeEnrichmentCoordinator,
+    SessionCreateCoordinator? sessionCreateCoordinator,
+    LocationSearchRepository? locationSearchRepository,
+    LocationSearchRuntimeConfig locationSearchConfig =
+        const LocationSearchRuntimeConfig(),
     CatalogObjectPickerPort? catalogObjectPicker,
     CreateRuntimeDefaults runtimeDefaults = const CreateRuntimeDefaults(
       marketCityId: '',
@@ -174,6 +189,9 @@ class CreateController extends ChangeNotifier {
        _scenarioCreateCoordinator = scenarioCreateCoordinator,
        _scenarioGenerationCoordinator = scenarioGenerationCoordinator,
        _placeEnrichmentCoordinator = placeEnrichmentCoordinator,
+       _sessionCreateCoordinator = sessionCreateCoordinator,
+       _locationSearchRepository = locationSearchRepository,
+       _locationSearchConfig = locationSearchConfig,
        _catalogObjectPicker = catalogObjectPicker,
        _runtimeDefaults = runtimeDefaults,
        _validateCreateAvailability = validateCreateAvailability,
@@ -211,6 +229,10 @@ class CreateController extends ChangeNotifier {
   final ScenarioCreateCoordinator? _scenarioCreateCoordinator;
   final ScenarioGenerationCoordinator? _scenarioGenerationCoordinator;
   final PlaceEnrichmentCoordinator? _placeEnrichmentCoordinator;
+  final SessionCreateCoordinator? _sessionCreateCoordinator;
+  final LocationSearchRepository? _locationSearchRepository;
+  final LocationSearchRuntimeConfig _locationSearchConfig;
+  int _placeLocationRequestSerial = 0;
   final CatalogObjectPickerPort? _catalogObjectPicker;
   final CreateRuntimeDefaults _runtimeDefaults;
   final ValidateCreateAvailabilityUseCase _validateCreateAvailability;
@@ -269,8 +291,7 @@ class CreateController extends ChangeNotifier {
   bool get canModerateCollection =>
       _capabilities.contains('moderate.collection');
   bool get canManageCollection => _capabilities.contains('manage.collection');
-  bool get canArchiveCollection =>
-      _capabilities.contains('archive.collection');
+  bool get canArchiveCollection => _capabilities.contains('archive.collection');
   RouteCreateState? get routeCreateState => _routeCoordinator?.state;
   bool get eventClassificationEnabled => _eventClassificationEnabled;
   EventClassificationSectionState get eventClassificationState =>
@@ -506,6 +527,14 @@ class CreateController extends ChangeNotifier {
     if (draft.objectType == CreateObjectType.findPeople &&
         draft.findPeopleData == null) {
       draft = draft.copyWith(findPeopleData: _findPeopleDefaults(userId));
+    }
+    if (draft.objectType == CreateObjectType.session &&
+        _sessionCreateCoordinator != null) {
+      draft = _sessionCreateCoordinator.apply(
+        draft,
+        _sessionCreateCoordinator.ensureData(draft, timezoneId: draft.timezone),
+        incrementRevision: false,
+      );
     }
     if (draft.objectType == CreateObjectType.scenario &&
         draft.scenarioData == null) {
@@ -790,6 +819,14 @@ class CreateController extends ChangeNotifier {
             ? (_state.draft.rentalData ?? _rentalDefaults(_state.userId))
             : null,
         clearRentalData: type != CreateObjectType.rental,
+        sessionData: type == CreateObjectType.session
+            ? (_state.draft.sessionData ??
+                  SessionDraftData.defaults(
+                    resourceName: _state.draft.title,
+                    timezoneId: _runtimeDefaults.timezone,
+                  ))
+            : null,
+        clearSessionData: type != CreateObjectType.session,
         collectionData: type == CreateObjectType.collection
             ? (_state.draft.collectionData ?? _collectionDefaults())
             : null,
@@ -2384,6 +2421,102 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void clearPlaceLocationSuggestions() {
+    ++_placeLocationRequestSerial;
+    _setState(
+      _state.copyWith(
+        placeLocationSearchLoading: false,
+        placeLocationSuggestions: const <LocationSearchSuggestion>[],
+      ),
+    );
+  }
+
+  Future<void> searchPlaceLocation(String query) async {
+    final repository = _locationSearchRepository;
+    if (!_locationSearchConfig.enabled ||
+        repository == null ||
+        _state.draft.objectType != CreateObjectType.place ||
+        query.trim().isEmpty) {
+      clearPlaceLocationSuggestions();
+      return;
+    }
+    final request = ++_placeLocationRequestSerial;
+    _setState(
+      _state.copyWith(
+        placeLocationSearchLoading: true,
+        placeLocationSuggestions: const <LocationSearchSuggestion>[],
+      ),
+    );
+    List<LocationSearchSuggestion> suggestions;
+    try {
+      suggestions = await repository.search(
+        query.trim(),
+        marketCityId: _runtimeDefaults.marketCityId,
+      );
+    } catch (_) {
+      suggestions = const <LocationSearchSuggestion>[];
+    }
+    if (request != _placeLocationRequestSerial) return;
+    _setState(
+      _state.copyWith(
+        placeLocationSearchLoading: false,
+        placeLocationSuggestions: suggestions,
+      ),
+    );
+  }
+
+  Future<void> selectPlaceLocationSuggestion(
+    LocationSearchSuggestion suggestion,
+  ) async {
+    final repository = _locationSearchRepository;
+    if (!_locationSearchConfig.enabled ||
+        repository == null ||
+        _state.draft.objectType != CreateObjectType.place)
+      return;
+    final request = ++_placeLocationRequestSerial;
+    _setState(
+      _state.copyWith(
+        placeLocationSearchLoading: true,
+        placeLocationSuggestions: const <LocationSearchSuggestion>[],
+      ),
+    );
+    try {
+      final point = await repository.resolve(suggestion.id);
+      if (request != _placeLocationRequestSerial) return;
+      final place = _state.draft.placeData;
+      // A search result is only a suggestion, never an author-confirmed pin.
+      if (place != null &&
+          !place.location.pinConfirmed &&
+          point.latitude.isFinite &&
+          point.longitude.isFinite &&
+          point.latitude.abs() <= 90 &&
+          point.longitude.abs() <= 180) {
+        _updatePlace(
+          (value) => value.copyWith(
+            location: value.location.copyWith(
+              formattedAddress: point.formattedAddress,
+              latitude: point.latitude,
+              longitude: point.longitude,
+              pinConfirmed: false,
+              timezoneId: '',
+              clearGeocodedAtUtc: true,
+            ),
+          ),
+          commonDraft: (draft) => draft.copyWith(
+            addressLine1: point.formattedAddress,
+            latitude: point.latitude,
+            longitude: point.longitude,
+          ),
+        );
+      }
+    } catch (_) {
+      // Keep the author's existing location and manual-map fallback.
+    } finally {
+      if (request == _placeLocationRequestSerial)
+        clearPlaceLocationSuggestions();
+    }
+  }
+
   void updatePlaceLocationLabel(String value) {
     final String? normalized = _nullableText(value);
     _updatePlace(
@@ -3323,6 +3456,119 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  List<SessionSlotProjection> get sessionSchedulePreview =>
+      _sessionCreateCoordinator?.materialize(_state.draft).projections ??
+      const <SessionSlotProjection>[];
+
+  void _updateSession(SessionDraftData Function(SessionDraftData) change) {
+    final coordinator = _sessionCreateCoordinator;
+    if (coordinator == null ||
+        _state.draft.objectType != CreateObjectType.session)
+      return;
+    final data = coordinator.ensureData(
+      _state.draft,
+      timezoneId: _runtimeDefaults.timezone,
+    );
+    _updateDraft(coordinator.apply(_state.draft, change(data)));
+  }
+
+  String _sessionLocalId() =>
+      'loc_session_${DateTime.now().microsecondsSinceEpoch}_${_localIdCounter++}';
+  void updateSessionResourceName(String value) =>
+      _updateSession((s) => s.copyWith(resourceName: value));
+  void confirmSessionTimezone(String value) => _updateSession(
+    (s) => s.copyWith(timezoneId: value, timezoneConfirmed: true),
+  );
+  void applySessionWeeklyPreset(SessionWeeklyPreset preset) => _updateSession(
+    (s) => _sessionCreateCoordinator!.applyWeeklyPreset(
+      s,
+      preset.buildRules(_sessionLocalId),
+    ),
+  );
+  void removeSessionWeeklyRule(String id) =>
+      _updateSession((s) => _sessionCreateCoordinator!.removeWeeklyRule(s, id));
+  void setSessionSlotDuration(int value) => _updateSession(
+    (s) => _sessionCreateCoordinator!.setSlotDuration(s, value),
+  );
+  void setSessionPriceFree() => _updateSession(
+    (s) => _sessionCreateCoordinator!.setPrice(s, SessionPriceDisclosure.free),
+  );
+  void setSessionPriceFixed({
+    required int amountMinor,
+    required String currencyCode,
+  }) => _updateSession(
+    (s) => _sessionCreateCoordinator!.setPrice(
+      s,
+      SessionPriceDisclosure(
+        mode: SessionPricingMode.fixed,
+        amount: SessionMoneyDraft(
+          amountMinor: amountMinor,
+          currencyCode: currencyCode,
+        ),
+      ),
+    ),
+  );
+  void setSessionExternalBookingUrl(String value) => _updateSession(
+    (s) => _sessionCreateCoordinator!.setExternalBookingUrl(s, value),
+  );
+  void setSessionExternalTermsUrl(String value) => _updateSession(
+    (s) => s.copyWith(
+      externalTermsUrl: value,
+      clearExternalTermsUrl: value.trim().isEmpty,
+    ),
+  );
+  void setSessionMaxPartySize(int value) => _updateSession(
+    (s) => _sessionCreateCoordinator!.setMaxPartySize(s, value),
+  );
+  void setSessionAmenityIds(Set<String> value) =>
+      _updateSession((s) => s.copyWith(amenityIds: Set.unmodifiable(value)));
+  void removeSessionException(String id) =>
+      _updateSession((s) => _sessionCreateCoordinator!.removeException(s, id));
+  void addSessionException({
+    required String startDateLocal,
+    required String endDateLocal,
+    required bool allDay,
+  }) => _updateSession(
+    (s) => _sessionCreateCoordinator!.addException(
+      s,
+      SessionAvailabilityException(
+        id: _sessionLocalId(),
+        startDateLocal: startDateLocal,
+        endDateLocal: endDateLocal,
+        allDay: allDay,
+        createdByUserId: _state.userId,
+        createdAtUtc: DateTime.now().toUtc(),
+      ),
+    ),
+  );
+
+  List<SessionValidationIssue> _sessionIssues(CreateDraftEntity draft) {
+    final coordinator = _sessionCreateCoordinator;
+    if (coordinator == null)
+      return const <SessionValidationIssue>[
+        SessionValidationIssue(
+          code: SessionBlockingCode.resourceMissing,
+          severity: SessionValidationSeverity.blocking,
+        ),
+      ];
+    final category = createTaxonomyCategoryById(draft.mainCategory);
+    return coordinator.validate(
+      draft,
+      context: SessionExternalValidationContext(
+        categoryAllowedForSession:
+            category?.subcategories.any(
+              (s) =>
+                  s.id == draft.subcategory &&
+                  s.allows(CreateObjectType.session),
+            ) ??
+            false,
+        hasCover: draft.media.coverImage.trim().isNotEmpty,
+        publisherEligible:
+            _isVerifiedCreator && (_activePublisherRef?.isValid ?? false),
+      ),
+    );
+  }
+
   void updateFindPeopleData(FindPeopleDraftData value) {
     if (_state.draft.objectType != CreateObjectType.findPeople) return;
     _updateDraft(
@@ -3503,6 +3749,16 @@ class CreateController extends ChangeNotifier {
             clearPublishedDraft: true,
           ),
         );
+      } else if (_state.draft.objectType == CreateObjectType.session) {
+        _setState(
+          _state.copyWith(
+            status: CreateStatus.ready,
+            validationErrors: errors,
+            sessionValidationIssues: _sessionIssues(_state.draft),
+            message: 'Проверьте обязательные поля Session',
+            clearPublishedDraft: true,
+          ),
+        );
       } else if (_state.draft.objectType == CreateObjectType.place) {
         _setPlaceIssues(_placeIssues(), message: 'Заполните обязательные поля');
       } else if (_state.draft.objectType == CreateObjectType.activity) {
@@ -3574,6 +3830,7 @@ class CreateController extends ChangeNotifier {
       if (isInformal) {
         final int priorInformalCount = _countActivityInformalAccess(
           draftToPublish,
+          actorUserId: _state.userId,
         );
         if (priorInformalCount >= 3) {
           draftToPublish = draftToPublish.copyWith(
@@ -3954,6 +4211,12 @@ class CreateController extends ChangeNotifier {
             issue.fieldId ?? issue.code: issue.messageKey,
       };
     }
+    if (draft.objectType == CreateObjectType.session) {
+      return <String, String>{
+        for (final issue in _sessionIssues(draft))
+          if (issue.isBlocking) issue.fieldId ?? issue.code: issue.code,
+      };
+    }
     if (draft.objectType == CreateObjectType.findPeople) {
       return <String, String>{
         for (final FindPeopleValidationIssue issue in _findPeopleIssues(draft))
@@ -3999,7 +4262,6 @@ class CreateController extends ChangeNotifier {
   CreateAvailabilityKind _availabilityKindFor(CreateObjectType type) {
     return switch (type) {
       CreateObjectType.event ||
-      CreateObjectType.session ||
       CreateObjectType.classWorkshop ||
       CreateObjectType.findPeople => CreateAvailabilityKind.eventSlots,
       CreateObjectType.rental => CreateAvailabilityKind.openingHours,
@@ -4009,6 +4271,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void _updateDraft(CreateDraftEntity next) {
+    ++_placeLocationRequestSerial;
     var resolved = next;
     final coordinator = _routeCoordinator;
     if (next.objectType == CreateObjectType.route && coordinator != null) {
@@ -4034,6 +4297,7 @@ class CreateController extends ChangeNotifier {
             resolved.objectType == CreateObjectType.event ||
                 resolved.objectType == CreateObjectType.place ||
                 resolved.objectType == CreateObjectType.activity ||
+                resolved.objectType == CreateObjectType.session ||
                 resolved.objectType == CreateObjectType.findPeople ||
                 resolved.objectType == CreateObjectType.scenario ||
                 resolved.objectType == CreateObjectType.route ||
@@ -4047,6 +4311,9 @@ class CreateController extends ChangeNotifier {
         clearPlaceValidationIssues: true,
         clearActivityValidationIssues: true,
         clearRentalValidationIssues: true,
+        clearSessionValidationIssues: true,
+        placeLocationSearchLoading: false,
+        placeLocationSuggestions: const <LocationSearchSuggestion>[],
         placeEnrichmentLoading: invalidatesPlaceHelper ? false : null,
         clearPlaceEnrichmentProposal: invalidatesPlaceHelper,
         clearPlaceEnrichmentError: invalidatesPlaceHelper,
@@ -4056,6 +4323,7 @@ class CreateController extends ChangeNotifier {
     if ((resolved.objectType == CreateObjectType.event ||
             resolved.objectType == CreateObjectType.place ||
             resolved.objectType == CreateObjectType.activity ||
+            resolved.objectType == CreateObjectType.session ||
             resolved.objectType == CreateObjectType.findPeople ||
             resolved.objectType == CreateObjectType.scenario ||
             resolved.objectType == CreateObjectType.rental ||
@@ -5279,9 +5547,7 @@ class CreateController extends ChangeNotifier {
     if (coordinator == null) return false;
     if (!_collectionCreateConfig.collectionPublishingEnabled) {
       _setState(
-        _state.copyWith(
-          message: 'Публикация Collection временно отключена.',
-        ),
+        _state.copyWith(message: 'Публикация Collection временно отключена.'),
       );
       return false;
     }
@@ -5328,7 +5594,9 @@ class CreateController extends ChangeNotifier {
         failureCode: e.failure.name,
       );
       _setState(
-        _state.copyWith(message: 'Collection не опубликован: ${e.failure.name}.'),
+        _state.copyWith(
+          message: 'Collection не опубликован: ${e.failure.name}.',
+        ),
       );
       return false;
     }
@@ -5400,7 +5668,8 @@ class CreateController extends ChangeNotifier {
   /// the presentation layer calls this yet — no dedicated moderation page
   /// ships in this slice, so the flow is not reachable end to end through
   /// the running app.
-  Future<List<CollectionModerationRequest>> loadPendingCollectionModerationRequests() async {
+  Future<List<CollectionModerationRequest>>
+  loadPendingCollectionModerationRequests() async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null || !canModerateCollection) {
       return const <CollectionModerationRequest>[];
@@ -5421,9 +5690,7 @@ class CreateController extends ChangeNotifier {
     if (coordinator == null || !canModerateCollection) return false;
     if (!accept && rejectionReason == null) {
       _setState(
-        _state.copyWith(
-          message: 'Отказ по Collection требует кода причины.',
-        ),
+        _state.copyWith(message: 'Отказ по Collection требует кода причины.'),
       );
       return false;
     }
@@ -5472,6 +5739,7 @@ class CreateController extends ChangeNotifier {
 
   @override
   void dispose() {
+    ++_placeLocationRequestSerial;
     _scenarioGenerationRequestSerial++;
     _autosaveTimer?.cancel();
     super.dispose();

@@ -1,11 +1,6 @@
 import '../../domain/entities/favorite_item_entity.dart';
 
-enum FavoritesStatus {
-  initial,
-  loading,
-  ready,
-  error,
-}
+enum FavoritesStatus { initial, loading, ready, error }
 
 class FavoritesState {
   const FavoritesState({

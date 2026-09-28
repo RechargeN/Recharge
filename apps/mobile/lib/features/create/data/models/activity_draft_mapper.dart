@@ -114,7 +114,10 @@ class ActivityDraftMapper {
     final String? id = _text(raw['id']);
     if (id == null) return null;
     final PublisherType type =
-        _enumValue<PublisherType>(raw['type'] as String?, PublisherType.values) ??
+        _enumValue<PublisherType>(
+          raw['type'] as String?,
+          PublisherType.values,
+        ) ??
         PublisherType.user;
     return PublisherRef(type: type, id: id);
   }
@@ -151,9 +154,7 @@ class ActivityDraftMapper {
     return ActivityIntRangeDraft(min: min, max: max);
   }
 
-  static ActivityOptionalContributionDraft? _optionalContribution(
-    Object? raw,
-  ) {
+  static ActivityOptionalContributionDraft? _optionalContribution(Object? raw) {
     if (raw is! Map) return null;
     final ActivityContributionKind? kind = _enumValue<ActivityContributionKind>(
       raw['kind'] as String?,

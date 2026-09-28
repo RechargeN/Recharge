@@ -2,24 +2,36 @@
 
 Status: **Draft for product and architecture review**
 
-Version: **1.9** (supersedes v1.8 — adopts Professional Page v2.28's
-accepted `PP-D16` transfer disposition and refreshes the sibling-version
-snapshot; see §0.13)
+Version: **1.10** (refreshes the sibling-count framing from "three
+personal-identity documents plus a `ManagedPage` peer, four total" to the
+current six-document, three private/public-pair model — `VIEWER_PROFILE_
+FUNCTIONAL_SPEC.md` and `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` each split
+their own public-facing half into a sibling since this document's framing
+text was last touched; no `CP-D`/`CP-AC` content changed, pure framing
+correction; see §0.14)
 
-Date: **2026-08-12**
+Date: **2026-09-07**
 
 Scope: **target full-release product; documentation only**
 
 Verified-against snapshot (exact versions; a mismatch means this snapshot
 is stale and MUST be refreshed whenever this document is substantively
 changed, but does not by itself prove content incompatibility):
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.15 (targeted verification:
-`AccountStatus`'s five values/casing, §12.3's bidirectional-Block rule and
-the Scenario/Quick Plan boundary still have the meaning consumed below),
+`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17 (targeted verification:
+`AccountStatus`'s five values/casing and the Scenario/Quick Plan boundary
+still have the meaning consumed below; §12 there is now a pointer to the
+new sibling below),
+`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.0 (new — targeted
+verification: bidirectional-Block rule has the same meaning §12.3 of the
+parent document used to state before the split),
 `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9,
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.28 (targeted verification:
-`PP-D44`, `PP-D25`, `PP-AC-58`, `PP-D03` and the now-Accepted `PP-D16`
-still have the meaning cited below),
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.34 (targeted verification:
+`PP-D44`, `PP-D25`, `PP-AC-58`, `PP-D03` and the Accepted `PP-D16`/`PP-D48`
+still have the meaning cited below; §1.1 there already uses the current
+six-document, three-pair model this revision adopts),
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.3 (new — not independently
+re-verified in this pass beyond the framing count itself; this document
+cites no `PPP-D`/`PPP-AC` directly),
 `IDENTITY_PUBLISHER_SLICE_SPEC.md` v1.3.1,
 `SCENARIO_CONNECTED_PLANNING_SPEC.md` v1.1 (Approved).
 See `docs/product/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
@@ -58,8 +70,16 @@ already being `verified`, even though most of its surface only becomes
 useful once verification succeeds. **It does not define the public-facing
 Creator card** — that is `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s
 exclusive subject (§1, §23); this document's own settings surfaces link to
-that document's fields without redefining them. It is one of three sibling
-documents, each with a distinct, non-overlapping subject:
+that document's fields without redefining them.
+
+The wider profile-surface family is now **six documents in three
+private/public pairs**, not the three-plus-a-peer, four-document group this
+document's framing text described when last touched — both
+`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and `PROFESSIONAL_PAGE_FUNCTIONAL_
+SPEC.md` have since split their own public-facing half into a sibling
+(`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and `PUBLIC_PROFESSIONAL_
+PAGE_FUNCTIONAL_SPEC.md` respectively), the same private/public split this
+document already uses for itself:
 
 ```text
 docs/product/VIEWER_PROFILE_FUNCTIONAL_SPEC.md
@@ -68,6 +88,11 @@ docs/product/VIEWER_PROFILE_FUNCTIONAL_SPEC.md
     Searches, Visit History, My participation, Reviews, Photos, account and
     session state. This document does not redefine any of it.
 
+docs/product/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md
+  — the minimal Public User Projection every Viewer has, split out of
+    VIEWER_PROFILE_FUNCTIONAL_SPEC.md's own former §12; introduces no
+    decision of its own, defers entirely to that document's numbering.
+
 docs/product/CREATOR_PROFILE_FUNCTIONAL_SPEC.md  (this document)
   — Creator verification lifecycle, the personal publisher context, Created
     content management, and this account's relationship to any Professional
@@ -75,20 +100,20 @@ docs/product/CREATOR_PROFILE_FUNCTIONAL_SPEC.md  (this document)
 
 docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
   — the public card of a verified Creator shown to other authorized users;
-    a strict superset of Viewer Profile's minimal Public User Projection.
+    a strict superset of Public Viewer Profile's minimal Public User
+    Projection.
 ```
 
-This is a deliberate three-document split among **personal identity/profile**
-documents, not an unresolved leftover from an earlier "two documents" plan:
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` is a sibling owned by a separate work
-session with its own scope boundary, and this document's own split
-(private-management vs. public card) is the two-way division that was
-actually chosen for the Creator-specific surface. §23 records the exact
-non-overlap between all three. `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` is a
-related **peer specification** over the separate `ManagedPage` workspace —
-not a fourth personal-identity document, but participating in the same
-cross-document compatibility/conflict protocol (§0.1) because it shares
-canonical aggregates (`PublisherRef`, Follow, etc.) with all three.
+This document's own split (private-management vs. public card) is one of
+now three matched private/public pairs across the family, not a unique
+two-way division. §23 records the exact non-overlap between the two
+personal-identity pairs this document participates in.
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` and its own public split,
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`, form the third pair — a
+related **`ManagedPage` peer pair** over the separate `ManagedPage`
+workspace, not personal-identity documents, but participating in the same
+cross-document compatibility/conflict protocol (§0.1) because they share
+canonical aggregates (`PublisherRef`, Follow, etc.) with the other four.
 
 This document is not an Accepted ADR, does not replace the approved Identity
 / Publisher contract and does not authorize runtime, Firebase, backend,
@@ -109,11 +134,12 @@ When sources conflict, the following order applies:
    today.
 5. Draft profile-surface specifications on equal footing with each other —
    this document, `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
-   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` and
-   `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`. None of them outranks another by
-   virtue of which one a reader opened first; a conflict between them is
-   blocked pending a joint decision (§0.1), not resolved by this tier
-   ordering.
+   `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
+   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
+   `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` and `PUBLIC_PROFESSIONAL_PAGE_
+   FUNCTIONAL_SPEC.md`. None of them outranks another by virtue of which
+   one a reader opened first; a conflict between them is blocked pending a
+   joint decision (§0.1), not resolved by this tier ordering.
 6. `docs/product/VISION.md` and other general product material.
 
 If any statement in this document contradicts an Accepted ADR, an Approved
@@ -124,7 +150,7 @@ and does not assume it is now free of others.
 
 ### 0.1 When sibling documents disagree
 
-All four documents in item 5 above are `Draft`. If two of them disagree on a
+All six documents in item 5 above are `Draft`. If two of them disagree on a
 shared invariant and no higher-priority source (items 1–4) resolves it,
 **implementation of that invariant is blocked pending a joint decision —
 neither document's wording wins by default.** This document does not treat
@@ -157,11 +183,16 @@ Canonical supporting sources:
 - `docs/product/S2_EXP_01_PROFILE_SETTINGS_SPEC.md`;
 - `docs/product/VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns every
   personal-library lifecycle this document must not redefine; see §23);
+- `docs/product/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (that sibling's
+  own public-facing pair; introduces no decision of its own, always traces
+  back to `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s numbering);
 - `docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns
   the public card field list this document must not redefine; see §23);
 - `docs/product/PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (`ManagedPage` peer,
   not a personal-identity sibling — see §0's distinction; shared invariants
   MUST NOT diverge without the divergence being recorded in §23);
+- `docs/product/PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (that peer's
+  own public-facing pair, added to this list for the same reason);
 - `docs/product/CATEGORY_SYSTEM.md`;
 - `docs/product/SCENARIO_BUILDER_SPEC.md`;
 - `docs/product/ROUTE_BUILDER_SPEC.md`.
@@ -550,6 +581,37 @@ The verified-against snapshot is also refreshed to Viewer v1.15, Public
 Creator v1.9 and Professional Page v2.28. A version mismatch is consistently
 treated as a maintenance signal requiring targeted re-verification, not both
 a mandatory same-change defect and an expected non-defect.
+
+### 0.14 v1.9 → v1.10: sibling-count framing refreshed to six documents
+
+Not a content review — this document's own framing text had gone stale
+independent of any decision or invariant: both `VIEWER_PROFILE_FUNCTIONAL_
+SPEC.md` (v1.17) and `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (v2.31, then
+confirmed live as of v2.34) split their own public-facing half into a
+sibling since this document last touched its "three personal-identity
+documents plus a `ManagedPage` peer, four total" framing —
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §1.1 already uses the current
+six-document, three private/public-pair model as of its own v2.33/v2.34.
+
+**What changed:** §0's body text, the six-tier precedence list (item 5),
+§0.1's "all four documents" line, the canonical supporting sources list and
+§23's opening paragraph now name all six current documents — the two new
+ones being `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and
+`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`. §23's `VIEWER_PROFILE_
+FUNCTIONAL_SPEC.md` entry gained a note that the Public User Projection and
+Block/Mute mechanics it owns now have their *descriptive* text living in
+the new sibling — decision ownership itself did not move. The
+verified-against snapshot is refreshed to Viewer v1.17, Public Viewer
+Profile v1.0, Public Creator v1.9, Professional Page v2.34 and Public
+Professional Page v1.3.
+
+**What did not change:** no `CP-D`/`CP-AC` was added, removed or
+renumbered; no invariant's substance changed; §23's non-overlap statements
+for `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and `PUBLIC_CREATOR_PROFILE_
+FUNCTIONAL_SPEC.md` are unchanged in substance. This document's own
+content-level citations of those two siblings (beyond the count itself)
+were not independently re-verified in this pass — that remains a separate,
+future targeted check, named here rather than silently assumed done.
 
 ## 1. Product definition
 
@@ -1750,10 +1812,13 @@ tracked routing decision, referenced not re-decided here.
 This document reuses, rather than restates independently, every invariant
 that does not depend on the verification/publisher distinction:
 `PublisherRef`, the fail-closed mutation principle, the state-family
-separation and the Booking honesty rules are the same contract across all
-three sibling documents by design.
+separation and the Booking honesty rules are the same contract across the
+personal-identity documents this section covers by design.
 
-Explicit non-overlap:
+Explicit non-overlap (the two personal-identity pairs this document
+participates in — `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` and its own
+public pair are the third, `ManagedPage` pair, out of this section's
+scope):
 
 - **`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`** owns: Scenario, Quick Plan,
   Favorites, Saved Searches, Smart Search history, Visit History, My
@@ -1762,7 +1827,11 @@ Explicit non-overlap:
   minimal Public User Projection shown to every account regardless of
   Creator status, and full Block/Mute mechanics (bidirectional Block,
   one-directional Mute) — including their effect on card visibility in
-  both directions, not only what one document's own card shows. It
+  both directions, not only what one document's own card shows. As of
+  `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17, the Public User Projection and
+  Block/Mute mechanics' *descriptive* text physically lives in its own
+  public-facing pair, `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` — decision
+  ownership stays exactly as stated here, only the prose relocated. It
   **proposes**, but does not yet unilaterally own, a base Follow
   relationship (a `FollowRef` shape) — Follow remains a joint decision
   (`PP-D44`/`VP-D12`/`PCP-D02`) not yet accepted by any of the three

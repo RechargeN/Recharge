@@ -95,12 +95,14 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Session still routes through the generic _validateCreateAvailability
-    // path (unlike event/place/findPeople/scenario/activity, which all have
-    // dedicated _validate branches). Recharge Activity has no Booking/
-    // attendance concept per ACT-CRT-01 spec AC #2, so it no longer fits
-    // as the "generic availability validation" example here.
-    controller.setObjectType(CreateObjectType.session);
+    // Class/workshop still routes through the generic
+    // _validateCreateAvailability path (unlike event/place/findPeople/
+    // scenario/activity/session, which all have dedicated _validate
+    // branches now — SES-CRT-01 gave Session its own typed validator).
+    // Recharge Activity has no Booking/attendance concept per ACT-CRT-01
+    // spec AC #2, so it no longer fits as the "generic availability
+    // validation" example here.
+    controller.setObjectType(CreateObjectType.classWorkshop);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCoverImage('cover.jpg');
@@ -212,13 +214,14 @@ void main() {
       capabilities: const <String>['create.route'],
     );
 
-    // Session still requires startDateTimeUtc via the generic validation
-    // path (unlike event/place/findPeople/scenario, which have their own
-    // dedicated _validate branches that never touch the generic
-    // startDateTimeUtc key). Recharge Activity was deliberately made
-    // evergreen (no start time) by ACT-CRT-01 spec AC #2, so it no longer
-    // fits as the "missing time" example here.
-    controller.setObjectType(CreateObjectType.session);
+    // Class/workshop still requires startDateTimeUtc via the generic
+    // validation path (unlike event/place/findPeople/scenario/session,
+    // which have their own dedicated _validate branches that never touch
+    // the generic startDateTimeUtc key — SES-CRT-01 gave Session its own
+    // typed schedule and requiresStartDateTime = false). Recharge Activity
+    // was deliberately made evergreen (no start time) by ACT-CRT-01 spec
+    // AC #2, so it no longer fits as the "missing time" example here.
+    controller.setObjectType(CreateObjectType.classWorkshop);
     controller.updateTitle('Recharge walk');
     controller.updateMainCategory('food_drinks');
     controller.updateCity('Rezekne');
@@ -509,6 +512,10 @@ void main() {
         organizerName: 'user',
       );
       controller.setObjectType(CreateObjectType.activity);
+      controller.updateTitle('Hidden viewpoint');
+      controller.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
       controller.updateCoverImage('cover.jpg');
       controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
       controller.confirmActivityPin();
@@ -548,8 +555,16 @@ void main() {
       );
       moderationController.setObjectType(CreateObjectType.activity);
       moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
       moderationController.updateCity('Rezekne');
       moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityCoordinates(
+        latitude: '56.51',
+        longitude: '27.33',
+      );
+      moderationController.confirmActivityPin();
       moderationController.updateActivityAccessNotes(
         'Trail off the marked path.',
       );
@@ -594,8 +609,16 @@ void main() {
       );
       moderationController.setObjectType(CreateObjectType.activity);
       moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
       moderationController.updateCity('Rezekne');
       moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityCoordinates(
+        latitude: '56.51',
+        longitude: '27.33',
+      );
+      moderationController.confirmActivityPin();
       moderationController.updateActivityAccessNotes(
         'Trail off the marked path.',
       );

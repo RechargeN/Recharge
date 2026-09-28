@@ -192,6 +192,10 @@ class PublicProfessionalPageView extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(projection.shortDescription!),
                 ],
+                if (projection.description != null) ...<Widget>[
+                  const SizedBox(height: 12),
+                  Text(projection.description!),
+                ],
                 const SizedBox(height: 18),
                 Wrap(
                   spacing: 8,

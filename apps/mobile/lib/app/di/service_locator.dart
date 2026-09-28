@@ -124,6 +124,11 @@ import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
 import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_bookable_session_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_class_workshop_discovery_local_datasource.dart';
+import '../../features/discover/domain/repositories/published_class_workshop_discovery_port.dart';
+import '../../features/discover/data/datasources/published_event_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_find_people_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
@@ -138,6 +143,9 @@ import '../../features/discover/domain/repositories/collection_item_resolution_r
 import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_bookable_session_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_event_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_find_people_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_route_discovery_port.dart';
 import '../../features/discover/domain/repositories/route_safety_reporting_port.dart';
@@ -166,6 +174,11 @@ import '../../features/identity/data/repositories/identity_workspace_repository_
 import '../../features/identity/data/repositories/public_professional_page_repository_impl.dart';
 import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
 import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
+import '../../features/identity/domain/repositories/managed_page_field_moderation_repository.dart';
+import '../../features/create/application/session_create_coordinator.dart';
+import '../../features/create/domain/usecases/materialize_session_schedule_usecase.dart';
+import '../../features/identity/data/datasources/managed_page_field_moderation_local_datasource.dart';
+import '../../features/identity/data/repositories/managed_page_field_moderation_repository_impl.dart';
 import '../../features/identity/domain/usecases/create_professional_page_usecase.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
@@ -384,6 +397,25 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<PublishedRentalDiscoveryPort>(
       () => sl<RentalPublicationDiscoveryAdapter>(),
     )
+    // Event (DTL-EVT-01) — read-only, mock-first: no write-side sink
+    // exists yet (§0.6), so unlike Rental/Collection above this is a
+    // single registration, not a shared adapter instance.
+    ..registerLazySingleton<PublishedEventDiscoveryPort>(
+      () => PublishedEventDiscoveryLocalDataSource(),
+    )
+    // Find People (DTL-FP-01) — public read-only mock projection. It is
+    // deliberately independent from Create drafts and participation flows.
+    ..registerLazySingleton<PublishedFindPeopleDiscoveryPort>(
+      () => PublishedFindPeopleDiscoveryLocalDataSource(),
+    )
+    // Bookable Session (DTL-SES-01) — read-only public schedule snapshots.
+    // Provider calendar state and Create drafts never cross this boundary.
+    ..registerLazySingleton<PublishedBookableSessionDiscoveryPort>(
+      () => PublishedBookableSessionDiscoveryLocalDataSource(),
+    )
+    ..registerLazySingleton<PublishedClassWorkshopDiscoveryPort>(
+      () => PublishedClassWorkshopDiscoveryLocalDataSource(),
+    )
     // Collection — both sides active (CLG-CRT-01): mirrors Rental above.
     // `CollectionPublicationDiscoveryAdapter` is the one file that imports
     // both `CollectionPublicationIndexSink` (Create) and
@@ -424,7 +456,8 @@ Future<void> setupDependencies() async {
       () => SecureCollectionPublicationStore(sl<FlutterSecureStorage>()),
     )
     ..registerLazySingleton<CollectionPublicationLocalDatasource>(
-      () => CollectionPublicationLocalDatasource(idGenerator: sl(), store: sl()),
+      () =>
+          CollectionPublicationLocalDatasource(idGenerator: sl(), store: sl()),
     )
     ..registerLazySingleton<CollectionPublicationRepository>(
       () => CollectionPublicationRepositoryImpl(
@@ -572,6 +605,13 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<EventTimezoneRepository>(
       EventTimezoneRepositoryImpl.new,
     )
+    ..registerLazySingleton<SessionCreateCoordinator>(
+      () => SessionCreateCoordinator(
+        materializeSchedule: MaterializeSessionScheduleUseCase(
+          sl<EventTimezoneRepository>(),
+        ),
+      ),
+    )
     ..registerLazySingleton<EventMockInventoryDataSource>(
       EventMockInventoryDataSource.new,
     )
@@ -707,10 +747,17 @@ Future<void> setupDependencies() async {
     ..registerFactory<SelectWorkspaceUseCase>(
       () => SelectWorkspaceUseCase(sl()),
     )
+    ..registerLazySingleton<ManagedPageFieldModerationLocalDataSource>(
+      () => ManagedPageFieldModerationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<ManagedPageFieldModerationRepository>(
+      () => ManagedPageFieldModerationRepositoryImpl(sl()),
+    )
     ..registerFactory<ResolvePublicProfessionalPageUseCase>(
       () => ResolvePublicProfessionalPageUseCase(
         repository: sl(),
         contentRepository: sl(),
+        moderationRepository: sl(),
       ),
     )
     ..registerFactory<LoadCreateDraftUseCase>(

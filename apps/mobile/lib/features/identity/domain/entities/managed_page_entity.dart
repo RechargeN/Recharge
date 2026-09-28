@@ -34,6 +34,7 @@ class ManagedPageEntity {
     required this.supportedLocales,
     required this.createdAtUtc,
     required this.revision,
+    this.verificationRevision = 1,
   });
 
   final String id;
@@ -52,6 +53,15 @@ class ManagedPageEntity {
   final List<String> supportedLocales;
   final DateTime createdAtUtc;
   final int revision;
+
+  /// Separate from [revision] by design (`PP-D48`): bumped only when
+  /// `verificationStatus` transitions, never on an ordinary field edit. A
+  /// `ManagedPageFieldModerationOverlay`'s `approvedForVerificationRevision`
+  /// must match this exactly, so revoking and re-approving verification
+  /// does not silently re-expose a value approved under an earlier
+  /// verification. Nothing in the current bounded local/mock runtime moves
+  /// `verificationStatus`, so this stays `1` for every page today.
+  final int verificationRevision;
 
   bool get isActive => lifecycle == ManagedPageLifecycle.active;
 

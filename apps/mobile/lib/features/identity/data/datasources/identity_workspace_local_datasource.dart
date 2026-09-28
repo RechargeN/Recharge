@@ -22,7 +22,7 @@ class IdentityManagedPageLocalRecord {
 class IdentityWorkspaceLocalDataSource {
   const IdentityWorkspaceLocalDataSource(this._storage);
 
-  static const int schemaVersion = 2;
+  static const int schemaVersion = 3;
 
   final FlutterSecureStorage _storage;
 
@@ -81,7 +81,9 @@ class IdentityWorkspaceLocalDataSource {
         return const IdentityManagedPageLocalRecord();
       }
       final int? storedVersion = decoded['schemaVersion'] as int?;
-      if (storedVersion != 1 && storedVersion != schemaVersion) {
+      if (storedVersion != 1 &&
+          storedVersion != 2 &&
+          storedVersion != schemaVersion) {
         return const IdentityManagedPageLocalRecord();
       }
       final List<dynamic> pageJson =
@@ -152,6 +154,7 @@ class IdentityWorkspaceLocalDataSource {
       'supportedLocales': page.supportedLocales,
       'createdAtUtc': page.createdAtUtc.toUtc().toIso8601String(),
       'revision': page.revision,
+      'verificationRevision': page.verificationRevision,
     };
   }
 
@@ -186,6 +189,7 @@ class IdentityWorkspaceLocalDataSource {
           .toList(growable: false),
       createdAtUtc: DateTime.parse(json['createdAtUtc'] as String).toUtc(),
       revision: json['revision'] as int,
+      verificationRevision: json['verificationRevision'] as int? ?? 1,
     );
   }
 

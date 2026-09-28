@@ -36,8 +36,7 @@ class ItemsPickerSection extends StatefulWidget {
 
 class _ItemsPickerSectionState extends State<ItemsPickerSection> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _sectionTitleController =
-      TextEditingController();
+  final TextEditingController _sectionTitleController = TextEditingController();
 
   @override
   void dispose() {
@@ -59,7 +58,8 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
               child: TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
-                  labelText: 'Search Place, Route, Bookable Session, '
+                  labelText:
+                      'Search Place, Route, Bookable Session, '
                       'Class/Workshop, Rental',
                 ),
                 onSubmitted: widget.onSearch,

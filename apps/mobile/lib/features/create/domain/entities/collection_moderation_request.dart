@@ -81,7 +81,9 @@ class CollectionModerationRequest {
 
   bool get isPending => decision == null;
 
-  CollectionModerationRequest copyWith({CollectionModerationDecision? decision}) {
+  CollectionModerationRequest copyWith({
+    CollectionModerationDecision? decision,
+  }) {
     return CollectionModerationRequest(
       requestId: requestId,
       bundle: bundle,

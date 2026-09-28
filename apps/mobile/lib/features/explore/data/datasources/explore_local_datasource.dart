@@ -24,10 +24,7 @@ class ExploreLocalDataSource {
     }
   }
 
-  Future<void> saveProfileEditable(
-    String userId,
-    ProfileEditableModel model,
-  ) {
+  Future<void> saveProfileEditable(String userId, ProfileEditableModel model) {
     return _storage.write(
       key: _profileKey(userId),
       value: jsonEncode(model.toJson()),
@@ -45,10 +42,7 @@ class ExploreLocalDataSource {
     }
   }
 
-  Future<void> saveSettings(
-    String userId,
-    SettingsModel model,
-  ) {
+  Future<void> saveSettings(String userId, SettingsModel model) {
     return _storage.write(
       key: _settingsKey(userId),
       value: jsonEncode(model.toJson()),

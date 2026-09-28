@@ -2,10 +2,7 @@ import '../entities/auth_result_entity.dart';
 import '../entities/auth_user_entity.dart';
 
 class AuthException implements Exception {
-  const AuthException({
-    required this.code,
-    required this.message,
-  });
+  const AuthException({required this.code, required this.message});
 
   final String code;
   final String message;

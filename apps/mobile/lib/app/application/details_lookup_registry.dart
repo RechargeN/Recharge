@@ -18,8 +18,9 @@ class DetailsLookupRegistry {
   final Map<CatalogObjectType, DetailsLookupPort> _ports;
 
   /// Returns the port registered for [objectType], or `null` if this
-  /// slice hasn't registered a loader for it yet (Session/Find People/
-  /// Class-Workshop/Rental/Scenario — `DTL-LINK-01` §1.2). A missing
+  /// slice hasn't registered a loader for it yet (Scenario
+  /// today; earlier slices also used this for Rental, Find People and
+  /// Bookable Session). A missing
   /// registration is a legitimate, expected `notFound` outcome here, not a
   /// wiring bug — unlike `DetailsRendererRegistry.build`, which throws for
   /// a missing family because every family it's asked for is expected to

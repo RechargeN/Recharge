@@ -44,6 +44,5 @@ class RentalDirectPublishDecision {
 
   final RentalDirectPublishReasonCode reasonCode;
 
-  bool get authorized =>
-      reasonCode == RentalDirectPublishReasonCode.authorized;
+  bool get authorized => reasonCode == RentalDirectPublishReasonCode.authorized;
 }

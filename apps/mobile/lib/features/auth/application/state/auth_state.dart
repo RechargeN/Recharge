@@ -1,10 +1,6 @@
 import '../../domain/entities/auth_user_entity.dart';
 
-enum AuthStatus {
-  guest,
-  loading,
-  authenticated,
-}
+enum AuthStatus { guest, loading, authenticated }
 
 class AuthState {
   const AuthState({
@@ -15,17 +11,18 @@ class AuthState {
   });
 
   const AuthState.guest()
-      : status = AuthStatus.guest,
-        user = null,
-        errorCode = null,
-        message = null;
+    : status = AuthStatus.guest,
+      user = null,
+      errorCode = null,
+      message = null;
 
   final AuthStatus status;
   final AuthUserEntity? user;
   final String? errorCode;
   final String? message;
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
   bool get isGuest => status == AuthStatus.guest;
   bool get isLoading => status == AuthStatus.loading;
 

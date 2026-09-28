@@ -8,6 +8,9 @@ import 'collection_create_config.dart';
 import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
+import 'session_create_coordinator.dart';
+import 'location_search_config.dart';
+import '../domain/repositories/location_search_repository.dart';
 import 'scenario_create_coordinator.dart';
 import 'scenario_generation_coordinator.dart';
 import 'scenario_transit_schedule_coordinator.dart';
@@ -48,6 +51,9 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     analyticsService: sl<AnalyticsService>(),
     runtimeDefaults: sl<CreateRuntimeDefaults>(),
     eventCreateCoordinator: sl<EventCreateCoordinator>(),
+    sessionCreateCoordinator: sl<SessionCreateCoordinator>(),
+    locationSearchRepository: sl<LocationSearchRepository>(),
+    locationSearchConfig: sl<LocationSearchRuntimeConfig>(),
     eventAdmissionConfigurationEnabled: true,
     eventMockAvailabilityEnabled: true,
     createTemplateRepository: sl<CreateTemplateRepository>(),
@@ -60,9 +66,7 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     checkPlaceDuplicates: sl<CheckPlaceDuplicatesUseCase>(),
     // RNT-PUB-01 §1.3: local/mock composition explicitly opts into the
     // trusted direct-publish policy — the domain default is `false`.
-    rentalDirectPublishPolicy: const RentalDirectPublishPolicy(
-      isTrusted: true,
-    ),
+    rentalDirectPublishPolicy: const RentalDirectPublishPolicy(isTrusted: true),
     promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
     rentalPublicationIndexSink: sl<RentalPublicationIndexSink>(),
     // CLG-CRT-01: the same `CollectionCreateRuntimeConfig` instance the

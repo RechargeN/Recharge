@@ -1031,7 +1031,10 @@ class _TextFieldState extends State<_TextField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: RechargeTheme.emerald900, width: 1.6),
+          borderSide: const BorderSide(
+            color: RechargeTheme.emerald900,
+            width: 1.6,
+          ),
         ),
       ),
       onChanged: widget.onChanged,
@@ -1077,7 +1080,10 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: RechargeTheme.emerald900, width: 1.6),
+          borderSide: const BorderSide(
+            color: RechargeTheme.emerald900,
+            width: 1.6,
+          ),
         ),
       ),
       items: values

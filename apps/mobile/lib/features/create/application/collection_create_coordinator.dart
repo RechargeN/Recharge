@@ -137,7 +137,9 @@ class CollectionCreateCoordinator {
     final CollectionCreateState current = state;
     if (createDraft.objectType != CreateObjectType.collection ||
         createDraft.id != current.createDraft.id) {
-      throw ArgumentError('The Collection envelope must keep its draft identity.');
+      throw ArgumentError(
+        'The Collection envelope must keep its draft identity.',
+      );
     }
     _stateOrNull = current.copyWith(
       createDraft: createDraft.copyWith(collectionData: current.collectionData),
@@ -171,10 +173,8 @@ class CollectionCreateCoordinator {
   void setAreaAnchor({required double latitude, required double longitude}) {
     _mutate(
       CollectionEditCommandKind.setArea,
-      (CollectionDraftData data) => data.copyWith(
-        anchorLatitude: latitude,
-        anchorLongitude: longitude,
-      ),
+      (CollectionDraftData data) =>
+          data.copyWith(anchorLatitude: latitude, anchorLongitude: longitude),
       invalidatesReview: false,
     );
   }

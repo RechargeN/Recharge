@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import '../entities/managed_page_entity.dart';
+import '../entities/managed_page_field_moderation_overlay.dart';
 import '../entities/public_professional_page.dart';
+import '../repositories/managed_page_field_moderation_repository.dart';
 import '../repositories/public_professional_page_repository.dart';
 
 enum PublicProfessionalPageLookup { id, slug }
@@ -12,11 +14,14 @@ class ResolvePublicProfessionalPageUseCase {
   const ResolvePublicProfessionalPageUseCase({
     required PublicProfessionalPageRepository repository,
     required PublicPageContentProjectionRepository contentRepository,
+    required ManagedPageFieldModerationRepository moderationRepository,
   }) : _repository = repository,
-       _contentRepository = contentRepository;
+       _contentRepository = contentRepository,
+       _moderationRepository = moderationRepository;
 
   final PublicProfessionalPageRepository _repository;
   final PublicPageContentProjectionRepository _contentRepository;
+  final ManagedPageFieldModerationRepository _moderationRepository;
 
   Future<PublicProfessionalPageResolution> call({
     required PublicProfessionalPageLookup lookup,
@@ -64,6 +69,20 @@ class ResolvePublicProfessionalPageUseCase {
   }) async {
     final PublicPageContentSummary summary = await _contentRepository
         .loadSummaryForPage(page.id);
+    final List<ManagedPageFieldModerationOverlay> overlays =
+        await _moderationRepository.loadForPage(page.id);
+    final String? shortDescription = _resolveLocalizedText(
+      overlays,
+      ManagedPageModeratedFieldKey.shortDescription,
+      page: page,
+      requestedLocale: requestedLocale,
+    );
+    final String? description = _resolveLocalizedText(
+      overlays,
+      ManagedPageModeratedFieldKey.description,
+      page: page,
+      requestedLocale: requestedLocale,
+    );
     final String slug = page.slug.trim().isEmpty
         ? ManagedPageEntity.localSlug(
             displayName: page.displayName,
@@ -80,6 +99,8 @@ class ResolvePublicProfessionalPageUseCase {
       page.verificationStatus.name,
       page.lifecycle.name,
       page.revision,
+      shortDescription ?? '',
+      description ?? '',
       summary.upcomingCount,
       summary.ongoingCount,
       summary.pastCount,
@@ -96,6 +117,8 @@ class ResolvePublicProfessionalPageUseCase {
               mediaId: page.avatar.trim(),
               altText: page.displayName,
             ),
+      shortDescription: shortDescription,
+      description: description,
       countryCode: page.countryCode,
       verificationBadge:
           page.verificationStatus == ManagedPageVerificationStatus.verified,
@@ -103,5 +126,32 @@ class ResolvePublicProfessionalPageUseCase {
       publicRevision: sha256.convert(utf8.encode(revisionSource)).toString(),
       schemaVersion: 1,
     );
+  }
+
+  static String? _resolveLocalizedText(
+    List<ManagedPageFieldModerationOverlay> overlays,
+    ManagedPageModeratedFieldKey fieldKey, {
+    required ManagedPageEntity page,
+    required String requestedLocale,
+  }) {
+    final ManagedPageFieldModerationOverlay? overlay = overlays
+        .cast<ManagedPageFieldModerationOverlay?>()
+        .firstWhere(
+          (ManagedPageFieldModerationOverlay? item) =>
+              item?.fieldKey == fieldKey,
+          orElse: () => null,
+        );
+    final ManagedPageModeratedFieldValue? value = overlay?.effectiveValue(
+      currentVerificationRevision: page.verificationRevision,
+    );
+    if (value is! ManagedPageLocalizedTextValue) return null;
+    final String? forRequested = value.valuesByLocale[requestedLocale];
+    if (forRequested != null && forRequested.trim().isNotEmpty) {
+      return forRequested;
+    }
+    final String? forDefault = value.valuesByLocale[page.defaultLocale];
+    return (forDefault != null && forDefault.trim().isNotEmpty)
+        ? forDefault
+        : null;
   }
 }

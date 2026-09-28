@@ -195,7 +195,12 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
             item.catalogObjectType == CatalogObjectType.route
             ? DetailsRendererFamily.route
             : DetailsRendererFamily.objectOffer;
-        return DetailsScreenAvailable(renderer: registry.build(family));
+        return DetailsScreenAvailable(
+          renderer: registry.build(family),
+          immersiveHero:
+              item.catalogObjectType == CatalogObjectType.place ||
+              item.catalogObjectType == CatalogObjectType.activity,
+        );
       },
       loading: () => const DetailsScreenLoading(),
       error: (_, __) {
@@ -274,7 +279,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         sourceScreen: 'discover_details',
         sourceAction: 'favorite_tap',
         originRoute: RouteNames.discoverDetailsCanonicalFor(
-          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+          CatalogObjectRef(
+            objectType: item.catalogObjectType,
+            objectId: item.id,
+          ),
         ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
@@ -308,7 +316,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         sourceScreen: 'discover_details',
         sourceAction: 'route_safety_report',
         originRoute: RouteNames.discoverDetailsCanonicalFor(
-          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+          CatalogObjectRef(
+            objectType: item.catalogObjectType,
+            objectId: item.id,
+          ),
         ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
@@ -391,7 +402,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         sourceScreen: 'discover_details',
         sourceAction: 'mark_visited',
         originRoute: RouteNames.discoverDetailsCanonicalFor(
-          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+          CatalogObjectRef(
+            objectType: item.catalogObjectType,
+            objectId: item.id,
+          ),
         ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(

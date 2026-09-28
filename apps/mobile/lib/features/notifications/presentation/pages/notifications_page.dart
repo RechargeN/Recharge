@@ -255,13 +255,22 @@ String? _typedSubjectRoute(NotificationSubjectRef? subject) {
     // that is an improvement over today's behavior (a `session` id was
     // never a valid Discover item id to begin with).
     NotificationSubjectKind.event => RouteNames.discoverDetailsCanonicalFor(
-      CatalogObjectRef(objectType: CatalogObjectType.event, objectId: subject.id),
+      CatalogObjectRef(
+        objectType: CatalogObjectType.event,
+        objectId: subject.id,
+      ),
     ),
     NotificationSubjectKind.place => RouteNames.discoverDetailsCanonicalFor(
-      CatalogObjectRef(objectType: CatalogObjectType.place, objectId: subject.id),
+      CatalogObjectRef(
+        objectType: CatalogObjectType.place,
+        objectId: subject.id,
+      ),
     ),
     NotificationSubjectKind.activity => RouteNames.discoverDetailsCanonicalFor(
-      CatalogObjectRef(objectType: CatalogObjectType.activity, objectId: subject.id),
+      CatalogObjectRef(
+        objectType: CatalogObjectType.activity,
+        objectId: subject.id,
+      ),
     ),
     NotificationSubjectKind.bookableSession =>
       RouteNames.discoverDetailsCanonicalFor(

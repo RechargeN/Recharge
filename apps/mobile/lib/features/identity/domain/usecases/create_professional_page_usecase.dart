@@ -101,6 +101,7 @@ class CreateProfessionalPageUseCase {
         'page.content.create',
         'page.content.submit',
         'page.insights.view',
+        'page.team.manage',
       },
       revision: 1,
     );

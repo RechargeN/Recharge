@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mobile-web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "web-server", "--web-port", "5959"],
+      "cwd": "apps/mobile",
+      "port": 5959,
+      "url": "http://localhost:5959"
+    }
+  ]
+}

@@ -39,6 +39,9 @@ void main() {
     );
     controller.setObjectType(CreateObjectType.activity);
     controller.updateTitle('Hidden viewpoint');
+    controller.updateShortDescription(
+      'A quiet, lesser-known viewpoint with a great sunset view.',
+    );
     controller.updateCoverImage('cover.jpg');
     final bool advanced = await controller.goToActivityStep(1);
     expect(advanced, isTrue);

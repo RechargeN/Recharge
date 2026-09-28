@@ -65,6 +65,73 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(find.byType(TextFormField), findsWidgets);
   });
+
+  testWidgets('Basics step fits 360 dp at 1.5 text scale without overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.activity);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          final MediaQueryData media = MediaQuery.of(context);
+          return MediaQuery(
+            data: media.copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) {
+              return SingleChildScrollView(
+                child: ActivityCreateBlock(
+                  controller: controller,
+                  state: controller.state,
+                  onPublished: () {},
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Title'), findsOneWidget);
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

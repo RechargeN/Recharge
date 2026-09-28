@@ -61,9 +61,7 @@ class CollectionPublicationModel {
     final String? marketCityId = _requiredText(json['market_city_id']);
     final String? areaLabel = _requiredText(json['area_label']);
     final String? visibility = _requiredText(json['visibility']);
-    final String? publishAttemptId = _requiredText(
-      json['publish_attempt_id'],
-    );
+    final String? publishAttemptId = _requiredText(json['publish_attempt_id']);
     final CollectionCompositionReview? review = _review(
       json['composition_review'],
     );
@@ -80,9 +78,7 @@ class CollectionPublicationModel {
         review == null) {
       return null;
     }
-    final List<CollectionSectionDraft>? sections = _sections(
-      json['sections'],
-    );
+    final List<CollectionSectionDraft>? sections = _sections(json['sections']);
     final List<CollectionItemDraft>? items = _items(json['items']);
     if (sections == null || items == null) return null;
     return CollectionPublishBundle(
@@ -125,7 +121,11 @@ class CollectionPublicationModel {
       final int? order = _int(entry['order']);
       if (id == null || order == null) return null;
       result.add(
-        CollectionSectionDraft(id: id, title: _text(entry['title']) ?? '', order: order),
+        CollectionSectionDraft(
+          id: id,
+          title: _text(entry['title']) ?? '',
+          order: order,
+        ),
       );
     }
     return List<CollectionSectionDraft>.unmodifiable(result);

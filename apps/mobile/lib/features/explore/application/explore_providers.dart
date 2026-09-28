@@ -8,7 +8,9 @@ import '../domain/usecases/save_profile_editable_usecase.dart';
 import '../domain/usecases/save_settings_usecase.dart';
 import 'controllers/explore_controller.dart';
 
-final exploreControllerProvider = ChangeNotifierProvider<ExploreController>((ref) {
+final exploreControllerProvider = ChangeNotifierProvider<ExploreController>((
+  ref,
+) {
   return ExploreController(
     loadProfileEditableUseCase: sl<LoadProfileEditableUseCase>(),
     saveProfileEditableUseCase: sl<SaveProfileEditableUseCase>(),

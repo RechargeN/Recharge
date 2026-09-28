@@ -18,6 +18,8 @@ import 'place_draft_mapper.dart';
 import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
+import 'session_draft_mapper.dart';
+import '../../domain/entities/session_draft_data.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -229,6 +231,11 @@ class CreateDraftModel {
         entity.rentalData!,
       );
     }
+    if (entity.sessionData != null) {
+      serializedSections['session_details'] = SessionDraftMapper.toJson(
+        entity.sessionData!,
+      );
+    }
     if (entity.collectionData != null) {
       serializedSections['collection_details'] = CollectionDraftMapper.toJson(
         entity.collectionData!,
@@ -427,6 +434,24 @@ class CreateDraftModel {
             ),
           )
         : null;
+    final Object? sessionPayload = migratedSectionData['session_details'];
+    final SessionDraftData? sessionData =
+        parsedObjectType != CreateObjectType.session
+        ? null
+        : sessionPayload is Map<String, Object?>
+        ? SessionDraftMapper.fromJson(sessionPayload)
+        : SessionDraftData.defaults(
+            resourceName: venueName,
+            timezoneId: timezone,
+          ).copyWith(
+            legacySchedule: scheduleSlots.isEmpty
+                ? null
+                : SessionDraftMapper.migrateLegacyEventSlots(
+                    scheduleSlots
+                        .map(CreateTimeSlotDraft.fromMap)
+                        .toList(growable: false),
+                  ),
+          );
     final RentalDraftData? rentalData =
         parsedObjectType == CreateObjectType.rental
         ? RentalDraftMapper.fromJson(
@@ -502,6 +527,7 @@ class CreateDraftModel {
       scenarioData: scenarioData,
       collectionData: collectionData,
       rentalData: rentalData,
+      sessionData: sessionData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),

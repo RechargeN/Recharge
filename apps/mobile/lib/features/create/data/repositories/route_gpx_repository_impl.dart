@@ -30,9 +30,7 @@ class RouteGpxRepositoryImpl implements RouteGpxRepository {
   }
 
   @override
-  Future<RouteGpxImportResult> import(
-    RouteGpxImportSelection selection,
-  ) async {
+  Future<RouteGpxImportResult> import(RouteGpxImportSelection selection) async {
     final bytes = await _sourceStore.read(selection.file);
     return _importer.import(
       selection: selection,

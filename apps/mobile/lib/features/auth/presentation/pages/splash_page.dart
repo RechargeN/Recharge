@@ -33,10 +33,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           children: <Widget>[
             Text(
               'Recharge',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 12),
             CircularProgressIndicator(),

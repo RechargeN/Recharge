@@ -24,6 +24,7 @@ import '../widgets/event_create_block.dart';
 import '../widgets/activity_create_block.dart';
 import '../widgets/collection_create_block.dart';
 import '../widgets/find_people_create_block.dart';
+import '../widgets/session_create_block.dart';
 import '../widgets/place_create_block.dart';
 import '../widgets/rental_create_block.dart';
 import '../widgets/route/route_create_block.dart';
@@ -230,6 +231,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 CreateObjectType.findPeople) ...<Widget>[
               const SizedBox(height: 12),
               FindPeopleCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.session) ...<Widget>[
+              const SizedBox(height: 12),
+              SessionCreateBlock(
                 controller: controller,
                 state: state,
                 onPublished: () =>

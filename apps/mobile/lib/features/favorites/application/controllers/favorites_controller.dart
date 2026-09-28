@@ -13,10 +13,10 @@ class FavoritesController extends ChangeNotifier {
     required AddFavoriteUseCase addFavoriteUseCase,
     required RemoveFavoriteUseCase removeFavoriteUseCase,
     required AnalyticsService analyticsService,
-  })  : _getFavoritesUseCase = getFavoritesUseCase,
-        _addFavoriteUseCase = addFavoriteUseCase,
-        _removeFavoriteUseCase = removeFavoriteUseCase,
-        _analyticsService = analyticsService;
+  }) : _getFavoritesUseCase = getFavoritesUseCase,
+       _addFavoriteUseCase = addFavoriteUseCase,
+       _removeFavoriteUseCase = removeFavoriteUseCase,
+       _analyticsService = analyticsService;
 
   final GetFavoritesUseCase _getFavoritesUseCase;
   final AddFavoriteUseCase _addFavoriteUseCase;
@@ -36,10 +36,7 @@ class FavoritesController extends ChangeNotifier {
 
   Future<void> loadFavorites() async {
     _setState(
-      _state.copyWith(
-        status: FavoritesStatus.loading,
-        clearMessage: true,
-      ),
+      _state.copyWith(status: FavoritesStatus.loading, clearMessage: true),
     );
     try {
       final List<FavoriteItemEntity> favorites = await _getFavoritesUseCase();
@@ -52,9 +49,7 @@ class FavoritesController extends ChangeNotifier {
       );
       _analyticsService.track(
         'favorites_loaded',
-        params: <String, Object?>{
-          'item_count': favorites.length,
-        },
+        params: <String, Object?>{'item_count': favorites.length},
       );
     } on Exception {
       _setState(
@@ -65,9 +60,7 @@ class FavoritesController extends ChangeNotifier {
       );
       _analyticsService.track(
         'favorites_load_failed',
-        params: const <String, Object?>{
-          'error_group': 'storage',
-        },
+        params: const <String, Object?>{'error_group': 'storage'},
       );
     }
   }

@@ -85,4 +85,15 @@ const List<EventAmenityDefinition> eventAmenityTaxonomy =
       EventAmenityDefinition('food_available', 'Food available', 'Facilities'),
       EventAmenityDefinition('weather_shelter', 'Weather shelter', 'Outdoor'),
       EventAmenityDefinition('first_aid', 'First aid', 'Safety'),
+      // Bounded extraction for Bookable Session's own amenities section
+      // (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §12 «Необязательно», §7) —
+      // additive entries only, no change to existing Event/Place behavior.
+      EventAmenityDefinition('shower', 'Shower', 'Wellness'),
+      EventAmenityDefinition('towels', 'Towels provided', 'Wellness'),
+      EventAmenityDefinition('changing_room', 'Changing room', 'Wellness'),
+      EventAmenityDefinition(
+        'equipment_provided',
+        'Equipment provided',
+        'Wellness',
+      ),
     ];

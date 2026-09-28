@@ -27,9 +27,7 @@ class CreateHubPage extends StatelessWidget {
     // finer-grained submit/publish-direct/moderate/manage/archive
     // capabilities are re-checked inside `CreateController` at each
     // mutation, not here.
-    final bool canCreateCollection = capabilities.contains(
-      'create.collection',
-    );
+    final bool canCreateCollection = capabilities.contains('create.collection');
     final List<CreateBlockConfig> availableBlocks = rechargeCreateBlockConfigs
         .where(
           (CreateBlockConfig config) =>

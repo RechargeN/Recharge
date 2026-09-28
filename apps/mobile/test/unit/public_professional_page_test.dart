@@ -9,6 +9,7 @@ import 'package:recharge/features/identity/domain/entities/page_limit_increase_r
 import 'package:recharge/features/identity/domain/entities/public_professional_page.dart';
 import 'package:recharge/features/identity/domain/entities/workspace_ref.dart';
 import 'package:recharge/features/identity/domain/repositories/identity_workspace_repository.dart';
+import 'package:recharge/features/identity/domain/repositories/managed_page_field_moderation_repository.dart';
 import 'package:recharge/features/identity/domain/repositories/public_professional_page_repository.dart';
 import 'package:recharge/features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import 'package:recharge/features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
@@ -87,6 +88,88 @@ void main() {
       );
       expect(byId.projection!.contentSummary.timelessCount, 0);
     });
+
+    test(
+      'approved field overlay content surfaces short and long description',
+      () async {
+        final ManagedPageEntity page = _page();
+        final overlays = <ManagedPageFieldModerationOverlay>[
+          ManagedPageFieldModerationOverlay(
+            pageId: page.id,
+            fieldKey: ManagedPageModeratedFieldKey.shortDescription,
+            lastApprovedValue: const ManagedPageLocalizedTextValue(
+              <String, String>{'en': 'Bike tours across Riga'},
+            ),
+            lastApprovedAtUtc: DateTime.utc(2026, 1, 1),
+            approvedForVerificationRevision: page.verificationRevision,
+            revision: 1,
+            schemaVersion: 1,
+          ),
+          ManagedPageFieldModerationOverlay(
+            pageId: page.id,
+            fieldKey: ManagedPageModeratedFieldKey.description,
+            lastApprovedValue: const ManagedPageLocalizedTextValue(
+              <String, String>{'en': 'Full-day and half-day guided routes.'},
+            ),
+            lastApprovedAtUtc: DateTime.utc(2026, 1, 1),
+            approvedForVerificationRevision: page.verificationRevision,
+            revision: 1,
+            schemaVersion: 1,
+          ),
+        ];
+        final ResolvePublicProfessionalPageUseCase resolver = _resolver(
+          page,
+          overlays: overlays,
+        );
+
+        final PublicProfessionalPageResolution result = await resolver(
+          lookup: PublicProfessionalPageLookup.id,
+          reference: page.id,
+          requestedLocale: 'en',
+        );
+
+        expect(
+          result.projection!.shortDescription,
+          'Bike tours across Riga',
+        );
+        expect(
+          result.projection!.description,
+          'Full-day and half-day guided routes.',
+        );
+      },
+    );
+
+    test(
+      'an overlay approved under a different verification revision is hidden',
+      () async {
+        final ManagedPageEntity page = _page();
+        final overlays = <ManagedPageFieldModerationOverlay>[
+          ManagedPageFieldModerationOverlay(
+            pageId: page.id,
+            fieldKey: ManagedPageModeratedFieldKey.shortDescription,
+            lastApprovedValue: const ManagedPageLocalizedTextValue(
+              <String, String>{'en': 'Stale approval'},
+            ),
+            lastApprovedAtUtc: DateTime.utc(2026, 1, 1),
+            approvedForVerificationRevision: page.verificationRevision + 1,
+            revision: 1,
+            schemaVersion: 1,
+          ),
+        ];
+        final ResolvePublicProfessionalPageUseCase resolver = _resolver(
+          page,
+          overlays: overlays,
+        );
+
+        final PublicProfessionalPageResolution result = await resolver(
+          lookup: PublicProfessionalPageLookup.id,
+          reference: page.id,
+          requestedLocale: 'en',
+        );
+
+        expect(result.projection!.shortDescription, isNull);
+      },
+    );
 
     test(
       'pending page can be projected only through explicit preview',
@@ -262,10 +345,14 @@ void main() {
   });
 }
 
-ResolvePublicProfessionalPageUseCase _resolver(ManagedPageEntity page) {
+ResolvePublicProfessionalPageUseCase _resolver(
+  ManagedPageEntity page, {
+  List<ManagedPageFieldModerationOverlay> overlays = const <ManagedPageFieldModerationOverlay>[],
+}) {
   return ResolvePublicProfessionalPageUseCase(
     repository: _MemoryPublicPageRepository(<ManagedPageEntity>[page]),
     contentRepository: const _EmptyContentRepository(),
+    moderationRepository: _MemoryModerationRepository(overlays),
   );
 }
 
@@ -323,6 +410,25 @@ class _EmptyContentRepository implements PublicPageContentProjectionRepository {
   Future<PublicPageContentSummary> loadSummaryForPage(String pageId) async {
     return const PublicPageContentSummary.empty();
   }
+}
+
+class _MemoryModerationRepository
+    implements ManagedPageFieldModerationRepository {
+  const _MemoryModerationRepository(this.overlays);
+
+  final List<ManagedPageFieldModerationOverlay> overlays;
+
+  @override
+  Future<List<ManagedPageFieldModerationOverlay>> loadForPage(
+    String pageId,
+  ) async {
+    return overlays
+        .where((ManagedPageFieldModerationOverlay o) => o.pageId == pageId)
+        .toList(growable: false);
+  }
+
+  @override
+  Future<void> saveOverlay(ManagedPageFieldModerationOverlay overlay) async {}
 }
 
 IdentityAccessSnapshot _access(ManagedPageEntity page) {

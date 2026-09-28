@@ -1,6 +1,8 @@
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
+import '../../features/discover/domain/entities/event_occurrence.dart';
+import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 
 class DiscoverScenarioIntakeAdapter {
   const DiscoverScenarioIntakeAdapter();
@@ -64,6 +66,95 @@ class DiscoverScenarioIntakeAdapter {
       intentId: intentId,
       requesterId: requesterId,
       checkedAtUtc: checkedAtUtc,
+    );
+  }
+
+  /// `DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §4.3 — Event's own typed
+  /// Scenario-intake mapping, built directly from
+  /// [PublishedEventDiscoveryEntity], never by converting back to
+  /// [DiscoverItemEntity]. Always single-item/`details` surface: Event
+  /// Details has no multi-select tray, unlike Search/Map's
+  /// [toIntent]/[items] path above.
+  ScenarioObjectIntakeIntent toEventIntent({
+    required PublishedEventDiscoveryEntity event,
+    required String intentId,
+    required String requesterId,
+    required DateTime checkedAtUtc,
+  }) {
+    final String? locationIssue = _eventLocationIssue(event);
+    if (locationIssue != null) throw FormatException(locationIssue);
+    return ScenarioObjectIntakeIntent(
+      contractVersion: ScenarioObjectIntakeIntent.currentContractVersion,
+      intentId: intentId,
+      requesterId: requesterId,
+      sourceSurface: ScenarioIntakeSourceSurface.details,
+      candidates: <ScenarioIntakeCandidate>[
+        _toEventCandidate(event, checkedAtUtc.toUtc()),
+      ],
+    );
+  }
+
+  String? _eventLocationIssue(PublishedEventDiscoveryEntity event) {
+    if (event.eventId.trim().isEmpty || event.title.trim().isEmpty) {
+      return 'This event is missing a stable catalog identity.';
+    }
+    if (!event.latitude.isFinite ||
+        !event.longitude.isFinite ||
+        event.latitude < -90 ||
+        event.latitude > 90 ||
+        event.longitude < -180 ||
+        event.longitude > 180) {
+      return 'This event has no usable catalog location.';
+    }
+    return null;
+  }
+
+  ScenarioIntakeCandidate _toEventCandidate(
+    PublishedEventDiscoveryEntity event,
+    DateTime checkedAtUtc,
+  ) {
+    // Occurrence-resolved start/end (`DTL-EVT-01` §2.2), never a bare
+    // start/end pair — `PublishedEventDiscoveryEntity` has no such pair to
+    // fall back to by construction.
+    final EventOccurrence? occurrence = event.displayOccurrence;
+    final DateTime? fixedStart = occurrence?.startAtUtc;
+    final DateTime? fixedEnd = occurrence?.endAtUtc;
+    return ScenarioIntakeCandidate(
+      ref: ScenarioObjectRef(
+        objectId: event.eventId,
+        objectType: ScenarioCatalogObjectType.event,
+      ),
+      snapshot: ScenarioObjectSnapshotDraft(
+        title: event.title,
+        durationMinutes: event.durationMinutes,
+        distanceM: null,
+        checkedAtUtc: checkedAtUtc,
+      ),
+      sourceStatus: occurrence?.status == EventOccurrenceStatus.cancelled
+          ? ScenarioSourceStatus.unavailable
+          : ScenarioSourceStatus.ready,
+      location: ScenarioIntakeLocationSnapshot(
+        title: event.venueName.trim().isEmpty ? event.title : event.venueName,
+        point: ScenarioGeoPointDraft(
+          latitude: event.latitude,
+          longitude: event.longitude,
+        ),
+        address: _nullable(event.addressLine),
+        marketId: _nullable(event.marketCityId),
+        timezoneId: _nullable(event.timezoneId),
+        disclosure: ScenarioLocationDisclosure.public,
+      ),
+      schedule: fixedStart == null
+          ? null
+          : ScenarioScheduleDraft(
+              mode: ScenarioTimeMode.fixed,
+              planned: ScenarioDatedPlannedTimeDraft(
+                fixedStartAtUtc: fixedStart,
+                fixedEndAtUtc: fixedEnd,
+                startTimezoneId: _nullable(event.timezoneId),
+                endTimezoneId: _nullable(event.timezoneId),
+              ),
+            ),
     );
   }
 

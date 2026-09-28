@@ -149,4 +149,79 @@ void main() {
     expect(record.pages.single.displayName, 'Legacy Riga Page');
     expect(record.pages.single.slug, 'legacy-riga-page-12345678');
   });
+
+  test(
+    'schema v2 page record migrates with default verificationRevision',
+    () async {
+      FlutterSecureStorage.setMockInitialValues(<String, String>{
+        'identity_managed_pages_$userId': jsonEncode(<String, Object>{
+          'schemaVersion': 2,
+          'pages': <Map<String, Object>>[
+            <String, Object>{
+              'id': 'v2-page-12345678',
+              'ownerUserId': userId,
+              'kind': 'company',
+              'displayName': 'V2 Page',
+              'slug': 'v2-page-slug',
+              'avatar': '',
+              'verificationStatus': 'pending',
+              'lifecycle': 'active',
+              'marketId': 'riga',
+              'countryCode': 'LV',
+              'defaultLocale': 'en',
+              'timezone': 'Europe/Riga',
+              'defaultCurrency': 'EUR',
+              'supportedLocales': <String>['en'],
+              'createdAtUtc': '2026-07-31T00:00:00.000Z',
+              'revision': 2,
+            },
+          ],
+          'memberships': <Object>[],
+          'limitRequests': <Object>[],
+        }),
+      });
+      const dataSource = IdentityWorkspaceLocalDataSource(
+        FlutterSecureStorage(),
+      );
+
+      final record = await dataSource.loadManagedPageRecord(userId);
+
+      expect(record.pages.single.verificationRevision, 1);
+    },
+  );
+
+  test(
+    'verificationRevision round-trips through save and load',
+    () async {
+      const dataSource = IdentityWorkspaceLocalDataSource(
+        FlutterSecureStorage(),
+      );
+      final page = ManagedPageEntity(
+        id: 'roundtrip-page',
+        ownerUserId: userId,
+        kind: ManagedPageKind.company,
+        displayName: 'Roundtrip Page',
+        avatar: '',
+        verificationStatus: ManagedPageVerificationStatus.verified,
+        lifecycle: ManagedPageLifecycle.active,
+        marketId: 'riga',
+        countryCode: 'LV',
+        defaultLocale: 'en',
+        timezone: 'Europe/Riga',
+        defaultCurrency: 'EUR',
+        supportedLocales: const <String>['en'],
+        createdAtUtc: DateTime.utc(2026, 7, 31),
+        revision: 4,
+        verificationRevision: 2,
+      );
+
+      await dataSource.saveManagedPageRecord(
+        userId,
+        IdentityManagedPageLocalRecord(pages: <ManagedPageEntity>[page]),
+      );
+      final record = await dataSource.loadManagedPageRecord(userId);
+
+      expect(record.pages.single.verificationRevision, 2);
+    },
+  );
 }

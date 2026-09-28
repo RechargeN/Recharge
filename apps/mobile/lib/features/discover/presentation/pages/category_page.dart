@@ -7,6 +7,7 @@ import '../../../../core/config/recharge_taxonomy.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
+import '../widgets/collection_discover_section.dart';
 import '../widgets/discover_category_icon.dart';
 import '../widgets/discover_feed_section.dart';
 
@@ -133,6 +134,11 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                 );
               },
             ),
+          ),
+          const SizedBox(height: 18),
+          CollectionDiscoverSection(
+            onOpenCollection: (String collectionId) =>
+                context.push('${RouteNames.collectionDetails}/$collectionId'),
           ),
           const SizedBox(height: 18),
           DiscoverFeedSection(

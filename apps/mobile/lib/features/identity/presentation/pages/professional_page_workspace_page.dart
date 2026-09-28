@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../application/identity_workspace_providers.dart';
 import '../../domain/entities/managed_page_entity.dart';
+import '../../domain/entities/managed_page_membership_entity.dart';
+import '../widgets/managed_page_profile_editor_card.dart';
+import '../widgets/team_invitations_card.dart';
 
 enum ProfessionalPageSection { overview, content, account }
 
@@ -31,7 +34,12 @@ class ProfessionalPageWorkspacePage extends ConsumerWidget {
           if (page == null)
             _EmptyProfessionalExperience(section: section)
           else
-            _ActiveProfessionalPage(page: page, section: section),
+            _ActiveProfessionalPage(
+              page: page,
+              section: section,
+              actingUserId: state.userId,
+              membership: state.accessSnapshot?.membershipFor(page.id),
+            ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () => context.push(RouteNames.settings),
@@ -85,53 +93,85 @@ class _EmptyProfessionalExperience extends StatelessWidget {
 }
 
 class _ActiveProfessionalPage extends StatelessWidget {
-  const _ActiveProfessionalPage({required this.page, required this.section});
+  const _ActiveProfessionalPage({
+    required this.page,
+    required this.section,
+    required this.actingUserId,
+    required this.membership,
+  });
 
   final ManagedPageEntity page;
   final ProfessionalPageSection section;
+  final String actingUserId;
+  final ManagedPageMembershipEntity? membership;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              page.displayName,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '${page.verificationStatus.name} · ${page.countryCode} · '
-              '${page.defaultCurrency} · ${page.timezone}',
-            ),
-            const SizedBox(height: 18),
-            Text(_sectionDescription(section)),
-            if (section == ProfessionalPageSection.overview) ...<Widget>[
-              const SizedBox(height: 18),
-              OutlinedButton.icon(
-                key: const ValueKey<String>('preview-public-page'),
-                onPressed: () => context.push(
-                  RouteNames.professionalPagePreviewFor(page.id),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  page.displayName,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                icon: const Icon(Icons.visibility_outlined),
-                label: const Text('Preview public page'),
-              ),
-              if (!page.isPubliclyVisible) ...<Widget>[
-                const SizedBox(height: 8),
-                const Text(
-                  'Preview only. The page is not public until verification '
-                  'is approved.',
+                const SizedBox(height: 6),
+                Text(
+                  '${page.verificationStatus.name} · ${page.countryCode} · '
+                  '${page.defaultCurrency} · ${page.timezone}',
                 ),
+                const SizedBox(height: 18),
+                Text(_sectionDescription(section)),
+                if (section == ProfessionalPageSection.overview) ...<Widget>[
+                  const SizedBox(height: 18),
+                  OutlinedButton.icon(
+                    key: const ValueKey<String>('preview-public-page'),
+                    onPressed: () => context.push(
+                      RouteNames.professionalPagePreviewFor(page.id),
+                    ),
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Preview public page'),
+                  ),
+                  if (!page.isPubliclyVisible) ...<Widget>[
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Preview only. The page is not public until '
+                      'verification is approved.',
+                    ),
+                  ],
+                ],
               ],
-            ],
-          ],
+            ),
+          ),
         ),
-      ),
+        if (section == ProfessionalPageSection.overview &&
+            membership != null &&
+            membership!.isActive) ...<Widget>[
+          const SizedBox(height: 16),
+          ManagedPageProfileEditorCard(
+            page: page,
+            actingUserId: actingUserId,
+            ownCapabilities: membership!.capabilities,
+          ),
+        ],
+        if (section == ProfessionalPageSection.account &&
+            membership != null &&
+            membership!.isActive) ...<Widget>[
+          const SizedBox(height: 16),
+          TeamInvitationsCard(
+            pageId: page.id,
+            actingUserId: actingUserId,
+            ownCapabilities: membership!.capabilities,
+          ),
+        ],
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
 import 'place_draft_data.dart';
 import 'rental_draft_data.dart';
+import 'session_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
 
@@ -111,6 +112,7 @@ class CreateDraftEntity {
     this.scenarioData,
     this.collectionData,
     this.rentalData,
+    this.sessionData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -185,6 +187,7 @@ class CreateDraftEntity {
   final ScenarioDraftData? scenarioData;
   final CollectionDraftData? collectionData;
   final RentalDraftData? rentalData;
+  final SessionDraftData? sessionData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -275,10 +278,7 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
-        publisherRef: PublisherRef(
-          type: PublisherType.user,
-          id: organizerId,
-        ),
+        publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,
       findPeopleData: null,
@@ -369,6 +369,8 @@ class CreateDraftEntity {
     bool clearCollectionData = false,
     RentalDraftData? rentalData,
     bool clearRentalData = false,
+    SessionDraftData? sessionData,
+    bool clearSessionData = false,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -451,7 +453,9 @@ class CreateDraftEntity {
       sectionData: sectionData ?? this.sectionData,
       eventData: clearEventData ? null : (eventData ?? this.eventData),
       placeData: clearPlaceData ? null : (placeData ?? this.placeData),
-      activityData: clearActivityData ? null : (activityData ?? this.activityData),
+      activityData: clearActivityData
+          ? null
+          : (activityData ?? this.activityData),
       findPeopleData: clearFindPeopleData
           ? null
           : (findPeopleData ?? this.findPeopleData),
@@ -463,6 +467,7 @@ class CreateDraftEntity {
           ? null
           : (collectionData ?? this.collectionData),
       rentalData: clearRentalData ? null : (rentalData ?? this.rentalData),
+      sessionData: clearSessionData ? null : (sessionData ?? this.sessionData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),

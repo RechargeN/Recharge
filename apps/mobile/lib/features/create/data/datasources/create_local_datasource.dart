@@ -711,7 +711,12 @@ class CreateLocalDataSource {
   }
 }
 
-enum RentalPromotionStatus { promoted, alreadyPublished, conflict, invalidExistingData }
+enum RentalPromotionStatus {
+  promoted,
+  alreadyPublished,
+  conflict,
+  invalidExistingData,
+}
 
 class RentalPromotionResult {
   const RentalPromotionResult({required this.status, this.persisted});

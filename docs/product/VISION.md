@@ -321,6 +321,8 @@ personal/pre-verification authoring без Submit/Publish; остальные д
       Выбранное отображается иконками в Details.
     - `InventorySection` — единицы, залог (Rental)
     - `ItemsPickerSection` — подборка существующих объектов (Collection)
+    - `CollectionCuratorNotesSection` — авторская заметка и featured-флаг
+      на каждом пункте подборки (Collection)
     - `ScenarioContextSection`, `ScenarioComposerSection`,
       `ScenarioLogisticsSection`, `ScenarioReviewSection` — самостоятельные
       секции Scenario внутри общего Create form engine
@@ -352,7 +354,9 @@ personal/pre-verification authoring без Submit/Publish; остальные д
 7. **Find People** — поиск компании; полноценный MapObject
    (в общей выдаче и на карте) · 30 мин–1 день · 2–20
 8. **Class / Workshop / Experience** · 45 мин–4 ч · 1–30
-9. **Rental / Equipment** — аренда вещей/транспорта · 1 ч–3 дня · 1+
+9. **Rental / Equipment** — аренда вещей/транспорта · 1 ч–3 дня · 1+;
+   каноническая логика создания —
+   [RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md](RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md)
 10. **Collection / Guide** — подборка идей и мест · без лимита
 
 Quick Plan не является одиннадцатым Create-типом: это отдельный utility-flow

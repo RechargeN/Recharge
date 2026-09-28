@@ -2,14 +2,13 @@
 
 Status: **Reference index — fully non-normative, no exceptions** (see §0)
 
-Version: **1.7** (restores the post-v1.5 correction line and registers
-`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.3 and
-`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.0, bringing the group to six
-documents in three private/public pairs; refreshes Viewer to v1.17,
-Professional Page to v2.34, records the accepted `PP-D48`/`PPP-D01`–`06`
-contract and corrects the Block/Mute and identity-overlay rows)
+Version: **1.8** (registers `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.10,
+which refreshes its own sibling-count framing to the six-document,
+three-pair model — the last of the six documents whose own framing text
+still described the stale four-document group; §0.1's per-document status
+table and §1's registry row updated accordingly)
 
-Date: **2026-08-16**
+Date: **2026-09-07**
 
 Scope: **cross-document hygiene layer over the profile-surface documents;
 documentation only**
@@ -52,7 +51,7 @@ management document and a public-projection document:
 | Document | How it currently describes the group |
 |---|---|
 | `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | Owns the split into `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` as of v1.17 (§0) |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Pre-existing team/public split with `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (§0) |
+| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Pre-existing team/public split with `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`; §0 (v1.10+) now also states the current six-document, three-pair frame explicitly, refreshed from the stale four-document count |
 | `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Same pair, public half (§0) |
 | `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | §1.1 (v2.34+) adopts the same six-document, three-pair frame explicitly |
 | `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | §1.1 states the same pair frame directly |
@@ -83,7 +82,7 @@ index.
 | Document | Current version | Cited as compatible by others | Citation status |
 |---|---|---|---|
 | `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | **v1.17** | CP/PCP cite v1.15 (stale by 2); VP's own header cites CP v1.9, PCP v1.9 (both current) and PP v2.32 (stale by 2) | v1.17 split off `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` — its own outbound snapshot is nearly current, not stale the way an earlier pass of this index recorded; see §7 |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | **v1.9** | PCP/PP cite v1.9; VP cites v1.9 | v1.9 consumes accepted `PP-D16` without treating it as runtime authorization |
+| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | **v1.10** | PCP/PP cite v1.9 (stale by 1); VP cites v1.9 | v1.10 refreshes the sibling-count framing (§0, §0.1, §23) from the four-document frame to the current six-document, three-pair model; no `CP-D`/`CP-AC` content changed |
 | `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | **v1.9** | CP/PP cite v1.9; VP cites v1.9 | v1.9 separates neutral pending review from effective enforcement so a report cannot weaken an existing restriction |
 | `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | **v2.34** | CP/PCP cite v2.28 (stale by 6); VP cites v2.32 (stale by 2) | v2.34 accepts the closed typed `PP-D48` field-moderation overlay and adopts the six-document frame; v2.31 split off `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` |
 | `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | **v1.3** (as of 2026-08-16) | PP v2.34 cites it | Public-facing projection split from `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §8.2; owns Accepted `PPP-D01`–`06` and `PPP-AC-01`–`15`; production delivery remains separately gated |
@@ -439,3 +438,4 @@ until checked against the source documents.
 | 1.5 | 2026-08-16 | Registered two new public-facing split documents that landed independently of each other: `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.2 (from `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.31) and `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.0 (from `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17) — the group is now six documents in three private/public pairs, not four; §0/§0.1/§1/§2/§3/§5.3 updated accordingly. Professional Page registry advanced to v2.33 (`PP-D48` added, `PP-D17` self-contradiction fixed). §7's outbound-citation table was itself found stale on direct re-check — Viewer's own header already cites current Creator/Public Creator versions; only its Professional Page citation is genuinely one version behind. `PROFESSIONAL_PAGE_SPEC_CHANGELOG.md` marked deleted (product-owner instruction); Decision Package's registry note corrected to state all 47 `PP-D` IDs now have a disposition in the parent's own `§20.1`, superseding that package's own stale 42-of-47 header. `ManagedPage` public-field-set and Professional-Page-Follow-display ownership rows in §3 retargeted to `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`; added a Block/Mute-against-a-page row. |
 | 1.6 | 2026-08-16 | Correction-line restoration after the v1.5 attachment regressed previously reviewed ownership/status notes: Block/Mute ownership retargeted to Public Viewer rendering; `CP-D20` recorded as resolved by Viewer/Public Viewer adoption while `CP-D19` remains open. |
 | 1.7 | 2026-08-16 | Registered Professional Page v2.34 and Public Professional Page v1.3. The index now records accepted `PP-D48`/`PPP-D01`–`06`, the shared content read model, page-target Block/Mute semantics and the bounded local/mock implementation slice without converting Draft contracts into production authority. |
+| 1.8 | 2026-09-07 | Registered `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.10 — the last of the six documents whose own framing text still described the stale "three personal-identity plus a `ManagedPage` peer, four total" group; it now states the six-document, three-pair model directly (§0, §0.1's "all four documents" line, the precedence list, canonical sources and §23's opening). No `CP-D`/`CP-AC` content changed. §0.1's per-document status table and §1's registry row updated to match — every document in the family now self-describes the current count, closing the staleness this index had been tracking since v1.5. |

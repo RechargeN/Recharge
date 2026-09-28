@@ -54,6 +54,7 @@ class ValidateCollectionDraftUseCase {
         ),
       );
     }
+
     void warning(String code, String section, String field, String message) {
       issues.add(
         CollectionValidationIssue(

@@ -51,13 +51,15 @@ class CollectionPublicationRepositoryImpl
     required String decidedByActorId,
     CollectionModerationRejectionReason? rejectionReason,
   }) async {
-    final (CollectionModerationRequest decided, PublishedCollectionVersion? activated) =
-        await datasource.decide(
-          requestId: requestId,
-          accept: accept,
-          decidedByActorId: decidedByActorId,
-          rejectionReason: rejectionReason,
-        );
+    final (
+      CollectionModerationRequest decided,
+      PublishedCollectionVersion? activated,
+    ) = await datasource.decide(
+      requestId: requestId,
+      accept: accept,
+      decidedByActorId: decidedByActorId,
+      rejectionReason: rejectionReason,
+    );
     if (activated == null) {
       // Reject, or nothing to sync — trivially "synced".
       return CollectionModerationDecisionResult(
@@ -131,7 +133,9 @@ class CollectionPublicationRepositoryImpl
   /// One immediate retry before giving up (DTL-OBJ-01 §3.5 review
   /// correction, applied here too) — the caller decides how a lasting
   /// failure is surfaced; this never throws.
-  Future<bool> _activateSinkWithRetry(PublishedCollectionVersion version) async {
+  Future<bool> _activateSinkWithRetry(
+    PublishedCollectionVersion version,
+  ) async {
     for (int attempt = 0; attempt < 2; attempt++) {
       try {
         await _sink.activate(version);

@@ -783,11 +783,7 @@ class ValidateRouteDraftUseCase {
       return;
     }
     if (quality.geometryRevision != route.geometryRevision) {
-      block(
-        'quality_revision_stale',
-        'quality',
-        field: 'geometryRevision',
-      );
+      block('quality_revision_stale', 'quality', field: 'geometryRevision');
     }
     final knownSurfaceDistance = quality.surfaces.fold<double>(
       0,
@@ -797,11 +793,7 @@ class ValidateRouteDraftUseCase {
         knownSurfaceDistance + quality.unknownSurfaceDistanceMeters;
     if ((describedSurfaceDistance - route.metrics.distanceMeters).abs() >
         policy.distanceToleranceMeters) {
-      block(
-        'quality_surface_distance_mismatch',
-        'quality',
-        field: 'surfaces',
-      );
+      block('quality_surface_distance_mismatch', 'quality', field: 'surfaces');
     }
     if (quality.difficulty.differsFromAuthorSelection) {
       warn(
@@ -809,9 +801,7 @@ class ValidateRouteDraftUseCase {
         'quality',
         field: 'difficultyId',
         remediation: RouteValidationRemediation.review,
-        safeMetrics: <String, num>{
-          'score': quality.difficulty.score,
-        },
+        safeMetrics: <String, num>{'score': quality.difficulty.score},
       );
     }
     if (quality.difficulty.missingElevation) {

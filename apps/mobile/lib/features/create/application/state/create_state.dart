@@ -10,6 +10,8 @@ import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/repositories/catalog_object_picker_port.dart';
 import '../scenario_generation_coordinator.dart';
+import '../../domain/entities/session_validation_issue.dart';
+import '../../domain/entities/location_search_suggestion.dart';
 
 enum CreateSaveStatus { saved, saving, unsaved, failed }
 
@@ -60,6 +62,9 @@ class CreateState {
     required this.rentalStep,
     required this.rentalValidationIssues,
     required this.collectionStep,
+    this.sessionValidationIssues = const <SessionValidationIssue>[],
+    this.placeLocationSearchLoading = false,
+    this.placeLocationSuggestions = const <LocationSearchSuggestion>[],
   });
 
   factory CreateState.initial() {
@@ -141,6 +146,9 @@ class CreateState {
   final int rentalStep;
   final List<RentalValidationIssue> rentalValidationIssues;
   final int collectionStep;
+  final List<SessionValidationIssue> sessionValidationIssues;
+  final bool placeLocationSearchLoading;
+  final List<LocationSearchSuggestion> placeLocationSuggestions;
 
   bool get isLoaded =>
       status == CreateStatus.ready ||
@@ -202,6 +210,10 @@ class CreateState {
     List<RentalValidationIssue>? rentalValidationIssues,
     bool clearRentalValidationIssues = false,
     int? collectionStep,
+    List<SessionValidationIssue>? sessionValidationIssues,
+    bool clearSessionValidationIssues = false,
+    bool? placeLocationSearchLoading,
+    List<LocationSearchSuggestion>? placeLocationSuggestions,
   }) {
     return CreateState(
       status: status ?? this.status,
@@ -278,6 +290,13 @@ class CreateState {
           ? const <RentalValidationIssue>[]
           : (rentalValidationIssues ?? this.rentalValidationIssues),
       collectionStep: collectionStep ?? this.collectionStep,
+      sessionValidationIssues: clearSessionValidationIssues
+          ? const <SessionValidationIssue>[]
+          : sessionValidationIssues ?? this.sessionValidationIssues,
+      placeLocationSearchLoading:
+          placeLocationSearchLoading ?? this.placeLocationSearchLoading,
+      placeLocationSuggestions:
+          placeLocationSuggestions ?? this.placeLocationSuggestions,
     );
   }
 }

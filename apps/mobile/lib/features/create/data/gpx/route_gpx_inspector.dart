@@ -109,8 +109,7 @@ class _InspectionParser {
   final List<String> _stack = <String>[];
   final List<RouteGpxCandidateSummary> _candidates =
       <RouteGpxCandidateSummary>[];
-  final List<RouteGpxWaypointSummary> _waypoints =
-      <RouteGpxWaypointSummary>[];
+  final List<RouteGpxWaypointSummary> _waypoints = <RouteGpxWaypointSummary>[];
   final Set<String> _issues = <String>{};
   final Set<String> _unsupportedExtensions = <String>{};
 
@@ -283,10 +282,7 @@ class _InspectionParser {
     }
     final latitude = _finiteDouble(_attribute(event, 'lat'));
     final longitude = _finiteDouble(_attribute(event, 'lon'));
-    final position = GeoPoint(
-      latitude: latitude,
-      longitude: longitude,
-    );
+    final position = GeoPoint(latitude: latitude, longitude: longitude);
     if (!position.isValid) {
       throw const RouteGpxException('gpx_coordinate_invalid');
     }
@@ -296,7 +292,8 @@ class _InspectionParser {
 
   bool _shouldCapture(String name, String? parent) {
     if (_captureName != null) return false;
-    if (_point != null && const <String>{'name', 'type', 'ele', 'time'}.contains(name)) {
+    if (_point != null &&
+        const <String>{'name', 'type', 'ele', 'time'}.contains(name)) {
       return true;
     }
     return name == 'name' &&
@@ -546,8 +543,8 @@ class _CandidateBuilder {
       final previousTime = _previousTimestamp;
       final currentTime = point.timestamp;
       if (previousTime != null && currentTime != null) {
-        final seconds = currentTime.difference(previousTime).inMilliseconds /
-            1000;
+        final seconds =
+            currentTime.difference(previousTime).inMilliseconds / 1000;
         if (seconds <= 0) {
           issueCodes.add('gpx_timestamp_non_monotonic');
         } else if (delta / seconds > 50) {
@@ -556,8 +553,7 @@ class _CandidateBuilder {
       }
     }
     pointCount++;
-    hasElevation =
-        hasElevation || point.position.elevationMeters != null;
+    hasElevation = hasElevation || point.position.elevationMeters != null;
     hasTimestamps = hasTimestamps || point.hasTimestamp;
     _previous = point.position;
     _previousTimestamp = point.timestamp;
@@ -645,14 +641,8 @@ class _CandidateBuilder {
       }
     }
     return GeoBounds(
-      southwest: GeoPoint(
-        latitude: _minimumLatitude!,
-        longitude: west,
-      ),
-      northeast: GeoPoint(
-        latitude: _maximumLatitude!,
-        longitude: east,
-      ),
+      southwest: GeoPoint(latitude: _minimumLatitude!, longitude: west),
+      northeast: GeoPoint(latitude: _maximumLatitude!, longitude: east),
     ).validated();
   }
 }

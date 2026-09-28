@@ -12,10 +12,8 @@ class ActivityIntRangeDraft {
   final int min;
   final int max;
 
-  ActivityIntRangeDraft copyWith({int? min, int? max}) => ActivityIntRangeDraft(
-    min: min ?? this.min,
-    max: max ?? this.max,
-  );
+  ActivityIntRangeDraft copyWith({int? min, int? max}) =>
+      ActivityIntRangeDraft(min: min ?? this.min, max: max ?? this.max);
 }
 
 class ActivityAccessCautionDraft {

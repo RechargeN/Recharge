@@ -118,7 +118,10 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
     description: 'Time-based service, class, table, court, or session',
     defaultCategoryId: 'sport',
     defaultSubcategoryId: 'tennis',
-    requiresStartDateTime: true,
+    // Typed SessionSchedule is the single time authority
+    // (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §6.1) — the generic
+    // startDateTimeUtc gate does not apply once the typed writer is active.
+    requiresStartDateTime: false,
     locationLabel: 'Bookable venue',
     priceLabel: 'Booking price',
   ),

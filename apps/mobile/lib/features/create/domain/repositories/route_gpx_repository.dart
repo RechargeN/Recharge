@@ -3,7 +3,9 @@ import '../../../../shared/primitives/geo/geo_point.dart';
 import '../entities/route_draft_data.dart';
 
 enum RouteGpxCandidateKind { track, route }
+
 enum RouteGpxGapResolution { direct, separate }
+
 enum RouteGpxWaypointDecision { skip, attachNearest, keepOffTrack }
 
 class RouteGpxImportConfig {

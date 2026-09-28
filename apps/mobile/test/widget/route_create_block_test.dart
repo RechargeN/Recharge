@@ -49,7 +49,7 @@ import 'package:recharge/features/create/data/repositories/route_gpx_repository_
 import '../support/event_create_test_support.dart';
 
 void main() {
-  // Root cause (see docs/architecture/LAUNCH_STATUS.md Execution Log,
+  // Root cause (see commit 0e5a499,
   // 2026-09-05): the fixture rendered text with no explicit fontFamily, so
   // glyph metrics (even for the tofu placeholder glyphs Flutter substitutes
   // for unloaded fonts) came from whatever font the host's fontconfig/Skia

@@ -220,7 +220,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
                 ),
                 zoom: 12,
               ),
-              markers: data.anchorLatitude == null || data.anchorLongitude == null
+              markers:
+                  data.anchorLatitude == null || data.anchorLongitude == null
                   ? const <Marker>{}
                   : <Marker>{
                       Marker(
@@ -312,8 +313,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
             icon: const Icon(Icons.auto_awesome, size: 18),
             label: const Text('Suggest from item prices'),
             onPressed: () {
-              final CollectionBudgetTier? suggestion =
-                  widget.controller.suggestCollectionBudgetTier();
+              final CollectionBudgetTier? suggestion = widget.controller
+                  .suggestCollectionBudgetTier();
               if (suggestion == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -366,8 +367,10 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
     return _StepCard(
       title: 'Preview & publish',
       children: <Widget>[
-        Text(draft.title.isEmpty ? '(no title yet)' : draft.title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          draft.title.isEmpty ? '(no title yet)' : draft.title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         Text(data.areaLabel),
         const SizedBox(height: 8),
         Text('${data.items.length} items'),
@@ -394,10 +397,13 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.fact_check_outlined),
-          label: Text(reviewed ? 'Composition reviewed' : 'Acknowledge composition'),
+          label: Text(
+            reviewed ? 'Composition reviewed' : 'Acknowledge composition',
+          ),
           onPressed: reviewed
               ? null
-              : () => widget.controller.acknowledgeCollectionCompositionReview(),
+              : () =>
+                    widget.controller.acknowledgeCollectionCompositionReview(),
         ),
         const SizedBox(height: 16),
         FilledButton(
@@ -429,9 +435,9 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
                 onPressed: () async {
                   try {
                     await widget.controller
-                        .removeCollectionItemsFromActiveVersion(
-                          <String>{item.ref.stableKey},
-                        );
+                        .removeCollectionItemsFromActiveVersion(<String>{
+                          item.ref.stableKey,
+                        });
                   } catch (error) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -537,7 +543,10 @@ class _StepCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
       ),
     );
   }
@@ -550,6 +559,9 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: const EdgeInsets.all(24), child: Center(child: child));
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center(child: child),
+    );
   }
 }

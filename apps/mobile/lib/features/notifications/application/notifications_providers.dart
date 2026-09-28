@@ -8,9 +8,9 @@ import 'controllers/notifications_controller.dart';
 
 final notificationsControllerProvider =
     ChangeNotifierProvider<NotificationsController>((ref) {
-  return NotificationsController(
-    getNotificationsUseCase: sl<GetNotificationsUseCase>(),
-    markNotificationReadUseCase: sl<MarkNotificationReadUseCase>(),
-    analyticsService: sl<AnalyticsService>(),
-  );
-});
+      return NotificationsController(
+        getNotificationsUseCase: sl<GetNotificationsUseCase>(),
+        markNotificationReadUseCase: sl<MarkNotificationReadUseCase>(),
+        analyticsService: sl<AnalyticsService>(),
+      );
+    });

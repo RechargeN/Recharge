@@ -10,9 +10,11 @@ import '../../domain/entities/location_search_suggestion.dart';
 /// non-2xx response, unparseable body) instead of throwing: search is an
 /// authoring convenience, never a hard dependency of Create.
 class GooglePlacesSearchDatasource {
-  GooglePlacesSearchDatasource({required http.Client client, required String apiKey})
-    : _client = client,
-      _apiKey = apiKey;
+  GooglePlacesSearchDatasource({
+    required http.Client client,
+    required String apiKey,
+  }) : _client = client,
+       _apiKey = apiKey;
 
   static const String _baseUrl = 'https://places.googleapis.com/v1';
 
@@ -39,7 +41,8 @@ class GooglePlacesSearchDatasource {
       }
       final Object? rawSuggestions = decoded['suggestions'];
       if (rawSuggestions is! List) return const <LocationSearchSuggestion>[];
-      final List<LocationSearchSuggestion> results = <LocationSearchSuggestion>[];
+      final List<LocationSearchSuggestion> results =
+          <LocationSearchSuggestion>[];
       for (final Object? entry in rawSuggestions) {
         final LocationSearchSuggestion? suggestion = _parseSuggestion(entry);
         if (suggestion != null) results.add(suggestion);
