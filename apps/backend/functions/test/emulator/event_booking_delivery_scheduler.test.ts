@@ -18,7 +18,9 @@ import { seedEventBookingOutbox } from '../support/event_outbox_seed.js';
 import { finiteEvent } from '../support/booking_fixtures.js';
 
 const firestore = emulatorFirestore();
-const nowUtc = '2026-09-27T23:00:00.000Z';
+// Keep scheduler time strictly after the server-owned source timestamp so a
+// delayed Emulator trigger cannot turn deterministic discovery into not-due work.
+const nowUtc = '2099-09-27T23:00:00.000Z';
 
 function event(revision: number): EventBookingProjectionEvent {
   const projection = finiteEvent({ materialRevision: revision });
