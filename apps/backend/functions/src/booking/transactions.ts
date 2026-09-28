@@ -11,6 +11,9 @@ export const bookingCollections = Object.freeze({
   idempotency: 'bookingIdempotency',
   audit: 'bookingAudit',
   outbox: 'bookingOutbox',
+  reconfirmationDeadlineJobs: 'bookingReconfirmationDeadlineJobs',
+  reconfirmationDeadlineCheckpoints: 'bookingReconfirmationDeadlineCheckpoints',
+  reconfirmationDeadlineOperatorAudit: 'bookingReconfirmationDeadlineOperatorAudit',
 });
 
 export const exactBookingCollectionNames = Object.freeze(Object.values(bookingCollections));

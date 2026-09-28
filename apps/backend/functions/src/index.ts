@@ -53,6 +53,7 @@ import {
   processEventBookingOutboxDocument,
   runPendingEventBookingDeliveries,
 } from './booking/event_projection_runtime.js';
+import { runReconfirmationDeadlineWorker } from './booking/reconfirmation_deadline_worker.js';
 
 // Preserve R0 while exposing only the explicitly approved, Emulator-only callables.
 // R1 platform composition is internal-only and intentionally has no transport export.
@@ -312,6 +313,15 @@ export const retryEventBookingProjectionDeliveriesV1 = onSchedule(
     const firestore = emulatorFirestore();
     if (firestore === undefined) return;
     await runPendingEventBookingDeliveries(firestore, systemServerClock.now().toISOString(), 20);
+  },
+);
+
+export const releaseMissedReconfirmationsV1 = onSchedule(
+  { schedule: 'every 5 minutes', region: 'europe-west1', retryCount: 0 },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await runReconfirmationDeadlineWorker(firestore, systemServerClock.now().toISOString(), 20);
   },
 );
 

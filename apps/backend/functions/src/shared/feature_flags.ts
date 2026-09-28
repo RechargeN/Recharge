@@ -4,6 +4,7 @@ export const bookingFlagIds = Object.freeze({
   reconfirm: 'booking.reconfirm',
   read: 'booking.read',
   eventProjectionDelivery: 'booking.eventProjection.delivery',
+  reconfirmationDeadlineWorker: 'booking.reconfirmation.deadlineWorker',
 });
 
 export const identityFlagIds = Object.freeze({

@@ -4,7 +4,8 @@ export interface BookingAuditFact {
     | 'booking_created'
     | 'booking_cancelled'
     | 'booking_reconfirmation_required'
-    | 'booking_reconfirmed';
+    | 'booking_reconfirmed'
+    | 'booking_reconfirmation_expired';
   readonly bookingId: string;
   readonly actorId: string;
   readonly eventId: string;

@@ -143,6 +143,7 @@ const expectedBoundedCallableExports = [
   "establishIdentitySessionV1",
   "refreshIdentitySessionV1",
   "recoverIdentitySessionsV1",
+  "releaseMissedReconfirmationsV1",
   "consumeEventBookingOutboxV1",
   "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",

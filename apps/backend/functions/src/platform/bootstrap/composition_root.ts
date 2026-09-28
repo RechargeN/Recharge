@@ -150,6 +150,27 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       ['booking.active-key', 'restricted', true, true, 'booking.active-key'],
       ['event.booking-outbox', 'internal', false, false, 'event.booking-outbox'],
       ['booking.projection-delivery', 'internal', false, false, 'booking.projection-delivery'],
+      [
+        'booking.reconfirmation-deadline-job',
+        'internal',
+        false,
+        false,
+        'booking.reconfirmation-deadline-job',
+      ],
+      [
+        'booking.reconfirmation-deadline-checkpoint',
+        'internal',
+        false,
+        false,
+        'booking.reconfirmation-deadline-checkpoint',
+      ],
+      [
+        'booking.reconfirmation-deadline-operator-audit',
+        'restricted',
+        false,
+        false,
+        'booking.reconfirmation-deadline-operator-audit',
+      ],
     ].map(
       ([
         dataClassId,
@@ -240,6 +261,25 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
     { policyId: 'identity.managed-page', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.page-membership', status: 'unresolved', legalHoldSupported: true },
     ...acceptedBookingRetentionPolicies(),
+    {
+      policyId: 'booking.reconfirmation-deadline-job',
+      status: 'accepted',
+      durationDays: 90,
+      evidenceRevision: 'BCK09-2B-local-v1',
+      legalHoldSupported: false,
+    },
+    {
+      policyId: 'booking.reconfirmation-deadline-operator-audit',
+      status: 'accepted',
+      durationDays: 180,
+      evidenceRevision: 'BCK09-2B-local-v1',
+      legalHoldSupported: false,
+    },
+    {
+      policyId: 'booking.reconfirmation-deadline-checkpoint',
+      status: 'unresolved',
+      legalHoldSupported: false,
+    },
     ...[
       'booking.event-projection',
       'booking.hold',

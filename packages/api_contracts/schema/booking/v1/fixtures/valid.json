@@ -39,6 +39,27 @@
       "reconfirmationState": "notOpen",
       "createdAt": "2026-08-09T08:00:00.000Z",
       "updatedAt": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "01JBOOKING0000000000000003",
+      "revision": 4,
+      "userId": "01JUSER000000000000000003",
+      "marketId": "LV",
+      "eventId": "01JEVENT00000000000000001",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "channel": "onsite",
+      "admissionMode": "booking",
+      "confirmationMode": "instant",
+      "state": "cancelled",
+      "participantUnits": 1,
+      "reconfirmationState": "missed",
+      "terminalReason": "missedReconfirmation",
+      "createdAt": "2026-08-09T08:00:00.000Z",
+      "updatedAt": "2026-08-10T08:00:00.000Z",
+      "confirmedAt": "2026-08-09T08:01:00.000Z",
+      "cancelledAt": "2026-08-10T08:00:00.000Z"
     }
   ],
   "holds": [

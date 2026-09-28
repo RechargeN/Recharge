@@ -25,6 +25,7 @@ const expected = [
   "establishIdentitySessionV1",
   "refreshIdentitySessionV1",
   "recoverIdentitySessionsV1",
+  "releaseMissedReconfirmationsV1",
   "consumeEventBookingOutboxV1",
   "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",
@@ -38,12 +39,15 @@ const schedules = [
 ].map((match) => match[1]);
 if (
   JSON.stringify(schedules.sort()) !==
-  JSON.stringify(["retryEventBookingProjectionDeliveriesV1"])
+  JSON.stringify([
+    "releaseMissedReconfirmationsV1",
+    "retryEventBookingProjectionDeliveriesV1",
+  ])
 ) {
   throw new Error(
-    `Only the approved disabled Event retry schedule is allowed: ${schedules.join(", ")}`,
+    `Only the approved disabled Event and Booking schedules are allowed: ${schedules.join(", ")}`,
   );
 }
 process.stdout.write(
-  "R1 export gate passed: bounded Booking, Session lifecycle and disabled Event delivery surface.\n",
+  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery and reconfirmation-deadline surface.\n",
 );

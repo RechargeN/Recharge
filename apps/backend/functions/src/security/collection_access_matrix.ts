@@ -140,6 +140,21 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
       'booking.projection-operator-audit',
       'event-booking-projection-consumer',
     ],
+    [
+      'bookingReconfirmationDeadlineJobs',
+      'booking.reconfirmation-deadline-job',
+      'booking-authority',
+    ],
+    [
+      'bookingReconfirmationDeadlineCheckpoints',
+      'booking.reconfirmation-deadline-checkpoint',
+      'booking-authority',
+    ],
+    [
+      'bookingReconfirmationDeadlineOperatorAudit',
+      'booking.reconfirmation-deadline-operator-audit',
+      'booking-authority',
+    ],
     ['bookingPrivacyProgress', 'booking.privacy-progress', 'privacy-orchestration'],
   ].map(([collectionId, dataClassId, singleWriter]) => ({
     collectionId: collectionId ?? '',

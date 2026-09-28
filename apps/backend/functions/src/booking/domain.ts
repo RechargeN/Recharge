@@ -49,14 +49,15 @@ export interface BookingRecord {
   readonly state: BookingState;
   readonly participantUnits: number;
   readonly cancellationDeadlineSnapshot?: string;
-  readonly reconfirmationState: 'notRequired' | 'required' | 'confirmed';
+  readonly reconfirmationState: 'notRequired' | 'required' | 'confirmed' | 'missed';
   readonly reconfirmationRequiredForRevision?: number;
   readonly reconfirmationDeadlineUtc?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly confirmedAt: string;
   readonly cancelledAt?: string;
-  readonly terminalReason?: 'userCancelled' | 'occurrenceCancelled' | 'privacyErasure';
+  readonly terminalReason?:
+    'userCancelled' | 'occurrenceCancelled' | 'privacyErasure' | 'missedReconfirmation';
 }
 
 export interface StoredBookingRecord extends BookingRecord {

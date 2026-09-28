@@ -28,6 +28,15 @@
       ]
     },
     {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reconfirmationState", "order": "ASCENDING" },
+        { "fieldPath": "reconfirmationDeadlineUtc", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "platformReleaseManifests",
       "queryScope": "COLLECTION",
       "fields": [
@@ -62,6 +71,15 @@
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineJobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
       ]
     }
   ],
@@ -110,6 +128,18 @@
     },
     {
       "collectionGroup": "bookingProjectionOperatorAudit",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineJobs",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineOperatorAudit",
       "fieldPath": "expiresAt",
       "ttl": true,
       "indexes": []
