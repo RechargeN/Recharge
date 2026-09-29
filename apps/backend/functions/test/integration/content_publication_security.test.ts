@@ -84,11 +84,50 @@ class IdentityBackedEligibility implements PublisherEligibilityPort {
 
 const placeBody = {
   title: 'Vermanes garden greenhouse',
+  placeKind: 'managedVenue',
+  relationshipToPlace: 'owner',
+  shortDescription: 'Historic glass greenhouse in the city centre',
+  contentLocale: 'en',
   categoryId: 'art_culture_museums',
   subcategoryId: 'museum',
-  geoVisibility: 'exact',
-  location: { latitude: 56.9496, longitude: 24.1052 },
+  location: {
+    marketCityId: 'riga',
+    countryCode: 'LV',
+    city: 'Riga',
+    formattedAddress: 'Elizabetes iela 1, Riga',
+    point: { latitude: 56.9496, longitude: 24.1052 },
+    timezoneId: 'Europe/Riga',
+    accuracy: 'rooftop',
+    pinConfirmed: true,
+  },
+  hours: {
+    mode: 'regular',
+    weeklyPeriods: [
+      { id: 'period-1', dayOfWeek: 1, openMinute: 600, closeMinute: 1140, closesNextDay: false },
+    ],
+    seasons: [],
+    exceptions: [],
+  },
+  operationalStatus: { status: 'operating' },
+  pricing: { entryType: 'paid', entryPriceFrom: 700, currencyCode: 'EUR' },
+  media: { coverImage: { mediaId: 'media-cover' }, gallery: [] },
+  provenance: {
+    sourceType: 'ownerSubmission',
+    submittedByUserId: u1,
+    relationshipClaim: 'owner',
+    createdAtUtc: '2026-09-29T09:00:00.000Z',
+    lastConfirmedAtUtc: '2026-09-29T09:00:00.000Z',
+  },
 };
+
+const referenceLookups = {
+  supportsLocale: (locale: string) => ['en', 'ru', 'lv'].includes(locale),
+  subcategoryApplies: () => true,
+  requiredCriteria: () => [] as readonly string[],
+  pointInServiceArea: (latitude: number, longitude: number) =>
+    latitude > 56 && latitude < 58 && longitude > 23 && longitude < 25.5,
+};
+const marketContext = { currencyCode: 'EUR', timezoneId: 'Europe/Riga' } as const;
 
 async function bootstrap() {
   const { authority, repository: identity } = createLocalIdentityPublisherAuthority({
@@ -169,6 +208,8 @@ async function bootstrap() {
             taxonomyRevisionId: 'tx-1',
             localizationRevisionId: 'loc-1',
           },
+          market: marketContext,
+          lookups: referenceLookups,
         } as const),
     },
     moderation: {

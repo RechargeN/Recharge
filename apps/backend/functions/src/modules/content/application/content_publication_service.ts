@@ -24,7 +24,6 @@ import {
 import {
   contentTypeRegistry,
   isContentTypeAvailable,
-  mediaIdsOf,
   resolveContentType,
   type ContentAction,
   type ContentTypeRegistryEntry,
@@ -54,7 +53,8 @@ import type { ContentRepository, ContentTransaction } from '../domain/repositori
 import type { MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
 import type { ContentActor, PublisherEligibilityPort } from './ports/publisher_eligibility_port.js';
-import type { ReferenceDataPort } from './ports/reference_data_port.js';
+import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
+import type { ContentValidationContext } from '../domain/type_rules/validation_context.js';
 
 export interface ContentIdGenerator {
   newId(): EntityId;
@@ -74,6 +74,8 @@ export interface ContentPublicationServiceDeps {
 
 export type ContentCommandData = ContentDraft | PublicationSubmission | PublishedRevision;
 export type ContentQueryData = ContentDraft | PublicationStatusV1 | PublishedRevision;
+
+type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
 
 interface CommandContext {
   readonly tx: ContentTransaction;
@@ -277,15 +279,16 @@ export class ContentPublicationService {
       draft.marketId,
     );
     assertSubmittable(draft, payload.expectedDraftRevision);
-    this.assertValid(entry, draft);
-    const references = await this.pin(draft.marketId, draft.typeId, context.nowUtc);
+    const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
+    this.assertValid(entry, draft, resolved, context.nowUtc);
+    const references = resolved.revisions;
     const profile = await this.deps.moderation.profileFor({
       typeId: draft.typeId,
       marketId: draft.marketId,
       publisherRef: draft.publisherRef,
     });
     if (!profile.available) throw new ContentDomainRefusal('policy_unavailable');
-    await this.assertMediaReady(draft);
+    await this.assertMediaReady(entry, draft);
     const submission = createPublicationSubmission({
       submissionId: this.deps.ids.newId(),
       draft,
@@ -328,9 +331,10 @@ export class ContentPublicationService {
       'publish',
       submission.marketId,
     );
-    this.assertValid(entry, draft);
-    const references = await this.pin(submission.marketId, submission.typeId, nowUtc);
-    const media = await this.assertMediaReady(draft);
+    const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
+    this.assertValid(entry, draft, resolved, nowUtc);
+    const references = resolved.revisions;
+    const media = await this.assertMediaReady(entry, draft);
     const pointer = await tx.pointer(submission.contentId);
     const existing = await tx.publishedRevisionsForContent(submission.contentId);
     const revision = createPublishedRevision({
@@ -392,19 +396,46 @@ export class ContentPublicationService {
     return entry;
   }
 
-  private assertValid(entry: ContentTypeRegistryEntry, draft: ContentDraft): void {
-    const issues = entry.validate?.(draft.body) ?? ['no_source_contract'];
+  private assertValid(
+    entry: ContentTypeRegistryEntry,
+    draft: ContentDraft,
+    resolved: ResolvedReferences,
+    nowUtc: UtcInstant,
+  ): void {
+    const context: ContentValidationContext = {
+      typeId: draft.typeId,
+      marketId: draft.marketId,
+      publisherRef: draft.publisherRef,
+      createdByUserId: draft.createdByUserId,
+      nowUtc,
+      market: resolved.market,
+      lookups: resolved.lookups,
+    };
+    const issues = entry.validate?.(draft.body, context) ?? ['no_source_contract'];
     if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
   }
 
-  private async assertMediaReady(draft: ContentDraft): Promise<string> {
+  private async assertMediaReady(
+    entry: ContentTypeRegistryEntry,
+    draft: ContentDraft,
+  ): Promise<string> {
     const readiness = await this.deps.media.check({
       contentId: draft.contentId,
       typeId: draft.typeId,
-      mediaIds: mediaIdsOf(draft.body),
+      mediaIds: entry.mediaIds?.(draft.body) ?? [],
     });
     if (!readiness.ready) throw new ContentDomainRefusal('media_not_ready');
     return readiness.mediaRevision;
+  }
+
+  private async resolveReferences(
+    marketId: MarketId,
+    typeId: ContentTypeId,
+    nowUtc: UtcInstant,
+  ): Promise<ResolvedReferences> {
+    const resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
+    if (!resolution.ok) throw new ContentDomainRefusal(resolution.code);
+    return resolution;
   }
 
   private async pin(
@@ -412,9 +443,7 @@ export class ContentPublicationService {
     typeId: ContentTypeId,
     nowUtc: UtcInstant,
   ): Promise<ContentReferenceRevisionsV1> {
-    const resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
-    if (!resolution.ok) throw new ContentDomainRefusal(resolution.code);
-    return resolution.revisions;
+    return (await this.resolveReferences(marketId, typeId, nowUtc)).revisions;
   }
 
   private async authorize(

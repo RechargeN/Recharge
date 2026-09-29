@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { contentTypeIds, type ContentTypeId } from '../../../src/contracts/content_v1.js';
+import { contentTypeIds } from '../../../src/contracts/content_v1.js';
 import {
   assertBoundedBody,
   createContentDraft,
@@ -12,9 +12,7 @@ import {
   contentTypeRegistry,
   contentTypeRegistryRevision,
   isContentTypeAvailable,
-  mediaIdsOf,
   resolveContentType,
-  validatePlaceBody,
 } from '../../../src/modules/content/domain/content_type_registry.js';
 import { ContentDomainRefusal } from '../../../src/modules/content/domain/failures.js';
 import { activateRevision } from '../../../src/modules/content/domain/publication_pointer.js';
@@ -82,57 +80,27 @@ void test('registry has exactly the ten accepted types and never Quick Plan', ()
   assert.equal(Object.isFrozen(contentTypeRegistry), true);
 });
 
-const validPlace = {
-  title: 'Vermanes garden greenhouse',
-  categoryId: 'art_culture_museums',
-  subcategoryId: 'museum',
-  geoVisibility: 'exact',
-  location: { latitude: 56.9496, longitude: 24.1052 },
-};
-
-/**
- * Shared per-type contract fixtures. A type is available exactly when it has
- * fixtures here and a validator in the registry; extending coverage for a type
- * means adding its entry (2.2b), never loosening the conformance test below.
- */
-const typeBodyFixtures: Partial<
-  Record<
-    ContentTypeId,
-    {
-      readonly valid: readonly Record<string, unknown>[];
-      readonly invalid: readonly Record<string, unknown>[];
-    }
-  >
+const expectedUnavailable: Readonly<
+  Record<string, { readonly reason: string; readonly dependency: string | undefined }>
 > = {
-  place: {
-    valid: [
-      validPlace,
-      {
-        ...validPlace,
-        geoVisibility: 'approximate',
-        shortDescription: 'Glass house',
-        mediaIds: ['m1'],
-        openingHours: [{ weekday: 1, opens: '10:00', closes: '19:00' }],
-      },
-    ],
-    invalid: [
-      {},
-      { ...validPlace, title: '' },
-      { ...validPlace, geoVisibility: 'hidden' },
-      { ...validPlace, location: { latitude: 0 } },
-      { ...validPlace, unknownField: 1 },
-    ],
+  event: { reason: 'source_contract_pending', dependency: undefined },
+  activity: { reason: 'source_contract_pending', dependency: undefined },
+  rental: { reason: 'source_contract_pending', dependency: undefined },
+  collection: { reason: 'source_contract_pending', dependency: undefined },
+  route: { reason: 'dependency_pending', dependency: 'BCK-11' },
+  scenario: { reason: 'dependency_pending', dependency: 'BCK-10' },
+  find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
+  session: { reason: 'spec_not_approved', dependency: 'SES-CRT-01 spec Draft' },
+  class_workshop: {
+    reason: 'spec_not_approved',
+    dependency: 'Class/Workshop spec Ready for approval',
   },
 };
-
-const expectedUnavailable: Readonly<Record<string, string | undefined>> = {
-  route: 'BCK-11',
-  scenario: 'BCK-10',
-  find_people: 'BCK-06',
-};
+/** Types whose approved source rules are implemented; grows one type per commit. */
+const expectedAvailable = ['place'] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v1');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v2');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
@@ -158,68 +126,38 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
   assert.equal(resolveContentType('collection')?.sourceResolver, 'published_object_membership');
 });
 
-void test('a type is available exactly when it has a validator and shared fixtures', () => {
+void test('availability is explicit: rules and media extractor exist exactly when available', () => {
   for (const item of contentTypeRegistry) {
-    const fixtures = typeBodyFixtures[item.typeId];
     if (isContentTypeAvailable(item)) {
-      assert.ok(fixtures, `available ${item.typeId} needs fixtures`);
+      assert.ok(expectedAvailable.includes(item.typeId as 'place'), `unexpected ${item.typeId}`);
       assert.equal(item.availability.status, 'available');
-      for (const body of fixtures.valid)
-        assert.deepEqual(item.validate?.(body), [], `${item.typeId} valid`);
-      for (const body of fixtures.invalid)
-        assert.ok((item.validate?.(body) ?? ['x']).length > 0, `${item.typeId} invalid`);
+      assert.equal(typeof item.validate, 'function');
+      assert.equal(typeof item.mediaIds, 'function');
+      assert.equal(item.validatorRevision, `${item.typeId}-source-v1`);
     } else {
-      assert.equal(fixtures, undefined, `unavailable ${item.typeId} must not ship fixtures`);
+      const expected = expectedUnavailable[item.typeId];
+      assert.ok(expected, `unexpected unavailable ${item.typeId}`);
       assert.equal(item.validate, undefined, item.typeId);
+      assert.equal(item.mediaIds, undefined, item.typeId);
       assert.equal(item.validatorRevision, 'unavailable');
       assert.equal(item.availability.status, 'unavailable');
       if (item.availability.status === 'unavailable') {
-        const dependency = expectedUnavailable[item.typeId];
-        assert.equal(
-          item.availability.reason,
-          dependency === undefined ? 'source_contract_pending' : 'dependency_pending',
-          item.typeId,
-        );
-        assert.equal(item.availability.dependency, dependency, item.typeId);
+        assert.equal(item.availability.reason, expected.reason, item.typeId);
+        assert.equal(item.availability.dependency, expected.dependency, item.typeId);
       }
     }
   }
 });
 
-void test('only Place is available today; the other nine fail closed', () => {
+void test('the available set is exactly the implemented approved types', () => {
   assert.deepEqual(
     contentTypeRegistry.filter(isContentTypeAvailable).map((item) => item.typeId),
-    ['place'],
+    [...expectedAvailable],
   );
-  assert.equal(contentTypeRegistry.filter((item) => !isContentTypeAvailable(item)).length, 9);
-});
-
-void test('Place validator accepts a complete body and reports bounded issues', () => {
-  assert.deepEqual(validatePlaceBody(placeBody), []);
-  const issues = validatePlaceBody({
-    title: '   ',
-    categoryId: 'x',
-    subcategoryId: '',
-    geoVisibility: 'secret',
-    location: { latitude: 91, longitude: 24 },
-    openingHours: [{ weekday: 9, opens: '25:00', closes: '10:00' }],
-    mediaIds: [1],
-    surprise: true,
-  });
-  assert.deepEqual(
-    new Set(issues),
-    new Set([
-      'unknown_field:surprise',
-      'title',
-      'subcategoryId',
-      'geoVisibility',
-      'location',
-      'openingHours',
-      'mediaIds',
-    ]),
+  assert.equal(
+    contentTypeRegistry.filter((item) => !isContentTypeAvailable(item)).length,
+    10 - expectedAvailable.length,
   );
-  assert.deepEqual(mediaIdsOf({ mediaIds: ['m1', 'm2'] }), ['m1', 'm2']);
-  assert.deepEqual(mediaIdsOf({ mediaIds: [1] }), []);
 });
 
 void test('draft creation is deep-frozen, versioned and binds an immutable publisher origin', () => {

@@ -3,11 +3,13 @@ import {
   type ContentBody,
   type ContentTypeId,
 } from '../../../contracts/content_v1.js';
+import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
+import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v1';
+export const contentTypeRegistryRevision = 'content-type-registry-v2';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -19,8 +21,12 @@ export type ContentSourceResolver =
   | 'published_object_membership';
 
 export type ContentTypeUnavailableReason =
-  /** No accepted backend source contract exists for the type yet. */
+  /** Approved spec exists but its backend rules are not implemented yet. */
   | 'source_contract_pending'
+  /** The type's specification is not yet approved. */
+  | 'spec_not_approved'
+  /** Publication needs an accepted consent/legal decision first. */
+  | 'consent_gate_pending'
   /** The source lives in another BCK whose contract is not implemented. */
   | 'dependency_pending';
 
@@ -29,9 +35,14 @@ export type ContentTypeAvailability =
   | {
       readonly status: 'unavailable';
       readonly reason: ContentTypeUnavailableReason;
-      /** Owning authority the type is waiting for, when it is not Content. */
+      /** Owning authority or decision the type is waiting for. */
       readonly dependency?: string;
     };
+
+export type ContentTypeRule = (
+  body: ContentBody,
+  context: ContentValidationContext,
+) => readonly string[];
 
 export interface ContentTypeRegistryEntry {
   readonly typeId: ContentTypeId;
@@ -50,10 +61,12 @@ export interface ContentTypeRegistryEntry {
   readonly mapperRevision: string;
   readonly availability: ContentTypeAvailability;
   /**
-   * Source validator: returns bounded issue codes (empty = valid). Present
+   * Typed source rule: returns bounded issue codes (empty = valid). Present
    * exactly when the type is available; otherwise the type fails closed.
    */
-  readonly validate?: (body: ContentBody) => readonly string[];
+  readonly validate?: ContentTypeRule;
+  /** Media ids the body references; Media readiness is checked for exactly these. */
+  readonly mediaIds?: (body: ContentBody) => readonly string[];
 }
 
 const capabilities: Readonly<Record<ContentAction, string>> = Object.freeze({
@@ -69,21 +82,34 @@ interface EntryInput {
   readonly sourceAuthority: string;
   readonly sourceResolver: ContentSourceResolver;
   readonly visibilityPolicy?: ContentTypeRegistryEntry['visibilityPolicy'];
-  readonly validate?: (body: ContentBody) => readonly string[];
-  readonly dependency?: string;
+  /** Exactly one of `rules` and `unavailable` must be given. */
+  readonly rules?: {
+    readonly validate: ContentTypeRule;
+    readonly mediaIds: (body: ContentBody) => readonly string[];
+  };
+  readonly unavailable?: {
+    readonly reason: ContentTypeUnavailableReason;
+    readonly dependency?: string;
+  };
 }
 
 function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEntry {
+  if ((input.rules === undefined) === (input.unavailable === undefined))
+    throw new Error(`content_type_registry_entry_invalid:${typeId}`);
   const availability: ContentTypeAvailability =
-    input.validate !== undefined
+    input.rules !== undefined
       ? { status: 'available' }
-      : input.dependency !== undefined
-        ? { status: 'unavailable', reason: 'dependency_pending', dependency: input.dependency }
-        : { status: 'unavailable', reason: 'source_contract_pending' };
+      : {
+          status: 'unavailable',
+          reason: input.unavailable?.reason ?? 'source_contract_pending',
+          ...(input.unavailable?.dependency === undefined
+            ? {}
+            : { dependency: input.unavailable.dependency }),
+        };
   return Object.freeze({
     typeId,
     typeSchemaMajor: 1,
-    validatorRevision: input.validate === undefined ? 'unavailable' : `${typeId}-source-v1`,
+    validatorRevision: input.rules === undefined ? 'unavailable' : `${typeId}-source-v1`,
     sourceAuthority: input.sourceAuthority,
     sourceResolver: input.sourceResolver,
     requiredCapabilities: capabilities,
@@ -95,143 +121,80 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
     discoverFamily: input.discoverFamily,
     mapperRevision: `${typeId}-mapper-v1`,
     availability: Object.freeze(availability),
-    ...(input.validate === undefined ? {} : { validate: input.validate }),
-  });
-}
-
-const placeKeys = new Set([
-  'title',
-  'categoryId',
-  'subcategoryId',
-  'geoVisibility',
-  'location',
-  'shortDescription',
-  'openingHours',
-  'mediaIds',
-]);
-
-/** Place source validator: profile, geo visibility, hours (BCK-07 §33.1). */
-export function validatePlaceBody(body: ContentBody): readonly string[] {
-  const issues: string[] = [];
-  for (const key of Object.keys(body)) if (!placeKeys.has(key)) issues.push(`unknown_field:${key}`);
-  if (!boundedString(body.title, 1, 120)) issues.push('title');
-  if (!boundedString(body.categoryId, 1, 64)) issues.push('categoryId');
-  if (!boundedString(body.subcategoryId, 1, 64)) issues.push('subcategoryId');
-  if (body.geoVisibility !== 'exact' && body.geoVisibility !== 'approximate')
-    issues.push('geoVisibility');
-  const location = body.location;
-  if (
-    typeof location !== 'object' ||
-    location === null ||
-    !inRange((location as Record<string, unknown>).latitude, -90, 90) ||
-    !inRange((location as Record<string, unknown>).longitude, -180, 180)
-  )
-    issues.push('location');
-  if (body.shortDescription !== undefined && !boundedString(body.shortDescription, 0, 500))
-    issues.push('shortDescription');
-  if (body.openingHours !== undefined && !validOpeningHours(body.openingHours))
-    issues.push('openingHours');
-  if (body.mediaIds !== undefined && !validMediaIds(body.mediaIds)) issues.push('mediaIds');
-  return Object.freeze(issues);
-}
-
-export function mediaIdsOf(body: ContentBody): readonly string[] {
-  return validMediaIds(body.mediaIds) ? (body.mediaIds as readonly string[]) : [];
-}
-
-function boundedString(value: unknown, min: number, max: number): boolean {
-  return typeof value === 'string' && value.trim().length >= min && value.length <= max;
-}
-
-function inRange(value: unknown, min: number, max: number): boolean {
-  return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
-}
-
-function validMediaIds(value: unknown): boolean {
-  return (
-    Array.isArray(value) &&
-    value.length <= 20 &&
-    value.every((item) => typeof item === 'string' && item.length >= 1 && item.length <= 128)
-  );
-}
-
-function validOpeningHours(value: unknown): boolean {
-  if (!Array.isArray(value) || value.length > 14) return false;
-  const time = /^([01]\d|2[0-3]):[0-5]\d$/;
-  return value.every((item) => {
-    if (typeof item !== 'object' || item === null) return false;
-    const rule = item as Record<string, unknown>;
-    return (
-      Number.isInteger(rule.weekday) &&
-      (rule.weekday as number) >= 0 &&
-      (rule.weekday as number) <= 6 &&
-      typeof rule.opens === 'string' &&
-      time.test(rule.opens) &&
-      typeof rule.closes === 'string' &&
-      time.test(rule.closes)
-    );
+    ...(input.rules === undefined
+      ? {}
+      : { validate: input.rules.validate, mediaIds: input.rules.mediaIds }),
   });
 }
 
 // Exactly the accepted ten Create types (BCK-07 §33.1). An adapter is
-// registered for every type, but only types with a ready source rule are
-// available; the rest are explicit, carry their reason and fail closed instead
-// of falling back to a generic schema or Event.
+// registered for every type, but only types with a ready, approved source rule
+// are available; the rest are explicit, carry their reason and fail closed
+// instead of falling back to a generic schema or Event.
 const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   entry('event', {
     discoverFamily: 'Event',
-    sourceAuthority: 'Event classification spec v2.2.3',
+    sourceAuthority: 'Event classification v2.2.3 (C0 + schedule-C1 subset)',
     sourceResolver: 'inline_body',
+    unavailable: { reason: 'source_contract_pending' },
   }),
   entry('activity', {
     discoverFamily: 'Activity',
     sourceAuthority: 'Recharge Activity create block (ACT-CRT-01)',
     sourceResolver: 'inline_body',
+    unavailable: { reason: 'source_contract_pending' },
   }),
   entry('route', {
     discoverFamily: 'Route',
     sourceAuthority: 'BCK-11 immutable RouteRevision',
     sourceResolver: 'pinned_immutable_revision',
-    dependency: 'BCK-11',
+    unavailable: { reason: 'dependency_pending', dependency: 'BCK-11' },
   }),
   entry('place', {
     discoverFamily: 'Place',
-    sourceAuthority: 'Place create block (PLC-ADP-01)',
+    sourceAuthority: 'Place create block (PLC-ADP-01, v1.0 Approved)',
     sourceResolver: 'inline_body',
-    validate: validatePlaceBody,
+    rules: { validate: validatePlaceBody, mediaIds: placeMediaIds },
   }),
   entry('session', {
     discoverFamily: 'Session',
     sourceAuthority: 'Bookable Session create block (SES-CRT-01)',
     sourceResolver: 'inline_body',
+    unavailable: { reason: 'spec_not_approved', dependency: 'SES-CRT-01 spec Draft' },
   }),
   entry('scenario', {
     discoverFamily: 'Scenario',
     sourceAuthority: 'BCK-10 immutable ScenarioRevision',
     sourceResolver: 'pinned_immutable_revision',
-    dependency: 'BCK-10',
+    unavailable: { reason: 'dependency_pending', dependency: 'BCK-10' },
   }),
   entry('find_people', {
     discoverFamily: 'Find People',
     sourceAuthority: 'BCK-06 purpose-limited consented profile revision',
     sourceResolver: 'pinned_immutable_revision',
     visibilityPolicy: 'consent_limited',
-    dependency: 'BCK-06',
+    unavailable: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
   }),
   entry('class_workshop', {
     discoverFamily: 'Class/Workshop',
-    sourceAuthority: 'typed Class / Workshop experience revision (no typed create block yet)',
+    sourceAuthority: 'typed Class / Workshop experience revision',
     sourceResolver: 'inline_body',
+    unavailable: {
+      reason: 'spec_not_approved',
+      dependency: 'Class/Workshop spec Ready for approval',
+    },
   }),
   entry('rental', {
     discoverFamily: 'Rental',
     sourceAuthority: 'Rental / Equipment create block (RNT-CRT-01)',
     sourceResolver: 'inline_body',
+    unavailable: { reason: 'source_contract_pending' },
   }),
   entry('collection', {
     discoverFamily: 'Collection',
-    sourceAuthority: 'Collection revision of stable published object IDs',
+    sourceAuthority: 'Collection revision of stable published object IDs (CLG-CRT-01)',
     sourceResolver: 'published_object_membership',
+    unavailable: { reason: 'source_contract_pending' },
   }),
 ]);
 
@@ -247,7 +210,10 @@ if (
 )
   throw new Error('content_type_registry_incomplete');
 for (const item of entries)
-  if ((item.availability.status === 'available') !== (item.validate !== undefined))
+  if (
+    (item.availability.status === 'available') !== (item.validate !== undefined) ||
+    (item.validate !== undefined) !== (item.mediaIds !== undefined)
+  )
     throw new Error(`content_type_registry_inconsistent:${item.typeId}`);
 
 export const contentTypeRegistry = entries;
