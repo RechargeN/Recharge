@@ -1,8 +1,11 @@
 import type {
   ContentBody,
   ContentDraftV1,
+  ContentProvenanceV1,
   ContentReferenceRevisionsV1,
   ContentTypeId,
+  DelegatedOriginV1,
+  SourceRefreshV1,
 } from '../../../contracts/content_v1.js';
 import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
 import type { MarketId } from '../../reference_data/domain/identifiers.js';
@@ -15,6 +18,60 @@ export type ContentDraft = DeepReadonly<ContentDraftV1>;
 
 const maxBodyBytes = 64 * 1024;
 const maxBodyDepth = 8;
+
+/** Provenance of content authored directly by a signed-in user. */
+export function directProvenance(userId: string): ContentProvenanceV1 {
+  return deepFreeze({
+    kind: 'creatorSubmission',
+    importerActorRef: `user:${userId}`,
+    originBinding: { kind: 'directAuthoring' },
+  } satisfies ContentProvenanceV1);
+}
+
+/**
+ * Provenance of an owner import. Only what the source really supplied is
+ * recorded; optional fields are omitted rather than invented.
+ */
+export function importProvenance(origin: DelegatedOriginV1): ContentProvenanceV1 {
+  return deepFreeze({
+    kind: 'ownerImport',
+    sourceId: origin.sourceId,
+    sourceRevision: origin.sourceRevision,
+    ...(origin.snapshotHash === undefined ? {} : { snapshotHash: origin.snapshotHash }),
+    ...(origin.sourceUrlRef === undefined ? {} : { sourceUrlRef: origin.sourceUrlRef }),
+    acquiredAtUtc: origin.acquiredAtUtc,
+    ...(origin.checkedAtUtc === undefined ? {} : { checkedAtUtc: origin.checkedAtUtc }),
+    correctionRemovalPolicyRef: origin.correctionRemovalPolicyRef,
+    importerActorRef: origin.delegatedActorRef,
+    originBinding: {
+      kind: 'delegatedImport',
+      delegatedActorRef: origin.delegatedActorRef,
+      externalBindingRef: origin.externalBindingRef,
+    },
+  } satisfies ContentProvenanceV1);
+}
+
+/**
+ * Refresh the source snapshot of an imported draft. The binding, the importer
+ * and the acquisition facts are immutable; only the source revision, its hash
+ * and the last check move forward.
+ */
+export function refreshProvenance(
+  provenance: ContentProvenanceV1,
+  refresh: SourceRefreshV1,
+): ContentProvenanceV1 {
+  if (provenance.kind !== 'ownerImport') throw new ContentDomainRefusal('capability_denied');
+  // Only the moving source facts are replaced; everything else is carried over.
+  const stable: Record<string, unknown> = { ...provenance };
+  delete stable.snapshotHash;
+  delete stable.checkedAtUtc;
+  return deepFreeze({
+    ...stable,
+    sourceRevision: refresh.sourceRevision,
+    ...(refresh.snapshotHash === undefined ? {} : { snapshotHash: refresh.snapshotHash }),
+    ...(refresh.checkedAtUtc === undefined ? {} : { checkedAtUtc: refresh.checkedAtUtc }),
+  } as unknown as ContentProvenanceV1);
+}
 
 export function assertBoundedBody(body: unknown): asserts body is ContentBody {
   if (typeof body !== 'object' || body === null || Array.isArray(body))
@@ -40,7 +97,8 @@ export function createContentDraft(input: {
   readonly marketId: MarketId;
   readonly body: ContentBody;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
-  readonly createdByUserId: EntityId;
+  readonly createdByUserId: EntityId | null;
+  readonly provenance: ContentProvenanceV1;
   readonly importSourceKey?: string;
   readonly nowUtc: UtcInstant;
 }): ContentDraft {
@@ -60,6 +118,7 @@ export function createContentDraft(input: {
     body: structuredClone(input.body),
     referenceRevisions: { ...input.referenceRevisions },
     createdByUserId: input.createdByUserId,
+    provenance: structuredClone(input.provenance),
     ...(input.importSourceKey === undefined ? {} : { importSourceKey: input.importSourceKey }),
     createdAtUtc: input.nowUtc,
     updatedAtUtc: input.nowUtc,
@@ -72,6 +131,7 @@ export function updateContentDraftBody(
   body: ContentBody,
   referenceRevisions: ContentReferenceRevisionsV1,
   nowUtc: UtcInstant,
+  sourceRefresh?: SourceRefreshV1,
 ): ContentDraft {
   if (draft.revision !== expectedRevision) throw new ContentDomainRefusal('revision_conflict');
   if (draft.status === 'submitted') throw new ContentDomainRefusal('revision_conflict');
@@ -82,6 +142,10 @@ export function updateContentDraftBody(
     revision: draft.revision + 1,
     body: structuredClone(body),
     referenceRevisions: { ...referenceRevisions },
+    provenance:
+      sourceRefresh === undefined
+        ? structuredClone(draft.provenance)
+        : refreshProvenance(draft.provenance, sourceRefresh),
     updatedAtUtc: nowUtc,
   });
 }

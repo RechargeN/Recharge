@@ -108,6 +108,14 @@ function transactionFor(store: Store): ContentTransaction {
       Promise.resolve(
         [...store.drafts.values()].find((item) => item.contentId === contentId) ?? null,
       ),
+    draftByExternalBinding: (externalBindingRef) =>
+      Promise.resolve(
+        [...store.drafts.values()].find(
+          (item) =>
+            item.provenance.originBinding.kind === 'delegatedImport' &&
+            item.provenance.originBinding.externalBindingRef === externalBindingRef,
+        ) ?? null,
+      ),
     putDraft(draft) {
       store.drafts.set(draft.draftId, copy(draft));
     },

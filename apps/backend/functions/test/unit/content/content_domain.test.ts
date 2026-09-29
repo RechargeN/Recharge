@@ -5,6 +5,7 @@ import { contentTypeIds } from '../../../src/contracts/content_v1.js';
 import {
   assertBoundedBody,
   createContentDraft,
+  directProvenance,
   updateContentDraftBody,
   withDraftStatus,
 } from '../../../src/modules/content/domain/content_draft.js';
@@ -64,6 +65,7 @@ function draft() {
     body: placeBody,
     referenceRevisions: references,
     createdByUserId: id('YC'),
+    provenance: directProvenance(id('YC')),
     nowUtc: now,
   });
 }

@@ -21,14 +21,30 @@
     "updatedAtUtc"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "submissionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
-    "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
-    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
-    "draftRevision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
-    "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
-    "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
-    "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
+    "schemaVersion": {
+      "const": 1
+    },
+    "submissionId": {
+      "$ref": "content_common.schema.json#/$defs/entityId"
+    },
+    "draftId": {
+      "$ref": "content_common.schema.json#/$defs/entityId"
+    },
+    "contentId": {
+      "$ref": "content_common.schema.json#/$defs/entityId"
+    },
+    "draftRevision": {
+      "$ref": "content_common.schema.json#/$defs/positiveRevision"
+    },
+    "typeId": {
+      "$ref": "content_common.schema.json#/$defs/typeId"
+    },
+    "publisherRef": {
+      "$ref": "content_common.schema.json#/$defs/publisherRef"
+    },
+    "marketId": {
+      "$ref": "content_common.schema.json#/$defs/marketId"
+    },
     "state": {
       "enum": [
         "submitted",
@@ -43,18 +59,49 @@
     "moderation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["profileId", "requiresPrePublicationModeration", "policyRevision"],
+      "required": [
+        "profileId",
+        "requiresPrePublicationModeration",
+        "policyRevision"
+      ],
       "properties": {
-        "profileId": { "type": "string", "minLength": 1, "maxLength": 128 },
-        "requiresPrePublicationModeration": { "type": "boolean" },
-        "policyRevision": { "type": "string", "minLength": 1, "maxLength": 128 },
-        "policyDecisionId": { "type": "string", "minLength": 1, "maxLength": 128 }
+        "profileId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "requiresPrePublicationModeration": {
+          "type": "boolean"
+        },
+        "policyRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "policyDecisionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
       }
     },
-    "eligibilityAuthorityRevision": { "$ref": "content_common.schema.json#/$defs/revision" },
-    "referenceRevisions": { "$ref": "content_common.schema.json#/$defs/referenceRevisions" },
-    "revision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
-    "createdAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" },
-    "updatedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
+    "eligibilityAuthorityRevision": {
+      "$ref": "content_common.schema.json#/$defs/revision"
+    },
+    "referenceRevisions": {
+      "$ref": "content_common.schema.json#/$defs/referenceRevisions"
+    },
+    "revision": {
+      "$ref": "content_common.schema.json#/$defs/positiveRevision"
+    },
+    "createdAtUtc": {
+      "$ref": "content_common.schema.json#/$defs/utcInstant"
+    },
+    "updatedAtUtc": {
+      "$ref": "content_common.schema.json#/$defs/utcInstant"
+    },
+    "changeClass": {
+      "$ref": "content_common.schema.json#/$defs/changeClass"
+    }
   }
 }

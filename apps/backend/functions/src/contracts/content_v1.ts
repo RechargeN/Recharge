@@ -29,6 +29,72 @@ export type PublicationSubmissionState =
 
 export type ContentBody = Readonly<Record<string, unknown>>;
 
+/** Typed reason a source revision differs from what is public (BCK-07 §7.4). */
+export type ChangeClass =
+  | 'new'
+  | 'operationalSchedule'
+  | 'venueChange'
+  | 'operationalCancellation'
+  | 'operationalPostponement'
+  | 'commercial'
+  | 'contentMinor'
+  | 'contentMajor'
+  | 'occurrenceAdded';
+
+export interface DirectOriginBindingV1 {
+  readonly kind: 'directAuthoring';
+}
+export interface DelegatedOriginBindingV1 {
+  readonly kind: 'delegatedImport';
+  /** `module:<module>/<operation>` of the approved server module. */
+  readonly delegatedActorRef: string;
+  readonly externalBindingRef: string;
+}
+
+/**
+ * Immutable-by-origin provenance. A direct submission names the authenticated
+ * user; an owner import names the approved module, the exact source and its
+ * binding. No field is fabricated when the source did not supply it.
+ */
+export type ContentProvenanceV1 =
+  | {
+      readonly kind: 'creatorSubmission';
+      readonly importerActorRef: string;
+      readonly originBinding: DirectOriginBindingV1;
+    }
+  | {
+      readonly kind: 'ownerImport';
+      readonly sourceId: string;
+      readonly sourceRevision: string;
+      readonly snapshotHash?: string;
+      readonly sourceUrlRef?: string;
+      readonly acquiredAtUtc: UtcInstant;
+      readonly checkedAtUtc?: UtcInstant;
+      readonly correctionRemovalPolicyRef: string;
+      readonly importerActorRef: string;
+      readonly originBinding: DelegatedOriginBindingV1;
+    };
+
+/** Input of `createDraft` that is only honoured for an approved delegated module. */
+export interface DelegatedOriginV1 {
+  readonly kind: 'delegatedImport';
+  readonly delegatedActorRef: string;
+  readonly externalBindingRef: string;
+  readonly sourceId: string;
+  readonly sourceRevision: string;
+  readonly snapshotHash?: string;
+  readonly sourceUrlRef?: string;
+  readonly acquiredAtUtc: UtcInstant;
+  readonly checkedAtUtc?: UtcInstant;
+  readonly correctionRemovalPolicyRef: string;
+}
+
+export interface SourceRefreshV1 {
+  readonly sourceRevision: string;
+  readonly snapshotHash?: string;
+  readonly checkedAtUtc?: UtcInstant;
+}
+
 export interface ContentReferenceRevisionsV1 {
   readonly marketConfigRevisionId: string;
   readonly taxonomyRevisionId: string;
@@ -48,7 +114,9 @@ export interface ContentDraftV1 {
   readonly revision: number;
   readonly body: ContentBody;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
-  readonly createdByUserId: EntityId;
+  /** Authoring user; null for a delegated import (see `provenance`). */
+  readonly createdByUserId: EntityId | null;
+  readonly provenance: ContentProvenanceV1;
   readonly importSourceKey?: string;
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
@@ -71,6 +139,7 @@ export interface PublicationSubmissionV1 {
     readonly policyDecisionId?: string;
   };
   readonly eligibilityAuthorityRevision: number;
+  readonly changeClass?: ChangeClass;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly revision: number;
   readonly createdAtUtc: UtcInstant;
@@ -91,6 +160,7 @@ export interface PublishedRevisionV1 {
   readonly bodyHash: string;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly mediaRevision: string;
+  readonly provenance: ContentProvenanceV1;
   readonly publishedAtUtc: UtcInstant;
 }
 
@@ -158,15 +228,25 @@ export type CreateDraftCommandV1 = CommandEnvelope<
     readonly marketId: MarketId;
     readonly body: ContentBody;
     readonly importSourceKey?: string;
+    readonly origin?: DelegatedOriginV1;
   }
 >;
 export type UpdateDraftCommandV1 = CommandEnvelope<
   'updateDraft',
-  { readonly draftId: EntityId; readonly expectedRevision: number; readonly body: ContentBody }
+  {
+    readonly draftId: EntityId;
+    readonly expectedRevision: number;
+    readonly body: ContentBody;
+    readonly sourceRefresh?: SourceRefreshV1;
+  }
 >;
 export type SubmitForPublicationCommandV1 = CommandEnvelope<
   'submitForPublication',
-  { readonly draftId: EntityId; readonly expectedDraftRevision: number }
+  {
+    readonly draftId: EntityId;
+    readonly expectedDraftRevision: number;
+    readonly changeClass?: ChangeClass;
+  }
 >;
 export type PublishApprovedRevisionCommandV1 = CommandEnvelope<
   'publishApprovedRevision',
@@ -245,6 +325,19 @@ export type ContentQueryV1 =
       readonly queryType: 'getPublicationStatus' | 'getPublishedRevision';
       readonly payload: { readonly contentId: EntityId };
     };
+
+export type ContentQueryByBindingV1 = {
+  readonly schemaVersion: 1;
+  readonly queryType: 'findByExternalBinding';
+  readonly payload: { readonly externalBindingRef: string };
+};
+
+export interface ExternalBindingLookupV1 {
+  readonly externalBindingRef: string;
+  readonly draft: ContentDraftV1;
+  readonly pointer: PublicationPointerV1 | null;
+  readonly currentRevision: PublishedRevisionV1 | null;
+}
 
 export interface PublicationStatusV1 {
   readonly contentId: EntityId;

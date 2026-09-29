@@ -27,4 +27,30 @@ export interface PublisherEligibilityRequest {
  */
 export interface PublisherEligibilityPort {
   evaluate(request: PublisherEligibilityRequest): Promise<PublisherEligibilityV1>;
+
+  /**
+   * Eligibility for an approved server module acting for a Publisher without a
+   * user Session. The Publisher itself (account, verification, page and
+   * delegation) is still evaluated by BCK-06; the absence of a Session never
+   * weakens authorization.
+   */
+  evaluateDelegated(request: DelegatedEligibilityRequest): Promise<PublisherEligibilityV1>;
+}
+
+/** An approved server module and the operation it performs (no user Session). */
+export interface DelegatedActor {
+  readonly moduleId: string;
+  readonly operation: string;
+  /** `module:<moduleId>/<operation>` */
+  readonly actorRef: string;
+}
+
+export interface DelegatedEligibilityRequest {
+  readonly delegatedActor: DelegatedActor;
+  readonly publisherRef: PublisherRefV1;
+  readonly typeId: ContentTypeId;
+  readonly action: ContentAction;
+  readonly marketId: MarketId;
+  readonly requiredCapability: string;
+  readonly nowUtc: string;
 }

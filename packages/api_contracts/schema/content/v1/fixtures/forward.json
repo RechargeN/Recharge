@@ -35,7 +35,14 @@
       "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
       "importSourceKey": "loc_abc123",
       "createdAtUtc": "2026-09-29T00:00:00.000Z",
-      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "provenance": {
+        "kind": "creatorSubmission",
+        "importerActorRef": "user:018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "originBinding": {
+          "kind": "directAuthoring"
+        }
+      }
     },
     {
       "schemaVersion": 1,
@@ -72,7 +79,14 @@
       "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
       "importSourceKey": "loc_abc123",
       "createdAtUtc": "2026-09-29T00:00:00.000Z",
-      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "provenance": {
+        "kind": "creatorSubmission",
+        "importerActorRef": "user:018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "originBinding": {
+          "kind": "directAuthoring"
+        }
+      }
     }
   ],
   "submission": [
@@ -137,7 +151,14 @@
         "localizationRevisionId": "loc-1"
       },
       "mediaRevision": "media-1",
-      "publishedAtUtc": "2026-09-29T00:00:00.000Z"
+      "publishedAtUtc": "2026-09-29T00:00:00.000Z",
+      "provenance": {
+        "kind": "creatorSubmission",
+        "importerActorRef": "user:018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "originBinding": {
+          "kind": "directAuthoring"
+        }
+      }
     }
   ],
   "publicationPointer": [

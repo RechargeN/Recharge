@@ -52,7 +52,8 @@
             "publishedRevision",
             "publicationStatus",
             "publicationPointer",
-            "moderationAcknowledgement"
+            "moderationAcknowledgement",
+            "externalBindingLookup"
           ]
         },
         "data": {

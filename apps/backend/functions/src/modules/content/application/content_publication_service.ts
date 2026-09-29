@@ -1,11 +1,14 @@
 import type {
   ApplyModerationDispositionCommandV1,
+  ChangeClass,
   ContentCommandV1,
   ContentEffectV1,
+  ContentQueryByBindingV1,
   ContentFailureCode,
   ContentQueryV1,
   ContentReferenceRevisionsV1,
   ContentTypeId,
+  ExternalBindingLookupV1,
   ModerationAcknowledgementV1,
   PublicationStatusV1,
 } from '../../../contracts/content_v1.js';
@@ -19,6 +22,8 @@ import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import {
   assertSubmittable,
   createContentDraft,
+  directProvenance,
+  importProvenance,
   updateContentDraftBody,
   withDraftStatus,
   type ContentDraft,
@@ -62,7 +67,11 @@ import {
 import type { ContentRepository, ContentTransaction } from '../domain/repositories.js';
 import type { MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
-import type { ContentActor, PublisherEligibilityPort } from './ports/publisher_eligibility_port.js';
+import type {
+  ContentActor,
+  DelegatedActor,
+  PublisherEligibilityPort,
+} from './ports/publisher_eligibility_port.js';
 import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
 import type {
   ContentValidationContext,
@@ -71,6 +80,20 @@ import type {
 
 export interface ContentIdGenerator {
   newId(): EntityId;
+}
+
+/**
+ * What an approved server module may do without a user Session. The grant is
+ * server-owned configuration: with no entry a module can do nothing.
+ */
+export interface DelegatedModuleGrant {
+  readonly operations: ReadonlySet<string>;
+  readonly typeIds: ReadonlySet<ContentTypeId>;
+}
+
+export interface DelegatedModuleCaller {
+  readonly moduleId: string;
+  readonly operation: string;
 }
 
 export interface ContentPublicationServiceDeps {
@@ -85,6 +108,8 @@ export interface ContentPublicationServiceDeps {
   readonly enabledTypes: ReadonlySet<ContentTypeId>;
   /** Live status of published objects a Collection references (Catalog/Content owners). */
   readonly publishedObjects?: PublishedObjectLookup;
+  /** Approved delegated-import modules by module id (default: none). */
+  readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
 }
 
 export type ContentCommandData =
@@ -93,11 +118,23 @@ export type ContentQueryData = ContentDraft | PublicationStatusV1 | PublishedRev
 
 type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
 
+type Principal =
+  | { readonly kind: 'session'; readonly actor: ContentActor }
+  | { readonly kind: 'delegated'; readonly delegated: DelegatedActor };
+
 interface CommandContext {
   readonly tx: ContentTransaction;
-  readonly actor: ContentActor;
+  readonly principal: Principal;
   readonly nowUtc: UtcInstant;
 }
+
+/** Stable identity used for idempotency scope, audit and attribution. */
+function principalId(principal: Principal): string {
+  return principal.kind === 'session' ? principal.actor.userId : principal.delegated.actorRef;
+}
+
+/** Commands a delegated import module may issue; it can never activate or publish. */
+const delegatedCommands = new Set(['createDraft', 'updateDraft', 'submitForPublication']);
 
 /**
  * Single writer of Content records (BCK-07). Moderation, Media, Catalog and
@@ -111,6 +148,43 @@ export class ContentPublicationService {
     rawCommand: unknown,
   ): Promise<ContentResult<ContentCommandData>> {
     if (actor === undefined) return rejected('unauthenticated');
+    return this.run({ kind: 'session', actor }, rawCommand);
+  }
+
+  /**
+   * Entry point for an approved server module (delegated import). There is no
+   * user Session, but authorization never weakens: the module and operation
+   * must be granted, the requested Publisher is evaluated by the identity
+   * authority, and the module can only create, refresh and submit its own bound
+   * drafts. It can never publish, activate, withdraw or moderate.
+   */
+  async executeDelegated(
+    caller: DelegatedModuleCaller | undefined,
+    rawCommand: unknown,
+  ): Promise<ContentResult<ContentCommandData>> {
+    const delegated = this.delegatedActor(caller);
+    if (delegated === undefined) return rejected('unauthenticated');
+    if (delegated === null) return rejected('capability_denied');
+    return this.run({ kind: 'delegated', delegated }, rawCommand);
+  }
+
+  private delegatedActor(
+    caller: DelegatedModuleCaller | undefined,
+  ): DelegatedActor | null | undefined {
+    if (caller === undefined) return undefined;
+    const grant = this.deps.delegatedModules?.get(caller.moduleId);
+    if (grant === undefined || !grant.operations.has(caller.operation)) return null;
+    return {
+      moduleId: caller.moduleId,
+      operation: caller.operation,
+      actorRef: `module:${caller.moduleId}/${caller.operation}`,
+    };
+  }
+
+  private async run(
+    principal: Principal,
+    rawCommand: unknown,
+  ): Promise<ContentResult<ContentCommandData>> {
     const early = preflight(rawCommand, 'commandType');
     if (early !== undefined) return early;
     const parsed = await validateContentContract<ContentCommandV1>('command', rawCommand);
@@ -120,10 +194,13 @@ export class ContentPublicationService {
     // is only accepted through `applyModerationDisposition` after verification.
     if ((command as { commandType: string }).commandType === 'applyModerationDisposition')
       return rejected('capability_denied');
+    const gate = this.principalGate(principal, command);
+    if (gate !== undefined) return gate;
+    const actorId = principalId(principal);
     const semanticHash = sha256Hex(
       canonicalJson({
         algorithm: 'content_semantic_hash_v1',
-        actorUserId: actor.userId,
+        actorUserId: actorId,
         commandType: command.commandType,
         payload: command.payload,
       }),
@@ -131,20 +208,16 @@ export class ContentPublicationService {
     const nowUtc = this.now();
     try {
       return await this.deps.repository.transact(async (tx) => {
-        const prior = await tx.idempotency(
-          actor.userId,
-          command.commandType,
-          command.idempotencyKey,
-        );
+        const prior = await tx.idempotency(actorId, command.commandType, command.idempotencyKey);
         if (prior !== undefined && prior !== null) {
           if (prior.semanticHash !== semanticHash)
             throw new ContentDomainRefusal('idempotency_conflict');
           return succeeded(deepFreeze(structuredClone(prior.outcome)) as ContentCommandData);
         }
-        const context: CommandContext = { tx, actor, nowUtc };
+        const context: CommandContext = { tx, principal, nowUtc };
         const outcome = await this.dispatch(context, command);
         tx.putIdempotency({
-          actorUserId: actor.userId,
+          actorUserId: actorId,
           commandType: command.commandType,
           idempotencyKey: command.idempotencyKey,
           semanticHash,
@@ -152,6 +225,80 @@ export class ContentPublicationService {
           createdAtUtc: nowUtc,
         });
         return succeeded(outcome);
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  /**
+   * Import inputs (origin, source refresh, change class) exist only for an
+   * approved delegated module; a signed-in user can never claim an import
+   * origin, and a module can only run its allow-listed commands for granted types.
+   */
+  private principalGate(
+    principal: Principal,
+    command: ContentCommandV1,
+  ): ContentResult<never> | undefined {
+    const payload = command.payload as Record<string, unknown>;
+    const importInputs =
+      payload.origin !== undefined ||
+      payload.sourceRefresh !== undefined ||
+      payload.changeClass !== undefined;
+    if (principal.kind === 'session')
+      return importInputs ? rejected('capability_denied') : undefined;
+    if (!delegatedCommands.has(command.commandType)) return rejected('capability_denied');
+    const grant = this.deps.delegatedModules?.get(principal.delegated.moduleId);
+    if (grant === undefined) return rejected('capability_denied');
+    if (
+      command.commandType === 'createDraft' &&
+      (command.payload.origin === undefined ||
+        command.payload.origin.delegatedActorRef !== principal.delegated.actorRef ||
+        !grant.typeIds.has(command.payload.typeId))
+    )
+      return rejected('capability_denied');
+    return undefined;
+  }
+
+  /** Lookup of the draft and publication bound to an external source record. */
+  async findByExternalBinding(
+    caller: DelegatedModuleCaller | undefined,
+    rawQuery: unknown,
+  ): Promise<ContentResult<ExternalBindingLookupV1>> {
+    const delegated = this.delegatedActor(caller);
+    if (delegated === undefined) return rejected('unauthenticated');
+    if (delegated === null) return rejected('capability_denied');
+    const early = preflight(rawQuery, 'queryType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<ContentQueryByBindingV1>('query', rawQuery);
+    if (!parsed.ok || parsed.value.queryType !== 'findByExternalBinding')
+      return rejected('invalid_contract');
+    const ref = parsed.value.payload.externalBindingRef;
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const draft = await tx.draftByExternalBinding(ref);
+        // A module only sees drafts bound by itself; anything else does not exist for it.
+        if (
+          draft === null ||
+          draft.provenance.originBinding.kind !== 'delegatedImport' ||
+          !draft.provenance.originBinding.delegatedActorRef.startsWith(
+            `module:${delegated.moduleId}/`,
+          )
+        )
+          throw new ContentDomainRefusal('not_found');
+        const pointer = await tx.pointer(draft.contentId);
+        const currentRevision =
+          pointer?.currentPublishedRevisionId == null
+            ? null
+            : await tx.publishedRevision(pointer.currentPublishedRevisionId);
+        return succeeded<ExternalBindingLookupV1>(
+          deepFreeze({
+            externalBindingRef: ref,
+            draft,
+            pointer,
+            currentRevision,
+          }),
+        );
       });
     } catch (error) {
       return this.toRefusal(error);
@@ -168,10 +315,13 @@ export class ContentPublicationService {
     const parsed = await validateContentContract<ContentQueryV1>('query', rawQuery);
     if (!parsed.ok) return rejected('invalid_contract');
     const query = parsed.value;
+    // Binding lookups belong to the delegated import path only.
+    if ((query as { queryType: string }).queryType === 'findByExternalBinding')
+      return rejected('capability_denied');
     const nowUtc = this.now();
     try {
       return await this.deps.repository.transact(async (tx) => {
-        const context: CommandContext = { tx, actor, nowUtc };
+        const context: CommandContext = { tx, principal: { kind: 'session', actor }, nowUtc };
         switch (query.queryType) {
           case 'getDraft': {
             const draft = await tx.draft(query.payload.draftId);
@@ -244,6 +394,12 @@ export class ContentPublicationService {
     if (!entry.allowedPublisherTypes.includes(payload.publisherRef.type))
       throw new ContentDomainRefusal('publisher_not_eligible');
     await this.authorize(context, payload.publisherRef, payload.typeId, 'create', payload.marketId);
+    const { principal } = context;
+    if (principal.kind === 'delegated' && payload.origin !== undefined) {
+      // One external source record is bound to at most one Content draft.
+      const bound = await context.tx.draftByExternalBinding(payload.origin.externalBindingRef);
+      if (bound !== null) throw new ContentDomainRefusal('revision_conflict');
+    }
     const references = await this.pin(payload.marketId, payload.typeId, context.nowUtc);
     const draft = createContentDraft({
       draftId: this.deps.ids.newId(),
@@ -253,7 +409,11 @@ export class ContentPublicationService {
       marketId: payload.marketId,
       body: payload.body,
       referenceRevisions: references,
-      createdByUserId: context.actor.userId,
+      createdByUserId: principal.kind === 'session' ? principal.actor.userId : null,
+      provenance:
+        principal.kind === 'session' || payload.origin === undefined
+          ? directProvenance(principalId(principal))
+          : importProvenance(payload.origin),
       ...(payload.importSourceKey === undefined
         ? {}
         : { importSourceKey: payload.importSourceKey }),
@@ -271,6 +431,7 @@ export class ContentPublicationService {
     const draft = await context.tx.draft(payload.draftId);
     if (draft === null) throw new ContentDomainRefusal('not_found');
     this.usableType(draft.typeId, draft.typeSchemaMajor);
+    this.assertBoundToCaller(context, draft);
     await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
     const references = await this.pin(draft.marketId, draft.typeId, context.nowUtc);
     const updated = updateContentDraftBody(
@@ -279,6 +440,7 @@ export class ContentPublicationService {
       payload.body,
       references,
       context.nowUtc,
+      payload.sourceRefresh,
     );
     context.tx.putDraft(updated);
     this.audit(context, 'content.draft.updated', updated.draftId);
@@ -292,6 +454,7 @@ export class ContentPublicationService {
     const draft = await context.tx.draft(payload.draftId);
     if (draft === null) throw new ContentDomainRefusal('not_found');
     const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
+    this.assertBoundToCaller(context, draft);
     const eligibility = await this.authorize(
       context,
       draft.publisherRef,
@@ -300,13 +463,15 @@ export class ContentPublicationService {
       draft.marketId,
     );
     assertSubmittable(draft, payload.expectedDraftRevision);
+    await this.assertChangeClass(context, draft, payload.changeClass);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
-    this.assertValid(entry, draft, resolved, context.nowUtc, context.actor.userId);
+    this.assertValid(entry, draft, resolved, context.nowUtc, principalId(context.principal));
     const references = resolved.revisions;
     const profile = await this.deps.moderation.profileFor({
       typeId: draft.typeId,
       marketId: draft.marketId,
       publisherRef: draft.publisherRef,
+      ...(payload.changeClass === undefined ? {} : { changeClass: payload.changeClass }),
     });
     if (!profile.available) throw new ContentDomainRefusal('policy_unavailable');
     await this.assertMediaReady(entry, draft);
@@ -322,6 +487,7 @@ export class ContentPublicationService {
           : { policyDecisionId: profile.policyDecisionId }),
       },
       eligibilityAuthorityRevision: eligibility.authorityRevision,
+      ...(payload.changeClass === undefined ? {} : { changeClass: payload.changeClass }),
       referenceRevisions: references,
       nowUtc: context.nowUtc,
     });
@@ -353,7 +519,7 @@ export class ContentPublicationService {
       submission.marketId,
     );
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
-    this.assertValid(entry, draft, resolved, nowUtc, context.actor.userId);
+    this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal));
     const references = resolved.revisions;
     const media = await this.assertMediaReady(entry, draft);
     const pointer = await tx.pointer(submission.contentId);
@@ -673,7 +839,8 @@ export class ContentPublicationService {
       typeId: draft.typeId,
       marketId: draft.marketId,
       publisherRef: draft.publisherRef,
-      createdByUserId: draft.createdByUserId,
+      // Imported drafts have no authoring user; the importer stands in.
+      createdByUserId: draft.createdByUserId ?? draft.provenance.importerActorRef,
       actorUserId,
       nowUtc,
       draftRevision: draft.revision,
@@ -727,15 +894,27 @@ export class ContentPublicationService {
   ): Promise<PublisherEligibilityV1> {
     const entry = resolveContentType(typeId);
     if (entry === null) throw new ContentDomainRefusal('content_type_unsupported');
-    const result = await this.deps.eligibility.evaluate({
-      actor: context.actor,
-      publisherRef,
-      typeId,
-      action,
-      marketId,
-      requiredCapability: entry.requiredCapabilities[action],
-      nowUtc: context.nowUtc,
-    });
+    const { principal } = context;
+    const result =
+      principal.kind === 'session'
+        ? await this.deps.eligibility.evaluate({
+            actor: principal.actor,
+            publisherRef,
+            typeId,
+            action,
+            marketId,
+            requiredCapability: entry.requiredCapabilities[action],
+            nowUtc: context.nowUtc,
+          })
+        : await this.deps.eligibility.evaluateDelegated({
+            delegatedActor: principal.delegated,
+            publisherRef,
+            typeId,
+            action,
+            marketId,
+            requiredCapability: entry.requiredCapabilities[action],
+            nowUtc: context.nowUtc,
+          });
     // A response about another publisher is never accepted as authority.
     const sameRef =
       result.publisherRef.type === publisherRef.type && result.publisherRef.id === publisherRef.id;
@@ -744,7 +923,39 @@ export class ContentPublicationService {
   }
 
   private audit(context: CommandContext, action: string, subjectId: string): void {
-    this.auditAs(context.tx, context.actor.userId, action, subjectId, context.nowUtc);
+    this.auditAs(context.tx, principalId(context.principal), action, subjectId, context.nowUtc);
+  }
+
+  /**
+   * A delegated module may only touch drafts it bound itself; a signed-in user
+   * keeps editing imported drafts through their own Publisher authority.
+   */
+  private assertBoundToCaller(context: CommandContext, draft: ContentDraft): void {
+    const { principal } = context;
+    if (principal.kind === 'session') return;
+    const binding = draft.provenance.originBinding;
+    if (
+      binding.kind !== 'delegatedImport' ||
+      !binding.delegatedActorRef.startsWith(`module:${principal.delegated.moduleId}/`)
+    )
+      throw new ContentDomainRefusal('capability_denied');
+  }
+
+  /**
+   * An imported submission states what changed relative to what is public:
+   * `new` exactly when nothing has been published yet. A signed-in user never
+   * supplies it (gated earlier); a module must.
+   */
+  private async assertChangeClass(
+    context: CommandContext,
+    draft: ContentDraft,
+    changeClass: ChangeClass | undefined,
+  ): Promise<void> {
+    if (context.principal.kind === 'session') return;
+    if (changeClass === undefined) throw new ContentDomainRefusal('validation_failed');
+    const published = await context.tx.publishedRevisionsForContent(draft.contentId);
+    if ((changeClass === 'new') !== (published.length === 0))
+      throw new ContentDomainRefusal('validation_failed');
   }
 
   private auditAs(

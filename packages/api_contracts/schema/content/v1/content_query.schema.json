@@ -5,45 +5,116 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "queryType", "payload"],
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "queryType": { "const": "getDraft" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getDraft"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["draftId"],
-          "properties": { "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" } }
+          "required": [
+            "draftId"
+          ],
+          "properties": {
+            "draftId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            }
+          }
         }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "queryType", "payload"],
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "queryType": { "const": "getPublicationStatus" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getPublicationStatus"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["contentId"],
-          "properties": { "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" } }
+          "required": [
+            "contentId"
+          ],
+          "properties": {
+            "contentId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            }
+          }
         }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "queryType", "payload"],
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "queryType": { "const": "getPublishedRevision" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getPublishedRevision"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["contentId"],
-          "properties": { "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" } }
+          "required": [
+            "contentId"
+          ],
+          "properties": {
+            "contentId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "findByExternalBinding"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "externalBindingRef"
+          ],
+          "properties": {
+            "externalBindingRef": {
+              "$ref": "content_common.schema.json#/$defs/externalBindingRef"
+            }
+          }
         }
       }
     }

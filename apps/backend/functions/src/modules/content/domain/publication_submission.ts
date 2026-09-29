@@ -1,4 +1,5 @@
 import type {
+  ChangeClass,
   ContentReferenceRevisionsV1,
   ModerationDispositionKind,
   PublicationSubmissionV1,
@@ -21,6 +22,7 @@ export function createPublicationSubmission(input: {
     readonly policyDecisionId?: string;
   };
   readonly eligibilityAuthorityRevision: number;
+  readonly changeClass?: ChangeClass;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly nowUtc: UtcInstant;
 }): PublicationSubmission {
@@ -42,6 +44,7 @@ export function createPublicationSubmission(input: {
     state: needsReview ? 'under_review' : 'approved_for_publication',
     moderation: { ...input.moderation },
     eligibilityAuthorityRevision: input.eligibilityAuthorityRevision,
+    ...(input.changeClass === undefined ? {} : { changeClass: input.changeClass }),
     referenceRevisions: { ...input.referenceRevisions },
     revision: 1,
     createdAtUtc: input.nowUtc,

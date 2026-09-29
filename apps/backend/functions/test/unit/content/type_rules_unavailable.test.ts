@@ -35,6 +35,9 @@ function serviceWithAllTypesEnabled() {
     repository,
     // Ports must never be reached for an unavailable type.
     eligibility: {
+      evaluateDelegated: () => {
+        throw new Error('eligibility must not be evaluated for an unavailable type');
+      },
       evaluate: () => {
         throw new Error('eligibility must not be evaluated for an unavailable type');
       },

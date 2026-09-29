@@ -1,7 +1,7 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.9**
+- Version: **0.10**
 - Date: **2026-09-30**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
@@ -15,6 +15,19 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.10 — 2026-09-30
+
+- closes BCK07-LOCAL-01 item 2.4 (local acceptance) inside the v0.8 map, with
+  no new paths: delegated import through `executeDelegated` only, exact
+  `ownerImport` provenance, `originBinding {directAuthoring | delegatedImport}`,
+  `changeClass`, non-session actor idempotency (`module:<id>/<op>`) and lookup
+  by `externalBindingRef` (BCK-07-AC-92..AC-97);
+- adds §36, the agreed EVS hook register for Content, Identity, Catalog and
+  Place: what the local slice already provides, what is deferred and to which
+  small slice; it adds no EVS runtime, module path, flag or network permission;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled; BCK-23 stays Draft/Proposed.
 
 ### v0.9 — 2026-09-30
 
@@ -1335,3 +1348,27 @@ does not authorize Content persistence, workers, cloud or market activation.
     restart and rejects the same key with a different semantic payload.
 97. **BCK-07-AC-97:** this additive boundary creates no Event Ingestion
     runtime, network permission, callable export, resource or activation.
+
+## 36. Agreed EVS hook register (BCK07-LOCAL-01 item 2.4)
+
+This register agrees, ahead of time, the hooks that Event Ingestion (BCK-23,
+Draft/Proposed) will need from the core modules
+([EVS plan §2.2](EVENT_SOURCE_INGESTION_BACKEND_IMPLEMENTATION_PLAN.md)). It is
+a coordination record only: no EVS code, module path, `eventIngestion*` prefix,
+flag, network permission or resource is added, and BCK-23 keeps its status.
+
+| # | Module | Hook | State after 2.4 | Where the rest lands |
+|---|---|---|---|---|
+| 1 | Content | `ownerImport` provenance, `delegatedImport` origin with `delegatedActorRef` and `externalBindingRef`, non-session idempotency, `changeClass` (AC-92..AC-97) | **Implemented locally**, in-memory, tested | — |
+| 2 | Content | Lookup of draft and publication by `externalBindingRef` | **Implemented locally** (`findByExternalBinding`, module sees only drafts it bound) | Firestore adapter: Content persistence slice (2.6) |
+| 3 | Content | Delegated actor is never a Session; grants per module, operation and type through `DelegatedModuleGrant` | **Implemented locally** | Grant source: BCK-06 delegation (row 5) |
+| 4 | Content | `hidden` with reason `sourceMissing`, reversible only by delegated import, never by moderation | **Deferred**: the lifecycle has `ownerHold` and `moderationHold` only | Small Content slice before EVS-LOCAL-04 (B6), needs a BCK-07 revision |
+| 5 | Content | Additive `location.placeId` on Event | **Deferred**: Event without Place stays valid | Same small Content slice, additive |
+| 6 | Identity | `EventIngestionDelegation`, capabilities `event_sources.manage` and `event_sources.review_changes`, `PagePlaceOperatorLink` | **Agreed, not built**: the port `evaluateDelegated` already asks Identity whether a Publisher is eligible without a Session | BCK-06 small slice after its revision, before EVS-LOCAL-03/04 |
+| 7 | Catalog | Projections hide `hidden` content (any reason), Details reads provenance | **Agreed, not built**: Content effects carry `visibility` and a monotonic `pointerRevision`, so a tombstone beats stale cache | 6B BCK-08 |
+| 8 | Place | Published `place` with `placeKind = managedVenue` and query by ID | **Provided** by the Place type rules; enabled state is off | BCK-08 Place query |
+
+Rules kept for every later slice: Content and Identity never treat the actor
+as a Session by construction; `hidden` always carries a reason; rescheduling
+and cancellation are Content commands with a change class; the `100/day` limit
+counts per Publisher, not per Session; complaints stay in BCK-22.

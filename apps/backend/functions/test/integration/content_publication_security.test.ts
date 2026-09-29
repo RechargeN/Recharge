@@ -7,6 +7,7 @@ import type { PublisherEligibilityV1 } from '../../src/contracts/identity_v1.js'
 import { ContentPublicationService } from '../../src/modules/content/application/content_publication_service.js';
 import type {
   ContentActor,
+  DelegatedEligibilityRequest,
   PublisherEligibilityPort,
   PublisherEligibilityRequest,
 } from '../../src/modules/content/application/ports/publisher_eligibility_port.js';
@@ -40,6 +41,42 @@ class IdentityBackedEligibility implements PublisherEligibilityPort {
     private readonly authority: IdentityPublisherAuthority,
     private readonly identity: InMemoryIdentityAuthorityRepository,
   ) {}
+
+  /**
+   * Stand-in for the BCK-06 delegated check: no Session, but the Publisher
+   * itself must be an active, verified Creator or a verified, active Page in
+   * the right market whose owner is still eligible.
+   */
+  async evaluateDelegated(request: DelegatedEligibilityRequest): Promise<PublisherEligibilityV1> {
+    const result = (
+      eligible: boolean,
+      reason: PublisherEligibilityV1['reason'],
+    ): PublisherEligibilityV1 => ({
+      schemaVersion: 1,
+      publisherRef: request.publisherRef,
+      eligible,
+      reason,
+      authorityRevision: 1,
+      evaluatedAtUtc: request.nowUtc as PublisherEligibilityV1['evaluatedAtUtc'],
+    });
+    return this.identity.transact(async (tx) => {
+      let ownerId: string = request.publisherRef.id;
+      if (request.publisherRef.type === 'page') {
+        const page = await tx.page(request.publisherRef.id);
+        if (page === null) return result(false, 'publisher_not_accessible');
+        if (page.status !== 'active' || page.verificationStatus !== 'verified')
+          return result(false, 'publisher_not_accessible');
+        if (page.marketId !== request.marketId) return result(false, 'publisher_not_accessible');
+        ownerId = page.ownerUserId;
+      }
+      const account = await tx.account(ownerId);
+      if (account?.status !== 'active') return result(false, 'account_inactive');
+      const verification = await tx.verificationForUser(ownerId);
+      if (verification?.status !== 'verified' || !account.systemRoles.includes('Creator'))
+        return result(false, 'creator_verification_required');
+      return result(true, 'eligible');
+    });
+  }
 
   async evaluate(request: PublisherEligibilityRequest): Promise<PublisherEligibilityV1> {
     const denied = (reason: PublisherEligibilityV1['reason']): PublisherEligibilityV1 => ({
@@ -232,6 +269,12 @@ async function bootstrap() {
       },
     },
     enabledTypes: new Set(['place'] as const),
+    delegatedModules: new Map([
+      [
+        'event-ingestion',
+        { operations: new Set(['syncSource']), typeIds: new Set<'place'>(['place']) },
+      ],
+    ]),
   });
   return { authority, service, repository };
 }
@@ -587,6 +630,205 @@ void test('a signed-in actor cannot issue a moderation disposition even with a w
   assert.equal(repository.snapshot().pointers[0]?.revision, 1);
 });
 
+// ---------------------------------------------------------------------------
+// 2.4 acceptance: delegated import authority and staff impersonation
+// ---------------------------------------------------------------------------
+
+const importer = { moduleId: 'event-ingestion', operation: 'syncSource' };
+const importOrigin = {
+  kind: 'delegatedImport',
+  delegatedActorRef: 'module:event-ingestion/syncSource',
+  externalBindingRef: 'src-1|uid-42|',
+  sourceId: 'src-1',
+  sourceRevision: '3',
+  acquiredAtUtc: '2026-09-29T09:00:00.000Z',
+  correctionRemovalPolicyRef: 'removal-policy-1',
+};
+const importCreate = (
+  publisherRef: { type: 'user' | 'page'; id: string },
+  marketId = 'LV',
+  externalBindingRef = 'src-1|uid-42|',
+) => ({
+  schemaVersion: 1,
+  commandType: 'createDraft',
+  idempotencyKey: key('import'),
+  payload: {
+    typeId: 'place',
+    publisherRef,
+    marketId,
+    body: placeBody,
+    origin: { ...importOrigin, externalBindingRef },
+  },
+});
+
+async function verifiedStranger(
+  context: Awaited<ReturnType<typeof bootstrap>>,
+): Promise<ContentActor> {
+  const { authority } = context;
+  await authority.creatorVerification.submit({
+    userId: u2,
+    verificationId: verification2,
+    evidenceRefIds: [evidence],
+    nowUtc: '2026-09-29T09:59:11.000Z',
+  });
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: u2,
+    status: 'verified',
+    nowUtc: '2026-09-29T09:59:21.000Z',
+  });
+  await authority.sessions.issue({
+    userId: u2,
+    sessionId: session2b,
+    issuedAtUtc: '2026-09-29T09:59:46.000Z',
+    firebaseUid: u2,
+    installationId: 'install-2b',
+    snapshotExpiresAtUtc: '2026-09-29T10:04:00.000Z',
+  });
+  return { userId: u2, sessionId: session2b };
+}
+
+void test('staff review cannot submit or publish while impersonating the owning Page', async () => {
+  const context = await bootstrap();
+  const { service, repository } = context;
+  const staff = await verifiedStranger(context);
+  const draft = await ok<{ draftId: string; contentId: string }>(
+    service.execute(actor1, create({ type: 'page', id: page1 })),
+  );
+  const submission = await ok<{ submissionId: string }>(
+    service.execute(actor1, submit(draft.draftId, 1)),
+  );
+  // A verified Creator with staff-like reach but no membership of the Page.
+  assert.deepEqual(
+    await service.execute(staff, submit(draft.draftId, 1)),
+    denial('membership_inactive'),
+  );
+  assert.deepEqual(
+    await service.execute(staff, publish(submission.submissionId, 0)),
+    denial('membership_inactive'),
+  );
+  assert.deepEqual(
+    await service.execute(staff, create({ type: 'page', id: page1 })),
+    denial('membership_inactive'),
+  );
+  assert.equal(repository.snapshot().revisions.length, 0);
+});
+
+void test('a delegated import for a Page still needs the Page, its owner and its market to be eligible', async () => {
+  const context = await bootstrap();
+  const { authority, service, repository } = context;
+  const accepted = await service.executeDelegated(
+    importer,
+    importCreate({ type: 'page', id: page1 }),
+  );
+  assert.equal(accepted.kind, 'succeeded');
+  // No Session is involved, yet a cross-market Page is refused.
+  assert.deepEqual(
+    await service.executeDelegated(
+      importer,
+      importCreate({ type: 'page', id: pageEE }, 'LV', 'src-1|uid-2|'),
+    ),
+    denial('publisher_not_eligible'),
+  );
+  // An owner that never completed Creator verification cannot be imported for.
+  assert.deepEqual(
+    await service.executeDelegated(
+      importer,
+      importCreate({ type: 'user', id: u2 }, 'LV', 'src-1|uid-3|'),
+    ),
+    denial('creator_verification_required'),
+  );
+  // Unknown Pages do not exist for the importer.
+  assert.deepEqual(
+    await service.executeDelegated(
+      importer,
+      importCreate({ type: 'page', id: id('ZZ') }, 'LV', 'src-1|uid-4|'),
+    ),
+    denial('publisher_not_eligible'),
+  );
+  // Losing the Page's authority stops later imports immediately.
+  await authority.pages.decidePage({
+    reviewerId: 'reviewer',
+    pageId: page1,
+    decision: 'suspended',
+    nowUtc: '2026-09-29T09:59:50.000Z',
+  });
+  assert.deepEqual(
+    await service.executeDelegated(
+      importer,
+      importCreate({ type: 'page', id: page1 }, 'LV', 'src-1|uid-5|'),
+    ),
+    denial('publisher_not_eligible'),
+  );
+  assert.equal(repository.snapshot().drafts.length, 1);
+});
+
+void test('revoked Creator verification of the Page owner blocks a delegated submit', async () => {
+  const context = await bootstrap();
+  const { authority, service } = context;
+  const created = await service.executeDelegated(
+    importer,
+    importCreate({ type: 'page', id: page1 }),
+  );
+  assert.equal(created.kind, 'succeeded');
+  const draftId = (created as { data: { draftId: string } }).data.draftId;
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: u1,
+    status: 'revoked',
+    nowUtc: '2026-09-29T09:59:50.000Z',
+  });
+  assert.deepEqual(
+    await service.executeDelegated(importer, {
+      schemaVersion: 1,
+      commandType: 'submitForPublication',
+      idempotencyKey: key('import-submit'),
+      payload: { draftId, expectedDraftRevision: 1, changeClass: 'new' },
+    }),
+    denial('creator_verification_required'),
+  );
+});
+
+/** True when `text` (source of `file`) imports something inside the Content module. */
+function importsContentModule(file: string, text: string, contentDir: string): boolean {
+  return [...text.matchAll(/from\s+['"]([^'"]+)['"]/gu)].some((match) => {
+    const specifier = match[1] ?? '';
+    return (
+      specifier.startsWith('.') &&
+      path.resolve(path.dirname(file), specifier).startsWith(contentDir)
+    );
+  });
+}
+
+void test('delegated import never reaches Content storage except through the Content service', () => {
+  const root = path.resolve(process.cwd(), 'src');
+  const contentDir = path.join(root, 'modules', 'content');
+  // Positive control: the detector really flags a sibling-module import.
+  const sibling = path.join(root, 'modules', 'other', 'application', 'x.ts');
+  assert.equal(
+    importsContentModule(
+      sibling,
+      "import x from '../../content/domain/repositories.js';",
+      contentDir,
+    ),
+    true,
+  );
+  assert.equal(
+    importsContentModule(sibling, "import x from '../../reference_data/domain/y.js';", contentDir),
+    false,
+  );
+  const offenders = sourceFiles(root)
+    .filter((file) => !file.startsWith(contentDir))
+    // Shared wire contracts (types and schemas only) are the intended seam.
+    .filter((file) => !file.includes(`${path.sep}contracts${path.sep}`))
+    .filter((file) => importsContentModule(file, readFileSync(file, 'utf8'), contentDir));
+  // Nothing outside the Content module can reach its repositories or writers.
+  assert.deepEqual(
+    offenders.map((file) => path.relative(root, file)),
+    [],
+  );
+});
+
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {
     const full = path.join(directory, entry);
@@ -609,4 +851,187 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
   }
   // No callable/export registry, Rules or index change was introduced.
   assert.doesNotMatch(readFileSync(path.join(root, 'index.ts'), 'utf8'), /content/iu);
+});
+
+// ---------------------------------------------------------------------------
+// BCK07-LOCAL-01 local acceptance traceability (BCK-07 §34.4 and AC-76 .. AC-97).
+// Each requirement names the tests that are its evidence. The matrix fails if a
+// named test disappears or is renamed, so acceptance cannot silently erode.
+// ---------------------------------------------------------------------------
+
+const testRoot = path.resolve(process.cwd(), 'test');
+const files = {
+  contract: 'contract/content_fixture_parity.test.ts',
+  domain: 'unit/content/content_domain.test.ts',
+  common: 'unit/content/type_rules_common.test.ts',
+  unavailable: 'unit/content/type_rules_unavailable.test.ts',
+  service: 'integration/content_publication_service.test.ts',
+  security: 'integration/content_publication_security.test.ts',
+} as const;
+
+const acceptanceMatrix: ReadonlyArray<
+  readonly [requirement: string, evidence: ReadonlyArray<readonly [keyof typeof files, string]>]
+> = [
+  [
+    'schema/TypeScript parity and forward rejection',
+    [['contract', 'content schemas accept canonical fixtures']],
+  ],
+  [
+    'all ten registry entries, explicit and fail closed',
+    [
+      ['domain', 'registry has exactly the ten accepted types'],
+      ['unavailable', 'is registered but unavailable'],
+      ['service', 'all ten types are explicit'],
+    ],
+  ],
+  [
+    'unknown or newer type/schema rejection',
+    [
+      ['service', 'unauthenticated, newer schema and malformed commands'],
+      ['service', 'a stored draft from a newer type schema major is never coerced'],
+    ],
+  ],
+  [
+    'lifecycle: submit, moderation disposition, publish',
+    [
+      ['service', 'Place flows draft -> submit -> publish'],
+      ['service', 'a moderated submission cannot publish until BCK-22 approves'],
+      ['service', 'request_revision returns the draft to its author'],
+      ['service', 'reject closes only that submission'],
+    ],
+  ],
+  [
+    'lifecycle: withdraw, archive, hide (restrict) and restore',
+    [
+      ['service', 'owner withdraw and archive take content down'],
+      ['service', 'restrict hides content publicly'],
+      ['service', 'owner and moderation holds are independent'],
+    ],
+  ],
+  [
+    'idempotency conflict',
+    [['service', 'semantic idempotency replays equal commands and rejects a changed payload']],
+  ],
+  ['stale revision', [['service', 'stale draft revisions are rejected']]],
+  [
+    'cross-user denial',
+    [
+      [
+        'security',
+        "another verified Creator cannot read, edit, submit or publish someone else's content",
+      ],
+    ],
+  ],
+  [
+    'cross-page denial',
+    [['security', 'Page publishing requires an active membership of that exact Page']],
+  ],
+  ['cross-market denial', [['security', 'cross-market use of a Page is denied']]],
+  [
+    'revoked PublisherRef authority',
+    [
+      ['security', 'revoked Creator verification blocks publish'],
+      ['security', 'a suspended Page can no longer publish'],
+      ['security', 'a revoked Session loses Content authority immediately'],
+    ],
+  ],
+  [
+    'immutable revision enforcement',
+    [
+      ['domain', 'published revision is immutable'],
+      ['service', 'a second revision supersedes the first without touching immutable history'],
+      ['service', 'the repository refuses to overwrite a published revision'],
+    ],
+  ],
+  [
+    'pointer contention',
+    [['service', 'concurrent duplicate publishes create exactly one revision']],
+  ],
+  ['atomic rollback of a failed publish', [['service', 'a failed publish rolls back completely']]],
+  [
+    'compatible rollback',
+    [
+      ['service', 'compatible rollback re-selects an earlier immutable revision'],
+      ['service', 'rollback fails closed when media, market or the type are no longer valid'],
+    ],
+  ],
+  [
+    'AC-92 delegated import uses only Content commands',
+    [
+      ['service', 'a delegated caller must be an approved module and operation for a granted type'],
+      [
+        'security',
+        'delegated import never reaches Content storage except through the Content service',
+      ],
+    ],
+  ],
+  [
+    'AC-93 ownerImport provenance is exact and not fabricated',
+    [
+      ['service', 'a delegated import creates a bound draft with exact ownerImport provenance'],
+      [
+        'service',
+        'an imported draft is published by its Publisher and the revision freezes the provenance',
+      ],
+    ],
+  ],
+  [
+    'AC-94 imported content passes the same validation, moderation and eligibility',
+    [
+      [
+        'service',
+        'an imported submission passes the same validation and moderation as manual content',
+      ],
+      [
+        'security',
+        'a delegated import for a Page still needs the Page, its owner and its market to be eligible',
+      ],
+      ['security', 'revoked Creator verification of the Page owner blocks a delegated submit'],
+    ],
+  ],
+  [
+    'AC-95 staff cannot impersonate the owning Page',
+    [
+      ['security', 'staff review cannot submit or publish while impersonating the owning Page'],
+      ['service', 'a signed-in user can never claim an import origin'],
+    ],
+  ],
+  [
+    'AC-96 non-session actor idempotency',
+    [
+      ['service', 'non-session actor idempotency is stable across retry and restart'],
+      ['service', 'one external source record binds to at most one draft'],
+    ],
+  ],
+  [
+    'import binding lookup and change class',
+    [
+      ['service', 'a module only sees and touches drafts it bound itself'],
+      ['service', 'lookup by binding also returns the publication and current revision'],
+      ['service', 'the change class must match whether anything is already published'],
+    ],
+  ],
+  [
+    'AC-97 / AC-76 no endpoint, worker, Firebase import or cloud context',
+    [
+      ['security', 'Content stays framework-neutral'],
+      ['common', 'issue collector is unique and bounded'],
+    ],
+  ],
+];
+
+void test('local acceptance matrix: every requirement is backed by a named, existing test', () => {
+  const sources = new Map<string, string>();
+  for (const [name, relative] of Object.entries(files))
+    sources.set(name, readFileSync(path.join(testRoot, relative), 'utf8'));
+  const missing: string[] = [];
+  for (const [requirement, evidence] of acceptanceMatrix) {
+    if (evidence.length === 0) missing.push(`${requirement}: no evidence listed`);
+    for (const [file, title] of evidence)
+      if (!sources.get(file)?.includes(title))
+        missing.push(`${requirement}: "${title}" not in ${file}`);
+  }
+  assert.deepEqual(missing, []);
+  // The matrix itself stays complete: every named requirement group is present.
+  assert.ok(acceptanceMatrix.length >= 22);
 });

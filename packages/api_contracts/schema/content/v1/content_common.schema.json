@@ -5,9 +5,20 @@
   "$defs": {
     "entityId": {
       "type": "string",
-      "anyOf": [{ "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "format": "uuid" }]
+      "anyOf": [
+        {
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        {
+          "format": "uuid"
+        }
+      ]
     },
-    "utcInstant": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "utcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
     "revision": {
       "type": "integer",
       "minimum": 0,
@@ -18,7 +29,13 @@
       "minimum": 1,
       "maximum": 9007199254740991
     },
-    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "marketId": {
+      "enum": [
+        "LV",
+        "EE",
+        "LT"
+      ]
+    },
     "typeId": {
       "enum": [
         "event",
@@ -39,27 +56,256 @@
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:-]+$"
     },
-    "sha256Hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "referenceRevisionId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "referenceRevisionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
     "publisherRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "id"],
+      "required": [
+        "type",
+        "id"
+      ],
       "properties": {
-        "type": { "enum": ["user", "page"] },
-        "id": { "$ref": "#/$defs/entityId" }
+        "type": {
+          "enum": [
+            "user",
+            "page"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/entityId"
+        }
       }
     },
     "referenceRevisions": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["marketConfigRevisionId", "taxonomyRevisionId", "localizationRevisionId"],
+      "required": [
+        "marketConfigRevisionId",
+        "taxonomyRevisionId",
+        "localizationRevisionId"
+      ],
       "properties": {
-        "marketConfigRevisionId": { "$ref": "#/$defs/referenceRevisionId" },
-        "taxonomyRevisionId": { "$ref": "#/$defs/referenceRevisionId" },
-        "localizationRevisionId": { "$ref": "#/$defs/referenceRevisionId" }
+        "marketConfigRevisionId": {
+          "$ref": "#/$defs/referenceRevisionId"
+        },
+        "taxonomyRevisionId": {
+          "$ref": "#/$defs/referenceRevisionId"
+        },
+        "localizationRevisionId": {
+          "$ref": "#/$defs/referenceRevisionId"
+        }
       }
     },
-    "contentBody": { "type": "object" }
+    "contentBody": {
+      "type": "object"
+    },
+    "moduleActorRef": {
+      "type": "string",
+      "pattern": "^module:[a-z][a-z0-9-]{0,63}/[a-zA-Z][a-zA-Z0-9._]{0,63}$"
+    },
+    "externalBindingRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "changeClass": {
+      "enum": [
+        "new",
+        "operationalSchedule",
+        "venueChange",
+        "operationalCancellation",
+        "operationalPostponement",
+        "commercial",
+        "contentMinor",
+        "contentMajor",
+        "occurrenceAdded"
+      ]
+    },
+    "provenance": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "importerActorRef",
+            "originBinding"
+          ],
+          "properties": {
+            "kind": {
+              "const": "creatorSubmission"
+            },
+            "importerActorRef": {
+              "type": "string",
+              "pattern": "^user:.+$",
+              "maxLength": 128
+            },
+            "originBinding": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "directAuthoring"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "sourceId",
+            "sourceRevision",
+            "acquiredAtUtc",
+            "correctionRemovalPolicyRef",
+            "importerActorRef",
+            "originBinding"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ownerImport"
+            },
+            "sourceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "sourceRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "snapshotHash": {
+              "$ref": "#/$defs/sha256Hex"
+            },
+            "sourceUrlRef": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "acquiredAtUtc": {
+              "$ref": "#/$defs/utcInstant"
+            },
+            "checkedAtUtc": {
+              "$ref": "#/$defs/utcInstant"
+            },
+            "correctionRemovalPolicyRef": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "importerActorRef": {
+              "$ref": "#/$defs/moduleActorRef"
+            },
+            "originBinding": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "delegatedActorRef",
+                "externalBindingRef"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "delegatedImport"
+                },
+                "delegatedActorRef": {
+                  "$ref": "#/$defs/moduleActorRef"
+                },
+                "externalBindingRef": {
+                  "$ref": "#/$defs/externalBindingRef"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "delegatedOrigin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "delegatedActorRef",
+        "externalBindingRef",
+        "sourceId",
+        "sourceRevision",
+        "acquiredAtUtc",
+        "correctionRemovalPolicyRef"
+      ],
+      "properties": {
+        "kind": {
+          "const": "delegatedImport"
+        },
+        "delegatedActorRef": {
+          "$ref": "#/$defs/moduleActorRef"
+        },
+        "externalBindingRef": {
+          "$ref": "#/$defs/externalBindingRef"
+        },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "snapshotHash": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "sourceUrlRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "acquiredAtUtc": {
+          "$ref": "#/$defs/utcInstant"
+        },
+        "checkedAtUtc": {
+          "$ref": "#/$defs/utcInstant"
+        },
+        "correctionRemovalPolicyRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "sourceRefresh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRevision"
+      ],
+      "properties": {
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "snapshotHash": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "checkedAtUtc": {
+          "$ref": "#/$defs/utcInstant"
+        }
+      }
+    }
   }
 }

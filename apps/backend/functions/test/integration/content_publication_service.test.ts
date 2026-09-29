@@ -10,9 +10,11 @@ import type { PublisherEligibilityV1 } from '../../src/contracts/identity_v1.js'
 import {
   ContentPublicationService,
   type ContentIdGenerator,
+  type DelegatedModuleGrant,
 } from '../../src/modules/content/application/content_publication_service.js';
 import type {
   ContentActor,
+  DelegatedEligibilityRequest,
   PublisherEligibilityPort,
   PublisherEligibilityRequest,
 } from '../../src/modules/content/application/ports/publisher_eligibility_port.js';
@@ -24,6 +26,7 @@ import {
   resolveContentType,
 } from '../../src/modules/content/domain/content_type_registry.js';
 import {
+  ContentRepositoryConflict,
   toContentWireResult,
   type ContentResult,
   type ContentResultType,
@@ -62,6 +65,19 @@ const actorB: ContentActor = { userId: userB, sessionId: sessionB };
 
 class FakeEligibility implements PublisherEligibilityPort {
   readonly requests: PublisherEligibilityRequest[] = [];
+  readonly delegatedRequests: DelegatedEligibilityRequest[] = [];
+  evaluateDelegated(request: DelegatedEligibilityRequest): Promise<PublisherEligibilityV1> {
+    this.delegatedRequests.push(request);
+    const eligible = this.deny === undefined;
+    return Promise.resolve({
+      schemaVersion: 1,
+      publisherRef: this.wrongPublisher ? { type: 'user', id: ulid(999) } : request.publisherRef,
+      eligible,
+      reason: this.deny ?? 'eligible',
+      authorityRevision: 7,
+      evaluatedAtUtc: request.nowUtc as PublisherEligibilityV1['evaluatedAtUtc'],
+    });
+  }
   deny: PublisherEligibilityV1['reason'] | undefined;
   wrongPublisher = false;
   evaluate(request: PublisherEligibilityRequest): Promise<PublisherEligibilityV1> {
@@ -102,6 +118,7 @@ class FakeReferenceData implements ReferenceDataPort {
 class FakeModeration implements ModerationDispositionPort {
   requiresReview = false;
   available = true;
+  lastChangeClass: string | undefined;
   /** Issuer the fake decision authority vouches for; undefined = nobody. */
   issuer: string | undefined = 'bck22';
   verifyDisposition(input: { readonly payload: { readonly attestation: string } }) {
@@ -111,7 +128,8 @@ class FakeModeration implements ModerationDispositionPort {
         : ({ verified: false } as const),
     );
   }
-  profileFor() {
+  profileFor(input: { readonly changeClass?: string }) {
+    this.lastChangeClass = input.changeClass;
     return Promise.resolve(
       this.available
         ? ({
@@ -184,6 +202,19 @@ const referenceLookups = {
 };
 const marketContext = { currencyCode: 'EUR', timezoneId: 'Europe/Riga' } as const;
 
+function eventGrants(): ReadonlyMap<string, DelegatedModuleGrant> {
+  return new Map<string, DelegatedModuleGrant>([
+    [
+      'event-ingestion',
+      { operations: new Set(['syncSource']), typeIds: new Set<ContentTypeId>(['event']) },
+    ],
+    [
+      'other-module',
+      { operations: new Set(['syncSource']), typeIds: new Set<ContentTypeId>(['event']) },
+    ],
+  ]);
+}
+
 function harness(enabled: readonly ContentTypeId[] = ['place']) {
   const repository = new InMemoryContentRepository();
   const eligibility = new FakeEligibility();
@@ -200,6 +231,7 @@ function harness(enabled: readonly ContentTypeId[] = ['place']) {
     clock,
     ids: new SequentialIds(),
     enabledTypes: new Set(enabled),
+    delegatedModules: eventGrants(),
   });
   return { service, repository, eligibility, referenceData, moderation, media, clock };
 }
@@ -1588,4 +1620,566 @@ void test('lifecycle results satisfy the wire result schema', async () => {
     );
   const stored = h.repository.snapshot().pointers[0];
   assert.equal((await validateContentContract('publicationPointer', stored)).ok, true);
+});
+
+// ---------------------------------------------------------------------------
+// 2.4 Local acceptance: delegated import, provenance and non-session actor
+// idempotency, only through Content commands (BCK-07 AC-92 .. AC-96).
+// ---------------------------------------------------------------------------
+
+const eventBody = () => ({
+  eventArchetype: 'workshop',
+  primaryParticipationMode: 'learn',
+  title: 'Ceramics evening',
+  categoryId: 'workshops_masterclasses',
+  subcategoryId: 'pottery',
+  shortDescription: 'Shape your own bowl on the wheel',
+  fullDescription:
+    'An evening of guided pottery in a friendly studio. All materials and firing are included.',
+  media: {
+    coverImage: { mediaId: 'media-cover', altText: 'A potter shaping a bowl' },
+    gallery: [],
+    rightsConfirmed: true,
+  },
+  format: 'offline',
+  location: {
+    marketCityId: 'riga',
+    countryCode: 'LV',
+    city: 'Riga',
+    formattedAddress: 'Brivibas iela 1, Riga',
+    latitude: 56.95,
+    longitude: 24.1,
+    pinConfirmed: true,
+  },
+  schedule: {
+    timezoneId: 'Europe/Riga',
+    scheduleMode: 'oneTime',
+    allDay: false,
+    localStartDate: '2026-10-10',
+    startMinute: 1080,
+    durationMinutes: 120,
+    allowsPartialAttendance: false,
+    bufferBeforeMinutes: 0,
+    bufferAfterMinutes: 0,
+  },
+  eventSlots: [
+    {
+      id: ulid(7001),
+      localDate: '2026-10-10',
+      startAtUtc: '2026-10-10T15:00:00.000Z',
+      endAtUtc: '2026-10-10T17:00:00.000Z',
+    },
+  ],
+  pricing: { mode: 'free', paymentCollectionMode: 'none' },
+  participants: { capacityMode: 'unknown' },
+  registration: { mode: 'none' },
+  visibility: 'public',
+});
+
+const importer = { moduleId: 'event-ingestion', operation: 'syncSource' };
+const importerRef = 'module:event-ingestion/syncSource';
+const bindingRef = 'src-1|uid-42|';
+
+const importOrigin = (overrides: Record<string, unknown> = {}) => ({
+  kind: 'delegatedImport',
+  delegatedActorRef: importerRef,
+  externalBindingRef: bindingRef,
+  sourceId: 'src-1',
+  sourceRevision: '3',
+  snapshotHash: 'b'.repeat(64),
+  sourceUrlRef: 'secret-ref-1',
+  acquiredAtUtc: '2026-09-29T09:00:00.000Z',
+  correctionRemovalPolicyRef: 'removal-policy-1',
+  ...overrides,
+});
+
+const importCreate = (
+  overrides: Record<string, unknown> = {},
+  idempotencyKey = key('import-create'),
+) => ({
+  schemaVersion: 1,
+  commandType: 'createDraft',
+  idempotencyKey,
+  payload: {
+    typeId: 'event',
+    publisherRef: { type: 'page', id: pageA },
+    marketId: 'LV',
+    body: eventBody(),
+    origin: importOrigin(),
+    ...overrides,
+  },
+});
+
+const importSubmit = (
+  draftId: string,
+  expectedDraftRevision: number,
+  changeClass: string | undefined,
+  idempotencyKey = key('import-submit'),
+) => ({
+  schemaVersion: 1,
+  commandType: 'submitForPublication',
+  idempotencyKey,
+  payload: {
+    draftId,
+    expectedDraftRevision,
+    ...(changeClass === undefined ? {} : { changeClass }),
+  },
+});
+
+interface ImportedDraft extends DraftLike {
+  createdByUserId: string | null;
+  provenance: {
+    kind: string;
+    importerActorRef: string;
+    sourceRevision?: string;
+    snapshotHash?: string;
+    checkedAtUtc?: string;
+    acquiredAtUtc?: string;
+    originBinding: { kind: string; delegatedActorRef?: string; externalBindingRef?: string };
+  };
+}
+
+const eventHarness = () => harness(['place', 'event']);
+
+void test('a delegated import creates a bound draft with exact ownerImport provenance and no fabricated fields', async () => {
+  const h = eventHarness();
+  const draft = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  assert.equal(draft.createdByUserId, null);
+  assert.deepEqual(draft.provenance, {
+    kind: 'ownerImport',
+    sourceId: 'src-1',
+    sourceRevision: '3',
+    snapshotHash: 'b'.repeat(64),
+    sourceUrlRef: 'secret-ref-1',
+    acquiredAtUtc: '2026-09-29T09:00:00.000Z',
+    correctionRemovalPolicyRef: 'removal-policy-1',
+    importerActorRef: importerRef,
+    originBinding: {
+      kind: 'delegatedImport',
+      delegatedActorRef: importerRef,
+      externalBindingRef: bindingRef,
+    },
+  });
+  // The module is not a PublisherRef: the Page stays the publisher of record.
+  const stored = h.repository.snapshot().drafts[0];
+  assert.deepEqual(stored?.publisherRef, { type: 'page', id: pageA });
+  assert.deepEqual(stored?.publisherBindingOrigin, { type: 'page', id: pageA });
+  // Optional source facts that were not supplied are absent, not invented.
+  const minimal = await data<ImportedDraft>(
+    h.service.executeDelegated(
+      importer,
+      importCreate({
+        origin: {
+          kind: 'delegatedImport',
+          delegatedActorRef: importerRef,
+          externalBindingRef: 'src-1|uid-43|',
+          sourceId: 'src-1',
+          sourceRevision: '3',
+          acquiredAtUtc: '2026-09-29T09:00:00.000Z',
+          correctionRemovalPolicyRef: 'removal-policy-1',
+        },
+      }),
+    ),
+  );
+  assert.equal('snapshotHash' in minimal.provenance, false);
+  assert.equal('sourceUrlRef' in minimal.provenance, false);
+  assert.equal('checkedAtUtc' in minimal.provenance, false);
+  // Authorization used the delegated path, never a user Session.
+  assert.equal(h.eligibility.requests.length, 0);
+  assert.equal(h.eligibility.delegatedRequests[0]?.delegatedActor.actorRef, importerRef);
+  assert.equal(h.eligibility.delegatedRequests[0]?.action, 'create');
+  assert.equal(
+    h.repository.snapshot().audit.every((entry) => entry.actorUserId === importerRef),
+    true,
+  );
+});
+
+void test('an imported submission passes the same validation and moderation as manual content', async () => {
+  const h = eventHarness();
+  const draft = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  // Same domain validation: an invalid Event body is refused.
+  const broken = await data<ImportedDraft>(
+    h.service.executeDelegated(
+      importer,
+      importCreate(
+        {
+          body: { ...eventBody(), title: 'Hi' },
+          origin: importOrigin({ externalBindingRef: 'src-1|uid-9|' }),
+        },
+        key('import-create'),
+      ),
+    ),
+  );
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importSubmit(broken.draftId, 1, 'new')),
+    {
+      kind: 'rejected',
+      code: 'validation_failed',
+    },
+  );
+  // Same moderation: the change class reaches the review policy, and a type
+  // that requires review stays under review.
+  h.moderation.requiresReview = true;
+  const submission = await data<SubmissionLike & { changeClass?: string }>(
+    h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, 'new')),
+  );
+  assert.equal(submission.state, 'under_review');
+  assert.equal(submission.changeClass, 'new');
+  assert.equal(h.moderation.lastChangeClass, 'new');
+  assert.equal(h.eligibility.delegatedRequests.at(-1)?.action, 'submit');
+  // The module has no way to publish, activate or withdraw.
+  for (const command of [
+    publishCommand(submission.submissionId, 0),
+    withdrawCommand(draft.contentId, 1),
+    activateCommand(draft.contentId, ulid(9700), 1),
+  ])
+    assert.deepEqual(await h.service.executeDelegated(importer, command), {
+      kind: 'rejected',
+      code: 'capability_denied',
+    });
+  assert.equal(h.repository.snapshot().revisions.length, 0);
+});
+
+void test('an imported draft is published by its Publisher and the revision freezes the provenance', async () => {
+  const h = eventHarness();
+  const draft = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  const submission = await data<SubmissionLike>(
+    h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, 'new')),
+  );
+  // The Page's own signed-in publisher activates; the module cannot.
+  const revision = await data<PublishedRevisionV1 & { provenance: ImportedDraft['provenance'] }>(
+    h.service.execute(actorA, publishCommand(submission.submissionId, 0)),
+  );
+  assert.equal(revision.provenance.kind, 'ownerImport');
+  assert.equal(revision.provenance.originBinding.externalBindingRef, bindingRef);
+  // A later source refresh never rewrites the published revision.
+  const refreshed = await data<ImportedDraft>(
+    h.service.executeDelegated(importer, {
+      schemaVersion: 1,
+      commandType: 'updateDraft',
+      idempotencyKey: key('refresh'),
+      payload: {
+        draftId: draft.draftId,
+        expectedRevision: 1,
+        body: { ...eventBody(), title: 'Ceramics evening, new date' },
+        sourceRefresh: {
+          sourceRevision: '4',
+          snapshotHash: 'c'.repeat(64),
+          checkedAtUtc: '2026-09-29T09:30:00.000Z',
+        },
+      },
+    }),
+  );
+  assert.equal(refreshed.provenance.sourceRevision, '4');
+  assert.equal(refreshed.provenance.snapshotHash, 'c'.repeat(64));
+  assert.equal(refreshed.provenance.checkedAtUtc, '2026-09-29T09:30:00.000Z');
+  // Origin facts are immutable across refreshes.
+  assert.equal(refreshed.provenance.acquiredAtUtc, '2026-09-29T09:00:00.000Z');
+  assert.deepEqual(refreshed.provenance.originBinding, {
+    kind: 'delegatedImport',
+    delegatedActorRef: importerRef,
+    externalBindingRef: bindingRef,
+  });
+  const stored = h.repository.snapshot().revisions[0] as unknown as {
+    provenance: ImportedDraft['provenance'];
+  };
+  assert.equal(stored.provenance.sourceRevision, '3');
+  assert.equal(stored.provenance.snapshotHash, 'b'.repeat(64));
+});
+
+void test('a delegated caller must be an approved module and operation for a granted type', async () => {
+  const h = eventHarness();
+  const denied = { kind: 'rejected', code: 'capability_denied' };
+  assert.deepEqual(await h.service.executeDelegated(undefined, importCreate()), {
+    kind: 'rejected',
+    code: 'unauthenticated',
+  });
+  // Unknown module, and a known module doing an operation it was not granted.
+  assert.deepEqual(
+    await h.service.executeDelegated(
+      { moduleId: 'rogue', operation: 'syncSource' },
+      importCreate(),
+    ),
+    denied,
+  );
+  assert.deepEqual(
+    await h.service.executeDelegated(
+      { moduleId: 'event-ingestion', operation: 'purge' },
+      importCreate(),
+    ),
+    denied,
+  );
+  // The origin must name exactly the caller, never staff or another module.
+  assert.deepEqual(
+    await h.service.executeDelegated(
+      importer,
+      importCreate({
+        origin: importOrigin({ delegatedActorRef: 'module:other-module/syncSource' }),
+      }),
+    ),
+    denied,
+  );
+  // A type outside the module's grant is refused.
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importCreate({ typeId: 'place' })),
+    denied,
+  );
+  // Without an origin a module cannot author directly.
+  const withoutOrigin: Record<string, unknown> = { ...importCreate().payload };
+  delete withoutOrigin.origin;
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, {
+      ...importCreate(),
+      payload: withoutOrigin,
+    }),
+    denied,
+  );
+  assert.equal(h.repository.snapshot().drafts.length, 0);
+  assert.equal(h.eligibility.delegatedRequests.length, 0);
+});
+
+void test('a signed-in user can never claim an import origin, refresh or change class', async () => {
+  const h = eventHarness();
+  const denied = { kind: 'rejected', code: 'capability_denied' };
+  assert.deepEqual(
+    await h.service.execute(actorA, {
+      ...importCreate(),
+      payload: { ...importCreate().payload, publisherRef: { type: 'user', id: userA } },
+    }),
+    denied,
+  );
+  const draft = await data<DraftLike>(
+    h.service.execute(actorA, createCommand({ typeId: 'event', body: eventBody() })),
+  );
+  assert.deepEqual(
+    await h.service.execute(actorA, {
+      schemaVersion: 1,
+      commandType: 'updateDraft',
+      idempotencyKey: key('refresh'),
+      payload: {
+        draftId: draft.draftId,
+        expectedRevision: 1,
+        body: eventBody(),
+        sourceRefresh: { sourceRevision: '9' },
+      },
+    }),
+    denied,
+  );
+  assert.deepEqual(await h.service.execute(actorA, importSubmit(draft.draftId, 1, 'new')), denied);
+  // The user's own drafts carry direct-authoring provenance.
+  const stored = h.repository.snapshot().drafts[0] as unknown as ImportedDraft;
+  assert.equal(stored.provenance.kind, 'creatorSubmission');
+  assert.equal(stored.provenance.importerActorRef, `user:${userA}`);
+  assert.deepEqual(stored.provenance.originBinding, { kind: 'directAuthoring' });
+});
+
+void test('non-session actor idempotency is stable across retry and restart and rejects a changed payload', async () => {
+  const h = eventHarness();
+  const command = importCreate({}, 'import-key-0001');
+  const first = await data<ImportedDraft>(h.service.executeDelegated(importer, command));
+  const retry = await data<ImportedDraft>(h.service.executeDelegated(importer, command));
+  assert.equal(retry.draftId, first.draftId);
+  // Restart: a brand-new service over the same durable repository replays the outcome.
+  const restarted = new ContentPublicationService({
+    repository: h.repository,
+    eligibility: h.eligibility,
+    referenceData: h.referenceData,
+    moderation: h.moderation,
+    media: h.media,
+    clock: h.clock,
+    ids: new SequentialIds(),
+    enabledTypes: new Set<ContentTypeId>(['event']),
+    delegatedModules: eventGrants(),
+  });
+  const replayed = await data<ImportedDraft>(restarted.executeDelegated(importer, command));
+  assert.equal(replayed.draftId, first.draftId);
+  assert.equal(h.repository.snapshot().drafts.length, 1);
+  // The same key with a different semantic payload is a conflict.
+  assert.deepEqual(
+    await h.service.executeDelegated(
+      importer,
+      importCreate({ body: { ...eventBody(), title: 'A different title' } }, 'import-key-0001'),
+    ),
+    { kind: 'rejected', code: 'idempotency_conflict' },
+  );
+  // A different module actor with the same key is an independent logical operation.
+  const other = await data<ImportedDraft>(
+    h.service.executeDelegated(
+      { moduleId: 'other-module', operation: 'syncSource' },
+      importCreate(
+        {
+          origin: importOrigin({
+            delegatedActorRef: 'module:other-module/syncSource',
+            externalBindingRef: 'src-9|uid-1|',
+          }),
+        },
+        'import-key-0001',
+      ),
+    ),
+  );
+  assert.notEqual(other.draftId, first.draftId);
+  // The same key never shares scope with a signed-in user's identity.
+  const userDraft = await data<DraftLike>(
+    h.service.execute(
+      actorA,
+      createCommand({ typeId: 'event', body: eventBody() }, 'import-key-0001'),
+    ),
+  );
+  assert.notEqual(userDraft.draftId, first.draftId);
+});
+
+void test('one external source record binds to at most one draft', async () => {
+  const h = eventHarness();
+  await data<ImportedDraft>(
+    h.service.executeDelegated(importer, importCreate({}, 'import-key-0002')),
+  );
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importCreate({}, 'import-key-0003')),
+    { kind: 'rejected', code: 'revision_conflict' },
+  );
+  assert.equal(h.repository.snapshot().drafts.length, 1);
+});
+
+void test('the change class must match whether anything is already published', async () => {
+  const h = eventHarness();
+  const draft = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  const invalid = { kind: 'rejected', code: 'validation_failed' };
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, undefined)),
+    invalid,
+  );
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, 'commercial')),
+    invalid,
+  );
+  const submission = await data<SubmissionLike>(
+    h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, 'new')),
+  );
+  await data<PublishedRevisionV1>(
+    h.service.execute(actorA, publishCommand(submission.submissionId, 0)),
+  );
+  // After publication a candidate is a change, never `new`.
+  await data<ImportedDraft>(
+    h.service.executeDelegated(importer, {
+      schemaVersion: 1,
+      commandType: 'updateDraft',
+      idempotencyKey: key('update'),
+      payload: {
+        draftId: draft.draftId,
+        expectedRevision: 1,
+        body: { ...eventBody(), title: 'Updated title' },
+      },
+    }),
+  );
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importSubmit(draft.draftId, 2, 'new')),
+    invalid,
+  );
+  const change = await data<SubmissionLike & { changeClass?: string }>(
+    h.service.executeDelegated(importer, importSubmit(draft.draftId, 2, 'contentMajor')),
+  );
+  assert.equal(change.changeClass, 'contentMajor');
+});
+
+void test('a module only sees and touches drafts it bound itself', async () => {
+  const h = eventHarness();
+  const mine = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  const manual = await data<DraftLike>(
+    h.service.execute(actorA, createCommand({ typeId: 'event', body: eventBody() })),
+  );
+  const denied = { kind: 'rejected', code: 'capability_denied' };
+  // Not its own: a manual draft.
+  assert.deepEqual(
+    await h.service.executeDelegated(importer, importSubmit(manual.draftId, 1, 'new')),
+    denied,
+  );
+  // Not its own: another module's binding.
+  const strange = { moduleId: 'other-module', operation: 'syncSource' };
+  assert.deepEqual(
+    await h.service.executeDelegated(strange, importSubmit(mine.draftId, 1, 'new')),
+    denied,
+  );
+  // Lookup by binding: the owner module finds it, others and unknown refs do not.
+  const found = await data<{
+    draft: { draftId: string };
+    pointer: unknown;
+    currentRevision: unknown;
+  }>(h.service.findByExternalBinding(importer, lookupQuery(bindingRef)));
+  assert.equal(found.draft.draftId, mine.draftId);
+  assert.equal(found.pointer, null);
+  assert.equal(found.currentRevision, null);
+  assert.deepEqual(await h.service.findByExternalBinding(strange, lookupQuery(bindingRef)), {
+    kind: 'rejected',
+    code: 'not_found',
+  });
+  assert.deepEqual(await h.service.findByExternalBinding(importer, lookupQuery('unknown|ref')), {
+    kind: 'rejected',
+    code: 'not_found',
+  });
+  assert.deepEqual(
+    await h.service.findByExternalBinding(
+      { moduleId: 'rogue', operation: 'x' },
+      lookupQuery(bindingRef),
+    ),
+    denied,
+  );
+  assert.deepEqual(await h.service.findByExternalBinding(undefined, lookupQuery(bindingRef)), {
+    kind: 'rejected',
+    code: 'unauthenticated',
+  });
+  // A signed-in user has no binding lookup.
+  assert.deepEqual(await h.service.query(actorA, lookupQuery(bindingRef)), denied);
+});
+
+void test('lookup by binding also returns the publication and current revision', async () => {
+  const h = eventHarness();
+  const draft = await data<ImportedDraft>(h.service.executeDelegated(importer, importCreate()));
+  const submission = await data<SubmissionLike>(
+    h.service.executeDelegated(importer, importSubmit(draft.draftId, 1, 'new')),
+  );
+  const revision = await data<PublishedRevisionV1>(
+    h.service.execute(actorA, publishCommand(submission.submissionId, 0)),
+  );
+  const found = await data<{
+    pointer: { revision: number; visibility: string };
+    currentRevision: { publishedRevisionId: string };
+  }>(h.service.findByExternalBinding(importer, lookupQuery(bindingRef)));
+  assert.equal(found.pointer.revision, 1);
+  assert.equal(found.pointer.visibility, 'visible');
+  assert.equal(found.currentRevision.publishedRevisionId, revision.publishedRevisionId);
+});
+
+const lookupQuery = (externalBindingRef: string) => ({
+  schemaVersion: 1,
+  queryType: 'findByExternalBinding',
+  payload: { externalBindingRef },
+});
+
+void test('the repository refuses to overwrite a published revision or move the pointer from a stale revision', async () => {
+  const h = harness();
+  const first = await published(h);
+  const snapshot = h.repository.snapshot();
+  const revision = snapshot.revisions[0];
+  const pointer = snapshot.pointers[0];
+  assert.ok(revision && pointer);
+  await assert.rejects(
+    h.repository.transact((tx) => {
+      tx.putPublishedRevision({ ...revision, bodyHash: 'f'.repeat(64) });
+    }),
+    (error: unknown) => error instanceof ContentRepositoryConflict,
+  );
+  await assert.rejects(
+    h.repository.transact((tx) => {
+      tx.putPointer({ ...pointer, revision: pointer.revision + 1 }, 0);
+    }),
+    (error: unknown) => error instanceof ContentRepositoryConflict,
+  );
+  // A failed transaction leaves committed history exactly as it was.
+  assert.equal(JSON.stringify(h.repository.snapshot()), JSON.stringify(snapshot));
+  // Stored history is frozen: even a caller holding it cannot edit a revision.
+  assert.throws(() => {
+    (h.repository.snapshot().revisions[0]?.body as Record<string, unknown>).title = 'edited';
+  });
+  const live = await data<PublishedRevisionV1>(publicRead(h.service, first.contentId));
+  assert.equal(live.bodyHash, revision.bodyHash);
 });

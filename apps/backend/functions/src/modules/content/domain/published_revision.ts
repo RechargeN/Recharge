@@ -52,6 +52,8 @@ export function createPublishedRevision(input: {
     bodyHash: sha256Hex(canonicalJson(input.draft.body)),
     referenceRevisions: { ...input.referenceRevisions },
     mediaRevision: input.mediaRevision,
+    // Provenance is frozen into the revision: later refreshes never rewrite it.
+    provenance: structuredClone(input.draft.provenance),
     publishedAtUtc: input.nowUtc,
   } satisfies PublishedRevisionV1);
 }

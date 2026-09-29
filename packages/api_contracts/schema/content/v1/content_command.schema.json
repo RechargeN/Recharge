@@ -46,6 +46,9 @@
             "importSourceKey": {
               "type": "string",
               "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            },
+            "origin": {
+              "$ref": "content_common.schema.json#/$defs/delegatedOrigin"
             }
           }
         }
@@ -87,6 +90,9 @@
             },
             "body": {
               "$ref": "content_common.schema.json#/$defs/contentBody"
+            },
+            "sourceRefresh": {
+              "$ref": "content_common.schema.json#/$defs/sourceRefresh"
             }
           }
         }
@@ -124,6 +130,9 @@
             },
             "expectedDraftRevision": {
               "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "changeClass": {
+              "$ref": "content_common.schema.json#/$defs/changeClass"
             }
           }
         }

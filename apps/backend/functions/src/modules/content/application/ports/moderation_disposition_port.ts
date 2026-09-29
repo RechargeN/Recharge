@@ -1,5 +1,6 @@
 import type {
   ApplyModerationDispositionCommandV1,
+  ChangeClass,
   ContentTypeId,
 } from '../../../../contracts/content_v1.js';
 import type { PublisherRefV1 } from '../../../../contracts/identity_v1.js';
@@ -25,6 +26,8 @@ export interface ModerationDispositionPort {
     readonly typeId: ContentTypeId;
     readonly marketId: MarketId;
     readonly publisherRef: PublisherRefV1;
+    /** Present for imported submissions so review policy can react to the change. */
+    readonly changeClass?: ChangeClass;
   }): Promise<ModerationProfileResolution>;
 
   /**

@@ -30,6 +30,8 @@ export interface PublicationEffectSink {
 export interface ContentTransaction {
   draft(draftId: string): Promise<ContentDraft | null>;
   draftByContentId(contentId: string): Promise<ContentDraft | null>;
+  /** Draft bound to an external source record by `originBinding.externalBindingRef`. */
+  draftByExternalBinding(externalBindingRef: string): Promise<ContentDraft | null>;
   putDraft(draft: ContentDraft): void;
   submission(submissionId: string): Promise<PublicationSubmission | null>;
   submissionsForContent(contentId: string): Promise<readonly PublicationSubmission[]>;
