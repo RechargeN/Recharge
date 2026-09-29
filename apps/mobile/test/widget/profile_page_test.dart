@@ -1096,11 +1096,11 @@ void main() {
     // 'art_culture_museums'/'museum' was never an applicable category for
     // CreateObjectType.activity (applicableTypeIds: ['event', 'place'] in
     // recharge_taxonomy_seed.dart) — this only "worked" before because
-    // activity had no real subcategory-applicability check. Session has no
-    // dedicated _validate branch (falls through to the generic path, which
-    // never checked category applicability), so it's a safe substitute for
-    // this generic creator-listing-status fixture.
-    createController.setObjectType(CreateObjectType.session);
+    // activity had no real subcategory-applicability check. Session now has
+    // its own typed validator (SES-CRT-01); Class / Workshop still uses the
+    // generic path, so it's the substitute for this generic
+    // creator-listing-status fixture.
+    createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Museum evening route');
     createController.applyTaxonomySelection(
       mainCategory: 'art_culture_museums',
@@ -1271,12 +1271,11 @@ void main() {
     // recharge_taxonomy_seed.dart) — this only "worked" before because
     // activity had no real subcategory-applicability check. ACT-CRT-01's
     // _activityIssues wrapper now mirrors Place's real check, correctly
-    // rejecting this combination. Session has no dedicated _validate branch
-    // (falls through to the generic path, which never checked category
-    // applicability for any type), so it's a safe, minimal substitute — the
-    // legacy route-context rendering this test exercises is keyed only on
-    // mainCategory/subcategory, not objectType.
-    createController.setObjectType(CreateObjectType.session);
+    // rejecting this combination. Session now has its own typed validator
+    // (SES-CRT-01); Class / Workshop stays on the generic path, so it's a
+    // minimal substitute — the legacy route-context rendering this test
+    // exercises is keyed only on mainCategory/subcategory, not objectType.
+    createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Calm coffee walking route');
     createController.applyTaxonomySelection(
       mainCategory: 'travel_tours',
@@ -1457,9 +1456,9 @@ void main() {
         organizerName: 'creator',
       );
       // See the 'opens legacy route-context activity' test above for why
-      // session (not activity) is used for this travel_tours/walking_tour
-      // legacy-route fixture.
-      createController.setObjectType(CreateObjectType.session);
+      // classWorkshop (not activity) is used for this travel_tours/
+      // walking_tour legacy-route fixture.
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Published calm route');
       createController.applyTaxonomySelection(
         mainCategory: 'travel_tours',

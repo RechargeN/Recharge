@@ -75,7 +75,9 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('RECHARGE'), findsOneWidget);
+    // Activity uses the immersive hero (DTL-EVT-01 §1.1 п.12): transparent
+    // AppBar without the RECHARGE title.
+    expect(find.text('RECHARGE'), findsNothing);
     expect(find.text('Morning yoga'), findsOneWidget);
     expect(find.text('Gentle recharge session'), findsOneWidget);
     expect(find.text('Recharge Studio'), findsOneWidget);
@@ -131,7 +133,10 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
+    // Share lives in the hero utility popup menu: open it, then pick it.
     await tester.tap(find.byIcon(Icons.ios_share_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Поделиться'));
     await tester.pumpAndSettle();
 
     expect(find.text('Ссылка скопирована'), findsOneWidget);

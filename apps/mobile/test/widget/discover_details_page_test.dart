@@ -68,38 +68,34 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.scrollPageUntilVisible(
-      find.text('Plan this recharge'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
 
-    expect(find.text('Add to Scenario'), findsNothing);
-    expect(find.text('Build route'), findsNothing);
-    expect(find.text('Find similar'), findsOneWidget);
+    expect(find.text('Добавить в сценарий'), findsNothing);
+    expect(find.text('Найти похожее'), findsOneWidget);
+    expect(find.text('Создать маршрут'), findsOneWidget);
   });
 
-  fullPageTestWidgets('renders action hub and opens contextual map', (
+  fullPageTestWidgets('renders utility actions and opens contextual map', (
     tester,
   ) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
+    await _openUtilityMenu(tester);
+    expect(find.text('Добавить в сценарий'), findsOneWidget);
+    expect(find.text('Найти похожее'), findsOneWidget);
+    expect(find.text('Создать похожее'), findsOneWidget);
+    expect(find.text('Посмотреть маршрут'), findsOneWidget);
+    expect(find.text('Создать маршрут'), findsOneWidget);
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+
     await tester.scrollPageUntilVisible(
-      find.text('Plan this recharge'),
+      find.text('Показать на карте'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Plan this recharge'), findsOneWidget);
-    expect(find.text('Build route'), findsNothing);
-    expect(find.text('Add to Scenario'), findsOneWidget);
-    expect(find.text('Add this stop to a personal plan'), findsOneWidget);
-    expect(find.text('Find similar'), findsOneWidget);
-    expect(find.text('Create similar'), findsOneWidget);
-    expect(find.text('Route from this'), findsOneWidget);
-    expect(find.text('Calm walk · Coffee'), findsOneWidget);
-
-    await tester.tap(find.text('Map'));
+    await tester.tap(find.text('Показать на карте'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -114,12 +110,8 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Route map'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Route map'));
+    await _openUtilityMenu(tester);
+    await tester.tap(find.text('Посмотреть маршрут'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -134,12 +126,8 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Find similar'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Find similar'));
+    await _openUtilityMenu(tester);
+    await tester.tap(find.text('Найти похожее'));
     await tester.pumpAndSettle();
 
     expect(find.text('Search page'), findsOneWidget);
@@ -149,12 +137,8 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Create similar'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Create similar'));
+    await _openUtilityMenu(tester);
+    await tester.tap(find.text('Создать похожее'));
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
@@ -167,12 +151,8 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Create route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Create route'));
+    await _openUtilityMenu(tester);
+    await tester.tap(find.text('Создать маршрут'));
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
@@ -191,7 +171,8 @@ void main() {
   ) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
-    expect(find.text('Mark as visited'), findsNothing);
+    await _openUtilityMenu(tester);
+    expect(find.text('Отметить посещённым'), findsNothing);
   });
 
   fullPageTestWidgets('an explicit place can be marked as visited', (
@@ -212,13 +193,9 @@ void main() {
       await _detailsApp(visitedController: visitedController),
     );
     await tester.pumpAndSettle();
-    await tester.scrollPageUntilVisible(
-      find.text('Mark as visited'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
 
-    await tester.tap(find.text('Mark as visited'));
+    await tester.tap(find.text('Отметить посещённым'));
     await tester.pumpAndSettle();
     expect(find.text('When did you visit?'), findsOneWidget);
     await tester.tap(find.text('OK'));
@@ -229,6 +206,12 @@ void main() {
     expect(repository.items.single.evidence, VisitEvidence.selfReported);
     expect(find.textContaining('Added to Visit history'), findsOneWidget);
   });
+}
+
+/// Actions moved from the legacy in-body hub into the hero utility menu.
+Future<void> _openUtilityMenu(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Поделиться и другие действия'));
+  await tester.pumpAndSettle();
 }
 
 DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;

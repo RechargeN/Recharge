@@ -793,10 +793,11 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
-      // Session (generic success-hub flow; Recharge Activity now requires
-      // its own accessNotes/location fields per ACT-CRT-01 spec, which this
-      // generic-fields draft never sets).
-      createController.setObjectType(CreateObjectType.session);
+      // Class / Workshop (generic success-hub flow; Recharge Activity needs
+      // its own accessNotes/location fields per ACT-CRT-01 and Session its
+      // own resource/schedule/price per SES-CRT-01, which this generic-fields
+      // draft never sets).
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',

@@ -274,14 +274,20 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Session (see comment on the "partial attendance" test above for why
-    // activity no longer fits this generic publish-success example).
-    controller.setObjectType(CreateObjectType.session);
+    // Recharge Activity: Session has its own typed validator that also
+    // requires a resource, weekly rules and price (SES-CRT-01), so it no
+    // longer fits as the minimal generic publish-success example.
+    controller.setObjectType(CreateObjectType.activity);
     controller.updateTitle('My Event');
-    controller.updateMainCategory('outdoor_nature_walking');
+    controller.updateShortDescription(
+      'A quiet, lesser-known viewpoint with a great sunset view.',
+    );
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
-    controller.updateStartDateTime('2026-05-01T10:00:00Z');
+    controller.updateActivityCoordinates(latitude: '56.51', longitude: '27.33');
+    controller.confirmActivityPin();
+    controller.updateActivityAccessNotes('Trail off the marked path.');
+    controller.updateCategoryCriterion('difficulty', 'easy');
 
     final success = await controller.publishDraft();
 
