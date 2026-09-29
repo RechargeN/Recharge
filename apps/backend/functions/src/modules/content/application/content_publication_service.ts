@@ -54,7 +54,10 @@ import type { MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
 import type { ContentActor, PublisherEligibilityPort } from './ports/publisher_eligibility_port.js';
 import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
-import type { ContentValidationContext } from '../domain/type_rules/validation_context.js';
+import type {
+  ContentValidationContext,
+  PublishedObjectLookup,
+} from '../domain/type_rules/validation_context.js';
 
 export interface ContentIdGenerator {
   newId(): EntityId;
@@ -70,6 +73,8 @@ export interface ContentPublicationServiceDeps {
   readonly ids: ContentIdGenerator;
   /** Server-owned type flags. Every type is disabled unless listed here. */
   readonly enabledTypes: ReadonlySet<ContentTypeId>;
+  /** Live status of published objects a Collection references (Catalog/Content owners). */
+  readonly publishedObjects?: PublishedObjectLookup;
 }
 
 export type ContentCommandData = ContentDraft | PublicationSubmission | PublishedRevision;
@@ -408,6 +413,10 @@ export class ContentPublicationService {
       publisherRef: draft.publisherRef,
       createdByUserId: draft.createdByUserId,
       nowUtc,
+      draftRevision: draft.revision,
+      ...(this.deps.publishedObjects === undefined
+        ? {}
+        : { publishedObjects: this.deps.publishedObjects }),
       market: resolved.market,
       lookups: resolved.lookups,
     };

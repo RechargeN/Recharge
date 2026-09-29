@@ -4,13 +4,14 @@ import {
   type ContentTypeId,
 } from '../../../contracts/content_v1.js';
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
+import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v3';
+export const contentTypeRegistryRevision = 'content-type-registry-v4';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -193,9 +194,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('collection', {
     discoverFamily: 'Collection',
-    sourceAuthority: 'Collection revision of stable published object IDs (CLG-CRT-01)',
+    sourceAuthority: 'Collection / Guide create block (CLG-CRT-01 v1.0, Approved)',
     sourceResolver: 'published_object_membership',
-    unavailable: { reason: 'source_contract_pending' },
+    rules: { validate: validateCollectionBody, mediaIds: collectionMediaIds },
   }),
 ]);
 

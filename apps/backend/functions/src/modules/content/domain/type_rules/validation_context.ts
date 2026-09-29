@@ -23,12 +23,28 @@ export interface ReferenceLookups {
   pointInServiceArea(latitude: number, longitude: number): boolean | undefined;
 }
 
+/** Object types a Collection may reference (CLG-CRT-01 §3.12). */
+export type CollectionObjectType =
+  'place' | 'route' | 'bookableSession' | 'classWorkshop' | 'rental';
+
+/**
+ * Live status of a referenced published object, answered by the owning
+ * Content/Catalog authority. `undefined` means it could not be resolved and the
+ * rule fails closed; a client-supplied snapshot is never authority.
+ */
+export interface PublishedObjectLookup {
+  statusOf(objectType: CollectionObjectType, objectId: string): 'ready' | 'unavailable' | undefined;
+}
+
 export interface ContentValidationContext {
   readonly typeId: ContentTypeId;
   readonly marketId: MarketId;
   readonly publisherRef: PublisherRefV1;
   readonly createdByUserId: string;
   readonly nowUtc: string;
+  /** Revision of the draft being validated (post-update, i.e. current). */
+  readonly draftRevision: number;
+  readonly publishedObjects?: PublishedObjectLookup;
   readonly market: { readonly currencyCode: string; readonly timezoneId: string };
   readonly lookups: ReferenceLookups;
 }

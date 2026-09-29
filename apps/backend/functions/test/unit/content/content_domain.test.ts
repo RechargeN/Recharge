@@ -85,7 +85,6 @@ const expectedUnavailable: Readonly<
 > = {
   event: { reason: 'source_contract_pending', dependency: undefined },
   rental: { reason: 'source_contract_pending', dependency: undefined },
-  collection: { reason: 'source_contract_pending', dependency: undefined },
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
   scenario: { reason: 'dependency_pending', dependency: 'BCK-10' },
   find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
@@ -96,10 +95,10 @@ const expectedUnavailable: Readonly<
   },
 };
 /** Types whose approved source rules are implemented; grows one type per commit. */
-const expectedAvailable = ['place', 'activity'] as const;
+const expectedAvailable = ['place', 'activity', 'collection'] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v3');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v4');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
