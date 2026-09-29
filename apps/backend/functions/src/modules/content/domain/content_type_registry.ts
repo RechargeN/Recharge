@@ -6,18 +6,52 @@ import {
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
+/** Bump when an entry's policy or availability changes; pinned by tests. */
+export const contentTypeRegistryRevision = 'content-type-registry-v1';
+
+/** How the publication adapter obtains and pins the type's source. */
+export type ContentSourceResolver =
+  /** The draft body itself is the source, validated by the type validator. */
+  | 'inline_body'
+  /** An immutable revision owned by another BCK is pinned by reference. */
+  | 'pinned_immutable_revision'
+  /** Stable IDs of already published objects, order-checked. */
+  | 'published_object_membership';
+
+export type ContentTypeUnavailableReason =
+  /** No accepted backend source contract exists for the type yet. */
+  | 'source_contract_pending'
+  /** The source lives in another BCK whose contract is not implemented. */
+  | 'dependency_pending';
+
+export type ContentTypeAvailability =
+  | { readonly status: 'available' }
+  | {
+      readonly status: 'unavailable';
+      readonly reason: ContentTypeUnavailableReason;
+      /** Owning authority the type is waiting for, when it is not Content. */
+      readonly dependency?: string;
+    };
+
 export interface ContentTypeRegistryEntry {
   readonly typeId: ContentTypeId;
   readonly typeSchemaMajor: 1;
   readonly validatorRevision: string;
+  /** Authority that owns the source the adapter validates or pins. */
+  readonly sourceAuthority: string;
+  readonly sourceResolver: ContentSourceResolver;
   readonly requiredCapabilities: Readonly<Record<ContentAction, string>>;
   readonly allowedPublisherTypes: readonly ('user' | 'page')[];
   readonly moderationProfileId: string;
+  readonly visibilityPolicy: 'public_catalog' | 'consent_limited';
+  readonly marketPolicy: 'single_market_per_content';
+  readonly localizedTextPolicy: 'per_locale_with_declared_fallback';
   readonly discoverFamily: string;
   readonly mapperRevision: string;
+  readonly availability: ContentTypeAvailability;
   /**
-   * Source validator: returns bounded issue codes (empty = valid). Absent means
-   * the type has no registered source contract yet and fails closed.
+   * Source validator: returns bounded issue codes (empty = valid). Present
+   * exactly when the type is available; otherwise the type fails closed.
    */
   readonly validate?: (body: ContentBody) => readonly string[];
 }
@@ -30,21 +64,38 @@ const capabilities: Readonly<Record<ContentAction, string>> = Object.freeze({
   publish: 'content.publish',
 });
 
-function entry(
-  typeId: ContentTypeId,
-  discoverFamily: string,
-  validate?: (body: ContentBody) => readonly string[],
-): ContentTypeRegistryEntry {
+interface EntryInput {
+  readonly discoverFamily: string;
+  readonly sourceAuthority: string;
+  readonly sourceResolver: ContentSourceResolver;
+  readonly visibilityPolicy?: ContentTypeRegistryEntry['visibilityPolicy'];
+  readonly validate?: (body: ContentBody) => readonly string[];
+  readonly dependency?: string;
+}
+
+function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEntry {
+  const availability: ContentTypeAvailability =
+    input.validate !== undefined
+      ? { status: 'available' }
+      : input.dependency !== undefined
+        ? { status: 'unavailable', reason: 'dependency_pending', dependency: input.dependency }
+        : { status: 'unavailable', reason: 'source_contract_pending' };
   return Object.freeze({
     typeId,
     typeSchemaMajor: 1,
-    validatorRevision: validate === undefined ? 'unavailable' : `${typeId}-source-v1`,
+    validatorRevision: input.validate === undefined ? 'unavailable' : `${typeId}-source-v1`,
+    sourceAuthority: input.sourceAuthority,
+    sourceResolver: input.sourceResolver,
     requiredCapabilities: capabilities,
     allowedPublisherTypes: Object.freeze(['user', 'page'] as const),
     moderationProfileId: `${typeId}.default`,
-    discoverFamily,
+    visibilityPolicy: input.visibilityPolicy ?? 'public_catalog',
+    marketPolicy: 'single_market_per_content',
+    localizedTextPolicy: 'per_locale_with_declared_fallback',
+    discoverFamily: input.discoverFamily,
     mapperRevision: `${typeId}-mapper-v1`,
-    ...(validate === undefined ? {} : { validate }),
+    availability: Object.freeze(availability),
+    ...(input.validate === undefined ? {} : { validate: input.validate }),
   });
 }
 
@@ -122,28 +173,82 @@ function validOpeningHours(value: unknown): boolean {
   });
 }
 
-// Exactly the accepted ten Create types (BCK-07 §33.1). Only Place has a
-// registered source validator in this slice; every other entry is explicit but
-// unavailable and fails closed instead of falling back to a generic schema.
+// Exactly the accepted ten Create types (BCK-07 §33.1). An adapter is
+// registered for every type, but only types with a ready source rule are
+// available; the rest are explicit, carry their reason and fail closed instead
+// of falling back to a generic schema or Event.
 const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
-  entry('event', 'Event'),
-  entry('activity', 'Activity'),
-  entry('route', 'Route'),
-  entry('place', 'Place', validatePlaceBody),
-  entry('session', 'Session'),
-  entry('scenario', 'Scenario'),
-  entry('find_people', 'Find People'),
-  entry('class_workshop', 'Class/Workshop'),
-  entry('rental', 'Rental'),
-  entry('collection', 'Collection'),
+  entry('event', {
+    discoverFamily: 'Event',
+    sourceAuthority: 'Event classification spec v2.2.3',
+    sourceResolver: 'inline_body',
+  }),
+  entry('activity', {
+    discoverFamily: 'Activity',
+    sourceAuthority: 'Recharge Activity create block (ACT-CRT-01)',
+    sourceResolver: 'inline_body',
+  }),
+  entry('route', {
+    discoverFamily: 'Route',
+    sourceAuthority: 'BCK-11 immutable RouteRevision',
+    sourceResolver: 'pinned_immutable_revision',
+    dependency: 'BCK-11',
+  }),
+  entry('place', {
+    discoverFamily: 'Place',
+    sourceAuthority: 'Place create block (PLC-ADP-01)',
+    sourceResolver: 'inline_body',
+    validate: validatePlaceBody,
+  }),
+  entry('session', {
+    discoverFamily: 'Session',
+    sourceAuthority: 'Bookable Session create block (SES-CRT-01)',
+    sourceResolver: 'inline_body',
+  }),
+  entry('scenario', {
+    discoverFamily: 'Scenario',
+    sourceAuthority: 'BCK-10 immutable ScenarioRevision',
+    sourceResolver: 'pinned_immutable_revision',
+    dependency: 'BCK-10',
+  }),
+  entry('find_people', {
+    discoverFamily: 'Find People',
+    sourceAuthority: 'BCK-06 purpose-limited consented profile revision',
+    sourceResolver: 'pinned_immutable_revision',
+    visibilityPolicy: 'consent_limited',
+    dependency: 'BCK-06',
+  }),
+  entry('class_workshop', {
+    discoverFamily: 'Class/Workshop',
+    sourceAuthority: 'typed Class / Workshop experience revision (no typed create block yet)',
+    sourceResolver: 'inline_body',
+  }),
+  entry('rental', {
+    discoverFamily: 'Rental',
+    sourceAuthority: 'Rental / Equipment create block (RNT-CRT-01)',
+    sourceResolver: 'inline_body',
+  }),
+  entry('collection', {
+    discoverFamily: 'Collection',
+    sourceAuthority: 'Collection revision of stable published object IDs',
+    sourceResolver: 'published_object_membership',
+  }),
 ]);
 
 const byId: ReadonlyMap<string, ContentTypeRegistryEntry> = new Map(
   entries.map((item) => [item.typeId, item]),
 );
 
-if (entries.length !== contentTypeIds.length || contentTypeIds.some((id) => !byId.has(id)))
+// Load-time invariants: a broken registry must never start serving.
+if (
+  entries.length !== contentTypeIds.length ||
+  byId.size !== entries.length ||
+  contentTypeIds.some((id) => !byId.has(id))
+)
   throw new Error('content_type_registry_incomplete');
+for (const item of entries)
+  if ((item.availability.status === 'available') !== (item.validate !== undefined))
+    throw new Error(`content_type_registry_inconsistent:${item.typeId}`);
 
 export const contentTypeRegistry = entries;
 
@@ -152,6 +257,10 @@ export function resolveContentType(typeId: unknown): ContentTypeRegistryEntry | 
   return typeof typeId === 'string' ? (byId.get(typeId) ?? null) : null;
 }
 
-export function hasSourceContract(item: ContentTypeRegistryEntry): boolean {
-  return item.validate !== undefined;
+/** True only for a type whose source rules are implemented (fail closed otherwise). */
+export function isContentTypeAvailable(item: ContentTypeRegistryEntry): boolean {
+  return item.availability.status === 'available' && item.validate !== undefined;
 }
+
+/** Kept for existing call sites: a source contract exists iff the type is available. */
+export const hasSourceContract = isContentTypeAvailable;

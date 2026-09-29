@@ -23,7 +23,7 @@ import {
 } from '../domain/content_draft.js';
 import {
   contentTypeRegistry,
-  hasSourceContract,
+  isContentTypeAvailable,
   mediaIdsOf,
   resolveContentType,
   type ContentAction,
@@ -247,7 +247,7 @@ export class ContentPublicationService {
   ): Promise<ContentDraft> {
     const draft = await context.tx.draft(payload.draftId);
     if (draft === null) throw new ContentDomainRefusal('not_found');
-    this.usableType(draft.typeId);
+    this.usableType(draft.typeId, draft.typeSchemaMajor);
     await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
     const references = await this.pin(draft.marketId, draft.typeId, context.nowUtc);
     const updated = updateContentDraftBody(
@@ -268,7 +268,7 @@ export class ContentPublicationService {
   ): Promise<PublicationSubmission> {
     const draft = await context.tx.draft(payload.draftId);
     if (draft === null) throw new ContentDomainRefusal('not_found');
-    const entry = this.usableType(draft.typeId);
+    const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
     const eligibility = await this.authorize(
       context,
       draft.publisherRef,
@@ -319,7 +319,7 @@ export class ContentPublicationService {
     if (draft === null) throw new ContentDomainRefusal('not_found');
     if (draft.revision !== submission.draftRevision)
       throw new ContentDomainRefusal('source_revision_stale');
-    const entry = this.usableType(submission.typeId);
+    const entry = this.usableType(submission.typeId, draft.typeSchemaMajor);
     // Authority is re-read at publish time; the submit-time result is not reused.
     await this.authorize(
       context,
@@ -381,10 +381,13 @@ export class ContentPublicationService {
     });
   }
 
-  private usableType(typeId: ContentTypeId): ContentTypeRegistryEntry {
+  private usableType(typeId: ContentTypeId, storedSchemaMajor?: number): ContentTypeRegistryEntry {
     const entry = resolveContentType(typeId);
-    if (entry === null || !hasSourceContract(entry))
+    if (entry === null || !isContentTypeAvailable(entry))
       throw new ContentDomainRefusal('content_type_unsupported');
+    // A stored record from a newer/incompatible type schema is never coerced.
+    if (storedSchemaMajor !== undefined && storedSchemaMajor !== entry.typeSchemaMajor)
+      throw new ContentDomainRefusal('unsupported_version');
     if (!this.deps.enabledTypes.has(typeId)) throw new ContentDomainRefusal('type_disabled');
     return entry;
   }

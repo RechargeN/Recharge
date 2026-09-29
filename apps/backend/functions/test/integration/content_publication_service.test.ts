@@ -686,3 +686,68 @@ void test('queries of unknown content and unpublished content return not_found',
     },
   );
 });
+
+async function replaceStoredDraft(
+  repository: InMemoryContentRepository,
+  draftId: string,
+  change: Record<string, unknown>,
+): Promise<void> {
+  await repository.transact(async (tx) => {
+    const stored = await tx.draft(draftId);
+    assert.ok(stored);
+    tx.putDraft({ ...structuredClone(stored), ...change });
+  });
+}
+
+void test('stored records of an unavailable type fail closed on every later command', async () => {
+  const { service, repository } = harness([...contentTypeIds]);
+  const draft = await data<DraftLike>(service.execute(actorA, createCommand()));
+  await replaceStoredDraft(repository, draft.draftId, { typeId: 'event' });
+  assert.deepEqual(await service.execute(actorA, updateCommand(draft.draftId, 1, placeBody)), {
+    kind: 'rejected',
+    code: 'content_type_unsupported',
+  });
+  assert.deepEqual(await service.execute(actorA, submitCommand(draft.draftId, 1)), {
+    kind: 'rejected',
+    code: 'content_type_unsupported',
+  });
+  assert.equal(repository.snapshot().submissions.length, 0);
+});
+
+void test('a stored draft from a newer type schema major is never coerced', async () => {
+  const { service, repository } = harness();
+  const draft = await data<DraftLike>(service.execute(actorA, createCommand()));
+  await replaceStoredDraft(repository, draft.draftId, { typeSchemaMajor: 2 });
+  assert.deepEqual(await service.execute(actorA, updateCommand(draft.draftId, 1, placeBody)), {
+    kind: 'rejected',
+    code: 'unsupported_version',
+  });
+  assert.deepEqual(await service.execute(actorA, submitCommand(draft.draftId, 1)), {
+    kind: 'rejected',
+    code: 'unsupported_version',
+  });
+  assert.equal(repository.snapshot().submissions.length, 0);
+});
+
+void test('a type disabled after submit cannot be published', async () => {
+  const first = harness();
+  const draft = await data<DraftLike>(first.service.execute(actorA, createCommand()));
+  const submission = await data<SubmissionLike>(
+    first.service.execute(actorA, submitCommand(draft.draftId, 1)),
+  );
+  const disabled = new ContentPublicationService({
+    repository: first.repository,
+    eligibility: first.eligibility,
+    referenceData: first.referenceData,
+    moderation: first.moderation,
+    media: first.media,
+    clock: first.clock,
+    ids: new SequentialIds(),
+    enabledTypes: new Set<ContentTypeId>(),
+  });
+  assert.deepEqual(await disabled.execute(actorA, publishCommand(submission.submissionId, 0)), {
+    kind: 'rejected',
+    code: 'type_disabled',
+  });
+  assert.equal(first.repository.snapshot().revisions.length, 0);
+});
