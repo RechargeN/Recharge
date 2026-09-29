@@ -3,13 +3,14 @@ import {
   type ContentBody,
   type ContentTypeId,
 } from '../../../contracts/content_v1.js';
+import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v2';
+export const contentTypeRegistryRevision = 'content-type-registry-v3';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -140,9 +141,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('activity', {
     discoverFamily: 'Activity',
-    sourceAuthority: 'Recharge Activity create block (ACT-CRT-01)',
+    sourceAuthority: 'Recharge Activity create block (ACT-CRT-01 v1.4, Approved)',
     sourceResolver: 'inline_body',
-    unavailable: { reason: 'source_contract_pending' },
+    rules: { validate: validateActivityBody, mediaIds: activityMediaIds },
   }),
   entry('route', {
     discoverFamily: 'Route',

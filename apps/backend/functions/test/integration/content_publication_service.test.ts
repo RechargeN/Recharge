@@ -19,6 +19,10 @@ import type {
 import type { MediaReadinessPort } from '../../src/modules/content/application/ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from '../../src/modules/content/application/ports/moderation_disposition_port.js';
 import type { ReferenceDataPort } from '../../src/modules/content/application/ports/reference_data_port.js';
+import {
+  isContentTypeAvailable,
+  resolveContentType,
+} from '../../src/modules/content/domain/content_type_registry.js';
 import { toContentWireResult } from '../../src/modules/content/domain/failures.js';
 import { InMemoryContentRepository } from '../../src/modules/content/infrastructure/in_memory_content_repository.js';
 import { validateContentContract } from '../../src/contracts/validate_content_contract.js';
@@ -338,7 +342,10 @@ void test('every result satisfies the wire result schema', async () => {
 
 void test('all ten types are explicit; unknown types and Quick Plan fail closed without fallback', async () => {
   const { service } = harness([...contentTypeIds]);
-  for (const typeId of contentTypeIds.filter((id) => id !== 'place')) {
+  for (const typeId of contentTypeIds.filter((id) => {
+    const entry = resolveContentType(id);
+    return entry === null || !isContentTypeAvailable(entry);
+  })) {
     const result = await service.execute(actorA, createCommand({ typeId }));
     assert.deepEqual(result, { kind: 'rejected', code: 'content_type_unsupported' }, typeId);
   }

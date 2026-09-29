@@ -97,9 +97,9 @@ void test('Place is available in the registry with its rule and media extractor'
   assert.ok(entry);
   assert.equal(isContentTypeAvailable(entry), true);
   assert.equal(entry.validate, validatePlaceBody);
-  assert.deepEqual(
-    contentTypeRegistry.filter(isContentTypeAvailable).map((item) => item.typeId),
-    ['place'],
+  assert.equal(entry.mediaIds, placeMediaIds);
+  assert.ok(
+    contentTypeRegistry.filter(isContentTypeAvailable).some((item) => item.typeId === 'place'),
   );
 });
 

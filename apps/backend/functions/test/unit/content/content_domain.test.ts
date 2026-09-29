@@ -84,7 +84,6 @@ const expectedUnavailable: Readonly<
   Record<string, { readonly reason: string; readonly dependency: string | undefined }>
 > = {
   event: { reason: 'source_contract_pending', dependency: undefined },
-  activity: { reason: 'source_contract_pending', dependency: undefined },
   rental: { reason: 'source_contract_pending', dependency: undefined },
   collection: { reason: 'source_contract_pending', dependency: undefined },
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
@@ -97,10 +96,10 @@ const expectedUnavailable: Readonly<
   },
 };
 /** Types whose approved source rules are implemented; grows one type per commit. */
-const expectedAvailable = ['place'] as const;
+const expectedAvailable = ['place', 'activity'] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v2');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v3');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
@@ -129,7 +128,10 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
 void test('availability is explicit: rules and media extractor exist exactly when available', () => {
   for (const item of contentTypeRegistry) {
     if (isContentTypeAvailable(item)) {
-      assert.ok(expectedAvailable.includes(item.typeId as 'place'), `unexpected ${item.typeId}`);
+      assert.ok(
+        (expectedAvailable as readonly string[]).includes(item.typeId),
+        `unexpected ${item.typeId}`,
+      );
       assert.equal(item.availability.status, 'available');
       assert.equal(typeof item.validate, 'function');
       assert.equal(typeof item.mediaIds, 'function');
@@ -151,8 +153,11 @@ void test('availability is explicit: rules and media extractor exist exactly whe
 
 void test('the available set is exactly the implemented approved types', () => {
   assert.deepEqual(
-    contentTypeRegistry.filter(isContentTypeAvailable).map((item) => item.typeId),
-    [...expectedAvailable],
+    contentTypeRegistry
+      .filter(isContentTypeAvailable)
+      .map((item) => item.typeId)
+      .sort(),
+    [...expectedAvailable].sort(),
   );
   assert.equal(
     contentTypeRegistry.filter((item) => !isContentTypeAvailable(item)).length,
