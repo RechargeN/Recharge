@@ -35,6 +35,7 @@ class ScenarioDraftMapper {
 
   static const Set<String> _knownRootKeys = <String>{
     'schemaVersion',
+    'updatesEnabled',
     'revision',
     'format',
     'dateMode',
@@ -242,6 +243,7 @@ class ScenarioDraftMapper {
       origin: _origin(json['origin']),
       capabilities: _capabilities(json['capabilities']),
       unknownFields: unknown,
+      updatesEnabled: _bool(json['updatesEnabled']) ?? fallback.updatesEnabled,
     );
   }
 
@@ -249,6 +251,7 @@ class ScenarioDraftMapper {
     return <String, Object?>{
       ...value.unknownFields,
       'schemaVersion': ScenarioDraftData.currentSchemaVersion,
+      'updatesEnabled': value.updatesEnabled,
       'revision': value.revision,
       'format': _id(_formats, value.format),
       'dateMode': _id(_dateModes, value.dateMode),

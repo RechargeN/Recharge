@@ -20,7 +20,7 @@ logic и пользовательского потока.
 Это не сокращённый продуктовый контракт. Полный Route Builder остаётся
 заданным в [ROUTE_BUILDER_SPEC.md](../product/ROUTE_BUILDER_SPEC.md) v3.2,
 а порядок его реализации — в
-[ROUTE_CREATE_BLOCK_SLICE_SPEC.md](../product/ROUTE_CREATE_BLOCK_SLICE_SPEC.md).
+[ROUTE_CREATE_BLOCK_SLICE_SPEC.md](../product/route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md).
 Этапность меняет источник данных и эксплуатационный масштаб, но не модель
 Route, validation rules, versioning или итоговый пользовательский результат.
 

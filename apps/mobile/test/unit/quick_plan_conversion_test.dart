@@ -201,11 +201,69 @@ void main() {
       contains(QuickPlanConversionIssueCode.stopUnavailable),
     );
   });
+
+  test('preserves a catalog ref for every repeated occurrence', () async {
+    source.put(
+      _snapshot(
+        repeatCatalogObject: true,
+      ),
+    );
+
+    final result = await expand(
+      const ExpandQuickPlanToScenarioRequest(
+        quickPlanId: 'quick-plan-1',
+        expectedQuickPlanRevision: 4,
+        selectedStopIds: <String>{'stop-a', 'stop-b'},
+        copyPrivateNotes: false,
+        requesterId: 'owner-1',
+      ),
+    );
+
+    expect(result.scenario!.items, hasLength(2));
+    final sources = result.scenario!.items
+        .map((item) => item.source)
+        .whereType<ScenarioCatalogObjectSourceDraft>()
+        .toList(growable: false);
+    expect(sources, hasLength(2));
+    expect(sources.map((source) => source.objectId), <String>[
+      'place-123',
+      'place-123',
+    ]);
+    expect(result.quickPlanStopIdToScenarioItemId.values.toSet(), hasLength(2));
+    expect(
+      result.issues.map((issue) => issue.code),
+      isNot(contains(QuickPlanConversionIssueCode.legacySourceIdentityMissing)),
+    );
+  });
+
+  test('keeps missing legacy identity as a typed custom-location issue', () async {
+    source.put(_snapshot());
+
+    final result = await expand(
+      const ExpandQuickPlanToScenarioRequest(
+        quickPlanId: 'quick-plan-1',
+        expectedQuickPlanRevision: 4,
+        selectedStopIds: <String>{'stop-b'},
+        copyPrivateNotes: false,
+        requesterId: 'owner-1',
+      ),
+    );
+
+    expect(
+      result.scenario!.items.single.source,
+      isA<ScenarioCustomLocationSourceDraft>(),
+    );
+    expect(
+      result.issues.map((issue) => issue.code),
+      contains(QuickPlanConversionIssueCode.legacySourceIdentityMissing),
+    );
+  });
 }
 
 QuickPlanConversionSnapshot _snapshot({
   int revision = 4,
   bool secondAvailable = true,
+  bool repeatCatalogObject = false,
 }) {
   return QuickPlanConversionSnapshot(
     id: 'quick-plan-1',
@@ -225,6 +283,8 @@ QuickPlanConversionSnapshot _snapshot({
         isFree: false,
         priceMinorUnits: 500,
         available: true,
+        sourceObjectId: 'place-123',
+        sourceObjectType: ScenarioCatalogObjectType.place,
         requesterPrivateNote: 'Window seat',
       ),
       QuickPlanConversionStopSnapshot(
@@ -236,6 +296,10 @@ QuickPlanConversionSnapshot _snapshot({
         isFree: false,
         priceMinorUnits: 1200,
         available: secondAvailable,
+        sourceObjectId: repeatCatalogObject ? 'place-123' : null,
+        sourceObjectType: repeatCatalogObject
+            ? ScenarioCatalogObjectType.place
+            : null,
       ),
     ],
   );

@@ -146,10 +146,10 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: '${RouteNames.scenarioBuilder}?preview=1',
+            initialLocation: '${RouteNames.legacyScenarioBuilder}?preview=1',
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => ScenarioBuilderPage(
                   seedParameters: state.uri.queryParameters,
                 ),
@@ -209,7 +209,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('My plan'), findsOneWidget);
+    expect(find.text('My quick plan'), findsOneWidget);
     expect(find.text('After work'), findsOneWidget);
     expect(find.text('Your route'), findsOneWidget);
     expect(find.byKey(const Key('scenario-preview-edit')), findsOneWidget);
@@ -217,7 +217,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('scenario-preview-edit')));
     await tester.pumpAndSettle();
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Quick Plan'), findsOneWidget);
     expect(find.text('Ready route ideas'), findsOneWidget);
   });
 
@@ -231,7 +231,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Quick Plan'), findsOneWidget);
     expect(find.text('Build a recharge route'), findsOneWidget);
     expect(find.text('Slow coffee start'), findsOneWidget);
 
@@ -308,7 +308,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Calm city walk'), findsOneWidget);
+    expect(find.text('Calm city walk'), findsNWidgets(2));
     expect(find.text('Slow coffee start'), findsOneWidget);
     expect(find.text('Calm plan with 1 stops'), findsOneWidget);
   });
@@ -320,10 +320,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -349,7 +349,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
   });
@@ -361,10 +361,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -394,7 +394,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('social'), findsOneWidget);
     expect(find.text('social evening near me'), findsOneWidget);
     expect(find.textContaining('games_indoor.board_games'), findsOneWidget);
@@ -410,13 +410,13 @@ void main() {
         child: MaterialApp.router(
           routerConfig: GoRouter(
             initialLocation:
-                '${RouteNames.scenarioBuilder}?mood=social&duration=90'
+                '${RouteNames.legacyScenarioBuilder}?mood=social&duration=90'
                 '&free=1&walking=1'
                 '&steps=games_indoor.board_games,'
                 'music_nightlife.afterwork_drinks',
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => ScenarioBuilderPage(
                   seedParameters: state.uri.queryParameters,
                 ),
@@ -465,7 +465,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('games_indoor.board_games'), findsOneWidget);
     expect(
       find.textContaining('music_nightlife.afterwork_drinks'),
@@ -478,10 +478,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -514,7 +514,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('calm'), findsOneWidget);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
@@ -526,10 +526,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -559,7 +559,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('150'), findsOneWidget);
@@ -694,7 +694,7 @@ void main() {
     await _tapScrollableTooltip(tester, 'Open smart search on map');
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
@@ -707,10 +707,10 @@ void main() {
     await _tapScrollableTooltip(tester, 'Create listing from smart search');
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
 
@@ -740,7 +740,9 @@ void main() {
     expect(find.text('Slow coffee start'), findsOneWidget);
   });
 
-  fullPageTestWidgets('saves scenario into favorites', (tester) async {
+  fullPageTestWidgets('saves Quick Plan with an explicit target kind', (
+    tester,
+  ) async {
     final AuthController authController = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
       restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -781,9 +783,9 @@ void main() {
 
     final List<FavoriteItemEntity> saved = await repository.getFavorites();
     expect(saved, hasLength(1));
-    expect(saved.single.category, 'scenario');
-    expect(saved.single.title, contains('recharge scenario'));
-    expect(saved.single.targetRoute, contains('/scenario-builder'));
+    expect(saved.single.category, 'quick_plan');
+    expect(saved.single.title, contains('quick plan'));
+    expect(saved.single.targetRoute, contains('/quick-plan/'));
     expect(saved.single.targetRoute, contains('steps='));
   });
 }
@@ -817,12 +819,21 @@ Future<void> _pumpScenarioIntentHarness(
       ),
       child: MaterialApp.router(
         routerConfig: GoRouter(
-          initialLocation: RouteNames.scenarioBuilder,
+          initialLocation: RouteNames.legacyScenarioBuilder,
           routes: <RouteBase>[
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => ScenarioBuilderPage(
                 seedParameters: state.uri.queryParameters,
+              ),
+            ),
+            GoRoute(
+              path: '${RouteNames.quickPlan}/:quickPlanId',
+              builder: (context, state) => ScenarioBuilderPage(
+                seedParameters: <String, String>{
+                  ...state.uri.queryParameters,
+                  'quickPlanId': state.pathParameters['quickPlanId'] ?? '',
+                },
               ),
             ),
             GoRoute(

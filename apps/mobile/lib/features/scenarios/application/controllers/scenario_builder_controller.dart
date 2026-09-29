@@ -101,10 +101,6 @@ class ScenarioBuilderController extends ChangeNotifier {
   }
 
   void addSuggestedStep(ScenarioStepEntity step) {
-    final bool alreadyAdded = _state.draft.steps.any(
-      (ScenarioStepEntity current) => current.category == step.category,
-    );
-    if (alreadyAdded) return;
     _setDraftSteps(<ScenarioStepEntity>[
       ..._state.draft.steps,
       step.copyWith(id: _idGenerator.generate()),

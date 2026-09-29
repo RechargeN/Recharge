@@ -5,6 +5,8 @@ enum ScenarioMood { calm, social, active }
 class ScenarioStepEntity {
   const ScenarioStepEntity({
     this.id = '',
+    this.sourceObjectId,
+    this.sourceObjectType,
     required this.title,
     required this.subtitle,
     required this.category,
@@ -17,6 +19,8 @@ class ScenarioStepEntity {
   });
 
   final String id;
+  final String? sourceObjectId;
+  final String? sourceObjectType;
   final String title;
   final String subtitle;
   final String category;
@@ -27,9 +31,15 @@ class ScenarioStepEntity {
   final double latitude;
   final double longitude;
 
-  ScenarioStepEntity copyWith({String? id}) {
+  ScenarioStepEntity copyWith({
+    String? id,
+    String? sourceObjectId,
+    String? sourceObjectType,
+  }) {
     return ScenarioStepEntity(
       id: id ?? this.id,
+      sourceObjectId: sourceObjectId ?? this.sourceObjectId,
+      sourceObjectType: sourceObjectType ?? this.sourceObjectType,
       title: title,
       subtitle: subtitle,
       category: category,

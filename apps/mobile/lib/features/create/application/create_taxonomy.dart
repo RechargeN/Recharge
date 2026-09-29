@@ -88,9 +88,9 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
     description: 'Lightweight activity such as a walk or reset',
     defaultCategoryId: 'wellness_recharge',
     defaultSubcategoryId: 'recharge_walk',
-    requiresStartDateTime: true,
-    locationLabel: 'Meeting place',
-    priceLabel: 'Expected spend',
+    requiresStartDateTime: false,
+    locationLabel: 'Where to go',
+    priceLabel: '',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.route,
@@ -118,7 +118,10 @@ const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
     description: 'Time-based service, class, table, court, or session',
     defaultCategoryId: 'sport',
     defaultSubcategoryId: 'tennis',
-    requiresStartDateTime: true,
+    // Typed SessionSchedule is the single time authority
+    // (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §6.1) — the generic
+    // startDateTimeUtc gate does not apply once the typed writer is active.
+    requiresStartDateTime: false,
     locationLabel: 'Bookable venue',
     priceLabel: 'Booking price',
   ),

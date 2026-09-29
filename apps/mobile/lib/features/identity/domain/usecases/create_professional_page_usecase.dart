@@ -71,6 +71,10 @@ class CreateProfessionalPageUseCase {
       ownerUserId: normalizedUserId,
       kind: input.kind,
       displayName: displayName,
+      slug: ManagedPageEntity.localSlug(
+        displayName: displayName,
+        pageId: pageId,
+      ),
       avatar: '',
       verificationStatus: ManagedPageVerificationStatus.pending,
       lifecycle: ManagedPageLifecycle.active,
@@ -97,6 +101,7 @@ class CreateProfessionalPageUseCase {
         'page.content.create',
         'page.content.submit',
         'page.insights.view',
+        'page.team.manage',
       },
       revision: 1,
     );

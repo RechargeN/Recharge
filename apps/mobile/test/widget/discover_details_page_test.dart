@@ -75,7 +75,7 @@ void main() {
     );
 
     expect(find.text('Add to Scenario'), findsNothing);
-    expect(find.text('Build route'), findsOneWidget);
+    expect(find.text('Build route'), findsNothing);
     expect(find.text('Find similar'), findsOneWidget);
   });
 
@@ -91,7 +91,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Plan this recharge'), findsOneWidget);
-    expect(find.text('Build route'), findsOneWidget);
+    expect(find.text('Build route'), findsNothing);
     expect(find.text('Add to Scenario'), findsOneWidget);
     expect(find.text('Add this stop to a personal plan'), findsOneWidget);
     expect(find.text('Find similar'), findsOneWidget);
@@ -110,30 +110,7 @@ void main() {
     expect(find.text('27.333200'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario search and create actions', (
-    tester,
-  ) async {
-    await tester.pumpWidget(await _detailsApp());
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.text('Build route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Build route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('Morning yoga'), findsOneWidget);
-    expect(
-      find.text('wellness_recharge.calm_walk,food_drinks.coffee'),
-      findsOneWidget,
-    );
-
+  fullPageTestWidgets('opens Route, search and create actions', (tester) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
@@ -146,7 +123,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
     expect(
@@ -199,7 +176,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Morning yoga route'), findsOneWidget);
     expect(find.textContaining('Morning yoga'), findsWidgets);
     expect(find.text('120'), findsOneWidget);
@@ -332,7 +309,7 @@ Future<Widget> _detailsApp({
             ),
           ),
           GoRoute(
-            path: RouteNames.scenarioBuilder,
+            path: RouteNames.legacyScenarioBuilder,
             builder: (context, state) => Scaffold(
               body: Column(
                 children: <Widget>[

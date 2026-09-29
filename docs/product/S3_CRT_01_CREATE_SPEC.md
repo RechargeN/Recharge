@@ -10,7 +10,7 @@ Date: 2026-04-20
 - Publish happy path with status `pending_review`.
 - The accepted and implemented category system is defined in
   `docs/product/CATEGORY_SYSTEM.md`. The former
-  `docs/product/RECHARGE_CREATE_TAXONOMY_V1.md` is retained only as historical
+  `docs/product/taxonomy/RECHARGE_CREATE_TAXONOMY_V1.md` is retained only as historical
   context for the compatibility migration.
 
 ## Approved Decisions

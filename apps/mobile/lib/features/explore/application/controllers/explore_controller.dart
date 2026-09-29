@@ -16,11 +16,11 @@ class ExploreController extends ChangeNotifier {
     required LoadSettingsUseCase loadSettingsUseCase,
     required SaveSettingsUseCase saveSettingsUseCase,
     required AnalyticsService analyticsService,
-  })  : _loadProfileEditableUseCase = loadProfileEditableUseCase,
-        _saveProfileEditableUseCase = saveProfileEditableUseCase,
-        _loadSettingsUseCase = loadSettingsUseCase,
-        _saveSettingsUseCase = saveSettingsUseCase,
-        _analyticsService = analyticsService;
+  }) : _loadProfileEditableUseCase = loadProfileEditableUseCase,
+       _saveProfileEditableUseCase = saveProfileEditableUseCase,
+       _loadSettingsUseCase = loadSettingsUseCase,
+       _saveSettingsUseCase = saveSettingsUseCase,
+       _analyticsService = analyticsService;
 
   final LoadProfileEditableUseCase _loadProfileEditableUseCase;
   final SaveProfileEditableUseCase _saveProfileEditableUseCase;
@@ -47,14 +47,12 @@ class ExploreController extends ChangeNotifier {
     }
 
     _setState(
-      _state.copyWith(
-        status: ExploreStatus.loading,
-        clearMessage: true,
-      ),
+      _state.copyWith(status: ExploreStatus.loading, clearMessage: true),
     );
 
     try {
-      final ProfileEditableEntity profile = await _loadProfileEditableUseCase(userId) ??
+      final ProfileEditableEntity profile =
+          await _loadProfileEditableUseCase(userId) ??
           ProfileEditableEntity.defaults(email: email);
       final SettingsEntity settings =
           await _loadSettingsUseCase(userId) ?? SettingsEntity.defaults();
@@ -91,48 +89,33 @@ class ExploreController extends ChangeNotifier {
 
   void updateDisplayName(String value) {
     _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(displayName: value),
-      ),
+      _state.copyWith(profile: _state.profile.copyWith(displayName: value)),
     );
   }
 
   void updateAbout(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(about: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(about: value)));
   }
 
   void updateCity(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(city: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(city: value)));
   }
 
   void updateAvatar(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(avatar: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(avatar: value)));
   }
 
   Future<void> saveProfile() async {
     if (_state.userId.isEmpty) return;
-    _setState(_state.copyWith(status: ExploreStatus.saving, clearMessage: true));
+    _setState(
+      _state.copyWith(status: ExploreStatus.saving, clearMessage: true),
+    );
     await _saveProfileEditableUseCase(
       userId: _state.userId,
       profile: _state.profile,
     );
     _setState(
-      _state.copyWith(
-        status: ExploreStatus.ready,
-        message: 'Профиль сохранен',
-      ),
+      _state.copyWith(status: ExploreStatus.ready, message: 'Профиль сохранен'),
     );
     _analyticsService.track(
       'explore_profile_saved',
@@ -153,18 +136,16 @@ class ExploreController extends ChangeNotifier {
   }
 
   Future<void> updateNotifications(bool enabled) async {
-    final SettingsEntity next =
-        _state.settings.copyWith(notificationsEnabled: enabled);
+    final SettingsEntity next = _state.settings.copyWith(
+      notificationsEnabled: enabled,
+    );
     _setState(_state.copyWith(settings: next));
     await _saveSettings(next);
   }
 
   Future<void> _saveSettings(SettingsEntity next) async {
     if (_state.userId.isEmpty) return;
-    await _saveSettingsUseCase(
-      userId: _state.userId,
-      settings: next,
-    );
+    await _saveSettingsUseCase(userId: _state.userId, settings: next);
     _analyticsService.track(
       'explore_settings_updated',
       params: <String, Object?>{

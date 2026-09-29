@@ -49,9 +49,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(createControllerProvider);
-    final qualityController = ref.watch(
-      routeQualityAdminControllerProvider,
-    );
+    final qualityController = ref.watch(routeQualityAdminControllerProvider);
     final requests = controller.state.routeModerationRequests;
     final canManageQuality = widget.capabilities.contains('manage.route');
     final canModerateSafety = widget.capabilities.contains('moderate.route');
@@ -131,8 +129,8 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
                       onResolve: () => _decideSafety(
                         report,
                         RouteSafetyReportState.resolved,
-                        restore: report.severity ==
-                            RouteSafetySeverity.critical,
+                        restore:
+                            report.severity == RouteSafetySeverity.critical,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -182,13 +180,15 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
       reason = await _reason('Candidate decision reason');
       if (reason == null) return;
     }
-    await ref.read(routeQualityAdminControllerProvider).decideCandidate(
-      candidateId: candidate.id,
-      decision: decision,
-      actorId: widget.userId,
-      capabilities: widget.capabilities.toSet(),
-      reasonCode: reason,
-    );
+    await ref
+        .read(routeQualityAdminControllerProvider)
+        .decideCandidate(
+          candidateId: candidate.id,
+          decision: decision,
+          actorId: widget.userId,
+          capabilities: widget.capabilities.toSet(),
+          reasonCode: reason,
+        );
   }
 
   Future<void> _decideSafety(
@@ -198,14 +198,16 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
   }) async {
     final reason = await _reason('Safety decision reason');
     if (reason == null) return;
-    await ref.read(routeQualityAdminControllerProvider).decideSafety(
-      reportId: report.id,
-      state: state,
-      actorId: widget.userId,
-      capabilities: widget.capabilities.toSet(),
-      reasonCode: reason,
-      restoreRoute: restore,
-    );
+    await ref
+        .read(routeQualityAdminControllerProvider)
+        .decideSafety(
+          reportId: report.id,
+          state: state,
+          actorId: widget.userId,
+          capabilities: widget.capabilities.toSet(),
+          reasonCode: reason,
+          restoreRoute: restore,
+        );
   }
 
   Future<String?> _reason(String title) async {

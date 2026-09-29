@@ -64,7 +64,10 @@ void main() {
     expect(createUri.queryParameters['q'], 'museum');
     expect(createUri.queryParameters['category'], 'art');
     expect(createUri.queryParameters['budgetMax'], '10');
-    expect(routeUri.path, RouteNames.scenarioBuilder);
+    expect(routeUri.path, RouteNames.create);
+    expect(routeUri.queryParameters['source'], 'saved_search_route_seed');
+    expect(routeUri.queryParameters['type'], 'route');
+    expect(routeUri.queryParameters['category'], 'route');
     expect(routeUri.queryParameters['mood'], 'social');
     expect(routeUri.queryParameters['prompt'], contains('museum'));
   });
@@ -93,7 +96,10 @@ void main() {
     expect(createUri.queryParameters['subtitle'], 'museum today under 10');
     expect(createUri.queryParameters['category'], 'art');
     expect(createUri.queryParameters['budgetMax'], '10');
-    expect(routeUri.path, RouteNames.scenarioBuilder);
+    expect(routeUri.path, RouteNames.create);
+    expect(routeUri.queryParameters['source'], 'saved_search_route_seed');
+    expect(routeUri.queryParameters['type'], 'route');
+    expect(routeUri.queryParameters['category'], 'route');
     expect(routeUri.queryParameters['mood'], 'social');
     expect(routeUri.queryParameters['prompt'], 'museum today under 10');
   });
@@ -118,10 +124,11 @@ void main() {
     );
 
     expect(createUri.path, RouteNames.create);
-    expect(createUri.queryParameters['source'], 'scenario');
+    expect(createUri.queryParameters['source'], 'smart_route_seed');
+    expect(createUri.queryParameters['type'], 'route');
     expect(createUri.queryParameters['title'], 'Calm recharge route');
     expect(createUri.queryParameters['q'], item.prompt);
-    expect(createUri.queryParameters['category'], 'scenario');
+    expect(createUri.queryParameters['category'], 'route');
     expect(createUri.queryParameters['duration'], '120');
     expect(createUri.queryParameters['free'], '1');
     expect(
@@ -129,7 +136,10 @@ void main() {
       'food_drinks.coffee,wellness_recharge.calm_walk',
     );
 
-    expect(builderUri.path, RouteNames.scenarioBuilder);
+    expect(builderUri.path, RouteNames.create);
+    expect(builderUri.queryParameters['source'], 'smart_route_seed');
+    expect(builderUri.queryParameters['type'], 'route');
+    expect(builderUri.queryParameters['category'], 'route');
     expect(builderUri.queryParameters['mood'], 'calm');
     expect(builderUri.queryParameters['duration'], '120');
     expect(builderUri.queryParameters['free'], '1');
@@ -156,7 +166,10 @@ void main() {
     final Uri createUri = Uri.parse(mapScenarioCreateLocationForSeed(seed)!);
     final Uri searchUri = Uri.parse(mapScenarioSearchLocationForSeed(seed)!);
 
-    expect(builderUri.path, RouteNames.scenarioBuilder);
+    expect(builderUri.path, RouteNames.create);
+    expect(builderUri.queryParameters['source'], 'map_route_seed');
+    expect(builderUri.queryParameters['type'], 'route');
+    expect(builderUri.queryParameters['category'], 'route');
     expect(builderUri.queryParameters['mode'], isNull);
     expect(builderUri.queryParameters['mood'], 'social');
     expect(builderUri.queryParameters['duration'], '150');
@@ -167,11 +180,11 @@ void main() {
     );
 
     expect(createUri.path, RouteNames.create);
-    expect(createUri.queryParameters['source'], 'scenario');
-    expect(createUri.queryParameters['type'], 'event');
+    expect(createUri.queryParameters['source'], 'map_route_seed');
+    expect(createUri.queryParameters['type'], 'route');
     expect(createUri.queryParameters['title'], 'Social recharge route');
     expect(createUri.queryParameters['q'], 'social evening near me');
-    expect(createUri.queryParameters['category'], 'scenario');
+    expect(createUri.queryParameters['category'], 'route');
     expect(createUri.queryParameters['walking'], '1');
     expect(
       createUri.queryParameters['steps'],

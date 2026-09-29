@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
-import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../discover/application/controllers/discover_feed_controller.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
@@ -96,7 +95,12 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
     required List<SavedSearchEntity> savedSearches,
     required List<SmartSearchHistoryEntity> smartSearchHistory,
   }) {
-    if (items.isEmpty && savedSearches.isEmpty && smartSearchHistory.isEmpty) {
+    final favoriteItems = items
+        .where((item) => !_isLegacyScenarioFavorite(item))
+        .toList(growable: false);
+    if (favoriteItems.isEmpty &&
+        savedSearches.isEmpty &&
+        smartSearchHistory.isEmpty) {
       return _StateMessage(
         message: 'Пока нет сохраненных событий',
         actionLabel: 'Открыть Discover',
@@ -104,11 +108,11 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
       );
     }
 
-    final List<FavoriteItemEntity> visibleItems = _filteredItems(items);
+    final List<FavoriteItemEntity> visibleItems = _filteredItems(favoriteItems);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
       children: <Widget>[
-        if (items.isNotEmpty) ...<Widget>[
+        if (favoriteItems.isNotEmpty) ...<Widget>[
           _FavoritesFilterBar(
             selected: _filter,
             onChanged: (_FavoritesFilter next) {
@@ -132,10 +136,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                       context.go(item.targetRoute!);
                       return;
                     }
-                    if (item.category == 'scenario') {
-                      context.go(RouteNames.scenarioBuilder);
-                      return;
-                    }
                     context.push('${RouteNames.discoverDetails}/${item.id}');
                   },
                   onMap: () => context.go(_mapRouteForFavorite(item)),
@@ -151,7 +151,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         ],
         if (savedSearches.isNotEmpty ||
             smartSearchHistory.isNotEmpty) ...<Widget>[
-          if (items.isNotEmpty) const SizedBox(height: 10),
+          if (favoriteItems.isNotEmpty) const SizedBox(height: 10),
           _SavedIntentSection(
             savedSearches: savedSearches,
             smartSearchHistory: smartSearchHistory,
@@ -160,9 +160,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             },
             onMapSavedSearch: (SavedSearchEntity search) {
               context.go(_mapRouteForSavedSearch(search));
-            },
-            onRouteSavedSearch: (SavedSearchEntity search) {
-              context.go(_scenarioBuilderRouteForSavedSearch(search));
             },
             onCreateSavedSearch: (SavedSearchEntity search) {
               context.go(_createRouteForSavedSearch(search));
@@ -175,9 +172,6 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             },
             onMapSmartSearch: (SmartSearchHistoryEntity item) {
               context.go(_mapRouteForSmartSearch(item));
-            },
-            onRouteSmartSearch: (SmartSearchHistoryEntity item) {
-              context.go(_scenarioBuilderRouteForSmartSearch(item));
             },
             onCreateSmartSearch: (SmartSearchHistoryEntity item) {
               context.go(_createRouteForSmartSearch(item));
@@ -212,12 +206,10 @@ class _SavedIntentSection extends StatelessWidget {
     required this.smartSearchHistory,
     required this.onResumeSavedSearch,
     required this.onMapSavedSearch,
-    required this.onRouteSavedSearch,
     required this.onCreateSavedSearch,
     required this.onDeleteSavedSearch,
     required this.onResumeSmartSearch,
     required this.onMapSmartSearch,
-    required this.onRouteSmartSearch,
     required this.onCreateSmartSearch,
     required this.onDeleteSmartSearch,
   });
@@ -226,12 +218,10 @@ class _SavedIntentSection extends StatelessWidget {
   final List<SmartSearchHistoryEntity> smartSearchHistory;
   final ValueChanged<SavedSearchEntity> onResumeSavedSearch;
   final ValueChanged<SavedSearchEntity> onMapSavedSearch;
-  final ValueChanged<SavedSearchEntity> onRouteSavedSearch;
   final ValueChanged<SavedSearchEntity> onCreateSavedSearch;
   final ValueChanged<SavedSearchEntity> onDeleteSavedSearch;
   final ValueChanged<SmartSearchHistoryEntity> onResumeSmartSearch;
   final ValueChanged<SmartSearchHistoryEntity> onMapSmartSearch;
-  final ValueChanged<SmartSearchHistoryEntity> onRouteSmartSearch;
   final ValueChanged<SmartSearchHistoryEntity> onCreateSmartSearch;
   final ValueChanged<SmartSearchHistoryEntity> onDeleteSmartSearch;
 
@@ -256,11 +246,9 @@ class _SavedIntentSection extends StatelessWidget {
               subtitle: search.subtitle,
               chips: _queryChips(search.query),
               deleteTooltip: 'Delete saved conditions',
-              routeTooltip: 'Build route from saved conditions',
               createTooltip: 'Create listing from saved conditions',
               onResume: () => onResumeSavedSearch(search),
               onMap: () => onMapSavedSearch(search),
-              onRoute: () => onRouteSavedSearch(search),
               onCreate: () => onCreateSavedSearch(search),
               onDelete: () => onDeleteSavedSearch(search),
             ),
@@ -276,11 +264,9 @@ class _SavedIntentSection extends StatelessWidget {
               subtitle: _promptForQuery(item.query),
               chips: _smartSearchChips(item),
               deleteTooltip: 'Delete smart search',
-              routeTooltip: 'Build route from smart search',
               createTooltip: 'Create listing from smart search',
               onResume: () => onResumeSmartSearch(item),
               onMap: () => onMapSmartSearch(item),
-              onRoute: () => onRouteSmartSearch(item),
               onCreate: () => onCreateSmartSearch(item),
               onDelete: () => onDeleteSmartSearch(item),
             ),
@@ -342,11 +328,9 @@ class _SavedIntentCard extends StatelessWidget {
     required this.subtitle,
     required this.chips,
     required this.deleteTooltip,
-    required this.routeTooltip,
     required this.createTooltip,
     required this.onResume,
     required this.onMap,
-    required this.onRoute,
     required this.onCreate,
     required this.onDelete,
   });
@@ -357,11 +341,9 @@ class _SavedIntentCard extends StatelessWidget {
   final String subtitle;
   final List<_IntentChipData> chips;
   final String deleteTooltip;
-  final String routeTooltip;
   final String createTooltip;
   final VoidCallback onResume;
   final VoidCallback onMap;
-  final VoidCallback onRoute;
   final VoidCallback onCreate;
   final VoidCallback onDelete;
 
@@ -453,12 +435,6 @@ class _SavedIntentCard extends StatelessWidget {
                     icon: const Icon(Icons.map_outlined),
                     label: const Text('Map'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  tooltip: routeTooltip,
-                  onPressed: onRoute,
-                  icon: const Icon(Icons.route_outlined),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
@@ -938,11 +914,15 @@ _FavoriteKind _favoriteKind(FavoriteItemEntity item) {
 
 bool _isRouteFavorite(FavoriteItemEntity item) {
   final String category = item.category.trim().toLowerCase();
-  final String? targetRoute = item.targetRoute?.toLowerCase();
+  return category.contains('route') || category.contains('tour');
+}
+
+bool _isLegacyScenarioFavorite(FavoriteItemEntity item) {
+  final category = item.category.trim().toLowerCase();
+  final targetRoute = item.targetRoute?.toLowerCase();
   return category == 'scenario' ||
-      category.contains('route') ||
-      category.contains('tour') ||
-      (targetRoute?.contains(RouteNames.scenarioBuilder) ?? false);
+      item.planningTargetKind == FavoritePlanningTargetKind.scenario ||
+      (targetRoute?.contains(RouteNames.legacyScenarioBuilder) ?? false);
 }
 
 bool _isPlaceFavorite(FavoriteItemEntity item) {
@@ -1045,13 +1025,6 @@ String _createRouteForSavedSearch(SavedSearchEntity search) {
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
-String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
-  return _scenarioBuilderRouteForQuery(
-    search.query,
-    prompt: _promptForQuery(search.query),
-  );
-}
-
 String _searchRouteForSmartSearch(SmartSearchHistoryEntity item) {
   return Uri(
     path: RouteNames.smartSearch,
@@ -1082,14 +1055,14 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._smartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -1101,22 +1074,6 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
     'subtitle': item.prompt,
   };
   return Uri(path: RouteNames.create, queryParameters: params).toString();
-}
-
-String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
-    item,
-  );
-  if (parseResult != null) {
-    return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
-    ).toString();
-  }
-  final String prompt = item.prompt.trim().isEmpty
-      ? _promptForQuery(item.query)
-      : item.prompt.trim();
-  return _scenarioBuilderRouteForQuery(item.query, prompt: prompt);
 }
 
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
@@ -1133,7 +1090,7 @@ Map<String, String> _smartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -1164,43 +1121,6 @@ Map<String, String> _queryParametersForQuery(DiscoverQuery query) {
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
   };
-}
-
-String _scenarioBuilderRouteForQuery(
-  DiscoverQuery query, {
-  required String prompt,
-}) {
-  final Map<String, String> params = <String, String>{
-    'mood': _scenarioMoodForQuery(query),
-    'duration': query.radiusMeters <= 5000 ? '120' : '180',
-    'walking': query.unlimitedRadius ? '0' : '1',
-    if (query.freeOnly) 'free': '1',
-    if (prompt.isNotEmpty) 'prompt': prompt,
-  };
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
-  ).toString();
-}
-
-String _scenarioMoodForQuery(DiscoverQuery query) {
-  final String queryText = query.queryText.toLowerCase();
-  final Set<String> normalizedCategories = query.selectedCategoryIds
-      .map(normalizeRechargeContentGroupId)
-      .toSet();
-  if (queryText.contains('run') ||
-      queryText.contains('sport') ||
-      queryText.contains('tennis') ||
-      normalizedCategories.contains('sport') ||
-      normalizedCategories.contains('outdoor_nature_walking')) {
-    return 'active';
-  }
-  if (normalizedCategories.contains('art_culture_museums') ||
-      normalizedCategories.contains('music_nightlife') ||
-      normalizedCategories.contains('family_kids')) {
-    return 'social';
-  }
-  return 'calm';
 }
 
 String _promptForQuery(DiscoverQuery query) {

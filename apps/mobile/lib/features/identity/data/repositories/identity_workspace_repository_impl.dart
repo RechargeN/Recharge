@@ -6,22 +6,33 @@ import '../../domain/entities/workspace_ref.dart';
 import '../../domain/repositories/identity_workspace_repository.dart';
 import '../datasources/identity_workspace_local_datasource.dart';
 import '../datasources/mock_identity_fixture.dart';
+import '../datasources/public_professional_page_local_datasource.dart';
 
 class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
   const IdentityWorkspaceRepositoryImpl({
     required IdentityWorkspaceLocalDataSource localDataSource,
     required MockIdentityFixture mockFixture,
+    PublicProfessionalPageLocalDataSource? publicPageLocalDataSource,
   }) : _localDataSource = localDataSource,
-       _mockFixture = mockFixture;
+       _mockFixture = mockFixture,
+       _publicPageLocalDataSource = publicPageLocalDataSource;
 
   final IdentityWorkspaceLocalDataSource _localDataSource;
   final MockIdentityFixture _mockFixture;
+  final PublicProfessionalPageLocalDataSource? _publicPageLocalDataSource;
 
   @override
   Future<IdentityAccessSnapshot> loadAccessSnapshot(String userId) async {
     final IdentityAccessSnapshot fixture = _mockFixture.accessForUser(userId);
     final IdentityManagedPageLocalRecord local = await _localDataSource
         .loadManagedPageRecord(userId);
+    final PublicProfessionalPageLocalDataSource? publicDataSource =
+        _publicPageLocalDataSource;
+    if (publicDataSource != null) {
+      for (final ManagedPageEntity page in local.pages) {
+        await publicDataSource.upsertPage(page);
+      }
+    }
     return IdentityAccessSnapshot(
       userId: fixture.userId,
       globalRole: fixture.globalRole,
@@ -78,6 +89,7 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
         limitRequests: record.limitRequests,
       ),
     );
+    await _publicPageLocalDataSource?.upsertPage(page);
   }
 
   @override

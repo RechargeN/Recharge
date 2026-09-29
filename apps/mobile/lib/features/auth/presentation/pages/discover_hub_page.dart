@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
@@ -16,6 +17,10 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/application/state/favorites_state.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/auth_providers.dart';
+
+// Kept as a non-constant compatibility gate until the M10 code deletion.
+// Main intentionally exposes neither Scenario nor legacy Quick Plan.
+bool _legacyPlanningOnMainEnabled() => false;
 
 class DiscoverHubPage extends ConsumerStatefulWidget {
   const DiscoverHubPage({super.key, required this.favoriteApplied});
@@ -228,43 +233,58 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                 state: discoverState,
                 onViewAll: () => context.go(RouteNames.search),
                 onOpenDetails: (DiscoverItemEntity item) {
-                  context.push('${RouteNames.discoverDetails}/${item.id}');
+                  context.push(
+                    RouteNames.discoverDetailsCanonicalFor(
+                      CatalogObjectRef(
+                        objectType: item.catalogObjectType,
+                        objectId: item.id,
+                      ),
+                    ),
+                  );
                 },
               ),
-              const SizedBox(height: 18),
-              _SectionHeader(
-                title: 'Quick scenarios',
-                actionLabel: 'Smart search',
-                onAction: () => context.go(RouteNames.search),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: _scenarios
-                    .map(
-                      (_ScenarioCardData scenario) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _ScenarioCard(
-                          scenario: scenario,
-                          onTap: () => _openScenario(scenario),
+              if (_legacyPlanningOnMainEnabled()) ...<Widget>[
+                const SizedBox(height: 18),
+                _SectionHeader(
+                  title: 'Quick scenarios',
+                  actionLabel: 'Smart search',
+                  onAction: () => context.go(RouteNames.search),
+                ),
+                const SizedBox(height: 10),
+                Column(
+                  children: _scenarios
+                      .map(
+                        (_ScenarioCardData scenario) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _ScenarioCard(
+                            scenario: scenario,
+                            onTap: () => _openScenario(scenario),
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
-              const SizedBox(height: 18),
-              _SectionHeader(
-                title: 'Route ideas',
-                actionLabel: 'Builder',
-                onAction: () => context.go(RouteNames.scenarioBuilder),
-              ),
-              const SizedBox(height: 10),
-              _HomeRouteTemplateRail(
-                templates: _routeTemplates,
-                onBuild: _openRouteTemplate,
-                onMap: _openRouteTemplateMap,
-                onCreate: _openRouteTemplateCreate,
-              ),
-              if (savedScenario != null) ...<Widget>[
+                      )
+                      .toList(growable: false),
+                ),
+                const SizedBox(height: 18),
+                _SectionHeader(
+                  title: 'Route ideas',
+                  actionLabel: 'Builder',
+                  onAction: () => context.go(
+                    Uri(
+                      path: RouteNames.create,
+                      queryParameters: const <String, String>{'type': 'route'},
+                    ).toString(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _HomeRouteTemplateRail(
+                  templates: _routeTemplates,
+                  onBuild: _openRouteTemplate,
+                  onMap: _openRouteTemplateMap,
+                  onCreate: _openRouteTemplateCreate,
+                ),
+              ],
+              if (_legacyPlanningOnMainEnabled() &&
+                  savedScenario != null) ...<Widget>[
                 const SizedBox(height: 12),
                 _SavedScenarioPanel(
                   scenario: savedScenario,
@@ -278,7 +298,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                   item: smartSearch,
                   onResume: () => _openSmartSearch(smartSearch),
                   onMap: () => _openSmartSearchMap(smartSearch),
-                  onRoute: () => _openSmartSearchRoute(smartSearch),
                   onCreate: () => _openSmartSearchCreate(smartSearch),
                 ),
               ],
@@ -288,16 +307,24 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                   search: savedSearch,
                   onResume: () => _openSavedSearch(savedSearch),
                   onMap: () => _openSavedSearchMap(savedSearch),
-                  onRoute: () => _openSavedSearchRoute(savedSearch),
                   onCreate: () => _openSavedSearchCreate(savedSearch),
                 ),
               ],
-              const SizedBox(height: 14),
-              _ForYouStrip(
-                onPopular: () => context.go(RouteNames.search),
-                onScenario: () => context.go(RouteNames.scenarioBuilder),
-                onCreate: () => context.push(RouteNames.create),
-              ),
+              if (_legacyPlanningOnMainEnabled()) ...<Widget>[
+                const SizedBox(height: 14),
+                _ForYouStrip(
+                  onPopular: () => context.go(RouteNames.search),
+                  onScenario: () => context.go(
+                    Uri(
+                      path: RouteNames.create,
+                      queryParameters: const <String, String>{
+                        'type': 'scenario',
+                      },
+                    ).toString(),
+                  ),
+                  onCreate: () => context.push(RouteNames.create),
+                ),
+              ],
               if (authState.message != null) ...<Widget>[
                 const SizedBox(height: 16),
                 Text(
@@ -323,7 +350,12 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   void _openSavedScenario(FavoriteItemEntity scenario) {
     final String? targetRoute = scenario.targetRoute;
     if (targetRoute == null || targetRoute.trim().isEmpty) {
-      context.go(RouteNames.scenarioBuilder);
+      context.go(
+        Uri(
+          path: RouteNames.create,
+          queryParameters: const <String, String>{'type': 'scenario'},
+        ).toString(),
+      );
       return;
     }
     context.go(targetRoute);
@@ -341,10 +373,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
     context.go(_mapRouteForSavedSearch(search));
   }
 
-  void _openSavedSearchRoute(SavedSearchEntity search) {
-    context.go(_scenarioBuilderRouteForSavedSearch(search));
-  }
-
   void _openSavedSearchCreate(SavedSearchEntity search) {
     context.go(_createRouteForSavedSearch(search));
   }
@@ -355,10 +383,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
 
   void _openSmartSearchMap(SmartSearchHistoryEntity item) {
     context.go(_mapRouteForSmartSearch(item));
-  }
-
-  void _openSmartSearchRoute(SmartSearchHistoryEntity item) {
-    context.go(_scenarioBuilderRouteForSmartSearch(item));
   }
 
   void _openSmartSearchCreate(SmartSearchHistoryEntity item) {
@@ -547,14 +571,12 @@ class _SavedSearchPanel extends StatelessWidget {
     required this.search,
     required this.onResume,
     required this.onMap,
-    required this.onRoute,
     required this.onCreate,
   });
 
   final SavedSearchEntity search;
   final VoidCallback onResume;
   final VoidCallback onMap;
-  final VoidCallback onRoute;
   final VoidCallback onCreate;
 
   @override
@@ -654,12 +676,6 @@ class _SavedSearchPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
-                  tooltip: 'Build route from saved search',
-                  onPressed: onRoute,
-                  icon: const Icon(Icons.route_outlined),
-                ),
-                const SizedBox(width: 10),
-                IconButton.filledTonal(
                   tooltip: 'Create listing from saved search',
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
@@ -678,14 +694,12 @@ class _SmartSearchPanel extends StatelessWidget {
     required this.item,
     required this.onResume,
     required this.onMap,
-    required this.onRoute,
     required this.onCreate,
   });
 
   final SmartSearchHistoryEntity item;
   final VoidCallback onResume;
   final VoidCallback onMap;
-  final VoidCallback onRoute;
   final VoidCallback onCreate;
 
   @override
@@ -798,12 +812,6 @@ class _SmartSearchPanel extends StatelessWidget {
                     icon: const Icon(Icons.map_outlined),
                     label: const Text('Map'),
                   ),
-                ),
-                const SizedBox(width: 10),
-                IconButton.filledTonal(
-                  tooltip: 'Build route from smart search',
-                  onPressed: onRoute,
-                  icon: const Icon(Icons.route_outlined),
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
@@ -1910,14 +1918,14 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._smartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
+        'source': 'smart_route_seed',
+        'type': 'route',
         'title': '${_capitalized(routeIntent.mood)} recharge route',
         'subtitle':
             '${routeIntent.stepCategories.length} stops · '
             '${routeIntent.durationMinutes} min · smart route',
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -1933,15 +1941,20 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
 
 String _scenarioBuilderRouteForTemplate(_HomeRouteTemplate template) {
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: _scenarioTemplateParameters(template),
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ..._scenarioTemplateParameters(template),
+      'source': 'route_template_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
 String _mapRouteForTemplate(_HomeRouteTemplate template) {
   final Map<String, String> params = <String, String>{
     ..._scenarioTemplateParameters(template),
-    'mode': 'scenario',
+    'mode': 'route',
   };
   return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
@@ -1949,12 +1962,12 @@ String _mapRouteForTemplate(_HomeRouteTemplate template) {
 String _createRouteForTemplate(_HomeRouteTemplate template) {
   final Map<String, String> params = <String, String>{
     ..._scenarioTemplateParameters(template),
-    'source': 'scenario',
-    'type': 'event',
+    'source': 'route_template_seed',
+    'type': 'route',
     'title': '${template.title} route',
     'subtitle': template.subtitle,
     'q': template.prompt,
-    'category': 'scenario',
+    'category': 'route',
   };
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
@@ -1991,28 +2004,6 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
   };
 }
 
-String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
-  final DiscoverQuery query = search.query;
-  final String prompt = _promptForSavedSearch(query);
-  return _scenarioBuilderRouteForQuery(query, prompt: prompt);
-}
-
-String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
-    item,
-  );
-  if (parseResult != null) {
-    return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
-    ).toString();
-  }
-  final String prompt = item.prompt.trim().isEmpty
-      ? _promptForSavedSearch(item.query)
-      : item.prompt.trim();
-  return _scenarioBuilderRouteForQuery(item.query, prompt: prompt);
-}
-
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
@@ -2027,7 +2018,7 @@ Map<String, String> _smartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -2037,23 +2028,6 @@ Map<String, String> _smartRouteParameters(
     if (routeIntent.stepCategories.isNotEmpty)
       'steps': routeIntent.stepCategories.join(','),
   };
-}
-
-String _scenarioBuilderRouteForQuery(
-  DiscoverQuery query, {
-  required String prompt,
-}) {
-  final Map<String, String> params = <String, String>{
-    'mood': _scenarioMoodForSavedSearch(query),
-    'duration': query.radiusMeters <= 5000 ? '120' : '180',
-    'walking': query.unlimitedRadius ? '0' : '1',
-    if (query.freeOnly) 'free': '1',
-    if (prompt.isNotEmpty) 'prompt': prompt,
-  };
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
-  ).toString();
 }
 
 String _titleForSmartSearch(DiscoverQuery query) {
@@ -2071,37 +2045,4 @@ String _capitalized(String value) {
   final String trimmed = value.trim();
   if (trimmed.isEmpty) return trimmed;
   return trimmed[0].toUpperCase() + trimmed.substring(1);
-}
-
-String _scenarioMoodForSavedSearch(DiscoverQuery query) {
-  final String queryText = query.queryText.toLowerCase();
-  final Set<String> normalizedCategories = query.selectedCategoryIds
-      .map(normalizeRechargeContentGroupId)
-      .toSet();
-  if (queryText.contains('run') ||
-      queryText.contains('sport') ||
-      queryText.contains('tennis') ||
-      normalizedCategories.contains('sport') ||
-      normalizedCategories.contains('outdoor_nature_walking')) {
-    return 'active';
-  }
-  if (normalizedCategories.contains('art_culture_museums') ||
-      normalizedCategories.contains('music_nightlife') ||
-      normalizedCategories.contains('family_kids')) {
-    return 'social';
-  }
-  return 'calm';
-}
-
-String _promptForSavedSearch(DiscoverQuery query) {
-  final List<String> parts = <String>[
-    if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
-    if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
-    query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
-  ];
-  return parts.join(' · ');
 }

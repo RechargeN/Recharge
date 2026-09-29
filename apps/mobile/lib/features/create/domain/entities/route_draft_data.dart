@@ -493,9 +493,7 @@ class RouteWaypointDraft {
     List<String> photoIds = const <String>[],
     this.verifiedAtUtc,
     this.access,
-  }) : technicalAttributeIds = List<String>.unmodifiable(
-         technicalAttributeIds,
-       ),
+  }) : technicalAttributeIds = List<String>.unmodifiable(technicalAttributeIds),
        photoIds = List<String>.unmodifiable(photoIds);
 
   final String id;

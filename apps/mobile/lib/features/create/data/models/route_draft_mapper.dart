@@ -665,9 +665,7 @@ abstract final class RouteDraftMapper {
           json['calculatedAtUtc'],
           'quality.calculatedAtUtc',
         ),
-        elevation: _elevation(
-          _map(json['elevation'], 'quality.elevation'),
-        ),
+        elevation: _elevation(_map(json['elevation'], 'quality.elevation')),
         surfaces: _listOrEmpty(json['surfaces'])
             .asMap()
             .entries
@@ -682,9 +680,7 @@ abstract final class RouteDraftMapper {
           json['unknownSurfaceDistanceMeters'],
           'quality.unknownSurfaceDistanceMeters',
         ),
-        difficulty: _difficulty(
-          _map(json['difficulty'], 'quality.difficulty'),
-        ),
+        difficulty: _difficulty(_map(json['difficulty'], 'quality.difficulty')),
         verifications: _listOrEmpty(json['verifications'])
             .asMap()
             .entries
@@ -713,43 +709,42 @@ abstract final class RouteDraftMapper {
             .toList(growable: false),
       };
 
-  static RouteElevationProfileDraft _elevation(
-    Map<String, Object?> json,
-  ) => RouteElevationProfileDraft(
-    availability: _enumValue(
-      RouteElevationAvailability.values,
-      json['availability'],
-      'quality.elevation.availability',
-    ),
-    source: _enumValue(
-      RouteQualitySource.values,
-      json['source'],
-      'quality.elevation.source',
-    ),
-    samples: _listOrEmpty(json['samples'])
-        .asMap()
-        .entries
-        .map((entry) {
-          final path = 'quality.elevation.samples[${entry.key}]';
-          final sample = _map(entry.value, path);
-          return RouteElevationSampleDraft(
-            distanceFromStartMeters: _double(
-              sample['distanceFromStartMeters'],
-              '$path.distanceFromStartMeters',
-            ),
-            elevationMeters: _double(
-              sample['elevationMeters'],
-              '$path.elevationMeters',
-            ),
-          );
-        })
-        .toList(growable: false),
-    ascentMeters: _nullableDouble(json['ascentMeters']),
-    descentMeters: _nullableDouble(json['descentMeters']),
-    minimumElevationMeters: _nullableDouble(json['minimumElevationMeters']),
-    maximumElevationMeters: _nullableDouble(json['maximumElevationMeters']),
-    attribution: _nullableString(json['attribution']),
-  );
+  static RouteElevationProfileDraft _elevation(Map<String, Object?> json) =>
+      RouteElevationProfileDraft(
+        availability: _enumValue(
+          RouteElevationAvailability.values,
+          json['availability'],
+          'quality.elevation.availability',
+        ),
+        source: _enumValue(
+          RouteQualitySource.values,
+          json['source'],
+          'quality.elevation.source',
+        ),
+        samples: _listOrEmpty(json['samples'])
+            .asMap()
+            .entries
+            .map((entry) {
+              final path = 'quality.elevation.samples[${entry.key}]';
+              final sample = _map(entry.value, path);
+              return RouteElevationSampleDraft(
+                distanceFromStartMeters: _double(
+                  sample['distanceFromStartMeters'],
+                  '$path.distanceFromStartMeters',
+                ),
+                elevationMeters: _double(
+                  sample['elevationMeters'],
+                  '$path.elevationMeters',
+                ),
+              );
+            })
+            .toList(growable: false),
+        ascentMeters: _nullableDouble(json['ascentMeters']),
+        descentMeters: _nullableDouble(json['descentMeters']),
+        minimumElevationMeters: _nullableDouble(json['minimumElevationMeters']),
+        maximumElevationMeters: _nullableDouble(json['maximumElevationMeters']),
+        attribution: _nullableString(json['attribution']),
+      );
 
   static Map<String, Object?> _elevationToJson(
     RouteElevationProfileDraft value,
@@ -801,10 +796,7 @@ abstract final class RouteDraftMapper {
       'quality.difficulty.recommendedDifficultyId',
     ),
     modelId: _string(json['modelId'], 'quality.difficulty.modelId'),
-    modelVersion: _int(
-      json['modelVersion'],
-      'quality.difficulty.modelVersion',
-    ),
+    modelVersion: _int(json['modelVersion'], 'quality.difficulty.modelVersion'),
     score: _double(json['score'], 'quality.difficulty.score'),
     missingElevation: _bool(
       json['missingElevation'],
@@ -837,16 +829,9 @@ abstract final class RouteDraftMapper {
     String path,
   ) => RouteVerificationRecordDraft(
     id: _string(json['id'], '$path.id'),
-    kind: _enumValue(
-      RouteVerificationKind.values,
-      json['kind'],
-      '$path.kind',
-    ),
+    kind: _enumValue(RouteVerificationKind.values, json['kind'], '$path.kind'),
     actorId: _string(json['actorId'], '$path.actorId'),
-    geometryRevision: _int(
-      json['geometryRevision'],
-      '$path.geometryRevision',
-    ),
+    geometryRevision: _int(json['geometryRevision'], '$path.geometryRevision'),
     verifiedAtUtc: _dateTime(json['verifiedAtUtc'], '$path.verifiedAtUtc'),
     evidenceMediaIds: _stringListOrEmpty(json['evidenceMediaIds']),
     note: _nullableString(json['note']),

@@ -198,12 +198,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 controller.deleteSavedSearch(search.id),
           ),
           const SizedBox(height: 16),
-          _SectionHeader(
-            title: 'Quick plans',
-            action: 'See all',
-            onAction: () =>
-                context.go('${RouteNames.scenarioBuilder}?preview=1'),
-          ),
+          _SectionHeader(title: 'Quick plans', action: null, onAction: null),
           const SizedBox(height: 6),
           _QuickPlanRail(onOpen: (String location) => context.go(location)),
         ],
@@ -1318,7 +1313,7 @@ class _QuickPlanData {
   final String steps;
 
   String get location => Uri(
-    path: RouteNames.scenarioBuilder,
+    path: RouteNames.quickPlanFor('quick-template-$mood-$minutes'),
     queryParameters: <String, String>{
       'preview': '1',
       'title': title,

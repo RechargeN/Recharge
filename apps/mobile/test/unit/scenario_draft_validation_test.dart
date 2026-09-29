@@ -77,6 +77,16 @@ void main() {
     );
   });
 
+  test('Scenario outside draft state requires at least one day', () {
+    final result = validate(
+      ScenarioDraftData.defaults(),
+      target: ScenarioValidationTarget.myScenarios,
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.issues.map((issue) => issue.code), contains('days_minimum'));
+  });
+
   test('blocks multiple selected alternatives in one group', () {
     final ScenarioDraftData source = _validDraft();
     final ScenarioItemDraft first = _visit(

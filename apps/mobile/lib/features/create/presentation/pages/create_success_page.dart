@@ -629,8 +629,13 @@ class _PublishedScenarioRouteContext {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _routeParameters(includeMode: false),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._routeParameters(includeMode: false),
+        'source': 'published_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
@@ -643,7 +648,7 @@ class _PublishedScenarioRouteContext {
 
   Map<String, String> _routeParameters({required bool includeMode}) {
     return <String, String>{
-      if (includeMode) 'mode': 'scenario',
+      if (includeMode) 'mode': 'route',
       'mood': mood,
       'duration': durationMinutes.toString(),
       'free': isFree ? '1' : '0',

@@ -14,6 +14,8 @@ class FavoriteItemModel {
     required this.isFree,
     required this.savedAtUtcIso,
     required this.targetRoute,
+    required this.planningTargetKind,
+    required this.planningTargetId,
     required this.coverImageUrl,
   });
 
@@ -28,6 +30,8 @@ class FavoriteItemModel {
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
+  final String? planningTargetKind;
+  final String? planningTargetId;
   final String coverImageUrl;
 
   factory FavoriteItemModel.fromJson(
@@ -55,6 +59,8 @@ class FavoriteItemModel {
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
+      planningTargetKind: json['planningTargetKind'] as String?,
+      planningTargetId: json['planningTargetId'] as String?,
       coverImageUrl: json['coverImageUrl'] as String? ?? '',
     );
   }
@@ -72,6 +78,8 @@ class FavoriteItemModel {
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,
+      'planningTargetKind': planningTargetKind,
+      'planningTargetId': planningTargetId,
       'coverImageUrl': coverImageUrl,
     };
   }
@@ -89,6 +97,8 @@ class FavoriteItemModel {
       isFree: entity.isFree,
       savedAtUtcIso: entity.savedAtUtc.toUtc().toIso8601String(),
       targetRoute: entity.targetRoute,
+      planningTargetKind: entity.planningTargetKind?.name,
+      planningTargetId: entity.planningTargetId,
       coverImageUrl: entity.coverImageUrl,
     );
   }
@@ -106,6 +116,10 @@ class FavoriteItemModel {
       isFree: isFree,
       savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
       targetRoute: targetRoute,
+      planningTargetKind: FavoritePlanningTargetKind.values
+          .where((value) => value.name == planningTargetKind)
+          .firstOrNull,
+      planningTargetId: planningTargetId,
       coverImageUrl: coverImageUrl,
     );
   }

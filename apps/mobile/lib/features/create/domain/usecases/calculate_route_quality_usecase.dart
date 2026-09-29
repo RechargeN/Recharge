@@ -64,17 +64,18 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
 
     final trackPoints = _trackPoints(route);
     final elevation = _elevationProfile(route, trackPoints);
-    final surfaces = route.metrics.surfaceDistanceMeters.entries
-        .where((entry) => entry.value > 0)
-        .map(
-          (entry) => RouteSurfaceMetricDraft(
-            surfaceId: entry.key,
-            distanceMeters: entry.value,
-            source: RouteQualitySource.derived,
-          ),
-        )
-        .toList(growable: false)
-      ..sort((left, right) => left.surfaceId.compareTo(right.surfaceId));
+    final surfaces =
+        route.metrics.surfaceDistanceMeters.entries
+            .where((entry) => entry.value > 0)
+            .map(
+              (entry) => RouteSurfaceMetricDraft(
+                surfaceId: entry.key,
+                distanceMeters: entry.value,
+                source: RouteQualitySource.derived,
+              ),
+            )
+            .toList(growable: false)
+          ..sort((left, right) => left.surfaceId.compareTo(right.surfaceId));
     final knownSurfaceDistance = surfaces.fold<double>(
       0,
       (total, surface) => total + surface.distanceMeters,
@@ -152,7 +153,8 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
     var ascent = 0.0;
     var descent = 0.0;
     for (var index = 1; index < normalizedElevations.length; index += 1) {
-      final delta = normalizedElevations[index] - normalizedElevations[index - 1];
+      final delta =
+          normalizedElevations[index] - normalizedElevations[index - 1];
       if (delta.abs() < policy.elevationNoiseThresholdMeters) continue;
       if (delta > 0) {
         ascent += delta;
@@ -167,8 +169,7 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
       samples: <RouteElevationSampleDraft>[
         for (var index = 0; index < available.length; index += 1)
           RouteElevationSampleDraft(
-            distanceFromStartMeters:
-                available[index].distanceFromStartMeters,
+            distanceFromStartMeters: available[index].distanceFromStartMeters,
             elevationMeters: normalizedElevations[index],
           ),
       ],
@@ -194,8 +195,7 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
       final isolatedSpike =
           (current - previous).abs() >= policy.elevationSpikeThresholdMeters &&
           (current - next).abs() >= policy.elevationSpikeThresholdMeters &&
-          (previous - next).abs() <
-              policy.elevationSpikeThresholdMeters / 2;
+          (previous - next).abs() < policy.elevationSpikeThresholdMeters / 2;
       if (isolatedSpike) result[index] = (previous + next) / 2;
     }
     return result;
@@ -295,13 +295,14 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
   }
 
   String? _elevationAttribution(RouteDraftData route) {
-    final attributions = route.segments
-        .map((segment) => segment.provenance.provider?.attribution)
-        .whereType<String>()
-        .where((value) => value.trim().isNotEmpty)
-        .toSet()
-        .toList(growable: false)
-      ..sort();
+    final attributions =
+        route.segments
+            .map((segment) => segment.provenance.provider?.attribution)
+            .whereType<String>()
+            .where((value) => value.trim().isNotEmpty)
+            .toSet()
+            .toList(growable: false)
+          ..sort();
     return attributions.isEmpty ? null : attributions.join(' · ');
   }
 }

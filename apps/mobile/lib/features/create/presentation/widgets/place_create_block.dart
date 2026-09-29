@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
 import '../../application/get_category_criteria_usecase.dart';
@@ -7,11 +11,13 @@ import '../../application/place_create_config.dart';
 import '../../application/state/create_state.dart';
 import '../../application/create_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/location_search_suggestion.dart';
 import '../../domain/entities/place_draft_data.dart';
 import '../../domain/entities/place_duplicate_candidate.dart';
 import '../../domain/entities/place_enrichment_proposal.dart';
 import '../../domain/entities/place_creation_policy.dart';
 import '../../domain/entities/place_validation_issue.dart';
+import 'location_search_suggestion_list.dart';
 
 class PlaceCreateBlock extends StatefulWidget {
   const PlaceCreateBlock({
@@ -35,6 +41,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
   int _periodDay = 1;
   bool _periodOvernight = false;
 
+  // Matches LocationSearchRuntimeConfig.debounceMilliseconds' default.
+  static const Duration _locationSearchDebounce = Duration(milliseconds: 350);
+  Timer? _locationSearchDebounceTimer;
+
   TextEditingController _field(String id, String value) {
     final TextEditingController controller = _fields.putIfAbsent(
       id,
@@ -54,7 +64,22 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     for (final TextEditingController controller in _fields.values) {
       controller.dispose();
     }
+    _locationSearchDebounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _onTitleChanged(String value) {
+    widget.controller.updateTitle(value);
+    _locationSearchDebounceTimer?.cancel();
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      widget.controller.clearPlaceLocationSuggestions();
+      return;
+    }
+    _locationSearchDebounceTimer = Timer(_locationSearchDebounce, () {
+      if (!mounted) return;
+      widget.controller.searchPlaceLocation(trimmed);
+    });
   }
 
   @override
@@ -157,8 +182,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           label: 'Place name *',
           value: draft.title,
           maxLength: 100,
-          onChanged: widget.controller.updateTitle,
+          onChanged: _onTitleChanged,
         ),
+        if (widget.state.placeLocationSearchLoading)
+          const Padding(
+            padding: EdgeInsets.only(top: 4, bottom: 4),
+            child: LinearProgressIndicator(minHeight: 2),
+          ),
+        if (widget.state.placeLocationSuggestions.isNotEmpty)
+          LocationSearchSuggestionList(
+            suggestions: widget.state.placeLocationSuggestions,
+            onSelected: (LocationSearchSuggestion suggestion) {
+              widget.controller.selectPlaceLocationSuggestion(suggestion);
+            },
+          ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomyCategory>(
           initialValue: selectedCategory,
@@ -783,8 +820,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           alignment: Alignment.centerLeft,
           child: OutlinedButton.icon(
             onPressed: () {
-              final int? open = _parseTime(_field('period-open', '09:00').text);
-              final int? close = _parseTime(
+              final int? open = parseClockMinute(
+                _field('period-open', '09:00').text,
+              );
+              final int? close = parseClockMinute(
                 _field('period-close', '18:00').text,
               );
               if (open == null || close == null) return;
@@ -1711,13 +1750,4 @@ String _weekdayShort(int day) => const <String>[
 String _minuteLabel(int minute) {
   return '${(minute ~/ 60).toString().padLeft(2, '0')}:'
       '${(minute % 60).toString().padLeft(2, '0')}';
-}
-
-int? _parseTime(String raw) {
-  final List<String> parts = raw.trim().split(':');
-  if (parts.length != 2) return null;
-  final int? hour = int.tryParse(parts[0]);
-  final int? minute = int.tryParse(parts[1]);
-  if (hour == null || minute == null || hour > 23 || minute > 59) return null;
-  return hour * 60 + minute;
 }

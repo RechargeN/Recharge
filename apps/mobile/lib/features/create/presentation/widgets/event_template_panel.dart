@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -11,56 +12,56 @@ class EventTemplatePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<CreateTemplateEntity> templates = controller.eventTemplates;
-    return Card(
+    return CreateFlowSection(
       key: const Key('event-template-panel'),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.auto_awesome_motion_outlined),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Event templates',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Icon(
+                Icons.auto_awesome_motion_outlined,
+                color: RechargeTheme.emerald900,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Event templates',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                Text('${templates.length} saved'),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                OutlinedButton.icon(
-                  key: const Key('open-event-templates'),
-                  onPressed: () => _openManager(context),
-                  icon: const Icon(Icons.view_list_outlined),
-                  label: const Text('Choose or manage'),
-                ),
-                FilledButton.tonalIcon(
-                  key: const Key('save-event-template'),
-                  onPressed: () => _saveCurrent(context),
-                  icon: const Icon(Icons.bookmark_add_outlined),
-                  label: const Text('Save current'),
-                ),
-              ],
-            ),
-            if (controller.lastEventTemplate case final template?) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                'Next “Create another Event” will use: ${template.name}',
-                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Text('${templates.length} saved'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              OutlinedButton.icon(
+                key: const Key('open-event-templates'),
+                onPressed: () => _openManager(context),
+                icon: const Icon(Icons.view_list_outlined),
+                label: const Text('Choose or manage'),
+              ),
+              FilledButton.tonalIcon(
+                key: const Key('save-event-template'),
+                onPressed: () => _saveCurrent(context),
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: const Text('Save current'),
               ),
             ],
+          ),
+          if (controller.lastEventTemplate case final template?) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              'Next “Create another Event” will use: ${template.name}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

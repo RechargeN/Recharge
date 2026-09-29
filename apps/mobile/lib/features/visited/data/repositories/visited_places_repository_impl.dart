@@ -30,9 +30,7 @@ class VisitedPlacesRepositoryImpl implements VisitedPlacesRepository {
         .readVisitedPlaces(visit.userId);
     final List<VisitedPlaceEntity> entities = current
         .map((VisitedPlaceModel model) => model.toEntity())
-        .where(
-          (VisitedPlaceEntity existing) => existing.userId == visit.userId,
-        )
+        .where((VisitedPlaceEntity existing) => existing.userId == visit.userId)
         .toList(growable: true);
     for (final VisitedPlaceEntity existing in entities) {
       if (existing.placeId == visit.placeId &&

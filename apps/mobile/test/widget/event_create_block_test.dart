@@ -66,7 +66,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('event-create-block')), findsOneWidget);
-    expect(find.text('1. Basics & media'), findsOneWidget);
+    expect(find.text('Step 1 of 5 · Basics'), findsOneWidget);
 
     controller.applyTaxonomySelection(
       mainCategory: 'entertainment',
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _tapVisible(tester, const Key('event-step-next'));
-    expect(find.text('2. Location & schedule'), findsOneWidget);
+    expect(find.text('Step 2 of 5 · When & where'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const Key('event-address')),
@@ -125,11 +125,11 @@ void main() {
           .map((issue) => '${issue.code}:${issue.message}')
           .join(', '),
     );
-    expect(find.text('3. Requirements & amenities'), findsOneWidget);
+    expect(find.text('Step 3 of 5 · Requirements'), findsOneWidget);
     await _tapVisible(tester, const Key('event-step-next'));
-    expect(find.text('4. Price & participants'), findsOneWidget);
+    expect(find.text('Step 4 of 5 · Price & people'), findsOneWidget);
     await _tapVisible(tester, const Key('event-step-next'));
-    expect(find.text('5. Preview & publish'), findsOneWidget);
+    expect(find.text('Step 5 of 5 · Publish'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pumpAndSettle();

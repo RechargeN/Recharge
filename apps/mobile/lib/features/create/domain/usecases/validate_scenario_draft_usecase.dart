@@ -68,6 +68,13 @@ class ValidateScenarioDraftUseCase {
     _validateParty(draft, issue);
     _validateConstraints(draft, issue);
 
+    if (draft.days.isEmpty) {
+      issue(
+        code: 'days_minimum',
+        path: 'days',
+        message: 'A Scenario must contain at least one calendar day',
+      );
+    }
     if (draft.days.length > 30) {
       issue(
         code: 'days_limit',

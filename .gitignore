@@ -72,4 +72,15 @@ app.*.map.json
 *.keystore
 **/secrets/**
 **/secret/**
+apps/mobile/google_maps.properties
 .aider*
+
+# Isolated git worktrees used for agent-driven feature work (superpowers:using-git-worktrees)
+.worktrees/
+
+# Local IDE/plugin configs (not project sources)
+.continue/
+aider_config_html.txt
+
+# Separately versioned local assistant tooling; preserved outside app history.
+.claude/skills/flutter-claude-skills/

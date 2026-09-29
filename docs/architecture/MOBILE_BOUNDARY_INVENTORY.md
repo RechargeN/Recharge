@@ -4,7 +4,7 @@
 
 - Tool version: `1.0.0`
 - Policy version: `1.0.0`
-- Scanned Dart files: 380
+- Scanned Dart files: 390
 - Active exceptions: 71
 - Exception budget: 71
 - Unsuppressed violations: 0

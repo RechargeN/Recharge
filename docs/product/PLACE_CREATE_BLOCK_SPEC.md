@@ -1215,7 +1215,7 @@ API/Firestore DTO подключается отдельным backend slice че
 |---|---|---|
 | Form engine | Четыре Place-шага в общем config-driven Create Hub | Готово для MVP Create scope |
 | Draft storage | Schema v3 + typed `PlaceDraftData` в versioned `place_details`, single active draft | Готово для MVP; multi-draft repository — Phase 2 |
-| Location | Google Map/manual coordinates, explicit pin confirmation, accuracy, market/timezone config | Address search/reverse-geocode provider подключается отдельным provider slice |
+| Location | Google Map/manual coordinates, explicit pin confirmation, accuracy, market/timezone config, live Google Places (New) autocomplete on the title field that prefills the map pin (never overwrites an already-confirmed pin) — added 2026-08-23, degrades to manual-tap-only when `GOOGLE_PLACES_API_KEY` is unset | Reverse-geocode-on-manual-pin (coordinates → address) is still not wired — remains its own future provider slice |
 | Hours | Regular/alwaysOpen/unknown, split/overnight, exceptions и operational overlay | Seasonal — Phase 2 |
 | Amenities | Config taxonomy + true/explicitUnknown/notStated | Backend registry/sync подключаются отдельно |
 | Publisher | Typed `PublisherRef`, deterministic provenance и `create.place` guard | ManagedPage publisher ждёт Publisher slice |

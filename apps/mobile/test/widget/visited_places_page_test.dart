@@ -51,6 +51,12 @@ void main() {
                     const VisitedPlacesPage(userId: 'creator-1'),
               ),
               GoRoute(
+                path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+                builder: (context, state) => Scaffold(
+                  body: Text('Details ${state.pathParameters['objectId']}'),
+                ),
+              ),
+              GoRoute(
                 path: '${RouteNames.discoverDetails}/:itemId',
                 builder: (context, state) => Scaffold(
                   body: Text('Details ${state.pathParameters['itemId']}'),

@@ -14,7 +14,7 @@ slice не начинается, пока предыдущий не прошёл
 Источники продуктового и платформенного контракта:
 
 - [ROUTE_BUILDER_SPEC.md](ROUTE_BUILDER_SPEC.md) v3.2;
-- [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](ROUTE_CREATE_BLOCK_SLICE_SPEC.md) v1.2;
+- [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md) v1.2;
 - [PLATFORM_FOUNDATION_SPEC.md](../architecture/PLATFORM_FOUNDATION_SPEC.md)
   v2.1;
 - [ARCHITECTURE_BASELINE.md](../architecture/ARCHITECTURE_BASELINE.md);

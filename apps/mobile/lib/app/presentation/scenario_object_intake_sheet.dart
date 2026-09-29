@@ -11,6 +11,7 @@ import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
+import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 import '../application/controllers/scenario_object_intake_controller.dart';
 import '../application/scenario_object_intake_providers.dart';
 import '../application/scenario_object_intake_telemetry.dart';
@@ -154,6 +155,92 @@ Future<ScenarioObjectIntakeSheetResult?> showScenarioObjectIntakeSheet({
     }
     return null;
   }
+  if (!context.mounted) return null;
+  return _presentScenarioObjectIntakeSheet(
+    context: context,
+    ref: ref,
+    intent: intent,
+    organizerEmail: requesterEmail,
+    organizerName: requesterName,
+    isRequesterAuthenticated: isRequesterAuthenticated,
+  );
+}
+
+/// `DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §4.3 — Event's own entry
+/// point, parallel to [launchScenarioObjectIntake] but built from
+/// [PublishedEventDiscoveryEntity] via
+/// `DiscoverScenarioIntakeAdapter.toEventIntent`, never by converting the
+/// event back into a [DiscoverItemEntity]. Always single-item/`details`
+/// surface — Event Details has no multi-select tray.
+Future<ScenarioObjectIntakeSheetResult?> launchScenarioObjectIntakeForEvent({
+  required BuildContext context,
+  required WidgetRef ref,
+  required PublishedEventDiscoveryEntity event,
+  required String sourceScreen,
+  required String sourceAction,
+  required String originRoute,
+}) async {
+  final config = ref.read(scenarioObjectIntakeConfigProvider);
+  if (!config.allowsSurface(ScenarioIntakeSourceSurface.details)) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add to Scenario is unavailable.')),
+      );
+    }
+    return null;
+  }
+  final authenticated = await requireScenarioObjectIntakeAuth(
+    context: context,
+    ref: ref,
+    sourceScreen: sourceScreen,
+    sourceAction: sourceAction,
+    originRoute: originRoute,
+  );
+  if (!authenticated || !context.mounted) return null;
+  final user = ref.read(authControllerProvider).state.user;
+  if (user == null) return null;
+
+  ScenarioObjectIntakeIntent intent;
+  try {
+    intent = ref
+        .read(discoverScenarioIntakeAdapterProvider)
+        .toEventIntent(
+          event: event,
+          intentId: sl<IdGenerator>().generate(),
+          requesterId: user.id,
+          checkedAtUtc: DateTime.now().toUtc(),
+        );
+  } on FormatException catch (error) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message.toString())));
+    }
+    return null;
+  }
+  if (!context.mounted) return null;
+  return _presentScenarioObjectIntakeSheet(
+    context: context,
+    ref: ref,
+    intent: intent,
+    organizerEmail: user.email,
+    organizerName: user.email.split('@').first,
+    isRequesterAuthenticated: () =>
+        ref.read(authControllerProvider).state.user?.id == user.id,
+  );
+}
+
+/// Shared tail: present the sheet for an already-built [intent], track
+/// telemetry, and clean up on cancel — used by both the `items`-based
+/// (Search/Map, multi-select) and Event (single-item) entry points above.
+Future<ScenarioObjectIntakeSheetResult?> _presentScenarioObjectIntakeSheet({
+  required BuildContext context,
+  required WidgetRef ref,
+  required ScenarioObjectIntakeIntent intent,
+  required String organizerEmail,
+  required String organizerName,
+  required bool Function() isRequesterAuthenticated,
+}) async {
   final telemetry = ref.read(scenarioObjectIntakeTelemetryProvider);
   telemetry.track(
     intent: intent,
@@ -163,8 +250,8 @@ Future<ScenarioObjectIntakeSheetResult?> showScenarioObjectIntakeSheet({
   final controller = ScenarioObjectIntakeController(
     intent: intent,
     facade: ref.read(scenarioObjectIntakeFacadeProvider),
-    organizerEmail: requesterEmail,
-    organizerName: requesterName,
+    organizerEmail: organizerEmail,
+    organizerName: organizerName,
     telemetry: telemetry,
   );
   unawaited(controller.initialize());

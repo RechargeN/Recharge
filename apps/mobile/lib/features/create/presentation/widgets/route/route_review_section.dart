@@ -228,10 +228,7 @@ class _RouteQualityPanel extends StatelessWidget {
             ],
             if (elevation.attribution case final attribution?) ...<Widget>[
               const SizedBox(height: 8),
-              Text(
-                attribution,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(attribution, style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
         ),

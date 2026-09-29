@@ -6,9 +6,7 @@ class GetNotificationsUseCase {
 
   final NotificationsRepository _repository;
 
-  Future<List<NotificationItemEntity>> call({
-    required String userId,
-  }) {
+  Future<List<NotificationItemEntity>> call({required String userId}) {
     return _repository.getNotifications(userId: userId);
   }
 }

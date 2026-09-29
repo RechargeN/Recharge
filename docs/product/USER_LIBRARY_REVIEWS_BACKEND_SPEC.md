@@ -69,7 +69,7 @@ BCK-12 inherits, without silently overriding:
    (`BCK-08`);
 8. [MOBILE_BACKEND_INTEGRATION_STANDARD.md](MOBILE_BACKEND_INTEGRATION_STANDARD.md)
    (`BCK-18`);
-9. [VISIT_HISTORY_SLICE_SPEC.md](VISIT_HISTORY_SLICE_SPEC.md) (`VIS-HIST-01`).
+9. [VISIT_HISTORY_SLICE_SPEC.md](discover/VISIT_HISTORY_SLICE_SPEC.md) (`VIS-HIST-01`).
 
 Authority remains split: BCK-06 owns identity; BCK-08 catalog identity;
 BCK-12 library/review source and rating projection; BCK-22 reports, sanctions,

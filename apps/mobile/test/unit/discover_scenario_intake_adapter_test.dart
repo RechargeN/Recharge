@@ -4,6 +4,8 @@ import 'package:recharge/features/create/domain/entities/scenario_item_draft.dar
 import 'package:recharge/features/create/domain/entities/scenario_object_intake.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
+import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -43,6 +45,20 @@ void main() {
     expect(candidate.ref.objectType, ScenarioCatalogObjectType.place);
     expect(candidate.schedule, isNull);
     expect(candidate.location!.address, 'Atbrivosanas aleja 93');
+  });
+
+  test('typed cancelled Event enters Scenario as unavailable', () {
+    final intent = adapter.toEventIntent(
+      event: _publishedEvent(EventOccurrenceStatus.cancelled),
+      intentId: 'intent-cancelled',
+      requesterId: 'user-1',
+      checkedAtUtc: DateTime.utc(2026, 8, 3),
+    );
+
+    expect(
+      intent.candidates.single.sourceStatus,
+      ScenarioSourceStatus.unavailable,
+    );
   });
 
   test('Search batch preserves tap order and copies no search context', () {
@@ -128,4 +144,35 @@ DiscoverItemEntity _item({required DiscoverObjectKind kind}) =>
       marketCityId: 'rezekne',
       timezoneId: 'Europe/Riga',
       durationMinutes: 90,
+    );
+
+PublishedEventDiscoveryEntity _publishedEvent(EventOccurrenceStatus status) =>
+    PublishedEventDiscoveryEntity(
+      eventId: 'evt-1',
+      publisherId: 'page-1',
+      publisherType: 'page',
+      publisherName: 'Marine Tennis Club',
+      title: 'Sunset Tennis Meetup',
+      subtitle: 'Evening tennis',
+      fullDescription: 'Tennis at sunset.',
+      category: 'sport',
+      city: 'Dubai',
+      latitude: 25.08,
+      longitude: 55.14,
+      distanceKm: 3.2,
+      priceAmount: 12,
+      isFree: false,
+      currencyCode: 'EUR',
+      scheduleMode: EventScheduleMode.oneTime,
+      occurrences: <EventOccurrence>[
+        EventOccurrence(
+          id: 'occ-1',
+          startAtUtc: DateTime.utc(2026, 6, 21, 14),
+          endAtUtc: DateTime.utc(2026, 6, 21, 16, 30),
+          status: status,
+        ),
+      ],
+      displayOccurrenceId: 'occ-1',
+      timezoneId: 'Asia/Dubai',
+      publishedAtUtc: DateTime.utc(2026, 5, 1),
     );

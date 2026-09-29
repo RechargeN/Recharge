@@ -7,12 +7,13 @@ import '../domain/usecases/get_favorites_usecase.dart';
 import '../domain/usecases/remove_favorite_usecase.dart';
 import 'controllers/favorites_controller.dart';
 
-final favoritesControllerProvider =
-    ChangeNotifierProvider<FavoritesController>((ref) {
-  return FavoritesController(
-    getFavoritesUseCase: sl<GetFavoritesUseCase>(),
-    addFavoriteUseCase: sl<AddFavoriteUseCase>(),
-    removeFavoriteUseCase: sl<RemoveFavoriteUseCase>(),
-    analyticsService: sl<AnalyticsService>(),
-  );
-});
+final favoritesControllerProvider = ChangeNotifierProvider<FavoritesController>(
+  (ref) {
+    return FavoritesController(
+      getFavoritesUseCase: sl<GetFavoritesUseCase>(),
+      addFavoriteUseCase: sl<AddFavoriteUseCase>(),
+      removeFavoriteUseCase: sl<RemoveFavoriteUseCase>(),
+      analyticsService: sl<AnalyticsService>(),
+    );
+  },
+);

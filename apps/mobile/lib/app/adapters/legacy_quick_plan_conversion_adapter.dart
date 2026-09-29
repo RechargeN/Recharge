@@ -1,4 +1,5 @@
 import '../../features/create/domain/entities/quick_plan_conversion.dart';
+import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/scenarios/domain/entities/scenario_draft_entity.dart';
 
 class LegacyQuickPlanConversionAdapter {
@@ -31,10 +32,23 @@ class LegacyQuickPlanConversionAdapter {
               isFree: step.isFree,
               priceMinorUnits: step.isFree ? 0 : step.priceAmount.minorUnits,
               available: true,
+              distanceKm: step.distanceKm,
+              sourceObjectId: step.sourceObjectId,
+              sourceObjectType: _catalogObjectType(step.sourceObjectType),
             ),
           )
           .toList(growable: false),
       readableByUserIds: <String>{ownerId},
     );
+  }
+
+  static ScenarioCatalogObjectType? _catalogObjectType(String? value) {
+    final String normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) return null;
+    for (final ScenarioCatalogObjectType type
+        in ScenarioCatalogObjectType.values) {
+      if (type.name == normalized) return type;
+    }
+    return null;
   }
 }

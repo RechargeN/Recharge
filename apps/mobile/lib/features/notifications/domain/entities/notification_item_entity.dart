@@ -1,7 +1,29 @@
-enum NotificationType {
-  system,
-  reminder,
+enum NotificationType { system, reminder, activity }
+
+enum NotificationSubjectKind {
+  event,
+  place,
+  route,
   activity,
+  bookableSession,
+  system,
+}
+
+class NotificationSubjectRef {
+  const NotificationSubjectRef({required this.kind, required this.id});
+
+  final NotificationSubjectKind kind;
+  final String id;
+}
+
+class ScenarioNotificationContext {
+  const ScenarioNotificationContext({
+    required this.scenarioDraftId,
+    required this.scenarioItemId,
+  });
+
+  final String scenarioDraftId;
+  final String scenarioItemId;
 }
 
 class NotificationItemEntity {
@@ -13,6 +35,8 @@ class NotificationItemEntity {
     required this.createdAtUtc,
     required this.isRead,
     required this.targetRoute,
+    this.subjectRef,
+    this.scenarioContext,
   });
 
   final String id;
@@ -22,10 +46,10 @@ class NotificationItemEntity {
   final DateTime createdAtUtc;
   final bool isRead;
   final String? targetRoute;
+  final NotificationSubjectRef? subjectRef;
+  final ScenarioNotificationContext? scenarioContext;
 
-  NotificationItemEntity copyWith({
-    bool? isRead,
-  }) {
+  NotificationItemEntity copyWith({bool? isRead}) {
     return NotificationItemEntity(
       id: id,
       title: title,
@@ -34,6 +58,8 @@ class NotificationItemEntity {
       createdAtUtc: createdAtUtc,
       isRead: isRead ?? this.isRead,
       targetRoute: targetRoute,
+      subjectRef: subjectRef,
+      scenarioContext: scenarioContext,
     );
   }
 }
