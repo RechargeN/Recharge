@@ -180,6 +180,7 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 | Route Builder (creation) | Route-only spec v3.2; RTE-01–07 Done, RTE-08–11 Review. Локально работают GPS-запись (RTE-11: зашифрованный журнал, восстановление без auto-resume) и GPX inspection/import/export с UI. До Done — проверки на Android/iOS и общий stabilization gate; production adapters — RTE-12 |
 | Локализация en/ru/lv | не настроена |
 | Бронирование | Видимый Mobile MVP по-прежнему использует externalBookingUrl. Добавлен provider-neutral Booking callable adapter с persistent local receipts/checkpoints и только loopback Emulator binding; production binding выключен. Backend имеет disabled local/Emulator-only free Booking authority, Event projection consumer, create/cancel/queries, finite/unlimited inventory, atomic Identity/flag authorization и privacy/retention evidence. Popular-pool escrow только pure/default-off model; Firebase cloud, UI cutover, market activation, production load proof и Payments отсутствуют |
+| Backend (Release R1, Latvia-first) | Локальные foundations в `apps/backend`; состав R1 и baseline проверки приняты владельцем (roadmap §3.5); Payments, AI, Providers и Event Ingestion вне R1. Cloud, deployment и активация рынков закрыты до отдельных разрешений |
 | Геолокация | Discover current location остаётся mock в центре Riga; Route GPS recording подключён через `geolocator` и изолирован provider-neutral port |
 
 ## Правила разработки

@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.100**
-- Date: **2026-09-28**
+- Version: **2.4.101**
+- Date: **2026-09-29**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -21,6 +21,12 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.101.** Records the Product owner's Release R1 decisions of 2026-09-29 without widening cloud, spend or market authority:
+
+- Release R1 is Latvia-first; scope, Deferred items (Payments/paid Booking, AI, external Providers, Event Ingestion runtime), Import migration condition and the SLO/cost/RPO-RTO verification baseline live in Latvia roadmap v1.29 §3.5;
+- registers BCK-23 as a Draft candidate under item `6E` in §5 outside the 22-document checksum; its Draft/Proposed status is unchanged;
+- numeric error-budget/burn-rate thresholds are required before stage; RPO/RTO stays unconfirmed until a successful PITR/restore drill.
 
 **v2.4.100.** Reconciles the bounded Booking reconfirmation `2A/2B` vertical
 without widening cloud or market authority:
@@ -1360,6 +1366,14 @@ and hosted gates are green. Перед `Approved` всё ещё нужны де�
 verdicts из BCK09-REV-01 v0.12; BCK09-API-REV-01 v0.10 сохраняет Hold.
 Production Identity, Event projection handoff, effects, repair, deployment,
 activation и mobile integration остаются отдельными последующими gates.
+
+**Зарегистрированные кандидаты (вне checksum 22, v2.4.101).**
+
+| ID | Файл | Item | Accountable owner | Spec | Runtime |
+|---|---|---|---|---|---|
+| BCK-23 | `EVENT_SOURCE_INGESTION_BACKEND_SPEC.md` | 6E | Content Platform owner | Draft v0.4 (ADR 0020 Proposed; решения BCK23-D01…D18 в основном ждут владельца) — не Approved | Absent; вне Release R1 |
+
+Регистрация не меняет статус, не разрешает runtime и не включает BCK-23 в checksum до отдельной ревизии после Approved.
 
 Число 22 — checksum текущей ревизии, не вечный invariant. Новый BCK требует
 уникального ID, одного accountable owner, непересекающегося scope, dependencies,

@@ -1,8 +1,8 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.28**
-- Date: **2026-09-23**
+- Version: **1.29**
+- Date: **2026-09-29**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
 - Accountable owner: **Platform Architecture**
@@ -10,6 +10,10 @@
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
+
+Revision 1.29 records the Product owner's Release R1 decisions (§3.5): scope,
+Deferred items, LV-first market order and the SLO/cost/RPO-RTO verification
+baseline. Documentation only; it grants no cloud, spend or activation.
 
 Revision 1.28 reconciles the completed local items 1–5 foundation and defines
 item 6 as separately approved product-domain slices. BCK07-LOCAL-01 is first:
@@ -342,6 +346,46 @@ Market General Availability
 
 Для Latvia `M0–M5` проходят первыми. Estonia и Lithuania могут достичь M0–M3
 параллельно, но ни один их gate не считается пройденным по Latvia evidence.
+
+### 3.5. Release R1 — решения владельца (2026-09-29)
+
+Product owner (RechargeN) принял состав и baseline релиза **R1 = Latvia-first
+backend**. Это утверждённая база для проверки, а не доказанная эксплуатационная
+готовность; она не разрешает cloud, credentials, расходы, deployment или
+активацию рынков.
+
+**Состав R1.** Входит всё из §3.1 (Identity/Publisher, 10 Create types,
+Media, Catalog/Discover, free Booking, Notifications, библиотека/отзывы/
+planning, Trust & Safety, Admin/Support, Privacy). Import локальных данных
+входит при условии ниже. **Deferred (вне R1, без ложных claims в UI):**
+Payments и paid Booking (BCK-17, нужен новый Accepted Payments ADR), AI
+provider (BCK-15), внешние Providers (BCK-16), Event Ingestion (BCK-23; hooks
+готовятся, runtime — по собственному roadmap). Deferred не равно Implemented.
+
+**Import.** Локальный оригинал не удаляется до серверной проверки, явного
+подтверждения пользователя и окончания периода восстановления.
+
+**Рынки.** Только LV в R1; EE и LT активируются независимыми решениями и не
+наследуют LV. Локализация `lv/en/ru` и обязательные тексты — условие приёмки LV.
+Rollout: сотрудники → ограниченная когорта → расширение в пределах L1.
+
+**Baseline проверки (BCK05-OD-03/04/05, статус остаётся Proposed до stage).**
+
+| Область | Принятая baseline | Условие |
+|---|---|---|
+| Нагрузка | L1: 5k MAU / 1k peak DAU; L2 (30k / 8k) — ориентир года; L3 — только стресс | sustained/burst RPS выводятся в stage |
+| Латентность | OD-07: чтения p95 ≤ 750 мс / p99 ≤ 2 с; команды и Booking p95 ≤ 1,5 с / p99 ≤ 3 с; Discover p95 ≤ 1,5 с / p99 ≤ 4 с; ноль oversell | подтверждаются только в stage |
+| Error budget | численные error-budget и burn-rate пороги | **зафиксировать до создания stage** |
+| Остановка rollout | oversell/ledger drift, authz-нарушение, потеря данных, burn выше порога, расход > 100% бюджета | disable/rollback по runbook |
+| Бюджет | dev €25, stage €75, prod L1 €150; L2 €500 и L3 €1 000 только по датированной записи | RechargeN — временный Finance owner; уровневые предупреждения и kill-switch/runbook настроены **до создания ресурсов**; budget alerts не считаются ограничением расходов |
+| RPO/RTO | таблица BCK05-OD05-REC-01 §7 (Identity/Booking/Privacy RPO ≤ 1 мин, safe RTO ≤ 1 ч, full RTO ≤ 4 ч и далее по семействам) | соответствие **не подтверждено** до успешного PITR/restore drill; значения не ослабляются молча |
+| Наблюдение | 14 дней и не менее 1 000 реальных операций Booking/Create после публичного запуска LV | сокращение до 7 дней не разрешено |
+
+**Ответственные.** Product/Architecture/Incident/Finance owner R1 — RechargeN
+(совмещение ролей фиксируется честно). RechargeN отвечает за заказ внешних
+Security/Privacy и Legal проверок; специалисты и сроки фиксируются **до
+публичного LV rollout**. До публичного запуска назначается резервный
+Incident/Support contact.
 
 ## 4. Target platform и будущая файловая карта
 
