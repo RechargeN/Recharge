@@ -800,8 +800,8 @@ void main() {
       createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
-        mainCategory: 'art_culture_museums',
-        subcategory: 'museum',
+        mainCategory: 'workshops_masterclasses',
+        subcategory: 'workshop',
       );
       createController.updateCity('Rezekne');
       createController.updateVenueName('City museum');
@@ -881,8 +881,8 @@ void main() {
       expect(find.text('Sent to moderation'), findsOneWidget);
       expect(find.text('Museum evening route'), findsWidgets);
       expect(find.text('pendingReview'), findsWidgets);
-      expect(find.text('Art, culture & museums'), findsOneWidget);
-      expect(find.text('Museum'), findsOneWidget);
+      expect(find.text('Workshops & masterclasses'), findsOneWidget);
+      expect(find.text('Workshop'), findsOneWidget);
       expect(find.text('12 EUR'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Search similar'));
@@ -890,7 +890,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -900,7 +900,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Map page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();

@@ -18,6 +18,7 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/create_providers.dart';
+import 'package:recharge/features/create/application/state/create_state.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
@@ -1093,18 +1094,13 @@ void main() {
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    // 'art_culture_museums'/'museum' was never an applicable category for
-    // CreateObjectType.activity (applicableTypeIds: ['event', 'place'] in
-    // recharge_taxonomy_seed.dart) — this only "worked" before because
-    // activity had no real subcategory-applicability check. Session now has
-    // its own typed validator (SES-CRT-01); Class / Workshop still uses the
-    // generic path, so it's the substitute for this generic
-    // creator-listing-status fixture.
+    // Generic creator-listing-status fixture: Class / Workshop with an applicable
+    // Workshops & masterclasses category.
     createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Museum evening route');
     createController.applyTaxonomySelection(
-      mainCategory: 'art_culture_museums',
-      subcategory: 'museum',
+      mainCategory: 'workshops_masterclasses',
+      subcategory: 'workshop',
     );
     createController.updateCity('Rezekne');
     createController.updateVenueName('City museum');
@@ -1191,8 +1187,8 @@ void main() {
     expect(find.text('Creator listing'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('pendingReview'), findsOneWidget);
-    expect(find.text('Art, culture & museums'), findsOneWidget);
-    expect(find.text('Museum'), findsOneWidget);
+    expect(find.text('Workshops & masterclasses'), findsOneWidget);
+    expect(find.text('Workshop'), findsOneWidget);
     expect(find.text('12 EUR'), findsOneWidget);
 
     await tester.scrollPageUntilVisible(find.text('Open Create').first, 220);
@@ -1210,7 +1206,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art_culture_museums'), findsOneWidget);
+    expect(find.text('workshops_masterclasses'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -1223,7 +1219,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Map page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art_culture_museums'), findsOneWidget);
+    expect(find.text('workshops_masterclasses'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens legacy route-context activity from profile workspace', (
@@ -1260,40 +1256,24 @@ void main() {
       analyticsService: _NoopAnalyticsService(),
     );
     final DiscoverFeedController discoverController = _discoverController();
-    final CreateController createController = _createController();
+    // Historical fixture, not a publish: 'travel_tours'/'walking_tour' is not
+    // an applicable category for the activity type under today's validators.
+    final CreateController createController =
+        _HistoricalListingCreateController(
+          repository: _FakeCreateRepository(),
+          historicalListing: _legacyRouteContextListing(
+            title: 'Calm coffee walking route',
+            fullDescription:
+                'Route steps: food_drinks.coffee,wellness_recharge.calm_walk,'
+                'outdoor_nature_walking. Review the route before publishing.',
+            startsAtUtc: '2026-04-18T10:00:00Z',
+          ),
+        );
     await createController.ensureLoaded(
       userId: 'creator_1',
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    // 'travel_tours'/'walking_tour' was never an applicable category for
-    // CreateObjectType.activity (applicableTypeIds: ['event', 'route'] in
-    // recharge_taxonomy_seed.dart) — this only "worked" before because
-    // activity had no real subcategory-applicability check. ACT-CRT-01's
-    // _activityIssues wrapper now mirrors Place's real check, correctly
-    // rejecting this combination. Session now has its own typed validator
-    // (SES-CRT-01); Class / Workshop stays on the generic path, so it's a
-    // minimal substitute — the legacy route-context rendering this test
-    // exercises is keyed only on mainCategory/subcategory, not objectType.
-    createController.setObjectType(CreateObjectType.classWorkshop);
-    createController.updateTitle('Calm coffee walking route');
-    createController.applyTaxonomySelection(
-      mainCategory: 'travel_tours',
-      subcategory: 'walking_tour',
-    );
-    createController.updateCity('Rezekne');
-    createController.updateVenueName('Old town start');
-    createController.updateShortDescription('90 min calm creator route.');
-    createController.updateFullDescription(
-      'Route steps: food_drinks.coffee,wellness_recharge.calm_walk,'
-      'outdoor_nature_walking. Review the route before publishing.',
-    );
-    createController.updateCoverImage(
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    );
-    createController.updateStartDateTime('2026-04-18T10:00:00Z');
-    final bool published = await createController.publishDraft();
-    expect(published, isTrue);
 
     Widget app() {
       return ProviderScope(
@@ -1449,42 +1429,39 @@ void main() {
         analyticsService: _NoopAnalyticsService(),
       );
       final DiscoverFeedController discoverController = _discoverController();
-      final CreateController createController = _createController();
+      // The published listing is the explicit historical legacy
+      // route-context fixture; only the current draft is created live, with
+      // a valid Class / Workshop category.
+      final CreateController createController =
+          _HistoricalListingCreateController(
+            repository: _FakeCreateRepository(),
+            historicalListing: _legacyRouteContextListing(
+              title: 'Published calm route',
+              fullDescription:
+                  'Route steps: food_drinks.coffee,wellness_recharge.calm_walk. '
+                  'Review the route before publishing.',
+              startsAtUtc: '2026-04-18T10:00:00Z',
+            ),
+          );
       await createController.ensureLoaded(
         userId: 'creator_1',
         organizerEmail: 'creator@example.com',
         organizerName: 'creator',
       );
-      // See the 'opens legacy route-context activity' test above for why
-      // classWorkshop (not activity) is used for this travel_tours/
-      // walking_tour legacy-route fixture.
       createController.setObjectType(CreateObjectType.classWorkshop);
-      createController.updateTitle('Published calm route');
-      createController.applyTaxonomySelection(
-        mainCategory: 'travel_tours',
-        subcategory: 'walking_tour',
-      );
-      createController.updateCity('Rezekne');
-      createController.updateVenueName('Old town start');
-      createController.updateShortDescription('90 min calm route.');
-      createController.updateFullDescription(
-        'Route steps: food_drinks.coffee,wellness_recharge.calm_walk. '
-        'Review the route before publishing.',
-      );
-      createController.updateCoverImage(
-        'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-      );
-      createController.updateStartDateTime('2026-04-18T10:00:00Z');
-      expect(await createController.publishDraft(), isTrue);
-
       createController.updateTitle('Draft pottery workshop');
       createController.applyTaxonomySelection(
-        mainCategory: 'art_culture_museums',
-        subcategory: 'museum',
+        mainCategory: 'workshops_masterclasses',
+        subcategory: 'pottery',
       );
       createController.updateShortDescription('Hands-on clay evening.');
       createController.updateFullDescription('Small creator workshop draft.');
       createController.updateVenueName('City studio');
+      createController.updateCity('Rezekne');
+      createController.updateCoverImage(
+        'https://images.unsplash.com/photo-1518998053901-5348d3961a04',
+      );
+      createController.updateStartDateTime('2026-04-18T18:00:00Z');
       createController.updateIsFree(false);
       createController.updateBasePrice('8');
 
@@ -1604,7 +1581,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
       expect(find.text('8'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -1849,6 +1826,77 @@ CreateController _createController({CreateDraftEntity? initialDraft}) {
       city: 'Riga',
       currency: 'EUR',
     ),
+  );
+}
+
+/// Explicit HISTORICAL fixture for the legacy route-context rendering
+/// (`travel_tours`/`walking_tour` activity listing whose steps live in the
+/// full description). That category/type pairing is not creatable through
+/// today's validators, so it must not be produced by a successful publish in
+/// a test; the profile reads it as an already-published listing instead.
+CreateDraftEntity _legacyRouteContextListing({
+  required String title,
+  required String fullDescription,
+  required String startsAtUtc,
+}) {
+  final CreateDraftEntity base = CreateDraftEntity.defaults(
+    organizerId: 'creator_1',
+    organizerEmail: 'creator@example.com',
+    organizerName: 'creator',
+    marketCityId: 'riga',
+    timezone: 'Europe/Riga',
+    country: 'Latvia',
+    city: 'Riga',
+    currency: 'EUR',
+  );
+  return base.copyWith(
+    objectType: CreateObjectType.activity,
+    title: title,
+    mainCategory: 'travel_tours',
+    subcategory: 'walking_tour',
+    city: 'Rezekne',
+    venueName: 'Old town start',
+    shortDescription: '90 min calm creator route.',
+    fullDescription: fullDescription,
+    media: const MediaEntity(
+      coverImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
+      gallery: <String>[],
+    ),
+    startDateTimeUtc: DateTime.parse(startsAtUtc),
+    draftStatus: DraftStatus.pendingReview,
+    moderationStatus: ModerationStatus.pending,
+    publishStatus: PublishStatus.pendingReview,
+    publishedAtUtc: DateTime.utc(2026, 4, 18, 9),
+  );
+}
+
+/// Create controller whose `publishedDraft` is a preloaded historical
+/// listing; the current editable draft still behaves normally.
+class _HistoricalListingCreateController extends CreateController {
+  _HistoricalListingCreateController({
+    required CreateRepository repository,
+    required CreateDraftEntity historicalListing,
+  }) : _historicalListing = historicalListing,
+       super(
+         loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+         saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+         publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+         analyticsService: _NoopAnalyticsService(),
+         eventCreateCoordinator: createTestEventCoordinator(),
+         runtimeDefaults: const CreateRuntimeDefaults(
+           marketCityId: 'riga',
+           timezone: 'Europe/Riga',
+           country: 'Latvia',
+           city: 'Riga',
+           currency: 'EUR',
+         ),
+       );
+
+  final CreateDraftEntity _historicalListing;
+
+  @override
+  CreateState get state => super.state.copyWith(
+    publishedDraft: _historicalListing,
   );
 }
 
