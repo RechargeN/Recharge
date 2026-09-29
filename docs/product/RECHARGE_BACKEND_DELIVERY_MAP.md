@@ -25,7 +25,7 @@
 **v2.4.102.** Records the BCK-07 v0.8 amendment of the closed BCK07-LOCAL-01
 map without widening cloud, spend, market or publication authority:
 
-- BCK07-LOCAL-01 gains fourteen exact files for typed source rules
+- BCK07-LOCAL-01 gains thirteen exact files for typed source rules
   (`domain/type_rules/` plus unit tests); `content_type_registry.ts` remains the
   registry;
 - rules cover only Place, Event (C0 + schedule-C1), Activity, Rental and

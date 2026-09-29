@@ -18,7 +18,7 @@
 
 ### v0.8 — 2026-09-29
 
-- amends the closed §34.2 map with fourteen exact files for typed source rules
+- amends the closed §34.2 map with thirteen exact files for typed source rules
   (`domain/type_rules/` and their unit tests); `content_type_registry.ts`
   stays the registry and only wires the rules and records unavailability
   reasons;
@@ -1179,7 +1179,7 @@ apps/backend/functions/test/
   integration/content_publication_security.test.ts
 ```
 
-Amendment v0.8 adds exactly these fourteen paths; no `<type>` placeholder or
+Amendment v0.8 adds exactly these thirteen paths; no `<type>` placeholder or
 other file is authorized:
 
 ```text
