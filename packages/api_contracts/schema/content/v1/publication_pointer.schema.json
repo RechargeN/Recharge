@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/publication_pointer.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contentId",
+    "currentPublishedRevisionId",
+    "previousPublishedRevisionId",
+    "visibility",
+    "revision",
+    "updatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "currentPublishedRevisionId": {
+      "anyOf": [{ "$ref": "content_common.schema.json#/$defs/entityId" }, { "type": "null" }]
+    },
+    "previousPublishedRevisionId": {
+      "anyOf": [{ "$ref": "content_common.schema.json#/$defs/entityId" }, { "type": "null" }]
+    },
+    "visibility": { "enum": ["visible", "withdrawn"] },
+    "revision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+    "updatedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
+  }
+}

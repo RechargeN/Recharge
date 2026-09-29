@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/content_command.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "createDraft" },
+        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["typeId", "publisherRef", "marketId", "body"],
+          "properties": {
+            "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
+            "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
+            "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
+            "body": { "$ref": "content_common.schema.json#/$defs/contentBody" },
+            "importSourceKey": { "type": "string", "pattern": "^loc_[A-Za-z0-9_-]{1,120}$" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "updateDraft" },
+        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["draftId", "expectedRevision", "body"],
+          "properties": {
+            "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+            "expectedRevision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+            "body": { "$ref": "content_common.schema.json#/$defs/contentBody" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "submitForPublication" },
+        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["draftId", "expectedDraftRevision"],
+          "properties": {
+            "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+            "expectedDraftRevision": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "publishApprovedRevision" },
+        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["submissionId", "expectedPointerRevision"],
+          "properties": {
+            "submissionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+            "expectedPointerRevision": { "$ref": "content_common.schema.json#/$defs/revision" }
+          }
+        }
+      }
+    }
+  ]
+}

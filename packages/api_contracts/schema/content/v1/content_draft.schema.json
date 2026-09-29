@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/content_draft.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "draftId",
+    "contentId",
+    "typeId",
+    "typeSchemaMajor",
+    "publisherRef",
+    "publisherBindingOrigin",
+    "marketId",
+    "status",
+    "revision",
+    "body",
+    "referenceRevisions",
+    "createdByUserId",
+    "createdAtUtc",
+    "updatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
+    "typeSchemaMajor": { "const": 1 },
+    "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
+    "publisherBindingOrigin": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
+    "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
+    "status": { "enum": ["editing", "ready", "submitted", "revision_requested"] },
+    "revision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+    "body": { "$ref": "content_common.schema.json#/$defs/contentBody" },
+    "referenceRevisions": { "$ref": "content_common.schema.json#/$defs/referenceRevisions" },
+    "createdByUserId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "importSourceKey": { "type": "string", "pattern": "^loc_[A-Za-z0-9_-]{1,120}$" },
+    "createdAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" },
+    "updatedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
+  }
+}

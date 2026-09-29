@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/publication_submission.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "submissionId",
+    "draftId",
+    "contentId",
+    "draftRevision",
+    "typeId",
+    "publisherRef",
+    "marketId",
+    "state",
+    "moderation",
+    "eligibilityAuthorityRevision",
+    "referenceRevisions",
+    "revision",
+    "createdAtUtc",
+    "updatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "submissionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "draftRevision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+    "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
+    "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
+    "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
+    "state": {
+      "enum": [
+        "submitted",
+        "under_review",
+        "revision_requested",
+        "rejected",
+        "approved_for_publication",
+        "published",
+        "superseded"
+      ]
+    },
+    "moderation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profileId", "requiresPrePublicationModeration", "policyRevision"],
+      "properties": {
+        "profileId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "requiresPrePublicationModeration": { "type": "boolean" },
+        "policyRevision": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "policyDecisionId": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "eligibilityAuthorityRevision": { "$ref": "content_common.schema.json#/$defs/revision" },
+    "referenceRevisions": { "$ref": "content_common.schema.json#/$defs/referenceRevisions" },
+    "revision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+    "createdAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" },
+    "updatedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
+  }
+}

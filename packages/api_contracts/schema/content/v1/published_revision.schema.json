@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/published_revision.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contentId",
+    "publishedRevisionId",
+    "revisionNumber",
+    "draftId",
+    "submissionId",
+    "typeId",
+    "publisherRef",
+    "marketId",
+    "body",
+    "bodyHash",
+    "referenceRevisions",
+    "mediaRevision",
+    "publishedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "publishedRevisionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "revisionNumber": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
+    "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "submissionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
+    "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
+    "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
+    "body": { "$ref": "content_common.schema.json#/$defs/contentBody" },
+    "bodyHash": { "$ref": "content_common.schema.json#/$defs/sha256Hex" },
+    "referenceRevisions": { "$ref": "content_common.schema.json#/$defs/referenceRevisions" },
+    "mediaRevision": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "publishedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
+  }
+}

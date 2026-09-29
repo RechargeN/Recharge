@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/content_result.schema.json",
+  "$defs": {
+    "failureCode": {
+      "enum": [
+        "unauthenticated",
+        "capability_denied",
+        "publisher_not_eligible",
+        "creator_verification_required",
+        "membership_inactive",
+        "type_disabled",
+        "content_type_unsupported",
+        "source_revision_stale",
+        "validation_failed",
+        "media_not_ready",
+        "moderation_required",
+        "moderation_decision_stale",
+        "market_disabled",
+        "policy_unavailable",
+        "revision_conflict",
+        "idempotency_conflict",
+        "unsupported_version",
+        "unknown_outcome",
+        "not_found",
+        "invalid_contract"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "resultType", "data"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "succeeded" },
+        "resultType": {
+          "enum": ["draft", "submission", "publishedRevision", "publicationStatus"]
+        },
+        "data": { "type": "object" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "code"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "rejected" },
+        "code": { "$ref": "#/$defs/failureCode" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "code"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "unsupportedContract" },
+        "code": { "enum": ["unsupported_version", "content_type_unsupported"] }
+      }
+    }
+  ]
+}

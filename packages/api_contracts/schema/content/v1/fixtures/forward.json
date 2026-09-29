@@ -1,0 +1,196 @@
+{
+  "draft": [
+    {
+      "schemaVersion": 2,
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "typeId": "place",
+      "typeSchemaMajor": 1,
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "publisherBindingOrigin": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "status": "editing",
+      "revision": 1,
+      "body": {
+        "title": "Vermanes garden greenhouse",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "geoVisibility": "exact",
+        "location": {
+          "latitude": 56.9496,
+          "longitude": 24.1052
+        }
+      },
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "importSourceKey": "loc_abc123",
+      "createdAtUtc": "2026-09-29T00:00:00.000Z",
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "typeId": "place",
+      "typeSchemaMajor": 2,
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "publisherBindingOrigin": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "status": "editing",
+      "revision": 1,
+      "body": {
+        "title": "Vermanes garden greenhouse",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "geoVisibility": "exact",
+        "location": {
+          "latitude": 56.9496,
+          "longitude": 24.1052
+        }
+      },
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "importSourceKey": "loc_abc123",
+      "createdAtUtc": "2026-09-29T00:00:00.000Z",
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    }
+  ],
+  "submission": [
+    {
+      "schemaVersion": 2,
+      "submissionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "draftRevision": 1,
+      "typeId": "place",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "state": "approved_for_publication",
+      "moderation": {
+        "profileId": "place.default",
+        "requiresPrePublicationModeration": false,
+        "policyRevision": "pol-1",
+        "policyDecisionId": "pd-1"
+      },
+      "eligibilityAuthorityRevision": 1,
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "revision": 1,
+      "createdAtUtc": "2026-09-29T00:00:00.000Z",
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    }
+  ],
+  "publishedRevision": [
+    {
+      "schemaVersion": 2,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "revisionNumber": 1,
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "submissionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+      "typeId": "place",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "body": {
+        "title": "Vermanes garden greenhouse",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "geoVisibility": "exact",
+        "location": {
+          "latitude": 56.9496,
+          "longitude": 24.1052
+        }
+      },
+      "bodyHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "mediaRevision": "media-1",
+      "publishedAtUtc": "2026-09-29T00:00:00.000Z"
+    }
+  ],
+  "publicationPointer": [
+    {
+      "schemaVersion": 2,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    }
+  ],
+  "command": [
+    {
+      "schemaVersion": 2,
+      "commandType": "createDraft",
+      "idempotencyKey": "create-000001",
+      "payload": {
+        "typeId": "place",
+        "publisherRef": {
+          "type": "page",
+          "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+        },
+        "marketId": "LV",
+        "body": {
+          "title": "Vermanes garden greenhouse",
+          "categoryId": "art_culture_museums",
+          "subcategoryId": "museum",
+          "geoVisibility": "exact",
+          "location": {
+            "latitude": 56.9496,
+            "longitude": 24.1052
+          }
+        },
+        "importSourceKey": "loc_abc123"
+      }
+    }
+  ],
+  "query": [
+    {
+      "schemaVersion": 2,
+      "queryType": "getDraft",
+      "payload": {
+        "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC"
+      }
+    }
+  ],
+  "result": [
+    {
+      "schemaVersion": 2,
+      "kind": "rejected",
+      "code": "revision_conflict"
+    }
+  ]
+}
