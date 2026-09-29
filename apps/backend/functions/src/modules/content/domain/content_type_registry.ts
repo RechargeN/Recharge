@@ -6,13 +6,14 @@ import {
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
+import { eventMediaIds, validateEventBody } from './type_rules/event_rules.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v5';
+export const contentTypeRegistryRevision = 'content-type-registry-v6';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -137,9 +138,9 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
 const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   entry('event', {
     discoverFamily: 'Event',
-    sourceAuthority: 'Event classification v2.2.3 (C0 + schedule-C1 subset)',
+    sourceAuthority: 'Event classification v2.2.3, EVT-CRT-01 (C0 + schedule-C1 subset)',
     sourceResolver: 'inline_body',
-    unavailable: { reason: 'source_contract_pending' },
+    rules: { validate: validateEventBody, mediaIds: eventMediaIds },
   }),
   entry('activity', {
     discoverFamily: 'Activity',
