@@ -12,9 +12,10 @@ import {
   isIanaZone,
   isInt,
   isLocalDate,
-  isLocalMinute,
   isMinorUnits,
+  isLocalMinute,
   isNumberIn,
+  isOpeningPeriod,
   isPhone,
   isRecord,
   isSafeHttpsUrl,
@@ -22,6 +23,7 @@ import {
   isText,
   weeklyIntervals,
   type ContentRuleIssues,
+  type OpeningPeriod,
   type ContentValidationContext,
   type Json,
 } from './validation_context.js';
@@ -241,24 +243,9 @@ function validateLocation(
   else issues.require(inside, 'place.location.outside_service_area');
 }
 
-interface Period {
-  readonly dayOfWeek: number;
-  readonly openMinute: number;
-  readonly closeMinute: number;
-  readonly closesNextDay: boolean;
-}
+type Period = OpeningPeriod;
 
-function periodShapeOk(value: unknown, withDay: boolean): value is Period {
-  if (!isRecord(value)) return false;
-  if (typeof value.id !== 'string' || value.id.length === 0 || value.id.length > 64) return false;
-  if (withDay && !isInt(value.dayOfWeek, 1, 7)) return false;
-  if (!isLocalMinute(value.openMinute) || !isLocalMinute(value.closeMinute)) return false;
-  if (typeof value.closesNextDay !== 'boolean') return false;
-  // 24/7 is only `alwaysOpen`; close < open without the flag is invalid state.
-  return value.closesNextDay
-    ? value.closeMinute < value.openMinute
-    : value.closeMinute > value.openMinute;
-}
+const periodShapeOk = isOpeningPeriod;
 
 function validateHours(value: unknown, issues: IssueCollector): void {
   if (!issues.require(isRecord(value), 'place.hours')) return;

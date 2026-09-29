@@ -7,6 +7,25 @@ import type { MarketId } from '../../../reference_data/domain/identifiers.js';
  * (BCK-20 registry) could not answer; rules then fail closed with an explicit
  * `*_unavailable` issue instead of assuming validity.
  */
+/**
+ * Versioned market/category policy for Rental (RNT-CRT-01 §5, §11, §14). The
+ * limits are policy values, never widget constants; `undefined` fails closed.
+ */
+export interface RentalMarketPolicy {
+  /** Subcategory is enabled for Rental in this market (whitelist + subtype). */
+  readonly enabled: boolean;
+  readonly policyVersion: string;
+  readonly coverageFreshnessDays: number;
+  readonly absoluteMinMinutes: number;
+  readonly absoluteMaxMinutes: number;
+  readonly minApproximatePrecisionMeters: number;
+  readonly maxDeliveryRadiusKm: number;
+  readonly requiresSizeOrVariant: boolean;
+  readonly requiresMinRenterAge: boolean;
+  readonly requiresIdAtHandover: boolean;
+  readonly requiresSafetyNotice: boolean;
+}
+
 export interface ReferenceLookups {
   supportsLocale(locale: string): boolean | undefined;
   subcategoryApplies(
@@ -21,6 +40,8 @@ export interface ReferenceLookups {
     subcategoryId: string,
   ): readonly string[] | undefined;
   pointInServiceArea(latitude: number, longitude: number): boolean | undefined;
+  /** Rental policy for the subcategory in the pinned market; optional authority. */
+  rentalPolicy?(categoryId: string, subcategoryId: string): RentalMarketPolicy | undefined;
 }
 
 /** Object types a Collection may reference (CLG-CRT-01 §3.12). */
@@ -41,6 +62,8 @@ export interface ContentValidationContext {
   readonly marketId: MarketId;
   readonly publisherRef: PublisherRefV1;
   readonly createdByUserId: string;
+  /** The authenticated user performing this command (not necessarily the author). */
+  readonly actorUserId: string;
   readonly nowUtc: string;
   /** Revision of the draft being validated (post-update, i.e. current). */
   readonly draftRevision: number;
@@ -270,7 +293,7 @@ export function hasUnreplacedLocalId(value: unknown, depth = 0): boolean {
   if (!isRecord(value)) return false;
   for (const [key, child] of Object.entries(value)) {
     const idKey = key === 'id' || key.endsWith('Id');
-    const idsKey = key.endsWith('Ids');
+    const idsKey = key.endsWith('Ids') || key.endsWith('Refs');
     if (idKey && typeof child === 'string' && child.startsWith('loc_')) return true;
     if (
       idsKey &&
@@ -281,4 +304,41 @@ export function hasUnreplacedLocalId(value: unknown, depth = 0): boolean {
     if (hasUnreplacedLocalId(child, depth + 1)) return true;
   }
   return false;
+}
+
+/** Local opening period (Place hours, Rental handover hours). */
+export interface OpeningPeriod {
+  readonly dayOfWeek: number;
+  readonly openMinute: number;
+  readonly closeMinute: number;
+  readonly closesNextDay: boolean;
+}
+
+/**
+ * Period shape and duration invariants: a close before the open needs the
+ * explicit overnight flag, and 24/7 is never written as a period.
+ */
+export function isOpeningPeriod(value: unknown, withDay: boolean): value is OpeningPeriod {
+  if (!isRecord(value)) return false;
+  if (typeof value.id !== 'string' || value.id.length === 0 || value.id.length > 64) return false;
+  if (withDay && !isInt(value.dayOfWeek, 1, 7)) return false;
+  if (!isLocalMinute(value.openMinute) || !isLocalMinute(value.closeMinute)) return false;
+  if (typeof value.closesNextDay !== 'boolean') return false;
+  return value.closesNextDay
+    ? value.closeMinute < value.openMinute
+    : value.closeMinute > value.openMinute;
+}
+
+/** ISO-4217 alphabetic code that the runtime knows. */
+const knownCurrencies = new Set(Intl.supportedValuesOf('currency'));
+export function isCurrencyCode(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Z]{3}$/u.test(value) && knownCurrencies.has(value);
+}
+
+export function isInstant(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/u.test(value) &&
+    Number.isFinite(Date.parse(value))
+  );
 }

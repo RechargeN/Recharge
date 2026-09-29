@@ -5,13 +5,14 @@ import {
 } from '../../../contracts/content_v1.js';
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
+import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v4';
+export const contentTypeRegistryRevision = 'content-type-registry-v5';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -188,9 +189,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('rental', {
     discoverFamily: 'Rental',
-    sourceAuthority: 'Rental / Equipment create block (RNT-CRT-01)',
+    sourceAuthority: 'Rental / Equipment create block (RNT-CRT-01, Approved)',
     sourceResolver: 'inline_body',
-    unavailable: { reason: 'source_contract_pending' },
+    rules: { validate: validateRentalBody, mediaIds: rentalMediaIds },
   }),
   entry('collection', {
     discoverFamily: 'Collection',

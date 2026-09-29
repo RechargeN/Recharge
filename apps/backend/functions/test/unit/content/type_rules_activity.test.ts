@@ -34,6 +34,7 @@ function context(overrides: Partial<ContentValidationContext> = {}): ContentVali
     marketId: 'LV',
     publisherRef: { type: 'user', id: userId as never },
     createdByUserId: userId,
+    actorUserId: userId,
     nowUtc: '2026-09-29T10:00:00.000Z',
     draftRevision: 1,
     market: { currencyCode: 'EUR', timezoneId: 'Europe/Riga' },

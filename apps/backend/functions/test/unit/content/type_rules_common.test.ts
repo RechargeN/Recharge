@@ -113,6 +113,8 @@ void test('unreplaced local ids are found in identifier-valued fields only', () 
   assert.equal(hasUnreplacedLocalId({ media: { coverImage: { mediaId: 'loc_1' } } }), true);
   assert.equal(hasUnreplacedLocalId({ hours: { weeklyPeriods: [{ id: 'loc_p1' }] } }), true);
   assert.equal(hasUnreplacedLocalId({ itemIds: ['ok', 'loc_2'] }), true);
+  assert.equal(hasUnreplacedLocalId({ mediaRefs: ['ok', 'loc_3'] }), true);
+  assert.equal(hasUnreplacedLocalId({ mediaRefs: ['ok'] }), false);
   assert.equal(hasUnreplacedLocalId({ title: 'loc_ is only a title' }), false);
   assert.equal(hasUnreplacedLocalId({ media: { coverImage: { mediaId: 'media-1' } } }), false);
 });

@@ -285,7 +285,7 @@ export class ContentPublicationService {
     );
     assertSubmittable(draft, payload.expectedDraftRevision);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
-    this.assertValid(entry, draft, resolved, context.nowUtc);
+    this.assertValid(entry, draft, resolved, context.nowUtc, context.actor.userId);
     const references = resolved.revisions;
     const profile = await this.deps.moderation.profileFor({
       typeId: draft.typeId,
@@ -337,7 +337,7 @@ export class ContentPublicationService {
       submission.marketId,
     );
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
-    this.assertValid(entry, draft, resolved, nowUtc);
+    this.assertValid(entry, draft, resolved, nowUtc, context.actor.userId);
     const references = resolved.revisions;
     const media = await this.assertMediaReady(entry, draft);
     const pointer = await tx.pointer(submission.contentId);
@@ -406,12 +406,14 @@ export class ContentPublicationService {
     draft: ContentDraft,
     resolved: ResolvedReferences,
     nowUtc: UtcInstant,
+    actorUserId: string,
   ): void {
     const context: ContentValidationContext = {
       typeId: draft.typeId,
       marketId: draft.marketId,
       publisherRef: draft.publisherRef,
       createdByUserId: draft.createdByUserId,
+      actorUserId,
       nowUtc,
       draftRevision: draft.revision,
       ...(this.deps.publishedObjects === undefined
