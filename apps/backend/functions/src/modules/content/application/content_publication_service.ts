@@ -1,10 +1,12 @@
 import type {
+  ApplyModerationDispositionCommandV1,
   ContentCommandV1,
   ContentEffectV1,
   ContentFailureCode,
   ContentQueryV1,
   ContentReferenceRevisionsV1,
   ContentTypeId,
+  ModerationAcknowledgementV1,
   PublicationStatusV1,
 } from '../../../contracts/content_v1.js';
 import type { PublisherEligibilityV1, PublisherRefV1 } from '../../../contracts/identity_v1.js';
@@ -36,8 +38,16 @@ import {
   unsupported,
   type ContentResult,
 } from '../domain/failures.js';
-import { activateRevision, type PublicationPointer } from '../domain/publication_pointer.js';
 import {
+  activateRevision,
+  applyModerationHold,
+  isPubliclyVisible,
+  restoreModerationHold,
+  withdrawByOwner,
+  type PublicationPointer,
+} from '../domain/publication_pointer.js';
+import {
+  applyReviewDisposition,
   assertPublishable,
   createPublicationSubmission,
   withSubmissionState,
@@ -77,7 +87,8 @@ export interface ContentPublicationServiceDeps {
   readonly publishedObjects?: PublishedObjectLookup;
 }
 
-export type ContentCommandData = ContentDraft | PublicationSubmission | PublishedRevision;
+export type ContentCommandData =
+  ContentDraft | PublicationSubmission | PublishedRevision | PublicationPointer;
 export type ContentQueryData = ContentDraft | PublicationStatusV1 | PublishedRevision;
 
 type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
@@ -105,6 +116,10 @@ export class ContentPublicationService {
     const parsed = await validateContentContract<ContentCommandV1>('command', rawCommand);
     if (!parsed.ok) return rejected('invalid_contract');
     const command = parsed.value;
+    // A moderation disposition is a BCK-22 instruction, not a user command: it
+    // is only accepted through `applyModerationDisposition` after verification.
+    if ((command as { commandType: string }).commandType === 'applyModerationDisposition')
+      return rejected('capability_denied');
     const semanticHash = sha256Hex(
       canonicalJson({
         algorithm: 'content_semantic_hash_v1',
@@ -177,11 +192,8 @@ export class ContentPublicationService {
           }
           case 'getPublishedRevision': {
             const pointer = await tx.pointer(query.payload.contentId);
-            if (
-              pointer === null ||
-              pointer.visibility !== 'visible' ||
-              pointer.currentPublishedRevisionId === null
-            )
+            // Withdrawn, archived and restricted content is not served publicly.
+            if (!isPubliclyVisible(pointer) || pointer?.currentPublishedRevisionId == null)
               throw new ContentDomainRefusal('not_found');
             const revision = await tx.publishedRevision(pointer.currentPublishedRevisionId);
             if (revision === null) throw new ContentDomainRefusal('not_found');
@@ -217,6 +229,10 @@ export class ContentPublicationService {
         return this.submit(context, command.payload);
       case 'publishApprovedRevision':
         return this.publish(context, command.payload);
+      case 'withdrawPublication':
+        return this.withdraw(context, command.payload);
+      case 'activatePublishedRevision':
+        return this.activate(context, command.payload);
     }
   }
 
@@ -365,29 +381,274 @@ export class ContentPublicationService {
         tx.putSubmission(withSubmissionState(prior, 'superseded', nowUtc));
     tx.putSubmission(withSubmissionState(submission, 'published', nowUtc));
     tx.putDraft(withDraftStatus(draft, 'editing', nowUtc));
-    tx.effects.append(this.effectFor(revision, existing.length === 0, nowUtc));
+    tx.effects.append(this.publishEffect(revision, nextPointer, existing.length === 0, nowUtc));
     this.audit(context, 'content.publication.published', revision.publishedRevisionId);
     return revision;
   }
 
-  private effectFor(
+  private publishEffect(
     revision: PublishedRevision,
+    pointer: PublicationPointer,
     first: boolean,
     nowUtc: UtcInstant,
   ): ContentEffectV1 {
     const kind = first ? 'ContentPublished' : 'ContentRevisionActivated';
+    return this.effectBase(
+      revision,
+      pointer,
+      kind,
+      `${revision.publishedRevisionId}:${kind}`,
+      nowUtc,
+    );
+  }
+
+  private effectBase(
+    revision: PublishedRevision,
+    pointer: PublicationPointer,
+    kind: ContentEffectV1['kind'],
+    effectId: string,
+    nowUtc: UtcInstant,
+  ): ContentEffectV1 {
     return deepFreeze({
       schemaVersion: 1,
-      effectId: `${revision.publishedRevisionId}:${kind}`,
+      effectId,
       kind,
       contentId: revision.contentId,
       publishedRevisionId: revision.publishedRevisionId,
+      pointerRevision: pointer.revision,
+      visibility: pointer.visibility,
       typeId: revision.typeId,
       publisherRef: { ...revision.publisherRef },
       marketId: revision.marketId,
       referenceRevisions: { ...revision.referenceRevisions },
       occurredAtUtc: nowUtc,
     });
+  }
+
+  /**
+   * Visibility changes are committed with the pointer and carry its revision, so
+   * a consumer can drop stale replays and a tombstone always beats stale cache.
+   */
+  private async visibilityEffect(
+    tx: ContentTransaction,
+    pointer: PublicationPointer,
+    nowUtc: UtcInstant,
+  ): Promise<ContentEffectV1> {
+    const current = pointer.currentPublishedRevisionId;
+    const revision = current === null ? null : await tx.publishedRevision(current);
+    if (revision === null) throw new ContentDomainRefusal('not_found');
+    return this.effectBase(
+      revision,
+      pointer,
+      'ContentVisibilityChanged',
+      `${revision.contentId}:visibility:${pointer.revision}`,
+      nowUtc,
+    );
+  }
+
+  /** Owner withdrawal/archival: always allowed to reduce visibility, even if the type is later disabled. */
+  private async withdraw(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'withdrawPublication' }>['payload'],
+  ): Promise<PublicationPointer> {
+    const { tx, nowUtc } = context;
+    const draft = await tx.draftByContentId(payload.contentId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    // Taking content down is authorized by the publisher's current authority but
+    // never by the type flag: a disabled type must still be withdrawable.
+    await this.authorize(context, draft.publisherRef, draft.typeId, 'withdraw', draft.marketId);
+    const pointer = await tx.pointer(payload.contentId);
+    const next = withdrawByOwner(pointer, payload.expectedPointerRevision, payload.mode, nowUtc);
+    tx.putPointer(next, pointer?.revision ?? 0);
+    tx.effects.append(await this.visibilityEffect(tx, next, nowUtc));
+    this.audit(context, `content.publication.${payload.mode}`, payload.contentId);
+    return next;
+  }
+
+  /** Compatible rollback: select an earlier immutable revision, never edit history. */
+  private async activate(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'activatePublishedRevision' }>['payload'],
+  ): Promise<PublicationPointer> {
+    const { tx, nowUtc } = context;
+    const draft = await tx.draftByContentId(payload.contentId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
+    await this.authorize(context, draft.publisherRef, draft.typeId, 'publish', draft.marketId);
+    const target = await tx.publishedRevision(payload.publishedRevisionId);
+    if (target === null || target.contentId !== payload.contentId)
+      throw new ContentDomainRefusal('not_found');
+    // Compatible = same type, still available, market and media still valid.
+    if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
+    await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    const media = await this.deps.media.check({
+      contentId: target.contentId,
+      typeId: target.typeId,
+      mediaIds: entry.mediaIds?.(target.body) ?? [],
+    });
+    if (!media.ready) throw new ContentDomainRefusal('media_not_ready');
+    const pointer = await tx.pointer(payload.contentId);
+    if (pointer === null) throw new ContentDomainRefusal('not_found');
+    // Re-selecting what is already public is a no-op conflict, not a new state.
+    if (
+      pointer.currentPublishedRevisionId === target.publishedRevisionId &&
+      pointer.ownerHold === null &&
+      pointer.moderationHold === null
+    )
+      throw new ContentDomainRefusal('revision_conflict');
+    const next = activateRevision(
+      pointer,
+      payload.expectedPointerRevision,
+      payload.contentId,
+      target.publishedRevisionId,
+      nowUtc,
+    );
+    tx.putPointer(next, pointer.revision);
+    tx.effects.append(
+      this.effectBase(
+        target,
+        next,
+        'ContentRevisionActivated',
+        `${target.publishedRevisionId}:ContentRevisionActivated:${next.revision}`,
+        nowUtc,
+      ),
+    );
+    this.audit(context, 'content.publication.rolled_back', target.publishedRevisionId);
+    return next;
+  }
+
+  /**
+   * System path for BCK-22 enforcement instructions. It verifies the instruction
+   * through the moderation port first; unknown, unsigned, stale or foreign
+   * instructions mutate nothing. Replays are idempotent by decision.
+   */
+  async applyModerationDisposition(
+    rawCommand: unknown,
+  ): Promise<ContentResult<ModerationAcknowledgementV1>> {
+    const early = preflight(rawCommand, 'commandType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<
+      ContentCommandV1 | { commandType: 'applyModerationDisposition'; payload: unknown }
+    >('command', rawCommand);
+    if (!parsed.ok) return rejected('invalid_contract');
+    const command = parsed.value as ApplyModerationDispositionCommandV1;
+    if (command.commandType !== 'applyModerationDisposition') return rejected('invalid_contract');
+    const payload = command.payload;
+    const nowUtc = this.now();
+    const verification = await this.deps.moderation.verifyDisposition({ payload, nowUtc });
+    if (!verification.verified) return rejected('capability_denied');
+    // An instruction that is not yet in effect cannot be applied early.
+    if (Date.parse(payload.effectiveAtUtc) > Date.parse(nowUtc))
+      return rejected('moderation_decision_stale');
+    const systemActor = `moderation:${verification.issuer}`;
+    const semanticHash = sha256Hex(
+      canonicalJson({
+        algorithm: 'content_disposition_hash_v1',
+        decisionId: payload.decisionId,
+        disposition: payload.disposition,
+        policyRevision: payload.policyRevision,
+        reasonCategory: payload.reasonCategory,
+        target: payload.target,
+        restoresDecisionId: payload.restoresDecisionId ?? null,
+      }),
+    );
+    const key = `${payload.decisionId}:${payload.disposition}`.slice(0, 128);
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const prior = await tx.idempotency(systemActor, 'applyModerationDisposition', key);
+        if (prior !== null) {
+          if (prior.semanticHash !== semanticHash)
+            throw new ContentDomainRefusal('idempotency_conflict');
+          const stored = deepFreeze(structuredClone(prior.outcome)) as ModerationAcknowledgementV1;
+          return succeeded<ModerationAcknowledgementV1>({ ...stored, outcome: 'already_applied' });
+        }
+        const pointerRevision = await this.applyDisposition(tx, payload, systemActor, nowUtc);
+        const ack: ModerationAcknowledgementV1 = {
+          instructionId: payload.instructionId,
+          decisionId: payload.decisionId,
+          outcome: 'applied',
+          disposition: payload.disposition,
+          contentId: payload.target.contentId,
+          pointerRevision,
+        };
+        tx.putIdempotency({
+          actorUserId: systemActor,
+          commandType: 'applyModerationDisposition',
+          idempotencyKey: key,
+          semanticHash,
+          outcome: structuredClone(ack),
+          createdAtUtc: nowUtc,
+        });
+        return succeeded(deepFreeze(ack));
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  private async applyDisposition(
+    tx: ContentTransaction,
+    payload: ApplyModerationDispositionCommandV1['payload'],
+    systemActor: string,
+    nowUtc: UtcInstant,
+  ): Promise<number | null> {
+    const { disposition, target, decisionId } = payload;
+    if (
+      disposition === 'approve' ||
+      disposition === 'request_revision' ||
+      disposition === 'reject'
+    ) {
+      // Exact submission only; a foreign or unknown target is a stale decision.
+      const submission =
+        target.submissionId === undefined ? null : await tx.submission(target.submissionId);
+      if (submission === null || submission.contentId !== target.contentId)
+        throw new ContentDomainRefusal('moderation_decision_stale');
+      const updated = applyReviewDisposition(submission, disposition, decisionId, nowUtc);
+      tx.putSubmission(updated);
+      if (disposition !== 'approve') {
+        const draft = await tx.draft(submission.draftId);
+        // The draft returns to the author only if it is still the reviewed one.
+        if (
+          draft !== null &&
+          draft.status === 'submitted' &&
+          draft.revision === submission.draftRevision
+        )
+          tx.putDraft(
+            withDraftStatus(
+              draft,
+              disposition === 'reject' ? 'editing' : 'revision_requested',
+              nowUtc,
+            ),
+          );
+      }
+      this.auditAs(
+        tx,
+        systemActor,
+        `content.moderation.${disposition}`,
+        submission.submissionId,
+        nowUtc,
+      );
+      return null;
+    }
+    const pointer = await tx.pointer(target.contentId);
+    let next: PublicationPointer;
+    if (disposition === 'restore') {
+      if (payload.restoresDecisionId === undefined)
+        throw new ContentDomainRefusal('moderation_decision_stale');
+      next = restoreModerationHold(pointer, payload.restoresDecisionId, nowUtc);
+    } else {
+      next = applyModerationHold(
+        pointer,
+        target.publishedRevisionId,
+        disposition === 'withdraw' ? 'withdrawn' : 'restricted',
+        decisionId,
+        nowUtc,
+      );
+    }
+    tx.putPointer(next, pointer?.revision ?? 0);
+    tx.effects.append(await this.visibilityEffect(tx, next, nowUtc));
+    this.auditAs(tx, systemActor, `content.moderation.${disposition}`, target.contentId, nowUtc);
+    return next.revision;
   }
 
   private usableType(typeId: ContentTypeId, storedSchemaMajor?: number): ContentTypeRegistryEntry {
@@ -483,10 +744,20 @@ export class ContentPublicationService {
   }
 
   private audit(context: CommandContext, action: string, subjectId: string): void {
-    context.tx.appendAudit({
+    this.auditAs(context.tx, context.actor.userId, action, subjectId, context.nowUtc);
+  }
+
+  private auditAs(
+    tx: ContentTransaction,
+    actorUserId: string,
+    action: string,
+    subjectId: string,
+    nowUtc: UtcInstant,
+  ): void {
+    tx.appendAudit({
       auditId: this.deps.ids.newId(),
-      occurredAtUtc: context.nowUtc,
-      actorUserId: context.actor.userId,
+      occurredAtUtc: nowUtc,
+      actorUserId,
       action,
       subjectId,
       outcome: 'succeeded',

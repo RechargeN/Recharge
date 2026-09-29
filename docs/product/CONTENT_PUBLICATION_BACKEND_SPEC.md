@@ -1,8 +1,8 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.8**
-- Date: **2026-09-29**
+- Version: **0.9**
+- Date: **2026-09-30**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
@@ -15,6 +15,25 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.9 — 2026-09-30
+
+- records the additive local publication-lifecycle contract implemented by
+  BCK07-LOCAL-01 item 2.3 inside the v0.8 map (no new paths):
+  `withdrawPublication` (`withdraw | archive`) and `activatePublishedRevision`
+  (compatible rollback to an earlier immutable revision) as actor commands, and
+  `applyModerationDisposition` as a system-only BCK-22 instruction verified
+  through the moderation port and never accepted from a client;
+- the `PublicationPointer` carries two independent holds, `ownerHold` and
+  `moderationHold {kind, decisionId}`, and a derived `visibility`; lifting one
+  never lifts the other, a newer decision replaces the chain, `restore` lifts
+  only the decision it names, and publishing cannot bypass a moderation hold
+  (`publication_restricted`, an additive failure code);
+- visibility facts (`ContentVisibilityChanged`) carry the monotonic pointer
+  revision so a tombstone always beats stale cache; dispositions are idempotent
+  by decision;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
 
 ### v0.8 — 2026-09-29
 

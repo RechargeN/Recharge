@@ -45,6 +45,9 @@ function serviceWithAllTypesEnabled() {
       },
     },
     moderation: {
+      verifyDisposition: () => {
+        throw new Error('moderation must not be consulted for an unavailable type');
+      },
       profileFor: () => {
         throw new Error('moderation must not be consulted for an unavailable type');
       },

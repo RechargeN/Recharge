@@ -1,4 +1,7 @@
-import type { ContentTypeId } from '../../../../contracts/content_v1.js';
+import type {
+  ApplyModerationDispositionCommandV1,
+  ContentTypeId,
+} from '../../../../contracts/content_v1.js';
 import type { PublisherRefV1 } from '../../../../contracts/identity_v1.js';
 import type { MarketId } from '../../../reference_data/domain/identifiers.js';
 
@@ -23,4 +26,18 @@ export interface ModerationDispositionPort {
     readonly marketId: MarketId;
     readonly publisherRef: PublisherRefV1;
   }): Promise<ModerationProfileResolution>;
+
+  /**
+   * Verify that a disposition really comes from the BCK-22 decision authority:
+   * signature/attestation, issuer and that the policy revision is current.
+   * Unknown, foreign or unsigned instructions are `verified: false` and must
+   * create no Content mutation.
+   */
+  verifyDisposition(input: {
+    readonly payload: ApplyModerationDispositionCommandV1['payload'];
+    readonly nowUtc: string;
+  }): Promise<VerifiedDisposition>;
 }
+
+export type VerifiedDisposition =
+  { readonly verified: true; readonly issuer: string } | { readonly verified: false };

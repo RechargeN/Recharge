@@ -33,7 +33,13 @@ export class ContentRepositoryConflict extends Error {
   }
 }
 
-export type ContentResultType = 'draft' | 'submission' | 'publishedRevision' | 'publicationStatus';
+export type ContentResultType =
+  | 'draft'
+  | 'submission'
+  | 'publishedRevision'
+  | 'publicationStatus'
+  | 'publicationPointer'
+  | 'moderationAcknowledgement';
 
 export function toContentWireResult<T>(
   resultType: ContentResultType,

@@ -10,7 +10,7 @@ import { eventMediaIds, validateEventBody } from './type_rules/event_rules.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
-export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish';
+export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
 export const contentTypeRegistryRevision = 'content-type-registry-v6';
@@ -79,6 +79,8 @@ const capabilities: Readonly<Record<ContentAction, string>> = Object.freeze({
   read: 'content.create',
   submit: 'content.submit',
   publish: 'content.publish',
+  // Taking content down is governed by the publish authority.
+  withdraw: 'content.publish',
 });
 
 interface EntryInput {

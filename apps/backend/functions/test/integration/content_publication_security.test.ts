@@ -213,6 +213,7 @@ async function bootstrap() {
         } as const),
     },
     moderation: {
+      verifyDisposition: () => Promise.resolve({ verified: false } as const),
       profileFor: () =>
         Promise.resolve({
           available: true,
@@ -445,6 +446,145 @@ void test('a revoked Session loses Content authority immediately', async () => {
     await service.execute(actor1, update(draft.draftId, 1)),
     denial('publisher_not_eligible'),
   );
+});
+
+// ---------------------------------------------------------------------------
+// 2.3 lifecycle authority: taking content down or rolling back re-checks the
+// current Publisher authority, and a client can never issue moderation.
+// ---------------------------------------------------------------------------
+
+const withdraw = (contentId: string, expectedPointerRevision: number) => ({
+  schemaVersion: 1,
+  commandType: 'withdrawPublication',
+  idempotencyKey: key('withdraw'),
+  payload: { contentId, expectedPointerRevision, mode: 'withdraw' },
+});
+const rollback = (
+  contentId: string,
+  publishedRevisionId: string,
+  expectedPointerRevision: number,
+) => ({
+  schemaVersion: 1,
+  commandType: 'activatePublishedRevision',
+  idempotencyKey: key('activate'),
+  payload: { contentId, publishedRevisionId, expectedPointerRevision },
+});
+
+async function publishedPersonally(context: Awaited<ReturnType<typeof bootstrap>>) {
+  const draft = await ok<{ draftId: string; contentId: string }>(
+    context.service.execute(actor1, create({ type: 'user', id: u1 })),
+  );
+  const submission = await ok<{ submissionId: string }>(
+    context.service.execute(actor1, submit(draft.draftId, 1)),
+  );
+  const revision = await ok<{ publishedRevisionId: string }>(
+    context.service.execute(actor1, publish(submission.submissionId, 0)),
+  );
+  return { draft, revision };
+}
+
+void test("another verified Creator cannot withdraw or roll back someone else's publication", async () => {
+  const context = await bootstrap();
+  const { authority, service, repository } = context;
+  await authority.creatorVerification.submit({
+    userId: u2,
+    verificationId: verification2,
+    evidenceRefIds: [evidence],
+    nowUtc: '2026-09-29T09:59:11.000Z',
+  });
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: u2,
+    status: 'verified',
+    nowUtc: '2026-09-29T09:59:21.000Z',
+  });
+  await authority.sessions.issue({
+    userId: u2,
+    sessionId: session2b,
+    issuedAtUtc: '2026-09-29T09:59:46.000Z',
+    firebaseUid: u2,
+    installationId: 'install-2b',
+    snapshotExpiresAtUtc: '2026-09-29T10:04:00.000Z',
+  });
+  const stranger: ContentActor = { userId: u2, sessionId: session2b };
+  const { draft, revision } = await publishedPersonally(context);
+  assert.deepEqual(
+    await service.execute(stranger, withdraw(draft.contentId, 1)),
+    denial('publisher_not_eligible'),
+  );
+  assert.deepEqual(
+    await service.execute(stranger, rollback(draft.contentId, revision.publishedRevisionId, 1)),
+    denial('publisher_not_eligible'),
+  );
+  const pointer = repository.snapshot().pointers[0];
+  assert.equal(pointer?.revision, 1);
+  assert.equal(pointer?.visibility, 'visible');
+});
+
+void test('withdrawing a Page publication needs an active membership of that Page', async () => {
+  const context = await bootstrap();
+  const { service, repository } = context;
+  const draft = await ok<{ draftId: string; contentId: string }>(
+    service.execute(actor1, create({ type: 'page', id: page1 })),
+  );
+  const submission = await ok<{ submissionId: string }>(
+    service.execute(actor1, submit(draft.draftId, 1)),
+  );
+  await ok(service.execute(actor1, publish(submission.submissionId, 0)));
+  assert.deepEqual(
+    await service.execute(actor2, withdraw(draft.contentId, 1)),
+    denial('membership_inactive'),
+  );
+  assert.equal(repository.snapshot().pointers[0]?.visibility, 'visible');
+  await ok(service.execute(actor1, withdraw(draft.contentId, 1)));
+  assert.equal(repository.snapshot().pointers[0]?.visibility, 'withdrawn');
+});
+
+void test('lost Creator authority blocks owner takedown and rollback; moderation is the takedown path', async () => {
+  const context = await bootstrap();
+  const { authority, service, repository } = context;
+  const { draft, revision } = await publishedPersonally(context);
+  await authority.creatorVerification.decide({
+    reviewerId: 'reviewer',
+    userId: u1,
+    status: 'revoked',
+    nowUtc: '2026-09-29T09:59:50.000Z',
+  });
+  assert.deepEqual(
+    await service.execute(actor1, withdraw(draft.contentId, 1)),
+    denial('publisher_not_eligible'),
+  );
+  assert.deepEqual(
+    await service.execute(actor1, rollback(draft.contentId, revision.publishedRevisionId, 1)),
+    denial('publisher_not_eligible'),
+  );
+  assert.equal(repository.snapshot().pointers[0]?.revision, 1);
+});
+
+void test('a signed-in actor cannot issue a moderation disposition even with a well-formed one', async () => {
+  const context = await bootstrap();
+  const { service, repository } = context;
+  const { draft, revision } = await publishedPersonally(context);
+  const forged = {
+    schemaVersion: 1,
+    commandType: 'applyModerationDisposition',
+    idempotencyKey: key('forged'),
+    payload: {
+      instructionId: 'ins-forged',
+      decisionId: 'dec-forged',
+      policyRevision: 'pol-1',
+      disposition: 'restore',
+      restoresDecisionId: 'dec-anything',
+      target: { contentId: draft.contentId, publishedRevisionId: revision.publishedRevisionId },
+      reasonCategory: 'appeal_upheld',
+      effectiveAtUtc: '2026-09-29T09:00:00.000Z',
+      attestation: 'valid-but-forged-by-client',
+    },
+  };
+  assert.deepEqual(await service.execute(actor1, forged), denial('capability_denied'));
+  // The system path independently refuses what its trusted issuer did not sign.
+  assert.deepEqual(await service.applyModerationDisposition(forged), denial('capability_denied'));
+  assert.equal(repository.snapshot().pointers[0]?.revision, 1);
 });
 
 function sourceFiles(directory: string): string[] {

@@ -1,5 +1,6 @@
 import type {
   ContentReferenceRevisionsV1,
+  ModerationDispositionKind,
   PublicationSubmissionV1,
 } from '../../../contracts/content_v1.js';
 import type { EntityId } from '../../../shared/ids.js';
@@ -72,6 +73,40 @@ export function withSubmissionState(
   return deepFreeze({
     ...structuredClone(submission),
     state,
+    revision: submission.revision + 1,
+    updatedAtUtc: nowUtc,
+  });
+}
+
+export type ReviewDisposition = Extract<
+  ModerationDispositionKind,
+  'approve' | 'request_revision' | 'reject'
+>;
+
+/**
+ * Apply a verified pre-publication review outcome to the exact submission.
+ * Only a submission that is still under review can change; anything else is a
+ * stale or foreign decision and mutates nothing. A rejected or revision-requested
+ * submission never reaches an earlier published revision.
+ */
+export function applyReviewDisposition(
+  submission: PublicationSubmission,
+  disposition: ReviewDisposition,
+  decisionId: string,
+  nowUtc: UtcInstant,
+): PublicationSubmission {
+  if (submission.state !== 'under_review')
+    throw new ContentDomainRefusal('moderation_decision_stale');
+  const state =
+    disposition === 'approve'
+      ? 'approved_for_publication'
+      : disposition === 'reject'
+        ? 'rejected'
+        : 'revision_requested';
+  return deepFreeze({
+    ...structuredClone(submission),
+    state,
+    moderation: { ...structuredClone(submission.moderation), policyDecisionId: decisionId },
     revision: submission.revision + 1,
     updatedAtUtc: nowUtc,
   });

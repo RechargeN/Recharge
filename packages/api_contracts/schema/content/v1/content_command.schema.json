@@ -5,21 +5,48 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "commandType": { "const": "createDraft" },
-        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "createDraft"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["typeId", "publisherRef", "marketId", "body"],
+          "required": [
+            "typeId",
+            "publisherRef",
+            "marketId",
+            "body"
+          ],
           "properties": {
-            "typeId": { "$ref": "content_common.schema.json#/$defs/typeId" },
-            "publisherRef": { "$ref": "content_common.schema.json#/$defs/publisherRef" },
-            "marketId": { "$ref": "content_common.schema.json#/$defs/marketId" },
-            "body": { "$ref": "content_common.schema.json#/$defs/contentBody" },
-            "importSourceKey": { "type": "string", "pattern": "^loc_[A-Za-z0-9_-]{1,120}$" }
+            "typeId": {
+              "$ref": "content_common.schema.json#/$defs/typeId"
+            },
+            "publisherRef": {
+              "$ref": "content_common.schema.json#/$defs/publisherRef"
+            },
+            "marketId": {
+              "$ref": "content_common.schema.json#/$defs/marketId"
+            },
+            "body": {
+              "$ref": "content_common.schema.json#/$defs/contentBody"
+            },
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            }
           }
         }
       }
@@ -27,19 +54,40 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "commandType": { "const": "updateDraft" },
-        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "updateDraft"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["draftId", "expectedRevision", "body"],
+          "required": [
+            "draftId",
+            "expectedRevision",
+            "body"
+          ],
           "properties": {
-            "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
-            "expectedRevision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
-            "body": { "$ref": "content_common.schema.json#/$defs/contentBody" }
+            "draftId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "expectedRevision": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "body": {
+              "$ref": "content_common.schema.json#/$defs/contentBody"
+            }
           }
         }
       }
@@ -47,17 +95,33 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "commandType": { "const": "submitForPublication" },
-        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "submitForPublication"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["draftId", "expectedDraftRevision"],
+          "required": [
+            "draftId",
+            "expectedDraftRevision"
+          ],
           "properties": {
-            "draftId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+            "draftId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
             "expectedDraftRevision": {
               "$ref": "content_common.schema.json#/$defs/positiveRevision"
             }
@@ -68,18 +132,218 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "commandType", "idempotencyKey", "payload"],
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "commandType": { "const": "publishApprovedRevision" },
-        "idempotencyKey": { "$ref": "content_common.schema.json#/$defs/idempotencyKey" },
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "publishApprovedRevision"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
         "payload": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["submissionId", "expectedPointerRevision"],
+          "required": [
+            "submissionId",
+            "expectedPointerRevision"
+          ],
           "properties": {
-            "submissionId": { "$ref": "content_common.schema.json#/$defs/entityId" },
-            "expectedPointerRevision": { "$ref": "content_common.schema.json#/$defs/revision" }
+            "submissionId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "expectedPointerRevision": {
+              "$ref": "content_common.schema.json#/$defs/revision"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "withdrawPublication"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contentId",
+            "expectedPointerRevision",
+            "mode"
+          ],
+          "properties": {
+            "contentId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "expectedPointerRevision": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "mode": {
+              "enum": [
+                "withdraw",
+                "archive"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "activatePublishedRevision"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contentId",
+            "publishedRevisionId",
+            "expectedPointerRevision"
+          ],
+          "properties": {
+            "contentId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "publishedRevisionId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "expectedPointerRevision": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "applyModerationDisposition"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instructionId",
+            "decisionId",
+            "policyRevision",
+            "disposition",
+            "target",
+            "reasonCategory",
+            "effectiveAtUtc",
+            "attestation"
+          ],
+          "properties": {
+            "instructionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "decisionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "policyRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "disposition": {
+              "enum": [
+                "approve",
+                "request_revision",
+                "reject",
+                "restrict",
+                "withdraw",
+                "restore"
+              ]
+            },
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "contentId"
+              ],
+              "properties": {
+                "contentId": {
+                  "$ref": "content_common.schema.json#/$defs/entityId"
+                },
+                "submissionId": {
+                  "$ref": "content_common.schema.json#/$defs/entityId"
+                },
+                "publishedRevisionId": {
+                  "$ref": "content_common.schema.json#/$defs/entityId"
+                }
+              }
+            },
+            "reasonCategory": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            "restoresDecisionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "effectiveAtUtc": {
+              "$ref": "content_common.schema.json#/$defs/utcInstant"
+            },
+            "attestation": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 4096
+            }
           }
         }
       }

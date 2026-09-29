@@ -9,20 +9,154 @@
     "currentPublishedRevisionId",
     "previousPublishedRevisionId",
     "visibility",
+    "ownerHold",
+    "moderationHold",
     "revision",
     "updatedAtUtc"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "contentId": { "$ref": "content_common.schema.json#/$defs/entityId" },
+    "schemaVersion": {
+      "const": 1
+    },
+    "contentId": {
+      "$ref": "content_common.schema.json#/$defs/entityId"
+    },
     "currentPublishedRevisionId": {
-      "anyOf": [{ "$ref": "content_common.schema.json#/$defs/entityId" }, { "type": "null" }]
+      "anyOf": [
+        {
+          "$ref": "content_common.schema.json#/$defs/entityId"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "previousPublishedRevisionId": {
-      "anyOf": [{ "$ref": "content_common.schema.json#/$defs/entityId" }, { "type": "null" }]
+      "anyOf": [
+        {
+          "$ref": "content_common.schema.json#/$defs/entityId"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "visibility": { "enum": ["visible", "withdrawn"] },
-    "revision": { "$ref": "content_common.schema.json#/$defs/positiveRevision" },
-    "updatedAtUtc": { "$ref": "content_common.schema.json#/$defs/utcInstant" }
-  }
+    "visibility": {
+      "enum": [
+        "visible",
+        "withdrawn",
+        "restricted",
+        "archived"
+      ]
+    },
+    "revision": {
+      "$ref": "content_common.schema.json#/$defs/positiveRevision"
+    },
+    "updatedAtUtc": {
+      "$ref": "content_common.schema.json#/$defs/utcInstant"
+    },
+    "ownerHold": {
+      "enum": [
+        "withdrawn",
+        "archived",
+        null
+      ]
+    },
+    "moderationHold": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "decisionId"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "restricted",
+                "withdrawn"
+              ]
+            },
+            "decisionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "visibility": {
+            "const": "visible"
+          }
+        },
+        "required": [
+          "visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "ownerHold": {
+            "const": null
+          },
+          "moderationHold": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "visibility": {
+            "const": "restricted"
+          }
+        },
+        "required": [
+          "visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "moderationHold": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "moderationHold"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "visibility": {
+            "const": "archived"
+          }
+        },
+        "required": [
+          "visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "ownerHold": {
+            "const": "archived"
+          },
+          "moderationHold": {
+            "const": null
+          }
+        }
+      }
+    }
+  ]
 }

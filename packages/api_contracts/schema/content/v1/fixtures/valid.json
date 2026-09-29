@@ -97,15 +97,83 @@
     "mediaRevision": "media-1",
     "publishedAtUtc": "2026-09-29T00:00:00.000Z"
   },
-  "publicationPointer": {
-    "schemaVersion": 1,
-    "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
-    "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
-    "previousPublishedRevisionId": null,
-    "visibility": "visible",
-    "revision": 1,
-    "updatedAtUtc": "2026-09-29T00:00:00.000Z"
-  },
+  "publicationPointer": [
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "restricted",
+      "revision": 2,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": {
+        "kind": "restricted",
+        "decisionId": "dec-1"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "archived",
+      "revision": 3,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": "archived",
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "withdrawn",
+      "revision": 4,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": {
+        "kind": "withdrawn",
+        "decisionId": "dec-3"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "withdrawn",
+      "revision": 5,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": "withdrawn",
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "restricted",
+      "revision": 6,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": "withdrawn",
+      "moderationHold": {
+        "kind": "restricted",
+        "decisionId": "dec-4"
+      }
+    }
+  ],
   "command": [
     {
       "schemaVersion": 1,
@@ -166,6 +234,62 @@
       "payload": {
         "submissionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
         "expectedPointerRevision": 0
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "withdrawPublication",
+      "idempotencyKey": "withdraw-00001",
+      "payload": {
+        "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+        "expectedPointerRevision": 1,
+        "mode": "archive"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "activatePublishedRevision",
+      "idempotencyKey": "activate-0001",
+      "payload": {
+        "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+        "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+        "expectedPointerRevision": 2
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyModerationDisposition",
+      "idempotencyKey": "decision-0001",
+      "payload": {
+        "instructionId": "ins-1",
+        "decisionId": "dec-1",
+        "policyRevision": "pol-1",
+        "disposition": "restrict",
+        "target": {
+          "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+          "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+        },
+        "reasonCategory": "policy_violation",
+        "effectiveAtUtc": "2026-09-29T00:00:00.000Z",
+        "attestation": "signed-attestation-token"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyModerationDisposition",
+      "idempotencyKey": "decision-0002",
+      "payload": {
+        "instructionId": "ins-2",
+        "decisionId": "dec-2",
+        "policyRevision": "pol-1",
+        "disposition": "restore",
+        "target": {
+          "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD"
+        },
+        "reasonCategory": "appeal_upheld",
+        "effectiveAtUtc": "2026-09-29T00:00:00.000Z",
+        "attestation": "signed-attestation-token",
+        "restoresDecisionId": "dec-1"
       }
     }
   ],
@@ -244,6 +368,27 @@
       "schemaVersion": 1,
       "kind": "unsupportedContract",
       "code": "unsupported_version"
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "succeeded",
+      "resultType": "publicationPointer",
+      "data": {
+        "schemaVersion": 1,
+        "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+        "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+        "previousPublishedRevisionId": null,
+        "visibility": "visible",
+        "revision": 1,
+        "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+        "holdSource": null,
+        "holdDecisionId": null
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "rejected",
+      "code": "publication_restricted"
     }
   ]
 }

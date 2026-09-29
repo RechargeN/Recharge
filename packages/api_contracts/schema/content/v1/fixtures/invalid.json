@@ -224,6 +224,109 @@
       "visibility": "hidden",
       "revision": 1,
       "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": "withdrawn",
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": {
+        "kind": "restricted",
+        "decisionId": "d"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "restricted",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "archived",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": "withdrawn",
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "hidden",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "restricted",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": {
+        "kind": "banned",
+        "decisionId": "d"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "restricted",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": {
+        "kind": "restricted"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 1,
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z"
     }
   ],
   "command": [
@@ -276,6 +379,70 @@
             "longitude": 24.1052
           }
         }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "withdrawPublication",
+      "idempotencyKey": "withdraw-00001",
+      "payload": {
+        "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+        "expectedPointerRevision": 1,
+        "mode": "delete"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyModerationDisposition",
+      "idempotencyKey": "decision-0001",
+      "payload": {
+        "instructionId": "ins-1",
+        "decisionId": "dec-1",
+        "policyRevision": "pol-1",
+        "disposition": "ban",
+        "target": {
+          "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+          "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+        },
+        "reasonCategory": "policy_violation",
+        "effectiveAtUtc": "2026-09-29T00:00:00.000Z",
+        "attestation": "signed-attestation-token"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyModerationDisposition",
+      "idempotencyKey": "decision-0001",
+      "payload": {
+        "instructionId": "ins-1",
+        "decisionId": "dec-1",
+        "policyRevision": "pol-1",
+        "disposition": "restrict",
+        "target": {
+          "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+          "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+        },
+        "reasonCategory": "Policy Violation",
+        "effectiveAtUtc": "2026-09-29T00:00:00.000Z",
+        "attestation": "signed-attestation-token"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyModerationDisposition",
+      "idempotencyKey": "decision-0001",
+      "payload": {
+        "instructionId": "ins-1",
+        "decisionId": "dec-1",
+        "policyRevision": "pol-1",
+        "disposition": "restrict",
+        "target": {
+          "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+          "publishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+        },
+        "reasonCategory": "policy_violation",
+        "effectiveAtUtc": "2026-09-29T00:00:00.000Z",
+        "attestation": "short"
       }
     }
   ],

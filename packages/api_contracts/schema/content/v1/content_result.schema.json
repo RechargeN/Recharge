@@ -16,6 +16,7 @@
         "media_not_ready",
         "moderation_required",
         "moderation_decision_stale",
+        "publication_restricted",
         "market_disabled",
         "policy_unavailable",
         "revision_conflict",
@@ -31,34 +32,75 @@
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "kind", "resultType", "data"],
+      "required": [
+        "schemaVersion",
+        "kind",
+        "resultType",
+        "data"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "kind": { "const": "succeeded" },
-        "resultType": {
-          "enum": ["draft", "submission", "publishedRevision", "publicationStatus"]
+        "schemaVersion": {
+          "const": 1
         },
-        "data": { "type": "object" }
+        "kind": {
+          "const": "succeeded"
+        },
+        "resultType": {
+          "enum": [
+            "draft",
+            "submission",
+            "publishedRevision",
+            "publicationStatus",
+            "publicationPointer",
+            "moderationAcknowledgement"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "kind", "code"],
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "kind": { "const": "rejected" },
-        "code": { "$ref": "#/$defs/failureCode" }
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "rejected"
+        },
+        "code": {
+          "$ref": "#/$defs/failureCode"
+        }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "kind", "code"],
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ],
       "properties": {
-        "schemaVersion": { "const": 1 },
-        "kind": { "const": "unsupportedContract" },
-        "code": { "enum": ["unsupported_version", "content_type_unsupported"] }
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "unsupportedContract"
+        },
+        "code": {
+          "enum": [
+            "unsupported_version",
+            "content_type_unsupported"
+          ]
+        }
       }
     }
   ]
