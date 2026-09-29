@@ -7,7 +7,7 @@
 
 Родитель: [Object / Offer Runtime Completion Plan](OBJECT_OFFER_DETAILS_RUNTIME_COMPLETION_PLAN.md)
 v0.2 Approved. Визуал: [Object / Offer Visual System Plan](OBJECT_OFFER_DETAILS_VISUAL_SYSTEM_PLAN.md).
-Связанный продуктовый источник: [Class / Workshop / Experience Create](CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md)
+Связанный продуктовый источник: [Class / Workshop / Experience Create](../create/CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md)
 v1.1, **Ready for approval**, не Approved.
 Accepted ADR 0013/0015/0019 выше этого документа по приоритету.
 

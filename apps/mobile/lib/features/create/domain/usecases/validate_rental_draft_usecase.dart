@@ -4,7 +4,7 @@ import '../entities/rental_draft_data.dart';
 import '../entities/rental_validation_issue.dart';
 
 /// Implements the §14 validation contract of
-/// `docs/product/RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md`. Pure and
+/// `docs/product/create/RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md`. Pure and
 /// side-effect free; the same validator runs for preview, submit and
 /// update — UI-side checks are only early feedback (mirrors
 /// `ValidatePlaceDraftUseCase`).

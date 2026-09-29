@@ -9,7 +9,7 @@ import '../shell/details_renderer.dart';
 import '../widgets/collection_details_mini_map.dart';
 
 /// [DetailsRenderer] for `CatalogObjectType.collection`
-/// (`docs/product/DTL_CLG_01_COLLECTION_SHELL_MIGRATION_SLICE_SPEC.md`).
+/// (`docs/product/discover/DTL_CLG_01_COLLECTION_SHELL_MIGRATION_SLICE_SPEC.md`).
 ///
 /// A **pure shell migration**, not a visual redesign (§1.1/§1.2 of that
 /// spec): every widget/helper here is moved verbatim from the pre-slice

@@ -13,7 +13,7 @@ import 'package:recharge/features/discover/domain/repositories/discover_reposito
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';
 import 'package:recharge/shared/models/catalog_object_ref.dart';
 
-/// `docs/product/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md` §3.4: hint
+/// `docs/product/discover/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md` §3.4: hint
 /// matched / hint diverged / not found, plus legacy-compatibility
 /// classification (including the Route branch via `isPublishedRoute`).
 void main() {

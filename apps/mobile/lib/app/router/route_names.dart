@@ -38,7 +38,7 @@ class RouteNames {
   }
 
   /// The new canonical Details link (`DTL-LINK-01`,
-  /// `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11, DTL-D09) — used
+  /// `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11, DTL-D09) — used
   /// wherever [ref]'s `objectType` is already known at the call site.
   /// Resolved through `ResolveDetailsUseCase`
   /// (`app/application/resolve_details_usecase.dart`), which verifies the

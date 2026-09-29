@@ -16,21 +16,21 @@
 
 Связанные источники истины:
 
-- [VISION.md](VISION.md) — продуктовая роль Place / Business;
-- [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — категории, подкатегории и
+- [VISION.md](../VISION.md) — продуктовая роль Place / Business;
+- [CATEGORY_SYSTEM.md](../CATEGORY_SYSTEM.md) — категории, подкатегории и
   динамические criteria-профили;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — общий Create flow,
+- [S3_CRT_01_CREATE_SPEC.md](../archive/S3_CRT_01_CREATE_SPEC.md) — общий Create flow,
   локальный draft и отправка в `pending_review`;
-- [SEARCH_FILTERS_TIME_SPEC.md](SEARCH_FILTERS_TIME_SPEC.md) — opening hours,
+- [SEARCH_FILTERS_TIME_SPEC.md](../SEARCH_FILTERS_TIME_SPEC.md) — opening hours,
   open-now, time-fit и travel-fit;
-- [S2_DISC_02_MAP_SPEC.md](S2_DISC_02_MAP_SPEC.md) — общий Map/Discover
+- [S2_DISC_02_MAP_SPEC.md](../S2_DISC_02_MAP_SPEC.md) — общий Map/Discover
   contract и Google Maps baseline;
-- [ADR 0011](../adr/0011-architecture-freeze.md) — frozen architecture;
-- [ADR 0012](../adr/0012-tech-stack-defaults.md) — state, DI, errors и
+- [ADR 0011](../../adr/0011-architecture-freeze.md) — frozen architecture;
+- [ADR 0012](../../adr/0012-tech-stack-defaults.md) — state, DI, errors и
   telemetry defaults;
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — ownership, lifecycle,
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — ownership, lifecycle,
   permissions, moderation, IDs, geo, offline и audit;
-- [ADR 0014](../adr/0014-time-fit-ranking.md) — вес time-fit, grouping и
+- [ADR 0014](../../adr/0014-time-fit-ranking.md) — вес time-fit, grouping и
   обязательный kill switch.
 
 При конфликте Accepted ADR и этого документа побеждает ADR. После

@@ -16,10 +16,10 @@ GPS, импортировать из файла или сгенерироват�
 
 - [VISION.md](VISION.md);
 - [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md), профиль `outdoor_activity`;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md), общий движок форм;
+- [S3_CRT_01_CREATE_SPEC.md](archive/S3_CRT_01_CREATE_SPEC.md), общий движок форм;
 - [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md),
   реализация Route-блока в Create Hub;
-- [ROUTE_IMPLEMENTATION_ROADMAP.md](ROUTE_IMPLEMENTATION_ROADMAP.md),
+- [ROUTE_IMPLEMENTATION_ROADMAP.md](route/ROUTE_IMPLEMENTATION_ROADMAP.md),
   последовательность небольших implementation slices;
 - [PLATFORM_FOUNDATION_SPEC.md](../architecture/PLATFORM_FOUNDATION_SPEC.md),
   demo-first/free-first фундамент и production gates;

@@ -43,7 +43,7 @@ class DetailsRouteTargetLegacyCollection extends DetailsRouteTarget {
 enum DetailsResolutionStatus { found, notFound }
 
 /// Outcome of [ResolveDetailsUseCase.call]. `notFound` is deliberately the
-/// *only* failure outcome (`docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md`
+/// *only* failure outcome (`docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md`
 /// §12, `DTL-D10`): a missing loader, a load miss, and a hint/actual-type
 /// mismatch are all folded into the same safe outcome so a caller —
 /// and, downstream, a viewer — cannot distinguish "wrong type guess" from

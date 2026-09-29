@@ -1,5 +1,5 @@
 /// Discover-owned read projection of one Event program item
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.1). The name
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.1). The name
 /// deliberately says "Published...ProgramItem", not "ProgramItem" — this is
 /// a Discover read projection of one program entry, not a second canonical
 /// aggregate type alongside Event.

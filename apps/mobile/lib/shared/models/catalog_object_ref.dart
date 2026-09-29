@@ -1,5 +1,5 @@
 /// The closed set of stable catalog object types Discover Details can
-/// resolve, per `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11
+/// resolve, per `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11
 /// (DTL-D09). Mirrors `CreateObjectType.taxonomyId`
 /// (`apps/mobile/lib/features/create/domain/entities/create_draft_entity.dart`)
 /// minus `quick_plan` — Quick Plan is explicitly excluded from the Discover
@@ -64,7 +64,7 @@ CatalogObjectType? catalogObjectTypeFromTaxonomyId(String value) {
 }
 
 /// Shared app-level reference to one catalog object —
-/// `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11 (DTL-D09). Not a
+/// `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11 (DTL-D09). Not a
 /// router-only type: also used by Favorites, Collection item refs, and
 /// Notifications wherever a link target is already known by type at
 /// construction time.

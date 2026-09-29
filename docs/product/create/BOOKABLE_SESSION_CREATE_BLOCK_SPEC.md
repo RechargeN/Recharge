@@ -148,12 +148,12 @@ provider/Booking данных.
 
 ### 5.1 Внутренние источники истины
 
-- [VISION.md](VISION.md) — Bookable Session среди 10 Create-типов,
+- [VISION.md](../VISION.md) — Bookable Session среди 10 Create-типов,
   `RecurrenceScheduleSection`, `AmenitiesSection`, диапазон 30 мин–3 ч,
   party size 1–20 и external booking MVP;
-- [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — `ContentType.session` и
+- [CATEGORY_SYSTEM.md](../CATEGORY_SYSTEM.md) — `ContentType.session` и
   `applicableTypes` marker `S`;
-- [IDENTITY_PUBLISHER_SLICE_SPEC.md](IDENTITY_PUBLISHER_SLICE_SPEC.md) —
+- [IDENTITY_PUBLISHER_SLICE_SPEC.md](../IDENTITY_PUBLISHER_SLICE_SPEC.md) —
   mandatory auth, pre-verification draft, operation capabilities и
   PublisherRef;
 - [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md)
@@ -163,11 +163,11 @@ provider/Booking данных.
   проверено против кода и заявлено явно, а не скрыто);
 - [CREATE_TEMPLATES_SLICE_SPEC.md](CREATE_TEMPLATES_SLICE_SPEC.md) —
   независимый draft, authority stripping и type isolation;
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — lifecycle, IDs,
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — lifecycle, IDs,
   offline/sync, privacy и audit;
-- [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md)
+- [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md)
   — authenticated Viewer, verified Creator и exact Publisher authority;
-- [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md) — target
+- [ADR 0019](../../adr/0019-authoritative-internal-booking-ledger.md) — target
   Event Booking backend; не Session runtime authorization.
 
 ### 5.2 Проверенные индустриальные источники

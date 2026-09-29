@@ -34,7 +34,7 @@ re-verified in this pass beyond the framing count itself; this document
 cites no `PPP-D`/`PPP-AC` directly),
 `IDENTITY_PUBLISHER_SLICE_SPEC.md` v1.3.1,
 `SCENARIO_CONNECTED_PLANNING_SPEC.md` v1.1 (Approved).
-See `docs/product/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
+See `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
 registry this citation block is checked against.
 
 The Scenario `editor` conflict recorded in v1.3 of this document is
@@ -82,23 +82,23 @@ PAGE_FUNCTIONAL_SPEC.md` respectively), the same private/public split this
 document already uses for itself:
 
 ```text
-docs/product/VIEWER_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity/VIEWER_PROFILE_FUNCTIONAL_SPEC.md
   — the private personal operational center every authenticated account has,
     independent of Creator status: Scenario, Quick Plan, Favorites, Saved
     Searches, Visit History, My participation, Reviews, Photos, account and
     session state. This document does not redefine any of it.
 
-docs/product/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md
   — the minimal Public User Projection every Viewer has, split out of
     VIEWER_PROFILE_FUNCTIONAL_SPEC.md's own former §12; introduces no
     decision of its own, defers entirely to that document's numbering.
 
-docs/product/CREATOR_PROFILE_FUNCTIONAL_SPEC.md  (this document)
+docs/product/identity/CREATOR_PROFILE_FUNCTIONAL_SPEC.md  (this document)
   — Creator verification lifecycle, the personal publisher context, Created
     content management, and this account's relationship to any Professional
     Page it manages.
 
-docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
   — the public card of a verified Creator shown to other authorized users;
     a strict superset of Public Viewer Profile's minimal Public User
     Projection.
@@ -180,18 +180,18 @@ Canonical supporting sources:
   namespace (§7);
 - `docs/product/SCENARIO_CONNECTED_PLANNING_SPEC.md` v1.1 (**Approved**
   execution spec) — canonical source for Scenario collaboration roles (§10);
-- `docs/product/S2_EXP_01_PROFILE_SETTINGS_SPEC.md`;
-- `docs/product/VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns every
+- `docs/product/archive/S2_EXP_01_PROFILE_SETTINGS_SPEC.md`;
+- `docs/product/identity/VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns every
   personal-library lifecycle this document must not redefine; see §23);
-- `docs/product/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (that sibling's
+- `docs/product/identity/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (that sibling's
   own public-facing pair; introduces no decision of its own, always traces
   back to `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s numbering);
-- `docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns
+- `docs/product/identity/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (sibling — owns
   the public card field list this document must not redefine; see §23);
-- `docs/product/PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (`ManagedPage` peer,
+- `docs/product/identity/PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (`ManagedPage` peer,
   not a personal-identity sibling — see §0's distinction; shared invariants
   MUST NOT diverge without the divergence being recorded in §23);
-- `docs/product/PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (that peer's
+- `docs/product/identity/PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (that peer's
   own public-facing pair, added to this list for the same reason);
 - `docs/product/CATEGORY_SYSTEM.md`;
 - `docs/product/SCENARIO_BUILDER_SPEC.md`;
@@ -410,7 +410,7 @@ including one claim in v1.1's own "correction" of v1.0. This revision:
    `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s to define independently —
    this document's own citation of that ownership was stale.
 
-### 0.8 v1.4 → v1.4: fixes from `docs/product/PROFILE_DOCUMENTS_INDEX.md` v1.0, complete closure pass
+### 0.8 v1.4 → v1.4: fixes from `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` v1.0, complete closure pass
 
 `PROFILE_DOCUMENTS_INDEX.md` is a new non-normative cross-document registry
 tracking version citations, ownership and confirmed defects across all four
@@ -1211,7 +1211,7 @@ ScenarioCollaborationRole = owner | editor | viewer | unlistedViewer
   consistent with its three single-token neighbors rather than mixing a
   two-word phrase into a code-style declaration. This is a Direction, not
   yet Accepted/propagated into the owning Scenario contract — see
-  `docs/product/PROFILE_DOCUMENTS_INDEX.md` §6.1; `CP-AC-17` requires this
+  `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` §6.1; `CP-AC-17` requires this
   document to match VIEWER_PROFILE_FUNCTIONAL_SPEC.md's own rendering,
   which already uses this same casing)
 

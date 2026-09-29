@@ -24,25 +24,25 @@
 
 Связанные источники истины:
 
-- [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md) — §7.1
+- [EVENT_CLASSIFICATION_SPEC.md](../EVENT_CLASSIFICATION_SPEC.md) — §7.1
   (`multiVenue` facet), §16 (`ProgramItem`, `childEventRef`/`parentEventRef`),
   §20.5 (пример «Городской фестиваль») — этот документ специфицирует их
   Create-реализацию, не переопределяет;
-- [COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md](COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md) —
+- [COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md](../create/COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md) —
   ближайший архитектурный прецедент id-only связей на чужой опубликованный
   контент и асимметрии self-service удаления vs добавления (§3.11 того
   документа); Multi-Festival Program не копирует его дословно — там подборка
   ссылок одним автором без согласия второй стороны, здесь двусторонняя связь
   с явным запросом-подтверждением;
-- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md) —
+- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](../create/EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md) —
   принятый паттерн детерминированной материализации occurrences, на который
   опирается расписание точек программы;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — общий Create flow,
+- [S3_CRT_01_CREATE_SPEC.md](../archive/S3_CRT_01_CREATE_SPEC.md) — общий Create flow,
   черновики, автосохранение, публикация;
 - `AGENTS.md` — разрешённый конфликт №4 (Create Hub), №2 (ID только по id);
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — lifecycle, ownership,
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — lifecycle, ownership,
   permissions, moderation, ID, audit;
-- [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
+- [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
   роли, Publisher, capability-based доступ.
 
 При конфликте действуют приоритеты `AGENTS.md`: Accepted ADR → spec активного

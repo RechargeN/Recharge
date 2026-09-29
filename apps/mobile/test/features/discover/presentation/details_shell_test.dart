@@ -5,7 +5,7 @@ import 'package:recharge/features/discover/presentation/shell/details_shell.dart
 
 /// Contract tests for [DetailsShell] in isolation from any real renderer.
 ///
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: these
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: these
 /// tests must prove the shell renders its loading/unavailable states
 /// correctly with **no** dependency on a coordinate, a single date, a
 /// price, a single publisher CTA, a single location or a single schedule —

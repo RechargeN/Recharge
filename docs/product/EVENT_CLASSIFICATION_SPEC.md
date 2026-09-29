@@ -21,7 +21,7 @@ ADR.
 Связанные источники истины:
 
 - [EVENT_CREATE_SPEC.md](EVENT_CREATE_SPEC.md) — Creator UX и form flow;
-- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md)
+- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](create/EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md)
   — уже реализованное local/mock подмножество EVT-CRT-01;
 - [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — каноническая тематическая
   таксономия v1.4.3;

@@ -31,7 +31,7 @@ Owner: Recharge team (execution tracking by Codex)
 | 7 | Testing Strategy | Done | Recharge team | 2026-04-17 | 2026-04-17 | change-type -> required tests + critical flows + integration requirements | docs/architecture/TESTING_STRATEGY.md, .github templates | - |
 | 8 | Analytics Taxonomy | Done | Recharge team | 2026-04-17 | 2026-04-17 | naming + required params + event owner + deprecate policy | docs/analytics/ANALYTICS_TAXONOMY.md, docs/analytics/EVENT_CATALOG.md | - |
 | 9 | UI Baseline / Design System Governance | Done | Recharge team | 2026-04-17 | 2026-04-17 | reusable UI only in design_system; feature UI stays in features | docs/architecture/UI_BASELINE_DESIGN_SYSTEM.md, docs/architecture/DS_COMPONENT_INTAKE.md | - |
-| 10 | MVP Plan (2–3 sprints) | Done | Recharge team | 2026-04-17 | 2026-04-17 | scope/dependencies/DoD/out-of-scope/release/rollback per slice | docs/product/MVP_PLAN_3_SPRINTS.md, docs/product/MVP_SLICE_TEMPLATE.md | - |
+| 10 | MVP Plan (2–3 sprints) | Done | Recharge team | 2026-04-17 | 2026-04-17 | scope/dependencies/DoD/out-of-scope/release/rollback per slice | docs/product/archive/MVP_PLAN_3_SPRINTS.md, docs/product/archive/MVP_SLICE_TEMPLATE.md | - |
 
 ## Backend Booking readiness
 
@@ -53,7 +53,7 @@ Owner: Recharge team (execution tracking by Codex)
   runtime, not the current Route contract. Canonical specs:
   `docs/product/ROUTE_BUILDER_SPEC.md` v3.2,
   `docs/architecture/PLATFORM_FOUNDATION_SPEC.md` v2.1,
-  `docs/product/ROUTE_IMPLEMENTATION_ROADMAP.md` v1.0.
+  `docs/product/route/ROUTE_IMPLEMENTATION_ROADMAP.md` v1.0.
 - Account, workspace and publisher are separate identity concepts (ADR 0015,
   `docs/product/IDENTITY_PUBLISHER_SLICE_SPEC.md` v1.2). Historical profile
   rows keep the `User / Creator / Pro generator` terminology; that local tier

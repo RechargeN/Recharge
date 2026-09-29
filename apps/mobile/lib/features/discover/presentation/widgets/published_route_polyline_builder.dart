@@ -6,7 +6,7 @@ import '../../../../shared/primitives/geo/geometry_encoding.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
 
 /// Pure function: `PublishedRouteDiscoveryEntity → Polyline?`
-/// (`docs/product/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §1.1.1/§2).
+/// (`docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §1.1.1/§2).
 ///
 /// Extracted verbatim from the Published-Route branch of
 /// `discover_map_page.dart`'s `_buildPolylines` — the **only** branch:

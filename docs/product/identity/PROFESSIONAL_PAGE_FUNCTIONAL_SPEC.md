@@ -933,7 +933,7 @@ Home · Favorites · Smart Search · Notifications · Profile
 
 The public-facing projection — exact fields, content rules, CTA logic and
 what is never exposed — is owned by
-[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](./PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md),
+[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md),
 not restated here. That document is a presentation split-out only: it
 introduces no new decisions and defers to this document's `PP-D`/`PP-AC`
 numbering and invariants for every rule it states.
@@ -1576,7 +1576,7 @@ At minimum, implementation slices cover:
 ## 20. Decisions required before implementation
 
 These are deliberately not hidden as settled facts.
-[`PROFESSIONAL_PAGE_DECISION_PACKAGE.md`](identity/PROFESSIONAL_PAGE_DECISION_PACKAGE.md)
+[`PROFESSIONAL_PAGE_DECISION_PACKAGE.md`](PROFESSIONAL_PAGE_DECISION_PACKAGE.md)
 (same directory) proposes a recommended resolution for each one, in the
 same spirit as `EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md` did for
 ECL-03 — accepting a recommendation there is what actually moves a
@@ -2324,7 +2324,7 @@ on the owning contract, policy, capability, lifecycle and Approved slice.
 
 The public-page block inventory and illustrative CTA-by-content-contract
 table moved to
-[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](./PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md)
+[`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`](PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md)
 §4/§6 — this appendix now covers only the team-workspace surfaces that
 document does not.
 
@@ -2426,7 +2426,7 @@ itself, why.
 | 2.13 | Fixed a real error: `PCP-D04` (content-review display) is independent of `VP-D08` (reviews-about-a-person), not dependent on it as 2.12 stated. Removed §1.1's competing 5-tier precedence order, which contradicted §0's own order (`current-slice spec` at position 2 vs. 4, `LAUNCH_STATUS.md` dropped entirely) — §1.1 now only clarifies within §0's existing tier 4, never restates it. Narrowed `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s row to the private workspace/publisher relationship only; public Creator↔Page cross-link display is `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D05`. |
 | 2.14 | §0's precedence order previously placed sibling profile documents in item 5's "other product material," below this document's own item 4 — readable as this document outranking its siblings, contradicting §1.1. §0 is restructured to six tiers: ADR → current-slice spec → `LAUNCH_STATUS.md` → owning aggregate/shared contract → all Draft profile-surface specs (this document and every sibling) on equal footing → `VISION.md`/general material. §1.1 no longer cites "§0 item 4" for the sibling tier; it cites item 5. |
 | 2.15 | Cosmetic status fix: §0 item 4 and §1.1 listed "the Review contract" among existing Accepted/Approved contracts, which could read as already approved. Both now say "once approved, the canonical Review contract," consistent with §12.5/Appendix A already saying "when approved." No normative change. |
-| 2.16 | Found via `docs/product/PROFILE_DOCUMENTS_INDEX.md`, verified against primary sources, and fixed two real defects: §1.1's `owner`-collision example wrongly attributed `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §4.2's `owned \| invited` field to Scenario — it is `QuickPlanRef.relationship`, a Quick-Plan-only field (`VP-D02`); Scenario's own `PersonalScenarioRef.accessRole` is a *different*, Approved, four-value enum (`owner \| editor \| viewer \| unlistedViewer`) that already has both `owner` and `editor`. Also fixed a broken cross-reference: §1.1 cited "§21.1" in `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` for `PCP-D05`; that document ends at §19 — the correct location is §5. |
+| 2.16 | Found via `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md`, verified against primary sources, and fixed two real defects: §1.1's `owner`-collision example wrongly attributed `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §4.2's `owned \| invited` field to Scenario — it is `QuickPlanRef.relationship`, a Quick-Plan-only field (`VP-D02`); Scenario's own `PersonalScenarioRef.accessRole` is a *different*, Approved, four-value enum (`owner \| editor \| viewer \| unlistedViewer`) that already has both `owner` and `editor`. Also fixed a broken cross-reference: §1.1 cited "§21.1" in `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` for `PCP-D05`; that document ends at §19 — the correct location is §5. |
 | 2.17 | Checked `PP-D44` against `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` directly: both now cross-reference it extensively as a trilateral `PP-D44`/`VP-D12`/`PCP-D02` decision, making this document's "not yet reciprocated" claim stale — corrected in §1.1, `PP-D44` and `FOL-01`. Also surfaced and flagged a real, unresolved shape mismatch: this document's `FollowRelation` discriminates `target: {type: user \| page, id}`; `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s own proposed `FollowRef` has no target field and cannot represent a page-follow at all. Added: a "3 personal-identity documents + 1 `ManagedPage` peer" framing note in §1.1 (matching `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s own framing, without changing the equal-footing precedence tier); a `PublisherRef`-rollout clarification in §0.2 (Place already consumes the shared type, not "Event only"). |
 | 2.18 | A full mechanical self-audit, not a content-hunting pass: every `§N`/`§N.M` reference verified to resolve to a real heading (2 false positives found, both legitimate — an external-document citation and a quoted historical citation in the changelog; 0 real breaks); every `PP-D`/`PP-AC` mention verified to resolve to a real definition with no gaps in either range (44/44, 85/85); every cross-document decision ID (`VP-D02/08/12`, `PCP-D02/04/05`) reverified directly against the sibling files as they exist right now, including `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`, which moved v1.8→v1.10 *during this session* — a live demonstration of the cross-document staleness risk this document has repeatedly named but not previously mitigated structurally. §1.1 gains a **verified-against snapshot** naming the exact sibling versions checked (VP v1.10, CP v1.4, PCP v1.3) so future drift is a visible, checkable boundary instead of a silent assumption. |
 | 2.19 | New feature, requested and scoped: `PP-D45` — automatic template-reuse suggestions based on a page's own content-similarity history, building on the existing `CRT-TPL-01` (Event-only) and the currently-unwired `AI-PLAT-LOCAL-01` local assistance foundation. Safe boundaries fixed now (suggestion-only, never auto-creates; accepted draft has no live link to its source; reads only the page's own content; opt-in with Messages-grade rate limits); similarity criteria, delivery surface and Create-type scope left open. Added `PP-AC-86`–`88`, a `§7` module row, an `Assist` notification category (`§14`), `PP-17` roadmap slice, and matching `§19` tests. |

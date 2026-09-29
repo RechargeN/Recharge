@@ -45,7 +45,7 @@ import '../../../widget/widget_test_viewport.dart';
 /// Behavioral parity for `DiscoverDetailsPage` after `DTL-FND-01`'s move
 /// onto `DetailsShell`/`DetailsRenderer`/`CompatibilityObjectRenderer`.
 ///
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: "тесты
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: "тесты
 /// поведенческого паритета: то же содержимое, те же CTA, та же навигация,
 /// та же аналитика до/после". `test/widget/discover_details_page_test.dart`
 /// already locks the Map/Route-map/Search/Create navigation handoffs; this

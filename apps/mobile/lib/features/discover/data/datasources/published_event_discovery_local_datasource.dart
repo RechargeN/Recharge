@@ -5,7 +5,7 @@ import '../../domain/entities/publisher_verification_display_state.dart';
 import '../../domain/repositories/published_event_discovery_port.dart';
 
 /// Mock-first `PublishedEventDiscoveryPort` implementation
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §0.6) — the
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §0.6) — the
 /// slice's actual data source, not a boundary-compliant `app/adapters/`
 /// adapter: no live Create → Discover Event publish pipeline exists to
 /// adapt from. Holds exactly the demo fixture from the spec's §7.5

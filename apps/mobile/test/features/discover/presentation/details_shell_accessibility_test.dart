@@ -6,7 +6,7 @@ import 'package:recharge/features/discover/presentation/shell/compatibility_obje
 import 'package:recharge/features/discover/presentation/shell/details_renderer.dart';
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: "360dp/
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` file map: "360dp/
 /// 150% text scale, sticky action container overflow" — the shell owns the
 /// sticky action container, so it must not let an oversized label overflow
 /// it regardless of which renderer supplies the content.

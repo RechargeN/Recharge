@@ -12,14 +12,14 @@
 
 Связанные источники истины:
 
-- [VISION.md](VISION.md) — Create Hub и продуктовые границы типа;
-- [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — канонические категории,
+- [VISION.md](../VISION.md) — Create Hub и продуктовые границы типа;
+- [CATEGORY_SYSTEM.md](../CATEGORY_SYSTEM.md) — канонические категории,
   подкатегории, applicable types и dynamic criteria;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — текущий baseline
+- [S3_CRT_01_CREATE_SPEC.md](../archive/S3_CRT_01_CREATE_SPEC.md) — текущий baseline
   общего draft/publish flow;
-- [EVENT_CREATE_SPEC.md](EVENT_CREATE_SPEC.md) — согласуемые общие правила
+- [EVENT_CREATE_SPEC.md](../EVENT_CREATE_SPEC.md) — согласуемые общие правила
   времени, медиа, Publisher и публикации;
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — обязательные правила
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — обязательные правила
   ownership, capabilities, lifecycle, ULID, времени, offline, moderation,
   privacy и audit. Его MVP-ограничения не определяют конечную функциональность;
   production-расширения требуют отдельного ADR до реализации.

@@ -8,7 +8,7 @@ import 'package:recharge/features/discover/domain/repositories/collection_item_r
 import 'package:recharge/features/discover/domain/repositories/published_collection_discovery_port.dart';
 import 'package:recharge/features/discover/presentation/pages/collection_details_page.dart';
 
-/// `docs/product/DTL_CLG_01_COLLECTION_SHELL_MIGRATION_SLICE_SPEC.md` §2:
+/// `docs/product/discover/DTL_CLG_01_COLLECTION_SHELL_MIGRATION_SLICE_SPEC.md` §2:
 /// parity (same sections/content before/after the `DetailsShell` move) and
 /// the unavailable-item hide policy (CLG-D-AC-05).
 void main() {

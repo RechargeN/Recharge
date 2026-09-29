@@ -6,7 +6,7 @@ import 'details_renderer.dart';
 
 /// Why a Details screen currently has no content to show. Mirrors the
 /// enumeration-safe viewer states from
-/// `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §12 (DTL-D10): never a
+/// `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §12 (DTL-D10): never a
 /// Create-domain lifecycle enum (`DraftStatus`/`ModerationStatus`), and
 /// [unavailable]/[notFound] deliberately render identical copy so a viewer
 /// cannot distinguish "hidden by moderation" from "never existed".
@@ -16,7 +16,7 @@ enum DetailsUnavailableReason { temporarilyUnavailable, unavailable, notFound }
 /// [DetailsRenderer] (see `details_renderer.dart`), there is no reason for
 /// callers outside this library to add their own state, so `sealed` is the
 /// right tool here
-/// (`docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §2: "`sealed`
+/// (`docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §2: "`sealed`
 /// remains a valid tool ... for a typed read-model union").
 sealed class DetailsScreenState {
   const DetailsScreenState();
@@ -68,7 +68,7 @@ class DetailsScreenUnavailable extends DetailsScreenState {
 /// action container and the loading/unavailable representation — nothing
 /// here requires a coordinate, a single date, a price, a single publisher
 /// CTA, a single location or a single schedule
-/// (`docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §4).
+/// (`docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §4).
 ///
 /// [DetailsShell] never resolves data and never picks a renderer for an
 /// `objectType` — it is handed an already-resolved [DetailsScreenState] by

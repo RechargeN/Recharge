@@ -5,7 +5,7 @@ import 'package:recharge/features/discover/presentation/widgets/published_route_
 import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
 import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
-/// `docs/product/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §2: the pure
+/// `docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §2: the pure
 /// function extracted verbatim from `discover_map_page.dart`'s
 /// `_buildPolylines` Published-Route branch — proving its behavior is
 /// unchanged (same id shape, same style, same silent-degrade on a bad

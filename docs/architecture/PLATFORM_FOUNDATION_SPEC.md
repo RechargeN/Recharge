@@ -41,7 +41,7 @@ Route, validation rules, versioning или итоговый пользовате
 - [0013-domain-policy-baseline.md](../adr/0013-domain-policy-baseline.md);
 - [CATEGORY_SYSTEM.md](../product/CATEGORY_SYSTEM.md);
 - [LAUNCH_STATUS.md](LAUNCH_STATUS.md);
-- [ROUTE_IMPLEMENTATION_ROADMAP.md](../product/ROUTE_IMPLEMENTATION_ROADMAP.md);
+- [ROUTE_IMPLEMENTATION_ROADMAP.md](../product/route/ROUTE_IMPLEMENTATION_ROADMAP.md);
 - [AGENTS.md](../../AGENTS.md).
 
 ---

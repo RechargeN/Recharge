@@ -11,7 +11,7 @@ import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
 
-/// `docs/product/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §2/§3: map-hero,
+/// `docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` §2/§3: map-hero,
 /// elevation summary (no graph), difficulty/surface/POI/field-verified as
 /// first-class, safety reporting, navigation action — plus parity for the
 /// generic sections reused from `CompatibilityObjectRenderer`.

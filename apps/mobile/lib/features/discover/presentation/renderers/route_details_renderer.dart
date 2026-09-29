@@ -10,7 +10,7 @@ import '../widgets/published_route_polyline_builder.dart';
 import '../widgets/route_elevation_summary.dart';
 
 /// [DetailsRenderer] for `CatalogObjectType.route`
-/// (`docs/product/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md`).
+/// (`docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md`).
 ///
 /// Replaces the photo-hero + `_PublishedRouteCard`-bolted-onto-a-generic-
 /// card treatment `CompatibilityObjectRenderer` gave Route before this

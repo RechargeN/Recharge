@@ -1,7 +1,7 @@
 import '../entities/published_event_discovery_entity.dart';
 
 /// Read side of the Create→Discover boundary for Event
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §3), by the same
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §3), by the same
 /// shape as `PublishedRentalDiscoveryPort`. Unlike Rental, there is no
 /// write-side sink here yet — no live Create → Discover Event publish
 /// pipeline exists (§0.6) — so this slice's implementation

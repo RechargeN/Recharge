@@ -9,7 +9,7 @@ import '../../shared/models/catalog_object_ref.dart';
 /// renders an already-resolved family"; this one answers "where does the
 /// data for a given `objectType` come from, and how do I confirm it".
 /// The two are never merged into one class
-/// (`docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11, third-round
+/// (`docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11, third-round
 /// finding on presentation-registry-as-data-authority).
 class DetailsLookupRegistry {
   DetailsLookupRegistry(Map<CatalogObjectType, DetailsLookupPort> ports)

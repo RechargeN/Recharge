@@ -251,7 +251,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // segment structure, and `:objectType/:objectId` (4 segments) never
       // collides with legacy `:itemId` (3 segments), so both coexist
       // without redirecting or removing the legacy one
-      // (`docs/product/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md`
+      // (`docs/product/discover/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md`
       // §1.1.6/§1.2: legacy routes are not removed by this slice).
       GoRoute(
         name: 'discover_details_canonical',

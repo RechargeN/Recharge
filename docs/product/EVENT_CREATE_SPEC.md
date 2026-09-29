@@ -18,7 +18,7 @@
   canonical contract** для Event classification, admission, inventory,
   availability, provenance и границ со смежными aggregates;
 - [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — категории, подкатегории и dynamic criteria;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — текущий baseline черновика и публикации;
+- [S3_CRT_01_CREATE_SPEC.md](archive/S3_CRT_01_CREATE_SPEC.md) — текущий baseline черновика и публикации;
 - [ADR 0013](../adr/0013-domain-policy-baseline.md) — ownership, capabilities,
   lifecycle, ULID, время, бронирование, offline/conflict и moderation;
 - [SEARCH_FILTERS_TIME_SPEC.md](SEARCH_FILTERS_TIME_SPEC.md) — event slots и time-fit.

@@ -30,7 +30,7 @@ import '../shell/details_shell.dart';
 /// the side-effecting page-level flows (favorites, visit history, scenario
 /// intake, route safety reports) that predate the shell split.
 ///
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this page was
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this page was
 /// the shell's first real consumer, rendering every item via
 /// [CompatibilityObjectRenderer] with zero behavior change from the
 /// pre-shell layout. Since `DTL-RTE-01`, `route`-classified items

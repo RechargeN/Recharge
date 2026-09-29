@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// The closed set of Details renderer families defined by
-/// `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §3. Adding a member here
+/// `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §3. Adding a member here
 /// is an architecture-level change to the Details System, not a per-slice
 /// decision — it mirrors the four target renderer contracts
 /// (`ObjectOfferDetailsRenderer`, `RouteDetailsRenderer`,
@@ -12,7 +12,7 @@ enum DetailsRendererFamily { objectOffer, route, scenario, collection }
 /// `sealed`: `sealed` would restrict implementations to this library, which
 /// would prevent future renderers (`DTL-RTE-01`, `DTL-CLG-01`,
 /// `DTL-SCN-01`) from living in their own files/libraries, as required by
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §2.
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §2.
 ///
 /// A renderer supplies content for the slots [DetailsShell] owns (app bar
 /// actions, hero, body, sticky action) — it never owns the shell chrome
@@ -51,7 +51,7 @@ typedef DetailsRendererBuilder = DetailsRenderer Function();
 /// it never reads from a repository. That responsibility is
 /// `DetailsLookupRegistry`/`ResolveDetailsUseCase`, introduced in
 /// `DTL-LINK-01`'s application layer (see
-/// `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11: router parses,
+/// `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11: router parses,
 /// application resolver verifies, presentation registry only dispatches).
 class DetailsRendererRegistry {
   DetailsRendererRegistry(

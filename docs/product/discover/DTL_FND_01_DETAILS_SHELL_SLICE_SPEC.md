@@ -14,7 +14,7 @@ file map ниже, каждый под собственные analyzer/test/boun
 
 ## Approval gates — выполнены
 
-1. `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` принят владельцем
+1. `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` принят владельцем
    продукта 2026-08-24 (Accepted).
 2. Этот документ отдельно получил статус `Approved` от владельца
    продукта 2026-08-24.
@@ -24,7 +24,7 @@ file map ниже, каждый под собственные analyzer/test/boun
 
 ## Связанные документы
 
-- `docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` v0.2 (Accepted) — родительский
+- `docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` v0.2 (Accepted) — родительский
   каноничный контракт; §3 (каноническое решение), §4 (Details Shell),
   §5 (Object/Offer), §12 (состояния) — прямые источники этого slice.
 - `docs/architecture/ARCHITECTURE_BASELINE.md` — правило 3 (layering

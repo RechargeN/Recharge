@@ -56,18 +56,18 @@ Rental обязана использовать отдельное имя `Rental
 
 Связанные канонические документы:
 
-- [VISION.md](VISION.md) — десять Create-типов и общий form engine;
-- [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — `rental` и собственный whitelist;
-- [IDENTITY_PUBLISHER_SLICE_SPEC.md](IDENTITY_PUBLISHER_SLICE_SPEC.md) —
+- [VISION.md](../VISION.md) — десять Create-типов и общий form engine;
+- [CATEGORY_SYSTEM.md](../CATEGORY_SYSTEM.md) — `rental` и собственный whitelist;
+- [IDENTITY_PUBLISHER_SLICE_SPEC.md](../IDENTITY_PUBLISHER_SLICE_SPEC.md) —
   authenticated Viewer, Creator eligibility, capabilities и `PublisherRef`;
 - [CREATE_TEMPLATES_SLICE_SPEC.md](CREATE_TEMPLATES_SLICE_SPEC.md) —
   local-first template materialization и sanitization;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — общий Create pipeline;
-- [BACKEND_API_CONTRACT_STANDARD.md](BACKEND_API_CONTRACT_STANDARD.md) —
+- [S3_CRT_01_CREATE_SPEC.md](../archive/S3_CRT_01_CREATE_SPEC.md) — общий Create pipeline;
+- [BACKEND_API_CONTRACT_STANDARD.md](../BACKEND_API_CONTRACT_STANDARD.md) —
   Money, stable metadata, idempotency и concurrency;
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — lifecycle, moderation,
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — lifecycle, moderation,
   offline, IDs, privacy, abuse и audit;
-- [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
+- [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
   mandatory auth, verified Creator и canonical Publisher.
 
 ADR 0019 — Event Booking precedent. Он не является Rental Booking contract и

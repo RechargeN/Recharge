@@ -3,7 +3,7 @@ import '../application/resolve_details_usecase.dart';
 import 'route_names.dart';
 
 /// Parses a Details path into a [DetailsRouteTarget] — **parsing only**,
-/// never resolution (`docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11:
+/// never resolution (`docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11:
 /// "Router парсит URI... ничего не резолвит сам"). Returns `null` when
 /// [path] matches none of the three known Details route shapes; callers
 /// treat that as a routing miss, not a Details-specific `notFound` (that

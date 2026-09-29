@@ -3,7 +3,7 @@ import 'package:recharge/app/application/resolve_details_usecase.dart';
 import 'package:recharge/app/router/details_route_parser.dart';
 import 'package:recharge/shared/models/catalog_object_ref.dart';
 
-/// `docs/product/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md` §1.1.6/§3.4:
+/// `docs/product/discover/DTL_LINK_01_DEEP_LINK_MIGRATION_SLICE_SPEC.md` §1.1.6/§3.4:
 /// the parser recognizes the canonical shape and both legacy shapes
 /// byte-for-byte, and resolves nothing itself.
 void main() {

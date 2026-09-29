@@ -26,7 +26,7 @@ re-verified for content in this pass, since this change's only trigger was
 the Viewer-side split, not a Professional Page resync),
 `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.1 (same caveat),
 `SCENARIO_CONNECTED_PLANNING_SPEC.md` v1.1 (Approved). See also
-`docs/product/PROFILE_DOCUMENTS_INDEX.md` — a fully non-normative
+`docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` — a fully non-normative
 cross-document navigational and hygiene index over these four documents;
 it decides nothing on its own and is itself subject to going stale, but is
 a useful map of who owns which concern and which cross-document citations
@@ -88,13 +88,13 @@ The two documents this one does not redefine, each with a distinct,
 non-overlapping subject:
 
 ```text
-docs/product/CREATOR_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity/CREATOR_PROFILE_FUNCTIONAL_SPEC.md
   — Creator verification lifecycle, the personal publisher context
     (`PublisherRef{type: user}`), Created-content management, and this
     account's relationship to any Professional Page it manages. It does not
     redefine anything this document owns.
 
-docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
   — the public card of a verified Creator shown to other authorized users; a
     strict superset of `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s minimal
     Public User Projection.
@@ -173,24 +173,24 @@ Canonical supporting sources:
 - `docs/adr/0015-authenticated-viewer-verified-creator-professional-page.md`;
 - `docs/adr/0016-bounded-identity-workspace-during-stabilization.md`;
 - `docs/adr/0019-authoritative-internal-booking-ledger.md`;
-- `docs/product/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (this document's
+- `docs/product/identity/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` (this document's
   own public-facing pair — the presentation split-out §12 now points to; it
   introduces no decisions of its own, see §25);
-- `docs/product/CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (personal-identity
+- `docs/product/identity/CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (personal-identity
   sibling — owns verification, personal publisher context and
   Created-content management; see §25);
-- `docs/product/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (personal-identity
+- `docs/product/identity/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` (personal-identity
   sibling — owns the public Creator card this document's Public User
   Projection is a
   baseline for; see §25);
-- `docs/product/PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (ManagedPage peer, not
+- `docs/product/identity/PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (ManagedPage peer, not
   a personal-identity sibling — but equal-footing on the precedence tier
   above; shared invariants MUST NOT diverge without the divergence being
   recorded in §25);
-- `docs/product/PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (that peer's
+- `docs/product/identity/PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (that peer's
   own public-facing pair, added to this list for the same reason);
 - `docs/product/IDENTITY_PUBLISHER_SLICE_SPEC.md`;
-- `docs/product/S2_EXP_01_PROFILE_SETTINGS_SPEC.md`;
+- `docs/product/archive/S2_EXP_01_PROFILE_SETTINGS_SPEC.md`;
 - `docs/product/SCENARIO_BUILDER_SPEC.md`;
 - `docs/product/SCENARIO_CONNECTED_PLANNING_SPEC.md` (Approved — the
   canonical source of Scenario's `ScenarioAccessGrant` role model this
@@ -1154,7 +1154,7 @@ obligations here are boundary-preserving:
 The public-facing identity projection — visibility defaults, the Public
 User Projection field set, discoverability/blocking/deleted-account
 handling, and the proposed Follow direction — is owned by
-[`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`](./PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md),
+[`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`](PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md),
 not restated here. That document is a presentation split-out only: it
 introduces no new `VP-D`/`VP-AC` numbering and defers to this document's
 decisions and invariants (`VP-D07`, `VP-D10`, `VP-D12`, invariants 13 and
@@ -2895,7 +2895,7 @@ already.
 
 ### From draft 1.8 to 1.9
 
-Incorporates findings from `docs/product/PROFILE_DOCUMENTS_INDEX.md` v1.0
+Incorporates findings from `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` v1.0
 (2026-08-12), a new fully non-normative cross-document navigational index
 over the four profile-surface documents. Per that document's own stated
 role, nothing in it was treated as authoritative on its own — each item

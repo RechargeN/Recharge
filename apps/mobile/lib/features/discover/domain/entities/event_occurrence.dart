@@ -1,5 +1,5 @@
 /// Discover-owned occurrence of a published Event
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.2), per the
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.2), per the
 /// canonical `scheduleMode`/occurrence model in
 /// `EVENT_CLASSIFICATION_SPEC.md` §8/§17.4. Header/Metrics/CTA on a
 /// `PublishedEventDiscoveryEntity` resolve through its

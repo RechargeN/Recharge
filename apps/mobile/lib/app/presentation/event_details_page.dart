@@ -25,7 +25,7 @@ import '../router/route_names.dart';
 import 'scenario_object_intake_sheet.dart';
 
 /// Reader-facing Details for one published Event
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §3/§4), on the
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §3/§4), on the
 /// same footing as `RentalDetailsPage`/`CollectionDetailsPage` — takes the
 /// already-resolved [projection] directly, not a bare id (the canonical
 /// route already loaded it once via `EventDetailsLookup`).

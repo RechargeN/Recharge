@@ -5,7 +5,7 @@ import '../../../../shared/models/catalog_object_ref.dart';
 /// `DetailsLookupRegistry` (`app/application/details_lookup_registry.dart`,
 /// `DTL-LINK-01`). It is the *only* thing that reads a public projection
 /// for Details resolution — never the presentation renderer registry
-/// (`docs/product/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11).
+/// (`docs/product/discover/DISCOVER_DETAILS_SYSTEM_SPEC.md` §11).
 ///
 /// Deliberately not generic (`DetailsLookupPort<T>`): a registry keyed by
 /// [CatalogObjectType] needs one non-generic handle it can call uniformly,

@@ -12,7 +12,7 @@ import 'package:recharge/features/discover/presentation/shell/details_shell.dart
 
 import '../../../../widget/widget_test_viewport.dart';
 
-/// `docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §5 — order,
+/// `docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §5 — order,
 /// honest metrics, verified badge, empty-section hiding, honest CTA.
 void main() {
   final TimezoneRepository timezoneRepository = TimezoneRepositoryImpl();

@@ -4,7 +4,7 @@ import 'published_event_program_item.dart';
 import 'publisher_verification_display_state.dart';
 
 /// Discover-owned typed read projection for a published Event
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.4), built by
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.4), built by
 /// the mock-first `published_event_discovery_local_datasource.dart` for
 /// this slice — not by a live Create → Discover publish pipeline, which
 /// does not exist yet for Event (or for any Discover type: the whole

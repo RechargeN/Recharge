@@ -1,6 +1,6 @@
 /// Public, denormalized verification badge state for a
 /// `PublishedEventDiscoveryEntity` publisher
-/// (`docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.3).
+/// (`docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §2.3).
 ///
 /// Never a live Identity-domain lookup — Discover does not import
 /// Identity-domain types. An adapter collapses Identity's five-state

@@ -4,7 +4,7 @@
 все 20 открытых вопросов 2026-08-20; решения и куда каждое из них попало в
 тексте — таблица в §20. Документ разрешён как Approved slice spec по правилу
 «Create Hub» из
-[AGENTS.md](../../AGENTS.md) (разрешённый конфликт №4: реализация блоков для
+[AGENTS.md](../../../AGENTS.md) (разрешённый конфликт №4: реализация блоков для
 уже утверждённых 10 типов Create Hub — это завершение принятого scope, а не
 новая фича). Документ является канонической спецификацией CLG-CRT-01;
 физический runtime ещё не начат и не считается реализованным.
@@ -37,7 +37,7 @@
 > типов (§6, Вопрос 14). CLG-CRT-02 передвинут из «отдельный gated slice
 > когда-нибудь» в «сразу после CLG-CRT-01» (§16, Вопрос 15).
 > `CollectionCuratorNotesSection` добавлена в реестр секций
-> [VISION.md](VISION.md) (Вопрос 17). §20 «Открытые вопросы» снят — вопросов
+> [VISION.md](../VISION.md) (Вопрос 17). §20 «Открытые вопросы» снят — вопросов
 > больше нет, раздел заменён итоговым списком решений.
 >
 > *v0.2 — самопроверка логики перед передачей владельцу* нашла и исправила:
@@ -49,19 +49,19 @@
 > противоречивую формулировку про `highlight` в §7.
 
 Источник задачи: тип **Collection / Guide** утверждён в целевой десятке Create
-Hub в [VISION.md:358](VISION.md), секция `ItemsPickerSection` анонсирована
-там же ([VISION.md:323](VISION.md)) как переиспользуемая типо-специфичная
+Hub в [VISION.md:358](../VISION.md), секция `ItemsPickerSection` анонсирована
+там же ([VISION.md:323](../VISION.md)) как переиспользуемая типо-специфичная
 секция form engine. Отдельной спецификации блока не существовало — это
 первый документ, который её вводит. Проверено по коду: `CreateObjectType.collection`
 и запись в `rechargeCreateBlockConfigs` уже существуют
-([create_draft_entity.dart](../../apps/mobile/lib/features/create/domain/entities/create_draft_entity.dart),
-[create_taxonomy.dart](../../apps/mobile/lib/features/create/application/create_taxonomy.dart)),
+([create_draft_entity.dart](../../../apps/mobile/lib/features/create/domain/entities/create_draft_entity.dart),
+[create_taxonomy.dart](../../../apps/mobile/lib/features/create/application/create_taxonomy.dart)),
 но `collectionData`, `CollectionDraftData`, `ItemsPickerSection` и любой Create-код
 блока отсутствуют — таксономия готова принять тип, сам блок не реализован.
 
 Ближайший архитектурный прецедент внутри репозитория — механизм добавления
 существующих каталожных объектов в черновик, уже принятый и реализованный для
-Scenario: [SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md](scenario/SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md)
+Scenario: [SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md](../scenario/SCENARIO_OBJECT_INTAKE_SLICE_SPEC.md)
 (`ScenarioObjectRef`, `ScenarioIntakeCandidate`, typed outcomes, revision-safe
 Apply). Этот документ переиспользует те же принципы (id-only связи, снапшот +
 live resolution, явные duplicate/unavailable guard), но не копирует контракт
@@ -240,7 +240,7 @@ GetYourGuide guide-страница по отношению к своим bookab
    наборы категорий приходят из
    конфигурации блока (`collection_create_config.dart`, см. §15), не
    зашиваются в UI — тот же принцип, что и у Route (решение №12 в
-   [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md),
+   [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](../route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md),
    далее по документу — «RCB»).
 10. Минимальный порог пунктов (§11) — это **publish-time gate**, не
     постоянно поддерживаемый инвариант. Объекты внутри уже опубликованной
@@ -408,7 +408,7 @@ Collection/Scenario недоступны как объект для добавл
 
 Отдельная типо-специфичная секция form engine (вторая новая секция блока,
 наравне с `ItemsPickerSection`, см. §15; уже добавлена в реестр секций
-[VISION.md](VISION.md)).
+[VISION.md](../VISION.md)).
 Для каждого добавленного пункта — отдельный компактный редактор:
 
 - `curatorNote` — короткая авторская заметка, максимум **300 Unicode grapheme
@@ -1423,7 +1423,7 @@ stabilization gate.
 | 14. Порог публикации | B — per-type capability | §3.3, §6 |
 | 15. Приоритет CLG-CRT-02 | A — сразу за CLG-CRT-01 | §16 |
 | 16. Scenario как тип пункта | C — отложено | §3.7 (без изменений) |
-| 17. Реестр секций VISION.md | A — обновлено сейчас | [VISION.md](VISION.md) |
+| 17. Реестр секций VISION.md | A — обновлено сейчас | [VISION.md](../VISION.md) |
 | 18. Индикатор бюджета | B — опционален с автоподсказкой | §7 (Шаг 4), без изменений |
 | 19. Асимметрия модерации | B — удаление self-service | §3.11, §12, AC-27 |
 | 20. Скоротечные типы | B — сужен до 5 типов | §3.12, §9, §14, AC-06 |

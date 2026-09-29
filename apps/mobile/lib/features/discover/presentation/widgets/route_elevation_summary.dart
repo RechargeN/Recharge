@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
 
 /// Honest elevation summary — **not a graph**
-/// (`docs/product/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` "Что изменилось
+/// (`docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md` "Что изменилось
 /// относительно v0.1", п.1): `PublishedRouteDiscoveryEntity` carries only
 /// `elevationAvailability` + ascent/descent totals, never per-point
 /// samples, so no graph can honestly be drawn from it. This renders those

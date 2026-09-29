@@ -19,7 +19,7 @@ changed, but does not by itself prove content incompatibility):
 `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9,
 `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.28 (targeted verification:
 `PP-D44`, `PP-D25` and `PP-D23` still have the meaning cited below).
-See `docs/product/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
+See `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
 registry this citation block is checked against.
 
 **On the pace of sibling-document change:**
@@ -256,7 +256,7 @@ implemented unless `LAUNCH_STATUS.md` contains corresponding evidence.
    address verification, anti-spam/rate limiting and provider-failure
    fallback, not only social-link platforms.
 
-### 0.6 v1.3 → v1.4: fixes from `docs/product/PROFILE_DOCUMENTS_INDEX.md` v1.0
+### 0.6 v1.3 → v1.4: fixes from `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` v1.0
 
 `PROFILE_DOCUMENTS_INDEX.md` is a new non-normative cross-document registry
 tracking version citations, ownership and confirmed defects across all four

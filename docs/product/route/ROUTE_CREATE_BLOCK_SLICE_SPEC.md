@@ -23,7 +23,7 @@ Android/iOS device-проверка foreground/background/restart.
 Платформенные зависимости, investor-demo и правила контроля стоимости заданы
 в [PLATFORM_FOUNDATION_SPEC.md](../../architecture/PLATFORM_FOUNDATION_SPEC.md).
 Порядок небольших slices и investor-ready milestone зафиксированы в
-[ROUTE_IMPLEMENTATION_ROADMAP.md](../ROUTE_IMPLEMENTATION_ROADMAP.md).
+[ROUTE_IMPLEMENTATION_ROADMAP.md](ROUTE_IMPLEMENTATION_ROADMAP.md).
 Первый поставляемый результат — полностью работающая локальная вертикаль без
 тарифицируемых API-вызовов; adapters меняются по мере готовности, но Route-
 контракт и Create flow не упрощаются.

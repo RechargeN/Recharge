@@ -163,7 +163,7 @@ Smart Search остаётся доступен через consumer Home/Search, 
 - Быстрые сценарии: «Near me now», «For two», «Low budget», «1 hour»,
   «Calm evening», «Recharge now» (фильтр по `ContentType.activity`,
   ранжирование по близости `bestTime.timeOfDay` к текущему времени суток —
-  см. [RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md](RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md) §16.1)
+  см. [RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md](create/RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md) §16.1)
 - Recent searches, Quick plans
 - `/search` — компактный стартовый экран выбора; фактическая выдача
   открывается отдельно на `/discover/results`. История обычных запросов
@@ -258,7 +258,7 @@ Smart Search остаётся доступен через consumer Home/Search, 
   через one-way Expand, из public template и через AI-generated preview.
 - AI generation является опциональным entry mode того же Scenario aggregate,
   а не отдельным типом плана. Детали:
-  [SCENARIO_AI_GENERATION_SPEC.md](SCENARIO_AI_GENERATION_SPEC.md).
+  [SCENARIO_AI_GENERATION_SPEC.md](scenario/SCENARIO_AI_GENERATION_SPEC.md).
 - Каноническая логика создания:
   [SCENARIO_BUILDER_SPEC.md](SCENARIO_BUILDER_SPEC.md).
 
@@ -340,12 +340,12 @@ personal/pre-verification authoring без Submit/Publish; остальные д
    [EVENT_CLASSIFICATION_SPEC.md](EVENT_CLASSIFICATION_SPEC.md).
 2. **Recharge Activity** — лёгкая активность: прогулка, coffee walk,
    sunset walk · 30 мин–4 ч · 1–10. Каноническая логика создания:
-   [RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md](RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md).
+   [RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md](create/RECHARGE_ACTIVITY_CREATE_BLOCK_SPEC.md).
 3. **Route** — непрерывный маршрут по местности: трек, GPX, elevation,
    условия и POI по километражу · 15 мин–8 ч · 1–8
 4. **Place / Business** — постоянное место/бизнес на карте (парк, кафе,
    музей); каноническая логика создания —
-   [PLACE_CREATE_BLOCK_SPEC.md](PLACE_CREATE_BLOCK_SPEC.md)
+   [PLACE_CREATE_BLOCK_SPEC.md](create/PLACE_CREATE_BLOCK_SPEC.md)
 5. **Bookable Session** — спот/услуга/бронь: сауна, фотосессия, корт ·
    30 мин–3 ч · 1–20
 6. **Scenario** — городской, однодневный, weekend или trip-план из независимых
@@ -356,7 +356,7 @@ personal/pre-verification authoring без Submit/Publish; остальные д
 8. **Class / Workshop / Experience** · 45 мин–4 ч · 1–30
 9. **Rental / Equipment** — аренда вещей/транспорта · 1 ч–3 дня · 1+;
    каноническая логика создания —
-   [RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md](RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md)
+   [RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md](create/RENTAL_EQUIPMENT_CREATE_BLOCK_SPEC.md)
 10. **Collection / Guide** — подборка идей и мест · без лимита
 
 Quick Plan не является одиннадцатым Create-типом: это отдельный utility-flow

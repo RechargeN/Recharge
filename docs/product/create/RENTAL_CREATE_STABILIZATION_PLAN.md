@@ -5,7 +5,7 @@
   выполнены в этом заходе — см. §8.
 - Дата: 2026-08-24
 - Контекст: prerequisite для возобновления `DTL-OBJ-01`
-  (`docs/product/DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`,
+  (`docs/product/discover/DTL_OBJ_01_OBJECT_OFFER_ENGINE_SLICE_SPEC.md`,
   Blocked on Rental Create prerequisite), по треку 1 из решения
   владельца продукта в `DISCOVER_DETAILS_PIPELINE_COVERAGE_MATRIX.md`
   §3. Не относится к Discover Details архитектуре напрямую — это

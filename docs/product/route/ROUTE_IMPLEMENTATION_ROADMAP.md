@@ -13,11 +13,11 @@ slice не начинается, пока предыдущий не прошёл
 
 Источники продуктового и платформенного контракта:
 
-- [ROUTE_BUILDER_SPEC.md](ROUTE_BUILDER_SPEC.md) v3.2;
-- [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](route/ROUTE_CREATE_BLOCK_SLICE_SPEC.md) v1.2;
-- [PLATFORM_FOUNDATION_SPEC.md](../architecture/PLATFORM_FOUNDATION_SPEC.md)
+- [ROUTE_BUILDER_SPEC.md](../ROUTE_BUILDER_SPEC.md) v3.2;
+- [ROUTE_CREATE_BLOCK_SLICE_SPEC.md](ROUTE_CREATE_BLOCK_SLICE_SPEC.md) v1.2;
+- [PLATFORM_FOUNDATION_SPEC.md](../../architecture/PLATFORM_FOUNDATION_SPEC.md)
   v2.1;
-- [ARCHITECTURE_BASELINE.md](../architecture/ARCHITECTURE_BASELINE.md);
+- [ARCHITECTURE_BASELINE.md](../../architecture/ARCHITECTURE_BASELINE.md);
 - Accepted ADR из `docs/adr/`.
 
 Roadmap не ослабляет acceptance criteria исходных спецификаций. Он определяет
@@ -742,5 +742,5 @@ authorized demo author
   существующий change set.
 
 Фактический статус хранится в
-[LAUNCH_STATUS.md](../architecture/LAUNCH_STATUS.md); этот документ описывает
+[LAUNCH_STATUS.md](../../architecture/LAUNCH_STATUS.md); этот документ описывает
 порядок и критерии, но не заменяет execution tracker.

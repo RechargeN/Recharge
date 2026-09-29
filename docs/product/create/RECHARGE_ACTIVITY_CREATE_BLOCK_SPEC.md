@@ -43,16 +43,16 @@ provider integration или новый Create-тип. `activity` уже вход
 
 Связанные документы:
 
-- [VISION.md](VISION.md) — продуктовая граница Activity и Search direction;
-- [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — `applicableTypes`, criteria,
+- [VISION.md](../VISION.md) — продуктовая граница Activity и Search direction;
+- [CATEGORY_SYSTEM.md](../CATEGORY_SYSTEM.md) — `applicableTypes`, criteria,
   taxonomy governance;
-- [S3_CRT_01_CREATE_SPEC.md](S3_CRT_01_CREATE_SPEC.md) — общий draft/publish
+- [S3_CRT_01_CREATE_SPEC.md](../archive/S3_CRT_01_CREATE_SPEC.md) — общий draft/publish
   runtime;
 - [RECHARGE_ACTIVITY_CREATE_BLOCK_OPEN_QUESTIONS.md](RECHARGE_ACTIVITY_CREATE_BLOCK_OPEN_QUESTIONS.md) —
   шесть ответов владельца продукта, встроенных в эту spec;
-- [ADR 0013](../adr/0013-domain-policy-baseline.md) — lifecycle, permissions,
+- [ADR 0013](../../adr/0013-domain-policy-baseline.md) — lifecycle, permissions,
   moderation, ID, offline/sync, audit;
-- [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
+- [ADR 0015](../../adr/0015-authenticated-viewer-verified-creator-professional-page.md) —
   обязательная авторизация Viewer, Creator verification, capabilities,
   `PublisherRef` и Professional Page.
 

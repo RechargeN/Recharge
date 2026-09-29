@@ -13,7 +13,7 @@ import 'details_renderer.dart';
 /// organizer, info grid, highlights, location card and bottom bar — for
 /// Event, Activity and Place.
 ///
-/// `docs/product/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this class
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this class
 /// proves the shell/renderer abstraction works for a real consumer. It
 /// does **not** implement the target Object/Offer section matrix
 /// (`DISCOVER_DETAILS_SYSTEM_SPEC.md` §5) — that is `DTL-OBJ-01`'s job.
