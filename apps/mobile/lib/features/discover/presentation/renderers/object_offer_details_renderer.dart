@@ -676,11 +676,13 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
             icon: Icons.alt_route,
             onSelected: delegate.onCreateRoute,
           ),
-          ObjectOfferUtilityActionData(
-            label: 'Отметить посещённым',
-            icon: Icons.history_toggle_off,
-            onSelected: delegate.onMarkVisited,
-          ),
+          // Visit History accepts explicit Place visits only (VIS-HIST-01).
+          if (delegate.item.objectKind == DiscoverObjectKind.place)
+            ObjectOfferUtilityActionData(
+              label: 'Отметить посещённым',
+              icon: Icons.history_toggle_off,
+              onSelected: delegate.onMarkVisited,
+            ),
         ];
     return <Widget>[
       ObjectOfferHeroActionButton(
