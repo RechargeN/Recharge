@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.101**
+- Version: **2.4.102**
 - Date: **2026-09-29**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.102.** Records the BCK-07 v0.8 amendment of the closed BCK07-LOCAL-01
+map without widening cloud, spend, market or publication authority:
+
+- BCK07-LOCAL-01 gains fourteen exact files for typed source rules
+  (`domain/type_rules/` plus unit tests); `content_type_registry.ts` remains the
+  registry;
+- rules cover only Place, Event (C0 + schedule-C1), Activity, Rental and
+  Collection; the other five types stay registered but unavailable with an
+  explicit reason;
+- no export, Firebase, cloud, push, merge, type or market activation.
 
 **v2.4.101.** Records the Product owner's Release R1 decisions of 2026-09-29 without widening cloud, spend or market authority:
 
@@ -2948,7 +2959,7 @@ than silently reusing `6D`.
 
 ### 31.2 Next bounded slice
 
-The approved next slice is `BCK07-LOCAL-01 — Disabled local Content
+The approved next slice (file map per BCK-07 v0.8 §34.2) is `BCK07-LOCAL-01 — Disabled local Content
 Publication foundation`, defined in BCK-07 v0.4. It may create only canonical
 Content schemas/fixtures, framework-neutral TypeScript domain/application
 code, in-memory repositories and local tests for the exact ten Create types.

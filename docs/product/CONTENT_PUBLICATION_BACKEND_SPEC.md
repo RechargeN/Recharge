@@ -1,8 +1,8 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.7**
-- Date: **2026-09-27**
+- Version: **0.8**
+- Date: **2026-09-29**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
@@ -15,6 +15,21 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.8 — 2026-09-29
+
+- amends the closed §34.2 map with fourteen exact files for typed source rules
+  (`domain/type_rules/` and their unit tests); `content_type_registry.ts`
+  stays the registry and only wires the rules and records unavailability
+  reasons;
+- scopes the rules to Place, Event (C0 + schedule-C1 only, unsupported variants
+  rejected explicitly), Activity, Rental and Collection, each read from its
+  current approved specification;
+- keeps Session, Class/Workshop, Find People, Route and Scenario registered but
+  unavailable with an explicit reason and negative tests, without a generic
+  validator;
+- changes no product rule, slice scope, contract schema or fixture; enables no
+  type, market, export, Firebase, cloud, push or merge.
 
 ### v0.7 — 2026-09-27
 
@@ -1164,6 +1179,36 @@ apps/backend/functions/test/
   integration/content_publication_security.test.ts
 ```
 
+Amendment v0.8 adds exactly these fourteen paths; no `<type>` placeholder or
+other file is authorized:
+
+```text
+apps/backend/functions/src/modules/content/domain/type_rules/
+  validation_context.ts
+  place_rules.ts
+  event_rules.ts
+  activity_rules.ts
+  rental_rules.ts
+  collection_rules.ts
+
+apps/backend/functions/test/unit/content/
+  type_rules_common.test.ts
+  type_rules_place.test.ts
+  type_rules_event.test.ts
+  type_rules_activity.test.ts
+  type_rules_rental.test.ts
+  type_rules_collection.test.ts
+  type_rules_unavailable.test.ts
+```
+
+Existing map files change only as follows: `content_type_registry.ts` wires the
+rules and extends unavailability reasons to `source_contract_pending`,
+`spec_not_approved`, `consent_gate_pending` and `dependency_pending`;
+`reference_data_port.ts` adds supported-locale and subcategory-applicability
+lookups whose failure fails closed; `content_publication_service.ts` passes the
+resulting validation context; their tests are updated. Event rules cover the
+approved C0 + schedule-C1 subset only.
+
 No existing export registry, Firebase config, Rules, indexes, mobile file or
 product collection may be changed by this slice. If implementation needs a
 path outside this map, the slice stops and BCK-07/BCK-02 must be amended first.
@@ -1207,7 +1252,8 @@ Firebase/GCP resources, credentials, deployment, activation, push or merge.
 ### 34.6 Acceptance addendum
 
 76. **BCK-07-AC-76:** BCK07-LOCAL-01 uses only the exact §34.2 path families
-    and introduces no export, worker, Firebase import or mobile change.
+    as amended by v0.8 and introduces no export, worker, Firebase import or
+    mobile change; typed rules do not enable publication.
 77. **BCK-07-AC-77:** all ten Content type entries are explicit and an unknown
     or unavailable type fails closed without generic fallback.
 78. **BCK-07-AC-78:** publish revalidates exact BCK-06 PublisherRef authority
