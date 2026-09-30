@@ -1,8 +1,8 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.3**
-- Date: **2026-09-20**
+- Version: **0.4**
+- Date: **2026-09-30**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent**
 - Accountable owner: **Media Platform owner**
@@ -15,6 +15,23 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.4 — 2026-09-30
+
+- authorizes `BCK14-LOCAL-01`, a bounded local/test-only Media foundation
+  slice, in a new §34: exact file map, one unified lifecycle table, trusted
+  entity binding, generation-pinned attachment storage, evidence split and
+  per-sub-slice tests;
+- for that slice only, the executable-slice prerequisites in §§24 and 27
+  ("BCK-14 Approved") are replaced by: Review status, the Product owner's
+  confirmation, the §34.2 map and frozen fixtures/failure vocabulary; the
+  §25 conditional map is superseded by §34.2 for this slice;
+- keeps BCK-14 in Review: production approval, the ten BCK14 decisions,
+  Storage/Rules/IAM, real scanner/processor adapters, delivery signer,
+  Firebase, cloud, push and merge stay separate decisions; all families and
+  markets stay disabled;
+- unifies the state names that §8, §32 and §33 used differently;
+- changes no product rule, retention period or limit.
 
 ### v0.3 — 2026-09-20
 
@@ -943,3 +960,149 @@ holds and DSR propagation.
 73. **BCK-14-AC-73:** Bytes, findings, access, audit and deletion receipts have distinct retention classes.
 74. **BCK-14-AC-74:** Signed URLs, bytes and unrestricted scan output never enter logs/analytics.
 75. **BCK-14-AC-75:** v0.3 authorizes no Storage, scanner, processor, Firebase or deployment runtime.
+
+## 34. BCK14-LOCAL-01 — disabled local Media foundation
+
+### 34.1 Decision and scope
+
+`BCK14-LOCAL-01` is a bounded local/test-only slice split into 2.5a
+(contracts, ownership, quarantine, scan/finalize outcomes, in-memory
+lifecycle), 2.5b (Content attachment readiness, variant metadata,
+deletion/orphan cleanup, privacy contracts) and 2.5c (local acceptance). It
+implements framework-neutral contracts, domain/application code, in-memory and
+explicitly `fake_*` adapters and tests. It is not production approval and not
+evidence about real storage, scanning or processing.
+
+Commands in scope: `media.createUploadSession`, `media.confirmUpload`,
+`media.finalizeAsset`, `media.retryProcessing`, `media.detachAsset`,
+`media.deleteAsset`, `media.applyRestriction` (system only) and
+`media.reconcileOrphan` (system only). Queries: `media.getAssetStatus`,
+`media.getProcessingReceipt`, `media.getDeletionStatus`. Deferred:
+`media.requestDelivery`, `media.getDeliveryHandle`, `media.replaceAsset`,
+delivery signer, Storage adapter, real scanner and processor.
+
+### 34.2 Exact implementation map (closed)
+
+Paths are from the repository root. Extending this list needs a BCK-14/BCK-02
+amendment confirmed by the Product owner.
+
+```text
+packages/api_contracts/schema/media/v1/
+  media_common.schema.json  media_asset.schema.json  upload_session.schema.json
+  media_command.schema.json media_query.schema.json  media_result.schema.json
+  fixtures/valid.json  fixtures/invalid.json  fixtures/forward.json
+
+apps/backend/functions/src/contracts/
+  media_v1.ts  media_schema_registry.ts  validate_media_contract.ts
+
+apps/backend/functions/src/modules/media/
+  domain/
+    media_asset.ts  upload_session.ts  media_policy.ts  failures.ts
+    repositories.ts                                        (2.5a)
+    media_variant.ts  media_attachment.ts  media_retention.ts (2.5b)
+  application/
+    media_service.ts                                       (2.5a)
+    ports/actor_authority_port.ts  ports/entity_scope_port.ts
+    ports/object_store_port.ts  ports/scanner_port.ts
+    ports/processor_port.ts                                (2.5a)
+    ports/attachment_reference_port.ts  ports/media_effect_sink.ts
+    content_media_readiness.ts  orphan_reconciler.ts
+    media_deletion_service.ts                              (2.5b)
+  infrastructure/
+    in_memory_media_repository.ts  fake_object_store.ts
+    fake_scanner.ts  fake_processor.ts                     (2.5a)
+
+apps/backend/functions/test/
+  contract/media_fixture_parity.test.ts                    (2.5a)
+  unit/media/media_domain.test.ts  unit/media/media_transitions.test.ts
+  integration/media_upload_service.test.ts                 (2.5a)
+  unit/media/media_variant.test.ts  unit/media/media_retention_policy.test.ts
+  integration/media_content_readiness.test.ts
+  integration/media_deletion_reconcile.test.ts
+  integration/media_privacy_boundary.test.ts               (2.5b)
+  integration/media_security.test.ts                        (2.5c)
+```
+
+The Content-side changes required by this slice are listed exactly in
+BCK-07 v0.11 §37. `package.json`, `scripts/` and the layout allowlist are not
+expected to change; if one is needed, work stops for an amendment.
+
+### 34.3 Unified lifecycle (replaces the differing names in §§8, 32, 33)
+
+Bytes stay quarantined until `ready`; `quarantined` is a state (unsafe or
+inconclusive), not a zone. `blocked` is the definitive rejection called
+"rejected" in §32. Any transition not listed is forbidden.
+
+| From | To | Condition |
+|---|---|---|
+| `reserved`, `uploading` | `deleted` | expiry or abort **and** the object store confirms that no object exists |
+| `reserved`, `uploading` | `deleting` | expiry or abort while any partial object may exist; then `deleting → deleted` only after confirmed cleanup |
+| `reserved` | `uploading` | first accepted byte range |
+| `uploading` | `uploaded` | `confirmUpload`: generation, length, hash and signature match the session |
+| `uploaded` | `validating` | source generation pinned |
+| `validating` | `processing` | scan passed and type verified |
+| `validating`, `processing` | `quarantined` | scan inconclusive, timeout, tool failure |
+| `validating`, `processing` | `blocked` | definitive rejection |
+| `quarantined` | `validating` | `retryProcessing`: same source generation, accepted policy available, expected asset revision matches, attempts within the policy limit, asset not deleting, deleted or restricted; creates a new attempt, never overwrites a result for other input |
+| `processing` | `ready` | every mandatory check passed **and** every mandatory variant verified **and** the variant manifest activated atomically |
+| `ready`, `quarantined`, `blocked` | `deleting` | `deleteAsset`: holds and attachment references evaluated |
+| `deleting` | `deleted` | cleanup confirmed with provider-generation preconditions |
+
+`blocked` never leaves except through `deleting`. `deliveryDisabled`
+(restriction or deletion) is set first and wins: any finalize or processor
+result carrying an older asset revision is rejected, so a late result can never
+re-enter `ready`; lifting a restriction never makes anything public by itself.
+
+### 34.4 Trusted binding and attachment
+
+- `entityIntent` is not trusted because the user is authenticated. Before a
+  session is issued, and again at finalize, Media asks the trusted
+  `EntityScopePort` whether this actor may attach media to the exact
+  `{domain, entityId}` for this `publisherRef`, `marketId` and `purpose`.
+  Content implements the port from its own records; an unknown or foreign
+  entity, wrong Publisher or market, or non-editable entity is refused.
+  The binding is stored in Media only after that answer.
+- A readiness answer is evidence, not an attach. The attach is the owning
+  domain recording generation-pinned references. For Content that record is
+  the immutable revision written by publish (BCK-07 v0.11 §37); Media keeps no
+  second copy that could disagree.
+- `AttachmentReferencePort` lets Media ask the owning domain whether an asset
+  is still referenced before deletion, orphan cleanup or detach.
+
+### 34.5 Evidence and policy
+
+- Local tests prove contracts, state rules, ownership and orchestration only.
+  A fake scanner or processor answering "malicious" or "decompression bomb"
+  proves how the service reacts, not that a real bomb or malware is detected.
+  Likewise EXIF minimization, transform determinism and real limits are **not
+  proven**; the traceability matrix marks each such row
+  "real scanner/processor evidence absent" and assigns it to the separate
+  adapter verification before dev acceptance 4.1.
+- No retention period or limit is invented. Tests use a synthetic policy
+  explicitly labelled test-only. A working configuration without an accepted
+  policy answers `policy_unavailable` and fails closed.
+
+### 34.6 Tests per sub-slice
+
+2.5a and 2.5b each carry their own focused tests (§34.2); 2.5c holds the final
+integration, negative security tests (cross-user, cross-Page, cross-market,
+guessed identifier or path, revoked membership, single-writer and
+no-Firebase checks) and the acceptance matrix reconciliation.
+
+### 34.7 Acceptance addendum
+
+76. **BCK-14-AC-76:** BCK14-LOCAL-01 uses only the §34.2 paths and adds no
+    export, worker, Firebase import, Storage rule or mobile change.
+77. **BCK-14-AC-77:** only the §34.3 transitions exist; quarantine exit is an
+    explicit retry on the same generation; a late result never restores
+    `ready` after delete or restriction.
+78. **BCK-14-AC-78:** entity binding is granted only by the owning-domain
+    scope port for the exact entity, Publisher, market and purpose.
+79. **BCK-14-AC-79:** readiness never attaches; the owning domain stores
+    generation-pinned references and rollback verifies exactly those.
+80. **BCK-14-AC-80:** fake scanner, processor and object store never count as
+    production or safety evidence.
+81. **BCK-14-AC-81:** an absent accepted policy fails closed; no numeric policy
+    is invented.
+82. **BCK-14-AC-82:** production approval, real adapters, delivery, Firebase,
+    cloud, push and merge remain separate decisions.

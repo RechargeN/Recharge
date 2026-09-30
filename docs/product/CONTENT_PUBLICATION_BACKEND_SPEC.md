@@ -1,7 +1,7 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.10**
+- Version: **0.11**
 - Date: **2026-09-30**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
@@ -15,6 +15,18 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.11 — 2026-09-30
+
+- amends the closed §34.2 map for the Media integration required by
+  BCK14-LOCAL-01: one new file and the exact existing files in §37 change;
+  nothing else;
+- the immutable published revision stores generation-pinned media
+  attachments; `mediaRevision` becomes a canonical hash of them; rollback
+  verifies the stored references; readiness checks are evidence, never an
+  attach;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
 
 ### v0.10 — 2026-09-30
 
@@ -1372,3 +1384,81 @@ Rules kept for every later slice: Content and Identity never treat the actor
 as a Session by construction; `hidden` always carries a reason; rescheduling
 and cancellation are Content commands with a change class; the `100/day` limit
 counts per Publisher, not per Session; complaints stay in BCK-22.
+
+## 37. Media integration amendment (BCK07-LOCAL-01, v0.11)
+
+### 37.1 Where attachments are stored
+
+Decision: **the immutable Content revision stores the exact references.** BCK-14
+§8.2 makes the owning domain the recorder of generation-pinned attachments and
+Media keeps no second copy. `PublishedRevision` gains
+`mediaAttachments: MediaAttachment[]` (empty when no media), each
+`{assetId, sourceGeneration, variantManifestRevision, purpose}`. The local
+`purpose` is the single value `contentMedia`; finer purposes wait for typed
+media rules and are not invented here.
+
+`mediaRevision` is the lowercase hex SHA-256 of the canonical JSON of the
+`mediaAttachments` array (array sorted by `assetId`, object keys sorted, no
+insignificant whitespace, UTF-8). A hash alone cannot restore references, which
+is why they are stored. Publish freezes attachments and hash in the same
+transaction as the revision.
+
+### 37.2 Port contract
+
+`MediaReadinessPort.check` receives `contentId`, `typeId`, `marketId`,
+`publisherRef`, `mediaIds` and, for rollback, a **required** `pinned` list taken
+from the stored target revision; for submit and publish `pinned` is absent.
+It returns `{ready: true, mediaRevision, attachments}` or `{ready: false,
+reason}` with the internal reasons `asset_unknown`, `foreign_binding`,
+`stale_generation`, `deleted`, `restricted`, `not_ready`, `policy_unavailable`;
+all map to the unchanged public failure `media_not_ready`. Returned
+`attachments` are evidence: nothing is attached until publish freezes them.
+Rollback (`activatePublishedRevision`) passes the stored references and needs
+every one to be still `ready` with the same generation and manifest and the
+recomputed hash equal to the stored `mediaRevision`.
+
+### 37.3 Trusted binding for uploads
+
+Content implements Media's `EntityScopePort` from its own draft record: the
+draft must exist and be editable, its `publisherRef`, `marketId` and type must
+match, and the actor must pass the same Publisher eligibility check as for
+editing. It also implements `AttachmentReferencePort` (drafts referencing the
+asset through the registry's `mediaIds`, and published revisions through
+`mediaAttachments`).
+
+### 37.4 Exact Content changes
+
+New file: `apps/backend/functions/src/modules/content/application/content_media_scope.ts`.
+
+Modified existing files:
+
+```text
+apps/backend/functions/src/contracts/content_v1.ts                      (MediaAttachmentV1, PublishedRevisionV1.mediaAttachments, port-facing types)
+apps/backend/functions/src/modules/content/domain/published_revision.ts (mediaAttachments frozen with the revision)
+apps/backend/functions/src/modules/content/domain/repositories.ts       (read: content referencing an asset)
+apps/backend/functions/src/modules/content/infrastructure/in_memory_content_repository.ts
+apps/backend/functions/src/modules/content/application/ports/media_readiness_port.ts
+apps/backend/functions/src/modules/content/application/content_publication_service.ts (submit, publish and rollback call sites; publish stores attachments; rollback passes pinned)
+packages/api_contracts/schema/content/v1/content_common.schema.json     (mediaAttachment definition)
+packages/api_contracts/schema/content/v1/published_revision.schema.json (mediaAttachments required)
+packages/api_contracts/schema/content/v1/fixtures/valid.json
+packages/api_contracts/schema/content/v1/fixtures/invalid.json
+apps/backend/functions/test/unit/content/content_domain.test.ts
+apps/backend/functions/test/unit/content/type_rules_unavailable.test.ts (fake port shape)
+apps/backend/functions/test/integration/content_publication_service.test.ts
+apps/backend/functions/test/integration/content_publication_security.test.ts
+```
+
+`fixtures/forward.json` and `content_fixture_parity.test.ts` change only if the
+parity run shows a needed case; then they are added with a further amendment.
+No published data exists, so `mediaAttachments` is required in v1 without a
+migration.
+
+### 37.5 Acceptance addendum
+
+98. **BCK-07-AC-98:** the immutable revision stores generation-pinned media
+    attachments and `mediaRevision` is their canonical hash.
+99. **BCK-07-AC-99:** rollback verifies the stored references; a stale
+    generation, foreign, deleted or restricted asset refuses it.
+100. **BCK-07-AC-100:** readiness is evidence, never an attach, and never
+     answers `ready` on missing binding data.

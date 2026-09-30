@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.102**
-- Date: **2026-09-29**
+- Version: **2.4.103**
+- Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -21,6 +21,18 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.103.** Registers the local Media slice `BCK14-LOCAL-01` (BCK-14 v0.4
+§34) and the matching BCK-07 v0.11 §37 amendment, without widening cloud, spend
+or market authority:
+
+- BCK14-LOCAL-01 is a bounded local/test-only slice with a closed exact file
+  map; it is a candidate outside the 22-document checksum and BCK-14 stays
+  Review, so production approval, real Storage/scanner/processor adapters,
+  delivery signer, Firebase, cloud, push and merge stay separate decisions;
+- BCK-07 gains one new file and a closed list of existing Content files for
+  generation-pinned media attachments;
+- no type, family or market activation.
 
 **v2.4.102.** Records the BCK-07 v0.8 amendment of the closed BCK07-LOCAL-01
 map without widening cloud, spend, market or publication authority:
