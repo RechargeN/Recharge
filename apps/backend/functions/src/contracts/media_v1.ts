@@ -77,8 +77,12 @@ export interface MediaAssetV1 {
   readonly deliveryDisabled: boolean;
   /** An authoritative (Security/Trust) restriction; only a verified instruction changes it. */
   readonly restricted?: boolean;
-  /** A temporary hold a deletion placed itself; released alone, never the restriction. */
-  readonly deletionHold?: boolean;
+  /**
+   * A temporary hold a deletion placed itself. It is fenced: only the holder with
+   * this `holdId` may act on it, and only until `expiresAtUtc` (its own lease, not
+   * the asset update time). Released alone, never the restriction.
+   */
+  readonly deletionHold?: { readonly holdId: string; readonly expiresAtUtc: UtcInstant };
   readonly attemptCount: number;
   readonly revision: number;
   readonly createdAtUtc: UtcInstant;

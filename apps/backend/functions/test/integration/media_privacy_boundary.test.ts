@@ -44,6 +44,15 @@ function harness() {
   let counter = 1000;
   const ids = { newId: () => ulid(++counter) };
   const deletion = new MediaDeletionService({
+    retention: {
+      revision: 'retention-test-1',
+      orphanGraceSeconds: 600,
+      quarantinedRetentionSeconds: 300,
+      blockedRetentionSeconds: 200,
+      inFlightAttemptLeaseSeconds: 120,
+      deletionHoldLeaseSeconds: 60,
+      deletionReceiptRetentionSeconds: 1000,
+    },
     repository,
     authority,
     restrictionAuthority: { verifyRestriction: () => Promise.resolve(true) },

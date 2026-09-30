@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.106**
+- Version: **2.4.107**
 - Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,16 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.107.** Third remediation pass of the independent audit, without widening
+cloud, spend or market authority:
+
+- BCK-14 v0.7 (AC-87): the deletion hold is fenced with a holder id and its own
+  lease, so an expired worker cannot delete an asset that became referenced;
+- LAUNCH_STATUS versions synchronized (BCK-07 v0.14 / 109 AC, BCK-14 v0.7);
+- the ROADMAP (A1 v1.31 §3.6) tightens the proposed merge conditions: one final
+  SHA for all checks, the full Flutter gate before the final Done/merge (AGENTS.md)
+  and approval of the conditions is not permission to merge.
 
 **v2.4.106.** Second remediation pass of the independent audit, without widening
 cloud, spend or market authority:

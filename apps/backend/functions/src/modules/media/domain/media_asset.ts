@@ -114,7 +114,7 @@ interface AdvancePatch {
   readonly attemptCount?: number;
   readonly deliveryDisabled?: boolean;
   readonly restricted?: boolean;
-  readonly deletionHold?: boolean;
+  readonly deletionHold?: DeletionHold;
   readonly deletedAtUtc?: UtcInstant;
 }
 
@@ -212,7 +212,11 @@ export function toAssetView(asset: MediaAsset): DeepReadonly<MediaAssetV1> {
  * reached a settled state are deleted here; in-flight ones are refused.
  */
 export function beginDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
-  return advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+  const next = advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+  // The hold has done its job: the tombstone replaces it.
+  const { deletionHold, ...rest } = next;
+  void deletionHold;
+  return deepFreeze(rest);
 }
 
 /**
@@ -243,10 +247,25 @@ export function finishDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsse
   return deepFreeze(rest);
 }
 
-/** Delivery is disabled while an authoritative restriction or a deletion hold is active. */
+/** A deletion hold as stored: who holds it and until when. */
+export interface DeletionHold {
+  readonly holdId: string;
+  readonly expiresAtUtc: UtcInstant;
+}
+
+export function isHoldExpired(hold: DeletionHold, nowUtc: UtcInstant): boolean {
+  return Date.parse(nowUtc) >= Date.parse(hold.expiresAtUtc);
+}
+
+/** The hold is still valid and belongs to exactly this holder. */
+export function holdOwnedBy(asset: MediaAsset, holdId: string, nowUtc: UtcInstant): boolean {
+  return asset.deletionHold?.holdId === holdId && !isHoldExpired(asset.deletionHold, nowUtc);
+}
+
+/** Delivery is disabled while an authoritative restriction or a deletion hold is set. */
 function withFlags(
   asset: MediaAsset,
-  flags: { readonly restricted: boolean; readonly deletionHold: boolean },
+  flags: { readonly restricted: boolean; readonly hold: DeletionHold | undefined },
   nowUtc: UtcInstant,
 ): MediaAsset {
   const { restricted: _restricted, deletionHold: _hold, ...rest } = asset;
@@ -255,8 +274,8 @@ function withFlags(
   return deepFreeze({
     ...rest,
     ...(flags.restricted ? { restricted: true } : {}),
-    ...(flags.deletionHold ? { deletionHold: true } : {}),
-    deliveryDisabled: flags.restricted || flags.deletionHold,
+    ...(flags.hold === undefined ? {} : { deletionHold: flags.hold }),
+    deliveryDisabled: flags.restricted || flags.hold !== undefined,
     revision: asset.revision + 1,
     updatedAtUtc: nowUtc,
   });
@@ -274,22 +293,41 @@ export function withRestriction(
   if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
     throw new MediaDomainRefusal('invalid_state');
   if ((asset.restricted === true) === restricted) return asset;
-  return withFlags(asset, { restricted, deletionHold: asset.deletionHold === true }, nowUtc);
+  return withFlags(asset, { restricted, hold: asset.deletionHold }, nowUtc);
 }
 
 /**
  * The temporary hold a deletion places while the owning domain is asked. It is a
- * separate flag from the restriction: releasing it can never lift a restriction.
+ * separate flag from the restriction and it is fenced: a hold still valid for
+ * someone else refuses (the caller starts over), an expired one may be taken over.
  */
-export function placeDeletionHold(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
-  if (asset.deletionHold === true) return asset;
-  return withFlags(asset, { restricted: asset.restricted === true, deletionHold: true }, nowUtc);
+export function placeDeletionHold(
+  asset: MediaAsset,
+  hold: DeletionHold,
+  nowUtc: UtcInstant,
+): MediaAsset {
+  if (asset.deletionHold !== undefined && !isHoldExpired(asset.deletionHold, nowUtc))
+    throw new MediaDomainRefusal('revision_conflict');
+  return withFlags(asset, { restricted: asset.restricted === true, hold }, nowUtc);
 }
 
-/** Releases only the deletion hold; a restriction that was placed meanwhile stays. */
-export function releaseDeletionHold(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
-  if (asset.deletionHold !== true) return asset;
-  return withFlags(asset, { restricted: asset.restricted === true, deletionHold: false }, nowUtc);
+/**
+ * Releases the hold of exactly this holder while it is still valid. A holder whose
+ * lease ran out, or whose hold was taken over or already released, changes nothing.
+ */
+export function releaseDeletionHold(
+  asset: MediaAsset,
+  holdId: string,
+  nowUtc: UtcInstant,
+): MediaAsset {
+  if (!holdOwnedBy(asset, holdId, nowUtc)) return asset;
+  return withFlags(asset, { restricted: asset.restricted === true, hold: undefined }, nowUtc);
+}
+
+/** Recovery of a hold whose holder never came back: only an expired hold is released. */
+export function releaseExpiredDeletionHold(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
+  if (asset.deletionHold === undefined || !isHoldExpired(asset.deletionHold, nowUtc)) return asset;
+  return withFlags(asset, { restricted: asset.restricted === true, hold: undefined }, nowUtc);
 }
 
 /** Starts or clears the orphan grace clock; unchanged state is not a new revision. */

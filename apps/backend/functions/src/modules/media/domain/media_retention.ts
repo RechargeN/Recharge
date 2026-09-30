@@ -30,6 +30,11 @@ export interface MediaRetentionPolicy {
    * value is invented here.
    */
   readonly inFlightAttemptLeaseSeconds: number;
+  /**
+   * Lease of a deletion hold: how long the holder may keep delivery held while it
+   * asks the owning domain. Its own clock, separate from any update time.
+   */
+  readonly deletionHoldLeaseSeconds: number;
   /** Retention of the deletion receipt itself, separate from the bytes it covers. */
   readonly deletionReceiptRetentionSeconds: number;
 }
@@ -88,12 +93,11 @@ export function decideOrphan(input: OrphanInput): OrphanDecision {
       ? { action: 'abandon_attempt' }
       : { action: 'keep' };
   // A deletion hold is someone else's short step: nothing is marked or cleaned up
-  // meanwhile (marking would also restart the age), and a hold whose owner never
-  // came back (a lost worker) is released after the lease. A restriction is never
-  // touched by this.
-  if (asset.deletionHold === true)
-    return Date.parse(nowUtc) - Date.parse(asset.updatedAtUtc) >=
-      policy.inFlightAttemptLeaseSeconds * 1000
+  // while its own lease is valid, and a hold whose holder never came back is
+  // released once that lease expired. The lease is the hold's own expiry, not the
+  // asset update time. A restriction is never touched by this.
+  if (asset.deletionHold !== undefined)
+    return Date.parse(nowUtc) >= Date.parse(asset.deletionHold.expiresAtUtc)
       ? { action: 'release_hold' }
       : { action: 'keep' };
   if (referenced === 'unknown') return { action: 'keep' };

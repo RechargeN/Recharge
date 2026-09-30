@@ -7,6 +7,7 @@ import type {
   OrphanReconciliationV1,
 } from '../../src/contracts/media_v1.js';
 import type { EntityId } from '../../src/shared/ids.js';
+import { parseUtcInstant } from '../../src/shared/utc_instant.js';
 import type { ServerClock } from '../../src/shared/server_clock.js';
 import { MediaDeletionService } from '../../src/modules/media/application/media_deletion_service.js';
 import { MediaService } from '../../src/modules/media/application/media_service.js';
@@ -53,6 +54,7 @@ const testRetention: MediaRetentionPolicy = {
   quarantinedRetentionSeconds: 300,
   blockedRetentionSeconds: 200,
   inFlightAttemptLeaseSeconds: 120,
+  deletionHoldLeaseSeconds: 60,
   deletionReceiptRetentionSeconds: 1000,
 };
 
@@ -101,7 +103,10 @@ function harness(options: { retention?: MediaRetentionPolicy | null } = {}) {
   const clock: ServerClock = { now: () => new Date(clockMs) };
   let counter = 1000;
   const ids = { newId: () => ulid(++counter) };
+  const retentionForDeletion =
+    options.retention === null ? undefined : (options.retention ?? testRetention);
   const deletion = new MediaDeletionService({
+    ...(retentionForDeletion === undefined ? {} : { retention: retentionForDeletion }),
     repository,
     authority,
     restrictionAuthority: restriction,
@@ -822,13 +827,20 @@ void test('a deletion hold nobody came back for is released after the lease, lea
     const current = await tx.asset(asset.assetId);
     assert.ok(current);
     tx.putAsset(
-      { ...current, deletionHold: true, revision: current.revision + 1 },
+      {
+        ...current,
+        deletionHold: {
+          holdId: 'lost-worker',
+          expiresAtUtc: parseUtcInstant('2026-09-30T09:01:00.000Z'),
+        },
+        revision: current.revision + 1,
+      },
       current.revision,
     );
   });
   const run = () =>
     ok<OrphanReconciliationV1>(h.reconciler.reconcile(reconcileCommand(asset.assetId)));
-  h.advanceSeconds(119);
+  h.advanceSeconds(59);
   assert.notEqual((await run()).action, 'recovered');
   h.advanceSeconds(1);
   assert.equal((await run()).action, 'recovered');
@@ -836,4 +848,80 @@ void test('a deletion hold nobody came back for is released after the lease, lea
   assert.equal(after.deletionHold, undefined);
   assert.equal(after.restricted, true);
   assert.equal(after.deliveryDisabled, true);
+});
+
+void test('an expired holder cannot delete: its stale answer changes nothing and a retry starts over', async () => {
+  const h = harness();
+  const asset = await ready(h);
+  const run = () =>
+    ok<OrphanReconciliationV1>(h.reconciler.reconcile(reconcileCommand(asset.assetId)));
+  // First look and the reconciler's own look: no references. Worker A then asks the
+  // owning domain; while it waits the lease runs out, the reconciler releases the
+  // hold, and a reference appears. A still receives its old answer "no references".
+  h.references.script.push(false, false, false);
+  let asks = 0;
+  let inside = false;
+  h.references.onAsk = async () => {
+    if (inside) return;
+    asks += 1;
+    if (asks !== 2) return;
+    inside = true;
+    h.advanceSeconds(61);
+    assert.equal((await run()).action, 'recovered');
+    h.references.referenced.add(asset.assetId);
+    inside = false;
+  };
+  assert.deepEqual(
+    await h.service.execute(actorA, deleteCommand(asset)),
+    denial('revision_conflict'),
+  );
+  h.references.onAsk = undefined;
+  const after = stored(h, asset.assetId);
+  // The late worker changed nothing: not deleted, not deleting, delivery back, nothing removed.
+  assert.equal(after.lifecycle, 'ready');
+  assert.equal(after.deletionHold, undefined);
+  assert.equal(after.deliveryDisabled, false);
+  assert.equal(h.objectStore.removedHandles.length, 0);
+  assert.equal(h.repository.snapshot().deletions.length, 0);
+  // A retry starts the check over and now sees the reference.
+  assert.deepEqual(
+    await h.service.execute(actorA, deleteCommand(after)),
+    denial('asset_referenced'),
+  );
+  assert.equal(stored(h, asset.assetId).lifecycle, 'ready');
+});
+
+void test('a valid hold of another worker refuses, and a taken-over hold fences the old holder', async () => {
+  const h = harness();
+  const asset = await ready(h);
+  const run = () =>
+    ok<OrphanReconciliationV1>(h.reconciler.reconcile(reconcileCommand(asset.assetId)));
+  h.references.script.push(false, false, false, false, false);
+  let asks = 0;
+  let inside = false;
+  let concurrent: unknown;
+  let second: unknown;
+  h.references.onAsk = async () => {
+    if (inside) return;
+    asks += 1;
+    // Only worker A's own post-hold question gets here with the hold placed.
+    if (asks !== 2) return;
+    inside = true;
+    // Another delete while A's hold is valid: refused, A is not disturbed.
+    concurrent = await h.service.execute(actorA, deleteCommand(stored(h, asset.assetId)));
+    // A's lease runs out, the hold is released, and worker B completes the deletion.
+    h.advanceSeconds(61);
+    assert.equal((await run()).action, 'recovered');
+    second = await h.service.execute(actorA, deleteCommand(stored(h, asset.assetId)));
+    inside = false;
+  };
+  const late = await h.service.execute(actorA, deleteCommand(asset));
+  h.references.onAsk = undefined;
+  assert.deepEqual(concurrent, denial('revision_conflict'));
+  assert.equal((second as { kind: string }).kind, 'succeeded');
+  // A comes back with its old answer: fenced out, nothing changes, nothing is removed twice.
+  assert.deepEqual(late, denial('revision_conflict'));
+  assert.equal(stored(h, asset.assetId).lifecycle, 'deleted');
+  assert.equal(h.objectStore.removedHandles.length, 1);
+  assert.equal(h.repository.snapshot().deletions.length, 1);
 });

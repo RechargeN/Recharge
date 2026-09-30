@@ -1,7 +1,7 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.6**
+- Version: **0.7**
 - Date: **2026-09-30**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent in production; BCK14-LOCAL-01 (2.5a-2.5c) present locally, in-memory and fake adapters only**
@@ -15,6 +15,17 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.7 — 2026-10-01
+
+- third audit remediation inside the closed §34.2 map: the deletion hold is
+  fenced (holder id and its own lease) so an expired worker can no longer delete
+  (§34.13); the retention policy gains `deletionHoldLeaseSeconds` (synthetic in
+  tests, never invented; absent policy fails closed for settled assets); adds
+  BCK-14-AC-87 and changes the asset field `deletionHold` to a holder/expiry
+  record;
+- changes no product rule, family, market, export, Firebase, cloud, push or
+  merge decision; BCK-14 stays in Review.
 
 ### v0.6 — 2026-09-30
 
@@ -1229,3 +1240,27 @@ together with the hold. Now:
 86. **BCK-14-AC-86:** a deletion hold never lifts an authoritative restriction;
     only the hold's own flag is released, in both directions and after a lost
     worker.
+
+### 34.13 The deletion hold is fenced (v0.7)
+
+Releasing a stale hold (§34.11) created a race: a worker that placed a hold and
+then waited for the owning domain could lose its lease, see the hold released
+and a reference appear, and still delete the asset with its old answer "no
+references". Now:
+
+- the hold records `holdId` (the holder) and `expiresAtUtc` (its own lease from
+  `deletionHoldLeaseSeconds`); the asset update time is never the lease clock;
+- another valid hold refuses a second deletion (`revision_conflict`, the caller
+  starts over); an expired hold may be taken over by a new holder;
+- before it releases the hold or tombstones the asset, the holder verifies in
+  the transaction that the hold is still its own and still valid; otherwise it
+  changes nothing and reports `revision_conflict` (owner) or does nothing
+  (cleanup), and a retry starts the reference check again;
+- the reconciler releases only a hold whose own expiry has passed, and marks or
+  cleans nothing while a hold is valid.
+
+### 34.14 Acceptance addendum (v0.7)
+
+87. **BCK-14-AC-87:** a deletion holder acts only while its own hold is valid and
+    its own; an expired or replaced holder cannot delete or release, and no
+    asset update time is used as a lease.

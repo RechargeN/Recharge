@@ -30,11 +30,13 @@ import {
   sha256Hex,
   toAssetView,
   withOrphanSince,
+  holdOwnedBy,
   placeDeletionHold,
   releaseDeletionHold,
   withRestriction,
   type MediaAsset,
 } from '../domain/media_asset.js';
+import { requireRetentionPolicy, type MediaRetentionPolicy } from '../domain/media_retention.js';
 import type {
   MediaAuthorization,
   MediaRepository,
@@ -59,6 +61,8 @@ export interface MediaDeletionDeps {
   readonly objectStore: ObjectStorePort;
   readonly clock: ServerClock;
   readonly ids: { newId(): EntityId };
+  /** Accepted retention policy (hold lease); `undefined` fails closed for settled assets. */
+  readonly retention?: MediaRetentionPolicy;
 }
 
 export type MediaDeletionData = DeepReadonly<MediaDeletionStatusV1> | DeepReadonly<MediaAssetV1>;
@@ -67,8 +71,7 @@ const systemActor = 'system:media-restriction';
 
 /** What the first step of a deletion left behind: a hold this call may have placed itself. */
 interface HeldAsset {
-  readonly revision: number;
-  readonly placed: boolean;
+  readonly holdId: string;
 }
 
 /**
@@ -126,6 +129,9 @@ export class MediaDeletionService {
         'owner_request',
       );
       if (decided === 'referenced') return rejected('asset_referenced');
+      // The hold ran out while the owning domain was being asked: nothing was
+      // changed, and a retry starts the check over.
+      if (decided === 'expired') return rejected('revision_conflict');
     }
     const final = await this.completeDeletion(command.payload.assetId);
     await this.deps.repository.transact((tx) => {
@@ -270,8 +276,7 @@ export class MediaDeletionService {
       if (first === null) return null;
       if ('held' in first) {
         const referenced = await this.referenced(assetId);
-        if ((await this.decide(assetId, first.held, referenced, reason)) === 'referenced')
-          return null;
+        if ((await this.decide(assetId, first.held, referenced, reason)) !== 'started') return null;
       }
     } catch (error) {
       if (error instanceof MediaDomainRefusal || error instanceof MediaRepositoryConflict)
@@ -342,13 +347,17 @@ export class MediaDeletionService {
     )
       throw new MediaDomainRefusal('invalid_state');
     if (knownReferenced) throw new MediaDomainRefusal('asset_referenced');
-    const held = placeDeletionHold(asset, nowUtc);
-    if (held !== asset) {
-      tx.putAsset(held, asset.revision);
-      // Only a real change of what clients can reach is a fact worth announcing.
-      if (!asset.deliveryDisabled) this.effect(tx, held, 'MediaDeliveryDisabled', nowUtc);
-    }
-    return { held: { revision: held.revision, placed: held !== asset } };
+    // The hold has its own owner id and lease; the holder may act only on that.
+    const policy = requireRetentionPolicy(this.deps.retention);
+    const holdId = this.deps.ids.newId();
+    const expiresAtUtc = parseUtcInstant(
+      new Date(Date.parse(nowUtc) + policy.deletionHoldLeaseSeconds * 1000).toISOString(),
+    );
+    const held = placeDeletionHold(asset, { holdId, expiresAtUtc }, nowUtc);
+    tx.putAsset(held, asset.revision);
+    // Only a real change of what clients can reach is a fact worth announcing.
+    if (!asset.deliveryDisabled) this.effect(tx, held, 'MediaDeliveryDisabled', nowUtc);
+    return { held: { holdId } };
   }
 
   /**
@@ -361,19 +370,20 @@ export class MediaDeletionService {
     held: HeldAsset,
     referenced: boolean,
     reason: DeletionReason,
-  ): Promise<'started' | 'referenced'> {
+  ): Promise<'started' | 'referenced' | 'expired'> {
     const nowUtc = this.now();
     return this.deps.repository.transact(async (tx) => {
       const asset = await tx.asset(assetId);
       if (asset === null) throw new MediaDomainRefusal('not_found');
+      // Fencing: a holder whose lease ran out, or whose hold was released or taken
+      // over, changes nothing; the answer it carries is about a moment that is over.
+      if (!holdOwnedBy(asset, held.holdId, nowUtc)) return 'expired' as const;
       if (referenced) {
         // Only the deletion's own hold is released, whatever else happened to the
         // asset meanwhile: an authoritative restriction placed in between stays.
-        if (held.placed && asset.deletionHold === true) this.releaseHold(tx, asset, nowUtc);
+        this.releaseHold(tx, asset, held.holdId, nowUtc);
         return 'referenced' as const;
       }
-      if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
-        return 'started' as const;
       const next = beginDeletion(asset, nowUtc);
       tx.putAsset(next, asset.revision);
       tx.putDeletion(this.pendingStatus(asset.assetId, reason, nowUtc), 0);
@@ -382,8 +392,8 @@ export class MediaDeletionService {
   }
 
   /** Releases the deletion hold and announces restored delivery only if it really is restored. */
-  releaseHold(tx: MediaTransaction, asset: MediaAsset, nowUtc: UtcInstant): void {
-    const released = releaseDeletionHold(asset, nowUtc);
+  releaseHold(tx: MediaTransaction, asset: MediaAsset, holdId: string, nowUtc: UtcInstant): void {
+    const released = releaseDeletionHold(asset, holdId, nowUtc);
     if (released === asset) return;
     tx.putAsset(released, asset.revision);
     if (asset.deliveryDisabled && !released.deliveryDisabled && released.lifecycle === 'ready')

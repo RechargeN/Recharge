@@ -74,6 +74,15 @@ function harness() {
   let counter = 1000;
   const ids = { newId: () => ulid(++counter) };
   const deletion = new MediaDeletionService({
+    retention: {
+      revision: 'retention-test-1',
+      orphanGraceSeconds: 600,
+      quarantinedRetentionSeconds: 300,
+      blockedRetentionSeconds: 200,
+      inFlightAttemptLeaseSeconds: 120,
+      deletionHoldLeaseSeconds: 60,
+      deletionReceiptRetentionSeconds: 1000,
+    },
     repository,
     authority,
     restrictionAuthority: { verifyRestriction: () => Promise.resolve(false) },
@@ -666,6 +675,14 @@ const acceptanceMatrix: ReadonlyArray<
     ],
   ],
   [
+    'AC-87 a deletion holder acts only while its own hold is valid',
+    [
+      ['deletion', 'an expired holder cannot delete'],
+      ['deletion', 'a valid hold of another worker refuses'],
+      ['retention', 'a stale deletion hold is released after the lease'],
+    ],
+  ],
+  [
     'restriction is a verified system instruction',
     [['deletion', 'a restriction is a verified system instruction and never a user command']],
   ],
@@ -710,7 +727,7 @@ void test('the specification records the acceptance criteria and the evidence th
     ),
     'utf8',
   );
-  for (let number = 76; number <= 86; number += 1)
+  for (let number = 76; number <= 87; number += 1)
     assert.ok(spec.includes(`BCK-14-AC-${String(number)}`), `AC-${String(number)}`);
   assert.ok(spec.includes('real scanner/processor evidence absent'));
   // Every behaviour a fake cannot prove is named, so it cannot be mistaken for covered.

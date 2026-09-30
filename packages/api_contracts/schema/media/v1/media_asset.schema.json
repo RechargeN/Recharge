@@ -239,7 +239,20 @@
       "type": "boolean"
     },
     "deletionHold": {
-      "type": "boolean"
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "holdId": {
+          "$ref": "media_common.schema.json#/$defs/entityId"
+        },
+        "expiresAtUtc": {
+          "$ref": "media_common.schema.json#/$defs/utcInstant"
+        }
+      },
+      "required": [
+        "holdId",
+        "expiresAtUtc"
+      ]
     },
     "attemptCount": {
       "type": "integer",

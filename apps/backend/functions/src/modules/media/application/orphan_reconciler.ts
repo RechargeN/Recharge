@@ -15,7 +15,7 @@ import {
   unsupported,
   type MediaResult,
 } from '../domain/failures.js';
-import { advance, releaseDeletionHold, withOrphanSince } from '../domain/media_asset.js';
+import { advance, releaseExpiredDeletionHold, withOrphanSince } from '../domain/media_asset.js';
 import {
   decideOrphan,
   requireRetentionPolicy,
@@ -83,7 +83,7 @@ export class OrphanReconciler {
         }
         if (choice.action === 'release_hold') {
           // A deletion hold nobody came back for: only that hold is released.
-          const released = releaseDeletionHold(asset, nowUtc);
+          const released = releaseExpiredDeletionHold(asset, nowUtc);
           if (released !== asset) {
             tx.putAsset(released, asset.revision);
             if (

@@ -137,6 +137,15 @@ async function harness(enabledForReadiness: readonly string[] = ['image']) {
   const entityScope: EntityScopePort = contentScope;
   const referencePort: AttachmentReferencePort = contentScope;
   const deletion = new MediaDeletionService({
+    retention: {
+      revision: 'retention-test-1',
+      orphanGraceSeconds: 600,
+      quarantinedRetentionSeconds: 300,
+      blockedRetentionSeconds: 200,
+      inFlightAttemptLeaseSeconds: 120,
+      deletionHoldLeaseSeconds: 60,
+      deletionReceiptRetentionSeconds: 1000,
+    },
     repository: mediaRepository,
     authority,
     restrictionAuthority: restriction,

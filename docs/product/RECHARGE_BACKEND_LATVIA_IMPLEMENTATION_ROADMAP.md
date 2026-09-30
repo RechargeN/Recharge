@@ -1,7 +1,7 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.30**
+- Version: **1.31**
 - Date: **2026-09-29**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
@@ -10,6 +10,9 @@
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
+
+Revision 1.31 tightens the proposed merge conditions of §3.6 (single final SHA,
+full Flutter gate before the final Done/merge, approval is not permission).
 
 Revision 1.30 adds §3.6: the map from the ten backend stages to the historical
 slices (stages 1-2 only, without inventing the rest) and the proposed conditions
@@ -413,13 +416,18 @@ People) безопасно выключены с причинами и **отл�
 **Условия будущего merge в `main` — предложение, не принято.** Подтверждает
 Product owner; до этого merge запрещён.
 
-1. Явное решение владельца на merge.
-2. Чистое дерево ветки; все gate зелёные на точной toolchain (Node 22.23.2,
-   npm 10.9.8, Temurin 21.0.12+8), включая полный Emulator и Rules.
+1. Явное решение владельца на merge. **Утверждение самих условий не является
+   разрешением выполнить merge**: merge требует отдельного решения.
+2. **Все проверки относятся к одному итоговому SHA.** Чистое дерево этого SHA;
+   все gate зелёные на точной toolchain (Node 22.23.2, npm 10.9.8,
+   Temurin 21.0.12+8), включая полный Emulator и Rules. Любая правка после
+   проверки означает новый SHA и повтор проверок.
 3. Нет открытых P1/P2 из независимой проверки; известные ограничения записаны
    в спецификациях.
 4. Реестры и статусы без drift; production-статусы не повышены.
-5. При изменении mobile — `flutter analyze` и `flutter test` зелёные.
+5. **Полный Flutter-gate (`flutter analyze`, `flutter test`) обязателен перед
+   окончательным Done и merge по AGENTS.md**, независимо от того, менялся ли
+   mobile в последней правке; результат относится к тому же итоговому SHA.
 6. Merge не включает ни один тип, рынок или флаг.
 7. Cloud, deployment и расходы — отдельные решения, merge их не подразумевает.
 

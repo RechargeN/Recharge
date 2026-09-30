@@ -34,6 +34,7 @@ const policy: MediaRetentionPolicy = {
   quarantinedRetentionSeconds: 300,
   blockedRetentionSeconds: 200,
   inFlightAttemptLeaseSeconds: 120,
+  deletionHoldLeaseSeconds: 60,
   deletionReceiptRetentionSeconds: 1000,
 };
 
@@ -214,10 +215,15 @@ void test('an unreachable owning domain leaves settled assets alone but never bl
 });
 
 void test('a stale deletion hold is released after the lease and never by the referenced check', () => {
-  const held = assetIn('ready', { deletionHold: true, deliveryDisabled: true, updatedAtUtc: t0 });
-  assert.deepEqual(decide(held, { now: 119 }), { action: 'keep' });
-  assert.deepEqual(decide(held, { now: 120 }), { action: 'release_hold' });
-  assert.deepEqual(decide(held, { referenced: 'unknown', now: 120 }), { action: 'release_hold' });
+  // The lease is the hold's own expiry: the asset update time plays no part.
+  const held = assetIn('ready', {
+    deletionHold: { holdId: 'hold-1', expiresAtUtc: at(60) },
+    deliveryDisabled: true,
+    updatedAtUtc: at(-10_000),
+  });
+  assert.deepEqual(decide(held, { now: 59 }), { action: 'keep' });
+  assert.deepEqual(decide(held, { now: 60 }), { action: 'release_hold' });
+  assert.deepEqual(decide(held, { referenced: 'unknown', now: 60 }), { action: 'release_hold' });
   // A restriction alone is not a hold: nothing to release.
   assert.notEqual(
     decide(assetIn('ready', { restricted: true, deliveryDisabled: true }), { now: 100_000 }).action,
