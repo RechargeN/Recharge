@@ -81,6 +81,22 @@
         { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" },
         { "fieldPath": "__name__", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "contentPublishedRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "revisionNumber", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentEffects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "pointerRevision", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

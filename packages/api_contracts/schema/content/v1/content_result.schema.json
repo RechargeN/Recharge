@@ -24,7 +24,8 @@
         "unsupported_version",
         "unknown_outcome",
         "not_found",
-        "invalid_contract"
+        "invalid_contract",
+        "storage_limit_exceeded"
       ]
     }
   },

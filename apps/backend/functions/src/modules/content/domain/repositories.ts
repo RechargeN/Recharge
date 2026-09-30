@@ -43,6 +43,8 @@ export interface ContentTransaction {
   /** Whether any draft body or immutable revision still references the Media asset. */
   isMediaReferenced(assetId: string): Promise<boolean>;
   pointer(contentId: string): Promise<PublicationPointer | null>;
+  /** Stored effects of one Content in `pointerRevision` order (replay read; never rebuilt). */
+  effectsForContent(contentId: string): Promise<readonly ContentEffectV1[]>;
   /** Compare-and-set on the stored pointer revision (0 = absent). */
   putPointer(pointer: PublicationPointer, expectedStoredRevision: number): void;
   idempotency(

@@ -233,7 +233,8 @@ export type ContentFailureCode =
   | 'unsupported_version'
   | 'unknown_outcome'
   | 'not_found'
-  | 'invalid_contract';
+  | 'invalid_contract'
+  | 'storage_limit_exceeded';
 
 interface CommandEnvelope<Type extends string, Payload> {
   readonly schemaVersion: 1;

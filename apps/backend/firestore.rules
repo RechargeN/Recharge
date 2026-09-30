@@ -32,6 +32,18 @@ service cloud.firestore {
     match /identityManagedPages/{document} { allow read, write: if false; }
     match /identityPageMemberships/{document} { allow read, write: if false; }
 
+    // Content persistence (BCK07-PERSIST-01) is Emulator-only and server-owned.
+    // No client, owner, page member or moderator has direct access; every write
+    // goes through the Content service and its Admin repository.
+    match /contentDrafts/{document} { allow read, write: if false; }
+    match /contentExternalBindings/{document} { allow read, write: if false; }
+    match /contentSubmissions/{document} { allow read, write: if false; }
+    match /contentPublishedRevisions/{document} { allow read, write: if false; }
+    match /contentPublicationPointers/{document} { allow read, write: if false; }
+    match /contentIdempotency/{document} { allow read, write: if false; }
+    match /contentAudit/{document} { allow read, write: if false; }
+    match /contentEffects/{document} { allow read, write: if false; }
+
     // RAW-C authoritative records are Admin-SDK-only. There is deliberately no
     // client exception, including for owners, flags, projections or outbox.
     match /bookingEventProjections/{document} { allow read, write: if false; }

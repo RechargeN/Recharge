@@ -848,10 +848,23 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
   ];
   const files = sourceFiles(path.join(root, 'modules', 'content'));
   assert.ok(files.length >= 14);
+  // BCK07-PERSIST-01: only the Emulator-only Firestore adapter and its composition
+  // may name the cloud SDK (types only); everything else stays SDK-free.
+  const emulatorOnly = new Set([
+    path.join('infrastructure', 'firestore_content_repository.ts'),
+    path.join('infrastructure', 'emulator_content_composition.ts'),
+  ]);
   for (const file of files) {
     const text = readFileSync(file, 'utf8');
-    for (const pattern of forbidden) assert.doesNotMatch(text, pattern, path.relative(root, file));
+    const relative = path.relative(path.join(root, 'modules', 'content'), file);
+    for (const pattern of forbidden.slice(emulatorOnly.has(relative) ? 1 : 0))
+      assert.doesNotMatch(text, pattern, path.relative(root, file));
   }
+  const sdkImporters = files
+    .filter((file) => /from ['"]firebase-admin/u.test(readFileSync(file, 'utf8')))
+    .map((file) => path.relative(path.join(root, 'modules', 'content'), file))
+    .sort();
+  assert.deepEqual(sdkImporters, [...emulatorOnly].sort());
   // No callable/export registry, Rules or index change was introduced.
   assert.doesNotMatch(readFileSync(path.join(root, 'index.ts'), 'utf8'), /content/iu);
 });
@@ -870,6 +883,13 @@ const files = {
   unavailable: 'unit/content/type_rules_unavailable.test.ts',
   service: 'integration/content_publication_service.test.ts',
   security: 'integration/content_publication_security.test.ts',
+  parity: 'integration/content_repository_parity.test.ts',
+  scenarios: 'support/content_repository_scenarios.ts',
+  guard: 'emulator/content_emulator_guard.test.ts',
+  firestore: 'emulator/content_firestore_repository.test.ts',
+  concurrency: 'emulator/content_concurrency.test.ts',
+  recovery: 'emulator/content_recovery.test.ts',
+  rules: 'emulator/content_rules_default_deny.test.ts',
 } as const;
 
 const acceptanceMatrix: ReadonlyArray<
@@ -1021,6 +1041,59 @@ const acceptanceMatrix: ReadonlyArray<
       ['common', 'issue collector is unique and bounded'],
     ],
   ],
+  // BCK07-PERSIST-01 (Emulator evidence lives in the named Emulator tests).
+  [
+    'AC-101 Emulator-only enforced technically, including direct construction',
+    [
+      ['guard', 'the repository constructor accepts only the demo-recharge loopback Emulator'],
+      ['guard', 'a missing or non-loopback endpoint is refused, with no cloud fallback'],
+      ['guard', 'any project other than the exact demo project is refused'],
+      ['guard', 'cloud credentials and endpoint overrides are refused'],
+      ['guard', 'the composition needs its default-off flag'],
+    ],
+  ],
+  [
+    'AC-102 buffered transactions: overlay, retry with a fresh buffer, checks before writes, rollback',
+    [
+      ['scenarios', 'a read after a staged write sees it, for single documents and lists'],
+      ['scenarios', 'two staged changes to one document leave the last one'],
+      ['scenarios', 'a refused or failed transaction stores nothing at all'],
+      ['firestore', 'a retried transaction runs the callback again with a new, empty buffer'],
+      ['firestore', 'contending transactions leave one winner and roll the losers back completely'],
+    ],
+  ],
+  [
+    'AC-103 bounded history and document size, identical on both adapters',
+    [
+      ['scenarios', 'history and document size are bounded with a typed refusal'],
+      ['parity', 'registerContentScenarios'],
+      ['firestore', 'registerContentScenarios'],
+    ],
+  ],
+  [
+    'AC-104 recovery verifies, replays stored effects and never invents history',
+    [
+      ['recovery', 'intact stored records verify clean and stored effects replay in order'],
+      ['recovery', 'a lost historical effect is reported as corruption and never invented'],
+      ['recovery', 'a tampered revision body or a missing current revision is reported'],
+    ],
+  ],
+  [
+    'AC-105 every Content collection denies all clients; one writer; concurrency and uniqueness',
+    [
+      ['rules', 'unauthenticated clients can neither read nor write any Content collection'],
+      [
+        'rules',
+        'authenticated clients, including a same-id user document, remain denied everywhere',
+      ],
+      ['rules', 'a document written by the server stays unreadable and unchangeable for clients'],
+      [
+        'concurrency',
+        'concurrent imports of one external source record leave exactly one bound draft',
+      ],
+      ['security', 'Content stays framework-neutral'],
+    ],
+  ],
 ];
 
 void test('local acceptance matrix: every requirement is backed by a named, existing test', () => {
@@ -1036,5 +1109,5 @@ void test('local acceptance matrix: every requirement is backed by a named, exis
   }
   assert.deepEqual(missing, []);
   // The matrix itself stays complete: every named requirement group is present.
-  assert.ok(acceptanceMatrix.length >= 22);
+  assert.ok(acceptanceMatrix.length >= 27);
 });

@@ -3,6 +3,14 @@ import { deepFreeze } from '../../../shared/immutable.js';
 import type { ContentDraft } from '../domain/content_draft.js';
 import { resolveContentType } from '../domain/content_type_registry.js';
 import { ContentRepositoryConflict } from '../domain/failures.js';
+import {
+  assertDocumentWithinLimit,
+  assertMediaIdsWithinLimit,
+  assertRoomForHistory,
+  defaultContentStorageLimits,
+  resolveStorageLimits,
+  type ContentStorageLimits,
+} from '../domain/storage_limits.js';
 import type { PublicationPointer } from '../domain/publication_pointer.js';
 import type { PublicationSubmission } from '../domain/publication_submission.js';
 import type { PublishedRevision } from '../domain/published_revision.js';
@@ -29,8 +37,13 @@ interface Store {
  * It is test infrastructure and carries no production authority.
  */
 export class InMemoryContentRepository implements ContentRepository {
+  readonly #limits: ContentStorageLimits;
   #store: Store = emptyStore();
   #tail: Promise<void> = Promise.resolve();
+
+  constructor(limits: Partial<ContentStorageLimits> = defaultContentStorageLimits) {
+    this.#limits = resolveStorageLimits(limits);
+  }
 
   async transact<T>(operation: (transaction: ContentTransaction) => T | Promise<T>): Promise<T> {
     let release: (() => void) | undefined;
@@ -41,7 +54,7 @@ export class InMemoryContentRepository implements ContentRepository {
     await previous;
     const working = cloneStore(this.#store);
     try {
-      const result = await operation(transactionFor(working));
+      const result = await operation(transactionFor(working, this.#limits));
       this.#store = working;
       return result;
     } finally {
@@ -102,7 +115,7 @@ function idempotencyKey(actorUserId: string, commandType: string, key: string): 
   return `${actorUserId.length}:${actorUserId}|${commandType}|${key}`;
 }
 
-function transactionFor(store: Store): ContentTransaction {
+function transactionFor(store: Store, limits: ContentStorageLimits): ContentTransaction {
   return {
     draft: (draftId) => Promise.resolve(store.drafts.get(draftId) ?? null),
     draftByContentId: (contentId) =>
@@ -118,6 +131,23 @@ function transactionFor(store: Store): ContentTransaction {
         ) ?? null,
       ),
     putDraft(draft) {
+      assertDocumentWithinLimit(draft, limits);
+      assertMediaIdsWithinLimit(
+        (resolveContentType(draft.typeId)?.mediaIds?.(draft.body) ?? []).length,
+        limits,
+      );
+      const binding = draft.provenance.originBinding;
+      // One external source record binds to at most one draft (same rule as the Firestore adapter).
+      if (
+        binding.kind === 'delegatedImport' &&
+        [...store.drafts.values()].some(
+          (other) =>
+            other.draftId !== draft.draftId &&
+            other.provenance.originBinding.kind === 'delegatedImport' &&
+            other.provenance.originBinding.externalBindingRef === binding.externalBindingRef,
+        )
+      )
+        throw new ContentRepositoryConflict('duplicate_id');
       store.drafts.set(draft.draftId, copy(draft));
     },
     submission: (submissionId) => Promise.resolve(store.submissions.get(submissionId) ?? null),
@@ -126,6 +156,13 @@ function transactionFor(store: Store): ContentTransaction {
         [...store.submissions.values()].filter((item) => item.contentId === contentId),
       ),
     putSubmission(submission) {
+      assertDocumentWithinLimit(submission, limits);
+      if (!store.submissions.has(submission.submissionId))
+        assertRoomForHistory(
+          [...store.submissions.values()].filter((item) => item.contentId === submission.contentId)
+            .length,
+          limits.maxSubmissionsPerContent,
+        );
       store.submissions.set(submission.submissionId, copy(submission));
     },
     publishedRevision: (id) => Promise.resolve(store.revisions.get(id) ?? null),
@@ -138,6 +175,13 @@ function transactionFor(store: Store): ContentTransaction {
     putPublishedRevision(revision) {
       if (store.revisions.has(revision.publishedRevisionId))
         throw new ContentRepositoryConflict('immutable_revision');
+      assertDocumentWithinLimit(revision, limits);
+      assertMediaIdsWithinLimit(revision.mediaAttachments.length, limits);
+      assertRoomForHistory(
+        [...store.revisions.values()].filter((item) => item.contentId === revision.contentId)
+          .length,
+        limits.maxRevisionsPerContent,
+      );
       store.revisions.set(revision.publishedRevisionId, copy(revision));
     },
     isMediaReferenced: (assetId) =>
@@ -159,16 +203,31 @@ function transactionFor(store: Store): ContentTransaction {
     idempotency: (actorUserId, commandType, key) =>
       Promise.resolve(store.idempotency.get(idempotencyKey(actorUserId, commandType, key)) ?? null),
     putIdempotency(record) {
+      assertDocumentWithinLimit(record, limits);
       store.idempotency.set(
         idempotencyKey(record.actorUserId, record.commandType, record.idempotencyKey),
         copy(record),
       );
     },
     appendAudit(entry) {
+      if (store.audit.some((item) => item.auditId === entry.auditId))
+        throw new ContentRepositoryConflict('duplicate_id');
       store.audit.push(copy(entry));
     },
+    effectsForContent: (contentId) =>
+      Promise.resolve(
+        store.effects
+          .filter((item) => item.contentId === contentId)
+          .sort(
+            (left, right) =>
+              left.pointerRevision - right.pointerRevision ||
+              left.effectId.localeCompare(right.effectId),
+          ),
+      ),
     effects: {
       append(effect) {
+        if (store.effects.some((item) => item.effectId === effect.effectId))
+          throw new ContentRepositoryConflict('duplicate_id');
         store.effects.push(copy(effect));
       },
     },

@@ -1645,3 +1645,27 @@ Emulator evidence pending".
      reports missing history as corrupted without inventing it.
 105. **BCK-07-AC-105:** every Content collection denies all client reads and
      writes; Content has one writer and no callable, export or cloud context.
+
+### 38.10 Implementation status (2026-09-30)
+
+Implemented within the §38.7 map. Emulator and Rules evidence was produced on
+the exact toolchain (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8): the full
+`npm run test:emulator` gate passed, including the Content guard (5), Firestore
+repository (20: the 17-scenario suite shared with the in-memory adapter plus a
+retry double, a contention test and a storage-shape test), concurrency (2),
+recovery (3) and Rules (4) tests. A mutation that let clients read
+`contentDrafts` made the Rules test fail. The same suite passed without
+Emulator on Node 22 (unit 537, contract 33, integration 167).
+
+Known limits, stated rather than hidden:
+
+- the bounds in §38.4 are synthetic local guards; production values need the
+  measured cost and cardinality study;
+- history is not rebuilt (§38.6): a lost effect is reported as corruption;
+- the Firestore adapter buffers reads of lists up to the bound only; a Content
+  near the bound costs that many reads per transaction;
+- the Admin client attempts a GCE metadata lookup and logs
+  `MetadataLookupWarning` under the Emulator; it grants nothing and is not
+  disabled here because the repository already refuses any non-Emulator context;
+- no callable, export, worker, Catalog projection or `eventBookingOutbox`
+  hand-off exists; all types and markets stay disabled.
