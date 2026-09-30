@@ -30,6 +30,8 @@ import {
   sha256Hex,
   toAssetView,
   withOrphanSince,
+  placeDeletionHold,
+  releaseDeletionHold,
   withRestriction,
   type MediaAsset,
 } from '../domain/media_asset.js';
@@ -232,8 +234,11 @@ export class MediaDeletionService {
         const next = withRestriction(asset, command.payload.restricted, nowUtc);
         if (next !== asset) {
           tx.putAsset(next, asset.revision);
-          if (command.payload.restricted) this.effect(tx, next, 'MediaDeliveryDisabled', nowUtc);
-          else if (next.lifecycle === 'ready')
+          // Announce only what clients can actually reach: a deletion hold may keep
+          // delivery disabled although the restriction itself was lifted.
+          if (!asset.deliveryDisabled && next.deliveryDisabled)
+            this.effect(tx, next, 'MediaDeliveryDisabled', nowUtc);
+          else if (asset.deliveryDisabled && !next.deliveryDisabled && next.lifecycle === 'ready')
             this.effect(tx, next, 'MediaDeliveryRestored', nowUtc);
         }
         const view = toAssetView(next);
@@ -337,10 +342,11 @@ export class MediaDeletionService {
     )
       throw new MediaDomainRefusal('invalid_state');
     if (knownReferenced) throw new MediaDomainRefusal('asset_referenced');
-    const held = withRestriction(asset, true, nowUtc);
+    const held = placeDeletionHold(asset, nowUtc);
     if (held !== asset) {
       tx.putAsset(held, asset.revision);
-      this.effect(tx, held, 'MediaDeliveryDisabled', nowUtc);
+      // Only a real change of what clients can reach is a fact worth announcing.
+      if (!asset.deliveryDisabled) this.effect(tx, held, 'MediaDeliveryDisabled', nowUtc);
     }
     return { held: { revision: held.revision, placed: held !== asset } };
   }
@@ -361,12 +367,9 @@ export class MediaDeletionService {
       const asset = await tx.asset(assetId);
       if (asset === null) throw new MediaDomainRefusal('not_found');
       if (referenced) {
-        if (held.placed && asset.revision === held.revision) {
-          const lifted = withRestriction(asset, false, nowUtc);
-          tx.putAsset(lifted, asset.revision);
-          if (lifted.lifecycle === 'ready')
-            this.effect(tx, lifted, 'MediaDeliveryRestored', nowUtc);
-        }
+        // Only the deletion's own hold is released, whatever else happened to the
+        // asset meanwhile: an authoritative restriction placed in between stays.
+        if (held.placed && asset.deletionHold === true) this.releaseHold(tx, asset, nowUtc);
         return 'referenced' as const;
       }
       if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
@@ -376,6 +379,15 @@ export class MediaDeletionService {
       tx.putDeletion(this.pendingStatus(asset.assetId, reason, nowUtc), 0);
       return 'started' as const;
     });
+  }
+
+  /** Releases the deletion hold and announces restored delivery only if it really is restored. */
+  releaseHold(tx: MediaTransaction, asset: MediaAsset, nowUtc: UtcInstant): void {
+    const released = releaseDeletionHold(asset, nowUtc);
+    if (released === asset) return;
+    tx.putAsset(released, asset.revision);
+    if (asset.deliveryDisabled && !released.deliveryDisabled && released.lifecycle === 'ready')
+      this.effect(tx, released, 'MediaDeliveryRestored', nowUtc);
   }
 
   private pendingStatus(

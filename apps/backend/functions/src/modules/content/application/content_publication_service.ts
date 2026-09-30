@@ -232,7 +232,13 @@ export class ContentPublicationService {
       }),
     );
     const nowUtc = this.now();
-    const media = await this.prepareMedia(command);
+    // A command that already completed is replayed from its stored result: Media is
+    // not consulted again (it may be unavailable now), only the caller authority is
+    // re-checked inside the transaction. Only a new command gathers media evidence.
+    const existing = await this.deps.repository.transact((tx) =>
+      tx.idempotency(actorId, command.commandType, command.idempotencyKey),
+    );
+    const media = existing === null ? await this.prepareMedia(command) : undefined;
     try {
       return await this.deps.repository.transact(async (tx) => {
         const context: CommandContext = { tx, principal, nowUtc, authorizations: [], media };
@@ -905,6 +911,17 @@ export class ContentPublicationService {
     if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
   }
 
+  /** A Media port that fails is "not ready": a typed refusal, never a thrown error. */
+  private async checkMedia(
+    input: Parameters<MediaReadinessPort['check']>[0],
+  ): Promise<MediaReadiness> {
+    try {
+      return await this.deps.media.check(input);
+    } catch {
+      return { ready: false, reason: 'not_ready' };
+    }
+  }
+
   /**
    * The media evidence for a draft, valid only if the draft is exactly the one it
    * was taken for: a draft edited since is a stale source, never silently reused.
@@ -956,7 +973,7 @@ export class ContentPublicationService {
     if (entry === null || !isContentTypeAvailable(entry)) return undefined;
     if (snapshot.kind === 'rollback') {
       const { target } = snapshot;
-      const readiness = await this.deps.media.check({
+      const readiness = await this.checkMedia({
         contentId: target.contentId,
         typeId: target.typeId,
         marketId: target.marketId,
@@ -967,7 +984,7 @@ export class ContentPublicationService {
       return { kind: 'rollback', publishedRevisionId: target.publishedRevisionId, readiness };
     }
     const { draft } = snapshot;
-    const readiness = await this.deps.media.check({
+    const readiness = await this.checkMedia({
       contentId: draft.contentId,
       typeId: draft.typeId,
       marketId: draft.marketId,

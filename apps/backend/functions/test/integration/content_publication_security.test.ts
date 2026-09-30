@@ -1114,6 +1114,10 @@ const acceptanceMatrix: ReadonlyArray<
       ['guard', 'the client itself must target the Emulator, whatever the environment claims'],
     ],
   ],
+  [
+    'AC-109 a completed command replays without a Media call and an unreachable Media is typed',
+    [['service', 'a completed command replays without asking Media again']],
+  ],
 ];
 
 void test('local acceptance matrix: every requirement is backed by a named, existing test', () => {

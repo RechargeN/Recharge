@@ -47,6 +47,7 @@ export type OrphanDecision =
   | { readonly action: 'unmark' }
   | { readonly action: 'resume_delete' }
   | { readonly action: 'abandon_attempt' }
+  | { readonly action: 'release_hold' }
   | { readonly action: 'delete'; readonly reason: 'orphan_cleanup' | 'expired_upload' };
 
 export interface OrphanInput {
@@ -85,6 +86,15 @@ export function decideOrphan(input: OrphanInput): OrphanDecision {
       Date.parse(nowUtc) - Date.parse(asset.updatedAtUtc) >=
         policy.inFlightAttemptLeaseSeconds * 1000
       ? { action: 'abandon_attempt' }
+      : { action: 'keep' };
+  // A deletion hold is someone else's short step: nothing is marked or cleaned up
+  // meanwhile (marking would also restart the age), and a hold whose owner never
+  // came back (a lost worker) is released after the lease. A restriction is never
+  // touched by this.
+  if (asset.deletionHold === true)
+    return Date.parse(nowUtc) - Date.parse(asset.updatedAtUtc) >=
+      policy.inFlightAttemptLeaseSeconds * 1000
+      ? { action: 'release_hold' }
       : { action: 'keep' };
   if (referenced === 'unknown') return { action: 'keep' };
   if (referenced)

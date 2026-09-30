@@ -654,6 +654,18 @@ const acceptanceMatrix: ReadonlyArray<
     ],
   ],
   [
+    'AC-86 a deletion hold never lifts an authoritative restriction',
+    [
+      [
+        'deletion',
+        'a deletion hold never lifts an authoritative restriction placed while it was open',
+      ],
+      ['deletion', 'lifting a restriction keeps delivery disabled while a deletion hold is open'],
+      ['deletion', 'a deletion hold nobody came back for is released after the lease'],
+      ['retention', 'a stale deletion hold is released after the lease'],
+    ],
+  ],
+  [
     'restriction is a verified system instruction',
     [['deletion', 'a restriction is a verified system instruction and never a user command']],
   ],
@@ -698,7 +710,7 @@ void test('the specification records the acceptance criteria and the evidence th
     ),
     'utf8',
   );
-  for (let number = 76; number <= 85; number += 1)
+  for (let number = 76; number <= 86; number += 1)
     assert.ok(spec.includes(`BCK-14-AC-${String(number)}`), `AC-${String(number)}`);
   assert.ok(spec.includes('real scanner/processor evidence absent'));
   // Every behaviour a fake cannot prove is named, so it cannot be mistaken for covered.

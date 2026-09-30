@@ -1,7 +1,7 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.29**
+- Version: **1.30**
 - Date: **2026-09-29**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
@@ -10,6 +10,10 @@
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
+
+Revision 1.30 adds §3.6: the map from the ten backend stages to the historical
+slices (stages 1-2 only, without inventing the rest) and the proposed conditions
+for a future merge. Documentation only; nothing in it is accepted yet.
 
 Revision 1.29 records the Product owner's Release R1 decisions (§3.5): scope,
 Deferred items, LV-first market order and the SLO/cost/RPO-RTO verification
@@ -386,6 +390,38 @@ Rollout: сотрудники → ограниченная когорта → р
 Security/Privacy и Legal проверок; специалисты и сроки фиксируются **до
 публичного LV rollout**. До публичного запуска назначается резервный
 Incident/Support contact.
+
+### 3.6. Этапы backend-плана и исторические slices (1.30)
+
+Соответствие фиксируется по факту выполнения; для этапов 3–10 оно записывается
+в плане файлов каждого этапа **до кода**, а не придумывается заранее.
+
+| Этап | Что это в исторических терминах | Статус |
+|---|---|---|
+| 1.1 Дельта-проверка | процедура, не slice | выполнена |
+| 1.2 Стабилизация | mobile-стабилизация, коммит `9b1599d` | принята |
+| 1.3 Границы релиза | §3.5 этого документа | принята; sustained/burst RPS и error-budget — Proposed, **не утверждены**, обязательны до создания stage |
+| 2.1–2.4 Content local | `BCK07-LOCAL-01` (6A), 5 из 10 типов, все выключены | выполнено локально |
+| 2.5a–c Media foundation | `BCK14-LOCAL-01` (6C), fake-адаптеры | выполнено локально; реальные Storage/scanner/processor — отдельно |
+| 2.6 Content persistence | `BCK07-PERSIST-01`, Emulator-only | выполнено, Emulator gate пройден |
+| 3–10 | соответствие — в плане файлов этапа | не начаты |
+
+Оставшиеся пять Create-типов (Route, Scenario, Session, Class/Workshop, Find
+People) безопасно выключены с причинами и **отложены решением владельца**; пока
+они не готовы, требование R1 «все десять типов» не выполнено.
+
+**Условия будущего merge в `main` — предложение, не принято.** Подтверждает
+Product owner; до этого merge запрещён.
+
+1. Явное решение владельца на merge.
+2. Чистое дерево ветки; все gate зелёные на точной toolchain (Node 22.23.2,
+   npm 10.9.8, Temurin 21.0.12+8), включая полный Emulator и Rules.
+3. Нет открытых P1/P2 из независимой проверки; известные ограничения записаны
+   в спецификациях.
+4. Реестры и статусы без drift; production-статусы не повышены.
+5. При изменении mobile — `flutter analyze` и `flutter test` зелёные.
+6. Merge не включает ни один тип, рынок или флаг.
+7. Cloud, deployment и расходы — отдельные решения, merge их не подразумевает.
 
 ## 4. Target platform и будущая файловая карта
 

@@ -15,7 +15,7 @@ import {
   unsupported,
   type MediaResult,
 } from '../domain/failures.js';
-import { advance, withOrphanSince } from '../domain/media_asset.js';
+import { advance, releaseDeletionHold, withOrphanSince } from '../domain/media_asset.js';
 import {
   decideOrphan,
   requireRetentionPolicy,
@@ -81,6 +81,27 @@ export class OrphanReconciler {
           if (next !== asset) tx.putAsset(next, asset.revision);
           return { choice, revision: next.revision };
         }
+        if (choice.action === 'release_hold') {
+          // A deletion hold nobody came back for: only that hold is released.
+          const released = releaseDeletionHold(asset, nowUtc);
+          if (released !== asset) {
+            tx.putAsset(released, asset.revision);
+            if (
+              asset.deliveryDisabled &&
+              !released.deliveryDisabled &&
+              released.lifecycle === 'ready'
+            )
+              tx.effects.append({
+                schemaVersion: 1,
+                effectId: `${released.assetId}:MediaDeliveryRestored:${String(released.revision)}`,
+                type: 'MediaDeliveryRestored',
+                assetId: released.assetId,
+                assetRevision: released.revision,
+                occurredAtUtc: nowUtc,
+              });
+          }
+          return { choice, revision: released.revision };
+        }
         if (choice.action === 'abandon_attempt') {
           const source = asset.sourceGenerationRef;
           if (source === undefined)
@@ -127,6 +148,7 @@ export class OrphanReconciler {
           break;
         }
         case 'abandon_attempt':
+        case 'release_hold':
           action = 'recovered';
           break;
         case 'resume_delete': {

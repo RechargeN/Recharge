@@ -75,6 +75,10 @@ export interface MediaAssetV1 {
   readonly policyRevision: string;
   /** Set first by delete/restrict; a late result can never undo it. */
   readonly deliveryDisabled: boolean;
+  /** An authoritative (Security/Trust) restriction; only a verified instruction changes it. */
+  readonly restricted?: boolean;
+  /** A temporary hold a deletion placed itself; released alone, never the restriction. */
+  readonly deletionHold?: boolean;
   readonly attemptCount: number;
   readonly revision: number;
   readonly createdAtUtc: UtcInstant;

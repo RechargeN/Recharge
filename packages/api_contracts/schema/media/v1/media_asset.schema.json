@@ -235,6 +235,12 @@
     "deliveryDisabled": {
       "type": "boolean"
     },
+    "restricted": {
+      "type": "boolean"
+    },
+    "deletionHold": {
+      "type": "boolean"
+    },
     "attemptCount": {
       "type": "integer",
       "minimum": 0,

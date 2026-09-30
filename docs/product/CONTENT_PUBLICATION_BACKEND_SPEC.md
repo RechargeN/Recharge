@@ -1,7 +1,7 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.13**
+- Version: **0.14**
 - Date: **2026-09-30**
 - Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
 - Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
@@ -15,6 +15,15 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.14 — 2026-09-30
+
+- second audit remediation inside the existing maps: a completed command is
+  replayed from its stored result without consulting Media again, and an
+  unreachable Media is a typed refusal (`media_not_ready`) for new commands
+  (§38.11.5); adds BCK-07-AC-109;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision.
 
 ### v0.13 — 2026-09-30
 
@@ -1732,6 +1741,17 @@ Rules tests. Without Emulator the suite passes on Node 22, including a
 deterministic test that fails when a cross-module call sits inside a transaction
 (checked by mutation: it reports a deadlock).
 
+5. **Replay does not need Media (AC-109).** The stored idempotency record is
+   looked up first; for a command that already completed Content returns the
+   stored result after repeating the recorded authority checks and does not ask
+   Media again (it may be unavailable now). Only a new command gathers media
+   evidence, and a Media port that fails is `media_not_ready`, a typed refusal
+   and never a thrown error.
+6. **Stated limit, not a closed guarantee.** The window between media evidence
+   and the command commit (§38.11.2) remains a limit. Before a real Media
+   adapter exists, a mechanism to detect and react to revisions that reference a
+   later-restricted or deleted asset is required; it is not implemented here.
+
 ### 38.12 Acceptance addendum (v0.13)
 
 106. **BCK-07-AC-106:** a replay of a stored result repeats the recorded authority
@@ -1742,3 +1762,5 @@ deterministic test that fails when a cross-module call sits inside a transaction
      accepts media evidence only for the exact snapshot it was taken for.
 108. **BCK-07-AC-108:** stored effects are replayed and verified through stable
      pages and targeted reads; no history length silently cuts them short.
+109. **BCK-07-AC-109:** a completed command replays without a Media call, and an
+     unreachable Media is the typed `media_not_ready` for new commands.

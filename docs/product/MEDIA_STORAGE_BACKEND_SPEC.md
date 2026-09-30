@@ -1,7 +1,7 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.5**
+- Version: **0.6**
 - Date: **2026-09-30**
 - Spec status: **Review — documentation only; approval pending**
 - Runtime status: **Absent in production; BCK14-LOCAL-01 (2.5a-2.5c) present locally, in-memory and fake adapters only**
@@ -15,6 +15,15 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.6 — 2026-09-30
+
+- second audit remediation inside the closed §34.2 map: a deletion hold is a
+  flag of its own and no longer shares the boolean that an authoritative
+  restriction uses (§34.11); adds BCK-14-AC-86 and the asset fields
+  `restricted` and `deletionHold`;
+- changes no product rule, family, market, export, Firebase, cloud, push or
+  merge decision; BCK-14 stays in Review.
 
 ### v0.5 — 2026-09-30
 
@@ -1193,3 +1202,30 @@ part of the separate adapter verification.
     held, and a plainly referenced asset is refused without any write.
 85. **BCK-14-AC-85:** an abandoned attempt is recovered to quarantine with an
     honest receipt and a late result is refused as stale.
+
+### 34.11 Deletion hold and restriction are separate (v0.6)
+
+A deletion places a temporary hold while the owning domain is asked about
+references. The hold used to share `deliveryDisabled` with the authoritative
+restriction, so a restriction placed by Security during that window was lifted
+together with the hold. Now:
+
+- `restricted` is the authoritative restriction and changes only through a
+  verified instruction (`applyRestriction`);
+- `deletionHold` is the deletion's own temporary hold;
+- `deliveryDisabled` is derived: disabled while either is set (or once the asset
+  is deleting or deleted);
+- a referenced asset releases **only** `deletionHold`, whatever happened to the
+  asset meanwhile; a restriction placed during the hold stays, and lifting a
+  restriction while a hold is open keeps delivery disabled;
+- `MediaDeliveryDisabled` and `MediaDeliveryRestored` are emitted only when what
+  clients can reach really changes;
+- a hold whose worker never came back is released by the reconciler once
+  `inFlightAttemptLeaseSeconds` has passed (nothing is marked or cleaned up
+  while a hold is open); the restriction is never touched by that release.
+
+### 34.12 Acceptance addendum (v0.6)
+
+86. **BCK-14-AC-86:** a deletion hold never lifts an authoritative restriction;
+    only the hold's own flag is released, in both directions and after a lost
+    worker.

@@ -113,6 +113,8 @@ interface AdvancePatch {
   readonly variantManifestRevision?: string;
   readonly attemptCount?: number;
   readonly deliveryDisabled?: boolean;
+  readonly restricted?: boolean;
+  readonly deletionHold?: boolean;
   readonly deletedAtUtc?: UtcInstant;
 }
 
@@ -241,7 +243,29 @@ export function finishDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsse
   return deepFreeze(rest);
 }
 
-/** Restriction toggles delivery only; it never changes the lifecycle or restores publicity. */
+/** Delivery is disabled while an authoritative restriction or a deletion hold is active. */
+function withFlags(
+  asset: MediaAsset,
+  flags: { readonly restricted: boolean; readonly deletionHold: boolean },
+  nowUtc: UtcInstant,
+): MediaAsset {
+  const { restricted: _restricted, deletionHold: _hold, ...rest } = asset;
+  void _restricted;
+  void _hold;
+  return deepFreeze({
+    ...rest,
+    ...(flags.restricted ? { restricted: true } : {}),
+    ...(flags.deletionHold ? { deletionHold: true } : {}),
+    deliveryDisabled: flags.restricted || flags.deletionHold,
+    revision: asset.revision + 1,
+    updatedAtUtc: nowUtc,
+  });
+}
+
+/**
+ * The authoritative restriction toggles its own flag only; it never changes the
+ * lifecycle, never touches a deletion hold and never restores publicity.
+ */
 export function withRestriction(
   asset: MediaAsset,
   restricted: boolean,
@@ -249,13 +273,23 @@ export function withRestriction(
 ): MediaAsset {
   if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
     throw new MediaDomainRefusal('invalid_state');
-  if (asset.deliveryDisabled === restricted) return asset;
-  return deepFreeze({
-    ...asset,
-    deliveryDisabled: restricted,
-    revision: asset.revision + 1,
-    updatedAtUtc: nowUtc,
-  });
+  if ((asset.restricted === true) === restricted) return asset;
+  return withFlags(asset, { restricted, deletionHold: asset.deletionHold === true }, nowUtc);
+}
+
+/**
+ * The temporary hold a deletion places while the owning domain is asked. It is a
+ * separate flag from the restriction: releasing it can never lift a restriction.
+ */
+export function placeDeletionHold(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
+  if (asset.deletionHold === true) return asset;
+  return withFlags(asset, { restricted: asset.restricted === true, deletionHold: true }, nowUtc);
+}
+
+/** Releases only the deletion hold; a restriction that was placed meanwhile stays. */
+export function releaseDeletionHold(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
+  if (asset.deletionHold !== true) return asset;
+  return withFlags(asset, { restricted: asset.restricted === true, deletionHold: false }, nowUtc);
 }
 
 /** Starts or clears the orphan grace clock; unchanged state is not a new revision. */

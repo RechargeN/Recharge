@@ -147,11 +147,14 @@ class FakeModeration implements ModerationDispositionPort {
 
 class FakeMedia implements MediaReadinessPort {
   ready = true;
+  /** Simulates an unreachable Media module: the port throws. */
+  unavailable = false;
   mediaRevision = 'media-1';
   attachments: MediaAttachmentV1[] = [];
   readonly inputs: Parameters<MediaReadinessPort['check']>[0][] = [];
   check(input: Parameters<MediaReadinessPort['check']>[0]) {
     this.inputs.push(input);
+    if (this.unavailable) return Promise.reject(new Error('media_unavailable'));
     return Promise.resolve(
       this.ready
         ? ({
@@ -2310,5 +2313,39 @@ void test('a stored result is not a standing permission: a replay repeats the cu
   assert.deepEqual(
     await h.service.execute(actorA, createCommand({ marketId: 'EE' }, 'create-replay-key')),
     { kind: 'rejected', code: 'idempotency_conflict' },
+  );
+});
+
+void test('a completed command replays without asking Media again, and an unreachable Media is a typed refusal for new commands', async () => {
+  const h = harness();
+  const draft = await data<DraftLike>(h.service.execute(actorA, createCommand()));
+  const submit = submitCommand(draft.draftId, 1, 'submit-media-down-key');
+  const first = await data<SubmissionLike>(h.service.execute(actorA, submit));
+  const submitCalls = h.media.inputs.length;
+  h.media.unavailable = true;
+  // The stored result is returned: Media is neither consulted nor required.
+  const replay = await data<SubmissionLike>(h.service.execute(actorA, submit));
+  assert.equal(replay.submissionId, first.submissionId);
+  assert.equal(h.media.inputs.length, submitCalls);
+  // Authority is still checked on the replay.
+  h.eligibility.deny = 'membership_inactive';
+  assert.deepEqual(await h.service.execute(actorA, submit), {
+    kind: 'rejected',
+    code: 'membership_inactive',
+  });
+  h.eligibility.deny = undefined;
+  // A new command needs Media: its failure is a typed refusal, never a thrown error.
+  const other = await data<DraftLike>(h.service.execute(actorA, createCommand()));
+  assert.deepEqual(
+    await h.service.execute(actorA, submitCommand(other.draftId, 1, 'submit-new-key')),
+    {
+      kind: 'rejected',
+      code: 'media_not_ready',
+    },
+  );
+  h.media.unavailable = false;
+  assert.equal(
+    (await h.service.execute(actorA, submitCommand(other.draftId, 1, 'submit-new-key-2'))).kind,
+    'succeeded',
   );
 });

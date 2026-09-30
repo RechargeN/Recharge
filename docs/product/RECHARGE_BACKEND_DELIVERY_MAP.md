@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.105**
+- Version: **2.4.106**
 - Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,18 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.106.** Second remediation pass of the independent audit, without widening
+cloud, spend or market authority:
+
+- BCK-07 v0.14 (AC-109) and BCK-14 v0.6 (AC-86): a deletion hold no longer lifts
+  an authoritative restriction, and a completed Content command replays without
+  consulting Media;
+- the BCK-14 registry row separates local/fake Present from production Absent;
+- the window between media evidence and publication stays a recorded limit, with
+  a detection/reaction mechanism required before a real Media adapter;
+- the ROADMAP (A1 v1.30 §3.6) records the stage-to-slice map for stages 1-2 and
+  the proposed, not yet accepted, conditions for a future merge.
 
 **v2.4.105.** Synchronizes the registry rows and records the remediation of an
 independent audit of stages 1-2, without widening cloud, spend or market
@@ -1392,7 +1404,7 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
 | BCK-13 | `NOTIFICATIONS_BACKEND_SPEC.md` | Notifications owner | Inbox, push tokens/FCM, preferences, deep links, outbox consumers and optional email | BCK-03, BCK-04, BCK-05, BCK-06, BCK-18, BCK-20, OD-02, OD-09, OD-10 | Review v0.3 — Stage 4 inbox/delivery/receipt contract; provider/runtime gates remain | Absent |
-| BCK-14 | `MEDIA_STORAGE_BACKEND_SPEC.md` | Media Platform owner | Upload/finalize, metadata, ownership, transforms, protected access, deletion/orphan cleanup | BCK-03, BCK-04, BCK-05, BCK-06, BCK-07 | Review v0.5 — Stage 4 upload/scan/variant/deletion plus local BCK14-LOCAL-01 (fake adapters) chain; Approval/runtime blockers remain | Absent |
+| BCK-14 | `MEDIA_STORAGE_BACKEND_SPEC.md` | Media Platform owner | Upload/finalize, metadata, ownership, transforms, protected access, deletion/orphan cleanup | BCK-03, BCK-04, BCK-05, BCK-06, BCK-07 | Review v0.5 — Stage 4 upload/scan/variant/deletion plus local BCK14-LOCAL-01 (fake adapters) chain; Approval/runtime blockers remain | Local Media foundation Present (in-memory, `fake_*` adapters); production Storage/scanner/processor Absent |
 | BCK-15 | `AI_BACKEND_SPEC.md` | AI Platform owner | Provider-neutral server proxy, quota, redaction, prompts/evals and kill switches | ADR 0018, BCK-03, BCK-04, BCK-05, BCK-06 | Draft v0.3 — Stage 5 provider-neutral gateway/fallback/evaluation contract; all production gates pending | Absent |
 | BCK-16 | `PROVIDER_INTEGRATION_BACKEND_SPEC.md` | Integrations owner | Provider adapters, provider availability source, provenance/freshness, cache, live-check/handoff | BCK-03, BCK-04, BCK-05, BCK-08, BCK-20 | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; all provider gates pending | Absent |
 | BCK-17 | `PAYMENTS_BACKEND_SPEC.md` | RechargeN / Product owner (interim); permanent Payments owner assigned by new Accepted ADR | Payment authority, ledger, webhooks, refunds, disputes and compliance | Hard: new Accepted ADR, BCK-03, BCK-04, BCK-05, BCK-06; integration peer: BCK-13 | Draft v0.3.1 — complete design with normalized lifecycle vocabulary; still hard-blocked pending new Accepted Payments ADR | Absent |

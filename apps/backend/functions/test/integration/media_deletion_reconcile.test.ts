@@ -71,7 +71,10 @@ class FakeReferences implements AttachmentReferencePort {
   readonly referenced = new Set<string>();
   /** Scripted answers consumed first; `throw` simulates an unreachable owning domain. */
   readonly script: (boolean | 'throw')[] = [];
-  isReferenced(assetId: string): Promise<boolean> {
+  /** Runs while the owning domain is being asked, i.e. outside any Media transaction. */
+  onAsk: (() => Promise<void>) | undefined;
+  async isReferenced(assetId: string): Promise<boolean> {
+    await this.onAsk?.();
     const next = this.script.shift();
     if (next === 'throw') return Promise.reject(new Error('owning domain unreachable'));
     if (next !== undefined) return Promise.resolve(next);
@@ -737,4 +740,100 @@ void test('a stored result is not a standing permission: replays repeat the curr
     }),
     denial('idempotency_conflict'),
   );
+});
+
+void test('a deletion hold never lifts an authoritative restriction placed while it was open', async () => {
+  const h = harness();
+  const asset = await ready(h);
+  h.restriction.trusted.add('decision-sec-1');
+  // First look: not referenced. While the hold is open Security restricts the asset,
+  // then the owning domain reports a reference: the deletion is refused.
+  let asks = 0;
+  h.references.script.push(false, true);
+  h.references.onAsk = async () => {
+    asks += 1;
+    if (asks === 2)
+      await ok(h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-1', true)));
+  };
+  assert.deepEqual(
+    await h.service.execute(actorA, deleteCommand(asset)),
+    denial('asset_referenced'),
+  );
+  h.references.onAsk = undefined;
+  const after = stored(h, asset.assetId);
+  assert.equal(after.lifecycle, 'ready');
+  // The deletion released only its own hold: the restriction and the disabled delivery stay.
+  assert.equal(after.deletionHold, undefined);
+  assert.equal(after.restricted, true);
+  assert.equal(after.deliveryDisabled, true);
+  // Only a verified Security instruction lifts it.
+  h.restriction.trusted.add('decision-sec-2');
+  const lifted = await ok<MediaAssetV1>(
+    h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-2', false)),
+  );
+  assert.equal(lifted.deliveryDisabled, false);
+  assert.equal(lifted.restricted, undefined);
+});
+
+void test('lifting a restriction keeps delivery disabled while a deletion hold is open, and announces nothing false', async () => {
+  const h = harness();
+  const asset = await ready(h);
+  h.restriction.trusted.add('decision-sec-3');
+  await ok(h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-3', true)));
+  const before = h.repository.snapshot().effects.length;
+  h.references.script.push(false, true);
+  let asks = 0;
+  h.references.onAsk = async () => {
+    asks += 1;
+    if (asks === 2) {
+      h.restriction.trusted.add('decision-sec-4');
+      const lifted = await ok<MediaAssetV1>(
+        h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-4', false)),
+      );
+      // The hold still disables delivery: the restriction flag is gone, delivery is not back.
+      assert.equal(lifted.deliveryDisabled, true);
+      assert.equal(lifted.restricted, undefined);
+    }
+  };
+  // The restricted asset is deletable (first look unreferenced), then referenced at the second look.
+  assert.deepEqual(
+    await h.service.execute(actorA, deleteCommand(stored(h, asset.assetId))),
+    denial('asset_referenced'),
+  );
+  h.references.onAsk = undefined;
+  const after = stored(h, asset.assetId);
+  assert.equal(after.deliveryDisabled, false);
+  assert.equal(after.deletionHold, undefined);
+  // Only the real changes were announced: restored exactly once, at the end.
+  const types = h.repository
+    .snapshot()
+    .effects.slice(before)
+    .map((item) => item.type);
+  assert.deepEqual(types, ['MediaDeliveryRestored']);
+});
+
+void test('a deletion hold nobody came back for is released after the lease, leaving a restriction alone', async () => {
+  const h = harness();
+  const asset = await ready(h);
+  h.restriction.trusted.add('decision-sec-5');
+  await ok(h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-5', true)));
+  // A worker died right after placing its hold.
+  await h.repository.transact(async (tx) => {
+    const current = await tx.asset(asset.assetId);
+    assert.ok(current);
+    tx.putAsset(
+      { ...current, deletionHold: true, revision: current.revision + 1 },
+      current.revision,
+    );
+  });
+  const run = () =>
+    ok<OrphanReconciliationV1>(h.reconciler.reconcile(reconcileCommand(asset.assetId)));
+  h.advanceSeconds(119);
+  assert.notEqual((await run()).action, 'recovered');
+  h.advanceSeconds(1);
+  assert.equal((await run()).action, 'recovered');
+  const after = stored(h, asset.assetId);
+  assert.equal(after.deletionHold, undefined);
+  assert.equal(after.restricted, true);
+  assert.equal(after.deliveryDisabled, true);
 });

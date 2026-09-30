@@ -212,3 +212,15 @@ void test('an unreachable owning domain leaves settled assets alone but never bl
     reason: 'expired_upload',
   });
 });
+
+void test('a stale deletion hold is released after the lease and never by the referenced check', () => {
+  const held = assetIn('ready', { deletionHold: true, deliveryDisabled: true, updatedAtUtc: t0 });
+  assert.deepEqual(decide(held, { now: 119 }), { action: 'keep' });
+  assert.deepEqual(decide(held, { now: 120 }), { action: 'release_hold' });
+  assert.deepEqual(decide(held, { referenced: 'unknown', now: 120 }), { action: 'release_hold' });
+  // A restriction alone is not a hold: nothing to release.
+  assert.notEqual(
+    decide(assetIn('ready', { restricted: true, deliveryDisabled: true }), { now: 100_000 }).action,
+    'release_hold',
+  );
+});
