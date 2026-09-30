@@ -4,7 +4,7 @@
 - Version: **0.4**
 - Date: **2026-09-30**
 - Spec status: **Review — documentation only; approval pending**
-- Runtime status: **Absent**
+- Runtime status: **Absent in production; BCK14-LOCAL-01 sub-slice 2.5a present locally, in-memory and fake adapters only**
 - Accountable owner: **Media Platform owner**
 - Review owners: **Security/Privacy, Platform Operations, Content, Identity,
   Mobile, Trust & Safety, Route and Legal/Privacy**
@@ -1106,3 +1106,19 @@ no-Firebase checks) and the acceptance matrix reconciliation.
     is invented.
 82. **BCK-14-AC-82:** production approval, real adapters, delivery, Firebase,
     cloud, push and merge remain separate decisions.
+
+### 34.8 Implementation status
+
+- **2.5a (2026-09-30):** contracts, fixtures and parity test; domain
+  (asset, upload session, policy, unified lifecycle table); `MediaService` with
+  `createUploadSession`, `confirmUpload`, `finalizeAsset`, `retryProcessing`,
+  `getAssetStatus`, `getProcessingReceipt`; in-memory repository and `fake_*`
+  object store, scanner and processor. Fake adapters prove orchestration only
+  (§34.5).
+- Known local gaps carried to 2.5b: an attempt whose second transaction never
+  ran leaves the asset `validating` without a receipt until orphan
+  reconciliation exists; session expiry is evaluated lazily at confirm; no quota
+  is modelled because no accepted quota policy exists; `deleteAsset`,
+  `applyRestriction`, `detachAsset`, `reconcileOrphan` and `getDeletionStatus`
+  are not implemented yet, so `deliveryDisabled` is exercised only through the
+  domain and the late-result test.

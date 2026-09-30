@@ -1,0 +1,510 @@
+{
+  "asset": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "deleted",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "hologram",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "route",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z",
+      "objectKeyHandle": "objk:leak"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "not-an-id",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z"
+    }
+  ],
+  "uploadSession": [
+    {
+      "schemaVersion": 1,
+      "uploadSessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityIntent": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "allowedFamily": "image",
+      "allowedMediaTypes": [],
+      "maxBytes": 4096,
+      "expiresAtUtc": "2026-09-30T09:15:00.000Z",
+      "state": "open",
+      "revision": 1,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "uploadSessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityIntent": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "allowedFamily": "image",
+      "allowedMediaTypes": [
+        "image/jpeg",
+        "image/png"
+      ],
+      "maxBytes": 4096,
+      "expiresAtUtc": "2026-09-30T09:15:00.000Z",
+      "state": "paused",
+      "revision": 1,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "uploadSessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityIntent": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "allowedFamily": "image",
+      "allowedMediaTypes": [
+        "image/jpeg",
+        "image/png"
+      ],
+      "maxBytes": 4096,
+      "expiresAtUtc": "2026-09-30T09:15:00.000Z",
+      "state": "open",
+      "revision": 1,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "objectKeyHandle": "objk:leak"
+    }
+  ],
+  "processingReceipt": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "attemptNumber": 1,
+      "sourceProviderGeneration": "g-1001",
+      "sourceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "policyRevision": "policy-test-1",
+      "scan": {
+        "toolRevision": "fake-scan-1",
+        "result": "clean"
+      },
+      "processing": {
+        "toolRevision": "fake-proc-1",
+        "result": "succeeded",
+        "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "outcome": "published",
+      "startedAtUtc": "2026-09-30T09:00:00.000Z",
+      "completedAtUtc": "2026-09-30T09:15:00.000Z"
+    }
+  ],
+  "command": [
+    {
+      "schemaVersion": 1,
+      "commandType": "createUploadSession",
+      "idempotencyKey": "media-create-0001",
+      "payload": {
+        "family": "image",
+        "marketId": "LV",
+        "visibilityClass": "publicDerived",
+        "declaredMediaType": "image/jpeg",
+        "declaredByteLength": 2048,
+        "publisherRef": {
+          "type": "page",
+          "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+        },
+        "entityIntent": {
+          "domain": "content",
+          "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+          "purpose": "contentMedia"
+        },
+        "objectKey": "public/x.jpg"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "confirmUpload",
+      "idempotencyKey": "media-confirm-0001",
+      "payload": {
+        "uploadSessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+        "expectedSha256": "abc",
+        "expectedByteLength": 2048
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "publishAsset",
+      "idempotencyKey": "media-final-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "expectedAssetRevision": 3,
+        "sourceProviderGeneration": "g-1001",
+        "expectedSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "expectedByteLength": 2048
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "retryProcessing",
+      "idempotencyKey": "media-retry-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "expectedAssetRevision": 5
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createUploadSession",
+      "idempotencyKey": "short",
+      "payload": {
+        "family": "image",
+        "marketId": "LV",
+        "visibilityClass": "publicDerived",
+        "declaredMediaType": "image/jpeg",
+        "declaredByteLength": 2048,
+        "publisherRef": {
+          "type": "page",
+          "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+        },
+        "entityIntent": {
+          "domain": "content",
+          "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+          "purpose": "contentMedia"
+        }
+      }
+    }
+  ],
+  "query": [
+    {
+      "schemaVersion": 1,
+      "queryType": "getDeliveryHandle",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getAssetStatus",
+      "payload": {}
+    }
+  ],
+  "result": [
+    {
+      "schemaVersion": 1,
+      "kind": "rejected",
+      "code": "no_such_code"
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "succeeded",
+      "resultType": "deliveryHandle",
+      "data": {}
+    }
+  ]
+}

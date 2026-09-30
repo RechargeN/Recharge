@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/media/v1/media_common.schema.json",
+  "title": "Recharge Media v1 common values",
+  "$defs": {
+    "entityId": {
+      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        {
+          "format": "uuid"
+        }
+      ]
+    },
+    "utcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "byteLength": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "marketId": {
+      "enum": [
+        "LV",
+        "EE",
+        "LT"
+      ]
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "providerGeneration": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "revisionLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "mediaType": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-z]+/[a-z0-9][a-z0-9.+-]*$"
+    },
+    "family": {
+      "enum": [
+        "image",
+        "video",
+        "audio",
+        "document",
+        "gpx"
+      ]
+    },
+    "visibilityClass": {
+      "enum": [
+        "private",
+        "protected",
+        "publicDerived"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "reserved",
+        "uploading",
+        "uploaded",
+        "validating",
+        "quarantined",
+        "processing",
+        "ready",
+        "blocked",
+        "deleting",
+        "deleted"
+      ]
+    },
+    "publisherRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "user",
+            "page"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/entityId"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "entityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "enum": [
+            "content"
+          ]
+        },
+        "entityId": {
+          "$ref": "#/$defs/entityId"
+        },
+        "purpose": {
+          "enum": [
+            "contentMedia"
+          ]
+        }
+      },
+      "required": [
+        "domain",
+        "entityId",
+        "purpose"
+      ]
+    },
+    "objectGenerationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "providerGeneration": {
+          "$ref": "#/$defs/providerGeneration"
+        },
+        "byteLength": {
+          "$ref": "#/$defs/byteLength"
+        },
+        "verifiedMediaType": {
+          "$ref": "#/$defs/mediaType"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "validationProfileRevision": {
+          "$ref": "#/$defs/revisionLabel"
+        }
+      },
+      "required": [
+        "providerGeneration",
+        "byteLength",
+        "verifiedMediaType",
+        "sha256",
+        "validationProfileRevision"
+      ]
+    },
+    "variantRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variantId": {
+          "$ref": "#/$defs/entityId"
+        },
+        "profile": {
+          "$ref": "#/$defs/revisionLabel"
+        },
+        "format": {
+          "$ref": "#/$defs/mediaType"
+        },
+        "providerGeneration": {
+          "$ref": "#/$defs/providerGeneration"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "byteLength": {
+          "$ref": "#/$defs/byteLength"
+        },
+        "transformProfileRevision": {
+          "$ref": "#/$defs/revisionLabel"
+        },
+        "sourceProviderGeneration": {
+          "$ref": "#/$defs/providerGeneration"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400000
+        }
+      },
+      "required": [
+        "variantId",
+        "profile",
+        "format",
+        "providerGeneration",
+        "sha256",
+        "byteLength",
+        "transformProfileRevision",
+        "sourceProviderGeneration"
+      ]
+    }
+  }
+}

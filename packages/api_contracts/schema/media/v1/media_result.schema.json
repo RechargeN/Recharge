@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/media/v1/media_result.schema.json",
+  "$defs": {
+    "failureCode": {
+      "enum": [
+        "unauthenticated",
+        "invalid_contract",
+        "unsupported_version",
+        "capability_denied",
+        "membership_inactive",
+        "market_disabled",
+        "not_found",
+        "policy_unavailable",
+        "family_unavailable",
+        "entity_scope_denied",
+        "session_expired",
+        "object_missing",
+        "upload_incomplete",
+        "generation_mismatch",
+        "signature_mismatch",
+        "limit_exceeded",
+        "stale_revision",
+        "invalid_state",
+        "idempotency_conflict",
+        "retry_not_allowed",
+        "revision_conflict",
+        "unknown_outcome"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "succeeded"
+        },
+        "resultType": {
+          "enum": [
+            "uploadSession",
+            "assetStatus",
+            "processingReceipt"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "resultType",
+        "data"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "rejected"
+        },
+        "code": {
+          "$ref": "#/$defs/failureCode"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "unsupportedContract"
+        },
+        "code": {
+          "enum": [
+            "unsupported_version"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ]
+    }
+  ]
+}

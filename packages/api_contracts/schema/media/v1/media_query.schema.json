@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/media/v1/media_query.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getAssetStatus"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            }
+          },
+          "required": [
+            "assetId"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getProcessingReceipt"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "attemptNumber": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "assetId"
+          ]
+        }
+      }
+    }
+  ]
+}

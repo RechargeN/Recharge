@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/media/v1/media_command.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "createUploadSession"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "family": {
+              "$ref": "media_common.schema.json#/$defs/family"
+            },
+            "marketId": {
+              "$ref": "media_common.schema.json#/$defs/marketId"
+            },
+            "visibilityClass": {
+              "$ref": "media_common.schema.json#/$defs/visibilityClass"
+            },
+            "declaredMediaType": {
+              "$ref": "media_common.schema.json#/$defs/mediaType"
+            },
+            "declaredByteLength": {
+              "$ref": "media_common.schema.json#/$defs/byteLength"
+            },
+            "publisherRef": {
+              "$ref": "media_common.schema.json#/$defs/publisherRef"
+            },
+            "entityIntent": {
+              "$ref": "media_common.schema.json#/$defs/entityBinding"
+            }
+          },
+          "required": [
+            "family",
+            "marketId",
+            "visibilityClass",
+            "declaredMediaType",
+            "declaredByteLength"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "confirmUpload"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "uploadSessionId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "expectedSha256": {
+              "$ref": "media_common.schema.json#/$defs/sha256Hex"
+            },
+            "expectedByteLength": {
+              "$ref": "media_common.schema.json#/$defs/byteLength"
+            }
+          },
+          "required": [
+            "uploadSessionId",
+            "expectedSha256",
+            "expectedByteLength"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "finalizeAsset"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "expectedAssetRevision": {
+              "$ref": "media_common.schema.json#/$defs/positiveRevision"
+            },
+            "sourceProviderGeneration": {
+              "$ref": "media_common.schema.json#/$defs/providerGeneration"
+            },
+            "expectedSha256": {
+              "$ref": "media_common.schema.json#/$defs/sha256Hex"
+            },
+            "expectedByteLength": {
+              "$ref": "media_common.schema.json#/$defs/byteLength"
+            }
+          },
+          "required": [
+            "assetId",
+            "expectedAssetRevision",
+            "sourceProviderGeneration",
+            "expectedSha256",
+            "expectedByteLength"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "retryProcessing"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "expectedAssetRevision": {
+              "$ref": "media_common.schema.json#/$defs/positiveRevision"
+            },
+            "sourceProviderGeneration": {
+              "$ref": "media_common.schema.json#/$defs/providerGeneration"
+            }
+          },
+          "required": [
+            "assetId",
+            "expectedAssetRevision",
+            "sourceProviderGeneration"
+          ]
+        }
+      }
+    }
+  ]
+}
