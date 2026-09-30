@@ -1,0 +1,627 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/r1/execution-manifest.schema.json",
+  "title": "Recharge execution manifest (stage 3.1, no authority)",
+  "$defs": {
+    "nullableToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "environmentId": {
+      "enum": [
+        "dev",
+        "stage",
+        "prod"
+      ]
+    },
+    "serviceAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "kind": {
+          "enum": [
+            "deploy",
+            "runtime",
+            "operator"
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "deployed": {
+          "type": "boolean"
+        },
+        "authorized": {
+          "const": false
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "purpose",
+        "deployed",
+        "authorized"
+      ]
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9]{0,63}$"
+        },
+        "clientAccess": {
+          "const": "deny"
+        },
+        "owner": {
+          "const": "firebase_cli"
+        },
+        "ttlFields": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "string"
+          }
+        },
+        "compositeIndexes": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "name",
+        "clientAccess",
+        "owner",
+        "ttlFields",
+        "compositeIndexes"
+      ]
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "logicalId": {
+          "$ref": "#/$defs/environmentId"
+        },
+        "projectId": {
+          "type": "null"
+        },
+        "projectIdSuffix": {
+          "type": "null"
+        },
+        "dataClass": {
+          "enum": [
+            "synthetic",
+            "anonymizedOrSynthetic",
+            "productionAfterGates"
+          ]
+        },
+        "authorized": {
+          "const": false
+        },
+        "serviceAccounts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/serviceAccount"
+          }
+        },
+        "workloadIdentity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "poolName": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{3,31}$"
+            },
+            "providerName": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{3,31}$"
+            },
+            "repositoryId": {
+              "type": "null"
+            },
+            "repositoryOwnerId": {
+              "type": "null"
+            },
+            "workflowFile": {
+              "type": "string",
+              "pattern": "^\\.github/workflows/[a-z0-9-]+\\.yml$"
+            },
+            "authorized": {
+              "const": false
+            }
+          },
+          "required": [
+            "poolName",
+            "providerName",
+            "repositoryId",
+            "repositoryOwnerId",
+            "workflowFile",
+            "authorized"
+          ]
+        },
+        "secretReferences": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "logicalName": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              },
+              "referenceName": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*$"
+              },
+              "ownerRole": {
+                "enum": [
+                  "Security owner",
+                  "Operations owner"
+                ]
+              },
+              "valuePresent": {
+                "const": false
+              }
+            },
+            "required": [
+              "logicalName",
+              "referenceName",
+              "ownerRole",
+              "valuePresent"
+            ]
+          }
+        },
+        "stateBucket": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "null"
+            },
+            "location": {
+              "const": "EU"
+            },
+            "purpose": {
+              "const": "terraformState"
+            },
+            "separatePerEnvironment": {
+              "const": true
+            },
+            "bootstrap": {
+              "const": "localStateThenMigrate"
+            },
+            "destroyProtected": {
+              "const": true
+            },
+            "authorized": {
+              "const": false
+            }
+          },
+          "required": [
+            "name",
+            "location",
+            "purpose",
+            "separatePerEnvironment",
+            "bootstrap",
+            "destroyProtected",
+            "authorized"
+          ]
+        },
+        "appCheck": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "type": "null"
+            },
+            "decisionRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "mode",
+            "decisionRef"
+          ]
+        },
+        "budget": {
+          "$ref": "budget-policy.schema.json"
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "null"
+          },
+          "minProperties": 1,
+          "maxProperties": 16
+        },
+        "ci": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "githubEnvironment": {
+              "type": "string",
+              "pattern": "^backend-(dev|stage|prod)$"
+            },
+            "permissions": {
+              "const": {
+                "contents": "read"
+              }
+            },
+            "secretsUsed": {
+              "const": false
+            },
+            "idTokenWrite": {
+              "const": false
+            },
+            "requiredReviewers": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "githubEnvironment",
+            "permissions",
+            "secretsUsed",
+            "idTokenWrite",
+            "requiredReviewers"
+          ]
+        }
+      },
+      "required": [
+        "logicalId",
+        "projectId",
+        "projectIdSuffix",
+        "dataClass",
+        "authorized",
+        "serviceAccounts",
+        "workloadIdentity",
+        "secretReferences",
+        "stateBucket",
+        "appCheck",
+        "budget",
+        "limits",
+        "ci"
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "manifestId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "status": {
+      "enum": [
+        "draft"
+      ]
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "apply": {
+          "const": "denied"
+        },
+        "provisioning": {
+          "const": "unauthorized"
+        },
+        "authorizationRef": {
+          "type": "null"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 300
+        }
+      },
+      "required": [
+        "apply",
+        "provisioning",
+        "authorizationRef",
+        "note"
+      ]
+    },
+    "locationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "firestore": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "edition": {
+              "const": "standard"
+            },
+            "mode": {
+              "const": "native"
+            },
+            "databaseId": {
+              "const": "(default)"
+            },
+            "location": {
+              "const": "eur3"
+            }
+          },
+          "required": [
+            "edition",
+            "mode",
+            "databaseId",
+            "location"
+          ]
+        },
+        "functions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "generation": {
+              "const": 2
+            },
+            "region": {
+              "const": "europe-west1"
+            }
+          },
+          "required": [
+            "generation",
+            "region"
+          ]
+        },
+        "mediaStorage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "regional"
+            },
+            "location": {
+              "const": "europe-west1"
+            }
+          },
+          "required": [
+            "type",
+            "location"
+          ]
+        },
+        "recoveryStorage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "multiRegion"
+            },
+            "location": {
+              "const": "EU"
+            },
+            "state": {
+              "const": "disabled"
+            }
+          },
+          "required": [
+            "type",
+            "location",
+            "state"
+          ]
+        }
+      },
+      "required": [
+        "firestore",
+        "functions",
+        "mediaStorage",
+        "recoveryStorage"
+      ]
+    },
+    "projectIdRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "const": "recharge-<env>-<uniqueSuffix>"
+        },
+        "suffixState": {
+          "const": "unresolved"
+        },
+        "selectedIn": {
+          "const": "approvedProvisioningSlice"
+        }
+      },
+      "required": [
+        "pattern",
+        "suffixState",
+        "selectedIn"
+      ]
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dev": {
+          "$ref": "#/$defs/environment"
+        },
+        "stage": {
+          "$ref": "#/$defs/environment"
+        },
+        "prod": {
+          "$ref": "#/$defs/environment"
+        }
+      },
+      "required": [
+        "dev",
+        "stage",
+        "prod"
+      ]
+    },
+    "firestore": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collections": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/collection"
+          }
+        }
+      },
+      "required": [
+        "collections"
+      ]
+    },
+    "flags": {
+      "$ref": "flag-policy.schema.json"
+    },
+    "resourceOwners": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resource": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9.]*$"
+          },
+          "owner": {
+            "enum": [
+              "firebase_cli",
+              "terraform",
+              "application"
+            ]
+          }
+        },
+        "required": [
+          "resource",
+          "owner"
+        ]
+      }
+    },
+    "procedures": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deploymentOrder": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          }
+        },
+        "rollback": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          }
+        },
+        "backupRecovery": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          }
+        },
+        "smoke": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          }
+        },
+        "destroy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dev": {
+              "const": "allowedWithExportAndProtectionCheck"
+            },
+            "stage": {
+              "const": "datedRecordRequired"
+            },
+            "prod": {
+              "const": "forbiddenExceptSupersedingDecision"
+            }
+          },
+          "required": [
+            "dev",
+            "stage",
+            "prod"
+          ]
+        },
+        "runbooks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "pattern": "^docs/runbooks/backend-[a-z-]+\\.md$"
+          }
+        }
+      },
+      "required": [
+        "deploymentOrder",
+        "rollback",
+        "backupRecovery",
+        "smoke",
+        "destroy",
+        "runbooks"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "manifestId",
+    "revision",
+    "status",
+    "authority",
+    "locationPolicy",
+    "projectIdRule",
+    "environments",
+    "firestore",
+    "flags",
+    "resourceOwners",
+    "procedures"
+  ]
+}

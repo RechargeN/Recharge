@@ -1,0 +1,4 @@
+# No real value is committed. A plan with these defaults creates zero resources.
+environment_id = "prod"
+project_id     = null
+# authorization_ref and manifest_sha256 stay null until a signed record exists.

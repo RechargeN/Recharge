@@ -1,0 +1,10 @@
+# Example only: copy to backend.tf during the separately authorized bootstrap.
+# Each environment has its own state bucket in its own project and its own prefix;
+# no real bucket name is committed. Bootstrap uses local state first, then migrates.
+#
+# terraform {
+#   backend "gcs" {
+#     bucket = "<env project id>-tfstate"
+#     prefix = "terraform/state/prod"
+#   }
+# }

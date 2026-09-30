@@ -1694,7 +1694,7 @@ apps/backend/infra/terraform/modules/storage/{main,variables,outputs,versions}.t
 apps/backend/infra/terraform/modules/runtime_identities/{main,variables,outputs,versions}.tf
 apps/backend/infra/terraform/modules/ci_wif/{main,variables,outputs,versions}.tf
 apps/backend/infra/terraform/modules/budget_alerts/{main,variables,outputs,versions}.tf
-apps/backend/infra/terraform/modules/secrets/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/secret_containers/{main,variables,outputs,versions}.tf
 apps/backend/infra/terraform/modules/app_check/{main,variables,outputs,versions}.tf
 apps/backend/infra/terraform/modules/state_bucket/{main,variables,outputs,versions}.tf
 apps/backend/infra/terraform/envs/{dev,stage,prod}/{main,variables,outputs,providers,versions}.tf
@@ -1749,3 +1749,28 @@ needs a further amendment confirmed by the Product owner.
      detach.
 106. **BCK-05-AC-106:** the validation workflow has minimal permissions, no
      secrets and no `id-token`; writing IaC grants no authority to apply it.
+
+
+### 36.9 Implementation status (2026-10-01)
+
+Implemented within the §36.6 map (the secrets module is named
+`secret_containers` because `**/secrets/**` is git-ignored, which would have
+dropped it silently). Evidence, all local and offline with the pinned Terraform
+1.15.9 and the local verified google 7.43.0 copy:
+
+- `verify-execution-manifest`: 44 collections, 13 flags and three environments
+  equal Rules, `firestore.indexes.json` and the code flag registry; 16 invalid and
+  3 forward fixtures are rejected; nine contract tests fail on mutations
+  (invented project, secret or address, collection or TTL drift, flag defaults,
+  cross-environment identity, double ownership, containment touching Booking
+  cancellation or privacy operations).
+- `verify-iac-topology`: nine modules and three isolated roots; `fmt -check`,
+  `init -backend=false` and `validate` pass for every root; the gate behaves as
+  specified: a closed gate, a wrong manifest hash and a missing authorization
+  reference each plan **zero** resources, and only the exact combination opens
+  it (planned only, never applied). Mutations (an unguarded resource, a provider
+  credential, a bypassed gate) are detected.
+- Limits stated: the IAM role bindings are not written (the exact role decision
+  of BCK05-OD-02 is pending), no budget channel exists, App Check mode and
+  limits/quotas are `null`, and OD-03/04/05/08 stay Proposed. None of this is
+  evidence of real IAM, billing, provider configuration or recovery.

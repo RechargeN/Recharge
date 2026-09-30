@@ -1,0 +1,2016 @@
+{
+  "cases": [
+    {
+      "target": "manifest",
+      "reason": "a newer schema version",
+      "value": {
+        "schemaVersion": 2,
+        "manifestId": "recharge-execution-manifest-r1",
+        "revision": 1,
+        "status": "draft",
+        "authority": {
+          "apply": "denied",
+          "provisioning": "unauthorized",
+          "authorizationRef": null,
+          "note": "Writing this manifest or its infrastructure code grants no authority to apply or provision anything."
+        },
+        "locationPolicy": {
+          "firestore": {
+            "edition": "standard",
+            "mode": "native",
+            "databaseId": "(default)",
+            "location": "eur3"
+          },
+          "functions": {
+            "generation": 2,
+            "region": "europe-west1"
+          },
+          "mediaStorage": {
+            "type": "regional",
+            "location": "europe-west1"
+          },
+          "recoveryStorage": {
+            "type": "multiRegion",
+            "location": "EU",
+            "state": "disabled"
+          }
+        },
+        "projectIdRule": {
+          "pattern": "recharge-<env>-<uniqueSuffix>",
+          "suffixState": "unresolved",
+          "selectedIn": "approvedProvisioningSlice"
+        },
+        "environments": {
+          "dev": {
+            "logicalId": "dev",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "synthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-dev",
+                "kind": "deploy",
+                "purpose": "dev promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-dev",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 25,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-dev",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "stage": {
+            "logicalId": "stage",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "anonymizedOrSynthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-stage",
+                "kind": "deploy",
+                "purpose": "stage promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-stage",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 75,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-stage",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "prod": {
+            "logicalId": "prod",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "productionAfterGates",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-prod",
+                "kind": "deploy",
+                "purpose": "prod promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-prod",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 150,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-prod",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          }
+        },
+        "firestore": {
+          "collections": [
+            {
+              "name": "bookingActiveKeys",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingAudit",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [
+                "expiresAt"
+              ],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingEventProjections",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            }
+          ]
+        },
+        "flags": {
+          "flags": [
+            {
+              "id": "booking.create",
+              "kind": "feature",
+              "defaultState": "off"
+            },
+            {
+              "id": "booking.cancel",
+              "kind": "feature",
+              "defaultState": "off"
+            }
+          ]
+        },
+        "resourceOwners": [
+          {
+            "resource": "firestore.rules",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.indexes",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.ttl",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "functions.deployment",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.database",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.media",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.recovery",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.terraformState",
+            "owner": "terraform"
+          },
+          {
+            "resource": "project.services",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.serviceAccounts",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.bindings",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.workloadIdentity",
+            "owner": "terraform"
+          },
+          {
+            "resource": "secrets.containers",
+            "owner": "terraform"
+          },
+          {
+            "resource": "appCheck.configuration",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.budgets",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.notificationChannels",
+            "owner": "terraform"
+          },
+          {
+            "resource": "flags.values",
+            "owner": "application"
+          },
+          {
+            "resource": "release.pointers",
+            "owner": "application"
+          }
+        ],
+        "procedures": {
+          "deploymentOrder": [
+            "verify-single-final-sha",
+            "verify-release-artifact-and-provenance",
+            "check-authorization-record",
+            "terraform-plan-reviewed",
+            "terraform-apply-by-authorized-slice",
+            "firebase-deploy-rules-indexes-ttl",
+            "firebase-deploy-functions",
+            "smoke",
+            "observe"
+          ],
+          "rollback": [
+            "disable-flags",
+            "reselect-previous-release-pointer",
+            "redeploy-previous-artifact",
+            "verify-smoke",
+            "record-decision"
+          ],
+          "backupRecovery": [
+            "confirm-protection-enabled",
+            "run-isolated-restore-drill",
+            "reconcile-restored-data",
+            "record-rpo-rto-evidence"
+          ],
+          "smoke": [
+            "functions-discoverable",
+            "rules-default-deny",
+            "booking-flags-off",
+            "no-public-storage-access",
+            "budget-route-present"
+          ],
+          "destroy": {
+            "dev": "allowedWithExportAndProtectionCheck",
+            "stage": "datedRecordRequired",
+            "prod": "forbiddenExceptSupersedingDecision"
+          },
+          "runbooks": [
+            "docs/runbooks/backend-deploy-order.md",
+            "docs/runbooks/backend-rollback.md",
+            "docs/runbooks/backend-disaster-recovery.md",
+            "docs/runbooks/backend-cost-response.md",
+            "docs/runbooks/backend-provisioning-and-destroy.md"
+          ]
+        }
+      }
+    },
+    {
+      "target": "manifest",
+      "reason": "an accepted status without a decision record",
+      "value": {
+        "schemaVersion": 1,
+        "manifestId": "recharge-execution-manifest-r1",
+        "revision": 1,
+        "status": "accepted",
+        "authority": {
+          "apply": "denied",
+          "provisioning": "unauthorized",
+          "authorizationRef": null,
+          "note": "Writing this manifest or its infrastructure code grants no authority to apply or provision anything."
+        },
+        "locationPolicy": {
+          "firestore": {
+            "edition": "standard",
+            "mode": "native",
+            "databaseId": "(default)",
+            "location": "eur3"
+          },
+          "functions": {
+            "generation": 2,
+            "region": "europe-west1"
+          },
+          "mediaStorage": {
+            "type": "regional",
+            "location": "europe-west1"
+          },
+          "recoveryStorage": {
+            "type": "multiRegion",
+            "location": "EU",
+            "state": "disabled"
+          }
+        },
+        "projectIdRule": {
+          "pattern": "recharge-<env>-<uniqueSuffix>",
+          "suffixState": "unresolved",
+          "selectedIn": "approvedProvisioningSlice"
+        },
+        "environments": {
+          "dev": {
+            "logicalId": "dev",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "synthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-dev",
+                "kind": "deploy",
+                "purpose": "dev promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-dev",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 25,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-dev",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "stage": {
+            "logicalId": "stage",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "anonymizedOrSynthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-stage",
+                "kind": "deploy",
+                "purpose": "stage promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-stage",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 75,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-stage",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "prod": {
+            "logicalId": "prod",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "productionAfterGates",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-prod",
+                "kind": "deploy",
+                "purpose": "prod promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-prod",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 150,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-prod",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          }
+        },
+        "firestore": {
+          "collections": [
+            {
+              "name": "bookingActiveKeys",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingAudit",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [
+                "expiresAt"
+              ],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingEventProjections",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            }
+          ]
+        },
+        "flags": {
+          "flags": [
+            {
+              "id": "booking.create",
+              "kind": "feature",
+              "defaultState": "off"
+            },
+            {
+              "id": "booking.cancel",
+              "kind": "feature",
+              "defaultState": "off"
+            }
+          ]
+        },
+        "resourceOwners": [
+          {
+            "resource": "firestore.rules",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.indexes",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.ttl",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "functions.deployment",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.database",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.media",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.recovery",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.terraformState",
+            "owner": "terraform"
+          },
+          {
+            "resource": "project.services",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.serviceAccounts",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.bindings",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.workloadIdentity",
+            "owner": "terraform"
+          },
+          {
+            "resource": "secrets.containers",
+            "owner": "terraform"
+          },
+          {
+            "resource": "appCheck.configuration",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.budgets",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.notificationChannels",
+            "owner": "terraform"
+          },
+          {
+            "resource": "flags.values",
+            "owner": "application"
+          },
+          {
+            "resource": "release.pointers",
+            "owner": "application"
+          }
+        ],
+        "procedures": {
+          "deploymentOrder": [
+            "verify-single-final-sha",
+            "verify-release-artifact-and-provenance",
+            "check-authorization-record",
+            "terraform-plan-reviewed",
+            "terraform-apply-by-authorized-slice",
+            "firebase-deploy-rules-indexes-ttl",
+            "firebase-deploy-functions",
+            "smoke",
+            "observe"
+          ],
+          "rollback": [
+            "disable-flags",
+            "reselect-previous-release-pointer",
+            "redeploy-previous-artifact",
+            "verify-smoke",
+            "record-decision"
+          ],
+          "backupRecovery": [
+            "confirm-protection-enabled",
+            "run-isolated-restore-drill",
+            "reconcile-restored-data",
+            "record-rpo-rto-evidence"
+          ],
+          "smoke": [
+            "functions-discoverable",
+            "rules-default-deny",
+            "booking-flags-off",
+            "no-public-storage-access",
+            "budget-route-present"
+          ],
+          "destroy": {
+            "dev": "allowedWithExportAndProtectionCheck",
+            "stage": "datedRecordRequired",
+            "prod": "forbiddenExceptSupersedingDecision"
+          },
+          "runbooks": [
+            "docs/runbooks/backend-deploy-order.md",
+            "docs/runbooks/backend-rollback.md",
+            "docs/runbooks/backend-disaster-recovery.md",
+            "docs/runbooks/backend-cost-response.md",
+            "docs/runbooks/backend-provisioning-and-destroy.md"
+          ]
+        }
+      }
+    },
+    {
+      "target": "manifest",
+      "reason": "an unknown environment",
+      "value": {
+        "schemaVersion": 1,
+        "manifestId": "recharge-execution-manifest-r1",
+        "revision": 1,
+        "status": "draft",
+        "authority": {
+          "apply": "denied",
+          "provisioning": "unauthorized",
+          "authorizationRef": null,
+          "note": "Writing this manifest or its infrastructure code grants no authority to apply or provision anything."
+        },
+        "locationPolicy": {
+          "firestore": {
+            "edition": "standard",
+            "mode": "native",
+            "databaseId": "(default)",
+            "location": "eur3"
+          },
+          "functions": {
+            "generation": 2,
+            "region": "europe-west1"
+          },
+          "mediaStorage": {
+            "type": "regional",
+            "location": "europe-west1"
+          },
+          "recoveryStorage": {
+            "type": "multiRegion",
+            "location": "EU",
+            "state": "disabled"
+          }
+        },
+        "projectIdRule": {
+          "pattern": "recharge-<env>-<uniqueSuffix>",
+          "suffixState": "unresolved",
+          "selectedIn": "approvedProvisioningSlice"
+        },
+        "environments": {
+          "dev": {
+            "logicalId": "dev",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "synthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-dev",
+                "kind": "deploy",
+                "purpose": "dev promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-dev",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 25,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-dev",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "stage": {
+            "logicalId": "stage",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "anonymizedOrSynthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-stage",
+                "kind": "deploy",
+                "purpose": "stage promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-stage",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 75,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-stage",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "prod": {
+            "logicalId": "prod",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "productionAfterGates",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-prod",
+                "kind": "deploy",
+                "purpose": "prod promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-prod",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 150,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-prod",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          },
+          "preview": {
+            "logicalId": "dev",
+            "projectId": null,
+            "projectIdSuffix": null,
+            "dataClass": "synthetic",
+            "authorized": false,
+            "serviceAccounts": [
+              {
+                "name": "deploy-dev",
+                "kind": "deploy",
+                "purpose": "dev promotion and reconciliation of the verified artifact",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-booking",
+                "kind": "runtime",
+                "purpose": "Booking callables, Event projection consumer and deadline worker",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-identity",
+                "kind": "runtime",
+                "purpose": "Identity Session callables",
+                "deployed": true,
+                "authorized": false
+              },
+              {
+                "name": "runtime-content",
+                "kind": "runtime",
+                "purpose": "Content service: library only, no callable or trigger yet",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-media",
+                "kind": "runtime",
+                "purpose": "Media service: library only, fake adapters, no runtime",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-privacy",
+                "kind": "runtime",
+                "purpose": "Privacy orchestration: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "runtime-reference-data",
+                "kind": "runtime",
+                "purpose": "Reference data: library only",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "backup-operator",
+                "kind": "operator",
+                "purpose": "scheduled protection operation",
+                "deployed": false,
+                "authorized": false
+              },
+              {
+                "name": "restore-operator",
+                "kind": "operator",
+                "purpose": "isolated restore and drill",
+                "deployed": false,
+                "authorized": false
+              }
+            ],
+            "workloadIdentity": {
+              "poolName": "github-dev",
+              "providerName": "github-actions",
+              "repositoryId": null,
+              "repositoryOwnerId": null,
+              "workflowFile": ".github/workflows/backend-iac-validate.yml",
+              "authorized": false
+            },
+            "secretReferences": [],
+            "stateBucket": {
+              "name": null,
+              "location": "EU",
+              "purpose": "terraformState",
+              "separatePerEnvironment": true,
+              "bootstrap": "localStateThenMigrate",
+              "destroyProtected": true,
+              "authorized": false
+            },
+            "appCheck": {
+              "mode": null,
+              "decisionRef": null
+            },
+            "budget": {
+              "status": "proposed",
+              "decisionRef": "BCK05-OD04-COST-01",
+              "currency": "EUR",
+              "guardrailMonthlyEur": 25,
+              "thresholdsPercent": [
+                50,
+                75,
+                90,
+                100
+              ],
+              "anomalyAlerts": true,
+              "responseOwnerRole": "Finance owner",
+              "notificationChannelRefs": [],
+              "hardStop": false,
+              "automaticBillingDetach": false,
+              "containment": {
+                "mechanism": "serverFlagsAndQuotas",
+                "killSwitchIds": [
+                  "booking.create.incidentDisable"
+                ],
+                "neverBlocked": [
+                  "booking.cancel",
+                  "privacy.dsr.export",
+                  "privacy.dsr.deletion",
+                  "privacy.dsr.restriction"
+                ],
+                "manualBillingActionIsLastResort": true
+              }
+            },
+            "limits": {
+              "firestoreWritesPerDay": null,
+              "firestoreReadsPerDay": null,
+              "functionsConcurrentInstances": null,
+              "storageBytes": null,
+              "egressBytesPerDay": null
+            },
+            "ci": {
+              "githubEnvironment": "backend-dev",
+              "permissions": {
+                "contents": "read"
+              },
+              "secretsUsed": false,
+              "idTokenWrite": false,
+              "requiredReviewers": null
+            }
+          }
+        },
+        "firestore": {
+          "collections": [
+            {
+              "name": "bookingActiveKeys",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingAudit",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [
+                "expiresAt"
+              ],
+              "compositeIndexes": []
+            },
+            {
+              "name": "bookingEventProjections",
+              "clientAccess": "deny",
+              "owner": "firebase_cli",
+              "ttlFields": [],
+              "compositeIndexes": []
+            }
+          ]
+        },
+        "flags": {
+          "flags": [
+            {
+              "id": "booking.create",
+              "kind": "feature",
+              "defaultState": "off"
+            },
+            {
+              "id": "booking.cancel",
+              "kind": "feature",
+              "defaultState": "off"
+            }
+          ]
+        },
+        "resourceOwners": [
+          {
+            "resource": "firestore.rules",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.indexes",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.ttl",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "functions.deployment",
+            "owner": "firebase_cli"
+          },
+          {
+            "resource": "firestore.database",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.media",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.recovery",
+            "owner": "terraform"
+          },
+          {
+            "resource": "storage.terraformState",
+            "owner": "terraform"
+          },
+          {
+            "resource": "project.services",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.serviceAccounts",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.bindings",
+            "owner": "terraform"
+          },
+          {
+            "resource": "iam.workloadIdentity",
+            "owner": "terraform"
+          },
+          {
+            "resource": "secrets.containers",
+            "owner": "terraform"
+          },
+          {
+            "resource": "appCheck.configuration",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.budgets",
+            "owner": "terraform"
+          },
+          {
+            "resource": "billing.notificationChannels",
+            "owner": "terraform"
+          },
+          {
+            "resource": "flags.values",
+            "owner": "application"
+          },
+          {
+            "resource": "release.pointers",
+            "owner": "application"
+          }
+        ],
+        "procedures": {
+          "deploymentOrder": [
+            "verify-single-final-sha",
+            "verify-release-artifact-and-provenance",
+            "check-authorization-record",
+            "terraform-plan-reviewed",
+            "terraform-apply-by-authorized-slice",
+            "firebase-deploy-rules-indexes-ttl",
+            "firebase-deploy-functions",
+            "smoke",
+            "observe"
+          ],
+          "rollback": [
+            "disable-flags",
+            "reselect-previous-release-pointer",
+            "redeploy-previous-artifact",
+            "verify-smoke",
+            "record-decision"
+          ],
+          "backupRecovery": [
+            "confirm-protection-enabled",
+            "run-isolated-restore-drill",
+            "reconcile-restored-data",
+            "record-rpo-rto-evidence"
+          ],
+          "smoke": [
+            "functions-discoverable",
+            "rules-default-deny",
+            "booking-flags-off",
+            "no-public-storage-access",
+            "budget-route-present"
+          ],
+          "destroy": {
+            "dev": "allowedWithExportAndProtectionCheck",
+            "stage": "datedRecordRequired",
+            "prod": "forbiddenExceptSupersedingDecision"
+          },
+          "runbooks": [
+            "docs/runbooks/backend-deploy-order.md",
+            "docs/runbooks/backend-rollback.md",
+            "docs/runbooks/backend-disaster-recovery.md",
+            "docs/runbooks/backend-cost-response.md",
+            "docs/runbooks/backend-provisioning-and-destroy.md"
+          ]
+        }
+      }
+    }
+  ]
+}

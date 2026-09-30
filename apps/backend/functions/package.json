@@ -37,6 +37,8 @@
     "test:r1:emulator": "npm run test:emulator",
     "test:r1:rules": "npm run test:emulator",
     "test:r1": "node ../scripts/run-r1-gates.mjs",
+    "verify:execution-manifest": "node ../scripts/verify-execution-manifest.mjs",
+    "verify:iac:topology": "node ../scripts/verify-iac-topology.mjs",
     "infra:r1:validate": "terraform -chdir=../infra/terraform fmt -check && terraform -chdir=../infra/terraform init -backend=false -input=false && terraform -chdir=../infra/terraform validate",
     "infra:r1:plan": "terraform -chdir=../infra/terraform plan -input=false -lock=false -refresh=false -var-file=../env/dev.tfvars.example",
     "verify:reference-data:layout": "node ../scripts/verify-reference-data-layout.mjs",
