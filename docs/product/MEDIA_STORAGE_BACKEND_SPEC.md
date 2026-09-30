@@ -1130,11 +1130,21 @@ no-Firebase checks) and the acceptance matrix reconciliation.
   policy is `policy_unavailable`. No hold source exists yet (BCK-04 pending), so
   no legal or safety hold is modelled; deletion fails closed on any doubt about
   references instead.
-- Still open for 2.5c and later: the acceptance matrix and cross-cutting
-  security tests (2.5c); real object store, scanner and processor evidence,
-  EXIF minimization, quota and hold handling (separate adapter verification
-  before dev acceptance 4.1); `requestDelivery`, delivery signer and
-  `replaceAsset` (deferred).
+- **2.5c (2026-09-30):** local acceptance in
+  `integration/media_security.test.ts`: negative security tests (another user,
+  another Page, cross-market, revoked membership or Session, guessed identifiers
+  and client-chosen keys, system instructions from a user), static boundary
+  checks (framework-neutral, offline, no delivery code, Media and Content never
+  import each other, only the application services write Media records, fake
+  adapters labelled) and an acceptance matrix that fails if a named test
+  disappears or is renamed.
+- Evidence that fake adapters **cannot** provide and that stays open until real
+  adapters are verified separately before dev acceptance 4.1 (real
+  scanner/processor evidence absent): malware detection, decompression-bomb
+  detection, EXIF minimization, transform determinism, real object generation
+  and hash, real limits and quota, and legal or safety hold. The local matrix
+  proves only contracts, state rules, ownership and orchestration.
+- Deferred by decision: `requestDelivery`, delivery signer and `replaceAsset`.
 - Known local gaps: an attempt whose second transaction never ran leaves the
   asset `validating` without a receipt (the reconciler deliberately never
   touches in-flight assets); session expiry is evaluated lazily at confirm.
