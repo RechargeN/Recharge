@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   contentTypeIds,
   type ContentTypeId,
+  type MediaAttachmentV1,
   type PublishedRevisionV1,
 } from '../../src/contracts/content_v1.js';
 import type { PublisherEligibilityV1 } from '../../src/contracts/identity_v1.js';
@@ -146,11 +147,19 @@ class FakeModeration implements ModerationDispositionPort {
 
 class FakeMedia implements MediaReadinessPort {
   ready = true;
-  check() {
+  mediaRevision = 'media-1';
+  attachments: MediaAttachmentV1[] = [];
+  readonly inputs: Parameters<MediaReadinessPort['check']>[0][] = [];
+  check(input: Parameters<MediaReadinessPort['check']>[0]) {
+    this.inputs.push(input);
     return Promise.resolve(
       this.ready
-        ? ({ ready: true, mediaRevision: 'media-1' } as const)
-        : ({ ready: false } as const),
+        ? ({
+            ready: true,
+            mediaRevision: this.mediaRevision,
+            attachments: this.attachments,
+          } as const)
+        : ({ ready: false, reason: 'not_ready' } as const),
     );
   }
 }
@@ -2182,4 +2191,87 @@ void test('the repository refuses to overwrite a published revision or move the 
   });
   const live = await data<PublishedRevisionV1>(publicRead(h.service, first.contentId));
   assert.equal(live.bodyHash, revision.bodyHash);
+});
+
+const pinnedAttachment: MediaAttachmentV1 = {
+  assetId: ulid(700),
+  sourceGeneration: 'g-1',
+  variantManifestRevision: 'c'.repeat(64),
+  purpose: 'contentMedia',
+};
+
+void test('publish freezes the generation-pinned media attachments into the immutable revision', async () => {
+  const h = harness();
+  h.media.attachments = [pinnedAttachment];
+  h.media.mediaRevision = 'rev-a';
+  const first = await published(h);
+  assert.deepEqual(first.revision.mediaAttachments, [pinnedAttachment]);
+  assert.equal(first.revision.mediaRevision, 'rev-a');
+  // Readiness receives trusted binding data taken from the draft, and no pinned list yet.
+  const input = h.media.inputs.at(-1);
+  assert.equal(input?.marketId, first.revision.marketId);
+  assert.deepEqual(input?.publisherRef, first.revision.publisherRef);
+  assert.equal(input?.contentId, first.contentId);
+  assert.equal(input?.pinned, undefined);
+  // History is frozen: later Media changes never rewrite the stored references.
+  h.media.attachments = [];
+  const stored = h.repository.snapshot().revisions[0];
+  assert.deepEqual(stored?.mediaAttachments, [pinnedAttachment]);
+  assert.throws(() => {
+    (stored?.mediaAttachments[0] as { sourceGeneration: string }).sourceGeneration = 'other';
+  });
+});
+
+void test('readiness at submit is evidence only and never attaches', async () => {
+  const h = harness();
+  h.media.attachments = [pinnedAttachment];
+  const draft = await data<DraftLike>(h.service.execute(actorA, createCommand()));
+  await data<SubmissionLike>(h.service.execute(actorA, submitCommand(draft.draftId, 1)));
+  assert.equal(h.repository.snapshot().revisions.length, 0);
+  const referenced = (assetId: string) =>
+    h.repository.transact((tx) => tx.isMediaReferenced(assetId));
+  // The draft body references its own media id; the evidence asset is not attached yet.
+  assert.equal(await referenced('media-cover'), true);
+  assert.equal(await referenced(pinnedAttachment.assetId), false);
+  assert.equal(await referenced(ulid(9999)), false);
+});
+
+void test('rollback verifies exactly the references stored in the target revision', async () => {
+  const h = harness();
+  h.media.attachments = [pinnedAttachment];
+  h.media.mediaRevision = 'rev-a';
+  const first = await published(h);
+  await data<DraftLike>(
+    h.service.execute(
+      actorA,
+      updateCommand(first.draft.draftId, 1, { ...placeBody, title: 'Second' }),
+    ),
+  );
+  const second = await data<SubmissionLike>(
+    h.service.execute(actorA, submitCommand(first.draft.draftId, 2)),
+  );
+  await data<PublishedRevisionV1>(
+    h.service.execute(actorA, publishCommand(second.submissionId, 1)),
+  );
+  // A changed generation or manifest (a different media revision) refuses rollback.
+  h.media.mediaRevision = 'rev-b';
+  assert.deepEqual(
+    await h.service.execute(
+      actorA,
+      activateCommand(first.contentId, first.revision.publishedRevisionId, 2),
+    ),
+    { kind: 'rejected', code: 'media_not_ready' },
+  );
+  h.media.mediaRevision = 'rev-a';
+  h.media.inputs.length = 0;
+  await data(
+    h.service.execute(
+      actorA,
+      activateCommand(first.contentId, first.revision.publishedRevisionId, 2),
+    ),
+  );
+  const input = h.media.inputs.at(-1);
+  // The pinned list comes from the stored target revision, not from the caller.
+  assert.deepEqual(input?.pinned, [pinnedAttachment]);
+  assert.equal(pointerOf(h).currentPublishedRevisionId, first.revision.publishedRevisionId);
 });

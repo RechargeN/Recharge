@@ -80,6 +80,8 @@ export interface MediaAssetV1 {
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
   readonly deletedAtUtc?: UtcInstant;
+  /** Since when no owning domain references this asset (orphan grace clock). */
+  readonly orphanSinceUtc?: UtcInstant;
 }
 
 export interface UploadSessionV1 {
@@ -174,11 +176,45 @@ export interface RetryProcessingCommandV1 {
     readonly sourceProviderGeneration: string;
   };
 }
+export interface DeleteAssetCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'deleteAsset';
+  readonly idempotencyKey: string;
+  readonly payload: { readonly assetId: EntityId; readonly expectedAssetRevision: number };
+}
+export interface DetachAssetCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'detachAsset';
+  readonly idempotencyKey: string;
+  readonly payload: { readonly assetId: EntityId; readonly expectedAssetRevision: number };
+}
+/** System-only: an authoritative privacy/moderation/security input, never a user command. */
+export interface ApplyRestrictionCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'applyRestriction';
+  readonly idempotencyKey: string;
+  readonly payload: {
+    readonly assetId: EntityId;
+    readonly decisionRef: string;
+    readonly restricted: boolean;
+  };
+}
+/** System-only: cleanup worker instruction. */
+export interface ReconcileOrphanCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'reconcileOrphan';
+  readonly idempotencyKey: string;
+  readonly payload: { readonly assetId: EntityId };
+}
 export type MediaCommandV1 =
   | CreateUploadSessionCommandV1
   | ConfirmUploadCommandV1
   | FinalizeAssetCommandV1
-  | RetryProcessingCommandV1;
+  | RetryProcessingCommandV1
+  | DeleteAssetCommandV1
+  | DetachAssetCommandV1
+  | ApplyRestrictionCommandV1
+  | ReconcileOrphanCommandV1;
 
 export interface GetAssetStatusQueryV1 {
   readonly schemaVersion: 1;
@@ -190,7 +226,48 @@ export interface GetProcessingReceiptQueryV1 {
   readonly queryType: 'getProcessingReceipt';
   readonly payload: { readonly assetId: EntityId; readonly attemptNumber?: number };
 }
-export type MediaQueryV1 = GetAssetStatusQueryV1 | GetProcessingReceiptQueryV1;
+export interface GetDeletionStatusQueryV1 {
+  readonly schemaVersion: 1;
+  readonly queryType: 'getDeletionStatus';
+  readonly payload: { readonly assetId: EntityId };
+}
+export type MediaQueryV1 =
+  GetAssetStatusQueryV1 | GetProcessingReceiptQueryV1 | GetDeletionStatusQueryV1;
+
+export type DeletionReason = 'owner_request' | 'orphan_cleanup' | 'expired_upload';
+
+/** Privacy-safe deletion task status: ids, state and times only. */
+export interface MediaDeletionStatusV1 {
+  readonly schemaVersion: 1;
+  readonly assetId: EntityId;
+  readonly state: 'pending' | 'completed';
+  readonly reason: DeletionReason;
+  readonly deletionRevision: number;
+  readonly requestedAtUtc: UtcInstant;
+  readonly completedAtUtc?: UtcInstant;
+}
+
+export interface OrphanReconciliationV1 {
+  readonly schemaVersion: 1;
+  readonly assetId: EntityId;
+  readonly action: 'keep' | 'marked' | 'unmarked' | 'deleting' | 'deleted';
+  readonly assetRevision: number;
+}
+
+/**
+ * Versioned fact for Catalog/owning domains: ids and revisions only, never
+ * bytes, URLs or object keys. The monotonic `assetRevision` lets a tombstone
+ * beat a stale cache.
+ */
+export interface MediaEffectV1 {
+  readonly schemaVersion: 1;
+  readonly effectId: string;
+  readonly type:
+    'MediaAssetReady' | 'MediaDeliveryDisabled' | 'MediaDeliveryRestored' | 'MediaAssetDeleted';
+  readonly assetId: EntityId;
+  readonly assetRevision: number;
+  readonly occurredAtUtc: UtcInstant;
+}
 
 export const mediaFailureCodes = [
   'unauthenticated',
@@ -215,5 +292,6 @@ export const mediaFailureCodes = [
   'retry_not_allowed',
   'revision_conflict',
   'unknown_outcome',
+  'asset_referenced',
 ] as const;
 export type MediaFailureCode = (typeof mediaFailureCodes)[number];

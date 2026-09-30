@@ -12,9 +12,9 @@ import {
   markReady,
   sha256Hex,
   toAssetView,
-  verifyVariantManifest,
   type MediaAsset,
 } from '../../../src/modules/media/domain/media_asset.js';
+import { verifyVariantManifest } from '../../../src/modules/media/domain/media_variant.js';
 import {
   resolveFamilyPolicy,
   type MediaPolicy,

@@ -34,3 +34,17 @@ export type MediaAuthorityResult =
 export interface MediaActorAuthorityPort {
   evaluate(request: MediaAuthorityRequest): Promise<MediaAuthorityResult>;
 }
+
+/**
+ * Authoritative privacy, moderation or security input that restricts or lifts a
+ * restriction on an asset. A restriction is never accepted from a client: the
+ * instruction is verified here first, and unknown, stale or foreign ones mutate
+ * nothing.
+ */
+export interface MediaRestrictionAuthority {
+  verifyRestriction(input: {
+    readonly assetId: string;
+    readonly decisionRef: string;
+    readonly restricted: boolean;
+  }): Promise<boolean>;
+}

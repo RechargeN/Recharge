@@ -25,7 +25,8 @@
         "idempotency_conflict",
         "retry_not_allowed",
         "revision_conflict",
-        "unknown_outcome"
+        "unknown_outcome",
+        "asset_referenced"
       ]
     }
   },
@@ -44,7 +45,9 @@
           "enum": [
             "uploadSession",
             "assetStatus",
-            "processingReceipt"
+            "processingReceipt",
+            "deletionStatus",
+            "orphanReconciliation"
           ]
         },
         "data": {

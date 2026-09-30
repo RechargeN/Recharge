@@ -35,9 +35,9 @@ import {
   sha256Hex,
   startAttempt,
   toAssetView,
-  verifyVariantManifest,
   type MediaAsset,
 } from '../domain/media_asset.js';
+import { variantsPreserveHistory, verifyVariantManifest } from '../domain/media_variant.js';
 import {
   resolveFamilyPolicy,
   type MediaFamilyPolicy,
@@ -46,6 +46,7 @@ import {
 import type {
   MediaRepository,
   MediaTransaction,
+  StoredDeletionStatus,
   StoredProcessingReceipt,
 } from '../domain/repositories.js';
 import {
@@ -54,6 +55,7 @@ import {
   toSessionView,
   withSessionState,
 } from '../domain/upload_session.js';
+import type { MediaDeletionData, MediaDeletionService } from './media_deletion_service.js';
 import type { EntityScopePort } from './ports/entity_scope_port.js';
 import type {
   MediaActor,
@@ -81,10 +83,14 @@ export interface MediaServiceDeps {
   readonly enabledFamilies: ReadonlySet<MediaFamily>;
   /** Accepted policy from configuration; `undefined` fails closed. */
   readonly policy?: MediaPolicy;
+  /** Deletion, detach and restriction; without it those commands are refused. */
+  readonly deletion?: MediaDeletionService;
 }
 
-export type MediaCommandData = DeepReadonly<MediaAssetV1> | DeepReadonly<UploadSessionV1>;
-export type MediaQueryData = DeepReadonly<MediaAssetV1> | StoredProcessingReceipt;
+export type MediaCommandData =
+  DeepReadonly<MediaAssetV1> | DeepReadonly<UploadSessionV1> | MediaDeletionData;
+export type MediaQueryData =
+  DeepReadonly<MediaAssetV1> | StoredProcessingReceipt | StoredDeletionStatus;
 
 /** A rejection that must still commit its state changes (e.g. a partial upload). */
 class CommittedRejection {
@@ -136,6 +142,18 @@ export class MediaService {
         case 'finalizeAsset':
         case 'retryProcessing':
           return await this.processAsset(actor, command, semanticHash);
+        case 'deleteAsset':
+          return this.deps.deletion === undefined
+            ? rejected('invalid_contract')
+            : await this.deps.deletion.deleteAsset(actor, command, semanticHash);
+        case 'detachAsset':
+          return this.deps.deletion === undefined
+            ? rejected('invalid_contract')
+            : await this.deps.deletion.detachAsset(actor, command, semanticHash);
+        // System instructions are never accepted as a user command.
+        case 'applyRestriction':
+        case 'reconcileOrphan':
+          return rejected('capability_denied');
       }
     } catch (error) {
       return this.toRefusal(error);
@@ -152,6 +170,14 @@ export class MediaService {
     const parsed = await validateMediaContract<MediaQueryV1>('query', rawQuery);
     if (!parsed.ok) return rejected('invalid_contract');
     const query = parsed.value;
+    if (query.queryType === 'getDeletionStatus') {
+      if (this.deps.deletion === undefined) return rejected('invalid_contract');
+      try {
+        return await this.deps.deletion.getDeletionStatus(actor, query);
+      } catch (error) {
+        return this.toRefusal(error);
+      }
+    }
     const nowUtc = this.now();
     try {
       return await this.deps.repository.transact(async (tx) => {
@@ -467,6 +493,8 @@ export class MediaService {
       let updated: MediaAsset;
       if (manifest?.ok === true) {
         outcome = 'ready';
+        if (!variantsPreserveHistory(current.variantRefs, manifest.variants))
+          throw new MediaDomainRefusal('invalid_state');
         updated = markReady(
           advance(current, ['processing'], completedAtUtc),
           manifest,
@@ -511,6 +539,15 @@ export class MediaService {
       };
       tx.putReceipt(deepFreeze(receipt));
       tx.putAsset(updated, current.revision);
+      if (outcome === 'ready')
+        tx.effects.append({
+          schemaVersion: 1,
+          effectId: `${updated.assetId}:MediaAssetReady:${updated.revision}`,
+          type: 'MediaAssetReady',
+          assetId: updated.assetId,
+          assetRevision: updated.revision,
+          occurredAtUtc: completedAtUtc,
+        });
       const view = toAssetView(updated);
       this.recordOutcome(tx, actor, command, semanticHash, view, completedAtUtc);
       return succeeded<MediaCommandData>(view);

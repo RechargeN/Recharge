@@ -1,4 +1,31 @@
 {
+  "deletionStatus": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "state": "pending",
+      "reason": "owner_request",
+      "deletionRevision": 1,
+      "requestedAtUtc": "2026-09-30T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "state": "completed",
+      "reason": "owner_request",
+      "deletionRevision": 1,
+      "requestedAtUtc": "2026-09-30T09:00:00.000Z",
+      "completedAtUtc": "2026-09-30T09:15:00.000Z"
+    }
+  ],
+  "orphanReconciliation": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "action": "marked",
+      "assetRevision": 8
+    }
+  ],
   "asset": [
     {
       "schemaVersion": 1,
@@ -130,6 +157,53 @@
       "createdAtUtc": "2026-09-30T09:00:00.000Z",
       "updatedAtUtc": "2026-09-30T09:15:00.000Z",
       "deletedAtUtc": "2026-09-30T09:15:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "ownerSubjectId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "entityBinding": {
+        "domain": "content",
+        "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+        "purpose": "contentMedia"
+      },
+      "marketId": "LV",
+      "family": "image",
+      "visibilityClass": "publicDerived",
+      "lifecycle": "ready",
+      "sourceGenerationRef": {
+        "providerGeneration": "g-1001",
+        "byteLength": 2048,
+        "verifiedMediaType": "image/jpeg",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "validationProfileRevision": "vp-test-1"
+      },
+      "variantManifestRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "variantRefs": [
+        {
+          "variantId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+          "profile": "display",
+          "format": "image/webp",
+          "providerGeneration": "g-2001",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "byteLength": 900,
+          "transformProfileRevision": "tp-test-1",
+          "sourceProviderGeneration": "g-1001",
+          "width": 800,
+          "height": 600
+        }
+      ],
+      "policyRevision": "policy-test-1",
+      "deliveryDisabled": false,
+      "attemptCount": 1,
+      "revision": 7,
+      "createdAtUtc": "2026-09-30T09:00:00.000Z",
+      "updatedAtUtc": "2026-09-30T09:15:00.000Z",
+      "orphanSinceUtc": "2026-09-30T09:15:00.000Z"
     }
   ],
   "uploadSession": [
@@ -235,6 +309,42 @@
         "expectedAssetRevision": 5,
         "sourceProviderGeneration": "g-1001"
       }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "deleteAsset",
+      "idempotencyKey": "media-delete-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "expectedAssetRevision": 7
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "detachAsset",
+      "idempotencyKey": "media-detach-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "expectedAssetRevision": 7
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyRestriction",
+      "idempotencyKey": "media-restrict-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "decisionRef": "decision-1",
+        "restricted": true
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reconcileOrphan",
+      "idempotencyKey": "media-reconcile-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC"
+      }
     }
   ],
   "query": [
@@ -251,6 +361,13 @@
       "payload": {
         "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
         "attemptNumber": 2
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getDeletionStatus",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC"
       }
     }
   ],

@@ -1,4 +1,8 @@
-import type { ObjectStat, ObjectStorePort } from '../application/ports/object_store_port.js';
+import type {
+  ObjectStat,
+  ObjectStorePort,
+  RemovalResult,
+} from '../application/ports/object_store_port.js';
 
 export interface FakeObject {
   readonly providerGeneration: string;
@@ -18,6 +22,26 @@ export class FakeObjectStore implements ObjectStorePort {
   put(objectKeyHandle: string, object: FakeObject): void {
     this.#partial.delete(objectKeyHandle);
     this.#objects.set(objectKeyHandle, object);
+  }
+
+  /** When set, every removal reports `failed` (cleanup cannot be confirmed). */
+  failRemovals = false;
+  readonly removedHandles: string[] = [];
+  readonly removedVariants: string[] = [];
+  readonly variants = new Set<string>();
+
+  remove(objectKeyHandle: string): Promise<RemovalResult> {
+    if (this.failRemovals) return Promise.resolve('failed');
+    const existed = this.#objects.delete(objectKeyHandle) || this.#partial.delete(objectKeyHandle);
+    this.removedHandles.push(objectKeyHandle);
+    return Promise.resolve(existed ? 'removed' : 'absent');
+  }
+
+  removeVariant(variantId: string): Promise<RemovalResult> {
+    if (this.failRemovals) return Promise.resolve('failed');
+    const existed = this.variants.delete(variantId);
+    this.removedVariants.push(variantId);
+    return Promise.resolve(existed ? 'removed' : 'absent');
   }
 
   putPartial(objectKeyHandle: string): void {

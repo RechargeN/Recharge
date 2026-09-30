@@ -1115,10 +1115,26 @@ no-Firebase checks) and the acceptance matrix reconciliation.
   `getAssetStatus`, `getProcessingReceipt`; in-memory repository and `fake_*`
   object store, scanner and processor. Fake adapters prove orchestration only
   (§34.5).
-- Known local gaps carried to 2.5b: an attempt whose second transaction never
-  ran leaves the asset `validating` without a receipt until orphan
-  reconciliation exists; session expiry is evaluated lazily at confirm; no quota
-  is modelled because no accepted quota policy exists; `deleteAsset`,
-  `applyRestriction`, `detachAsset`, `reconcileOrphan` and `getDeletionStatus`
-  are not implemented yet, so `deliveryDisabled` is exercised only through the
-  domain and the late-result test.
+- **2.5b (2026-09-30):** `media_variant`, `media_attachment` and
+  `media_retention` in the domain; `ContentMediaReadinessAdapter` (answers
+  Content's readiness port from Media's own records, structurally, without
+  importing Content); `MediaDeletionService` (`deleteAsset`, `detachAsset`,
+  system-only `applyRestriction`, `getDeletionStatus`; delivery is tombstoned
+  first and `deleted` is set only after confirmed cleanup); `OrphanReconciler`
+  (system-only `reconcileOrphan`); versioned `MediaEffect`s carrying ids and a
+  monotonic asset revision; the Content side from BCK-07 v0.11 §37.4.
+  Asset failures added: `asset_referenced`. A private or protected original is
+  never `ready` for a public revision, and the deletion tombstone keeps
+  identity and times only.
+- Retention and policy stay synthetic in tests; an absent accepted retention
+  policy is `policy_unavailable`. No hold source exists yet (BCK-04 pending), so
+  no legal or safety hold is modelled; deletion fails closed on any doubt about
+  references instead.
+- Still open for 2.5c and later: the acceptance matrix and cross-cutting
+  security tests (2.5c); real object store, scanner and processor evidence,
+  EXIF minimization, quota and hold handling (separate adapter verification
+  before dev acceptance 4.1); `requestDelivery`, delivery signer and
+  `replaceAsset` (deferred).
+- Known local gaps: an attempt whose second transaction never ran leaves the
+  asset `validating` without a receipt (the reconciler deliberately never
+  touches in-flight assets); session expiry is evaluated lazily at confirm.

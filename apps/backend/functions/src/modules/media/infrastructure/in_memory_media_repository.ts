@@ -1,3 +1,4 @@
+import type { MediaEffectV1 } from '../../../contracts/media_v1.js';
 import { deepFreeze } from '../../../shared/immutable.js';
 import { MediaRepositoryConflict } from '../domain/failures.js';
 import type { MediaAsset } from '../domain/media_asset.js';
@@ -6,6 +7,7 @@ import type {
   MediaIdempotencyRecord,
   MediaRepository,
   MediaTransaction,
+  StoredDeletionStatus,
   StoredProcessingReceipt,
 } from '../domain/repositories.js';
 import type { UploadSession } from '../domain/upload_session.js';
@@ -14,8 +16,10 @@ interface Store {
   readonly assets: Map<string, MediaAsset>;
   readonly sessions: Map<string, UploadSession>;
   readonly receipts: Map<string, StoredProcessingReceipt>;
+  readonly deletions: Map<string, StoredDeletionStatus>;
   readonly idempotency: Map<string, MediaIdempotencyRecord>;
   readonly audit: MediaAuditEntry[];
+  readonly effects: MediaEffectV1[];
 }
 
 /**
@@ -49,13 +53,17 @@ export class InMemoryMediaRepository implements MediaRepository {
     assets: readonly MediaAsset[];
     sessions: readonly UploadSession[];
     receipts: readonly StoredProcessingReceipt[];
+    deletions: readonly StoredDeletionStatus[];
     audit: readonly MediaAuditEntry[];
+    effects: readonly MediaEffectV1[];
   }> {
     return deepFreeze({
       assets: [...this.#store.assets.values()],
       sessions: [...this.#store.sessions.values()],
       receipts: [...this.#store.receipts.values()],
+      deletions: [...this.#store.deletions.values()],
       audit: [...this.#store.audit],
+      effects: [...this.#store.effects],
     });
   }
 }
@@ -65,8 +73,10 @@ function emptyStore(): Store {
     assets: new Map(),
     sessions: new Map(),
     receipts: new Map(),
+    deletions: new Map(),
     idempotency: new Map(),
     audit: [],
+    effects: [],
   };
 }
 
@@ -76,8 +86,10 @@ function cloneStore(store: Store): Store {
     assets: new Map(store.assets),
     sessions: new Map(store.sessions),
     receipts: new Map(store.receipts),
+    deletions: new Map(store.deletions),
     idempotency: new Map(store.idempotency),
     audit: [...store.audit],
+    effects: [...store.effects],
   };
 }
 
@@ -107,6 +119,16 @@ function transactionFor(store: Store): MediaTransaction {
       if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('session_revision');
       store.sessions.set(session.uploadSessionId, copy(session));
     },
+    sessionForAsset: (assetId) =>
+      Promise.resolve(
+        [...store.sessions.values()].find((item) => item.assetId === assetId) ?? null,
+      ),
+    deletion: (assetId) => Promise.resolve(store.deletions.get(assetId) ?? null),
+    putDeletion(status, expectedStoredRevision) {
+      const stored = store.deletions.get(status.assetId)?.deletionRevision ?? 0;
+      if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('asset_revision');
+      store.deletions.set(status.assetId, copy(status));
+    },
     receipt: (assetId, attemptNumber) =>
       Promise.resolve(store.receipts.get(receiptKey(assetId, attemptNumber)) ?? null),
     receiptsForAsset: (assetId) =>
@@ -130,6 +152,11 @@ function transactionFor(store: Store): MediaTransaction {
     },
     appendAudit(entry) {
       store.audit.push(copy(entry));
+    },
+    effects: {
+      append(effect) {
+        store.effects.push(copy(effect));
+      },
     },
   };
 }

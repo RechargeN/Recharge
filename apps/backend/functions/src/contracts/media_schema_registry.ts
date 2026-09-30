@@ -34,6 +34,10 @@ export const mediaTargetRefs = {
   uploadSession: 'https://recharge.app/schemas/media/v1/upload_session.schema.json',
   processingReceipt:
     'https://recharge.app/schemas/media/v1/media_asset.schema.json#/$defs/processingReceipt',
+  deletionStatus:
+    'https://recharge.app/schemas/media/v1/media_asset.schema.json#/$defs/deletionStatus',
+  orphanReconciliation:
+    'https://recharge.app/schemas/media/v1/media_asset.schema.json#/$defs/orphanReconciliation',
   command: 'https://recharge.app/schemas/media/v1/media_command.schema.json',
   query: 'https://recharge.app/schemas/media/v1/media_query.schema.json',
   result: 'https://recharge.app/schemas/media/v1/media_result.schema.json',

@@ -1,6 +1,7 @@
 import type { ContentEffectV1 } from '../../../contracts/content_v1.js';
 import { deepFreeze } from '../../../shared/immutable.js';
 import type { ContentDraft } from '../domain/content_draft.js';
+import { resolveContentType } from '../domain/content_type_registry.js';
 import { ContentRepositoryConflict } from '../domain/failures.js';
 import type { PublicationPointer } from '../domain/publication_pointer.js';
 import type { PublicationSubmission } from '../domain/publication_submission.js';
@@ -139,6 +140,15 @@ function transactionFor(store: Store): ContentTransaction {
         throw new ContentRepositoryConflict('immutable_revision');
       store.revisions.set(revision.publishedRevisionId, copy(revision));
     },
+    isMediaReferenced: (assetId) =>
+      Promise.resolve(
+        [...store.revisions.values()].some((revision) =>
+          revision.mediaAttachments.some((item) => item.assetId === assetId),
+        ) ||
+          [...store.drafts.values()].some((draft) =>
+            (resolveContentType(draft.typeId)?.mediaIds?.(draft.body) ?? []).includes(assetId),
+          ),
+      ),
     pointer: (contentId) => Promise.resolve(store.pointers.get(contentId) ?? null),
     putPointer(pointer, expectedStoredRevision) {
       const stored = store.pointers.get(pointer.contentId)?.revision ?? 0;

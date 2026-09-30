@@ -17,4 +17,9 @@ export type ObjectStat =
  */
 export interface ObjectStorePort {
   stat(objectKeyHandle: string): Promise<ObjectStat>;
+  /** `removed` and `absent` both confirm that nothing is left; `failed` confirms nothing. */
+  remove(objectKeyHandle: string): Promise<RemovalResult>;
+  removeVariant(variantId: string): Promise<RemovalResult>;
 }
+
+export type RemovalResult = 'removed' | 'absent' | 'failed';

@@ -1,4 +1,5 @@
-import type { ProcessingReceiptV1 } from '../../../contracts/media_v1.js';
+import type { MediaDeletionStatusV1, ProcessingReceiptV1 } from '../../../contracts/media_v1.js';
+import type { MediaEffectSink } from '../application/ports/media_effect_sink.js';
 import type { DeepReadonly } from '../../../shared/immutable.js';
 import type { MediaAsset } from './media_asset.js';
 import type { UploadSession } from './upload_session.js';
@@ -22,17 +23,22 @@ export interface MediaAuditEntry {
 }
 
 export type StoredProcessingReceipt = DeepReadonly<ProcessingReceiptV1>;
+export type StoredDeletionStatus = DeepReadonly<MediaDeletionStatusV1>;
 
 export interface MediaTransaction {
   asset(assetId: string): Promise<MediaAsset | null>;
   /** Compare-and-set on the stored revision (0 = absent). */
   putAsset(asset: MediaAsset, expectedStoredRevision: number): void;
   session(uploadSessionId: string): Promise<UploadSession | null>;
+  sessionForAsset(assetId: string): Promise<UploadSession | null>;
   putSession(session: UploadSession, expectedStoredRevision: number): void;
   /** Receipts are immutable: an existing attempt is never overwritten. */
   receipt(assetId: string, attemptNumber: number): Promise<StoredProcessingReceipt | null>;
   receiptsForAsset(assetId: string): Promise<readonly StoredProcessingReceipt[]>;
   putReceipt(receipt: StoredProcessingReceipt): void;
+  deletion(assetId: string): Promise<StoredDeletionStatus | null>;
+  /** Compare-and-set on the stored deletion revision (0 = absent). */
+  putDeletion(status: StoredDeletionStatus, expectedStoredRevision: number): void;
   idempotency(
     actorUserId: string,
     commandType: string,
@@ -40,6 +46,7 @@ export interface MediaTransaction {
   ): Promise<MediaIdempotencyRecord | null>;
   putIdempotency(record: MediaIdempotencyRecord): void;
   appendAudit(entry: MediaAuditEntry): void;
+  readonly effects: MediaEffectSink;
 }
 
 /** The Media application service is the only caller allowed to write. */

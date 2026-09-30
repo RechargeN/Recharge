@@ -65,7 +65,7 @@ import {
   type PublishedRevision,
 } from '../domain/published_revision.js';
 import type { ContentRepository, ContentTransaction } from '../domain/repositories.js';
-import type { MediaReadinessPort } from './ports/media_readiness_port.js';
+import type { MediaReadiness, MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
 import type {
   ContentActor,
@@ -530,7 +530,8 @@ export class ContentPublicationService {
       draft,
       submission,
       referenceRevisions: references,
-      mediaRevision: media,
+      mediaRevision: media.mediaRevision,
+      mediaAttachments: media.attachments,
       nowUtc,
     });
     const nextPointer = activateRevision(
@@ -647,12 +648,17 @@ export class ContentPublicationService {
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    // Rollback verifies exactly the references stored in the target revision.
     const media = await this.deps.media.check({
       contentId: target.contentId,
       typeId: target.typeId,
+      marketId: target.marketId,
+      publisherRef: target.publisherRef,
       mediaIds: entry.mediaIds?.(target.body) ?? [],
+      pinned: target.mediaAttachments,
     });
-    if (!media.ready) throw new ContentDomainRefusal('media_not_ready');
+    if (!media.ready || media.mediaRevision !== target.mediaRevision)
+      throw new ContentDomainRefusal('media_not_ready');
     const pointer = await tx.pointer(payload.contentId);
     if (pointer === null) throw new ContentDomainRefusal('not_found');
     // Re-selecting what is already public is a no-op conflict, not a new state.
@@ -857,14 +863,16 @@ export class ContentPublicationService {
   private async assertMediaReady(
     entry: ContentTypeRegistryEntry,
     draft: ContentDraft,
-  ): Promise<string> {
+  ): Promise<Extract<MediaReadiness, { ready: true }>> {
     const readiness = await this.deps.media.check({
       contentId: draft.contentId,
       typeId: draft.typeId,
+      marketId: draft.marketId,
+      publisherRef: draft.publisherRef,
       mediaIds: entry.mediaIds?.(draft.body) ?? [],
     });
     if (!readiness.ready) throw new ContentDomainRefusal('media_not_ready');
-    return readiness.mediaRevision;
+    return readiness;
   }
 
   private async resolveReferences(

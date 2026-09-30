@@ -1462,3 +1462,12 @@ migration.
     generation, foreign, deleted or restricted asset refuses it.
 100. **BCK-07-AC-100:** readiness is evidence, never an attach, and never
      answers `ready` on missing binding data.
+
+### 37.6 Implementation note (2026-09-30)
+
+Implemented within the §37.4 list. `fixtures/forward.json` and
+`content_fixture_parity.test.ts` needed no change: forward cases stay rejected
+by their version or type. `ContentMediaScope` implements Media's entity scope
+and reference questions structurally, with no import of the Media module; the
+Media adapter does the same in the other direction. A private or protected
+Media asset is never attachable to a public revision.

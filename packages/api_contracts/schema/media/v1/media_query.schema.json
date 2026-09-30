@@ -64,6 +64,35 @@
           ]
         }
       }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
+          "const": "getDeletionStatus"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            }
+          },
+          "required": [
+            "assetId"
+          ]
+        }
+      }
     }
   ]
 }

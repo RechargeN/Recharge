@@ -187,6 +187,154 @@
           ]
         }
       }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "deleteAsset"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "expectedAssetRevision": {
+              "$ref": "media_common.schema.json#/$defs/positiveRevision"
+            }
+          },
+          "required": [
+            "assetId",
+            "expectedAssetRevision"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "detachAsset"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "expectedAssetRevision": {
+              "$ref": "media_common.schema.json#/$defs/positiveRevision"
+            }
+          },
+          "required": [
+            "assetId",
+            "expectedAssetRevision"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "applyRestriction"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            },
+            "decisionRef": {
+              "$ref": "media_common.schema.json#/$defs/revisionLabel"
+            },
+            "restricted": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "assetId",
+            "decisionRef",
+            "restricted"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "reconcileOrphan"
+        },
+        "idempotencyKey": {
+          "$ref": "media_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assetId": {
+              "$ref": "media_common.schema.json#/$defs/entityId"
+            }
+          },
+          "required": [
+            "assetId"
+          ]
+        }
+      }
     }
   ]
 }

@@ -311,6 +311,7 @@ void test('published revision is immutable, hash-stable and copies authorship fr
     submission,
     referenceRevisions: references,
     mediaRevision: 'media-1',
+    mediaAttachments: [],
     nowUtc: later,
   });
   assert.deepEqual(revision.publisherRef, created.publisherBindingOrigin);

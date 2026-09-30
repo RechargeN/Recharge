@@ -2,6 +2,78 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://recharge.app/schemas/media/v1/media_asset.schema.json",
   "$defs": {
+    "deletionStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "assetId": {
+          "$ref": "media_common.schema.json#/$defs/entityId"
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "completed"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "owner_request",
+            "orphan_cleanup",
+            "expired_upload"
+          ]
+        },
+        "deletionRevision": {
+          "$ref": "media_common.schema.json#/$defs/positiveRevision"
+        },
+        "requestedAtUtc": {
+          "$ref": "media_common.schema.json#/$defs/utcInstant"
+        },
+        "completedAtUtc": {
+          "$ref": "media_common.schema.json#/$defs/utcInstant"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "assetId",
+        "state",
+        "reason",
+        "deletionRevision",
+        "requestedAtUtc"
+      ]
+    },
+    "orphanReconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "assetId": {
+          "$ref": "media_common.schema.json#/$defs/entityId"
+        },
+        "action": {
+          "enum": [
+            "keep",
+            "marked",
+            "unmarked",
+            "deleting",
+            "deleted"
+          ]
+        },
+        "assetRevision": {
+          "$ref": "media_common.schema.json#/$defs/positiveRevision"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "assetId",
+        "action",
+        "assetRevision"
+      ]
+    },
     "processingReceipt": {
       "type": "object",
       "additionalProperties": false,
@@ -177,6 +249,9 @@
       "$ref": "media_common.schema.json#/$defs/utcInstant"
     },
     "deletedAtUtc": {
+      "$ref": "media_common.schema.json#/$defs/utcInstant"
+    },
+    "orphanSinceUtc": {
       "$ref": "media_common.schema.json#/$defs/utcInstant"
     }
   },

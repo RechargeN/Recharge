@@ -1,4 +1,31 @@
 {
+  "deletionStatus": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "state": "gone",
+      "reason": "owner_request",
+      "deletionRevision": 1,
+      "requestedAtUtc": "2026-09-30T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "state": "pending",
+      "reason": "owner_request",
+      "deletionRevision": 1,
+      "requestedAtUtc": "2026-09-30T09:00:00.000Z",
+      "objectKey": "objk:x"
+    }
+  ],
+  "orphanReconciliation": [
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "action": "purged",
+      "assetRevision": 8
+    }
+  ],
   "asset": [
     {
       "schemaVersion": 1,
@@ -477,6 +504,33 @@
           "entityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
           "purpose": "contentMedia"
         }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "deleteAsset",
+      "idempotencyKey": "media-delete-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "applyRestriction",
+      "idempotencyKey": "media-restrict-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "decisionRef": "d",
+        "restricted": "yes"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reconcileOrphan",
+      "idempotencyKey": "media-reconcile-0001",
+      "payload": {
+        "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "force": true
       }
     }
   ],

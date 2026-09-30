@@ -146,6 +146,27 @@ export interface PublicationSubmissionV1 {
   readonly updatedAtUtc: UtcInstant;
 }
 
+/**
+ * Generation-pinned reference to a ready Media asset, stored in the immutable
+ * revision by the owning domain (BCK-14 §8.2, BCK-07 v0.11 §37).
+ */
+export interface MediaAttachmentV1 {
+  readonly assetId: EntityId;
+  readonly sourceGeneration: string;
+  readonly variantManifestRevision: string;
+  readonly purpose: 'contentMedia';
+}
+
+/** Internal reasons; every one is the public failure `media_not_ready`. */
+export type MediaNotReadyReason =
+  | 'asset_unknown'
+  | 'foreign_binding'
+  | 'stale_generation'
+  | 'deleted'
+  | 'restricted'
+  | 'not_ready'
+  | 'policy_unavailable';
+
 export interface PublishedRevisionV1 {
   readonly schemaVersion: 1;
   readonly contentId: EntityId;
@@ -160,6 +181,7 @@ export interface PublishedRevisionV1 {
   readonly bodyHash: string;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly mediaRevision: string;
+  readonly mediaAttachments: readonly MediaAttachmentV1[];
   readonly provenance: ContentProvenanceV1;
   readonly publishedAtUtc: UtcInstant;
 }

@@ -15,6 +15,7 @@ import { deepFreeze, type DeepReadonly } from '../../../shared/immutable.js';
 import type { UtcInstant } from '../../../shared/utc_instant.js';
 import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import { MediaDomainRefusal } from './failures.js';
+import type { VariantManifest } from './media_variant.js';
 
 /** Stored asset: the wire view plus the backend-selected object key handle. */
 export type MediaAsset = DeepReadonly<MediaAssetV1> & { readonly objectKeyHandle: string };
@@ -185,45 +186,6 @@ export function retryFromQuarantine(
   return advance(asset, ['validating'], nowUtc, { attemptCount: asset.attemptCount + 1 });
 }
 
-export type VariantManifest =
-  | {
-      readonly ok: true;
-      readonly revision: string;
-      readonly variants: readonly MediaVariantRefV1[];
-    }
-  | { readonly ok: false };
-
-/**
- * Verifies the processor output against the asset and the mandatory profiles and
- * derives the manifest revision. Reprocessing never reuses a generation: a
- * variant can never carry the source generation.
- */
-export function verifyVariantManifest(
-  asset: MediaAsset,
-  variants: readonly MediaVariantRefV1[],
-  mandatoryProfiles: readonly string[],
-): VariantManifest {
-  const source = asset.sourceGenerationRef;
-  if (source === undefined || variants.length === 0) return { ok: false };
-  const profiles = new Set<string>();
-  for (const variant of variants) {
-    if (profiles.has(variant.profile)) return { ok: false };
-    profiles.add(variant.profile);
-    if (variant.sourceProviderGeneration !== source.providerGeneration) return { ok: false };
-    if (variant.providerGeneration === source.providerGeneration) return { ok: false };
-    if (!/^[0-9a-f]{64}$/u.test(variant.sha256) || variant.byteLength < 1) return { ok: false };
-  }
-  for (const profile of mandatoryProfiles) if (!profiles.has(profile)) return { ok: false };
-  const sorted = [...variants].sort((left, right) => left.profile.localeCompare(right.profile));
-  return {
-    ok: true,
-    variants: sorted,
-    revision: sha256Hex(
-      canonicalJson({ algorithm: 'media_variant_manifest_v1', variants: sorted }),
-    ),
-  };
-}
-
 /** Only a trusted processor path calls this, after every mandatory check passed. */
 export function markReady(
   asset: MediaAsset,
@@ -241,4 +203,75 @@ export function toAssetView(asset: MediaAsset): DeepReadonly<MediaAssetV1> {
   const { objectKeyHandle, ...view } = asset;
   void objectKeyHandle;
   return deepFreeze(view);
+}
+
+/**
+ * Delivery is disabled first and wins over any late result. Only assets that
+ * reached a settled state are deleted here; in-flight ones are refused.
+ */
+export function beginDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
+  return advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+}
+
+/**
+ * Aborting or expiring an upload: with the object store confirming that no
+ * object exists it is deleted at once, otherwise it goes through `deleting`
+ * until cleanup is confirmed (BCK-14 v0.4 §34.3).
+ */
+export function abortUpload(
+  asset: MediaAsset,
+  objectAbsent: boolean,
+  nowUtc: UtcInstant,
+): MediaAsset {
+  if (asset.lifecycle !== 'reserved' && asset.lifecycle !== 'uploading')
+    throw new MediaDomainRefusal('invalid_state');
+  return objectAbsent
+    ? advance(asset, ['deleted'], nowUtc, { deliveryDisabled: true, deletedAtUtc: nowUtc })
+    : advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+}
+
+/** Cleanup confirmed: `deleting` -> `deleted`; derived metadata is dropped. */
+export function finishDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
+  const next = advance(asset, ['deleted'], nowUtc, { deletedAtUtc: nowUtc, variantRefs: [] });
+  // The tombstone keeps identity and times only: no derived metadata and no
+  // content hash of the source stay behind.
+  const { variantManifestRevision, sourceGenerationRef, ...rest } = next;
+  void variantManifestRevision;
+  void sourceGenerationRef;
+  return deepFreeze(rest);
+}
+
+/** Restriction toggles delivery only; it never changes the lifecycle or restores publicity. */
+export function withRestriction(
+  asset: MediaAsset,
+  restricted: boolean,
+  nowUtc: UtcInstant,
+): MediaAsset {
+  if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
+    throw new MediaDomainRefusal('invalid_state');
+  if (asset.deliveryDisabled === restricted) return asset;
+  return deepFreeze({
+    ...asset,
+    deliveryDisabled: restricted,
+    revision: asset.revision + 1,
+    updatedAtUtc: nowUtc,
+  });
+}
+
+/** Starts or clears the orphan grace clock; unchanged state is not a new revision. */
+export function withOrphanSince(
+  asset: MediaAsset,
+  since: UtcInstant | null,
+  nowUtc: UtcInstant,
+): MediaAsset {
+  if (since !== null && asset.orphanSinceUtc !== undefined) return asset;
+  if (since === null && asset.orphanSinceUtc === undefined) return asset;
+  const { orphanSinceUtc, ...rest } = asset;
+  void orphanSinceUtc;
+  return deepFreeze({
+    ...rest,
+    ...(since === null ? {} : { orphanSinceUtc: since }),
+    revision: asset.revision + 1,
+    updatedAtUtc: nowUtc,
+  });
 }

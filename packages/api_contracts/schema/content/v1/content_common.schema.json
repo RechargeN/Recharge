@@ -306,6 +306,32 @@
           "$ref": "#/$defs/utcInstant"
         }
       }
+    },
+    "mediaAttachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "sourceGeneration",
+        "variantManifestRevision",
+        "purpose"
+      ],
+      "properties": {
+        "assetId": {
+          "$ref": "#/$defs/entityId"
+        },
+        "sourceGeneration": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "variantManifestRevision": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "purpose": {
+          "const": "contentMedia"
+        }
+      }
     }
   }
 }

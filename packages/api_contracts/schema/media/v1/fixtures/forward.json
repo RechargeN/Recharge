@@ -1,4 +1,22 @@
 {
+  "deletionStatus": [
+    {
+      "schemaVersion": 2,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "state": "pending",
+      "reason": "owner_request",
+      "deletionRevision": 1,
+      "requestedAtUtc": "2026-09-30T09:00:00.000Z"
+    }
+  ],
+  "orphanReconciliation": [
+    {
+      "schemaVersion": 2,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "action": "marked",
+      "assetRevision": 8
+    }
+  ],
   "asset": [
     {
       "schemaVersion": 2,

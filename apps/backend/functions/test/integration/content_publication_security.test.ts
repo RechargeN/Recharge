@@ -260,7 +260,10 @@ async function bootstrap() {
           policyDecisionId: 'pd-1',
         } as const),
     },
-    media: { check: () => Promise.resolve({ ready: true, mediaRevision: 'media-1' } as const) },
+    media: {
+      check: () =>
+        Promise.resolve({ ready: true, mediaRevision: 'media-1', attachments: [] } as const),
+    },
     clock: new FakeClock(new Date('2026-09-29T10:00:00.000Z')),
     ids: {
       newId: () => {

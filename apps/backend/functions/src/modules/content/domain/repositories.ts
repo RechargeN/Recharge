@@ -40,6 +40,8 @@ export interface ContentTransaction {
   publishedRevisionsForContent(contentId: string): Promise<readonly PublishedRevision[]>;
   /** Fails with a repository conflict if the id already exists (immutability). */
   putPublishedRevision(revision: PublishedRevision): void;
+  /** Whether any draft body or immutable revision still references the Media asset. */
+  isMediaReferenced(assetId: string): Promise<boolean>;
   pointer(contentId: string): Promise<PublicationPointer | null>;
   /** Compare-and-set on the stored pointer revision (0 = absent). */
   putPointer(pointer: PublicationPointer, expectedStoredRevision: number): void;

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 import type {
   ContentReferenceRevisionsV1,
+  MediaAttachmentV1,
   PublishedRevisionV1,
 } from '../../../contracts/content_v1.js';
 import type { EntityId } from '../../../shared/ids.js';
@@ -35,6 +36,7 @@ export function createPublishedRevision(input: {
   readonly submission: PublicationSubmission;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly mediaRevision: string;
+  readonly mediaAttachments: readonly MediaAttachmentV1[];
   readonly nowUtc: UtcInstant;
 }): PublishedRevision {
   return deepFreeze({
@@ -52,6 +54,7 @@ export function createPublishedRevision(input: {
     bodyHash: sha256Hex(canonicalJson(input.draft.body)),
     referenceRevisions: { ...input.referenceRevisions },
     mediaRevision: input.mediaRevision,
+    mediaAttachments: structuredClone([...input.mediaAttachments]),
     // Provenance is frozen into the revision: later refreshes never rewrite it.
     provenance: structuredClone(input.draft.provenance),
     publishedAtUtc: input.nowUtc,
