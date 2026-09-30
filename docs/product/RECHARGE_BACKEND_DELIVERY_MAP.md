@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.107**
+- Version: **2.4.108**
 - Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,22 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.108.** Registers stage 3.1 (BCK-05 v0.2.42 §36), the execution manifest and
+infrastructure code, without widening cloud, spend or market authority:
+
+- a closed file map for a machine-readable manifest, shared IaC modules with a
+  root per environment, two verifiers, a credential-free validation workflow and
+  Draft runbooks; nothing is created in any cloud and **writing IaC does not
+  authorize apply**;
+- decisions: Firebase CLI alone owns Rules, indexes, TTL and Functions
+  deployment; no automatic billing detach and containment never blocks
+  cancelling an existing Booking or a mandatory privacy operation; one state
+  bucket per environment with bootstrap and destroy protection; minimal workflow
+  permissions;
+- the pinned Terraform 1.15.9 and google provider 7.43.0 already exist as
+  verified local copies, so no download is needed;
+- BCK05-OD-03/04/05/08 stay Proposed and keep blocking provisioning.
 
 **v2.4.107.** Third remediation pass of the independent audit, without widening
 cloud, spend or market authority:

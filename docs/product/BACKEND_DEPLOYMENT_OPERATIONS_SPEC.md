@@ -1,7 +1,7 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.41**
+- Version: **0.2.42**
 - Date: **2026-09-27**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
@@ -42,6 +42,27 @@
 ---
 
 ## 0. Changelog
+
+### v0.2.42 — 2026-10-01
+
+- authorizes stage 3.1, the **execution manifest and infrastructure code**, in a
+  new §36: a machine-readable manifest, shared IaC modules with per-environment
+  roots, validation gates, Draft runbooks and the exact closed file map;
+- **writing IaC grants no authority to apply it.** Every resource is guarded by a
+  flag that is false by default and opens only with a signed record reference;
+  no project, service account, binding, secret, state bucket or budget is
+  created; no cloud call is made;
+- fixes four execution decisions: Firebase CLI alone owns Rules, indexes, TTL and
+  Functions deployment (no double management by Terraform); no automatic billing
+  detach; one state bucket per environment with its own bootstrap and destroy
+  protection; the validation workflow runs with minimal permissions and no
+  secrets or `id-token`;
+- records that the pinned Terraform 1.15.9 and the google provider 7.43.0 are
+  already present as verified local copies, so no download is needed; any future
+  download must come from the official source with checksum/signature and pinned
+  versions;
+- keeps BCK05-OD-03/04/05/08 Proposed: their numbers enter the manifest as
+  proposed and still block provisioning.
 
 ### v0.2.41 — 2026-09-27
 
@@ -1588,3 +1609,143 @@ authority from this result.
 100. **BCK-05-AC-100:** manual dead-letter replay requires an immutable,
      idempotent operator-audit record retained for 180 days; reason, actor,
      correlation and exact target are mandatory.
+
+## 36. Stage 3.1 — execution manifest and infrastructure code (no authority)
+
+### 36.1 Decision and limits
+
+Stage 3.1 writes, in the repository only, everything a later approved
+provisioning slice needs: one **execution manifest**, shared IaC modules with a
+root per environment, verifiers, a credential-free validation workflow and Draft
+runbooks. It does not create a project, service account, IAM binding, workload
+identity pool, secret, state bucket, budget or any resource, performs no cloud
+call and does not select provider project IDs: those are chosen only in the
+approved provisioning slice after availability checks, by the rule
+`recharge-<env>-<uniqueSuffix>` of §19.1, so the manifest holds the rule with an
+unresolved suffix. **Writing IaC does not authorize `apply`.**
+
+### 36.2 Execution manifest (single source, per `dev`, `stage`, `prod`)
+
+The manifest records, without secret values: project-ID rule with unresolved
+suffix; Firestore `(default)`, Standard, Native, `eur3`; Functions 2nd gen
+`europe-west1`; media Storage regional `europe-west1` and the disabled `EU`
+recovery bucket (OD-07); service-account catalogue names from
+`BCK05-IAM-A1-ENV-WIF-v1` (`deploy-<env>`, `runtime-<module>`) and their role
+families; workload-identity provider names per environment; secret **references**
+(names and owners, never values or versions); collections, composite indexes and
+TTL fields, **derived and cross-checked** against `firestore.rules` and
+`firestore.indexes.json`; feature flags (all default off); CI environments; App
+Check mode per stage; budgets (50/75/90/100 % thresholds, guardrails €25 / €75 /
+€150 **as proposed by BCK05-OD-04**), limits and quotas (`null` until decided);
+deployment order, rollback, backup/recovery, smoke and destroy procedure
+references. Every unresolved value is `null`, never invented.
+
+### 36.3 Ownership of each resource (no double management)
+
+| Resource | Single owner |
+|---|---|
+| Firestore Rules, indexes, TTL policies | **Firebase CLI**, from the verified release artifact |
+| Functions deployment | **Firebase CLI**, from the verified release artifact |
+| Firestore database (create-only), media/recovery buckets, project service enablement, service accounts and IAM, workload identity, secret containers, App Check configuration, budgets and notification channels | **Terraform** |
+| Flags and release pointers | the application repositories (BCK-05 release model) |
+
+The manifest names the owner of each resource and the verifier fails if one
+resource has two owners.
+
+### 36.4 Budget and containment
+
+Provider budget alerts are notifications, not hard stops. **No automatic billing
+detach**: it can destroy data. Containment is by server-side flags, quotas and
+kill switches, with a documented manual billing action only as the last resort.
+Containment must never block cancellation of an existing Booking or a mandatory
+privacy operation (DSR export, deletion, restriction): the manifest lists these
+as `neverBlocked` and the verifier fails a containment rule that touches them.
+The owner and the reaction steps are named in a Draft runbook; an alert without
+a tested route is not evidence.
+
+### 36.5 State, bootstrap and destroy protection
+
+Each environment has its own Terraform state bucket in its own project, its own
+provider configuration and its own parameters; dev, stage and prod share
+modules, never state or rights. Bootstrap is a documented, separately
+authorized procedure (local state first, then migration) and is not performed
+here. State buckets and all data resources carry `prevent_destroy` or
+`deletion_protection`. The destroy procedure: dev only by default; stage needs
+a dated record; prod is forbidden except through a superseding decision; any
+destroy requires a verified export and a data-protection check first.
+
+### 36.6 Exact file map (closed; paths from the repository root)
+
+```text
+apps/backend/config/execution-manifest.schema.json
+apps/backend/config/budget-policy.schema.json
+apps/backend/config/flag-policy.schema.json
+apps/backend/config/manifests/execution-manifest.json
+apps/backend/config/manifests/fixtures/valid.json
+apps/backend/config/manifests/fixtures/invalid.json
+apps/backend/config/manifests/fixtures/forward.json
+apps/backend/scripts/verify-execution-manifest.mjs
+apps/backend/scripts/verify-iac-topology.mjs
+apps/backend/functions/test/contract/execution_manifest.test.ts
+
+apps/backend/infra/terraform/modules/project_baseline/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/firestore/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/storage/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/runtime_identities/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/ci_wif/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/budget_alerts/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/secrets/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/app_check/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/state_bucket/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/envs/{dev,stage,prod}/{main,variables,outputs,providers,versions}.tf
+apps/backend/infra/terraform/envs/{dev,stage,prod}/backend.tf.example
+apps/backend/infra/terraform/envs/{dev,stage,prod}/terraform.tfvars.example
+
+.github/workflows/backend-iac-validate.yml
+
+docs/runbooks/backend-deploy-order.md
+docs/runbooks/backend-rollback.md
+docs/runbooks/backend-disaster-recovery.md
+docs/runbooks/backend-cost-response.md
+docs/runbooks/backend-provisioning-and-destroy.md
+```
+
+`apps/backend/functions/package.json` gains only the scripts that run the two
+verifiers and the Terraform validation of the environment roots; the existing R1
+root under `infra/terraform` and its gates stay unchanged. Extending this list
+needs a further amendment confirmed by the Product owner.
+
+### 36.7 Gates
+
+- `verify-execution-manifest`: schema parity, fixtures, derived collections,
+  indexes and TTL equal to Rules and `firestore.indexes.json`, flags equal to the
+  code registry and default off, regions equal to the accepted policy, IAM names
+  equal to the catalogue, no invented project ID, no secret value or real
+  address, every `authorized` false, one owner per resource, containment never
+  touches `neverBlocked`.
+- `verify-iac-topology`: no credentials, project literal, real backend value,
+  `apply` or `id-token` anywhere; every resource guarded by the authorization
+  flag; per-environment state keys distinct; required labels; with the pinned
+  Terraform, `fmt -check` and `init -backend=false` plus `validate` of every
+  environment root using the local verified provider copy; an empty `plan` with
+  zero resources.
+- The workflow `backend-iac-validate.yml` has `contents: read` only, no secrets,
+  no `id-token`, pinned actions and no cloud step.
+
+### 36.8 Acceptance addendum
+
+101. **BCK-05-AC-101:** the execution manifest holds no invented project ID, no
+     secret value and no real address; every unresolved value is `null` and every
+     `authorized` is false.
+102. **BCK-05-AC-102:** every IaC resource is guarded by a flag that is false by
+     default; a plan without a signed record reference creates zero resources.
+103. **BCK-05-AC-103:** dev, stage and prod share modules and never state, rights
+     or parameters.
+104. **BCK-05-AC-104:** each resource has exactly one owner (Firebase CLI or
+     Terraform); Rules, indexes, TTL and Functions deployment are not managed by
+     Terraform.
+105. **BCK-05-AC-105:** containment never blocks cancellation of an existing
+     Booking or a mandatory privacy operation, and there is no automatic billing
+     detach.
+106. **BCK-05-AC-106:** the validation workflow has minimal permissions, no
+     secrets and no `id-token`; writing IaC grants no authority to apply it.
