@@ -1,4 +1,5 @@
-import type { MediaFamily } from '../../../../contracts/media_v1.js';
+import type { MediaFailureCode, MediaFamily } from '../../../../contracts/media_v1.js';
+import type { MediaAuthorization } from '../../domain/repositories.js';
 import type { PublisherRefV1 } from '../../../../contracts/identity_v1.js';
 import type { EntityId } from '../../../../shared/ids.js';
 import type { MarketId } from '../../../reference_data/domain/identifiers.js';
@@ -33,6 +34,32 @@ export type MediaAuthorityResult =
  */
 export interface MediaActorAuthorityPort {
   evaluate(request: MediaAuthorityRequest): Promise<MediaAuthorityResult>;
+}
+
+/**
+ * A stored command result is idempotency, not a standing permission: before a
+ * replay hands anything back, every check it originally relied on is repeated
+ * with the caller's current authority. Returns the first refusal, if any.
+ */
+export async function repeatAuthorizations(
+  authority: MediaActorAuthorityPort,
+  actor: MediaActor,
+  recorded: readonly MediaAuthorization[],
+  nowUtc: string,
+): Promise<MediaFailureCode | undefined> {
+  for (const item of recorded) {
+    const result = await authority.evaluate({
+      actor,
+      marketId: item.marketId,
+      ...(item.publisherRef === undefined ? {} : { publisherRef: item.publisherRef }),
+      family: item.family,
+      action: item.action,
+      nowUtc,
+    });
+    if (!result.allowed)
+      return result.reason === 'session_invalid' ? 'unauthenticated' : result.reason;
+  }
+  return undefined;
 }
 
 /**

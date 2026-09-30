@@ -7,6 +7,7 @@ import type { MediaAssetV1 } from '../../src/contracts/media_v1.js';
 import type { EntityId } from '../../src/shared/ids.js';
 import type { ServerClock } from '../../src/shared/server_clock.js';
 import { parseUtcInstant } from '../../src/shared/utc_instant.js';
+import { ContentPublicationService } from '../../src/modules/content/application/content_publication_service.js';
 import { ContentMediaScope } from '../../src/modules/content/application/content_media_scope.js';
 import type { MediaReadinessPort } from '../../src/modules/content/application/ports/media_readiness_port.js';
 import type {
@@ -32,6 +33,7 @@ import type { AttachmentReferencePort } from '../../src/modules/media/applicatio
 import type { EntityScopePort } from '../../src/modules/media/application/ports/entity_scope_port.js';
 import { attachmentsRevision } from '../../src/modules/media/domain/media_attachment.js';
 import type { MediaPolicy } from '../../src/modules/media/domain/media_policy.js';
+import { bodyFor, commands, servicePorts } from '../support/content_repository_scenarios.js';
 import { FakeObjectStore } from '../../src/modules/media/infrastructure/fake_object_store.js';
 import { FakeProcessor } from '../../src/modules/media/infrastructure/fake_processor.js';
 import { FakeScanner } from '../../src/modules/media/infrastructure/fake_scanner.js';
@@ -491,5 +493,75 @@ void test('a private or protected original never becomes part of a public revisi
       ready: false,
       reason: 'restricted',
     });
+  }
+});
+
+/** Fails the test instead of hanging it when two modules wait for each other. */
+function withDeadline<T>(work: Promise<T>, label: string): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label}: no progress (deadlock)`)), 5000);
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}
+
+void test('Content and Media never wait for each other while holding a transaction', async () => {
+  const h = await harness();
+  const contentService = new ContentPublicationService({
+    repository: h.contentRepository,
+    ...servicePorts(),
+    // The real Media readiness adapter, exactly as Content is wired to it in production code.
+    media: h.adapter,
+  });
+  const owner = ulid(1);
+  const c = commands(owner);
+  const actor = { userId: owner, sessionId: ulid(101) };
+  for (let round = 0; round < 12; round += 1) {
+    const draft = await contentService.execute(actor, c.create(bodyFor(owner)));
+    assert.equal(draft.kind, 'succeeded');
+    const created = (draft as { data: { draftId: string; contentId: string } }).data;
+    // Submit (Content transaction -> Media readiness) racing an upload session
+    // (Media transaction -> Content entity scope) and a delete (Media -> Content references).
+    const results = await withDeadline(
+      Promise.all([
+        contentService.execute(actor, c.submit(created.draftId, 1)),
+        h.service.execute(
+          actor,
+          createCommand({
+            publisherRef: { type: 'user', id: owner },
+            entityIntent: {
+              domain: 'content',
+              entityId: created.contentId,
+              purpose: 'contentMedia',
+            },
+          }),
+        ),
+        h.service.execute(
+          actor,
+          command('deleteAsset', { assetId: ulid(9000 + round), expectedAssetRevision: 1 }),
+        ),
+      ]),
+      `round ${String(round)}`,
+    );
+    assert.equal(results.length, 3);
+    // Rolling back while media is being attached must not wedge either module.
+    const rollback = await withDeadline(
+      Promise.all([
+        contentService.execute(actor, c.activate(created.contentId, ulid(8000 + round), 1)),
+        h.service.execute(
+          actor,
+          createCommand({
+            publisherRef: { type: 'user', id: owner },
+            entityIntent: {
+              domain: 'content',
+              entityId: created.contentId,
+              purpose: 'contentMedia',
+            },
+          }),
+        ),
+      ]),
+      `rollback round ${String(round)}`,
+    );
+    assert.equal(rollback.length, 2);
   }
 });

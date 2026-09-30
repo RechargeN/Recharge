@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.104**
+- Version: **2.4.105**
 - Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,22 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.105.** Synchronizes the registry rows and records the remediation of an
+independent audit of stages 1-2, without widening cloud, spend or market
+authority:
+
+- BCK-07 v0.13 (105 -> 108 AC) and BCK-14 v0.5 (82 -> 85 AC) record: replays
+  re-check authority, no cross-module port call under a repository transaction,
+  a verified Firestore client endpoint, paged effect reads and recovery of an
+  abandoned Media attempt; all inside the existing closed maps;
+- status drift removed: the BCK-07 row no longer says the Content aggregate is
+  absent (it is Present locally and in an Emulator-only Firestore repository,
+  production Absent) and the BCK-14 row records the local Media foundation
+  (fake adapters, production Absent); no production status is raised;
+- the five Create types without source rules (Route, Scenario, Session,
+  Class/Workshop, Find People) stay disabled with explicit reasons and are not
+  covered by this change.
 
 **v2.4.104.** Registers `BCK07-PERSIST-01` (BCK-07 v0.12 §38), the
 Emulator-only Content persistence slice, without widening cloud, spend or market
@@ -1369,14 +1385,14 @@ Absent -> Doing -> Review -> Done -> Enabled -> Disabled/Retired
 | BCK-04 | `BACKEND_SECURITY_PRIVACY_SPEC.md` | Security/Privacy owner | AuthN/Z controls, App Check, Rules/IAM, data classes, consent, retention/deletion, rate limits | BCK-01, ADR 0013, ADR 0015, environment policy, OD-07, OD-11 | Review v0.4.35 — legal-hold-safe paged erasure and linked follow-up added; 103 AC; independent/qualified/production gates retained | Local ports/Rules/Emulator evidence Present; product/cloud Absent |
 | BCK-05 | `BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md` | Platform Operations owner | Environments, projects/resources, CI/CD, server flags, SLO, operational monitoring, cost, backup/DR | BCK-01, BCK-04, environment policy, OD-07, OD-09 | Review v0.2.41 — durable Event discovery, fenced delivery and audited replay; 100 AC; cloud evidence retained | Local R0/R1 operations foundation Present; product/cloud Absent |
 | BCK-06 | `IDENTITY_PUBLISHER_BACKEND_SPEC.md` | Identity owner | User, sessions, Creator verification, Page/membership/capabilities, PublisherRef, Find People consent | ADR 0015, BCK-03, BCK-04, OD-08, OD-11 | Review v0.8 — establish/refresh/recovery, three-installation ceiling, idle expiry and persisted UID→User authority; production decisions remain gated | Present locally — in-memory and Emulator-only Firestore/callables; cloud/production Absent |
-| BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.7 — Event delivery handoff plus additive delegated-import inputs; broader BCK07-LOCAL-01 remains gated; 97 AC | Event delivery facts/effects only; Content/Event Ingestion aggregates absent |
+| BCK-07 | `CONTENT_PUBLICATION_BACKEND_SPEC.md` | Content Platform owner | 10 Create types, drafts/import, publish lifecycle, PublisherRef, moderation handoff, seeded provenance | BCK-03, BCK-04, BCK-06, BCK-18, BCK-20, domain specs, OD-03, OD-10, OD-11 | Review v0.13 — Event delivery handoff, delegated-import inputs, BCK07-LOCAL-01 (five of ten types, all disabled) and Emulator-only BCK07-PERSIST-01; 108 AC | Local Content aggregate Present (in-memory and Emulator-only Firestore); production, Event Ingestion runtime and activation absent |
 | BCK-08 | `DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md` | Discover owner | Catalog, search/filter/geo, ranking, freshness and composed availability projection | BCK-03, BCK-04, BCK-07, BCK-20, OD-01, OD-03 | Review v0.3 — Stage 3 unified query/snapshot/freshness contract complete; OD/source/Approval blockers remain | Absent |
 | BCK-09 | `EVENT_BOOKING_BACKEND_FIREBASE_FULL_SPEC.md` | Booking owner | Internal free Booking, holds, inventory ledger, active key, usage, audit, outbox and internal availability source | Hard: ADR 0019, ECL-03, BCK-03, BCK-04, BCK-05, BCK-06, BCK-07; policy gate: OD-11; gated effect peer: BCK-13 | Review v1.25 — manual reconfirmation and transaction-safe deadline release verified on exact toolchain; fixed escrow selected but disabled; qualified/cloud gates pending | Six disabled Booking callables, Event trigger plus two schedules, default-deny collections and disabled mobile adapter; cloud/deployed production binding Absent |
 | BCK-10 | `PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md` | Planning owner | Scenario sync/publish and separate private/invited Quick Plan collaboration | BCK-03, BCK-04, BCK-06, BCK-07, BCK-18, BCK-20, Scenario spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-11 | `ROUTE_GPX_BACKEND_SPEC.md` | Route owner | Route aggregate, GPX/media, privacy, sync and publication | BCK-03, BCK-04, BCK-06, BCK-07, BCK-14, BCK-18, BCK-20, Route spec | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; review pending | Absent |
 | BCK-12 | `USER_LIBRARY_REVIEWS_BACKEND_SPEC.md` | User Platform owner | Two bounded aggregates: favorites/visits and reviews/ratings; report cases excluded | BCK-03, BCK-04, BCK-06, BCK-08, BCK-18 | Review v0.3 — Stage 4 explicit Visit/Review/T&S effect contract; Approval/privacy/runtime blockers remain | Absent |
 | BCK-13 | `NOTIFICATIONS_BACKEND_SPEC.md` | Notifications owner | Inbox, push tokens/FCM, preferences, deep links, outbox consumers and optional email | BCK-03, BCK-04, BCK-05, BCK-06, BCK-18, BCK-20, OD-02, OD-09, OD-10 | Review v0.3 — Stage 4 inbox/delivery/receipt contract; provider/runtime gates remain | Absent |
-| BCK-14 | `MEDIA_STORAGE_BACKEND_SPEC.md` | Media Platform owner | Upload/finalize, metadata, ownership, transforms, protected access, deletion/orphan cleanup | BCK-03, BCK-04, BCK-05, BCK-06, BCK-07 | Review v0.3 — Stage 4 upload/scan/variant/deletion chain; Approval/runtime blockers remain | Absent |
+| BCK-14 | `MEDIA_STORAGE_BACKEND_SPEC.md` | Media Platform owner | Upload/finalize, metadata, ownership, transforms, protected access, deletion/orphan cleanup | BCK-03, BCK-04, BCK-05, BCK-06, BCK-07 | Review v0.5 — Stage 4 upload/scan/variant/deletion plus local BCK14-LOCAL-01 (fake adapters) chain; Approval/runtime blockers remain | Absent |
 | BCK-15 | `AI_BACKEND_SPEC.md` | AI Platform owner | Provider-neutral server proxy, quota, redaction, prompts/evals and kill switches | ADR 0018, BCK-03, BCK-04, BCK-05, BCK-06 | Draft v0.3 — Stage 5 provider-neutral gateway/fallback/evaluation contract; all production gates pending | Absent |
 | BCK-16 | `PROVIDER_INTEGRATION_BACKEND_SPEC.md` | Integrations owner | Provider adapters, provider availability source, provenance/freshness, cache, live-check/handoff | BCK-03, BCK-04, BCK-05, BCK-08, BCK-20 | Draft v0.3.1 — Stage 5 contract; lifecycle vocabulary normalized; all provider gates pending | Absent |
 | BCK-17 | `PAYMENTS_BACKEND_SPEC.md` | RechargeN / Product owner (interim); permanent Payments owner assigned by new Accepted ADR | Payment authority, ledger, webhooks, refunds, disputes and compliance | Hard: new Accepted ADR, BCK-03, BCK-04, BCK-05, BCK-06; integration peer: BCK-13 | Draft v0.3.1 — complete design with normalized lifecycle vocabulary; still hard-blocked pending new Accepted Payments ADR | Absent |

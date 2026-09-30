@@ -24,6 +24,12 @@
       "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
       "action": "marked",
       "assetRevision": 8
+    },
+    {
+      "schemaVersion": 1,
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "action": "recovered",
+      "assetRevision": 8
     }
   ],
   "asset": [

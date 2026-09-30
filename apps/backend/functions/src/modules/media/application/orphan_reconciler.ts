@@ -1,4 +1,8 @@
-import type { MediaCommandV1, OrphanReconciliationV1 } from '../../../contracts/media_v1.js';
+import type {
+  MediaCommandV1,
+  OrphanReconciliationV1,
+  ProcessingReceiptV1,
+} from '../../../contracts/media_v1.js';
 import { validateMediaContract } from '../../../contracts/validate_media_contract.js';
 import { deepFreeze, type DeepReadonly } from '../../../shared/immutable.js';
 import type { ServerClock } from '../../../shared/server_clock.js';
@@ -11,7 +15,7 @@ import {
   unsupported,
   type MediaResult,
 } from '../domain/failures.js';
-import { withOrphanSince } from '../domain/media_asset.js';
+import { advance, withOrphanSince } from '../domain/media_asset.js';
 import {
   decideOrphan,
   requireRetentionPolicy,
@@ -51,34 +55,56 @@ export class OrphanReconciler {
     const { assetId } = parsed.value.payload;
     try {
       const policy = requireRetentionPolicy(this.deps.retention);
+      // Asked before any transaction is held. An unreachable owning domain leaves
+      // every settled asset untouched; attempt and upload recovery never need it.
       const answer = await this.deps.references
         .isReferenced(assetId)
-        .then((value) => ({ known: true as const, value }))
-        .catch(() => ({ known: false as const }));
-      if (!answer.known) {
-        // The owning domain is unreachable: nothing changes, not even the grace clock.
-        const current = await this.deps.repository.transact((tx) => tx.asset(assetId));
-        if (current === null) throw new MediaDomainRefusal('not_found');
-        return succeeded(
-          deepFreeze({
-            schemaVersion: 1,
-            assetId,
-            action: 'keep',
-            assetRevision: current.revision,
-          }),
-        );
-      }
-      const referenced = answer.value;
+        .then((value): boolean | 'unknown' => value)
+        .catch((): 'unknown' => 'unknown');
       const nowUtc = parseUtcInstant(this.deps.clock.now().toISOString());
       const decision = await this.deps.repository.transact(async (tx) => {
         const asset = await tx.asset(assetId);
         if (asset === null) throw new MediaDomainRefusal('not_found');
         const session = await tx.sessionForAsset(assetId);
-        const choice = decideOrphan({ asset, session, referenced, policy, nowUtc });
+        const receipts = await tx.receiptsForAsset(assetId);
+        const lastAttempt = receipts[receipts.length - 1]?.attemptNumber ?? 0;
+        const choice = decideOrphan({
+          asset,
+          session,
+          referenced: answer,
+          attemptInFlight: asset.attemptCount > lastAttempt,
+          policy,
+          nowUtc,
+        });
         if (choice.action === 'mark' || choice.action === 'unmark') {
           const next = withOrphanSince(asset, choice.action === 'mark' ? nowUtc : null, nowUtc);
           if (next !== asset) tx.putAsset(next, asset.revision);
           return { choice, revision: next.revision };
+        }
+        if (choice.action === 'abandon_attempt') {
+          const source = asset.sourceGenerationRef;
+          if (source === undefined)
+            return { choice: { action: 'keep' as const }, revision: asset.revision };
+          // The attempt is closed as quarantined with an honest receipt. The asset
+          // revision moves, so a result that arrives late is refused as stale; the
+          // owner continues with `retryProcessing` on the same source generation.
+          const recovered = advance(asset, ['quarantined'], nowUtc);
+          tx.putReceipt(
+            deepFreeze<ProcessingReceiptV1>({
+              schemaVersion: 1,
+              assetId: asset.assetId,
+              attemptNumber: asset.attemptCount,
+              sourceProviderGeneration: source.providerGeneration,
+              sourceSha256: source.sha256,
+              policyRevision: asset.policyRevision,
+              scan: { toolRevision: 'attempt-abandoned', result: 'inconclusive' },
+              outcome: 'quarantined',
+              startedAtUtc: asset.updatedAtUtc,
+              completedAtUtc: nowUtc,
+            }),
+          );
+          tx.putAsset(recovered, asset.revision);
+          return { choice, revision: recovered.revision };
         }
         return { choice, revision: asset.revision };
       });
@@ -100,6 +126,9 @@ export class OrphanReconciler {
             status?.state === 'completed' ? 'deleted' : status === null ? 'keep' : 'deleting';
           break;
         }
+        case 'abandon_attempt':
+          action = 'recovered';
+          break;
         case 'resume_delete': {
           const status = await this.deps.deletion.completeDeletion(assetId);
           action = status.state === 'completed' ? 'deleted' : 'deleting';

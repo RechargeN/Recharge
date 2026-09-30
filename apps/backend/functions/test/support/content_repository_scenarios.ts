@@ -108,7 +108,7 @@ const placeBody = {
   },
 };
 
-function bodyFor(owner: string): Record<string, unknown> {
+export function bodyFor(owner: string): Record<string, unknown> {
   return { ...placeBody, provenance: { ...placeBody.provenance, submittedByUserId: owner } };
 }
 
@@ -207,6 +207,22 @@ function effectOf(contentId: EntityId, revisionId: EntityId, pointerRevision: nu
     referenceRevisions: references,
     occurredAtUtc: later,
   } as ContentEffectV1;
+}
+
+/** Every stored effect of a Content, read page by page (never a single unbounded read). */
+async function allEffects(
+  tx: Parameters<Parameters<ContentRepository['transact']>[0]>[0],
+  contentId: string,
+): Promise<ContentEffectV1[]> {
+  const found: ContentEffectV1[] = [];
+  let cursor: { pointerRevision: number; effectId: string } | null = null;
+  for (;;) {
+    const page: readonly ContentEffectV1[] = await tx.effectsPage(contentId, cursor, 2);
+    found.push(...page);
+    const last = page[page.length - 1];
+    if (last === undefined || page.length < 2) return found;
+    cursor = { pointerRevision: last.pointerRevision, effectId: last.effectId };
+  }
 }
 
 const refusalCode = (code: string) => (error: unknown) =>
@@ -417,7 +433,7 @@ export const repositoryScenarios: readonly ContentScenario[] = [
         assert.equal(await tx.draft(draft.draftId), null);
         assert.equal(await tx.publishedRevision(revision.publishedRevisionId), null);
         assert.equal(await tx.pointer(contentId), null);
-        assert.deepEqual(await tx.effectsForContent(contentId), []);
+        assert.deepEqual(await allEffects(tx, contentId), []);
       });
     },
   },
@@ -434,6 +450,7 @@ export const repositoryScenarios: readonly ContentScenario[] = [
         idempotencyKey: key,
         semanticHash: 'a'.repeat(64),
         outcome,
+        authorizations: [],
         createdAtUtc: later,
       };
       await repository.transact((tx) => {
@@ -476,10 +493,10 @@ export const repositoryScenarios: readonly ContentScenario[] = [
       });
       await repository.transact(async (tx) => {
         assert.deepEqual(
-          (await tx.effectsForContent(contentId)).map((item) => item.pointerRevision),
+          (await allEffects(tx, contentId)).map((item) => item.pointerRevision),
           [1, 2, 3],
         );
-        assert.deepEqual(await tx.effectsForContent(newId()), []);
+        assert.deepEqual(await allEffects(tx, newId()), []);
       });
       await assert.rejects(
         repository.transact((tx) => {
@@ -499,6 +516,99 @@ export const repositoryScenarios: readonly ContentScenario[] = [
           });
         }),
         conflict('duplicate_id'),
+      );
+    },
+  },
+  {
+    name: 'stored effects are read in stable pages, ties included, with no cap on history length',
+    async run(make) {
+      const repository = make();
+      const contentId = newId();
+      const revisionId = newId();
+      const total = 1100;
+      for (let start = 1; start <= total; start += 300)
+        await repository.transact((tx) => {
+          for (let revision = start; revision < start + 300 && revision <= total; revision += 1)
+            tx.effects.append(effectOf(contentId, revisionId, revision));
+        });
+      // Two effects at one pointer revision keep a total order through the cursor.
+      await repository.transact((tx) => {
+        tx.effects.append({
+          ...effectOf(contentId, revisionId, 5),
+          effectId: `${revisionId}:ContentVisibilityChanged:5`,
+          kind: 'ContentVisibilityChanged',
+        });
+      });
+      const seen: string[] = [];
+      let cursor: { pointerRevision: number; effectId: string } | null = null;
+      let pages = 0;
+      for (;;) {
+        const at: typeof cursor = cursor;
+        const page: readonly ContentEffectV1[] = await repository.transact((tx) =>
+          tx.effectsPage(contentId, at, 250),
+        );
+        pages += 1;
+        seen.push(...page.map((item) => item.effectId));
+        const last = page[page.length - 1];
+        if (last === undefined || page.length < 250) break;
+        cursor = { pointerRevision: last.pointerRevision, effectId: last.effectId };
+      }
+      assert.equal(seen.length, total + 1);
+      assert.equal(new Set(seen).size, total + 1);
+      assert.ok(pages >= 5);
+      const ordered = await repository.transact(async (tx) => allEffects(tx, contentId));
+      assert.equal(ordered.length, total + 1);
+      assert.deepEqual(
+        ordered.map((item) => item.effectId),
+        seen,
+      );
+      // The very last effect is reachable however long the history is.
+      const tail = await repository.transact((tx) =>
+        tx.effectsPage(contentId, { pointerRevision: total - 1, effectId: '￿' }, 1),
+      );
+      assert.equal(tail[0]?.pointerRevision, total);
+    },
+  },
+  {
+    name: 'integrity verification finds the current effect however long the effect history is',
+    async run(make) {
+      const repository = make();
+      const draft = draftOf({});
+      const revision = revisionOf(draft, 1);
+      const contentId = draft.contentId;
+      await repository.transact((tx) => {
+        tx.putPublishedRevision(revision);
+        tx.effects.append(effectOf(contentId, revision.publishedRevisionId, 1));
+        tx.putPointer(
+          { ...pointerFor(revision.publishedRevisionId, contentId), revision: 1300 },
+          0,
+        );
+      });
+      for (let start = 2; start <= 1300; start += 300)
+        await repository.transact((tx) => {
+          for (let value = start; value < start + 300 && value <= 1300; value += 1)
+            tx.effects.append({
+              ...effectOf(contentId, revision.publishedRevisionId, value),
+              kind: 'ContentVisibilityChanged',
+              effectId: `${revision.publishedRevisionId}:ContentVisibilityChanged:${String(value)}`,
+            });
+        });
+      const report = await new ContentIntegrityRecovery(repository).verify(contentId);
+      assert.deepEqual(report.findings, []);
+      const seen: number[] = [];
+      const delivered = await new ContentIntegrityRecovery(repository).replayEffects(
+        contentId,
+        (effect) => {
+          seen.push(effect.pointerRevision);
+          return Promise.resolve();
+        },
+        1200,
+        7,
+      );
+      assert.equal(delivered, 100);
+      assert.deepEqual(
+        seen,
+        Array.from({ length: 100 }, (_, index) => 1201 + index),
       );
     },
   },
@@ -596,6 +706,7 @@ export const repositoryScenarios: readonly ContentScenario[] = [
             idempotencyKey: `key-${uniqueToken()}`,
             semanticHash: 'a'.repeat(64),
             outcome: { blob: 'x'.repeat(5000) },
+            authorizations: [],
             createdAtUtc: later,
           });
         }),
@@ -711,7 +822,7 @@ async function data<T>(
 let keySerial = 0;
 const key = (label: string): string => `${label}-${uniqueToken()}-${String(++keySerial)}`;
 
-function commands(owner: EntityId) {
+export function commands(owner: EntityId) {
   return {
     create: (body: Record<string, unknown> = bodyFor(owner), idempotencyKey = key('create')) => ({
       schemaVersion: 1,
@@ -807,7 +918,7 @@ export const serviceScenarios: readonly ContentScenario[] = [
         );
         assert.equal(revisions[0]?.mediaAttachments[0]?.assetId, asset);
         assert.equal(await tx.isMediaReferenced(asset), true);
-        const effects = await tx.effectsForContent(draft.contentId);
+        const effects = await allEffects(tx, draft.contentId);
         assert.deepEqual(
           effects.map((item) => item.pointerRevision),
           [1, 2, 3, 4],
@@ -861,7 +972,7 @@ export const serviceScenarios: readonly ContentScenario[] = [
       );
       await repository.transact(async (tx) => {
         assert.equal((await tx.publishedRevisionsForContent(draft.contentId)).length, 1);
-        assert.equal((await tx.effectsForContent(draft.contentId)).length, 1);
+        assert.equal((await allEffects(tx, draft.contentId)).length, 1);
       });
     },
   },

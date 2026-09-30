@@ -24,6 +24,12 @@ export interface MediaRetentionPolicy {
   readonly orphanGraceSeconds: number;
   readonly quarantinedRetentionSeconds: number;
   readonly blockedRetentionSeconds: number;
+  /**
+   * How long an attempt may stay in flight before it counts as abandoned (a
+   * crashed worker or a lost second transaction). Synthetic in tests; no accepted
+   * value is invented here.
+   */
+  readonly inFlightAttemptLeaseSeconds: number;
   /** Retention of the deletion receipt itself, separate from the bytes it covers. */
   readonly deletionReceiptRetentionSeconds: number;
 }
@@ -40,12 +46,16 @@ export type OrphanDecision =
   | { readonly action: 'mark' }
   | { readonly action: 'unmark' }
   | { readonly action: 'resume_delete' }
+  | { readonly action: 'abandon_attempt' }
   | { readonly action: 'delete'; readonly reason: 'orphan_cleanup' | 'expired_upload' };
 
 export interface OrphanInput {
   readonly asset: MediaAsset;
   readonly session: UploadSession | null;
-  readonly referenced: boolean;
+  /** `unknown` = the owning domain could not be asked; nothing settled is touched then. */
+  readonly referenced: boolean | 'unknown';
+  /** An attempt was started (attempt count) that has no receipt yet. */
+  readonly attemptInFlight?: boolean;
   readonly policy: MediaRetentionPolicy;
   readonly nowUtc: UtcInstant;
 }
@@ -57,6 +67,7 @@ export interface OrphanInput {
  */
 export function decideOrphan(input: OrphanInput): OrphanDecision {
   const { asset, session, referenced, policy, nowUtc } = input;
+  const attemptInFlight = input.attemptInFlight === true;
   if (asset.lifecycle === 'deleted') return { action: 'keep' };
   if (asset.lifecycle === 'deleting') return { action: 'resume_delete' };
   if (asset.lifecycle === 'reserved' || asset.lifecycle === 'uploading')
@@ -68,7 +79,14 @@ export function decideOrphan(input: OrphanInput): OrphanDecision {
     asset.lifecycle === 'validating' ||
     asset.lifecycle === 'processing'
   )
-    return { action: 'keep' };
+    // An attempt whose result never arrived is recovered after its lease; an asset
+    // merely waiting for its owner to finalize is left alone.
+    return attemptInFlight &&
+      Date.parse(nowUtc) - Date.parse(asset.updatedAtUtc) >=
+        policy.inFlightAttemptLeaseSeconds * 1000
+      ? { action: 'abandon_attempt' }
+      : { action: 'keep' };
+  if (referenced === 'unknown') return { action: 'keep' };
   if (referenced)
     return asset.orphanSinceUtc === undefined ? { action: 'keep' } : { action: 'unmark' };
   if (asset.orphanSinceUtc === undefined) return { action: 'mark' };

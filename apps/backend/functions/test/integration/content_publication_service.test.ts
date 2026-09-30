@@ -2275,3 +2275,40 @@ void test('rollback verifies exactly the references stored in the target revisio
   assert.deepEqual(input?.pinned, [pinnedAttachment]);
   assert.equal(pointerOf(h).currentPublishedRevisionId, first.revision.publishedRevisionId);
 });
+
+void test('a stored result is not a standing permission: a replay repeats the current authority check', async () => {
+  const h = harness();
+  const create = createCommand({}, 'create-replay-key');
+  const draft = await data<DraftLike>(h.service.execute(actorA, create));
+  const submit = submitCommand(draft.draftId, 1, 'submit-replay-key');
+  const submission = await data<SubmissionLike>(h.service.execute(actorA, submit));
+  const publish = publishCommand(submission.submissionId, 0, 'publish-replay-key');
+  await data<PublishedRevisionV1>(h.service.execute(actorA, publish));
+  const stored = JSON.stringify(h.repository.snapshot());
+  for (const replayed of [create, submit, publish])
+    assert.equal((await h.service.execute(actorA, replayed)).kind, 'succeeded');
+  // The publisher loses its authority: the same commands are refused, nothing is handed back.
+  h.eligibility.deny = 'membership_inactive';
+  for (const replayed of [create, submit, publish])
+    assert.deepEqual(await h.service.execute(actorA, replayed), {
+      kind: 'rejected',
+      code: 'membership_inactive',
+    });
+  h.eligibility.deny = undefined;
+  h.eligibility.wrongPublisher = true;
+  for (const replayed of [create, submit, publish])
+    assert.deepEqual(await h.service.execute(actorA, replayed), {
+      kind: 'rejected',
+      code: 'publisher_not_eligible',
+    });
+  h.eligibility.wrongPublisher = false;
+  // Refused replays write nothing; once authority is back the replay works again.
+  assert.equal(JSON.stringify(h.repository.snapshot()), stored);
+  for (const replayed of [create, submit, publish])
+    assert.equal((await h.service.execute(actorA, replayed)).kind, 'succeeded');
+  // A changed payload under the same key stays a conflict.
+  assert.deepEqual(
+    await h.service.execute(actorA, createCommand({ marketId: 'EE' }, 'create-replay-key')),
+    { kind: 'rejected', code: 'idempotency_conflict' },
+  );
+});

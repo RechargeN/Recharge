@@ -1,8 +1,22 @@
-import type { MediaDeletionStatusV1, ProcessingReceiptV1 } from '../../../contracts/media_v1.js';
+import type {
+  MediaDeletionStatusV1,
+  MediaFamily,
+  ProcessingReceiptV1,
+} from '../../../contracts/media_v1.js';
+import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
+import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import type { MediaEffectSink } from '../application/ports/media_effect_sink.js';
 import type { DeepReadonly } from '../../../shared/immutable.js';
 import type { MediaAsset } from './media_asset.js';
 import type { UploadSession } from './upload_session.js';
+
+/** One authority check a stored command result relied on; repeated on every replay. */
+export interface MediaAuthorization {
+  readonly marketId: MarketId;
+  readonly publisherRef?: PublisherRefV1;
+  readonly family: MediaFamily;
+  readonly action: 'upload' | 'read' | 'manage';
+}
 
 export interface MediaIdempotencyRecord {
   readonly actorUserId: string;
@@ -10,6 +24,8 @@ export interface MediaIdempotencyRecord {
   readonly idempotencyKey: string;
   readonly semanticHash: string;
   readonly outcome: unknown;
+  /** Empty only for system instructions, which carry their own verified authority. */
+  readonly authorizations: readonly MediaAuthorization[];
   readonly createdAtUtc: string;
 }
 

@@ -636,6 +636,24 @@ const acceptanceMatrix: ReadonlyArray<
     ],
   ],
   [
+    'AC-83 a stored result never outlives the caller authority',
+    [
+      ['deletion', 'a stored result is not a standing permission'],
+      ['contentService', 'a stored result is not a standing permission'],
+    ],
+  ],
+  [
+    'AC-84 no module waits for another while holding a transaction',
+    [['readiness', 'Content and Media never wait for each other while holding a transaction']],
+  ],
+  [
+    'AC-85 an abandoned attempt is recovered and a late result is refused',
+    [
+      ['deletion', 'an attempt whose result never arrived is recovered after its lease'],
+      ['retention', 'an attempt without a result is abandoned only after its lease'],
+    ],
+  ],
+  [
     'restriction is a verified system instruction',
     [['deletion', 'a restriction is a verified system instruction and never a user command']],
   ],
@@ -664,7 +682,7 @@ void test('local acceptance matrix: every requirement is backed by a named, exis
         missing.push(`${requirement}: "${title}" not in ${file}`);
   }
   assert.deepEqual(missing, []);
-  assert.ok(acceptanceMatrix.length >= 16);
+  assert.ok(acceptanceMatrix.length >= 19);
 });
 
 void test('the specification records the acceptance criteria and the evidence that is still absent', () => {
@@ -680,7 +698,7 @@ void test('the specification records the acceptance criteria and the evidence th
     ),
     'utf8',
   );
-  for (let number = 76; number <= 82; number += 1)
+  for (let number = 76; number <= 85; number += 1)
     assert.ok(spec.includes(`BCK-14-AC-${String(number)}`), `AC-${String(number)}`);
   assert.ok(spec.includes('real scanner/processor evidence absent'));
   // Every behaviour a fake cannot prove is named, so it cannot be mistaken for covered.

@@ -1,10 +1,10 @@
 # Recharge Backend — Media Storage Specification
 
 - ID: **BCK-14**
-- Version: **0.4**
+- Version: **0.5**
 - Date: **2026-09-30**
 - Spec status: **Review — documentation only; approval pending**
-- Runtime status: **Absent in production; BCK14-LOCAL-01 sub-slice 2.5a present locally, in-memory and fake adapters only**
+- Runtime status: **Absent in production; BCK14-LOCAL-01 (2.5a-2.5c) present locally, in-memory and fake adapters only**
 - Accountable owner: **Media Platform owner**
 - Review owners: **Security/Privacy, Platform Operations, Content, Identity,
   Mobile, Trust & Safety, Route and Legal/Privacy**
@@ -15,6 +15,17 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.5 — 2026-09-30
+
+- records the remediation of an independent audit inside the closed §34.2 map
+  (no new paths): stored results re-check authority on replay, no Media port is
+  called under a lock, and an in-flight attempt that never returned is recovered
+  (§34.9); adds BCK-14-AC-83..AC-85;
+- the retention policy gains `inFlightAttemptLeaseSeconds` (synthetic in tests,
+  never invented; an absent accepted policy still fails closed);
+- changes no product rule, family, market, export, Firebase, cloud, push or
+  merge decision; BCK-14 stays in Review.
 
 ### v0.4 — 2026-09-30
 
@@ -1145,6 +1156,40 @@ no-Firebase checks) and the acceptance matrix reconciliation.
   and hash, real limits and quota, and legal or safety hold. The local matrix
   proves only contracts, state rules, ownership and orchestration.
 - Deferred by decision: `requestDelivery`, delivery signer and `replaceAsset`.
-- Known local gaps: an attempt whose second transaction never ran leaves the
-  asset `validating` without a receipt (the reconciler deliberately never
-  touches in-flight assets); session expiry is evaluated lazily at confirm.
+- Known local gaps: session expiry is evaluated lazily at confirm. (The earlier
+  gap of an attempt whose second transaction never ran is closed by the
+  recovery of §34.9.)
+
+### 34.9 Audit remediation (v0.5)
+
+- **Replays re-check authority (AC-83).** Every idempotency record stores the
+  checks it relied on; a replay repeats them with the current authority of the
+  caller before returning the stored result and writes nothing if refused.
+- **No wait under a lock (AC-84).** Media asks the owning domain (entity scope,
+  references) before it opens a transaction, never inside one. Deletion holds
+  delivery first, asks, then lifts its own hold or tombstones; an asset that is
+  plainly referenced is refused with no write and no revision change. This is
+  the Media half of BCK-07 v0.13 §38.11.2, where the residual window is stated.
+- **Abandoned attempts (AC-85).** An attempt that started (attempt count without
+  a receipt) and whose result never arrived is recovered by the reconciler once
+  `inFlightAttemptLeaseSeconds` has passed since the last change: the attempt is
+  closed with an honest receipt (`attempt-abandoned`, outcome `quarantined`),
+  the asset moves `validating -> quarantined` through the existing table hop and
+  its revision moves, so a late result is refused as stale; the owner continues
+  with `retryProcessing` on the same generation. A recovered attempt counts
+  against `maxProcessingAttempts`, so recovery cannot loop. An asset that only
+  waits for its owner to finalize is not an attempt and is left alone; an
+  unreachable owning domain never blocks this recovery.
+
+The gap recorded in §34.8 (an attempt without a receipt) is closed by this
+recovery for the local slice; a real worker lease, heartbeat and scheduler stay
+part of the separate adapter verification.
+
+### 34.10 Acceptance addendum (v0.5)
+
+83. **BCK-14-AC-83:** a stored command result never outlives the caller's
+    authority: replays repeat the recorded checks.
+84. **BCK-14-AC-84:** no Media port call is made while a repository transaction is
+    held, and a plainly referenced asset is refused without any write.
+85. **BCK-14-AC-85:** an abandoned attempt is recovered to quarantine with an
+    honest receipt and a late result is refused as stale.

@@ -889,6 +889,7 @@ const files = {
   firestore: 'emulator/content_firestore_repository.test.ts',
   concurrency: 'emulator/content_concurrency.test.ts',
   recovery: 'emulator/content_recovery.test.ts',
+  readiness: 'integration/media_content_readiness.test.ts',
   rules: 'emulator/content_rules_default_deny.test.ts',
 } as const;
 
@@ -1094,6 +1095,25 @@ const acceptanceMatrix: ReadonlyArray<
       ['security', 'Content stays framework-neutral'],
     ],
   ],
+  [
+    'AC-106 a replay never outlives the caller authority',
+    [['service', 'a stored result is not a standing permission']],
+  ],
+  [
+    'AC-107 no cross-module wait under a repository transaction',
+    [['readiness', 'Content and Media never wait for each other while holding a transaction']],
+  ],
+  [
+    'AC-108 effects are paged and verified without a silent cap; the client endpoint is verified',
+    [
+      ['scenarios', 'stored effects are read in stable pages, ties included'],
+      [
+        'scenarios',
+        'integrity verification finds the current effect however long the effect history is',
+      ],
+      ['guard', 'the client itself must target the Emulator, whatever the environment claims'],
+    ],
+  ],
 ];
 
 void test('local acceptance matrix: every requirement is backed by a named, existing test', () => {
@@ -1109,5 +1129,5 @@ void test('local acceptance matrix: every requirement is backed by a named, exis
   }
   assert.deepEqual(missing, []);
   // The matrix itself stays complete: every named requirement group is present.
-  assert.ok(acceptanceMatrix.length >= 27);
+  assert.ok(acceptanceMatrix.length >= 30);
 });

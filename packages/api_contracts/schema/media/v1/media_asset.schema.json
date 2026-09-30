@@ -60,7 +60,8 @@
             "marked",
             "unmarked",
             "deleting",
-            "deleted"
+            "deleted",
+            "recovered"
           ]
         },
         "assetRevision": {

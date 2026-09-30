@@ -34,15 +34,17 @@ import {
   type MediaAsset,
 } from '../domain/media_asset.js';
 import type {
+  MediaAuthorization,
   MediaRepository,
   MediaTransaction,
   StoredDeletionStatus,
 } from '../domain/repositories.js';
 import { withSessionState } from '../domain/upload_session.js';
-import type {
-  MediaActor,
-  MediaActorAuthorityPort,
-  MediaRestrictionAuthority,
+import {
+  repeatAuthorizations,
+  type MediaActor,
+  type MediaActorAuthorityPort,
+  type MediaRestrictionAuthority,
 } from './ports/actor_authority_port.js';
 import type { AttachmentReferencePort } from './ports/attachment_reference_port.js';
 import type { ObjectStorePort } from './ports/object_store_port.js';
@@ -61,6 +63,12 @@ export type MediaDeletionData = DeepReadonly<MediaDeletionStatusV1> | DeepReadon
 
 const systemActor = 'system:media-restriction';
 
+/** What the first step of a deletion left behind: a hold this call may have placed itself. */
+interface HeldAsset {
+  readonly revision: number;
+  readonly placed: boolean;
+}
+
 /**
  * Deletion, detach and restriction of Media assets (BCK-14 §33.3). Delivery is
  * tombstoned first; bytes and variants are removed afterwards and the asset is
@@ -74,32 +82,52 @@ export class MediaDeletionService {
     return parseUtcInstant(this.deps.clock.now().toISOString());
   }
 
-  /** Owner deletion: references are consulted and the asset must be settled. */
+  /**
+   * Owner deletion. The owning domain is asked about references only while no
+   * Media transaction is held (no cross-module call under a lock), and delivery is
+   * held first so nothing new can attach while it answers: hold, ask, then either
+   * lift the hold (still referenced) or tombstone and clean up.
+   */
   async deleteAsset(
     actor: MediaActor,
     command: DeleteAssetCommandV1,
     semanticHash: string,
   ): Promise<MediaResult<MediaDeletionData>> {
     const nowUtc = this.now();
-    const begun = await this.deps.repository.transact(async (tx) => {
+    const authorizations: MediaAuthorization[] = [];
+    // First look, before any transaction: an asset that is plainly referenced is
+    // refused without touching it (no hold, no revision churn).
+    const knownReferenced = await this.referenced(command.payload.assetId);
+    const first = await this.deps.repository.transact(async (tx) => {
       const prior = await tx.idempotency(actor.userId, command.commandType, command.idempotencyKey);
       if (prior !== null) {
         if (prior.semanticHash !== semanticHash)
           throw new MediaDomainRefusal('idempotency_conflict');
+        await this.repeat(actor, prior.authorizations, nowUtc);
         return { replay: deepFreeze(structuredClone(prior.outcome)) as MediaDeletionData };
       }
       const asset = await tx.asset(command.payload.assetId);
       if (asset === null || asset.ownerSubjectId !== actor.userId)
         throw new MediaDomainRefusal('not_found');
-      await this.authorize(actor, asset, nowUtc);
+      await this.authorize(actor, asset, nowUtc, 'manage', authorizations);
       if (asset.revision !== command.payload.expectedAssetRevision)
         throw new MediaDomainRefusal('stale_revision');
-      return { status: await this.begin(tx, asset, 'owner_request', nowUtc) };
+      return this.startDeletion(tx, asset, 'owner_request', nowUtc, knownReferenced);
     });
-    if ('replay' in begun) return succeeded(begun.replay);
+    if ('replay' in first) return succeeded(first.replay);
+    if ('held' in first) {
+      const referenced = await this.referenced(command.payload.assetId);
+      const decided = await this.decide(
+        command.payload.assetId,
+        first.held,
+        referenced,
+        'owner_request',
+      );
+      if (decided === 'referenced') return rejected('asset_referenced');
+    }
     const final = await this.completeDeletion(command.payload.assetId);
     await this.deps.repository.transact((tx) => {
-      this.remember(tx, actor.userId, command, semanticHash, final, nowUtc);
+      this.remember(tx, actor.userId, command, semanticHash, final, nowUtc, authorizations);
     });
     return succeeded(final);
   }
@@ -114,26 +142,31 @@ export class MediaDeletionService {
     semanticHash: string,
   ): Promise<MediaResult<MediaDeletionData>> {
     const nowUtc = this.now();
+    // Asked before any Media transaction is held; the orphan clock is re-checked
+    // against the owning domain by the reconciler before anything is deleted.
+    const referenced = await this.referenced(command.payload.assetId);
     return this.deps.repository.transact(async (tx) => {
       const prior = await tx.idempotency(actor.userId, command.commandType, command.idempotencyKey);
       if (prior !== null) {
         if (prior.semanticHash !== semanticHash)
           throw new MediaDomainRefusal('idempotency_conflict');
+        await this.repeat(actor, prior.authorizations, nowUtc);
         return succeeded(deepFreeze(structuredClone(prior.outcome)) as MediaDeletionData);
       }
+      const authorizations: MediaAuthorization[] = [];
       const asset = await tx.asset(command.payload.assetId);
       if (asset === null || asset.ownerSubjectId !== actor.userId)
         throw new MediaDomainRefusal('not_found');
-      await this.authorize(actor, asset, nowUtc);
+      await this.authorize(actor, asset, nowUtc, 'manage', authorizations);
       if (asset.revision !== command.payload.expectedAssetRevision)
         throw new MediaDomainRefusal('stale_revision');
       if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
         throw new MediaDomainRefusal('invalid_state');
-      if (await this.referenced(asset.assetId)) throw new MediaDomainRefusal('asset_referenced');
+      if (referenced) throw new MediaDomainRefusal('asset_referenced');
       const next = withOrphanSince(asset, nowUtc, nowUtc);
       if (next !== asset) tx.putAsset(next, asset.revision);
       const view = toAssetView(next);
-      this.remember(tx, actor.userId, command, semanticHash, view, nowUtc);
+      this.remember(tx, actor.userId, command, semanticHash, view, nowUtc, authorizations);
       return succeeded<MediaDeletionData>(view);
     });
   }
@@ -204,7 +237,7 @@ export class MediaDeletionService {
             this.effect(tx, next, 'MediaDeliveryRestored', nowUtc);
         }
         const view = toAssetView(next);
-        this.remember(tx, systemActor, command, semanticHash, view, nowUtc);
+        this.remember(tx, systemActor, command, semanticHash, view, nowUtc, []);
         return succeeded<MediaDeletionData>(view);
       });
     } catch (error) {
@@ -214,27 +247,32 @@ export class MediaDeletionService {
 
   /**
    * Cleanup worker entry: starts deletion of an asset the reconciler decided to
-   * remove. References are re-checked and the asset must still be in the state the
-   * decision was made for, so a late reference wins over cleanup.
+   * remove. Same order as an owner deletion (hold, ask the owning domain outside
+   * any transaction, then tombstone or lift), so a late reference wins over cleanup.
    */
   async deleteForCleanup(
     assetId: string,
     reason: DeletionReason,
   ): Promise<StoredDeletionStatus | null> {
     const nowUtc = this.now();
-    const begun = await this.deps.repository
-      .transact(async (tx) => {
+    const knownReferenced = await this.referenced(assetId);
+    try {
+      const first = await this.deps.repository.transact(async (tx) => {
         const asset = await tx.asset(assetId);
         if (asset === null) return null;
-        if (await this.referenced(assetId)) return null;
-        return await this.begin(tx, asset, reason, nowUtc);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof MediaDomainRefusal || error instanceof MediaRepositoryConflict)
-          return null;
-        throw error;
+        return this.startDeletion(tx, asset, reason, nowUtc, knownReferenced);
       });
-    if (begun === null) return null;
+      if (first === null) return null;
+      if ('held' in first) {
+        const referenced = await this.referenced(assetId);
+        if ((await this.decide(assetId, first.held, referenced, reason)) === 'referenced')
+          return null;
+      }
+    } catch (error) {
+      if (error instanceof MediaDomainRefusal || error instanceof MediaRepositoryConflict)
+        return null;
+      throw error;
+    }
     return this.completeDeletion(assetId);
   }
 
@@ -278,33 +316,98 @@ export class MediaDeletionService {
     });
   }
 
-  private async begin(
+  /**
+   * First step of a deletion, with no cross-module call: an unfinished upload is
+   * aborted at once; a settled asset only has its delivery held so nothing new can
+   * attach; anything in flight is not deletable.
+   */
+  private async startDeletion(
+    tx: MediaTransaction,
+    asset: MediaAsset,
+    reason: DeletionReason,
+    nowUtc: UtcInstant,
+    knownReferenced: boolean,
+  ): Promise<{ readonly status: StoredDeletionStatus } | { readonly held: HeldAsset }> {
+    if (asset.lifecycle === 'reserved' || asset.lifecycle === 'uploading')
+      return { status: await this.abortInFlight(tx, asset, reason, nowUtc) };
+    if (
+      asset.lifecycle !== 'ready' &&
+      asset.lifecycle !== 'quarantined' &&
+      asset.lifecycle !== 'blocked'
+    )
+      throw new MediaDomainRefusal('invalid_state');
+    if (knownReferenced) throw new MediaDomainRefusal('asset_referenced');
+    const held = withRestriction(asset, true, nowUtc);
+    if (held !== asset) {
+      tx.putAsset(held, asset.revision);
+      this.effect(tx, held, 'MediaDeliveryDisabled', nowUtc);
+    }
+    return { held: { revision: held.revision, placed: held !== asset } };
+  }
+
+  /**
+   * Second step, after the owning domain answered outside any transaction: a
+   * referenced asset gets its own hold lifted again (a hold that someone else
+   * placed is left alone); an unreferenced one is tombstoned.
+   */
+  private async decide(
+    assetId: string,
+    held: HeldAsset,
+    referenced: boolean,
+    reason: DeletionReason,
+  ): Promise<'started' | 'referenced'> {
+    const nowUtc = this.now();
+    return this.deps.repository.transact(async (tx) => {
+      const asset = await tx.asset(assetId);
+      if (asset === null) throw new MediaDomainRefusal('not_found');
+      if (referenced) {
+        if (held.placed && asset.revision === held.revision) {
+          const lifted = withRestriction(asset, false, nowUtc);
+          tx.putAsset(lifted, asset.revision);
+          if (lifted.lifecycle === 'ready')
+            this.effect(tx, lifted, 'MediaDeliveryRestored', nowUtc);
+        }
+        return 'referenced' as const;
+      }
+      if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
+        return 'started' as const;
+      const next = beginDeletion(asset, nowUtc);
+      tx.putAsset(next, asset.revision);
+      tx.putDeletion(this.pendingStatus(asset.assetId, reason, nowUtc), 0);
+      return 'started' as const;
+    });
+  }
+
+  private pendingStatus(
+    assetId: string,
+    reason: DeletionReason,
+    nowUtc: UtcInstant,
+  ): StoredDeletionStatus {
+    return deepFreeze<MediaDeletionStatusV1>({
+      schemaVersion: 1,
+      assetId: assetId as MediaAsset['assetId'],
+      state: 'pending',
+      reason,
+      deletionRevision: 1,
+      requestedAtUtc: nowUtc,
+    });
+  }
+
+  /** Aborts or expires an unfinished upload; confirmed absence deletes at once. */
+  private async abortInFlight(
     tx: MediaTransaction,
     asset: MediaAsset,
     reason: DeletionReason,
     nowUtc: UtcInstant,
   ): Promise<StoredDeletionStatus> {
-    let next: MediaAsset;
-    if (asset.lifecycle === 'reserved' || asset.lifecycle === 'uploading') {
-      // Confirmed absence deletes at once; any partial data goes through `deleting`.
-      const stat = await this.deps.objectStore.stat(asset.objectKeyHandle);
-      next = abortUpload(asset, stat.kind === 'absent', nowUtc);
-      const session = await tx.sessionForAsset(asset.assetId);
-      if (session?.state === 'open')
-        tx.putSession(
-          withSessionState(session, reason === 'expired_upload' ? 'expired' : 'aborted', nowUtc),
-          session.revision,
-        );
-    } else if (
-      asset.lifecycle === 'ready' ||
-      asset.lifecycle === 'quarantined' ||
-      asset.lifecycle === 'blocked'
-    ) {
-      if (await this.referenced(asset.assetId)) throw new MediaDomainRefusal('asset_referenced');
-      next = beginDeletion(asset, nowUtc);
-    } else {
-      throw new MediaDomainRefusal('invalid_state');
-    }
+    const stat = await this.deps.objectStore.stat(asset.objectKeyHandle);
+    const next = abortUpload(asset, stat.kind === 'absent', nowUtc);
+    const session = await tx.sessionForAsset(asset.assetId);
+    if (session?.state === 'open')
+      tx.putSession(
+        withSessionState(session, reason === 'expired_upload' ? 'expired' : 'aborted', nowUtc),
+        session.revision,
+      );
     tx.putAsset(next, asset.revision);
     this.effect(tx, next, 'MediaDeliveryDisabled', nowUtc);
     const done = next.lifecycle === 'deleted';
@@ -349,6 +452,7 @@ export class MediaDeletionService {
     asset: MediaAsset,
     nowUtc: UtcInstant,
     action: 'manage' | 'read' = 'manage',
+    record?: MediaAuthorization[],
   ): Promise<void> {
     const result = await this.deps.authority.evaluate({
       actor,
@@ -358,10 +462,26 @@ export class MediaDeletionService {
       action,
       nowUtc,
     });
-    if (result.allowed) return;
-    throw new MediaDomainRefusal(
-      result.reason === 'session_invalid' ? 'unauthenticated' : result.reason,
-    );
+    if (!result.allowed)
+      throw new MediaDomainRefusal(
+        result.reason === 'session_invalid' ? 'unauthenticated' : result.reason,
+      );
+    record?.push({
+      marketId: asset.marketId,
+      ...(asset.publisherRef === undefined ? {} : { publisherRef: asset.publisherRef }),
+      family: asset.family,
+      action,
+    });
+  }
+
+  /** A stored result is idempotency, not a standing permission: repeat its checks. */
+  private async repeat(
+    actor: MediaActor,
+    recorded: readonly MediaAuthorization[],
+    nowUtc: UtcInstant,
+  ): Promise<void> {
+    const refusal = await repeatAuthorizations(this.deps.authority, actor, recorded, nowUtc);
+    if (refusal !== undefined) throw new MediaDomainRefusal(refusal);
   }
 
   private remember(
@@ -371,6 +491,7 @@ export class MediaDeletionService {
     semanticHash: string,
     outcome: MediaDeletionData,
     nowUtc: UtcInstant,
+    authorizations: readonly MediaAuthorization[],
   ): void {
     tx.putIdempotency({
       actorUserId: actorId,
@@ -378,6 +499,7 @@ export class MediaDeletionService {
       idempotencyKey: command.idempotencyKey,
       semanticHash,
       outcome: structuredClone(outcome),
+      authorizations: structuredClone([...authorizations]),
       createdAtUtc: nowUtc,
     });
     tx.appendAudit({

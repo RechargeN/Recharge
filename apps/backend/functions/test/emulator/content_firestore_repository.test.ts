@@ -50,6 +50,7 @@ function retryingFirestore(applied: { path: string; data: unknown }[]) {
   const reference = (collection: string, id: string) => ({ path: `${collection}/${id}` });
   return {
     projectId: 'demo-recharge',
+    _settings: { servicePath: '127.0.0.1', port: 8080, ssl: false },
     collection: (name: string) => ({
       doc: (id: string) => reference(name, id),
       where: () => query,

@@ -1,6 +1,6 @@
 import type { ContentEffectV1 } from '../../../contracts/content_v1.js';
 import { canonicalJson, sha256Hex } from '../domain/published_revision.js';
-import type { ContentRepository } from '../domain/repositories.js';
+import type { ContentRepository, EffectCursor } from '../domain/repositories.js';
 
 export type IntegrityFindingCode =
   | 'pointer_missing'
@@ -37,10 +37,9 @@ export class ContentIntegrityRecovery {
       const findings: IntegrityFinding[] = [];
       const revisions = await tx.publishedRevisionsForContent(contentId);
       const pointer = await tx.pointer(contentId);
-      const effects = await tx.effectsForContent(contentId);
       if (pointer === null && revisions.length > 0)
         findings.push({ code: 'pointer_missing', subjectId: contentId });
-      revisions.forEach((revision, index) => {
+      for (const [index, revision] of revisions.entries()) {
         if (revision.contentId !== contentId)
           findings.push({
             code: 'revision_content_mismatch',
@@ -53,22 +52,20 @@ export class ContentIntegrityRecovery {
           });
         if (revision.revisionNumber !== index + 1)
           findings.push({ code: 'revision_number_gap', subjectId: revision.publishedRevisionId });
-        const published = effects.some(
-          (effect) =>
-            effect.publishedRevisionId === revision.publishedRevisionId &&
-            (effect.kind === 'ContentPublished' || effect.kind === 'ContentRevisionActivated'),
-        );
-        if (!published)
+        // A targeted read: independent of how many effects the Content has accumulated.
+        if (!(await tx.hasPublicationEffect(revision.publishedRevisionId)))
           findings.push({
             code: 'effect_missing_for_revision',
             subjectId: revision.publishedRevisionId,
           });
-      });
+      }
       if (pointer !== null) {
         const currentId = pointer.currentPublishedRevisionId;
         if (currentId !== null && !revisions.some((item) => item.publishedRevisionId === currentId))
           findings.push({ code: 'current_revision_missing', subjectId: currentId });
-        if (!effects.some((effect) => effect.pointerRevision === pointer.revision))
+        // The first stored effect at or after the pointer revision, however long the history is.
+        const [atPointer] = await tx.effectsPage(contentId, before(pointer.revision), 1);
+        if (atPointer?.pointerRevision !== pointer.revision)
           findings.push({ code: 'effect_missing_for_pointer_revision', subjectId: contentId });
       }
       return { contentId, ok: findings.length === 0, findings };
@@ -76,22 +73,38 @@ export class ContentIntegrityRecovery {
   }
 
   /**
-   * Hands stored effects to a consumer in `pointerRevision` order, starting after
-   * `afterPointerRevision`. The consumer must be idempotent by `effectId`; nothing
-   * is written and nothing is invented.
+   * Hands stored effects to a consumer in `(pointerRevision, effectId)` order,
+   * page by page from a stable cursor, starting after `afterPointerRevision`. The
+   * consumer must be idempotent by `effectId`; nothing is written and nothing is
+   * invented, and no history length can silently cut the replay short.
    */
   async replayEffects(
     contentId: string,
     consumer: (effect: ContentEffectV1) => Promise<void>,
     afterPointerRevision = 0,
+    pageSize = replayPageSize,
   ): Promise<number> {
-    const effects = await this.repository.transact((tx) => tx.effectsForContent(contentId));
+    let cursor: EffectCursor | null = before(afterPointerRevision + 1);
     let delivered = 0;
-    for (const effect of effects) {
-      if (effect.pointerRevision <= afterPointerRevision) continue;
-      await consumer(effect);
-      delivered += 1;
+    for (;;) {
+      const at: EffectCursor | null = cursor;
+      const page: readonly ContentEffectV1[] = await this.repository.transact((tx) =>
+        tx.effectsPage(contentId, at, pageSize),
+      );
+      for (const effect of page) {
+        await consumer(effect);
+        delivered += 1;
+      }
+      const last = page[page.length - 1];
+      if (last === undefined || page.length < pageSize) return delivered;
+      cursor = { pointerRevision: last.pointerRevision, effectId: last.effectId };
     }
-    return delivered;
   }
 }
+
+/** Cursor placed after every effect of the previous pointer revision. */
+function before(pointerRevision: number): EffectCursor {
+  return { pointerRevision: pointerRevision - 1, effectId: '￿' };
+}
+
+export const replayPageSize = 100;

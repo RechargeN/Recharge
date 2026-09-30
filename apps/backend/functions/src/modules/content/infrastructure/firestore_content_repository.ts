@@ -1,6 +1,12 @@
 import { createHash } from 'node:crypto';
 
-import type { DocumentReference, Firestore, Query, Transaction } from 'firebase-admin/firestore';
+import {
+  FieldPath,
+  type DocumentReference,
+  type Firestore,
+  type Query,
+  type Transaction,
+} from 'firebase-admin/firestore';
 
 import type { ContentEffectV1 } from '../../../contracts/content_v1.js';
 import { deepFreeze } from '../../../shared/immutable.js';
@@ -10,11 +16,14 @@ import { ContentDomainRefusal, ContentRepositoryConflict } from '../domain/failu
 import type { PublicationPointer } from '../domain/publication_pointer.js';
 import type { PublicationSubmission } from '../domain/publication_submission.js';
 import type { PublishedRevision } from '../domain/published_revision.js';
-import type {
-  ContentAuditEntry,
-  ContentIdempotencyRecord,
-  ContentRepository,
-  ContentTransaction,
+import {
+  compareEffects,
+  isAfterCursor,
+  type ContentAuditEntry,
+  type ContentIdempotencyRecord,
+  type ContentRepository,
+  type ContentTransaction,
+  type EffectCursor,
 } from '../domain/repositories.js';
 import {
   assertDocumentWithinLimit,
@@ -43,7 +52,9 @@ export type ContentPersistenceRefusal =
   | 'emulator_host_not_loopback'
   | 'project_not_demo'
   | 'cloud_credentials_present'
-  | 'cloud_endpoint_override';
+  | 'cloud_endpoint_override'
+  | 'client_endpoint_unverifiable'
+  | 'client_not_emulator_endpoint';
 
 export class ContentPersistenceEnvironmentError extends Error {
   constructor(readonly reason: ContentPersistenceRefusal) {
@@ -88,6 +99,45 @@ export function assertContentEmulatorContext(
   }
   if (projectId !== emulatorProjectId)
     throw new ContentPersistenceEnvironmentError('project_not_demo');
+  assertClientTargetsEmulator(firestore, host);
+}
+
+/**
+ * The environment alone proves nothing about where a client sends requests: the
+ * client itself must target exactly the loopback Emulator named by the
+ * environment, without TLS. A client whose endpoint cannot be read is refused
+ * rather than trusted.
+ */
+function assertClientTargetsEmulator(firestore: Firestore, environmentHost: string): void {
+  const settings = (
+    firestore as unknown as {
+      readonly _settings?: {
+        readonly servicePath?: unknown;
+        readonly port?: unknown;
+        readonly ssl?: unknown;
+      };
+    }
+  )._settings;
+  if (settings === undefined || settings === null || typeof settings !== 'object')
+    throw new ContentPersistenceEnvironmentError('client_endpoint_unverifiable');
+  const { servicePath, port, ssl } = settings;
+  // A client with no explicit endpoint uses the default one: the cloud.
+  if (servicePath === undefined && port === undefined)
+    throw new ContentPersistenceEnvironmentError('client_not_emulator_endpoint');
+  // Any explicit host that is not loopback is the cloud (or something else): refused
+  // as such, whatever else the settings say.
+  if (
+    typeof servicePath === 'string' &&
+    !/^(?:127\.0\.0\.1|localhost|::1|\[::1\])$/u.test(servicePath)
+  )
+    throw new ContentPersistenceEnvironmentError('client_not_emulator_endpoint');
+  if (typeof servicePath !== 'string' || typeof port !== 'number' || typeof ssl !== 'boolean')
+    throw new ContentPersistenceEnvironmentError('client_endpoint_unverifiable');
+  const bracketed =
+    servicePath.includes(':') && !servicePath.startsWith('[') ? `[${servicePath}]` : servicePath;
+  const target = `${bracketed}:${String(port)}`;
+  if (ssl || target !== environmentHost || !loopbackEmulatorHost.test(target))
+    throw new ContentPersistenceEnvironmentError('client_not_emulator_endpoint');
 }
 
 export interface FirestoreContentRepositoryOptions {
@@ -401,18 +451,47 @@ class BufferedContentTransaction implements ContentTransaction {
     });
   }
 
-  async effectsForContent(contentId: string): Promise<readonly ContentEffectV1[]> {
-    const found = await this.list(contentCollections.effects, 'contentId', contentId, {
-      limit: 1000,
-      orderBy: 'pointerRevision',
-    });
-    return found
-      .map((item) => deepFreeze(item) as unknown as ContentEffectV1)
-      .sort(
-        (left, right) =>
-          left.pointerRevision - right.pointerRevision ||
-          left.effectId.localeCompare(right.effectId),
-      );
+  async effectsPage(
+    contentId: string,
+    after: EffectCursor | null,
+    limit: number,
+  ): Promise<readonly ContentEffectV1[]> {
+    let query: Query = this.firestore
+      .collection(contentCollections.effects)
+      .where('contentId', '==', contentId)
+      .orderBy('pointerRevision', 'asc')
+      .orderBy(FieldPath.documentId(), 'asc');
+    if (after !== null) query = query.startAfter(after.pointerRevision, after.effectId);
+    const snapshot = await this.transaction.get(query.limit(limit));
+    const found = new Map<string, ContentEffectV1>();
+    for (const document of snapshot.docs)
+      found.set(document.id, document.data() as unknown as ContentEffectV1);
+    // Effects staged in this transaction are part of what a read sees.
+    for (const item of this.#staged)
+      if (item.collection === contentCollections.effects && item.data.contentId === contentId)
+        found.set(item.id, item.data as unknown as ContentEffectV1);
+    return [...found.values()]
+      .filter((item) => isAfterCursor(item, after))
+      .sort(compareEffects)
+      .slice(0, limit)
+      .map((item) => deepFreeze(item));
+  }
+
+  async hasPublicationEffect(publishedRevisionId: string): Promise<boolean> {
+    const snapshot = await this.transaction.get(
+      this.firestore
+        .collection(contentCollections.effects)
+        .where('publishedRevisionId', '==', publishedRevisionId)
+        .where('kind', 'in', ['ContentPublished', 'ContentRevisionActivated'])
+        .limit(1),
+    );
+    if (!snapshot.empty) return true;
+    return this.#staged.some(
+      (item) =>
+        item.collection === contentCollections.effects &&
+        item.data.publishedRevisionId === publishedRevisionId &&
+        (item.data.kind === 'ContentPublished' || item.data.kind === 'ContentRevisionActivated'),
+    );
   }
 
   readonly effects = {

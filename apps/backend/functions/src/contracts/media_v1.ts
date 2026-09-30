@@ -250,7 +250,7 @@ export interface MediaDeletionStatusV1 {
 export interface OrphanReconciliationV1 {
   readonly schemaVersion: 1;
   readonly assetId: EntityId;
-  readonly action: 'keep' | 'marked' | 'unmarked' | 'deleting' | 'deleted';
+  readonly action: 'keep' | 'marked' | 'unmarked' | 'deleting' | 'deleted' | 'recovered';
   readonly assetRevision: number;
 }
 

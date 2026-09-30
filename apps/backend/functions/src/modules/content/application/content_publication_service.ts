@@ -64,7 +64,11 @@ import {
   sha256Hex,
   type PublishedRevision,
 } from '../domain/published_revision.js';
-import type { ContentRepository, ContentTransaction } from '../domain/repositories.js';
+import type {
+  ContentAuthorization,
+  ContentRepository,
+  ContentTransaction,
+} from '../domain/repositories.js';
 import type { MediaReadiness, MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
 import type {
@@ -126,7 +130,29 @@ interface CommandContext {
   readonly tx: ContentTransaction;
   readonly principal: Principal;
   readonly nowUtc: UtcInstant;
+  /** Every authority check this command relied on, so a replay can repeat them. */
+  readonly authorizations: ContentAuthorization[];
+  /**
+   * Media evidence gathered before any Content transaction was opened. Holding a
+   * Content transaction while waiting for Media (which may wait for Content) made
+   * the two modules deadlock, so the port is never called under a lock.
+   */
+  readonly media?: PreparedMedia | undefined;
 }
+
+/** Media readiness taken from a snapshot; only valid for exactly that snapshot. */
+type PreparedMedia =
+  | {
+      readonly kind: 'draft';
+      readonly draftId: string;
+      readonly draftRevision: number;
+      readonly readiness: MediaReadiness;
+    }
+  | {
+      readonly kind: 'rollback';
+      readonly publishedRevisionId: string;
+      readonly readiness: MediaReadiness;
+    };
 
 /** Stable identity used for idempotency scope, audit and attribution. */
 function principalId(principal: Principal): string {
@@ -206,15 +232,26 @@ export class ContentPublicationService {
       }),
     );
     const nowUtc = this.now();
+    const media = await this.prepareMedia(command);
     try {
       return await this.deps.repository.transact(async (tx) => {
+        const context: CommandContext = { tx, principal, nowUtc, authorizations: [], media };
         const prior = await tx.idempotency(actorId, command.commandType, command.idempotencyKey);
         if (prior !== undefined && prior !== null) {
           if (prior.semanticHash !== semanticHash)
             throw new ContentDomainRefusal('idempotency_conflict');
+          // A stored result is idempotency, not a standing permission: the caller's
+          // current authority is checked again before anything is handed back.
+          for (const recorded of prior.authorizations)
+            await this.authorize(
+              { ...context, authorizations: [] },
+              recorded.publisherRef,
+              recorded.typeId,
+              recorded.action,
+              recorded.marketId,
+            );
           return succeeded(deepFreeze(structuredClone(prior.outcome)) as ContentCommandData);
         }
-        const context: CommandContext = { tx, principal, nowUtc };
         const outcome = await this.dispatch(context, command);
         tx.putIdempotency({
           actorUserId: actorId,
@@ -222,6 +259,7 @@ export class ContentPublicationService {
           idempotencyKey: command.idempotencyKey,
           semanticHash,
           outcome: structuredClone(outcome),
+          authorizations: structuredClone(context.authorizations),
           createdAtUtc: nowUtc,
         });
         return succeeded(outcome);
@@ -321,7 +359,12 @@ export class ContentPublicationService {
     const nowUtc = this.now();
     try {
       return await this.deps.repository.transact(async (tx) => {
-        const context: CommandContext = { tx, principal: { kind: 'session', actor }, nowUtc };
+        const context: CommandContext = {
+          tx,
+          principal: { kind: 'session', actor },
+          nowUtc,
+          authorizations: [],
+        };
         switch (query.queryType) {
           case 'getDraft': {
             const draft = await tx.draft(query.payload.draftId);
@@ -474,7 +517,7 @@ export class ContentPublicationService {
       ...(payload.changeClass === undefined ? {} : { changeClass: payload.changeClass }),
     });
     if (!profile.available) throw new ContentDomainRefusal('policy_unavailable');
-    await this.assertMediaReady(entry, draft);
+    this.mediaEvidence(context, draft);
     const submission = createPublicationSubmission({
       submissionId: this.deps.ids.newId(),
       draft,
@@ -521,7 +564,7 @@ export class ContentPublicationService {
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
     this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal));
     const references = resolved.revisions;
-    const media = await this.assertMediaReady(entry, draft);
+    const media = this.mediaEvidence(context, draft);
     const pointer = await tx.pointer(submission.contentId);
     const existing = await tx.publishedRevisionsForContent(submission.contentId);
     const revision = createPublishedRevision({
@@ -648,17 +691,17 @@ export class ContentPublicationService {
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     await this.resolveReferences(target.marketId, target.typeId, nowUtc);
-    // Rollback verifies exactly the references stored in the target revision.
-    const media = await this.deps.media.check({
-      contentId: target.contentId,
-      typeId: target.typeId,
-      marketId: target.marketId,
-      publisherRef: target.publisherRef,
-      mediaIds: entry.mediaIds?.(target.body) ?? [],
-      pinned: target.mediaAttachments,
-    });
-    if (!media.ready || media.mediaRevision !== target.mediaRevision)
+    // Rollback verifies exactly the references stored in the target revision; the
+    // evidence was taken for this very immutable revision before the transaction.
+    const evidence = context.media;
+    if (
+      evidence?.kind !== 'rollback' ||
+      evidence.publishedRevisionId !== target.publishedRevisionId
+    )
+      throw new ContentDomainRefusal('source_revision_stale');
+    if (!evidence.readiness.ready || evidence.readiness.mediaRevision !== target.mediaRevision)
       throw new ContentDomainRefusal('media_not_ready');
+    void entry;
     const pointer = await tx.pointer(payload.contentId);
     if (pointer === null) throw new ContentDomainRefusal('not_found');
     // Re-selecting what is already public is a no-op conflict, not a new state.
@@ -749,6 +792,8 @@ export class ContentPublicationService {
           idempotencyKey: key,
           semanticHash,
           outcome: structuredClone(ack),
+          // A verified system instruction carries its own authority; no user check to repeat.
+          authorizations: [],
           createdAtUtc: nowUtc,
         });
         return succeeded(deepFreeze(ack));
@@ -860,10 +905,68 @@ export class ContentPublicationService {
     if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
   }
 
-  private async assertMediaReady(
-    entry: ContentTypeRegistryEntry,
+  /**
+   * The media evidence for a draft, valid only if the draft is exactly the one it
+   * was taken for: a draft edited since is a stale source, never silently reused.
+   */
+  private mediaEvidence(
+    context: CommandContext,
     draft: ContentDraft,
-  ): Promise<Extract<MediaReadiness, { ready: true }>> {
+  ): Extract<MediaReadiness, { ready: true }> {
+    const evidence = context.media;
+    if (
+      evidence?.kind !== 'draft' ||
+      evidence.draftId !== draft.draftId ||
+      evidence.draftRevision !== draft.revision
+    )
+      throw new ContentDomainRefusal('source_revision_stale');
+    if (!evidence.readiness.ready) throw new ContentDomainRefusal('media_not_ready');
+    return evidence.readiness;
+  }
+
+  /**
+   * Reads the draft (or the rollback target) in a short read-only transaction,
+   * releases it, and only then asks Media. The result is bound to that snapshot
+   * and re-checked against the record inside the command transaction.
+   */
+  private async prepareMedia(command: ContentCommandV1): Promise<PreparedMedia | undefined> {
+    if (
+      command.commandType !== 'submitForPublication' &&
+      command.commandType !== 'publishApprovedRevision' &&
+      command.commandType !== 'activatePublishedRevision'
+    )
+      return undefined;
+    const snapshot = await this.deps.repository.transact(async (tx) => {
+      if (command.commandType === 'activatePublishedRevision') {
+        const draft = await tx.draftByContentId(command.payload.contentId);
+        const target = await tx.publishedRevision(command.payload.publishedRevisionId);
+        return draft === null || target === null || target.contentId !== command.payload.contentId
+          ? undefined
+          : ({ kind: 'rollback', draft, target } as const);
+      }
+      const draftId =
+        command.commandType === 'submitForPublication'
+          ? command.payload.draftId
+          : (await tx.submission(command.payload.submissionId))?.draftId;
+      const draft = draftId === undefined ? null : await tx.draft(draftId);
+      return draft === null ? undefined : ({ kind: 'draft', draft } as const);
+    });
+    if (snapshot === undefined) return undefined;
+    const entry = resolveContentType(snapshot.draft.typeId);
+    if (entry === null || !isContentTypeAvailable(entry)) return undefined;
+    if (snapshot.kind === 'rollback') {
+      const { target } = snapshot;
+      const readiness = await this.deps.media.check({
+        contentId: target.contentId,
+        typeId: target.typeId,
+        marketId: target.marketId,
+        publisherRef: target.publisherRef,
+        mediaIds: entry.mediaIds?.(target.body) ?? [],
+        pinned: target.mediaAttachments,
+      });
+      return { kind: 'rollback', publishedRevisionId: target.publishedRevisionId, readiness };
+    }
+    const { draft } = snapshot;
     const readiness = await this.deps.media.check({
       contentId: draft.contentId,
       typeId: draft.typeId,
@@ -871,8 +974,7 @@ export class ContentPublicationService {
       publisherRef: draft.publisherRef,
       mediaIds: entry.mediaIds?.(draft.body) ?? [],
     });
-    if (!readiness.ready) throw new ContentDomainRefusal('media_not_ready');
-    return readiness;
+    return { kind: 'draft', draftId: draft.draftId, draftRevision: draft.revision, readiness };
   }
 
   private async resolveReferences(
@@ -926,7 +1028,21 @@ export class ContentPublicationService {
     // A response about another publisher is never accepted as authority.
     const sameRef =
       result.publisherRef.type === publisherRef.type && result.publisherRef.id === publisherRef.id;
-    if (result.eligible && sameRef) return result;
+    if (result.eligible && sameRef) {
+      const recorded = { publisherRef, typeId, action, marketId };
+      if (
+        !context.authorizations.some(
+          (item) =>
+            item.action === action &&
+            item.typeId === typeId &&
+            item.marketId === marketId &&
+            item.publisherRef.type === publisherRef.type &&
+            item.publisherRef.id === publisherRef.id,
+        )
+      )
+        context.authorizations.push(recorded);
+      return result;
+    }
     throw new ContentDomainRefusal(sameRef ? failureFor(result.reason) : 'publisher_not_eligible');
   }
 

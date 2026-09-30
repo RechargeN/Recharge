@@ -1,10 +1,10 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.12**
+- Version: **0.13**
 - Date: **2026-09-30**
-- Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
-- Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
+- Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
+- Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
 - Review owners: **Identity, API, Security/Privacy, Mobile, Reference Data,
   Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
@@ -15,6 +15,18 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.13 — 2026-09-30
+
+- records the remediation of an independent audit of stages 1-2, inside the
+  existing maps (no new paths): a stored idempotent result is no longer a
+  standing permission (§38.11.1); no Content or Media port call is made while a
+  repository transaction is held (§38.11.2); the Firestore adapter verifies the
+  endpoint the client really targets (§38.11.3); effects are read and verified in
+  stable pages and targeted reads instead of one capped read (§38.11.4);
+- adds BCK-07-AC-106..AC-108; amends AC-101 and AC-104 accordingly;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
 
 ### v0.12 — 2026-09-30
 
@@ -1669,3 +1681,64 @@ Known limits, stated rather than hidden:
   disabled here because the repository already refuses any non-Emulator context;
 - no callable, export, worker, Catalog projection or `eventBookingOutbox`
   hand-off exists; all types and markets stay disabled.
+
+### 38.11 Audit remediation (v0.13)
+
+1. **Replays re-check authority (AC-106).** Every idempotency record stores the
+   authority checks the command relied on (`authorizations`: Publisher, type,
+   action, market). A replay first repeats each of them with the caller's current
+   authority and only then returns the stored outcome; a revoked Session,
+   membership or eligibility refuses the replay exactly like a new command, and
+   nothing is written. A changed payload under the same key stays
+   `idempotency_conflict`. A verified system instruction (moderation
+   disposition) carries no user check.
+2. **No cross-module wait under a lock (AC-107).** Content and Media call each
+   other (readiness, entity scope, references), so a call made while holding a
+   repository transaction let two concurrent commands wait for each other
+   forever. The rule is now: **a module never calls another module's port while
+   it holds a repository transaction.** Content reads the draft (or rollback
+   target) in a short read-only transaction, asks Media outside any transaction
+   and binds the answer to that snapshot; the command transaction accepts the
+   evidence only if the draft revision (or the immutable target revision) is
+   exactly the one it was taken for, otherwise `source_revision_stale`. Media asks
+   Content for entity scope and references before opening its transaction.
+   Deletion holds delivery first (a reversible restriction, so nothing new can
+   attach), asks the owning domain, then either lifts its own hold or
+   tombstones; a plainly referenced asset is refused with no write at all.
+   Residual window, stated rather than hidden: an asset restricted or deleted
+   after Content took its evidence and before the command transaction commits can
+   still end up referenced by a published revision. The publish path keeps the
+   generation-pinned attachments, deletion is blocked while a draft references the
+   asset, and rollback re-verifies the pinned references, but detecting such a
+   revision afterwards is not implemented.
+3. **The client is verified, not only the environment (AC-101).** The repository
+   reads the endpoint the Firestore client actually targets and requires it to be
+   exactly the loopback Emulator named by the environment, without TLS; an
+   endpoint that cannot be read is refused. A client bound to the cloud is
+   refused even when the environment object claims the Emulator.
+4. **Effects are paged (AC-104, AC-108).** The whole-history read is gone. Stored
+   effects are read in `(pointerRevision, effectId)` pages from a stable cursor;
+   integrity verification uses targeted reads (the first effect at the current
+   pointer revision, a publish or activation effect per revision) that do not
+   depend on how many effects a Content has accumulated. A visibility change is
+   never refused because of a storage bound, since a tombstone must always win.
+
+Evidence after the remediation (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8):
+the full `npm run test:emulator` gate passed again, with the Content guard (6,
+including a real cloud-bound client and forged environments), Firestore
+repository (22, the shared scenario suite now also proving 1,100-effect paging and
+integrity verification at pointer revision 1,300), concurrency, recovery and
+Rules tests. Without Emulator the suite passes on Node 22, including a
+deterministic test that fails when a cross-module call sits inside a transaction
+(checked by mutation: it reports a deadlock).
+
+### 38.12 Acceptance addendum (v0.13)
+
+106. **BCK-07-AC-106:** a replay of a stored result repeats the recorded authority
+     checks with current authority before returning it, and writes nothing when
+     it is refused.
+107. **BCK-07-AC-107:** no Content or Media port is called while a repository
+     transaction is held; the two modules cannot wait for each other, and Content
+     accepts media evidence only for the exact snapshot it was taken for.
+108. **BCK-07-AC-108:** stored effects are replayed and verified through stable
+     pages and targeted reads; no history length silently cuts them short.

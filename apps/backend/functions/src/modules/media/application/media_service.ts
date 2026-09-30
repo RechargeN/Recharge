@@ -44,6 +44,7 @@ import {
   type MediaPolicy,
 } from '../domain/media_policy.js';
 import type {
+  MediaAuthorization,
   MediaRepository,
   MediaTransaction,
   StoredDeletionStatus,
@@ -57,11 +58,13 @@ import {
 } from '../domain/upload_session.js';
 import type { MediaDeletionData, MediaDeletionService } from './media_deletion_service.js';
 import type { EntityScopePort } from './ports/entity_scope_port.js';
-import type {
-  MediaActor,
-  MediaActorAuthorityPort,
-  MediaAuthorityResult,
+import {
+  repeatAuthorizations,
+  type MediaActor,
+  type MediaActorAuthorityPort,
+  type MediaAuthorityResult,
 } from './ports/actor_authority_port.js';
+import type { EntityScopeResult } from './ports/entity_scope_port.js';
 import type { ObjectStorePort } from './ports/object_store_port.js';
 import type { ProcessorPort, ProcessOutcome } from './ports/processor_port.js';
 import type { ScanOutcome, ScannerPort } from './ports/scanner_port.js';
@@ -101,6 +104,13 @@ interface CommandContext {
   readonly tx: MediaTransaction;
   readonly actor: MediaActor;
   readonly nowUtc: UtcInstant;
+  /** Every authority check this command relied on, so a replay can repeat them. */
+  readonly authorizations: MediaAuthorization[];
+  /**
+   * The owning domain answer, fetched before any Media transaction was opened:
+   * no cross-module call is ever made while a repository transaction is held.
+   */
+  readonly entityScope?: EntityScopeResult | undefined;
 }
 
 /**
@@ -131,10 +141,12 @@ export class MediaService {
     );
     try {
       switch (command.commandType) {
-        case 'createUploadSession':
+        case 'createUploadSession': {
+          const scope = await this.scopeBeforeTransaction(actor, command.payload);
           return await this.single(actor, command, semanticHash, (context) =>
-            this.createSession(context, command.payload),
+            this.createSession({ ...context, entityScope: scope }, command.payload),
           );
+        }
         case 'confirmUpload':
           return await this.single(actor, command, semanticHash, (context) =>
             this.confirmUpload(context, command.payload),
@@ -185,7 +197,7 @@ export class MediaService {
         // Another subject's asset does not exist for the caller.
         if (asset === null || asset.ownerSubjectId !== actor.userId)
           throw new MediaDomainRefusal('not_found');
-        await this.authorize({ tx, actor, nowUtc }, asset, 'read');
+        await this.authorize({ tx, actor, nowUtc, authorizations: [] }, asset, 'read');
         if (query.queryType === 'getAssetStatus')
           return succeeded<MediaQueryData>(toAssetView(asset));
         const attempts = await tx.receiptsForAsset(asset.assetId);
@@ -225,11 +237,13 @@ export class MediaService {
       if (prior !== null) {
         if (prior.semanticHash !== semanticHash)
           throw new MediaDomainRefusal('idempotency_conflict');
+        await this.repeatChecks(actor, prior.authorizations, nowUtc);
         return succeeded(deepFreeze(structuredClone(prior.outcome)) as MediaCommandData);
       }
-      const outcome = await handler({ tx, actor, nowUtc });
+      const context: CommandContext = { tx, actor, nowUtc, authorizations: [] };
+      const outcome = await handler(context);
       if (outcome instanceof CommittedRejection) return rejected<MediaCommandData>(outcome.code);
-      this.recordOutcome(tx, actor, command, semanticHash, outcome, nowUtc);
+      this.recordOutcome(tx, actor, command, semanticHash, outcome, nowUtc, context.authorizations);
       return succeeded(outcome);
     });
   }
@@ -241,6 +255,7 @@ export class MediaService {
     semanticHash: string,
     outcome: MediaCommandData,
     nowUtc: UtcInstant,
+    authorizations: readonly MediaAuthorization[],
   ): void {
     tx.putIdempotency({
       actorUserId: actor.userId,
@@ -248,6 +263,7 @@ export class MediaService {
       idempotencyKey: command.idempotencyKey,
       semanticHash,
       outcome: structuredClone(outcome),
+      authorizations: structuredClone([...authorizations]),
       createdAtUtc: nowUtc,
     });
     tx.appendAudit({
@@ -278,9 +294,47 @@ export class MediaService {
       action,
       nowUtc: context.nowUtc,
     });
-    if (result.allowed) return;
-    if (result.reason === 'session_invalid') throw new MediaDomainRefusal('unauthenticated');
-    throw new MediaDomainRefusal(result.reason);
+    if (!result.allowed) {
+      if (result.reason === 'session_invalid') throw new MediaDomainRefusal('unauthenticated');
+      throw new MediaDomainRefusal(result.reason);
+    }
+    const recorded: MediaAuthorization = {
+      marketId: subject.marketId,
+      ...(subject.publisherRef === undefined ? {} : { publisherRef: subject.publisherRef }),
+      family: subject.family,
+      action,
+    };
+    if (!context.authorizations.some((item) => JSON.stringify(item) === JSON.stringify(recorded)))
+      context.authorizations.push(recorded);
+  }
+
+  /** Repeats the checks a stored result relied on, with the current authority of the caller. */
+  private async repeatChecks(
+    actor: MediaActor,
+    recorded: readonly MediaAuthorization[],
+    nowUtc: UtcInstant,
+  ): Promise<void> {
+    const refusal = await repeatAuthorizations(this.deps.authority, actor, recorded, nowUtc);
+    if (refusal !== undefined) throw new MediaDomainRefusal(refusal);
+  }
+
+  /**
+   * The owning domain entity-scope answer, taken before a Media transaction is
+   * opened: holding Media transaction while waiting for Content (which may in
+   * turn wait for Media) is what made the two modules deadlock.
+   */
+  private async scopeBeforeTransaction(
+    actor: MediaActor,
+    payload: CreateUploadSessionCommandV1['payload'],
+  ): Promise<EntityScopeResult | undefined> {
+    if (payload.entityIntent === undefined || payload.publisherRef === undefined) return undefined;
+    return this.deps.entityScope.authorize({
+      actor,
+      entity: payload.entityIntent,
+      publisherRef: payload.publisherRef,
+      marketId: payload.marketId,
+      nowUtc: this.now(),
+    });
   }
 
   private familyPolicy(family: MediaFamily): MediaFamilyPolicy {
@@ -309,15 +363,8 @@ export class MediaService {
     if (payload.entityIntent !== undefined) {
       // The binding is trusted only if the owning domain confirms the exact
       // entity, Publisher and market for this actor.
-      if (payload.publisherRef === undefined) throw new MediaDomainRefusal('entity_scope_denied');
-      const scope = await this.deps.entityScope.authorize({
-        actor,
-        entity: payload.entityIntent,
-        publisherRef: payload.publisherRef,
-        marketId: payload.marketId,
-        nowUtc,
-      });
-      if (!scope.allowed) throw new MediaDomainRefusal('entity_scope_denied');
+      if (payload.publisherRef === undefined || context.entityScope?.allowed !== true)
+        throw new MediaDomainRefusal('entity_scope_denied');
     }
     const assetId = this.deps.ids.newId();
     const objectKeyHandle = `objk:${this.deps.ids.newId()}`;
@@ -417,31 +464,40 @@ export class MediaService {
     semanticHash: string,
   ): Promise<MediaResult<MediaCommandData>> {
     const startedAtUtc = this.now();
+    // The owning domain is asked before any Media transaction is held (see
+    // scopeBeforeTransaction): the binding of an asset never changes once set.
+    const peek = await this.deps.repository.transact((tx) => tx.asset(command.payload.assetId));
+    const scope =
+      peek?.ownerSubjectId === actor.userId &&
+      peek.entityBinding !== undefined &&
+      peek.publisherRef !== undefined
+        ? await this.deps.entityScope.authorize({
+            actor,
+            entity: peek.entityBinding,
+            publisherRef: peek.publisherRef,
+            marketId: peek.marketId,
+            nowUtc: startedAtUtc,
+          })
+        : undefined;
     const started = await this.deps.repository.transact(async (tx) => {
       const prior = await tx.idempotency(actor.userId, command.commandType, command.idempotencyKey);
       if (prior !== null) {
         if (prior.semanticHash !== semanticHash)
           throw new MediaDomainRefusal('idempotency_conflict');
+        await this.repeatChecks(actor, prior.authorizations, startedAtUtc);
         return { replay: deepFreeze(structuredClone(prior.outcome)) as MediaCommandData };
       }
       const asset = await tx.asset(command.payload.assetId);
       if (asset === null || asset.ownerSubjectId !== actor.userId)
         throw new MediaDomainRefusal('not_found');
-      const context: CommandContext = { tx, actor, nowUtc: startedAtUtc };
+      const context: CommandContext = { tx, actor, nowUtc: startedAtUtc, authorizations: [] };
       await this.authorize(context, asset, 'upload');
       if (asset.revision !== command.payload.expectedAssetRevision)
         throw new MediaDomainRefusal('stale_revision');
       const policy = this.familyPolicy(asset.family);
       if (asset.entityBinding !== undefined) {
-        if (asset.publisherRef === undefined) throw new MediaDomainRefusal('entity_scope_denied');
-        const scope = await this.deps.entityScope.authorize({
-          actor,
-          entity: asset.entityBinding,
-          publisherRef: asset.publisherRef,
-          marketId: asset.marketId,
-          nowUtc: startedAtUtc,
-        });
-        if (!scope.allowed) throw new MediaDomainRefusal('entity_scope_denied');
+        if (asset.publisherRef === undefined || scope?.allowed !== true)
+          throw new MediaDomainRefusal('entity_scope_denied');
       }
       const source = asset.sourceGenerationRef;
       if (source?.providerGeneration !== command.payload.sourceProviderGeneration)
@@ -467,10 +523,10 @@ export class MediaService {
         );
       }
       tx.putAsset(next, asset.revision);
-      return { asset: next, source, policy };
+      return { asset: next, source, policy, authorizations: context.authorizations };
     });
     if ('replay' in started) return succeeded(started.replay);
-    const { asset: attempt, source, policy } = started;
+    const { asset: attempt, source, policy, authorizations } = started;
 
     const scan = await this.runScan(attempt, source.providerGeneration, source.sha256);
     let processing: ProcessOutcome | undefined;
@@ -549,7 +605,7 @@ export class MediaService {
           occurredAtUtc: completedAtUtc,
         });
       const view = toAssetView(updated);
-      this.recordOutcome(tx, actor, command, semanticHash, view, completedAtUtc);
+      this.recordOutcome(tx, actor, command, semanticHash, view, completedAtUtc, authorizations);
       return succeeded<MediaCommandData>(view);
     });
   }

@@ -33,6 +33,7 @@ const policy: MediaRetentionPolicy = {
   orphanGraceSeconds: 600,
   quarantinedRetentionSeconds: 300,
   blockedRetentionSeconds: 200,
+  inFlightAttemptLeaseSeconds: 120,
   deletionReceiptRetentionSeconds: 1000,
 };
 
@@ -72,11 +73,17 @@ function session(): UploadSession {
 
 const decide = (
   asset: MediaAsset,
-  over: { referenced?: boolean; session?: UploadSession | null; now?: number } = {},
+  over: {
+    referenced?: boolean | 'unknown';
+    session?: UploadSession | null;
+    now?: number;
+    inFlight?: boolean;
+  } = {},
 ) =>
   decideOrphan({
     asset,
     session: over.session === undefined ? null : over.session,
+    attemptInFlight: over.inFlight ?? false,
     referenced: over.referenced ?? false,
     policy,
     nowUtc: at(over.now ?? 0),
@@ -104,7 +111,7 @@ void test('data classes are distinct so no class inherits another retention', ()
   assert.notEqual(policy.deletionReceiptRetentionSeconds, policy.orphanGraceSeconds);
 });
 
-void test('in-flight assets are never touched by cleanup', () => {
+void test('in-flight assets are never deleted by cleanup and waiting assets are left alone', () => {
   for (const state of ['uploaded', 'validating', 'processing'] as const)
     assert.deepEqual(decide(assetIn(state), { now: 1_000_000 }), { action: 'keep' }, state);
 });
@@ -165,4 +172,43 @@ void test('an unreferenced asset is marked, then deleted only after the grace of
 void test('every lifecycle state has a decision', () => {
   for (const state of mediaLifecycles)
     assert.ok(decide(assetIn(state), { session: session() }).action, state);
+});
+
+void test('an attempt without a result is abandoned only after its lease, and only if one is in flight', () => {
+  for (const state of ['validating', 'processing'] as const) {
+    const running = assetIn(state, { updatedAtUtc: t0 });
+    assert.deepEqual(decide(running, { inFlight: true, now: 119 }), { action: 'keep' }, state);
+    assert.deepEqual(
+      decide(running, { inFlight: true, now: 120 }),
+      { action: 'abandon_attempt' },
+      state,
+    );
+    // Nothing started yet (the owner has not finalized): never abandoned.
+    assert.deepEqual(
+      decide(running, { inFlight: false, now: 1_000_000 }),
+      { action: 'keep' },
+      state,
+    );
+  }
+});
+
+void test('an unreachable owning domain leaves settled assets alone but never blocks recovery', () => {
+  for (const state of ['ready', 'quarantined', 'blocked'] as const)
+    assert.deepEqual(
+      decide(assetIn(state, { orphanSinceUtc: t0 }), { referenced: 'unknown', now: 100_000 }),
+      { action: 'keep' },
+      state,
+    );
+  assert.deepEqual(
+    decide(assetIn('validating', { updatedAtUtc: t0 }), {
+      referenced: 'unknown',
+      inFlight: true,
+      now: 500,
+    }),
+    { action: 'abandon_attempt' },
+  );
+  assert.deepEqual(decide(assetIn('reserved'), { referenced: 'unknown', session: null }), {
+    action: 'delete',
+    reason: 'expired_upload',
+  });
 });

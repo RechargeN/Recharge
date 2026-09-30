@@ -52,6 +52,7 @@ const testRetention: MediaRetentionPolicy = {
   orphanGraceSeconds: 600,
   quarantinedRetentionSeconds: 300,
   blockedRetentionSeconds: 200,
+  inFlightAttemptLeaseSeconds: 120,
   deletionReceiptRetentionSeconds: 1000,
 };
 
@@ -627,5 +628,113 @@ void test('reconcile needs an accepted retention policy and a well-formed system
   assert.deepEqual(
     await withPolicy.reconciler.reconcile(reconcileCommand(ulid(9999))),
     denial('not_found'),
+  );
+});
+
+void test('an attempt whose result never arrived is recovered after its lease and a late result is refused', async () => {
+  const h = harness();
+  const asset = await validating(h);
+  const finalize = command('finalizeAsset', {
+    assetId: asset.assetId,
+    expectedAssetRevision: asset.revision,
+    sourceProviderGeneration: 'g-1001',
+    expectedSha256: sha,
+    expectedByteLength: 2048,
+  });
+  const run = () =>
+    ok<OrphanReconciliationV1>(h.reconciler.reconcile(reconcileCommand(asset.assetId)));
+  // Waiting for its owner to finalize is not an attempt: nothing to recover.
+  h.advanceSeconds(10_000);
+  assert.equal((await run()).action, 'keep');
+  assert.equal(stored(h, asset.assetId).lifecycle, 'validating');
+  // The attempt starts, and while the scanner is "running" its worker is lost: the
+  // lease passes and the reconciler recovers the attempt.
+  let recovered: OrphanReconciliationV1 | undefined;
+  h.scanner.onScan = async () => {
+    h.advanceSeconds(119);
+    assert.equal((await run()).action, 'keep');
+    h.advanceSeconds(1);
+    recovered = await run();
+  };
+  // The late result of the abandoned attempt is refused as stale.
+  assert.deepEqual(await h.service.execute(actorA, finalize), denial('stale_revision'));
+  assert.equal(recovered?.action, 'recovered');
+  const after = stored(h, asset.assetId);
+  assert.equal(after.lifecycle, 'quarantined');
+  assert.equal(after.attemptCount, 1);
+  const receipt = h.repository.snapshot().receipts[0];
+  assert.equal(receipt?.attemptNumber, 1);
+  assert.equal(receipt?.outcome, 'quarantined');
+  assert.equal(receipt?.scan.toolRevision, 'attempt-abandoned');
+  assert.equal(receipt?.sourceProviderGeneration, 'g-1001');
+  // The owner continues with an explicit retry on the same generation.
+  h.scanner.onScan = undefined;
+  const ready = await ok<MediaAssetV1>(
+    h.service.execute(
+      actorA,
+      command('retryProcessing', {
+        assetId: asset.assetId,
+        expectedAssetRevision: after.revision,
+        sourceProviderGeneration: 'g-1001',
+      }),
+    ),
+  );
+  assert.equal(ready.lifecycle, 'ready');
+  assert.equal(ready.attemptCount, 2);
+  assert.deepEqual(
+    h.repository.snapshot().receipts.map((item) => item.outcome),
+    ['quarantined', 'ready'],
+  );
+  // A recovered attempt counts against the attempt budget, so recovery cannot loop forever.
+  assert.equal(stored(h, asset.assetId).attemptCount, 2);
+});
+
+void test('a stored result is not a standing permission: replays repeat the current authority check', async () => {
+  const h = harness();
+  const create = createCommand();
+  const session = await ok<{ uploadSessionId: string; assetId: string }>(
+    h.service.execute(actorA, create),
+  );
+  upload(h, session.assetId);
+  const confirm = command('confirmUpload', {
+    uploadSessionId: session.uploadSessionId,
+    expectedSha256: sha,
+    expectedByteLength: 2048,
+  });
+  const confirmed = await ok<MediaAssetV1>(h.service.execute(actorA, confirm));
+  const finalize = command('finalizeAsset', {
+    assetId: session.assetId,
+    expectedAssetRevision: confirmed.revision,
+    sourceProviderGeneration: 'g-1001',
+    expectedSha256: sha,
+    expectedByteLength: 2048,
+  });
+  const ready = await ok<MediaAssetV1>(h.service.execute(actorA, finalize));
+  const detach = command('detachAsset', {
+    assetId: session.assetId,
+    expectedAssetRevision: ready.revision,
+  });
+  const detached = await ok<MediaAssetV1>(h.service.execute(actorA, detach));
+  const remove = deleteCommand(detached, 'delete-replay-key');
+  await ok(h.service.execute(actorA, remove));
+  // While authorized, every replay returns the stored result.
+  for (const replayed of [create, confirm, finalize, detach, remove])
+    assert.equal((await h.service.execute(actorA, replayed)).kind, 'succeeded');
+  // Once the Session is revoked the very same commands are refused, and nothing is written.
+  const before = JSON.stringify(h.repository.snapshot().audit.length);
+  h.authority.revokedSessions.add(actorA.sessionId);
+  for (const replayed of [create, confirm, finalize, detach, remove])
+    assert.deepEqual(await h.service.execute(actorA, replayed), denial('unauthenticated'));
+  assert.equal(JSON.stringify(h.repository.snapshot().audit.length), before);
+  // Restoring the authority makes the replay available again: idempotency is intact.
+  h.authority.revokedSessions.clear();
+  assert.equal((await h.service.execute(actorA, create)).kind, 'succeeded');
+  // A changed payload under the same key is still a conflict, never a leak of the old result.
+  assert.deepEqual(
+    await h.service.execute(actorA, {
+      ...create,
+      payload: { ...create.payload, declaredByteLength: 1 },
+    }),
+    denial('idempotency_conflict'),
   );
 });

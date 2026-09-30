@@ -14,11 +14,13 @@ import {
 import type { PublicationPointer } from '../domain/publication_pointer.js';
 import type { PublicationSubmission } from '../domain/publication_submission.js';
 import type { PublishedRevision } from '../domain/published_revision.js';
-import type {
-  ContentAuditEntry,
-  ContentIdempotencyRecord,
-  ContentRepository,
-  ContentTransaction,
+import {
+  compareEffects,
+  isAfterCursor,
+  type ContentAuditEntry,
+  type ContentIdempotencyRecord,
+  type ContentRepository,
+  type ContentTransaction,
 } from '../domain/repositories.js';
 
 interface Store {
@@ -214,15 +216,20 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
         throw new ContentRepositoryConflict('duplicate_id');
       store.audit.push(copy(entry));
     },
-    effectsForContent: (contentId) =>
+    effectsPage: (contentId, after, limit) =>
       Promise.resolve(
         store.effects
-          .filter((item) => item.contentId === contentId)
-          .sort(
-            (left, right) =>
-              left.pointerRevision - right.pointerRevision ||
-              left.effectId.localeCompare(right.effectId),
-          ),
+          .filter((item) => item.contentId === contentId && isAfterCursor(item, after))
+          .sort(compareEffects)
+          .slice(0, limit),
+      ),
+    hasPublicationEffect: (publishedRevisionId) =>
+      Promise.resolve(
+        store.effects.some(
+          (item) =>
+            item.publishedRevisionId === publishedRevisionId &&
+            (item.kind === 'ContentPublished' || item.kind === 'ContentRevisionActivated'),
+        ),
       ),
     effects: {
       append(effect) {
