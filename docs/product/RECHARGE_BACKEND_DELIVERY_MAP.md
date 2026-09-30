@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.103**
+- Version: **2.4.104**
 - Date: **2026-09-30**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,17 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.104.** Registers `BCK07-PERSIST-01` (BCK-07 v0.12 §38), the
+Emulator-only Content persistence slice, without widening cloud, spend or market
+authority:
+
+- a candidate outside the 22-document checksum with a closed collection and
+  file manifest; default-off, Emulator-only (exact `demo-recharge`, loopback
+  endpoint), no callable, export, worker or cloud resource;
+- adds the additive failure code `storage_limit_exceeded`;
+- 2.6 is complete only after a successful Emulator and Rules run on the exact
+  toolchain; production approval remains a separate decision.
 
 **v2.4.103.** Registers the local Media slice `BCK14-LOCAL-01` (BCK-14 v0.4
 §34) and the matching BCK-07 v0.11 §37 amendment, without widening cloud, spend

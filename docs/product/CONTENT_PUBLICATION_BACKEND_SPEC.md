@@ -1,7 +1,7 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.11**
+- Version: **0.12**
 - Date: **2026-09-30**
 - Spec status: **Review — BCK07-LOCAL-01 approved as next local/test-only slice; production approval pending**
 - Runtime status: **Content aggregate Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
@@ -15,6 +15,21 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.12 — 2026-09-30
+
+- authorizes `BCK07-PERSIST-01`, a bounded Emulator-only Content persistence
+  slice (item 2.6), in a new §38: exact collection manifest, exact file map,
+  buffered-transaction semantics, bounded history and document size, technical
+  Emulator-only enforcement, narrow integrity/replay recovery and a scenario
+  suite that runs on both the in-memory and the Firestore adapter;
+- adds one additive failure code, `storage_limit_exceeded`, for a history or
+  document that would exceed the local storage bounds;
+- keeps every type, market and flag disabled; adds no callable, export, worker,
+  scheduler, cloud resource, Catalog projection or product rule; production
+  approval stays a separate decision;
+- 2.6 is not complete without a successful Emulator and Rules run on the exact
+  toolchain (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8).
 
 ### v0.11 — 2026-09-30
 
@@ -1471,3 +1486,162 @@ by their version or type. `ContentMediaScope` implements Media's entity scope
 and reference questions structurally, with no import of the Media module; the
 Media adapter does the same in the other direction. A private or protected
 Media asset is never attachable to a public revision.
+
+## 38. BCK07-PERSIST-01 — Emulator-only Content persistence (v0.12)
+
+### 38.1 Decision and scope
+
+`BCK07-PERSIST-01` gives the existing Content service a Firestore repository
+that runs only against the local Emulator, default-off, with server-only
+collections, Rules that deny every client, indexes, a composition binding and
+the tests below. It changes no product rule and adds no endpoint.
+
+### 38.2 Collection manifest (server-owned; clients get `allow read, write: if false`)
+
+| Collection | Document id | Notes |
+|---|---|---|
+| `contentDrafts` | `draftId` | fields `contentId`, `mediaAssetIds[]` (bounded) |
+| `contentExternalBindings` | sha256 of `externalBindingRef` | uniqueness of an import binding, written in the same transaction |
+| `contentSubmissions` | `submissionId` | |
+| `contentPublishedRevisions` | `publishedRevisionId` | created only if absent (immutable); fields `contentId`, `revisionNumber`, `mediaAssetIds[]` |
+| `contentPublicationPointers` | `contentId` | compare-and-set on `revision` |
+| `contentIdempotency` | sha256 of actor, command type and key | outcome stored in full |
+| `contentAudit` | `auditId` | append only |
+| `contentEffects` | `effectId` | created only if absent; fields `contentId`, `pointerRevision` |
+
+Composite indexes, exactly two: `contentPublishedRevisions(contentId ASC,
+revisionNumber ASC)` and `contentEffects(contentId ASC, pointerRevision ASC)`.
+Everything else uses automatic single-field indexes (including `array-contains`
+on `mediaAssetIds`). Documents never contain `undefined`.
+
+### 38.3 Buffered transaction semantics
+
+Firestore requires every read before any write, while the service reads after
+staging writes. The Firestore repository therefore buffers writes:
+
+- reads go to Firestore, and an overlay of the staged writes applies to both
+  single-document reads and list queries, so a read after a staged write sees it;
+- two staged changes to one document collapse to the last one;
+- a retried Firestore transaction starts a new, empty buffer and re-runs the
+  callback from its first line;
+- on commit, first every compare-and-set and uniqueness check runs against
+  freshly read documents (pointer revision, revision id, external binding,
+  idempotency record), then all writes are issued, so a conflict aborts before
+  any write;
+- audit records and effects are part of the same atomic write set; the
+  callback sends nothing outside the transaction.
+
+Tests: read-after-staged-write (document and list), two changes to one
+document, conflict and retry of a transaction, and complete rollback.
+
+### 38.4 Bounded history and document size
+
+`assertBoundedBody` bounds only the body. The service reads all revisions and
+submissions of one Content and derives the next revision number from the count,
+so history is bounded rather than assumed unlimited:
+
+- the repository reads at most `maxRevisionsPerContent` (200) revisions and
+  `maxSubmissionsPerContent` (200) submissions per Content; exceeding either is
+  a typed refusal, `storage_limit_exceeded`, never a silent truncation;
+- every stored document, including an idempotency outcome and a revision with
+  media attachments, must not exceed 900,000 bytes of canonical UTF-8 JSON; a
+  larger one is `storage_limit_exceeded` and nothing is written;
+- both adapters enforce the same bounds through one shared helper, so the
+  scenario suite proves the same behaviour on each;
+- these values are local engineering guards labelled synthetic, not product
+  limits; production values need the cost and cardinality measurement required
+  by §14 and stay a separate decision.
+
+`mediaAssetIds` is stored on drafts and on published revisions, and
+`isMediaReferenced` queries both collections inside the transaction.
+
+### 38.5 Emulator-only, enforced technically
+
+The repository constructor itself refuses anything but the Emulator, so a
+direct construction is as safe as the composition factory:
+
+- the Firestore project id must be exactly `demo-recharge`;
+- `FIRESTORE_EMULATOR_HOST` must be present and a loopback `host:port`
+  (`127.0.0.1`, `localhost` or `[::1]`);
+- no cloud fallback: `GOOGLE_APPLICATION_CREDENTIALS`, a non-demo
+  `GCLOUD_PROJECT` or `GOOGLE_CLOUD_PROJECT` and a `FIRESTORE_HOST` override make
+  it refuse;
+- the composition factory additionally requires its own default-off flag.
+
+Tests cover each refusal, including construction outside the factory.
+
+### 38.6 Recovery scope
+
+Effects cannot be rebuilt from the current pointer: it holds the current state,
+not the history of activations and visibility changes. `content_integrity_recovery`
+therefore only:
+
+- verifies integrity (pointer to an existing revision, revision body hash,
+  attachments present, an effect present for the current pointer revision);
+- replays already stored effects idempotently in `pointerRevision` order;
+- reports a missing historical fact as `corrupted` and never invents it.
+
+Rebuilding lost events would need a stored transition journal and a further
+amendment; it is deferred.
+
+### 38.7 Exact file map (closed)
+
+```text
+NEW
+apps/backend/functions/src/modules/content/domain/storage_limits.ts
+apps/backend/functions/src/modules/content/infrastructure/firestore_content_repository.ts
+apps/backend/functions/src/modules/content/infrastructure/emulator_content_composition.ts
+apps/backend/functions/src/modules/content/application/content_integrity_recovery.ts
+apps/backend/functions/test/support/content_repository_scenarios.ts
+apps/backend/functions/test/integration/content_repository_parity.test.ts
+apps/backend/functions/test/emulator/content_firestore_repository.test.ts
+apps/backend/functions/test/emulator/content_concurrency.test.ts
+apps/backend/functions/test/emulator/content_recovery.test.ts
+apps/backend/functions/test/emulator/content_rules_default_deny.test.ts
+apps/backend/functions/test/emulator/content_emulator_guard.test.ts
+apps/backend/scripts/verify-content-persistence-layout.mjs
+
+MODIFIED
+apps/backend/firestore.rules                       (eight explicit denies)
+apps/backend/firestore.indexes.json                (the two composite indexes)
+apps/backend/functions/package.json                (layout script; emulator test list)
+apps/backend/scripts/run-emulator-tests.mjs        (only if it lists test files)
+apps/backend/functions/src/contracts/content_v1.ts (failure code)
+apps/backend/functions/src/modules/content/domain/failures.ts
+apps/backend/functions/src/modules/content/domain/repositories.ts (effect replay read)
+apps/backend/functions/src/modules/content/infrastructure/in_memory_content_repository.ts (same bounds, effect replay read)
+packages/api_contracts/schema/content/v1/content_result.schema.json
+apps/backend/functions/test/integration/content_publication_security.test.ts
+```
+
+### 38.8 Tests and Definition of Done
+
+The scenario suite in `test/support/content_repository_scenarios.ts` is one
+set of scenarios executed against both adapters: the in-memory one in
+`content_repository_parity.test.ts` and the Firestore one in the Emulator
+tests. Serialization round-trips without an Emulator are useful but are not
+evidence of Firestore transactions. Emulator tests cover transactions, retries,
+concurrent publish and pointer swap, duplicate imports by external binding,
+recovery and negative Rules for every collection (unauthenticated and
+authenticated, read and write). The layout gate checks the Firestore SDK is
+confined to the two infrastructure files, eight explicit denies, exactly two
+composite indexes, the single writer and no cloud context.
+
+2.6 is Done only after a successful Emulator and Rules run on Node 22.23.2,
+npm 10.9.8 and Temurin 21.0.12+8; without it the slice is "implemented,
+Emulator evidence pending".
+
+### 38.9 Acceptance addendum
+
+101. **BCK-07-AC-101:** the Firestore repository refuses any environment other
+     than the exact `demo-recharge` loopback Emulator, including direct
+     construction.
+102. **BCK-07-AC-102:** buffered transactions apply the overlay to reads and
+     lists, retry with a fresh buffer, check compare-and-set and uniqueness
+     before writing and roll back completely.
+103. **BCK-07-AC-103:** history and document size are bounded and exceeding them
+     is the typed `storage_limit_exceeded`, identically on both adapters.
+104. **BCK-07-AC-104:** recovery verifies integrity, replays stored effects and
+     reports missing history as corrupted without inventing it.
+105. **BCK-07-AC-105:** every Content collection denies all client reads and
+     writes; Content has one writer and no callable, export or cloud context.
