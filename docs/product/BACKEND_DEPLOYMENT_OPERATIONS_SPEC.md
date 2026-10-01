@@ -1818,3 +1818,35 @@ already installed CLI snapshot with `--no-pub`; no SDK changes or downloads.
 No real provider plan/apply, Emulator rerun, cloud read/write, deployment, push or
 merge was performed. Real WIF token exchange and GCP permission evidence remain
 Pending, not implied by the mock checks.
+
+#### Follow-up verification and persistence (2026-10-01)
+
+The correction above is saved as `bb930eb18dbf52fa2aefc82271d403ff12db627b`.
+On that runtime/config source: format/lint, TypeScript build, 763 backend
+unit/contract/integration tests, all 121 full Emulator/Rules tests, Flutter
+analyze and all 1230 Flutter tests passed. Exact toolchain validation passed
+with Node 22.23.2, npm 10.9.8, **portable Temurin 21.0.12+8** and Terraform
+1.15.9. An initial Emulator pass used system Java 21.0.12.1+1 and is not the
+pinned-toolchain evidence; the full suite was repeated with the exact version.
+Terraform fmt/validate and 48 mock-only authorization scenarios passed;
+manifest, export, Content-persistence, no-cloud and mobile-boundary checks passed.
+These are local checks, not hosted CI or deployment evidence.
+The logical build is reproducible:
+`ffa386a75317847e0dabb2d48569466c5fdf86aa8c2cd353106dbe9613d0d4e7`.
+
+The historical R1 layout checker was red: its 133-path count predated the
+approved deadline worker, and it omitted 15 approved subsequent-slice files.
+The bounded follow-up changes only that checker and documentation: exactly
+134 base paths, the existing 20 foundation exceptions, 15 individually named
+BCK-05/07/14 paths and 38 retained RAW-C paths. Section bounds and duplicate
+rows are checked; no wildcard authorization is added. The corrected gate and
+three negative mutations (count, missing file, unregistered file) pass.
+Full runtime tests above are attributed to `bb930eb`, not falsely relabelled as
+a full run on the later checker/docs commit; product sources and schemas did
+not change in that follow-up.
+
+The runbook corrects the budget/owner preflight against roadmap §3.5: EUR25 dev
+and RechargeN's roles are already accepted verification baselines, not cloud
+spend authorization. Notification destination, quotas, permission manifests,
+source/WIF gate and a bounded execution approval remain open. No cloud API
+operation, IAM binding, provisioning, deployment, activation, push or merge.

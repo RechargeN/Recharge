@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.109**
+- Version: **2.4.110**
 - Date: **2026-10-01**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -21,6 +21,11 @@
 - Runtime effect: **none**
 
 ## 0. Changelog
+
+**v2.4.110.** Reconciles the R1 layout checker with the already approved Booking
+deadline worker and BCK-05/07/14 file maps. The existing dev runbook reuses the
+accepted R1 budget/owner baseline and records the remaining owner checkpoint;
+no new runtime path, role binding or cloud authority is introduced.
 
 **v2.4.109.** BCK-05 v0.2.43 corrects authorization to blocking preconditions,
 constrains WIF to the Accepted deployment identity, and adds dev-preflight and
@@ -2887,7 +2892,7 @@ Latvia approval cannot enable Estonia or Lithuania.
 | Operations | BCK-05 v0.2.36, Review; logical dev/stage/prod topology, no-cloud CI, migration and rollback | No project, billing, credential, resource or deployment is authorized |
 | Reference data | BCK-20 v0.2.28, Review; disabled synthetic LV/EE/LT config and explicit Money/time/localization contracts | External sources, mandatory copy and market activation remain Pending |
 | Coordination | BCK-02 v2.4.87, Approved coordination baseline | Approval of this map is not R1 execution authority |
-| Exact files | Historical v2.4.87 preflight: 120 paths; current v2.4.95 fixes §26 at 133 unique literal paths — 103 C, 6 M and 24 R/K; zero duplicates/wildcards | Any path change requires a versioned reconciliation |
+| Exact files | Historical v2.4.87: 120 paths; v2.4.95: 133. Current §26 contains 134 unique literal paths after the approved Booking deadline-worker addition; the R1 checker also enumerates exactly 15 existing BCK-05/07/14 paths in shared directories. No new runtime path or wildcard is authorized by this reconciliation | Any path change requires a versioned reconciliation |
 | Storage writers | Five §26.7 collection families, five named single writers | Direct client access remains denied |
 | Migration/rollback | Additive §26.9 order; exact repository/config rollback; non-destructive infra posture | RAW-C deletion, broad data rollback and `terraform destroy` remain forbidden |
 

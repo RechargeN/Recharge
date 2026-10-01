@@ -43,10 +43,10 @@ it. Do not ask the owner to re-accept already Accepted architecture decisions.
 |---|---|---|
 | Scope and location | OD-07 Accepted with controls; exact available project ID/number, artifact and resource/API allowlist still missing | project creation and any provisioning |
 | IAM/WIF | BCK05-OD-02 Accepted; expanded per-identity permissions/bindings, immutable subject opt-in, exact audience, protected main and environments, sanitized negative claim evidence pending | WIF binding or cloud-bearing workflow |
-| Budget | OD-04 Proposed; dev EUR25/month is a proposal, not an approved spend cap. Named budget owner, approved envelope, notification destination and quotas missing | billable provisioning |
+| Budget | Roadmap §3.5 already accepts the dev EUR25/month verification baseline and RechargeN as temporary Finance owner. OD-04 remains Proposed; this is neither spending authorization nor a hard cap. Notification destination, quotas and exact spend/provisioning approval remain missing | billable provisioning |
 | Reliability | OD-03 Proposed; select bounded dev thresholds, observation duration and stop criteria; full stage load evidence is not claimed | dev service deployment/traffic; BCK-05/G1/R1 approvals remain independent |
-| Recovery | OD-05 Proposed; accepted synthetic-dev recovery/loss policy, state backup custody, export/restore procedure missing | data-bearing provisioning under the approved slice |
-| Incident | OD-08 Proposed, formal G5/G6 gate. Name a dev contact, containment and escalation now; production specialist/tabletop evidence is not fabricated | dev traffic; full OD-08 evidence before G5/G6 |
+| Recovery | Roadmap §3.5 accepts the OD-05 §7 verification targets; OD-05 remains Proposed and restore evidence is absent. State backup custody and an executable dev export/restore procedure remain missing; do not silently relax RPO/RTO for synthetic data | data-bearing provisioning under the approved slice |
+| Incident | Roadmap §3.5 names RechargeN as Incident owner. OD-08 remains Proposed, formal G5/G6 gate; dev contact channel, containment and escalation remain missing. Independent review/tabletop evidence is not fabricated | dev traffic; full OD-08 evidence before G5/G6 |
 | App Check | mode/provider/registration and exact callable enforcement policy missing; Emulator bypass must be impossible in cloud | deploy/expose dev endpoints |
 | Approval | exact reviewed SHA, manifest bytes/hash, owner evidence, operations and expiry missing | every cloud operation |
 
@@ -151,3 +151,60 @@ a tested channel. Alerts are not a hard spending cap. Configure service quotas
 and scoped creation/ingestion kill switches; preserve existing Booking cancel,
 session recovery and mandatory privacy exits. Never detach billing automatically.
 Alert delivery test, budget creation and monitoring creation remain unauthorized.
+
+### Next owner checkpoint — one bounded decision, not a new document
+
+Do not request re-approval of the R1 scope, locations, IAM architecture, EUR25
+baseline or RechargeN's existing roles. Do not fill missing contact data from a
+Git email address. Resolve these inputs before preparing an executable cloud
+authorization:
+
+1. **Destination:** the owner supplies the dev budget/incident notification
+   address or channel, and confirms who acknowledges an alert. Thresholds
+   50/75/90/100% remain a proposal until explicitly adopted; delivery must be
+   tested before ordinary billable resources, not merely configured.
+2. **Next scope:** recommended next authorization is credentialed, read-only
+   discovery of a candidate dev project ID/number, billing currency/availability
+   and available quotas. Project creation, billing linkage, API activation,
+   role grants, plan/apply, deployment and active smoke are excluded. Login/MFA
+   stays with the owner; no credentials are pasted into chat or Git.
+3. **Source gate:** the Accepted WIF contract trusts only the protected `main`
+   deployment workflow. The current `codex/recharge-integration` branch is not
+   eligible, even if its tests pass. While push/merge are forbidden, CI cloud
+   execution stays blocked. Do not broaden the subject/ref condition to bypass
+   this. A later owner-authorized merge/protection setup or a separately
+   accepted bounded bootstrap route is required; neither is authorized here.
+
+Before implementation of IAM bindings, complete the existing IAM model §7.2
+permission manifests. The intended separation is:
+
+| Identity / phase | Intended scope to expand and review | Must not gain |
+|---|---|---|
+| Bootstrap operator | Exact dev project, APIs, protected state, approved accounts/trust/budget; short-lived and separately authorized | Standing runtime/deploy authority or stage/prod access |
+| WIF principal | Only the exact environment deploy identity and accepted claims | Arbitrary service-account impersonation or modification of its own trust |
+| Deploy identity | Reviewed artifact, exact target services, act-as only approved runtime identities | Billing administration, WIF/self-IAM administration, key creation, product-data mutation |
+| Runtime Booking / Identity | Approved data operations and telemetry for their responsibilities | Flags/IAM/deployment administration, unrelated modules or environments |
+| Recovery operator | Separately approved backup/restore targets and protected state evidence | Routine deploy powers or unapproved data deletion |
+
+This table is not a role-binding permission manifest. Do not grant a broad role
+as a temporary substitute; do not assume collection-level isolation from a
+database-level IAM grant. Verify the actual supported scope before choosing
+roles and digesting expanded permissions. No binding is created by this pass.
+
+Bootstrap order for the later authorized slice: owner decision and source gate
+→ exact IDs/permission manifests → protected state and recovery copy → budget
+channel plus active delivery evidence and quotas → reviewed ordinary-resource
+plan → separately approved apply → read-only inventory reconciliation →
+separately approved deployment/active smoke. Bootstrap resource costs and the
+alert test need explicit bounded authorization; there is no implied free or
+zero-risk bootstrap. Dev synthetic traffic does not prove R1/stage capacity.
+
+Copyable next-step wording (replace the channel and expiry first):
+
+> Подтверждаю канал dev budget/incident [канал] и получение уведомлений мной,
+> RechargeN. Принимаю пороги 50/75/90/100% поверх ранее принятого baseline
+> €25/месяц; это не hard cap и не разрешение расходов. Разрешаю только
+> read-only проверку доступности candidate dev project ID, billing currency
+> и доступных квот до [UTC]. Вход/MFA выполняю сам. Создание проекта,
+> привязку billing, IAM/API changes, plan/apply, deployment, активные проверки,
+> push, merge и activation не разрешаю. WIF/main gate не обходить.

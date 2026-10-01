@@ -14,9 +14,14 @@ const deliveryMapPath = path.join(
   "RECHARGE_BACKEND_DELIVERY_MAP.md",
 );
 const document = readFileSync(deliveryMapPath, "utf8");
-const section = document.slice(
-  document.indexOf("## 26. Stage 7 exact R1 executable implementation map"),
+const sectionStart = document.indexOf(
+  "## 26. Stage 7 exact R1 executable implementation map",
 );
+const sectionEnd = document.indexOf("\n## 27.", sectionStart);
+if (sectionStart < 0 || sectionEnd < 0) {
+  throw new Error("Exact R1 manifest section boundaries are absent");
+}
+const section = document.slice(sectionStart, sectionEnd);
 const tablePaths = [
   ...section.matchAll(/^\|\s*([CMR])\s*\|\s*`([^`]+)`/gmu),
 ].map((match) => match[2]);
@@ -50,12 +55,38 @@ const approvedSecurityPrivacyExtensionPaths = [
   "apps/backend/functions/src/platform/bootstrap/booking_composition_root.ts",
 ];
 
-if (manifestPaths.length !== 133) {
+// Later approved slices share directories owned by the historical R1 gate.
+// BCK-05 §36.6, BCK-07 §34/38 and BCK-14 local file maps; no wildcard grants.
+const approvedSubsequentSlicePaths = [
+  "apps/backend/config/budget-policy.schema.json",
+  "apps/backend/config/execution-manifest.schema.json",
+  "apps/backend/config/flag-policy.schema.json",
+  "apps/backend/config/manifests/execution-manifest.json",
+  "apps/backend/config/manifests/fixtures/forward.json",
+  "apps/backend/config/manifests/fixtures/invalid.json",
+  "apps/backend/config/manifests/fixtures/valid.json",
+  "apps/backend/functions/test/integration/content_publication_security.test.ts",
+  "apps/backend/functions/test/integration/content_publication_service.test.ts",
+  "apps/backend/functions/test/integration/content_repository_parity.test.ts",
+  "apps/backend/functions/test/integration/media_content_readiness.test.ts",
+  "apps/backend/functions/test/integration/media_deletion_reconcile.test.ts",
+  "apps/backend/functions/test/integration/media_privacy_boundary.test.ts",
+  "apps/backend/functions/test/integration/media_security.test.ts",
+  "apps/backend/functions/test/integration/media_upload_service.test.ts",
+];
+
+if (
+  manifestPaths.length !== 134 ||
+  tablePaths.length !== manifestPaths.length
+) {
   throw new Error(
-    `R1 manifest must contain 133 unique paths; found ${manifestPaths.length}`,
+    `R1 manifest must contain 134 unique paths without duplicates; found ${manifestPaths.length} unique / ${tablePaths.length} rows`,
   );
 }
-for (const relativePath of manifestPaths) {
+for (const relativePath of [
+  ...manifestPaths,
+  ...approvedSubsequentSlicePaths,
+]) {
   if (!existsSync(path.join(repoRoot, relativePath)))
     throw new Error(`R1 manifest path is absent: ${relativePath}`);
 }
@@ -81,7 +112,8 @@ for (const root of ownedRoots) {
     const relative = path.relative(repoRoot, file).replaceAll("\\", "/");
     if (
       !manifestPaths.includes(relative) &&
-      !approvedSecurityPrivacyExtensionPaths.includes(relative)
+      !approvedSecurityPrivacyExtensionPaths.includes(relative) &&
+      !approvedSubsequentSlicePaths.includes(relative)
     )
       throw new Error(`Unexpected file in exact R1 layout: ${relative}`);
   }
@@ -125,7 +157,7 @@ for (const forbidden of ["workers", "schedules"]) {
 }
 
 process.stdout.write(
-  `R1 layout gate passed: ${manifestPaths.length} exact actions, ${approvedSecurityPrivacyExtensionPaths.length} approved local foundation extensions and ${compatibilityPaths.length} retained RAW-C paths; no forbidden dependency or directory.\n`,
+  `R1 layout gate passed: ${manifestPaths.length} exact actions, ${approvedSecurityPrivacyExtensionPaths.length} approved local foundation extensions, ${approvedSubsequentSlicePaths.length} approved subsequent-slice paths and ${compatibilityPaths.length} retained RAW-C paths; no forbidden dependency or directory.\n`,
 );
 
 function walk(root) {
