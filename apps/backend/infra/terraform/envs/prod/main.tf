@@ -10,44 +10,74 @@ locals {
     stage       = "3-1-execution-manifest"
   }
 
-  # The gate. Writing this code does not authorize applying it: every module below
-  # receives `enabled = local.provisioning_authorized`, which is false unless a
-  # project id, an authorization record reference and the exact manifest hash are
-  # all supplied.
-  provisioning_authorized = (
-    var.project_id != null
-    && var.authorization_ref != null
+  # Authorization is an execution precondition, NEVER resource cardinality.
+  authorization = try(jsondecode(file(var.authorization_record_path)), null)
+  authorization_valid = try(
+    local.authorization.schemaVersion == 1
+    && local.authorization.status == "approved"
+    && local.authorization.recordRef == var.authorization_ref
+    && length(local.authorization.owner) > 0
+    && length(local.authorization.ownerApprovalEvidenceRef) > 0
+    && local.authorization.environment == var.environment_id
+    && var.project_id != null
+    && local.authorization.projectId == var.project_id
+    && local.authorization.manifestSha256 == filesha256(local.manifest_path)
     && var.manifest_sha256 == filesha256(local.manifest_path)
+    && var.authorization_record_sha256 == filesha256(var.authorization_record_path)
+    && can(regex("^[0-9a-f]{40}$", var.release_commit_sha))
+    && local.authorization.commitSha == var.release_commit_sha
+    && local.authorization.dataScope == "synthetic"
+    && local.authorization.push == false && local.authorization.merge == false
+    && local.authorization.marketActivation == false
+    && contains(local.authorization.operations, "plan")
+    && contains(local.authorization.operations, "apply")
+    && alltrue([for op in local.authorization.operations : contains(["plan", "apply"], op)])
+    && timecmp(local.authorization.issuedAtUtc, plantimestamp()) <= 0
+    && timecmp(local.authorization.expiresAtUtc, plantimestamp()) > 0,
+    false
   )
+  manifest_authorized = (
+    local.manifest.authority.apply == "allowed"
+    && local.manifest.authority.provisioning == "authorized"
+    && local.env.authorized == true
+    && local.env.projectId == var.project_id
+  )
+  provisioning_authorized = local.authorization_valid && local.manifest_authorized
 }
 
-check "authorization_is_complete_or_absent" {
-  assert {
-    condition     = var.authorization_ref == null || (var.project_id != null && var.manifest_sha256 != null)
-    error_message = "An authorization reference needs a project id and the manifest hash it covers."
-  }
-}
-
-check "nothing_is_authorized_in_the_manifest" {
-  assert {
-    condition     = local.manifest.authority.apply == "denied" && local.env.authorized == false
-    error_message = "The manifest itself never authorizes apply."
+# No provisioner, command or network action: the builtin resource is a blocking
+# precondition. The checked-in Draft manifest always fails this gate. An owner
+# record is an attestation, not a cryptographic signature: protected execution
+# must verify its provenance and exact reviewed plan before apply.
+resource "terraform_data" "execution_guard" {
+  input = var.environment_id
+  lifecycle {
+    precondition {
+      condition     = local.authorization_valid
+      error_message = "Execution denied: missing, expired, mismatched or incomplete owner record."
+    }
+    precondition {
+      condition     = local.manifest_authorized
+      error_message = "Execution denied: this Draft manifest grants no provisioning/apply authority."
+    }
   }
 }
 
 module "project_baseline" {
-  source = "../../modules/project_baseline"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/project_baseline"
 
-  enabled    = local.provisioning_authorized
+  enabled    = true
   labels     = local.labels
   project_id = var.project_id
   services   = toset(["artifactregistry.googleapis.com", "billingbudgets.googleapis.com", "cloudbuild.googleapis.com", "cloudfunctions.googleapis.com", "cloudresourcemanager.googleapis.com", "cloudscheduler.googleapis.com", "eventarc.googleapis.com", "firebase.googleapis.com", "firebaseappcheck.googleapis.com", "firestore.googleapis.com", "iam.googleapis.com", "iamcredentials.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com", "pubsub.googleapis.com", "run.googleapis.com", "secretmanager.googleapis.com", "storage.googleapis.com", "sts.googleapis.com"])
 }
 
 module "firestore" {
-  source = "../../modules/firestore"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/firestore"
 
-  enabled                = local.provisioning_authorized
+  enabled                = true
   labels                 = local.labels
   project_id             = var.project_id
   location_id            = local.manifest.locationPolicy.firestore.location
@@ -55,9 +85,10 @@ module "firestore" {
 }
 
 module "storage" {
-  source = "../../modules/storage"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/storage"
 
-  enabled           = local.provisioning_authorized
+  enabled           = true
   labels            = local.labels
   project_id        = var.project_id
   media_location    = local.manifest.locationPolicy.mediaStorage.location
@@ -66,30 +97,35 @@ module "storage" {
 }
 
 module "runtime_identities" {
-  source = "../../modules/runtime_identities"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/runtime_identities"
 
-  enabled          = local.provisioning_authorized
+  enabled          = true
   labels           = local.labels
   project_id       = var.project_id
   service_accounts = local.env.serviceAccounts
 }
 
 module "ci_wif" {
-  source = "../../modules/ci_wif"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/ci_wif"
 
-  enabled             = local.provisioning_authorized
+  enabled             = true
   labels              = local.labels
   project_id          = var.project_id
   pool_id             = local.env.workloadIdentity.poolName
   provider_id         = local.env.workloadIdentity.providerName
   repository_id       = var.github_repository_id
   repository_owner_id = var.github_repository_owner_id
+  environment_id      = var.environment_id
+  project_number      = var.project_number
 }
 
 module "budget_alerts" {
-  source = "../../modules/budget_alerts"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/budget_alerts"
 
-  enabled                  = local.provisioning_authorized && var.billing_account_id != null && var.project_number != null
+  enabled                  = true && var.billing_account_id != null && var.project_number != null
   labels                   = local.labels
   billing_account_id       = var.billing_account_id
   project_number           = var.project_number
@@ -100,9 +136,10 @@ module "budget_alerts" {
 }
 
 module "secret_containers" {
-  source = "../../modules/secret_containers"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/secret_containers"
 
-  enabled    = local.provisioning_authorized
+  enabled    = true
   labels     = local.labels
   project_id = var.project_id
   location   = local.manifest.locationPolicy.functions.region
@@ -110,18 +147,20 @@ module "secret_containers" {
 }
 
 module "app_check" {
-  source = "../../modules/app_check"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/app_check"
 
-  enabled    = local.provisioning_authorized
+  enabled    = true
   labels     = local.labels
   project_id = var.project_id
   mode       = local.env.appCheck.mode
 }
 
 module "state_bucket" {
-  source = "../../modules/state_bucket"
+  depends_on = [terraform_data.execution_guard]
+  source     = "../../modules/state_bucket"
 
-  enabled    = local.provisioning_authorized
+  enabled    = true
   labels     = local.labels
   project_id = var.project_id
   location   = local.env.stateBucket.location

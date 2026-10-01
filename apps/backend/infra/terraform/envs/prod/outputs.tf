@@ -1,10 +1,10 @@
 output "provisioning_authorized" {
-  description = "False unless project id, authorization reference and manifest hash are all supplied."
+  description = "True only with a valid bound owner record AND an authorized execution manifest."
   value       = local.provisioning_authorized
 }
 
 output "managed_resource_count" {
-  description = "Resources this root would manage right now; zero while the gate is closed."
+  description = "Desired resources, independent of execution permission. A closed gate fails the plan."
   value = sum([
     length(module.project_baseline.enabled_services),
     module.firestore.database_created ? 1 : 0,

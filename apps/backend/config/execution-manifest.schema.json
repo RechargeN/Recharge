@@ -144,8 +144,7 @@
               "type": "null"
             },
             "workflowFile": {
-              "type": "string",
-              "pattern": "^\\.github/workflows/[a-z0-9-]+\\.yml$"
+              "const": ".github/workflows/backend-deploy.yml"
             },
             "authorized": {
               "const": false

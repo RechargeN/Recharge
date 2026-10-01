@@ -22,7 +22,7 @@ variable "project_id" {
 }
 
 variable "authorization_ref" {
-  description = "Reference of the signed record that authorizes provisioning of this environment. Null keeps every resource closed."
+  description = "Reference of the signed record that authorizes provisioning of this environment. This alone grants no authority."
   type        = string
   default     = null
   nullable    = true
@@ -72,4 +72,25 @@ variable "point_in_time_recovery" {
 variable "recovery_bucket_enabled" {
   type    = bool
   default = false
+}
+
+variable "authorization_record_path" {
+  description = "Local reviewed owner attestation. No credentials or secret values."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "authorization_record_sha256" {
+  description = "Exact reviewed attestation digest; never inferred as owner approval."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "release_commit_sha" {
+  description = "Exact reviewed source commit, bound to the owner record."
+  type        = string
+  default     = null
+  nullable    = true
 }

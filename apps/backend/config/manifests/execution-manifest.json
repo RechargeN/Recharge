@@ -112,7 +112,7 @@
         "providerName": "github-actions",
         "repositoryId": null,
         "repositoryOwnerId": null,
-        "workflowFile": ".github/workflows/backend-iac-validate.yml",
+        "workflowFile": ".github/workflows/backend-deploy.yml",
         "authorized": false
       },
       "secretReferences": [],
@@ -252,7 +252,7 @@
         "providerName": "github-actions",
         "repositoryId": null,
         "repositoryOwnerId": null,
-        "workflowFile": ".github/workflows/backend-iac-validate.yml",
+        "workflowFile": ".github/workflows/backend-deploy.yml",
         "authorized": false
       },
       "secretReferences": [],
@@ -392,7 +392,7 @@
         "providerName": "github-actions",
         "repositoryId": null,
         "repositoryOwnerId": null,
-        "workflowFile": ".github/workflows/backend-iac-validate.yml",
+        "workflowFile": ".github/workflows/backend-deploy.yml",
         "authorized": false
       },
       "secretReferences": [],

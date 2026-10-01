@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -199,6 +200,13 @@ export function verifyExecutionManifest(manifest, facts = repositoryFacts()) {
         problems.push(`${env}: holds deploy-${other}`);
     if (item.projectId !== null || item.projectIdSuffix !== null)
       problems.push(`${env}: a provider project id is invented`);
+    if (
+      item.workloadIdentity.workflowFile !==
+      ".github/workflows/backend-deploy.yml"
+    )
+      problems.push(
+        `${env}: WIF must name the accepted deploy workflow, not validation CI`,
+      );
 
     // ---- budget and containment
     const budget = item.budget;
@@ -261,6 +269,53 @@ export function verifyExecutionManifest(manifest, facts = repositoryFacts()) {
   return problems;
 }
 
+/** Planning inventory only: no observed-cloud or approved-resource claim. */
+export function devResourceInventory(manifest) {
+  const env = manifest.environments.dev;
+  return {
+    status: "draft-not-authorized-not-observed",
+    environment: "dev",
+    projectId: env.projectId,
+    terraformCandidates: {
+      firestore: manifest.locationPolicy.firestore,
+      mediaStorage: manifest.locationPolicy.mediaStorage,
+      stateBucket: env.stateBucket,
+      serviceAccounts: env.serviceAccounts
+        .filter((item) => item.deployed || item.kind === "deploy")
+        .map((item) => item.name),
+      workloadIdentity: env.workloadIdentity,
+      budget: env.budget,
+      secretContainers: env.secretReferences,
+      appCheck: env.appCheck,
+    },
+    firebaseCliOwned: {
+      collections: manifest.firestore.collections,
+      flags: manifest.flags,
+      note: "Collections/flags are expected data/config, not created by Terraform. Rules/indexes/TTL deployment is separate; Functions require their own approved export list.",
+    },
+    mustRemainAbsentOrDisabled: [
+      "stage/prod resources",
+      "market activation",
+      "public bucket access",
+      "service-account keys",
+      "secret values",
+      "unapproved IAM bindings",
+      "recovery bucket until accepted recovery slice",
+      "product workers outside approved scope",
+    ],
+    unresolved: [
+      "project ID/number",
+      "exact API allowlist and role bindings",
+      "authorization",
+      "budget owner/channel",
+      "quotas",
+      "App Check policy",
+      "recovery policy",
+      "immutable OIDC subject and protected-main/environment evidence",
+    ],
+  };
+}
+
 function main() {
   const validate = createValidator();
   const manifest = readJson(
@@ -284,6 +339,19 @@ function main() {
       `Execution manifest gate failed:\n- ${problems.join("\n- ")}\n`,
     );
     process.exitCode = 1;
+    return;
+  }
+  if (process.argv.includes("--dev-inventory")) {
+    const digest = createHash("sha256")
+      .update(
+        readFileSync(
+          path.join(configRoot, "manifests", "execution-manifest.json"),
+        ),
+      )
+      .digest("hex");
+    process.stdout.write(
+      `${JSON.stringify({ manifestSha256: digest, ...devResourceInventory(manifest) }, null, 2)}\n`,
+    );
     return;
   }
   process.stdout.write(

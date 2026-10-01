@@ -241,3 +241,35 @@ void test('the runbooks the manifest names exist', () => {
     ),
   );
 });
+
+void test('validation workflow cannot become the WIF deployment identity', () => {
+  assert.ok(
+    hasProblem(
+      check((m) => {
+        (env(m, 'dev').workloadIdentity as Json).workflowFile =
+          '.github/workflows/backend-iac-validate.yml';
+      }),
+      'schema',
+    ),
+  );
+});
+
+void test('dev inventory is generated from the manifest, never cloud observations', async () => {
+  const { devResourceInventory } = (await import(
+    pathToFileURL(path.join(backendRoot, 'scripts', 'verify-execution-manifest.mjs')).href
+  )) as { devResourceInventory: (manifest: unknown) => Json };
+  const manifest = load();
+  const inventory = devResourceInventory(manifest);
+  assert.equal(inventory.status, 'draft-not-authorized-not-observed');
+  assert.equal(inventory.projectId, null);
+  assert.deepEqual((inventory.terraformCandidates as Json).serviceAccounts, [
+    'deploy-dev',
+    'runtime-booking',
+    'runtime-identity',
+  ]);
+  assert.deepEqual(
+    (inventory.firebaseCliOwned as Json).collections,
+    (manifest.firestore as Json).collections,
+  );
+  assert.deepEqual((inventory.firebaseCliOwned as Json).flags, manifest.flags);
+});

@@ -1,4 +1,6 @@
-# No real value is committed. A plan with these defaults creates zero resources.
+# No real values are committed. These defaults BLOCK plan/apply with an error.
 environment_id = "prod"
 project_id     = null
-# authorization_ref and manifest_sha256 stay null until a signed record exists.
+# authorization_ref, authorization_record_path, authorization_record_sha256,
+# manifest_sha256 and release_commit_sha remain null. The checked-in Draft
+# manifest is also denied; supplying these fields cannot open it.

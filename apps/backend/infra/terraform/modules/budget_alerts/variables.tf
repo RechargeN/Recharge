@@ -1,5 +1,5 @@
 variable "enabled" {
-  description = "Authorization gate. False by default: a module with enabled = false creates no resource."
+  description = "Desired resource presence, not execution authority. Never change in response to approval expiry."
   type        = bool
   default     = false
 }

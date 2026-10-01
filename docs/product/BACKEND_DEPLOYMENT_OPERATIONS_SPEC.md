@@ -1,8 +1,8 @@
 # Recharge Backend — Deployment & Operations Specification
 
 - ID: **BCK-05**
-- Version: **0.2.42**
-- Date: **2026-09-27**
+- Version: **0.2.43**
+- Date: **2026-10-01**
 - Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
 - Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
 - Accountable owner: **Platform Operations owner**
@@ -1724,11 +1724,12 @@ needs a further amendment confirmed by the Product owner.
   address, every `authorized` false, one owner per resource, containment never
   touches `neverBlocked`.
 - `verify-iac-topology`: no credentials, project literal, real backend value,
-  `apply` or `id-token` anywhere; every resource guarded by the authorization
-  flag; per-environment state keys distinct; required labels; with the pinned
+  executable `apply` or `id-token` in validation CI; root execution is blocked
+  by preconditions, independently of stable desired resource cardinality;
+  per-environment state keys distinct; required labels; with the pinned
   Terraform, `fmt -check` and `init -backend=false` plus `validate` of every
-  environment root using the local verified provider copy; an empty `plan` with
-  zero resources.
+  environment root using the local verified provider copy; mock-provider plans
+  reject unauthorized execution. No real provider plan is part of local checks.
 - The workflow `backend-iac-validate.yml` has `contents: read` only, no secrets,
   no `id-token`, pinned actions and no cloud step.
 
@@ -1737,8 +1738,12 @@ needs a further amendment confirmed by the Product owner.
 101. **BCK-05-AC-101:** the execution manifest holds no invented project ID, no
      secret value and no real address; every unresolved value is `null` and every
      `authorized` is false.
-102. **BCK-05-AC-102:** every IaC resource is guarded by a flag that is false by
-     default; a plan without a signed record reference creates zero resources.
+102. **BCK-05-AC-102:** missing/invalid approval blocks execution with a failing
+     precondition, never by reducing count/for_each. Every root module depends on
+     the execution guard. Record digest, environment, project, commit, manifest,
+     owner evidence, operations and expiry must match; Draft manifests remain
+     denied even with a complete record. The protected future runner verifies
+     real approval provenance, revocation/expiry and saved-plan digest at apply.
 103. **BCK-05-AC-103:** dev, stage and prod share modules and never state, rights
      or parameters.
 104. **BCK-05-AC-104:** each resource has exactly one owner (Firebase CLI or
@@ -1766,11 +1771,50 @@ dropped it silently). Evidence, all local and offline with the pinned Terraform
   cancellation or privacy operations).
 - `verify-iac-topology`: nine modules and three isolated roots; `fmt -check`,
   `init -backend=false` and `validate` pass for every root; the gate behaves as
-  specified: a closed gate, a wrong manifest hash and a missing authorization
-  reference each plan **zero** resources, and only the exact combination opens
-  it (planned only, never applied). Mutations (an unguarded resource, a provider
+  specified at the original 3.1 commit: a closed gate, wrong manifest hash and
+  missing reference each planned zero resources. This behavior is superseded
+  by the blocking preconditions in §36.10, not retained as a safety guarantee.
+  Mutations (an unguarded resource, a provider
   credential, a bypassed gate) are detected.
-- Limits stated: the IAM role bindings are not written (the exact role decision
-  of BCK05-OD-02 is pending), no budget channel exists, App Check mode and
+- Limits stated: the IAM role bindings are not written (BCK05-OD-02 architecture
+  is Accepted; exact permission manifests/bindings remain pending), no budget channel exists, App Check mode and
   limits/quotas are `null`, and OD-03/04/05/08 stay Proposed. None of this is
   evidence of real IAM, billing, provider configuration or recovery.
+
+### 36.10 Bounded local hardening and dev preflight (2026-10-01)
+
+The owner requested a local correction pass, not provisioning. It edits only
+existing §36.6 paths, the existing execution-manifest contract test and the
+coordination/status rows; no new approval package, cloud runner or resource.
+
+- Authorization is separate from desired topology. An invalid record or the
+  checked-in denied manifest fails a `terraform_data.execution_guard`
+  precondition; this builtin has no provisioner. Resource counts never depend on
+  the authorization predicate. Mock-only test copies isolate record checks from
+  the Draft-manifest denial; no real provider plan/apply is executed.
+- WIF follows the Accepted IAM §6.1: exact issuer, audience, immutable subject,
+  repository/owner IDs, visibility, workflow on main, environment and event.
+  Missing identity inputs disable trust. Validation CI never receives OIDC.
+  Real subject opt-in, sanitized token evidence, branch/environment protections
+  and least-privilege IAM bindings remain required before cloud use.
+- The existing provisioning runbook owns dev-preflight, the unsigned authorization
+  template, expected inventory command, read-only vs active smoke, monitoring and
+  cost requirements. OD-08 keeps its G5/G6 gate; dev still needs a named incident
+  contact and bounded stop/escalation policy. No Proposed OD is promoted here.
+- `verify-execution-manifest --dev-inventory` emits manifest-hash-bound candidate
+  resources/config and unresolved items, not observed or authorized cloud state.
+- Approval fields/hashes alone are not a signature. The future protected runner
+  must verify actual owner evidence and expiry/revocation again before applying
+  the exact reviewed saved plan. That runner is not implemented by this pass.
+
+Local verification for this working-tree correction (not commit-bound release or
+cloud evidence): Terraform 1.15.9 / local Google provider 7.43.0 fmt and validate,
+48 mock-provider plan scenarios across the three roots (including an isolated
+temporary override to test record validation independently of the Draft denial),
+11 execution-manifest contract tests, TypeScript and changed-test lint passed.
+Manifest/no-cloud checks, Flutter analyze, all 1230 Flutter tests, boundary
+(zero violations, 71/71 exception budget) and diff checks passed. Flutter used the
+already installed CLI snapshot with `--no-pub`; no SDK changes or downloads.
+No real provider plan/apply, Emulator rerun, cloud read/write, deployment, push or
+merge was performed. Real WIF token exchange and GCP permission evidence remain
+Pending, not implied by the mock checks.

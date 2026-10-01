@@ -1,5 +1,8 @@
 import { spawnSync } from "node:child_process";
 import {
+  cpSync,
+  mkdirSync,
+  writeFileSync,
   existsSync,
   mkdtempSync,
   readFileSync,
@@ -77,7 +80,7 @@ const forbidden = [
   [/\baccess_token\s*=/u, "an access token"],
   [/impersonate_service_account/u, "service account impersonation"],
   [
-    /\bprovisioner\b|local-exec|remote-exec|null_resource|terraform_data/u,
+    /\bprovisioner\b|local-exec|remote-exec|null_resource/u,
     "an executing provisioner",
   ],
   [
@@ -105,7 +108,10 @@ const forbidden = [
   [/google_secret_manager_secret_version/u, "a secret version (a value)"],
 ];
 for (const file of hclFiles) {
-  const text = read(file);
+  const text = read(file)
+    .split(/\r?\n/u)
+    .filter((line) => !/^\s*#/u.test(line))
+    .join("\n");
   const relative = path.relative(repoRoot, file);
   for (const [pattern, label] of forbidden)
     if (pattern.test(text)) problems.push(`${relative}: contains ${label}`);
@@ -150,17 +156,35 @@ for (const env of environments) {
     ).exec(main);
     if (match === null)
       problems.push(`envs/${env}: module ${name} is not used`);
-    else if (!/enabled\s*=\s*local\.provisioning_authorized/u.test(match[1]))
+    else if (
+      !/enabled\s*=\s*true/u.test(match[1]) ||
+      !match[1].includes("depends_on = [terraform_data.execution_guard]")
+    )
       problems.push(
-        `envs/${env}: module ${name} is not gated by provisioning_authorized`,
+        `envs/${env}: module ${name} must have stable presence and depend on execution_guard`,
       );
   }
-  if (
-    !/provisioning_authorized\s*=\s*\(\s*var\.project_id != null\s*&&\s*var\.authorization_ref != null\s*&&\s*var\.manifest_sha256 == filesha256/u.test(
-      main,
-    )
-  )
-    problems.push(`envs/${env}: the authorization gate is weakened`);
+  for (const required of [
+    'resource "terraform_data" "execution_guard"',
+    "precondition {",
+    "condition     = local.authorization_valid",
+    "condition     = local.manifest_authorized",
+    'local.authorization.status == "approved"',
+    "local.authorization.environment == var.environment_id",
+    "local.authorization.projectId == var.project_id",
+    "local.authorization.commitSha == var.release_commit_sha",
+    "local.authorization.manifestSha256 == filesha256(local.manifest_path)",
+    "var.authorization_record_sha256 == filesha256(var.authorization_record_path)",
+    "timecmp(local.authorization.expiresAtUtc, plantimestamp()) > 0",
+  ])
+    if (!main.includes(required))
+      problems.push(
+        `envs/${env}: missing blocking authorization check: ${required}`,
+      );
+  if (/enabled\s*=[^\n]*provisioning_authorized/u.test(main))
+    problems.push(
+      `envs/${env}: execution permission must not change resource cardinality`,
+    );
   for (const label of ["application", "environment", "managed_by", "stage"])
     if (!new RegExp(`${label}\\s*=`, "u").test(main))
       problems.push(`envs/${env}: label ${label} missing`);
@@ -187,6 +211,27 @@ for (const env of environments) {
     problems.push(`envs/${env}: does not read the execution manifest`);
 }
 if (projects.size !== 3) problems.push("three environment roots are required");
+
+// Exact accepted WIF surface, tested without exchanging any real token.
+const wif = read(path.join(terraformRoot, "modules", "ci_wif", "main.tf"));
+for (const clause of [
+  "assertion.iss",
+  "assertion.aud",
+  "assertion.sub",
+  "assertion.repository_id",
+  "assertion.repository_owner_id",
+  "assertion.repository_visibility",
+  "assertion.workflow_ref",
+  "assertion.ref",
+  "assertion.environment",
+  "assertion.event_name",
+  "allowed_audiences",
+  "backend-deploy.yml@refs/heads/main",
+  "disabled                           = !local.configured",
+])
+  if (!wif.includes(clause)) problems.push(`WIF: missing constraint ${clause}`);
+if (wif.includes("backend-iac-validate.yml"))
+  problems.push("Validation workflow must never be trusted");
 
 // ------------------------------------------------------------ workflow
 const workflowPath = path.join(
@@ -243,7 +288,10 @@ function findTerraform() {
   );
   candidates.push("terraform");
   for (const candidate of candidates) {
-    const result = spawnSync(candidate, ["version"], { encoding: "utf8" });
+    const result = spawnSync(candidate, ["version"], {
+      encoding: "utf8",
+      env: { ...process.env, CHECKPOINT_DISABLE: "1" },
+    });
     if (result.status === 0 && /Terraform v1\.15\.9\b/u.test(result.stdout))
       return candidate;
   }
@@ -262,7 +310,13 @@ function run(binary, args, cwd, extraEnv = {}) {
   return spawnSync(binary, args, {
     cwd,
     encoding: "utf8",
-    env: { ...cleaned, TF_IN_AUTOMATION: "1", TF_INPUT: "0", ...extraEnv },
+    env: {
+      ...cleaned,
+      CHECKPOINT_DISABLE: "1",
+      TF_IN_AUTOMATION: "1",
+      TF_INPUT: "0",
+      ...extraEnv,
+    },
   });
 }
 
@@ -285,133 +339,200 @@ if (terraform === undefined) {
       `terraform fmt -check failed: ${fmt.stdout.trim().split("\n").slice(0, 5).join(", ")}`,
     );
   const providerMirror = path.join(terraformRoot, ".terraform", "providers");
-  const planOf = (env, variables) => {
-    const dir = path.join(terraformRoot, "envs", env);
-    const scratch = mkdtempSync(path.join(os.tmpdir(), `recharge-iac-${env}-`));
-    try {
-      const args = [
-        "plan",
-        "-input=false",
-        "-lock=false",
-        "-refresh=false",
-        "-no-color",
-        `-out=${path.join(scratch, "plan")}`,
-      ];
-      for (const [key, value] of Object.entries(variables))
-        args.push(`-var=${key}=${value}`);
-      // A synthetic placeholder lets the provider configure without looking for
-      // credentials; with zero resources no API is ever called, and with
-      // refresh disabled nothing is read.
-      const plan = run(terraform, args, dir, {
-        GOOGLE_OAUTH_ACCESS_TOKEN: "offline-plan-placeholder",
-      });
-      if (plan.status !== 0)
-        return {
-          error:
-            plan.stderr.trim().slice(0, 300) || plan.stdout.trim().slice(-300),
-        };
-      const shown = run(
-        terraform,
-        ["show", "-json", path.join(scratch, "plan")],
-        dir,
-      );
-      const json = JSON.parse(shown.stdout);
-      return {
-        changes: (json.resource_changes ?? []).length,
-        outputs: json.planned_values?.outputs ?? {},
-      };
-    } finally {
-      rmSync(scratch, { recursive: true, force: true });
-    }
-  };
-  for (const env of environments) {
-    const dir = path.join(terraformRoot, "envs", env);
-    const init = run(
-      terraform,
-      [
-        "init",
-        "-backend=false",
-        "-input=false",
-        "-no-color",
-        ...(existsSync(providerMirror)
-          ? [`-plugin-dir=${providerMirror}`]
-          : []),
-      ],
-      dir,
+
+  // No real provider plan, no ADC lookup, no dummy access token. Test copies
+  // contain only mocked providers and synthetic records; no persistent state.
+  if (!existsSync(providerMirror) && !process.env.CI) {
+    problems.push(
+      "Local verified provider mirror missing; downloads require separate permission.",
     );
-    if (init.status !== 0) {
-      problems.push(
-        `envs/${env}: terraform init failed: ${init.stderr.trim().slice(0, 200)}`,
+  } else
+    for (const env of environments) {
+      const scratch = mkdtempSync(
+        path.join(os.tmpdir(), "recharge-iac-review-"),
       );
-      continue;
-    }
-    const validate = run(terraform, ["validate", "-no-color"], dir);
-    if (validate.status !== 0) {
-      problems.push(
-        `envs/${env}: terraform validate failed: ${validate.stdout.trim().slice(0, 300)}`,
-      );
-      continue;
-    }
-    // The gate closed: zero resources. Partially open: still zero. Only the exact
-    // combination opens it, and that is only ever planned, never applied.
-    const closed = planOf(env, {});
-    if (closed.error !== undefined)
-      problems.push(`envs/${env}: empty plan failed: ${closed.error}`);
-    else if (
-      closed.changes !== 0 ||
-      closed.outputs.provisioning_authorized?.value !== false
-    )
-      problems.push(
-        `envs/${env}: the closed gate planned ${String(closed.changes)} resources`,
-      );
-    const manifestHash = createHash("sha256")
-      .update(
-        readFileSync(
+      try {
+        const root = path.join(scratch, "infra", "terraform");
+        const dir = path.join(root, "envs", env);
+        mkdirSync(path.dirname(dir), { recursive: true });
+        cpSync(
+          path.join(terraformRoot, "modules"),
+          path.join(root, "modules"),
+          { recursive: true },
+        );
+        mkdirSync(dir);
+        for (const name of readdirSync(path.join(terraformRoot, "envs", env)))
+          if (/\.tf$|\.lock\.hcl$/u.test(name))
+            writeFileSync(
+              path.join(dir, name),
+              read(path.join(terraformRoot, "envs", env, name)),
+            );
+        const manifestDir = path.join(scratch, "config", "manifests");
+        mkdirSync(manifestDir, { recursive: true });
+        const raw = read(
           path.join(
             backendRoot,
             "config",
             "manifests",
             "execution-manifest.json",
           ),
-        ),
-      )
-      .digest("hex");
-    const syntheticProject = `recharge-${env}-selftest0`;
-    const partial = planOf(env, {
-      project_id: syntheticProject,
-      authorization_ref: "selftest-record",
-      manifest_sha256: "0".repeat(64),
-    });
-    if (partial.error !== undefined)
-      problems.push(
-        `envs/${env}: partial-authorization plan failed: ${partial.error}`,
-      );
-    else if (partial.changes !== 0)
-      problems.push(
-        `envs/${env}: a wrong manifest hash still planned ${String(partial.changes)} resources`,
-      );
-    const noReference = planOf(env, {
-      project_id: syntheticProject,
-      manifest_sha256: manifestHash,
-    });
-    if (noReference.error !== undefined)
-      problems.push(
-        `envs/${env}: no-reference plan failed: ${noReference.error}`,
-      );
-    else if (noReference.changes !== 0)
-      problems.push(
-        `envs/${env}: a missing authorization reference still planned ${String(noReference.changes)} resources`,
-      );
-    const open = planOf(env, {
-      project_id: syntheticProject,
-      authorization_ref: "selftest-record",
-      manifest_sha256: manifestHash,
-    });
-    if (open.error !== undefined)
-      problems.push(`envs/${env}: open-gate plan failed: ${open.error}`);
-    else if (open.changes === 0)
-      problems.push(`envs/${env}: the gate never opens even with every input`);
-  }
+        );
+        writeFileSync(path.join(manifestDir, "execution-manifest.json"), raw);
+        const digest = createHash("sha256").update(raw).digest("hex");
+        const record = {
+          schemaVersion: 1,
+          status: "approved",
+          recordRef: "synthetic-not-authority",
+          owner: "test-only",
+          ownerApprovalEvidenceRef: "test-only",
+          environment: env,
+          projectId: `recharge-${env}-selftest0`,
+          manifestSha256: digest,
+          commitSha: "a".repeat(40),
+          dataScope: "synthetic",
+          operations: ["plan", "apply"],
+          push: false,
+          merge: false,
+          marketActivation: false,
+          issuedAtUtc: "2000-01-01T00:00:00Z",
+          expiresAtUtc: "2100-01-01T00:00:00Z",
+        };
+        const variants = [
+          ["complete_but_draft", record],
+          ["expired", { ...record, expiresAtUtc: "2001-01-01T00:00:00Z" }],
+          [
+            "wrong_environment",
+            { ...record, environment: env === "dev" ? "prod" : "dev" },
+          ],
+          ["wrong_project", { ...record, projectId: "recharge-dev-foreign0" }],
+          ["wrong_manifest", { ...record, manifestSha256: "0".repeat(64) }],
+          ["unsigned", { ...record, status: "draft" }],
+        ];
+        let tests = 'mock_provider "google" {}\n';
+        tests += `run "missing_record" {
+        command = plan
+        variables { project_id = "recharge-${env}-selftest0" }
+        expect_failures = [terraform_data.execution_guard]
+      }\n`;
+        for (const [name, value] of variants) {
+          const recordRaw = JSON.stringify(value);
+          writeFileSync(path.join(dir, `${name}.json`), recordRaw);
+          tests += `run "${name}" {
+          command = plan
+          variables {
+            project_id = "recharge-${env}-selftest0"
+            authorization_ref = "synthetic-not-authority"
+            manifest_sha256 = "${digest}"
+            authorization_record_path = "./${name}.json"
+            authorization_record_sha256 = "${createHash("sha256").update(recordRaw).digest("hex")}"
+            release_commit_sha = "${"a".repeat(40)}"
+          }
+          expect_failures = [terraform_data.execution_guard]
+        }\n`;
+        }
+        writeFileSync(path.join(dir, "authorization.tftest.hcl"), tests);
+        const init = run(
+          terraform,
+          [
+            "init",
+            "-backend=false",
+            "-input=false",
+            "-lockfile=readonly",
+            "-no-color",
+            ...(existsSync(providerMirror)
+              ? [`-plugin-dir=${providerMirror}`]
+              : []),
+          ],
+          dir,
+        );
+        if (init.status !== 0) {
+          problems.push(
+            `envs/${env}: init failed: ${init.stderr.slice(0, 600)}`,
+          );
+          continue;
+        }
+        for (const args of [
+          ["validate", "-no-color"],
+          ["test", "-no-color"],
+        ]) {
+          const result = run(terraform, args, dir);
+          if (result.status !== 0)
+            problems.push(
+              `envs/${env}: ${args[0]} failed: ${result.stdout.slice(-1200)} ${result.stderr.slice(-1200)}`,
+            );
+          else if (args[0] === "test")
+            process.stdout.write(
+              `${env}: mocked authorization tests passed (no cloud).\n`,
+            );
+        }
+        // Isolate the record checks: otherwise the Draft-manifest refusal would
+        // conceal a broken expiry/hash/environment check. Override ONLY in this
+        // disposable mocked copy, never in the workspace or with a real provider.
+        writeFileSync(
+          path.join(dir, "review_override.tf"),
+          "locals { manifest_authorized = true }\n",
+        );
+        let isolated = tests.replace(
+          /(run "complete_but_draft"[\s\S]*?)expect_failures = \[terraform_data.execution_guard\]/u,
+          '$1assert {\n condition = output.provisioning_authorized == true\n error_message = "Synthetic valid record rejected"\n }',
+        );
+        const audience = `https://iam.googleapis.com/projects/123456789012/locations/global/workloadIdentityPools/github-${env}/providers/github-actions`;
+        const expectedTrust = [
+          "assertion.iss == 'https://token.actions.githubusercontent.com'",
+          `assertion.aud == '${audience}'`,
+          `assertion.sub == 'repo:RechargeN@277012929/Recharge@1213588766:environment:backend-${env}'`,
+          "assertion.repository_id == '1213588766'",
+          "assertion.repository_owner_id == '277012929'",
+          "assertion.repository_visibility == 'public'",
+          "assertion.workflow_ref == 'RechargeN/Recharge/.github/workflows/backend-deploy.yml@refs/heads/main'",
+          "assertion.ref == 'refs/heads/main'",
+          `assertion.environment == 'backend-${env}'`,
+          env === "dev"
+            ? "assertion.event_name in ['push', 'workflow_dispatch']"
+            : "assertion.event_name == 'workflow_dispatch'",
+        ].join(" && ");
+        for (const [name, repositoryId, expected] of [
+          ["exact_wif", "1213588766", expectedTrust],
+          ["foreign_repo", "9999999999", "false"],
+        ]) {
+          isolated += `run "${name}" {
+          command = plan
+          variables {
+            project_id = "recharge-${env}-selftest0"
+            authorization_ref = "synthetic-not-authority"
+            manifest_sha256 = "${digest}"
+            authorization_record_path = "./complete_but_draft.json"
+            authorization_record_sha256 = "${createHash("sha256").update(JSON.stringify(record)).digest("hex")}"
+            release_commit_sha = "${"a".repeat(40)}"
+            project_number = "123456789012"
+            github_repository_id = "${repositoryId}"
+            github_repository_owner_id = "277012929"
+          }
+          assert {
+            condition = output.trust_condition == ${JSON.stringify(expected)}
+            error_message = "WIF differs from exact accepted claim restrictions"
+          }
+        }\n`;
+        }
+        writeFileSync(path.join(dir, "authorization.tftest.hcl"), isolated);
+        const isolatedResult = run(terraform, ["test", "-no-color"], dir);
+        if (isolatedResult.status !== 0)
+          problems.push(
+            `envs/${env}: isolated record tests failed: ${isolatedResult.stdout.slice(-1500)} ${isolatedResult.stderr.slice(-1500)}`,
+          );
+        else
+          process.stdout.write(
+            `${env}: isolated record checks passed under mock-only override.\n`,
+          );
+      } finally {
+        if (
+          path.dirname(scratch) !== path.resolve(os.tmpdir()) ||
+          !path.basename(scratch).startsWith("recharge-iac-review-")
+        )
+          throw new Error("Unexpected cleanup target");
+        rmSync(scratch, { recursive: true, force: true });
+      }
+    }
 }
 
 if (problems.length > 0) {
@@ -421,6 +542,6 @@ if (problems.length > 0) {
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `IaC topology gate passed: ${String(moduleNames.length)} modules, three isolated environment roots, every resource gated, no credential, backend, project literal or double-managed resource${terraform === undefined ? "" : "; Terraform fmt, validate and gate-behaviour plans passed"}.\n`,
+    `IaC topology gate passed: ${String(moduleNames.length)} modules, three isolated environment roots, blocking authorization, stable resource presence, no credential, backend, project literal or double-managed resource${terraform === undefined ? "" : "; Terraform fmt, validate and mock-provider negative tests passed"}.\n`,
   );
 }
