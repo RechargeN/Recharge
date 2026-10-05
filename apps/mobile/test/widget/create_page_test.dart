@@ -793,7 +793,7 @@ void main() {
       // Session (generic success-hub flow; Recharge Activity now requires
       // its own accessNotes/location fields per ACT-CRT-01 spec, which this
       // generic-fields draft never sets).
-      createController.setObjectType(CreateObjectType.session);
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
         mainCategory: 'art_culture_museums',

@@ -274,14 +274,16 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Session (see comment on the "partial attendance" test above for why
-    // activity no longer fits this generic publish-success example).
-    controller.setObjectType(CreateObjectType.session);
+    // Class / Workshop has no typed block, so it exercises the generic
+    // publish path (Session now requires its own coordinator).
+    controller.setObjectType(CreateObjectType.classWorkshop);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
-    controller.updateStartDateTime('2026-05-01T10:00:00Z');
+    controller.updateStartDateTime(
+      DateTime.now().toUtc().add(const Duration(days: 30)).toIso8601String(),
+    );
 
     final success = await controller.publishDraft();
 

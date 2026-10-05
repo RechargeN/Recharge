@@ -1,6 +1,8 @@
 import '../../../../core/id/id_generator.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/draft_publisher.dart';
+import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/route_draft_save_result.dart';
 import '../../domain/entities/scenario_item_draft.dart';
@@ -206,11 +208,12 @@ class CreateRepositoryImpl
     // every Activity publish attempt fell through to the shared `?? 0`
     // default, so a genuinely new revision could replay as a duplicate of
     // an earlier one. Full formula also names `PublisherRef` + `actionKind`;
-    // those are not yet folded into this shared cross-type key (same
-    // `userId:draftId:revision` shape used by every other Create type) —
-    // deferred as a separate cross-type change, not silently dropped.
+    // IDP-05A: the key now also carries the effective `PublisherRef` and the
+    // action kind, so the same draft re-published under another publisher
+    // can never replay as the earlier one.
+    final PublisherRef publisher = draft.effectivePublisher;
     final String idempotencyKey =
-        '$userId:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? draft.sessionData?.revision ?? draft.activityData?.revision ?? draft.rentalData?.revision ?? 0}';
+        '$userId:${publisher.type.wireName}:${publisher.id}:publish:${draft.id}:${draft.eventData?.revision ?? draft.placeData?.revision ?? draft.findPeopleData?.revision ?? draft.sessionData?.revision ?? draft.activityData?.revision ?? draft.rentalData?.revision ?? 0}';
     final String publishedId = draft.id.startsWith('loc_')
         ? _idGenerator.generate()
         : draft.id;

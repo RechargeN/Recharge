@@ -74,7 +74,7 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('RECHARGE'), findsOneWidget);
+    expect(find.text('ACTIVITY'), findsOneWidget);
     expect(find.text('Morning yoga'), findsOneWidget);
     expect(find.text('Gentle recharge session'), findsOneWidget);
     expect(find.text('Recharge Studio'), findsOneWidget);
@@ -130,7 +130,9 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.ios_share_rounded));
+    await tester.tap(find.byTooltip('Поделиться и другие действия'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Поделиться'));
     await tester.pumpAndSettle();
 
     expect(find.text('Ссылка скопирована'), findsOneWidget);

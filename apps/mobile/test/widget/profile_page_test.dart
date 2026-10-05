@@ -1098,7 +1098,7 @@ void main() {
     // dedicated _validate branch (falls through to the generic path, which
     // never checked category applicability), so it's a safe substitute for
     // this generic creator-listing-status fixture.
-    createController.setObjectType(CreateObjectType.session);
+    createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Museum evening route');
     createController.applyTaxonomySelection(
       mainCategory: 'art_culture_museums',
@@ -1274,7 +1274,7 @@ void main() {
     // applicability for any type), so it's a safe, minimal substitute — the
     // legacy route-context rendering this test exercises is keyed only on
     // mainCategory/subcategory, not objectType.
-    createController.setObjectType(CreateObjectType.session);
+    createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Calm coffee walking route');
     createController.applyTaxonomySelection(
       mainCategory: 'travel_tours',
@@ -1457,7 +1457,7 @@ void main() {
       // See the 'opens legacy route-context activity' test above for why
       // session (not activity) is used for this travel_tours/walking_tour
       // legacy-route fixture.
-      createController.setObjectType(CreateObjectType.session);
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Published calm route');
       createController.applyTaxonomySelection(
         mainCategory: 'travel_tours',

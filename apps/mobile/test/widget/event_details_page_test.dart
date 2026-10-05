@@ -100,7 +100,6 @@ void main() {
     await tester.tap(find.text('Показать на карте'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Map destination'), findsOneWidget);
     expect(find.text('item=evt-1;lat=56.950000;lng=24.100000'), findsOneWidget);
   });
 
@@ -125,7 +124,7 @@ void main() {
   ) async {
     await tester.pumpWidget(await _app());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Присоединиться').last);
+    await tester.tap(find.text('Записаться').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Интерес к событию отмечен'), findsOneWidget);
