@@ -198,6 +198,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomyCategory>(
+          isExpanded: true,
           initialValue: selectedCategory,
           decoration: _decoration('Category *', 'mainCategory'),
           items: categories
@@ -222,6 +223,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomySubcategory>(
+          isExpanded: true,
           initialValue: selectedSubcategory,
           decoration: _decoration('Subcategory *', 'subcategory'),
           items:
@@ -295,6 +297,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             const SizedBox(height: 12),
             if (policy.isManaged)
               DropdownButtonFormField<PlaceRelationship>(
+                isExpanded: true,
                 key: const ValueKey<String>('place-relationship'),
                 initialValue: place.relationshipToPlace,
                 decoration: _decoration(
@@ -327,6 +330,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: place.contentLocale,
               decoration: _decoration('Content language', 'contentLocale'),
               items: widget.controller.supportedContentLocales
@@ -606,6 +610,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
       subtitle: 'Unknown is better than invented hours.',
       children: <Widget>[
         DropdownButtonFormField<PlaceHoursMode>(
+          isExpanded: true,
           initialValue: hours.mode,
           decoration: _decoration(
             required ? 'Hours mode *' : 'Hours mode',
@@ -704,6 +709,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         ],
         const Divider(height: 32),
         DropdownButtonFormField<PlaceOperationalStatus>(
+          isExpanded: true,
           initialValue: place.operationalStatus.status,
           decoration: const InputDecoration(
             labelText: 'Current operational status',
@@ -776,6 +782,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           children: <Widget>[
             Expanded(
               child: DropdownButtonFormField<int>(
+                isExpanded: true,
                 initialValue: _periodDay,
                 decoration: const InputDecoration(
                   labelText: 'Day',
@@ -954,6 +961,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             children: <Widget>[
               if (policy.admission.isVisible)
                 DropdownButtonFormField<PlaceEntryType>(
+                  isExpanded: true,
                   initialValue: pricing.entryType,
                   decoration: _decoration('Admission', 'entryType'),
                   items:

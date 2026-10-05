@@ -104,6 +104,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           DropdownButtonFormField<String>(
+            isExpanded: true,
             key: const ValueKey<String>('find-people-category'),
             initialValue: category.id,
             decoration: _decoration('Category *'),
@@ -129,6 +130,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             key: ValueKey<String>('find-people-subcategory-${category.id}'),
             initialValue:
                 subcategories.any(
@@ -186,6 +188,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 4),
           DropdownButtonFormField<FindPeopleSkillLevel>(
+            isExpanded: true,
             initialValue: data.skillLevel,
             decoration: _decoration('Skill level *'),
             items: FindPeopleSkillLevel.values
@@ -203,6 +206,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<FindPeopleParticipationGoal>(
+            isExpanded: true,
             initialValue: data.participationGoal,
             decoration: _decoration('Participation goal *'),
             items: FindPeopleParticipationGoal.values
@@ -334,6 +338,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           DropdownButtonFormField<FindPeopleScheduleMode>(
+            isExpanded: true,
             key: const ValueKey<String>('find-people-schedule-mode'),
             initialValue: data.scheduleMode,
             decoration: _decoration('Schedule mode *'),
@@ -502,6 +507,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           DropdownButtonFormField<FindPeopleMeetingMode>(
+            isExpanded: true,
             key: const ValueKey<String>('find-people-meeting-mode'),
             initialValue: data.meetingMode,
             decoration: _decoration('Meeting mode *'),
@@ -711,6 +717,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 _update(data.copyWith(hostSeatCount: value)),
           ),
           DropdownButtonFormField<FindPeopleApprovalMode>(
+            isExpanded: true,
             initialValue: data.approvalMode,
             decoration: _decoration('Approval mode *'),
             items: FindPeopleApprovalMode.values
@@ -755,6 +762,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                   _update(data.copyWith(maxSeatsPerApplication: value)),
             ),
           DropdownButtonFormField<FindPeopleVerificationLevel>(
+            isExpanded: true,
             initialValue: data.verificationRequirement,
             decoration: _decoration('Verification requirement *'),
             items: FindPeopleVerificationLevel.values
@@ -781,6 +789,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (data.waitlistEnabled) ...<Widget>[
             DropdownButtonFormField<FindPeopleWaitlistPolicy>(
+              isExpanded: true,
               initialValue: data.waitlistPolicy,
               decoration: _decoration('Waitlist policy'),
               items: FindPeopleWaitlistPolicy.values
@@ -800,6 +809,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<FindPeopleSeatFitPolicy>(
+              isExpanded: true,
               initialValue: data.waitlistSeatFitPolicy,
               decoration: _decoration('Seat-fit policy'),
               items: FindPeopleSeatFitPolicy.values
@@ -871,6 +881,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const Divider(height: 28),
           DropdownButtonFormField<FindPeopleCostType>(
+            isExpanded: true,
             initialValue: data.costType,
             decoration: _decoration('Expected cost *'),
             items: FindPeopleCostType.values
@@ -928,6 +939,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           DropdownButtonFormField<FindPeopleExpenseSplitMode>(
+            isExpanded: true,
             initialValue: data.expenseSplitMode,
             decoration: _decoration('Expense split mode *'),
             items: FindPeopleExpenseSplitMode.values
@@ -1012,6 +1024,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           DropdownButtonFormField<FindPeoplePublisherType>(
+            isExpanded: true,
             initialValue: data.publisherType,
             decoration: _decoration('Publish as *'),
             items: FindPeoplePublisherType.values
@@ -1089,6 +1102,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const Divider(height: 28),
           DropdownButtonFormField<FindPeopleVisibility>(
+            isExpanded: true,
             initialValue: data.visibility,
             decoration: _decoration('Visibility *'),
             items: FindPeopleVisibility.values
@@ -1115,6 +1129,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<FindPeopleConversationPolicy>(
+            isExpanded: true,
             initialValue: data.conversationPolicy,
             decoration: _decoration('Conversation policy *'),
             items: FindPeopleConversationPolicy.values
@@ -1358,7 +1373,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   }
 
   Widget _navigation(int step) {
-    return Row(
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
       children: <Widget>[
         if (step > 0)
           OutlinedButton.icon(
@@ -1366,20 +1385,17 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             icon: const Icon(Icons.arrow_back),
             label: const Text('Back'),
           ),
-        const Spacer(),
         TextButton.icon(
           onPressed: widget.controller.saveDraft,
           icon: const Icon(Icons.save_outlined),
           label: const Text('Save draft'),
         ),
-        if (step < findPeopleCreateSteps.length - 1) ...<Widget>[
-          const SizedBox(width: 8),
+        if (step < findPeopleCreateSteps.length - 1)
           FilledButton.icon(
             onPressed: () => widget.controller.goToFindPeopleStep(step + 1),
             icon: const Icon(Icons.arrow_forward),
             label: const Text('Continue'),
           ),
-        ],
       ],
     );
   }

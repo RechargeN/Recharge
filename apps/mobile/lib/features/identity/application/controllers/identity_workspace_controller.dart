@@ -97,6 +97,39 @@ class IdentityWorkspaceController extends ChangeNotifier {
     }
   }
 
+  /// IDP-05A: re-reads access and repairs a stale active workspace. A page
+  /// whose membership was revoked or whose lifecycle left `active` drops the
+  /// user back to the personal profile (fail-closed, preference repaired by
+  /// the load use case). Returns `true` when the active workspace changed.
+  Future<bool> revalidateAccess() async {
+    if (!_state.isLoaded || _state.userId.isEmpty || _state.isBusy) {
+      return false;
+    }
+    final int operationRevision = ++_operationRevision;
+    try {
+      final IdentityWorkspaceLoadResult result =
+          await _loadIdentityWorkspaceUseCase(_state.userId);
+      if (operationRevision != _operationRevision) return false;
+      final bool changed = result.activeWorkspace != _state.activeWorkspace;
+      _setState(
+        _state.copyWith(
+          accessSnapshot: result.accessSnapshot,
+          activeWorkspace: result.activeWorkspace,
+          pendingLimitRequest: result.pendingLimitRequest,
+          clearPendingLimitRequest: result.pendingLimitRequest == null,
+          clearAdminPreview: changed,
+          message: result.recoveryReasonCode == null
+              ? null
+              : 'Недоступная страница сброшена на личный профиль',
+          clearMessage: result.recoveryReasonCode == null,
+        ),
+      );
+      return changed;
+    } on Exception {
+      return false;
+    }
+  }
+
   Future<bool> selectWorkspace(WorkspaceRef workspace) async {
     if (!_state.isLoaded || _state.userId.isEmpty || _state.isBusy) {
       return false;

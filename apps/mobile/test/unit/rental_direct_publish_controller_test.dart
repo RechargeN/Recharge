@@ -7,6 +7,7 @@ import 'package:recharge/features/create/domain/entities/create_draft_entity.dar
 import 'package:recharge/features/create/domain/entities/rental_direct_publish_policy.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/domain/repositories/publisher_access_check.dart';
 import 'package:recharge/features/create/domain/repositories/rental_promotion_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/promote_rental_to_published_usecase.dart';
@@ -23,6 +24,7 @@ void main() {
       isTrusted: true,
     ),
     bool wirePromotion = true,
+    PublisherAccessCheck? publisherAccessCheck,
   }) {
     return CreateController(
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
@@ -38,6 +40,7 @@ void main() {
         currency: 'EUR',
       ),
       rentalDirectPublishPolicy: policy,
+      publisherAccessCheck: publisherAccessCheck,
       promoteRentalToPublished: wirePromotion
           ? PromoteRentalToPublishedUseCase(repository)
           : null,
@@ -48,9 +51,7 @@ void main() {
     repository = _FakeRentalRepository();
   });
 
-  RentalDraftData completeRentalData({
-    PublisherRef? publisherRef,
-  }) {
+  RentalDraftData completeRentalData({PublisherRef? publisherRef}) {
     final RentalDraftData base = RentalDraftData.defaults(
       userId: 'user-1',
       currencyCode: 'EUR',
@@ -214,13 +215,35 @@ void main() {
     },
   );
 
-  test('page publisher stays pending_review (fail-closed)', () async {
+  test('page publisher without page access is denied outright', () async {
     repository.seed(
       completeRentalDraft(
         publisherRef: const PublisherRef(type: PublisherType.page, id: 'p1'),
       ),
     );
     final controller = buildController();
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.test',
+      organizerName: 'User',
+      capabilities: const <String>['publish.rental.direct'],
+      isVerifiedCreator: true,
+    );
+
+    expect(await controller.publishDraft(), isFalse);
+    expect(controller.state.publishedDraft, isNull);
+    controller.dispose();
+  });
+
+  test('page publisher stays pending_review (fail-closed)', () async {
+    repository.seed(
+      completeRentalDraft(
+        publisherRef: const PublisherRef(type: PublisherType.page, id: 'p1'),
+      ),
+    );
+    final controller = buildController(
+      publisherAccessCheck: const _AllowAllPublisherAccess(),
+    );
     await controller.ensureLoaded(
       userId: 'user-1',
       organizerEmail: 'user@example.test',
@@ -286,26 +309,29 @@ void main() {
     },
   );
 
-  test('missing publish.rental.direct capability stays pending_review', () async {
-    repository.seed(completeRentalDraft());
-    final controller = buildController();
-    await controller.ensureLoaded(
-      userId: 'user-1',
-      organizerEmail: 'user@example.test',
-      organizerName: 'User',
-      capabilities: const <String>[],
-      isVerifiedCreator: true,
-    );
+  test(
+    'missing publish.rental.direct capability stays pending_review',
+    () async {
+      repository.seed(completeRentalDraft());
+      final controller = buildController();
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user@example.test',
+        organizerName: 'User',
+        capabilities: const <String>[],
+        isVerifiedCreator: true,
+      );
 
-    final bool ok = await controller.publishDraft();
+      final bool ok = await controller.publishDraft();
 
-    expect(ok, isTrue);
-    expect(
-      controller.state.publishedDraft?.publishStatus,
-      PublishStatus.pendingReview,
-    );
-    controller.dispose();
-  });
+      expect(ok, isTrue);
+      expect(
+        controller.state.publishedDraft?.publishStatus,
+        PublishStatus.pendingReview,
+      );
+      controller.dispose();
+    },
+  );
 
   test(
     'a rental draft with no typed rentalData never crashes publishDraft',
@@ -335,6 +361,16 @@ void main() {
       controller.dispose();
     },
   );
+}
+
+class _AllowAllPublisherAccess implements PublisherAccessCheck {
+  const _AllowAllPublisherAccess();
+
+  @override
+  Future<bool> canPublishAs({
+    required String actorUserId,
+    required PublisherRef publisher,
+  }) async => true;
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

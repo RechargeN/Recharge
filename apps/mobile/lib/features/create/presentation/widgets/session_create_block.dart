@@ -128,6 +128,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomyCategory>(
+          isExpanded: true,
           initialValue: selectedCategory,
           decoration: const InputDecoration(labelText: 'Category'),
           items: <DropdownMenuItem<CreateTaxonomyCategory>>[
@@ -149,6 +150,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomySubcategory>(
+          isExpanded: true,
           initialValue: selectedSubcategory,
           decoration: const InputDecoration(labelText: 'Subcategory'),
           items: <DropdownMenuItem<CreateTaxonomySubcategory>>[
@@ -435,11 +437,12 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               onTap: () => setState(() => _showOptional = !_showOptional),
               child: Row(
                 children: <Widget>[
-                  Text(
-                    'Optional — add now or after publishing',
-                    style: Theme.of(context).textTheme.titleSmall,
+                  Expanded(
+                    child: Text(
+                      'Optional — add now or after publishing',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                   ),
-                  const Spacer(),
                   Icon(_showOptional ? Icons.expand_less : Icons.expand_more),
                 ],
               ),
@@ -643,8 +646,11 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   Widget _footer() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
         children: <Widget>[
           OutlinedButton(
             onPressed: widget.controller.saveDraft,
@@ -707,10 +713,11 @@ class _BlockCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
               children: <Widget>[
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(width: 8),
                 if (required)
                   Text(
                     'required',

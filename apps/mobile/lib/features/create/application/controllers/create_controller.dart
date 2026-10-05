@@ -50,6 +50,8 @@ import '../../domain/repositories/collection_catalog_search_repository.dart';
 import '../../domain/repositories/collection_publication_repository.dart';
 import '../../domain/repositories/create_template_repository.dart';
 import '../../domain/repositories/rental_private_authoring_repository.dart';
+import '../../domain/repositories/publisher_access_check.dart';
+import '../../domain/entities/draft_publisher.dart';
 import '../../domain/repositories/rental_publication_index_sink.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 import '../../domain/usecases/build_rental_public_projection_usecase.dart';
@@ -174,6 +176,7 @@ class CreateController extends ChangeNotifier {
     CollectionCreateRuntimeConfig collectionCreateConfig =
         const CollectionCreateRuntimeConfig(),
     CollectionCreateTelemetry? collectionTelemetry,
+    PublisherAccessCheck? publisherAccessCheck,
   }) : _loadCreateDraftUseCase = loadCreateDraftUseCase,
        _loadCreateDraftByIdUseCase = loadCreateDraftByIdUseCase,
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
@@ -211,6 +214,7 @@ class CreateController extends ChangeNotifier {
        _promoteRentalToPublished = promoteRentalToPublished,
        _rentalPublicationIndexSink = rentalPublicationIndexSink,
        _collectionCreateConfig = collectionCreateConfig,
+       _publisherAccessCheck = publisherAccessCheck,
        _collectionTelemetry =
            collectionTelemetry ?? CollectionCreateTelemetry(analyticsService);
 
@@ -253,6 +257,8 @@ class CreateController extends ChangeNotifier {
   final RentalPublicationIndexSink? _rentalPublicationIndexSink;
   final CollectionCreateRuntimeConfig _collectionCreateConfig;
   final CollectionCreateTelemetry _collectionTelemetry;
+  final PublisherAccessCheck? _publisherAccessCheck;
+  bool _publishInFlight = false;
   bool _isVerifiedCreator = false;
   List<CreateTemplateEntity> _rentalTemplates = const <CreateTemplateEntity>[];
   int _scenarioGenerationRequestSerial = 0;
@@ -3734,8 +3740,65 @@ class CreateController extends ChangeNotifier {
     }
   }
 
+  /// IDP-05A: re-checks, at publish time, that the draft's stored publisher
+  /// is still usable by the current actor. A Page publisher is denied when no
+  /// access check is composed (fail-closed). The draft is never rewritten, so
+  /// the author keeps the form and can retry after access is restored.
+  Future<bool> _publisherAccessAllowed(CreateDraftEntity draft) async {
+    final PublisherRef publisher = draft.effectivePublisher;
+    final PublisherAccessCheck? check = _publisherAccessCheck;
+    bool allowed;
+    if (publisher.type == PublisherType.user) {
+      allowed = publisher.id == _state.userId;
+    } else if (check == null) {
+      allowed = false;
+    } else {
+      allowed = await check.canPublishAs(
+        actorUserId: _state.userId,
+        publisher: publisher,
+      );
+    }
+    if (!allowed) {
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.ready,
+          message: publisher.type == PublisherType.page
+              ? 'Публикация от имени страницы недоступна: доступ отозван или '
+                    'ограничен. Черновик сохранён.'
+              : 'Публикация недоступна для этого владельца. Черновик '
+                    'сохранён.',
+          clearPublishedDraft: true,
+        ),
+      );
+      _analyticsService.track(
+        'create_publish_denied',
+        params: <String, Object?>{
+          'object_type': draft.objectType.taxonomyId,
+          'publisher_type': publisher.type.wireName,
+        },
+      );
+    }
+    return allowed;
+  }
+
+  /// A second call while one is already running (double tap, retry during a
+  /// slow save) is ignored instead of racing the first publish.
   Future<bool> publishDraft() async {
+    if (_publishInFlight) return false;
+    _publishInFlight = true;
+    try {
+      return await _publishDraftOnce();
+    } finally {
+      _publishInFlight = false;
+    }
+  }
+
+  Future<bool> _publishDraftOnce() async {
     if (_state.userId.isEmpty) return false;
+    if (_state.draft.objectType != CreateObjectType.scenario &&
+        !await _publisherAccessAllowed(_state.draft)) {
+      return false;
+    }
     if (_state.draft.objectType == CreateObjectType.route) {
       return _publishRouteDraft();
     }
@@ -3871,10 +3934,31 @@ class CreateController extends ChangeNotifier {
       ),
     );
 
-    final CreateDraftEntity published = await _publishCreateDraftUseCase(
-      userId: _state.userId,
-      draft: draftToPublish,
-    );
+    final CreateDraftEntity published;
+    try {
+      published = await _publishCreateDraftUseCase(
+        userId: _state.userId,
+        draft: draftToPublish,
+      );
+    } on Object {
+      // The draft was saved right before; keep it in the form and let the
+      // author retry. The repository replays an already pending publish, so
+      // a retry can never create a duplicate.
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.ready,
+          message: 'Не удалось отправить. Черновик сохранён, попробуйте ещё раз.',
+          clearPublishedDraft: true,
+        ),
+      );
+      _analyticsService.track(
+        'create_publish_failed',
+        params: <String, Object?>{
+          'object_type': draftToPublish.objectType.taxonomyId,
+        },
+      );
+      return false;
+    }
 
     // RNT-PUB-01 §1.4: a single, bounded, Rental-only trusted direct-publish
     // attempt immediately after the generic publish above. `rentalData` is
@@ -4180,7 +4264,7 @@ class CreateController extends ChangeNotifier {
     required String organizerEmail,
     required String organizerName,
   }) {
-    final CreateDraftEntity draft = CreateDraftEntity.defaults(
+    CreateDraftEntity draft = CreateDraftEntity.defaults(
       organizerId: organizerId,
       organizerEmail: organizerEmail,
       organizerName: organizerName,
@@ -4190,6 +4274,13 @@ class CreateController extends ChangeNotifier {
       city: _runtimeDefaults.city,
       currency: _runtimeDefaults.currency,
     );
+    if (draft.eventData != null) {
+      draft = draft.copyWith(
+        eventData: draft.eventData!.copyWith(
+          publisherRef: _defaultPublisher(organizerId),
+        ),
+      );
+    }
     _setState(
       _state.copyWith(
         status: CreateStatus.ready,
@@ -4372,6 +4463,15 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  /// IDP-04A: publisher captured once from the active workspace when a new
+  /// typed block is created; existing drafts keep their stored publisher.
+  PublisherRef _defaultPublisher(String userId) {
+    final PublisherRef? active = _activePublisherRef;
+    return active != null && active.isValid
+        ? active
+        : PublisherRef(type: PublisherType.user, id: userId);
+  }
+
   PlaceDraftData _placeDefaults(String userId) {
     return PlaceDraftData.defaults(
       userId: userId,
@@ -4381,14 +4481,14 @@ class CreateController extends ChangeNotifier {
       timezoneId: _runtimeDefaults.timezone,
       currencyCode: _runtimeDefaults.currency,
       contentLocale: _runtimeDefaults.defaultContentLocale,
-    );
+    ).copyWith(publisherRef: _defaultPublisher(userId));
   }
 
   ActivityDraftData _activityDefaults(String userId) {
     return ActivityDraftData.defaults(
       userId: userId,
       currencyCode: _runtimeDefaults.currency,
-    );
+    ).copyWith(publisherRef: _defaultPublisher(userId));
   }
 
   RentalDraftData _rentalDefaults(String userId) {
@@ -4524,10 +4624,16 @@ class CreateController extends ChangeNotifier {
   }
 
   FindPeopleDraftData _findPeopleDefaults(String userId) {
+    final PublisherRef publisher = _defaultPublisher(userId);
     return FindPeopleDraftData.defaults(
       userId: userId,
       currencyCode: _runtimeDefaults.currency,
       defaultLanguageCode: _runtimeDefaults.defaultContentLocale,
+    ).copyWith(
+      publisherType: publisher.type == PublisherType.page
+          ? FindPeoplePublisherType.page
+          : FindPeoplePublisherType.user,
+      publisherId: publisher.id,
     );
   }
 
@@ -5566,6 +5672,16 @@ class CreateController extends ChangeNotifier {
   /// review without touching Discover, neither capability refuses outright.
   /// Never called if `collectionPublishingEnabled` is off (§15 kill switch).
   Future<bool> publishCollection() async {
+    if (_publishInFlight) return false;
+    _publishInFlight = true;
+    try {
+      return await _publishCollectionOnce();
+    } finally {
+      _publishInFlight = false;
+    }
+  }
+
+  Future<bool> _publishCollectionOnce() async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
     if (coordinator == null) return false;
     if (!_collectionCreateConfig.collectionPublishingEnabled) {
@@ -5583,6 +5699,10 @@ class CreateController extends ChangeNotifier {
               'или publish.collection.direct.',
         ),
       );
+      return false;
+    }
+    if (_state.draft.objectType == CreateObjectType.collection &&
+        !await _publisherAccessAllowed(_state.draft)) {
       return false;
     }
     try {

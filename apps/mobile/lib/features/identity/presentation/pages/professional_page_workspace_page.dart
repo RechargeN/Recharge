@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,18 +13,44 @@ import '../widgets/team_invitations_card.dart';
 
 enum ProfessionalPageSection { overview, content, account }
 
-class ProfessionalPageWorkspacePage extends ConsumerWidget {
+class ProfessionalPageWorkspacePage extends ConsumerStatefulWidget {
   const ProfessionalPageWorkspacePage({super.key, required this.section});
 
   final ProfessionalPageSection section;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfessionalPageWorkspacePage> createState() =>
+      _ProfessionalPageWorkspacePageState();
+}
+
+class _ProfessionalPageWorkspacePageState
+    extends ConsumerState<ProfessionalPageWorkspacePage> {
+  @override
+  void initState() {
+    super.initState();
+    // IDP-05A: opening a page surface (also by deep link) re-validates the
+    // stored active workspace, so a revoked page is never rendered from a
+    // stale preference.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        ref.read(identityWorkspaceControllerProvider).revalidateAccess(),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ProfessionalPageSection section = widget.section;
     final state = ref.watch(identityWorkspaceControllerProvider).state;
     final String? activePageId = state.activeWorkspace?.isPage ?? false
         ? state.activeWorkspace!.id
         : null;
-    final ManagedPageEntity? page = activePageId == null
+    // Exact-ID access: the page must be activatable for this user right now
+    // (verified Creator, active page, active membership) — not merely present.
+    final ManagedPageEntity? page =
+        activePageId == null ||
+            !(state.accessSnapshot?.canActivatePage(activePageId) ?? false)
         ? null
         : state.accessSnapshot?.pageById(activePageId);
 

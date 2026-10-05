@@ -184,6 +184,8 @@ import '../../features/explore/domain/usecases/load_profile_editable_usecase.dar
 import '../../features/explore/domain/usecases/load_settings_usecase.dart';
 import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
+import '../adapters/identity_publisher_access_check.dart';
+import '../../features/create/domain/repositories/publisher_access_check.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
 import '../../features/identity/data/datasources/public_professional_page_local_datasource.dart';
@@ -479,6 +481,11 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<RentalPublicationIndexSink>(
       () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    // IDP-05A: publish-time Page access is re-read from Identity, never
+    // trusted from the active-workspace preference.
+    ..registerLazySingleton<PublisherAccessCheck>(
+      () => IdentityPublisherAccessCheck(sl<IdentityWorkspaceRepository>()),
     )
     ..registerLazySingleton<PublishedRentalDiscoveryPort>(
       () => sl<RentalPublicationDiscoveryAdapter>(),

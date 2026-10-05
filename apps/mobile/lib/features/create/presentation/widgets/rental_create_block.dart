@@ -276,6 +276,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<RentalCondition>(
+                          isExpanded: true,
                           initialValue: group.condition,
                           decoration: const InputDecoration(
                             labelText: 'Condition',
@@ -376,7 +377,10 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           subtitle: const Text(
             'Recharge cannot see external bookings — confirm this is up to date.',
           ),
-          trailing: ElevatedButton(
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: ElevatedButton(
             onPressed: () =>
                 widget.controller.confirmRentalAvailabilityCoverage(
                   startsAtUtc: DateTime.now().toUtc(),
@@ -517,6 +521,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           ],
         ),
         DropdownButtonFormField<RentalLocationDisclosure>(
+          isExpanded: true,
           initialValue: h.disclosure,
           decoration: const InputDecoration(labelText: 'Location disclosure'),
           items: RentalLocationDisclosure.values
@@ -552,6 +557,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             ),
           ),
         DropdownButtonFormField<RentalScheduleMode>(
+          isExpanded: true,
           initialValue: h.scheduleMode,
           decoration: const InputDecoration(labelText: 'Pickup schedule'),
           items: RentalScheduleMode.values
@@ -765,6 +771,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             const SizedBox(width: 8),
             Expanded(
               child: DropdownButtonFormField<RentalBillingUnit>(
+                isExpanded: true,
                 initialValue: p.billingUnit,
                 decoration: const InputDecoration(labelText: 'Billing unit'),
                 items: RentalBillingUnit.values
@@ -852,6 +859,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             const SizedBox(width: 8),
             Expanded(
               child: DropdownButtonFormField<RentalDepositCollectionMethod>(
+                isExpanded: true,
                 initialValue: p.deposit.collectionMethod,
                 decoration: const InputDecoration(
                   labelText: 'Collection method',

@@ -397,6 +397,48 @@ void main() {
       expect(controller.state.accessSnapshot, same(pageSnapshot));
     },
   );
+  test(
+    'revalidateAccess drops a revoked active page back to personal',
+    () async {
+      final repository = _MemoryIdentityWorkspaceRepository(
+        _accessWithPageCount(1, userId: userId),
+        savedWorkspace: WorkspaceRef.page('page-0'),
+      );
+      final ids = _SequenceIdGenerator();
+      final controller = IdentityWorkspaceController(
+        loadIdentityWorkspaceUseCase: LoadIdentityWorkspaceUseCase(repository),
+        selectWorkspaceUseCase: SelectWorkspaceUseCase(repository),
+        createProfessionalPageUseCase: CreateProfessionalPageUseCase(
+          repository: repository,
+          idGenerator: ids,
+          utcNow: () => DateTime.utc(2026, 7, 31, 14),
+        ),
+        requestPageLimitIncreaseUseCase: RequestPageLimitIncreaseUseCase(
+          repository: repository,
+          idGenerator: ids,
+          utcNow: () => DateTime.utc(2026, 7, 31, 14),
+        ),
+        notificationSink: _MemoryNotificationSink(),
+        marketConfig: MarketConfig.riga,
+        analyticsService: _NoopAnalyticsService(),
+      );
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(userId);
+      expect(controller.state.activeWorkspace, WorkspaceRef.page('page-0'));
+      expect(await controller.revalidateAccess(), isFalse);
+
+      repository.accessSnapshot = _accessWithPageCount(
+        1,
+        userId: userId,
+        membershipStatus: ManagedPageMembershipStatus.revoked,
+      );
+
+      expect(await controller.revalidateAccess(), isTrue);
+      expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
+      expect(controller.state.accessSnapshot!.availablePages, isEmpty);
+      expect(repository.savedWorkspace, WorkspaceRef.personal(userId));
+    },
+  );
 }
 
 ProfessionalPageCreationInput _creationInput(String displayName) {
