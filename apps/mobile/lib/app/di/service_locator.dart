@@ -5,6 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import '../config/market_config.dart';
+import 'backend_binding_manifest.dart';
+import 'booking_backend_selection.dart';
+import 'booking_test_entry_guard.dart';
+import 'discover_catalog_composition.dart';
+import 'event_publication_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
@@ -119,6 +124,8 @@ import '../../features/create/domain/usecases/generate_place_enrichment_proposal
 import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
+import '../../features/create/domain/usecases/validate_event_access_configuration_usecase.dart';
+import '../../features/create/domain/usecases/validate_event_draft_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
 import '../../features/create/domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
@@ -132,6 +139,7 @@ import '../../features/discover/data/datasources/published_collection_discovery_
 import '../../features/discover/data/datasources/published_bookable_session_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_class_workshop_discovery_local_datasource.dart';
 import '../../features/discover/domain/repositories/published_class_workshop_discovery_port.dart';
+import '../../features/discover/data/datasources/catalog_query_port.dart';
 import '../../features/discover/data/datasources/published_event_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_find_people_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
@@ -139,6 +147,7 @@ import '../../features/discover/data/datasources/published_route_discovery_local
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
 import '../../features/discover/data/repositories/collection_item_resolution_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
+import '../../features/discover/data/repositories/catalog_snapshot_session.dart';
 import '../../features/discover/data/repositories/discover_repository_impl.dart';
 import '../../features/discover/data/repositories/timezone_repository_impl.dart';
 import '../../features/discover/data/repositories/travel_time_repository_impl.dart';
@@ -269,27 +278,50 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
     ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
     ..registerLazySingleton<http.Client>(http.Client.new)
-    ..registerLazySingleton<BookingBackendEndpoint>(_bookingBackendEndpoint)
+    ..registerLazySingleton<BookingBackendBindingController>(
+      _bookingBackendBindingController,
+    )
+    ..registerLazySingleton<BookingBackendEndpoint>(
+      () => sl<BookingBackendBindingController>().endpoint,
+    )
+    ..registerLazySingleton<BookingTestEntryGuard>(
+      () => BookingTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<EventPublicationTestEntryGuard>(
+      () => EventPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
+    ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(
+      () => DiscoverCatalogTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<CatalogSnapshotSession>(CatalogSnapshotSession.new)
+    ..registerLazySingleton<CatalogQueryPort>(
+      () => BookingPortCatalogAdapter(
+        runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        guard: sl(),
+      ),
+    )
+    ..registerLazySingleton<BookingSupportDirectoryProvider>(
+      () => getApplicationSupportDirectory,
+    )
     ..registerLazySingleton<BookingIdentitySessionStore>(
       () => SecureBookingIdentitySessionStore(sl()),
     )
-    ..registerLazySingleton<BookingFirebaseIdTokenProvider>(
-      () {
-        final endpoint = sl<BookingBackendEndpoint>();
-        return bookingFirebaseTokenProviderFor(
-          endpoint: endpoint,
-          emulator: endpoint.binding == BookingBackendBinding.devEmulator
-              ? BookingAuthEmulatorConfig(
-                  host: endpoint.uri!.host,
-                  port: const int.fromEnvironment(
-                    'RECHARGE_BOOKING_AUTH_EMULATOR_PORT',
-                    defaultValue: 9099,
-                  ),
-                )
-              : null,
-        );
-      },
-    )
+    ..registerLazySingleton<BookingFirebaseIdTokenProvider>(() {
+      final endpoint = sl<BookingBackendEndpoint>();
+      return bookingFirebaseTokenProviderFor(
+        endpoint: endpoint,
+        emulator: endpoint.binding == BookingBackendBinding.devEmulator
+            ? BookingAuthEmulatorConfig(
+                host: endpoint.uri!.host,
+                port: const int.fromEnvironment(
+                  'RECHARGE_BOOKING_AUTH_EMULATOR_PORT',
+                  defaultValue: 9099,
+                ),
+              )
+            : null,
+      );
+    })
     ..registerLazySingleton<BookingInstallationIdProvider>(
       () => SecureBookingInstallationIdProvider(sl()),
     )
@@ -444,7 +476,13 @@ Future<void> setupDependencies() async {
     // exists yet (§0.6), so unlike Rental/Collection above this is a
     // single registration, not a shared adapter instance.
     ..registerLazySingleton<PublishedEventDiscoveryPort>(
-      () => PublishedEventDiscoveryLocalDataSource(),
+      () => publishedEventDiscoveryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: PublishedEventDiscoveryLocalDataSource.new,
+        port: sl(),
+        session: sl(),
+        currencyCode: sl<MarketConfig>().currencyCode,
+      ),
     )
     // Find People (DTL-FP-01) — public read-only mock projection. It is
     // deliberately independent from Create drafts and participation flows.
@@ -668,6 +706,13 @@ Future<void> setupDependencies() async {
       () => EventCreateCoordinator(
         materializeSchedule: sl(),
         inventorySnapshotRepository: sl(),
+        validateDraft: ValidateEventDraftUseCase(
+          accessReadiness: () => EventAccessReadiness(
+            internalRegistration:
+                sl<EventPublicationTestEntryGuard>().allowed &&
+                sl<BookingTestEntryGuard>().allowed,
+          ),
+        ),
       ),
     )
     ..registerLazySingleton<CatalogObjectPickerPort>(
@@ -727,8 +772,17 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton<DiscoverRepository>(
-      () =>
-          DiscoverRepositoryImpl(remoteDataSource: sl(), publishedRoutes: sl()),
+      () => discoverRepositoryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: () => DiscoverRepositoryImpl(
+          remoteDataSource: sl(),
+          publishedRoutes: sl(),
+        ),
+        port: sl(),
+        session: sl(),
+        marketId: sl<MarketConfig>().countryCode,
+        currencyCode: sl<MarketConfig>().currencyCode,
+      ),
     )
     ..registerLazySingleton<TimezoneRepository>(TimezoneRepositoryImpl.new)
     ..registerLazySingleton<TravelTimeRepository>(
@@ -889,15 +943,17 @@ Future<void> setupDependencies() async {
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
 }
 
-BookingBackendEndpoint _bookingBackendEndpoint() {
-  if (kReleaseMode) {
-    return const BookingBackendEndpoint.productionDisabled();
-  }
+BookingBackendBindingController _bookingBackendBindingController() {
   const emulatorBase = String.fromEnvironment(
     'RECHARGE_BOOKING_EMULATOR_FUNCTIONS_BASE',
   );
-  if (emulatorBase.isEmpty) {
-    return const BookingBackendEndpoint.localMock();
-  }
-  return BookingBackendEndpoint.devEmulator(Uri.parse(emulatorBase));
+  // The dart-define keeps selecting the Emulator; the manifest now owns the
+  // mode so it can be rolled back to localOnly without touching local data.
+  return BookingBackendBindingController(
+    emulatorBase: emulatorBase.isEmpty ? null : Uri.parse(emulatorBase),
+    releaseMode: kReleaseMode,
+    initial: emulatorBase.isEmpty
+        ? BackendBindingMode.localOnly
+        : BackendBindingMode.testBackend,
+  );
 }

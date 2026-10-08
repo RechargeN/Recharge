@@ -442,9 +442,13 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 _scenarioSelectionController.toggle(item);
               } else {
                 controller.selectItem(item.id);
-                _mapController?.animateCamera(
-                  CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
-                );
+                if (_hasMapPoint(item)) {
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLng(
+                      LatLng(item.latitude, item.longitude),
+                    ),
+                  );
+                }
               }
             },
             onOpenDetails: (DiscoverItemEntity item) {
@@ -682,7 +686,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   }) {
     final List<DiscoverItemEntity> items = state.items;
 
-    final Set<Marker> markers = items.map((DiscoverItemEntity item) {
+    final Set<Marker> markers = items.where(_hasMapPoint).map((
+      DiscoverItemEntity item,
+    ) {
       final bool selected = item.id == selectedItemId;
       final int? scenarioOrder = scenarioSelection.orderOf(item.id);
       final BitmapDescriptor? customIcon = _customMarkers[item.id];
@@ -840,7 +846,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         sourceScreen: 'discover_map',
         sourceAction: 'favorite_tap',
         originRoute: RouteNames.discoverDetailsCanonicalFor(
-          CatalogObjectRef(objectType: item.catalogObjectType, objectId: item.id),
+          CatalogObjectRef(
+            objectType: item.catalogObjectType,
+            objectId: item.id,
+          ),
         ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
@@ -3159,3 +3168,8 @@ IconData _mapCategoryIcon(String categoryId) {
     _ => Icons.category_outlined,
   };
 }
+
+/// An item without a public point (an online Event, or one without a confirmed
+/// pin) stays in the list but gets no marker: never a fake coordinate (E2).
+bool _hasMapPoint(DiscoverItemEntity item) =>
+    item.latitude.isFinite && item.longitude.isFinite;

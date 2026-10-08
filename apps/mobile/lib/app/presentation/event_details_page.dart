@@ -11,6 +11,7 @@ import '../../core/telemetry/analytics_service.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/application/controllers/auth_controller.dart';
 import '../../features/auth/presentation/widgets/auth_gate_sheet.dart';
+import '../../features/discover/domain/entities/event_occurrence.dart';
 import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
 import '../../features/discover/presentation/renderers/object_offer_details_renderer.dart';
@@ -20,7 +21,10 @@ import '../../features/favorites/application/favorites_providers.dart';
 import '../../features/favorites/domain/entities/favorite_item_entity.dart';
 import '../../shared/models/catalog_object_ref.dart';
 import '../../shared/primitives/money/money.dart';
+import '../di/booking_test_entry_guard.dart';
 import '../di/service_locator.dart';
+import '../testing/seeded_event_fixture.dart';
+import 'event_booking_panel.dart';
 import '../router/route_names.dart';
 import 'scenario_object_intake_sheet.dart';
 
@@ -87,7 +91,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     );
     final bool isFavorite = favoritesController.isFavorite(projection.eventId);
 
-    return DetailsShell(
+    final Widget shell = DetailsShell(
       state: DetailsScreenAvailable(
         immersiveHero: true,
         renderer: ObjectOfferDetailsRenderer.event(
@@ -115,6 +119,25 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         ),
       ),
     );
+
+    // Default-off test entry, only when the whole guard (define, non-release,
+    // testBackend, loopback demo-recharge) allows it: the seeded B2 fixture
+    // Event, or the displayed occurrence of a Content Event with internal
+    // registration (E2b; terms then come from Booking, not from Details).
+    final EventBookingRef? bookingRef =
+        projection.displayOccurrence?.bookingRef;
+    final bool fixture = projection.eventId == seededBookingEventId;
+    if ((fixture || bookingRef != null) &&
+        sl.isRegistered<BookingTestEntryGuard>() &&
+        sl<BookingTestEntryGuard>().allowed) {
+      return Column(
+        children: <Widget>[
+          Expanded(child: shell),
+          EventBookingPanel(target: fixture ? null : bookingRef),
+        ],
+      );
+    }
+    return shell;
   }
 
   void _trackViewOnce(PublishedEventDiscoveryEntity projection) {

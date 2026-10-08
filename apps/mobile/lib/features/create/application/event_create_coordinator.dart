@@ -91,11 +91,21 @@ class EventCreateCoordinator {
         message:
             'Local configuration only. No booking or inventory is reserved.',
       ),
-      if (admission?.registrationMode == EventRegistrationMode.internal)
+      if (admission?.registrationMode == EventRegistrationMode.internal &&
+          !_validateDraft.accessReadiness.internalRegistration)
         const EventAccessCapabilityDisclosure(
           code: EventAccessDisclosureCode.internalLifecycleUnavailable,
           message: 'Internal registration is not active until ECL-03.',
           blocking: true,
+        ),
+      if (admission?.registrationMode == EventRegistrationMode.internal &&
+          _validateDraft.accessReadiness.internalRegistration)
+        const EventAccessCapabilityDisclosure(
+          code: EventAccessDisclosureCode.localConfiguration,
+          message:
+              'Internal registration v1 is available only in the local '
+              'testBackend stand: free, offline, instant confirmation. '
+              'No booking is created by configuring this draft.',
         ),
       if (admission?.confirmationMode == ConfirmationMode.providerManaged)
         const EventAccessCapabilityDisclosure(

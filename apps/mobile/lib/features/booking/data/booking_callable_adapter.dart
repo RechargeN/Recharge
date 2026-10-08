@@ -564,4 +564,13 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'getMyBookingV1',
   'listMyBookingsV1',
   'getEventAvailabilityV1',
+  // C1: default-off Emulator-only Media entry (same Session and token path).
+  'mediaCommandV1',
+  'mediaQueryV1',
+  'uploadMediaBytesV1',
+  // C3: default-off Emulator-only Event authoring through Content.
+  'contentCommandV1',
+  'contentQueryV1',
+  // E2: default-off Emulator-only Discover read over the server Catalog.
+  'discoverQueryV1',
 };

@@ -173,6 +173,25 @@ class EventAdmissionSection extends StatelessWidget {
               clearRegistrationWindow: window == null,
             ),
           ),
+          if (value?.registrationMode == EventRegistrationMode.internal)
+            TextFormField(
+              key: ValueKey<String>(
+                'event-cancellation-deadline-'
+                '${value?.cancellationClosesBeforeOccurrenceMinutes ?? ''}',
+              ),
+              initialValue:
+                  value?.cancellationClosesBeforeOccurrenceMinutes
+                      ?.toString() ??
+                  '',
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Cancellation closes N minutes before the start *',
+                errorText: state.errorFor('cancellationDeadline'),
+              ),
+              onChanged: (raw) => controller.updateEventCancellationDeadline(
+                int.tryParse(raw.trim()),
+              ),
+            ),
           _AccessWindowEditor(
             title: 'Application window',
             value: value?.applicationWindow,
@@ -239,7 +258,8 @@ class _GuestEditor extends StatelessWidget {
         _EnumField<GuestPolicyMode>(
           key: const Key('event-guest-mode'),
           label: 'Guest policy',
-          value: guest?.mode ?? GuestPolicyMode.none,
+          // No silent default: an unchosen policy shows no value (E2.0).
+          value: guest?.mode,
           values: GuestPolicyMode.values,
           error: state.errorFor('guestPolicy'),
           onChanged: (mode) => controller.updateEventGuestPolicy(

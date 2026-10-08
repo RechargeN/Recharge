@@ -175,6 +175,9 @@ class ValidateEventAccessConfigurationUseCase {
     _validateWindow(
       value.registrationWindow,
       fieldId: 'registrationWindow',
+      allowZeroClosing:
+          readiness.internalRegistration &&
+          value.registrationMode == EventRegistrationMode.internal,
       scheduleMode: scheduleMode,
       occurrences: occurrences,
       add: add,
@@ -193,6 +196,29 @@ class ValidateEventAccessConfigurationUseCase {
         'externalBookingUrl',
         'External registration requires a safe HTTPS handoff.',
       );
+    }
+    if (value.registrationMode == EventRegistrationMode.internal) {
+      final int? cancellation = value.cancellationClosesBeforeOccurrenceMinutes;
+      if (cancellation == null) {
+        add(
+          'cancellation_deadline_required',
+          'cancellationDeadline',
+          'Choose when cancellation closes before the start.',
+        );
+      } else if (cancellation < 0 || cancellation > 10080) {
+        add(
+          'cancellation_deadline_invalid',
+          'cancellationDeadline',
+          'Cancellation can close 0 to 10080 minutes before the start.',
+        );
+      }
+      if (value.guestPolicy == null) {
+        add(
+          'guest_policy_required',
+          'guestPolicy',
+          'Choose a guest policy, including "none".',
+        );
+      }
     }
     if (value.registrationMode == EventRegistrationMode.internal &&
         !readiness.internalRegistration) {
@@ -246,6 +272,7 @@ class ValidateEventAccessConfigurationUseCase {
 
   void _validateWindow(
     EventAccessWindow? value, {
+    bool allowZeroClosing = false,
     required String fieldId,
     required EventScheduleMode scheduleMode,
     required List<EventOccurrenceDraft> occurrences,
@@ -289,7 +316,10 @@ class ValidateEventAccessConfigurationUseCase {
     } else {
       final int opens = value.opensBeforeOccurrenceMinutes ?? 0;
       final int closes = value.closesBeforeOccurrenceMinutes ?? 0;
-      if (opens <= 0 || closes <= 0 || opens <= closes) {
+      if (opens <= 0 ||
+          value.closesBeforeOccurrenceMinutes == null ||
+          (allowZeroClosing ? closes < 0 : closes <= 0) ||
+          opens <= closes) {
         add(
           'relative_access_window_invalid',
           fieldId,

@@ -7,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../shared/models/catalog_object_ref.dart';
 import '../di/service_locator.dart';
+import '../di/booking_test_entry_guard.dart';
+import '../di/event_publication_composition.dart';
+import '../testing/seeded_event_fixture.dart';
 import '../adapters/legacy_planning_link_classifier.dart';
 import '../application/details_resolution_providers.dart';
 import '../application/planning_navigation_intent.dart';
@@ -33,6 +36,7 @@ import '../../features/discover/presentation/pages/collection_details_page.dart'
 import '../../features/discover/presentation/pages/rental_details_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../presentation/event_details_page.dart';
+import '../presentation/event_publication_panel.dart';
 import '../presentation/bookable_session_details_page.dart';
 import '../presentation/find_people_details_page.dart';
 import '../../features/discover/presentation/pages/categories_page.dart';
@@ -269,6 +273,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           }
           return ResolvedDetailsRoute(target: target);
         },
+      ),
+      // Default-off Booking test entry. The redirect is the route guard; the
+      // same guard also protects every command in the gateway.
+      GoRoute(
+        name: 'test_event_booking',
+        path: '${RouteNames.testEventBooking}/:eventId',
+        redirect: (BuildContext context, GoRouterState state) =>
+            bookingTestEntryRedirect(
+              sl.isRegistered<BookingTestEntryGuard>()
+                  ? sl<BookingTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) {
+          if (state.pathParameters['eventId'] != seededBookingEventId) {
+            return const DetailsShell(
+              state: DetailsScreenUnavailable(
+                reason: DetailsUnavailableReason.notFound,
+              ),
+            );
+          }
+          return EventDetailsPage(projection: seededBookingEventProjection());
+        },
+      ),
+      // Default-off Event publication test entry (C3). Same rule: the redirect
+      // guards the route and the guard also gates every command and upload.
+      GoRoute(
+        name: 'test_event_publication',
+        path: RouteNames.testEventPublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            eventPublicationTestEntryRedirect(
+              sl.isRegistered<EventPublicationTestEntryGuard>()
+                  ? sl<EventPublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const EventPublicationPage(),
       ),
       GoRoute(
         name: 'discover_details',

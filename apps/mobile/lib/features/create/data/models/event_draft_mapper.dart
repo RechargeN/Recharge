@@ -66,6 +66,7 @@ class EventDraftMapper {
     'registrationWindow',
     'applicationWindow',
     'waitlistPolicy',
+    'cancellationClosesBeforeOccurrenceMinutes',
   };
   static const Set<String> _knownInventoryKeys = <String>{
     'authority',
@@ -496,6 +497,9 @@ class EventDraftMapper {
     if (_map(json['waitlistPolicy']).isNotEmpty && waitlist == null) {
       return null;
     }
+    final Object? cancellation =
+        json['cancellationClosesBeforeOccurrenceMinutes'];
+    if (cancellation != null && cancellation is! int) return null;
     return EventAdmissionDraft(
       admissionMode: admissionMode,
       registrationMode: registrationMode,
@@ -507,6 +511,7 @@ class EventDraftMapper {
       registrationWindow: registrationWindow,
       applicationWindow: applicationWindow,
       waitlistPolicy: waitlist,
+      cancellationClosesBeforeOccurrenceMinutes: cancellation as int?,
     );
   }
 
@@ -619,6 +624,8 @@ class EventDraftMapper {
           },
     'registrationWindow': _accessWindowJson(value.registrationWindow),
     'applicationWindow': _accessWindowJson(value.applicationWindow),
+    'cancellationClosesBeforeOccurrenceMinutes':
+        value.cancellationClosesBeforeOccurrenceMinutes,
     'waitlistPolicy': value.waitlistPolicy == null
         ? null
         : <String, Object?>{

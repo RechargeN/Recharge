@@ -12,6 +12,7 @@ final class BookingTransportRuntime {
   const BookingTransportRuntime._({
     required this.binding,
     this.adapter,
+    this.port,
     this.identitySessions,
   });
 
@@ -23,15 +24,18 @@ final class BookingTransportRuntime {
 
   const BookingTransportRuntime.devEmulator({
     required BookingCallableAdapter adapter,
+    required BookingCallablePort port,
     required FunctionsIdentitySessionClient identitySessions,
   }) : this._(
          binding: BookingBackendBinding.devEmulator,
          adapter: adapter,
+         port: port,
          identitySessions: identitySessions,
        );
 
   final BookingBackendBinding binding;
   final BookingCallableAdapter? adapter;
+  final BookingCallablePort? port;
   final FunctionsIdentitySessionClient? identitySessions;
 
   bool get remoteCommandsEnabled =>
@@ -96,6 +100,7 @@ final class BookingTransportRuntimeFactory {
             operations: persistence.operationStore,
             receipts: persistence.receiptStore,
           ),
+          port: port,
           identitySessions: identitySessions,
         );
     }

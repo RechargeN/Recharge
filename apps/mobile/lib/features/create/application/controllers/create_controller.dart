@@ -1950,6 +1950,17 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  /// E2.0: minutes before each occurrence start when cancellation closes; null
+  /// clears it. The value is the user's own, never defaulted.
+  void updateEventCancellationDeadline(int? minutes) {
+    _updateEventAdmissionPolicy(
+      (current) => current.copyWith(
+        cancellationClosesBeforeOccurrenceMinutes: minutes,
+        clearCancellationClosesBeforeOccurrenceMinutes: minutes == null,
+      ),
+    );
+  }
+
   void updateEventWaitlistConfiguration(WaitlistConfiguration? policy) {
     _updateEventAdmissionPolicy(
       (current) => current.copyWith(

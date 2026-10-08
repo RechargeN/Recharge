@@ -49,6 +49,7 @@ class DiscoverItemEntity {
     this.ctaLabel = '',
     this.highlights = const <String>[],
     this.publishedRoute,
+    this.revisionRef = '',
   }) : assert(durationMinutes == null || durationMinutes > 0),
        assert(capacity == null || capacity > 0),
        assert(participantsCount == null || participantsCount >= 0),
@@ -94,6 +95,10 @@ class DiscoverItemEntity {
   final String ctaLabel;
   final List<String> highlights;
   final PublishedRouteDiscoveryEntity? publishedRoute;
+
+  /// Opaque id of the exact published revision this card shows, when the
+  /// source is the server Catalog (E2); empty for local sources.
+  final String revisionRef;
 
   bool get isPublishedRoute => publishedRoute != null;
 
@@ -178,6 +183,7 @@ class DiscoverItemEntity {
       publishedRoute: clearPublishedRoute
           ? null
           : (publishedRoute ?? this.publishedRoute),
+      revisionRef: revisionRef,
     );
   }
 }

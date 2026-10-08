@@ -13,6 +13,7 @@ class EventOccurrence {
     required this.startAtUtc,
     required this.endAtUtc,
     required this.status,
+    this.bookingRef,
   }) : assert(id != '', 'EventOccurrence.id must not be empty') {
     if (!endAtUtc.isAfter(startAtUtc)) {
       throw ArgumentError('EventOccurrence.endAtUtc must be after startAtUtc');
@@ -23,6 +24,24 @@ class EventOccurrence {
   final DateTime startAtUtc;
   final DateTime endAtUtc;
   final EventOccurrenceStatus status;
+
+  /// E2: set when this occurrence is bookable through Recharge (internal
+  /// registration). Only a reference: terms and availability come from Booking.
+  final EventBookingRef? bookingRef;
+}
+
+/// Reference to free internal Booking of one exact occurrence, as the server
+/// Catalog derived it. The client never computes pool ids or terms.
+final class EventBookingRef {
+  const EventBookingRef({
+    required this.eventId,
+    required this.occurrenceId,
+    this.channel,
+  });
+
+  final String eventId;
+  final String occurrenceId;
+  final String? channel;
 }
 
 /// Canonical occurrence lifecycle (`EVENT_CLASSIFICATION_SPEC.md` §17.4).

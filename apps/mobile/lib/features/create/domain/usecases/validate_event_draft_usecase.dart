@@ -3,6 +3,7 @@ import '../entities/event_draft_data.dart';
 import '../entities/event_validation_issue.dart';
 import 'validate_event_classification_usecase.dart';
 import 'validate_event_access_configuration_usecase.dart';
+import 'build_event_content_body.dart';
 
 class ValidateEventDraftUseCase {
   const ValidateEventDraftUseCase({
@@ -10,11 +11,17 @@ class ValidateEventDraftUseCase {
         const ValidateEventClassificationUseCase(),
     ValidateEventAccessConfigurationUseCase validateAccess =
         const ValidateEventAccessConfigurationUseCase(),
+    EventAccessReadiness Function()? accessReadiness,
   }) : _validateClassification = validateClassification,
-       _validateAccess = validateAccess;
+       _validateAccess = validateAccess,
+       _accessReadiness = accessReadiness;
 
   final ValidateEventClassificationUseCase _validateClassification;
   final ValidateEventAccessConfigurationUseCase _validateAccess;
+  final EventAccessReadiness Function()? _accessReadiness;
+
+  EventAccessReadiness get accessReadiness =>
+      _accessReadiness?.call() ?? const EventAccessReadiness();
 
   List<EventValidationIssue> call(
     CreateDraftEntity draft, {
@@ -447,8 +454,21 @@ class ValidateEventDraftUseCase {
           scheduleMode: event.scheduleMode,
           occurrences: event.occurrences,
           externalRegistrationUrl: event.externalBookingUrl,
+          readiness: accessReadiness,
         ),
       );
+      if (accessReadiness.internalRegistration &&
+          event.admission?.registrationMode == EventRegistrationMode.internal) {
+        for (final String field
+            in const EventContentBodyMapper().map(draft).unsupported) {
+          blocking(
+            3,
+            'internal_registration_v1_unsupported',
+            field,
+            'This configuration is outside local internal registration v1.',
+          );
+        }
+      }
     }
     if (event.admission == null &&
         event.registrationMode == EventRegistrationMode.external &&

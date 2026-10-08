@@ -6,6 +6,13 @@ class RouteNames {
   static const String categories = '/discover/categories';
   static const String search = '/search';
   static const String smartSearch = '/smart-search';
+
+  /// Default-off Booking test entry; see `BookingTestEntryGuard`.
+  static const String testEventBooking = '/test/event-booking';
+
+  /// Default-off Event publication test entry; see
+  /// `EventPublicationTestEntryGuard`.
+  static const String testEventPublication = '/test/event-publication';
   static const String discoverDetails = '/discover/details';
   static const String collectionDetails = '/collection/details';
   static const String discoverMap = '/discover/map';

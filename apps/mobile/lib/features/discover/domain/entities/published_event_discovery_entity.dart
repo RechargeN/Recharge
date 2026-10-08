@@ -57,6 +57,8 @@ class PublishedEventDiscoveryEntity {
     required this.timezoneId,
     this.programItems = const <PublishedEventProgramItem>[],
     required this.publishedAtUtc,
+    this.revisionRef = '',
+    this.changedSinceListing = false,
   }) : assert(
          eventId != '',
          'PublishedEventDiscoveryEntity.eventId must not be empty',
@@ -174,6 +176,14 @@ class PublishedEventDiscoveryEntity {
   final List<PublishedEventProgramItem> programItems;
 
   final DateTime publishedAtUtc;
+
+  /// Opaque id of the exact published revision shown, when the source is the
+  /// server Catalog (E2); empty for local sources.
+  final String revisionRef;
+
+  /// True when this revision differs from the one the listing (Feed/Map)
+  /// showed, or that can no longer be confirmed: the change is explicit.
+  final bool changedSinceListing;
 
   /// Resolves [displayOccurrenceId] against [occurrences]. Returns `null`
   /// if the id does not match any occurrence — callers must treat that as
