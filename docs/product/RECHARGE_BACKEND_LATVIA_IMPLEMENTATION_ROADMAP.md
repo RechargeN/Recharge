@@ -1,15 +1,21 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.31**
-- Date: **2026-09-29**
+- Version: **1.32**
+- Date: **2026-10-05**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
 - Accountable owner: **Platform Architecture**
-- Parent: [BCK-02 v2.4.91](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Parent: [BCK-02 v2.4.111](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
+
+Revision 1.32 adds §3.7: Release R1 naming, the stage order, the ten Create
+types with the five deferred-in-implementation types and their return
+conditions, the Deferred list, safe import, local-versus-cloud gates, the
+measurable Release M1/M2 criteria and the environment boundaries. Documentation
+only; it promotes no Draft/Proposed status and grants no code, cloud or merge.
 
 Revision 1.31 tightens the proposed merge conditions of §3.6 (single final SHA,
 full Flutter gate before the final Done/merge, approval is not permission).
@@ -368,6 +374,7 @@ planning, Trust & Safety, Admin/Support, Privacy). Import локальных д�
 Payments и paid Booking (BCK-17, нужен новый Accepted Payments ADR), AI
 provider (BCK-15), внешние Providers (BCK-16), Event Ingestion (BCK-23; hooks
 готовятся, runtime — по собственному roadmap). Deferred не равно Implemented.
+Состав, порядок, причины и условия возврата — в §3.7.
 
 **Import.** Локальный оригинал не удаляется до серверной проверки, явного
 подтверждения пользователя и окончания периода восстановления.
@@ -430,6 +437,131 @@ Product owner; до этого merge запрещён.
    mobile в последней правке; результат относится к тому же итоговому SHA.
 6. Merge не включает ни один тип, рынок или флаг.
 7. Cloud, deployment и расходы — отдельные решения, merge их не подразумевает.
+
+### 3.7. Release R1: порядок, состав, Deferred и критерии (1.32)
+
+Решения Product owner (RechargeN) от 2026-10-05. Раздел фиксирует состав,
+порядок и критерии; он не повышает ни один Draft/Proposed до Accepted, не
+меняет продуктовые правила и старые ADR и не разрешает код, cloud, расходы,
+deployment, push или merge. Условия merge из §3.6 остаются Proposed.
+
+**Именование (обязательно во всех документах).**
+
+| Термин | Значение | Не путать с |
+|---|---|---|
+| Release R1 | Latvia-first релиз из §3.5 и этого раздела | Backend stage R1 |
+| Backend stage R1 | стадия «Environment scaffold» из таблицы R0–R12 в BCK-02 | Release R1 |
+| Release M1 / Release M2 | локальные контрольные точки Release R1 (ниже) | Market M0–M5, MOB-ARCH-M1/M2 |
+| Market M0–M5 | независимые gates рынка из §3.4 | Release M1/M2 |
+
+**Порядок.** Локально → физические Android/iOS устройства → отдельно
+разрешённый Firebase. Каждый следующий шаг требует собственного решения
+владельца и не выводится из успеха предыдущего.
+
+**Цепочка этапов.** По решению владельца последовательность записана как
+`0 → Р → A–M2 → N → O`. Содержание этапов Р, A–M2, N и O в действующих
+документах не определено и здесь **не придумывается**. Сопоставление этой цепочки
+с этапами 1–10 из §3.6, LV-BE-00–14 и стадиями R0–R12 остаётся **blocker**:
+до его снятия положение Release M1 и Release M2 внутри цепочки не фиксируется.
+
+#### Состав Release R1: 10 Create-типов
+
+R1 включает все десять утверждённых типов. R1 не считается готовым, пока
+пять отложенных в реализации типов не вернулись. «Отложены» не означает
+«исключены из R1».
+
+| Тип | Состояние на 1.32 | Статус в R1 |
+|---|---|---|
+| Place, Event (C0 + schedule-C1), Activity, Rental, Collection | typed source rules локально/Emulator, всё выключено (§3.6, BCK-07) | входит, реализован локально |
+| Route | зарегистрирован, недоступен с явной причиной | входит, **отложен в реализации** |
+| Scenario | то же | входит, **отложен в реализации** |
+| Session | то же | входит, **отложен в реализации** |
+| Class/Workshop | то же | входит, **отложен в реализации** |
+| Find People | то же | входит, **отложен в реализации** |
+
+**Условие возврата — общее.** Тип возвращается в реализацию после закрытия
+применимых spec, функциональных и privacy/authority gates по действующим
+документам; точные условия берутся оттуда, а не из этой таблицы. До возврата UI
+не делает ложных claims. Возврат сам не включает тип, рынок или флаг.
+
+| Тип | Действующие источники условий |
+|---|---|
+| Route | BCK-11 (`ROUTE_GPX_BACKEND_SPEC.md`, сейчас Draft) Approved; exit R7 (§14: sync/conflict/import/privacy/rollback suites, privacy-trimmed publication, Route без полей Scenario); typed rules и negative tests в реестре BCK-07 |
+| Scenario | BCK-10 (`PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md`, сейчас Draft) Approved; exit R7; transport snapshots остаются `not live`; публикация только по отдельному slice; typed rules в BCK-07 |
+| Session | действующая spec Create-блока Session (сейчас Draft) и её открытые решения закрыты; typed PublisherRef; typed rules и negative tests в BCK-07 |
+| Class/Workshop | действующая spec Class/Workshop закрыта; typed source revision (host, schedule, participation, market policy) и typed PublisherRef; typed rules в BCK-07 |
+| Find People | OD-11 Accepted для рынка (сейчас Proposed, возраст не задан) и квалифицированные Legal/Privacy evidence; consented profile revision в BCK-06; Trust & Safety gate (R8); до этого server-disabled |
+
+#### Deferred (вне Latvia-first Release R1)
+
+Deferred не равно Implemented. Owner каждой строки — RechargeN (временно,
+§3.5). Срок пересмотра не назначен: его назначает владелец. Пока условие
+возврата не выполнено, runtime, cloud и UI-claims запрещены.
+
+| Что | Причина | Условие возврата |
+|---|---|---|
+| Payments и paid Booking (BCK-17) | нет Accepted Payments ADR | новый Accepted Payments ADR и отдельное решение владельца |
+| AI provider (BCK-15) | нет vendor/security/cost approval | Accepted provider ADR, backend-only proxy и секреты, cost ledger, kill switch, fallback; отдельное решение владельца |
+| Внешние Providers (BCK-16) | то же | vendor/security/cost approval по BCK-16; отдельное решение владельца |
+| Event Ingestion runtime (BCK-23) | ADR 0020 Proposed, spec Draft | ADR 0020 Accepted; EVS-LOCAL-01a прошёл Definition of Ready и одобрен владельцем |
+| EE и LT | Release R1 — только Latvia | отдельное owner-решение и независимые Market M0–M5; Latvia evidence не наследуется |
+
+#### Безопасный импорт локальных данных
+
+Существующие условия из §3.5 сохраняются без ослабления: локальный оригинал
+не удаляется до серверной проверки, явного подтверждения пользователя и
+окончания периода восстановления. Дополнительно:
+
+1. **Идемпотентность.** Повтор импорта того же локального объекта с тем же
+   idempotency key возвращает прежний результат и не создаёт дубликатов.
+2. **Возобновление.** Прерванный импорт (потеря сети, закрытие приложения)
+   продолжается с последней подтверждённой точки; неизвестный исход
+   восстанавливаем и повторяется с тем же ключом (§5.2, п. 10).
+3. **Откат без потери оригинала.** Откат убирает серверный результат импорта и
+   возвращает прежнее состояние; локальный оригинал ни импортом, ни откатом
+   не изменяется и не удаляется.
+
+#### Что проверяется локально, а что только в cloud
+
+| Gate | Локально / Emulator | Только dev/staging (вне Release M1/M2) |
+|---|---|---|
+| Нагрузка | функциональные и contention-тесты (ноль oversell) на Emulator | L1 RPS, p95/p99 из §3.5 |
+| Backup, restore, rollback, recovery | rollback версий и импорта, восстановление локальных данных после сбоя | PITR/restore drill, соответствие RPO/RTO |
+| Error budget, SLO, расходы | не проверяются | подтверждение после создания stage |
+
+SLO и error-budget остаются Proposed; численные пороги error-budget
+фиксируются до создания stage, RPO/RTO не подтверждены до PITR/restore drill.
+
+#### Release M1 и Release M2
+
+| Точка | Единственное допустимое название | Критерий |
+|---|---|---|
+| Release M1 | «первый локальный контур проверен» | первый локальный контур, состав которого записан в плане файлов этапа до кода, прошёл все применимые проверки: чистое дерево одного итогового SHA, зелёные backend/Emulator/Rules и mobile gates (`flutter analyze`, `flutter test`, boundary, diff), нет открытых P1/P2 |
+| Release M2 | «R1 функционально проверен локально» | весь согласованный Release R1 проверен локально, включая **10/10 Create-типов**; все обязательные gates зелёные на одном итоговом SHA; Deferred из этого раздела остаются выключенными |
+
+Release M1 и Release M2 не называются cloud-ready, production-ready,
+staging-ready или Market-готовностью и не включают проверку на физических
+устройствах: она следует отдельным шагом порядка. Ни одна из точек не включает
+тип, рынок или флаг.
+
+#### Границы сред
+
+| Среда | Что подтверждает | Чего не подтверждает | Статус |
+|---|---|---|---|
+| local | поведение на машине разработчика, in-memory/mock | Emulator, устройства, cloud | выполняется |
+| Emulator | Functions/Firestore/Auth/Storage/Rules на закреплённой toolchain без cloud | latency, cost, IAM, backup/PITR | выполняется |
+| физические Android/iOS | реальное поведение устройства | cloud и production | следующий шаг, не начат |
+| dev (Firebase) | — | — | **не разрешён**; нужно отдельное решение |
+| staging | — | — | не разрешён |
+| production | — | — | не разрешён |
+
+#### Решения и blockers
+
+- Закрыто 2026-10-05: порядок, именование, состав типов, Deferred, критерии
+  Release M1/M2, условия импорта.
+- Blocker: содержание этапов Р, A–M2, N, O и их сопоставление со старым планом.
+- Остаётся Proposed: SLO, error-budget, условия merge §3.6.
+- Не назначено: срок пересмотра Deferred, резервный Incident/Support contact.
 
 ## 4. Target platform и будущая файловая карта
 

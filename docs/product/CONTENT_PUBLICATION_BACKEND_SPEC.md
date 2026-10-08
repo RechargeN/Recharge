@@ -1764,3 +1764,28 @@ deterministic test that fails when a cross-module call sits inside a transaction
      pages and targeted reads; no history length silently cuts them short.
 109. **BCK-07-AC-109:** a completed command replays without a Media call, and an
      unreachable Media is the typed `media_not_ready` for new commands.
+
+## 39. E2 local amendment — Event internal registration v1 and handoff history
+
+Owner-accepted 2026-10-06; authoritative text:
+[EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md).
+Local/Emulator only; it narrows §35 and grants no cloud, deployment or market
+activation.
+
+- The Event body accepts `registration.mode = 'internal'` only as free,
+  instant, offline registration with explicit `maxPartySize`, relative
+  registration window and cancellation deadline (bounds in
+  `eventInternalRegistrationConfig`, test-only). Nothing is defaulted.
+- A published internal Event may not leave internal registration, switch
+  capacity mode, change format or venue. The binding check runs in the very
+  transaction that switches the publication pointer (publish and rollback);
+  the submit check is early feedback only.
+- The Content-owned handoff derives the Booking projection per occurrence on
+  the server (stable server-generated pool id, deadlines from each occurrence
+  start, D07 materiality) and writes `eventBookingOutbox` create-only. It
+  processes every object in `pointerRevision` order, fills a gap from stored
+  history, never moves its checkpoint past an unhandled effect, keeps
+  terminal markers for removed occurrences and decides "removed before start"
+  by the time of the Content change. Its checkpoint, receipts and state are
+  independent of the Catalog's; reconciliation and outbox repair replay stored
+  facts only.

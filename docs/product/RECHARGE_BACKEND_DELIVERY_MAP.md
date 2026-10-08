@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.110**
-- Date: **2026-10-01**
+- Version: **2.4.113**
+- Date: **2026-10-08**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -20,7 +20,58 @@
 - Заменяет в плане отдельный `BACKEND_CAPABILITY_OWNERSHIP_MATRIX.md`
 - Runtime effect: **none**
 
+### Local C1–E2 coordination amendment (2026-10-08)
+
+The bounded local stand now includes Media (C1), Moderation (C2), Event
+publication (C3), Catalog delivery (E1), shared Discover snapshots (E2a),
+internal registration v1 handoff and Details → Booking → cancel (E2).
+The bounded implementation is verified locally and remains in Review for the
+explicit physical-device and later production boundaries; current evidence
+is recorded in the closure review, not implied by this registry update.
+
+Normative scope and exact file map:
+[E2 amendment](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md), including the
+owner-authorized follow-up for Create readiness and Details description.
+Create readiness uses the existing publication and Booking test-entry guards;
+only the free/offline/instant local subset is supported. Production readiness,
+cloud indexes, push, merge and market activation remain separately gated.
+
+Physical Android/iOS B1-device remains open. Booking hide is eventual:
+instant fencing is a separate slice and must precede real Booking use.
+Media read URLs/organizer display and Catalog object extensions remain separate
+bounded slices. E1/E2 numerical test limits are not production defaults.
+The closure audit, Desktop transfer plan and device checklist are recorded in
+[C1–E2 closure review](C1_E2_CLOSURE_REVIEW.md).
+
 ## 0. Changelog
+
+**v2.4.113.** Records the owner-authorized local closure follow-up, visible
+security-gate corrections, Desktop transfer plan, physical-device checklist
+and ordered future bounded slices in the linked closure review. Environment
+and production authority boundaries remain unchanged.
+
+**v2.4.112.** Added the local C1–E2 coordination amendment and Create readiness/
+Details-description traceability to the accepted E2 amendment.
+
+**v2.4.111.** Records the Product owner's Release R1 order and criteria of
+2026-10-05 as documentation only; the authoritative text is Latvia roadmap
+v1.32 §3.7:
+
+- separates the names: Release R1 (Latvia-first release), Backend stage R1
+  (environment scaffold), Release M1/M2 (local checkpoints) and Market M0-M5;
+- order is local, then physical Android/iOS devices, then a separately
+  authorized Firebase; the content of stages `Р`, `A-M2`, `N`, `O` is not
+  defined in current documents and its mapping to the old plan stays a blocker;
+- all ten Create types are in R1; Route, Scenario, Session, Class/Workshop and
+  Find People are deferred in implementation, and R1 is not ready without them;
+- Deferred: Payments and paid Booking, AI provider, external Providers, Event
+  Ingestion runtime, EE and LT, each with a reason and a return condition;
+- import gains idempotency, resumability and rollback without losing the local
+  original; the existing original-retention conditions are unchanged;
+- Release M1 is only "first local contour verified" and Release M2 only "R1
+  functionally verified locally"; neither means cloud, staging or production
+  readiness; SLO and error-budget stay Proposed; the registry, checksum, gates,
+  merge conditions and every Draft/Proposed status are unchanged.
 
 **v2.4.110.** Reconciles the R1 layout checker with the already approved Booking
 deadline worker and BCK-05/07/14 file maps. The existing dev runbook reuses the

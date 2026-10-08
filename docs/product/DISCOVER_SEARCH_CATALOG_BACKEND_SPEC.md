@@ -1031,3 +1031,21 @@ local and cannot impersonate current server Catalog membership.
     cannot claim server Catalog freshness.
 75. **BCK-08-AC-75:** v0.3 grants no engine/index/schema/runtime/Firebase,
     deployment or market activation authority.
+
+## 34. E2 local amendment — Discover read and delivery (Emulator only)
+
+Owner-accepted 2026-10-06 together with
+[EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md).
+No production authority, cloud index or market activation.
+
+- `discoverQueryV1` (default off, Session required) serves Feed, Search, Map
+  and Details of the local Catalog through one snapshot token; refusals stay
+  typed; excluded or absent content never carries an item.
+- `consumeContentEffectV1` delivers committed Content effects to the Catalog
+  from the Catalog's own checkpoint; a failing peer consumer never marks or
+  blocks it. Manual delivery stays available and idempotent.
+- Projection v2 adds the Details facts (full description, schedule mode,
+  revision publication time; cards never carry the full description); v3 adds
+  the occurrence `bookingRef` of internal registration — a reference only.
+  Booking terms and availability are not Catalog facts: `availability` stays
+  `not_connected` and `onlyAvailable` stays a typed refusal.

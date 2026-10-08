@@ -2217,3 +2217,21 @@ allocations return sold out while cancellations continue to release units.
 176. `Local Booking vertical complete` is a local/Emulator verdict only. It
      authorizes no BCK-13 delivery, persistent escrow, cloud project,
      deployment, market activation, staging, production, push or merge.
+
+## 35. E2 local amendment — booking terms and hide consistency (Emulator only)
+
+Owner-accepted 2026-10-06 together with
+[EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md).
+
+177. An authoritative `getEventAvailability` answer (`notOpen`, finite
+     `available`/`limited`/`soldOut`, `unlimited` `available`, `closed`) may
+     carry `terms`: a copy of the projection's pool, channel, party mode and
+     limit, registration window and cancellation deadline. Non-authoritative
+     answers never carry it. The client books with these values only.
+178. Content projections from the Event handoff use the existing consumer,
+     delivery records, lease, retry and dead-letter unchanged; reschedule,
+     capacity change and occurrence cancellation use the existing lifecycle.
+179. Hide is eventually consistent locally: new Bookings are refused once
+     Booking applied `EventUnpublished`; a Booking confirmed before that stays
+     confirmed and cancellable. An immediate fence at Content commit is a
+     separate extension, not part of E2.
