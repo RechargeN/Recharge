@@ -1,0 +1,127 @@
+import { randomUUID } from 'node:crypto';
+import type { Firestore } from 'firebase-admin/firestore';
+
+import type { ContentPublicationService } from './modules/content/application/content_publication_service.js';
+import type { ContentActor } from './modules/content/application/ports/publisher_eligibility_port.js';
+import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
+import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
+import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
+import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
+import { IdentityPublisherEligibility } from './modules/content/infrastructure/identity_publisher_eligibility.js';
+import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import type { EmulatorMediaComposition } from './modules/media/infrastructure/emulator_media_composition.js';
+import {
+  createEmulatorModerationPorts,
+  createEmulatorModerationService,
+} from './modules/moderation/infrastructure/emulator_moderation_composition.js';
+import type { EntityId } from './shared/ids.js';
+import { systemServerClock, type ServerClock } from './shared/server_clock.js';
+import { mediaComposition } from './media_entry.js';
+
+/**
+ * C3 Emulator-only Event authoring. Content is composed with the real ports it
+ * already has: Identity publisher eligibility (Session, verified Creator, exact
+ * Page), Media readiness of the exact revision, and the C2 moderation verifier,
+ * which makes review mandatory before publication. Only `event` is enabled, and
+ * only here; the default composition enables nothing. Reference data is the
+ * synthetic Emulator constants (see `EmulatorSyntheticReferenceData`).
+ */
+export interface EventAuthoringComposition {
+  readonly content: ContentPublicationService;
+  readonly contentRepository: FirestoreContentRepository;
+  readonly media: EmulatorMediaComposition;
+  readonly moderation: ReturnType<typeof createEmulatorModerationService>;
+}
+
+export function eventAuthoringComposition(
+  firestore: Firestore,
+  options: { readonly media?: EmulatorMediaComposition; readonly clock?: ServerClock } = {},
+): EventAuthoringComposition {
+  const media = options.media ?? mediaComposition(firestore);
+  const clock = options.clock ?? systemServerClock;
+  const moderationPorts = createEmulatorModerationPorts(firestore);
+  const { service, repository } = createEmulatorContentService({
+    contentPersistenceEnabled: true,
+    firestore,
+    ports: {
+      eligibility: new IdentityPublisherEligibility(
+        new FirestoreIdentityAuthorityRepository(firestore),
+      ),
+      referenceData: new EmulatorSyntheticReferenceData(),
+      moderation: moderationPorts.verifier,
+      media: media.readiness,
+      clock,
+      ids: { newId: () => randomUUID() as EntityId },
+      enabledTypes: new Set(['event'] as const),
+    },
+  });
+  const moderation = createEmulatorModerationService({
+    firestore,
+    repository: moderationPorts.repository,
+    contentRepository: repository,
+    contentService: service,
+    clock,
+  });
+  return Object.freeze({ content: service, contentRepository: repository, media, moderation });
+}
+
+/** Server-resolved caller. The Session was already validated by the access authority. */
+export interface ContentCaller {
+  readonly actor: ContentActor;
+  readonly firestore: Firestore;
+}
+
+// Owner commands only. Moderation dispositions and delegated-import inputs are
+// refused by the Content service itself; nothing else is reachable here.
+const commandResultTypes: Readonly<Record<string, ContentResultType>> = Object.freeze({
+  createDraft: 'draft',
+  updateDraft: 'draft',
+  submitForPublication: 'submission',
+  publishApprovedRevision: 'publishedRevision',
+  withdrawPublication: 'publicationPointer',
+  activatePublishedRevision: 'publicationPointer',
+});
+const queryResultTypes: Readonly<Record<string, ContentResultType>> = Object.freeze({
+  getDraft: 'draft',
+  getPublicationStatus: 'publicationStatus',
+  getPublishedRevision: 'publishedRevision',
+});
+
+function stripTransport(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+  const { sessionContext, ...rest } = data as Record<string, unknown>;
+  void sessionContext;
+  return rest;
+}
+
+function field(body: unknown, name: string): unknown {
+  return typeof body === 'object' && body !== null
+    ? (body as Record<string, unknown>)[name]
+    : undefined;
+}
+
+export async function handleContentCommand(
+  caller: ContentCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const commandType = field(body, 'commandType');
+  const resultType = typeof commandType === 'string' ? commandResultTypes[commandType] : undefined;
+  if (resultType === undefined)
+    return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
+  const { content } = eventAuthoringComposition(caller.firestore);
+  return toContentWireResult(resultType, await content.execute(caller.actor, body));
+}
+
+export async function handleContentQuery(
+  caller: ContentCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const queryType = field(body, 'queryType');
+  const resultType = typeof queryType === 'string' ? queryResultTypes[queryType] : undefined;
+  if (resultType === undefined)
+    return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
+  const { content } = eventAuthoringComposition(caller.firestore);
+  return toContentWireResult(resultType, await content.query(caller.actor, body));
+}

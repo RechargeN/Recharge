@@ -73,3 +73,22 @@ void test('existing invalid and forward fixtures retain fail-closed verdicts', a
     assert.equal(validateResult(fixture.value), false, String(fixture.reason));
   }
 });
+
+void test('availability query fixtures, including E2.0 booking terms, keep their verdicts', async () => {
+  const registry = await createBookingSchemaRegistry();
+  const validate = registry.validator('booking_availability.schema.json');
+  const valid = asRecord(await readBookingJson('fixtures/query_valid.json'));
+  assert.ok(Array.isArray(valid.availability));
+  const withTerms = (valid.availability as unknown[]).filter((value) =>
+    JSON.stringify(value).includes('"terms"'),
+  );
+  assert.ok(withTerms.length >= 3, 'the valid set covers terms');
+  for (const value of valid.availability as unknown[])
+    assert.equal(validate(value), true, JSON.stringify(validate.errors));
+  const invalid = asRecord(await readBookingJson('fixtures/query_invalid.json'));
+  const cases = (invalid.cases as unknown[])
+    .map(asRecord)
+    .filter((entry) => entry.schema === 'booking_availability.schema.json');
+  assert.ok(cases.some((entry) => String(entry.reason).includes('terms')));
+  for (const entry of cases) assert.equal(validate(entry.value), false, String(entry.reason));
+});

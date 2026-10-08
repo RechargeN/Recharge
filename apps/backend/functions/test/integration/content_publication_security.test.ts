@@ -821,14 +821,107 @@ void test('delegated import never reaches Content storage except through the Con
     false,
   );
   const offenders = sourceFiles(root)
-    .filter((file) => !file.startsWith(contentDir))
+    .filter((file) => !file.startsWith(contentDir + path.sep))
     // Shared wire contracts (types and schemas only) are the intended seam.
     .filter((file) => !file.includes(`${path.sep}contracts${path.sep}`))
     .filter((file) => importsContentModule(file, readFileSync(file, 'utf8'), contentDir));
-  // Nothing outside the Content module can reach its repositories or writers.
+  // C1–E2: exact reviewed consumers; unknown modules still cannot reach Content.
+  // Persistence symbols are additionally checked by verify-content-persistence-layout.
+  const approved = [
+    'content_effects_entry.ts',
+    'content_entry.ts',
+    'modules/catalog/domain/catalog_item.ts',
+    'modules/catalog/infrastructure/content_catalog_source.ts',
+    'modules/catalog/infrastructure/emulator_catalog_composition.ts',
+    'modules/catalog/infrastructure/firestore_catalog_repository.ts',
+    'modules/media/infrastructure/emulator_media_composition.ts',
+    'modules/media/infrastructure/firestore_media_repository.ts',
+    'modules/moderation/infrastructure/content_moderation_adapter.ts',
+    'modules/moderation/infrastructure/emulator_moderation_composition.ts',
+    'modules/moderation/infrastructure/emulator_staff_authority.ts',
+    'modules/moderation/infrastructure/firestore_moderation_repository.ts',
+    'modules/moderation/infrastructure/moderation_decision_verifier.ts',
+  ];
   assert.deepEqual(
-    offenders.map((file) => path.relative(root, file)),
-    [],
+    offenders.map((file) => path.relative(root, file).replaceAll('\\', '/')).sort(),
+    approved.sort(),
+  );
+  assert.equal(approved.includes('modules/other/application/x.ts'), false);
+  assert.equal(approved.includes('modules/catalog/domain/other.ts'), false);
+  const symbols: Readonly<Record<string, readonly string[]>> = {
+    'content_effects_entry.ts': ['createEmulatorEventBookingHandoff'],
+    'content_entry.ts': [
+      'ContentPublicationService',
+      'ContentActor',
+      'toContentWireResult',
+      'ContentResultType',
+      'createEmulatorContentService',
+      'EmulatorSyntheticReferenceData',
+      'FirestoreContentRepository',
+      'IdentityPublisherEligibility',
+    ],
+    'modules/catalog/domain/catalog_item.ts': ['bookingRefsFor'],
+    'modules/catalog/infrastructure/content_catalog_source.ts': [
+      'ReferenceDataPort',
+      'resolveContentType',
+      'ContentPublicationFeed',
+    ],
+    'modules/catalog/infrastructure/emulator_catalog_composition.ts': [
+      'ContentPublicationFeed',
+      'FirestoreContentRepository',
+      'EmulatorSyntheticReferenceData',
+    ],
+    'modules/catalog/infrastructure/firestore_catalog_repository.ts': [
+      'assertContentEmulatorContext',
+    ],
+    'modules/media/infrastructure/emulator_media_composition.ts': [
+      'ContentMediaScope',
+      'FirestoreContentRepository',
+      'IdentityPublisherEligibility',
+    ],
+    'modules/media/infrastructure/firestore_media_repository.ts': ['assertContentEmulatorContext'],
+    'modules/moderation/infrastructure/content_moderation_adapter.ts': [
+      'ContentPublicationService',
+      'contentCollections',
+      'FirestoreContentRepository',
+    ],
+    'modules/moderation/infrastructure/emulator_moderation_composition.ts': [
+      'ContentPublicationService',
+      'FirestoreContentRepository',
+    ],
+    'modules/moderation/infrastructure/emulator_staff_authority.ts': [
+      'assertContentEmulatorContext',
+    ],
+    'modules/moderation/infrastructure/firestore_moderation_repository.ts': [
+      'assertContentEmulatorContext',
+    ],
+    'modules/moderation/infrastructure/moderation_decision_verifier.ts': [
+      'ModerationDispositionPort',
+      'ModerationProfileResolution',
+      'VerifiedDisposition',
+    ],
+  };
+  const allowedSymbol = (relative: string, symbol: string) =>
+    symbols[relative]?.includes(symbol) === true;
+  for (const file of offenders) {
+    const relative = path.relative(root, file).replaceAll('\\', '/');
+    for (const match of readFileSync(file, 'utf8').matchAll(
+      /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+['"]([^'"]+)['"]/gu,
+    )) {
+      if (!path.resolve(path.dirname(file), match[2]!).startsWith(contentDir + path.sep)) continue;
+      for (const part of match[1]!.split(',')) {
+        const symbol = part.replace(/\btype\b/u, '').trim();
+        if (symbol.length > 0) assert.ok(allowedSymbol(relative, symbol), `${relative}: ${symbol}`);
+      }
+    }
+  }
+  assert.equal(allowedSymbol('modules/other/application/x.ts', 'ContentPublicationService'), false);
+  assert.equal(
+    allowedSymbol(
+      'modules/catalog/infrastructure/firestore_catalog_repository.ts',
+      'FirestoreContentRepository',
+    ),
+    false,
   );
 });
 
@@ -853,20 +946,42 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
   const emulatorOnly = new Set([
     path.join('infrastructure', 'firestore_content_repository.ts'),
     path.join('infrastructure', 'emulator_content_composition.ts'),
+    path.join('infrastructure', 'content_publication_feed.ts'),
+    path.join('infrastructure', 'firestore_event_booking_handoff_repository.ts'),
   ]);
   for (const file of files) {
     const text = readFileSync(file, 'utf8');
     const relative = path.relative(path.join(root, 'modules', 'content'), file);
+    // E2 handoff reads the exact Booking collections, never its lifecycle services.
+    const inspected =
+      relative === path.join('infrastructure', 'firestore_event_booking_handoff_repository.ts')
+        ? text
+            .replace(
+              "import { eventBookingDeliveryCollections } from '../../../booking/event_projection_delivery.js';",
+              '',
+            )
+            .replace("import { bookingCollections } from '../../../booking/transactions.js';", '')
+        : text;
     for (const pattern of forbidden.slice(emulatorOnly.has(relative) ? 1 : 0))
-      assert.doesNotMatch(text, pattern, path.relative(root, file));
+      assert.doesNotMatch(inspected, pattern, path.relative(root, file));
   }
   const sdkImporters = files
     .filter((file) => /from ['"]firebase-admin/u.test(readFileSync(file, 'utf8')))
     .map((file) => path.relative(path.join(root, 'modules', 'content'), file))
     .sort();
   assert.deepEqual(sdkImporters, [...emulatorOnly].sort());
-  // No callable/export registry, Rules or index change was introduced.
-  assert.doesNotMatch(readFileSync(path.join(root, 'index.ts'), 'utf8'), /content/iu);
+  const entry = readFileSync(path.join(root, 'index.ts'), 'utf8');
+  assert.doesNotMatch(entry, /from ['"]\.\/modules\/content\//u);
+  assert.deepEqual(
+    [...entry.matchAll(/export const (\w+)\s*=/gu)]
+      .map((match) => match[1]!)
+      .filter((name) => /content/iu.test(name))
+      .sort(),
+    ['consumeContentEffectV1', 'contentCommandV1', 'contentQueryV1'],
+  );
+  // Negative control: neither a new SDK importer nor a new export is approved.
+  assert.equal(emulatorOnly.has(path.join('domain', 'foreign.ts')), false);
+  assert.match("import { getFirestore } from 'firebase-admin/firestore';", forbidden[0]!);
 });
 
 // ---------------------------------------------------------------------------

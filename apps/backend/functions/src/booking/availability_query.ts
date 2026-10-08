@@ -12,7 +12,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
-import { assertBookingEventProjection } from './domain.js';
+import { assertBookingEventProjection, type BookingEventProjection } from './domain.js';
 import { bookingCollections, finitePoolLedgerId } from './transactions.js';
 
 export interface EventAvailability {
@@ -28,6 +28,37 @@ export interface EventAvailability {
   readonly availableUnits?: number;
   readonly registrationOpensAt?: string;
   readonly registrationClosesAt?: string;
+  /** E2.0: the booking terms, a copy of the authoritative Booking projection. */
+  readonly terms?: EventAvailabilityTerms;
+}
+
+export interface EventAvailabilityTerms {
+  readonly inventoryPoolId?: string;
+  readonly channel?: 'onsite' | 'online' | 'any';
+  readonly partyMode: 'selfOnly' | 'partyWithoutNames';
+  readonly maxParticipantUnits: number;
+  readonly registrationOpensAt?: string;
+  readonly registrationClosesAt?: string;
+  readonly cancellationDeadline?: string;
+}
+
+/** What a client needs to book this exact occurrence; never from the Catalog. */
+function termsOf(event: BookingEventProjection): EventAvailabilityTerms {
+  return {
+    ...(event.poolId === undefined ? {} : { inventoryPoolId: event.poolId }),
+    ...(event.channel === undefined ? {} : { channel: event.channel }),
+    partyMode: event.guestPolicy.mode,
+    maxParticipantUnits: event.guestPolicy.maximumParticipantUnits,
+    ...(event.registrationWindow.opensAt === undefined
+      ? {}
+      : { registrationOpensAt: event.registrationWindow.opensAt }),
+    ...(event.registrationWindow.closesAt === undefined
+      ? {}
+      : { registrationClosesAt: event.registrationWindow.closesAt }),
+    ...(event.cancellationDeadline === undefined
+      ? {}
+      : { cancellationDeadline: event.cancellationDeadline }),
+  };
 }
 
 export async function getEventAvailability(
@@ -65,6 +96,7 @@ export async function getEventAvailability(
         eventRevision: event.materialRevision,
         status: 'notOpen',
         authority: 'authoritative',
+        terms: termsOf(event),
         registrationOpensAt: event.registrationWindow.opensAt,
       });
     }
@@ -81,6 +113,7 @@ export async function getEventAvailability(
         eventRevision: event.materialRevision,
         status: 'closed',
         authority: 'authoritative',
+        terms: termsOf(event),
         registrationClosesAt: event.registrationWindow.closesAt,
       });
     }
@@ -94,6 +127,7 @@ export async function getEventAvailability(
         eventRevision: event.materialRevision,
         status: 'available',
         authority: 'authoritative',
+        terms: termsOf(event),
       });
     }
     if (
@@ -125,6 +159,7 @@ export async function getEventAvailability(
             ? 'limited'
             : 'available',
       authority: 'authoritative',
+      terms: termsOf(event),
       ledgerRevision: ledger?.revision ?? 0,
       availableUnits,
     });

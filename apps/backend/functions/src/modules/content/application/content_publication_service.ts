@@ -1,6 +1,7 @@
 import type {
   ApplyModerationDispositionCommandV1,
   ChangeClass,
+  ContentBody,
   ContentCommandV1,
   ContentEffectV1,
   ContentQueryByBindingV1,
@@ -515,6 +516,13 @@ export class ContentPublicationService {
     await this.assertChangeClass(context, draft, payload.changeClass);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
     this.assertValid(entry, draft, resolved, context.nowUtc, principalId(context.principal));
+    // Early feedback only: the binding check runs where the pointer switches.
+    await this.assertTransition(
+      context.tx,
+      entry,
+      await context.tx.pointer(draft.contentId),
+      draft.body,
+    );
     const references = resolved.revisions;
     const profile = await this.deps.moderation.profileFor({
       typeId: draft.typeId,
@@ -572,6 +580,8 @@ export class ContentPublicationService {
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
     const pointer = await tx.pointer(submission.contentId);
+    // Binding: in the very transaction that switches the pointer.
+    await this.assertTransition(tx, entry, pointer, draft.body);
     const existing = await tx.publishedRevisionsForContent(submission.contentId);
     const revision = createPublishedRevision({
       publishedRevisionId: this.deps.ids.newId(),
@@ -707,9 +717,10 @@ export class ContentPublicationService {
       throw new ContentDomainRefusal('source_revision_stale');
     if (!evidence.readiness.ready || evidence.readiness.mediaRevision !== target.mediaRevision)
       throw new ContentDomainRefusal('media_not_ready');
-    void entry;
     const pointer = await tx.pointer(payload.contentId);
     if (pointer === null) throw new ContentDomainRefusal('not_found');
+    // A rollback is a pointer switch too: it may not leave a forbidden transition.
+    await this.assertTransition(tx, entry, pointer, target.body);
     // Re-selecting what is already public is a no-op conflict, not a new state.
     if (
       pointer.currentPublishedRevisionId === target.publishedRevisionId &&
@@ -909,6 +920,23 @@ export class ContentPublicationService {
     };
     const issues = entry.validate?.(draft.body, context) ?? ['no_source_contract'];
     if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
+  }
+
+  /**
+   * The type's forbidden transitions (E2.0 §2), against the revision the
+   * pointer holds now, whatever its hold. A refusal is `validation_failed`.
+   */
+  private async assertTransition(
+    tx: ContentTransaction,
+    entry: ContentTypeRegistryEntry,
+    pointer: PublicationPointer | null,
+    nextBody: ContentBody,
+  ): Promise<void> {
+    if (entry.validateTransition === undefined) return;
+    const currentId = pointer?.currentPublishedRevisionId ?? null;
+    const current = currentId === null ? null : await tx.publishedRevision(currentId);
+    if (entry.validateTransition(current?.body ?? null, nextBody).length > 0)
+      throw new ContentDomainRefusal('validation_failed');
   }
 
   /** A Media port that fails is "not ready": a typed refusal, never a thrown error. */

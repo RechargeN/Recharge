@@ -30,6 +30,14 @@ const expected = [
   "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",
   "r0ToolchainProbe",
+  "mediaCommandV1",
+  "mediaQueryV1",
+  "uploadMediaBytesV1",
+  "contentCommandV1",
+  "contentQueryV1",
+  // E2: default-off, Emulator-only Discover read and Content effect trigger.
+  "discoverQueryV1",
+  "consumeContentEffectV1",
 ].sort();
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
@@ -48,6 +56,24 @@ if (
     `Only the approved disabled Event and Booking schedules are allowed: ${schedules.join(", ")}`,
   );
 }
+const firestoreTriggers = [
+  ...source.matchAll(
+    /export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onDocumentCreated\(\s*\{\s*document:\s*'([^']+)'/gu,
+  ),
+]
+  .map((match) => `${match[1]}@${match[2]}`)
+  .sort();
+if (
+  JSON.stringify(firestoreTriggers) !==
+  JSON.stringify([
+    "consumeContentEffectV1@contentEffects/{effectId}",
+    "consumeEventBookingOutboxV1@eventBookingOutbox/{outboxId}",
+  ])
+) {
+  throw new Error(
+    `Only the approved Emulator-only Firestore triggers are allowed: ${firestoreTriggers.join(", ")}`,
+  );
+}
 process.stdout.write(
-  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery and reconfirmation-deadline surface.\n",
+  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover and Content-effect surface.\n",
 );

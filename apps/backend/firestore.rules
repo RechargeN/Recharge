@@ -44,6 +44,12 @@ service cloud.firestore {
     match /contentAudit/{document} { allow read, write: if false; }
     match /contentEffects/{document} { allow read, write: if false; }
 
+    // E2.0 Event → Booking handoff (Emulator-only, Content-owned): checkpoint,
+    // receipts and per-object state. Server-only, like the outbox it writes.
+    match /eventBookingHandoffCheckpoints/{document} { allow read, write: if false; }
+    match /eventBookingHandoffReceipts/{document} { allow read, write: if false; }
+    match /eventBookingHandoffStates/{document} { allow read, write: if false; }
+
     // RAW-C authoritative records are Admin-SDK-only. There is deliberately no
     // client exception, including for owners, flags, projections or outbox.
     match /bookingEventProjections/{document} { allow read, write: if false; }

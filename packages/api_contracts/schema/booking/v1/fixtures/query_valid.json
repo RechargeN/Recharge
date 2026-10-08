@@ -319,6 +319,84 @@
         "retryable": true,
         "correlationId": "availability-retryable"
       }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-finite",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "available",
+        "authority": "authoritative",
+        "capacityMode": "finite",
+        "ledgerRevision": 0,
+        "availableUnits": 10,
+        "terms": {
+          "inventoryPoolId": "pool_0123456789abcdef0123456789abcdef",
+          "channel": "onsite",
+          "partyMode": "partyWithoutNames",
+          "maxParticipantUnits": 3,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-unlimited",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-2",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "available",
+        "authority": "authoritative",
+        "capacityMode": "unlimited",
+        "terms": {
+          "partyMode": "selfOnly",
+          "maxParticipantUnits": 1,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-not-open",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-3",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "notOpen",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationOpensAt": "2026-09-01T00:00:00.000Z",
+        "terms": {
+          "inventoryPoolId": "pool_0123456789abcdef0123456789abcdef",
+          "channel": "onsite",
+          "partyMode": "partyWithoutNames",
+          "maxParticipantUnits": 3,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
     }
   ]
 }

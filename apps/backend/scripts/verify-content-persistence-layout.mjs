@@ -34,20 +34,17 @@ function sourceFiles(directory) {
   });
 }
 const cloudImport = /firebase-(?:admin|functions)|@google-cloud/u;
-const allowedCloud = new Set([
-  path.join(
-    "modules",
-    "content",
-    "infrastructure",
+// Emulator-only adapters: the repository, its composition, the read-only
+// publication feed the local Catalog reads (E1) and the Event → Booking
+// handoff store (E2.0).
+const allowedCloud = new Set(
+  [
     "firestore_content_repository.ts",
-  ),
-  path.join(
-    "modules",
-    "content",
-    "infrastructure",
     "emulator_content_composition.ts",
-  ),
-]);
+    "content_publication_feed.ts",
+    "firestore_event_booking_handoff_repository.ts",
+  ].map((name) => path.join("modules", "content", "infrastructure", name)),
+);
 for (const file of sourceFiles(path.join(functionsSrc, "modules", "content"))) {
   const relative = path.relative(functionsSrc, file);
   if (
@@ -64,20 +61,94 @@ for (const file of sourceFiles(path.join(functionsSrc, "contracts"))) {
     throw new Error(`Content contract imports a cloud SDK: ${file}`);
 }
 
-// Single writer, no endpoint: nothing outside the Content module reaches the
-// Firestore adapter or its composition, and the Functions entry knows nothing of it.
+// Single writer: outside the Content module only the approved Emulator-only
+// files reach the Firestore adapter or its composition, and each imports only
+// the listed symbols (C1 Media, C2 Moderation, C3 entry adapter, E1 Catalog).
+// The Emulator context guard is the only thing the other repositories borrow.
+const persistenceModules = [
+  "firestore_content_repository",
+  "emulator_content_composition",
+];
+const guardOnly = {
+  firestore_content_repository: ["assertContentEmulatorContext"],
+};
+const approvedOutsideUsers = {
+  "content_entry.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+    emulator_content_composition: ["createEmulatorContentService"],
+  },
+  "modules/media/infrastructure/emulator_media_composition.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
+  "modules/media/infrastructure/firestore_media_repository.ts": guardOnly,
+  "modules/moderation/infrastructure/content_moderation_adapter.ts": {
+    firestore_content_repository: [
+      "contentCollections",
+      "FirestoreContentRepository",
+    ],
+  },
+  "modules/moderation/infrastructure/emulator_moderation_composition.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
+  "modules/moderation/infrastructure/emulator_staff_authority.ts": guardOnly,
+  "modules/moderation/infrastructure/firestore_moderation_repository.ts":
+    guardOnly,
+  "modules/catalog/infrastructure/emulator_catalog_composition.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
+  "modules/catalog/infrastructure/firestore_catalog_repository.ts": guardOnly,
+};
+const importStatement =
+  /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'[^']*\/(firestore_content_repository|emulator_content_composition)\.js';/gu;
 const contentDir = path.join(functionsSrc, "modules", "content");
 for (const file of sourceFiles(functionsSrc)) {
-  if (file.startsWith(contentDir)) continue;
-  const source = readFileSync(file, "utf8").replaceAll("\\", "/");
-  if (/firestore_content_repository|emulator_content_composition/u.test(source))
-    throw new Error(
-      `Content persistence used outside its module: ${path.relative(functionsSrc, file)}`,
-    );
+  if (file.startsWith(contentDir + path.sep)) continue;
+  const relative = path.relative(functionsSrc, file).replaceAll("\\", "/");
+  const source = readFileSync(file, "utf8");
+  const mentions = persistenceModules.filter((name) => source.includes(name));
+  if (mentions.length === 0) continue;
+  const approved = approvedOutsideUsers[relative];
+  if (approved === undefined)
+    throw new Error(`Content persistence used outside its module: ${relative}`);
+  const imported = {};
+  for (const match of source.matchAll(importStatement)) {
+    const names = match[1]
+      .split(",")
+      .map((part) => part.replace(/\btype\b/u, "").trim())
+      .filter((part) => part.length > 0);
+    imported[match[2]] = [...(imported[match[2]] ?? []), ...names];
+  }
+  const withoutApprovedImports = source.replace(importStatement, "");
+  for (const name of persistenceModules)
+    if (withoutApprovedImports.includes(name))
+      throw new Error(`${relative} references ${name} outside an import`);
+  for (const name of mentions) {
+    if (imported[name] === undefined)
+      throw new Error(`${relative} references ${name} outside an import`);
+    for (const symbol of imported[name])
+      if (!(approved[name] ?? []).includes(symbol))
+        throw new Error(`${relative} imports ${symbol} from ${name}`);
+  }
 }
+// The Functions entry never imports Content internals; its Content surface is
+// exactly the approved Emulator-only callables (C3) and effect trigger (E2).
 const entry = readFileSync(path.join(functionsSrc, "index.ts"), "utf8");
-if (/content/iu.test(entry))
-  throw new Error("The Functions entry must not expose Content persistence");
+if (/from '\.\/modules\/content\//u.test(entry))
+  throw new Error("The Functions entry must not import Content internals");
+const approvedContentExports = [
+  "consumeContentEffectV1",
+  "contentCommandV1",
+  "contentQueryV1",
+];
+const contentExports = [...entry.matchAll(/export const (\w+)\s*=/gu)]
+  .map((match) => match[1])
+  .filter((name) => /content/iu.test(name))
+  .sort();
+for (const name of contentExports)
+  if (!approvedContentExports.includes(name))
+    throw new Error(
+      `The Functions entry exposes an unapproved Content export: ${name}`,
+    );
 
 const rules = readFileSync(path.join(backendRoot, "firestore.rules"), "utf8");
 const collections = [
@@ -123,5 +194,5 @@ if (JSON.stringify(actual) !== JSON.stringify(expected))
   );
 
 process.stdout.write(
-  `Content persistence layout gate passed: ${required.length} required paths, eight explicit denies, exactly two composite indexes, cloud SDK confined to two Emulator-only files, no endpoint or outside user.\n`,
+  `Content persistence layout gate passed: ${required.length} required paths, eight explicit denies, exactly two composite indexes, cloud SDK confined to ${allowedCloud.size} Emulator-only files, ${Object.keys(approvedOutsideUsers).length} approved outside users with exact symbols, Content exports ${contentExports.join(", ")}.\n`,
 );

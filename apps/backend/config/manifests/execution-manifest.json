@@ -686,6 +686,27 @@
         "compositeIndexes": []
       },
       {
+        "name": "eventBookingHandoffCheckpoints",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "eventBookingHandoffReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "eventBookingHandoffStates",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "eventBookingOutbox",
         "clientAccess": "deny",
         "owner": "firebase_cli",

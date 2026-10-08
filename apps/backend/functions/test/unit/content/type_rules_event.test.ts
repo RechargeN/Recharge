@@ -1144,11 +1144,13 @@ for (const [name, change, code] of invalidCases)
 
 const unsupported: ReadonlyArray<readonly [string, (body: Record<string, any>) => void, string]> = [
   [
-    'internal registration',
+    // E2.0: internal registration is accepted only with all its terms; a bare
+    // mode is refused by name (see event_rules_internal_registration.test.ts).
+    'internal registration without its terms',
     (b) => {
       b.registration = { mode: 'internal' };
     },
-    'event.unsupported_capability:registration.internal',
+    'event.internal_registration.party_size_invalid',
   ],
   [
     'private visibility',

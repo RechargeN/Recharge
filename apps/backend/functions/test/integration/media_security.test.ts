@@ -418,13 +418,33 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
     /from ['"]node:(https?|net|fs|child_process)['"]/u,
     /getSignedUrl|signedUrl|requestDelivery|getDeliveryHandle|createReadStream/u,
   ];
+  const sdk = new Set([
+    'infrastructure/emulator_media_composition.ts',
+    'infrastructure/firestore_media_repository.ts',
+  ]);
+  const environment = new Set([...sdk, 'infrastructure/storage_emulator_object_store.ts']);
+  const patternsFor = (relative: string) =>
+    forbidden.filter(
+      (_, index) =>
+        !(sdk.has(relative) && (index === 0 || index === 3)) &&
+        !(environment.has(relative) && index === 4),
+    );
   for (const file of sourceFiles(mediaDir))
-    for (const pattern of forbidden)
+    for (const pattern of patternsFor(path.relative(mediaDir, file).replaceAll('\\', '/')))
       assert.equal(
         pattern.test(read(file)),
         false,
         `${path.relative(srcRoot, file)} ${String(pattern)}`,
       );
+  const foreign = "import { getFirestore } from 'firebase-admin/firestore';";
+  assert.ok(patternsFor('domain/foreign.ts').some((pattern) => pattern.test(foreign)));
+  assert.ok(patternsFor('infrastructure/foreign.ts').some((pattern) => pattern.test(foreign)));
+  // Even approved adapters cannot acquire a delivery/read-URL surface.
+  assert.ok(
+    patternsFor('infrastructure/emulator_media_composition.ts').some((pattern) =>
+      pattern.test('getSignedUrl()'),
+    ),
+  );
 });
 
 void test('Media and Content never import each other and nothing exports Media to the runtime', () => {
@@ -434,13 +454,21 @@ void test('Media and Content never import each other and nothing exports Media t
   for (const file of sourceFiles(contentDir))
     assert.equal(/modules\/media\//u.test(read(file).replaceAll('\\', '/')), false, file);
   const offenders = sourceFiles(srcRoot)
-    .filter((file) => !file.startsWith(mediaDir))
+    .filter((file) => !file.startsWith(mediaDir + path.sep))
     .filter((file) => /modules\/media\//u.test(read(file).replaceAll('\\', '/')));
   assert.deepEqual(
     offenders.map((file) => path.relative(srcRoot, file)),
-    [],
+    ['content_entry.ts', 'media_entry.ts'],
   );
-  assert.equal(/media/iu.test(read(path.join(srcRoot, 'index.ts'))), false);
+  const entry = read(path.join(srcRoot, 'index.ts'));
+  assert.doesNotMatch(entry, /from ['"]\.\/modules\/media\//u);
+  assert.deepEqual(
+    [...entry.matchAll(/export const (\w+)\s*=/gu)]
+      .map((match) => match[1]!)
+      .filter((name) => /media/iu.test(name))
+      .sort(),
+    ['mediaCommandV1', 'mediaQueryV1', 'uploadMediaBytesV1'],
+  );
 });
 
 void test('only the Media application services write Media records', () => {
@@ -462,10 +490,14 @@ void test('fake adapters are labelled fake and are the only adapters in this sli
   const infrastructure = path.join(mediaDir, 'infrastructure');
   const names = readdirSync(infrastructure).sort();
   assert.deepEqual(names, [
+    'emulator_media_composition.ts',
     'fake_object_store.ts',
     'fake_processor.ts',
     'fake_scanner.ts',
+    'firestore_media_repository.ts',
+    'identity_media_authority.ts',
     'in_memory_media_repository.ts',
+    'storage_emulator_object_store.ts',
   ]);
   for (const name of names.filter((item) => item.startsWith('fake_')))
     assert.match(read(path.join(infrastructure, name)), /\bFAKE\b/u, name);

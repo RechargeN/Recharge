@@ -162,3 +162,434 @@ A missing exact tool, network outage or command that did not execute is
 `Inconclusive`, never Pass. Current hosted parity and Moderate transitive
 advisory disposition remain open. See
 `docs/evidence/backend/r0/BCK-R0-TCH-01_RESULT.md`.
+
+## A1 managed local Emulator stand (Windows)
+
+Requires the pinned Node 22.23.2 and JAVA_HOME pointing to Temurin
+21.0.12+8, with `%JAVA_HOME%in` first in PATH: the Firestore and Storage
+emulators start `java` from PATH, and another JDK there is refused as a foreign
+executable at stop. Build once (`npm run build`) so Functions can load.
+Run from apps/backend/functions:
+
+```powershell
+npm run stand:start
+npm run stand:status
+npm run stand:stop
+npm run stand:reset -- --yes
+npm run test:stand
+```
+
+Only demo-recharge is allowed. Auth (9099), Firestore (8080), Functions
+(5001), Storage (9199), Pub/Sub (8085), Hub (4400) and logging (4500)
+bind to 127.0.0.1. UI is disabled. No phones, LAN, cloud
+credentials, provisioning or domain-function changes are included in A1.
+Existing default-off function exports remain disabled.
+
+State, generated config, data and per-run logs are outside Git under
+%LOCALAPPDATA%\\Recharge\\emulator-stand\\demo-recharge\\.
+Every command rejects credential environment variables, ADC and cached
+Firebase login and Functions .env/.env.* files. Existing ports, stale state and foreign processes are
+never adopted or killed. Process ownership requires PID, creation time,
+executable and supervisor run ID; children must descend from that verified
+supervisor. Project identity additionally requires CLI argv, the
+demo-recharge locator PID, hub PID and the five emulator endpoints.
+
+Stop exports Auth/Firestore/Storage data before stopping verified child
+processes. Pub/Sub is ephemeral. Start imports a previous export when present.
+Reset warns and requires --yes; it removes only the exact marked data folder
+and the recorded state/config, rejects junctions (including nested ones),
+live/reused PIDs and occupied ports, and preserves logs.
+For stale state with a remaining locator or process, reset refuses: inspect
+the log and resolve the orphan manually; do not kill an unverified PID.
+A leftover command.lock after interruption also requires manual inspection.
+
+test:emulator keeps its existing independent lifecycle. Stop the stand
+before running it; it does not reuse stand state.
+
+## A2 deterministic seed, export/import and bootstrap (Emulator only)
+
+With the stand running (see A1), from apps/backend/functions:
+
+```powershell
+npm run stand:seed      # 3 users, 2 pages, Content Event, Booking fixture, 3 bookings
+npm run stand:verify    # seed invariants (authority, pages, inventory, flags)
+npm run stand:digest    # normalized state digest; add -- --out <new file>
+npm run stand:export    # export Auth/Firestore/Storage to the stand data folder
+npm run stand:acceptance -- --yes
+```
+
+Everything is created through owner paths: Firebase Auth Emulator users and the
+`establishIdentitySessionV1` / `recoverIdentitySessionsV1` callables for
+Sessions, the Identity owner services for the Creator verification and two
+Professional Pages, the Booking callables for bookings, and the Booking
+projection delivery for inventory. Since C3 the stand's Event is created through
+the Content path (see C3); the explicit Event-outbox fixture
+(`stand-event-outbox-riga-open-air-1`) remains only as the Booking-test fixture
+and is not evidence of Content publication. The writes made by the stand tooling
+itself are the local flag bootstrap (identity session, Media upload, Event
+authoring and booking create/cancel/read/projection delivery; reconfirmation
+stays off), because no Firestore flag repository exists yet, and the stand
+manifest (stand metadata, see C3). Owner-confirmed on 2026-10-06.
+
+The staff Account is the reviewer for the bootstrap decisions inside the seed
+process and, since C2, the one entry of the test-only staff registry (see C2).
+Ordinary sign-in never grants Creator or staff authority. A repeated seed on a
+complete stand reuses it (`reused ...`, owner-confirmed on 2026-10-06); a
+partial base seed is refused and needs a reset. The bootstrap is bounded to
+`demo-recharge`: the seed process rejects any other project, a non-loopback
+host or credential environment variables.
+
+Stop exports the data and start imports it, so a stopped stand is restored
+without manual database edits. A partial base seed is recovered with
+`stand:stop`, `stand:reset -- --yes` and `stand:seed`; an interrupted Content
+Event phase is resumed by running `stand:seed` again. The digest replaces
+server-generated ids with labels and removes timestamps and per-run hashes, so
+seed, reset, seed gives the same normalized state; `stand:acceptance` proves
+that and export/import equality on the local Emulator only. It makes no cloud,
+device or LAN claim. Session handles and the Emulator-only password are never
+printed.
+
+## B1/B2 local mobile gates (Emulator stand, PC host only)
+
+From apps/backend/functions, with the pinned toolchain and Flutter on PATH.
+Both gates reset the stand data and so need an explicit `--yes`:
+
+```powershell
+node ../scripts/stand-mobile-gate.mjs --yes   # B1-local: Auth Emulator, Session lifecycle
+node ../scripts/stand-b2-gate.mjs --yes       # B2-local: Event Booking UI, three fresh runs
+```
+
+Both start a fresh seeded stand, run Flutter tests on the PC against it
+(loopback only, no `adb`, no device, no LAN, no cloud) and always stop it.
+B1-local covers sign-in through the Auth Emulator, a server-issued Session and
+its recovery after a restart, owner-service revoke and expiry, and the
+reversible `localOnly` / `testBackend` Booking binding. B2-local covers the
+Event Booking screen on the seeded Event: create, my booking, cancel,
+loading/error/offline/unknown-outcome, the idempotency journal, double tap, a
+lost response and recovery after a restart. After every run the backend itself
+is asked for the staff user's booking counts: any duplicate fails the gate.
+
+The Booking test entry is default-off. It needs all of:
+`--dart-define=RECHARGE_TEST_BOOKING_ENTRY=true` (`bool.fromEnvironment` does
+not accept `1`), a non-release build, the `testBackend` binding and the
+loopback `demo-recharge/europe-west1` endpoint. The same check guards the
+`/test/event-booking/:eventId` route and every Booking read and command in the
+gateway, not just the button.
+
+Limits: the `firebase_auth` and secure-storage plugins do not run in a host
+test, so they are covered in B1-device; Sessions are rate limited per Account
+(5 issues per 15 minutes), so each gate starts from a reset stand; the
+`stand:*` npm scripts need a working npm (the portable one in Temp can be
+damaged), the gates can be run directly with `node` as shown.
+
+## C1 minimal Media (Emulator only)
+
+`node ../scripts/stand-c1-gate.mjs --yes` (from apps/backend/functions) starts a
+fresh seeded stand and runs the mobile Media adapter against it on the PC.
+
+What exists: a Firestore Media repository (compare-and-set, immutable
+receipts), a Storage Emulator object store (provider facts measured from the
+stored bytes; the media type comes from the file signature, never from what the
+client declared), Identity-backed upload authority (Session, verified Creator,
+exact Page membership) and Content-backed entity scope, plus three default-off
+Emulator-only callables behind the `media.upload` flag: `mediaCommandV1`
+(createUploadSession, confirmUpload, finalizeAsset), `mediaQueryV1` and
+`uploadMediaBytesV1`. The last is the byte channel: the contract hides the
+upload target and the Emulator cannot sign URLs, so the owner of an open session
+sends the bytes and the backend writes them. It is not the production upload
+mechanism. Content checks the exact Media revision through the existing
+readiness adapter, and a mandatory Event cover is unchanged.
+
+Evidence limits: the scanner and processor are the existing FAKES
+(`fake-scan-1`, `fake-proc-1`) with a synthetic `test-only` policy. They prove
+orchestration, not malware detection or transformation. Not covered: real
+scanner or processor, cloud Storage, a late restriction of Media, gallery
+selection and permissions (B1-device).
+
+## C2 minimal moderation (Emulator only)
+
+`node ../scripts/stand-c2-gate.mjs --yes` (from apps/backend/functions) starts a
+fresh seeded stand and drives the operator path end to end.
+
+The staff interface is a script, not a callable and not a screen:
+`node ../scripts/stand-moderate.mjs <command>` (also `npm run stand:moderate --`).
+No Functions export was added.
+
+```text
+queue
+approve|reject <submissionId> --reason "..."
+restrict|withdraw <contentId> --reason "..."
+restore <contentId> --decision <decisionId> --reason "..."
+receipt <decisionId>
+[--as <stand user>] [--key <idempotency key>]
+```
+
+The script holds no authority. It runs as a stand user (default `staff`) and the
+moderation service decides on every call: a current Session plus an entry in the
+staff registry. A Creator or ordinary user (`--as creator`) is refused with
+`staff_denied`; an unknown Session is `unauthenticated`. A reason of 3-500
+single-line characters is mandatory.
+
+What happens on a decision: the service validates the exact target (a
+submission still `under_review`, or the published revision and pointer revision
+now current), records an immutable decision (who, Session, target and revision,
+action, reason, policy revision) and an audit entry, then asks Content to apply
+it through Content's own verified `applyModerationDisposition`. Content verifies
+the instruction against the recorded decision and writes the pointer or
+submission; moderation never edits Content documents. The result is an
+immutable enforcement receipt (`applied`, `already_applied` or `refused` with
+Content's code) plus an audit entry. A retry with the same key resumes whatever
+step did not finish; the same key with other content is `idempotency_conflict`.
+
+Hold semantics are Content's, unchanged: `restrict` limits visibility,
+moderation `withdraw` takes the publication down by decision, the owner's own
+`withdrawPublication` is a separate hold, and `restore` lifts only the
+moderation hold named by `--decision`. It is not an unconditional republish: an
+owner hold stays, and a restore of a decision that a newer one replaced is
+refused as stale and changes nothing.
+
+Staff authority source (TEST-ONLY): the collection `moderationStaffAuthority`,
+keyed by the real Identity `userId`, written only by the stand seed
+(`grantStandStaff`), never by a command or a mobile client. It is read only
+inside the verified `demo-recharge` loopback Emulator context (the constructor
+refuses any other); a missing entry is a refusal; a user label or Firebase UID
+is never consulted. It is not production IAM and not a general Admin. The seed
+invariants require exactly one entry, for the staff Account.
+
+A2 digest change (intentional): `moderationStaffAuthority` joined the digest
+collections, so the normalized digest differs from the pre-C2 one by exactly
+that registry document (and the C1 `media.upload` flag change before it). The
+determinism rule is unchanged: seed -> reset -> seed gives the same digest
+(`stand:acceptance` passes). The old digest was not kept: it must not dictate
+the authorization model.
+
+While moderation is composed into Content, submissions need review before
+publication (profile `emulator.operator-review`, policy
+`test-only-emulator-moderation-policy-1`). The C1 Media checks still use the
+synthetic no-review profile.
+
+Evidence limits: this proves the operator path on the local Emulator. It is not
+an Admin UI, not production IAM and not product moderation policy; no reports,
+sanctions, appeals or AI review exist. The attestation that binds a decision to
+Content's verification is a hash, not a signature. Media is the existing fakes
+(orchestration only).
+
+## C3 Event through Content, Media and moderation (Emulator only)
+
+`node ../scripts/stand-c3-gate.mjs --yes` (from apps/backend/functions) proves
+the path end to end on the local stand and this PC.
+
+Backend. Two default-off, Emulator-only callables behind the local flag
+`content.event.authoring`: `contentCommandV1` (owner commands: createDraft,
+updateDraft, submitForPublication, publishApprovedRevision, withdrawPublication,
+activatePublishedRevision) and `contentQueryV1` (getDraft,
+getPublicationStatus, getPublishedRevision). Moderation dispositions and
+delegated-import inputs are refused there. The composition (`content_entry.ts`)
+binds Content to Identity eligibility (Session, verified Creator, exact Page),
+Media readiness of the exact revision and the C2 moderation verifier, so review
+before publication is mandatory. Only `event` is enabled, only in this
+composition. Reference data is `EmulatorSyntheticReferenceData`: TEST-ONLY
+constants for LV, not accepted MarketConfig or taxonomy. The stand helpers use
+the same composition; the former stand-only "no review" policy is gone.
+
+Server checks shown by `content_event_emulator_flow.test.ts` (in
+`test:emulator`): the callables are closed until the flag is on; a user who is
+not a verified Creator member of the Page cannot author for it; publication
+needs the staff approval; a published revision never changes and the pointer
+rolls back to an earlier immutable revision (`previousPublishedRevisionId`);
+the owner's hide and a moderation restriction are separate holds and the owner
+cannot lift a restriction; publishing an Event creates no Booking projection.
+
+Seeded Event. The stand's Event is created through the Content path only:
+Creator draft on the studio Page, a Media cover (existing fake
+scanner/processor), cover binding, submit, staff approval through the C2
+service, owner publish. The ids the owner services returned are kept in the
+stand manifest (`standManifest/seed`, stand metadata written only by the stand
+tooling, like the flag bootstrap); `npm run stand:manifest` prints it and tests
+read it. Every seed command has a fixed payload and idempotency key, so a
+repeated seed reuses the result (`reused ...`) and an interrupted seed resumes
+without duplicates (`STAND_SEED_INTERRUPT_AFTER=<step>` is the test hook the
+gate uses; the resumed digest equals a clean one). A partial base seed is still
+refused: reset the stand. The Booking-test Event is a separate, explicitly
+synthetic Event-outbox fixture: Content publication never makes an Event
+bookable, and no Content-to-Booking bridge exists (that needs a targeted
+Event/Content contract extension, not automatic values).
+
+A2 digest change (intentional): the digest now includes the Content, Media and
+moderation records of the seeded Event and the manifest; server-generated ids
+are labelled from the manifest, and Storage Emulator generations are volatile.
+
+Owner decisions (confirmed 2026-10-06): the manifest is kept in Firestore as
+stand metadata written only by the stand tooling; a repeated seed on a complete
+stand reuses it instead of refusing; and the A2 digest changes explicitly with
+C2 and C3, without keeping the old value.
+
+Mobile. A default-off test page (`/test/event-publication`, define
+`RECHARGE_TEST_EVENT_PUBLICATION=true`, not release, `testBackend`, loopback
+`demo-recharge` endpoint; the same guard gates the route, every Content call
+and the cover upload). It takes the signed-in user's own Create Event draft
+from the Create repository and maps it to the Content body (local occurrence
+ids become stable UUIDs; the cover is a local reference until the C1 Media
+upload returns the asset id; admission, inventory and occurrence overrides are
+reported and never sent). The application controller saves, uploads the cover,
+submits, shows the publication status, publishes after approval and hides; "my
+objects" is a local journal of ids from this install with statuses read from
+the server. Tests: `event_publication_stand_test.dart` (controller, real stand)
+and `event_publication_ui_stand_test.dart` (UI).
+
+Evidence limits: PC host and local Emulator only; the Create UI steps are not
+driven (the draft is a Create domain draft stored by the Create repository);
+synthetic reference data; fake scanner/processor; test-only staff registry; no
+Booking bridge, other types, Catalog, Discover, AI or full moderation; no
+physical device, gallery or permissions (B1-device).
+
+## E1 local Catalog (Emulator only)
+
+`node ../scripts/stand-e1-gate.mjs --yes` (from apps/backend/functions) proves
+the path on the local stand. The module is `src/modules/catalog` (BCK-08 v0.3
+is Review; this is a local implementation of its read-side model, not an
+approval). No Functions export, no trigger, no client callable and no cloud
+index were added.
+
+Delivery is manual: `node ../scripts/stand-seed.mjs catalog deliver` runs the
+projector over the committed Content facts (read through Content's own
+`ContentPublicationFeed`); automatic synchronization is not implemented, and
+the delivery mechanism for Discover is a separate decision. The stand command
+only calls the Catalog application layer:
+`catalog deliver | reconcile | status | rebuild | activate <set> <expected|none> | rollback <expected> | feed [<query json>] | details <contentId>`.
+
+Projection rules. `consumeContentFact` dedupes by fact id (same id with other
+content is a conflict and changes nothing), applies facts per object in
+`pointerRevision` order (an older revision, including a replay after a hide or
+withdrawal, is `stale`), and writes the item version, receipt, source state and
+set revision in one transaction. Withdrawn, restricted and archived Content,
+unlisted or private bodies, disabled types and consent-limited types are never
+listed. Only Event has a projection (an allowlist: no full description, contact
+or booking URL); every other type is `type_disabled` (BCK08-OD-04 stays open).
+The delivery checkpoint moves only inside the transaction that processed a
+fact. Reconciliation compares every Content pointer with the set, replays the
+facts Content stored for a gap, reports a fact Content lost as
+`source_effect_missing` (never invented), and only a complete run refreshes the
+sync time. A rebuild replays every object's fact history into a new set that is
+not queryable; activation catches it up, requires full parity and moves the
+active pointer atomically against the expected one; rollback re-activates the
+previous set after the same catch-up, so tombstones are kept.
+
+Query rules. Feed, Search, Map and Details of one applied query share one
+snapshot token (query fingerprint, projection set and revision, visibility,
+reference, ranking and availability revisions, and the pinned server time).
+Pages are ordered by a total key and never repeat or skip within a snapshot;
+an object hidden later is still removed (tombstone wins) and a newer listed
+revision is flagged `changedSinceSnapshot`. Ranking is the TEST-ONLY baseline:
+default order is the nearest start of the earliest not-ended occurrence,
+running occurrences first (`max(start, now)`), ties by content id; distance
+only with an explicit valid centre, Events without a point after the others;
+literal text filters only. `onlyAvailable=true` is refused with
+`booking_availability_source_not_connected_in_e1`; cards carry availability
+`not_connected`, never available. Freshness is component-wise and the strictest
+wins: projection age against the last successful sync (older is `stale`, never
+synced or a future sync time is `unknown`) and reference revisions.
+
+All numeric limits are in `catalogTestOnlyConfig` (owner-approved TEST-ONLY
+values, not production defaults, and they do not close BCK08-OD-08/OD-10): page
+20/50, candidates 2000, delivery batch 100 x 50, reconcile and rebuild batch
+200, projection age 900 s, snapshot and cursor TTL 600 s, radius 100 km within
+the LV service area, text 100 characters / 8 tokens / 2 characters, time window
+366 days.
+
+Catalog collections are derived and rebuildable; the seed does not write them
+and they are outside the A2 digest (the gate checks the digest is unchanged by a
+delivery).
+
+Evidence limits: local Emulator only; manual delivery; Event only; synthetic
+reference data; test-only ranking and limits; Booking availability not
+connected; no UI, ranking experiments, personalization, AI, reviews, provider
+data or cloud indexes.
+
+## E2 Discover over the Catalog and Event Booking (Emulator only)
+
+Scope and contract: `docs/product/EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md`
+(owner-accepted 2026-10-06). Order E2a (read path) → E2.0 (internal
+registration and the Event → Booking handoff) → E2b (Details → Booking →
+cancel, two independent clients).
+
+E2a read path:
+
+- `discoverQueryV1` (callable): `feed | search | map | details` over the E1
+  query service, Session required, flag `catalog.discover.read` (default off,
+  stand bootstrap only). Read-only; cards never carry the full description,
+  Details carries projection v2 (`fullDescription`, `scheduleMode`,
+  `publishedAtUtc`); excluded or absent content never carries an item.
+- `consumeContentEffectV1` (`contentEffects/{effectId}` created, `retry:
+  false`): runs every enabled consumer from its own checkpoint (Catalog under
+  `catalog.delivery`). A failing consumer is reported and never marks or blocks
+  another; it resumes on the next effect or the stand command, even without a
+  new effect. Manual `stand-seed catalog deliver` stays available and
+  idempotent next to it.
+- Exactly these two exports were added; `verify-r1-exports.mjs` also pins the
+  Firestore trigger list. `verify-content-persistence-layout.mjs` now lists
+  the approved users of Content persistence (C1 Media, C2 Moderation, C3
+  entry, E1 Catalog) and the exact symbols each imports, instead of a blanket
+  ban that the owner-approved slices had outgrown.
+- Mobile: `discover.catalog` in the binding manifest is `testBackend` only
+  with `--dart-define=RECHARGE_TEST_DISCOVER_CATALOG=true`, a non-release build
+  and the loopback `demo-recharge` binding; otherwise the existing local
+  Discover data (`localOnly`). Adapters live in the Discover data layer behind
+  `CatalogQueryPort`; the Functions transport is wired in `app/di`. Feed,
+  Search and the Map page share one listing snapshot, Details reads against it
+  and marks a different or unconfirmable revision; Catalog filters it cannot
+  apply are refused by name.
+
+Gate: `node scripts/stand-e2a-gate.mjs --yes` (builds the Functions the stand
+loads, resets the stand, seeds, waits for the trigger to project the seeded
+Event, runs `test/backend_local/discover_catalog_stand_test.dart`, checks
+reconciliation and stops the stand).
+
+Evidence limits: local Emulator and PC host only; Event only; synthetic
+reference data; test-only ranking and limits; Booking availability not
+connected in the Catalog; no cover images in Discover (no Media read URL);
+no physical device, LAN or cloud claim.
+
+E2.0 internal registration and the Event → Booking handoff:
+
+- Content accepts `registration.mode = 'internal'` only as free, instant,
+  offline registration with explicit `maxPartySize` (includes the booker),
+  relative registration window and cancellation deadline; bounds in
+  `eventInternalRegistrationConfig` (test-only). A published internal Event
+  may not leave internal registration, switch capacity mode, change format or
+  venue: checked in the transaction that switches the pointer (publish and
+  rollback), submit is early feedback.
+- `consumeContentEffectV1` also runs the Content-owned handoff (flag
+  `content.event.bookingHandoff`): per object in `pointerRevision` order,
+  gaps filled from stored history, a checkpoint that never skips, terminal
+  markers, "removed before start" decided by the Content change time. It writes
+  `eventBookingOutbox` create-only; Booking delivers with its own records.
+  Hide is eventually consistent (refused once applied in Booking).
+- Stand: `stand-seed.mjs handoff deliver|reconcile|status|state|repair <id>`,
+  `booking-deliver` (the Emulator does not run the retry schedule) and
+  `creator-fixture` (a second verified Creator for the two-client gate, outside
+  the A2 seed and digest). New stores have explicit Rules denies and execution
+  manifest entries; no new composite index.
+- `getEventAvailability` carries `terms` (pool, channel, party limit, window,
+  cancellation deadline) in its authoritative shapes; schema, fixtures and the
+  Dart DTO `BookingAvailabilityTermsDto` are updated.
+
+E2b gate: `node scripts/stand-e2-gate.mjs --yes` runs two independent
+`flutter test` processes (`test/backend_local/e2_client_test.dart`, roles A
+and B) with their own users, Sessions, installation ids and journals on one
+stand, synchronized by file rendezvous points with deadlines (no fixed
+delays): Create → moderation → Catalog → Details → Booking → cancel with a
+repeated command, then A hides its Event while B books it. Do not start other
+heavy work while a gate starts the stand: the Functions emulator gives the
+code 10 s to load by default and can fail the start under CPU contention.
+For a cold local closure run, set `$env:FUNCTIONS_DISCOVERY_TIMEOUT = '60'`
+before invoking the gate. This is Firebase CLI's discovery timeout in seconds,
+not a deployed function timeout. The stand still requires loaded triggers,
+loopback ownership and its original startup deadline; a timeout is a failed
+gate. Keep starts separate from heavy verification work.
+
+Verified stop diagnostics retain PID, parent PID, executable and start time in
+`%LOCALAPPDATA%/Recharge/emulator-stand/demo-recharge/process-stop-audit.jsonl`
+after the existing identity checks and stop action succeed. This file stays
+outside Git and is retained across stand reset; it does not grant permission
+to stop a process or relax the ownership checks.

@@ -20,6 +20,10 @@ import {
   type Json,
 } from './validation_context.js';
 import { isEntityId } from '../../../../shared/ids.js';
+import {
+  isInternalRegistration,
+  validateInternalRegistration,
+} from '../event_internal_registration.js';
 
 /**
  * Event source rules for the approved subset: capability C0 + schedule-C1
@@ -30,7 +34,9 @@ import { isEntityId } from '../../../../shared/ids.js';
  * with a public link or external registration, one-time/all-day/multi-day,
  * multi-date and recurring schedules with DST policies and exception dates,
  * audience/amenities, `free`/`fixed` price with `none`/`onsite`/`external`
- * collection, registration `none`/`external`, and `public`/`unlisted`.
+ * collection, registration `none`/`external`, and `public`/`unlisted`. Since
+ * E2.0 also the narrow free, instant, offline internal registration v1 (see
+ * `event_internal_registration.ts`).
  *
  * Everything beyond it (admission, inventory, Recharge Booking, ticket types,
  * donations, internal payments, private access, occurrence overrides, typed
@@ -561,11 +567,11 @@ function validateRegistration(body: ContentBody, issues: IssueCollector): void {
     issues.add('event.registration_required');
     return;
   }
-  hasOnlyKeys(registration, new Set(['mode', 'externalBookingUrl']), issues, 'event.registration');
-  if (registration.mode === 'internal') {
-    issues.add('event.unsupported_capability:registration.internal');
+  if (isInternalRegistration(body)) {
+    validateInternalRegistration(body, issues);
     return;
   }
+  hasOnlyKeys(registration, new Set(['mode', 'externalBookingUrl']), issues, 'event.registration');
   if (
     !issues.require(
       isEnumValue(registration.mode, ['none', 'external'] as const),

@@ -195,6 +195,103 @@
           "reasonCode": "flow_unsupported"
         }
       }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "terms need the party mode",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "requestId": "terms-invalid",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "available",
+          "authority": "authoritative",
+          "capacityMode": "unlimited",
+          "terms": {
+            "maxParticipantUnits": 1
+          }
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "terms never carry an unknown field",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "requestId": "terms-invalid",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "available",
+          "authority": "authoritative",
+          "capacityMode": "unlimited",
+          "terms": {
+            "partyMode": "selfOnly",
+            "maxParticipantUnits": 1,
+            "price": "0"
+          }
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "terms party size has an explicit bound",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "requestId": "terms-invalid",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "available",
+          "authority": "authoritative",
+          "capacityMode": "unlimited",
+          "terms": {
+            "partyMode": "partyWithoutNames",
+            "maxParticipantUnits": 22
+          }
+        }
+      }
+    },
+    {
+      "schema": "booking_availability.schema.json",
+      "reason": "a non-authoritative answer carries no terms",
+      "value": {
+        "schemaVersion": 1,
+        "queryType": "getEventAvailability",
+        "serverTime": "2026-08-27T12:00:00.000Z",
+        "kind": "succeeded",
+        "requestId": "terms-invalid",
+        "availability": {
+          "eventId": "event-1",
+          "occurrenceId": "occurrence-1",
+          "asOf": "2026-08-27T12:00:00.000Z",
+          "eventRevision": 1,
+          "status": "stale",
+          "authority": "nonAuthoritative",
+          "capacityMode": "notApplicable",
+          "reasonCode": "source_stale",
+          "terms": {
+            "partyMode": "selfOnly",
+            "maxParticipantUnits": 1
+          }
+        }
+      }
     }
   ]
 }

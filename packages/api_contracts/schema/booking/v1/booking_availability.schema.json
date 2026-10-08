@@ -148,6 +148,30 @@
         { "$ref": "#/$defs/unsupportedChannel" }
       ]
     },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inventoryPoolId": { "$ref": "common.schema.json#/$defs/id" },
+        "channel": { "$ref": "common.schema.json#/$defs/channel" },
+        "partyMode": { "enum": ["selfOnly", "partyWithoutNames"] },
+        "maxParticipantUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 21
+        },
+        "registrationOpensAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
+        "registrationClosesAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
+        "cancellationDeadline": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        }
+      },
+      "required": ["partyMode", "maxParticipantUnits"]
+    },
     "notOpen": { "$ref": "#/$defs/notOpenShape" },
     "finiteAvailable": { "$ref": "#/$defs/finiteAvailableShape" },
     "finiteLimited": { "$ref": "#/$defs/finiteLimitedShape" },
@@ -173,7 +197,8 @@
         "capacityMode": { "const": "notApplicable" },
         "registrationOpensAt": {
           "$ref": "common.schema.json#/$defs/utcTimestamp"
-        }
+        },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",
@@ -203,7 +228,8 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991
-        }
+        },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",
@@ -234,7 +260,8 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991
-        }
+        },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",
@@ -261,7 +288,8 @@
         "authority": { "const": "authoritative" },
         "capacityMode": { "const": "finite" },
         "ledgerRevision": { "$ref": "common.schema.json#/$defs/revision" },
-        "availableUnits": { "const": 0 }
+        "availableUnits": { "const": 0 },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",
@@ -286,7 +314,8 @@
         "eventRevision": { "$ref": "common.schema.json#/$defs/revision" },
         "status": { "const": "available" },
         "authority": { "const": "authoritative" },
-        "capacityMode": { "const": "unlimited" }
+        "capacityMode": { "const": "unlimited" },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",
@@ -312,7 +341,8 @@
         "capacityMode": { "const": "notApplicable" },
         "registrationClosesAt": {
           "$ref": "common.schema.json#/$defs/utcTimestamp"
-        }
+        },
+        "terms": { "$ref": "#/$defs/terms" }
       },
       "required": [
         "eventId",

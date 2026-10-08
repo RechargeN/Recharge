@@ -84,3 +84,7 @@ aider_config_html.txt
 
 # Separately versioned local assistant tooling; preserved outside app history.
 .claude/skills/flutter-claude-skills/
+
+# Local A1 stand safety net
+**/.recharge-emulator-stand/
+**/pubsub-debug.log

@@ -58,6 +58,16 @@ import { runReconfirmationDeadlineWorker } from './booking/reconfirmation_deadli
 // Preserve R0 while exposing only the explicitly approved, Emulator-only callables.
 // R1 platform composition is internal-only and intentionally has no transport export.
 export { r0ToolchainProbe } from './r0_toolchain_probe.js';
+import {
+  handleMediaBytes,
+  handleMediaCommand,
+  handleMediaQuery,
+  type MediaCaller,
+} from './media_entry.js';
+import { handleContentCommand, handleContentQuery, type ContentCaller } from './content_entry.js';
+import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
+import { deliverContentEffects } from './content_effects_entry.js';
+import { catalogFlagIds, contentFlagIds, mediaFlagIds } from './shared/feature_flags.js';
 
 const callableOptions = Object.freeze({
   region: 'europe-west1',
@@ -865,3 +875,150 @@ function toBookingQueryWireResult(
   if (queryType === 'listMyBookings') return { ...base, kind: 'succeeded', page: data };
   return { ...base, kind: 'succeeded', availability: data };
 }
+
+// Emulator-only Media entry (C1). Disabled unless the local `media.upload` flag is
+// on; the Session is validated by the same backend-time authority as Booking.
+export const mediaCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareMediaCaller(request);
+  return prepared.ok ? handleMediaCommand(prepared.caller, request.data) : prepared.result;
+});
+
+export const mediaQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareMediaCaller(request);
+  return prepared.ok ? handleMediaQuery(prepared.caller, request.data) : prepared.result;
+});
+
+export const uploadMediaBytesV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareMediaCaller(request);
+  return prepared.ok ? handleMediaBytes(prepared.caller, request.data) : prepared.result;
+});
+
+async function prepareMediaCaller(
+  request: CallableRequest<unknown>,
+): Promise<
+  | { readonly ok: true; readonly caller: MediaCaller }
+  | { readonly ok: false; readonly result: Readonly<Record<string, unknown>> }
+> {
+  const refuse = (code: string) => ({
+    ok: false as const,
+    result: { schemaVersion: 1, kind: 'rejected', code },
+  });
+  const access = prepareTransport(request);
+  if (!access.ok) return refuse('unauthenticated');
+  const now = systemServerClock.now();
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    now,
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return refuse('unauthenticated');
+  if (!(await access.composition.featureFlags.isEnabled(mediaFlagIds.upload))) {
+    return refuse('family_unavailable');
+  }
+  return {
+    ok: true,
+    caller: {
+      actor: { userId: decision.userId as never, sessionId: access.accessHint.sessionId as never },
+      firestore: access.firestore,
+    },
+  };
+}
+
+// Emulator-only Event authoring through Content (C3). Disabled unless the local
+// `content.event.authoring` flag is on. Owner commands and queries only: the
+// Content service re-checks Session, verified Creator, exact Page, Media
+// readiness and the C2 review on every call; dispositions are never accepted here.
+export const contentCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareContentCaller(request);
+  return prepared.ok ? handleContentCommand(prepared.caller, request.data) : prepared.result;
+});
+
+export const contentQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareContentCaller(request);
+  return prepared.ok ? handleContentQuery(prepared.caller, request.data) : prepared.result;
+});
+
+async function prepareContentCaller(
+  request: CallableRequest<unknown>,
+): Promise<
+  | { readonly ok: true; readonly caller: ContentCaller }
+  | { readonly ok: false; readonly result: Readonly<Record<string, unknown>> }
+> {
+  const refuse = (code: string) => ({
+    ok: false as const,
+    result: { schemaVersion: 1, kind: 'rejected', code },
+  });
+  const access = prepareTransport(request);
+  if (!access.ok) return refuse('unauthenticated');
+  const now = systemServerClock.now();
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    now,
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return refuse('unauthenticated');
+  if (!(await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring))) {
+    return refuse('type_disabled');
+  }
+  return {
+    ok: true,
+    caller: {
+      actor: { userId: decision.userId as never, sessionId: access.accessHint.sessionId as never },
+      firestore: access.firestore,
+    },
+  };
+}
+
+// Emulator-only Discover read over the local Catalog (E2). Disabled unless the
+// local `catalog.discover.read` flag is on; the Session is validated by the same
+// backend-time authority as Booking. Read-only: it never projects or delivers.
+export const discoverQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareDiscoverCaller(request);
+  return prepared.ok ? handleDiscoverQuery(prepared.caller, request.data) : prepared.result;
+});
+
+async function prepareDiscoverCaller(
+  request: CallableRequest<unknown>,
+): Promise<
+  | { readonly ok: true; readonly caller: DiscoverCaller }
+  | { readonly ok: false; readonly result: Readonly<Record<string, unknown>> }
+> {
+  const refuse = (code: string) => ({
+    ok: false as const,
+    result: { schemaVersion: 1, kind: 'rejected', code },
+  });
+  const access = prepareTransport(request);
+  if (!access.ok) return refuse('unauthenticated');
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    systemServerClock.now(),
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return refuse('unauthenticated');
+  if (!(await access.composition.featureFlags.isEnabled(catalogFlagIds.discoverRead))) {
+    return refuse('feature_disabled');
+  }
+  return { ok: true, caller: { firestore: access.firestore } };
+}
+
+// Emulator-only delivery of committed Content effects (E2). Every enabled
+// consumer (Catalog; Booking handoff from E2.0) runs from its own checkpoint, so
+// one failing never marks or blocks another. No retry: a failed consumer is
+// resumed by the next effect or by the stand command.
+export const consumeContentEffectV1 = onDocumentCreated(
+  {
+    document: 'contentEffects/{effectId}',
+    region: 'europe-west1',
+    retry: false,
+  },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    const outcomes = await deliverContentEffects(firestore, {
+      flags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+    });
+    for (const outcome of outcomes)
+      if (outcome.status === 'failed' || outcome.status === 'stopped')
+        logError('content_effect_consumer_incomplete', outcome);
+  },
+);

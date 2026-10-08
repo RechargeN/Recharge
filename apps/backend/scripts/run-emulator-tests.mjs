@@ -147,6 +147,16 @@ const expectedBoundedCallableExports = [
   "consumeEventBookingOutboxV1",
   "retryEventBookingProjectionDeliveriesV1",
   "listMyBookingsV1",
+  // C1: default-off, Emulator-only Media entry approved by the owner.
+  "mediaCommandV1",
+  "mediaQueryV1",
+  "uploadMediaBytesV1",
+  // C3: default-off, Emulator-only Event authoring through Content, approved by the owner.
+  "contentCommandV1",
+  "contentQueryV1",
+  // E2: default-off, Emulator-only Discover read and Content effect trigger.
+  "discoverQueryV1",
+  "consumeContentEffectV1",
 ].sort();
 if (
   JSON.stringify(boundedCallableExports) !==

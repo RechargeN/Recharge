@@ -7,6 +7,7 @@ import { activityMediaIds, validateActivityBody } from './type_rules/activity_ru
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
 import { eventMediaIds, validateEventBody } from './type_rules/event_rules.js';
+import { eventTransitionIssues } from './event_internal_registration.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
@@ -71,6 +72,11 @@ export interface ContentTypeRegistryEntry {
   readonly validate?: ContentTypeRule;
   /** Media ids the body references; Media readiness is checked for exactly these. */
   readonly mediaIds?: (body: ContentBody) => readonly string[];
+  /**
+   * Transitions a published object may not make (issue codes; empty = allowed),
+   * checked where the publication pointer switches, against the revision it held.
+   */
+  readonly validateTransition?: (from: ContentBody | null, to: ContentBody) => readonly string[];
 }
 
 const capabilities: Readonly<Record<ContentAction, string>> = Object.freeze({
@@ -92,6 +98,7 @@ interface EntryInput {
   readonly rules?: {
     readonly validate: ContentTypeRule;
     readonly mediaIds: (body: ContentBody) => readonly string[];
+    readonly validateTransition?: ContentTypeRegistryEntry['validateTransition'];
   };
   readonly unavailable?: {
     readonly reason: ContentTypeUnavailableReason;
@@ -129,7 +136,13 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
     availability: Object.freeze(availability),
     ...(input.rules === undefined
       ? {}
-      : { validate: input.rules.validate, mediaIds: input.rules.mediaIds }),
+      : {
+          validate: input.rules.validate,
+          mediaIds: input.rules.mediaIds,
+          ...(input.rules.validateTransition === undefined
+            ? {}
+            : { validateTransition: input.rules.validateTransition }),
+        }),
   });
 }
 
@@ -142,7 +155,11 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
     discoverFamily: 'Event',
     sourceAuthority: 'Event classification v2.2.3, EVT-CRT-01 (C0 + schedule-C1 subset)',
     sourceResolver: 'inline_body',
-    rules: { validate: validateEventBody, mediaIds: eventMediaIds },
+    rules: {
+      validate: validateEventBody,
+      mediaIds: eventMediaIds,
+      validateTransition: eventTransitionIssues,
+    },
   }),
   entry('activity', {
     discoverFamily: 'Activity',
