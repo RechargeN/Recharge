@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.114**
+- Version: **2.4.115**
 - Date: **2026-10-08**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -59,7 +59,22 @@ BCK13-OD-01, OD-04, OD-05, OD-06, OD-08 and OD-10 are not closed by the local
 contract. The former "F1 — Booking hide fence" planning slice is renamed
 `BOOKING-HIDE-FENCE-01` and keeps its priority before real Booking use.
 
+### Local F2 Booking actions amendment (2026-10-08)
+
+F2 connects the existing Booking reconfirmation to the mobile test entry with
+a journal, typed refusal reasons, seat selection and explicit Refresh, and
+fixes Create so a moved one-time Event keeps its occurrence (and with it the
+Booking id and allocation). Deadlines are tested with one controlled server
+clock, races by stored invariants, and two local clients run the organizer
+and participant paths. Normative scope, D05/D07 boundaries and exact file
+map: [F2 amendment](BOOKING_ACTIONS_F2_AMENDMENT.md). Local 2A/2B do not
+close D05/D07; one-time occurrence and whole-Event cancellation have no
+mobile path.
+
 ## 0. Changelog
+
+**v2.4.115.** Records the owner-accepted local F2 Booking actions amendment.
+Environment, production and BCK-09/BCK-13 Review boundaries remain unchanged.
 
 **v2.4.114.** Records the owner-accepted local F1 Notifications amendment and
 the rename of the hide-fence planning slice to `BOOKING-HIDE-FENCE-01`.

@@ -148,6 +148,153 @@ void main() {
     expect(c.state.booking, isNull);
     expect(store.pending, isNull);
   });
+
+  EventBookingView required({int revision = 2, int material = 8}) =>
+      EventBookingView(
+        id: 'b-1',
+        occurrenceId: 'occ-1',
+        state: EventBookingState.confirmed,
+        participantUnits: 1,
+        revision: revision,
+        reconfirmationState: EventReconfirmationState.required,
+        reconfirmationRequiredForRevision: material,
+        reconfirmationDeadlineUtc: DateTime.utc(2026, 11, 12, 17),
+      );
+
+  test(
+    'F2: reconfirm is journaled with the exact revisions and replays its key',
+    () async {
+      gateway.active = required();
+      final c = controller();
+      await c.load();
+      expect(c.state.canReconfirm, isTrue);
+      expect(c.state.canCancel, isTrue, reason: 'cancel stays available');
+      gateway.next.add(
+        const EventBookingResult(EventBookingOutcome.unknownOutcome),
+      );
+
+      await c.reconfirm();
+      final EventBookingOperation sent = gateway.executed.single;
+      expect(sent.kind, EventBookingOperationKind.reconfirm);
+      expect(sent.bookingId, 'b-1');
+      expect(sent.expectedBookingRevision, 2);
+      expect(sent.materialRevision, 8);
+      expect(store.pending?.toJson()['materialRevision'], 8);
+      expect(c.state.canReconfirm, isFalse, reason: 'no second intent');
+
+      // A restart replays the same intent; the server confirms it once.
+      final restarted = controller();
+      await restarted.load();
+      expect(gateway.executed.last.idempotencyKey, sent.idempotencyKey);
+      expect(
+        restarted.state.booking?.reconfirmationState,
+        EventReconfirmationState.confirmed,
+      );
+      expect(store.pending, isNull);
+    },
+  );
+
+  test(
+    'F2: typed refusals become specific messages; unknown stays general',
+    () async {
+      final c = controller();
+      await c.load();
+      for (final (String code, String text) in <(String, String)>[
+        ('sold_out', 'This event is sold out.'),
+        (
+          'active_booking_limit_reached',
+          'You have reached the limit of active bookings.',
+        ),
+        ('registration_closed', 'Registration is closed.'),
+        (
+          'reconfirmation_deadline_passed',
+          'The confirmation deadline has passed.',
+        ),
+        (
+          'material_revision_mismatch',
+          'The event changed again. Refresh and confirm the new time.',
+        ),
+        ('something_new', 'The booking was not accepted.'),
+      ]) {
+        gateway.next.add(
+          EventBookingResult(EventBookingOutcome.rejected, refusalCode: code),
+        );
+        await c.book();
+        expect(c.state.message, text);
+        expect(store.pending, isNull);
+        await c.retry();
+      }
+    },
+  );
+
+  test(
+    'F2: too many attempts keeps the saved intent and names the wait',
+    () async {
+      final c = controller();
+      await c.load();
+      gateway.next.add(
+        const EventBookingResult(
+          EventBookingOutcome.rateLimited,
+          refusalCode: 'rate_limited',
+          retryAfter: Duration(seconds: 30),
+        ),
+      );
+      await c.book();
+      expect(c.state.message, 'Too many attempts. Try again in 30 s.');
+      expect(store.pending, isNotNull);
+      await c.retry();
+      expect(
+        gateway.executed.map((o) => o.idempotencyKey).toSet(),
+        hasLength(1),
+      );
+    },
+  );
+
+  test(
+    'F2: seats stay within the terms limit and are sent with the intent',
+    () async {
+      final c = EventBookingController(
+        gateway: gateway,
+        store: store,
+        occurrenceId: 'occ-1',
+        inventoryPoolId: 'pool',
+        channel: 'onsite',
+        eventRevision: 1,
+        maxParticipantUnits: 3,
+      );
+      await c.load();
+      c.selectSeats(5);
+      expect(c.state.seats, 3);
+      c.selectSeats(0);
+      expect(c.state.seats, 1);
+      c.selectSeats(2);
+      await c.book();
+      expect(gateway.executed.single.participantUnits, 2);
+    },
+  );
+
+  test('F2: refresh explains a Booking ended by a missed deadline', () async {
+    gateway.active = required();
+    final c = controller();
+    await c.load();
+    gateway.active = null;
+    gateway.ended = EventBookingView(
+      id: 'b-1',
+      occurrenceId: 'occ-1',
+      state: EventBookingState.cancelled,
+      participantUnits: 1,
+      revision: 3,
+      reconfirmationState: EventReconfirmationState.missed,
+      terminalReason: 'missedReconfirmation',
+    );
+    await c.refresh();
+    expect(c.state.booking, isNull);
+    expect(
+      c.state.message,
+      'Your booking was released because attendance was not confirmed in time.',
+    );
+    expect(c.state.canBook, isTrue);
+  });
 }
 
 EventBookingView _view(EventBookingState state) => EventBookingView(
@@ -160,6 +307,7 @@ EventBookingView _view(EventBookingState state) => EventBookingView(
 
 final class _Gateway implements EventBookingGateway {
   EventBookingView? active;
+  EventBookingView? ended;
   final List<EventBookingOperation> executed = <EventBookingOperation>[];
   final List<EventBookingResult> next = <EventBookingResult>[];
   void Function()? beforeExecute;
@@ -182,11 +330,24 @@ final class _Gateway implements EventBookingGateway {
     executed.add(operation);
     await Future<void>.delayed(Duration.zero);
     if (next.isNotEmpty) return next.removeAt(0);
-    active = operation.kind == EventBookingOperationKind.create
-        ? _view(EventBookingState.confirmed)
-        : null;
+    active = switch (operation.kind) {
+      EventBookingOperationKind.create => _view(EventBookingState.confirmed),
+      EventBookingOperationKind.cancel => null,
+      EventBookingOperationKind.reconfirm => EventBookingView(
+        id: 'b-1',
+        occurrenceId: 'occ-1',
+        state: EventBookingState.confirmed,
+        participantUnits: 1,
+        revision: (operation.expectedBookingRevision ?? 1) + 1,
+        reconfirmationState: EventReconfirmationState.confirmed,
+      ),
+    };
     return EventBookingResult(EventBookingOutcome.succeeded, booking: active);
   }
+
+  @override
+  Future<EventBookingResult> booking(String bookingId) async =>
+      EventBookingResult(EventBookingOutcome.succeeded, booking: ended);
 }
 
 final class _Store implements EventBookingOperationStore {

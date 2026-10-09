@@ -633,3 +633,26 @@ SMS, device registration, scheduler or cloud.
 Evidence limits: local Emulator and PC host only; template wording is
 unreviewed fixture text; numbers are test-only; no physical device, LAN or
 cloud claim.
+
+## F2 user Booking actions (Emulator only)
+
+Scope and contract: `docs/product/BOOKING_ACTIONS_F2_AMENDMENT.md`
+(owner-accepted 2026-10-08). Booking `src/` is unchanged.
+
+- Mobile test entry: reconfirmation (journaled, exact Booking and material
+  revisions), typed refusal reasons, rate limit with retry-after, seats within
+  Booking terms, explicit Refresh; Create keeps a one-time occurrence id when
+  the Event is moved.
+- Stand: `stand-seed.mjs booking-actions flags on|off reconfirm|deadline-worker
+  | deadline | invariants`. The seed keeps reconfirmation and the deadline
+  worker off; the Emulator never runs schedules, `deadline` runs the worker
+  once with the real stand time.
+- Tests: `booking_reconfirmation_deadline_clock` (before/at/after the deadline
+  with one shared server clock) and `booking_action_races` (final invariants).
+- Gate: `node scripts/stand-f2-gate.mjs --yes` (organizer and participant
+  `flutter test` clients, `test/backend_local/f2_client_test.dart`, staff
+  approval at rendezvous points, reconciliation and invariants).
+
+Limits: local 2A/2B only; D05/D07 deadline window, under-24 h rule, urgent and
+non-material notices stay open; no mobile path to cancel a one-time occurrence
+or a whole Event; no device, LAN or cloud claim.

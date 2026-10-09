@@ -49,6 +49,13 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'booking-actions') {
+    // F2: loaded only for this command, like the F1 Notifications commands.
+    const { runBookingActions } = await import('./stand_booking_actions.js');
+    process.stdout.write(`${JSON.stringify(await runBookingActions(firestore, rest))}
+`);
+    return;
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

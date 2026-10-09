@@ -88,5 +88,7 @@ Future<EventBookingController?> createEventBookingControllerFor({
     inventoryPoolId: terms.inventoryPoolId,
     channel: terms.channel,
     eventRevision: terms.eventRevision,
+    // F2: the party limit from Booking terms bounds the seat selector.
+    maxParticipantUnits: terms.maxParticipantUnits,
   );
 }

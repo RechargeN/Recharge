@@ -29,11 +29,16 @@ final class BackendFailure {
     required this.code,
     required this.retryable,
     this.retryAfter,
+    this.reason,
   });
 
   final BackendFailureCode code;
   final bool retryable;
   final Duration? retryAfter;
+
+  /// The server's own typed refusal code (for example `sold_out`), kept so the
+  /// UI can explain a refusal that [code] only classifies.
+  final String? reason;
 }
 
 sealed class BackendResult<T> {

@@ -31,6 +31,7 @@ const commands = new Set([
   "booking-deliver",
   "creator-fixture",
   "notifications",
+  "booking-actions",
 ]);
 
 export function standEnvironment(base) {

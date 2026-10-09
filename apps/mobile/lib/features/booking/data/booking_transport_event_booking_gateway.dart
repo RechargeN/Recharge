@@ -73,6 +73,52 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
   }
 
   @override
+  Future<EventBookingResult> booking(String bookingId) async {
+    _gate.assertAllowed();
+    final Map<String, Object?> raw;
+    try {
+      raw = await _port.invoke('getMyBookingV1', <String, Object?>{
+        'schemaVersion': 1,
+        'queryType': 'getMyBooking',
+        'requestId': _uuid.v4(),
+        'payload': <String, Object?>{'bookingId': bookingId},
+      });
+    } on BookingCallableFailure catch (error) {
+      return EventBookingResult(_outcomeForFailure(error));
+    }
+    if (raw['kind'] == 'notFound') {
+      return const EventBookingResult(EventBookingOutcome.succeeded);
+    }
+    if (raw['kind'] != 'found' || raw['booking'] is! Map) {
+      final error = raw['error'];
+      final Object? code = error is Map ? error['code'] : null;
+      return EventBookingResult(
+        code == 'session_revoked' ||
+                code == 'session_expired' ||
+                code == 'unauthenticated'
+            ? EventBookingOutcome.unauthenticated
+            : EventBookingOutcome.rejected,
+        refusalCode: code is String ? code : null,
+      );
+    }
+    try {
+      return EventBookingResult(
+        EventBookingOutcome.succeeded,
+        booking: _view(
+          BookingDto.fromJson(
+            Map<String, Object?>.from(raw['booking']! as Map),
+          ),
+        ),
+      );
+    } on Object {
+      return const EventBookingResult(
+        EventBookingOutcome.rejected,
+        refusalCode: 'contract_invalid',
+      );
+    }
+  }
+
+  @override
   Future<EventBookingTermsResult> termsFor({
     required String eventId,
     required String occurrenceId,
@@ -184,15 +230,23 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
             'reasonCode': 'user_cancelled',
           },
         );
-        reconciliation = BookingReconciliationRequest(
-          callableName: 'getMyBookingV1',
-          query: <String, Object?>{
-            'schemaVersion': 1,
-            'queryType': 'getMyBooking',
-            'requestId': _uuid.v4(),
-            'payload': <String, Object?>{'bookingId': operation.bookingId},
+        reconciliation = _reconciliation(operation.bookingId);
+      case EventBookingOperationKind.reconfirm:
+        // F2: the exact Booking revision and Event material revision the user
+        // confirms; a later reschedule makes this answer stale on the server.
+        callable = 'reconfirmInternalBookingV1';
+        command = BookingCommandDto(
+          schemaVersion: bookingContractSchemaVersion,
+          commandType: BookingCommandType.reconfirmBooking,
+          requestId: _uuid.v4(),
+          idempotencyKey: operation.idempotencyKey,
+          expectedBookingRevision: operation.expectedBookingRevision,
+          payload: <String, Object?>{
+            'bookingId': operation.bookingId,
+            'materialRevision': operation.materialRevision,
           },
         );
+        reconciliation = _reconciliation(operation.bookingId);
     }
     final BackendResult<BookingResultDto> result;
     try {
@@ -216,15 +270,36 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
       BackendCancelled<BookingResultDto>() => const EventBookingResult(
         EventBookingOutcome.unknownOutcome,
       ),
-      BackendRejected<BookingResultDto>(:final failure) => EventBookingResult(
-        switch (failure.code) {
-          BackendFailureCode.unavailable => EventBookingOutcome.offline,
-          BackendFailureCode.unauthenticated =>
-            EventBookingOutcome.unauthenticated,
-          _ => EventBookingOutcome.rejected,
-        },
-      ),
+      BackendRejected<BookingResultDto>(:final failure) => _rejected(failure),
     };
+  }
+
+  BookingReconciliationRequest _reconciliation(String? bookingId) =>
+      BookingReconciliationRequest(
+        callableName: 'getMyBookingV1',
+        query: <String, Object?>{
+          'schemaVersion': 1,
+          'queryType': 'getMyBooking',
+          'requestId': _uuid.v4(),
+          'payload': <String, Object?>{'bookingId': bookingId},
+        },
+      );
+
+  /// A refusal keeps Booking's own reason so the UI can explain it; too many
+  /// attempts is not "offline" and carries its retry-after.
+  EventBookingResult _rejected(BackendFailure failure) {
+    if (failure.reason == 'rate_limited') {
+      return EventBookingResult(
+        EventBookingOutcome.rateLimited,
+        refusalCode: 'rate_limited',
+        retryAfter: failure.retryAfter,
+      );
+    }
+    return EventBookingResult(switch (failure.code) {
+      BackendFailureCode.unavailable => EventBookingOutcome.offline,
+      BackendFailureCode.unauthenticated => EventBookingOutcome.unauthenticated,
+      _ => EventBookingOutcome.rejected,
+    }, refusalCode: failure.reason);
   }
 
   EventBookingOutcome _outcomeForFailure(BookingCallableFailure error) {
@@ -242,5 +317,11 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
     state: EventBookingState.values.byName(dto.state.name),
     participantUnits: dto.participantUnits,
     revision: dto.revision,
+    reconfirmationState: EventReconfirmationState.values.byName(
+      dto.reconfirmationState.name,
+    ),
+    reconfirmationRequiredForRevision: dto.reconfirmationRequiredForRevision,
+    reconfirmationDeadlineUtc: dto.reconfirmationDeadlineUtc,
+    terminalReason: dto.terminalReason?.name,
   );
 }

@@ -2258,3 +2258,28 @@ Owner-accepted 2026-10-08 together with
      a full outbox period after its declared relevance deadline.
 184. Booking never reads or writes Notifications state; an inbox outage cannot
      block a Booking command, the deadline worker or a privacy erasure.
+
+## 37. F2 local amendment — user Booking actions (Emulator only)
+
+Owner-accepted 2026-10-08 together with
+[BOOKING_ACTIONS_F2_AMENDMENT.md](BOOKING_ACTIONS_F2_AMENDMENT.md). Booking
+`src/` is unchanged; the amendment proves and connects existing behaviour.
+
+185. A reschedule keeps the occurrence and Booking ids (D07): a one-time Event
+     moved through Create keeps its occurrence id, so Booking keeps the
+     Booking id and allocation and marks it `reconfirmation required`.
+     Multi-date dates remain identities; removing a date cancels it.
+186. Hide/withdraw (`EventUnpublished`) and occurrence cancellation are
+     different: only the second cancels existing Bookings. One-time
+     occurrence cancellation and whole-Event cancellation have no mobile path.
+187. Local `2A`: at or after the deadline (= rescheduled start) reconfirmation
+     is refused and the seat is not released. Local `2B` (default-off worker)
+     releases after the deadline; it is mechanism evidence only and does not
+     satisfy D05 (auto-release after proven delivery) or D07 (deadline at
+     least 12 h after notice and 6 h before start, under-24 h rule, urgent and
+     non-material notices), which stay open.
+188. Deadline boundaries are tested with one controlled server clock shared by
+     commands, lifecycle, worker and Notifications consumer; races are judged
+     by stored invariants (allocation/usage released at most once, an old
+     material revision never confirms a newer one, one outbox record and at
+     most one inbox record per Booking revision).

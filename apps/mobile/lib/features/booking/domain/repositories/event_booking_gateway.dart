@@ -2,6 +2,15 @@
 /// the server last confirmed to this device.
 enum EventBookingState { pending, confirmed, cancelled, expired, waitlisted }
 
+/// F2: reconfirmation after a material reschedule, as Booking reports it.
+enum EventReconfirmationState {
+  notRequired,
+  notOpen,
+  required,
+  confirmed,
+  missed,
+}
+
 final class EventBookingView {
   const EventBookingView({
     required this.id,
@@ -9,6 +18,10 @@ final class EventBookingView {
     required this.state,
     required this.participantUnits,
     required this.revision,
+    this.reconfirmationState = EventReconfirmationState.notRequired,
+    this.reconfirmationRequiredForRevision,
+    this.reconfirmationDeadlineUtc,
+    this.terminalReason,
   });
 
   final String id;
@@ -16,6 +29,17 @@ final class EventBookingView {
   final EventBookingState state;
   final int participantUnits;
   final int revision;
+  final EventReconfirmationState reconfirmationState;
+
+  /// The Event material revision a reconfirmation must name.
+  final int? reconfirmationRequiredForRevision;
+  final DateTime? reconfirmationDeadlineUtc;
+
+  /// Why a cancelled Booking ended (for example `missedReconfirmation`).
+  final String? terminalReason;
+
+  bool get reconfirmationRequired =>
+      isActive && reconfirmationState == EventReconfirmationState.required;
 
   bool get isActive =>
       state == EventBookingState.pending ||
@@ -23,7 +47,7 @@ final class EventBookingView {
       state == EventBookingState.waitlisted;
 }
 
-enum EventBookingOperationKind { create, cancel }
+enum EventBookingOperationKind { create, cancel, reconfirm }
 
 /// A user intent that survives restarts. The idempotency key is created and
 /// persisted before the first dispatch, so every retry, replay and recovery of
@@ -39,6 +63,7 @@ final class EventBookingOperation {
     this.eventRevision,
     this.bookingId,
     this.expectedBookingRevision,
+    this.materialRevision,
   });
 
   factory EventBookingOperation.fromJson(Map<String, Object?> json) =>
@@ -52,6 +77,7 @@ final class EventBookingOperation {
         eventRevision: json['eventRevision'] as int?,
         bookingId: json['bookingId'] as String?,
         expectedBookingRevision: json['expectedBookingRevision'] as int?,
+        materialRevision: json['materialRevision'] as int?,
       );
 
   final EventBookingOperationKind kind;
@@ -64,6 +90,9 @@ final class EventBookingOperation {
   final String? bookingId;
   final int? expectedBookingRevision;
 
+  /// F2: the exact Event material revision a reconfirmation answers.
+  final int? materialRevision;
+
   Map<String, Object?> toJson() => <String, Object?>{
     'kind': kind.name,
     'idempotencyKey': idempotencyKey,
@@ -75,6 +104,7 @@ final class EventBookingOperation {
     if (bookingId != null) 'bookingId': bookingId,
     if (expectedBookingRevision != null)
       'expectedBookingRevision': expectedBookingRevision,
+    if (materialRevision != null) 'materialRevision': materialRevision,
   };
 }
 
@@ -90,13 +120,26 @@ enum EventBookingOutcome {
   offline,
   unauthenticated,
   rejected,
+
+  /// F2: refused before execution because of too many attempts; the same
+  /// intent may be sent again after [EventBookingResult.retryAfter].
+  rateLimited,
 }
 
 final class EventBookingResult {
-  const EventBookingResult(this.outcome, {this.booking});
+  const EventBookingResult(
+    this.outcome, {
+    this.booking,
+    this.refusalCode,
+    this.retryAfter,
+  });
 
   final EventBookingOutcome outcome;
   final EventBookingView? booking;
+
+  /// F2: Booking's typed refusal (for example `sold_out`) when rejected.
+  final String? refusalCode;
+  final Duration? retryAfter;
 }
 
 /// E2.0: the booking terms of one exact occurrence, as Booking holds them.
@@ -157,6 +200,10 @@ abstract interface class EventBookingGateway {
 
   /// Sends (or replays) [operation]; replay with the same key is idempotent.
   Future<EventBookingResult> execute(EventBookingOperation operation);
+
+  /// F2: one of the user's Bookings by id, active or not, read from the server
+  /// (to explain why a Booking ended).
+  Future<EventBookingResult> booking(String bookingId);
 }
 
 abstract interface class EventBookingOperationStore {

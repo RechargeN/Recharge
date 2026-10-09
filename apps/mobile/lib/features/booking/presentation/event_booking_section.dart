@@ -82,15 +82,57 @@ class EventBookingSection extends StatelessWidget {
           )
         else if (!busy && state.phase == EventBookingPhase.ready)
           const Text('You have no booking for this event.'),
+        if (booking != null && booking.reconfirmationRequired)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _deadlineText(booking.reconfirmationDeadlineUtc),
+              key: const Key('event-booking-reconfirm-required'),
+            ),
+          ),
+        if (state.canBook && state.maxSeats > 1)
+          Row(
+            children: <Widget>[
+              IconButton(
+                key: const Key('event-booking-seats-less'),
+                onPressed: state.seats > 1
+                    ? () => controller.selectSeats(state.seats - 1)
+                    : null,
+                icon: const Icon(Icons.remove),
+              ),
+              Text(
+                '${state.seats} of ${state.maxSeats} seat(s)',
+                key: const Key('event-booking-seats'),
+              ),
+              IconButton(
+                key: const Key('event-booking-seats-more'),
+                onPressed: state.seats < state.maxSeats
+                    ? () => controller.selectSeats(state.seats + 1)
+                    : null,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: <Widget>[
             if (state.canBook || busy)
               FilledButton(
                 key: const Key('event-booking-create'),
-                onPressed: state.canBook ? () => controller.book() : null,
-                child: const Text('Book 1 seat'),
+                onPressed: state.canBook ? controller.book : null,
+                child: Text(
+                  state.seats == 1
+                      ? 'Book 1 seat'
+                      : 'Book ${state.seats} seats',
+                ),
+              ),
+            if (state.canReconfirm)
+              FilledButton(
+                key: const Key('event-booking-reconfirm'),
+                onPressed: controller.reconfirm,
+                child: const Text('Confirm attendance'),
               ),
             if (state.canCancel)
               OutlinedButton(
@@ -108,9 +150,26 @@ class EventBookingSection extends StatelessWidget {
                       : 'Try again',
                 ),
               ),
+            if (state.canRefresh)
+              TextButton(
+                key: const Key('event-booking-refresh'),
+                onPressed: controller.refresh,
+                child: const Text('Refresh'),
+              ),
           ],
         ),
       ],
     );
+  }
+
+  static String _deadlineText(DateTime? deadlineUtc) {
+    if (deadlineUtc == null) {
+      return 'The event changed. Please confirm your attendance.';
+    }
+    final DateTime local = deadlineUtc.toLocal();
+    String two(int value) => value.toString().padLeft(2, '0');
+    return 'The event changed. Confirm your attendance by '
+        '${local.year}-${two(local.month)}-${two(local.day)} '
+        '${two(local.hour)}:${two(local.minute)}.';
   }
 }

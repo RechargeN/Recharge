@@ -403,6 +403,7 @@ final class BookingCallableAdapter {
             code: _mapError(error.code),
             retryable: error.retryable,
             retryAfter: _retryAfter(error.details['retryAfterSeconds']),
+            reason: error.code.wireValue,
           ),
         );
     }
@@ -561,6 +562,8 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'recoverIdentitySessionsV1',
   'createInternalBookingV1',
   'cancelInternalBookingV1',
+  // F2: reconfirmation after a material reschedule (same Session and journal).
+  'reconfirmInternalBookingV1',
   'getMyBookingV1',
   'listMyBookingsV1',
   'getEventAvailabilityV1',

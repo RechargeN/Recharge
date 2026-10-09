@@ -331,6 +331,11 @@ final class FaultClient extends http.BaseClient {
     final isCreate = request.url.path.endsWith('/createInternalBookingV1');
     if (severed) throw const SocketException('simulated: no connection');
     if (isCreate) createCommands += 1;
+    // F2: every request on a fresh connection. The stand command before a
+    // cancel can idle ~5 s, Node's keep-alive limit; a reused socket closed by
+    // the server would turn a real cancel into an unknown outcome. The lost
+    // response and offline checks below are unchanged.
+    request.persistentConnection = false;
     final response = await _inner.send(request);
     if (isCreate && dropNextCreateResponse) {
       dropNextCreateResponse = false;
