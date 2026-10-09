@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto';
 
+import { isEntityId } from '../../../shared/ids.js';
+
 import type {
+  ObjectBytesPort,
+  ObjectRead,
   ObjectStat,
   ObjectStorePort,
   RemovalResult,
@@ -17,7 +21,7 @@ export interface StorageFileLike {
     [{ readonly generation?: string | number; readonly size?: string | number }]
   >;
   download(): Promise<[Buffer]>;
-  save(data: Buffer, options?: { resumable?: boolean }): Promise<void>;
+  save(data: Buffer, options?: { resumable?: boolean; contentType?: string }): Promise<void>;
   delete(options?: { ignoreNotFound?: boolean }): Promise<unknown>;
 }
 
@@ -67,13 +71,19 @@ export function detectMediaType(bytes: Buffer): string {
  * never taken from the caller. EMULATOR-ONLY: it proves how the service reacts
  * to real bytes in a local Storage, not production Storage, IAM or generations.
  */
-export class StorageEmulatorObjectStore implements ObjectStorePort {
+export class StorageEmulatorObjectStore implements ObjectStorePort, ObjectBytesPort {
   constructor(
     private readonly bucket: StorageBucketLike,
     environment: NodeJS.ProcessEnv = process.env,
     private readonly prefix = 'media-source/',
+    private readonly variantPrefix = 'media-variant/',
   ) {
     assertStorageEmulatorContext(environment);
+  }
+
+  private variantFile(variantId: string): StorageFileLike {
+    if (!isEntityId(variantId)) throw new StorageEmulatorContextError('variant_id_invalid');
+    return this.bucket.file(`${this.variantPrefix}${variantId}`);
   }
 
   private file(objectKeyHandle: string): StorageFileLike {
@@ -114,8 +124,43 @@ export class StorageEmulatorObjectStore implements ObjectStorePort {
     }
   }
 
-  removeVariant(): Promise<RemovalResult> {
-    // The fake processor stores no variant objects; nothing is left to remove.
-    return Promise.resolve('absent');
+  /** D1: the source bytes, never more than `maxBytes` (the size is checked first). */
+  async read(objectKeyHandle: string, maxBytes: number): Promise<ObjectRead> {
+    const file = this.file(objectKeyHandle);
+    const [exists] = await file.exists();
+    if (!exists) return { kind: 'absent' };
+    const [metadata] = await file.getMetadata();
+    if (Number(metadata.size ?? Number.POSITIVE_INFINITY) > maxBytes) return { kind: 'too_large' };
+    const [bytes] = await file.download();
+    if (bytes.length > maxBytes) return { kind: 'too_large' };
+    return { kind: 'complete', providerGeneration: String(metadata.generation ?? ''), bytes };
+  }
+
+  /** D1: a processed variant under its own id; the generation comes from Storage. */
+  async writeVariant(
+    variantId: string,
+    bytes: Buffer,
+    contentType: string,
+  ): Promise<{ readonly providerGeneration: string }> {
+    const file = this.variantFile(variantId);
+    await file.save(bytes, { resumable: false, contentType });
+    const [metadata] = await file.getMetadata();
+    const providerGeneration = String(metadata.generation ?? '');
+    if (providerGeneration === '')
+      throw new StorageEmulatorContextError('variant_generation_missing');
+    return { providerGeneration };
+  }
+
+  async removeVariant(variantId: string): Promise<RemovalResult> {
+    // With the fakes no variant object is ever written, so this reports `absent`.
+    try {
+      const file = this.variantFile(variantId);
+      const [exists] = await file.exists();
+      if (!exists) return 'absent';
+      await file.delete({ ignoreNotFound: true });
+      return 'removed';
+    } catch {
+      return 'failed';
+    }
   }
 }

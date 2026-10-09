@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "amendment": "docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md",
+  "mode": "L1",
+  "budgetBytes": 300000000,
+  "artifacts": {
+    "node": {
+      "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-win-x64.zip",
+      "size": 35683585,
+      "sha256": "1177b4137ba5adaa56354ae40f1080c7450e8ae09cecb47da459d1c52ac99f97",
+      "license": "MIT; bundled npm Artistic-2.0",
+      "unpack": {
+        "maxBytes": 250000000,
+        "maxEntries": 6000
+      },
+      "directory": "node-v22.23.2-win-x64",
+      "nodeExeSha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4",
+      "npmVersion": "10.9.8"
+    },
+    "clamav": {
+      "url": "https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.4/clamav-1.5.4.win.x64.zip",
+      "size": 225774978,
+      "sha256": "0d9e0228b2674137ea1a2853566c98a0278ad52ab2582c3d6dbd75373848c395",
+      "license": "GPL-2.0 with third-party COPYING files",
+      "unpack": {
+        "maxBytes": 1000000000,
+        "maxEntries": 5000
+      },
+      "directory": "clamav-1.5.4"
+    },
+    "clamavSignature": {
+      "url": "https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.4/clamav-1.5.4.win.x64.zip.sig",
+      "size": 801,
+      "sha256": "42189dd43040cd5fe4ba71a963f8d7a402b6cd2284099b653f42ca73f4055f50"
+    },
+    "talosKey": {
+      "url": "https://raw.githubusercontent.com/Cisco-Talos/clamav-documentation/ef67310292e305cb5b86e807095a85c916621b28/src/manual/cisco-talos.gpg",
+      "size": 3858,
+      "gitBlob": "55837de36413784018702116365d2f061294e7db"
+    }
+  },
+  "npm": [
+    {
+      "name": "sharp",
+      "version": "0.35.5",
+      "resolved": "https://registry.npmjs.org/sharp/-/sharp-0.35.5.tgz",
+      "integrity": "sha512-Ywn4OnzGukp7CDMrp08RQ50YKmuwG47brZgIVPTvBaaAfQlRlygrRqSrxdCiL9M+LlzLBiJ68IR1QqvzHyjC7g==",
+      "license": "Apache-2.0",
+      "unpackedBytes": 962168,
+      "maxTarballBytes": 1020536,
+      "tarballBytes": 214749,
+      "tarballSha256": "3b6bbbe6b308f5c383938ca4a31926cd5d79c4651ed8c5fda16a97da2014a9ac",
+      "notices": ["LICENSE"]
+    },
+    {
+      "name": "@img/sharp-win32-x64",
+      "version": "0.35.5",
+      "resolved": "https://registry.npmjs.org/@img/sharp-win32-x64/-/sharp-win32-x64-0.35.5.tgz",
+      "integrity": "sha512-x76eH0vEiHlcMQu8Y8IenntaACtddpT6W0wmXtWrnKcnKI7ME5DdgqhAD6SEWOEl1v2zDvkZDhFA9KnURwpfqg==",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later",
+      "unpackedBytes": 19812379,
+      "maxTarballBytes": 19830811,
+      "tarballBytes": 8575353,
+      "tarballSha256": "16a804181ddd258ca6fe7079b2faa0c0356654c9db3d93ab0a80ec5e5161c3d4",
+      "notices": ["LICENSE"]
+    },
+    {
+      "name": "@img/colour",
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/@img/colour/-/colour-1.1.0.tgz",
+      "integrity": "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==",
+      "license": "MIT",
+      "unpackedBytes": 73264,
+      "maxTarballBytes": 89648,
+      "tarballBytes": 17410,
+      "tarballSha256": "6c2df3ac33d4b8647191ad8942a579e6004be00c25846677eab85f04702d85b1",
+      "notices": ["LICENSE.md"]
+    },
+    {
+      "name": "detect-libc",
+      "version": "2.1.2",
+      "resolved": "https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz",
+      "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
+      "license": "Apache-2.0",
+      "unpackedBytes": 26437,
+      "maxTarballBytes": 44869,
+      "tarballBytes": 7776,
+      "tarballSha256": "270dec0fc06cff86481da8af2dd8f18dee6b602790b14ef0e1c2c18d7da39427",
+      "notices": ["LICENSE"]
+    },
+    {
+      "name": "@img/sharp-wasm32",
+      "version": "0.35.5",
+      "resolved": "https://registry.npmjs.org/@img/sharp-wasm32/-/sharp-wasm32-0.35.5.tgz",
+      "integrity": "sha512-Ptsga1su4tQx+LLF1ECS9U6nz5kmrXKo6XVbtR48Ke3ZRxxgaWBu7IDtEe1quo8hiupwm6WFqxVlXaSf7IINGQ==",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
+      "unpackedBytes": 9325870,
+      "maxTarballBytes": 9343278,
+      "tarballBytes": 3646133,
+      "tarballSha256": "c68abdf53e1ad2d7b27b53385a3862e16d4bde02ce6d121892ee36f0bfe5bb38",
+      "notices": ["LICENSE"]
+    },
+    {
+      "name": "@emnapi/runtime",
+      "version": "1.11.3",
+      "resolved": "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.11.3.tgz",
+      "integrity": "sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==",
+      "license": "MIT",
+      "unpackedBytes": 436901,
+      "maxTarballBytes": 464549,
+      "tarballBytes": 68501,
+      "tarballSha256": "e6eb8913a08b551436d65f9a5cfbdcc8006f58e6798226d24e695c25679b5e49",
+      "notices": ["LICENSE"]
+    }
+  ],
+  "databases": {
+    "stand": {
+      "file": "recharge-stand.ndb",
+      "signature": "Recharge.Test.Marker",
+      "sha256": "a2149c9d524ec5effbb479435562a68849c2aca3af2351e85aef00b77bc8e04a"
+    },
+    "official": null
+  },
+  "verified": {
+    "at": "2026-10-09T07:43:37.774Z",
+    "downloadedBytes": 278484001,
+    "node": {
+      "nodeVersion": "v22.23.2",
+      "npmVersion": "10.9.8",
+      "nodeExeSha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+    },
+    "talosKeySha256": "5bfca75f112f04b89cd992f5f925018e8dfc28e0e7f6e33f6a4c33ed9e29d911",
+    "gpg": {
+      "good": true,
+      "signingKeyFingerprint": "5BADCA2665EF59DCF8A23D8B707F0DB480836771"
+    },
+    "clamavFiles": {
+      "count": 198,
+      "digest": "b3c847367b6dc41689e57ecadbacbe1a4d345181bbd656a932546912d35e59f0"
+    }
+  }
+}

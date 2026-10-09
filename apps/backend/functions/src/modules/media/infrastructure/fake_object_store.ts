@@ -1,4 +1,6 @@
 import type {
+  ObjectBytesPort,
+  ObjectRead,
   ObjectStat,
   ObjectStorePort,
   RemovalResult,
@@ -15,9 +17,33 @@ export interface FakeObject {
  * FAKE object store for local tests. It records nothing about real Storage,
  * IAM, generations or signatures and is never evidence of production behaviour.
  */
-export class FakeObjectStore implements ObjectStorePort {
+export class FakeObjectStore implements ObjectStorePort, ObjectBytesPort {
   readonly #objects = new Map<string, FakeObject>();
   readonly #partial = new Set<string>();
+  readonly #bytes = new Map<string, { providerGeneration: string; bytes: Buffer }>();
+  readonly variantBytes = new Map<string, Buffer>();
+  #variantGeneration = 0;
+
+  /** D1 tests: source bytes for the local tools adapters. */
+  putBytes(objectKeyHandle: string, providerGeneration: string, bytes: Buffer): void {
+    this.#bytes.set(objectKeyHandle, { providerGeneration, bytes });
+  }
+
+  read(objectKeyHandle: string, maxBytes: number): Promise<ObjectRead> {
+    const stored = this.#bytes.get(objectKeyHandle);
+    if (stored === undefined) return Promise.resolve({ kind: 'absent' });
+    if (stored.bytes.length > maxBytes) return Promise.resolve({ kind: 'too_large' });
+    return Promise.resolve({ kind: 'complete', ...stored });
+  }
+
+  writeVariant(variantId: string, bytes: Buffer): Promise<{ readonly providerGeneration: string }> {
+    this.#variantGeneration += 1;
+    this.variants.add(variantId);
+    this.variantBytes.set(variantId, bytes);
+    return Promise.resolve({
+      providerGeneration: `fake-variant-generation-${this.#variantGeneration}`,
+    });
+  }
 
   put(objectKeyHandle: string, object: FakeObject): void {
     this.#partial.delete(objectKeyHandle);

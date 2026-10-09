@@ -1102,13 +1102,21 @@ re-enter `ready`; lifting a restriction never makes anything public by itself.
 
 ### 34.5 Evidence and policy
 
-- Local tests prove contracts, state rules, ownership and orchestration only.
-  A fake scanner or processor answering "malicious" or "decompression bomb"
+- Local tests prove contracts, state rules, ownership and orchestration. A
+  fake scanner or processor answering "malicious" or "decompression bomb"
   proves how the service reacts, not that a real bomb or malware is detected.
-  Likewise EXIF minimization, transform determinism and real limits are **not
-  proven**; the traceability matrix marks each such row
-  "real scanner/processor evidence absent" and assigns it to the separate
-  adapter verification before dev acceptance 4.1.
+- D1 (`MEDIA_D1_REAL_TOOLS_AMENDMENT.md`) puts real local tools — ClamAV 1.5.4
+  with the stand's test signature only and sharp 0.35.5 — behind the same
+  ports, only behind an explicit Emulator stand switch. The traceability
+  matrix marks the result "real scanner/processor evidence: Windows-local only
+  (D1)": decompression-bomb detection, EXIF minimization, transform
+  determinism, real object generation and hash, and the scan detection path
+  with the stand test signature are shown on this Windows PC only. Malware
+  detection with official signatures (EICAR), official signature database
+  freshness, Linux evidence of the native tools, real limits and quota, and
+  legal or safety hold stay **not proven** until the Linux gate and the owner
+  decisions BCK14-OD-03/04/05, before dev acceptance 4.1. Without an official
+  database a scan is never clean except in the stand's explicit L1 test mode.
 - No retention period or limit is invented. Tests use a synthetic policy
   explicitly labelled test-only. A working configuration without an accepted
   policy answers `policy_unavailable` and fails closed.
@@ -1169,12 +1177,15 @@ no-Firebase checks) and the acceptance matrix reconciliation.
   import each other, only the application services write Media records, fake
   adapters labelled) and an acceptance matrix that fails if a named test
   disappears or is renamed.
-- Evidence that fake adapters **cannot** provide and that stays open until real
-  adapters are verified separately before dev acceptance 4.1 (real
-  scanner/processor evidence absent): malware detection, decompression-bomb
-  detection, EXIF minimization, transform determinism, real object generation
-  and hash, real limits and quota, and legal or safety hold. The local matrix
-  proves only contracts, state rules, ownership and orchestration.
+- Evidence that fake adapters **cannot** provide. D1 shows part of it with real
+  local tools (real scanner/processor evidence: Windows-local only (D1)):
+  decompression-bomb detection, EXIF minimization, transform determinism, real
+  object generation and hash, and the scan detection path with the stand test
+  signature. Still open before dev acceptance 4.1: malware detection with
+  official signatures (EICAR, Linux gate), official signature database
+  freshness, Linux evidence, real limits and quota, and legal or safety hold.
+  The fake-based matrix proves only contracts, state rules, ownership and
+  orchestration.
 - Deferred by decision: `requestDelivery`, delivery signer and `replaceAsset`.
 - Known local gaps: session expiry is evaluated lazily at confirm. (The earlier
   gap of an attempt whose second transaction never ran is closed by the

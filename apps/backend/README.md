@@ -656,3 +656,31 @@ Scope and contract: `docs/product/BOOKING_ACTIONS_F2_AMENDMENT.md`
 Limits: local 2A/2B only; D05/D07 deadline window, under-24 h rule, urgent and
 non-material notices stay open; no mobile path to cancel a one-time occurrence
 or a whole Event; no device, LAN or cloud claim.
+
+## D1 real local Media tools (Emulator only, Windows-local)
+
+Scope and contract: `docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md`
+(owner-accepted 2026-10-09, variant L1, download budget 300 MB). Status:
+**Windows-local verified / Linux gate open.**
+
+- Tools live outside the repository in `%LOCALAPPDATA%\Recharge\tools`:
+  `node scripts/media-tools.mjs fetch --yes` downloads exactly the artifacts
+  of `media-tools.lock.json` within the budget (SHA-256, GPG for ClamAV, SRI
+  via an offline npm install) and restores the pinned npm 10.9.8.
+- `media-tools.mjs selftest --yes` checks the Windows Job Objects (J1–J6:
+  limits, the worker capped at 768 MiB, a hung worker ended at 15 s with
+  its memory released, fail-closed start, verified stop).
+- `media-tools.mjs start [--stand-signatures-only] | stop | status
+  [--instance=<name>]`: clamd and the local tools service, each in its own
+  job; `--stand-signatures-only` is the L1 test mode (clean without an
+  official database); without it a missing database keeps files in
+  quarantine.
+- The Emulator composition uses the real tools only with
+  `RECHARGE_MEDIA_TOOLS=local-real` (plus port and token); otherwise the
+  fakes stay, so C1 and `test:emulator` are unchanged.
+- Tests: `npm run test:media-tools` (real sharp and ClamAV); the gate
+  `npm run stand:d1-gate -- --yes` (self-check, tool tests, Storage path).
+
+Limits: ClamAV runs with the stand test signature only; EICAR, official
+databases and their freshness, the native Linux build and cgroup memory
+limits are the open Linux gate; BCK14-OD-03/04/05 stay open; no cloud.

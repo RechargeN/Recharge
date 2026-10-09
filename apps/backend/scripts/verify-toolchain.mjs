@@ -38,6 +38,11 @@ const allowedLicenses = new Set([
   "MIT",
   "Python-2.0",
   "public domain",
+  // D1 local stand only: the prebuilt libvips of sharp (LGPL-3.0-or-later),
+  // accepted with docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §3.6. Any
+  // distribution (deploy, container image, shared build) needs a new review.
+  "Apache-2.0 AND LGPL-3.0-or-later",
+  "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
 ]);
 const allowedLifecycleHooks = new Set([
   "@firebase/util@1.15.3:postinstall",

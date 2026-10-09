@@ -154,6 +154,12 @@ Approval, implementation or cloud-readiness claim.
 | BCK14-OD-09 | Legacy URL/GPX mapping, disclosure, conflict and rollback | Content + Route + Media + Mobile | Import | No import |
 | BCK14-OD-10 | Numeric SLO, quotas, egress/cost guardrails and degradation | Operations + Media + Product | Scale/production | Feature disabled |
 
+D1 (2026-10-09, `MEDIA_D1_REAL_TOOLS_AMENDMENT.md`) adds Windows-local
+evidence with real tools behind the existing ports — ClamAV 1.5.4 with the
+stand test signature only and sharp 0.35.5 — and does not close OD-03, OD-04
+or OD-05: its limits and profiles are local test values, and EICAR, official
+databases and Linux evidence are the open Linux gate.
+
 ## 8. Fail-closed defaults
 
 - no production Storage, bucket, Rules, worker, upload endpoint or CDN;

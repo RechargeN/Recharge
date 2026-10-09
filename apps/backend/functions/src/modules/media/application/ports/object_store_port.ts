@@ -23,3 +23,22 @@ export interface ObjectStorePort {
 }
 
 export type RemovalResult = 'removed' | 'absent' | 'failed';
+
+export type ObjectRead =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'too_large' }
+  | { readonly kind: 'complete'; readonly providerGeneration: string; readonly bytes: Buffer };
+
+/**
+ * D1: bounded byte access for the local tools adapters. A source larger than
+ * `maxBytes` is never read; a variant is stored under its own id and returns
+ * the generation the store assigned.
+ */
+export interface ObjectBytesPort {
+  read(objectKeyHandle: string, maxBytes: number): Promise<ObjectRead>;
+  writeVariant(
+    variantId: string,
+    bytes: Buffer,
+    contentType: string,
+  ): Promise<{ readonly providerGeneration: string }>;
+}

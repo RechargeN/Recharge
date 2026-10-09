@@ -88,6 +88,19 @@ export interface MediaServiceDeps {
   readonly policy?: MediaPolicy;
   /** Deletion, detach and restriction; without it those commands are refused. */
   readonly deletion?: MediaDeletionService;
+  /** Last-resort deadline around one scanner or processor call (D1 §4.8). */
+  readonly portCallDeadlineMs?: number;
+}
+
+const defaultPortCallDeadlineMs = 30_000;
+
+/** Rejects when the port has not answered in time; the timer never outlives the call. */
+function withDeadline<T>(call: Promise<T>, deadlineMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('port call deadline exceeded')), deadlineMs);
+  });
+  return Promise.race([call, expired]).finally(() => clearTimeout(timer));
 }
 
 export type MediaCommandData =
@@ -616,13 +629,16 @@ export class MediaService {
     sha256: string,
   ): Promise<ScanOutcome> {
     try {
-      return await this.deps.scanner.scan({
-        assetId: asset.assetId,
-        objectKeyHandle: asset.objectKeyHandle,
-        providerGeneration,
-        sha256,
-        policyRevision: this.deps.policy?.revision ?? '',
-      });
+      return await withDeadline(
+        this.deps.scanner.scan({
+          assetId: asset.assetId,
+          objectKeyHandle: asset.objectKeyHandle,
+          providerGeneration,
+          sha256,
+          policyRevision: this.deps.policy?.revision ?? '',
+        }),
+        this.deps.portCallDeadlineMs ?? defaultPortCallDeadlineMs,
+      );
     } catch {
       // A failed or timed-out scan is never a pass: the asset stays quarantined.
       return { toolRevision: 'scanner-error', result: 'inconclusive' };
@@ -636,15 +652,18 @@ export class MediaService {
     policy: MediaFamilyPolicy,
   ): Promise<ProcessOutcome> {
     try {
-      return await this.deps.processor.process({
-        assetId: asset.assetId,
-        objectKeyHandle: asset.objectKeyHandle,
-        family: asset.family,
-        sourceProviderGeneration,
-        sourceSha256,
-        policyRevision: this.deps.policy?.revision ?? '',
-        mandatoryVariantProfiles: policy.mandatoryVariantProfiles,
-      });
+      return await withDeadline(
+        this.deps.processor.process({
+          assetId: asset.assetId,
+          objectKeyHandle: asset.objectKeyHandle,
+          family: asset.family,
+          sourceProviderGeneration,
+          sourceSha256,
+          policyRevision: this.deps.policy?.revision ?? '',
+          mandatoryVariantProfiles: policy.mandatoryVariantProfiles,
+        }),
+        this.deps.portCallDeadlineMs ?? defaultPortCallDeadlineMs,
+      );
     } catch {
       return { toolRevision: 'processor-error', result: 'failed' };
     }

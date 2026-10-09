@@ -81,12 +81,15 @@
     "stand:e2-gate": "node ../scripts/stand-e2-gate.mjs",
     "stand:f1-gate": "node ../scripts/stand-f1-gate.mjs",
     "stand:f2-gate": "node ../scripts/stand-f2-gate.mjs",
+    "test:media-tools": "npm run build --silent && node --test --experimental-test-isolation=none \"lib/test/media_tools/*.test.js\"",
+    "stand:d1-gate": "node ../scripts/stand-d1-gate.mjs",
     "stand:manifest": "node ../scripts/stand-seed.mjs manifest",
     "test:stand": "node --test ../scripts/emulator-stand.test.mjs lib/test/stand/*.test.js"
   },
   "dependencies": {
     "firebase-admin": "14.3.0",
-    "firebase-functions": "7.3.2"
+    "firebase-functions": "7.3.2",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@types/node": "22.20.1",

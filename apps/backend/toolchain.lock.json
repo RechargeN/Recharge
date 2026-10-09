@@ -28,7 +28,8 @@
     "firebase-tools": "15.28.1",
     "eslint": "9.39.5",
     "typescript-eslint": "8.67.0",
-    "prettier": "3.9.6"
+    "prettier": "3.9.6",
+    "sharp": "0.35.5"
   },
   "githubActions": {
     "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",

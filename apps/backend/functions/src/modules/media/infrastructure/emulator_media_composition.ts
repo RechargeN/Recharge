@@ -16,6 +16,11 @@ import { FakeScanner } from './fake_scanner.js';
 import { FirestoreMediaRepository } from './firestore_media_repository.js';
 import { IdentityMediaActorAuthority } from './identity_media_authority.js';
 import {
+  LocalToolsProcessor,
+  LocalToolsScanner,
+  localToolsConfigFrom,
+} from './local_tools_client.js';
+import {
   StorageEmulatorObjectStore,
   type StorageBucketLike,
 } from './storage_emulator_object_store.js';
@@ -29,6 +34,15 @@ import {
  */
 export const emulatorMediaEvidence =
   'fake scanner and fake processor: orchestration only, no detection or transformation';
+
+/**
+ * D1 (amendment §10): only when the stand sets `RECHARGE_MEDIA_TOOLS=local-real`
+ * do the scanner and processor become the local tools service (ClamAV with the
+ * stand's test signature, sharp). Local Windows evidence only; the policy stays
+ * the synthetic Emulator policy below.
+ */
+export const localToolsMediaEvidence =
+  'local ClamAV and sharp behind the local tools service: Windows-local evidence, stand test signature only';
 
 /** Synthetic, TEST-ONLY policy for the local Emulator stand. */
 export const emulatorMediaPolicy: MediaPolicy = Object.freeze({
@@ -74,13 +88,14 @@ export function createEmulatorMediaComposition(input: {
     eligibility: new IdentityPublisherEligibility(identity),
   });
   const authority = new IdentityMediaActorAuthority(identity, emulatorMediaMarkets);
+  const tools = localToolsConfigFrom(environment);
   const service = new MediaService({
     repository,
     authority,
     entityScope: contentScope,
     objectStore,
-    scanner: new FakeScanner(),
-    processor: new FakeProcessor(),
+    scanner: tools === null ? new FakeScanner() : new LocalToolsScanner(tools, objectStore),
+    processor: tools === null ? new FakeProcessor() : new LocalToolsProcessor(tools, objectStore),
     clock: input.clock ?? systemServerClock,
     ids: { newId: () => randomUUID() as EntityId },
     enabledFamilies: emulatorMediaFamilies,

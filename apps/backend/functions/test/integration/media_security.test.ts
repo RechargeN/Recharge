@@ -423,12 +423,19 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
     'infrastructure/firestore_media_repository.ts',
   ]);
   const environment = new Set([...sdk, 'infrastructure/storage_emulator_object_store.ts']);
+  // D1: only the local tools client may open a loopback HTTP connection.
+  const localToolsClient = 'infrastructure/local_tools_client.ts';
+  const withoutHttp = /from ['"]node:(https|net|fs|child_process)['"]/u;
   const patternsFor = (relative: string) =>
-    forbidden.filter(
-      (_, index) =>
-        !(sdk.has(relative) && (index === 0 || index === 3)) &&
-        !(environment.has(relative) && index === 4),
-    );
+    forbidden
+      .filter(
+        (_, index) =>
+          !(sdk.has(relative) && (index === 0 || index === 3)) &&
+          !(environment.has(relative) && index === 4),
+      )
+      .map((pattern) =>
+        relative === localToolsClient && pattern === forbidden[6] ? withoutHttp : pattern,
+      );
   for (const file of sourceFiles(mediaDir))
     for (const pattern of patternsFor(path.relative(mediaDir, file).replaceAll('\\', '/')))
       assert.equal(
@@ -436,6 +443,22 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
         false,
         `${path.relative(srcRoot, file)} ${String(pattern)}`,
       );
+  const http = "import { request } from 'node:http';";
+  assert.equal(
+    patternsFor(localToolsClient).some((pattern) => pattern.test(http)),
+    false,
+  );
+  assert.ok(patternsFor('infrastructure/image_pipeline.ts').some((pattern) => pattern.test(http)));
+  for (const other of [
+    "from 'node:net'",
+    "from 'node:fs'",
+    "from 'node:child_process'",
+    'process.env',
+  ])
+    assert.ok(
+      patternsFor(localToolsClient).some((pattern) => pattern.test(other)),
+      other,
+    );
   const foreign = "import { getFirestore } from 'firebase-admin/firestore';";
   assert.ok(patternsFor('domain/foreign.ts').some((pattern) => pattern.test(foreign)));
   assert.ok(patternsFor('infrastructure/foreign.ts').some((pattern) => pattern.test(foreign)));
@@ -486,21 +509,53 @@ void test('only the Media application services write Media records', () => {
   assert.deepEqual(offenders, []);
 });
 
-void test('fake adapters are labelled fake and are the only adapters in this slice', () => {
+void test('adapters: the fakes are labelled FAKE and the D1 local tools modules are named', () => {
   const infrastructure = path.join(mediaDir, 'infrastructure');
   const names = readdirSync(infrastructure).sort();
   assert.deepEqual(names, [
+    'clamd_protocol.ts',
     'emulator_media_composition.ts',
     'fake_object_store.ts',
     'fake_processor.ts',
     'fake_scanner.ts',
     'firestore_media_repository.ts',
     'identity_media_authority.ts',
+    'image_pipeline.ts',
     'in_memory_media_repository.ts',
+    'local_tools_client.ts',
+    'local_tools_protocol.ts',
+    'media_tool_limits.ts',
     'storage_emulator_object_store.ts',
   ]);
   for (const name of names.filter((item) => item.startsWith('fake_')))
     assert.match(read(path.join(infrastructure, name)), /\bFAKE\b/u, name);
+  // The real tools replace the fakes only behind the stand's explicit switch.
+  const composition = read(path.join(infrastructure, 'emulator_media_composition.ts'));
+  assert.ok(composition.includes('localToolsConfigFrom(environment)'));
+  assert.ok(composition.includes('tools === null ? new FakeScanner()'));
+  assert.ok(composition.includes('tools === null ? new FakeProcessor()'));
+});
+
+void test('D1 real tools: sharp only in the image pipeline, loaders blocked first, nothing kept', () => {
+  const keepsMetadata =
+    /\b(keepMetadata|keepExif|withMetadata|withExif|withExifMerge|keepIccProfile|withIccProfile)\s*\(/u;
+  for (const file of sourceFiles(mediaDir)) {
+    const relative = path.relative(mediaDir, file).replaceAll('\\', '/');
+    const source = read(file);
+    assert.equal(/unlimited:\s*true/u.test(source), false, relative);
+    assert.equal(keepsMetadata.test(source), false, relative);
+    if (relative !== 'infrastructure/image_pipeline.ts')
+      assert.equal(/from ['"]sharp['"]/u.test(source), false, relative);
+  }
+  const pipeline = read(path.join(mediaDir, 'infrastructure', 'image_pipeline.ts'));
+  assert.ok(pipeline.includes("sharp.block({ operation: ['VipsForeignLoad'] });"));
+  assert.ok(pipeline.indexOf('sharp.block(') < pipeline.indexOf('sharp.unblock('));
+  assert.ok(
+    pipeline.indexOf('const runtime = configurePipeline();') <
+      pipeline.indexOf('await sharp(bytes'),
+  );
+  const composition = read(path.join(mediaDir, 'infrastructure', 'emulator_media_composition.ts'));
+  assert.equal(/image_pipeline|clamd_protocol/u.test(composition), false);
 });
 
 // ---------------------------------------------------------------------------
@@ -586,7 +641,10 @@ const acceptanceMatrix: ReadonlyArray<
   [
     'AC-80 fake adapters are never production or safety evidence',
     [
-      ['security', 'fake adapters are labelled fake and are the only adapters in this slice'],
+      [
+        'security',
+        'adapters: the fakes are labelled FAKE and the D1 local tools modules are named',
+      ],
       ['variant', 'the manifest is bound to the pinned source generation and its profiles'],
     ],
   ],
@@ -718,15 +776,38 @@ const acceptanceMatrix: ReadonlyArray<
     'restriction is a verified system instruction',
     [['deletion', 'a restriction is a verified system instruction and never a user command']],
   ],
+  [
+    'D1 real local tools are bounded, labelled and behind an explicit switch',
+    [
+      [
+        'security',
+        'adapters: the fakes are labelled FAKE and the D1 local tools modules are named',
+      ],
+      [
+        'security',
+        'D1 real tools: sharp only in the image pipeline, loaders blocked first, nothing kept',
+      ],
+    ],
+  ],
 ];
 
-/** Behaviour that fake adapters cannot prove; stays open until real adapters are verified. */
-const realEvidenceAbsent = [
-  'malware detection',
+/**
+ * D1: shown on this Windows PC with the real local tools
+ * (docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md), not on Linux and not in cloud.
+ */
+const windowsLocalEvidence = [
   'decompression-bomb detection',
   'EXIF minimization',
   'transform determinism',
   'real object generation and hash',
+  'scan detection path with the stand test signature',
+];
+
+/** Still absent: open until the Linux gate and the owner decisions. */
+const realEvidenceAbsent = [
+  'malware detection with official signatures (EICAR, Linux gate)',
+  'official signature database freshness',
+  'Linux evidence of the native tools',
   'quota and rate limits',
   'legal or safety hold',
 ];
@@ -761,9 +842,11 @@ void test('the specification records the acceptance criteria and the evidence th
   );
   for (let number = 76; number <= 87; number += 1)
     assert.ok(spec.includes(`BCK-14-AC-${String(number)}`), `AC-${String(number)}`);
-  assert.ok(spec.includes('real scanner/processor evidence absent'));
-  // Every behaviour a fake cannot prove is named, so it cannot be mistaken for covered.
-  assert.equal(realEvidenceAbsent.length, 7);
-  for (const item of ['bomb', 'EXIF', 'determinism', 'limits'])
+  assert.ok(spec.includes('real scanner/processor evidence: Windows-local only (D1)'));
+  // Every behaviour is named either as Windows-local evidence or as still absent,
+  // so neither can be mistaken for full coverage.
+  assert.equal(windowsLocalEvidence.length, 5);
+  assert.equal(realEvidenceAbsent.length, 5);
+  for (const item of ['bomb', 'EXIF', 'determinism', 'limits', 'EICAR', 'Linux gate', 'official'])
     assert.ok(spec.includes(item), item);
 });

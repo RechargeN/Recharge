@@ -1,8 +1,8 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.115**
-- Date: **2026-10-08**
+- Version: **2.4.116**
+- Date: **2026-10-09**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
 - Accountable owner: **Architecture owner**
@@ -71,7 +71,24 @@ map: [F2 amendment](BOOKING_ACTIONS_F2_AMENDMENT.md). Local 2A/2B do not
 close D05/D07; one-time occurrence and whole-Event cancellation have no
 mobile path.
 
+### Local D1 real Media tools amendment (2026-10-09)
+
+D1 puts ClamAV 1.5.4 and sharp 0.35.5 behind the existing Media
+`ScannerPort` and `ProcessorPort` through one local tools service on
+loopback, only behind an explicit Emulator stand switch. Memory is capped by
+Windows Job Objects, admission is global with an immediate refusal, EXIF/GPS
+never reaches a variant and SVG is excluded. Variant L1: no official
+signature database, only the stand test signature; without the stand test
+mode a missing database keeps files in quarantine. Status: Windows-local
+verified / Linux gate open (EICAR, official databases, native Linux build,
+cgroup limits). BCK14-OD-03/04/05 are not closed. Normative scope, download
+manifest and file map: [D1 amendment](MEDIA_D1_REAL_TOOLS_AMENDMENT.md).
+
 ## 0. Changelog
+
+**v2.4.116.** Records the owner-accepted local D1 real Media tools amendment
+(Windows-local verified, Linux gate open). Environment, production and
+BCK-14 Review boundaries remain unchanged.
 
 **v2.4.115.** Records the owner-accepted local F2 Booking actions amendment.
 Environment, production and BCK-09/BCK-13 Review boundaries remain unchanged.
