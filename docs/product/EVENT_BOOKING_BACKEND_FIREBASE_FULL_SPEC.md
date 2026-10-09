@@ -2235,3 +2235,26 @@ Owner-accepted 2026-10-06 together with
      Booking applied `EventUnpublished`; a Booking confirmed before that stays
      confirmed and cancellable. An immediate fence at Content commit is a
      separate extension, not part of E2.
+
+## 36. F1 local amendment — notification obligations and outbox retention (Emulator only)
+
+Owner-accepted 2026-10-08 together with
+[NOTIFICATIONS_F1_INBOX_AMENDMENT.md](NOTIFICATIONS_F1_INBOX_AMENDMENT.md).
+
+180. With the default-off local flag `booking.notification.effects`, every
+     Booking transition that already wrote its outbox record (create, cancel,
+     reconfirm, occurrence cancellation, material reschedule, missed
+     reconfirmation, privacy-erasure cancellation) writes the v2 record in the
+     accepted OD-09 envelope instead of v1, in the same transaction and under
+     the same document id. With the flag off the v1 record is unchanged.
+181. v2 names the effect explicitly (`booking.confirmed`, `booking.cancelled`
+     with its cause, `booking.reconfirmationRequired`, `booking.reconfirmed`);
+     the v1 `booking_reconfirmation` ambiguity is not carried over.
+182. The recipient stays the Booking subject in `actorId`, which Booking
+     erasure already pseudonymizes; the payload holds no person identifier.
+183. Outbox retention no longer waits only for `delivered + reconciled`: the
+     anchor is any terminal Notifications outcome (created, suppressed,
+     expired, erased) with reconciliation, and a v2 record carries `expiresAt`
+     a full outbox period after its declared relevance deadline.
+184. Booking never reads or writes Notifications state; an inbox outage cannot
+     block a Booking command, the deadline worker or a privacy erasure.

@@ -4,7 +4,7 @@ import { computeBookingSemanticHash } from '../contracts/booking_v1.js';
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
 import { activeBookingKeyId } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
-import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
+import { suppressedOutboxId } from '../notifications/outbox.js';
 import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import {
   BookingDomainRefusal,
@@ -19,6 +19,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
+import { bookingNotificationEffectsEnabled, bookingOutboxRecord } from './notification_effects.js';
 import { publicBookingRecord, type BookingRecord, type StoredBookingRecord } from './domain.js';
 import {
   logicalMutationId,
@@ -60,6 +61,7 @@ export async function cancelInternalBooking(
   const logicalId = logicalMutationId(actorId, command.commandType, command.idempotencyKey);
   const attemptId = requestAttemptId(actorId, command.requestId);
   try {
+    const notificationEffects = await bookingNotificationEffectsEnabled(dependencies.firestore);
     return await runBookingTransaction(dependencies.firestore, async (transaction) => {
       if (dependencies.mutationAuthorization !== undefined) {
         await assertBookingMutationAuthorized(
@@ -257,7 +259,14 @@ export async function cancelInternalBooking(
         dependencies.firestore
           .collection(bookingCollections.outbox)
           .doc(suppressedOutboxId(booking.id, nextBooking.revision)),
-        createSuppressedOutbox('booking_cancellation', booking.id, actorId, now.toISOString()),
+        bookingOutboxRecord(notificationEffects, {
+          effect: { kind: 'cancelled', cause: 'userCancelled' },
+          booking,
+          actorId,
+          revision: nextBooking.revision,
+          occurredAt: now.toISOString(),
+          correlationId: logicalId,
+        }),
       );
       return outcome;
     });

@@ -763,6 +763,77 @@
         "compositeIndexes": []
       },
       {
+        "name": "notificationCommandReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [
+          "expiresAt"
+        ],
+        "compositeIndexes": []
+      },
+      {
+        "name": "notificationDeliveryAttempts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [
+          "expiresAt"
+        ],
+        "compositeIndexes": []
+      },
+      {
+        "name": "notificationEffectReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [
+          "expiresAt"
+        ],
+        "compositeIndexes": [
+          [
+            "status:ASCENDING",
+            "nextAttemptAtUtc:ASCENDING"
+          ],
+          [
+            "status:ASCENDING",
+            "deliverUntilUtc:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "notificationInboxItems",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [
+          "expiresAt"
+        ],
+        "compositeIndexes": [
+          [
+            "recipientId:ASCENDING",
+            "status:ASCENDING",
+            "createdAtUtc:DESCENDING",
+            "__name__:DESCENDING"
+          ],
+          [
+            "recipientId:ASCENDING",
+            "status:ASCENDING",
+            "createdAtUtc:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "notificationPreferences",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "notificationReconcileCheckpoints",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "platformActiveFeatureFlagPointers",
         "clientAccess": "deny",
         "owner": "firebase_cli",

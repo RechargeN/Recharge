@@ -1,0 +1,26 @@
+[
+  {
+    "schemaVersion": 1,
+    "requestId": "req-list-1",
+    "queryType": "listInbox",
+    "payload": { "locale": "ru" }
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-list-2",
+    "queryType": "listInbox",
+    "payload": { "locale": "lv-LV", "view": "archived", "pageSize": 50 }
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-unread",
+    "queryType": "unreadSummary",
+    "payload": {}
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-prefs",
+    "queryType": "getPreferences",
+    "payload": {}
+  }
+]

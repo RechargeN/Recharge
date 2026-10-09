@@ -1,0 +1,56 @@
+[
+  {
+    "code": "unsupported_locale",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-bad-locale",
+      "queryType": "listInbox",
+      "payload": { "locale": "de" }
+    }
+  },
+  {
+    "code": "unknown_field:userId",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-user-id",
+      "queryType": "listInbox",
+      "payload": { "locale": "en", "userId": "someone-else" }
+    }
+  },
+  {
+    "code": "page_size_invalid",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-page",
+      "queryType": "listInbox",
+      "payload": { "locale": "en", "pageSize": 51 }
+    }
+  },
+  {
+    "code": "unsupported_version",
+    "request": {
+      "schemaVersion": 2,
+      "requestId": "req-version",
+      "queryType": "unreadSummary",
+      "payload": {}
+    }
+  },
+  {
+    "code": "query_type_unsupported",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-tokens",
+      "queryType": "listPushRegistrations",
+      "payload": {}
+    }
+  },
+  {
+    "code": "request_id_invalid",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "has space",
+      "queryType": "unreadSummary",
+      "payload": {}
+    }
+  }
+]

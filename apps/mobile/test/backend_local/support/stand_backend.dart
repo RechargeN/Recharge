@@ -64,6 +64,11 @@ final class StandBackend {
   Future<Map<String, Object?>> sessionFixture(List<String> args) =>
       _stand(<String>['session-fixture', ...args]);
 
+  /// F1 operator steps (flags, reconcile, receipts, stored-data faults) run on
+  /// the stand in its trusted backend context, never by the client.
+  Future<Map<String, Object?>> notifications(List<String> args) =>
+      _stand(<String>['notifications', ...args]);
+
   /// The stand manifest: ids the owner services returned for seeded objects.
   Future<Map<String, Object?>> manifest() => _stand(<String>['manifest']);
 

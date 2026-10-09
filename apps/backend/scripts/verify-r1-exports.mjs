@@ -38,6 +38,10 @@ const expected = [
   // E2: default-off, Emulator-only Discover read and Content effect trigger.
   "discoverQueryV1",
   "consumeContentEffectV1",
+  // F1: default-off, Emulator-only Notifications inbox and Booking-effect trigger.
+  "notificationsQueryV1",
+  "notificationsCommandV1",
+  "consumeNotificationEffectV1",
 ].sort();
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
@@ -68,6 +72,7 @@ if (
   JSON.stringify([
     "consumeContentEffectV1@contentEffects/{effectId}",
     "consumeEventBookingOutboxV1@eventBookingOutbox/{outboxId}",
+    "consumeNotificationEffectV1@bookingOutbox/{outboxId}",
   ])
 ) {
   throw new Error(
@@ -75,5 +80,5 @@ if (
   );
 }
 process.stdout.write(
-  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover and Content-effect surface.\n",
+  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover, Content-effect and Notifications surface.\n",
 );

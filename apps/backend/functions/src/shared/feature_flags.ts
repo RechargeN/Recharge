@@ -7,6 +7,22 @@ export const bookingFlagIds = Object.freeze({
   reconfirmationDeadlineWorker: 'booking.reconfirmation.deadlineWorker',
 });
 
+/**
+ * F1: Emulator-only activation of the Booking notification producer (default
+ * off). Kept apart from `bookingFlagIds` so enabling the Booking commands never
+ * switches the outbox from v1 `suppressedPreActivation` to v2.
+ */
+export const bookingNotificationFlagIds = Object.freeze({
+  effects: 'booking.notification.effects',
+});
+
+/** F1: Emulator-only Notifications inbox (default off). */
+export const notificationsFlagIds = Object.freeze({
+  consumeBooking: 'notifications.consume.booking',
+  inbox: 'notifications.inbox',
+  preferences: 'notifications.preferences',
+});
+
 export const identityFlagIds = Object.freeze({
   establishSession: 'identity.session.establish',
 });

@@ -2,7 +2,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
 import type { ReconfirmBookingCommand } from '../contracts/booking_v1.js';
 import { computeBookingSemanticHash } from '../contracts/booking_v1.js';
-import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
+import { suppressedOutboxId } from '../notifications/outbox.js';
 import {
   BookingDomainRefusal,
   BookingRetryableFailure,
@@ -16,6 +16,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
+import { bookingNotificationEffectsEnabled, bookingOutboxRecord } from './notification_effects.js';
 import { publicBookingRecord, type BookingRecord, type StoredBookingRecord } from './domain.js';
 import {
   logicalMutationId,
@@ -53,6 +54,7 @@ export async function reconfirmInternalBooking(
   const logicalId = logicalMutationId(actorId, command.commandType, command.idempotencyKey);
   const attemptId = requestAttemptId(actorId, command.requestId);
   try {
+    const notificationEffects = await bookingNotificationEffectsEnabled(dependencies.firestore);
     return await runBookingTransaction(dependencies.firestore, async (transaction) => {
       if (dependencies.mutationAuthorization !== undefined) {
         await assertBookingMutationAuthorized(
@@ -205,7 +207,14 @@ export async function reconfirmInternalBooking(
         dependencies.firestore
           .collection(bookingCollections.outbox)
           .doc(suppressedOutboxId(booking.id, nextBooking.revision)),
-        createSuppressedOutbox('booking_reconfirmation', booking.id, actorId, nowIso),
+        bookingOutboxRecord(notificationEffects, {
+          effect: { kind: 'reconfirmed' },
+          booking,
+          actorId,
+          revision: nextBooking.revision,
+          occurredAt: nowIso,
+          correlationId: logicalId,
+        }),
       );
       return outcome;
     });

@@ -1,0 +1,45 @@
+[
+  {
+    "schemaVersion": 1,
+    "requestId": "req-archive",
+    "idempotencyKey": "idem-archive-0001",
+    "commandType": "archive",
+    "payload": {
+      "notificationId": "ntf_0123456789abcdef0123456789abcdef",
+      "expectedRevision": 1
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-read",
+    "idempotencyKey": "idem-read-0001",
+    "commandType": "markRead",
+    "payload": {
+      "notificationId": "ntf_0123456789abcdef0123456789abcdef"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-mark-all",
+    "idempotencyKey": "idem-mark-all-0001",
+    "commandType": "markAllRead",
+    "payload": {
+      "cutoffUtc": "2026-08-29T12:00:00.000Z",
+      "maxItems": 100
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "requestId": "req-prefs",
+    "idempotencyKey": "idem-prefs-0001",
+    "commandType": "updatePreferences",
+    "payload": {
+      "expectedRevision": 0,
+      "categories": {
+        "booking.receipts": {
+          "inApp": false
+        }
+      }
+    }
+  }
+]

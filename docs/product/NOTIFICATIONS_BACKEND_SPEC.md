@@ -970,3 +970,40 @@ backup propagation proof.
 73. **BCK-13-AC-73:** Raw tokens, sensitive evidence and unrestricted source payloads never enter analytics/logs.
 74. **BCK-13-AC-74:** OD-02 keeps email disabled until its exact accepted policy and provider gates.
 75. **BCK-13-AC-75:** v0.3 authorizes no FCM/email runtime, Firebase, deployment or activation.
+
+## 35. F1 local amendment — inbox without push (Emulator only)
+
+Owner-accepted 2026-10-08 together with
+[NOTIFICATIONS_F1_INBOX_AMENDMENT.md](NOTIFICATIONS_F1_INBOX_AMENDMENT.md),
+which holds the exact contract and file map. It is a bounded local stand
+implementation of §11, §16, §17 and §34 for one producer (Booking); this
+specification's Review status and its production gates are unchanged.
+
+76. **BCK-13-F1-01:** The only producer is Booking. Its obligation is the v2
+    Booking outbox record in the accepted OD-09 envelope, written atomically
+    with the Booking transition and only while the default-off Booking flag
+    `booking.notification.effects` is on. v1 `suppressedPreActivation`
+    records are never activated.
+77. **BCK-13-F1-02:** One accepted effect and recipient create at most one
+    logical inbox record: consumer key `(notifications.inbox, 1, eventId)`,
+    create-only receipt and the record in one transaction; redelivery,
+    concurrent consumers, reconciliation and replay never duplicate.
+78. **BCK-13-F1-03:** Attempts are persisted by a separate claim/lease
+    transaction before completion. A stale lease cannot complete or fail;
+    an unrecorded failure is recovered as `abandoned` after the lease expires.
+    Template and policy revisions are pinned at the first claim.
+79. **BCK-13-F1-04:** Preferences change behaviour: `booking.receipts` can be
+    switched off for the in-app channel; `booking.changes` is locked by an
+    explicit local category policy, not by an automatic mandatory flag.
+    Push, email and SMS are not channels of the policy and cannot be enabled.
+80. **BCK-13-F1-05:** Every terminal outcome other than `created` is a minimal
+    receipt without recipient, event, aggregate, payload hash, variables or
+    references; erasure turns receipts into such tombstones, deletes records,
+    attempts, command receipts and preferences, and nothing erased can be
+    resurrected by redelivery or replay.
+81. **BCK-13-F1-06:** An inbox outage never blocks booking cancellation, access
+    recovery or independent privacy tasks; the DSR completes only after the
+    Notifications erasure task succeeded.
+82. **BCK-13-F1-07:** FCM/APNs, email, SMS, device registration, quiet hours,
+    correction/withdrawal, scheduler and cloud remain absent. BCK13-OD-01 is
+    not closed by the local JSON Schemas.

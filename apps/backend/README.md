@@ -593,3 +593,43 @@ Verified stop diagnostics retain PID, parent PID, executable and start time in
 after the existing identity checks and stop action succeed. This file stays
 outside Git and is retained across stand reset; it does not grant permission
 to stop a process or relax the ownership checks.
+
+## F1 Notifications inbox without push (Emulator only)
+
+Scope and contract: `docs/product/NOTIFICATIONS_F1_INBOX_AMENDMENT.md`
+(owner-accepted 2026-10-08). Booking is the only producer; no FCM/APNs, email,
+SMS, device registration, scheduler or cloud.
+
+- Producer: with the local flag `booking.notification.effects` (its own
+  registry `bookingNotificationFlagIds`, so enabling the Booking commands never
+  changes the outbox) the five Booking write paths store the v2 OD-09 envelope
+  in `bookingOutbox` in the same transaction; off, the v1
+  `suppressedPreActivation` record is unchanged. v1 records are never consumed.
+- `consumeNotificationEffectV1` (`bookingOutbox/{outboxId}` created, `retry:
+  false`, flag `notifications.consume.booking`): trusted backend context with
+  source, producer, schema and Emulator checks, no Session. Claim (Tx1) persists
+  a lease and a started attempt; completion (Tx2) writes the inbox record,
+  terminal receipt and attempt atomically or nothing; failure (Tx3) schedules a
+  retry or a dead letter; an expired lease marks a lost attempt `abandoned`.
+- `notificationsQueryV1` / `notificationsCommandV1` (Session, flags
+  `notifications.inbox` and `notifications.preferences`): list, unread summary,
+  preferences; mark read, mark all read (bounded), archive, update preferences
+  (idempotency key per command). `booking.receipts` can be switched off;
+  `booking.changes` is locked by the local category policy.
+- Stand: `stand-seed.mjs notifications flags on|off <group> | reconcile |
+  replay <receiptId> --reason <text> | status | inbox <label> | receipt
+  <eventId> | prefs-corrupt|prefs-repair <label> | privacy-erase <label>
+  <requestId>`. The stand seed keeps every F1 flag off.
+- Privacy: domain `notifications` in `PrivacyDomainTaskRunner`
+  (`runNotificationsTask`); erasure restricts the account first, deletes
+  records, attempts, command receipts and preferences and turns receipts into
+  tombstones without personal data.
+- Gates: `verify-notifications-layout.mjs` (exact module files, no inbox
+  dependency from Booking/Identity/Privacy, no push/email/SMS SDK, explicit
+  Rules denies) and `node scripts/stand-f1-gate.mjs --yes` (switches the F1
+  flags on, runs `test/backend_local/notifications_inbox_client_test.dart`,
+  reconciles to complete with no dead letter and runs an erasure DSR).
+
+Evidence limits: local Emulator and PC host only; template wording is
+unreviewed fixture text; numbers are test-only; no physical device, LAN or
+cloud claim.

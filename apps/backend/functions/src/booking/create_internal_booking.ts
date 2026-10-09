@@ -9,7 +9,7 @@ import {
   type ActiveBookingKey,
 } from '../inventory/active_key.js';
 import { allocateUnits, reconcileCapacity, type PoolLedger } from '../inventory/ledger.js';
-import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
+import { suppressedOutboxId } from '../notifications/outbox.js';
 import { acquireBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import { bookingCompletionGraceMinutes } from '../security/abuse_policy.js';
 import {
@@ -26,6 +26,7 @@ import {
   type FirestoreFailureLogger,
 } from '../shared/firestore_failure.js';
 import type { ServerClock } from '../shared/server_clock.js';
+import { bookingNotificationEffectsEnabled, bookingOutboxRecord } from './notification_effects.js';
 import {
   assertGuestPolicy,
   assertSupportedEvent,
@@ -81,6 +82,7 @@ export async function createInternalBooking(
   const logicalId = logicalMutationId(actorId, command.commandType, command.idempotencyKey);
   const attemptId = requestAttemptId(actorId, command.requestId);
   try {
+    const notificationEffects = await bookingNotificationEffectsEnabled(dependencies.firestore);
     return await runBookingTransaction(dependencies.firestore, async (transaction) => {
       if (dependencies.mutationAuthorization !== undefined) {
         await assertBookingMutationAuthorized(
@@ -309,7 +311,14 @@ export async function createInternalBooking(
         dependencies.firestore
           .collection(bookingCollections.outbox)
           .doc(suppressedOutboxId(bookingId, 1)),
-        createSuppressedOutbox('booking_confirmation', bookingId, actorId, nowIso),
+        bookingOutboxRecord(notificationEffects, {
+          effect: { kind: 'confirmed' },
+          booking,
+          actorId,
+          revision: 1,
+          occurredAt: nowIso,
+          correlationId: logicalId,
+        }),
       );
       return outcome;
     });

@@ -1,5 +1,5 @@
 import type { BookingAuditFact } from '../audit/booking_audit.js';
-import type { SuppressedBookingOutboxRecord } from '../notifications/outbox.js';
+import type { BookingOutboxRecord } from '../notifications/outbox.js';
 import type { BookingRecord } from './domain.js';
 import type { IdempotencyRecord } from './idempotency.js';
 
@@ -13,8 +13,9 @@ export type PrivacyBookingRecord = BookingRecord & {
   readonly legalHold?: boolean;
 };
 
+/** Outbox v1 and v2 (F1) both carry the subject only in `actorId`. */
 export type BookingIdentityBearingRecord =
-  PrivacyBookingRecord | IdempotencyRecord | BookingAuditFact | SuppressedBookingOutboxRecord;
+  PrivacyBookingRecord | IdempotencyRecord | BookingAuditFact | BookingOutboxRecord;
 
 const pseudonymousActorIdPattern = /^anon_[0-9a-f]{64}$/u;
 

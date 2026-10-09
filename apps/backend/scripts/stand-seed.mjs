@@ -30,6 +30,7 @@ const commands = new Set([
   "handoff",
   "booking-deliver",
   "creator-fixture",
+  "notifications",
 ]);
 
 export function standEnvironment(base) {

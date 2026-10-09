@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/notifications/v1/notifications_command.schema.json",
+  "title": "Recharge Notifications command request union v1 (F1, local stand contract)",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/idempotencyKey" },
+        "commandType": { "const": "markRead" },
+        "sessionContext": { "type": "object" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "notificationId": { "$ref": "#/$defs/notificationId" } },
+          "required": ["notificationId"]
+        }
+      },
+      "required": ["schemaVersion", "requestId", "idempotencyKey", "commandType", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/idempotencyKey" },
+        "commandType": { "const": "archive" },
+        "sessionContext": { "type": "object" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "notificationId": { "$ref": "#/$defs/notificationId" },
+            "expectedRevision": { "type": "integer", "minimum": 1 }
+          },
+          "required": ["notificationId", "expectedRevision"]
+        }
+      },
+      "required": ["schemaVersion", "requestId", "idempotencyKey", "commandType", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/idempotencyKey" },
+        "commandType": { "const": "markAllRead" },
+        "sessionContext": { "type": "object" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cutoffUtc": { "$ref": "#/$defs/utcInstant" },
+            "maxItems": { "type": "integer", "minimum": 1, "maximum": 100 }
+          },
+          "required": ["cutoffUtc", "maxItems"]
+        }
+      },
+      "required": ["schemaVersion", "requestId", "idempotencyKey", "commandType", "payload"]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "idempotencyKey": { "$ref": "#/$defs/idempotencyKey" },
+        "commandType": { "const": "updatePreferences" },
+        "sessionContext": { "type": "object" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "expectedRevision": { "type": "integer", "minimum": 0 },
+            "categories": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": false,
+              "properties": {
+                "booking.receipts": { "$ref": "#/$defs/channels" }
+              }
+            }
+          },
+          "required": ["expectedRevision", "categories"]
+        }
+      },
+      "required": ["schemaVersion", "requestId", "idempotencyKey", "commandType", "payload"]
+    }
+  ],
+  "$defs": {
+    "requestId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" },
+    "idempotencyKey": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{8,128}$" },
+    "notificationId": { "type": "string", "pattern": "^ntf_[0-9a-f]{32}$" },
+    "utcInstant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$"
+    },
+    "channels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "inApp": { "type": "boolean" } },
+      "required": ["inApp"]
+    }
+  }
+}

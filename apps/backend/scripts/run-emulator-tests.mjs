@@ -157,6 +157,10 @@ const expectedBoundedCallableExports = [
   // E2: default-off, Emulator-only Discover read and Content effect trigger.
   "discoverQueryV1",
   "consumeContentEffectV1",
+  // F1: default-off, Emulator-only Notifications inbox and Booking-effect trigger.
+  "notificationsQueryV1",
+  "notificationsCommandV1",
+  "consumeNotificationEffectV1",
 ].sort();
 if (
   JSON.stringify(boundedCallableExports) !==

@@ -8,3 +8,4 @@ export 'src/dto/response/booking_error_dto.dart';
 export 'src/dto/response/booking_hold_dto.dart';
 export 'src/dto/response/booking_policy_dto.dart';
 export 'src/dto/response/booking_result_dto.dart';
+export 'src/dto/response/notification_inbox_dto.dart';

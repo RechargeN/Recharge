@@ -188,7 +188,7 @@ require semantic review of Publisher/capability behavior. Nothing was applied.
 
 ## Future bounded slices (not implemented here)
 
-1. Booking hide fence: specify authoritative transaction fence, races and
+1. `BOOKING-HIDE-FENCE-01` (Booking hide fence): specify authoritative transaction fence, races and
    retry/idempotency behavior, migration/rollback and no-oversell tests before
    real Booking use; no implicit lifecycle change in E2.
 2. Discover covers/organizer: Media read URL authority/lifetime/privacy and
@@ -204,10 +204,14 @@ The following are proposed planning slices, not approved implementations:
 
 | Slice and order | Bounded scope and acceptance | Decision and rollback boundary |
 |---|---|---|
-| F1 — Booking hide fence | Define a Booking-owned fence and its relation to the Content hide commit. Test the race before/after hide, retries and restore ordering; no new booking after the agreed fence, no duplicate booking or inventory leak. Preserve bookings accepted before that boundary. Candidate areas: `booking/create_internal_booking.ts`, `booking/event_projection_consumer.ts`, `booking/occurrence_lifecycle.ts`, Content handoff and their race tests. | Owner accepts the atomicity contract and exact file map first. Dual-aggregate writes are not silently introduced. Backfill existing occurrences before enabling; rollback disables new internal bookings rather than promising a fence that has been removed. Required before real Booking use. |
+| BOOKING-HIDE-FENCE-01 — Booking hide fence | Define a Booking-owned fence and its relation to the Content hide commit. Test the race before/after hide, retries and restore ordering; no new booking after the agreed fence, no duplicate booking or inventory leak. Preserve bookings accepted before that boundary. Candidate areas: `booking/create_internal_booking.ts`, `booking/event_projection_consumer.ts`, `booking/occurrence_lifecycle.ts`, Content handoff and their race tests. | Owner accepts the atomicity contract and exact file map first. Dual-aggregate writes are not silently introduced. Backfill existing occurrences before enabling; rollback disables new internal bookings rather than promising a fence that has been removed. Required before real Booking use. |
 | F2a — Discover covers | Define authorized Media read delivery for published revision/attachment, hide/removal behavior, expiration and cache policy. A published cover renders; unauthorized or hidden assets remain inaccessible; missing/expired covers have a safe fallback. Candidate areas: Media read port/service/entry, Catalog projection, mobile Catalog datasource and Details. | Approve delivery authority and privacy policy, then exact files. Start on local demo fixtures; cloud signing/deployment needs separate authorization. Rollback removes delivery fields and uses the current cover fallback. |
 | F2b — Organizer public projection | Project a public publisher label by stable user/page ID with revision and removal semantics. Feed/Details agree; a rename refreshes through the chosen projection policy, private identity fields never enter Catalog. | Approve the public label source and freshness contract. Rollback ignores the new optional label and keeps existing publisher IDs; no identity verification behavior changes. |
 | F3 — Catalog type and query contracts | Decide BCK08-OD-04 ten-type mapping, OD-05 ranking features/weights, OD-08 cache/freshness thresholds and OD-10 numerical limits. Implement one accepted type family per file map; unsupported types remain denied. Validate revision, visibility, filtering, Details parity and no-public-geo behavior. | Product/architecture decisions precede code. Local fixture bounds remain test-only. Projection version and readers migrate together with rebuild/activation/rollback; cloud indexes and production limits remain separately gated. |
+
+Naming (owner decision 2026-10-08): the name F1 belongs to the Notifications
+inbox slice ([F1 amendment](NOTIFICATIONS_F1_INBOX_AMENDMENT.md)). The hide
+fence is `BOOKING-HIDE-FENCE-01` and keeps its priority before real Booking use.
 
 Payment, online/hybrid, absolute windows, named guests, waitlist and manual
 confirmation are excluded from these slices; each extension needs its own

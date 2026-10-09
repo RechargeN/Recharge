@@ -50,6 +50,15 @@ service cloud.firestore {
     match /eventBookingHandoffReceipts/{document} { allow read, write: if false; }
     match /eventBookingHandoffStates/{document} { allow read, write: if false; }
 
+    // F1 Notifications inbox (Emulator-only). Server-only: clients read and
+    // change their inbox only through the Session-checked callables.
+    match /notificationInboxItems/{document} { allow read, write: if false; }
+    match /notificationEffectReceipts/{document} { allow read, write: if false; }
+    match /notificationDeliveryAttempts/{document} { allow read, write: if false; }
+    match /notificationPreferences/{document} { allow read, write: if false; }
+    match /notificationCommandReceipts/{document} { allow read, write: if false; }
+    match /notificationReconcileCheckpoints/{document} { allow read, write: if false; }
+
     // RAW-C authoritative records are Admin-SDK-only. There is deliberately no
     // client exception, including for owners, flags, projections or outbox.
     match /bookingEventProjections/{document} { allow read, write: if false; }

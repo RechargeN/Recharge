@@ -9,6 +9,7 @@ import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
 import 'discover_catalog_composition.dart';
+import 'notifications_inbox_composition.dart';
 import 'event_publication_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
@@ -819,11 +820,26 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<NotificationsLocalDataSource>(
       () => NotificationsLocalDataSource(sl()),
     )
-    ..registerLazySingleton<NotificationsRepository>(
+    ..registerLazySingleton<NotificationsRepositoryImpl>(
       () => NotificationsRepositoryImpl(localDataSource: sl()),
     )
+    // F1: default-off server inbox; the local inbox otherwise.
+    ..registerLazySingleton<NotificationsInboxTestEntryGuard>(
+      () => NotificationsInboxTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<NotificationsRepository>(
+      () => notificationsRepositoryFor(
+        manifest: notificationsBindingManifest(sl()),
+        local: () => sl<NotificationsRepositoryImpl>(),
+        port: BookingPortNotificationsAdapter(
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+          guard: sl(),
+        ),
+      ),
+    )
+    // Local identity events always land in the local inbox, whatever the binding.
     ..registerLazySingleton<AppNotificationSink>(
-      () => sl<NotificationsRepository>() as AppNotificationSink,
+      () => sl<NotificationsRepositoryImpl>(),
     )
     ..registerLazySingleton<VisitedPlacesLocalDataSource>(
       () => VisitedPlacesLocalDataSource(sl()),

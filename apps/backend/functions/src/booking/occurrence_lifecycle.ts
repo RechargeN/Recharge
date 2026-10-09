@@ -2,9 +2,15 @@ import { FieldPath, type Firestore } from 'firebase-admin/firestore';
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
 import { activeBookingKeyId } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
-import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
+import { suppressedOutboxId } from '../notifications/outbox.js';
 import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import { auditExpiresAt, coreBookingExpiresAt } from './retention.js';
+import {
+  bookingNotificationEffectsEnabled,
+  bookingOutboxRecord,
+  systemCorrelationId,
+  type BookingNotificationEffect,
+} from './notification_effects.js';
 import type { StoredBookingRecord } from './domain.js';
 import {
   bookingCollections,
@@ -109,6 +115,7 @@ async function applyOne(
   bookingId: string,
   event: OccurrenceLifecycleEvent,
 ): Promise<boolean> {
+  const notificationEffects = await bookingNotificationEffectsEnabled(firestore);
   return runBookingTransaction(firestore, async (transaction) => {
     const bookingRef = firestore.collection(bookingCollections.bookings).doc(bookingId);
     const bookingSnapshot = await transaction.get(bookingRef);
@@ -226,17 +233,38 @@ async function applyOne(
     );
     transaction.create(
       firestore.collection(bookingCollections.outbox).doc(suppressedOutboxId(bookingId, revision)),
-      createSuppressedOutbox(
-        event.kind !== 'EventMateriallyRescheduled'
-          ? 'booking_cancellation'
-          : 'booking_reconfirmation',
-        bookingId,
-        booking.userId,
-        event.occurredAt,
-      ),
+      bookingOutboxRecord(notificationEffects, {
+        effect: lifecycleNotificationEffect(event),
+        booking,
+        actorId: booking.userId,
+        revision,
+        occurredAt: event.occurredAt,
+        correlationId:
+          event.kind === 'PrivacyErasureCancellation'
+            ? systemCorrelationId('prv', [bookingId, event.occurredAt])
+            : systemCorrelationId('occ', [
+                event.kind,
+                event.eventId,
+                event.occurrenceId,
+                String(event.publicationRevision),
+                String(event.materialRevision),
+              ]),
+      }),
     );
     return true;
   });
+}
+
+function lifecycleNotificationEffect(event: OccurrenceLifecycleEvent): BookingNotificationEffect {
+  if (event.kind === 'EventMateriallyRescheduled')
+    return {
+      kind: 'reconfirmationRequired',
+      reconfirmationDeadlineUtc: requireReconfirmationDeadline(event.reconfirmationDeadlineUtc),
+    };
+  return {
+    kind: 'cancelled',
+    cause: event.kind === 'PrivacyErasureCancellation' ? 'privacyErasure' : 'occurrenceCancelled',
+  };
 }
 
 function requireReconfirmationDeadline(value: string | undefined): string {

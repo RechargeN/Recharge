@@ -9,11 +9,12 @@ import {
 import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js';
 import { activeBookingKeyId, activeKeyMatches } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
-import { createSuppressedOutbox, suppressedOutboxId } from '../notifications/outbox.js';
+import { suppressedOutboxId } from '../notifications/outbox.js';
 import { FirestoreFeatureFlagGate } from '../platform/config/firestore_feature_flag_gate.js';
 import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
 import { bookingFlagIds } from '../shared/feature_flags.js';
 import { auditExpiresAt, coreBookingExpiresAt } from './retention.js';
+import { bookingNotificationEffectsEnabled, bookingOutboxRecord } from './notification_effects.js';
 import type { StoredBookingRecord } from './domain.js';
 import {
   bookingCollections,
@@ -342,6 +343,7 @@ async function autoCancelMissedReconfirmation(
   acquired: AcquiredDeadlineJob,
   nowUtc: string,
 ): Promise<ReconfirmationDeadlineResult> {
+  const notificationEffects = await bookingNotificationEffectsEnabled(firestore);
   return runBookingTransaction(firestore, async (transaction) => {
     const enabled = await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
       bookingFlagIds.reconfirmationDeadlineWorker,
@@ -473,7 +475,14 @@ async function autoCancelMissedReconfirmation(
     );
     transaction.create(
       firestore.collection(bookingCollections.outbox).doc(suppressedOutboxId(booking.id, revision)),
-      createSuppressedOutbox('booking_cancellation', booking.id, booking.userId, nowUtc),
+      bookingOutboxRecord(notificationEffects, {
+        effect: { kind: 'cancelled', cause: 'missedReconfirmation' },
+        booking,
+        actorId: booking.userId,
+        revision,
+        occurredAt: nowUtc,
+        correlationId: acquired.jobId,
+      }),
     );
     completeJob(transaction, jobRef, nowUtc, 'autoCancelled');
     return 'auto_cancelled';

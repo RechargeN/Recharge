@@ -97,6 +97,41 @@
         { "fieldPath": "contentId", "order": "ASCENDING" },
         { "fieldPath": "pointerRevision", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "deliverUntilUtc", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -156,6 +191,30 @@
     },
     {
       "collectionGroup": "bookingReconfirmationDeadlineOperatorAudit",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationDeliveryAttempts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationCommandReceipts",
       "fieldPath": "expiresAt",
       "ttl": true,
       "indexes": []

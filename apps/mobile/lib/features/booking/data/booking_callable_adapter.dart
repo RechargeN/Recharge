@@ -573,4 +573,7 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'contentQueryV1',
   // E2: default-off Emulator-only Discover read over the server Catalog.
   'discoverQueryV1',
+  // F1: default-off Emulator-only Notifications inbox.
+  'notificationsQueryV1',
+  'notificationsCommandV1',
 };

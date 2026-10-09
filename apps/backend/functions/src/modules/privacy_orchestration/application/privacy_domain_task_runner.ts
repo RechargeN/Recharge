@@ -9,6 +9,20 @@ import {
   FirestoreIdentityAuthorityRepository,
   identityAuthorityCollections,
 } from '../../identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { NotificationsPrivacyTaskHandler } from '../../notifications/application/notifications_privacy_task_handler.js';
+import type { NotificationsStore } from '../../notifications/domain/repositories.js';
+import { FirestoreNotificationsStore } from '../../notifications/infrastructure/firestore_notifications_repository.js';
+
+type PrivacyRequestType = 'access' | 'erasure' | 'restriction';
+type PrivacyTask = Awaited<ReturnType<PrivacyTaskRepository['listByRequest']>>[number];
+type DomainResult =
+  | Readonly<{
+      kind: 'succeeded';
+      evidence: Readonly<{ outcome: 'completed' | 'retained_legal_hold'; retainedCount: number }>;
+    }>
+  | Readonly<{ kind: 'retryableFailure' }>
+  | Readonly<{ kind: 'failed' }>;
+type RunOutcome = 'succeeded' | 'retry_scheduled' | 'failed' | 'not_found';
 
 export class PrivacyDomainTaskRunner {
   constructor(
@@ -21,14 +35,62 @@ export class PrivacyDomainTaskRunner {
     readonly requestId: string;
     readonly taskId: string;
     readonly nowUtc: string;
-  }): Promise<'succeeded' | 'retry_scheduled' | 'failed' | 'not_found' | 'not_booking'> {
+  }): Promise<RunOutcome | 'not_booking'> {
+    const prepared = await this.#prepare(input, 'booking');
+    if (prepared.kind !== 'ready') return prepared.outcome;
+    const { task, requestType } = prepared;
+    const handler = new BookingPrivacyTaskHandler(
+      new FirestoreBookingPrivacyRecordStore(this.firestore, task.subjectId, task.taskId),
+    );
+    const result = await handler.handle({
+      taskType: requestType,
+      subjectId: task.subjectId,
+      pseudonymousActorId: pseudonymousBookingActorId(task.subjectId),
+      nowUtc: input.nowUtc,
+    });
+    return this.#record(task, result, input.nowUtc);
+  }
+
+  /**
+   * F1: the Notifications privacy domain. Erasure restricts the account first
+   * (as for Booking), so a running consumer cannot create a new inbox record
+   * afterwards. A Notifications outage fails only this task, which is retried
+   * independently; the request is complete only once this task succeeded.
+   */
+  async runNotificationsTask(
+    input: {
+      readonly requestId: string;
+      readonly taskId: string;
+      readonly nowUtc: string;
+    },
+    options: Readonly<{ store?: NotificationsStore }> = {},
+  ): Promise<RunOutcome | 'not_notifications'> {
+    const prepared = await this.#prepare(input, 'notifications');
+    if (prepared.kind !== 'ready') return prepared.outcome;
+    const { task, requestType } = prepared;
+    const handler = new NotificationsPrivacyTaskHandler(
+      options.store ?? new FirestoreNotificationsStore(this.firestore),
+      { now: () => new Date(input.nowUtc) },
+    );
+    const result = await handler.handle({ taskType: requestType, subjectId: task.subjectId });
+    return this.#record(task, result, input.nowUtc);
+  }
+
+  async #prepare<D extends 'booking' | 'notifications'>(
+    input: { readonly requestId: string; readonly taskId: string; readonly nowUtc: string },
+    domainId: D,
+  ): Promise<
+    | Readonly<{ kind: 'ready'; task: PrivacyTask; requestType: PrivacyRequestType }>
+    | Readonly<{ kind: 'done'; outcome: RunOutcome | `not_${D}` }>
+  > {
+    const done = (outcome: RunOutcome | `not_${D}`) => ({ kind: 'done' as const, outcome });
     let task = (await this.tasks.listByRequest(input.requestId)).find(
       (candidate) => candidate.taskId === input.taskId,
     );
-    if (task === undefined) return 'not_found';
-    if (task.domainId !== 'booking') return 'not_booking';
-    if (task.status === 'succeeded') return 'succeeded';
-    if (task.status === 'failed' || task.status === 'cancelled') return 'failed';
+    if (task === undefined) return done('not_found');
+    if (task.domainId !== domainId) return done(`not_${domainId}`);
+    if (task.status === 'succeeded') return done('succeeded');
+    if (task.status === 'failed' || task.status === 'cancelled') return done('failed');
     if (task.status === 'pending') {
       const dispatched = await this.orchestration.recordTaskOutcome({
         requestId: task.requestId,
@@ -37,18 +99,18 @@ export class PrivacyDomainTaskRunner {
         nextStatus: 'dispatched',
         occurredAtUtc: input.nowUtc,
       });
-      if (dispatched !== 'saved') return dispatched === 'not_found' ? 'not_found' : 'failed';
+      if (dispatched !== 'saved') return done(dispatched === 'not_found' ? 'not_found' : 'failed');
       task = (await this.tasks.listByRequest(input.requestId)).find(
         (candidate) => candidate.taskId === input.taskId,
       );
-      if (task === undefined) return 'not_found';
+      if (task === undefined) return done('not_found');
     }
 
     const requestSnapshot = await this.firestore
       .collection('privacyRequests')
       .doc(input.requestId)
       .get();
-    if (!requestSnapshot.exists) return 'not_found';
+    if (!requestSnapshot.exists) return done('not_found');
     const requestType: unknown = requestSnapshot.get('requestType');
     if (requestType !== 'access' && requestType !== 'erasure' && requestType !== 'restriction') {
       await this.orchestration.recordTaskOutcome({
@@ -58,7 +120,7 @@ export class PrivacyDomainTaskRunner {
         nextStatus: 'failed',
         occurredAtUtc: input.nowUtc,
       });
-      return 'failed';
+      return done('failed');
     }
     if (requestType === 'erasure') {
       const account = await this.firestore
@@ -71,15 +133,10 @@ export class PrivacyDomainTaskRunner {
         ).setStatus({ userId: task.subjectId, status: 'restricted', nowUtc: input.nowUtc });
       }
     }
-    const handler = new BookingPrivacyTaskHandler(
-      new FirestoreBookingPrivacyRecordStore(this.firestore, task.subjectId, task.taskId),
-    );
-    const result = await handler.handle({
-      taskType: requestType,
-      subjectId: task.subjectId,
-      pseudonymousActorId: pseudonymousBookingActorId(task.subjectId),
-      nowUtc: input.nowUtc,
-    });
+    return { kind: 'ready', task, requestType };
+  }
+
+  async #record(task: PrivacyTask, result: DomainResult, nowUtc: string): Promise<RunOutcome> {
     if (result.kind === 'succeeded') {
       const saved = await this.orchestration.recordTaskOutcome({
         requestId: task.requestId,
@@ -89,7 +146,7 @@ export class PrivacyDomainTaskRunner {
         evidenceId: randomUUID(),
         completionOutcome: result.evidence.outcome,
         retainedCount: result.evidence.retainedCount,
-        occurredAtUtc: input.nowUtc,
+        occurredAtUtc: nowUtc,
       });
       return saved === 'saved' ? 'succeeded' : 'failed';
     }
@@ -99,7 +156,7 @@ export class PrivacyDomainTaskRunner {
         taskId: task.taskId,
         expectedTaskRevision: task.revision,
         nextStatus: 'dispatched',
-        occurredAtUtc: input.nowUtc,
+        occurredAtUtc: nowUtc,
       });
       if (saved === 'saved') return 'retry_scheduled';
     }
@@ -108,7 +165,7 @@ export class PrivacyDomainTaskRunner {
       taskId: task.taskId,
       expectedTaskRevision: task.revision,
       nextStatus: 'failed',
-      occurredAtUtc: input.nowUtc,
+      occurredAtUtc: nowUtc,
     });
     return 'failed';
   }

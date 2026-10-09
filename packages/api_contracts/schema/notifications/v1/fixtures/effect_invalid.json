@@ -1,0 +1,229 @@
+[
+  {
+    "code": "unsupported_effect",
+    "note": "unknown event version is quarantined",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 2,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "code": "unsupported_effect",
+    "note": "unknown event type is quarantined",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.teleported",
+      "eventVersion": 1,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "code": "invalid_effect",
+    "note": "payload never carries a person id",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 1,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z",
+        "recipientId": "leak"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "code": "invalid_effect",
+    "note": "cause only on booking.cancelled",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 1,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z",
+        "cause": "userCancelled"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "code": "invalid_effect",
+    "note": "only Booking produces this obligation",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 1,
+      "producer": "content",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "code": "invalid_effect",
+    "note": "no free text or HTML",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 1,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29T12:00:00.000Z",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z",
+      "htmlBody": "<b>x</b>"
+    }
+  },
+  {
+    "code": "invalid_effect",
+    "note": "UTC instant required",
+    "record": {
+      "schemaVersion": 2,
+      "effectDisposition": "pending",
+      "dispatchable": true,
+      "replayable": true,
+      "eventId": "01JF1FIXTUREBOOKING0000001__r1",
+      "eventType": "booking.confirmed",
+      "eventVersion": 1,
+      "producer": "booking",
+      "aggregateType": "booking",
+      "aggregateId": "01JF1FIXTUREBOOKING0000001",
+      "aggregateRevision": 1,
+      "occurredAt": "2026-08-29",
+      "correlationId": "m1_fixturecreate",
+      "marketId": "LV",
+      "dataClass": "personal",
+      "payload": {
+        "schemaVersion": 1,
+        "eventContentId": "evt_01JF1FIXTUREEVENT00000000",
+        "occurrenceId": "occ_01JF1FIXTUREOCCURRENCE000",
+        "deliverUntilUtc": "2026-09-05T12:00:00.000Z"
+      },
+      "actorId": "user-fixture-1",
+      "createdAt": "2026-08-29T12:00:00.000Z",
+      "retentionClass": "bookingOutbox",
+      "legalHold": false,
+      "expiresAt": "2026-10-05T12:00:00.000Z"
+    }
+  }
+]

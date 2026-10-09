@@ -1,0 +1,74 @@
+[
+  {
+    "schemaVersion": 1,
+    "queryType": "unreadSummary",
+    "requestId": "req-unread",
+    "kind": "succeeded",
+    "unreadCount": 2,
+    "asOfUtc": "2026-08-29T12:00:00.000Z"
+  },
+  {
+    "schemaVersion": 1,
+    "queryType": "listInbox",
+    "requestId": "req-list-1",
+    "kind": "succeeded",
+    "locale": "ru",
+    "view": "active",
+    "items": [
+      {
+        "notificationId": "ntf_0123456789abcdef0123456789abcdef",
+        "category": "booking.receipts",
+        "status": "unread",
+        "revision": 1,
+        "createdAtUtc": "2026-08-29T12:00:01.000Z",
+        "occurredAtUtc": "2026-08-29T12:00:00.000Z",
+        "readAtUtc": null,
+        "archivedAtUtc": null,
+        "template": {
+          "key": "booking.confirmed",
+          "revision": 1
+        },
+        "content": {
+          "title": "Бронь подтверждена",
+          "body": "Ваше место на событии забронировано."
+        },
+        "contentStatus": "rendered",
+        "navigation": {
+          "routeKind": "eventDetails",
+          "objectRef": {
+            "type": "event",
+            "id": "evt_01JF1FIXTUREEVENT00000000"
+          },
+          "routeContractVersion": 1
+        }
+      }
+    ],
+    "nextCursor": null
+  },
+  {
+    "schemaVersion": 1,
+    "commandType": "markRead",
+    "requestId": "req-read",
+    "kind": "succeeded",
+    "notificationId": "ntf_0123456789abcdef0123456789abcdef",
+    "status": "read",
+    "revision": 2,
+    "readAtUtc": "2026-08-29T13:00:00.000Z",
+    "archivedAtUtc": null
+  },
+  {
+    "schemaVersion": 1,
+    "commandType": "updatePreferences",
+    "requestId": "req-prefs",
+    "kind": "rejected",
+    "code": "invalid_preference",
+    "detail": "category_locked"
+  },
+  {
+    "schemaVersion": 1,
+    "queryType": "listInbox",
+    "requestId": "req-list-x",
+    "kind": "rejected",
+    "code": "feature_disabled"
+  }
+]

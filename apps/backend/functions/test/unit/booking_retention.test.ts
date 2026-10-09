@@ -10,6 +10,7 @@ import {
   bookingRetentionDurationDays,
   bookingRetentionPolicyIds,
   idempotencyExpiresAt,
+  notificationOutboxExpiresAt,
   outboxExpiresAt,
   unresolvedBookingRetentionPolicies,
 } from '../../src/booking/retention.js';
@@ -244,5 +245,47 @@ void test('backup restore preserves legal hold and blocks expired accepted recor
       policyId: bookingRetentionPolicyIds.idempotency,
       recordId: 'expired-idempotency',
     },
+  );
+});
+
+void test('F1: a suppressed, expired or erased notification outcome anchors outbox retention', () => {
+  const planner = new BookingRetentionPlanner(acceptedBookingRetentionPolicies());
+  for (const outcome of ['suppressed', 'expired', 'erased']) {
+    const decision = planner.plan(
+      bookingRetentionCandidate({
+        recordId: `outbox-${outcome}`,
+        retentionClass: 'outbox',
+        createdAtUtc: '2026-01-01T00:00:00.000Z',
+        terminalAtUtc: '2026-01-02T00:00:00.000Z',
+        reconciledAtUtc: '2026-01-03T00:00:00.000Z',
+      }),
+      parseUtcInstant('2026-02-03T00:00:00.000Z'),
+    );
+    assert.deepEqual(decision, {
+      action: 'dispatch_deletion',
+      policyId: bookingRetentionPolicyIds.outbox,
+      recordId: `outbox-${outcome}`,
+      expiredAtUtc: '2026-02-02T00:00:00.000Z',
+      physicalDeletionDueByUtc: '2026-02-05T00:00:00.000Z',
+    });
+  }
+  assert.deepEqual(
+    planner.plan(
+      bookingRetentionCandidate({
+        recordId: 'outbox-terminal-unreconciled',
+        retentionClass: 'outbox',
+        createdAtUtc: '2026-01-01T00:00:00.000Z',
+        terminalAtUtc: '2026-01-02T00:00:00.000Z',
+      }),
+      parseUtcInstant('2026-02-03T00:00:00.000Z'),
+    ).action,
+    'retain_delivery_pending',
+  );
+});
+
+void test('F1: a v2 obligation carries its expiry from the declared relevance deadline', () => {
+  assert.equal(
+    notificationOutboxExpiresAt('2026-09-05T12:00:00.000Z').toISOString(),
+    '2026-10-05T12:00:00.000Z',
   );
 });

@@ -67,6 +67,13 @@ import {
 import { handleContentCommand, handleContentQuery, type ContentCaller } from './content_entry.js';
 import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
 import { deliverContentEffects } from './content_effects_entry.js';
+import {
+  consumeBookingNotificationEffect,
+  handleNotificationsCommand,
+  handleNotificationsQuery,
+  notificationFeatures,
+  type NotificationsCaller,
+} from './notifications_entry.js';
 import { catalogFlagIds, contentFlagIds, mediaFlagIds } from './shared/feature_flags.js';
 
 const callableOptions = Object.freeze({
@@ -1020,5 +1027,74 @@ export const consumeContentEffectV1 = onDocumentCreated(
     for (const outcome of outcomes)
       if (outcome.status === 'failed' || outcome.status === 'stopped')
         logError('content_effect_consumer_incomplete', outcome);
+  },
+);
+
+// Emulator-only Notifications inbox (F1). Both callables need a valid Session
+// (same backend-time authority as Booking) and their own local flag; the
+// caller is the Session subject, never a client-supplied user id.
+export const notificationsQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareNotificationsCaller(request);
+  return prepared.ok ? handleNotificationsQuery(prepared.caller, request.data) : prepared.result;
+});
+
+export const notificationsCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const prepared = await prepareNotificationsCaller(request);
+  return prepared.ok ? handleNotificationsCommand(prepared.caller, request.data) : prepared.result;
+});
+
+async function prepareNotificationsCaller(
+  request: CallableRequest<unknown>,
+): Promise<
+  | { readonly ok: true; readonly caller: NotificationsCaller }
+  | { readonly ok: false; readonly result: Readonly<Record<string, unknown>> }
+> {
+  const refuse = (code: string) => ({
+    ok: false as const,
+    result: { schemaVersion: 1, kind: 'rejected', code },
+  });
+  const access = prepareTransport(request);
+  if (!access.ok) return refuse('unauthenticated');
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    systemServerClock.now(),
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return refuse('unauthenticated');
+  const features = await notificationFeatures(access.firestore);
+  if (!features.inbox && !features.preferences) return refuse('feature_disabled');
+  return {
+    ok: true,
+    caller: { firestore: access.firestore, userId: decision.userId, features },
+  };
+}
+
+// Emulator-only consumer of Booking notification obligations (F1). A trusted
+// backend context without a Session: the source path, producer, schema and
+// local consumer flag are checked. No retry: a failed or disabled consumer
+// leaves the obligation for the stand reconciliation, never for Booking.
+export const consumeNotificationEffectV1 = onDocumentCreated(
+  {
+    document: 'bookingOutbox/{outboxId}',
+    region: 'europe-west1',
+    retry: false,
+  },
+  async (event) => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined || event.data === undefined) return;
+    try {
+      const outcome = await consumeBookingNotificationEffect(firestore, {
+        collection: event.data.ref.parent.id,
+        outboxId: event.params.outboxId,
+        data: event.data.data(),
+      });
+      if (outcome === 'source_refused' || outcome === 'failed_unrecorded')
+        logError('notification_effect_unconsumed', { outcome });
+    } catch (error) {
+      logError('notification_effect_unconsumed', {
+        outcome: 'claim_failed',
+        code: (error as { code?: unknown } | null)?.code ?? 'unexpected',
+      });
+    }
   },
 );

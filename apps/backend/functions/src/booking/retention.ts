@@ -27,6 +27,11 @@ export interface BookingRetentionCandidate {
   readonly legalHold: boolean;
   readonly deliveredAtUtc?: UtcInstant;
   readonly reconciledAtUtc?: UtcInstant;
+  /**
+   * `core`: the Booking terminal time. `outbox`: any terminal Notifications
+   * outcome (created, suppressed, expired, erased), so a suppressed or expired
+   * obligation is not retained forever waiting for a delivery (F1 §8).
+   */
   readonly terminalAtUtc?: UtcInstant;
 }
 
@@ -65,15 +70,16 @@ export class BookingRetentionPlanner {
     const policyId = bookingRetentionPolicyIds[candidate.retentionClass];
     if (candidate.legalHold)
       return { action: 'retain_legal_hold', policyId, recordId: candidate.recordId };
+    const outcomeAtUtc = candidate.deliveredAtUtc ?? candidate.terminalAtUtc;
     if (
       candidate.retentionClass === 'outbox' &&
-      (candidate.deliveredAtUtc === undefined || candidate.reconciledAtUtc === undefined)
+      (outcomeAtUtc === undefined || candidate.reconciledAtUtc === undefined)
     ) {
       return { action: 'retain_delivery_pending', policyId, recordId: candidate.recordId };
     }
     const retentionAnchorUtc =
       candidate.retentionClass === 'outbox'
-        ? laterInstant(candidate.deliveredAtUtc, candidate.reconciledAtUtc)
+        ? laterInstant(outcomeAtUtc, candidate.reconciledAtUtc)
         : candidate.retentionClass === 'core' && candidate.terminalAtUtc !== undefined
           ? laterInstant(candidate.createdAtUtc, candidate.terminalAtUtc)
           : candidate.createdAtUtc;
@@ -199,6 +205,15 @@ export function outboxExpiresAt(
   if (legalHold || deliveredAtUtc === undefined || reconciledAtUtc === undefined) return undefined;
   const anchor = laterInstant(parseUtcInstant(deliveredAtUtc), parseUtcInstant(reconciledAtUtc));
   return new Date(retentionExpiryUtc('outbox', anchor));
+}
+
+/**
+ * F1: a v2 notification obligation expires a full outbox retention period after
+ * the relevance deadline its producer declared. By then every Notifications
+ * outcome is terminal (late work is `expired`), so no outcome waits forever.
+ */
+export function notificationOutboxExpiresAt(deliverUntilUtc: string): Date {
+  return new Date(retentionExpiryUtc('outbox', parseUtcInstant(deliverUntilUtc)));
 }
 
 export function suppressedOutboxExpiresAt(

@@ -41,6 +41,14 @@ async function main(args: readonly string[]): Promise<void> {
     process.stdout.write(`${JSON.stringify(await runHandoff(firestore, rest))}\n`);
     return;
   }
+  if (command === 'notifications') {
+    // Loaded only for this command, so F1 adds nothing to the start-up time of
+    // the other stand commands (B2 measures timing-sensitive sequences).
+    const { runNotifications } = await import('./stand_notifications.js');
+    process.stdout.write(`${JSON.stringify(await runNotifications(firestore, rest))}
+`);
+    return;
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

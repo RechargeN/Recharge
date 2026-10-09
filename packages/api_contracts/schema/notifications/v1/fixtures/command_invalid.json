@@ -1,0 +1,64 @@
+[
+  {
+    "code": "invalid_preference",
+    "detail": "category_locked",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-locked",
+      "idempotencyKey": "idem-locked-0001",
+      "commandType": "updatePreferences",
+      "payload": { "expectedRevision": 0, "categories": { "booking.changes": { "inApp": false } } }
+    }
+  },
+  {
+    "code": "invalid_preference",
+    "detail": "channel_unknown",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-push",
+      "idempotencyKey": "idem-push-0001",
+      "commandType": "updatePreferences",
+      "payload": { "expectedRevision": 0, "categories": { "booking.receipts": { "push": true } } }
+    }
+  },
+  {
+    "code": "max_items_invalid",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-mark-all",
+      "idempotencyKey": "idem-mark-all-0002",
+      "commandType": "markAllRead",
+      "payload": { "cutoffUtc": "2026-08-29T12:00:00.000Z", "maxItems": 101 }
+    }
+  },
+  {
+    "code": "notification_id_invalid",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-read",
+      "idempotencyKey": "idem-read-0002",
+      "commandType": "markRead",
+      "payload": { "notificationId": "https://example.invalid/route" }
+    }
+  },
+  {
+    "code": "idempotency_key_invalid",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-short",
+      "idempotencyKey": "short",
+      "commandType": "markRead",
+      "payload": { "notificationId": "ntf_0123456789abcdef0123456789abcdef" }
+    }
+  },
+  {
+    "code": "command_type_unsupported",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "req-register",
+      "idempotencyKey": "idem-register-0001",
+      "commandType": "registerPush",
+      "payload": {}
+    }
+  }
+]

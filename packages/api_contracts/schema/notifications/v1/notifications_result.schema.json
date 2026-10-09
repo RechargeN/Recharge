@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/notifications/v1/notifications_result.schema.json",
+  "title": "Recharge Notifications result union v1 (F1, local stand contract)",
+  "oneOf": [
+    { "$ref": "#/$defs/refusal" },
+    { "$ref": "#/$defs/inboxPage" },
+    { "$ref": "#/$defs/unreadSummary" },
+    { "$ref": "#/$defs/preferences" },
+    { "$ref": "#/$defs/itemState" },
+    { "$ref": "#/$defs/markAllRead" }
+  ],
+  "$defs": {
+    "requestId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" },
+    "notificationId": { "type": "string", "pattern": "^ntf_[0-9a-f]{32}$" },
+    "utcInstant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$"
+    },
+    "nullableInstant": { "oneOf": [{ "$ref": "#/$defs/utcInstant" }, { "type": "null" }] },
+    "status": { "enum": ["unread", "read", "archived"] },
+    "category": { "enum": ["booking.receipts", "booking.changes"] },
+    "refusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "queryType": { "type": "string", "maxLength": 64 },
+        "commandType": { "type": "string", "maxLength": 64 },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "enum": ["rejected", "unsupported"] },
+        "code": { "type": "string", "pattern": "^[a-z_]+(:[A-Za-z0-9_]+)?$" },
+        "detail": { "type": "string", "pattern": "^[a-z_]+$" },
+        "currentRevision": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["schemaVersion", "kind", "code"]
+    },
+    "content": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "body": { "type": "string", "minLength": 1, "maxLength": 1000 }
+          },
+          "required": ["title", "body"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "notificationId": { "$ref": "#/$defs/notificationId" },
+        "category": { "$ref": "#/$defs/category" },
+        "status": { "$ref": "#/$defs/status" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "createdAtUtc": { "$ref": "#/$defs/utcInstant" },
+        "occurredAtUtc": { "$ref": "#/$defs/utcInstant" },
+        "readAtUtc": { "$ref": "#/$defs/nullableInstant" },
+        "archivedAtUtc": { "$ref": "#/$defs/nullableInstant" },
+        "template": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "key": { "type": "string", "pattern": "^[a-z][a-zA-Z.]{1,80}$" },
+            "revision": { "type": "integer", "minimum": 1 }
+          },
+          "required": ["key", "revision"]
+        },
+        "content": { "$ref": "#/$defs/content" },
+        "contentStatus": { "enum": ["rendered", "unsupported_locale", "template_unavailable"] },
+        "navigation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "routeKind": { "const": "eventDetails" },
+            "objectRef": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": { "const": "event" },
+                "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,200}$" }
+              },
+              "required": ["type", "id"]
+            },
+            "routeContractVersion": { "const": 1 }
+          },
+          "required": ["routeKind", "objectRef", "routeContractVersion"]
+        }
+      },
+      "required": [
+        "notificationId",
+        "category",
+        "status",
+        "revision",
+        "createdAtUtc",
+        "occurredAtUtc",
+        "readAtUtc",
+        "archivedAtUtc",
+        "template",
+        "content",
+        "contentStatus",
+        "navigation"
+      ]
+    },
+    "inboxPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "queryType": { "const": "listInbox" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "const": "succeeded" },
+        "locale": { "enum": ["lv-LV", "en", "ru"] },
+        "view": { "enum": ["active", "archived"] },
+        "items": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/item" } },
+        "nextCursor": { "oneOf": [{ "type": "string", "maxLength": 512 }, { "type": "null" }] }
+      },
+      "required": ["schemaVersion", "queryType", "requestId", "kind", "locale", "view", "items", "nextCursor"]
+    },
+    "unreadSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "queryType": { "const": "unreadSummary" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "const": "succeeded" },
+        "unreadCount": { "type": "integer", "minimum": 0 },
+        "asOfUtc": { "$ref": "#/$defs/utcInstant" }
+      },
+      "required": ["schemaVersion", "queryType", "requestId", "kind", "unreadCount", "asOfUtc"]
+    },
+    "categoryDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "category": { "$ref": "#/$defs/category" },
+        "inApp": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "enabled": { "type": "boolean" }, "locked": { "type": "boolean" } },
+          "required": ["enabled", "locked"]
+        }
+      },
+      "required": ["category", "inApp"]
+    },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "queryType": { "const": "getPreferences" },
+        "commandType": { "const": "updatePreferences" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "const": "succeeded" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "policyRevision": { "type": "integer", "minimum": 1 },
+        "channels": { "type": "array", "items": { "const": "inApp" } },
+        "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryDecision" } },
+        "replayed": { "const": true }
+      },
+      "required": ["schemaVersion", "requestId", "kind", "revision", "policyRevision", "categories"]
+    },
+    "itemState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "enum": ["markRead", "archive"] },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "const": "succeeded" },
+        "notificationId": { "$ref": "#/$defs/notificationId" },
+        "status": { "$ref": "#/$defs/status" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "readAtUtc": { "$ref": "#/$defs/nullableInstant" },
+        "archivedAtUtc": { "$ref": "#/$defs/nullableInstant" },
+        "replayed": { "const": true }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "kind", "notificationId", "status", "revision"]
+    },
+    "markAllRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "commandType": { "const": "markAllRead" },
+        "requestId": { "$ref": "#/$defs/requestId" },
+        "kind": { "const": "succeeded" },
+        "updated": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "remaining": { "type": "boolean" },
+        "cutoffUtc": { "$ref": "#/$defs/utcInstant" },
+        "replayed": { "const": true }
+      },
+      "required": ["schemaVersion", "commandType", "requestId", "kind", "updated", "remaining", "cutoffUtc"]
+    }
+  }
+}

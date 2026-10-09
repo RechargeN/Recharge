@@ -1,7 +1,7 @@
 # Recharge Backend — единая карта документов и дальнейшей реализации
 
 - ID: **BCK-02**
-- Version: **2.4.113**
+- Version: **2.4.114**
 - Date: **2026-10-08**
 - Spec status: **Approved — canonical coordination baseline, documentation only**
 - Runtime status: **N/A — documentation-only coordination**
@@ -43,7 +43,27 @@ bounded slices. E1/E2 numerical test limits are not production defaults.
 The closure audit, Desktop transfer plan and device checklist are recorded in
 [C1–E2 closure review](C1_E2_CLOSURE_REVIEW.md).
 
+### Local F1 Notifications amendment (2026-10-08)
+
+F1 adds the Notifications inbox without push to the bounded local stand:
+Booking (the only producer) writes v2 obligations in the accepted OD-09
+envelope behind a default-off flag; BCK-13 consumes them into at most one
+inbox record per effect and recipient, with persisted claim/lease attempts,
+pinned template and policy revisions, explicit local category preferences,
+minimal suppression receipts, two-cursor reconciliation, retention for every
+terminal outcome and a `notifications` privacy domain. Normative scope and
+exact file map: [F1 amendment](NOTIFICATIONS_F1_INBOX_AMENDMENT.md).
+
+FCM/APNs, email, SMS, device registration, scheduler and cloud remain absent;
+BCK13-OD-01, OD-04, OD-05, OD-06, OD-08 and OD-10 are not closed by the local
+contract. The former "F1 — Booking hide fence" planning slice is renamed
+`BOOKING-HIDE-FENCE-01` and keeps its priority before real Booking use.
+
 ## 0. Changelog
+
+**v2.4.114.** Records the owner-accepted local F1 Notifications amendment and
+the rename of the hide-fence planning slice to `BOOKING-HIDE-FENCE-01`.
+Environment, production and BCK-13 Review boundaries remain unchanged.
 
 **v2.4.113.** Records the owner-authorized local closure follow-up, visible
 security-gate corrections, Desktop transfer plan, physical-device checklist
