@@ -1,0 +1,4 @@
+{
+  "stage": "inspect",
+  "note": "D1-L: inspect downloads and checks ClamAV and the official databases only; the owner switches to test after reading the report (docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §15)."
+}

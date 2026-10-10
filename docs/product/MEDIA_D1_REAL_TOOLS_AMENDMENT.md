@@ -214,6 +214,7 @@ GPL для движка и CC BY-ND 2.5 для содержимого сайта
 | libvips и зависимые DLL (№ 6) | загружаются только процессом-обработчиком сервиса инструментов (§4) на этом PC, как отдельные динамические библиотеки; runtime Functions `sharp` не загружает | нет | пакет не изменяется; `LICENSE` и уведомления о сторонних компонентах внутри пакета остаются на месте; их точный список и SHA-256 записываются в `media-tools.lock.json` после установки |
 | WASM-сборка (№ 9) и `@emnapi/runtime` (№ 10) | лежат в `node_modules`, не используются: обработчик требует нативную привязку и отвечает `failed`, если загружена бы WASM-сборка | нет | как выше |
 | `sharp` (№ 5), `@img/colour` (№ 7), `detect-libc` (№ 8) | JS-код обработчика | нет | как выше |
+| `@img/sharp-libvips-linux-x64` 1.3.4 (LGPL-3.0-or-later) и `@img/sharp-linux-x64` 0.35.5 (Apache-2.0), версии из lock (§15.4) | только на одноразовом CI runner `ubuntu-24.04` Linux gate (§15); libvips — отдельная динамическая библиотека | нет: runner уничтожается, артефактов и кеша нет | пакеты не изменяются; имена, размеры и SHA-256 файлов лицензий записываются в отчёт CI (стадия `inspect`) |
 | ClamAV `clamd.exe` и DLL (№ 2) | отдельная программа без изменений на `127.0.0.1` из `%LOCALAPPDATA%\Recharge\tools\clamav-1.5.4`; с кодом проекта не связывается и не компонуется | нет | `COPYING*` из архива лежат рядом с бинарниками без изменений |
 | Тестовая база `recharge-stand.ndb` | данные стенда, создаются из константы проекта | нет | — (собственный файл) |
 | Официальные базы (№ 11, только L2) | данные для локальной проверки | нет; не зеркалируются, не попадают в репозиторий | файлы как есть; версии и SHA-256 — в lock |
@@ -240,11 +241,14 @@ GPL для движка и CC BY-ND 2.5 для содержимого сайта
 
 Любое распространение — deploy, образ контейнера, передача стенда или
 сборки — снимает эту оценку и требует новой лицензионной проверки до него.
-Расширение allowlist `verify-toolchain.mjs` выражениями
-`Apache-2.0 AND LGPL-3.0-or-later` и `Apache-2.0 AND LGPL-3.0-or-later AND MIT`
-делается только после принятия этой записки владельцем, с комментарием-ссылкой
-на неё и с пометкой «только локальный стенд»; само расширение не доказывает
-выполнение лицензионных требований.
+`verify-toolchain.mjs` разрешает эти лицензии **поштучно**, по имени и
+версии пакета, а не как класс лицензий: `@img/sharp-win32-x64@0.35.5`
+(`Apache-2.0 AND LGPL-3.0-or-later`), `@img/sharp-wasm32@0.35.5`
+(`Apache-2.0 AND LGPL-3.0-or-later AND MIT`) и
+`@img/sharp-libvips-linux-x64@1.3.4` (`LGPL-3.0-or-later`, решение владельца
+2026-10-09: только CI и локальный стенд). Другая версия или другой пакет с
+этими лицензиями падает на проверке и требует нового решения; само разрешение
+не доказывает выполнение лицензионных требований.
 
 ### 3.7 Сеть и разрешения
 
@@ -836,6 +840,173 @@ D1 не объявляется Done и не считается зелёным, �
 | D1-gate | пройден: «Windows-local verified», «daily freshness: NOT APPLIED — official database absent (L1)», «EICAR: not run here — Linux gate open», «Linux: not verified» |
 | полный регресс (npm 10.9.8) | tsc, eslint, prettier, unit 663/663, contract, integration 180/180, stand, `media-tools.test.mjs` 9/9, все `verify-*`, `verify-toolchain`, три contract-проверки, gates D1, F1, E2, E2a, E1, C3, C2, C1, B2, B1, acceptance, `api_contracts`, `flutter analyze` 0, `flutter test` 1303/20 skip, границы 71/71, `git diff --check` — зелёные |
 | сбои инфраструктуры в регрессе | `test:emulator`: Pub/Sub-эмулятор вышел с кодом 1 посреди последнего файла (`pubsub-debug.log` пуст, ни один тест не упал); повтор — 181/181. F2-gate: два параллельных `flutter test` одновременно скопировали `build\native_assets\…\native_assets.json` (`PathExistsException`, гонка инструмента Flutter); повтор — пройден. Гонка возможна и в E2-gate: два клиента в одном каталоге приложения — открытый риск самих gates, D1 их не меняет |
+
+## 15. D1-L: Linux gate в CI — план (2026-10-09, до кода)
+
+Решения владельца (2026-10-09): Linux gate закрывается на GitHub-runner
+`ubuntu-24.04`; официальные базы ClamAV разрешено скачивать через `freshclam` и
+использовать только для внутреннего Linux gate в CI — не добавлять в Git,
+публикуемые артефакты или образы, не создавать зеркало; подписи проверяются,
+версии и SHA-256 записываются, `COPYING` и другие уведомления из скачанных баз
+извлекаются и фиксируются; если их нет или они оставляют конкретную
+неопределённость для нашего использования — сообщить владельцу до
+тестирования. Развёртывание Firebase в этап не входит. Перед push — итоговый
+diff и состав коммитов.
+
+### 15.1 Запуск
+
+- Новый workflow `.github/workflows/backend-d1-linux.yml`, только
+  `ubuntu-24.04`, `permissions: contents: read`, actions закреплены теми же SHA,
+  что в `toolchain.lock.json`; нет `upload-artifact`, `cache`, `id-token`;
+  checkout без сохранённых учётных данных.
+- `workflow_dispatch` GitHub допускает только для workflow из ветки по
+  умолчанию, поэтому запуск — `push` в `codex/recharge-integration` с фильтром
+  путей: сам workflow и файл стадии `apps/backend/ci/d1-linux-stage.json`.
+- Две стадии — ручная контрольная точка между ними:
+  1. `inspect`: только скачивание и проверка баз и лицензионных уведомлений,
+     отчёт в step summary; тесты не запускаются. Результат приносится
+     владельцу.
+  2. `test`: полный Linux gate. Переход — отдельным коммитом, меняющим
+     стадию, после решения владельца по отчёту `inspect`.
+- Базы, распакованные CVD и отчёты существуют только во временном каталоге
+  runner'а и уничтожаются вместе с ним; в step summary попадают версии, даты,
+  SHA-256 и текст уведомлений.
+
+### 15.2 Стадия `inspect`
+
+1. ClamAV 1.5.4 `.deb` для x86_64: SHA-256 из манифеста, GPG-подпись тем же
+   ключом Cisco Talos (закреплённый коммит), распаковка `dpkg-deb -x` во
+   временный каталог — без установки в систему.
+2. `freshclam` (из того же `.deb`) один раз с отдельным `freshclam.conf`
+   (`DatabaseDirectory` в пустом каталоге) и сторожем бюджета: лимит —
+   меньшее из 400 МБ и остатка общего бюджета 700 МБ; при нулевом остатке
+   `freshclam` не запускается. Сторож опрашивает каталог раз в 500 мс, а при
+   выходе `freshclam` рост проверяется ещё раз при любом коде выхода — рывок
+   между опросами тоже отклоняется. Затем итог журнала сверяется с общим
+   бюджетом. Обязателен набор `main`, `daily`, `bytecode` — каждая ровно в
+   одной форме `.cvd` или `.cld`. При превышении бюджета или неполном наборе
+   каталог уходит в `_rejected`, и обе стадии падают до отчёта. Ту же проверку
+   набора повторяют `inspect`, список открытых пунктов и запуск `clamd` в
+   режиме `official`.
+3. Для каждого `.cvd`/`.cld`: `sigtool --info` (версия, дата сборки, число
+   сигнатур, проверка цифровой подписи), SHA-256, размер.
+4. `sigtool --unpack` во временный каталог; перечень файлов; полный текст
+   `COPYING` и любых файлов уведомлений (`COPYING*`, `LICENSE*`, `NOTICE*`,
+   `README*`) — в отчёт. Отсутствие `COPYING` — явная строка «NOT FOUND».
+5. Итог `inspect` — таблица версий/SHA-256 и тексты уведомлений; формулировка
+   §3.5 «условия не опубликованы» заменяется результатом этой проверки.
+
+### 15.3 Стадия `test`
+
+- Всё из `inspect`, затем: `npm ci --ignore-scripts` (ставит
+  `@img/sharp-linux-x64` и `@img/sharp-libvips-linux-x64` по SRI lock),
+  сборка, unit-тесты D1 и охранный тест Media.
+- Потолок памяти на Linux — cgroup v2 через `sudo systemd-run --scope
+  --uid=$(id -u) --gid=$(id -g) -p MemoryMax=… -p MemorySwapMax=0
+  -p TasksMax=…`; остановка `systemctl stop <scope>` завершает все процессы
+  scope (аналог `KILL_ON_JOB_CLOSE`). Самопроверка L1–L6 — те же утверждения,
+  что J1–J6: лимиты scope (`systemctl show`), членство обработчика
+  (`/proc/<pid>/cgroup`), отказ/OOM-kill обработчика при превышении,
+  освобождение памяти после таймаута (`MemoryCurrent`), отказ запуска,
+  проверяемая остановка.
+- `clamd` из распакованного `.deb` с официальными базами **и** тестовой базой
+  стенда в одном каталоге; режим `official` (без исключения стенда).
+- Проверки:
+  - конвейер изображений на нативной Linux-сборке (`image_pipeline.test`);
+  - сервис (`media_tools_host.test`);
+  - настоящий `clamd` с официальными базами: EICAR (собирается только в
+    памяти) → `rejected`; чистый файл в обычном режиме → `clean` при `fresh`;
+    маркер стенда, маркер в сжатом ZIP, вложенность, повреждения — как на
+    Windows;
+  - путь через Storage-эмулятор (`emulators:exec --only auth,firestore,storage`):
+    JPEG с GPS → `ready`, варианты в Storage без метаданных, `toolRevision`
+    `clamav-1.5.4/daily-<N>`; EICAR через Storage → `blocked`; маркер →
+    `blocked`; сервис недоступен → карантин, повтор → `ready`; полиглот; SVG.
+- Тесты, рассчитанные на L1 (официальной базы нет), получают режим из
+  `access.json`/окружения и проверяют ожидания своего режима; режим L1 на
+  Windows не меняется.
+
+### 15.4 Манифест скачиваний на runner
+
+| Что | Источник | Размер | Проверка |
+|---|---|---|---|
+| Node.js 22.23.2 linux-x64 | `actions/setup-node` (закреплённый SHA) | — | `node-v22.23.2-linux-x64.tar.xz` SHA-256 `d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307` |
+| Temurin 21.0.12+8 | `actions/setup-java` (закреплённый SHA) | — | `verify-signature: true` |
+| npm-зависимости functions | `npm ci` по lock | как в R0 CI | SRI lock; в том числе `@img/sharp-linux-x64` 0.35.5 (`sha512-SxFtLTeJ…NoNog==`, 427 138 Б, Apache-2.0) и `@img/sharp-libvips-linux-x64` 1.3.4 (`sha512-GJ//SSXb…U1zkw==`, 18 711 101 Б, LGPL-3.0-or-later) |
+| ClamAV 1.5.4 `.deb` x86_64 | `https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.4/clamav-1.5.4.linux.x86_64.deb` | 105 819 396 Б | SHA-256 `28d6efc5b4423e7830c3559339552eb53870a9eac51ac4efb37d60530d329886` + GPG |
+| подпись `.deb` | тот же путь + `.sig` | 801 Б | SHA-256 `1fa7a94df398345b89aeaf8eb4098834946296560266ff17b4cd05f9d8679a15` |
+| ключ Cisco Talos | закреплённый коммит (§3.1 № 4) | 3 858 Б | git blob и SHA-256 из §14 |
+| Firestore emulator 1.22.0 | firebase-tools 15.28.1 сам | 136 707 194 Б | MD5 `5d74cc6bee9e18560d2eae2c6440fd13` (проверяет firebase-tools) |
+| Storage rules runtime 1.1.3 | firebase-tools 15.28.1 сам | 52 892 936 Б | MD5 `2ca11ec1193003bea89f806cc085fa25` |
+| официальные базы | `freshclam` → database.clamav.net | ≤ 400 000 000 Б (сторож) | цифровая подпись CVD; SHA-256 и версии — в отчёт |
+
+Бюджет специфичных для D1-L скачиваний: ≤ 700 МБ (ClamAV 106 МБ + jar
+190 МБ + базы ≤ 400 МБ); Node, JDK и `npm ci` — как в существующем R0 CI.
+
+### 15.5 Лицензии: решение владельца (2026-10-09)
+
+`@img/sharp-libvips-linux-x64` 1.3.4 (`LGPL-3.0-or-later`, версия из lock)
+разрешён для CI и локального стенда, только этот пакет и эта версия; это не
+общее одобрение LGPL-зависимостей. Записка §3.6 дополнена, `verify-toolchain`
+проверяет лицензии поштучно (§3.6). Лицензионные уведомления пакета не
+изменяются; их имена, размеры и SHA-256 записывает стадия `inspect`.
+`@img/sharp-linux-x64` — Apache-2.0, разрешён общим списком.
+
+### 15.6 Push: что произойдёт
+
+- Удалённая `codex/recharge-integration` на `42f8850`; push отправит
+  7 коммитов: C1–E2 владельца (`fc3ab4f`, `d1ad5ac`, `2529a54`) и F1, F2, D1,
+  гонка, плюс коммит(ы) D1-L.
+- Push запустит и существующие workflow по их фильтрам путей (`backend-r0` на
+  ubuntu и windows, `backend-r1` и др.); их результаты — дополнительные
+  доказательства и возможные новые находки, которые разбираются отдельно.
+
+### 15.7 Карта файлов D1-L
+
+```text
+новые:
+  .github/workflows/backend-d1-linux.yml
+  apps/backend/ci/d1-linux-stage.json            стадия: inspect | test
+  apps/backend/scripts/media-tools-linux.mjs     .deb, freshclam, inspect, cgroup-scope, start/stop/selftest
+  apps/backend/scripts/media-tools-linux.test.mjs
+  apps/backend/scripts/stand-d1-linux-gate.mjs   inspect | test
+изменяемые:
+  apps/backend/media-tools.lock.json             раздел linux (артефакты §15.4)
+  apps/backend/scripts/media-tools.mjs           выбор платформы для start/stop/status/selftest
+  apps/backend/scripts/verify-toolchain.mjs      LGPL-3.0-or-later — после согласия §15.5
+  apps/backend/functions/test/media_tools/clamd_scan.test.ts           режимы L1 / official, EICAR на Linux
+  apps/backend/functions/test/emulator/media_real_tools_flow.test.ts   режим official, EICAR через Storage
+  docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md  §3.5 (результат inspect), §12, §14, §15
+  docs/architecture/LAUNCH_STATUS.md             строка D1 после результата
+```
+
+### 15.7a Добавлено при реализации
+
+- `media_tools_host.ts`: на Linux токены приходят в файле с правами 0600,
+  который хост читает и сразу удаляет (`RECHARGE_TOOLS_SECRETS_FILE`): `sudo`
+  отбрасывает окружение, а `systemd-run --scope` остаётся родителем процесса,
+  поэтому токены не идут ни в командную строку, ни в окружение родителя.
+  Остальные переменные передаются через `/usr/bin/env` внутри scope (`sudo`
+  удаляет `LD_*`).
+- `clamd.conf`: `Bytecode yes` только с официальными базами; на Windows (L1)
+  по-прежнему `no`.
+- EICAR через Storage идёт как член ZIP за JPEG: официальная сигнатура EICAR —
+  хэш точного файла, а сам EICAR не прошёл бы проверку первых байтов при
+  загрузке; `clamd` распаковывает ZIP.
+- `stand-d1-gate.mjs` (Windows): каждый пропуск должен иметь одну из
+  разрешённых причин (Defender для EICAR; «Linux gate only» для проверок с
+  официальными базами), число пропусков сверяется; на Linux допускаются
+  только пропуски «L1 only».
+- `clamd_scan.test.ts` и `media_real_tools_flow.test.ts` получают режим базы
+  (`stand` / `official`) из окружения и `access.json`; ожидания L1 на Windows
+  не изменились.
+
+### 15.8 Статус
+
+До зелёной стадии `test` статус остаётся **Windows-local verified / Linux gate
+open**. После неё — «Windows-local verified / Linux CI verified (official
+databases, EICAR, image pipeline, Storage path)»; OD-03/04/05 по-прежнему
+открыты.
 
 ## Приложение A. Проверенный состав F2 (до первой правки D1)
 

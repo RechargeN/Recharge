@@ -56,6 +56,27 @@ function run(args, options) {
   return output;
 }
 
+/**
+ * The only skips a Windows D1 gate accepts: EICAR (Defender, §8) and checks
+ * that need the official databases of the Linux gate (§15).
+ */
+export const allowedSkips = Object.freeze([
+  "Defender real-time protection active",
+  "Linux gate only: needs the official databases",
+]);
+
+/** Every skip must carry one of the allowed reasons; returns how many there were. */
+export function allowedSkipCount(output) {
+  const skips = [...output.matchAll(/# SKIP (.*)$/gmu)].map(
+    (match) => match[1],
+  );
+  const foreign = skips.filter(
+    (reason) => !allowedSkips.some((allowed) => reason.startsWith(allowed)),
+  );
+  if (foreign.length > 0) fail(`unexpected skips: ${JSON.stringify(foreign)}`);
+  return skips.length;
+}
+
 /** node:test summary counters from TAP output. */
 export function counts(output) {
   const value = (name) =>
@@ -98,15 +119,13 @@ export async function main(args) {
         { cwd: functionsDir },
       );
       const result = counts(output);
-      const skippedEicar = /# SKIP Defender real-time protection active/u.test(
-        output,
-      );
-      if (result.fail !== 0 || result.skipped !== 1 || !skippedEicar)
+      const skipped = allowedSkipCount(output);
+      if (result.fail !== 0 || result.skipped !== skipped || skipped !== 2)
         fail(
-          `tool tests: ${JSON.stringify(result)}; only the EICAR test may be skipped`,
+          `tool tests: ${JSON.stringify(result)}; only EICAR and the official-database check may be skipped`,
         );
       process.stdout.write(
-        `  ${result.pass} passed, EICAR skipped (Linux gate)\n`,
+        `  ${result.pass} passed; EICAR and the official-database check skipped (Linux gate)\n`,
       );
     });
     await step("Storage path on the Emulator with the real tools", () => {
@@ -137,9 +156,17 @@ export async function main(args) {
         },
       );
       const result = counts(output);
-      if (result.fail !== 0 || result.skipped !== 0 || result.pass !== 6)
+      const skipped = allowedSkipCount(output);
+      if (
+        result.fail !== 0 ||
+        result.skipped !== skipped ||
+        skipped !== 1 ||
+        result.pass !== 6
+      )
         fail(`Storage path: ${JSON.stringify(result)}`);
-      process.stdout.write(`  ${result.pass} passed\n`);
+      process.stdout.write(
+        `  ${result.pass} passed; EICAR through Storage skipped (Linux gate)\n`,
+      );
     });
   } finally {
     if (running)

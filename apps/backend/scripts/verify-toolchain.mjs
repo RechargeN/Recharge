@@ -38,11 +38,16 @@ const allowedLicenses = new Set([
   "MIT",
   "Python-2.0",
   "public domain",
-  // D1 local stand only: the prebuilt libvips of sharp (LGPL-3.0-or-later),
-  // accepted with docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §3.6. Any
-  // distribution (deploy, container image, shared build) needs a new review.
-  "Apache-2.0 AND LGPL-3.0-or-later",
-  "Apache-2.0 AND LGPL-3.0-or-later AND MIT",
+]);
+// Reviewed one package at a time, never as a license class: the prebuilt
+// libvips of sharp, accepted with docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md
+// §3.6 for the local stand and the Linux CI gate only. Any other version or
+// package with these licenses, and any distribution (deploy, container image,
+// shared build), needs a new review.
+const reviewedPackageLicenses = new Map([
+  ["@img/sharp-win32-x64@0.35.5", "Apache-2.0 AND LGPL-3.0-or-later"],
+  ["@img/sharp-wasm32@0.35.5", "Apache-2.0 AND LGPL-3.0-or-later AND MIT"],
+  ["@img/sharp-libvips-linux-x64@1.3.4", "LGPL-3.0-or-later"],
 ]);
 const allowedLifecycleHooks = new Set([
   "@firebase/util@1.15.3:postinstall",
@@ -147,7 +152,13 @@ for (const { directory, manifest } of collectPackageManifests(
   path.join(functionsRoot, "node_modules"),
 )) {
   if (typeof manifest.license === "string") {
-    if (!allowedLicenses.has(manifest.license)) {
+    const reviewed = reviewedPackageLicenses.get(
+      `${manifest.name}@${manifest.version}`,
+    );
+    if (
+      !allowedLicenses.has(manifest.license) &&
+      reviewed !== manifest.license
+    ) {
       failures.push(
         `unreviewed dependency license ${manifest.license}: ${manifest.name}@${manifest.version}`,
       );

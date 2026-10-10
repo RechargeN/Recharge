@@ -20,7 +20,7 @@ const backend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const functionsDir = path.join(backend, "functions");
+export const functionsDir = path.join(backend, "functions");
 const lockFile = path.join(backend, "media-tools.lock.json");
 export const toolsRoot = path.resolve(
   process.env.LOCALAPPDATA || os.tmpdir(),
@@ -54,11 +54,11 @@ export function standDatabase() {
   return `Recharge.Test.Marker:0:*:${hex}\n`;
 }
 
-function fail(message) {
+export function fail(message) {
   throw new Error(message);
 }
-const log = (message) => process.stdout.write(message + "\n");
-const stamp = () =>
+export const log = (message) => process.stdout.write(message + "\n");
+export const stamp = () =>
   new Date().toISOString().replaceAll(":", "").replace(/\..*$/u, "");
 
 export function readLock(file = lockFile) {
@@ -88,7 +88,7 @@ export function sha256File(file) {
 }
 
 /** Moves a refused file or directory aside for review; never deletes. */
-function reject(target, reason) {
+export function reject(target, reason) {
   const into = path.join(dirs.rejected, stamp());
   fs.mkdirSync(into, { recursive: true });
   const moved = path.join(into, path.basename(target));
@@ -104,7 +104,7 @@ export function readLedger(file = ledgerFile) {
     ? JSON.parse(fs.readFileSync(file, "utf8"))
     : { totalBytes: 0, entries: [] };
 }
-function record(name, bytes) {
+export function record(name, bytes) {
   const ledger = readLedger();
   ledger.totalBytes += bytes;
   ledger.entries.push({ name, bytes, at: new Date().toISOString() });
@@ -121,7 +121,7 @@ export function remainingBudget(lock, ledger) {
  * Streams one fixed-size artifact: the size must be announced and equal the
  * manifest; the first byte beyond it, or beyond the budget, aborts.
  */
-function download(name, artifact, lock) {
+export function download(name, artifact, lock) {
   const target = path.join(
     dirs.downloads,
     path.basename(new URL(artifact.url).pathname),
@@ -405,7 +405,7 @@ async function restoreNode(lock) {
   };
 }
 
-function directorySize(dir) {
+export function directorySize(dir) {
   if (!fs.existsSync(dir)) return 0;
   let total = 0;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -672,6 +672,10 @@ function verifyInstall(lock, oldPackages) {
 }
 
 function findGpg() {
+  if (process.platform !== "win32") {
+    const which = spawnSync("which", ["gpg"], { encoding: "utf8" });
+    return which.status === 0 ? which.stdout.trim() : null;
+  }
   for (const candidate of [
     "C:\\Program Files\\Git\\usr\\bin\\gpg.exe",
     path.join(process.env.ProgramFiles || "", "Git", "usr", "bin", "gpg.exe"),
@@ -680,25 +684,30 @@ function findGpg() {
   return null;
 }
 
-async function fetchClamav(lock) {
-  log("ClamAV 1.5.4 (Windows x64 portable zip)");
-  const { clamav, clamavSignature, talosKey } = lock.artifacts;
-  const zip = await download("clamav", clamav, lock);
-  const sig = await download("clamav-signature", clamavSignature, lock);
-  const key = await download("talos-key", { ...talosKey, sha256: null }, lock);
+/** The Cisco Talos key, pinned by commit and git blob; its SHA-256 is recorded. */
+export async function fetchTalosKey(lock, budgetLock = lock) {
+  const { talosKey } = lock.artifacts;
+  const key = await download(
+    "talos-key",
+    { ...talosKey, sha256: null },
+    budgetLock,
+  );
   const keyBytes = fs.readFileSync(key);
   const blob = createHash("sha1")
     .update(Buffer.concat([Buffer.from(`blob ${keyBytes.length}\0`), keyBytes]))
     .digest("hex");
   if (blob !== talosKey.gitBlob)
     reject(key, `talos key git blob ${blob} differs from the manifest`);
-  const keySha256 = sha256File(key);
+  return { key, keySha256: sha256File(key) };
+}
 
-  let gpg = { performed: false, reason: "gpg not found" };
+/** GPG check in a throwaway GNUPGHOME: the user's keyring is never touched. */
+export function verifyGpgSignature(sig, file, key) {
   const gpgExe = findGpg();
-  if (gpgExe) {
+  if (!gpgExe) return { performed: false, reason: "gpg not found" };
+  {
     const home = path.join(dirs.gnupg, stamp());
-    fs.mkdirSync(home, { recursive: true });
+    fs.mkdirSync(home, { recursive: true, mode: 0o700 });
     const run = (args) =>
       spawnSync(
         gpgExe,
@@ -709,7 +718,7 @@ async function fetchClamav(lock) {
         },
       );
     const imported = run(["--import", key]);
-    const verified = run(["--verify", sig, zip]);
+    const verified = run(["--verify", sig, file]);
     const good = /\[GNUPG:\] GOODSIG/u.test(verified.stdout);
     const valid = /\[GNUPG:\] VALIDSIG ([0-9A-F]{40})/u.exec(verified.stdout);
     if (!good || !valid)
@@ -719,15 +728,24 @@ async function fetchClamav(lock) {
     const keyId =
       /\[GNUPG:\] IMPORT_OK \d+ ([0-9A-F]{40})/u.exec(imported.stdout)?.[1] ??
       null;
-    gpg = {
+    log(`  GPG: good signature, key ${valid[1]}`);
+    return {
       performed: true,
       good: true,
       signingKeyFingerprint: valid[1],
       importedKeyFingerprint: keyId,
       homedir: home,
     };
-    log(`  GPG: good signature, key ${valid[1]}`);
   }
+}
+
+async function fetchClamav(lock) {
+  log("ClamAV 1.5.4 (Windows x64 portable zip)");
+  const { clamav, clamavSignature } = lock.artifacts;
+  const zip = await download("clamav", clamav, lock);
+  const sig = await download("clamav-signature", clamavSignature, lock);
+  const { key, keySha256 } = await fetchTalosKey(lock);
+  const gpg = verifyGpgSignature(sig, zip, key);
 
   const finalDir = path.join(toolsRoot, clamav.directory);
   const extracted = extract("clamav", zip, clamav.unpack, finalDir);
@@ -798,7 +816,7 @@ async function fetchAll() {
 
 // ---------- Job Object keeper (amendment §3.8, §4.2) ----------
 
-const MiB = 1024 * 1024;
+export const MiB = 1024 * 1024;
 export const jobLimits = Object.freeze({
   service: { processBytes: 768 * MiB, jobBytes: 1024 * MiB, processes: 3 },
   clamd: { processBytes: 1024 * MiB, jobBytes: 1280 * MiB, processes: 2 },
@@ -909,7 +927,7 @@ try {
 }
 `;
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function launchInJob({
   jobName,
@@ -1001,18 +1019,19 @@ export function identities(pids) {
 
 // ---------- the service ----------
 
-const runRoot = path.join(toolsRoot, "run");
-const hostModule = path.join(
+export const runRoot = path.join(toolsRoot, "run");
+export const hostModule = path.join(
   functionsDir,
   "lib",
   "test",
   "stand",
   "media_tools_host.js",
 );
-const instanceDir = (instance) => path.join(runRoot, instance);
-const stateOf = (instance) => path.join(instanceDir(instance), "state.json");
+export const instanceDir = (instance) => path.join(runRoot, instance);
+export const stateOf = (instance) =>
+  path.join(instanceDir(instance), "state.json");
 
-function freePort() {
+export function freePort() {
   return new Promise((resolve, reject) => {
     const server = createNetServer();
     server.once("error", reject);
@@ -1023,7 +1042,7 @@ function freePort() {
   });
 }
 
-function portOpen(port) {
+export function portOpen(port) {
   return new Promise((resolve) => {
     const socket = netConnect({ host: "127.0.0.1", port });
     socket.once("connect", () => {
@@ -1093,7 +1112,7 @@ function verifyBinaries(lock, clamavDir) {
     fail("node.exe does not match the lock");
 }
 
-export function clamdConf(runDir, port) {
+export function clamdConf(runDir, port, { bytecode = false } = {}) {
   const at = (name) => path.join(runDir, name);
   return [
     `TCPSocket ${port}`,
@@ -1119,21 +1138,35 @@ export function clamdConf(runDir, port) {
     "AlertExceedsMax yes",
     "AlertBrokenMedia yes",
     "AlertEncrypted yes",
-    "Bytecode no",
+    `Bytecode ${bytecode ? "yes" : "no"}`,
     "",
   ].join("\n");
 }
 
-async function hostHelpers() {
+export async function hostHelpers() {
   return import(pathToFileURL(hostModule).href);
 }
 
 /** Starts clamd and the service, each inside its own job (§4.11). */
+const linux = () => import("./media-tools-linux.mjs");
+
 export async function start({
   instance = "stand",
   standSignaturesOnly = false,
   selftestProbes = false,
+  databaseMode = "stand",
 } = {}) {
+  if (process.platform === "linux")
+    return (await linux()).startLinux({
+      instance,
+      standSignaturesOnly,
+      selftestProbes,
+      databaseMode,
+    });
+  if (databaseMode !== "stand")
+    fail(
+      "Windows runs the stand database only (L1); official databases are the Linux gate",
+    );
   const lock = readLock();
   if (!fs.existsSync(hostModule))
     fail("Build first: lib/test/stand/media_tools_host.js is missing");
@@ -1276,7 +1309,11 @@ export async function start({
       fail("a started process is already gone");
     fs.writeFileSync(
       path.join(runDir, "access.json"),
-      JSON.stringify({ port, token, standSignaturesOnly }, null, 2),
+      JSON.stringify(
+        { port, token, standSignaturesOnly, databaseMode: "stand" },
+        null,
+        2,
+      ),
     );
     fs.writeFileSync(
       path.join(runDir, "control.json"),
@@ -1327,6 +1364,8 @@ async function stopProcesses(started) {
 }
 
 export async function stop({ instance = "stand" } = {}) {
+  if (process.platform === "linux")
+    return (await linux()).stopLinux({ instance });
   const file = stateOf(instance);
   if (!fs.existsSync(file)) fail(`Instance ${instance} is not running`);
   const state = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -1373,6 +1412,8 @@ export async function stop({ instance = "stand" } = {}) {
 }
 
 export async function status({ instance = "stand" } = {}) {
+  if (process.platform === "linux")
+    return (await linux()).statusLinux({ instance });
   const file = stateOf(instance);
   if (!fs.existsSync(file)) return { instance, state: "down" };
   const state = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -1402,12 +1443,13 @@ export async function status({ instance = "stand" } = {}) {
 
 // ---------- self-check J1–J6 (§3.8) ----------
 
-const tinyJpeg = Buffer.from(
+export const tinyJpeg = Buffer.from(
   "/9j/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAP/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAABf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKAATb//2Q==",
   "base64",
 );
 
 export async function selftest() {
+  if (process.platform === "linux") return (await linux()).selftestLinux();
   const instance = `selftest-${stamp()}`;
   const report = {
     instance,

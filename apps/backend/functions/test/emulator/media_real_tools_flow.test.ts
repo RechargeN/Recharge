@@ -1,6 +1,7 @@
-// D1 Storage path with the real local tools (amendment §9, §10): the Emulator
-// composition switched to the local tools service started by stand-d1-gate
-// (L1 test mode). Run only by the D1 gate, which passes the service access.
+// D1 Storage path with the real local tools (amendment §9, §10, §15): the
+// Emulator composition switched to the local tools service started by a D1
+// gate, which passes the service access. Windows runs the L1 test mode
+// (stand signature only); the Linux CI gate runs the official databases.
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -29,12 +30,24 @@ const skip =
   accessFile === undefined ? 'run by scripts/stand-d1-gate.mjs (needs the local tools)' : false;
 const access =
   accessFile === undefined
-    ? { port: 0, token: '', standSignaturesOnly: false }
+    ? { port: 0, token: '', standSignaturesOnly: false, databaseMode: 'stand' }
     : (JSON.parse(readFileSync(accessFile, 'utf8')) as {
         port: number;
         token: string;
         standSignaturesOnly: boolean;
+        databaseMode?: 'stand' | 'official';
       });
+const official = access.databaseMode === 'official';
+/** The receipt label of a clean scan in this mode. */
+const cleanScanRevision = official
+  ? /^clamav-1\.5\.4\/daily-\d+$/u
+  : /^clamav-1\.5\.4\/stand-marker-1\/official-db-absent$/u;
+const eicarSkip =
+  skip !== false
+    ? skip
+    : official
+      ? false
+      : 'Defender real-time protection active: clamd writes INSTREAM data to a temporary file (amendment §8); runs in the Linux gate';
 
 const firestore = emulatorFirestore();
 const bucket = getStorage().bucket('demo-recharge.appspot.com');
@@ -195,8 +208,13 @@ async function upload(
 }
 
 let realComposition: EmulatorMediaComposition | undefined;
-/** The L1 test-mode composition, built only when the gate supplied the service. */
-const realMedia = () => (realComposition ??= compose(toolsEnv(access.port, true)));
+/**
+ * The composition the gate's service matches: the L1 test mode exemption on
+ * Windows, none with the official databases. Built only when the gate
+ * supplied the service.
+ */
+const realMedia = () =>
+  (realComposition ??= compose(toolsEnv(access.port, access.standSignaturesOnly)));
 let scene: World | undefined;
 const sceneOnce = async () => (scene ??= await world(realMedia()));
 
@@ -214,11 +232,13 @@ void test(
     );
     assert.equal(view.lifecycle, 'ready', JSON.stringify(view));
     const receipt = receipts.at(-1);
-    assert.equal(receipt?.scan.toolRevision, 'clamav-1.5.4/stand-marker-1/official-db-absent');
-    assert.match(
-      receipt?.processing?.toolRevision ?? '',
-      /^sharp-0\.35\.5\/libvips-[\d.]+\/win32-x64-native$/u,
+    assert.match(receipt?.scan.toolRevision ?? '', cleanScanRevision);
+    assert.equal(
+      receipt?.processing?.toolRevision.endsWith(`/${process.platform}-${process.arch}-native`),
+      true,
+      receipt?.processing?.toolRevision,
     );
+    assert.match(receipt?.processing?.toolRevision ?? '', /^sharp-0\.35\.5\/libvips-[\d.]+\//u);
     const asset = await realMedia().repository.transact((tx) => tx.asset(view.assetId));
     assert.deepEqual(asset?.variantRefs.map((variant) => variant.profile).sort(), [
       'display',
@@ -259,7 +279,7 @@ void test(
 );
 
 void test(
-  'normal mode: without the client exemption a clean file stays quarantined',
+  'a client without the stand exemption: quarantined without official databases, ready with them',
   { skip, timeout: 120_000 },
   async () => {
     const normal = compose(toolsEnv(access.port, false));
@@ -270,8 +290,34 @@ void test(
       await samples.jpeg(),
       'image/jpeg',
     );
-    assert.equal(view.lifecycle, 'quarantined');
-    assert.equal(receipts.at(-1)?.scan.result, 'inconclusive');
+    if (official) {
+      assert.equal(view.lifecycle, 'ready');
+      assert.equal(receipts.at(-1)?.scan.result, 'clean');
+    } else {
+      assert.equal(view.lifecycle, 'quarantined');
+      assert.equal(receipts.at(-1)?.scan.result, 'inconclusive');
+    }
+  },
+);
+
+void test(
+  'EICAR through the Storage path is blocked by the official signatures',
+  { skip: eicarSkip, timeout: 120_000 },
+  async () => {
+    const { view, receipts } = await upload(
+      realMedia(),
+      realMedia(),
+      await sceneOnce(),
+      // The official EICAR signature matches the exact file, so it travels as a
+      // ZIP member behind the picture; clamd unpacks it.
+      Buffer.concat([
+        await samples.jpeg(),
+        samples.zip([{ name: 'eicar.com', data: samples.eicarInMemory() }]),
+      ]),
+      'image/jpeg',
+    );
+    assert.equal(view.lifecycle, 'blocked');
+    assert.equal(receipts.at(-1)?.scan.result, 'rejected');
   },
 );
 

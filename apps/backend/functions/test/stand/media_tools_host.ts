@@ -7,6 +7,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { fork, type ChildProcess } from 'node:child_process';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { connect } from 'node:net';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -538,10 +539,21 @@ if (
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
   const env = process.env;
+  // On Linux the tokens arrive in a file only the user can read; it is removed
+  // at once, so they never sit in a command line or a parent's environment.
+  const secretsFile = env.RECHARGE_TOOLS_SECRETS_FILE;
+  const secrets =
+    secretsFile === undefined
+      ? { token: env.RECHARGE_TOOLS_TOKEN, controlToken: env.RECHARGE_TOOLS_CONTROL_TOKEN }
+      : (JSON.parse(readFileSync(secretsFile, 'utf8')) as {
+          token?: string;
+          controlToken?: string;
+        });
+  if (secretsFile !== undefined) unlinkSync(secretsFile);
   const host = startHost({
     port: Number(env.RECHARGE_TOOLS_PORT),
-    token: hex64(env.RECHARGE_TOOLS_TOKEN, 'RECHARGE_TOOLS_TOKEN'),
-    controlToken: hex64(env.RECHARGE_TOOLS_CONTROL_TOKEN, 'RECHARGE_TOOLS_CONTROL_TOKEN'),
+    token: hex64(secrets.token, 'RECHARGE_TOOLS_TOKEN'),
+    controlToken: hex64(secrets.controlToken, 'RECHARGE_TOOLS_CONTROL_TOKEN'),
     clamdPort: Number(env.RECHARGE_TOOLS_CLAMD_PORT),
     instanceId: env.RECHARGE_TOOLS_INSTANCE ?? 'unknown',
     standSignaturesOnly: process.argv.includes('--stand-signatures-only'),
