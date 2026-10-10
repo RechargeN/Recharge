@@ -103,16 +103,85 @@ function processes() {
 export function getProcess(pid) {
   return processes().find((p) => p.pid === pid);
 }
-function descendants(all, parent) {
-  const result = [];
-  function visit(pid) {
+/**
+ * The process tree under `parent`, split by what can be proven. Windows reuses
+ * PIDs: after a reboot csrss and winlogon still name the PID of the smss that
+ * exited, and a later Functions worker may hold that PID.
+ * - owned: created at or after a parent that is itself owned (or the root);
+ * - doubtful: its own or an ancestor's start time is unknown — never stopped
+ *   here, and a stop while one is still alive is not verified;
+ * - older than the process that holds its parent's PID: not the stand's, left
+ *   alone and not reported.
+ * Owned processes are listed children first, so a stop never ends a parent
+ * (a wrapper such as the Pub/Sub cmd) before the processes it started.
+ */
+export function processTree(all, parent) {
+  const owned = [];
+  const doubtful = [];
+  function visit(pid, started, proven) {
+    const since = Date.parse(started ?? "");
     for (const child of all.filter((p) => p.parent === pid)) {
-      visit(child.pid);
-      result.push(child);
+      const at = Date.parse(child.started ?? "");
+      if (!proven || Number.isNaN(since) || Number.isNaN(at)) {
+        doubtful.push(child);
+        visit(child.pid, child.started, false);
+        continue;
+      }
+      if (at < since) continue;
+      visit(child.pid, child.started, true);
+      owned.push(child);
     }
   }
-  visit(parent);
-  return result;
+  const root = all.find((p) => p.pid === parent);
+  visit(parent, root?.started, root !== undefined);
+  return { owned, doubtful };
+}
+export function descendants(all, parent) {
+  return processTree(all, parent).owned;
+}
+/** The same process: same PID and same creation time (a PID alone is reused). */
+export function sameProcess(recorded, candidate) {
+  return (
+    candidate !== undefined &&
+    candidate !== null &&
+    candidate.pid === recorded.pid &&
+    Date.parse(candidate.started) === Date.parse(recorded.started)
+  );
+}
+/** Whether a recorded supervisor or CLI is still alive as itself. */
+function recordedAlive(recorded) {
+  return (
+    recorded !== undefined && sameProcess(recorded, getProcess(recorded.pid))
+  );
+}
+/**
+ * What of a stopped run may still be alive. A PID alone proves nothing, since
+ * Windows reuses it: an owned process counts only with the same PID and the
+ * same creation time. A doubtful one has no known creation time, so its PID
+ * counts while the process holding it cannot be told apart from it — unknown
+ * creation time, or created no later than the stop record. A process created
+ * after the record holds a reused PID and blocks nothing.
+ */
+export function remainingAfterStop(record, live) {
+  const recordedAt = Date.parse(record.recordedAtUtc ?? "");
+  const same = (recorded, process) =>
+    process.pid === recorded.pid &&
+    Date.parse(process.started) === Date.parse(recorded.started);
+  const maybeSame = (recorded, process) => {
+    if (process.pid !== recorded.pid) return false;
+    const created = Date.parse(process.started ?? "");
+    return (
+      Number.isNaN(created) || Number.isNaN(recordedAt) || created <= recordedAt
+    );
+  };
+  return [
+    ...record.owned.filter((item) =>
+      live.some((process) => same(item, process)),
+    ),
+    ...record.doubtful.filter((item) =>
+      live.some((process) => maybeSame(item, process)),
+    ),
+  ];
 }
 export function validateReset(target, expected, content) {
   if (
@@ -373,10 +442,9 @@ async function start() {
     );
   if (
     previous &&
-    (getProcess(previous.supervisor.pid) ||
-      (previous.cli && getProcess(previous.cli.pid)))
+    (recordedAlive(previous.supervisor) || recordedAlive(previous.cli))
   )
-    fail("Recorded PID live/reused; refused.");
+    fail("Recorded process still alive; refused.");
   toolchain();
   await freePorts();
   const locatorPath = path.join(os.tmpdir(), "hub-" + project + ".json");
@@ -474,8 +542,8 @@ async function stop() {
     return;
   }
   if (s.phase === "stopped") {
-    if (getProcess(s.supervisor.pid) || (s.cli && getProcess(s.cli.pid)))
-      fail("Recorded PID reused/live; refused.");
+    if (recordedAlive(s.supervisor) || recordedAlive(s.cli))
+      fail("Recorded process still alive; refused.");
 
     await freePorts();
     console.log("stopped");
@@ -490,8 +558,8 @@ async function stop() {
   fs.writeFileSync(path.join(root, s.runId + ".stop"), s.runId, { flag: "wx" });
   for (let n = 0; n < 30; n++) {
     await delay(1000);
-    if (!getProcess(s.supervisor.pid)) {
-      await freePorts();
+    if (!recordedAlive(s.supervisor)) {
+      await verifyStopped(s.runId);
       const locatorPath = path.join(os.tmpdir(), "hub-" + project + ".json");
       if (fs.existsSync(locatorPath)) {
         assertPlainPath(locatorPath);
@@ -508,6 +576,45 @@ async function stop() {
   }
   fail("Stop timed out; state retained.");
 }
+/**
+ * A stop is verified only when every process the supervisor recorded is gone —
+ * the ones it stopped and the doubtful ones it left alone — and every stand
+ * port is free. Otherwise the state is retained and nothing is reported as
+ * stopped.
+ */
+async function verifyStopped(runId) {
+  const recordPath = path.join(root, runId + ".stopset.json");
+  assertPlainPath(recordPath);
+  if (!fs.existsSync(recordPath))
+    fail(
+      "Stop not verified: the supervisor left no stop record; state retained.",
+    );
+  const record = JSON.parse(fs.readFileSync(recordPath, "utf8"));
+  let problem = "";
+  for (let n = 0; n < 10; n++) {
+    const left = remainingAfterStop(record, processes());
+    problem =
+      left.length > 0
+        ? "still running: " +
+          left
+            .map(
+              (item) =>
+                `${item.pid} ${item.executable ?? "<unknown executable>"}`,
+            )
+            .join("; ")
+        : "";
+    if (problem === "") {
+      try {
+        await freePorts();
+        return;
+      } catch (error) {
+        problem = error.message;
+      }
+    }
+    await delay(1000);
+  }
+  fail("Stop not verified (" + problem + "); state retained.");
+}
 async function status() {
   const s = readState();
   if (!s) {
@@ -516,8 +623,8 @@ async function status() {
     return;
   }
   if (s.phase === "stopped") {
-    if (getProcess(s.supervisor.pid) || (s.cli && getProcess(s.cli.pid)))
-      fail("Recorded PID reused/live; refused.");
+    if (recordedAlive(s.supervisor) || recordedAlive(s.cli))
+      fail("Recorded process still alive; refused.");
 
     await freePorts();
     console.log("stopped " + s.runId);
@@ -533,9 +640,10 @@ async function reset(yes) {
   if (!yes) fail("Explicit --yes required.");
   const s = readState();
   if (s) {
-    // Stale state may only be cleared if every recorded PID is absent; reused/foreign PID refuses.
-    if (getProcess(s.supervisor.pid) || (s.cli && getProcess(s.cli.pid)))
-      fail("Live/reused/foreign PID; reset refused.");
+    // Stale state may only be cleared once every recorded process is gone as
+    // itself (PID and creation time); a PID reused by another process is not it.
+    if (recordedAlive(s.supervisor) || recordedAlive(s.cli))
+      fail("Recorded process still alive; reset refused.");
   }
   await freePorts();
   if (fs.existsSync(path.join(os.tmpdir(), "hub-" + project + ".json")))
@@ -560,7 +668,7 @@ async function reset(yes) {
 }
 export function stopOwnedProcesses(owned) {
   ps(
-    '$items = ConvertFrom-Json -InputObject $env:RECHARGE_STOP_IDENTITIES; foreach ($item in $items) { $candidate = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $item.pid); if ($candidate -and ($candidate.CreationDate.ToUniversalTime().Ticks -ne ([datetime]$item.started).ToUniversalTime().Ticks -or $candidate.ExecutablePath -ne $item.executable -or [int]$candidate.ParentProcessId -ne $item.parent)) { throw "Identity changed; refused" } }; foreach ($item in $items) { $candidate = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $item.pid); if ($candidate) { if ($candidate.CreationDate.ToUniversalTime().Ticks -ne ([datetime]$item.started).ToUniversalTime().Ticks -or $candidate.ExecutablePath -ne $item.executable -or [int]$candidate.ParentProcessId -ne $item.parent) { throw "Identity changed; refused" }; Stop-Process -Id $item.pid -ErrorAction Stop } }',
+    '$items = ConvertFrom-Json -InputObject $env:RECHARGE_STOP_IDENTITIES; foreach ($item in $items) { $candidate = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $item.pid); if ($candidate -and ($candidate.CreationDate.ToUniversalTime().Ticks -ne ([datetime]$item.started).ToUniversalTime().Ticks -or $candidate.ExecutablePath -ne $item.executable -or [int]$candidate.ParentProcessId -ne $item.parent)) { throw "Identity changed; refused" } }; foreach ($item in $items) { $candidate = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $item.pid); if ($candidate) { if ($candidate.CreationDate.ToUniversalTime().Ticks -ne ([datetime]$item.started).ToUniversalTime().Ticks -or $candidate.ExecutablePath -ne $item.executable -or [int]$candidate.ParentProcessId -ne $item.parent) { throw "Identity changed; refused" }; try { Stop-Process -Id $item.pid -ErrorAction Stop } catch { if (Get-Process -Id $item.pid -ErrorAction SilentlyContinue) { throw } } } }',
     { RECHARGE_STOP_IDENTITIES: JSON.stringify(owned) },
   );
   // Diagnostic evidence only: retain checked PID identities outside Git.
@@ -648,10 +756,10 @@ async function supervise(runId, config) {
         fail("Supervisor state changed.");
       assertIdentity(getProcess(process.pid), s.supervisor, runId);
       const all = processes();
-      const owned = [
-        ...descendants(all, cli.pid),
-        all.find((p) => p.pid === cli.pid),
-      ].filter(Boolean);
+      const tree = processTree(all, cli.pid);
+      const owned = [...tree.owned, all.find((p) => p.pid === cli.pid)].filter(
+        Boolean,
+      );
       if (
         !owned.some((p) => p.pid === cli.pid && p.started === identity.started)
       )
@@ -694,6 +802,19 @@ async function supervise(runId, config) {
               )
               .join("; "),
         );
+      // The record lets `stop` verify afterwards that nothing of the run is
+      // left: what is stopped here, and what is doubtful and left alone.
+      const recordPath = path.join(root, runId + ".stopset.json");
+      assertPlainPath(recordPath);
+      fs.writeFileSync(
+        recordPath,
+        JSON.stringify({
+          recordedAtUtc: new Date().toISOString(),
+          owned,
+          doubtful: tree.doubtful,
+        }),
+        { flag: "wx" },
+      );
       // Recheck each PID/start time/path inside the same PowerShell action, never taskkill /T.
       stopOwnedProcesses(owned);
       return;
