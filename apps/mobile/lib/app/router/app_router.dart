@@ -9,6 +9,7 @@ import '../../shared/models/catalog_object_ref.dart';
 import '../di/service_locator.dart';
 import '../di/booking_test_entry_guard.dart';
 import '../di/event_publication_composition.dart';
+import '../di/place_publication_composition.dart';
 import '../testing/seeded_event_fixture.dart';
 import '../adapters/legacy_planning_link_classifier.dart';
 import '../application/details_resolution_providers.dart';
@@ -37,6 +38,7 @@ import '../../features/discover/presentation/pages/rental_details_page.dart';
 import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../presentation/event_details_page.dart';
 import '../presentation/event_publication_panel.dart';
+import '../presentation/place_publication_panel.dart';
 import '../presentation/bookable_session_details_page.dart';
 import '../presentation/find_people_details_page.dart';
 import '../../features/discover/presentation/pages/categories_page.dart';
@@ -311,6 +313,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
         builder: (BuildContext context, GoRouterState state) =>
             const EventPublicationPage(),
+      ),
+      // Default-off Place publication test entry (D3.1), the same rule with
+      // its own guard and define.
+      GoRoute(
+        name: 'test_place_publication',
+        path: RouteNames.testPlacePublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            placePublicationTestEntryRedirect(
+              sl.isRegistered<PlacePublicationTestEntryGuard>()
+                  ? sl<PlacePublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const PlacePublicationPage(),
       ),
       GoRoute(
         name: 'discover_details',

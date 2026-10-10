@@ -34,6 +34,8 @@ const commands = new Set([
   "booking-actions",
   // D2: run the media availability consumers and sweeps once (no retention policy).
   "media-reconcile",
+  // D3.1: the stand Place (its own flag) — seed | verify | manifest | status.
+  "place",
 ]);
 
 export function standEnvironment(base) {

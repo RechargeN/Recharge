@@ -67,7 +67,12 @@ import {
   type MediaDeliveryCaller,
 } from './media_entry.js';
 import { deliverMediaEffects, reconcileMediaReferences } from './media_effects_entry.js';
-import { handleContentCommand, handleContentQuery, type ContentCaller } from './content_entry.js';
+import {
+  authoringTypesFor,
+  handleContentCommand,
+  handleContentQuery,
+  type ContentCaller,
+} from './content_entry.js';
 import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
 import { deliverContentEffects } from './content_effects_entry.js';
 import {
@@ -988,10 +993,13 @@ export const reconcileMediaReferencesV1 = onSchedule(
   },
 );
 
-// Emulator-only Event authoring through Content (C3). Disabled unless the local
-// `content.event.authoring` flag is on. Owner commands and queries only: the
-// Content service re-checks Session, verified Creator, exact Page, Media
-// readiness and the C2 review on every call; dispositions are never accepted here.
+// Emulator-only authoring through Content: Event (C3) and Place (D3.1). The
+// surface is open while at least one local authoring flag (`content.event.authoring`,
+// `content.place.authoring`) is on; each type's own flag gates the commands that
+// create or change publishable content (D3.1 §2.2), while the owner's hide and
+// reads stay available. Owner commands and queries only: the Content service
+// re-checks Session, verified Creator, exact Page, Media readiness and the C2
+// review on every call; dispositions are never accepted here.
 export const contentCommandV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareContentCaller(request);
   return prepared.ok ? handleContentCommand(prepared.caller, request.data) : prepared.result;
@@ -1021,14 +1029,17 @@ async function prepareContentCaller(
     bookingAccessCapability,
   );
   if (!decision.allowed) return refuse('unauthenticated');
-  if (!(await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring))) {
-    return refuse('type_disabled');
-  }
+  const enabledTypes = authoringTypesFor({
+    eventAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring),
+    placeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.placeAuthoring),
+  });
+  if (enabledTypes.size === 0) return refuse('type_disabled');
   return {
     ok: true,
     caller: {
       actor: { userId: decision.userId as never, sessionId: access.accessHint.sessionId as never },
       firestore: access.firestore,
+      enabledTypes,
     },
   };
 }

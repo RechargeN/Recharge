@@ -3,6 +3,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 
 import type { ContentActor } from '../../src/modules/content/application/ports/publisher_eligibility_port.js';
 import { createStandContentService, standEventBody } from './stand_content.js';
+import type { StandContentPlaceManifest } from './stand_content_place.js';
 import { actorFor, mediaFor, pageIdOf } from './stand_media.js';
 
 /**
@@ -29,6 +30,8 @@ export interface StandManifest {
   readonly schemaVersion: 1;
   readonly base?: { readonly completedAtUtc: string };
   readonly contentEvent?: StandContentEventManifest;
+  /** D3.1: written only by `stand-seed.mjs place seed`. */
+  readonly contentPlace?: StandContentPlaceManifest;
 }
 
 export async function readStandManifest(firestore: Firestore): Promise<StandManifest | null> {

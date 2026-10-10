@@ -1,8 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
+import type { ContentTypeId } from './contracts/content_v1.js';
 import type { ContentPublicationService } from './modules/content/application/content_publication_service.js';
 import type { ContentActor } from './modules/content/application/ports/publisher_eligibility_port.js';
+import {
+  isContentTypeAvailable,
+  resolveContentType,
+} from './modules/content/domain/content_type_registry.js';
 import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
@@ -20,12 +25,46 @@ import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 import { mediaComposition } from './media_entry.js';
 
 /**
- * C3 Emulator-only Event authoring. Content is composed with the real ports it
+ * Types the Emulator-only authoring path may ever enable: Event (C3) and Place
+ * (D3.1). Every other type stays off here, with or without a validator.
+ */
+export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze(['event', 'place']);
+
+/** D3.1 §2.2: the authoring types whose own flag is on. */
+export function authoringTypesFor(flags: {
+  readonly eventAuthoring: boolean;
+  readonly placeAuthoring: boolean;
+}): ReadonlySet<ContentTypeId> {
+  return new Set<ContentTypeId>([
+    ...(flags.eventAuthoring ? (['event'] as const) : []),
+    ...(flags.placeAuthoring ? (['place'] as const) : []),
+  ]);
+}
+
+/**
+ * A type outside `emulatorAuthoringTypes`, or one without an available
+ * validator, can never be enabled: the composition refuses to be built.
+ */
+export function assertEmulatorAuthoringTypes(types: ReadonlySet<string>): void {
+  for (const typeId of types) {
+    const entry = resolveContentType(typeId);
+    if (
+      !emulatorAuthoringTypes.includes(typeId as ContentTypeId) ||
+      entry === null ||
+      !isContentTypeAvailable(entry)
+    )
+      throw new Error(`content_authoring_type_not_allowed:${typeId}`);
+  }
+}
+
+/**
+ * C3/D3.1 Emulator-only authoring. Content is composed with the real ports it
  * already has: Identity publisher eligibility (Session, verified Creator, exact
  * Page), Media readiness of the exact revision, and the C2 moderation verifier,
- * which makes review mandatory before publication. Only `event` is enabled, and
- * only here; the default composition enables nothing. Reference data is the
- * synthetic Emulator constants (see `EmulatorSyntheticReferenceData`).
+ * which makes review mandatory before publication. Only the given authoring
+ * types are enabled (default `event`), and only here; the default composition
+ * enables nothing. Reference data is the synthetic Emulator data (see
+ * `EmulatorSyntheticReferenceData`).
  */
 export interface EventAuthoringComposition {
   readonly content: ContentPublicationService;
@@ -36,8 +75,15 @@ export interface EventAuthoringComposition {
 
 export function eventAuthoringComposition(
   firestore: Firestore,
-  options: { readonly media?: EmulatorMediaComposition; readonly clock?: ServerClock } = {},
+  options: {
+    readonly media?: EmulatorMediaComposition;
+    readonly clock?: ServerClock;
+    /** D3.1: the enabled authoring types (default: Event only, as in C3). */
+    readonly enabledTypes?: ReadonlySet<ContentTypeId>;
+  } = {},
 ): EventAuthoringComposition {
+  const enabledTypes = options.enabledTypes ?? new Set<ContentTypeId>(['event']);
+  assertEmulatorAuthoringTypes(enabledTypes);
   const media = options.media ?? mediaComposition(firestore);
   const clock = options.clock ?? systemServerClock;
   const moderationPorts = createEmulatorModerationPorts(firestore);
@@ -53,7 +99,7 @@ export function eventAuthoringComposition(
       media: media.readiness,
       clock,
       ids: { newId: () => randomUUID() as EntityId },
-      enabledTypes: new Set(['event'] as const),
+      enabledTypes,
     },
   });
   const moderation = createEmulatorModerationService({
@@ -72,6 +118,8 @@ export function eventAuthoringComposition(
 export interface ContentCaller {
   readonly actor: ContentActor;
   readonly firestore: Firestore;
+  /** D3.1 §2.2: authoring types whose flag is on for this call. */
+  readonly enabledTypes: ReadonlySet<ContentTypeId>;
 }
 
 // Owner commands only. Moderation dispositions and delegated-import inputs are
@@ -112,7 +160,9 @@ export async function handleContentCommand(
   const resultType = typeof commandType === 'string' ? commandResultTypes[commandType] : undefined;
   if (resultType === undefined)
     return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
-  const { content } = eventAuthoringComposition(caller.firestore);
+  const { content } = eventAuthoringComposition(caller.firestore, {
+    enabledTypes: caller.enabledTypes,
+  });
   return toContentWireResult(resultType, await content.execute(caller.actor, body));
 }
 
@@ -125,6 +175,8 @@ export async function handleContentQuery(
   const resultType = typeof queryType === 'string' ? queryResultTypes[queryType] : undefined;
   if (resultType === undefined)
     return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
-  const { content } = eventAuthoringComposition(caller.firestore);
+  const { content } = eventAuthoringComposition(caller.firestore, {
+    enabledTypes: caller.enabledTypes,
+  });
   return toContentWireResult(resultType, await content.query(caller.actor, body));
 }

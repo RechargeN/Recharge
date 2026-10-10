@@ -63,6 +63,36 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'place') {
+    // D3.1: loaded only for this command, like the F1/F2 and D2 commands.
+    const { seedContentPlace, standPlaceStatus, verifyStandPlace } =
+      await import('./stand_content_place.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentPlace(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} place=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandPlace(firestore);
+      if (problems.length > 0) throw new Error(`place invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified place invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentPlace;
+      if (manifest === undefined) throw new Error('stand Place is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standPlaceStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: place seed | verify | manifest | status');
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

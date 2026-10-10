@@ -42,6 +42,165 @@ function succeeded<T>(result: { kind: string; data?: unknown }, label: string): 
   return (result as { data: T }).data;
 }
 
+/** A signed-in stand-alone actor: owner-service identity plus its Session handle. */
+export interface PublishingActor {
+  readonly actor: { readonly userId: EntityId; readonly sessionId: EntityId };
+  readonly firebaseUid: string;
+  readonly installationId: string;
+  readonly sessionHandle: string;
+}
+
+/**
+ * A verified Creator with a verified Page in LV, and a staff member in the C2
+ * registry, created through the Identity owner services, each with an active
+ * Session. `scope` makes every proof, uid and installation id unique.
+ */
+export async function createPublishingActors(firestore: Firestore, scope: string) {
+  const repository = new FirestoreIdentityAuthorityRepository(firestore);
+  const nowUtc = new Date().toISOString();
+  const reviewer = randomUUID();
+  const authority = new IdentityPublisherAuthority({
+    repository,
+    providerVerifier: new SyntheticProviderIdentityVerifier(),
+    verificationDecisions: new LocalVerificationDecisionAdapter(new Set([reviewer])),
+    pagePolicy: new LocalPageCreationPolicy(true, 2),
+  });
+  const creator = randomUUID();
+  const staff = randomUUID();
+  for (const [name, id] of [
+    ['reviewer', reviewer],
+    ['creator', creator],
+    ['staff', staff],
+  ] as const)
+    await authority.accounts.ensureAccount({
+      proof: {
+        provider: 'google',
+        providerTenant: 'demo-recharge-emulator',
+        proof: `local-test:google:${scope}-${name}`,
+      },
+      proposedUserId: id,
+      proposedIdentityId: randomUUID(),
+      nowUtc,
+      accountCreationEnabled: true,
+    });
+  await authority.creatorVerification.submit({
+    userId: creator,
+    verificationId: randomUUID(),
+    evidenceRefIds: [randomUUID()],
+    nowUtc,
+  });
+  await authority.creatorVerification.decide({
+    reviewerId: reviewer,
+    userId: creator,
+    status: 'verified',
+    nowUtc,
+  });
+  const pageId = randomUUID();
+  await authority.pages.create({
+    userId: creator,
+    pageId,
+    membershipId: randomUUID(),
+    marketId: 'LV',
+    nowUtc,
+  });
+  await authority.pages.decidePage({
+    reviewerId: reviewer,
+    pageId,
+    decision: 'verified',
+    nowUtc,
+  });
+  await new EmulatorStaffAuthority(firestore, repository).grant(staff, nowUtc);
+  const session = async (userId: string): Promise<PublishingActor> => {
+    const sessionId = randomUUID();
+    const firebaseUid = `${scope}-${userId}`;
+    const installationId = `${scope}-installation-${userId}`;
+    const issued = await authority.sessions.issue({
+      userId,
+      sessionId,
+      firebaseUid,
+      installationId,
+      issuedAtUtc: nowUtc,
+      snapshotExpiresAtUtc: new Date(Date.now() + 3_600_000).toISOString(),
+    });
+    return {
+      actor: { userId: userId as EntityId, sessionId: sessionId as EntityId },
+      firebaseUid,
+      installationId,
+      sessionHandle: issued.sessionHandle,
+    };
+  };
+  return { pageId, creator: await session(creator), staff: await session(staff) };
+}
+
+/**
+ * One image through the real Media path (upload session, bytes, confirm,
+ * finalize) bound to the exact Content draft; returns the session and asset ids.
+ */
+export async function uploadReadyImage(
+  media: EmulatorMediaComposition,
+  actor: { readonly userId: EntityId; readonly sessionId: EntityId },
+  input: {
+    readonly publisherRef: { readonly type: 'page' | 'user'; readonly id: string };
+    readonly contentId: string;
+    readonly bytes: Buffer;
+    readonly mediaType: string;
+    readonly key: (name: string) => string;
+  },
+): Promise<{ uploadSessionId: string; assetId: string }> {
+  const upload = succeeded<{ uploadSessionId: string; assetId: string }>(
+    await media.service.execute(actor, {
+      schemaVersion: 1,
+      commandType: 'createUploadSession',
+      idempotencyKey: input.key('session'),
+      payload: {
+        family: 'image',
+        marketId: 'LV',
+        visibilityClass: 'publicDerived',
+        declaredMediaType: input.mediaType,
+        declaredByteLength: input.bytes.length,
+        publisherRef: input.publisherRef,
+        entityIntent: { domain: 'content', entityId: input.contentId, purpose: 'contentMedia' },
+      },
+    }),
+    'upload',
+  );
+  const asset = await media.repository.transact((tx) => tx.asset(upload.assetId));
+  assert.ok(asset);
+  await media.objectStore.put(asset.objectKeyHandle, input.bytes);
+  const confirmed = succeeded<{
+    revision: number;
+    sourceGenerationRef: { providerGeneration: string };
+  }>(
+    await media.service.execute(actor, {
+      schemaVersion: 1,
+      commandType: 'confirmUpload',
+      idempotencyKey: input.key('confirm'),
+      payload: {
+        uploadSessionId: upload.uploadSessionId,
+        expectedSha256: sha256(input.bytes),
+        expectedByteLength: input.bytes.length,
+      },
+    }),
+    'confirm',
+  );
+  succeeded(
+    await media.service.execute(actor, {
+      schemaVersion: 1,
+      commandType: 'finalizeAsset',
+      idempotencyKey: input.key('finalize'),
+      payload: {
+        assetId: upload.assetId,
+        expectedAssetRevision: confirmed.revision,
+        sourceProviderGeneration: confirmed.sourceGenerationRef.providerGeneration,
+        expectedSha256: sha256(input.bytes),
+        expectedByteLength: input.bytes.length,
+      },
+    }),
+    'finalize',
+  );
+  return upload;
+}
+
 /**
  * A real local publishing world for Emulator tests: a verified Creator with a
  * verified Page, a staff member in the C2 registry and two Sessions. Events go
@@ -71,75 +230,9 @@ export function createContentEventWorld(
   let sequence = 0;
   const key = (name: string) => `${label}-${name}-${run}-${(sequence += 1)}`;
 
-  const actors = (async () => {
-    const repository = new FirestoreIdentityAuthorityRepository(firestore);
-    const nowUtc = new Date().toISOString();
-    const reviewer = randomUUID();
-    const authority = new IdentityPublisherAuthority({
-      repository,
-      providerVerifier: new SyntheticProviderIdentityVerifier(),
-      verificationDecisions: new LocalVerificationDecisionAdapter(new Set([reviewer])),
-      pagePolicy: new LocalPageCreationPolicy(true, 2),
-    });
-    const creator = randomUUID();
-    const staff = randomUUID();
-    for (const [name, id] of [
-      ['reviewer', reviewer],
-      ['creator', creator],
-      ['staff', staff],
-    ] as const)
-      await authority.accounts.ensureAccount({
-        proof: {
-          provider: 'google',
-          providerTenant: 'demo-recharge-emulator',
-          proof: `local-test:google:${label}-${run}-${name}`,
-        },
-        proposedUserId: id,
-        proposedIdentityId: randomUUID(),
-        nowUtc,
-        accountCreationEnabled: true,
-      });
-    await authority.creatorVerification.submit({
-      userId: creator,
-      verificationId: randomUUID(),
-      evidenceRefIds: [randomUUID()],
-      nowUtc,
-    });
-    await authority.creatorVerification.decide({
-      reviewerId: reviewer,
-      userId: creator,
-      status: 'verified',
-      nowUtc,
-    });
-    const pageId = randomUUID();
-    await authority.pages.create({
-      userId: creator,
-      pageId,
-      membershipId: randomUUID(),
-      marketId: 'LV',
-      nowUtc,
-    });
-    await authority.pages.decidePage({
-      reviewerId: reviewer,
-      pageId,
-      decision: 'verified',
-      nowUtc,
-    });
-    await new EmulatorStaffAuthority(firestore, repository).grant(staff, nowUtc);
-    const session = async (userId: string) => {
-      const sessionId = randomUUID();
-      await authority.sessions.issue({
-        userId,
-        sessionId,
-        firebaseUid: `${label}-${run}-${userId}`,
-        installationId: `${label}-${run}-installation-${userId}`,
-        issuedAtUtc: nowUtc,
-        snapshotExpiresAtUtc: new Date(Date.now() + 3_600_000).toISOString(),
-      });
-      return { userId: userId as EntityId, sessionId: sessionId as EntityId };
-    };
-    return { pageId, creator: await session(creator), staff: await session(staff) };
-  })();
+  const actors = createPublishingActors(firestore, `${label}-${run}`).then(
+    ({ pageId, creator, staff }) => ({ pageId, creator: creator.actor, staff: staff.actor }),
+  );
 
   /** Per object: its draft, cover asset and the stable id of its first occurrence. */
   const records = new Map<string, { draftId: string; cover: string; slotId: string }>();
@@ -185,57 +278,13 @@ export function createContentEventWorld(
       }),
       'createDraft',
     );
-    const upload = succeeded<{ uploadSessionId: string; assetId: string }>(
-      await media.service.execute(creator, {
-        schemaVersion: 1,
-        commandType: 'createUploadSession',
-        idempotencyKey: key('session'),
-        payload: {
-          family: 'image',
-          marketId: 'LV',
-          visibilityClass: 'publicDerived',
-          declaredMediaType: cover.mediaType,
-          declaredByteLength: cover.bytes.length,
-          publisherRef,
-          entityIntent: { domain: 'content', entityId: draft.contentId, purpose: 'contentMedia' },
-        },
-      }),
-      'upload',
-    );
-    const asset = await media.repository.transact((tx) => tx.asset(upload.assetId));
-    assert.ok(asset);
-    await media.objectStore.put(asset.objectKeyHandle, cover.bytes);
-    const confirmed = succeeded<{
-      revision: number;
-      sourceGenerationRef: { providerGeneration: string };
-    }>(
-      await media.service.execute(creator, {
-        schemaVersion: 1,
-        commandType: 'confirmUpload',
-        idempotencyKey: key('confirm'),
-        payload: {
-          uploadSessionId: upload.uploadSessionId,
-          expectedSha256: sha256(cover.bytes),
-          expectedByteLength: cover.bytes.length,
-        },
-      }),
-      'confirm',
-    );
-    succeeded(
-      await media.service.execute(creator, {
-        schemaVersion: 1,
-        commandType: 'finalizeAsset',
-        idempotencyKey: key('finalize'),
-        payload: {
-          assetId: upload.assetId,
-          expectedAssetRevision: confirmed.revision,
-          sourceProviderGeneration: confirmed.sourceGenerationRef.providerGeneration,
-          expectedSha256: sha256(cover.bytes),
-          expectedByteLength: cover.bytes.length,
-        },
-      }),
-      'finalize',
-    );
+    const upload = await uploadReadyImage(media, creator, {
+      publisherRef,
+      contentId: draft.contentId,
+      bytes: cover.bytes,
+      mediaType: cover.mediaType,
+      key,
+    });
     const bound = succeeded<{ revision: number }>(
       await content.content.execute(creator, {
         schemaVersion: 1,

@@ -68,6 +68,24 @@ const volatileKeys = new Set([
   'sourceProviderGeneration',
 ]);
 
+/**
+ * D3.1: inside a Media asset's `variantRefs` only, the values the fake
+ * processor derives from its per-process counter (a resumed Place seed runs it
+ * in two processes). Everywhere else these keys stay significant.
+ */
+const fakeVariantKeys = new Set(['variantId', 'byteLength']);
+
+/**
+ * D3.1: lists the domain itself stores sorted by asset id (Media readiness and
+ * the publication pointer); ids are random per run, so after labelling their
+ * order is canonicalised. Nothing else is reordered: a draft's `mediaAssetIds`
+ * and a body's gallery keep the user's order.
+ */
+const assetSortedKeys = new Set(['mediaAttachments', 'mediaConfirmations', 'mediaSuppression']);
+const assetSortedKeysIn: Readonly<Record<string, ReadonlySet<string>>> = {
+  [contentCollections.publishedRevisions]: new Set(['mediaAssetIds']),
+};
+
 export interface StandDigest {
   readonly digest: string;
   readonly normalized: unknown;
@@ -96,9 +114,9 @@ export async function computeStandDigest(firestore: Firestore): Promise<StandDig
 /** Pure normalization: server-generated ids become labels, volatile values become placeholders. */
 export function digestStandState(raw: RawStandState, auth: unknown): StandDigest {
   const labels = deriveLabels(raw);
-  const normalizer = new Normalizer(labels);
   const collections: Record<string, unknown[]> = {};
   for (const [collection, documents] of raw) {
+    const normalizer = new Normalizer(labels, assetSortedKeysIn[collection]);
     // Hash-named documents can collapse to one normalized id, so entries stay a sorted list.
     const entries = [...documents].map(([id, data]) => ({
       id: normalizer.text(id),
@@ -176,14 +194,44 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     if (typeof asset?.objectKeyHandle === 'string')
       labels.set(asset.objectKeyHandle, 'objk:seed-event');
   }
+  // D3.1: the seeded Place, named by its manifest.
+  const place = manifest?.contentPlace as Record<string, unknown> | undefined;
+  if (place !== undefined) {
+    for (const [key, name] of Object.entries({
+      contentId: 'content',
+      draftId: 'draft',
+      submissionId: 'submission',
+      publishedRevisionId: 'revision',
+      approveDecisionId: 'decision',
+    })) {
+      const value = place[key];
+      if (typeof value === 'string') labels.set(value, `${name}:seed-place`);
+    }
+    const gallery = Array.isArray(place.galleryAssetIds) ? place.galleryAssetIds : [];
+    const images: Array<[unknown, string]> = [
+      [place.coverAssetId, 'cover'],
+      ...gallery.map((assetId, index): [unknown, string] => [assetId, `gallery-${index + 1}`]),
+    ];
+    for (const [assetId, role] of images) {
+      if (typeof assetId !== 'string') continue;
+      labels.set(assetId, `asset:seed-place-${role}`);
+      const asset = raw.get(mediaCollections.assets)?.get(assetId);
+      if (typeof asset?.objectKeyHandle === 'string')
+        labels.set(asset.objectKeyHandle, `objk:seed-place-${role}`);
+      for (const [sessionId, session] of raw.get(mediaCollections.sessions) ?? [])
+        if (session.assetId === assetId) labels.set(sessionId, `upload:seed-place-${role}`);
+    }
+  }
   return labels;
 }
 
 class Normalizer {
   readonly #ordered: Array<[string, string]>;
+  readonly #sortedKeys: ReadonlySet<string>;
 
-  constructor(labels: ReadonlyMap<string, string>) {
+  constructor(labels: ReadonlyMap<string, string>, sortedKeys: ReadonlySet<string> = new Set()) {
     this.#ordered = [...labels].sort(([a], [b]) => b.length - a.length);
+    this.#sortedKeys = new Set([...assetSortedKeys, ...sortedKeys]);
   }
 
   text(input: string): string {
@@ -194,20 +242,28 @@ class Normalizer {
       .replace(instantPattern, (match) => (keptInstants.has(match) ? match : '<utc>'));
   }
 
-  value(input: unknown, key?: string): unknown {
+  value(input: unknown, key?: string, inVariant = false): unknown {
     if (key !== undefined && volatileKeys.has(key)) return '<volatile>';
+    if (inVariant && key !== undefined && fakeVariantKeys.has(key)) return '<volatile>';
     if (input instanceof Timestamp) return '<timestamp>';
     if (typeof input === 'string') return this.text(input);
-    if (Array.isArray(input)) return input.map((item) => this.value(item));
+    if (Array.isArray(input)) {
+      const items = input.map((item) => this.value(item, undefined, key === 'variantRefs'));
+      return key !== undefined && this.#sortedKeys.has(key) ? [...items].sort(byJson) : items;
+    }
     if (typeof input === 'object' && input !== null) {
       const entries = Object.entries(input as Plain).map(
-        ([name, item]) => [this.text(name), this.value(item, name)] as const,
+        ([name, item]) => [this.text(name), this.value(item, name, inVariant)] as const,
       );
       entries.sort(([left], [right]) => compare(left, right));
       return Object.fromEntries(entries);
     }
     return input;
   }
+}
+
+function byJson(left: unknown, right: unknown): number {
+  return compare(stableStringify(left), stableStringify(right));
 }
 
 function compare(left: string, right: string): number {

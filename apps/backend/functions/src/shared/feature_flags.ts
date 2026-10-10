@@ -38,6 +38,8 @@ export const mediaFlagIds = Object.freeze({
 /** C3: Emulator-only Event authoring through Content (default off). */
 export const contentFlagIds = Object.freeze({
   eventAuthoring: 'content.event.authoring',
+  /** D3.1: Emulator-only Place authoring through Content (default off). */
+  placeAuthoring: 'content.place.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */

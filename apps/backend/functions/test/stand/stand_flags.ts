@@ -38,31 +38,41 @@ export async function enableStandFlags(firestore: Firestore, nowUtc: string): Pr
     mediaFlagIds.reconcile,
     ...standEnabledBookingFlags,
   ];
-  for (const capabilityId of capabilityIds) {
-    const key = featureFlagKey('local', standMarketId, capabilityId);
-    // createFeatureFlag() rejects mixed-case ids such as booking.eventProjection.delivery,
-    // which the Booking gate reads verbatim, so the exact shape is written here.
-    const revision: FeatureFlagRevision = {
-      schemaVersion: 1,
-      revision: 1,
-      environmentId: 'local',
-      marketId: standMarketId,
-      capabilityId,
-      enabled: true,
-      createdAtUtc: nowUtc as UtcInstant,
-    };
-    const revisionRef = firestore
-      .collection(featureFlagRevisionCollection)
-      .doc(featureFlagRevisionDocumentId(key, 1));
-    const pointerRef = firestore.collection(featureFlagPointerCollection).doc(key);
-    await firestore.runTransaction(async (transaction) => {
-      const existing = await transaction.get(revisionRef);
-      if (existing.exists) {
-        if (existing.get('enabled') !== true) throw new Error(`flag_revision_conflict:${key}`);
-        return;
-      }
-      transaction.create(revisionRef, { ...revision });
-      transaction.set(pointerRef, { key, activeRevision: 1, pointerRevision: 1 });
-    });
-  }
+  for (const capabilityId of capabilityIds) await enableStandFlag(firestore, capabilityId, nowUtc);
+}
+
+/**
+ * One local flag revision and pointer, in the exact shape FirestoreFeatureFlagGate
+ * reads. An existing enabled revision is kept; a different one is a conflict.
+ */
+export async function enableStandFlag(
+  firestore: Firestore,
+  capabilityId: string,
+  nowUtc: string,
+): Promise<void> {
+  const key = featureFlagKey('local', standMarketId, capabilityId);
+  // createFeatureFlag() rejects mixed-case ids such as booking.eventProjection.delivery,
+  // which the Booking gate reads verbatim, so the exact shape is written here.
+  const revision: FeatureFlagRevision = {
+    schemaVersion: 1,
+    revision: 1,
+    environmentId: 'local',
+    marketId: standMarketId,
+    capabilityId,
+    enabled: true,
+    createdAtUtc: nowUtc as UtcInstant,
+  };
+  const revisionRef = firestore
+    .collection(featureFlagRevisionCollection)
+    .doc(featureFlagRevisionDocumentId(key, 1));
+  const pointerRef = firestore.collection(featureFlagPointerCollection).doc(key);
+  await firestore.runTransaction(async (transaction) => {
+    const existing = await transaction.get(revisionRef);
+    if (existing.exists) {
+      if (existing.get('enabled') !== true) throw new Error(`flag_revision_conflict:${key}`);
+      return;
+    }
+    transaction.create(revisionRef, { ...revision });
+    transaction.set(pointerRef, { key, activeRevision: 1, pointerRevision: 1 });
+  });
 }

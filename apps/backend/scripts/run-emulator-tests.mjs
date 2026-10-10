@@ -218,6 +218,8 @@ const child = spawn(
   },
 );
 
+// The bound catches a hung suite, not a slow one: the suite ran ~600 s before
+// D3.1 and ~12 min after it (PLACE_D3_1_PUBLICATION_AMENDMENT.md §10).
 const timeout = setTimeout(() => {
   if (process.platform === "win32" && child.pid !== undefined) {
     spawnSync("taskkill.exe", ["/pid", String(child.pid), "/t", "/f"], {
@@ -226,7 +228,7 @@ const timeout = setTimeout(() => {
   } else {
     child.kill("SIGTERM");
   }
-}, 600_000);
+}, 900_000);
 
 const exitCode = await new Promise((resolve, reject) => {
   child.once("error", reject);
