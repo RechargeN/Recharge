@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { Firestore, Transaction } from 'firebase-admin/firestore';
+import { FieldPath, type Firestore, type Query, type Transaction } from 'firebase-admin/firestore';
 
 import type { MediaEffectV1 } from '../../../contracts/media_v1.js';
 import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
@@ -120,6 +120,15 @@ class BufferedMediaTransaction implements MediaTransaction {
 
   asset(assetId: string): Promise<MediaAsset | null> {
     return this.read<MediaAsset>('asset', assetId);
+  }
+
+  async assetIdsPage(afterAssetId: string | null, limit: number): Promise<readonly string[]> {
+    let query: Query = this.firestore
+      .collection(mediaCollections.assets)
+      .orderBy(FieldPath.documentId(), 'asc');
+    if (afterAssetId !== null) query = query.startAfter(afterAssetId);
+    const snapshot = await this.transaction.get(query.select().limit(limit));
+    return snapshot.docs.map((document) => document.id);
   }
 
   putAsset(asset: MediaAsset, expectedStoredRevision: number): void {

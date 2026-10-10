@@ -125,7 +125,9 @@ async function harness(enabledForReadiness: readonly string[] = ['image']) {
   const restriction: MediaRestrictionAuthority & { trusted: Set<string> } = {
     trusted: new Set(['decision-1']),
     verifyRestriction(input) {
-      return Promise.resolve(this.trusted.has(input.decisionRef));
+      return Promise.resolve(
+        this.trusted.has(input.decisionRef) ? { verified: true } : { verified: false },
+      );
     },
   };
   const objectStore = new FakeObjectStore();
@@ -331,12 +333,22 @@ void test('a ready asset yields generation-pinned evidence and a canonical media
     },
   ];
   assert.deepEqual(result.attachments, expected);
+  // D2 §3: every attachment carries the revocation epoch it is confirmed at.
+  assert.deepEqual(
+    result.ready && result.confirmations,
+    expected.map((item) => ({ assetId: item.assetId, revocationEpoch: 0 })),
+  );
   assert.equal(result.mediaRevision, attachmentsRevision(expected));
   // Checking is evidence only: it changed nothing in Media.
   assert.equal(stored(h, asset.assetId).revision, asset.revision);
   // No media at all is ready with the canonical revision of the empty list.
   const empty = await h.contentPort.check(checkInput([]));
-  assert.deepEqual(empty, { ready: true, mediaRevision: attachmentsRevision([]), attachments: [] });
+  assert.deepEqual(empty, {
+    ready: true,
+    mediaRevision: attachmentsRevision([]),
+    attachments: [],
+    confirmations: [],
+  });
   // Duplicated ids are one attachment.
   const twice = await h.contentPort.check(checkInput([asset.assetId, asset.assetId]));
   assert.deepEqual(twice.ready && twice.attachments.length, 1);

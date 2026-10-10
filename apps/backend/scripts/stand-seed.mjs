@@ -32,6 +32,8 @@ const commands = new Set([
   "creator-fixture",
   "notifications",
   "booking-actions",
+  // D2: run the media availability consumers and sweeps once (no retention policy).
+  "media-reconcile",
 ]);
 
 export function standEnvironment(base) {

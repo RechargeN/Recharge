@@ -5,6 +5,8 @@ import type { Firestore } from 'firebase-admin/firestore';
 import type { ContentActor } from '../../src/modules/content/application/ports/publisher_eligibility_port.js';
 import { FirestoreIdentityAuthorityRepository } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { createEmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
+import { FirestoreModerationRepository } from '../../src/modules/moderation/infrastructure/firestore_moderation_repository.js';
+import { MediaRestrictionVerifier } from '../../src/modules/moderation/infrastructure/media_restriction_verifier.js';
 import type { EntityId } from '../../src/shared/ids.js';
 import { createStandContentService, standEventBody } from './stand_content.js';
 import { standPages, standUsers } from './stand_plan.js';
@@ -16,6 +18,10 @@ export function mediaFor(firestore: Firestore) {
   return createEmulatorMediaComposition({
     firestore,
     bucket: getStorage().bucket(emulatorBucket) as never,
+    // D2 §7: the same verifier as the runtime; only recorded staff decisions restrict.
+    restrictionAuthority: new MediaRestrictionVerifier(
+      new FirestoreModerationRepository(firestore),
+    ),
   });
 }
 

@@ -1751,6 +1751,12 @@ deterministic test that fails when a cross-module call sits inside a transaction
    and the command commit (§38.11.2) remains a limit. Before a real Media
    adapter exists, a mechanism to detect and react to revisions that reference a
    later-restricted or deleted asset is required; it is not implemented here.
+   D2 (2026-10-09, [MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md](MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md))
+   implements it on the Emulator: the pointer confirms the Media revocation
+   epoch of every attachment, Content suppresses media that Media revoked or
+   deleted afterwards (decided from Media's current state, never from an event),
+   and only the publisher's activation of the current revision confirms it again.
+   The residual windows are stated there (§10).
 
 ### 38.12 Acceptance addendum (v0.13)
 

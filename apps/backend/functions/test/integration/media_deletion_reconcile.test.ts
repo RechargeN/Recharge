@@ -17,6 +17,7 @@ import type {
   MediaActorAuthorityPort,
   MediaAuthorityResult,
   MediaRestrictionAuthority,
+  MediaRestrictionVerdict,
 } from '../../src/modules/media/application/ports/actor_authority_port.js';
 import type { AttachmentReferencePort } from '../../src/modules/media/application/ports/attachment_reference_port.js';
 import type { EntityScopePort } from '../../src/modules/media/application/ports/entity_scope_port.js';
@@ -86,8 +87,16 @@ class FakeReferences implements AttachmentReferencePort {
 
 class FakeRestriction implements MediaRestrictionAuthority {
   readonly trusted = new Set<string>();
-  verifyRestriction(input: { decisionRef: string }): Promise<boolean> {
-    return Promise.resolve(this.trusted.has(input.decisionRef));
+  /** Which restriction a trusted lift restores (D2 §3). */
+  readonly restores = new Map<string, string>();
+  verifyRestriction(input: { decisionRef: string }): Promise<MediaRestrictionVerdict> {
+    if (!this.trusted.has(input.decisionRef)) return Promise.resolve({ verified: false });
+    const restores = this.restores.get(input.decisionRef);
+    return Promise.resolve(
+      restores === undefined
+        ? { verified: true }
+        : { verified: true, restoresDecisionRef: restores },
+    );
   }
 }
 
@@ -431,6 +440,7 @@ void test('a restriction is a verified system instruction and never a user comma
     denial('idempotency_conflict'),
   );
   h.restriction.trusted.add('decision-2');
+  h.restriction.restores.set('decision-2', 'decision-1');
   const lifted = await ok<MediaAssetV1>(
     h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-2', false)),
   );
@@ -773,6 +783,7 @@ void test('a deletion hold never lifts an authoritative restriction placed while
   assert.equal(after.deliveryDisabled, true);
   // Only a verified Security instruction lifts it.
   h.restriction.trusted.add('decision-sec-2');
+  h.restriction.restores.set('decision-sec-2', 'decision-sec-1');
   const lifted = await ok<MediaAssetV1>(
     h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-2', false)),
   );
@@ -792,6 +803,7 @@ void test('lifting a restriction keeps delivery disabled while a deletion hold i
     asks += 1;
     if (asks === 2) {
       h.restriction.trusted.add('decision-sec-4');
+      h.restriction.restores.set('decision-sec-4', 'decision-sec-3');
       const lifted = await ok<MediaAssetV1>(
         h.deletion.applyRestriction(restrictCommand(asset.assetId, 'decision-sec-4', false)),
       );

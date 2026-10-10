@@ -778,7 +778,13 @@ export function servicePorts(
   attachments: MediaAttachmentV1[] = [],
 ): Omit<ContentPublicationServiceDeps, 'repository'> {
   const media: MediaReadinessPort = {
-    check: () => Promise.resolve({ ready: true, mediaRevision: 'media-1', attachments } as const),
+    check: () =>
+      Promise.resolve({
+        ready: true,
+        mediaRevision: 'media-1',
+        attachments,
+        confirmations: attachments.map((item) => ({ assetId: item.assetId, revocationEpoch: 0 })),
+      } as const),
   };
   return {
     eligibility: new Eligibility(),

@@ -151,6 +151,23 @@ export class StorageEmulatorObjectStore implements ObjectStorePort, ObjectBytesP
     return { providerGeneration };
   }
 
+  /** D2: a variant's bytes, only at exactly the pinned generation and within `maxBytes`. */
+  async readVariant(
+    variantId: string,
+    providerGeneration: string,
+    maxBytes: number,
+  ): Promise<ObjectRead> {
+    const file = this.variantFile(variantId);
+    const [exists] = await file.exists();
+    if (!exists) return { kind: 'absent' };
+    const [metadata] = await file.getMetadata();
+    if (String(metadata.generation ?? '') !== providerGeneration) return { kind: 'absent' };
+    if (Number(metadata.size ?? Number.POSITIVE_INFINITY) > maxBytes) return { kind: 'too_large' };
+    const [bytes] = await file.download();
+    if (bytes.length > maxBytes) return { kind: 'too_large' };
+    return { kind: 'complete', providerGeneration, bytes };
+  }
+
   async removeVariant(variantId: string): Promise<RemovalResult> {
     // With the fakes no variant object is ever written, so this reports `absent`.
     try {

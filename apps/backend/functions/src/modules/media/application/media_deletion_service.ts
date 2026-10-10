@@ -35,6 +35,7 @@ import {
   releaseDeletionHold,
   withRestriction,
   type MediaAsset,
+  type RestrictionInstruction,
 } from '../domain/media_asset.js';
 import { requireRetentionPolicy, type MediaRetentionPolicy } from '../domain/media_retention.js';
 import type {
@@ -49,6 +50,7 @@ import {
   type MediaActor,
   type MediaActorAuthorityPort,
   type MediaRestrictionAuthority,
+  type MediaRestrictionVerdict,
 } from './ports/actor_authority_port.js';
 import type { AttachmentReferencePort } from './ports/attachment_reference_port.js';
 import type { ObjectStorePort } from './ports/object_store_port.js';
@@ -211,14 +213,19 @@ export class MediaDeletionService {
     if (!parsed.ok || parsed.value.commandType !== 'applyRestriction')
       return rejected('invalid_contract');
     const command: ApplyRestrictionCommandV1 = parsed.value;
-    const trusted = await this.deps.restrictionAuthority
+    const verdict = await this.deps.restrictionAuthority
       .verifyRestriction({
         assetId: command.payload.assetId,
         decisionRef: command.payload.decisionRef,
         restricted: command.payload.restricted,
       })
-      .catch(() => false);
-    if (!trusted) return rejected('capability_denied');
+      .catch((): MediaRestrictionVerdict => ({ verified: false }));
+    if (!verdict.verified) return rejected('capability_denied');
+    // A lift that does not name the decision it restores matches no active
+    // restriction: the domain refuses it as stale (D2 §3).
+    const instruction: RestrictionInstruction = command.payload.restricted
+      ? { restricted: true, decisionRef: command.payload.decisionRef }
+      : { restricted: false, restoresDecisionRef: verdict.restoresDecisionRef };
     const semanticHash = sha256Hex(
       canonicalJson({ algorithm: 'media_semantic_hash_v1', command: command.payload }),
     );
@@ -237,7 +244,7 @@ export class MediaDeletionService {
         }
         const asset = await tx.asset(command.payload.assetId);
         if (asset === null) throw new MediaDomainRefusal('not_found');
-        const next = withRestriction(asset, command.payload.restricted, nowUtc);
+        const next = withRestriction(asset, instruction, nowUtc);
         if (next !== asset) {
           tx.putAsset(next, asset.revision);
           // Announce only what clients can actually reach: a deletion hold may keep

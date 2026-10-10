@@ -157,6 +157,27 @@ export interface MediaAttachmentV1 {
   readonly purpose: 'contentMedia';
 }
 
+/**
+ * The Media revocation epoch the publisher confirmed for an attached asset at
+ * publish or activation (D2 §3, §5.1). Kept in the pointer, never in the
+ * immutable revision or its `mediaRevision` hash.
+ */
+export interface MediaConfirmationV1 {
+  readonly assetId: EntityId;
+  readonly revocationEpoch: number;
+}
+
+/**
+ * An attached asset Content stopped showing because Media revoked it after
+ * confirmation (`revoked`) or deleted it (`deleted`). Only an activation by the
+ * publisher clears it (D2 §5.4).
+ */
+export interface MediaSuppressionV1 {
+  readonly assetId: EntityId;
+  readonly reason: 'revoked' | 'deleted';
+  readonly observedEpoch: number;
+}
+
 /** Internal reasons; every one is the public failure `media_not_ready`. */
 export type MediaNotReadyReason =
   | 'asset_unknown'
@@ -210,6 +231,10 @@ export interface PublicationPointerV1 {
   readonly moderationHold: ModerationHold | null;
   readonly revision: number;
   readonly updatedAtUtc: UtcInstant;
+  /** D2: stored only when non-empty; absent means none. */
+  readonly mediaConfirmations?: readonly MediaConfirmationV1[];
+  /** D2: stored only when non-empty; grows until the publisher activates again. */
+  readonly mediaSuppression?: readonly MediaSuppressionV1[];
 }
 
 export type ContentFailureCode =
@@ -376,7 +401,12 @@ export interface PublicationStatusV1 {
 export interface ContentEffectV1 {
   readonly schemaVersion: 1;
   readonly effectId: string;
-  readonly kind: 'ContentPublished' | 'ContentRevisionActivated' | 'ContentVisibilityChanged';
+  readonly kind:
+    | 'ContentPublished'
+    | 'ContentRevisionActivated'
+    | 'ContentVisibilityChanged'
+    /** D2: only the media the pointer suppresses changed; no Booking fact. */
+    | 'ContentMediaAvailabilityChanged';
   readonly contentId: EntityId;
   readonly publishedRevisionId: EntityId;
   readonly pointerRevision: number;
@@ -386,4 +416,6 @@ export interface ContentEffectV1 {
   readonly marketId: MarketId;
   readonly referenceRevisions: ContentReferenceRevisionsV1;
   readonly occurredAtUtc: UtcInstant;
+  /** D2: media the pointer suppresses at this fact; absent when none. */
+  readonly suppressedMediaIds?: readonly EntityId[];
 }

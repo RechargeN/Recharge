@@ -160,6 +160,15 @@ stand test signature only and sharp 0.35.5 — and does not close OD-03, OD-04
 or OD-05: its limits and profiles are local test values, and EICAR, official
 databases and Linux evidence are the open Linux gate.
 
+D2 (2026-10-09, `MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md`) adds the reaction to
+late restriction or deletion of published Media on the Emulator: a durable
+revocation epoch, an Emulator-only delivery gate that refuses at once, Content
+suppression decided from Media's state, publisher-only confirmation, Catalog
+facts that carry the suppression, staff `restrict_media`/`restore_media` and the
+R1/R2 sweeps. It does not close OD-07 (retention, legal hold) or OD-08 (protected
+delivery, CDN, cache): R2 deletes only with an explicitly test-only policy, and
+signed URLs, CDN and client caches stay F2a.
+
 ## 8. Fail-closed defaults
 
 - no production Storage, bucket, Rules, worker, upload endpoint or CDN;

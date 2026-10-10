@@ -328,6 +328,7 @@ export class EventBookingHandoff {
           marketId: effect.marketId,
           publisherRef: effect.publisherRef,
           occurredAtUtc: effect.occurredAtUtc,
+          mediaOnly: effect.kind === 'ContentMediaAvailabilityChanged',
         },
         revision.body,
       );
@@ -478,6 +479,7 @@ export class EventBookingHandoff {
           marketId: effect.marketId,
           publisherRef: effect.publisherRef,
           occurredAtUtc: effect.occurredAtUtc,
+          mediaOnly: effect.kind === 'ContentMediaAvailabilityChanged',
         },
         revision.body,
       );

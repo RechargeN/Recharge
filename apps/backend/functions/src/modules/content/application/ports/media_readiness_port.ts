@@ -1,6 +1,7 @@
 import type {
   ContentTypeId,
   MediaAttachmentV1,
+  MediaConfirmationV1,
   MediaNotReadyReason,
 } from '../../../../contracts/content_v1.js';
 import type { PublisherRefV1 } from '../../../../contracts/identity_v1.js';
@@ -15,6 +16,8 @@ export type MediaReadiness =
       readonly ready: true;
       readonly mediaRevision: string;
       readonly attachments: readonly MediaAttachmentV1[];
+      /** D2: the revocation epoch of every attachment at this instant. */
+      readonly confirmations: readonly MediaConfirmationV1[];
     }
   | { readonly ready: false; readonly reason: MediaNotReadyReason };
 

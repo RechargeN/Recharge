@@ -9,7 +9,10 @@ import { FirestoreIdentityAuthorityRepository } from '../../src/modules/identity
 import { LocalPageCreationPolicy } from '../../src/modules/identity_publisher/infrastructure/local_page_creation_policy.js';
 import { LocalVerificationDecisionAdapter } from '../../src/modules/identity_publisher/infrastructure/local_verification_decision_adapter.js';
 import { SyntheticProviderIdentityVerifier } from '../../src/modules/identity_publisher/infrastructure/synthetic_provider_identity_verifier.js';
-import { createEmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
+import {
+  createEmulatorMediaComposition,
+  type EmulatorMediaComposition,
+} from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { EmulatorStaffAuthority } from '../../src/modules/moderation/infrastructure/emulator_staff_authority.js';
 import type { EntityId } from '../../src/shared/ids.js';
 import { standEventBody } from '../stand/stand_content.js';
@@ -45,11 +48,23 @@ function succeeded<T>(result: { kind: string; data?: unknown }, label: string): 
  * through Content, Media and C2 moderation exactly like the stand; nothing is
  * written to Content storage directly. Every label is unique per run.
  */
-export function createContentEventWorld(firestore: Firestore, label: string) {
-  const media = createEmulatorMediaComposition({
-    firestore,
-    bucket: getStorage().bucket('demo-recharge.appspot.com') as never,
-  });
+export function createContentEventWorld(
+  firestore: Firestore,
+  label: string,
+  /** D2: the real local tools and the moderation verifier, when a gate supplies them. */
+  options: {
+    readonly media?: EmulatorMediaComposition;
+    /** D2: a real image for the real processor (default: a 1x1 PNG for the fakes). */
+    readonly cover?: { readonly bytes: Buffer; readonly mediaType: string };
+  } = {},
+) {
+  const cover = options.cover ?? { bytes: png, mediaType: 'image/png' };
+  const media =
+    options.media ??
+    createEmulatorMediaComposition({
+      firestore,
+      bucket: getStorage().bucket('demo-recharge.appspot.com') as never,
+    });
   const content = eventAuthoringComposition(firestore, { media });
   const run = randomUUID().slice(0, 8);
   const subcategory = `sub-${label}-${run}`;
@@ -179,8 +194,8 @@ export function createContentEventWorld(firestore: Firestore, label: string) {
           family: 'image',
           marketId: 'LV',
           visibilityClass: 'publicDerived',
-          declaredMediaType: 'image/png',
-          declaredByteLength: png.length,
+          declaredMediaType: cover.mediaType,
+          declaredByteLength: cover.bytes.length,
           publisherRef,
           entityIntent: { domain: 'content', entityId: draft.contentId, purpose: 'contentMedia' },
         },
@@ -189,7 +204,7 @@ export function createContentEventWorld(firestore: Firestore, label: string) {
     );
     const asset = await media.repository.transact((tx) => tx.asset(upload.assetId));
     assert.ok(asset);
-    await media.objectStore.put(asset.objectKeyHandle, png);
+    await media.objectStore.put(asset.objectKeyHandle, cover.bytes);
     const confirmed = succeeded<{
       revision: number;
       sourceGenerationRef: { providerGeneration: string };
@@ -200,8 +215,8 @@ export function createContentEventWorld(firestore: Firestore, label: string) {
         idempotencyKey: key('confirm'),
         payload: {
           uploadSessionId: upload.uploadSessionId,
-          expectedSha256: sha256(png),
-          expectedByteLength: png.length,
+          expectedSha256: sha256(cover.bytes),
+          expectedByteLength: cover.bytes.length,
         },
       }),
       'confirm',
@@ -215,8 +230,8 @@ export function createContentEventWorld(firestore: Firestore, label: string) {
           assetId: upload.assetId,
           expectedAssetRevision: confirmed.revision,
           sourceProviderGeneration: confirmed.sourceGenerationRef.providerGeneration,
-          expectedSha256: sha256(png),
-          expectedByteLength: png.length,
+          expectedSha256: sha256(cover.bytes),
+          expectedByteLength: cover.bytes.length,
         },
       }),
       'finalize',
@@ -360,5 +375,24 @@ export function createContentEventWorld(firestore: Firestore, label: string) {
     );
   }
 
-  return { subcategory, publish, revise, activate, pointer, ownerWithdraw, slotIdOf };
+  const coverOf = (contentId: string): string => {
+    const record = records.get(contentId);
+    assert.ok(record);
+    return record.cover;
+  };
+
+  return {
+    subcategory,
+    publish,
+    revise,
+    activate,
+    pointer,
+    ownerWithdraw,
+    slotIdOf,
+    // D2: the cover asset, the actors and the compositions behind the world.
+    coverOf,
+    actors,
+    content,
+    media,
+  };
 }

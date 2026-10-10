@@ -42,6 +42,10 @@ const expected = [
   "notificationsQueryV1",
   "notificationsCommandV1",
   "consumeNotificationEffectV1",
+  // D2: default-off, Emulator-only delivery gate, Media-fact trigger and sweeps.
+  "mediaDeliveryV1",
+  "consumeMediaEffectV1",
+  "reconcileMediaReferencesV1",
 ].sort();
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
@@ -52,6 +56,7 @@ const schedules = [
 if (
   JSON.stringify(schedules.sort()) !==
   JSON.stringify([
+    "reconcileMediaReferencesV1",
     "releaseMissedReconfirmationsV1",
     "retryEventBookingProjectionDeliveriesV1",
   ])
@@ -72,6 +77,7 @@ if (
   JSON.stringify([
     "consumeContentEffectV1@contentEffects/{effectId}",
     "consumeEventBookingOutboxV1@eventBookingOutbox/{outboxId}",
+    "consumeMediaEffectV1@mediaEffects/{effectId}",
     "consumeNotificationEffectV1@bookingOutbox/{outboxId}",
   ])
 ) {
@@ -80,5 +86,5 @@ if (
   );
 }
 process.stdout.write(
-  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover, Content-effect and Notifications surface.\n",
+  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover, Content-effect, Notifications and D2 Media-delivery surface.\n",
 );

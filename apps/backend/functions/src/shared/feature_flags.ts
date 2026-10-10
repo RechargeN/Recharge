@@ -29,6 +29,10 @@ export const identityFlagIds = Object.freeze({
 
 export const mediaFlagIds = Object.freeze({
   upload: 'media.upload',
+  /** D2: Emulator-only delivery gate (default off). */
+  delivery: 'media.delivery',
+  /** D2: Emulator-only R2 orphan sweep (default off). */
+  reconcile: 'media.reconcile',
 });
 
 /** C3: Emulator-only Event authoring through Content (default off). */
@@ -36,6 +40,8 @@ export const contentFlagIds = Object.freeze({
   eventAuthoring: 'content.event.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
+  /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */
+  mediaAvailability: 'content.mediaAvailability',
 });
 
 /** E2: Emulator-only Discover read and Content → Catalog delivery (default off). */

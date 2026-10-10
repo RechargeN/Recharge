@@ -43,6 +43,8 @@ export type StoredDeletionStatus = DeepReadonly<MediaDeletionStatusV1>;
 
 export interface MediaTransaction {
   asset(assetId: string): Promise<MediaAsset | null>;
+  /** D2 sweep: asset ids in id order strictly after `afterAssetId` (one bounded page). */
+  assetIdsPage(afterAssetId: string | null, limit: number): Promise<readonly string[]>;
   /** Compare-and-set on the stored revision (0 = absent). */
   putAsset(asset: MediaAsset, expectedStoredRevision: number): void;
   session(uploadSessionId: string): Promise<UploadSession | null>;

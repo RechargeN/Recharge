@@ -10,7 +10,15 @@ export const moderationIssuer = 'test-only-emulator-moderation';
 export const moderationEvidence =
   'Emulator operator moderation: staff authority comes from the stand bootstrap registry, not from production IAM';
 
-export type ModerationAction = 'approve' | 'reject' | 'restrict' | 'withdraw' | 'restore';
+export type ModerationAction =
+  | 'approve'
+  | 'reject'
+  | 'restrict'
+  | 'withdraw'
+  | 'restore'
+  /** D2: restrict or restore one Media asset (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md` §7). */
+  | 'restrict_media'
+  | 'restore_media';
 
 export const moderationActions: readonly ModerationAction[] = Object.freeze([
   'approve',
@@ -18,7 +26,14 @@ export const moderationActions: readonly ModerationAction[] = Object.freeze([
   'restrict',
   'withdraw',
   'restore',
+  'restrict_media',
+  'restore_media',
 ]);
+
+/** Actions that act on a Media asset instead of a Content publication. */
+export function isMediaAction(action: ModerationAction): boolean {
+  return action === 'restrict_media' || action === 'restore_media';
+}
 
 export type ModerationFailureCode =
   | 'invalid_contract'
@@ -54,6 +69,9 @@ export interface ModerationTarget {
   /** Enforcement actions: the exact published revision and pointer revision. */
   readonly publishedRevisionId?: string;
   readonly pointerRevision?: number;
+  /** Media actions: the asset and its revision; `contentId` is its Content binding. */
+  readonly assetId?: string;
+  readonly assetRevision?: number;
 }
 
 export interface StaffModerationCommand {
@@ -62,11 +80,13 @@ export interface StaffModerationCommand {
   readonly idempotencyKey: string;
   /** Operator reason; kept in the decision, the receipt and the audit. */
   readonly reason: string;
+  /** Content actions name `contentId`; Media actions name only `assetId`. */
   readonly target: {
-    readonly contentId: string;
+    readonly contentId?: string;
     readonly submissionId?: string;
+    readonly assetId?: string;
   };
-  /** `restore` only: the exact decision whose hold is lifted. */
+  /** `restore` / `restore_media` only: the exact decision that is lifted. */
   readonly restoresDecisionId?: string;
 }
 

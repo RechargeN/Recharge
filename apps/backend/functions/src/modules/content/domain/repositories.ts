@@ -62,6 +62,34 @@ export interface PublicationEffectSink {
   append(effect: ContentEffectV1): void;
 }
 
+/** The two feeds the D2 media availability reaction reads (D2 §5.3). */
+export type MediaAvailabilityFeed = 'mediaEffects' | 'contentEffects';
+
+/** Position in a feed ordered by `(occurredAtUtc, effectId)`. */
+export interface FeedPosition {
+  readonly occurredAtUtc: string;
+  readonly effectId: string;
+}
+
+/** Where one D2 consumer stands in its feed; nothing else shares it. */
+export interface MediaAvailabilityStatusRecord {
+  readonly feed: MediaAvailabilityFeed;
+  readonly checkpoint: FeedPosition | null;
+  readonly updatedAtUtc: string;
+}
+
+/** One processed fact of a D2 consumer: ids, hash and per-Content outcome only. */
+export interface MediaAvailabilityReceipt {
+  readonly feed: MediaAvailabilityFeed;
+  readonly effectId: string;
+  readonly payloadHash: string;
+  readonly outcomes: readonly {
+    readonly contentId: string;
+    readonly outcome: 'suppressed' | 'unchanged' | 'unavailable' | 'no_publication';
+  }[];
+  readonly processedAtUtc: string;
+}
+
 export interface ContentTransaction {
   draft(draftId: string): Promise<ContentDraft | null>;
   draftByContentId(contentId: string): Promise<ContentDraft | null>;
@@ -77,7 +105,24 @@ export interface ContentTransaction {
   putPublishedRevision(revision: PublishedRevision): void;
   /** Whether any draft body or immutable revision still references the Media asset. */
   isMediaReferenced(assetId: string): Promise<boolean>;
+  /** Content ids with an immutable revision that attaches the asset (bounded, sorted). */
+  contentIdsAttachingMedia(assetId: string, limit: number): Promise<readonly string[]>;
   pointer(contentId: string): Promise<PublicationPointer | null>;
+  /** Current pointers in content-id order strictly after `afterContentId` (one bounded page). */
+  pointersPage(
+    afterContentId: string | null,
+    limit: number,
+  ): Promise<readonly PublicationPointer[]>;
+  mediaAvailabilityStatus(
+    feed: MediaAvailabilityFeed,
+  ): Promise<MediaAvailabilityStatusRecord | null>;
+  putMediaAvailabilityStatus(record: MediaAvailabilityStatusRecord): void;
+  mediaAvailabilityReceipt(
+    feed: MediaAvailabilityFeed,
+    effectId: string,
+  ): Promise<MediaAvailabilityReceipt | null>;
+  /** Receipts are immutable: a second receipt for the same fact is a conflict. */
+  putMediaAvailabilityReceipt(receipt: MediaAvailabilityReceipt): void;
   /**
    * One page of stored effects of a Content in `(pointerRevision, effectId)` order
    * strictly after `after` (`null` = from the start). Stored effects are replayed

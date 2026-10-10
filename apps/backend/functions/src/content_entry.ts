@@ -14,6 +14,7 @@ import {
   createEmulatorModerationPorts,
   createEmulatorModerationService,
 } from './modules/moderation/infrastructure/emulator_moderation_composition.js';
+import { MediaModerationAdapter } from './modules/moderation/infrastructure/media_moderation_adapter.js';
 import type { EntityId } from './shared/ids.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 import { mediaComposition } from './media_entry.js';
@@ -60,6 +61,8 @@ export function eventAuthoringComposition(
     repository: moderationPorts.repository,
     contentRepository: repository,
     contentService: service,
+    // D2 §7: staff restrict or restore one Media asset through Media's own path.
+    media: new MediaModerationAdapter(media.repository, media.deletion),
     clock,
   });
   return Object.freeze({ content: service, contentRepository: repository, media, moderation });

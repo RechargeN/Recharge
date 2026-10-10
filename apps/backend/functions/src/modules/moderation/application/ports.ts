@@ -64,6 +64,28 @@ export type EnforcementOutcome =
     }
   | { readonly kind: 'refused'; readonly code: string };
 
+/** D2: what Moderation may know about one Media asset (ids and revision only). */
+export interface MediaAssetView {
+  readonly assetId: string;
+  /** The Content the asset is bound to; `null` for an unbound asset. */
+  readonly contentId: string | null;
+  readonly assetRevision: number;
+}
+
+/**
+ * D2: Moderation's view of Media. The one write path is Media's own verified
+ * `applyRestriction`, which checks the recorded decision again; Moderation never
+ * edits Media records.
+ */
+export interface MediaModerationPort {
+  asset(assetId: string): Promise<MediaAssetView | null>;
+  enforce(instruction: {
+    readonly decisionId: string;
+    readonly assetId: string;
+    readonly restricted: boolean;
+  }): Promise<EnforcementOutcome>;
+}
+
 /**
  * Moderation's view of Content: read-only state of the exact target, and the
  * one write path, which is Content's own verified `applyModerationDisposition`.

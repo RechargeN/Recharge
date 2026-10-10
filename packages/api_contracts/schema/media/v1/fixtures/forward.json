@@ -163,5 +163,13 @@
       "kind": "rejected",
       "code": "not_found"
     }
+  ],
+  "deliveryRequest": [
+    {
+      "schemaVersion": 2,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+      "profile": "display"
+    }
   ]
 }

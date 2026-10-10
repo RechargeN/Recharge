@@ -9,12 +9,19 @@ import { FirestoreContentRepository } from '../../content/infrastructure/firesto
 import { IdentityPublisherEligibility } from '../../content/infrastructure/identity_publisher_eligibility.js';
 import { FirestoreIdentityAuthorityRepository } from '../../identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { ContentMediaReadinessAdapter } from '../application/content_media_readiness.js';
+import { MediaDeletionService } from '../application/media_deletion_service.js';
+import { MediaDeliveryGate } from '../application/media_delivery_gate.js';
 import { MediaService } from '../application/media_service.js';
+import { OrphanReconciler } from '../application/orphan_reconciler.js';
+import { OrphanSweep } from '../application/orphan_sweep.js';
+import type { MediaRestrictionAuthority } from '../application/ports/actor_authority_port.js';
 import type { MediaPolicy } from '../domain/media_policy.js';
+import type { MediaRetentionPolicy } from '../domain/media_retention.js';
 import { FakeProcessor } from './fake_processor.js';
 import { FakeScanner } from './fake_scanner.js';
 import { FirestoreMediaRepository } from './firestore_media_repository.js';
 import { IdentityMediaActorAuthority } from './identity_media_authority.js';
+import { FirestoreMediaEffectFeed } from './media_effect_feed.js';
 import {
   LocalToolsProcessor,
   LocalToolsScanner,
@@ -71,13 +78,36 @@ export interface EmulatorMediaComposition {
   readonly readiness: ContentMediaReadinessAdapter;
   /** Media's question to Content: may this actor bind media to this exact draft? */
   readonly contentScope: ContentMediaScope;
+  /** D2: deletion and the verified restriction path. */
+  readonly deletion: MediaDeletionService;
+  /** D2: the delivery gate (§4). */
+  readonly delivery: MediaDeliveryGate;
+  /** D2: R2 over every asset; without an accepted retention policy it deletes nothing. */
+  readonly orphanSweep: OrphanSweep;
+  /** D2: committed Media facts for the owning domain's reaction. */
+  readonly effectFeed: FirestoreMediaEffectFeed;
 }
+
+/** Without a verified source every restriction instruction is refused. */
+const noRestrictionAuthority: MediaRestrictionAuthority = Object.freeze({
+  verifyRestriction: () => Promise.resolve({ verified: false } as const),
+});
+
+/** D2 local bound of one delivered variant; not a product limit. */
+export const emulatorDeliveryMaxBytes = 1_048_576;
 
 export function createEmulatorMediaComposition(input: {
   readonly firestore: Firestore;
   readonly bucket: StorageBucketLike;
   readonly clock?: ServerClock;
   readonly environment?: NodeJS.ProcessEnv;
+  /** D2: the moderation verifier; absent means every restriction is refused. */
+  readonly restrictionAuthority?: MediaRestrictionAuthority;
+  /**
+   * D2: an accepted retention policy. The stand has none (R2 refuses with
+   * `policy_unavailable`); only the D2 gate passes its explicitly test-only one.
+   */
+  readonly retention?: MediaRetentionPolicy;
 }): EmulatorMediaComposition {
   const environment = input.environment ?? process.env;
   const identity = new FirestoreIdentityAuthorityRepository(input.firestore);
@@ -89,6 +119,8 @@ export function createEmulatorMediaComposition(input: {
   });
   const authority = new IdentityMediaActorAuthority(identity, emulatorMediaMarkets);
   const tools = localToolsConfigFrom(environment);
+  const clock = input.clock ?? systemServerClock;
+  const ids = { newId: () => randomUUID() as EntityId };
   const service = new MediaService({
     repository,
     authority,
@@ -96,8 +128,8 @@ export function createEmulatorMediaComposition(input: {
     objectStore,
     scanner: tools === null ? new FakeScanner() : new LocalToolsScanner(tools, objectStore),
     processor: tools === null ? new FakeProcessor() : new LocalToolsProcessor(tools, objectStore),
-    clock: input.clock ?? systemServerClock,
-    ids: { newId: () => randomUUID() as EntityId },
+    clock,
+    ids,
     enabledFamilies: emulatorMediaFamilies,
     policy: emulatorMediaPolicy,
   });
@@ -105,5 +137,43 @@ export function createEmulatorMediaComposition(input: {
     repository,
     enabledFamilies: emulatorMediaFamilies,
   });
-  return Object.freeze({ service, objectStore, authority, repository, readiness, contentScope });
+  const retention = input.retention === undefined ? {} : { retention: input.retention };
+  const deletion = new MediaDeletionService({
+    repository,
+    authority,
+    restrictionAuthority: input.restrictionAuthority ?? noRestrictionAuthority,
+    references: contentScope,
+    objectStore,
+    clock,
+    ids,
+    ...retention,
+  });
+  const orphanSweep = new OrphanSweep({
+    repository,
+    reconciler: new OrphanReconciler({
+      repository,
+      references: contentScope,
+      deletion,
+      clock,
+      ...retention,
+    }),
+  });
+  const delivery = new MediaDeliveryGate({
+    repository,
+    published: contentScope,
+    objects: objectStore,
+    maxBytes: emulatorDeliveryMaxBytes,
+  });
+  return Object.freeze({
+    service,
+    objectStore,
+    authority,
+    repository,
+    readiness,
+    contentScope,
+    deletion,
+    delivery,
+    orphanSweep,
+    effectFeed: new FirestoreMediaEffectFeed(input.firestore),
+  });
 }

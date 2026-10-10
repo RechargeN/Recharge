@@ -48,6 +48,32 @@ export class InMemoryMediaRepository implements MediaRepository {
     }
   }
 
+  /** Test-only feed of committed facts in `(occurredAtUtc, effectId)` order (D2). */
+  effectsAfter(
+    after: { readonly occurredAtUtc: string; readonly effectId: string } | null,
+    limit: number,
+  ): Promise<readonly MediaEffectV1[]> {
+    const ordered = [...this.#store.effects].sort((left, right) =>
+      left.occurredAtUtc === right.occurredAtUtc
+        ? left.effectId < right.effectId
+          ? -1
+          : 1
+        : left.occurredAtUtc < right.occurredAtUtc
+          ? -1
+          : 1,
+    );
+    return Promise.resolve(
+      ordered
+        .filter(
+          (item) =>
+            after === null ||
+            item.occurredAtUtc > after.occurredAtUtc ||
+            (item.occurredAtUtc === after.occurredAtUtc && item.effectId > after.effectId),
+        )
+        .slice(0, limit),
+    );
+  }
+
   /** Test-only inspection of committed state. */
   snapshot(): Readonly<{
     assets: readonly MediaAsset[];
@@ -108,6 +134,13 @@ function idempotencyKey(actorUserId: string, commandType: string, key: string): 
 function transactionFor(store: Store): MediaTransaction {
   return {
     asset: (assetId) => Promise.resolve(store.assets.get(assetId) ?? null),
+    assetIdsPage: (afterAssetId, limit) =>
+      Promise.resolve(
+        [...store.assets.keys()]
+          .filter((id) => afterAssetId === null || id > afterAssetId)
+          .sort()
+          .slice(0, limit),
+      ),
     putAsset(asset, expectedStoredRevision) {
       const stored = store.assets.get(asset.assetId)?.revision ?? 0;
       if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('asset_revision');

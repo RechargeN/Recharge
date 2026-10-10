@@ -21,6 +21,9 @@ import {
   type ContentIdempotencyRecord,
   type ContentRepository,
   type ContentTransaction,
+  type MediaAvailabilityFeed,
+  type MediaAvailabilityReceipt,
+  type MediaAvailabilityStatusRecord,
 } from '../domain/repositories.js';
 
 interface Store {
@@ -31,6 +34,8 @@ interface Store {
   readonly idempotency: Map<string, ContentIdempotencyRecord>;
   readonly audit: ContentAuditEntry[];
   readonly effects: ContentEffectV1[];
+  readonly availabilityStatus: Map<MediaAvailabilityFeed, MediaAvailabilityStatusRecord>;
+  readonly availabilityReceipts: Map<string, MediaAvailabilityReceipt>;
 }
 
 /**
@@ -93,6 +98,8 @@ function emptyStore(): Store {
     idempotency: new Map(),
     audit: [],
     effects: [],
+    availabilityStatus: new Map(),
+    availabilityReceipts: new Map(),
   };
 }
 
@@ -106,6 +113,8 @@ function cloneStore(store: Store): Store {
     idempotency: new Map(store.idempotency),
     audit: [...store.audit],
     effects: [...store.effects],
+    availabilityStatus: new Map(store.availabilityStatus),
+    availabilityReceipts: new Map(store.availabilityReceipts),
   };
 }
 
@@ -195,7 +204,39 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
             (resolveContentType(draft.typeId)?.mediaIds?.(draft.body) ?? []).includes(assetId),
           ),
       ),
+    contentIdsAttachingMedia: (assetId, limit) =>
+      Promise.resolve(
+        [
+          ...new Set(
+            [...store.revisions.values()]
+              .filter((revision) =>
+                revision.mediaAttachments.some((item) => item.assetId === assetId),
+              )
+              .map((revision) => revision.contentId),
+          ),
+        ]
+          .sort()
+          .slice(0, limit),
+      ),
     pointer: (contentId) => Promise.resolve(store.pointers.get(contentId) ?? null),
+    pointersPage: (afterContentId, limit) =>
+      Promise.resolve(
+        [...store.pointers.values()]
+          .filter((item) => afterContentId === null || item.contentId > afterContentId)
+          .sort((left, right) => (left.contentId < right.contentId ? -1 : 1))
+          .slice(0, limit),
+      ),
+    mediaAvailabilityStatus: (feed) => Promise.resolve(store.availabilityStatus.get(feed) ?? null),
+    putMediaAvailabilityStatus(record) {
+      store.availabilityStatus.set(record.feed, copy(record));
+    },
+    mediaAvailabilityReceipt: (feed, effectId) =>
+      Promise.resolve(store.availabilityReceipts.get(`${feed}:${effectId}`) ?? null),
+    putMediaAvailabilityReceipt(receipt) {
+      const key = `${receipt.feed}:${receipt.effectId}`;
+      if (store.availabilityReceipts.has(key)) throw new ContentRepositoryConflict('duplicate_id');
+      store.availabilityReceipts.set(key, copy(receipt));
+    },
     putPointer(pointer, expectedStoredRevision) {
       const stored = store.pointers.get(pointer.contentId)?.revision ?? 0;
       if (stored !== expectedStoredRevision)

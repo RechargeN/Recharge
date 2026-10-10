@@ -660,6 +660,20 @@
         "compositeIndexes": []
       },
       {
+        "name": "contentMediaAvailabilityReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "contentMediaAvailabilityStatus",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "contentPublicationPointers",
         "clientAccess": "deny",
         "owner": "firebase_cli",

@@ -27,13 +27,15 @@ const commands = new Set([
   "restrict",
   "withdraw",
   "restore",
+  "restrict-media",
+  "restore-media",
   "receipt",
 ]);
 
 export async function main(args) {
   if (!commands.has(args[0])) {
     throw new Error(
-      "Usage: stand-moderate.mjs queue | approve|reject <submissionId> --reason <text> | restrict|withdraw <contentId> --reason <text> | restore <contentId> --decision <decisionId> --reason <text> | receipt <decisionId>  [--as <stand user>] [--key <idempotency key>]",
+      "Usage: stand-moderate.mjs queue | approve|reject <submissionId> --reason <text> | restrict|withdraw <contentId> --reason <text> | restore <contentId> --decision <decisionId> --reason <text> | restrict-media <assetId> --reason <text> | restore-media <assetId> --decision <decisionId> --reason <text> | receipt <decisionId>  [--as <stand user>] [--key <idempotency key>]",
     );
   }
   if (!fs.existsSync(entry)) {

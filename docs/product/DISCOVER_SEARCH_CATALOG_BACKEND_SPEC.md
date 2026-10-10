@@ -1049,3 +1049,16 @@ No production authority, cloud index or market activation.
   the occurrence `bookingRef` of internal registration — a reference only.
   Booking terms and availability are not Catalog facts: `availability` stays
   `not_connected` and `onlyAvailable` stays a typed refusal.
+
+## 35. D2 local amendment — suppressed Media in Catalog facts (Emulator only)
+
+Owner-accepted 2026-10-09:
+[MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md](MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md) §6.
+
+- Every Content fact carries `suppressedMediaIds` (omitted when empty, so earlier
+  facts keep their hash), and the Content fact source passes it on; a suppressed
+  cover is projected as `coverMediaId: null` and the object stays listed. The
+  projection shape and schema revision are unchanged.
+- A media-only change is the fact kind `ContentMediaAvailabilityChanged` with a
+  new pointer revision: delivery, reconciliation, rebuild, activation and
+  rollback replay it like any other fact, so no suppressed cover comes back.

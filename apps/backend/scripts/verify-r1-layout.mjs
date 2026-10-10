@@ -73,6 +73,11 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/media_privacy_boundary.test.ts",
   "apps/backend/functions/test/integration/media_security.test.ts",
   "apps/backend/functions/test/integration/media_upload_service.test.ts",
+  // D2 (MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md §12): late Media restriction.
+  "apps/backend/functions/test/integration/content_media_availability.test.ts",
+  "apps/backend/functions/test/integration/media_delivery_gate.test.ts",
+  "apps/backend/functions/test/integration/media_orphan_sweep.test.ts",
+  "apps/backend/functions/test/integration/moderation_media_restriction.test.ts",
 ];
 
 if (

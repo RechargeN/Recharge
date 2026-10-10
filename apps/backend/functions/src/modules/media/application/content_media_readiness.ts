@@ -1,9 +1,11 @@
 import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
 import type { MediaFamily } from '../../../contracts/media_v1.js';
+import { revocationEpochOf } from '../domain/media_asset.js';
 import {
   attachmentsRevision,
   checkAttachment,
   type MediaAttachment,
+  type MediaConfirmation,
   type NotReadyReason,
 } from '../domain/media_attachment.js';
 import type { MediaRepository } from '../domain/repositories.js';
@@ -27,8 +29,25 @@ export type ContentMediaReadiness =
       readonly ready: true;
       readonly mediaRevision: string;
       readonly attachments: readonly MediaAttachment[];
+      /** The revocation epoch of every attachment at this instant (D2 §3). */
+      readonly confirmations: readonly MediaConfirmation[];
     }
   | { readonly ready: false; readonly reason: NotReadyReason };
+
+/**
+ * Structural shape of Content's availability question (D2 §5.2): what Media
+ * says about an attached asset now. Ids, states, generations and epochs only.
+ */
+export type ContentMediaAvailabilityState =
+  'deliverable' | 'restricted' | 'held' | 'not_ready' | 'deleted' | 'absent';
+
+export interface ContentMediaAvailability {
+  readonly assetId: string;
+  readonly state: ContentMediaAvailabilityState;
+  readonly revocationEpoch: number;
+  readonly sourceGeneration?: string;
+  readonly variantManifestRevision?: string;
+}
 
 export interface ContentMediaReadinessDeps {
   readonly repository: MediaRepository;
@@ -58,6 +77,7 @@ export class ContentMediaReadinessAdapter {
         return { ready: false, reason: 'stale_generation' };
     }
     const attachments: MediaAttachment[] = [];
+    const confirmations: MediaConfirmation[] = [];
     const outcome = await this.deps.repository.transact(async (tx) => {
       for (const id of ids) {
         const asset = await tx.asset(id);
@@ -73,8 +93,10 @@ export class ContentMediaReadinessAdapter {
           },
           expected,
         );
-        if (!check.ok) return { ready: false as const, reason: check.reason };
+        if (!check.ok || asset === null)
+          return { ready: false as const, reason: check.ok ? 'asset_unknown' : check.reason };
         attachments.push(check.attachment);
+        confirmations.push({ assetId: asset.assetId, revocationEpoch: revocationEpochOf(asset) });
       }
       return null;
     });
@@ -82,6 +104,54 @@ export class ContentMediaReadinessAdapter {
     const sorted = [...attachments].sort((left, right) =>
       left.assetId.localeCompare(right.assetId),
     );
-    return { ready: true, mediaRevision: attachmentsRevision(sorted), attachments: sorted };
+    return {
+      ready: true,
+      mediaRevision: attachmentsRevision(sorted),
+      attachments: sorted,
+      confirmations: [...confirmations].sort((left, right) =>
+        left.assetId.localeCompare(right.assetId),
+      ),
+    };
+  }
+
+  /**
+   * Current availability of attached assets, from Media's own records, in one
+   * short read. A restriction, deletion or hold is reported as such; whether a
+   * Content revision still may show the asset is Content's decision.
+   */
+  async availability(assetIds: readonly string[]): Promise<readonly ContentMediaAvailability[]> {
+    const ids = [...new Set(assetIds)].sort();
+    return this.deps.repository.transact(async (tx) => {
+      const answers: ContentMediaAvailability[] = [];
+      for (const assetId of ids) {
+        const asset = await tx.asset(assetId);
+        if (asset === null) {
+          answers.push({ assetId, state: 'absent', revocationEpoch: 0 });
+          continue;
+        }
+        const state: ContentMediaAvailabilityState =
+          asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted'
+            ? 'deleted'
+            : asset.restricted === true
+              ? 'restricted'
+              : asset.deletionHold !== undefined
+                ? 'held'
+                : asset.lifecycle !== 'ready' ||
+                    asset.deliveryDisabled ||
+                    asset.visibilityClass !== 'publicDerived'
+                  ? 'not_ready'
+                  : 'deliverable';
+        const generation = asset.sourceGenerationRef?.providerGeneration;
+        const manifest = asset.variantManifestRevision;
+        answers.push({
+          assetId,
+          state,
+          revocationEpoch: revocationEpochOf(asset),
+          ...(generation === undefined ? {} : { sourceGeneration: generation }),
+          ...(manifest === undefined ? {} : { variantManifestRevision: manifest }),
+        });
+      }
+      return answers;
+    });
   }
 }

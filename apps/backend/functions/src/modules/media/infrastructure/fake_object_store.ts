@@ -38,11 +38,38 @@ export class FakeObjectStore implements ObjectStorePort, ObjectBytesPort {
 
   writeVariant(variantId: string, bytes: Buffer): Promise<{ readonly providerGeneration: string }> {
     this.#variantGeneration += 1;
+    const providerGeneration = `fake-variant-generation-${this.#variantGeneration}`;
+    this.putVariantBytes(variantId, providerGeneration, bytes);
+    return Promise.resolve({ providerGeneration });
+  }
+
+  readonly #variantGenerations = new Map<string, string>();
+
+  /** D2 tests: variant bytes at a given generation (the FAKE processor writes none). */
+  putVariantBytes(variantId: string, providerGeneration: string, bytes: Buffer): void {
     this.variants.add(variantId);
     this.variantBytes.set(variantId, bytes);
-    return Promise.resolve({
-      providerGeneration: `fake-variant-generation-${this.#variantGeneration}`,
-    });
+    this.#variantGenerations.set(variantId, providerGeneration);
+  }
+
+  /** Called whenever a variant is read; lets a test change the world mid-delivery. */
+  onReadVariant: ((variantId: string) => Promise<void>) | undefined;
+
+  async readVariant(
+    variantId: string,
+    providerGeneration: string,
+    maxBytes: number,
+  ): Promise<ObjectRead> {
+    await this.onReadVariant?.(variantId);
+    const bytes = this.variantBytes.get(variantId);
+    if (
+      bytes === undefined ||
+      !this.variants.has(variantId) ||
+      this.#variantGenerations.get(variantId) !== providerGeneration
+    )
+      return { kind: 'absent' };
+    if (bytes.length > maxBytes) return { kind: 'too_large' };
+    return { kind: 'complete', providerGeneration, bytes };
   }
 
   put(objectKeyHandle: string, object: FakeObject): void {

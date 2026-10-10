@@ -17,8 +17,26 @@ import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import { MediaDomainRefusal } from './failures.js';
 import type { VariantManifest } from './media_variant.js';
 
-/** Stored asset: the wire view plus the backend-selected object key handle. */
-export type MediaAsset = DeepReadonly<MediaAssetV1> & { readonly objectKeyHandle: string };
+/**
+ * Stored asset: the wire view plus fields that never leave the module — the
+ * backend-selected object key handle and the D2 revocation marker
+ * (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md` §3).
+ */
+export type MediaAsset = DeepReadonly<MediaAssetV1> & {
+  readonly objectKeyHandle: string;
+  /**
+   * Monotonic: +1 whenever a restriction decision is applied or deletion starts;
+   * lifting a restriction never lowers it. Absent means 0.
+   */
+  readonly revocationEpoch?: number;
+  /** The decision behind the active restriction; only its own restore lifts it. */
+  readonly restrictionDecisionRef?: string;
+};
+
+/** The revocation epoch of an asset (absent = 0). */
+export function revocationEpochOf(asset: MediaAsset): number {
+  return asset.revocationEpoch ?? 0;
+}
 
 /** Deterministic JSON with sorted object keys (used for hashes only). */
 export function canonicalJson(value: unknown): string {
@@ -116,6 +134,7 @@ interface AdvancePatch {
   readonly restricted?: boolean;
   readonly deletionHold?: DeletionHold;
   readonly deletedAtUtc?: UtcInstant;
+  readonly revocationEpoch?: number;
 }
 
 /**
@@ -200,10 +219,12 @@ export function markReady(
   });
 }
 
-/** Owner-safe wire view: the backend object key never leaves the module. */
+/** Owner-safe wire view: the object key and the revocation marker never leave the module. */
 export function toAssetView(asset: MediaAsset): DeepReadonly<MediaAssetV1> {
-  const { objectKeyHandle, ...view } = asset;
+  const { objectKeyHandle, revocationEpoch, restrictionDecisionRef, ...view } = asset;
   void objectKeyHandle;
+  void revocationEpoch;
+  void restrictionDecisionRef;
   return deepFreeze(view);
 }
 
@@ -212,7 +233,10 @@ export function toAssetView(asset: MediaAsset): DeepReadonly<MediaAssetV1> {
  * reached a settled state are deleted here; in-flight ones are refused.
  */
 export function beginDeletion(asset: MediaAsset, nowUtc: UtcInstant): MediaAsset {
-  const next = advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+  const next = advance(asset, ['deleting'], nowUtc, {
+    deliveryDisabled: true,
+    revocationEpoch: revocationEpochOf(asset) + 1,
+  });
   // The hold has done its job: the tombstone replaces it.
   const { deletionHold, ...rest } = next;
   void deletionHold;
@@ -231,9 +255,14 @@ export function abortUpload(
 ): MediaAsset {
   if (asset.lifecycle !== 'reserved' && asset.lifecycle !== 'uploading')
     throw new MediaDomainRefusal('invalid_state');
+  const revocationEpoch = revocationEpochOf(asset) + 1;
   return objectAbsent
-    ? advance(asset, ['deleted'], nowUtc, { deliveryDisabled: true, deletedAtUtc: nowUtc })
-    : advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true });
+    ? advance(asset, ['deleted'], nowUtc, {
+        deliveryDisabled: true,
+        deletedAtUtc: nowUtc,
+        revocationEpoch,
+      })
+    : advance(asset, ['deleting'], nowUtc, { deliveryDisabled: true, revocationEpoch });
 }
 
 /** Cleanup confirmed: `deleting` -> `deleted`; derived metadata is dropped. */
@@ -265,35 +294,79 @@ export function holdOwnedBy(asset: MediaAsset, holdId: string, nowUtc: UtcInstan
 /** Delivery is disabled while an authoritative restriction or a deletion hold is set. */
 function withFlags(
   asset: MediaAsset,
-  flags: { readonly restricted: boolean; readonly hold: DeletionHold | undefined },
+  flags: {
+    readonly restricted: boolean;
+    readonly hold: DeletionHold | undefined;
+    /** Defaults to the stored decision while restricted, none once lifted. */
+    readonly decisionRef?: string;
+    readonly revocationEpoch?: number;
+  },
   nowUtc: UtcInstant,
 ): MediaAsset {
-  const { restricted: _restricted, deletionHold: _hold, ...rest } = asset;
+  const {
+    restricted: _restricted,
+    deletionHold: _hold,
+    restrictionDecisionRef: _decision,
+    revocationEpoch: _epoch,
+    ...rest
+  } = asset;
   void _restricted;
   void _hold;
+  const decisionRef = flags.restricted ? (flags.decisionRef ?? _decision) : undefined;
+  const revocationEpoch = flags.revocationEpoch ?? _epoch;
   return deepFreeze({
     ...rest,
     ...(flags.restricted ? { restricted: true } : {}),
+    ...(decisionRef === undefined ? {} : { restrictionDecisionRef: decisionRef }),
     ...(flags.hold === undefined ? {} : { deletionHold: flags.hold }),
+    ...(revocationEpoch === undefined ? {} : { revocationEpoch }),
     deliveryDisabled: flags.restricted || flags.hold !== undefined,
     revision: asset.revision + 1,
     updatedAtUtc: nowUtc,
   });
 }
 
+/** A verified restriction instruction: a new decision, or the restore of one. */
+export type RestrictionInstruction =
+  | { readonly restricted: true; readonly decisionRef: string }
+  | { readonly restricted: false; readonly restoresDecisionRef: string | undefined };
+
 /**
- * The authoritative restriction toggles its own flag only; it never changes the
- * lifecycle, never touches a deletion hold and never restores publicity.
+ * The authoritative restriction changes its own flag only; it never changes the
+ * lifecycle, never touches a deletion hold and never restores publicity. Every
+ * new restriction decision raises the revocation epoch (D2 §3), which lifting
+ * never lowers; a newer decision replaces an older one, and only the restore of
+ * exactly the active decision lifts it.
  */
 export function withRestriction(
   asset: MediaAsset,
-  restricted: boolean,
+  instruction: RestrictionInstruction,
   nowUtc: UtcInstant,
 ): MediaAsset {
   if (asset.lifecycle === 'deleting' || asset.lifecycle === 'deleted')
     throw new MediaDomainRefusal('invalid_state');
-  if ((asset.restricted === true) === restricted) return asset;
-  return withFlags(asset, { restricted, hold: asset.deletionHold }, nowUtc);
+  if (instruction.restricted) {
+    if (asset.restricted === true && asset.restrictionDecisionRef === instruction.decisionRef)
+      return asset;
+    return withFlags(
+      asset,
+      {
+        restricted: true,
+        hold: asset.deletionHold,
+        decisionRef: instruction.decisionRef,
+        revocationEpoch: revocationEpochOf(asset) + 1,
+      },
+      nowUtc,
+    );
+  }
+  if (asset.restricted !== true) return asset;
+  // A restore of an older, foreign or unnamed decision is stale: the active one stays.
+  if (
+    instruction.restoresDecisionRef === undefined ||
+    asset.restrictionDecisionRef !== instruction.restoresDecisionRef
+  )
+    throw new MediaDomainRefusal('stale_revision');
+  return withFlags(asset, { restricted: false, hold: asset.deletionHold }, nowUtc);
 }
 
 /**

@@ -341,6 +341,47 @@
         "kind": "restricted",
         "decisionId": "dec-4"
       }
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 3,
+      "updatedAtUtc": "2026-10-09T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null,
+      "mediaConfirmations": [
+        {
+          "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+          "revocationEpoch": 0
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 3,
+      "updatedAtUtc": "2026-10-09T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null,
+      "mediaConfirmations": [
+        {
+          "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+          "revocationEpoch": 0
+        }
+      ],
+      "mediaSuppression": [
+        {
+          "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+          "reason": "revoked",
+          "observedEpoch": 1
+        }
+      ]
     }
   ],
   "command": [

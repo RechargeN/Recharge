@@ -10,6 +10,16 @@ export interface MediaAttachment {
   readonly purpose: 'contentMedia';
 }
 
+/**
+ * The revocation epoch an owning domain confirmed for an attached asset (D2 §3).
+ * It is kept outside the immutable revision and its hash: a restriction cycle
+ * must never make a rollback impossible forever.
+ */
+export interface MediaConfirmation {
+  readonly assetId: EntityId;
+  readonly revocationEpoch: number;
+}
+
 export type NotReadyReason =
   | 'asset_unknown'
   | 'foreign_binding'

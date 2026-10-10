@@ -2,6 +2,11 @@ import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
 import type { EntityId } from '../../../shared/ids.js';
 import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import { isContentTypeAvailable, resolveContentType } from '../domain/content_type_registry.js';
+import {
+  isPubliclyVisible,
+  mediaConfirmationsOf,
+  suppressedMediaIds,
+} from '../domain/publication_pointer.js';
 import type { ContentRepository } from '../domain/repositories.js';
 import type { ContentActor, PublisherEligibilityPort } from './ports/publisher_eligibility_port.js';
 
@@ -78,4 +83,46 @@ export class ContentMediaScope {
   isReferenced(assetId: string): Promise<boolean> {
     return this.deps.repository.transact((tx) => tx.isMediaReferenced(assetId));
   }
+
+  /**
+   * Content's answer to the D2 delivery gate (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md`
+   * §4): the pin of an asset only while the publication is publicly visible, its
+   * current revision attaches the asset, Content does not suppress it and the
+   * publisher confirmed its epoch. Anything else is `null`; nothing is revealed.
+   */
+  async deliverablePin(request: {
+    readonly contentId: string;
+    readonly assetId: string;
+  }): Promise<DeliverablePin | null> {
+    return this.deps.repository.transact(async (tx) => {
+      const pointer = await tx.pointer(request.contentId);
+      if (!isPubliclyVisible(pointer) || pointer?.currentPublishedRevisionId == null) return null;
+      if (suppressedMediaIds(pointer).some((id) => id === request.assetId)) return null;
+      const confirmation = mediaConfirmationsOf(pointer).find(
+        (item) => item.assetId === request.assetId,
+      );
+      if (confirmation === undefined) return null;
+      const revision = await tx.publishedRevision(pointer.currentPublishedRevisionId);
+      const pin = revision?.mediaAttachments.find((item) => item.assetId === request.assetId);
+      if (revision === null || pin === undefined) return null;
+      return {
+        contentId: pointer.contentId,
+        pointerRevision: pointer.revision,
+        publishedRevisionId: revision.publishedRevisionId,
+        sourceGeneration: pin.sourceGeneration,
+        variantManifestRevision: pin.variantManifestRevision,
+        revocationEpoch: confirmation.revocationEpoch,
+      };
+    });
+  }
+}
+
+/** Structural shape of Media's published-media question (D2 §4, step 2). */
+export interface DeliverablePin {
+  readonly contentId: string;
+  readonly pointerRevision: number;
+  readonly publishedRevisionId: string;
+  readonly sourceGeneration: string;
+  readonly variantManifestRevision: string;
+  readonly revocationEpoch: number;
 }

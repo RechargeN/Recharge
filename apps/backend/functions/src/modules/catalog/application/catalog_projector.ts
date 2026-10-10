@@ -90,6 +90,15 @@ export function parseFact(raw: unknown): ContentFact | null {
     value.referenceRevisions === null
   )
     return null;
+  // D2: optional, bounded list of plain ids.
+  const suppressed = value.suppressedMediaIds;
+  if (
+    suppressed !== undefined &&
+    (!Array.isArray(suppressed) ||
+      suppressed.length > 100 ||
+      suppressed.some((item) => typeof item !== 'string' || item.length === 0))
+  )
+    return null;
   return raw as ContentFact;
 }
 

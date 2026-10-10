@@ -77,6 +77,10 @@ const approvedOutsideUsers = {
     firestore_content_repository: ["FirestoreContentRepository"],
     emulator_content_composition: ["createEmulatorContentService"],
   },
+  // D2: composition root of Content's reaction to late Media restriction.
+  "media_effects_entry.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
   "modules/media/infrastructure/emulator_media_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },

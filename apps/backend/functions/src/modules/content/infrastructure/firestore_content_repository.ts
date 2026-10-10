@@ -24,6 +24,9 @@ import {
   type ContentRepository,
   type ContentTransaction,
   type EffectCursor,
+  type MediaAvailabilityFeed,
+  type MediaAvailabilityReceipt,
+  type MediaAvailabilityStatusRecord,
 } from '../domain/repositories.js';
 import {
   assertDocumentWithinLimit,
@@ -42,6 +45,9 @@ export const contentCollections = Object.freeze({
   idempotency: 'contentIdempotency',
   audit: 'contentAudit',
   effects: 'contentEffects',
+  // D2: the media availability reaction's own checkpoints and receipts.
+  mediaAvailabilityStatus: 'contentMediaAvailabilityStatus',
+  mediaAvailabilityReceipts: 'contentMediaAvailabilityReceipts',
 });
 
 const emulatorProjectId = 'demo-recharge';
@@ -412,6 +418,80 @@ class BufferedContentTransaction implements ContentTransaction {
       if (found.size > 0) return true;
     }
     return false;
+  }
+
+  async contentIdsAttachingMedia(assetId: string, limit: number): Promise<readonly string[]> {
+    const snapshot = await this.transaction.get(
+      this.firestore
+        .collection(contentCollections.publishedRevisions)
+        .where('mediaAssetIds', 'array-contains', assetId)
+        .select('contentId')
+        .limit(100),
+    );
+    const ids = new Set<string>();
+    for (const document of snapshot.docs) {
+      const contentId: unknown = document.get('contentId');
+      if (typeof contentId === 'string') ids.add(contentId);
+    }
+    for (const item of this.#staged) {
+      if (item.collection !== contentCollections.publishedRevisions) continue;
+      const attached = item.data.mediaAssetIds;
+      if (
+        Array.isArray(attached) &&
+        attached.includes(assetId) &&
+        typeof item.data.contentId === 'string'
+      )
+        ids.add(item.data.contentId);
+    }
+    return [...ids].sort().slice(0, limit);
+  }
+
+  async pointersPage(
+    afterContentId: string | null,
+    limit: number,
+  ): Promise<readonly PublicationPointer[]> {
+    let query: Query = this.firestore
+      .collection(contentCollections.pointers)
+      .orderBy(FieldPath.documentId(), 'asc');
+    if (afterContentId !== null) query = query.startAfter(afterContentId);
+    const snapshot = await this.transaction.get(query.limit(limit));
+    return snapshot.docs.map((document) => deepFreeze(document.data()) as PublicationPointer);
+  }
+
+  async mediaAvailabilityStatus(
+    feed: MediaAvailabilityFeed,
+  ): Promise<MediaAvailabilityStatusRecord | null> {
+    const data = await this.read(contentCollections.mediaAvailabilityStatus, feed);
+    return data === null ? null : (deepFreeze(data) as unknown as MediaAvailabilityStatusRecord);
+  }
+
+  putMediaAvailabilityStatus(record: MediaAvailabilityStatusRecord): void {
+    this.stage({
+      collection: contentCollections.mediaAvailabilityStatus,
+      id: record.feed,
+      data: plain(record),
+      check: { kind: 'none' },
+    });
+  }
+
+  async mediaAvailabilityReceipt(
+    feed: MediaAvailabilityFeed,
+    effectId: string,
+  ): Promise<MediaAvailabilityReceipt | null> {
+    const data = await this.read(
+      contentCollections.mediaAvailabilityReceipts,
+      sha256(`${feed}|${effectId}`),
+    );
+    return data === null ? null : (deepFreeze(data) as unknown as MediaAvailabilityReceipt);
+  }
+
+  putMediaAvailabilityReceipt(receipt: MediaAvailabilityReceipt): void {
+    this.stage({
+      collection: contentCollections.mediaAvailabilityReceipts,
+      id: sha256(`${receipt.feed}|${receipt.effectId}`),
+      data: plain(receipt),
+      check: { kind: 'create', conflict: 'duplicate_id' },
+    });
   }
 
   // ------------------------------------------------------ idempotency, audit

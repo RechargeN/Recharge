@@ -2,15 +2,19 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
+import { validateMediaContract } from './contracts/validate_media_contract.js';
 import type { MediaActor } from './modules/media/application/ports/actor_authority_port.js';
 import { toMediaWireResult, type MediaResultType } from './modules/media/domain/failures.js';
 import { isSessionExpired } from './modules/media/domain/upload_session.js';
+import type { MediaRetentionPolicy } from './modules/media/domain/media_retention.js';
 import {
   createEmulatorMediaComposition,
   type EmulatorMediaComposition,
 } from './modules/media/infrastructure/emulator_media_composition.js';
+import { FirestoreModerationRepository } from './modules/moderation/infrastructure/firestore_moderation_repository.js';
+import { MediaRestrictionVerifier } from './modules/moderation/infrastructure/media_restriction_verifier.js';
 import { parseUtcInstant } from './shared/utc_instant.js';
-import { systemServerClock } from './shared/server_clock.js';
+import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 
 const emulatorBucket = 'demo-recharge.appspot.com';
 
@@ -30,11 +34,20 @@ export interface MediaCaller {
   readonly firestore: Firestore;
 }
 
-export function mediaComposition(firestore: Firestore): EmulatorMediaComposition {
+export function mediaComposition(
+  firestore: Firestore,
+  options: { readonly clock?: ServerClock; readonly retention?: MediaRetentionPolicy } = {},
+): EmulatorMediaComposition {
   const app = getApps().find((candidate) => candidate.name === '[DEFAULT]') ?? initializeApp();
   return createEmulatorMediaComposition({
     firestore,
     bucket: getStorage(app).bucket(emulatorBucket) as never,
+    // D2 §7: a restriction is accepted only for a recorded staff decision.
+    restrictionAuthority: new MediaRestrictionVerifier(
+      new FirestoreModerationRepository(firestore),
+    ),
+    ...(options.clock === undefined ? {} : { clock: options.clock }),
+    ...(options.retention === undefined ? {} : { retention: options.retention }),
   });
 }
 
@@ -92,6 +105,39 @@ export async function handleMediaQuery(
   }
   const { service } = mediaComposition(caller.firestore);
   return toMediaWireResult(resultType, await service.query(caller.actor, body));
+}
+
+/** D2: the delivery gate needs no actor: the publication decides who may see it. */
+export interface MediaDeliveryCaller {
+  readonly firestore: Firestore;
+}
+
+/**
+ * Emulator-only D2 delivery (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md` §4): the
+ * bytes of one public variant, decided again from authoritative records on every
+ * request. No URL, handle or cache header exists; every refusal is `not_found`.
+ */
+export async function handleMediaDelivery(
+  caller: MediaDeliveryCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const parsed = await validateMediaContract<{
+    readonly contentId: string;
+    readonly assetId: string;
+    readonly profile: string;
+  }>('deliveryRequest', body);
+  if (!parsed.ok) return { schemaVersion: 1, kind: 'rejected', code: 'invalid_contract' };
+  const result = await mediaComposition(caller.firestore).delivery.deliver(parsed.value);
+  if (result.kind !== 'succeeded')
+    return { schemaVersion: 1, kind: result.kind, code: result.code };
+  const { bytes, ...identity } = result.data;
+  return {
+    schemaVersion: 1,
+    kind: 'succeeded',
+    resultType: 'mediaDelivery',
+    data: { ...identity, bytesBase64: bytes.toString('base64') },
+  };
 }
 
 /**

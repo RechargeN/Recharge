@@ -41,4 +41,9 @@ export interface ObjectBytesPort {
     bytes: Buffer,
     contentType: string,
   ): Promise<{ readonly providerGeneration: string }>;
+  /**
+   * D2: the bytes of a variant only if the stored object has exactly this
+   * generation; anything else (absent, other generation) is `absent`.
+   */
+  readVariant(variantId: string, providerGeneration: string, maxBytes: number): Promise<ObjectRead>;
 }

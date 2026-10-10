@@ -723,6 +723,53 @@
       "visibility": "visible",
       "revision": 1,
       "updatedAtUtc": "2026-09-29T00:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 3,
+      "updatedAtUtc": "2026-10-09T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null,
+      "mediaConfirmations": []
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 3,
+      "updatedAtUtc": "2026-10-09T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null,
+      "mediaSuppression": [
+        {
+          "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+          "reason": "hidden",
+          "observedEpoch": 1
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "currentPublishedRevisionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+      "previousPublishedRevisionId": null,
+      "visibility": "visible",
+      "revision": 3,
+      "updatedAtUtc": "2026-10-09T00:00:00.000Z",
+      "ownerHold": null,
+      "moderationHold": null,
+      "mediaConfirmations": [
+        {
+          "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+          "revocationEpoch": -1
+        }
+      ]
     }
   ],
   "command": [

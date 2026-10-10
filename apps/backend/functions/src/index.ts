@@ -61,9 +61,12 @@ export { r0ToolchainProbe } from './r0_toolchain_probe.js';
 import {
   handleMediaBytes,
   handleMediaCommand,
+  handleMediaDelivery,
   handleMediaQuery,
   type MediaCaller,
+  type MediaDeliveryCaller,
 } from './media_entry.js';
+import { deliverMediaEffects, reconcileMediaReferences } from './media_effects_entry.js';
 import { handleContentCommand, handleContentQuery, type ContentCaller } from './content_entry.js';
 import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
 import { deliverContentEffects } from './content_effects_entry.js';
@@ -930,6 +933,60 @@ async function prepareMediaCaller(
     },
   };
 }
+
+// Emulator-only D2 delivery gate (MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md §4).
+// Disabled unless the local `media.delivery` flag is on; the Session is validated
+// by the same backend-time authority as Booking. Every request is decided again
+// from the publication and Media's own record; no URL or handle is ever issued.
+export const mediaDeliveryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const refuse = (code: string) => ({ schemaVersion: 1, kind: 'rejected', code });
+  const access = prepareTransport(request);
+  if (!access.ok) return refuse('unauthenticated');
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    systemServerClock.now(),
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return refuse('unauthenticated');
+  if (!(await access.composition.featureFlags.isEnabled(mediaFlagIds.delivery)))
+    return refuse('capability_denied');
+  const caller: MediaDeliveryCaller = { firestore: access.firestore };
+  return handleMediaDelivery(caller, request.data);
+});
+
+// Emulator-only D2 reaction: every committed Media fact lets Content check the
+// publications that attach the asset. Disabled unless `content.mediaAvailability`
+// is on; a stopped run is resumed by the next fact or the scheduled sweep.
+export const consumeMediaEffectV1 = onDocumentCreated(
+  {
+    document: 'mediaEffects/{effectId}',
+    region: 'europe-west1',
+    retry: false,
+  },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    const outcome = await deliverMediaEffects(firestore, {
+      flags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+    });
+    if (outcome.status === 'failed' || outcome.status === 'stopped')
+      logError('media_effect_consumer_incomplete', outcome);
+  },
+);
+
+// Emulator-only D2 sweeps: R1 (Content ↔ Media, `content.mediaAvailability`) and
+// R2 (Media orphans, `media.reconcile`). No retention policy is configured here,
+// so R2 deletes nothing (`policy_unavailable`).
+export const reconcileMediaReferencesV1 = onSchedule(
+  { schedule: 'every 15 minutes', region: 'europe-west1', retryCount: 0 },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await reconcileMediaReferences(firestore, {
+      flags: new FirestoreFeatureFlagGate(firestore, 'local', 'LV'),
+    });
+  },
+);
 
 // Emulator-only Event authoring through Content (C3). Disabled unless the local
 // `content.event.authoring` flag is on. Owner commands and queries only: the

@@ -67,13 +67,15 @@ const cleanup = async () => {
 before(cleanup);
 after(cleanup);
 
-void test('the manifest names exactly the eight Content collections', () => {
+void test('the manifest names exactly the ten Content collections (D2 adds two)', () => {
   assert.deepEqual([...collections].sort(), [
     'contentAudit',
     'contentDrafts',
     'contentEffects',
     'contentExternalBindings',
     'contentIdempotency',
+    'contentMediaAvailabilityReceipts',
+    'contentMediaAvailabilityStatus',
     'contentPublicationPointers',
     'contentPublishedRevisions',
     'contentSubmissions',

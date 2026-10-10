@@ -161,6 +161,10 @@ const expectedBoundedCallableExports = [
   "notificationsQueryV1",
   "notificationsCommandV1",
   "consumeNotificationEffectV1",
+  // D2: default-off, Emulator-only delivery gate, Media-fact trigger and sweeps.
+  "mediaDeliveryV1",
+  "consumeMediaEffectV1",
+  "reconcileMediaReferencesV1",
 ].sort();
 if (
   JSON.stringify(boundedCallableExports) !==

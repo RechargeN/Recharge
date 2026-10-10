@@ -1,6 +1,7 @@
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { createEmulatorCatalogComposition } from './modules/catalog/infrastructure/emulator_catalog_composition.js';
+import { mediaVerificationEffectConsumer } from './media_effects_entry.js';
 import { createEmulatorEventBookingHandoff } from './modules/content/infrastructure/firestore_event_booking_handoff_repository.js';
 import { catalogFlagIds, contentFlagIds } from './shared/feature_flags.js';
 import type { ServerClock } from './shared/server_clock.js';
@@ -73,7 +74,12 @@ export function bookingHandoffEffectConsumer(clock?: ServerClock): ContentEffect
 }
 
 export function defaultEffectConsumers(clock?: ServerClock): readonly ContentEffectConsumer[] {
-  return [catalogEffectConsumer(clock), bookingHandoffEffectConsumer(clock)];
+  return [
+    catalogEffectConsumer(clock),
+    bookingHandoffEffectConsumer(clock),
+    // D2: every publication, activation or media change is checked against Media.
+    mediaVerificationEffectConsumer(clock),
+  ];
 }
 
 function safeName(error: unknown): string {

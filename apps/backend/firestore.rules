@@ -43,6 +43,10 @@ service cloud.firestore {
     match /contentIdempotency/{document} { allow read, write: if false; }
     match /contentAudit/{document} { allow read, write: if false; }
     match /contentEffects/{document} { allow read, write: if false; }
+    // D2 media availability reaction (Emulator-only, Content-owned): checkpoints
+    // and receipts of its two consumers. Server-only.
+    match /contentMediaAvailabilityStatus/{document} { allow read, write: if false; }
+    match /contentMediaAvailabilityReceipts/{document} { allow read, write: if false; }
 
     // E2.0 Event → Booking handoff (Emulator-only, Content-owned): checkpoint,
     // receipts and per-object state. Server-only, like the outbox it writes.

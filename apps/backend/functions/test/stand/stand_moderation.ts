@@ -248,6 +248,9 @@ const actionByCommand: Readonly<Record<string, ModerationAction>> = {
   restrict: 'restrict',
   withdraw: 'withdraw',
   restore: 'restore',
+  // D2 §7: one Media asset; Media verifies the recorded decision itself.
+  'restrict-media': 'restrict_media',
+  'restore-media': 'restore_media',
 };
 
 /** The staff script: it holds no authority, the moderation service decides on every call. */
@@ -264,9 +267,18 @@ export async function runModerate(firestore: Firestore, request: ModerateRequest
   const [subject] = request.args;
   if (action === undefined || subject === undefined) {
     throw new Error(
-      'usage: approve|reject <submissionId> | restrict|withdraw <contentId> | restore <contentId> --decision <decisionId>',
+      'usage: approve|reject <submissionId> | restrict|withdraw <contentId> | restore <contentId> --decision <decisionId> | restrict-media <assetId> | restore-media <assetId> --decision <decisionId>',
     );
   }
+  if (action === 'restrict_media' || action === 'restore_media')
+    return stand.moderation.service.decide(actor, {
+      schemaVersion: 1,
+      action,
+      idempotencyKey: request.key ?? `op-${randomUUID()}`,
+      reason: request.reason ?? '',
+      target: { assetId: subject },
+      ...(action === 'restore_media' ? { restoresDecisionId: request.decision } : {}),
+    });
   const review = action === 'approve' || action === 'reject';
   let contentId = subject;
   if (review) {

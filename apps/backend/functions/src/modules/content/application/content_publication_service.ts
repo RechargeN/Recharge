@@ -47,7 +47,9 @@ import {
 import {
   activateRevision,
   applyModerationHold,
+  contentEffect,
   isPubliclyVisible,
+  mediaNeedsConfirmation,
   restoreModerationHold,
   withdrawByOwner,
   type PublicationPointer,
@@ -599,6 +601,7 @@ export class ContentPublicationService {
       submission.contentId,
       revision.publishedRevisionId,
       nowUtc,
+      media.confirmations,
     );
     tx.putPublishedRevision(revision);
     tx.putPointer(nextPointer, pointer?.revision ?? 0);
@@ -635,20 +638,7 @@ export class ContentPublicationService {
     effectId: string,
     nowUtc: UtcInstant,
   ): ContentEffectV1 {
-    return deepFreeze({
-      schemaVersion: 1,
-      effectId,
-      kind,
-      contentId: revision.contentId,
-      publishedRevisionId: revision.publishedRevisionId,
-      pointerRevision: pointer.revision,
-      visibility: pointer.visibility,
-      typeId: revision.typeId,
-      publisherRef: { ...revision.publisherRef },
-      marketId: revision.marketId,
-      referenceRevisions: { ...revision.referenceRevisions },
-      occurredAtUtc: nowUtc,
-    });
+    return contentEffect(revision, pointer, kind, effectId, nowUtc);
   }
 
   /**
@@ -721,12 +711,15 @@ export class ContentPublicationService {
     if (pointer === null) throw new ContentDomainRefusal('not_found');
     // A rollback is a pointer switch too: it may not leave a forbidden transition.
     await this.assertTransition(tx, entry, pointer, target.body);
-    // Re-selecting what is already public is a no-op conflict, not a new state.
-    if (
+    const confirmations = evidence.readiness.confirmations;
+    const sameVisibleRevision =
       pointer.currentPublishedRevisionId === target.publishedRevisionId &&
       pointer.ownerHold === null &&
-      pointer.moderationHold === null
-    )
+      pointer.moderationHold === null;
+    // Re-selecting what is already public is a no-op conflict, not a new state,
+    // unless the publisher confirms media again after a suppression or after
+    // Media revoked what was confirmed (D2 §5.4).
+    if (sameVisibleRevision && !mediaNeedsConfirmation(pointer, confirmations))
       throw new ContentDomainRefusal('revision_conflict');
     const next = activateRevision(
       pointer,
@@ -734,18 +727,34 @@ export class ContentPublicationService {
       payload.contentId,
       target.publishedRevisionId,
       nowUtc,
+      confirmations,
     );
     tx.putPointer(next, pointer.revision);
+    // Only the media changed: visibility and revision stay, so Booking sees no fact.
     tx.effects.append(
-      this.effectBase(
-        target,
-        next,
-        'ContentRevisionActivated',
-        `${target.publishedRevisionId}:ContentRevisionActivated:${next.revision}`,
-        nowUtc,
-      ),
+      sameVisibleRevision
+        ? this.effectBase(
+            target,
+            next,
+            'ContentMediaAvailabilityChanged',
+            `${target.contentId}:media:${next.revision}`,
+            nowUtc,
+          )
+        : this.effectBase(
+            target,
+            next,
+            'ContentRevisionActivated',
+            `${target.publishedRevisionId}:ContentRevisionActivated:${next.revision}`,
+            nowUtc,
+          ),
     );
-    this.audit(context, 'content.publication.rolled_back', target.publishedRevisionId);
+    this.audit(
+      context,
+      sameVisibleRevision
+        ? 'content.publication.media_confirmed'
+        : 'content.publication.rolled_back',
+      target.publishedRevisionId,
+    );
     return next;
   }
 

@@ -16,6 +16,8 @@ export interface ContentFact {
   readonly marketId: string;
   readonly referenceRevisions: Readonly<Record<string, string>>;
   readonly occurredAtUtc: string;
+  /** D2: media Content stopped showing at this fact; absent when none. */
+  readonly suppressedMediaIds?: readonly string[];
 }
 
 /** The immutable published revision a fact points at (read from Content). */
@@ -252,6 +254,10 @@ export function projectFact(input: {
 
   const media = record(body.media);
   const cover = record(media?.coverImage);
+  const coverMediaId = text(cover?.mediaId);
+  // D2: media Content suppresses never reaches Feed, Map, Search or Details,
+  // whatever the immutable revision says; replays carry the same list.
+  const suppressed = new Set(fact.suppressedMediaIds ?? []);
   const audience = record(body.audience);
   const tags = Array.isArray(body.tags)
     ? body.tags.filter((tag): tag is string => typeof tag === 'string')
@@ -282,7 +288,7 @@ export function projectFact(input: {
     scheduleMode,
     occurrences,
     price,
-    coverMediaId: text(cover?.mediaId),
+    coverMediaId: coverMediaId !== null && suppressed.has(coverMediaId) ? null : coverMediaId,
     wheelchairAccessible: audience?.wheelchairAccessible === true,
     referenceRevisions: { ...revision.referenceRevisions },
     publishedAtUtc: revision.publishedAtUtc,

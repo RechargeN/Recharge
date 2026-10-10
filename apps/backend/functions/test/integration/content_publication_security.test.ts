@@ -262,7 +262,12 @@ async function bootstrap() {
     },
     media: {
       check: () =>
-        Promise.resolve({ ready: true, mediaRevision: 'media-1', attachments: [] } as const),
+        Promise.resolve({
+          ready: true,
+          mediaRevision: 'media-1',
+          attachments: [],
+          confirmations: [],
+        } as const),
     },
     clock: new FakeClock(new Date('2026-09-29T10:00:00.000Z')),
     ids: {
@@ -830,6 +835,8 @@ void test('delegated import never reaches Content storage except through the Con
   const approved = [
     'content_effects_entry.ts',
     'content_entry.ts',
+    // D2: the composition root of Content's reaction to late Media restriction.
+    'media_effects_entry.ts',
     'modules/catalog/domain/catalog_item.ts',
     'modules/catalog/infrastructure/content_catalog_source.ts',
     'modules/catalog/infrastructure/emulator_catalog_composition.ts',
@@ -859,6 +866,12 @@ void test('delegated import never reaches Content storage except through the Con
       'EmulatorSyntheticReferenceData',
       'FirestoreContentRepository',
       'IdentityPublisherEligibility',
+    ],
+    'media_effects_entry.ts': [
+      'ContentMediaAvailability',
+      'SweepReport',
+      'ContentPublicationFeed',
+      'FirestoreContentRepository',
     ],
     'modules/catalog/domain/catalog_item.ts': ['bookingRefsFor'],
     'modules/catalog/infrastructure/content_catalog_source.ts': [

@@ -560,5 +560,31 @@
       "resultType": "deliveryHandle",
       "data": {}
     }
+  ],
+  "deliveryRequest": [
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+      "profile": "Display"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "not-an-id",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+      "profile": "display"
+    },
+    {
+      "schemaVersion": 1,
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "assetId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+      "profile": "display",
+      "url": "https://example.invalid/x"
+    }
   ]
 }

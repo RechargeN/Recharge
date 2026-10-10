@@ -376,6 +376,11 @@ export interface HandoffEffect {
   readonly marketId: string;
   readonly publisherRef: { readonly type: string; readonly id: string };
   readonly occurredAtUtc: string;
+  /**
+   * D2: only the media the pointer suppresses changed. The revision, its
+   * visibility and every occurrence stay as they are, so Booking gets no fact.
+   */
+  readonly mediaOnly?: boolean;
 }
 
 export interface HandoffPlan {
@@ -395,6 +400,19 @@ export function planBookingHandoff(
   body: ContentBody | null,
 ): HandoffPlan {
   const occurrences: Record<string, HandoffOccurrenceState> = { ...(state?.occurrences ?? {}) };
+  // D2: a media-only change keeps the order of pointer revisions and nothing else.
+  if (effect.mediaOnly === true)
+    return {
+      facts: [],
+      findings: [],
+      next: {
+        schemaVersion: 1,
+        contentId: effect.contentId,
+        lastPointerRevision: effect.pointerRevision,
+        lastEffectId: effect.effectId,
+        occurrences,
+      },
+    };
   const facts: EventBookingFactV1[] = [];
   const findings: string[] = [];
   const publication = effect.pointerRevision;

@@ -151,6 +151,8 @@ class FakeMedia implements MediaReadinessPort {
   unavailable = false;
   mediaRevision = 'media-1';
   attachments: MediaAttachmentV1[] = [];
+  /** D2: the revocation epoch Media reports per asset (absent = 0). */
+  readonly epochs = new Map<string, number>();
   readonly inputs: Parameters<MediaReadinessPort['check']>[0][] = [];
   check(input: Parameters<MediaReadinessPort['check']>[0]) {
     this.inputs.push(input);
@@ -161,6 +163,10 @@ class FakeMedia implements MediaReadinessPort {
             ready: true,
             mediaRevision: this.mediaRevision,
             attachments: this.attachments,
+            confirmations: this.attachments.map((item) => ({
+              assetId: item.assetId,
+              revocationEpoch: this.epochs.get(item.assetId) ?? 0,
+            })),
           } as const)
         : ({ ready: false, reason: 'not_ready' } as const),
     );

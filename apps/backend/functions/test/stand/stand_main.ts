@@ -56,6 +56,13 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'media-reconcile') {
+    // D2: loaded only for this command, like the F1/F2 commands.
+    const { runMediaReconcile } = await import('./stand_media_reconcile.js');
+    process.stdout.write(`${JSON.stringify(await runMediaReconcile(firestore))}
+`);
+    return;
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

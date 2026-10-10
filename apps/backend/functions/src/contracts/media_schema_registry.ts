@@ -28,6 +28,7 @@ export const mediaSchemaFiles = [
   'media_command.schema.json',
   'media_query.schema.json',
   'media_result.schema.json',
+  'media_delivery.schema.json',
 ] as const;
 export const mediaTargetRefs = {
   asset: 'https://recharge.app/schemas/media/v1/media_asset.schema.json',
@@ -41,6 +42,7 @@ export const mediaTargetRefs = {
   command: 'https://recharge.app/schemas/media/v1/media_command.schema.json',
   query: 'https://recharge.app/schemas/media/v1/media_query.schema.json',
   result: 'https://recharge.app/schemas/media/v1/media_result.schema.json',
+  deliveryRequest: 'https://recharge.app/schemas/media/v1/media_delivery.schema.json',
 } as const;
 export type MediaContractTarget = keyof typeof mediaTargetRefs;
 

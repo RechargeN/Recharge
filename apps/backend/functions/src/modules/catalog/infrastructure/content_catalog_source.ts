@@ -24,6 +24,10 @@ function toFact(effect: ContentEffectV1): ContentFact {
     marketId: effect.marketId,
     referenceRevisions: { ...effect.referenceRevisions },
     occurredAtUtc: effect.occurredAtUtc,
+    // D2 §6: the media Content suppresses travel with every fact (absent when none).
+    ...(effect.suppressedMediaIds === undefined
+      ? {}
+      : { suppressedMediaIds: [...effect.suppressedMediaIds] }),
   };
 }
 

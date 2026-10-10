@@ -55,7 +55,7 @@ function harness() {
     },
     repository,
     authority,
-    restrictionAuthority: { verifyRestriction: () => Promise.resolve(true) },
+    restrictionAuthority: { verifyRestriction: () => Promise.resolve({ verified: true }) },
     references: { isReferenced: () => Promise.resolve(false) },
     objectStore,
     clock,

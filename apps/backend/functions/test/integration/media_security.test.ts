@@ -85,7 +85,7 @@ function harness() {
     },
     repository,
     authority,
-    restrictionAuthority: { verifyRestriction: () => Promise.resolve(false) },
+    restrictionAuthority: { verifyRestriction: () => Promise.resolve({ verified: false }) },
     references: { isReferenced: () => Promise.resolve(false) },
     objectStore,
     clock,
@@ -421,6 +421,8 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
   const sdk = new Set([
     'infrastructure/emulator_media_composition.ts',
     'infrastructure/firestore_media_repository.ts',
+    // D2: read-only feed of committed Media facts for the owning domain.
+    'infrastructure/media_effect_feed.ts',
   ]);
   const environment = new Set([...sdk, 'infrastructure/storage_emulator_object_store.ts']);
   // D1: only the local tools client may open a loopback HTTP connection.
@@ -481,7 +483,8 @@ void test('Media and Content never import each other and nothing exports Media t
     .filter((file) => /modules\/media\//u.test(read(file).replaceAll('\\', '/')));
   assert.deepEqual(
     offenders.map((file) => path.relative(srcRoot, file)),
-    ['content_entry.ts', 'media_entry.ts'],
+    // D2: the composition root of Content's reaction to late Media restriction.
+    ['content_entry.ts', 'media_effects_entry.ts', 'media_entry.ts'],
   );
   const entry = read(path.join(srcRoot, 'index.ts'));
   assert.doesNotMatch(entry, /from ['"]\.\/modules\/media\//u);
@@ -490,7 +493,43 @@ void test('Media and Content never import each other and nothing exports Media t
       .map((match) => match[1]!)
       .filter((name) => /media/iu.test(name))
       .sort(),
-    ['mediaCommandV1', 'mediaQueryV1', 'uploadMediaBytesV1'],
+    // D2 adds the delivery gate, the Media-fact trigger and the sweeps.
+    [
+      'consumeMediaEffectV1',
+      'mediaCommandV1',
+      'mediaDeliveryV1',
+      'mediaQueryV1',
+      'reconcileMediaReferencesV1',
+      'uploadMediaBytesV1',
+    ],
+  );
+});
+
+void test('D2 delivery: bytes only — no URL, handle or cache surface, nothing logged', () => {
+  const gate = read(path.join(mediaDir, 'application', 'media_delivery_gate.ts'));
+  const entry = read(path.join(srcRoot, 'media_entry.ts'));
+  const index = read(path.join(srcRoot, 'index.ts'));
+  const surface =
+    /getSignedUrl|signedUrl|publicUrl|downloadUrl|Cache-Control|max-age|createReadStream|https?:\/\//iu;
+  assert.equal(surface.test(gate), false, 'gate');
+  assert.equal(surface.test(entry), false, 'entry');
+  assert.equal(/\blog(?:Error|ger)?\b|console\./u.test(gate), false, 'the gate logs nothing');
+  const callable = index.slice(
+    index.indexOf('export const mediaDeliveryV1'),
+    index.indexOf('export const consumeMediaEffectV1'),
+  );
+  assert.ok(callable.includes('handleMediaDelivery(caller, request.data)'));
+  assert.equal(/logError|console\./u.test(callable), false, 'no bytes or ids are logged');
+  // The Media-fact trigger logs only the consumer outcome (ids and codes).
+  const trigger = index.slice(
+    index.indexOf('export const consumeMediaEffectV1'),
+    index.indexOf('export const reconcileMediaReferencesV1'),
+  );
+  assert.ok(trigger.includes("logError('media_effect_consumer_incomplete', outcome)"));
+  // Every refusal after the Session check is `not_found`: nothing is revealed.
+  assert.deepEqual(
+    [...new Set([...gate.matchAll(/rejected\('([a-z_]+)'\)/gu)].map((match) => match[1]))],
+    ['not_found'],
   );
 });
 
@@ -524,6 +563,7 @@ void test('adapters: the fakes are labelled FAKE and the D1 local tools modules 
     'in_memory_media_repository.ts',
     'local_tools_client.ts',
     'local_tools_protocol.ts',
+    'media_effect_feed.ts',
     'media_tool_limits.ts',
     'storage_emulator_object_store.ts',
   ]);

@@ -4,6 +4,7 @@ import type { ServerClock } from '../../../shared/server_clock.js';
 import {
   attest,
   commandHash,
+  isMediaAction,
   moderationActions,
   moderationIssuer,
   moderationPolicyRevision,
@@ -21,6 +22,8 @@ import {
 import type { ModerationRepository } from '../domain/repositories.js';
 import type {
   ContentModerationPort,
+  EnforcementOutcome,
+  MediaModerationPort,
   StaffActor,
   StaffAuthorityPort,
   SubmissionView,
@@ -30,6 +33,8 @@ export interface ModerationServiceDependencies {
   readonly repository: ModerationRepository;
   readonly staff: StaffAuthorityPort;
   readonly content: ContentModerationPort;
+  /** D2: Media actions; without it they find no target. */
+  readonly media?: MediaModerationPort;
   readonly clock: ServerClock;
   readonly newId?: () => string;
 }
@@ -151,21 +156,32 @@ export class ModerationService {
     const decision = stored.decision;
     if (stored.receipt !== null) return moderationSucceeded({ decision, receipt: stored.receipt });
 
-    let enforcement;
+    let enforcement: EnforcementOutcome;
     try {
-      enforcement = await this.#deps.content.enforce({
-        instructionId: decision.decisionId,
-        decisionId: decision.decisionId,
-        policyRevision: decision.policyRevision,
-        disposition: decision.action,
-        target: instructionTarget(decision.target),
-        reasonCategory: decision.reasonCategory,
-        ...(decision.restoresDecisionId === undefined
-          ? {}
-          : { restoresDecisionId: decision.restoresDecisionId }),
-        effectiveAtUtc: decision.decidedAtUtc,
-        attestation: decision.attestation,
-      });
+      const media = this.#deps.media;
+      if (isMediaAction(decision.action)) {
+        if (media === undefined || decision.target.assetId === undefined)
+          return moderationRejected('unknown_outcome');
+        // Media verifies the recorded decision itself before it changes anything.
+        enforcement = await media.enforce({
+          decisionId: decision.decisionId,
+          assetId: decision.target.assetId,
+          restricted: decision.action === 'restrict_media',
+        });
+      } else
+        enforcement = await this.#deps.content.enforce({
+          instructionId: decision.decisionId,
+          decisionId: decision.decisionId,
+          policyRevision: decision.policyRevision,
+          disposition: decision.action,
+          target: instructionTarget(decision.target),
+          reasonCategory: decision.reasonCategory,
+          ...(decision.restoresDecisionId === undefined
+            ? {}
+            : { restoresDecisionId: decision.restoresDecisionId }),
+          effectiveAtUtc: decision.decidedAtUtc,
+          attestation: decision.attestation,
+        });
     } catch {
       // The decision stays recorded; the same key resumes enforcement.
       return moderationRejected('unknown_outcome');
@@ -220,7 +236,9 @@ export class ModerationService {
   async #resolveTarget(
     command: StaffModerationCommand,
   ): Promise<ModerationResult<ModerationTarget>> {
-    const { contentId, submissionId } = command.target;
+    if (isMediaAction(command.action)) return this.#resolveMediaTarget(command);
+    const { submissionId } = command.target;
+    const contentId = command.target.contentId ?? '';
     if (command.action === 'approve' || command.action === 'reject') {
       if (submissionId === undefined) return moderationRejected('invalid_contract');
       const submission: SubmissionView | null = await this.#deps.content.submission(submissionId);
@@ -254,6 +272,36 @@ export class ModerationService {
       pointerRevision: publication.pointerRevision,
     });
   }
+
+  /**
+   * D2: the asset as Media knows it now, bound to a Content. A restore names a
+   * recorded `restrict_media` decision of the same asset; Media itself lifts only
+   * the restriction that is still active.
+   */
+  async #resolveMediaTarget(
+    command: StaffModerationCommand,
+  ): Promise<ModerationResult<ModerationTarget>> {
+    const assetId = command.target.assetId ?? '';
+    const asset = await this.#deps.media?.asset(assetId);
+    if (asset === undefined || asset === null || asset.contentId === null)
+      return moderationRejected('target_not_found');
+    if (command.action === 'restore_media') {
+      const restored = await this.#deps.repository.transact((tx) =>
+        tx.decision(command.restoresDecisionId ?? ''),
+      );
+      if (
+        restored === null ||
+        restored.action !== 'restrict_media' ||
+        restored.target.assetId !== assetId
+      )
+        return moderationRejected('target_not_found');
+    }
+    return moderationSucceeded({
+      contentId: asset.contentId,
+      assetId,
+      assetRevision: asset.assetRevision,
+    });
+  }
 }
 
 function instructionTarget(target: ModerationTarget) {
@@ -282,8 +330,34 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     target === null
   )
     return null;
-  const { contentId, submissionId } = target as Record<string, unknown>;
+  const { contentId, submissionId, assetId } = target as Record<string, unknown>;
   const restoresDecisionId = value.restoresDecisionId;
+  const action = value.action as ModerationAction;
+  if (isMediaAction(action)) {
+    // D2: a Media action names exactly one asset and nothing of Content.
+    if (
+      typeof assetId !== 'string' ||
+      !idPattern.test(assetId) ||
+      contentId !== undefined ||
+      submissionId !== undefined
+    )
+      return null;
+    if (
+      restoresDecisionId !== undefined &&
+      (typeof restoresDecisionId !== 'string' || !idPattern.test(restoresDecisionId))
+    )
+      return null;
+    if ((action === 'restore_media') !== (typeof restoresDecisionId === 'string')) return null;
+    return {
+      schemaVersion: 1,
+      action,
+      idempotencyKey: value.idempotencyKey,
+      reason: value.reason,
+      target: { assetId },
+      ...(typeof restoresDecisionId === 'string' ? { restoresDecisionId } : {}),
+    };
+  }
+  if (assetId !== undefined) return null;
   if (typeof contentId !== 'string' || !idPattern.test(contentId)) return null;
   if (
     submissionId !== undefined &&
@@ -295,7 +369,6 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     (typeof restoresDecisionId !== 'string' || !idPattern.test(restoresDecisionId))
   )
     return null;
-  const action = value.action as ModerationAction;
   const review = action === 'approve' || action === 'reject';
   if (review !== (submissionId !== undefined)) return null;
   if ((action === 'restore') !== (restoresDecisionId !== undefined)) return null;

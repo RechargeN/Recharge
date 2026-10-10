@@ -63,6 +63,13 @@ export async function repeatAuthorizations(
 }
 
 /**
+ * What the authority says about one instruction. A lift must name the decision
+ * it restores: Media lifts only that exact active restriction (D2 §3).
+ */
+export type MediaRestrictionVerdict =
+  { readonly verified: false } | { readonly verified: true; readonly restoresDecisionRef?: string };
+
+/**
  * Authoritative privacy, moderation or security input that restricts or lifts a
  * restriction on an asset. A restriction is never accepted from a client: the
  * instruction is verified here first, and unknown, stale or foreign ones mutate
@@ -73,5 +80,5 @@ export interface MediaRestrictionAuthority {
     readonly assetId: string;
     readonly decisionRef: string;
     readonly restricted: boolean;
-  }): Promise<boolean>;
+  }): Promise<MediaRestrictionVerdict>;
 }

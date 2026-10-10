@@ -1275,3 +1275,22 @@ references". Now:
 87. **BCK-14-AC-87:** a deletion holder acts only while its own hold is valid and
     its own; an expired or replaced holder cannot delete or release, and no
     asset update time is used as a lease.
+
+### 34.15 D2: late restriction and deletion of published Media (2026-10-09)
+
+Owner-accepted local amendment:
+[MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md](MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md).
+Emulator only; it narrows nothing above.
+
+- Every applied restriction decision and every deletion start raises the
+  asset's internal `revocationEpoch`; lifting a restriction never lowers it, and
+  only the restore of exactly the active decision lifts it.
+- An Emulator-only delivery gate (`mediaDeliveryV1`) returns the bytes of one
+  public variant after checking, on every request, the owning domain's pin and
+  Media's own record — state, generation, manifest and the confirmed epoch — and
+  again before the response. No URL, handle or cache contract exists; the
+  delivery signer, protected handles and OD-08 stay deferred (F2a).
+- Restrictions come only from recorded staff moderation decisions
+  (`restrict_media` / `restore_media`), verified again by Media.
+- R2 runs the existing orphan reconciliation over every asset; without an
+  accepted retention policy it refuses with `policy_unavailable`.

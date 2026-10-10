@@ -31,6 +31,11 @@ export async function enableStandFlags(firestore: Firestore, nowUtc: string): Pr
     catalogFlagIds.delivery,
     // E2.0: the Event → Booking handoff behind the same trigger.
     contentFlagIds.eventBookingHandoff,
+    // D2: delivery gate, Content's reaction and the sweeps (no retention policy on
+    // the stand: R2 marks nothing for deletion and deletes nothing).
+    mediaFlagIds.delivery,
+    contentFlagIds.mediaAvailability,
+    mediaFlagIds.reconcile,
     ...standEnabledBookingFlags,
   ];
   for (const capabilityId of capabilityIds) {
