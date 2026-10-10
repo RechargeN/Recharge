@@ -1,0 +1,478 @@
+[
+  {
+    "source": "2942dc2",
+    "path": "packages/api_contracts/pubspec.lock",
+    "current_path": "packages/api_contracts/pubspec.lock",
+    "disposition": "package lock absent: root Dart workspace lock retained",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "2942dc2",
+    "path": "packages/design_system/pubspec.lock",
+    "current_path": "packages/design_system/pubspec.lock",
+    "disposition": "package lock absent: root Dart workspace lock retained",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "2942dc2",
+    "path": "pubspec.lock",
+    "current_path": "pubspec.lock",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "cf54bdcf11644430f19d376f6028e704cedb5a1bab989acf3b8d67b1fcca3106"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/architecture/LAUNCH_STATUS.md",
+    "current_path": "docs/architecture/LAUNCH_STATUS.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "226c42effb73538d0c0fd3a1d963473c6484fdcd039352082760301a19cbf85b"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/AI_BACKEND_SPEC.md",
+    "current_path": "docs/product/AI_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "7a27c1d71582b420493b25df6cb55d3dfcc7e6c25744142726e97fd4d309e71a"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/PAYMENTS_BACKEND_SPEC.md",
+    "current_path": "docs/product/PAYMENTS_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "c25f9cf553977fc5655b8fccae914a58015c215c804642a83d1e763259309672"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md",
+    "current_path": "docs/product/PLANNING_SCENARIO_QUICK_PLAN_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "018c5f7d13851fb78a0e4d86f2bd2748e09d6c72ce13ef427a0b9d10688b740b"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/PROVIDER_INTEGRATION_BACKEND_SPEC.md",
+    "current_path": "docs/product/PROVIDER_INTEGRATION_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "0ec2770d2cf24c94ac4f16db894616662eed7beccadaecdac9ecf7224a52232c"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md",
+    "current_path": "docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "12613ef3b62a79137fe3955974d866574037083bc2d0c75bb8af45dbe675e916"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md",
+    "current_path": "docs/product/RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "692883e65f85841fce14dc242df6d7731028caf4589b780227ffccf333a12d80"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/RECHARGE_BACKEND_MASTER_SPEC.md",
+    "current_path": "docs/product/RECHARGE_BACKEND_MASTER_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "f8836da68f7d108be3b118bfee5ec409d118c6c5f741dbfd7f8fa3bfbe65537f"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/ROUTE_GPX_BACKEND_SPEC.md",
+    "current_path": "docs/product/ROUTE_GPX_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "9c7f77774cf31ddc0afd29de5df3605378dd28a2f63b6381217e69b509543bc4"
+  },
+  {
+    "source": "6d58b91",
+    "path": "docs/product/TRUST_SAFETY_MODERATION_BACKEND_SPEC.md",
+    "current_path": "docs/product/TRUST_SAFETY_MODERATION_BACKEND_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "5dd20674a2eebfc9f6e9ee8c7567e6dbdd481e21b31ffbee71d61eeaa91a6926"
+  },
+  {
+    "source": "6d58b91",
+    "path": "packages/api_contracts/pubspec.lock",
+    "current_path": "packages/api_contracts/pubspec.lock",
+    "disposition": "package lock absent: root Dart workspace lock retained",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "6d58b91",
+    "path": "packages/design_system/pubspec.lock",
+    "current_path": "packages/design_system/pubspec.lock",
+    "disposition": "package lock absent: root Dart workspace lock retained",
+    "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "6d58b91",
+    "path": "pubspec.lock",
+    "current_path": "pubspec.lock",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "cf54bdcf11644430f19d376f6028e704cedb5a1bab989acf3b8d67b1fcca3106"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/adapters/discover_scenario_intake_adapter.dart",
+    "current_path": "apps/mobile/lib/app/adapters/discover_scenario_intake_adapter.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "fa40bf2d2ec2b3b9c0bcf6fc855fe8ae254d897afc6235cc19baff55f50fac7b"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/application/details_resolution_providers.dart",
+    "current_path": "apps/mobile/lib/app/application/details_resolution_providers.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "12246b86a437f64136e9aaa36436c5f80395370c4cd6c3cd721171199ee8d203"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/di/service_locator.dart",
+    "current_path": "apps/mobile/lib/app/di/service_locator.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "6d2e921df711c5ae279bae9a23c9cb4e4b57664b86bcde4f2fb24547a3381912"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/presentation/event_details_page.dart",
+    "current_path": "apps/mobile/lib/app/presentation/event_details_page.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "c75a97b6e9a49228a72b56d589389e0ea864d8e477c4138d049062406745db98"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/presentation/scenario_object_intake_sheet.dart",
+    "current_path": "apps/mobile/lib/app/presentation/scenario_object_intake_sheet.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "a0040b013a87cee9fc39fe8a21f927038608f2a68ba592cb512978cd52f4b843"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/app/router/app_router.dart",
+    "current_path": "apps/mobile/lib/app/router/app_router.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "5d47860c53b0da9329d0cb3b990b4123e343e683cc7fe683fe18e9819bb52736"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/data/datasources/published_event_discovery_local_datasource.dart",
+    "current_path": "apps/mobile/lib/features/discover/data/datasources/published_event_discovery_local_datasource.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "fd1ba6fce8c00cef2c4b743ce42fe550862ec2b4d6fbcf6b7ae00735acb67309"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/data/repositories/event_details_lookup.dart",
+    "current_path": "apps/mobile/lib/features/discover/data/repositories/event_details_lookup.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "1e0e22a066bbff672cbd70ec9a899a0611b037c8d4d412839244b0314fea35c8"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/domain/entities/event_occurrence.dart",
+    "current_path": "apps/mobile/lib/features/discover/domain/entities/event_occurrence.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "c8f1578067903385ce1c5de60fc88f6945637033a530df89cf9594d8e095dae0"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/domain/entities/published_event_discovery_entity.dart",
+    "current_path": "apps/mobile/lib/features/discover/domain/entities/published_event_discovery_entity.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "fe9793179b9b5624f4447cc17696beb9136930fddd592df7426bc894009a6c30"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/domain/entities/published_event_program_item.dart",
+    "current_path": "apps/mobile/lib/features/discover/domain/entities/published_event_program_item.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "94619e27e5d485ae960dd37439f178e9281b9e6cfa74741f42edd1c5dafc9b79"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/domain/entities/publisher_verification_display_state.dart",
+    "current_path": "apps/mobile/lib/features/discover/domain/entities/publisher_verification_display_state.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "d7e7d815fbbcf8ac4e601c96394ee0ad69ffc224574b7bce0d0e84a4399e3164"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/domain/repositories/published_event_discovery_port.dart",
+    "current_path": "apps/mobile/lib/features/discover/domain/repositories/published_event_discovery_port.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "05745c7653a64559f4d0606357e944736262284abeebdd532262c238e9dd4706"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_details_renderer.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_details_renderer.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "2d611689b4092afc15735fd0fb69be4461715a10ba0eb09a17f1cc961727c4e3"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_section_matrix.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_section_matrix.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "5b48855b5ef576010b7d20b67be39591e0aa78fc18f38b06c57f97767b80b845"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/lib/features/discover/presentation/shell/details_shell.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/shell/details_shell.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "c18111cca1fe5021927e2c04eabdd3014db25a883d60378520416d9a4ad26a78"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_event_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_event_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "e0d5b9afc8250b430ac7cd06e9074a69e5f02cb53f8c9e3c8bbc8664eb369689"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/test/unit/discover_scenario_intake_adapter_test.dart",
+    "current_path": "apps/mobile/test/unit/discover_scenario_intake_adapter_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "8ec09821d3ef640bde55553cc28205b4d338f071a6ece5a85d4f9e3e78dc29f1"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/test/unit/published_event_discovery_entity_test.dart",
+    "current_path": "apps/mobile/test/unit/published_event_discovery_entity_test.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "88b545713ae3db16d7fc665a6f47af9eafe4b170d11c51f639d6cf7dd37bbef1"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/test/unit/published_event_discovery_local_datasource_test.dart",
+    "current_path": "apps/mobile/test/unit/published_event_discovery_local_datasource_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "cb7d67e5d01c46c91996f53cb123ad96b58c181e8b164055abce3b4321054b88"
+  },
+  {
+    "source": "bb63f53",
+    "path": "apps/mobile/test/widget/event_details_page_test.dart",
+    "current_path": "apps/mobile/test/widget/event_details_page_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "d3ff64712a59fce74d64f46d64f8336c52ed97fd8a9c87b693ae20f606d731f8"
+  },
+  {
+    "source": "bb63f53",
+    "path": "docs/architecture/LAUNCH_STATUS.md",
+    "current_path": "docs/architecture/LAUNCH_STATUS.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "0a39bd0a5f65dcaae381a2d9f6ad2e76b9ad3e74d0e9cec8acb1ad9b9dc1accd"
+  },
+  {
+    "source": "bb63f53",
+    "path": "docs/product/DISCOVER_DETAILS_PIPELINE_COVERAGE_MATRIX.md",
+    "current_path": "docs/product/discover/DISCOVER_DETAILS_PIPELINE_COVERAGE_MATRIX.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "62c86da12c3388dfe7f070984358a2e72317d4022e5e2741e1c53c421598d248"
+  },
+  {
+    "source": "bb63f53",
+    "path": "docs/product/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md",
+    "current_path": "docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "4e38989dbe9e4a4ae2b5f5e19a709c6919e56ba179c39bd4812c318e853e3d17"
+  },
+  {
+    "source": "bb63f53",
+    "path": "packages/design_system/lib/src/recharge_theme.dart",
+    "current_path": "packages/design_system/lib/src/recharge_theme.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "35686b5a412871991e7bbd3e91924f86678e8609f6b4a57a99d22a98d13a6011"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "68309b20f4192e989bb18e446507ec29c09349a1e930ea02d5538694a1c158de"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_details_renderer.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_details_renderer.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "7888e2face1afe410ef67b7b6ac88a419d3a07391d540f009bc762772b66b2ae"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_section_matrix.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_section_matrix.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "16ab4acf59bd63b319335d2038813753e7de85301ef1dd1e8f59a0c6e6692fdd"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_visual_preview_props.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_visual_preview_props.dart",
+    "disposition": "preview input replaced by typed FindPeople/ClassWorkshop/BookableSession projections",
+    "source_sha256": "38ea7cc88c076b22796caa693913ca7b672dcd900ad480b5c1add2c036a19e4d"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_visual_primitives.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/renderers/object_offer_visual_primitives.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "831578d5459324c879602a10bcbc1693a1d65e9f13f8c7c1dd10efa9835f4a71"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/lib/features/discover/presentation/shell/details_shell.dart",
+    "current_path": "apps/mobile/lib/features/discover/presentation/shell/details_shell.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "0f9b36137dde7b963797c400b66956649315ef1c0e902f557f06f4c99b23bed8"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/discover_details_parity_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/discover_details_parity_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "2dd630898e837512766b872103d0c838bc80e4dba00f4dec6c275954cc349243"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_activity_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_activity_reference.png",
+    "disposition": "exact bytes already present",
+    "source_sha256": "810ba525591985ecec0c4d860bc58e1bfcaf27f3d3c09c1e94e3dd15752b9b57"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_bookable_session_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_bookable_session_reference.png",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "bf8b725987eda84d38b4ef630df47abe2c9f37e98a644927488e7e2c3bd02600"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_class_workshop_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_class_workshop_reference.png",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "25da848afa19714490445fac3b681bc1db536ff5fe8ef6e3a95ee287f811932e"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_event_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_event_reference.png",
+    "disposition": "exact bytes already present",
+    "source_sha256": "5dff790502793d2f4a5e0dd9ae738ca56789b142e6ed14f1ebedf624d5cd23c5"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_find_people_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_find_people_reference.png",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "1b21f38d298bb70c95d9625aa177636e8d045223bbba12a70459cd1a565ba1fd"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_place_reference.png",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/goldens/object_offer_place_reference.png",
+    "disposition": "exact bytes already present",
+    "source_sha256": "70c23b67f8bc7337d043eff11c5f1666ecc9d8975cb61336edf929f00f161324"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_activity_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_activity_visual_golden_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "d684eb137780521cace02e380f8c6ff5beabab065c55ea0271c2e732a64a910d"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_bookable_session_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_bookable_session_visual_golden_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "582e2cb1373fe0ebe3323e1204e1dc20aa400ea009ebf4c4221cb6374c1feb79"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_class_workshop_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_class_workshop_visual_golden_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "a5449808f9f2060b63200d81b03559a530e5763fcb9a097aa9da09a1b29982d1"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_activity_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_activity_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "7f5a008c427a99d236fb08c6ce70055607c3fada43d253547c8ee3ef12932058"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_bookable_session_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_bookable_session_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "01448cee5f757f56f13c448acaffe5145e5d3974a2c5b774571dd3d846defe7a"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_class_workshop_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_class_workshop_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "c8ff1601a33215445b094d5f60dd77a8c657565b116402dbce7861b2c5aff5cf"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_event_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_event_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "11496e5308e6d17bc751681952328609d1e1ea3877b7cd7d8d0aab22e7f5f3f6"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_find_people_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_find_people_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "9d6fbe1b97db10919225d4655f543fc912ed4f3313134030ac557259e0f2750a"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_place_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_details_renderer_place_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "93efdb775a5cc0ce420dd05492a1e0471705def850c0683b98d31d6c5dbf3f48"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_event_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_event_visual_golden_test.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "37ec63ae4931683684be39d0eb2a5fe4bf1f516d15c7558bd8f8581cb8c8e49a"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_find_people_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_find_people_visual_golden_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "3f8ab5dacc5e554b0d5ee03fa7a8a05117dee629253d48dbad9e98b62d680a52"
+  },
+  {
+    "source": "4ae375a",
+    "path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_place_visual_golden_test.dart",
+    "current_path": "apps/mobile/test/features/discover/presentation/renderers/object_offer_place_visual_golden_test.dart",
+    "disposition": "current version differs; retained current implementation",
+    "source_sha256": "9e30c9f845271b56720fb85aec4996bab7f58192d075678b898fbb1271efcfdf"
+  },
+  {
+    "source": "4ae375a",
+    "path": "docs/product/OBJECT_OFFER_DETAILS_VISUAL_SYSTEM_PLAN.md",
+    "current_path": "docs/product/discover/OBJECT_OFFER_DETAILS_VISUAL_SYSTEM_PLAN.md",
+    "disposition": "exact bytes already present",
+    "source_sha256": "f013ab2c0a340f0e5509e30c16a8f132d8b9f32a52bf641d68c34565295a488c"
+  },
+  {
+    "source": "4ae375a",
+    "path": "packages/design_system/lib/src/recharge_theme.dart",
+    "current_path": "packages/design_system/lib/src/recharge_theme.dart",
+    "disposition": "exact bytes already present",
+    "source_sha256": "8f7fa8fc5ed7d3191bf89c9991d8cf1239d49d786c90410891e1307606907bdb"
+  }
+]
