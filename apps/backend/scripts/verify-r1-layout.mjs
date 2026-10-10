@@ -78,6 +78,10 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/media_delivery_gate.test.ts",
   "apps/backend/functions/test/integration/media_orphan_sweep.test.ts",
   "apps/backend/functions/test/integration/moderation_media_restriction.test.ts",
+  // D3.1 (PLACE_D3_1_PUBLICATION_AMENDMENT.md §8): Place enablement matrix.
+  "apps/backend/functions/test/integration/content_place_enablement.test.ts",
+  // D3.2 (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md §8): Activity enablement matrix.
+  "apps/backend/functions/test/integration/content_activity_enablement.test.ts",
 ];
 
 if (

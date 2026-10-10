@@ -1795,3 +1795,55 @@ activation.
   by the time of the Content change. Its checkpoint, receipts and state are
   independent of the Catalog's; reconciliation and outbox repair replay stored
   facts only.
+
+## 40. D3.1 local amendment — Place through Content in the Emulator
+
+Owner-accepted 2026-10-10; authoritative text:
+[PLACE_D3_1_PUBLICATION_AMENDMENT.md](PLACE_D3_1_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts only `event` and `place`, and only
+  with an available validator; Activity, Rental, Collection and every type
+  without a validator stay off there. The accepted Place validator and the type
+  registry are unchanged.
+- `content.place.authoring` (default off) gates the Place commands that create
+  or change publishable content (`type_disabled`); the owner's
+  `withdrawPublication` and owner reads are not gated by a type's flag. The
+  callables stay closed while no authoring flag is on.
+- Emulator reference data answers Place from a TEST-ONLY subset of the mobile
+  taxonomy (applicability and required criteria); it is not the accepted
+  BCK-20 taxonomy.
+- Create-form compatibility is a verified subset: drafts under the strict v1.0
+  rules pass; the adaptive Create rules (PLC-ADP-01) that the server refuses
+  answer `validation_failed` without validator codes.
+- Catalog keeps Place excluded (`type_disabled`, BCK08-OD-04); Booking ignores
+  Place effects; D2 applies to Place media.
+
+## 41. D3.2 local amendment — Recharge Activity through Content in the Emulator
+
+Authoritative text:
+[ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md](ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts `event`, `place` and `activity`,
+  each only with an available validator and its own default-off flag
+  (`content.activity.authoring` for Activity); Rental, Collection and every
+  type without a validator stay off there. The accepted Activity validator and
+  the type registry are unchanged.
+- The Content service takes optional `compositionRules`: rules a composition
+  adds on top of a type's validator; they can only add issues. The Emulator
+  composition refuses any Activity `location.linkedPlaceId`
+  (`validation_failed`), because the existence of the Place is not resolvable
+  there (fail closed). The rules check the body that would become public: the
+  submitted draft revision at submit and publish, and the target immutable
+  revision at `activatePublishedRevision`, so a revision published before the
+  rule cannot be made public again past it.
+- Emulator reference data answers Activity from a TEST-ONLY subset of the
+  mobile taxonomy; an unknown pair does not apply. It is not the accepted
+  BCK-20 taxonomy.
+- Create-form compatibility is a verified subset; validator codes are not sent
+  to the client.
+- Catalog keeps Activity excluded (`type_disabled`, BCK08-OD-04); Booking
+  ignores Activity effects; D2 applies to Activity media.

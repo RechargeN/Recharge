@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "typeId": "place",
+  "taxonomyRevisionId": "test-only-tx-place-1",
+  "source": "TEST-ONLY subset of apps/mobile/lib/core/config/recharge_taxonomy_seed.dart and recharge_category_criteria.dart; not the accepted BCK-20 taxonomy (PLACE_D3_1_PUBLICATION_AMENDMENT.md §2.3)",
+  "entries": [
+    {
+      "categoryId": "art_culture_museums",
+      "subcategoryId": "museum",
+      "appliesToPlace": true,
+      "profileId": "exhibition_visit",
+      "requiredCriteria": []
+    },
+    {
+      "categoryId": "art_culture_museums",
+      "subcategoryId": "gallery",
+      "appliesToPlace": true,
+      "profileId": "exhibition_visit",
+      "requiredCriteria": []
+    },
+    {
+      "categoryId": "art_culture_museums",
+      "subcategoryId": "artist_talk",
+      "appliesToPlace": false,
+      "profileId": "talk_lecture",
+      "requiredCriteria": ["language"]
+    },
+    {
+      "categoryId": "outdoor_nature_walking",
+      "subcategoryId": "park",
+      "appliesToPlace": true,
+      "profileId": "outdoor_activity",
+      "requiredCriteria": ["difficulty"]
+    },
+    {
+      "categoryId": "outdoor_nature_walking",
+      "subcategoryId": "lake",
+      "appliesToPlace": true,
+      "profileId": "outdoor_activity",
+      "requiredCriteria": ["difficulty"]
+    }
+  ]
+}

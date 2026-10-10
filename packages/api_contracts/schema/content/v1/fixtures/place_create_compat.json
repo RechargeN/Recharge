@@ -1,0 +1,841 @@
+{
+  "schemaVersion": 1,
+  "typeId": "place",
+  "source": "PLACE_D3_1_PUBLICATION_AMENDMENT.md §5.7: the exact body PlaceContentBodyMapper produces for each Create draft case (apps/mobile/test/fixtures/create/user_place_draft.dart) and the codes validatePlaceBody returns under the Emulator reference data; the server answers every non-empty case with validation_failed only.",
+  "serverOwnerUserId": "server-owner-compat-1",
+  "cases": [
+    {
+      "name": "valid",
+      "createCase": "the accepted draft: strict v1.0 rules and the Emulator Place taxonomy",
+      "expectedIssues": [],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "cover_missing",
+      "createCase": "no cover (the profile only recommends one)",
+      "expectedIssues": [
+        "place.media.cover_missing"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "short_description_short",
+      "createCase": "short description under 20 characters",
+      "expectedIssues": [
+        "place.shortDescription"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet park",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "hours_mode_missing",
+      "createCase": "no opening-hours mode chosen (optional for the profile)",
+      "expectedIssues": [
+        "place.hours"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "entry_type_missing",
+      "createCase": "no entry type chosen (optional for the profile)",
+      "expectedIssues": [
+        "place.pricing.entryType"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "currency_mismatch",
+      "createCase": "draft currency differs from the market currency",
+      "expectedIssues": [
+        "place.pricing.currencyCode"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "USD"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "phone_invalid",
+      "createCase": "phone with letters (Create checks only for 7 digits)",
+      "expectedIssues": [
+        "place.contacts.phone"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "contacts": {
+          "phone": "call 1234567 ext"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "source_type_mismatch",
+      "createCase": "relationship owner with a creator source type",
+      "expectedIssues": [
+        "place.provenance.sourceType"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "owner",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "owner",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "outside_service_area",
+      "createCase": "pin outside the market bounding box",
+      "expectedIssues": [
+        "place.location.outside_service_area"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "criteria": {
+          "difficulty": "easy"
+        },
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 59.437,
+            "longitude": 24.7536
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "subcategory_not_applicable",
+      "createCase": "subcategory that applies to Event only",
+      "expectedIssues": [
+        "place.subcategory.not_applicable"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "artist_talk",
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    },
+    {
+      "name": "criterion_missing",
+      "createCase": "park without its required criterion",
+      "expectedIssues": [
+        "place.criteria.required_missing:difficulty"
+      ],
+      "body": {
+        "title": "Kronvalda park pond",
+        "placeKind": "publicSpace",
+        "relationshipToPlace": "visitor",
+        "shortDescription": "Quiet city park with a pond and benches",
+        "contentLocale": "en",
+        "categoryId": "outdoor_nature_walking",
+        "subcategoryId": "park",
+        "location": {
+          "marketCityId": "riga",
+          "countryCode": "LV",
+          "city": "Riga",
+          "formattedAddress": "Kronvalda bulvaris, Riga",
+          "point": {
+            "latitude": 56.9586,
+            "longitude": 24.1066
+          },
+          "timezoneId": "Europe/Riga",
+          "accuracy": "rooftop",
+          "pinConfirmed": true
+        },
+        "hours": {
+          "mode": "regular",
+          "weeklyPeriods": [
+            {
+              "id": "c9f7dd79-cd6a-5b13-9085-63dd9eb08757",
+              "dayOfWeek": 1,
+              "openMinute": 420,
+              "closeMinute": 1320,
+              "closesNextDay": false
+            }
+          ],
+          "exceptions": []
+        },
+        "operationalStatus": {
+          "status": "operating"
+        },
+        "visitPlanning": {
+          "allowsShortVisit": false,
+          "weatherDependent": false,
+          "arrivalBufferMinutes": 0,
+          "exitBufferMinutes": 0
+        },
+        "pricing": {
+          "entryType": "free",
+          "currencyCode": "EUR"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": [
+            {
+              "mediaId": "asset-gallery-1"
+            },
+            {
+              "mediaId": "asset-gallery-2"
+            }
+          ]
+        },
+        "provenance": {
+          "sourceType": "creatorSubmission",
+          "submittedByUserId": "server-owner-compat-1",
+          "relationshipClaim": "visitor",
+          "createdAtUtc": "2026-10-10T08:00:00.000Z",
+          "lastConfirmedAtUtc": "2026-10-10T08:00:00.000Z"
+        }
+      }
+    }
+  ]
+}

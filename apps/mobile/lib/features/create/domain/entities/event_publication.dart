@@ -5,11 +5,16 @@ final class EventServerDraftRef {
     required this.contentId,
     required this.draftId,
     required this.revision,
+    this.createdByUserId,
   });
 
   final String contentId;
   final String draftId;
   final int revision;
+
+  /// The author the server recorded for the draft (D3.1 §5.4); the client
+  /// echoes it where a type's body names its author and never decides it.
+  final String? createdByUserId;
 }
 
 final class EventPublicationStatus {

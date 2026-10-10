@@ -1,6 +1,7 @@
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
 import '../domain/repositories/event_publication_gateway.dart';
+import '../domain/repositories/place_publication_gateway.dart';
 
 /// Transport used for Content: the same authenticated Functions path as
 /// Booking, injected so the Create feature does not import the Booking feature.
@@ -21,17 +22,21 @@ final class ContentTransportFailure implements Exception {
 /// Content owner commands and queries over `contentCommandV1`/`contentQueryV1`.
 /// It holds no authority: the gate is asked before every call, and every
 /// decision (Session, verified Creator, exact Page, Media readiness, review)
-/// is the server's.
+/// is the server's. One instance creates drafts of one [typeId] (Event by
+/// default; Place for D3.1); every other command addresses ids the server
+/// already bound to a type.
 final class FunctionsEventPublicationGateway
-    implements EventPublicationGateway {
+    implements EventPublicationGateway, ContentDraftReader {
   FunctionsEventPublicationGateway({
     required ContentCallablePort port,
     required EventPublicationCommandGate gate,
+    this.typeId = 'event',
   }) : _port = port,
        _gate = gate;
 
   final ContentCallablePort _port;
   final EventPublicationCommandGate _gate;
+  final String typeId;
 
   @override
   Future<EventServerDraftRef> createDraft({
@@ -41,7 +46,7 @@ final class FunctionsEventPublicationGateway
     required String idempotencyKey,
   }) async => _draftRef(
     await _command('createDraft', idempotencyKey, <String, Object?>{
-      'typeId': 'event',
+      'typeId': typeId,
       'publisherRef': <String, Object?>{
         'type': publisherRef.type.wireName,
         'id': publisherRef.id,
@@ -150,6 +155,19 @@ final class FunctionsEventPublicationGateway
     );
   }
 
+  /// The owner's read of the draft (`getDraft`), for its revision and author.
+  @override
+  Future<EventServerDraftRef> draft(String draftId) async {
+    _gate.assertAllowed();
+    return _draftRef(
+      await _call('contentQueryV1', <String, Object?>{
+        'schemaVersion': 1,
+        'queryType': 'getDraft',
+        'payload': <String, Object?>{'draftId': draftId},
+      }),
+    );
+  }
+
   Future<Map<String, Object?>> _command(
     String commandType,
     String idempotencyKey,
@@ -191,6 +209,9 @@ final class FunctionsEventPublicationGateway
         revision: draft['revision'] is int
             ? draft['revision']! as int
             : throw const EventPublicationRejected('invalid_contract'),
+        createdByUserId: draft['createdByUserId'] is String
+            ? draft['createdByUserId']! as String
+            : null,
       );
 
   static String _string(Map<String, Object?> data, String key) {

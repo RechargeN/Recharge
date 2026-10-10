@@ -866,6 +866,11 @@ void test('delegated import never reaches Content storage except through the Con
       'EmulatorSyntheticReferenceData',
       'FirestoreContentRepository',
       'IdentityPublisherEligibility',
+      // D3.1 §2.1: the authoring list accepts only types with an available validator.
+      'isContentTypeAvailable',
+      'resolveContentType',
+      // D3.2 §2.4: Emulator rules that refuse what the composition cannot resolve.
+      'emulatorCompositionRules',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',

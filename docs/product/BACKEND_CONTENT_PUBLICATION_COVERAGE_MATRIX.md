@@ -62,9 +62,9 @@ production processing are authorized.
 | Canonical type | Publication boundary | Source-domain note | Current evidence/gap |
 |---|---|---|---|
 | `event` | BCK-07 publication revision | Event v2.2.3 invariants; Booking state remains BCK-09 | Typed local subset; backend absent |
-| `activity` | BCK-07 | Activity product rules required | Generic local runtime; dedicated spec absent here |
+| `activity` | BCK-07 | Activity product rules required | D3.2 ([amendment](ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.activity.authoring`; linked Place fails closed; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04); cloud absent |
 | `route` | BCK-07 manifest/handoff | Route aggregate and GPX remain BCK-11 | Separate local publication path; BCK-11 absent |
-| `place` | BCK-07 | Place typed schema and provenance | Typed local runtime; backend absent |
+| `place` | BCK-07 | Place typed schema and provenance | D3.1 ([amendment](PLACE_D3_1_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.place.authoring`; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04); cloud absent |
 | `session` | BCK-07 | Bookable Session source; Booking authority separate | Generic/local; dedicated spec absent here |
 | `scenario` | BCK-07 distribution manifest | Scenario aggregate remains BCK-10 | Typed local personal flow; BCK-10 absent |
 | `find_people` | BCK-07 with OD-11/privacy gate | Consent/access input from BCK-06 | Typed local/mock; production gated |
