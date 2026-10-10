@@ -1,0 +1,403 @@
+# PVR-01 / 00 — baseline и передача
+
+STAGE: 00; RESULT: ready; DATE: 2026-10-10 (Europe/Moscow).
+Ready — только для архива 01, не runtime cutover.
+TARGET_ROOT: C:/Users/User/.codex/worktrees/7275/Recharge
+HEAD: 8c69715bba03eb1cef7309d4496ebfddd6d11a1e
+BRANCH: codex/recharge-integration
+Вход/выход HEAD одинаковы; commit/push/merge не выполнялись.
+
+## Вход и собственная дельта
+
+Предыдущих выполненных передач нет. Полный master plan v2.1 прочитан и
+перенесён из C:/Users/User/.codex/worktrees/012d/Recharge/docs/product/.
+4d5f/012d на detached 06dae4920e8dbf9492267d534397689c345169b1 устарели.
+7275 выбрана по поздним исходникам и проверенному Git; WIP сохранён.
+Подготовленные задания 00–08 также перенесены byte-for-byte в target docs/product/viewer-profile-retirement-handoffs/ из исходной папки
+C:/Users/User/.codex/worktrees/012d/Recharge/docs/product/viewer-profile-retirement-handoffs/;
+они не являются результатами. Runtime из 012d не копировался.
+AGENTS.md target версии 2026-09-29 прочитан; rg --files -g AGENTS.md дал только root.
+Также применяется пользовательский AGENTS. Реальные ADR:
+- docs/adr/0015-authenticated-viewer-verified-creator-professional-page.md
+- docs/adr/0017-admin-experience-preview-and-user-created-pages.md
+
+Оба Status: Accepted, Deciders: Recharge team. PVR ADR не принят/не создан.
+План остаётся Proposed. Созданы три документа результатов и перенесён документационный пакет заданий:
+- docs/product/VIEWER_PROFILE_RETIREMENT_PLAN.md — перенос полного плана, §2.1/§13 file map.
+- docs/verification/PVR_01_VERIFICATION.md — индекс.
+- docs/verification/pvr-01/00-baseline.md — эта передача.
+
+Откат: удалить только эти три новых файла и перенесённый пакет заданий после проверки поздних правок.
+Не применять reset/clean к чужому WIP. Архива/manifest ещё нет, это работа 01.
+
+## Symbols/file map
+
+Все искомые символы: 66 matches, 8 runtime файлов (список совпадений ниже).
+F01: удалить _ViewerProfileBody/_ViewerUpgradeRow с переносом Saved/Visited;
+удалить _RoleTrack/fallback selector, сохранить Creator/shared widgets.
+Изменить _profilePresentationSummary/_profileBadgeLabel/_profilePageTitle/
+_profileContextLine. Общий profile_page.dart целиком не удалять.
+F02: ProfileRoleTier.user оставить actual-access классификацией, изменить display.
+Creator summary сейчас canCreate:true — новый title не должен стать grant.
+F03/F04/F05: изменить AccountExperience/effectiveExperience/Viewer fallback;
+AccountExperienceScope и personal/page nav остаются общими.
+F06: убрать Viewer presentation preview после нового решения, не system roles.
+F07: изменить personal label/preview chips, сохранить IDs/guards/quota.
+Controller: generic selectAdminPreview/reset оставить; Viewer-specific reset нет.
+Host/Settings fallback общий без Viewer; route_names без Viewer URL.
+app_router внедряет WorkspaceSectionHost в SettingsPage.workspaceSectionBuilder.
+WorkspaceSection: apps/mobile/lib/features/identity/presentation/widgets/workspace_section.dart.
+Host: apps/mobile/lib/app/presentation/workspace_section_host.dart.
+ScenarioLibraryPanel: apps/mobile/lib/features/explore/presentation/widgets/scenario_library_panel.dart.
+Scenario viewer/unlistedViewer/PublicPageViewerContext — не относятся.
+
+## Storage и publisher
+
+IdentityWorkspaceLocalDataSource.schemaVersion=3; keys
+identity_active_workspace_<userId>, identity_managed_pages_<userId>.
+Workspace JSON schemaVersion/type/id: type.name пишет personal/page,
+reader принимает только personal/page; corrupt fail closed.
+AccountExperience/AdminExperiencePreview persisted readers/index не найдены
+по всем consumers. adminPreview session state: null при load, clearAdminPreview
+при switch. preview.name только message/analytics. Guard: ready snapshot +
+admin.experience.preview. Data migration по найденной базе не нужна.
+Существующие ManagedPage v1/v2 → v3 migrations не относятся к PVR.
+active_create_publisher_provider читает WorkspaceRef, выдаёт user/page + exact id.
+CreateController.ensureLoaded same-user loaded обновляет defaults/access и
+возвращается без переписывания draft; PublisherRef применяет только к fresh
+Event draft. Это code-reading evidence, U14 runtime regression ещё не закрыта.
+
+## Action/route baseline
+
+Router защищает profile/workspace/visited/favorites/create/settings/page routes
+по isAuthenticated, с originRoute на signIn. Profile также отказывает user==null.
+
+| Action | Route / current gate | Existing evidence |
+|---|---|---|
+| Saved | /favorites, auth, FavoritesController | T01 Saved/search handoffs; сохранность всех записей отдельно не проверена |
+| Visited | /profile/visited, auth без Creator verification | visited_places_page_test: Creator/Viewer/Details; visit_history_repository_test idempotency/date |
+| Scenario library | Panel до role branch; facade.list(ownerId:user.id), resolver | code reading; dedicated shared-library widget case отсутствует |
+| Created | /profile/workspace, auth/current-user Create load | T01 listing status/incomplete draft |
+| Create Hub | /create, auth; operation-specific capabilities/readiness | T01 Creator dashboard; create_controller_test Route capability/readiness/pending_review |
+| Personal Scenario | /create objectType=scenario; personal save, public publish blocked | create_controller_test personal save/undo/offline; create_exact_scenario_open_test exact owner |
+| Listing search/map | search/discoverMap query от draft | T01 listing/legacy-route handoffs |
+| Draft/route continue | /create draft/objectType/route context, type gates | T01 finish incomplete draft/legacy route-context activity |
+| Settings/edit/logout | /settings, auth, inline host | settings_page_test/auth tests; demo restore не production logout evidence |
+| Page Account | professionalPageAccount, auth/page context/capabilities | professional_app_shell_test nav/empty preview; полный Account flow не проверялся |
+| Workspace | exact membership/page id, switch resets preview | identity_workspace_usecase_test A/B, restore, quota 3/4; workspace_section_test |
+
+## Viewer specs references
+
+Repo-wide rg нашёл только восемь identity docs (список ниже); tooling/runtime/
+tests consumers имён specs не найдены. Ignored build/cache не включены.
+Creator/Public Creator active references: AccountStatus §15.1, projection §12.2,
+Block/Mute §12.3, Follow, VP-D08/VP-D10, privacy libraries.
+Professional/Public Page: shared Block/Mute/privacy, sibling framing.
+PROFILE_DOCUMENTS_INDEX: non-normative registry/version pins.
+Viewer/Public Viewer остаются владельцами общих правил до миграции 03.
+PROFESSIONAL_PAGE_DECISION_PACKAGE — historical rationale, по header/index.
+Version/changelog rows исторические: не заменять массово, не выдавать за current
+section ownership. Draft requirements не разрешают новые runtime функции.
+
+## Checks/evidence
+
+Команды PowerShell в TARGET_ROOT, 2026-10-10:
+- git rev-parse HEAD; git branch --show-current; git status --short: exit 0.
+- Get-Command flutter,dart; flutter --version; dart --version: exit 0.
+- rg --files -g AGENTS.md; repo-wide symbol/spec searches: результаты ниже.
+- dart tools/scripts/check_boundaries.dart --repo-root . --format text:
+  exit 0, scanned 567, findings/suppressed 71, violations 0, stale/expired 0,
+  budget 71/71. Existing suppressions не скрываются.
+
+Первый restricted Git 7275: Permission denied exit 1; повтор с разрешением
+успешен. Literal wildcard rg ошибки исправлены explicit paths/repo-wide search,
+не использованы как отсутствие consumers. Ошибка PowerShell parser первого
+документального writer не выполнила его; повтор создал только три docs.
+Flutter 3.44.9 user-branch, framework 6b182d2c75, engine 5a2a6a42cc;
+Dart 3.12.2; C:/src/flutter/bin. Pubspec resolution workspace, sdk ^3.8.0;
+api_contracts/design_system local, riverpod ^2.6.1, go_router ^14.8.1,
+secure_storage ^9.2.4, firebase_auth 6.7.0/firebase_core 4.15.0 существуют.
+Dependencies resolved; 87 newer incompatible packages informational, upgrade нет.
+Mobile/pubspec.lock Git WIP после тестов отсутствует.
+
+Из TARGET_ROOT/apps/mobile, exit 0, 56 passed:
+```powershell
+flutter test test/widget/profile_page_test.dart test/widget/workspace_section_test.dart test/widget/professional_app_shell_test.dart test/unit/profile_role_summary_test.dart test/unit/identity_workspace_usecase_test.dart test/widget/app_shell_test.dart test/widget/settings_page_test.dart test/widget/visited_places_page_test.dart test/unit/identity_workspace_repository_test.dart test/unit/identity_notification_sink_test.dart test/unit/visit_history_repository_test.dart test/unit/visited_places_controller_test.dart test/unit/auth_controller_test.dart test/unit/auth_repository_impl_test.dart --reporter expanded
+```
+
+Та же cwd, exit 0, 22 passed:
+```powershell
+flutter test --no-pub test/unit/create_controller_test.dart test/unit/create_exact_scenario_open_test.dart --reporter expanded
+```
+
+Доступны flutter pub get/analyze/test/run из apps/mobile; root melos
+bootstrap/analyze/test по melos.yaml; boundary Dart/PowerShell wrapper.
+Полный flutter analyze/test не запускался: финальные gates 08 открыты.
+Device/cloud/UI walkthrough не выполнялись. PVR-AC-01 подтверждён baseline;
+остальные AC не закрыты. A01–A12/U01–U16 не проверялись как итог cutover:
+таблица actions — baseline test/code-reading, не post-change acceptance.
+Общая Scenario library/Publisher non-rewrite требуют поведенческих cases
+в ближайшем T01/Create тесте будущей регрессии; 00 tests не меняет.
+
+## Next
+
+Только 01, тот же target; сначала проверить HEAD/status/hashes. Новый HEAD/WIP
+допустим при понятном происхождении. Raw archive/manifest до runtime edits.
+Не переносить старый runtime. План Proposed не стал Accepted. Следующие заходы,
+commit/push/merge/cloud здесь не выполнялись. Ready не означает slice Done.
+
+## Input WIP (сохранён на выходе)
+
+Mobile related WIP отсутствует. Полный входной status ниже; к нему добавляются
+только собственные docs и пакет заданий. Backend/media WIP остаётся входом следующих заходов.
+```text
+ M apps/backend/config/manifests/execution-manifest.json
+ M apps/backend/firestore.rules
+ M apps/backend/functions/src/content_effects_entry.ts
+ M apps/backend/functions/src/content_entry.ts
+ M apps/backend/functions/src/contracts/content_v1.ts
+ M apps/backend/functions/src/contracts/media_schema_registry.ts
+ M apps/backend/functions/src/index.ts
+ M apps/backend/functions/src/media_entry.ts
+ M apps/backend/functions/src/modules/catalog/application/catalog_projector.ts
+ M apps/backend/functions/src/modules/catalog/domain/catalog_item.ts
+ M apps/backend/functions/src/modules/catalog/infrastructure/content_catalog_source.ts
+ M apps/backend/functions/src/modules/content/application/content_media_scope.ts
+ M apps/backend/functions/src/modules/content/application/content_publication_service.ts
+ M apps/backend/functions/src/modules/content/application/event_booking_handoff.ts
+ M apps/backend/functions/src/modules/content/application/ports/media_readiness_port.ts
+ M apps/backend/functions/src/modules/content/domain/event_internal_registration.ts
+ M apps/backend/functions/src/modules/content/domain/publication_pointer.ts
+ M apps/backend/functions/src/modules/content/domain/repositories.ts
+ M apps/backend/functions/src/modules/content/infrastructure/firestore_content_repository.ts
+ M apps/backend/functions/src/modules/content/infrastructure/in_memory_content_repository.ts
+ M apps/backend/functions/src/modules/media/application/content_media_readiness.ts
+ M apps/backend/functions/src/modules/media/application/media_deletion_service.ts
+ M apps/backend/functions/src/modules/media/application/ports/actor_authority_port.ts
+ M apps/backend/functions/src/modules/media/application/ports/object_store_port.ts
+ M apps/backend/functions/src/modules/media/domain/media_asset.ts
+ M apps/backend/functions/src/modules/media/domain/media_attachment.ts
+ M apps/backend/functions/src/modules/media/domain/repositories.ts
+ M apps/backend/functions/src/modules/media/infrastructure/emulator_media_composition.ts
+ M apps/backend/functions/src/modules/media/infrastructure/fake_object_store.ts
+ M apps/backend/functions/src/modules/media/infrastructure/firestore_media_repository.ts
+ M apps/backend/functions/src/modules/media/infrastructure/in_memory_media_repository.ts
+ M apps/backend/functions/src/modules/media/infrastructure/storage_emulator_object_store.ts
+ M apps/backend/functions/src/modules/moderation/application/moderation_service.ts
+ M apps/backend/functions/src/modules/moderation/application/ports.ts
+ M apps/backend/functions/src/modules/moderation/domain/moderation.ts
+ M apps/backend/functions/src/modules/moderation/infrastructure/emulator_moderation_composition.ts
+ M apps/backend/functions/src/shared/feature_flags.ts
+ M apps/backend/functions/test/emulator/content_rules_default_deny.test.ts
+ M apps/backend/functions/test/emulator/media_real_tools_flow.test.ts
+ M apps/backend/functions/test/integration/content_publication_security.test.ts
+ M apps/backend/functions/test/integration/content_publication_service.test.ts
+ M apps/backend/functions/test/integration/media_content_readiness.test.ts
+ M apps/backend/functions/test/integration/media_deletion_reconcile.test.ts
+ M apps/backend/functions/test/integration/media_privacy_boundary.test.ts
+ M apps/backend/functions/test/integration/media_security.test.ts
+ M apps/backend/functions/test/media_tools/clamd_scan.test.ts
+ M apps/backend/functions/test/stand/media_tools_host.ts
+ M apps/backend/functions/test/stand/stand_flags.ts
+ M apps/backend/functions/test/stand/stand_main.ts
+ M apps/backend/functions/test/stand/stand_media.ts
+ M apps/backend/functions/test/stand/stand_moderation.ts
+ M apps/backend/functions/test/support/content_event_world.ts
+ M apps/backend/functions/test/support/content_repository_scenarios.ts
+ M apps/backend/media-tools.lock.json
+ M apps/backend/scripts/media-tools.mjs
+ M apps/backend/scripts/run-emulator-tests.mjs
+ M apps/backend/scripts/stand-d1-gate.mjs
+ M apps/backend/scripts/stand-moderate.mjs
+ M apps/backend/scripts/stand-seed.mjs
+ M apps/backend/scripts/verify-content-persistence-layout.mjs
+ M apps/backend/scripts/verify-r1-exports.mjs
+ M apps/backend/scripts/verify-r1-layout.mjs
+ M apps/backend/scripts/verify-toolchain.mjs
+ M docs/architecture/LAUNCH_STATUS.md
+ M docs/product/BACKEND_MEDIA_STORAGE_COVERAGE_MATRIX.md
+ M docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md
+ M docs/product/DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md
+ M docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md
+ M docs/product/MEDIA_STORAGE_BACKEND_SPEC.md
+ M packages/api_contracts/schema/content/v1/fixtures/invalid.json
+ M packages/api_contracts/schema/content/v1/fixtures/valid.json
+ M packages/api_contracts/schema/content/v1/publication_pointer.schema.json
+ M packages/api_contracts/schema/media/v1/fixtures/forward.json
+ M packages/api_contracts/schema/media/v1/fixtures/invalid.json
+ M packages/api_contracts/schema/media/v1/fixtures/valid.json
+?? .github/workflows/backend-d1-linux.yml
+?? apps/backend/ci/
+?? apps/backend/functions/src/media_effects_entry.ts
+?? apps/backend/functions/src/modules/content/application/content_media_availability.ts
+?? apps/backend/functions/src/modules/content/application/ports/media_availability_port.ts
+?? apps/backend/functions/src/modules/media/application/media_delivery_gate.ts
+?? apps/backend/functions/src/modules/media/application/orphan_sweep.ts
+?? apps/backend/functions/src/modules/media/application/ports/published_media_port.ts
+?? apps/backend/functions/src/modules/media/infrastructure/media_effect_feed.ts
+?? apps/backend/functions/src/modules/moderation/infrastructure/media_moderation_adapter.ts
+?? apps/backend/functions/src/modules/moderation/infrastructure/media_restriction_verifier.ts
+?? apps/backend/functions/test/emulator/media_late_restriction_flow.test.ts
+?? apps/backend/functions/test/integration/content_media_availability.test.ts
+?? apps/backend/functions/test/integration/media_delivery_gate.test.ts
+?? apps/backend/functions/test/integration/media_orphan_sweep.test.ts
+?? apps/backend/functions/test/integration/moderation_media_restriction.test.ts
+?? apps/backend/functions/test/stand/stand_media_reconcile.ts
+?? apps/backend/functions/test/unit/catalog/catalog_media_suppression.test.ts
+?? apps/backend/functions/test/unit/content/publication_pointer_media.test.ts
+?? apps/backend/functions/test/unit/media/media_revocation_epoch.test.ts
+?? apps/backend/scripts/media-tools-linux.mjs
+?? apps/backend/scripts/media-tools-linux.test.mjs
+?? apps/backend/scripts/stand-d1-linux-gate.mjs
+?? apps/backend/scripts/stand-d2-gate.mjs
+?? docs/product/MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md
+?? packages/api_contracts/schema/media/v1/media_delivery.schema.json
+```
+
+## Exact symbol matches
+
+```text
+apps/mobile\lib\core\identity\account_experience.dart:3:enum AccountExperience { viewer, creator, professionalPage }
+apps/mobile\lib\core\identity\account_experience.dart:5:class AccountExperienceScope extends InheritedWidget {
+apps/mobile\lib\core\identity\account_experience.dart:6:  const AccountExperienceScope({
+apps/mobile\lib\core\identity\account_experience.dart:12:  final AccountExperience experience;
+apps/mobile\lib\core\identity\account_experience.dart:14:  static AccountExperienceScope? maybeOf(BuildContext context) {
+apps/mobile\lib\core\identity\account_experience.dart:15:    return context.dependOnInheritedWidgetOfExactType<AccountExperienceScope>();
+apps/mobile\lib\core\identity\account_experience.dart:19:  bool updateShouldNotify(AccountExperienceScope oldWidget) {
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:83:        onPreview: (AdminExperiencePreview preview) {
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:157:  final ValueChanged<AdminExperiencePreview> onPreview;
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:406:  final AdminExperiencePreview? selected;
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:408:  final ValueChanged<AdminExperiencePreview> onSelect;
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:432:              children: AdminExperiencePreview.values
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:434:                    (AdminExperiencePreview preview) => ChoiceChip(
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:597:String _previewLabel(AdminExperiencePreview preview) {
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:599:    AdminExperiencePreview.viewer => 'Viewer',
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:600:    AdminExperiencePreview.creator => 'Creator',
+apps/mobile\lib\features\identity\presentation\widgets\workspace_section.dart:601:    AdminExperiencePreview.professionalPage => 'Professional Page',
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:84:    final ProfileRoleSummary roleSummary = _profilePresentationSummary(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:172:              _ViewerProfileBody(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:286:ProfileRoleSummary _profilePresentationSummary(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:290:  final AccountExperienceScope? scope = AccountExperienceScope.maybeOf(context);
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:293:    AccountExperience.viewer => profileRoleSummaryForTier(ProfileRoleTier.user),
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:294:    AccountExperience.creator => profileRoleSummaryForTier(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:297:    AccountExperience.professionalPage => profileRoleSummaryForTier(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:309:String _profileBadgeLabel(ProfileRoleSummary roleSummary) {
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:364:    final AccountExperienceScope? experienceScope =
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:365:        AccountExperienceScope.maybeOf(context);
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:372:        : _profilePresentationSummary(context, accessRoleSummary);
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:393:            _RoleTrack(
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:629:                  _HeroPill(label: _profileBadgeLabel(roleSummary)),
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:778:class _ViewerProfileBody extends StatelessWidget {
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:779:  const _ViewerProfileBody({
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:857:              _ViewerUpgradeRow(onTap: onUpgrade),
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:932:class _ViewerUpgradeRow extends StatelessWidget {
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:933:  const _ViewerUpgradeRow({required this.onTap});
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:1505:class _RoleTrack extends StatelessWidget {
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:1506:  const _RoleTrack({
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:1537:                    active: activeTier == ProfileRoleTier.user,
+apps/mobile\lib\features\explore\presentation\pages\profile_page.dart:1540:                    onTap: () => onRoleSelected(ProfileRoleTier.user),
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:44:  final AdminExperiencePreview? adminPreview;
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:60:  AccountExperience get effectiveExperience {
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:62:      return AccountExperience.professionalPage;
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:66:        ? AccountExperience.creator
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:67:        : AccountExperience.viewer;
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:75:    AdminExperiencePreview? adminPreview,
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:98:extension on AdminExperiencePreview {
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:99:  AccountExperience get experience => switch (this) {
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:100:    AdminExperiencePreview.viewer => AccountExperience.viewer,
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:101:    AdminExperiencePreview.creator => AccountExperience.creator,
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:102:    AdminExperiencePreview.professionalPage =>
+apps/mobile\lib\features\identity\application\state\identity_workspace_state.dart:103:      AccountExperience.professionalPage,
+apps/mobile\lib\features\identity\application\controllers\identity_workspace_controller.dart:156:  bool selectAdminPreview(AdminExperiencePreview preview) {
+apps/mobile\lib\app\presentation\recharge_app_shell.dart:115:    final AccountExperience experience =
+apps/mobile\lib\app\presentation\recharge_app_shell.dart:117:        AccountExperience.viewer;
+apps/mobile\lib\app\presentation\recharge_app_shell.dart:119:        experience == AccountExperience.professionalPage;
+apps/mobile\lib\app\presentation\recharge_app_shell.dart:129:      body: AccountExperienceScope(experience: experience, child: widget.child),
+apps/mobile\lib\features\identity\domain\entities\admin_experience_preview.dart:1:enum AdminExperiencePreview { viewer, creator, professionalPage }
+apps/mobile\lib\features\explore\application\profile_role_summary.dart:22:  bool get isUser => tier == ProfileRoleTier.user;
+apps/mobile\lib\features\explore\application\profile_role_summary.dart:58:  return profileRoleSummaryForTier(ProfileRoleTier.user);
+apps/mobile\lib\features\explore\application\profile_role_summary.dart:91:    case ProfileRoleTier.user:
+apps/mobile\lib\features\explore\application\profile_role_summary.dart:93:        tier: ProfileRoleTier.user,
+apps/mobile\lib\features\explore\application\profile_role_summary.dart:113:    ProfileRoleTier.user => true,
+apps/mobile\test\widget\professional_app_shell_test.dart:51:      controller.selectAdminPreview(AdminExperiencePreview.professionalPage);
+apps/mobile\test\unit\profile_role_summary_test.dart:11:    expect(summary.tier, ProfileRoleTier.user);
+apps/mobile\test\unit\profile_role_summary_test.dart:23:    expect(summary.tier, ProfileRoleTier.user);
+apps/mobile\test\unit\identity_workspace_usecase_test.dart:190:        controller.selectAdminPreview(AdminExperiencePreview.viewer),
+apps/mobile\test\unit\identity_workspace_usecase_test.dart:193:      expect(controller.state.effectiveExperience, AccountExperience.viewer);
+apps/mobile\test\unit\identity_workspace_usecase_test.dart:206:        AccountExperience.professionalPage,
+```
+
+## Spec consumers
+
+```text
+docs/product/identity\CREATOR_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity\PROFESSIONAL_PAGE_DECISION_PACKAGE.md
+docs/product/identity\PROFILE_DOCUMENTS_INDEX.md
+docs/product/identity\PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md
+docs/product/identity\PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md
+docs/product/identity\PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity\PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md
+docs/product/identity\VIEWER_PROFILE_FUNCTIONAL_SPEC.md
+```
+
+## SHA-256 для 01
+
+| Path | SHA-256 |
+|---|---|
+| AGENTS.md | 4AF050D48F8CDBB1C03258014BD5D889FB8542B2168A88E32E2729C7077B6D6C |
+| apps/mobile/lib/features/explore/presentation/pages/profile_page.dart | 8D48FF364044CCB17702C03A46A9A7AAC3143966F6B68B88EB7ABED73953DB64 |
+| apps/mobile/lib/features/explore/application/profile_role_summary.dart | 354F09F8A3534C5199E0A868D0244AE2794867582F95C73F7CA73931E2D6A8DE |
+| apps/mobile/lib/core/identity/account_experience.dart | 7966C910EBD4B3ED435B088C5C641F1933A3236240FE51DE988FA1E1FE84B259 |
+| apps/mobile/lib/features/identity/application/state/identity_workspace_state.dart | 7D1592EBA14CD782A11F36B9C4182CFE29FB425C5A9FD046C2B01CFC22D5BD22 |
+| apps/mobile/lib/app/presentation/recharge_app_shell.dart | 4879F93D0269754897730FAA612EFB5384A372E8CDA76940C995BEE624974AA6 |
+| apps/mobile/lib/features/identity/domain/entities/admin_experience_preview.dart | 1B288181085FE4EAF08BC09AEFC6B8057616F88EECB5B9D0960E5EF1F51CF29E |
+| apps/mobile/lib/features/identity/presentation/widgets/workspace_section.dart | 4365DAC904FE04C9423E8625733BEA6FC49F87FC9B21E342F6CEF631D457F35F |
+| apps/mobile/lib/app/presentation/workspace_section_host.dart | 58049D40B6642143917DA2B48D6D2AEBB4FFE032341100FD71FAF60927399305 |
+| apps/mobile/lib/app/router/app_router.dart | 2FB2DFC61F5E95541388889776C70C3356DE13984A961C0C8287D57507BEE8BD |
+| apps/mobile/lib/app/router/route_names.dart | 467EADD7AA4D0B80D2F3B22E077BDBFFA66378E9B640A8C6B39FC9A00B928B9D |
+| apps/mobile/lib/features/explore/presentation/pages/settings_page.dart | FCEB33645A877DFF0A182C1876F2391F8FD49615C0490871170271B3A58AB62B |
+| apps/mobile/lib/features/identity/application/controllers/identity_workspace_controller.dart | 6E4F7E9B7A1BF1BB0386EAA8496F8A4F374B79BAEF4882F11A26BDB9666FD91F |
+| apps/mobile/lib/features/identity/data/datasources/identity_workspace_local_datasource.dart | 2FA9F279EAA74D57286534440BC60C9878D1B57574EAA06A2BC39D71E5328BC3 |
+| apps/mobile/lib/app/application/active_create_publisher_provider.dart | 0457F64543F30D7E258EB9EA603B3CC4DFFC480714DA1CF598EF6D52166E3514 |
+| apps/mobile/lib/features/create/application/controllers/create_controller.dart | D02A04524EC88B183936584FB4AC9849DE8BE75F055863B3BDB16FD67CD92AB2 |
+| apps/mobile/lib/features/explore/presentation/widgets/scenario_library_panel.dart | D697B6370E7BD7E2613E7A47CC4EDF173A8C24270A3741D0782D4A4772CEA2D4 |
+| apps/mobile/pubspec.yaml | C2557A2CA99D41A97693CCA98B745BA6BA1519FFA0CE39FB31A16584913406C0 |
+| pubspec.lock | CB349B8631C04024BE55B01070ED14544A233C7882EC72F73AA8274F423DD1B7 |
+| docs/adr/0015-authenticated-viewer-verified-creator-professional-page.md | 652644110624C051A48899D37F83613A63D696673B12D6975F2F22842A8A8964 |
+| docs/adr/0017-admin-experience-preview-and-user-created-pages.md | 9833A56B97B73FD848AAE5EEF51C149AFC42C3BAA1DF3820E5D96A63A6336DA9 |
+| docs/product/VIEWER_PROFILE_RETIREMENT_PLAN.md | EBE73441EC483F795F6A1BF4F863BE4F4D0E51DAAC0A0E4E2BCDE5FC652742E0 |
+| docs/product/identity/CREATOR_PROFILE_FUNCTIONAL_SPEC.md | C0D741882FC8084943C5F29BC2831E22B6D3955A39B84FAF9B553E2D0357EBD2 |
+| docs/product/identity/MANAGED_PAGE_PROFILE_EDITOR_LOCAL_SLICE_SPEC.md | C82FE61975C78AE2E0BA57CE032BF39EF7BF67A58D02005A41D812990F05E705 |
+| docs/product/identity/PROFILE_DOCUMENTS_INDEX.md | C870D8F18894B4E0FCFCE3BD9152370D1777698B1AEC0E7650AAD2643C015AFC |
+| docs/product/identity/PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md | 8DE4CA4FF85419C2A5785ED24F9AB19B0BC4C7EB2EDF219EA888206F503E298C |
+| docs/product/identity/PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md | F743F0D5EDE5D5405A51AC38EFA6B236A0A7701468371CCCC972F59C2073237C |
+| docs/product/identity/VIEWER_PROFILE_FUNCTIONAL_SPEC.md | A548A6BE7BFFC15903A6B481AF4FAE22249055AD5AC37E41374746404A44B6C4 |
+| apps/mobile/test/widget/profile_page_test.dart | D108F8A6D73C98C032DC4AFF685619A18E1BECC725BF484CF33DABEBD819BD76 |
+| apps/mobile/test/widget/workspace_section_test.dart | E01F909B36B1B464ABFAF3F75BFF68459408F895DF95E9FB31E2C16AB2E6E697 |
+| apps/mobile/test/widget/professional_app_shell_test.dart | DF684FDD389B31F02DDF3FE71CC340E4676597727AC841CBDCC243D88F3A1D8E |
+| apps/mobile/test/unit/profile_role_summary_test.dart | C81D10588A76862BB94A684BC89F09E90D0272E584120ABA38A6BD8B8A594232 |
+| apps/mobile/test/unit/identity_workspace_usecase_test.dart | 01EA02D0CB67872AD2EDC3FDA2B30BBB0D1EEC19DB655A249E63A78FD09047E6 |
+| apps/mobile/test/unit/create_controller_test.dart | D020C1AA95E02E465B1C6B87BD711027A075BC1FCBEFF1B997242F048F625120 |
+| apps/mobile/test/unit/create_exact_scenario_open_test.dart | 3B4130D0F9F7239D2EA5E15F538936A356DF164DF5FEA3380E25276CBC7CB74E |
+
+## Финальная проверка собственной дельты
+
+git diff --check: exit 0, только CRLF warnings для чужого tracked WIP.
+No-index check для новых docs не показал whitespace findings; exit 1 при
+сравнении с NUL означает new-file difference и не записывается как exit 0.
+Независимый Markdown check: trailing whitespace 0, fences парные.
+Первый link check нашёл 10 missing links на пакет подготовленных заданий:
+исправлено разрешённым byte-for-byte переносом только документов в
+ docs/product/viewer-profile-retirement-handoffs/. Это задания, не выполненные
+передачи; исходный source package не менялся. Их hashes ниже.
+Входная чужая status-карта сохранена; HEAD прежний. Mobile/tests не изменены.
+- docs/product/viewer-profile-retirement-handoffs/00-baseline.md: D20845C65A3215C1DB2065A618D7665C5B11344F16AB0EB388C2C23DDBB86C62
+- docs/product/viewer-profile-retirement-handoffs/01-archive.md: F49A7900938DA75E5BD49952B150F8B7445C86D3DD2C7564F7C8DB28FFF006DB
+- docs/product/viewer-profile-retirement-handoffs/02-decision.md: 5D4B291F99E19D7E8463069AB341E0CF6F6AABC9098E397C093CB0A1CCBCD653
+- docs/product/viewer-profile-retirement-handoffs/03-spec-migration.md: 2B9030C71F75D3C2DDC259FE061BED4EA27BDDCC809C713565D59875F0377258
+- docs/product/viewer-profile-retirement-handoffs/04-presentation-access.md: B696437822EE612882543CB6E632749C7730093279174AEC9D918DB00A930448
+- docs/product/viewer-profile-retirement-handoffs/05-unified-ui.md: 1CA1EF59E4AED0BE4D8AEC80A37C6958640AD28F1EB5194CAB0769C7D904DA1B
+- docs/product/viewer-profile-retirement-handoffs/06-regression.md: 85829B9A7665E099E797FAB945D18173615531549CA393C78B00500673343C0C
+- docs/product/viewer-profile-retirement-handoffs/07-retirement-restore.md: E365AE0BD414435DBC625372D10F514DFEA7B86FE0E4B712C20F1DB8EE9CBF18
+- docs/product/viewer-profile-retirement-handoffs/08-final-gates.md: C32630486352A02D984E184B557DECEAA87BFDE2D94C34E8F9A1D56DFA945E98
+- docs/product/viewer-profile-retirement-handoffs/README.md: E73B7422554E1CF918933EFA9BBB06F077B8B4FE87A10DC61B8378D2AD5284C4

@@ -1,6 +1,6 @@
 # RECHARGE — Product Vision (полное продуктовое видение)
 
-Версия: 2026-08-11. Приоритет документа: 4 (после ADR, slice spec,
+Версия: 2026-10-10. Приоритет документа: 4 (после ADR, slice spec,
 LAUNCH_STATUS — см. AGENTS.md). Описывает ЦЕЛЕВОЕ состояние продукта.
 Фактические статусы реализации — в AGENTS.md.
 
@@ -17,7 +17,7 @@ EUR. Масштабирование: страны, города, языки (en/
 ADR 0013 и обязательная identity/publisher policy по ADR 0015.
 Роль, рабочий контекст и publisher — три разные оси.
 
-1. **User (Viewer)** — базовый личный профиль с обязательной авторизацией.
+1. **User (Viewer access)** — личный профиль UI Creator с обязательной авторизацией.
    НЕ отправляет контент на модерацию и не публикует его в Discover/каталог.
    Может: поиск, просмотр, участие, отзывы, избранное, а также
    создание, редактирование и хранение собственных личных Scenario.
@@ -26,16 +26,17 @@ ADR 0013 и обязательная identity/publisher policy по ADR 0015.
    Auth: Google / Apple Sign-In; unauthenticated guest mode отсутствует.
    Может сохранить разрешённый локальный pre-verification draft, но Submit и
    Publish заблокированы.
-   Профиль: My scenarios, Visited places, Photos, Saved list, Upgrade account.
+   Единый профиль Creator: личные планы, посещения, сохранённое и настройки;
+   будущие Photos и другие Draft-модули не становятся реализованными от названия.
 
-2. **Creator** — после отдельной дополнительной identity verification.
+2. **Creator (системная identity)** — после отдельной дополнительной identity verification.
    Google/Apple account, verified email или телефон сами по себе не дают
    Creator. Решение server-owned, проверяемое и аудируемое.
    Creator — тот же личный профиль и тот же consumer UI, но с дополнительными
    create/submit/publish capabilities. Пользователь не переключается вручную
    между Viewer и Creator. При наличии grants личный профиль получает Creator
    tools и может создавать все 10 create-типов от своего имени.
-   Профиль: вкладки Created / Visited / Photos, созданные объекты
+   Тот же единый профиль: личные библиотеки и доступные Created tools, объекты
    со статусами Published / Draft, Quick actions.
 
 3. **Professional Page** — отдельный рабочий контекст verified Creator:
@@ -54,7 +55,7 @@ ADR 0013 и обязательная identity/publisher policy по ADR 0015.
 4. **Admin** — системная роль с отдельными admin capabilities. Admin tools
    открываются как защищённая поверхность и не являются личным профилем,
    Professional Page или рабочим publisher. Admin может использовать
-   presentation-only `View as Viewer / Creator / Professional Page`; preview
+   presentation-only `View as Creator / Professional Page`; preview
    не меняет роль, grants, workspace или publisher.
 
 ### Active workspace
@@ -120,10 +121,11 @@ Deep links: `recharge://{objectType}/{id}`.
 
 | Active workspace | Bottom nav |
 |---|---|
-| Personal profile: Viewer или Creator | **Home · Favorites · Smart Search · Notifications · Profile** |
+| Personal profile: UI Creator для любого User | **Home · Favorites · Smart Search · Notifications · Profile** |
 | Professional Page | **Page · Content · Create · Notifications · Account** |
 
-В personal workspace Creator остаётся тем же Viewer-интерфейсом. Creator tools
+В personal workspace используется единый интерфейс Creator для любого
+авторизованного User; system role Creator остаётся отдельным authority фактом. Creator tools
 доступны из Profile и Create Hub; центральный Smart Search не заменяется.
 
 В Professional Page workspace центральная кнопка `Create` открывает Create Hub
@@ -185,7 +187,7 @@ Smart Search остаётся доступен через consumer Home/Search, 
 
 ### Smart Search
 - Отдельная от обычного Search функция и центральный экран bottom nav только
-  в personal workspace Viewer/Creator.
+  в personal workspace с единым профилем Creator.
 - Запрос можно ввести текстом или голосом; оба входа передают
   один естественный запрос в SmartQueryParser.
 - Пользователь пишет запрос обычным языком («Хочу сегодня вечером
@@ -394,3 +396,21 @@ onboarding by region, professional web cabinet, partner accounts.
 означает полноценную admin panel: массовая модерация, sensitive verification,
 audit и access administration целево выносятся в защищённую internal web
 console по отдельному Approved scope.
+
+## PVR-01/03 — единый личный профиль, 2026-10-10
+
+По Accepted [ADR 0021](../adr/0021-unified-personal-profile.md) личный экран называется Creator для
+любого авторизованного User. Отдельная Viewer-композиция снимается; Admin
+presentation preview предлагает creator | professionalPage. UI-название и
+preview не меняют User / Creator / Admin, verification, capabilities,
+WorkspaceRef, PublisherRef или exact page membership. Personal libraries,
+Saved/Favorites, Visit History, Scenario/Quick Plan, настройки и edit/save
+не требуют publishing verification. Конкретные операции сохраняют свои
+owning-contract guards; Professional Pages остаются отдельными контекстами.
+Базовая публичная проекция и eligible public Creator card имеют разные
+visibility gates; смена названия не создаёт searchable identity.
+
+Это принятая UI-политика и документационный перенос, а не отчёт о выполненной
+runtime-миграции. Draft/Open profile требования, Follow, Legal/minors,
+retention и step-up остаются со своей прежней зрелостью; production gates
+не изменены. Текущий runtime и проверки — в передаче PVR-01/03.

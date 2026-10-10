@@ -22,8 +22,87 @@ import 'package:recharge/features/identity/presentation/widgets/workspace_sectio
 
 void main() {
   testWidgets(
+    'ordinary User has one Creator row without Admin preview or tool grants',
+    (tester) async {
+      const snapshot = IdentityAccessSnapshot(
+        userId: 'ordinary',
+        globalRole: 'user',
+        creatorVerificationStatus: CreatorVerificationStatus.notStarted,
+        globalCapabilities: {},
+        pages: [],
+        memberships: [],
+        revision: 3,
+      );
+      final repository = _MemoryIdentityWorkspaceRepository(snapshot);
+      final ids = _SequenceIdGenerator();
+      final controller = IdentityWorkspaceController(
+        loadIdentityWorkspaceUseCase: LoadIdentityWorkspaceUseCase(repository),
+        selectWorkspaceUseCase: SelectWorkspaceUseCase(repository),
+        createProfessionalPageUseCase: CreateProfessionalPageUseCase(
+          repository: repository,
+          idGenerator: ids,
+        ),
+        requestPageLimitIncreaseUseCase: RequestPageLimitIncreaseUseCase(
+          repository: repository,
+          idGenerator: ids,
+        ),
+        notificationSink: _MemoryNotificationSink(),
+        marketConfig: MarketConfig.riga,
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            identityWorkspaceControllerProvider.overrideWith(
+              (ref) => controller,
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: WorkspaceSection(userId: 'ordinary'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('workspace-personal')), findsOneWidget);
+      expect(find.text('Creator'), findsOneWidget);
+      expect(
+        find.text('Personal profile · Verification not started'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Viewer'), findsNothing);
+      expect(find.byType(ChoiceChip), findsNothing);
+      expect(controller.state.accessSnapshot, same(snapshot));
+      expect(
+        controller.state.activeWorkspace,
+        WorkspaceRef.personal('ordinary'),
+      );
+      expect(
+        await controller.createProfessionalPage(
+          displayName: 'Denied page',
+          kind: ManagedPageKind.company,
+        ),
+        isFalse,
+      );
+      expect(repository.accessSnapshot, same(snapshot));
+      expect(repository.accessSnapshot.pages, isEmpty);
+    },
+  );
+
+  testWidgets(
     'starts empty, exposes Admin preview and creates only a user page',
     (WidgetTester tester) async {
+      tester.view
+        ..physicalSize = const Size(360, 800)
+        ..devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view
+          ..resetPhysicalSize()
+          ..resetDevicePixelRatio();
+      });
       const String userId = 'demo_full_access';
       final repository = _MemoryIdentityWorkspaceRepository(
         const MockIdentityFixture().accessForUser(userId),
@@ -55,8 +134,14 @@ void main() {
               (Ref ref) => controller,
             ),
           ],
-          child: const MaterialApp(
-            home: Scaffold(
+          child: MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.5)),
+              child: child!,
+            ),
+            home: const Scaffold(
               body: SingleChildScrollView(
                 padding: EdgeInsets.all(16),
                 child: WorkspaceSection(userId: userId),
@@ -67,7 +152,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Personal profile'), findsOneWidget);
+      expect(find.byKey(const ValueKey('workspace-personal')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('workspace-personal')),
+          matching: find.text('Creator'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Viewer'), findsNothing);
+      expect(
+        find.text('Verified · Tools follow your permissions'),
+        findsOneWidget,
+      );
       expect(
         find.text('You have not created a Professional Page yet.'),
         findsOneWidget,
@@ -75,10 +172,7 @@ void main() {
       expect(find.text('Baltic Events'), findsNothing);
       expect(find.text('Riga Coffee Group'), findsNothing);
       expect(find.text('Weekend Latvia'), findsNothing);
-      expect(
-        find.byKey(const ValueKey('admin-preview-viewer')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const ValueKey('admin-preview-viewer')), findsNothing);
       expect(
         find.byKey(const ValueKey('admin-preview-creator')),
         findsOneWidget,
@@ -88,6 +182,10 @@ void main() {
         findsOneWidget,
       );
 
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('admin-preview-professionalPage')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(
         find.byKey(const ValueKey('admin-preview-professionalPage')),
       );
@@ -104,16 +202,35 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const ValueKey('professional-page-name')),
-        'User Created Page',
+        'Очень длинное название профессиональной страницы в Риге и Латвии',
+      );
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('submit-professional-page')),
       );
       await tester.tap(find.byKey(const ValueKey('submit-professional-page')));
       await tester.pumpAndSettle();
 
-      expect(find.text('User Created Page'), findsOneWidget);
+      expect(
+        find.text(
+          'Очень длинное название профессиональной страницы в Риге и Латвии',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('1 of 3 self-service pages used'), findsOneWidget);
       expect(controller.state.activeWorkspace?.isPage, isTrue);
       expect(controller.state.accessSnapshot!.ownedPages, hasLength(1));
       expect(notifications.events, hasLength(2));
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('workspace-personal')),
+      );
+      await tester.tap(find.byKey(const ValueKey('workspace-personal')));
+      await tester.pumpAndSettle();
+      expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
+      expect(controller.state.adminPreview, isNull);
+      expect(tester.takeException(), isNull);
     },
   );
 }

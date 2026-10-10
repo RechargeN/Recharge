@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-09-29. Канонический файл инструкций репозитория.
+Версия: 2026-10-10. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -48,9 +48,11 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    `User / Creator / Admin` + capability-based permissions. Viewer —
    обязательно авторизованный User. Creator требует отдельной
    подтверждённой identity verification; Google/Apple auth сам по себе
-   Creator не даёт. Creator остаётся тем же личным Viewer-интерфейсом с
-   дополнительными create/submit/publish capabilities; пользователь не
-   переключается вручную между Viewer и Creator. Professional Page
+   Creator не даёт. По Accepted ADR 0021 единый личный интерфейс называется Creator для любого
+   авторизованного User; имя UI не выдаёт роль или grants. Creator tools доступны
+   по действующим create/submit/publish capabilities; пользователь не
+   переключается вручную между Viewer и Creator; отдельной Viewer-страницы
+   в целевой UI-политике нет. Professional Page
    (`ManagedPage`) — отдельный рабочий контекст verified Creator с active
    membership и page-scoped capabilities (`manage_page`, `view_insights`,
    `manage_bookings`). Один аккаунт может управлять несколькими страницами и
@@ -169,7 +171,8 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 | Event Classification v2.2.3 | Accepted canonical contract; ECL-00–03B Done. BCK-09 v1.25: disabled local/Emulator Booking vertical с Identity, reconfirmation, deadline release и privacy/retention; после объединения общий mobile gate остаётся открытым. BCK-13 delivery, cloud/production, markets, independent Security/Legal, оставшиеся ECL-03D–H, provider sync и Payments отсутствуют |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
-| Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only preview Viewer/Creator/Professional Page без смены authority; production shell скрывает legacy-переключатель режимов; production verification НЕ реализована |
+| Personal Profile / Viewer retirement | PVR-01 In progress: единый личный Creator UI и архив Viewer реализованы локально по ADR 0021; роли, verification и page guards сохранены. До Done открыты Saved isolation и регрессионные сценарии auth/workspace/publisher; подробности — LAUNCH_STATUS и PVR verification |
+| Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only preview Creator/Professional Page без смены authority; production shell скрывает legacy-переключатель режимов; production verification НЕ реализована |
 | Professional Page / Active workspace / PublisherRef | IDP-03A в Review, IDP-04A в Doing: пользователь сам создаёт страницы (с нуля, лимит 3, дальше pending-заявка модераторам), exact-ID доступ, локальные уведомления, switcher и навигация страниц. Локально в Review: публичная страница (PPP-01A), редактор профиля (PP-01A), приглашения в команду (PP-03A). PublisherRef с active-workspace default есть только у Event (ECL-01), остальные 9 типов не переведены; production authority gated |
 | Отзывы (Review) | запланировано (в MVP) |
 | Visit History | VIS-HIST-01 Done: только явная self-reported отметка Place (сегодня или раньше), idempotency place/day, несколько дат, удаление; v2 начинается пустым; просмотр, избранное, бронь и GPS посещением не считаются |
@@ -219,7 +222,7 @@ Recharge — приложение подбора и создания досуг�
 маршруты, активности. Ядро: единый filter flow
 search → filters → map → feed → details с одним общим состоянием
 фильтров (обычный Search, Smart Search, карта, категории, лента). В личном
-workspace Viewer и Creator используют один bottom nav:
+workspace единый профиль Creator использует bottom nav:
 Home / Favorites / Smart Search / Notifications / Profile. Creator tools
 открываются внутри Profile/Create Hub, а не заменяют Smart Search. В
 Professional Page workspace навигация:
@@ -235,3 +238,23 @@ Route, Scenario и Quick Plan — разные aggregates. Основная ка
 Google Maps, outdoor renderer Route Builder утверждается отдельным ADR. Отзывы и
 рейтинги — в MVP.
 Find People — полноценный MapObject в общей выдаче.
+
+## PVR-01 — единый личный профиль, фактический статус 2026-10-10
+
+По Accepted [ADR 0021](docs/adr/0021-unified-personal-profile.md) личный экран называется Creator для
+любого авторизованного User. Отдельная Viewer-композиция снимается; Admin
+presentation preview предлагает creator | professionalPage. UI-название и
+preview не меняют User / Creator / Admin, verification, capabilities,
+WorkspaceRef, PublisherRef или exact page membership. Personal libraries,
+Saved/Favorites, Visit History, Scenario/Quick Plan, настройки и edit/save
+не требуют publishing verification. Конкретные операции сохраняют свои
+owning-contract guards; Professional Pages остаются отдельными контекстами.
+Базовая публичная проекция и eligible public Creator card имеют разные
+visibility gates; смена названия не создаёт searchable identity.
+
+Единая local/mock композиция и retirement документов реализованы; исходные
+Viewer snapshots сохранены в docs/archive/viewer-profile/2026-10-10.
+PVR-01 остаётся In progress: Saved isolation и часть auth/workspace/publisher
+регрессии не закрыты. Draft/Open profile требования, Follow, Legal/minors,
+retention и step-up сохраняют прежнюю зрелость; production gates не изменены.
+Фактическое evidence — docs/verification/PVR_01_VERIFICATION.md.

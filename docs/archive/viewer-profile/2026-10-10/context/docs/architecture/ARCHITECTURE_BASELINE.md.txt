@@ -1,0 +1,137 @@
+# Recharge Architecture Baseline
+
+Status: Frozen baseline, expanded by Accepted ADR 0019
+Effective date: 2026-08-08
+Owner: Recharge team
+Related expansion: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
+Backend delivery coordination: [BCK-02 v2.4](../product/RECHARGE_BACKEND_DELIVERY_MAP.md)
+— Approved canonical registry/ownership/waves/gates baseline; documentation only.
+Accepted mobile target supplement:
+[Recharge Mobile Architecture v3.1.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
+— Accepted baseline plus 2026-09-09 request/idempotency erratum, documentation only.
+Current bounded migration slice:
+[MOB-ARCH-M1](MOBILE_ARCHITECTURE_M1_BOUNDARY_INVENTORY_PLAN.md) — approved
+tooling/docs implementation is locally complete and remains Review until the
+updated GitHub Actions Linux boundary job succeeds; no runtime claim.
+
+BCK-02 orders future backend specifications and gated implementation slices. It
+does not change this frozen architecture, supersede Accepted ADR or authorize
+`apps/backend`, Firebase provisioning, deployment or production data processing.
+
+Mobile Architecture v3.1.1 elaborates the target mobile structure, boundaries,
+market expansion and staged migration. It does not supersede this frozen
+baseline or Accepted ADR, and its acceptance does not authorize runtime work.
+Every implementation change still requires an Approved bounded slice.
+
+## 1) Canonical Project Tree
+
+```txt
+recharge/
+├─ README.md
+├─ .gitignore
+├─ melos.yaml
+├─ analysis_options.yaml
+├─ .github/
+│  ├─ workflows/
+│  │  ├─ mobile-ci.yml
+│  │  ├─ mobile-tests.yml
+│  │  ├─ codegen-check.yml
+│  │  └─ release.yml
+│  ├─ pull_request_template.md
+│  └─ ISSUE_TEMPLATE/
+│     └─ task.md
+│
+├─ apps/
+│  ├─ backend/                 # Accepted target; created only by Approved ECL-03 stage
+│  │  ├─ firebase.json
+│  │  ├─ firestore.rules
+│  │  ├─ firestore.indexes.json
+│  │  └─ functions/{src/,test/}
+│  └─ mobile/
+│     ├─ pubspec.yaml
+│     ├─ analysis_options.yaml
+│     ├─ android/
+│     ├─ ios/
+│     ├─ web/
+│     ├─ assets/
+│     │  ├─ images/{common,onboarding,mock_events,mock_places,avatars}
+│     │  ├─ icons/
+│     │  ├─ fonts/
+│     │  ├─ map/{markers,pins,overlays}
+│     │  └─ mock/{json,seed}
+│     ├─ lib/
+│     │  ├─ main.dart
+│     │  ├─ app/{app.dart,bootstrap.dart,router/,di/,theme/,config/,observers/}
+│     │  ├─ core/{errors/,network/,storage/,telemetry/,security/,platform/,utils/,extensions/}
+│     │  ├─ shared/{primitives/,models/,extensions/}
+│     │  ├─ l10n/
+│     │  ├─ generated/{l10n/,api/}
+│     │  └─ features/
+│     │     ├─ splash/{application/,presentation/,splash_feature.dart}
+│     │     ├─ onboarding/{application/,presentation/,onboarding_feature.dart}
+│     │     ├─ auth/{domain/,data/,application/,presentation/,auth_feature.dart}
+│     │     ├─ discover/{domain/,data/,application/,presentation/,discover_feature.dart}
+│     │     ├─ create/{domain/,data/,application/,presentation/,create_feature.dart}
+│     │     ├─ explore/{domain/,data/,application/,presentation/,explore_feature.dart}
+│     │     ├─ favorites/{domain/,data/,application/,presentation/,favorites_feature.dart}
+│     │     └─ notifications/{domain/,data/,application/,presentation/,notifications_feature.dart}
+│     ├─ test/{unit/,widget/,golden/,features/}
+│     └─ integration_test/
+│
+├─ packages/
+│  ├─ design_system/
+│  │  ├─ pubspec.yaml
+│  │  ├─ lib/design_system.dart
+│  │  ├─ lib/src/{foundation/,tokens/,theme/,components/,patterns/}
+│  │  └─ test/
+│  └─ api_contracts/
+│     ├─ pubspec.yaml
+│     ├─ lib/api_contracts.dart
+│     ├─ lib/src/{contracts/,dto/{request,response},clients/,serializers/,generated/}
+│     └─ test/
+│
+├─ docs/
+│  ├─ adr/
+│  ├─ architecture/
+│  ├─ api/
+│  ├─ analytics/
+│  ├─ product/
+│  └─ runbooks/{release.md,rollback.md,incident.md,feature-flags.md}
+│
+└─ tools/
+   ├─ ci/{lint/,test/,build/,release/}
+   └─ scripts/{bootstrap/,codegen/,format/,localization/,clean/,check-boundaries/}
+```
+
+## 2) Mandatory Rules
+
+1. `packages/design_system` is the single source of truth for reusable UI components.
+2. `packages/api_contracts` is the single source of truth for DTOs and API clients.
+3. Feature layering is mandatory: `presentation -> application -> domain`; `data -> domain`.
+4. `domain` layer must not depend on framework/infrastructure code.
+5. `features/*` must not import each other directly. Cross-feature interaction only via contracts/facades.
+6. `core` contains only infrastructure and cross-cutting technical concerns, never product/business workflows.
+7. `lib/generated/**` and package `generated/**` are codegen-only; manual edits are forbidden.
+8. Mock/seed assets and mock datasources are excluded from production flavors.
+9. CI gates are required before merge: lint, tests, codegen check, boundaries check.
+10. Any architecture change to this baseline requires a new ADR with status `Accepted`.
+11. Authoritative Booking, hold, inventory, idempotency and related operational
+    writes cross a trusted backend command boundary; mobile clients never write
+    their authoritative collections directly.
+12. The accepted `apps/backend` target does not itself authorize directory
+    creation, Firebase deployment or production data processing. Each physical
+    implementation is bounded by an Approved ECL-03 stage and its gates.
+13. Mobile target slices must cite the applicable Mobile Architecture v3.1.1
+    acceptance criteria by document version and stable AC ID. Any conflict with
+    this baseline requires an Accepted ADR rather than a silent reinterpretation.
+
+## 3) Definition Of Done (Architecture Compliance)
+
+- New code is placed in the correct feature and layer.
+- Imports respect layer and feature boundaries.
+- Tests are added according to change scope (`unit`/`widget`/`integration`).
+- No manual edits in generated code.
+- PR checklist is fully completed.
+- Backend slices additionally pass contract compatibility, emulator Rules,
+  transaction contention/idempotency and rollback/reconciliation gates before
+  production activation.

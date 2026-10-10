@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -27,6 +29,14 @@ void main() {
   testWidgets('renders settings controls for authenticated user', (
     tester,
   ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
     final authController = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
       restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -56,13 +66,35 @@ void main() {
       favoritesCount: 0,
     );
 
+    final router = GoRouter(
+      initialLocation: RouteNames.settings,
+      routes: [
+        GoRoute(
+          path: RouteNames.settings,
+          builder: (_, _) => const SettingsPage(),
+        ),
+        GoRoute(
+          path: RouteNames.discover,
+          builder: (_, _) => const Scaffold(body: Text('Logged out home')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
           authControllerProvider.overrideWith((ref) => authController),
           exploreControllerProvider.overrideWith((ref) => exploreController),
         ],
-        child: const MaterialApp(home: SettingsPage()),
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          ),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -78,6 +110,22 @@ void main() {
     expect(find.text('About'), findsOneWidget);
     expect(find.text('City'), findsOneWidget);
     expect(find.text('Avatar URL/Path'), findsOneWidget);
+    const longName =
+        'Очень длинное имя пользователя для проверки доступности действий';
+    await tester.enterText(find.byType(TextField).first, longName);
+    await tester.scrollUntilVisible(
+      find.text('Сохранить профиль'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Сохранить профиль'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Сохранить профиль'));
+    await tester.pumpAndSettle();
+    expect(exploreRepository.profiles['u']?.displayName, longName);
+    expect(tester.takeException(), isNull);
 
     await tester.scrollUntilVisible(
       find.text('CONTENT & ACTIVITY'),
@@ -108,6 +156,10 @@ void main() {
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Currency'), findsOneWidget);
     expect(find.text('Notification preferences'), findsOneWidget);
+    await tester.ensureVisible(find.byType(Switch).first);
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
+    expect(exploreRepository.settings['u']?.notificationsEnabled, isFalse);
 
     await tester.scrollUntilVisible(
       find.text('Support / Help'),
@@ -119,6 +171,20 @@ void main() {
     expect(find.text('Privacy Policy'), findsOneWidget);
     expect(find.text('Terms of Service'), findsOneWidget);
     expect(find.text('Выйти'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Выйти'));
+    await tester.pumpAndSettle();
+    expect(authController.state.isAuthenticated, isFalse);
+    expect(find.text('Logged out home'), findsOneWidget);
+    expect(
+      (await exploreRepository.loadProfileEditable('u'))?.displayName,
+      longName,
+    );
+    expect(
+      (await exploreRepository.loadSettings('u'))?.notificationsEnabled,
+      isFalse,
+    );
+    expect(await exploreRepository.loadProfileEditable('another-user'), isNull);
   });
 }
 
@@ -164,19 +230,25 @@ class _NoopAuthRepository implements AuthRepository {
 }
 
 class _FakeExploreRepository implements ExploreRepository {
+  final profiles = <String, ProfileEditableEntity>{};
+  final settings = <String, SettingsEntity>{};
   @override
   Future<ProfileEditableEntity?> loadProfileEditable(String userId) async =>
-      null;
+      profiles[userId];
 
   @override
-  Future<SettingsEntity?> loadSettings(String userId) async => null;
+  Future<SettingsEntity?> loadSettings(String userId) async => settings[userId];
 
   @override
   Future<void> saveProfileEditable(
     String userId,
     ProfileEditableEntity profile,
-  ) async {}
+  ) async {
+    profiles[userId] = profile;
+  }
 
   @override
-  Future<void> saveSettings(String userId, SettingsEntity settings) async {}
+  Future<void> saveSettings(String userId, SettingsEntity settings) async {
+    this.settings[userId] = settings;
+  }
 }

@@ -50,11 +50,14 @@ class IdentityWorkspaceController extends ChangeNotifier {
 
     final int operationRevision = ++_operationRevision;
     _setState(
-      _state.copyWith(
-        status: IdentityWorkspaceStatus.loading,
-        userId: userId,
-        clearMessage: true,
-      ),
+      // A different account must never inherit the previous account's access,
+      // workspace or presentation while its own snapshot is pending or fails.
+      (_state.userId == userId ? _state : IdentityWorkspaceState.initial())
+          .copyWith(
+            status: IdentityWorkspaceStatus.loading,
+            userId: userId,
+            clearMessage: true,
+          ),
     );
 
     try {

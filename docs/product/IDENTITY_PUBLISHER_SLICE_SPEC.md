@@ -1,9 +1,9 @@
 # Identity, Creator Verification And Professional Publisher Slice
 
 Status: Approved; bounded local/mock implementation allowed during stabilization
-Version: 1.3.1
-Date: 2026-08-11
-Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017,
+Version: 1.3.2
+Date: 2026-10-10
+Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017, ADR 0021,
 `docs/architecture/FIREBASE_ARCHITECTURE.md`
 
 ## 1. Purpose
@@ -37,7 +37,8 @@ publication remain post-stabilization.
 4. Model Professional Page, membership, verification and lifecycle.
 5. Let an eligible Creator publish as the personal profile or an authorized
    Professional Page.
-6. Keep one personal Viewer UI while exposing Creator tools automatically from
+6. Keep one personal UI named Creator for every authenticated User, exposing
+   Creator tools automatically from
    verified eligibility and grants.
 7. Let one account switch between its personal workspace and its authorized
    Professional Pages without changing authentication; self-service ownership
@@ -73,8 +74,8 @@ publication remain post-stabilization.
 | Professional Page access | Creator + active membership for an exact page + page grants | Open that page workspace; manage and publish as that eligible page |
 | Admin | Authenticated `Admin` + explicit admin capabilities | Verification, grants and moderation through audited operations |
 
-Persisted roles remain `User`, `Creator` and `Admin`. `Viewer` is product
-terminology for the personal consumer experience. Creator eligibility expands
+Persisted roles remain `User`, `Creator` and `Admin`. `Viewer` remains access-policy terminology for authenticated consumer access;
+the single personal UI is named Creator under ADR 0021. Creator eligibility expands
 that same personal experience and is not a second selectable profile.
 `Professional Page` is the UI name of `ManagedPage`, not a role or generic
 `Pro` level. `Pro generator` is legacy UI debt and is not used in the target
@@ -117,7 +118,7 @@ Admin tools are a separate protected destination. They do not appear as a
 `WorkspaceRef`, do not set `PublisherRef` and cannot be selected as an active
 publisher context.
 
-An Admin with `admin.experience.preview` may preview Viewer, Creator or
+An Admin with `admin.experience.preview` may preview Creator or
 Professional Page presentation. Preview is session-scoped presentation state,
 not a role, workspace, publisher, verification, membership or capability
 grant. Professional Page preview with no real page shows the creation
@@ -127,7 +128,7 @@ onboarding and never invents a placeholder page.
 
 | Active workspace | Bottom navigation |
 |---|---|
-| Personal Viewer or Creator | `Home · Favorites · Smart Search · Notifications · Profile` |
+| Personal profile UI Creator (any authenticated User) | `Home · Favorites · Smart Search · Notifications · Profile` |
 | Professional Page | `Page · Content · Create · Notifications · Account` |
 
 Creator grants do not replace the personal central Smart Search destination.
@@ -611,7 +612,7 @@ rewrite.
   to moderators and does not grant its own approval.
 - **IDP-AC-24:** Page creation and quota requests create idempotent local
   notifications for the user and moderator inbox.
-- **IDP-AC-25:** Admin Viewer/Creator/Professional Page preview changes only
+- **IDP-AC-25:** Admin Creator/Professional Page preview changes only
   presentation and cannot authorize workspace, publisher or mutations.
 - **IDP-AC-21:** Suspended/revoked active page access returns the shell to the
   personal workspace with an explanation and blocks future page mutations.
@@ -668,3 +669,21 @@ The overall production flow is Done only when:
 10. localization QA covers supported languages and international metadata;
 11. `flutter analyze` and `flutter test` are green;
 12. `LAUNCH_STATUS.md` records exact evidence and remaining production gates.
+
+## PVR-01/03 — единый личный профиль, 2026-10-10
+
+По Accepted [ADR 0021](../adr/0021-unified-personal-profile.md) личный экран называется Creator для
+любого авторизованного User. Отдельная Viewer-композиция снимается; Admin
+presentation preview предлагает creator | professionalPage. UI-название и
+preview не меняют User / Creator / Admin, verification, capabilities,
+WorkspaceRef, PublisherRef или exact page membership. Personal libraries,
+Saved/Favorites, Visit History, Scenario/Quick Plan, настройки и edit/save
+не требуют publishing verification. Конкретные операции сохраняют свои
+owning-contract guards; Professional Pages остаются отдельными контекстами.
+Базовая публичная проекция и eligible public Creator card имеют разные
+visibility gates; смена названия не создаёт searchable identity.
+
+Это принятая UI-политика и документационный перенос, а не отчёт о выполненной
+runtime-миграции. Draft/Open profile требования, Follow, Legal/minors,
+retention и step-up остаются со своей прежней зрелостью; production gates
+не изменены. Текущий runtime и проверки — в передаче PVR-01/03.

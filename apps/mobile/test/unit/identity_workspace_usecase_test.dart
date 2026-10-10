@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/core/id/id_generator.dart';
@@ -22,6 +23,129 @@ import 'package:recharge/features/identity/domain/usecases/select_workspace_usec
 
 void main() {
   const String userId = 'demo_full_access';
+
+  test(
+    'personal experience does not depend on verification or loading/error access',
+    () {
+      for (final verification in CreatorVerificationStatus.values) {
+        final snapshot = IdentityAccessSnapshot(
+          userId: userId,
+          globalRole: 'user',
+          creatorVerificationStatus: verification,
+          globalCapabilities: const {},
+          pages: const [],
+          memberships: const [],
+          revision: 7,
+        );
+        final state = IdentityWorkspaceState.initial().copyWith(
+          status: IdentityWorkspaceStatus.ready,
+          userId: userId,
+          accessSnapshot: snapshot,
+          activeWorkspace: WorkspaceRef.personal(userId),
+        );
+        expect(state.effectiveExperience, AccountExperience.personal);
+        expect(state.accessSnapshot, same(snapshot));
+        expect(
+          state
+              .copyWith(adminPreview: AdminExperiencePreview.creator)
+              .effectiveExperience,
+          AccountExperience.personal,
+        );
+        expect(
+          state
+              .copyWith(adminPreview: AdminExperiencePreview.professionalPage)
+              .effectiveExperience,
+          AccountExperience.professionalPage,
+        );
+        expect(
+          state
+              .copyWith(
+                activeWorkspace: WorkspaceRef.page('exact-page'),
+                adminPreview: AdminExperiencePreview.creator,
+              )
+              .effectiveExperience,
+          AccountExperience.professionalPage,
+        );
+      }
+      for (final status in [
+        IdentityWorkspaceStatus.initial,
+        IdentityWorkspaceStatus.loading,
+        IdentityWorkspaceStatus.error,
+      ]) {
+        final state = IdentityWorkspaceState.initial().copyWith(status: status);
+        expect(state.effectiveExperience, AccountExperience.personal);
+        expect(state.accessSnapshot, isNull);
+        expect(state.activeWorkspace, isNull);
+      }
+    },
+  );
+
+  test(
+    'account B loading and error never retain account A authority or preview',
+    () async {
+      final repository = _MemoryIdentityWorkspaceRepository(
+        _accessWithPageCount(1, userId: 'account-a'),
+        savedWorkspace: WorkspaceRef.page('page-0'),
+      );
+      final ids = _SequenceIdGenerator();
+      final controller = IdentityWorkspaceController(
+        loadIdentityWorkspaceUseCase: LoadIdentityWorkspaceUseCase(repository),
+        selectWorkspaceUseCase: SelectWorkspaceUseCase(repository),
+        createProfessionalPageUseCase: CreateProfessionalPageUseCase(
+          repository: repository,
+          idGenerator: ids,
+        ),
+        requestPageLimitIncreaseUseCase: RequestPageLimitIncreaseUseCase(
+          repository: repository,
+          idGenerator: ids,
+        ),
+        notificationSink: _MemoryNotificationSink(),
+        marketConfig: MarketConfig.riga,
+        analyticsService: _NoopAnalyticsService(),
+      );
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded('account-a');
+      expect(
+        controller.selectAdminPreview(AdminExperiencePreview.creator),
+        isTrue,
+      );
+      final pending = Completer<IdentityAccessSnapshot>();
+      repository.nextAccess = pending.future;
+      final loading = controller.ensureLoaded('account-b');
+      expect(controller.state.userId, 'account-b');
+      expect(controller.state.status, IdentityWorkspaceStatus.loading);
+      expect(controller.state.accessSnapshot, isNull);
+      expect(controller.state.activeWorkspace, isNull);
+      expect(controller.state.adminPreview, isNull);
+      expect(
+        controller.selectAdminPreview(AdminExperiencePreview.professionalPage),
+        isFalse,
+      );
+      pending.completeError(Exception('controlled load failure'));
+      await loading;
+      expect(controller.state.status, IdentityWorkspaceStatus.error);
+      expect(controller.state.accessSnapshot, isNull);
+      expect(controller.state.effectiveExperience, AccountExperience.personal);
+      repository.nextAccess = null;
+      repository.savedWorkspace = null;
+      repository.accessSnapshot = const IdentityAccessSnapshot(
+        userId: 'account-b',
+        globalRole: 'user',
+        creatorVerificationStatus: CreatorVerificationStatus.notStarted,
+        globalCapabilities: {},
+        pages: [],
+        memberships: [],
+        revision: 1,
+      );
+      await controller.ensureLoaded('account-b');
+      expect(
+        controller.state.activeWorkspace,
+        WorkspaceRef.personal('account-b'),
+      );
+      expect(controller.state.accessSnapshot!.globalCapabilities, isEmpty);
+      expect(controller.state.adminPreview, isNull);
+    },
+  );
 
   test('default Admin fixture starts with zero invented pages', () async {
     final repository = _MemoryIdentityWorkspaceRepository(
@@ -56,6 +180,48 @@ void main() {
     expect(repository.savedWorkspace, selected);
     expect(restored.activeWorkspace, selected);
   });
+
+  test(
+    'limited active manager selects only page A and receives no owner grants',
+    () async {
+      final pages = _accessWithPageCount(2, userId: 'owner').pages;
+      final access = IdentityAccessSnapshot(
+        userId: 'manager',
+        globalRole: 'creator',
+        creatorVerificationStatus: CreatorVerificationStatus.verified,
+        globalCapabilities: const {},
+        pages: pages,
+        memberships: const [
+          ManagedPageMembershipEntity(
+            pageId: 'page-0',
+            userId: 'manager',
+            relationship: ManagedPageRelationship.manager,
+            status: ManagedPageMembershipStatus.active,
+            capabilities: {'page.content.create'},
+            revision: 1,
+          ),
+        ],
+        revision: 3,
+      );
+      final repository = _MemoryIdentityWorkspaceRepository(access);
+      final select = SelectWorkspaceUseCase(repository);
+      expect(
+        await select(userId: 'manager', workspace: WorkspaceRef.page('page-0')),
+        WorkspaceRef.page('page-0'),
+      );
+      expect(access.ownedPages, isEmpty);
+      expect(
+        access.membershipFor('page-0')!.hasCapability('page.manage'),
+        isFalse,
+      );
+      await expectLater(
+        select(userId: 'manager', workspace: WorkspaceRef.page('page-1')),
+        throwsA(isA<WorkspaceSelectionException>()),
+      );
+      expect(repository.savedWorkspace, WorkspaceRef.page('page-0'));
+      expect(repository.accessSnapshot, same(access));
+    },
+  );
 
   test('page A access never authorizes unavailable page B', () async {
     final repository = _MemoryIdentityWorkspaceRepository(
@@ -187,10 +353,17 @@ void main() {
       await controller.ensureLoaded(userId);
       expect(controller.state.status, IdentityWorkspaceStatus.ready);
       expect(
-        controller.selectAdminPreview(AdminExperiencePreview.viewer),
+        controller.selectAdminPreview(AdminExperiencePreview.creator),
         isTrue,
       );
-      expect(controller.state.effectiveExperience, AccountExperience.viewer);
+      expect(controller.state.effectiveExperience, AccountExperience.personal);
+      expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
+      final actualSnapshot = controller.state.accessSnapshot;
+      expect(
+        controller.selectAdminPreview(AdminExperiencePreview.professionalPage),
+        isTrue,
+      );
+      expect(controller.state.accessSnapshot, same(actualSnapshot));
       expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
 
       final success = await controller.createProfessionalPage(
@@ -206,6 +379,22 @@ void main() {
         AccountExperience.professionalPage,
       );
       expect(notifications.events, hasLength(2));
+      final pageSnapshot = controller.state.accessSnapshot;
+      expect(
+        controller.selectAdminPreview(AdminExperiencePreview.creator),
+        isTrue,
+      );
+      expect(
+        controller.state.effectiveExperience,
+        AccountExperience.professionalPage,
+      );
+      expect(
+        await controller.selectWorkspace(WorkspaceRef.personal(userId)),
+        isTrue,
+      );
+      expect(controller.state.adminPreview, isNull);
+      expect(controller.state.effectiveExperience, AccountExperience.personal);
+      expect(controller.state.accessSnapshot, same(pageSnapshot));
     },
   );
 }
@@ -283,6 +472,7 @@ class _MemoryIdentityWorkspaceRepository
     this.savedWorkspace,
   });
 
+  Future<IdentityAccessSnapshot>? nextAccess;
   IdentityAccessSnapshot accessSnapshot;
   WorkspaceRef? savedWorkspace;
   final List<PageLimitIncreaseRequestEntity> limitRequests =
@@ -290,7 +480,7 @@ class _MemoryIdentityWorkspaceRepository
 
   @override
   Future<IdentityAccessSnapshot> loadAccessSnapshot(String userId) async {
-    return accessSnapshot;
+    return nextAccess ?? Future.value(accessSnapshot);
   }
 
   @override

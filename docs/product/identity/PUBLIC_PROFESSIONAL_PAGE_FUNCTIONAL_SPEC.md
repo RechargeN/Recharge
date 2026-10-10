@@ -2,14 +2,20 @@
 
 Status: **Draft for product and architecture review**
 
-Version: **1.3**
+Version: **1.4** — PVR-01/03 documentation transfer
 
-Date: **2026-08-16**
+Date: **2026-10-10**
 
 Scope: **the public-facing projection of a Professional Page — the public
 identity, resolver, field contract, content projection and UX states — as a
 presentation split of `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`; documentation
 only**
+
+PVR-01/03 consumer snapshot (2026-10-10): Creator v1.11 common personal
+part / Public Creator v1.10 baseline; source Viewer v1.17 / Public Viewer v1.0.
+Original compatibility pins below are dated pre-transfer evidence, not a
+claim that the previous files remain active owners. Existing PP/PPP decisions,
+page resolver and runtime maturity are unchanged.
 
 ## 0. Document authority and purpose
 
@@ -86,29 +92,16 @@ never a place where a Viewer mutates page data directly. Every action a
 Viewer can take (§6) delegates to that action's own owning contract
 (Follow, Block, Report, Save, Booking, content).
 
-### 1.1 Relationship to sibling documents
+### 1.1 Relationship to active documents
 
-This document is the public half of the Professional Page pair in the
-six-document, three-pair profile-surface family
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §1.1 describes — it splits
-that document's own "any other Viewer, about a page" audience out of "the
-page's own team" audience, the same way
-`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` already splits "any other
-Viewer, about a verified Creator" out of `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s
-"the Creator, about themselves." The parallel is deliberate:
-
-| Private/management view | Public view (this pattern) |
-|---|---|
-| `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` |
-| `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` (this document) |
-
-**Verified-against snapshot.** Every citation below of
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` was checked directly against its
-v2.34 text as of 2026-08-16. A later version of that document moving past
-this pin does not retroactively make this document wrong, but does mean its
-citations are unconfirmed against the newer text until the next
-verification pass.
+Professional Page / Public Professional Page remain the page pair. Creator /
+Public Creator are the personal pair; the public spec separates baseline
+context projection from the eligible extended card. Canonical personal
+AccountStatus/session rules: [Creator VP §15](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15).
+Context privacy and Block/Mute: [Public Creator PVP §4](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4).
+Page-specific Block/Mute adaptation below and existing PPP decisions remain
+unchanged. Management membership never changes the public page payload.
+PVR-01 changes no ManagedPage resolver, decision or runtime authority.
 
 ## 2. Public visibility resolver (`PPP-D01`)
 
@@ -508,9 +501,9 @@ Unavailable or unknown capacity MUST NOT be presented as bookable.
 
 ### 6.2 Block and Mute against a Page
 
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` is the canonical owner of Block/Mute
+`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` is the canonical owner of Block/Mute
 mechanics for a Viewer, and its own text (restated via
-`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`) fixes the general shape: **Block
+`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#baseline-context-projection`) fixes the general shape: **Block
 is bidirectional by default** for a person-to-person target — neither side
 can view the other's card, follow, or initiate new contact. **Mute is
 one-directional** — content stays visible but deprioritized for the muting

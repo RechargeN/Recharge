@@ -62,9 +62,7 @@ class IdentityWorkspaceState {
       return AccountExperience.professionalPage;
     }
     if (adminPreview != null) return adminPreview!.experience;
-    return accessSnapshot?.isVerifiedCreator ?? false
-        ? AccountExperience.creator
-        : AccountExperience.viewer;
+    return AccountExperience.personal;
   }
 
   IdentityWorkspaceState copyWith({
@@ -97,8 +95,7 @@ class IdentityWorkspaceState {
 
 extension on AdminExperiencePreview {
   AccountExperience get experience => switch (this) {
-    AdminExperiencePreview.viewer => AccountExperience.viewer,
-    AdminExperiencePreview.creator => AccountExperience.creator,
+    AdminExperiencePreview.creator => AccountExperience.personal,
     AdminExperiencePreview.professionalPage =>
       AccountExperience.professionalPage,
   };

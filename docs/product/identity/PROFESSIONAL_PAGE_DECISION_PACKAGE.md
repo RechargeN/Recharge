@@ -658,3 +658,10 @@ accepted decision, which remains this package's open request to you. None
 of this authorizes implementation by itself (§1); it only clears the §21
 gate this package exists to clear, and only once owners are actually
 assigned.
+
+## PVR-01/03 reference note — 2026-10-10
+
+Historical non-normative rationale above remains unchanged (v1.4). Current
+profile ownership routes through [retirement map](VIEWER_PROFILE_RETIREMENT_MAP.md):
+personal/account rules in Creator common part, contextual privacy/Block/Mute
+in Public Creator baseline. No Page decision is accepted or changed here.

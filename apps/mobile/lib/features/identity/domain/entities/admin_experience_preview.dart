@@ -1,1 +1,1 @@
-enum AdminExperiencePreview { viewer, creator, professionalPage }
+enum AdminExperiencePreview { creator, professionalPage }

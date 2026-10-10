@@ -25,9 +25,12 @@ class ProfileRoleSummary {
 }
 
 ProfileRoleSummary profileRoleSummaryFor({
-  required String role,
-  required List<String> capabilities,
+  required String? role,
+  required List<String>? capabilities,
 }) {
+  if (role == null || capabilities == null) {
+    return profileRoleSummaryForTier(ProfileRoleTier.user);
+  }
   final String normalizedRole = role.trim().toLowerCase();
   final Set<String> capabilitySet = capabilities
       .map((String capability) => capability.trim().toLowerCase())
@@ -114,4 +117,37 @@ bool profileRoleTierUnlocked({
     ProfileRoleTier.creator => accessSummary.canCreate,
     ProfileRoleTier.proGenerator => accessSummary.canGenerate,
   };
+}
+
+/// The personal surface is presentation, never a verification or mutation grant.
+/// Tool hints reuse the current account summary; each operation keeps its guard.
+enum ProfilePersonalLayout { personal }
+
+class ProfilePersonalPresentation {
+  const ProfilePersonalPresentation({this.accessSummary});
+
+  final ProfileRoleSummary? accessSummary;
+
+  String get title => 'Creator';
+  ProfilePersonalLayout get layout => ProfilePersonalLayout.personal;
+  bool get canShowCreatorTools => accessSummary?.canCreate ?? false;
+  bool get canShowGeneratorTools => accessSummary?.canGenerate ?? false;
+}
+
+/// Legacy compatibility projection; unified Profile uses ProfilePersonalPresentation.
+/// A selected/preview tier changes labels/layout only, retaining actual hints.
+ProfileRoleSummary profileRoleSummaryForPresentation({
+  required ProfileRoleTier tier,
+  required ProfileRoleSummary accessSummary,
+}) {
+  final ProfileRoleSummary presentation = profileRoleSummaryForTier(tier);
+  return ProfileRoleSummary(
+    tier: presentation.tier,
+    title: presentation.title,
+    subtitle: presentation.subtitle,
+    primaryActionLabel: presentation.primaryActionLabel,
+    capabilities: accessSummary.capabilities,
+    canCreate: accessSummary.canCreate,
+    canGenerate: accessSummary.canGenerate,
+  );
 }

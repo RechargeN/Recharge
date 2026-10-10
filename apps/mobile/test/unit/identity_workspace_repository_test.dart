@@ -32,6 +32,53 @@ void main() {
     expect(await repository.loadActiveWorkspace('another-user'), isNull);
   });
 
+  test(
+    'legacy workspace payloads survive account switches without rewriting storage',
+    () async {
+      const aPayload = '{"schemaVersion":3,"type":"page","id":"page-a"}';
+      const bPayload = '{"schemaVersion":3,"type":"personal","id":"account-b"}';
+      FlutterSecureStorage.setMockInitialValues({
+        'identity_active_workspace_account-a': aPayload,
+        'identity_active_workspace_account-b': bPayload,
+        'unrelated-profile-account-a': 'long personal name',
+        'unrelated-saved-account-a': 'saved-place-id',
+      });
+      const storage = FlutterSecureStorage();
+      IdentityWorkspaceRepositoryImpl reopen() =>
+          IdentityWorkspaceRepositoryImpl(
+            localDataSource: const IdentityWorkspaceLocalDataSource(storage),
+            mockFixture: const MockIdentityFixture(),
+          );
+      final before = await storage.readAll();
+      expect(
+        await reopen().loadActiveWorkspace('account-a'),
+        WorkspaceRef.page('page-a'),
+      );
+      expect(
+        await reopen().loadActiveWorkspace('account-b'),
+        WorkspaceRef.personal('account-b'),
+      );
+      expect(await reopen().loadActiveWorkspace('account-c'), isNull);
+      expect(await storage.readAll(), before);
+      await reopen().saveActiveWorkspace(
+        'account-a',
+        WorkspaceRef.personal('account-a'),
+      );
+      expect(
+        await reopen().loadActiveWorkspace('account-a'),
+        WorkspaceRef.personal('account-a'),
+      );
+      expect(
+        await storage.read(key: 'identity_active_workspace_account-b'),
+        bPayload,
+      );
+      expect(
+        await storage.read(key: 'unrelated-saved-account-a'),
+        'saved-place-id',
+      );
+    },
+  );
+
   test('persists only pages explicitly created by the user', () async {
     const storage = FlutterSecureStorage();
     const publicDataSource = PublicProfessionalPageLocalDataSource(storage);
@@ -190,38 +237,33 @@ void main() {
     },
   );
 
-  test(
-    'verificationRevision round-trips through save and load',
-    () async {
-      const dataSource = IdentityWorkspaceLocalDataSource(
-        FlutterSecureStorage(),
-      );
-      final page = ManagedPageEntity(
-        id: 'roundtrip-page',
-        ownerUserId: userId,
-        kind: ManagedPageKind.company,
-        displayName: 'Roundtrip Page',
-        avatar: '',
-        verificationStatus: ManagedPageVerificationStatus.verified,
-        lifecycle: ManagedPageLifecycle.active,
-        marketId: 'riga',
-        countryCode: 'LV',
-        defaultLocale: 'en',
-        timezone: 'Europe/Riga',
-        defaultCurrency: 'EUR',
-        supportedLocales: const <String>['en'],
-        createdAtUtc: DateTime.utc(2026, 7, 31),
-        revision: 4,
-        verificationRevision: 2,
-      );
+  test('verificationRevision round-trips through save and load', () async {
+    const dataSource = IdentityWorkspaceLocalDataSource(FlutterSecureStorage());
+    final page = ManagedPageEntity(
+      id: 'roundtrip-page',
+      ownerUserId: userId,
+      kind: ManagedPageKind.company,
+      displayName: 'Roundtrip Page',
+      avatar: '',
+      verificationStatus: ManagedPageVerificationStatus.verified,
+      lifecycle: ManagedPageLifecycle.active,
+      marketId: 'riga',
+      countryCode: 'LV',
+      defaultLocale: 'en',
+      timezone: 'Europe/Riga',
+      defaultCurrency: 'EUR',
+      supportedLocales: const <String>['en'],
+      createdAtUtc: DateTime.utc(2026, 7, 31),
+      revision: 4,
+      verificationRevision: 2,
+    );
 
-      await dataSource.saveManagedPageRecord(
-        userId,
-        IdentityManagedPageLocalRecord(pages: <ManagedPageEntity>[page]),
-      );
-      final record = await dataSource.loadManagedPageRecord(userId);
+    await dataSource.saveManagedPageRecord(
+      userId,
+      IdentityManagedPageLocalRecord(pages: <ManagedPageEntity>[page]),
+    );
+    final record = await dataSource.loadManagedPageRecord(userId);
 
-      expect(record.pages.single.verificationRevision, 2);
-    },
-  );
+    expect(record.pages.single.verificationRevision, 2);
+  });
 }

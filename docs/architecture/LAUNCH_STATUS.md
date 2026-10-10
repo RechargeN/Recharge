@@ -1,7 +1,7 @@
 # Launch Status
 
 Status legend: `Planned` | `In progress` | `Review` | `Done`
-Last updated: 2026-10-06
+Last updated: 2026-10-10
 Owner: Recharge team (execution tracking by Codex)
 
 ## Update Rules
@@ -67,6 +67,7 @@ Owner: Recharge team (execution tracking by Codex)
 
 | Slice ID | Sprint | Status | Updated | Summary |
 |---|---|---|---|---|
+| PVR-01 | Unified personal profile / Viewer retirement | In progress | 2026-10-10 | Personal UI is Creator under ADR 0021; Professional Pages and access guards remain separate, Viewer originals are archived and old spec paths are retired pointers. Open before Done: account isolation for Saved and outstanding auth-return, workspace/publisher and UI regression evidence; see [bounded plan](../product/VIEWER_PROFILE_RETIREMENT_PLAN.md) and [verification](../verification/PVR_01_VERIFICATION.md). |
 | REPO-CONSOLIDATION-01 | Local branch consolidation | In progress | 2026-09-29 | Backend and current mobile work are combined locally; main is unchanged and the alternate M2-B branch is retained. Open before Done: existing Details, Create publication and Profile regressions; no push or release approval. See `AGENTS.md` stabilization criteria and the consolidation commit. |
 | BCK-01 | Backend platform architecture document | Review | 2026-09-24 | `RECHARGE_BACKEND_MASTER_SPEC.md` v0.4.84 has 146 AC. The local foundation now includes the Emulator-only Identity persistence and atomic Booking authorization seam. This does not claim all product runtimes or cloud readiness. |
 | BCK-03 | Backend API contract standard | Review | 2026-09-25 | `BACKEND_API_CONTRACT_STANDARD.md` v0.3.22 has 114 AC. Identity Session command/result schemas and UID/User separation are parity-verified locally; deployed product API remains absent. |

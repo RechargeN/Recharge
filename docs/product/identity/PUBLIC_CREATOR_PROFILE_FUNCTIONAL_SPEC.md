@@ -2,100 +2,45 @@
 
 Status: **Draft for product and architecture review**
 
-Version: **1.9** (supersedes v1.8 — separates non-restrictive pending review
-from an already-effective card restriction so a new report can never weaken
-an existing moderator decision; see §0.12)
+Version: **1.10** — PVR-01/03 documentation transfer
 
-Date: **2026-08-12**
+Date: **2026-10-10**
 
 Scope: **target full-release product; documentation only**
 
-Verified-against snapshot (exact versions; a mismatch means this snapshot
-is stale and MUST be refreshed whenever this document is substantively
-changed, but does not by itself prove content incompatibility):
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.15 (targeted verification:
-`AccountStatus`'s five values/casing, §12.3's bidirectional-Block rule and
-`VP-D10`/`VP-D12` still have the meaning consumed below),
-`CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9,
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.28 (targeted verification:
-`PP-D44`, `PP-D25` and `PP-D23` still have the meaning cited below).
-See `docs/product/identity/PROFILE_DOCUMENTS_INDEX.md` for the cross-document
-registry this citation block is checked against.
-
-**On the pace of sibling-document change:**
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` and
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` are under active, frequent revision
-independent of this document's own edit cycle. A full
-line-by-line re-verification against every sibling version bump is not
-sustainable at that pace; this document's practice is a targeted
-spot-check of the specific facts it actually cites, recorded above, each
-time this header is touched — not a claim of exhaustive re-reading. A
-version mismatch is therefore a maintenance signal requiring a new targeted
-check, not automatic evidence that the documents' semantics conflict.
+PVR-01/03 source snapshot: Viewer v1.17 / Public Viewer v1.0.
+Current consumers: Creator v1.11, Public Creator v1.10, Professional Page
+v2.35, Public Professional Page v1.4, index v2.0; Identity slice v1.3.2.
+Targeted transfer audit: roles, projection fields, AccountStatus, block/deletion
+and all VP IDs; maturity unchanged. Historical review notes below retain
+their original version pins and are not current compatibility declarations.
 
 ## 0. Document authority and purpose
 
-This document defines the target functional model of the **public card** of
-a verified Creator — what another authorized account sees. It is one of
-three **personal-identity** documents
-(this one, `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
-`CREATOR_PROFILE_FUNCTIONAL_SPEC.md`), plus a related **`ManagedPage` peer
-specification** (`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`) — four documents
-total participate in the same cross-document
-compatibility/conflict protocol (§0.1) because they share canonical
-aggregates (`UserProfile`, `CreatorVerification`, Create content,
-`ManagedPage`, Favorites, Scenario, Follow, etc.), but Professional Page is
-not a fourth personal-identity sibling. A surface already owned by one
-document is referenced, never redefined, by the others:
+This Draft specifies two different public presentations of one account:
+[baseline context projection](#baseline-context-projection), available in
+legitimate contexts independently of Creator verification, and the eligible
+extended Creator card (original §§1–19), with its existing opt-in, verification,
+visibility and moderation gates. The baseline contains at most display name,
+avatar and optional city. A personal screen named Creator grants neither a
+searchable identity nor any additional public fields.
 
-```text
-VIEWER_PROFILE_FUNCTIONAL_SPEC.md   — private personal libraries; the
-                                       minimal Public User Projection every
-                                       Viewer has (§12.2 there), which this
-                                       document extends; and the `AccountStatus`
-                                       axis (§15.1 there).
-CREATOR_PROFILE_FUNCTIONAL_SPEC.md  — verification + personal publisher
-                                       context; the private-management half
-                                       of every feature this document shows
-                                       publicly.
-PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md (this document)
-                                     — the public card itself: field list,
-                                       visibility, discoverability, and this
-                                       document's own half of any joint
-                                       cross-document decision (§7).
-PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md — the ManagedPage public projection;
-                                       not redefined here, only linked (§5).
-```
+Creator common personal part owns UserProfile/AccountStatus/session and VP-D /
+VP-AC requirements. This public spec owns baseline rendering/privacy/Block-Mute
+and extended-card rendering. Follow remains joint Open VP-D12 / PP-D44 / PCP-D02;
+no candidate shape is accepted. Four active Draft surface specs share the
+existing precedence tier; owning aggregates and Accepted/Approved contracts
+outrank them. This transfer authorizes no deferred runtime or production work.
 
-This document is not an Accepted ADR, does not replace the approved Identity
-/ Publisher contract and does not authorize runtime, Firebase, backend,
-verification or provider integration. Before implementation, each delivery
-slice still requires an Approved bounded slice specification.
 
-When sources conflict, the following order applies:
+When sources conflict:
 
-1. Accepted ADRs, especially ADR 0013, 0015, 0016 and 0017.
-2. The Approved current-slice specification.
-3. `docs/architecture/LAUNCH_STATUS.md` — only for truth about current
-   implementation, never for target product semantics.
-4. An Accepted/Approved owning aggregate specification or shared
-   cross-product contract (e.g. `SCENARIO_CONNECTED_PLANNING_SPEC.md`,
-   once approved the canonical Review contract, a future `FollowRelation`
-   foundation) — the Review contract and `FollowRelation` are listed as
-   illustrative future examples of this tier, not as already-Approved
-   today.
-5. Draft profile-surface specifications on equal footing with each other —
-   this document, `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
-   `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` and
-   `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`. None of them outranks another by
-   virtue of which one a reader opened first; a conflict between them is
-   blocked pending a joint decision (§0.1), not resolved by this tier
-   ordering.
-6. `docs/product/VISION.md` and other general product material.
-
-If any statement in this document contradicts an Accepted ADR, an Approved
-spec, `LAUNCH_STATUS.md`, or a shared cross-product contract (items 1–4),
-that is a defect in this Draft, to be corrected.
+1. Accepted ADRs, including the narrow UI decision ADR 0021.
+2. Approved current-slice specification.
+3. LAUNCH_STATUS for current implementation evidence only.
+4. Accepted/Approved owning aggregate or shared cross-product contract.
+5. Four active Draft surface specs on equal footing; joint conflicts remain gated.
+6. VISION and general product material.
 
 ### 0.1 When sibling documents disagree
 
@@ -111,7 +56,7 @@ every use in this document, never left implicit:
 - **`owner`** means a page-team role
   (`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` `ManagedPageMembership.
   relationship = owner`) in that document, and a personal content item's
-  own ownership relationship (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §4.2's
+  own ownership relationship ([VP §4.2](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-4-2)'s
   **Quick Plan** `relationship: owned | invited` — not Scenario's; Scenario
   uses the separate, Approved `owner|editor|viewer|unlistedViewer`
   `ScenarioAccessGrant` model, `SCENARIO_CONNECTED_PLANNING_SPEC.md` §10.1,
@@ -133,7 +78,7 @@ work.
 
 ### 0.3 Current implementation boundary
 
-At the date of this document there is no production Follow, Reviews,
+The carried pre-transfer snapshot reports no production Follow, Reviews,
 personal analytics, moderation-visible-state or externally reachable public
 Creator card. `profile_page.dart` presents only the account's own view of
 itself; no code path renders one account's profile the way another account
@@ -396,19 +341,19 @@ review ID, and clears `underReview` only when no active reviews remain.
 The resolver, entity shape, UX, roadmap, acceptance criteria and test matrix
 are updated together.
 
-## 1. Product definition
+## 1. Product definition — eligible extended Creator card
 
 The Public Creator Profile is a **presentation/aggregation surface**, not an
 owner of state — it never stores Follow relationships, Reviews or content
 itself; it projects them from their own canonical aggregates
 (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s Created-content list; a future
 accepted Follow contract, once `PP-D44`/`VP-D12`/`PCP-D02` resolve one,
-§7.1; `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s Reviews-authored) and renders a
+§7.1; `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s Reviews-authored) and renders a
 safe read view for another authorized account.
 
 It answers, for a viewing account: **"who is this Creator, and what have
 they published?"** It is a strict superset of
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2's Public User Projection (display
+[VP §12.2](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-3)'s Public User Projection (display
 name, avatar, optional city) — every field that projection allows, this
 document also allows, plus the fields §4 adds once the subject is a
 `verified` Creator with an activated public card.
@@ -418,7 +363,7 @@ It is not:
 - a fourth global role or `Pro` tier;
 - the owner of verification mechanics (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md`);
 - the owner of private personal libraries, `AccountStatus`, or the base
-  Follow relationship (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`);
+  Follow relationship (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`);
 - a `ManagedPage` public projection — a Professional Page's own public page
   is `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §8.2's subject; this document
   MAY link to it by ID, never duplicate its field list;
@@ -444,7 +389,7 @@ rollback.
 ```text
 Account status
   active | securityLocked | suspended | deletionPending | tombstoned
-  (owned by VIEWER_PROFILE_FUNCTIONAL_SPEC.md §15.1 — this document only
+  (owned by [VP §15.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15-1) — this document only
   reacts to it, using its exact camelCase values, §3.3)
 
 Creator verification
@@ -456,7 +401,8 @@ Card visibility
   private | unlisted | public
   (owned by this document, §3.4 / PublicCreatorProfileConfig.visibility,
   §4.2 — gates only the EXTENDED card, never the baseline projection or
-  Follow reachability, both owned by VIEWER_PROFILE_FUNCTIONAL_SPEC.md)
+  Follow reachability; baseline rules are in PVP §§2–4 and Follow remains
+  joint Open VP-D12 / PP-D44 / PCP-D02)
 
 Card enforcement
   clear | restricted(restrictions[]) | quarantined
@@ -475,7 +421,7 @@ not "suspended", and "card set to private" is not "account hidden".
 ### 3.1 Existence versus visibility
 
 Every account has a Public User Projection
-(`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2) regardless of Creator status.
+([VP §12.2](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-3)) regardless of Creator status.
 Follow reachability against that baseline is not yet an accepted contract
 (§7.1) — once the joint `PP-D44`/`VP-D12`/`PCP-D02` decision resolves it,
 this document's `visibility` setting is not intended to gate that baseline
@@ -503,16 +449,16 @@ row is deliberately left open rather than asserted, per `PCP-D09` (§17).
 
 ### 3.3 Account-status mapping
 
-Uses `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §15.1's exact `AccountStatus`
+Uses [VP §15.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15-1)'s exact `AccountStatus`
 values verbatim — `active | securityLocked | suspended | deletionPending |
 tombstoned` — not a locally re-cased approximation.
 
 | Account status | Card behavior |
 |---|---|
 | `active` | Per §3.2 and §3.5 |
-| `securityLocked` / `suspended` | Extended card withdrawn; Public User Projection also withdrawn, per `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3's own rule ("withdrawn entirely, not merely degraded") — this document only reacts to that, never redefines it |
+| `securityLocked` / `suspended` | Extended card withdrawn; Public User Projection also withdrawn, per [VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4)'s own rule ("withdrawn entirely, not merely degraded") — this document only reacts to that, never redefines it |
 | `deletionPending` | Same as `suspended`, for the retention window |
-| `tombstoned` | A direct link returns the same safe not-found response a genuinely nonexistent account would (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3's anti-enumeration rule — this document's own rendering responsibility to honor it) |
+| `tombstoned` | A direct link returns the same safe not-found response a genuinely nonexistent account would ([VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4)'s anti-enumeration rule — this document's own rendering responsibility to honor it) |
 
 ### 3.4 Card visibility states
 
@@ -523,7 +469,7 @@ time (§4.2's `activatedAtUtc?`):
 - `private` — the **extended card** is never shown to another account,
   including via direct link; only the owner (previewing their own card) and
   Admin moderation see it. Does **not** hide the baseline projection or
-  Follow reachability (§3.1) — those are `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s
+  Follow reachability (§3.1) — those are `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s
   own axis and are unaffected by this setting.
 - `unlisted` — the extended card is not surfaced in Search/Discover or
   Follow suggestions. **Resolution requires an opaque, revocable link or
@@ -531,7 +477,7 @@ time (§4.2's `activatedAtUtc?`):
   if the link is built only from a stable identifier, `unlisted` is merely
   undiscoverable, not access-controlled, and the implementation MUST be
   honest about that distinction. A blocked viewer
-  (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3) does not get this exception regardless of
+  ([VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4)) does not get this exception regardless of
   token possession (§3.6).
 - `public` — the extended card is indexable in Search/Discover, subject to
   `PCP-D01`'s exact indexing/ranking rules (open).
@@ -604,8 +550,8 @@ extendedCardWithRestrictions`:
 | 1. Account status | `tombstoned` (any other axis) | `notFound` |
 | 1. Account status | `suspended` / `securityLocked` (any other axis) | `notFound` (§3.3 — both projections withdrawn) |
 | 1. Account status | `deletionPending` (any other axis) | `notFound` — same treatment as `suspended`/`securityLocked`, for the retention window; a deletion request in progress MUST NOT itself become an observable account state (§10) |
-| 2. Block | `active` + requester is blocked by or has blocked the subject (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3 — bidirectional by default) | `notFound` — Block removes visibility of **both** the baseline projection and the extended card, in both directions; it is stronger than "extended card withheld", not weaker |
-| 3. Minor gate | Subject is a known minor (§9) | `baselineProjection`, **pending `VP-D10`** — this row is provisional, not a settled outcome: it reflects the illustrative direction in §9, and MUST be revisited once `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` `VP-D10` resolves what a minor's baseline itself may contain. The extended card (§4) is withheld regardless of what `VP-D10` decides — that part is settled (`CP-D14` gates it independently) |
+| 2. Block | `active` + requester is blocked by or has blocked the subject ([VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4) — bidirectional by default) | `notFound` — Block removes visibility of **both** the baseline projection and the extended card, in both directions; it is stronger than "extended card withheld", not weaker |
+| 3. Minor gate | Subject is a known minor (§9) | `baselineProjection`, **pending `VP-D10`** — this row is provisional, not a settled outcome: it reflects the illustrative direction in §9, and MUST be revisited once `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` `VP-D10` resolves what a minor's baseline itself may contain. The extended card (§4) is withheld regardless of what `VP-D10` decides — that part is settled (`CP-D14` gates it independently) |
 | 4. Verification (explicit values, not blocked, not a gated minor) | `notStarted` / `pending` / `rejected` / `revoked` | `baselineProjection` |
 | 4. Verification | `expired` | Per `PCP-D09` once decided; until then, `extendedCardWithRestrictions` with the badge as the only guaranteed-safe field (conservative default, not the final rule) — never silently folded into the "not verified → baseline" row above, since `expired` is a distinct state with its own §3.2 row |
 | 4. Verification | `verified` | proceed to step 5 |
@@ -630,13 +576,12 @@ The Block check (step 2) runs before verification/visibility precisely so
 that a valid `unlisted` token or `public` visibility can never be used to
 route around an active Block — a bug in an earlier revision of this
 resolver treated a blocked `unlisted`-token holder as still entitled to the
-baseline projection, contradicting `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`
-§12.3's "removes both accounts' ability to view each other's card/
+baseline projection, contradicting [VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4)'s "removes both accounts' ability to view each other's card/
 projection" rule; that row is corrected above.
 
 ## 4. Public card field set (release foundation)
 
-Extends `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2's baseline
+Extends [VP §12.2](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-3)'s baseline
 (`displayName`, `avatar`, optional `city`) with, subject to §3.6's resolver:
 
 - `displayName`/`avatar` themselves, on the extended card, are read from
@@ -647,7 +592,7 @@ Extends `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2's baseline
   as `headline`/`specialtyTagIds` below applies. **Whether the baseline
   projection this document extends does the same is not yet settled** —
   that is `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` `CP-D20`, owned by
-  `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` to accept; until `CP-D20` resolves,
+  `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` to accept; until `CP-D20` resolves,
   this document's own extended-card sourcing rule above is correct in
   isolation, but the two documents' verified-against snapshots do not yet
   represent a fully reconciled identity-field display across every
@@ -666,7 +611,7 @@ Extends `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2's baseline
 - a Follow CTA and follower count — **only once the joint
   `PP-D44`/`VP-D12`/`PCP-D02` decision is accepted** (§7.1); until then this
   row does not exist on the card, it is not merely undesigned display —
-  consuming `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s base `FollowRef`
+  consuming `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s base `FollowRef`
   relationship once that decision resolves; this document does not own who
   may follow whom;
 - portfolio gallery, once `PCP-D03` is accepted;
@@ -677,7 +622,7 @@ Extends `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.2's baseline
 
 MUST NOT expose: email, phone, verification evidence, private
 Favorites/Visit History/Notifications/drafts
-(`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.1), membership/team data on any
+([VP §12.1](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-2)), membership/team data on any
 Professional Page this account manages, or precise location beyond an
 opted-in `city`.
 
@@ -725,7 +670,7 @@ SocialLinkEntry {
 ```
 
 **There is no `cityOptIn`.** `city` is part of the baseline Public User
-Projection already (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.1 owns its
+Projection already ([VP §12.1](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-2) owns its
 default/opt-in there); the extended card **inherits** whatever that
 baseline decision is rather than exposing a second, independent toggle —
 §1 states this document is a strict superset of the baseline, and a
@@ -812,7 +757,7 @@ dedicated "Pages" section versus no cross-link at all) is `PCP-D05`.
 
 ## 6. Reviews — two independent features, not one dependency chain
 
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §9 separates "reviews about published
+[VP §9](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-9) separates "reviews about published
 content" from "reviews about a person" and defers the latter to its own
 open decision, `VP-D08`. These are **two different features with
 independent dependencies**:
@@ -860,7 +805,7 @@ all unforced risks for a feature that is already gated and undesigned.
 ### 7.1 Follow is a joint decision, not this document's model
 
 Follow is **not yet an accepted contract anywhere in the sibling
-documents** — the same status `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.4
+documents** — the same status [VP §12.4](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-5)
 states about its own proposal, and this document must not contradict that
 by presenting a different, independently-designed Follow model. This
 document's `PCP-D02` is the public-card half of the joint
@@ -880,14 +825,14 @@ decision:
   it does not restrict per §3.1), that interaction is part of the joint
   decision, not decided unilaterally here.
 
-### 7.2 Block and mute — fully owned by `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`
+### 7.2 Block and mute — consume the baseline contextual rules
 
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3 is the **sole** canonical source
+[VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4) is the **sole** canonical source
 for Block/Mute mechanics: the Block/Mute distinction itself, bidirectional
 Block by default (including its effect on this document's own card, per
 §3.6's resolver), one-directional Mute, and the split between what an
 owning aggregate (e.g. a shared Scenario) still shows versus what this
-document's card shows. This document has no independent Block/Mute model
+document's card shows. The extended-card part has no independent Block/Mute model
 and does not establish, split, or co-define any part of it — an earlier
 revision implied a two-way "each document establishes half the split"
 relationship with that section, which was circular (each document citing
@@ -911,7 +856,7 @@ removed or withdrawn at that point, and any existing `restricted` or
 confirmed decision can change enforcement to `restricted` or `quarantined`;
 the report never causes either directly, and never automatically causes an
 `AccountStatus` suspension either — that remains
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s own
+`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s own
 decision to make, informed by but not automatically triggered by a
 card-level report. Admin reviewing a report never becomes this account's
 publisher (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §1's principle).
@@ -945,7 +890,7 @@ separately owned decisions**, not one:
 - `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` `CP-D14` — whether a minor may ever
   become a `verified` Creator at all (gates the extended card, §4,
   entirely);
-- `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` `VP-D10` — the minor's own baseline
+- `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` `VP-D10` — the minor's own baseline
   Public User Projection policy, which this document's baseline (§3.1)
   inherits regardless of Creator status, and which that document also
   notes may further restrict who may follow/be followed by a minor
@@ -1055,7 +1000,7 @@ question above is not.
   from account suspension;
 - Follow CTA rendered, pending the joint decision on the underlying model
   (§7.1);
-- blocked-viewer state, per `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3;
+- blocked-viewer state, per [VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4);
 - moderation-under-review field state showing `lastApprovedPublicValue` or
   absent-not-blank for a never-approved field (§4);
 - minor-account state: extended card unconditionally withheld (`CP-D14`);
@@ -1083,7 +1028,7 @@ meaning.
 | PCP-11 Content-review display | Aggregated summary on published content | Mature extension | `PCP-D04` |
 | PCP-12 Localization | Translatable fields, fallback locale | Mature extension | `PCP-D07` |
 | PCP-13 Legal/privacy review | Data export/erasure, retention windows | Mature extension | Legal sign-off |
-| PCP-14 Person-level reviews | Only if `VP-D08` is ever accepted | Gated expansion | `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` VP-D08 |
+| PCP-14 Person-level reviews | Only if `VP-D08` is ever accepted | Gated expansion | `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` VP-D08 |
 | PCP-15 Minors policy | Full gating once both `CP-D14` and `VP-D10` resolve | Gated expansion | Both cited decisions |
 | PCP-16 Creator level | §6.1 | Gated expansion | `PCP-D04`, `PCP-D08` |
 
@@ -1139,7 +1084,7 @@ meaning.
   stated proposal; it does not present Follow mechanics as settled ahead of
   the joint `PP-D44`/`VP-D12`/`PCP-D02` decision.
 - **PCP-AC-13:** Block/Mute mechanics are read from
-  `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §12.3, never independently
+  [VP §12.3](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-4), never independently
   redefined here.
 - **PCP-AC-14:** A minor account's extended card (§4) is withheld
   unconditionally, gated on `CP-D14`; the exact content of the baseline
@@ -1249,7 +1194,7 @@ enumeration is impractical; coverage strategy is:
    categories, appeal path, enforcement decision triggers/SLA and review
    lifecycle (§3.5), and — scoped specifically to **this card's own Created-content
    list** (§7.2; not shared state on another aggregate, which
-   `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` owns) — whether Block retroactively
+   `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` owns) — whether Block retroactively
    hides pre-existing entries there or only blocks new joint interaction.
 7. **PCP-D07 — Localized public fields and data ownership:** which fields
    are translatable, where locale data and translation ownership live,
@@ -1334,14 +1279,13 @@ separation are the same contract across all sibling documents.
 
 Explicit non-overlap, restated from the owning side:
 
-- `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` owns the `AccountStatus` axis (§3.3
-  here only reacts to it, using its exact camelCase values), the baseline
-  Public User Projection this document extends (unaffected by this
-  document's `visibility` setting, §3.1), the base Follow relationship
-  (§7.1 here only proposes a display-side position for the joint decision),
-  Block/Mute mechanics (§7.2 here only references them), reviews-about-a-
-  person (`VP-D08`, §6 here only defers to it), and minors' baseline-
-  projection policy (`VP-D10`, §9).
+- [Creator common personal part](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal)
+  owns AccountStatus/session requirements and transferred VP decisions/AC,
+  including reviews-about-a-person VP-D08 and minors baseline VP-D10.
+- [Baseline context projection](#baseline-context-projection) owns public
+  rendering/privacy/Block-Mute rules consumed by the extended card. Its field
+  set and context-only visibility are unaffected by extended card visibility.
+  Follow remains a joint Open proposal, not an owned accepted relationship.
 - `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` owns the verification axis (§3.2
   here only reacts to it), verification/publisher mechanics, Created-
   content management, handle rename mechanics (§10 here only defers to
@@ -1354,3 +1298,299 @@ Explicit non-overlap, restated from the owning side:
 Any future edit to a shared invariant in one document SHOULD check whether
 the sibling documents need the same edit, and SHOULD record the check even
 when no change was needed.
+
+<a id="baseline-context-projection"></a>
+
+## Базовая контекстная identity projection — transferred requirements
+
+Transferred from Public Viewer v1.0 (PVR-01/03). Draft maturity retained;
+[map](VIEWER_PROFILE_RETIREMENT_MAP.md). No runtime/public field expansion.
+PVP §§1–6 below are a separate namespace; bare §N in this part means PVP §N,
+except explicitly named Creator VP references. Original public-card §§1–19
+retain their numbers and verification/visibility requirements. VP decisions
+and AC remain owned by Creator common personal part. Contextual Block/Mute
+rules are rendered here; AccountStatus and session lifecycle are in Creator.
+Follow remains a joint Open decision. Source history stays in archive 01.
+
+<a id="pvp-0"></a>
+
+## PVP §0. Authority
+
+Accepted ADRs and Approved owning contracts outrank this Draft projection.
+The baseline is a presentation view of UserProfile, with the existing overlay
+read rule; it creates no aggregate and authorizes no future slice. Creator's
+[VP §0](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-0) contains shared authority.
+
+<a id="pvp-0-1"></a>
+
+### PVP §0.1. Normative language
+
+MUST / MUST NOT / SHOULD / MAY retain their source meanings. Target is future
+behavior; Current evidence requires LAUNCH_STATUS and a dated verification.
+
+<a id="pvp-1"></a>
+
+## PVP §1. Baseline context projection
+
+This is the minimal identity snippet attached to legitimate contexts, never
+a standalone searchable profile page. It is available independently of
+Creator verification and contains at most display name, avatar, optional city.
+The same account's eligible opt-in extended Creator card uses this document's
+original sections and their own stricter conditions. UI name Creator does
+not make an ordinary account searchable or disclose additional fields.
+
+<a id="pvp-2"></a>
+
+## PVP §2. Visibility defaults
+
+Per-library default, all owner-overridable only where the underlying
+aggregate contract allows it. `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` is the
+sole authority for every row below — `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_
+SPEC.md` §4 explicitly cites the `About` default here rather than
+redefining it:
+
+| Library | Default visibility | Public exposure |
+|---|---|---|
+| `displayName`, avatar, city | Owner-controlled | Part of Public User Projection when shown next to authored content |
+| About | Private, owner may opt public | Shown on a Public Creator Profile only if the owner opts it public |
+| Favorites, Saved Searches, Smart Search history | Private | Never public |
+| Personal Scenario | Private unless the owner sets `unlisted` (any Viewer, own capability) or `public` (Creator-only Create Hub publish — [VP §5.2](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-5-2)'s asymmetry) | Per Scenario's own `visibility` field |
+| Quick Plan | Private to owner + explicit participants | Never public |
+| Visit History | Private | Never public |
+| My participation | Private | Never public |
+| Notifications | Private | Never public |
+| Photos | Private (`public` reserved, not settable — [VP §4.2](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-4-2), §10) | No public surface exists yet |
+| Reviews authored | Owner-controlled per Review contract | May be public if the Review contract makes authored reviews public |
+| Reviews received | Attached to the reviewed content's own visibility | Never exposes the reviewing author's private data beyond their own Public User Projection |
+
+<a id="pvp-3"></a>
+
+## PVP §3. Public User Projection
+
+The minimal safe identity snapshot shown next to a Review, a Find People
+response, an invited Scenario or a shared plan — for **every** Viewer, not
+only a verified Creator. It contains at most: display name, avatar,
+optional city. It MUST NOT expose email, phone, Favorites, Visit History,
+Quick Plans, private Scenario, Notifications or any other library
+[VP §5](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-5)–§10 owns.
+
+These four trigger surfaces (Review, Find People, invited Scenario, shared
+plan) are the accepted initial list — not exhaustive by construction, but
+not fully open either; `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `VP-D07` (§22
+there) tracks only whether additional surfaces should be added, not
+whether these four are legitimate. A Find People response showing a Public
+User Projection is a targeted, consent-scoped disclosure to the searching
+account, not general discoverability — it does not contradict §4's
+standalone-discoverability rule, because the projection is only ever shown
+as part of a specific, consented interaction, never surfaced by an open
+search over all Viewers. Once an account is Followed (§5), the Follow
+relationship itself becomes a fifth legitimate context in which the
+followed account's Public User Projection is shown to the follower —
+Follow does not add a *field* to the projection, only another place it may
+legitimately appear.
+
+The strict field set above (display name, avatar, optional city) never
+grows just because Follow exists — a Follow action and a follower/following
+count are §5's own adjacent feature, not part of this baseline projection.
+
+**Identity-field source for a `VerifiedCreatorIdentity` account —
+`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` adopts `CREATOR_PROFILE_FUNCTIONAL_
+SPEC.md` `CP-D20`.** `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §16.1 defines
+`IdentityFieldModerationOverlay`, a separate record that becomes
+authoritative for `displayName`/`avatar` once a row exists for an account
+— which happens only once that account has been `VerifiedCreatorIdentity`
+at least once ([VP §3.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-3-1)); a plain Viewer
+who never verifies has no overlay row, ever. **Whenever an
+`IdentityFieldModerationOverlay` row exists for the shown account, this
+projection MUST read `displayName`/`avatar` from that overlay's
+`lastApprovedPublicValue` (absent, not blank, if no approved value exists
+yet) — never directly from `UserProfile` — on every one of this section's
+trigger surfaces (Review, Find People response, invited Scenario, shared
+plan, Follow).** Without this, a Creator's pending or rejected
+identity-affecting edit could legitimately show the new value on this
+projection while `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s extended
+card still showed the last approved one, or vice versa — the exact
+inconsistency `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §16.1 warns against. For
+an account with no overlay row (never `VerifiedCreatorIdentity`), this rule
+is a no-op — `UserProfile` remains the direct, immediate source, exactly as
+before. `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` does not adopt the overlay's
+still-open lifecycle mechanics (seeding, migration, atomicity,
+identity-affecting-change detection — `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`
+`CP-D18`/`CP-D19`); only the read-source rule above, which holds regardless
+of how those separate questions resolve.
+
+<a id="pvp-4"></a>
+
+## PVP §4. Discoverability, blocking, deleted accounts
+
+- A Viewer who never verifies as Creator MUST NOT appear in Search/Discover
+  as a public profile result — only the Public User Projection (§3)
+  surfaces incidentally, attached to specific content, never as a
+  standalone searchable identity. The proposed Follow model (§5) does not
+  change this: an account would be reachable to follow only through an
+  existing legitimate trigger surface or a revocable link, never through
+  open search;
+- **Block and Mute are different relationships, not two names for one
+  thing.** Their transferred descriptive rules live in this baseline part;
+  Creator VP §12.3 points here and keeps VP decision/AC tracking. The extended
+  card §7.2 consumes this same split instead of defining a second model.
+  **Block is bidirectional by
+  default** — it removes *both* accounts' ability to view each other's
+  card/projection, follow each other, or initiate new contact, not only
+  what the blocking account sees (`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`
+  `PP-AC-66`'s principle, applied to a Viewer rather than a page). It never
+  unpublishes content. **Mute is one-directional** — content stays visible
+  but is deprioritized for the muting account only, and the muted account
+  is never notified of either action. Block MUST remain enforceable even
+  against content the blocked account already interacted with jointly
+  (e.g. a shared Scenario or an invited Quick Plan) —
+  [VP §5.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-5-1) owns whether the *Scenario/Quick
+  Plan itself* still shows that account's contribution, while
+  `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §7 owns only whether the
+  blocked account's *card* is shown, and whether existing shared state is
+  retroactively hidden versus only blocking new joint interaction is that
+  document's own `PCP-D06`. A Block removes any existing proposed
+  `FollowRef` in both directions immediately (§5) and prevents a new one
+  from either side while the Block stands; a Mute never affects Follow
+  state at all;
+- report is a separate moderation submission with its own audit/appeal
+  contract; it is not a block state and does not itself change what every
+  other Viewer sees;
+- a direct link to a tombstoned/deleted account's Public User Projection
+  returns the same safe not-found response a genuinely nonexistent account
+  would ([VP §15.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15-1)'s anti-enumeration rule
+  — `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §3.3/§10 restates this
+  because honoring it is that document's own rendering responsibility, but
+  `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` remains the owner of the underlying
+  `AccountStatus` fact);
+- a suspended, security-locked or deletion-pending account's Public User Projection is
+  withdrawn entirely, not merely degraded — all three withdrawn states
+  follow the existing action table in [VP §15.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15-1)'s `AccountStatus` contract;
+- a minor's baseline Public User Projection follows `VP-D10`
+  ([VP §22](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-22)) — a decision that document owns
+  and that is distinct from `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` `CP-D14`
+  (whether a minor may become a verified Creator at all): even an account
+  that will never seek Creator verification still has some baseline
+  projection, and that baseline's minor-specific policy is
+  `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s own open decision, not inherited
+  from `CP-D14`.
+
+<a id="pvp-5"></a>
+
+## PVP §5. Follow (proposed direction only — joint decision pending, `PP-D44`/`PCP-D02`)
+
+**Follow is not yet an accepted contract anywhere in the sibling
+documents, and this section MUST NOT be read as one.**
+`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` §7 is explicitly titled
+"illustrative direction only" and models Follow as gated on a `verified`
+Creator's card visibility; `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` `PP-D44`
+separately asks whether following a page and following a person share one
+relationship/consent/retention contract, and proposes a neutral
+`FollowRelation{followerUserId, target:{type:user|page,id}, status, ...}`
+shape "as a starting point... it does not unilaterally adopt it."
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §0's own conflict rule governs here:
+"if two sibling profile documents disagree below tier 5 and no higher tier
+resolves it, implementation is blocked on that specific invariant until a
+joint decision is made — neither document's wording wins by default."
+
+**`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s own proposed position**, for input
+into that joint decision, is stated below — recording actual product
+direction from a 2026-08-12 review, not this document's unilateral ruling:
+
+- every account should be able to follow, and be followed by, any other
+  non-blocking account, with no Creator-verification gate — extending
+  [VP §3.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-3-1)'s "requires only Viewer"
+  principle to Follow;
+- the base relationship (`FollowRef`, [VP §4.2](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-4-2)) would be owned by that document regardless of either party's
+  Creator/Page status, with `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s
+  and `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`'s own Follow surfaces
+  consuming it (follower count, Follow action on their respective cards)
+  rather than redefining who may be followed;
+- open by default — no approval required from the followed account in the
+  baseline proposal;
+- a Block (§4, bidirectional) removes any existing `FollowRef` in both
+  directions immediately and prevents a new one while it stands; a Mute
+  never affects Follow state;
+- reachable only where a Public User Projection is already legitimately
+  shown (§3's trigger surfaces) or via a link — and that link MUST use the
+  same opaque, revocable token `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`
+  `PCP-D10` already requires for `unlisted` card resolution, never a raw
+  `userId` or predictable handle, or Follow becomes an enumeration/privacy
+  surface rather than a safe discoverability boundary —
+  `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` does not yet define that token
+  mechanism itself (`VP-D07`);
+- follower/following counts visible per the owner's own preference,
+  defaulting to visible;
+- unfollow and follower-removal available to the owner at any time,
+  distinct from Block;
+- a `tombstoned` account ([VP §15.1](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-15-1)) would
+  lose all `FollowRef` relationships at the point of tombstoning; restore
+  within the retention window would not silently restore them;
+- a new-follower event would be a notification category
+  ([VP §16](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-16)), subject to the same
+  cross-document dedup discipline as every other category (`VP-D11`).
+
+**Known, unresolved shape mismatch with the sibling proposal.**
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` `PP-D44` proposes a discriminated
+`FollowRelation{followerUserId, target: {type: user | page, id}, status,
+...}` covering both a person-follow and a page-follow in one shape.
+`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `FollowRef` (§4.2 there) has no
+`target` field at all — `{followId, followerUserId, followedUserId,
+createdAtUtc}` — and is structurally unable to represent following a page.
+This is not a wording difference to reconcile by picking better prose; the
+two shapes cannot both be correct as written, and
+`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` tracks the reconciliation itself as
+a **neutral, third-party slice** — `FOL-01`, "not PP-owned" — precisely so
+the fix isn't presented as either sibling unilaterally winning. Neither
+this document nor `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` resolves the mismatch
+by silently adopting the discriminated shape or by insisting on the
+narrower one; both remain candidate shapes for `VP-D12`/`PP-D44`/`PCP-D02`
+to choose between, with `FOL-01` as the roadmap home for whichever one
+wins.
+
+**Not yet addressed even within this proposal** — self-follow prohibition
+and one-active-relationship-per-pair uniqueness; idempotency and
+`revision`/`schemaVersion` on `FollowRef`; race handling between Follow,
+Block and account deletion arriving out of order; rate limiting and spam
+protection; re-follow cooldown; retention/audit of the relationship record
+after unfollow or Block; follower/following counter consistency under
+concurrent writes; pagination of follower/following lists; and how Follow
+is meant to affect anything else in the product (it currently gates no
+feed, ranking or publish-notification) — `PP-D44` already tracks most of
+these as required inputs to the joint decision; this document does not
+duplicate that list, only confirms it applies here too.
+
+**Tracked as `VP-D12`** ([VP §22](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-22)) — that
+document's half of the joint `PP-D44`/`PCP-D02` decision: whether the
+proposal above is adopted as-is, modified, or rejected in favor of separate
+person/page models; an approval-gated ("private account") variant on top
+of it; follower/following list visibility to other accounts; the
+opaque-link mechanism `VP-D07` also depends on; and whether a minor
+account's baseline (`VP-D10`) further restricts who may follow them or be
+followed by them. Follow does not ship in any form until this joint
+decision resolves — that gate itself is not open for negotiation within
+`VP-D12`.
+
+<a id="pvp-6"></a>
+
+## PVP §6. What this projection never exposes
+
+[VP §12.2](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#pvp-3)/§4.3(16) is the normative source;
+consolidated here for a quick reference. This projection MUST NOT expose:
+
+- email, phone, or any contact channel;
+- Favorites, Saved Searches, Smart Search history;
+- Visit History, My participation, Notifications;
+- private Scenario or Quick Plan content (only an *invited* Scenario/plan's
+  existence triggers this projection at all — never its content);
+- Photos beyond what the owner has explicitly made part of the projection
+  (currently none — Photos visibility is `private`, `public` reserved and
+  not settable, §2 above);
+- a live `UserProfile` `displayName`/`avatar` value when an
+  `IdentityFieldModerationOverlay` row exists and holds a different
+  `lastApprovedPublicValue` (§3);
+- itself, entirely, once the account is `securityLocked`, `suspended`, `deletionPending`, or
+  the requester and the shown account are in a Block relationship in
+  either direction (§4);
+- itself, at all, as a standalone searchable result for an account that
+  has never verified as Creator (§4).

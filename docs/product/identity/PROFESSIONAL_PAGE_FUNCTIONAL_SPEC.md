@@ -2,11 +2,17 @@
 
 Status: **Draft for product and architecture review**
 
-Version: **2.34**
+Version: **2.35** — PVR-01/03 documentation transfer
 
-Date: **2026-08-16**
+Date: **2026-10-10**
 
 Scope: **target full-release product; documentation only**
+
+PVR-01/03 consumer snapshot (2026-10-10): Creator v1.11 common personal
+part / Public Creator v1.10 baseline; source Viewer v1.17 / Public Viewer v1.0.
+Original compatibility pins below are dated pre-transfer evidence, not a
+claim that the previous files remain active owners. Existing PP/PPP decisions,
+page resolver and runtime maturity are unchanged.
 
 ## 0. Document authority and purpose
 
@@ -32,9 +38,9 @@ When sources conflict, the following order applies:
    foundation).
 5. Draft profile-surface specifications on equal footing with each
    other — this document and all sibling profile documents
-   (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`, `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
+   (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`, `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
    `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
-   `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`,
+   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#baseline-context-projection`,
    `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`). None of them outranks
    another by virtue of which one a reader opened first; a conflict between
    them is blocked per §1.1, not resolved by this tier ordering.
@@ -125,16 +131,14 @@ It is not:
 - an Event, Booking, CRM, chat or payments aggregate;
 - an authorization shortcut based on display name, category or active tab.
 
-### 1.1 Relationship to sibling documents
+### 1.1 Relationship to active documents
 
-Professional Page is one of six audience-scoped surfaces over the same
-underlying canonical aggregates, not a competing model. Surfaces are split
-by *who is looking*, not by *what data exists*. They form three explicit
-private/public pairs: Viewer/Public Viewer, Creator/Public Creator and
-Professional Page/Public Professional Page. `ManagedPage` remains a peer
-aggregate rather than a personal identity, but all six Draft surface specs
-share the same equal-footing conflict-precedence tier (§0 item 5); none
-silently outranks another.
+Four active Draft surface specs cover two private/public pairs: Creator /
+Public Creator, Professional Page / Public Professional Page. Personal
+profile requirements include both common libraries and guarded publisher
+tools; baseline contextual identity and eligible extended card remain distinct.
+Viewer source files stay unchanged for stage 07, not as a separate UI policy.
+ManagedPage remains its own aggregate; no surface name grants authority.
 
 The right-hand column is
 **primary surface responsibility** — which document specifies the UI/UX and
@@ -146,35 +150,19 @@ which profile document displays a projection of it.
 
 | Document | Audience | Primary surface responsibility |
 |---|---|---|
-| `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | The Viewer, about themselves | Scenario, Quick Plan, Favorites, Saved Searches, Visit History, personal participation, authored Reviews, photos, account/session state, and the baseline Public User Projection — shown only within a legitimate trigger context (Review, Find People response, invited Scenario, shared plan), never as a standalone searchable profile for every `User` |
-| `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | Another authorized Viewer, about a Viewer in a legitimate trigger context | The public Viewer projection and its privacy-safe resolver; it owns public rendering of Viewer identity and consumes, rather than redefines, Viewer-owned Block/Mute mechanics |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | The Creator, about themselves | `CreatorVerification` lifecycle, the personal `PublisherRef{type: user}` context, management of their own Created content, and the *private* workspace/publisher relationship to managed Professional Pages — public display of the Creator↔Page cross-link is owned separately by `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D05` |
-| `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Any other Viewer, about a verified Creator | The public card for a verified Creator — extends the Public User Projection with verification badge, specialization, published-content list, Follow, and (§5 there) public Creator↔Page cross-link display (`PCP-D05`). Aggregated reviews-about-*content* display is gated only on `PCP-D04` and is independent of `VP-D08`; reviews-about-a-*person* remain a separate, unaccepted feature gated on `VP-D08` alone |
+| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal` | The Viewer, about themselves | Scenario, Quick Plan, Favorites, Saved Searches, Visit History, personal participation, authored Reviews, photos, account/session state, and the baseline Public User Projection — shown only within a legitimate trigger context (Review, Find People response, invited Scenario, shared plan), never as a standalone searchable profile for every `User` |
+| `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#baseline-context-projection` | Another authorized Viewer, about a Viewer in a legitimate trigger context | The baseline context projection and its privacy-safe resolver; owns contextual rendering/privacy/Block-Mute and consumes Creator common AccountStatus/session rules |
+| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Any authenticated account, about themselves; guarded Creator tools | `CreatorVerification` lifecycle, the personal `PublisherRef{type: user}` context, management of their own Created content, and the *private* workspace/publisher relationship to managed Professional Pages — public display of the Creator↔Page cross-link is owned separately by `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D05` |
+| `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Any other Viewer, about a verified Creator | The eligible opt-in public card for a verified Creator — extends the Public User Projection with verification badge, specialization, published-content list, proposed/gated Follow, and (§5 there) public Creator↔Page cross-link display (`PCP-D05`). Aggregated reviews-about-*content* display is gated only on `PCP-D04` and is independent of `VP-D08`; reviews-about-a-*person* remain a separate, unaccepted feature gated on `VP-D08` alone |
 | This document | The page's own team | `ManagedPage` in full — team, page lifecycle, a page-scoped Booking **management projection**. The `Booking`/`BookingHold`/ledger aggregates themselves remain owned by the authoritative Booking contract (ADR 0019, §13) — this document owns the authorization boundary and UI over them, not the aggregates |
 | `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | Any Viewer resolving the public page — including this document's own team members, whose public payload never differs from any other Viewer's (see that document's §1) | The public page projection split out of this document's former §8.2 — resolver, typed field contract, content projection, relation display, CTA logic and UX states. Owns its own `PPP-D`/`PPP-AC` numbering for questions that are genuinely about public presentation only; it never redefines a `PP-D` or restates a `PP-AC` under a new number, and a `ManagedPage`-invariant conflict still resolves in this document's favor per its own §0.1 |
 
-**Verified-against snapshot.** Every citation of a sibling document above
-and throughout this document was last cross-checked directly against
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17,
-`CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9 and
-`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.9,
-`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.0 and
-`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v1.3, as of 2026-08-16 — the
-prior pin (v1.10/v1.4/v1.3) had gone stale by several versions each on the
-sibling side. Re-verification against the current text found this
-document's specific citations (`PP-D44`'s trilateral status, the
-`FollowRelation`/`FollowRef` shape mismatch, `PersonalScenarioRef` vs.
-`QuickPlanRef`'s field split, and `PCP-D05`'s location) still accurate —
-none of the sibling documents' intervening changes altered what was cited
-here. This is
-a deliberate boundary, not a claim of permanence: a sibling document moving
-past its pinned version here does not retroactively make this document
-wrong, but it does mean this document's citations of that specific sibling
-have not yet been re-verified against the newer text and MUST be treated as
-unconfirmed — never silently assumed still accurate — until the next
-verification pass updates this line. Cross-document correctness is a
-snapshot property of a multi-document Draft ecosystem, not a permanent one;
-this document does not claim otherwise.
+**PVR-01/03 consumer snapshot, 2026-10-10.** Creator v1.11,
+Public Creator v1.10, Public Professional Page v1.4. Source pins remain
+Viewer v1.17 / Public Viewer v1.0 in archive 01. Transferred enums,
+Scenario/QuickPlan roles, Follow shape conflict, account deletion and block
+references preserve their meaning. Earlier version-pin checks are historical
+revision evidence, not current ownership assertions.
 
 None of these documents stores data independently — each is a
 presentation/aggregation surface over the same canonical aggregates
@@ -205,7 +193,7 @@ use, never left implicit:
 - **`owner`** means two different things depending on which document is
   speaking: `ManagedPageMembership.relationship = owner` (a page-team role,
   §5.3 of this document) versus a personal content item's own ownership
-  role. For **Scenario**, `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` §4.2's
+  role. For **Scenario**, [VP §4.2](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#vp-4-2)'s
   `PersonalScenarioRef.accessRole: owner | editor | viewer | unlistedViewer`
   is the Approved four-role model per
   `SCENARIO_CONNECTED_PLANNING_SPEC.md` §10.1/§10.2 — it already has both
@@ -221,7 +209,7 @@ use, never left implicit:
 - **Follow** is not yet confirmed as one shared relationship/consent/
   retention model or two deliberately separate ones — following a page
   (§12.2, `PP-D06`) and following a person
-  (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s `VP-D12`,
+  (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `VP-D12`,
   `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02`) may or may not
   share a contract. This is now a **trilateral** open decision —
   `PP-D44`/`VP-D12`/`PCP-D02` — actively cross-referenced by all three
@@ -231,7 +219,7 @@ use, never left implicit:
   marked `Approved` alone. The documents have not converged on one data
   shape: this document's `FollowRelation` (§20) uses a discriminated
   `target: {type: user | page, id}` covering both person- and page-follow
-  in one contract, while `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s own proposed
+  in one contract, while `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s own proposed
   `FollowRef{followerUserId, followedUserId, createdAtUtc}` has no target
   discrimination and cannot represent following a page at all. Reconciling
   that shape mismatch — not only the party count or policy — is itself
@@ -1297,7 +1285,7 @@ decided by this document itself.
 | PP-14 Public support & moderation | Report/block, impersonation appeal, audited support access without Admin-as-publisher | Mature extension | PP-D25 accepted |
 | PP-15 Security & access governance | Step-up re-authentication for critical operations, delegability matrix | Release foundation | PP-D30, PP-D31 accepted |
 | PP-16 Operational limits | Team/media/message/export/API quotas with a no-data-loss, no-obligation-interruption guarantee | Release foundation | `PP-D38` core accepted; actual numeric limits await Infra/Operations capacity planning |
-| `FOL-01` Follow relationship foundation *(neutral, not PP-owned)* | Reconciling this document's discriminated-target `FollowRelation` with `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s person-only `FollowRef` into one shape usable by both a page-follow and a person-follow policy (§20, `PP-D44`) | Mature extension | `PP-D44` **and** `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s `VP-D12` **and** `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02` jointly accepted — this document cannot accept it alone |
+| `FOL-01` Follow relationship foundation *(neutral, not PP-owned)* | Reconciling this document's discriminated-target `FollowRelation` with `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s person-only `FollowRef` into one shape usable by both a page-follow and a person-follow policy (§20, `PP-D44`) | Mature extension | `PP-D44` **and** `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `VP-D12` **and** `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02` jointly accepted — this document cannot accept it alone |
 | PP-18 Page content templates *(no AI dependency)* | Manual save/list/reuse of a page content item as a template; v1 scope is Event only | Mature extension | `PP-D46` Accepted core; per-type extension beyond Event is Explicitly deferred (Owner: Product, staged one type at a time) — ships independently of `PP-17`/AI |
 | PP-17 Content assist & templates | v1: deterministic, non-AI similarity detection (category + recurring weekday) over the page's own content history, inline Create Hub prompt to use a `PP-18` template; Event-only, matching `CRT-TPL-01`'s current coverage | Mature extension | `PP-D45` (Accepted) **and** `PP-D46`/`PP-18` (Accepted core) — v1 has no `AI-PLAT-LOCAL-01` dependency at all; semantic/AI-based matching is a separate v2+ extension requiring its own Approval and `AI-PLAT-LOCAL-01`'s quota/kill-switch gates |
 
@@ -1882,7 +1870,7 @@ problem, that one proposes the answer.
     of this document alone until it does.
 44. **PP-D44 — Shared or separate Follow model:** whether following a
     Professional Page (§12.2, `PP-D06`) and following a verified Creator
-    (`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s `VP-D12`,
+    (`CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `VP-D12`,
     `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02`) share one
     relationship/consent/retention contract or are deliberately separate
     models (§1.1). This is a trilateral decision —
@@ -1910,7 +1898,7 @@ problem, that one proposes the answer.
     and no audience data transfers between a person-follow and a page-follow
     relation.
 
-    **Not yet resolved:** `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s own
+    **Not yet resolved:** `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s own
     proposed `FollowRef{followerUserId, followedUserId, createdAtUtc}` has
     no `target` discrimination and cannot represent following a page at
     all — reconciling the two shapes is part of what this joint decision
@@ -2069,7 +2057,7 @@ parameters`) — collapsing that distinction was itself a traceability defect.
 | PP-D41 | **Accepted core** (unique-user canonical count); **Explicitly deferred**: suppression threshold, data-quality remainder | PP-07 | TBD (core); Analytics/Privacy (remainder) | Same gate as `PP-D08` |
 | PP-D42 | **Accepted core** (§3.1, three-separate-facts constraint); **Explicitly deferred**: billing mechanics | PP-10/PP-11 | TBD (core); Commercial/Billing (remainder) | Same gate as `PP-D11`/`PP-D26` — a Commercial/Billing spec exists and is approved |
 | PP-D43 | **Accepted** (§17's existing PP-01–PP-16 mapping promoted to the formal answer) | n/a (meta-decision) | TBD | — |
-| PP-D44 | **Explicitly deferred** — trilateral (`PP-D44`/`VP-D12`/`PCP-D02`), cross-referenced by all three documents; `FollowRelation`/`FollowRef` shape mismatch unresolved | `FOL-01` | A party spanning all three sibling documents | Joint `FollowRelation`/`FollowRef` shape reconciliation with `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`'s `VP-D12` and `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02`; not resolvable by this document alone |
+| PP-D44 | **Explicitly deferred** — trilateral (`PP-D44`/`VP-D12`/`PCP-D02`), cross-referenced by all three documents; `FollowRelation`/`FollowRef` shape mismatch unresolved | `FOL-01` | A party spanning all three sibling documents | Joint `FollowRelation`/`FollowRef` shape reconciliation with `CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal`'s `VP-D12` and `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`'s `PCP-D02`; not resolvable by this document alone |
 | PP-D45 | **Accepted** — deterministic non-AI v1 (category + recurring weekday), inline Create Hub prompt, Event-only | PP-17 | TBD | v1 has no `AI-PLAT-LOCAL-01` dependency; semantic/AI matching is a separate v2+ extension requiring its own Approval |
 | PP-D46 | **Accepted core** (Event-only v1); **Explicitly deferred**: per-type expansion | PP-18 | TBD (core); Product, staged per type (remainder) | Each additional Create type's sensitive-data/migration review completed and approved |
 | PP-D47 | **Accepted** — own record type (§4.4), v1 registry fixed, `unconfirmed` display rule fixed | PP-01/PP-12 | TBD | Depends on `PP-D10`'s claim/merge plan only where a relation's verification state must survive a merge |

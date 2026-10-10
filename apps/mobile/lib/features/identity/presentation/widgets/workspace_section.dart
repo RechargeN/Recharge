@@ -171,10 +171,8 @@ class _WorkspaceList extends StatelessWidget {
         _WorkspaceTile(
           key: const ValueKey<String>('workspace-personal'),
           icon: Icons.person_outline,
-          title: 'Personal profile',
-          subtitle: snapshot.isVerifiedCreator
-              ? 'Viewer · Creator tools available'
-              : 'Viewer',
+          title: 'Creator',
+          subtitle: _personalSubtitle(snapshot.creatorVerificationStatus),
           selected: active == WorkspaceRef.personal(state.userId),
           enabled: !state.isSwitching,
           onTap: () => onSelect(WorkspaceRef.personal(state.userId)),
@@ -256,6 +254,22 @@ class _WorkspaceList extends StatelessWidget {
       ],
     );
   }
+
+  static String _personalSubtitle(CreatorVerificationStatus status) =>
+      switch (status) {
+        CreatorVerificationStatus.notStarted =>
+          'Personal profile · Verification not started',
+        CreatorVerificationStatus.pending =>
+          'Personal profile · Verification pending',
+        CreatorVerificationStatus.verified =>
+          'Verified · Tools follow your permissions',
+        CreatorVerificationStatus.rejected =>
+          'Personal profile · Verification rejected',
+        CreatorVerificationStatus.expired =>
+          'Personal profile · Verification expired',
+        CreatorVerificationStatus.revoked =>
+          'Personal profile · Verification revoked',
+      };
 
   static String _pageSubtitle(
     IdentityAccessSnapshot snapshot,
@@ -479,6 +493,7 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
       title: const Text('Create Professional Page'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -495,13 +510,18 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
           const SizedBox(height: 12),
           DropdownButtonFormField<ManagedPageKind>(
             key: const ValueKey<String>('professional-page-kind'),
+            isExpanded: true,
             initialValue: _kind,
             decoration: const InputDecoration(labelText: 'Page type'),
             items: ManagedPageKind.values
                 .map(
                   (ManagedPageKind kind) => DropdownMenuItem<ManagedPageKind>(
                     value: kind,
-                    child: Text(_kindLabel(kind)),
+                    child: Text(
+                      _kindLabel(kind),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 )
                 .toList(growable: false),
@@ -596,7 +616,6 @@ String _verificationLabel(ManagedPageVerificationStatus status) {
 
 String _previewLabel(AdminExperiencePreview preview) {
   return switch (preview) {
-    AdminExperiencePreview.viewer => 'Viewer',
     AdminExperiencePreview.creator => 'Creator',
     AdminExperiencePreview.professionalPage => 'Professional Page',
   };

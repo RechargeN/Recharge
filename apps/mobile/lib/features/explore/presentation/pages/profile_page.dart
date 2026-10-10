@@ -3,13 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:design_system/design_system.dart';
 
-import '../../../../app/application/visit_history_facade.dart';
-import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/router/route_names.dart';
-import '../../../../shared/models/catalog_object_ref.dart';
 import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../../../core/identity/account_experience.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/domain/entities/auth_user_entity.dart';
 import '../../../create/application/create_providers.dart';
@@ -27,8 +23,6 @@ import '../../application/explore_providers.dart';
 import '../../application/profile_role_summary.dart';
 import '../../application/state/explore_state.dart';
 
-enum _ProfileDashboardSection { page, created, visited }
-
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -39,8 +33,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   String? _loadKey;
   String? _createLoadKey;
-  String? _visitedLoadKey;
-  _ProfileDashboardSection? _selectedDashboardSection;
 
   @override
   void initState() {
@@ -81,23 +73,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       role: user.role,
       capabilities: user.capabilities,
     );
-    final ProfileRoleSummary roleSummary = _profilePresentationSummary(
-      context,
-      accessRoleSummary,
-    );
-    final _ProfileDashboardSection dashboardSection =
-        _selectedDashboardSection ??
-        (roleSummary.isProGenerator
-            ? _ProfileDashboardSection.page
-            : roleSummary.isCreator
-            ? _ProfileDashboardSection.created
-            : _ProfileDashboardSection.visited);
-    final VisitHistorySummary? visitedState = roleSummary.isUser
-        ? ref.watch(visitHistorySummaryProvider)
-        : null;
-    if (roleSummary.isUser) {
-      _scheduleVisitedLoad(user.id);
-    }
+    final ProfilePersonalPresentation presentation =
+        ProfilePersonalPresentation(accessSummary: accessRoleSummary);
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       favoritesState.items,
       savedSearches,
@@ -109,7 +86,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       backgroundColor: RechargeTheme.profileBackground,
       appBar: AppBar(
-        title: Text(_profilePageTitle(roleSummary)),
+        title: Text(presentation.title),
         backgroundColor: RechargeTheme.profileBackground,
         foregroundColor: RechargeTheme.ink,
         centerTitle: true,
@@ -151,74 +128,61 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               email: state.email,
               avatar: state.profile.avatar,
               city: state.profile.city,
-              roleSummary: roleSummary,
+              presentation: presentation,
             ),
             const SizedBox(height: 14),
             _ProfileDashboardTabs(
-              roleSummary: roleSummary,
-              selectedSection: dashboardSection,
-              onPage: () =>
-                  _selectDashboardSection(_ProfileDashboardSection.page),
-              onCreated: () =>
-                  _selectDashboardSection(_ProfileDashboardSection.created),
+              onCreated: () => context.push(RouteNames.profileWorkspace),
               onVisited: () => context.push(RouteNames.visitedPlaces),
-              onInsights: () => context.push(RouteNames.profileWorkspace),
               onPhotos: () => context.push(RouteNames.settings),
             ),
+            const SizedBox(height: 10),
+            _ProfileActionRow(
+              icon: Icons.bookmark_border,
+              title: 'Saved list',
+              onTap: () => context.push(RouteNames.favorites),
+            ),
+            if (!presentation.canShowCreatorTools)
+              _ProfileActionRow(
+                icon: Icons.workspace_premium_outlined,
+                title: 'Creator tools',
+                subtitle: 'Check verification and available tools in Settings',
+                onTap: () => context.push(RouteNames.settings),
+              ),
             const SizedBox(height: 14),
             ScenarioLibraryPanel(userId: user.id),
             const SizedBox(height: 14),
-            if (roleSummary.isUser)
-              _ViewerProfileBody(
-                state: visitedState!,
-                onOpenVisit: (VisitHistoryItem item) => context.push(
-                  RouteNames.discoverDetailsCanonicalFor(
-                    CatalogObjectRef(
-                      objectType: CatalogObjectType.place,
-                      objectId: item.placeId,
-                    ),
-                  ),
-                ),
-                onViewAllVisits: () => context.push(RouteNames.visitedPlaces),
-                onSavedList: () => context.push(RouteNames.favorites),
-                onUpgrade: () => context.push(RouteNames.settings),
-              )
-            else if (roleSummary.isCreator ||
-                dashboardSection == _ProfileDashboardSection.created)
-              _LatestCreatedEvents(
-                data: workspaceData,
-                onViewAll: () =>
-                    _selectDashboardSection(_ProfileDashboardSection.created),
-                onOpenListing: (listing) =>
-                    context.push(_searchRouteForCreateListing(listing)),
-                onCreate: () => context.push(RouteNames.create),
-                onCreateRoute: () => context.push(
-                  Uri(
-                    path: RouteNames.create,
-                    queryParameters: const <String, String>{'type': 'route'},
-                  ).toString(),
-                ),
-                onScenario: () => context.push(
-                  Uri(
-                    path: RouteNames.create,
-                    queryParameters: const <String, String>{'type': 'scenario'},
-                  ).toString(),
-                ),
-                onFindPeople: () => context.push(RouteNames.search),
-              )
-            else
-              _ProGeneratorProfileBody(
-                displayName: state.profile.displayName,
-                city: state.profile.city,
-                avatar: state.profile.avatar,
-                data: workspaceData,
-                onManagePage: () =>
-                    _selectDashboardSection(_ProfileDashboardSection.page),
+            _LatestCreatedEvents(
+              data: workspaceData,
+              canCreate: presentation.canShowCreatorTools,
+              onViewAll: () => context.push(RouteNames.profileWorkspace),
+              onOpenListing: (listing) =>
+                  context.push(_searchRouteForCreateListing(listing)),
+              onCreate: () => context.push(RouteNames.create),
+              onCreateRoute: () => context.push(
+                Uri(
+                  path: RouteNames.create,
+                  queryParameters: const <String, String>{'type': 'route'},
+                ).toString(),
+              ),
+              onScenario: () => context.push(
+                Uri(
+                  path: RouteNames.create,
+                  queryParameters: const <String, String>{'type': 'scenario'},
+                ).toString(),
+              ),
+              onFindPeople: () => context.push(RouteNames.search),
+            ),
+            if (presentation.canShowGeneratorTools) ...<Widget>[
+              const SizedBox(height: 14),
+              _GeneratorToolsPanel(
+                onManagePage: () => context.push(RouteNames.settings),
                 onCreatedEvents: () =>
-                    _selectDashboardSection(_ProfileDashboardSection.created),
+                    context.push(RouteNames.profileWorkspace),
                 onInsights: () => context.push(RouteNames.profileWorkspace),
                 onBookings: () => context.push(RouteNames.notifications),
               ),
+            ],
             if (state.message != null) ...<Widget>[
               const SizedBox(height: 10),
               Text(state.message!, style: const TextStyle(color: Colors.green)),
@@ -227,11 +191,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       },
     );
-  }
-
-  void _selectDashboardSection(_ProfileDashboardSection section) {
-    if (_selectedDashboardSection == section) return;
-    setState(() => _selectedDashboardSection = section);
   }
 
   void _scheduleLoad({
@@ -272,54 +231,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           );
     });
   }
-
-  void _scheduleVisitedLoad(String userId) {
-    if (_visitedLoadKey == userId) return;
-    _visitedLoadKey = userId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(visitHistoryFacadeProvider).ensureLoaded(userId: userId);
-    });
-  }
 }
 
-ProfileRoleSummary _profilePresentationSummary(
-  BuildContext context,
-  ProfileRoleSummary accessSummary,
-) {
-  final AccountExperienceScope? scope = AccountExperienceScope.maybeOf(context);
-  if (scope == null) return accessSummary;
-  return switch (scope.experience) {
-    AccountExperience.viewer => profileRoleSummaryForTier(ProfileRoleTier.user),
-    AccountExperience.creator => profileRoleSummaryForTier(
-      ProfileRoleTier.creator,
-    ),
-    AccountExperience.professionalPage => profileRoleSummaryForTier(
-      ProfileRoleTier.creator,
-    ),
-  };
-}
-
-String _profilePageTitle(ProfileRoleSummary roleSummary) {
-  if (roleSummary.isProGenerator) return 'Pro generator profile';
-  if (roleSummary.isCreator) return 'Community creator profile';
-  return 'Viewer profile';
-}
-
-String _profileBadgeLabel(ProfileRoleSummary roleSummary) {
-  if (roleSummary.isProGenerator) return 'PRO GENERATOR';
-  if (roleSummary.isCreator) return 'CREATOR LIGHT';
-  return 'VIEWER';
-}
-
-String _profileContextLine(ProfileRoleSummary roleSummary, String city) {
+String _profileContextLine(String city) {
   final String location = city.trim().isEmpty ? 'Riga' : city.trim();
-  final String contextLabel = roleSummary.isProGenerator
-      ? 'Organizer'
-      : roleSummary.isCreator
-      ? 'Community'
-      : 'Explorer';
-  return '$contextLabel · $location';
+  return 'Personal · $location';
 }
 
 class ProfileWorkspacePage extends ConsumerStatefulWidget {
@@ -332,7 +248,6 @@ class ProfileWorkspacePage extends ConsumerStatefulWidget {
 
 class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
   String? _createLoadKey;
-  ProfileRoleTier? _selectedRoleTier;
 
   @override
   void initState() {
@@ -361,15 +276,7 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
       role: user.role,
       capabilities: user.capabilities,
     );
-    final AccountExperienceScope? experienceScope =
-        AccountExperienceScope.maybeOf(context);
-    final ProfileRoleTier activeRoleTier = _activeRoleTierFor(
-      selectedTier: _selectedRoleTier,
-      accessSummary: accessRoleSummary,
-    );
-    final ProfileRoleSummary roleSummary = experienceScope == null
-        ? profileRoleSummaryForTier(activeRoleTier)
-        : _profilePresentationSummary(context, accessRoleSummary);
+    final ProfileRoleSummary roleSummary = accessRoleSummary;
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       favoritesState.items,
       discoverState.savedSearches,
@@ -389,14 +296,6 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: <Widget>[
-          if (experienceScope == null) ...<Widget>[
-            _RoleTrack(
-              activeTier: activeRoleTier,
-              accessSummary: accessRoleSummary,
-              onRoleSelected: _selectRoleTier,
-            ),
-            const SizedBox(height: 14),
-          ],
           _RoleWorkspace(
             roleSummary: roleSummary,
             data: workspaceData,
@@ -453,26 +352,6 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
         ],
       ),
     );
-  }
-
-  ProfileRoleTier _activeRoleTierFor({
-    required ProfileRoleTier? selectedTier,
-    required ProfileRoleSummary accessSummary,
-  }) {
-    if (selectedTier != null &&
-        profileRoleTierUnlocked(
-          tier: selectedTier,
-          accessSummary: accessSummary,
-        )) {
-      return selectedTier;
-    }
-    return accessSummary.tier;
-  }
-
-  void _selectRoleTier(ProfileRoleTier tier) {
-    setState(() {
-      _selectedRoleTier = tier;
-    });
   }
 
   void _openSavedScenario(FavoriteItemEntity scenario) {
@@ -548,14 +427,14 @@ class _ProfileHero extends StatelessWidget {
     required this.email,
     required this.avatar,
     required this.city,
-    required this.roleSummary,
+    required this.presentation,
   });
 
   final String displayName;
   final String email;
   final String avatar;
   final String city;
-  final ProfileRoleSummary roleSummary;
+  final ProfilePersonalPresentation presentation;
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +492,7 @@ class _ProfileHero extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          _profileContextLine(roleSummary, city),
+                          _profileContextLine(city),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
@@ -626,7 +505,7 @@ class _ProfileHero extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _HeroPill(label: _profileBadgeLabel(roleSummary)),
+                  _HeroPill(label: presentation.title.toUpperCase()),
                 ],
               ),
             ),
@@ -639,87 +518,41 @@ class _ProfileHero extends StatelessWidget {
 
 class _ProfileDashboardTabs extends StatelessWidget {
   const _ProfileDashboardTabs({
-    required this.roleSummary,
-    required this.selectedSection,
-    required this.onPage,
     required this.onCreated,
     required this.onVisited,
-    required this.onInsights,
     required this.onPhotos,
   });
-
-  final ProfileRoleSummary roleSummary;
-  final _ProfileDashboardSection selectedSection;
-  final VoidCallback onPage;
   final VoidCallback onCreated;
   final VoidCallback onVisited;
-  final VoidCallback onInsights;
   final VoidCallback onPhotos;
-
   @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(RechargeTheme.profileCompactRadius),
-        border: Border.all(color: RechargeTheme.profileBorder),
+  Widget build(BuildContext context) => _ProfileSurfacePanel(
+    child: Padding(
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: <Widget>[
+          _ProfileDashboardTab(
+            icon: Icons.work_outline,
+            label: 'Created',
+            active: true,
+            onTap: onCreated,
+          ),
+          _ProfileDashboardTab(
+            icon: Icons.place_outlined,
+            label: 'Visited',
+            active: false,
+            onTap: onVisited,
+          ),
+          _ProfileDashboardTab(
+            icon: Icons.image_outlined,
+            label: 'Photos',
+            active: false,
+            onTap: onPhotos,
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          children: roleSummary.isProGenerator
-              ? <Widget>[
-                  _ProfileDashboardTab(
-                    icon: Icons.storefront_outlined,
-                    label: 'Page',
-                    active: selectedSection == _ProfileDashboardSection.page,
-                    onTap: onPage,
-                  ),
-                  _ProfileDashboardTab(
-                    icon: Icons.work_outline,
-                    label: 'Created',
-                    active: selectedSection == _ProfileDashboardSection.created,
-                    onTap: onCreated,
-                  ),
-                  _ProfileDashboardTab(
-                    icon: Icons.insights_outlined,
-                    label: 'Insights',
-                    active: false,
-                    onTap: onInsights,
-                  ),
-                  _ProfileDashboardTab(
-                    icon: Icons.image_outlined,
-                    label: 'Photos',
-                    active: false,
-                    onTap: onPhotos,
-                  ),
-                ]
-              : <Widget>[
-                  if (roleSummary.isCreator)
-                    _ProfileDashboardTab(
-                      icon: Icons.work_outline,
-                      label: 'Created',
-                      active:
-                          selectedSection == _ProfileDashboardSection.created,
-                      onTap: onCreated,
-                    ),
-                  _ProfileDashboardTab(
-                    icon: Icons.place_outlined,
-                    label: 'Visited',
-                    active: roleSummary.isUser,
-                    onTap: onVisited,
-                  ),
-                  _ProfileDashboardTab(
-                    icon: Icons.image_outlined,
-                    label: 'Photos',
-                    active: false,
-                    onTap: onPhotos,
-                  ),
-                ],
-        ),
-      ),
-    );
-  }
+    ),
+  );
 }
 
 class _ProfileDashboardTab extends StatelessWidget {
@@ -775,346 +608,51 @@ class _ProfileDashboardTab extends StatelessWidget {
   }
 }
 
-class _ViewerProfileBody extends StatelessWidget {
-  const _ViewerProfileBody({
-    required this.state,
-    required this.onOpenVisit,
-    required this.onViewAllVisits,
-    required this.onSavedList,
-    required this.onUpgrade,
-  });
-
-  final VisitHistorySummary state;
-  final ValueChanged<VisitHistoryItem> onOpenVisit;
-  final VoidCallback onViewAllVisits;
-  final VoidCallback onSavedList;
-  final VoidCallback onUpgrade;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<VisitHistoryItem> visits = state.items
-        .take(3)
-        .toList(growable: false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        const _ProfileSectionLabel('VISITED PLACES'),
-        const SizedBox(height: 8),
-        _ProfileSurfacePanel(
-          child: switch (state.status) {
-            VisitHistoryLoadStatus.initial ||
-            VisitHistoryLoadStatus.loading => const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            VisitHistoryLoadStatus.error => _ProfileActionRow(
-              icon: Icons.refresh,
-              title: 'Could not load visits',
-              subtitle: 'Open visit history to try again',
-              onTap: onViewAllVisits,
-            ),
-            VisitHistoryLoadStatus.ready when visits.isEmpty =>
-              _ProfileActionRow(
-                icon: Icons.place_outlined,
-                title: 'No visits yet',
-                subtitle: 'Places you visit will appear here',
-                onTap: onViewAllVisits,
-              ),
-            VisitHistoryLoadStatus.ready => Column(
-              children: <Widget>[
-                for (final VisitHistoryItem visit in visits)
-                  _VisitedProfileRow(
-                    item: visit,
-                    onTap: () => onOpenVisit(visit),
-                  ),
-                if (state.items.length > visits.length)
-                  ListTile(
-                    dense: true,
-                    title: const Center(
-                      child: Text(
-                        'View all visits',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right, size: 18),
-                    onTap: onViewAllVisits,
-                  ),
-              ],
-            ),
-          },
-        ),
-        const SizedBox(height: 14),
-        const _ProfileSectionLabel('ACTIONS'),
-        const SizedBox(height: 8),
-        _ProfileSurfacePanel(
-          child: Column(
-            children: <Widget>[
-              _ProfileActionRow(
-                icon: Icons.bookmark_border,
-                title: 'Saved list',
-                onTap: onSavedList,
-              ),
-              _ViewerUpgradeRow(onTap: onUpgrade),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _VisitedProfileRow extends StatelessWidget {
-  const _VisitedProfileRow({required this.item, required this.onTap});
-
-  final VisitHistoryItem item;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final String visitedDate = MaterialLocalizations.of(
-      context,
-    ).formatMediumDate(item.visitedOn);
-    return Column(
-      children: <Widget>[
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 4,
-          ),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              RechargeTheme.profileCompactRadius,
-            ),
-            child: SizedBox(
-              width: 52,
-              height: 52,
-              child: item.coverImageUrl.isEmpty
-                  ? const ColoredBox(
-                      color: RechargeTheme.mint100,
-                      child: Icon(
-                        Icons.place_outlined,
-                        color: RechargeTheme.profileAccent,
-                      ),
-                    )
-                  : Image.network(
-                      item.coverImageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const ColoredBox(
-                        color: RechargeTheme.mint100,
-                        child: Icon(
-                          Icons.place_outlined,
-                          color: RechargeTheme.profileAccent,
-                        ),
-                      ),
-                    ),
-            ),
-          ),
-          title: Text(
-            item.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-          subtitle: Text(
-            '${item.city} · Self-reported $visitedDate',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
-        ),
-        const Divider(height: 1, indent: 72),
-      ],
-    );
-  }
-}
-
-class _ViewerUpgradeRow extends StatelessWidget {
-  const _ViewerUpgradeRow({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 3, 6, 6),
-      child: Material(
-        color: RechargeTheme.profileAccent,
-        borderRadius: BorderRadius.circular(RechargeTheme.profileCompactRadius),
-        child: ListTile(
-          dense: true,
-          leading: const Icon(Icons.workspace_premium_outlined),
-          iconColor: Colors.white,
-          textColor: Colors.white,
-          title: const Text(
-            'Upgrade account',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          trailing: const Icon(Icons.chevron_right, color: Colors.white),
-          onTap: onTap,
-        ),
-      ),
-    );
-  }
-}
-
-class _ProGeneratorProfileBody extends StatelessWidget {
-  const _ProGeneratorProfileBody({
-    required this.displayName,
-    required this.city,
-    required this.avatar,
-    required this.data,
+class _GeneratorToolsPanel extends StatelessWidget {
+  const _GeneratorToolsPanel({
     required this.onManagePage,
     required this.onCreatedEvents,
     required this.onInsights,
     required this.onBookings,
   });
-
-  final String displayName;
-  final String city;
-  final String avatar;
-  final _ProfileWorkspaceData data;
   final VoidCallback onManagePage;
   final VoidCallback onCreatedEvents;
   final VoidCallback onInsights;
   final VoidCallback onBookings;
-
   @override
-  Widget build(BuildContext context) {
-    final _CreatorListingData? listing =
-        data.publishedListing ?? data.draftListing;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        const _ProfileSectionLabel('MANAGED PAGE'),
-        const SizedBox(height: 8),
-        _ManagedPageCard(
-          title: listing?.title ?? displayName,
-          subtitle:
-              'Organizer page · ${city.trim().isEmpty ? 'Riga' : city.trim()}',
-          status: listing?.stageLabel ?? 'Active',
-          coverImageUrl: listing?.draft.media.coverImage ?? avatar,
-          onTap: onManagePage,
-        ),
-        const SizedBox(height: 14),
-        const _ProfileSectionLabel('CONTROL CENTER'),
-        const SizedBox(height: 8),
-        _ProfileSurfacePanel(
-          child: Column(
-            children: <Widget>[
-              _ProfileActionRow(
-                icon: Icons.edit_square,
-                title: 'Manage page',
-                onTap: onManagePage,
-              ),
-              _ProfileActionRow(
-                icon: Icons.event_note_outlined,
-                title: 'Created events',
-                onTap: onCreatedEvents,
-              ),
-              _ProfileActionRow(
-                icon: Icons.insights_outlined,
-                title: 'Event insights',
-                onTap: onInsights,
-              ),
-              _ProfileActionRow(
-                icon: Icons.group_outlined,
-                title: 'Bookings & requests',
-                onTap: onBookings,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ManagedPageCard extends StatelessWidget {
-  const _ManagedPageCard({
-    required this.title,
-    required this.subtitle,
-    required this.status,
-    required this.coverImageUrl,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final String status;
-  final String coverImageUrl;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _ProfileSurfacePanel(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(RechargeTheme.profileCardRadius),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  RechargeTheme.profileCompactRadius,
-                ),
-                child: SizedBox(
-                  width: 78,
-                  height: 78,
-                  child: coverImageUrl.trim().isEmpty
-                      ? const ColoredBox(
-                          color: RechargeTheme.mint100,
-                          child: Icon(
-                            Icons.storefront_outlined,
-                            color: RechargeTheme.profileAccent,
-                          ),
-                        )
-                      : Image.network(
-                          coverImageUrl.trim(),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const ColoredBox(
-                            color: RechargeTheme.mint100,
-                            child: Icon(
-                              Icons.storefront_outlined,
-                              color: RechargeTheme.profileAccent,
-                            ),
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: RechargeTheme.profileMuted),
-                    ),
-                    const SizedBox(height: 8),
-                    _ProfileStatusPill(label: status),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: <Widget>[
+      const _ProfileSectionLabel('CONTROL CENTER'),
+      const SizedBox(height: 8),
+      _ProfileSurfacePanel(
+        child: Column(
+          children: <Widget>[
+            _ProfileActionRow(
+              icon: Icons.edit_square,
+              title: 'Manage page',
+              onTap: onManagePage,
+            ),
+            _ProfileActionRow(
+              icon: Icons.event_note_outlined,
+              title: 'Created events',
+              onTap: onCreatedEvents,
+            ),
+            _ProfileActionRow(
+              icon: Icons.insights_outlined,
+              title: 'Event insights',
+              onTap: onInsights,
+            ),
+            _ProfileActionRow(
+              icon: Icons.group_outlined,
+              title: 'Bookings & requests',
+              onTap: onBookings,
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ],
+  );
 }
 
 class _ProfileSurfacePanel extends StatelessWidget {
@@ -1135,36 +673,10 @@ class _ProfileSurfacePanel extends StatelessWidget {
   }
 }
 
-class _ProfileStatusPill extends StatelessWidget {
-  const _ProfileStatusPill({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: RechargeTheme.mint100,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: RechargeTheme.profileAccent,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _LatestCreatedEvents extends StatelessWidget {
   const _LatestCreatedEvents({
     required this.data,
+    required this.canCreate,
     required this.onViewAll,
     required this.onOpenListing,
     required this.onCreate,
@@ -1174,6 +686,7 @@ class _LatestCreatedEvents extends StatelessWidget {
   });
 
   final _ProfileWorkspaceData data;
+  final bool canCreate;
   final VoidCallback onViewAll;
   final ValueChanged<_CreatorListingData> onOpenListing;
   final VoidCallback onCreate;
@@ -1205,9 +718,13 @@ class _LatestCreatedEvents extends StatelessWidget {
                 if (listings.isEmpty)
                   _ProfileActionRow(
                     icon: Icons.add_box_outlined,
-                    title: 'Create first event',
-                    subtitle: 'Start from Recharge Create Hub',
-                    onTap: onCreate,
+                    title: canCreate
+                        ? 'Create first event'
+                        : 'No created events yet',
+                    subtitle: canCreate
+                        ? 'Start from Recharge Create Hub'
+                        : null,
+                    onTap: canCreate ? onCreate : null,
                   )
                 else
                   for (final _CreatorListingData listing in listings.take(3))
@@ -1248,29 +765,32 @@ class _LatestCreatedEvents extends StatelessWidget {
             type: MaterialType.transparency,
             child: Column(
               children: <Widget>[
-                _ProfileActionRow(
-                  icon: Icons.add_box_outlined,
-                  title: 'Create Hub',
-                  subtitle: 'Open taxonomy-based creator flow',
-                  onTap: onCreate,
-                ),
-                _ProfileActionRow(
-                  icon: Icons.route_outlined,
-                  title: 'Create route',
-                  subtitle: 'Open the Route block in Create Hub',
-                  onTap: onCreateRoute,
-                ),
+                if (canCreate)
+                  _ProfileActionRow(
+                    icon: Icons.add_box_outlined,
+                    title: 'Create Hub',
+                    subtitle: 'Open taxonomy-based creator flow',
+                    onTap: onCreate,
+                  ),
+                if (canCreate)
+                  _ProfileActionRow(
+                    icon: Icons.route_outlined,
+                    title: 'Create route',
+                    subtitle: 'Open the Route block in Create Hub',
+                    onTap: onCreateRoute,
+                  ),
                 _ProfileActionRow(
                   icon: Icons.auto_awesome_outlined,
                   title: 'Create Scenario',
                   subtitle: 'Open the Scenario block in Create Hub',
                   onTap: onScenario,
                 ),
-                _ProfileActionRow(
-                  icon: Icons.calendar_today_outlined,
-                  title: 'One-time event',
-                  onTap: onCreate,
-                ),
+                if (canCreate)
+                  _ProfileActionRow(
+                    icon: Icons.calendar_today_outlined,
+                    title: 'One-time event',
+                    onTap: onCreate,
+                  ),
                 _ProfileActionRow(
                   icon: Icons.group_outlined,
                   title: 'Find people',
@@ -1407,7 +927,7 @@ class _ProfileActionRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1502,171 +1022,6 @@ class _HeroPill extends StatelessWidget {
   }
 }
 
-class _RoleTrack extends StatelessWidget {
-  const _RoleTrack({
-    required this.activeTier,
-    required this.accessSummary,
-    required this.onRoleSelected,
-  });
-
-  final ProfileRoleTier activeTier;
-  final ProfileRoleSummary accessSummary;
-  final ValueChanged<ProfileRoleTier> onRoleSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const _ProfileSectionLabel('PROFILE MODE'),
-        const SizedBox(height: 8),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE7ECE6)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: _RoleCard(
-                    title: 'User',
-                    description: 'Discover, save, and join activities.',
-                    active: activeTier == ProfileRoleTier.user,
-                    unlocked: true,
-                    icon: Icons.person_outline,
-                    onTap: () => onRoleSelected(ProfileRoleTier.user),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _RoleCard(
-                    title: 'Creator',
-                    description: 'Create events and places for others.',
-                    active: activeTier == ProfileRoleTier.creator,
-                    unlocked: accessSummary.canCreate,
-                    icon: Icons.edit_calendar_outlined,
-                    onTap: accessSummary.canCreate
-                        ? () => onRoleSelected(ProfileRoleTier.creator)
-                        : null,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _RoleCard(
-                    title: 'Pro',
-                    description: 'Generate scenarios, routes, and smart plans.',
-                    active: activeTier == ProfileRoleTier.proGenerator,
-                    unlocked: accessSummary.canGenerate,
-                    icon: Icons.auto_awesome_outlined,
-                    onTap: accessSummary.canGenerate
-                        ? () => onRoleSelected(ProfileRoleTier.proGenerator)
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({
-    required this.title,
-    required this.description,
-    required this.active,
-    required this.unlocked,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String description;
-  final bool active;
-  final bool unlocked;
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color foreground = active
-        ? Colors.white
-        : unlocked
-        ? const Color(0xFF0B3028)
-        : const Color(0xFF9AA39E);
-    return Tooltip(
-      message: description,
-      child: InkWell(
-        onTap: unlocked ? onTap : null,
-        borderRadius: BorderRadius.circular(10),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: active ? const Color(0xFF0B3028) : const Color(0xFFF3F5F2),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(icon, size: 18, color: foreground),
-                const SizedBox(height: 5),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                _RoleStatusBadge(active: active, unlocked: unlocked),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoleStatusBadge extends StatelessWidget {
-  const _RoleStatusBadge({required this.active, required this.unlocked});
-
-  final bool active;
-  final bool unlocked;
-
-  @override
-  Widget build(BuildContext context) {
-    final String label = active ? 'Active' : (unlocked ? 'Open' : 'Locked');
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: active ? Colors.white.withValues(alpha: 0.18) : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        child: Text(
-          label,
-          maxLines: 1,
-          style: TextStyle(
-            color: active ? Colors.white : const Color(0xFF0B3028),
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _RoleWorkspace extends StatelessWidget {
   const _RoleWorkspace({
     required this.roleSummary,
@@ -1727,28 +1082,31 @@ class _RoleWorkspace extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
-        GridView.count(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 1.08,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _WorkspaceMetric(
-              label: 'Saved',
-              value: data.savedCount.toString(),
-              icon: Icons.bookmark,
+            Expanded(
+              child: _WorkspaceMetric(
+                label: 'Saved',
+                value: data.savedCount.toString(),
+                icon: Icons.bookmark,
+              ),
             ),
-            _WorkspaceMetric(
-              label: 'Routes',
-              value: data.scenarioCount.toString(),
-              icon: Icons.route,
+            const SizedBox(width: 8),
+            Expanded(
+              child: _WorkspaceMetric(
+                label: 'Routes',
+                value: data.scenarioCount.toString(),
+                icon: Icons.route,
+              ),
             ),
-            _WorkspaceMetric(
-              label: 'Searches',
-              value: data.searchCount.toString(),
-              icon: Icons.tune,
+            const SizedBox(width: 8),
+            Expanded(
+              child: _WorkspaceMetric(
+                label: 'Searches',
+                value: data.searchCount.toString(),
+                icon: Icons.tune,
+              ),
             ),
           ],
         ),
@@ -1780,8 +1138,7 @@ class _RoleWorkspace extends StatelessWidget {
             onCreate: onCreateFromSmartSearch,
           ),
         ],
-        if ((roleSummary.isCreator || roleSummary.isProGenerator) &&
-            data.hasCreatorPublications) ...<Widget>[
+        if (roleSummary.canCreate && data.hasCreatorPublications) ...<Widget>[
           const SizedBox(height: 10),
           _CreatorPublicationsPanel(
             data: data,
@@ -1824,7 +1181,7 @@ class _RoleWorkspace extends StatelessWidget {
   }
 
   List<Widget> _workspaceActions() {
-    if (roleSummary.isProGenerator) {
+    if (roleSummary.canGenerate) {
       return <Widget>[
         _WorkspaceActionRow(
           icon: Icons.auto_awesome,
@@ -1850,7 +1207,7 @@ class _RoleWorkspace extends StatelessWidget {
         ),
       ];
     }
-    if (roleSummary.isCreator) {
+    if (roleSummary.canCreate) {
       return <Widget>[
         _WorkspaceActionRow(
           icon: Icons.add_circle,
@@ -1927,10 +1284,11 @@ class _WorkspaceMetric extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Icon(icon, color: colorScheme.primary, size: 20),
-            const Spacer(),
+            const SizedBox(height: 8),
             Text(
               value,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -2671,7 +2029,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
       }
     }
 
-    if (roleSummary.isProGenerator) {
+    if (roleSummary.canGenerate) {
       steps.add(
         _CreatorNextStepData(
           icon: Icons.auto_awesome,

@@ -114,7 +114,7 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
     _ensureIdentityLoaded(widget.userId);
     final AccountExperience experience =
         identityController?.state.effectiveExperience ??
-        AccountExperience.viewer;
+        AccountExperience.personal;
     final bool isProfessional =
         experience == AccountExperience.professionalPage;
     final List<_RechargeDestination> destinations = isProfessional

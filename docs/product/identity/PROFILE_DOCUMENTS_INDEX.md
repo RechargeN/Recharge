@@ -2,97 +2,55 @@
 
 Status: **Reference index — fully non-normative, no exceptions** (see §0)
 
-Version: **1.8** (registers `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` v1.10,
-which refreshes its own sibling-count framing to the six-document,
-three-pair model — the last of the six documents whose own framing text
-still described the stale four-document group; §0.1's per-document status
-table and §1's registry row updated accordingly)
+Version: **2.0** — PVR-01/07 retirement pointers
 
-Date: **2026-09-07**
+Date: **2026-10-10**
 
 Scope: **cross-document hygiene layer over the profile-surface documents;
 documentation only**
 
-## 0. Purpose, authority and non-normative boundary
+## 0. Purpose and non-normative boundary
 
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md`, `CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
-`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`,
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`,
-`PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` and
-`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` are six Draft, audience-scoped
-documents over the same canonical aggregates (`UserProfile`,
-`CreatorVerification`, Create content, `ManagedPage`, Favorites, Scenario,
-Follow, etc.). Each restates, in its own §0/§1.1, the same kind
-of cross-cutting fact — who owns which concern, which values an enum has,
-which version of which sibling it was last checked against — independently
-of the others. This index exists so those facts have one place to live
-instead of six, and so open cross-document conflicts are tracked with an
-explicit maturity level instead of being silently assumed resolved.
+Reference only: this index creates no rules, acceptance or runtime authority.
+ADR 0021 accepts unified personal UI; Draft full-release specs remain Draft.
+Four active surface owners: Creator / Public Creator / Professional Page /
+Public Professional Page. Viewer source paths are retired compatibility pointers;
+original bytes remain in archive 01. They are not independent policy owners.
 
-**This entire document is non-normative, without exception.** Nothing here
-binds implementation, and nothing here outranks any sibling document's own
-text, any Accepted ADR, or any Approved specification. Priority order for
-all matters recorded by this index remains whatever the owning documents
-establish; this index decides nothing — it records candidates, directions,
-and open conflicts, and states plainly which of those it is doing in every
-case, using §5's maturity ladder.
+### 0.1 Current concern routing
 
-### 0.1 Three private/public pairs, six documents
-
-`PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` v2.31 split its public-facing
-audience into `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`;
-`VIEWER_PROFILE_FUNCTIONAL_SPEC.md` v1.17 independently did the same into
-`PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md`.
-`CREATOR_PROFILE_FUNCTIONAL_SPEC.md`/`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`
-already had this shape.
-The group is now symmetric — three identities, each with a private/
-management document and a public-projection document:
-
-| Document | How it currently describes the group |
+| Concern | Active owner |
 |---|---|
-| `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | Owns the split into `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` as of v1.17 (§0) |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Pre-existing team/public split with `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`; §0 (v1.10+) now also states the current six-document, three-pair frame explicitly, refreshed from the stale four-document count |
-| `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | Same pair, public half (§0) |
-| `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | §1.1 (v2.34+) adopts the same six-document, three-pair frame explicitly |
-| `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | §1.1 states the same pair frame directly |
-| `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | New as of 2026-08-16; states the Viewer/Public-Viewer pair frame |
+| Private personal libraries, UserProfile projections, AccountStatus/sessions, VP-D/VP-AC | [Creator common part](CREATOR_PROFILE_FUNCTIONAL_SPEC.md#common-personal) |
+| Verification, publisher, Created content, identity overlay | Creator original §§3–7/9/16/22 |
+| Context projection, allowlist, privacy, Block/Mute, minors baseline rendering | [Public Creator baseline](PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md#baseline-context-projection) |
+| Eligible opt-in extended public card | Public Creator original §§1–19 |
+| Exact page membership / management / lifecycle | Professional Page |
+| Public page / moderation / page Block/Mute adaptation | Public Professional Page |
+| Follow | Joint Open VP-D12 / PP-D44 / PCP-D02; FOL-01; neither person-only nor discriminated shape adopted |
 
-**Recommended frame:**
+## 1. Current document registry — PVR-01/07
 
-```text
-Product/profile architecture:  3 identities, each a private/public pair:
-                                  Viewer <-> Public Viewer
-                                  Creator <-> Public Creator
-                                  Professional Page <-> Public Professional Page
-Conflict-precedence tier:      all 6 Draft documents on equal footing
-```
+| Document | Version | Maturity / treatment |
+|---|---|---|
+| Creator Profile | 1.11 | Draft; common personal part transferred; verification/publishing separate |
+| Public Creator Profile | 1.10 | Draft; context baseline separate from eligible extended card |
+| Professional Page | 2.35 | Draft; existing Accepted decisions unchanged |
+| Public Professional Page | 1.4 | Draft; existing Accepted decisions unchanged |
+| Viewer Profile pointer | 1.18 | Retired; original v1.17 in archive 01 |
+| Public Viewer Profile pointer | 1.1 | Retired; original v1.0 in archive 01 |
+| Professional Page Decision Package | 1.4 | Historical non-normative; dated routing note only |
+| Retirement map | 1.1 | Non-normative reference; exhaustive VP IDs / sections |
 
-**Adoption status:** the Professional Page pair and (independently) the
-Viewer pair both adopt this framing as of 2026-08-16.
-`CREATOR_PROFILE_FUNCTIONAL_SPEC.md`/`PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md`
-had the shape first but, as of this index's last direct check, still
-describe the group in their own older three-plus-a-peer terms rather than
-the three-pairs frame — expected drift in a concurrently-edited Draft
-ecosystem, not a conflict this index resolves on their behalf. This remains
-descriptive architecture hygiene, not an Accepted decision created by this
-index.
+Original version-pin and review history below is dated historical evidence;
+current transfers are verified by [03-spec-migration](../../verification/pvr-01/03-spec-migration.md).
 
-## 1. Document registry
+## Previous cross-document audit — historical reference
 
-| Document | Current version | Cited as compatible by others | Citation status |
-|---|---|---|---|
-| `VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | **v1.17** | CP/PCP cite v1.15 (stale by 2); VP's own header cites CP v1.9, PCP v1.9 (both current) and PP v2.32 (stale by 2) | v1.17 split off `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` — its own outbound snapshot is nearly current, not stale the way an earlier pass of this index recorded; see §7 |
-| `CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | **v1.10** | PCP/PP cite v1.9 (stale by 1); VP cites v1.9 | v1.10 refreshes the sibling-count framing (§0, §0.1, §23) from the four-document frame to the current six-document, three-pair model; no `CP-D`/`CP-AC` content changed |
-| `PUBLIC_CREATOR_PROFILE_FUNCTIONAL_SPEC.md` | **v1.9** | CP/PP cite v1.9; VP cites v1.9 | v1.9 separates neutral pending review from effective enforcement so a report cannot weaken an existing restriction |
-| `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | **v2.34** | CP/PCP cite v2.28 (stale by 6); VP cites v2.32 (stale by 2) | v2.34 accepts the closed typed `PP-D48` field-moderation overlay and adopts the six-document frame; v2.31 split off `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` |
-| `PUBLIC_PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` | **v1.3** (as of 2026-08-16) | PP v2.34 cites it | Public-facing projection split from `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` §8.2; owns Accepted `PPP-D01`–`06` and `PPP-AC-01`–`15`; production delivery remains separately gated |
-| `PUBLIC_VIEWER_PROFILE_FUNCTIONAL_SPEC.md` | **v1.0** (as of 2026-08-16) | PP v2.34 and Public PP v1.3 cite it | Public-facing projection split from `VIEWER_PROFILE_FUNCTIONAL_SPEC.md`; its Block/Mute rendering contract is consumed by the Public Professional Page target adaptation, while its wider content remains outside this pass |
-| `PROFESSIONAL_PAGE_SPEC_CHANGELOG.md` | **Deleted** as of 2026-08-16, at the product owner's direct instruction | n/a | Revision History inside `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md` is now the sole record; remove this row entirely once no other document still cites the deleted file |
-| `PROFESSIONAL_PAGE_DECISION_PACKAGE.md` | **v1.4** (as of 2026-08-16, not further maintained per direct product-owner instruction) | Not yet cited by any sibling document | Historical rationale record only — stale. All 47 `PP-D` IDs now have a disposition in `PROFESSIONAL_PAGE_FUNCTIONAL_SPEC.md`'s own `§20.1` as of v2.29+; this package's header still describes an older 42-of-47 state. Treat the parent spec's `§20.1` as current, not this package |
-
-A version match in this table means only that the citing document's header
-string is current — it does **not** mean the citing document has re-checked
-the cited section for actual content compatibility.
+The following pre-transfer audit is retained for rationale and unresolved
+cross-document findings. Its document counts/version pins and ownership
+wording are historical; §0–§1 above and the retirement map are the current
+routing index. This index remains entirely non-normative.
 
 ## 2. Precedence order — target vs. actual
 
