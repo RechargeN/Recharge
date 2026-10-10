@@ -1,0 +1,2 @@
+# Preserve raw Viewer rollback snapshots byte for byte.
+docs/archive/viewer-profile/** -text -diff
