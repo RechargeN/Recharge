@@ -12,6 +12,7 @@ import 'discover_catalog_composition.dart';
 import 'notifications_inbox_composition.dart';
 import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
+import 'activity_publication_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
@@ -295,6 +296,10 @@ Future<void> setupDependencies() async {
     // D3.1: default-off Place publication test entry, its own define.
     ..registerLazySingleton<PlacePublicationTestEntryGuard>(
       () => PlacePublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.2: default-off Recharge Activity publication test entry, its own define.
+    ..registerLazySingleton<ActivityPublicationTestEntryGuard>(
+      () => ActivityPublicationTestEntryGuard.fromEnvironment(sl()),
     )
     // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
     ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(

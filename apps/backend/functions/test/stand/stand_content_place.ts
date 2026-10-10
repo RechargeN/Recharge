@@ -164,7 +164,8 @@ function placeComposition(firestore: Firestore) {
   };
 }
 
-async function uploadStandImage(
+/** One stand photo through C1 Media (also used by the D3.2 stand Activity). */
+export async function uploadStandImage(
   media: ReturnType<typeof mediaFor>,
   creator: ContentActor,
   input: {

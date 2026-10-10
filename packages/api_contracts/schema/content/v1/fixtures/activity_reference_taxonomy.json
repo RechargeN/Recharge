@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "typeId": "activity",
+  "taxonomyRevisionId": "test-only-tx-activity-1",
+  "source": "TEST-ONLY subset of apps/mobile/lib/core/config/recharge_taxonomy_seed.dart and recharge_category_criteria.dart; not the accepted BCK-20 taxonomy (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md §2.3)",
+  "entries": [
+    {
+      "categoryId": "outdoor_nature_walking",
+      "subcategoryId": "forest_walk",
+      "appliesToActivity": true,
+      "profileId": "outdoor_activity",
+      "requiredCriteria": ["difficulty"]
+    },
+    {
+      "categoryId": "outdoor_nature_walking",
+      "subcategoryId": "sunset_walk",
+      "appliesToActivity": true,
+      "profileId": "outdoor_activity",
+      "requiredCriteria": ["difficulty"]
+    },
+    {
+      "categoryId": "wellness_recharge",
+      "subcategoryId": "meditation",
+      "appliesToActivity": true,
+      "profileId": "wellness_session",
+      "requiredCriteria": []
+    },
+    {
+      "categoryId": "wellness_recharge",
+      "subcategoryId": "sauna",
+      "appliesToActivity": false,
+      "profileId": "wellness_session",
+      "requiredCriteria": []
+    },
+    {
+      "categoryId": "water_activities",
+      "subcategoryId": "kayak",
+      "appliesToActivity": true,
+      "profileId": "water_activity",
+      "requiredCriteria": ["equipment_provided", "swimming_required"]
+    }
+  ]
+}

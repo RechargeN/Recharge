@@ -718,3 +718,33 @@ Limits: Create-form compatibility is a verified subset (the adaptive Create
 rules and the strict v1.0 server rules differ); validator codes are not sent to
 the client; no Catalog/Discover for Place; fake scanner/processor; no device,
 Linux or cloud claim.
+
+## D3.2 Recharge Activity through Content, Media and moderation (Emulator only)
+
+`node ../scripts/stand-d3-2-gate.mjs --yes` (from apps/backend/functions) proves
+the path end to end on the local stand and this PC
+([amendment](../../docs/product/ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md)).
+
+Backend. Activity uses the same Emulator-only `contentCommandV1` and
+`contentQueryV1` behind its own default-off local flag
+`content.activity.authoring`; the per-type gating is the D3.1 rule. The
+composition accepts `event`, `place` and `activity`, each only with an available
+validator; Rental, Collection and every type without a validator stay off. The
+accepted Activity validator is unchanged. What the Emulator cannot resolve fails
+closed: Activity reference data is a TEST-ONLY subset of the mobile taxonomy
+(`emulator_activity_taxonomy.ts`, equal to
+`packages/api_contracts/schema/content/v1/fixtures/activity_reference_taxonomy.json`)
+where an unknown pair does not apply, and the composition rule
+(`emulator_activity_dependencies.ts`) refuses any `location.linkedPlaceId`.
+Catalog keeps Activity excluded (`type_disabled`, BCK08-OD-04), Discover refuses
+it and the Booking handoff ignores it; D2 applies to Activity media.
+
+Stand. `stand-seed.mjs activity seed | verify | manifest | status`: only
+`activity seed` enables the Activity flag on the stand. The seeded Activity
+starts as an empty draft, gets a cover and two gallery photos through Media,
+then the full body, submit, staff approval and owner publish
+(`STAND_SEED_INTERRUPT_AFTER=gallery-1` is the gate's resume hook).
+
+Limits: Create-form compatibility is a verified subset; validator codes are not
+sent to the client; no linked Place, no Catalog/Discover for Activity; fake
+scanner/processor; no device, Linux or cloud claim.

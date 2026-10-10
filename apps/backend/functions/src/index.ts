@@ -993,9 +993,10 @@ export const reconcileMediaReferencesV1 = onSchedule(
   },
 );
 
-// Emulator-only authoring through Content: Event (C3) and Place (D3.1). The
-// surface is open while at least one local authoring flag (`content.event.authoring`,
-// `content.place.authoring`) is on; each type's own flag gates the commands that
+// Emulator-only authoring through Content: Event (C3), Place (D3.1) and Recharge
+// Activity (D3.2). The surface is open while at least one local authoring flag
+// (`content.event.authoring`, `content.place.authoring`, `content.activity.authoring`)
+// is on; each type's own flag gates the commands that
 // create or change publishable content (D3.1 §2.2), while the owner's hide and
 // reads stay available. Owner commands and queries only: the Content service
 // re-checks Session, verified Creator, exact Page, Media readiness and the C2
@@ -1032,6 +1033,9 @@ async function prepareContentCaller(
   const enabledTypes = authoringTypesFor({
     eventAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring),
     placeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.placeAuthoring),
+    activityAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.activityAuthoring,
+    ),
   });
   if (enabledTypes.size === 0) return refuse('type_disabled');
   return {

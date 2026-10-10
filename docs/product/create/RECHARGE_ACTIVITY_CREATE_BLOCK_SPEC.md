@@ -508,6 +508,15 @@ Local/mock slice may model these stages deterministically but cannot claim
 authoritative moderation, cross-device idempotency, server rate limiting or
 production publication.
 
+D3.2 (2026-10-11, [ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md](../ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md)):
+отдельный тестовый серверный путь, выключенный по умолчанию, проводит черновик
+Activity из этой формы через Content, Media (обложка и галерея) и модерацию C2
+только в локальном Emulator. Форма Create и её локальная публикация не
+меняются. Пока владелец Catalog не проверяет существование Place, черновик с
+`linkedPlaceId` на сервер не отправляется, а сервер такое тело отклоняет (fail
+closed). Совместимость формы с сервером — проверенное подмножество. Discover для
+Activity остаётся на локальном источнике.
+
 ## 14. Discover и public projection
 
 ### 14.1 Contract

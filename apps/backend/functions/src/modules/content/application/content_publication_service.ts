@@ -35,6 +35,7 @@ import {
   resolveContentType,
   type ContentAction,
   type ContentTypeRegistryEntry,
+  type ContentTypeRule,
 } from '../domain/content_type_registry.js';
 import {
   ContentDomainRefusal,
@@ -117,6 +118,12 @@ export interface ContentPublicationServiceDeps {
   readonly publishedObjects?: PublishedObjectLookup;
   /** Approved delegated-import modules by module id (default: none). */
   readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
+  /**
+   * Rules a composition adds on top of a type's accepted validator (default:
+   * none). They can only add issues, never lift one: a dependency the
+   * composition cannot resolve fails closed here (D3.2 §2.4).
+   */
+  readonly compositionRules?: ReadonlyMap<ContentTypeId, ContentTypeRule>;
 }
 
 export type ContentCommandData =
@@ -696,7 +703,13 @@ export class ContentPublicationService {
       throw new ContentDomainRefusal('not_found');
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
-    await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    // The composition's rules apply to the target immutable body, not the draft.
+    this.assertCompositionRules(
+      target.typeId,
+      target.body,
+      this.validationContext(draft, resolved, nowUtc, principalId(context.principal)),
+    );
     // Rollback verifies exactly the references stored in the target revision; the
     // evidence was taken for this very immutable revision before the transaction.
     const evidence = context.media;
@@ -905,14 +918,13 @@ export class ContentPublicationService {
     return entry;
   }
 
-  private assertValid(
-    entry: ContentTypeRegistryEntry,
+  private validationContext(
     draft: ContentDraft,
     resolved: ResolvedReferences,
     nowUtc: UtcInstant,
     actorUserId: string,
-  ): void {
-    const context: ContentValidationContext = {
+  ): ContentValidationContext {
+    return {
       typeId: draft.typeId,
       marketId: draft.marketId,
       publisherRef: draft.publisherRef,
@@ -927,8 +939,38 @@ export class ContentPublicationService {
       market: resolved.market,
       lookups: resolved.lookups,
     };
+  }
+
+  /**
+   * At submit and publish the draft is exactly the submitted revision (publish
+   * refuses a draft that moved on), so its body is the body being published.
+   */
+  private assertValid(
+    entry: ContentTypeRegistryEntry,
+    draft: ContentDraft,
+    resolved: ResolvedReferences,
+    nowUtc: UtcInstant,
+    actorUserId: string,
+  ): void {
+    const context = this.validationContext(draft, resolved, nowUtc, actorUserId);
     const issues = entry.validate?.(draft.body, context) ?? ['no_source_contract'];
     if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
+    this.assertCompositionRules(draft.typeId, draft.body, context);
+  }
+
+  /**
+   * The composition's rules (D3.2 §2.4) over the exact body that would become
+   * public: the submitted draft revision at submit and publish, the target
+   * immutable revision at activation. A revision published before a rule
+   * existed cannot be made public again past it.
+   */
+  private assertCompositionRules(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    context: ContentValidationContext,
+  ): void {
+    const added = this.deps.compositionRules?.get(typeId)?.(body, context) ?? [];
+    if (added.length > 0) throw new ContentDomainRefusal('validation_failed');
   }
 
   /**

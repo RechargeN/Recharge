@@ -287,3 +287,21 @@ for (const [name, mutate] of Object.entries(changes)) {
     assert.notEqual(digest(placeState(runB, { variantBase: 7, mutate })), baseline, name);
   });
 }
+
+// D3.2 (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md §7): the seeded Activity is
+// named from its own manifest entry the same way, with its own labels.
+void test('a seeded Activity is labelled from its manifest like the Place', () => {
+  const asActivity: Mutation = (state) => {
+    const seed = doc(state, standManifestCollection, 'seed');
+    seed.contentActivity = seed.contentPlace;
+    delete seed.contentPlace;
+  };
+  const activityA = digestStandState(placeState(runA, { mutate: asActivity }), []);
+  const activityB = digestStandState(placeState(runB, { variantBase: 7, mutate: asActivity }), []);
+  assert.equal(activityB.digest, activityA.digest);
+  assert.notEqual(activityA.digest, baseline);
+  const text = JSON.stringify(activityA.normalized);
+  assert.match(text, /content:seed-activity/);
+  assert.match(text, /asset:seed-activity-gallery-2/);
+  assert.doesNotMatch(text, /seed-place/);
+});

@@ -1,7 +1,9 @@
-// D3.1 §2.1 (PLACE_D3_1_PUBLICATION_AMENDMENT.md): which authoring types the
-// Emulator path may enable, and that a type outside the list or without a
-// validator can never be enabled. Pure functions only; the service behaviour
-// is in test/integration/content_place_enablement.test.ts.
+// D3.1 §2.1 (PLACE_D3_1_PUBLICATION_AMENDMENT.md) and D3.2 §2.1
+// (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md): which authoring types the Emulator
+// path may enable, and that a type outside the list or without a validator can
+// never be enabled. Pure functions only; the service behaviour is in
+// test/integration/content_place_enablement.test.ts and
+// test/integration/content_activity_enablement.test.ts.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
@@ -18,40 +20,40 @@ import {
 
 void test('each authoring flag enables exactly its own type', () => {
   const sorted = (set: ReadonlySet<string>) => [...set].sort();
-  assert.deepEqual(sorted(authoringTypesFor({ eventAuthoring: false, placeAuthoring: false })), []);
-  assert.deepEqual(sorted(authoringTypesFor({ eventAuthoring: true, placeAuthoring: false })), [
-    'event',
-  ]);
-  assert.deepEqual(sorted(authoringTypesFor({ eventAuthoring: false, placeAuthoring: true })), [
-    'place',
-  ]);
-  assert.deepEqual(sorted(authoringTypesFor({ eventAuthoring: true, placeAuthoring: true })), [
-    'event',
-    'place',
-  ]);
+  for (const eventAuthoring of [false, true])
+    for (const placeAuthoring of [false, true])
+      for (const activityAuthoring of [false, true])
+        assert.deepEqual(
+          sorted(authoringTypesFor({ eventAuthoring, placeAuthoring, activityAuthoring })),
+          [
+            ...(activityAuthoring ? ['activity'] : []),
+            ...(eventAuthoring ? ['event'] : []),
+            ...(placeAuthoring ? ['place'] : []),
+          ],
+        );
 });
 
-void test('the Emulator authoring list is Event and Place, both with an available validator', () => {
-  assert.deepEqual([...emulatorAuthoringTypes], ['event', 'place']);
+void test('the Emulator authoring list is Event, Place and Activity, each with an available validator', () => {
+  assert.deepEqual([...emulatorAuthoringTypes], ['event', 'place', 'activity']);
   for (const typeId of emulatorAuthoringTypes) {
     const entry = resolveContentType(typeId);
     assert.ok(entry !== null && isContentTypeAvailable(entry), typeId);
   }
   assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set()));
-  assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set(['event', 'place'])));
+  assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set(['event', 'place', 'activity'])));
 });
 
 void test('no other type can be enabled, with or without a validator', () => {
   const others = contentTypeIds.filter((typeId) => !emulatorAuthoringTypes.includes(typeId));
-  assert.deepEqual(others.length, contentTypeIds.length - 2);
+  assert.deepEqual(others.length, contentTypeIds.length - 3);
   for (const typeId of others) {
     assert.throws(
-      () => assertEmulatorAuthoringTypes(new Set(['place', typeId])),
+      () => assertEmulatorAuthoringTypes(new Set(['activity', typeId])),
       new RegExp(`content_authoring_type_not_allowed:${typeId}$`),
     );
   }
-  // Activity, Rental and Collection have validators and still stay off here.
-  for (const typeId of ['activity', 'rental', 'collection'] as const) {
+  // Rental and Collection have validators and still stay off here.
+  for (const typeId of ['rental', 'collection'] as const) {
     const entry = resolveContentType(typeId);
     assert.ok(entry !== null && isContentTypeAvailable(entry));
     assert.ok(others.includes(typeId));

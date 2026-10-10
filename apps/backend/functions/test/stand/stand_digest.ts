@@ -194,9 +194,13 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     if (typeof asset?.objectKeyHandle === 'string')
       labels.set(asset.objectKeyHandle, 'objk:seed-event');
   }
-  // D3.1: the seeded Place, named by its manifest.
-  const place = manifest?.contentPlace as Record<string, unknown> | undefined;
-  if (place !== undefined) {
+  // D3.1/D3.2: the seeded Place and Activity, named by their manifests.
+  for (const [manifestKey, tag] of [
+    ['contentPlace', 'seed-place'],
+    ['contentActivity', 'seed-activity'],
+  ] as const) {
+    const seeded = manifest?.[manifestKey] as Record<string, unknown> | undefined;
+    if (seeded === undefined) continue;
     for (const [key, name] of Object.entries({
       contentId: 'content',
       draftId: 'draft',
@@ -204,22 +208,22 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
       publishedRevisionId: 'revision',
       approveDecisionId: 'decision',
     })) {
-      const value = place[key];
-      if (typeof value === 'string') labels.set(value, `${name}:seed-place`);
+      const value = seeded[key];
+      if (typeof value === 'string') labels.set(value, `${name}:${tag}`);
     }
-    const gallery = Array.isArray(place.galleryAssetIds) ? place.galleryAssetIds : [];
+    const gallery = Array.isArray(seeded.galleryAssetIds) ? seeded.galleryAssetIds : [];
     const images: Array<[unknown, string]> = [
-      [place.coverAssetId, 'cover'],
+      [seeded.coverAssetId, 'cover'],
       ...gallery.map((assetId, index): [unknown, string] => [assetId, `gallery-${index + 1}`]),
     ];
     for (const [assetId, role] of images) {
       if (typeof assetId !== 'string') continue;
-      labels.set(assetId, `asset:seed-place-${role}`);
+      labels.set(assetId, `asset:${tag}-${role}`);
       const asset = raw.get(mediaCollections.assets)?.get(assetId);
       if (typeof asset?.objectKeyHandle === 'string')
-        labels.set(asset.objectKeyHandle, `objk:seed-place-${role}`);
+        labels.set(asset.objectKeyHandle, `objk:${tag}-${role}`);
       for (const [sessionId, session] of raw.get(mediaCollections.sessions) ?? [])
-        if (session.assetId === assetId) labels.set(sessionId, `upload:seed-place-${role}`);
+        if (session.assetId === assetId) labels.set(sessionId, `upload:${tag}-${role}`);
     }
   }
   return labels;

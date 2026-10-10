@@ -89,6 +89,25 @@ final class StandBackend {
   Future<Map<String, Object?>> placeManifest() =>
       _stand(<String>['place', 'manifest']);
 
+  /// D3.2: seeds (or reuses) the stand Activity and enables Activity authoring
+  /// on the stand only; prints no JSON, so only its exit code is checked.
+  Future<void> activitySeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'activity',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'activity seed failed: ${result.stderr}${result.stdout}',
+      );
+    }
+  }
+
+  /// D3.2: the ids the owner services returned for the stand Activity.
+  Future<Map<String, Object?>> activityManifest() =>
+      _stand(<String>['activity', 'manifest']);
+
   /// The C2 staff script. It holds no authority: the backend checks the staff
   /// Session and registry. A refusal (non-zero exit) still returns its JSON.
   Future<({int exitCode, Map<String, Object?> json})> moderate(

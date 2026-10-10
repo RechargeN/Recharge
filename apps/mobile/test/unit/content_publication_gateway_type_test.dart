@@ -52,6 +52,24 @@ void main() {
     },
   );
 
+  test('an Activity gateway creates Activity drafts (D3.2)', () async {
+    final _RecordingPort port = _RecordingPort();
+    await FunctionsEventPublicationGateway(
+      port: port,
+      gate: const _Open(),
+      typeId: 'activity',
+    ).createDraft(
+      publisherRef: const PublisherRef(type: PublisherType.page, id: 'page-1'),
+      marketId: 'LV',
+      body: const <String, Object?>{},
+      idempotencyKey: 'key-activity-1',
+    );
+    expect(
+      (port.calls.single.data['payload']! as Map<String, Object?>)['typeId'],
+      'activity',
+    );
+  });
+
   test(
     'draft() is the owner read getDraft with the same draft fields',
     () async {

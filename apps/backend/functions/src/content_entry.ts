@@ -9,6 +9,7 @@ import {
   resolveContentType,
 } from './modules/content/domain/content_type_registry.js';
 import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
+import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
 import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
@@ -25,19 +26,26 @@ import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 import { mediaComposition } from './media_entry.js';
 
 /**
- * Types the Emulator-only authoring path may ever enable: Event (C3) and Place
- * (D3.1). Every other type stays off here, with or without a validator.
+ * Types the Emulator-only authoring path may ever enable: Event (C3), Place
+ * (D3.1) and Recharge Activity (D3.2). Every other type stays off here, with
+ * or without a validator.
  */
-export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze(['event', 'place']);
+export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
+  'event',
+  'place',
+  'activity',
+]);
 
-/** D3.1 §2.2: the authoring types whose own flag is on. */
+/** D3.1 §2.2, D3.2 §2.2: the authoring types whose own flag is on. */
 export function authoringTypesFor(flags: {
   readonly eventAuthoring: boolean;
   readonly placeAuthoring: boolean;
+  readonly activityAuthoring: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
     ...(flags.placeAuthoring ? (['place'] as const) : []),
+    ...(flags.activityAuthoring ? (['activity'] as const) : []),
   ]);
 }
 
@@ -58,13 +66,14 @@ export function assertEmulatorAuthoringTypes(types: ReadonlySet<string>): void {
 }
 
 /**
- * C3/D3.1 Emulator-only authoring. Content is composed with the real ports it
+ * C3/D3.1/D3.2 Emulator-only authoring. Content is composed with the real ports it
  * already has: Identity publisher eligibility (Session, verified Creator, exact
  * Page), Media readiness of the exact revision, and the C2 moderation verifier,
  * which makes review mandatory before publication. Only the given authoring
  * types are enabled (default `event`), and only here; the default composition
  * enables nothing. Reference data is the synthetic Emulator data (see
- * `EmulatorSyntheticReferenceData`).
+ * `EmulatorSyntheticReferenceData`); what this composition cannot resolve
+ * fails closed through `emulatorCompositionRules` (D3.2 §2.4).
  */
 export interface EventAuthoringComposition {
   readonly content: ContentPublicationService;
@@ -100,6 +109,7 @@ export function eventAuthoringComposition(
       clock,
       ids: { newId: () => randomUUID() as EntityId },
       enabledTypes,
+      compositionRules: emulatorCompositionRules,
     },
   });
   const moderation = createEmulatorModerationService({
