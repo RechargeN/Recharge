@@ -34,7 +34,7 @@ Source worktrees and historical branch refs are preserved. A differing blob is n
 - Backend Node 22.23.2: typecheck and lint passed; unit 692/692; contract 50/50; Place/Activity enablement + publication security 31/31; format check passed.
 - Raw Viewer archive: 65/65 committed-index bytes verified against manifest.
 - Diff check: passed after raw snapshots were marked binary diffs.
-- Full Emulator suite: running; final outcome will be recorded below.
+- Full Emulator suite: inconclusive. The 900-second wrapper stopped the long run; cleanup then threw `R0 Windows emulator child cleanup failed`. Completed groups passed, but the whole suite has no success result. Do not mark this gate green.
 
 The first mobile suite crossed an IDP conflict-resolution window and was discarded. A complete repeat on the stable tree passed. The initial backend tests used PATH Node 20 and could not start because of an unsupported flag; their Node 22 repeats passed.
 
@@ -45,3 +45,14 @@ No push, remote merge, deployment, provisioning or production verification perfo
 Runtime integration is committed through `1e0517e`; report and IDP status updates are saved in the following documentation commit. Full Emulator run is still in progress (session 38793); read `apps/backend/functions/integration-emulator.log` for its terminal outcome before reporting it green. It was launched through Node 22.23.2 and the local no-cloud wrapper. Latest completed groups include Event→Booking and reconfirmation boundary-clock checks, all passing so far.
 
 Resume in `C:/Users/User/.codex/worktrees/7275/Recharge`, `codex/recharge-integration`. Recheck HEAD/status and the two Claude source heads before any edit. Do not repeat already green mobile/unit/contract suites without a new change or failure. Finish Emulator outcome, investigate any failure, update this report and verify clean tree. Mobile stand D3.1/D3.2 gates were not rerun in this consolidation and remain separate evidence. Historical M2-B and tooling exclusions remain explicit. No push authorized.
+
+
+## Resumed verification and final consolidation outcome — 2026-10-11
+
+Starting resumed HEAD `2d0d38a`; working tree clean, D3.2 source tip included by ancestry. Runtime source files unchanged during this resumed pass.
+
+A focused local Emulator repeat on Node 22.23.2 passed **25/25**, exit 0: Place callables 5 + lifecycle 7; Activity callables 5 + lifecycle 8. The no-cloud preflight passed. The command used Firebase `emulators:exec --project demo-recharge --only auth,functions,firestore,storage,pubsub` and ran the four compiled D3 test files. It covers the affected backend publication paths, not the skipped mobile stand tests or the whole backend suite.
+
+Firebase reported successful shutdown; one Java Pub/Sub child remained at localhost:8085. PID 2972, creation timestamp 2026-10-11 11:24:19 and the exact pubsub-emulator JAR/host/port were verified before stopping that process. No unrelated processes were stopped.
+
+Consolidation is committed locally. The previously documented full mobile, analyzer, boundary, unit, contract, publication-security and format results remain applicable because runtime code did not change. Full Emulator regression remains inconclusive; D3 mobile stand repeats, device/Linux/cloud/production gates and PVR acceptance gaps remain open. No push or deployment. Historical variants/tooling exclusions remain as listed above.
