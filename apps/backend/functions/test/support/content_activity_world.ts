@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { eventAuthoringComposition } from '../../src/content_entry.js';
+import type { EmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { mediaComposition } from '../../src/media_entry.js';
 import { standActivityBody, standSeedActivity } from '../stand/stand_content_activity.js';
 import { createFirebaseActor, registerSessionContext } from './booking_emulator.js';
@@ -26,9 +27,20 @@ type Answer = { readonly kind: string; readonly code?: string; readonly data?: u
  * through Content, Media and C2 moderation only; nothing is written to Content
  * storage directly. Every label is unique per run.
  */
-export function createActivityWorld(firestore: Firestore, label: string) {
-  const media = mediaComposition(firestore);
-  const images = standSeedActivity.images;
+export function createActivityWorld(
+  firestore: Firestore,
+  label: string,
+  options: {
+    readonly media?: EmulatorMediaComposition;
+    readonly images?: {
+      readonly cover: Buffer;
+      readonly gallery: readonly Buffer[];
+      readonly mediaType: string;
+    };
+  } = {},
+) {
+  const media = options.media ?? mediaComposition(firestore);
+  const images = options.images ?? { ...standSeedActivity.images, mediaType: 'image/png' };
   const composition = eventAuthoringComposition(firestore, {
     media,
     enabledTypes: new Set(['event', 'activity'] as const),
@@ -92,7 +104,7 @@ export function createActivityWorld(firestore: Firestore, label: string) {
       publisherRef: { type: 'page', id: pageId },
       contentId,
       bytes,
-      mediaType: 'image/png',
+      mediaType: images.mediaType,
       key,
     });
     return result.assetId;

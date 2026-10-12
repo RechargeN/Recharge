@@ -5,6 +5,7 @@
 // refused after the restriction is lifted without the publisher's activation
 // (before and after Content reacts), real bytes again after the activation.
 // Run by scripts/stand-d3-1-gate.mjs (needs the tools); skipped elsewhere.
+// D10 reuses these same four cases with RECHARGE_MEDIA_DELIVERY_CONTENT_TYPE=activity.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -18,9 +19,16 @@ import { createEmulatorMediaComposition } from '../../src/modules/media/infrastr
 import { FirestoreModerationRepository } from '../../src/modules/moderation/infrastructure/firestore_moderation_repository.js';
 import { MediaRestrictionVerifier } from '../../src/modules/moderation/infrastructure/media_restriction_verifier.js';
 import { emulatorFirestore } from '../support/booking_emulator.js';
+import { createActivityWorld } from '../support/content_activity_world.js';
 import { createPlaceWorld, expectData } from '../support/content_place_world.js';
 import * as samples from '../support/media_samples.js';
 
+const contentType = process.env.RECHARGE_MEDIA_DELIVERY_CONTENT_TYPE ?? 'place';
+assert.ok(
+  contentType === 'place' || contentType === 'activity',
+  'explicit supported delivery test type',
+);
+const contentLabel = contentType === 'activity' ? 'Activity' : 'Place';
 const accessFile = process.env.RECHARGE_MEDIA_TOOLS_ACCESS;
 const skip =
   accessFile === undefined ? 'run by scripts/stand-d3-1-gate.mjs (needs the local tools)' : false;
@@ -57,7 +65,8 @@ async function setup() {
       new FirestoreModerationRepository(firestore),
     ),
   });
-  const world = createPlaceWorld(firestore, 'd31-delivery', {
+  const makeWorld = contentType === 'activity' ? createActivityWorld : createPlaceWorld;
+  const world = makeWorld(firestore, `d310-${contentType}-delivery`, {
     media,
     images: {
       cover: await samples.jpeg(64, 48),
@@ -66,7 +75,8 @@ async function setup() {
       mediaType: 'image/jpeg',
     },
   });
-  const place = await world.publishedPlace();
+  const place =
+    'publishedActivity' in world ? await world.publishedActivity() : await world.publishedPlace();
   return {
     world,
     place,
@@ -112,7 +122,7 @@ async function assertRealBytes(assetId: string): Promise<void> {
 const refused = { schemaVersion: 1, kind: 'rejected', code: 'not_found' };
 
 void test(
-  'before a restriction the Place photo is delivered as its real variant bytes',
+  `before a restriction the ${contentLabel} photo is delivered as its real variant bytes`,
   { skip, timeout: 240_000 },
   async () => {
     const { photo, other } = await current();
