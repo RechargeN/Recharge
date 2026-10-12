@@ -124,6 +124,37 @@ async function main(args: readonly string[]): Promise<void> {
     }
     throw new Error('usage: activity seed | verify | manifest | status');
   }
+  if (command === 'collection') {
+    // D3.4: loaded only for this command, like the D3.1 Place command.
+    const { seedContentCollection, standCollectionStatus, verifyStandCollection } =
+      await import('./stand_content_collection.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentCollection(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} collection=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandCollection(firestore);
+      if (problems.length > 0)
+        throw new Error(`collection invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified collection invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentCollection;
+      if (manifest === undefined) throw new Error('stand Collection is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standCollectionStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: collection seed | verify | manifest | status');
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

@@ -5,6 +5,7 @@ import type {
   FeedPage,
   MapResult,
 } from './catalog_query_service.js';
+import { isListingTypeId } from '../domain/published_object_link.js';
 
 /**
  * Transport-agnostic `discoverQuery` v1 envelope over the local Catalog query
@@ -17,9 +18,20 @@ import type {
  *            map         { query, snapshotToken?, viewport? }
  *            details     { contentId, snapshotToken?, query? } }
  * ```
+ *
+ * D3.9 adds `placeLink`/`placeCandidates`; D3.4 adds `publishedObject`
+ * { marketId, typeId, contentId } and `publishedObjectCandidates`
+ * { marketId, typeId, text?, after?, limit? } for any listing type.
  */
 export type DiscoverQueryType =
-  'feed' | 'search' | 'map' | 'details' | 'placeLink' | 'placeCandidates';
+  | 'feed'
+  | 'search'
+  | 'map'
+  | 'details'
+  | 'placeLink'
+  | 'placeCandidates'
+  | 'publishedObject'
+  | 'publishedObjectCandidates';
 
 export type DiscoverWireResult = Readonly<Record<string, unknown>>;
 
@@ -32,10 +44,14 @@ const queryTypes = new Set<string>([
   'details',
   'placeLink',
   'placeCandidates',
+  'publishedObject',
+  'publishedObjectCandidates',
 ]);
 const payloadKeys: Readonly<Record<DiscoverQueryType, ReadonlySet<string>>> = {
   placeLink: new Set(['marketId', 'placeId']),
   placeCandidates: new Set(['marketId', 'text', 'after', 'limit']),
+  publishedObject: new Set(['marketId', 'typeId', 'contentId']),
+  publishedObjectCandidates: new Set(['marketId', 'typeId', 'text', 'after', 'limit']),
   feed: new Set(['query', 'snapshotToken', 'cursor']),
   search: new Set(['query', 'snapshotToken', 'cursor']),
   map: new Set(['query', 'snapshotToken', 'viewport']),
@@ -115,6 +131,21 @@ function detailsBody(result: DetailsResult): Readonly<Record<string, unknown>> {
   };
 }
 
+/** Optional bounded candidate page parameters: text ≤ 100, cursor id, limit 1–50. */
+function candidatePage(payload: Record<string, unknown>): boolean {
+  return !(
+    (payload.text !== undefined &&
+      (typeof payload.text !== 'string' || payload.text.length > 100)) ||
+    (payload.after !== undefined &&
+      (typeof payload.after !== 'string' || !contentIdPattern.test(payload.after))) ||
+    (payload.limit !== undefined &&
+      (typeof payload.limit !== 'number' ||
+        !Number.isInteger(payload.limit) ||
+        payload.limit < 1 ||
+        payload.limit > 50))
+  );
+}
+
 export async function handleDiscoverQueryRequest(
   service: CatalogQueryService,
   raw: unknown,
@@ -179,6 +210,35 @@ export async function handleDiscoverQueryRequest(
       return refusal(queryType, requestId, 'rejected', 'place_candidates_invalid');
     return ok({
       placeCandidates: await service.placeCandidates({
+        marketId: payload.marketId,
+        text: typeof payload.text === 'string' ? payload.text : '',
+        limit: typeof payload.limit === 'number' ? payload.limit : 20,
+        ...(typeof payload.after === 'string' ? { after: payload.after } : {}),
+      }),
+    });
+  }
+  if (queryType === 'publishedObject' || queryType === 'publishedObjectCandidates') {
+    if (payload.marketId !== 'LV')
+      return refusal(queryType, requestId, 'unsupported', 'market_disabled');
+    const typeId = payload.typeId;
+    if (!isListingTypeId(typeId))
+      return refusal(queryType, requestId, 'rejected', 'type_id_invalid');
+    if (queryType === 'publishedObject') {
+      if (typeof payload.contentId !== 'string' || !contentIdPattern.test(payload.contentId))
+        return refusal(queryType, requestId, 'rejected', 'content_id_invalid');
+      return ok({
+        publishedObject: await service.publishedObject({
+          typeId,
+          contentId: payload.contentId,
+          marketId: payload.marketId,
+        }),
+      });
+    }
+    if (!candidatePage(payload))
+      return refusal(queryType, requestId, 'rejected', 'published_object_candidates_invalid');
+    return ok({
+      publishedObjectCandidates: await service.publishedObjectCandidates({
+        typeId,
         marketId: payload.marketId,
         text: typeof payload.text === 'string' ? payload.text : '',
         limit: typeof payload.limit === 'number' ? payload.limit : 20,

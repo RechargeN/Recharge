@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recharge:catalog:published-object-link:v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "object"
+      ],
+      "properties": {
+        "status": {
+          "const": "eligible"
+        },
+        "object": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "typeId",
+            "contentId",
+            "publishedRevisionId",
+            "pointerRevision",
+            "marketId",
+            "title"
+          ],
+          "properties": {
+            "typeId": {
+              "enum": [
+                "place",
+                "route",
+                "session",
+                "class_workshop",
+                "rental"
+              ]
+            },
+            "contentId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "publishedRevisionId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pointerRevision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "marketId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "withheld",
+            "unknown",
+            "forbidden",
+            "unavailable"
+          ]
+        }
+      }
+    }
+  ]
+}

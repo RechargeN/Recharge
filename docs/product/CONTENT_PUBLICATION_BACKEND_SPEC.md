@@ -1848,6 +1848,34 @@ or market activation.
 - Catalog keeps Activity excluded (`type_disabled`, BCK08-OD-04); Booking
   ignores Activity effects; D2 applies to Activity media.
 
+## 43. D3.4 local amendment — Collection / Guide through Content in the Emulator
+
+Authoritative text:
+[COLLECTION_D3_4_PUBLICATION_AMENDMENT.md](COLLECTION_D3_4_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation. (Section 42 is reserved for D3.3 Rental.)
+
+- The Emulator authoring composition accepts `collection` too, only with its
+  available validator and its own default-off flag `content.collection.authoring`.
+  The accepted Collection validator and the type registry are unchanged.
+- The Content service takes an optional `publishedObjectMembership` port. For
+  Collection it asks the Catalog-owned exact-id evaluator, freshly, about the
+  exact body at submit, publish and activation: an eligible listing is `ready`;
+  a published listing of that type and market that its owner hid or moderation
+  restricted is `unavailable` and needs the author's acknowledgement in
+  `compositionReview`; an unknown id, another type, market or visibility
+  policy, and an unanswered question are refused (`validation_failed`). At
+  activation natural decay does not block; hard references and an outage do. A
+  refusal changes nothing.
+- The evaluator is one Catalog service for the listing types `place`, `route`,
+  `session`, `class_workshop`, `rental`; the D3.9 Place relation delegates to it
+  with unchanged answers. `discoverQueryV1` gains additive
+  `publishedObject`/`publishedObjectCandidates` queries. No Collection Catalog
+  projection or model exists; Catalog keeps Collection excluded (`type_disabled`,
+  BCK08-OD-04); Booking ignores Collection effects; D2 applies to its media.
+- Emulator reference data answers Collection from the pinned BCK-20 artifact:
+  any existing pair applies (as in the mobile taxonomy); an unknown pair does
+  not; validator codes are not sent to the client.
 
 ## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
 

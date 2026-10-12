@@ -1,0 +1,837 @@
+{
+  "schemaVersion": 1,
+  "typeId": "collection",
+  "source": "D3.4 §5.7: CollectionContentBodyMapper output for the Create cases of user_collection_draft.dart",
+  "accountId": "account-compat-1",
+  "publisherRef": {
+    "type": "page",
+    "id": "page-compat-1"
+  },
+  "reviewedRevision": 2,
+  "coverAssetId": "asset-cover",
+  "cases": [
+    {
+      "name": "valid",
+      "createCase": "the accepted draft: three ready Places, canonical taxonomy",
+      "unavailableStableKeys": [],
+      "expectedIssues": [],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "withheld_acknowledged",
+      "createCase": "a member hidden by its owner, acknowledged in the preview",
+      "unavailableStableKeys": [
+        "place:b7a9c1d2-0000-4000-8000-00000000d342"
+      ],
+      "expectedIssues": [],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "unavailable",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": [
+            "place:b7a9c1d2-0000-4000-8000-00000000d342"
+          ]
+        }
+      }
+    },
+    {
+      "name": "withheld_not_reviewed",
+      "createCase": "a member hidden after the preview, which saw it ready",
+      "unavailableStableKeys": [
+        "place:b7a9c1d2-0000-4000-8000-00000000d342"
+      ],
+      "expectedIssues": [
+        "collection.composition_review_mismatch"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "too_few_items",
+      "createCase": "Create lets a draft hold two items",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.min_items"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "area_missing",
+      "createCase": "no area label",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.area_required"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "short_description_missing",
+      "createCase": "no short description",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.short_description_required"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "cover_missing",
+      "createCase": "no cover photo",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.cover_image_required"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "subcategory_unknown",
+      "createCase": "a subcategory absent from the canonical taxonomy",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.subcategory_not_applicable"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "no_such_subcategory",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "curator_note_too_long",
+      "createCase": "a legacy curator note over 300 graphemes",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.curator_note_length"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Stop 1",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "curatorNote": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d343",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Esplanāde chess corner",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    },
+    {
+      "name": "local_object",
+      "createCase": "an item that references an unsaved local object",
+      "unavailableStableKeys": [],
+      "expectedIssues": [
+        "collection.item_ref_invalid",
+        "collection.local_id_unreplaced"
+      ],
+      "body": {
+        "title": "Quiet corners of central Riga",
+        "shortDescription": "Three calm stops a short walk apart",
+        "categoryId": "travel_tours",
+        "subcategoryId": "hidden_gems_tour",
+        "media": {
+          "coverImage": {
+            "mediaId": "asset-cover"
+          },
+          "gallery": []
+        },
+        "areaLabel": "Riga centre",
+        "anchor": {
+          "latitude": 56.9545,
+          "longitude": 24.1155
+        },
+        "budgetTier": "free",
+        "visibility": "public",
+        "sections": [
+          {
+            "id": "cee4983d-36fc-5438-b815-051304169bc8",
+            "title": "Parks",
+            "order": 0
+          }
+        ],
+        "items": [
+          {
+            "id": "684271e5-d16e-5683-927e-af9b5086c72b",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d341",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Kronvalda park pond",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8",
+            "curatorNote": "Benches by the water",
+            "highlight": true
+          },
+          {
+            "id": "52bbe8d7-e0b2-5791-9afa-ccc0889b1e30",
+            "ref": {
+              "objectId": "b7a9c1d2-0000-4000-8000-00000000d342",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Vērmanes garden fountain",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 1,
+            "sectionId": "cee4983d-36fc-5438-b815-051304169bc8"
+          },
+          {
+            "id": "cad7bbaa-f751-544b-871c-3d996304a5f5",
+            "ref": {
+              "objectId": "loc_place_draft_1",
+              "objectType": "place"
+            },
+            "snapshot": {
+              "title": "Stop 3",
+              "checkedAtUtc": "2026-10-12T08:00:00.000Z"
+            },
+            "sourceStatus": "ready",
+            "order": 0
+          }
+        ],
+        "compositionReview": {
+          "draftRevision": 2,
+          "reviewedAtUtc": "2026-10-12T08:30:00.000Z",
+          "acknowledgedUnavailableStableKeys": []
+        }
+      }
+    }
+  ]
+}

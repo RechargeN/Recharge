@@ -871,6 +871,8 @@ void test('delegated import never reaches Content storage except through the Con
       'resolveContentType',
       // D3.2 §2.4: Emulator rules that refuse what the composition cannot resolve.
       'emulatorCompositionRules',
+      // D3.4 §2.3: Collection membership asked from the Catalog-owned evaluator.
+      'CatalogCollectionMembership',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',
@@ -883,6 +885,9 @@ void test('delegated import never reaches Content storage except through the Con
       'ReferenceDataPort',
       'resolveContentType',
       'ContentPublicationFeed',
+      // D3.9 integrity check of the owner's immutable revision (registered in D3.4).
+      'canonicalJson',
+      'sha256Hex',
     ],
     'modules/catalog/infrastructure/emulator_catalog_composition.ts': [
       'ContentPublicationFeed',

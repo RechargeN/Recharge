@@ -85,6 +85,16 @@ export const emulatorTestGroups = Object.freeze([
     ],
   },
   {
+    // D3.4: Collection / Guide through Content with Catalog-owned membership.
+    name: "collection",
+    baselineMs: 192200,
+    timeoutMs: 390000,
+    tasks: [
+      ["lib/test/emulator/content_collection_callable.test.js"],
+      ["lib/test/emulator/content_collection_emulator_flow.test.js"],
+    ],
+  },
+  {
     name: "rules-reference",
     baselineMs: 6749,
     timeoutMs: 120000,

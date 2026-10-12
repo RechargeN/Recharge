@@ -9,6 +9,7 @@ import type {
   SourcePointer,
 } from '../application/ports.js';
 import type { ContentFact, SourceRevision } from '../domain/catalog_item.js';
+import { isListingTypeId } from '../domain/published_object_link.js';
 import type { FeedCheckpoint } from '../domain/repositories.js';
 
 function toFact(effect: ContentEffectV1): ContentFact {
@@ -92,7 +93,8 @@ export class ContentFeedCatalogSource implements ContentCatalogSource {
     const revision = await this.feed.publishedRevision(publishedRevisionId);
     if (revision === null) return null;
     if (
-      (revision.typeId === 'activity' || revision.typeId === 'place') &&
+      // Projected Activity and every exact-id relation target (D3.9, D3.4).
+      (revision.typeId === 'activity' || isListingTypeId(revision.typeId)) &&
       revision.bodyHash !== sha256Hex(canonicalJson(revision.body))
     ) {
       throw new Error('catalog_source_integrity_failed');

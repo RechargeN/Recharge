@@ -21,6 +21,11 @@ class RouteNames {
   /// Default-off Recharge Activity publication test entry (D3.2); see
   /// `ActivityPublicationTestEntryGuard`.
   static const String testActivityPublication = '/test/activity-publication';
+
+  /// Default-off Collection / Guide publication test entry (D3.4); see
+  /// `CollectionPublicationTestEntryGuard`.
+  static const String testCollectionPublication =
+      '/test/collection-publication';
   static const String discoverDetails = '/discover/details';
   static const String collectionDetails = '/collection/details';
   static const String discoverMap = '/discover/map';

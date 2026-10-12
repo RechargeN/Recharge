@@ -1,4 +1,5 @@
 import type { PlaceLinkService } from './place_link_service.js';
+import type { PublishedObjectLinkService } from './published_object_link_service.js';
 import type { ServerClock } from '../../../shared/server_clock.js';
 import { availabilityNotConnectedReason, catalogTestOnlyConfig } from '../domain/catalog_config.js';
 import type {
@@ -8,6 +9,7 @@ import type {
   CatalogOccurrence,
 } from '../domain/catalog_item.js';
 import { parseDiscoverQuery, type DiscoverQuery } from '../domain/discover_query.js';
+import type { ListingTypeId } from '../domain/published_object_link.js';
 import {
   compareKeys,
   evaluate,
@@ -147,7 +149,31 @@ export class CatalogQueryService {
     private readonly clock: ServerClock,
     private readonly activityEnabled = false,
     private readonly placeLinks?: PlaceLinkService,
+    private readonly publishedObjects?: PublishedObjectLinkService,
   ) {}
+
+  /** D3.4: exact-id status of a published listing (any listing type). */
+  publishedObject(input: {
+    readonly typeId: ListingTypeId;
+    readonly contentId: string;
+    readonly marketId: string;
+  }) {
+    return (
+      this.publishedObjects?.status(input) ?? Promise.resolve({ status: 'unavailable' as const })
+    );
+  }
+  publishedObjectCandidates(input: {
+    readonly typeId: ListingTypeId;
+    readonly marketId: string;
+    readonly text: string;
+    readonly after?: string;
+    readonly limit: number;
+  }) {
+    return (
+      this.publishedObjects?.candidates(input) ??
+      Promise.resolve({ status: 'unavailable' as const })
+    );
+  }
 
   placeLink(input: { readonly placeId: string; readonly marketId: string }) {
     return this.placeLinks?.check(input) ?? Promise.resolve({ status: 'unavailable' as const });

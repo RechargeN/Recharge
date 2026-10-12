@@ -194,12 +194,20 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     if (typeof asset?.objectKeyHandle === 'string')
       labels.set(asset.objectKeyHandle, 'objk:seed-event');
   }
-  // D3.1/D3.2: the seeded Place and Activity, named by their manifests.
-  for (const [manifestKey, tag] of [
-    ['contentPlace', 'seed-place'],
-    ['contentActivity', 'seed-activity'],
-  ] as const) {
-    const seeded = manifest?.[manifestKey] as Record<string, unknown> | undefined;
+  // D3.1/D3.2/D3.4: the seeded Place, Activity and Collection (with its member
+  // Places), named by their manifests.
+  const collection = manifest?.contentCollection as Record<string, unknown> | undefined;
+  const members = Array.isArray(collection?.members) ? (collection.members as unknown[]) : [];
+  const seededObjects: Array<readonly [Record<string, unknown> | undefined, string]> = [
+    [manifest?.contentPlace as Record<string, unknown> | undefined, 'seed-place'],
+    [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
+    [collection, 'seed-collection'],
+    ...members.map(
+      (member, index) =>
+        [member as Record<string, unknown>, `seed-collection-member-${index + 1}`] as const,
+    ),
+  ];
+  for (const [seeded, tag] of seededObjects) {
     if (seeded === undefined) continue;
     for (const [key, name] of Object.entries({
       contentId: 'content',

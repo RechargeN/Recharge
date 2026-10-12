@@ -1,4 +1,8 @@
 import type { LinkedPlaceEligibilityPort } from './ports/linked_place_eligibility_port.js';
+import type {
+  PublishedObjectMembershipPort,
+  PublishedObjectMembershipStatus,
+} from './ports/published_object_membership_port.js';
 import { publicValidationDetails } from '../domain/validation_details.js';
 import type {
   ApplyModerationDispositionCommandV1,
@@ -83,7 +87,9 @@ import type {
   PublisherEligibilityPort,
 } from './ports/publisher_eligibility_port.js';
 import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
+import { collectionRuleConfig } from '../domain/type_rules/collection_rules.js';
 import type {
+  CollectionObjectType,
   ContentValidationContext,
   PublishedObjectLookup,
 } from '../domain/type_rules/validation_context.js';
@@ -120,6 +126,12 @@ export interface ContentPublicationServiceDeps {
   readonly enabledTypes: ReadonlySet<ContentTypeId>;
   /** Live status of published objects a Collection references (Catalog/Content owners). */
   readonly publishedObjects?: PublishedObjectLookup;
+  /**
+   * D3.4: Catalog-owned membership of Collection items, read fresh for the exact
+   * body at submit, publish and activation. When given it replaces
+   * `publishedObjects` for Collection (default: none, behaviour unchanged).
+   */
+  readonly publishedObjectMembership?: PublishedObjectMembershipPort;
   /** Approved delegated-import modules by module id (default: none). */
   readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
   /**
@@ -135,6 +147,18 @@ export type ContentCommandData =
 export type ContentQueryData = ContentDraft | PublicationStatusV1 | PublishedRevision;
 
 type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
+
+/**
+ * Fresh Catalog-owned membership of one Collection body (D3.4). `lookup` feeds
+ * the accepted validator (`withheld`, `unknown` and `forbidden` read as
+ * unavailable, an outage as unresolved); `refusals` are the references that may
+ * never be published, whatever the composition review says.
+ */
+interface CollectionMembership {
+  readonly lookup: PublishedObjectLookup;
+  readonly refusals: readonly string[];
+  readonly unresolved: boolean;
+}
 
 type Principal =
   | { readonly kind: 'session'; readonly actor: ContentActor }
@@ -528,7 +552,15 @@ export class ContentPublicationService {
     assertSubmittable(draft, payload.expectedDraftRevision);
     await this.assertChangeClass(context, draft, payload.changeClass);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
-    this.assertValid(entry, draft, resolved, context.nowUtc, principalId(context.principal));
+    const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
+    this.assertValid(
+      entry,
+      draft,
+      resolved,
+      context.nowUtc,
+      principalId(context.principal),
+      membership,
+    );
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     // Early feedback only: the binding check runs where the pointer switches.
     await this.assertTransition(
@@ -590,7 +622,9 @@ export class ContentPublicationService {
       submission.marketId,
     );
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
-    this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal));
+    // Membership is read again: the submit-time answer is not reused.
+    const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
+    this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal), membership);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
@@ -717,6 +751,7 @@ export class ContentPublicationService {
       this.validationContext(draft, resolved, nowUtc, principalId(context.principal)),
     );
     await this.assertLinkedPlace(target.typeId, target.body, target.marketId);
+    await this.assertCollectionTargetMembership(target.typeId, target.body, target.marketId);
     // Rollback verifies exactly the references stored in the target revision; the
     // evidence was taken for this very immutable revision before the transaction.
     const evidence = context.media;
@@ -930,6 +965,7 @@ export class ContentPublicationService {
     resolved: ResolvedReferences,
     nowUtc: UtcInstant,
     actorUserId: string,
+    publishedObjects: PublishedObjectLookup | undefined = this.deps.publishedObjects,
   ): ContentValidationContext {
     return {
       typeId: draft.typeId,
@@ -940,9 +976,7 @@ export class ContentPublicationService {
       actorUserId,
       nowUtc,
       draftRevision: draft.revision,
-      ...(this.deps.publishedObjects === undefined
-        ? {}
-        : { publishedObjects: this.deps.publishedObjects }),
+      ...(publishedObjects === undefined ? {} : { publishedObjects }),
       market: resolved.market,
       lookups: resolved.lookups,
     };
@@ -958,9 +992,19 @@ export class ContentPublicationService {
     resolved: ResolvedReferences,
     nowUtc: UtcInstant,
     actorUserId: string,
+    membership?: CollectionMembership,
   ): void {
-    const context = this.validationContext(draft, resolved, nowUtc, actorUserId);
-    const issues = entry.validate?.(draft.body, context) ?? ['no_source_contract'];
+    const context = this.validationContext(
+      draft,
+      resolved,
+      nowUtc,
+      actorUserId,
+      membership === undefined ? this.deps.publishedObjects : membership.lookup,
+    );
+    const issues = [
+      ...(entry.validate?.(draft.body, context) ?? ['no_source_contract']),
+      ...(membership?.refusals ?? []),
+    ];
     if (issues.length > 0)
       throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
     this.assertCompositionRules(draft.typeId, draft.body, context);
@@ -1003,6 +1047,74 @@ export class ContentPublicationService {
           `activity.linked_place_${status === 'unknown' ? 'unknown' : status === 'forbidden' ? 'forbidden' : 'unresolved'}`,
         ]),
       );
+  }
+
+  /**
+   * D3.4: asks the Catalog-owned port, item by item, about the exact body that
+   * would become public. Nothing for other types or without the port. An
+   * oversized list is left to the validator and never resolved.
+   */
+  private async collectionMembership(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<CollectionMembership | undefined> {
+    const port = this.deps.publishedObjectMembership;
+    if (typeId !== 'collection' || port === undefined) return undefined;
+    const statuses = new Map<string, PublishedObjectMembershipStatus>();
+    const items = Array.isArray(body.items) ? (body.items as unknown[]) : [];
+    if (items.length <= collectionRuleConfig.maxItems)
+      for (const item of items) {
+        const ref = collectionRef(item);
+        if (ref === null || statuses.has(ref.stableKey)) continue;
+        let status: PublishedObjectMembershipStatus = 'unavailable';
+        try {
+          status = await port.statusOf({
+            objectType: ref.objectType,
+            objectId: ref.objectId,
+            marketId,
+          });
+        } catch {
+          status = 'unavailable';
+        }
+        statuses.set(ref.stableKey, status);
+      }
+    const values = [...statuses.values()];
+    return {
+      lookup: {
+        statusOf: (objectType, objectId) => {
+          const status = statuses.get(`${objectType}:${objectId}`);
+          if (status === undefined || status === 'unavailable') return undefined;
+          return status === 'ready' ? 'ready' : 'unavailable';
+        },
+      },
+      refusals: [
+        ...(values.includes('unknown') ? ['collection.item_ref_unknown'] : []),
+        ...(values.includes('forbidden') ? ['collection.item_ref_forbidden'] : []),
+      ],
+      unresolved: values.includes('unavailable'),
+    };
+  }
+
+  /**
+   * Activation makes an immutable Collection revision public again (D3.4): its
+   * references must still be resolvable and allowed. Items that became
+   * unavailable since (natural decay, CLG §3.10) do not block it, and the
+   * composition review of that revision is not re-checked.
+   */
+  private async assertCollectionTargetMembership(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<void> {
+    const membership = await this.collectionMembership(typeId, body, marketId);
+    if (membership === undefined) return;
+    const issues = [
+      ...membership.refusals,
+      ...(membership.unresolved ? ['collection.published_objects_unavailable'] : []),
+    ];
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
   }
 
   private assertCompositionRules(
@@ -1273,3 +1385,21 @@ function preflight(raw: unknown, discriminator: 'commandType' | 'queryType') {
 
 export const registeredContentTypeIds = contentTypeRegistry.map((item) => item.typeId);
 export type { PublicationPointer };
+
+/** The `{objectType, objectId}` reference of a Collection item, or null when malformed. */
+function collectionRef(item: unknown): {
+  readonly objectType: CollectionObjectType;
+  readonly objectId: string;
+  readonly stableKey: string;
+} | null {
+  if (typeof item !== 'object' || item === null || Array.isArray(item)) return null;
+  const ref = (item as Readonly<Record<string, unknown>>).ref;
+  if (typeof ref !== 'object' || ref === null || Array.isArray(ref)) return null;
+  const { objectType, objectId } = ref as Readonly<Record<string, unknown>>;
+  if (typeof objectType !== 'string' || typeof objectId !== 'string') return null;
+  return {
+    objectType: objectType as CollectionObjectType,
+    objectId,
+    stableKey: `${objectType}:${objectId}`,
+  };
+}

@@ -850,6 +850,16 @@ Replay того же requestId идемпотентен; команда и diff 
 Архивирование не использует этот контракт: это отдельная idempotent lifecycle-
 команда с `archive.collection` и publisher access.
 
+D3.4 (2026-10-12, [COLLECTION_D3_4_PUBLICATION_AMENDMENT.md](../COLLECTION_D3_4_PUBLICATION_AMENDMENT.md)):
+отдельный тестовый серверный путь, выключенный по умолчанию, проводит черновик
+Collection из этой формы через Content, Media и модерацию C2 только в локальном
+Emulator; под тем же test-guard `ItemsPickerSection` ищет опубликованные
+объекты в Catalog. Сервер принимает пункт только как ссылку на разрешённый
+опубликованный объект по точному id (решает Catalog-owned evaluator); скрытый
+или ограниченный объект требует подтверждения в `compositionReview`.
+Removal-only и архивирование, Discover/Details по серверным данным не
+реализованы; форма Create и её локальная публикация не меняются.
+
 ## §13. Discover-интеграция
 
 ### Object type
