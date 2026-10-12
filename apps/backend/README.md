@@ -748,3 +748,46 @@ then the full body, submit, staff approval and owner publish
 Limits: Create-form compatibility is a verified subset; validator codes are not
 sent to the client; no linked Place, no Catalog/Discover for Activity; fake
 scanner/processor; no device, Linux or cloud claim.
+
+## Sequential Emulator test groups (2026-10-11)
+
+From `apps/backend/functions`, `npm run test:emulator` builds once before
+starting the Emulator and executes every group in the original order. Use
+`npm run test:emulator:<group>` for an isolated named group. All use the same
+local `demo-recharge` configuration; groups never run in parallel.
+
+The baseline is the complete 210-test suite on `b1e678a`, measured through
+a temporary direct-Node harness in the original order with the build completed
+before the live run. The archived Node distribution's incomplete npm prevented
+the unmodified command from reaching tests; that attempt is not passing evidence.
+All 40 original Node invocations (including the final three globs) are retained.
+
+| Group | Measured baseline | Timeout |
+|---|---:|---:|
+| `platform` | 10.7 s | 120 s |
+| `booking` | 105.9 s | 240 s |
+| `content-media` | 158.5 s | 330 s |
+| `handoff-notifications` | 233.8 s | 450 s |
+| `place-activity` | 148.2 s | 300 s |
+| `rules-reference` | 6.7 s | 120 s |
+
+Each limit is rounded up to 30 s from `1.75 × measured duration + 30 s`, with
+a 120 s floor. The outer full-run limit is 1800 s: the sum of group limits plus
+180 s for startup and 60 s for shutdown. These are local hang bounds, not an SLO.
+A group's deadline includes all of its invocations; timeout or any nonzero exit
+makes the full run fail. Later groups still report their results sequentially.
+The Booking load-evidence mode retains its separate 900 s bound.
+
+The runner prints a unique directory under the OS temp directory. It preserves
+`emulator.log`, one log per group, and `summary.json` with durations, TAP counts,
+invocation exit codes and timeout/not-run status. Inner scripts never rebuild
+artifacts. `npm run test:emulator:runner` tests the original sequence, explicit
+selection, failure aggregation, separate logs and termination of a hung child.
+
+Rollback: restore `scripts/run-emulator-tests.mjs`,
+`functions/package.json` and this README from `b1e678a`, and remove
+`scripts/run-emulator-test-groups.mjs` and its test. Keep the evidence logs.
+
+### D3.8 standalone Activity Catalog (local Emulator only)
+
+`RECHARGE_TEST_ACTIVITY_CATALOG=true` enables the backend Activity projection/query family. Mobile requires `--dart-define=RECHARGE_TEST_DISCOVER_CATALOG=true` and `--dart-define=RECHARGE_TEST_ACTIVITY_CATALOG=true` plus existing testBackend/non-release/loopback guards. Both Activity switches default off. `node scripts/build-taxonomy-dataset.mjs --check` verifies canonical artifact, bundled mirror and manifest; `node scripts/stand-d3-8-gate.mjs --yes` builds before starting the verified demo stand, resets only its owned data, tests real mobile Feed/Search/Map/Details and stops it. Use the existing pinned Node/Java/Flutter toolchain. The stand gate is a Windows host test, not device or production evidence. No dynamic criteria or dedicated duration/bestTime facets in this first projection. Rollback: disable both Activity switches. Re-enable with reconcile/rebuild and atomic activation if an earlier set recorded `type_disabled`.

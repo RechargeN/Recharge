@@ -1,8 +1,22 @@
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, appendFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { selectGroups, suiteTimeoutMs } from "./run-emulator-test-groups.mjs";
 import { createServer } from "node:net";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+const args = process.argv.slice(2);
+const loadEvidenceMode =
+  args.length === 1 && args[0] === "--booking-load-evidence";
+const groupName =
+  args.length === 2 && args[0] === "--group" ? args[1] : undefined;
+if (args.length !== 0 && !loadEvidenceMode && groupName === undefined) {
+  throw new Error(
+    "usage: run-emulator-tests.mjs [--group NAME | --booking-load-evidence]",
+  );
+}
+const selectedGroups = selectGroups(groupName);
 
 const backendRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -178,20 +192,13 @@ process.stdout.write(
   `R0 ESM function entry loaded in ${Date.now() - loadStartedAt}ms.\n`,
 );
 
-// Both Windows cmd.exe and POSIX sh support this form. Running from the
-// package root keeps fixture/schema resolution identical to standalone gates.
-const loadEvidenceMode = process.argv.includes("--booking-load-evidence");
-if (
-  process.argv.some(
-    (argument) =>
-      argument.startsWith("--") && argument !== "--booking-load-evidence",
-  )
-) {
-  throw new Error("unsupported emulator runner option");
-}
+// The compiler above finishes before emulators:exec. Inner commands never build.
+const logDir = mkdtempSync(path.join(tmpdir(), "recharge-emulator-tests-"));
+const emulatorLog = path.join(logDir, "emulator.log");
+process.stdout.write(`Emulator logs: ${logDir}\n`);
 const insideCommand = loadEvidenceMode
-  ? "cd functions && npm run test:booking:load:inside"
-  : "cd functions && npm run test:emulator:inside";
+  ? `cd functions && "${process.execPath}" --test --experimental-test-isolation=none lib/test/emulator/booking_load_evidence.test.js`
+  : `cd functions && "${process.execPath}" ../scripts/run-emulator-test-groups.mjs`;
 
 const child = spawn(
   process.execPath,
@@ -212,39 +219,43 @@ const child = spawn(
       FUNCTIONS_EMULATOR: "true",
       FUNCTIONS_DISCOVERY_TIMEOUT: "30",
       GCLOUD_PROJECT: "demo-recharge",
+      R0_EMULATOR_GROUP: groupName ?? "",
+      R0_EMULATOR_LOG_DIR: logDir,
     },
-    stdio: "inherit",
+    stdio: ["ignore", "pipe", "pipe"],
     shell: false,
   },
 );
 
-// The bound catches a hung suite, not a slow one: the suite ran ~600 s before
-// D3.1 and ~12 min after it (PLACE_D3_1_PUBLICATION_AMENDMENT.md §10).
+for (const stream of [child.stdout, child.stderr]) {
+  stream.on("data", (chunk) => {
+    appendFileSync(emulatorLog, chunk);
+    process.stdout.write(chunk);
+  });
+}
+let timedOut = false;
+// Per-group measured bounds plus startup/shutdown allowances; load mode retains its bound.
+const timeoutMs = loadEvidenceMode ? 900_000 : suiteTimeoutMs(selectedGroups);
 const timeout = setTimeout(() => {
+  timedOut = true;
   if (process.platform === "win32" && child.pid !== undefined) {
     spawnSync("taskkill.exe", ["/pid", String(child.pid), "/t", "/f"], {
       shell: false,
     });
-  } else {
-    child.kill("SIGTERM");
-  }
-}, 900_000);
-
-const exitCode = await new Promise((resolve, reject) => {
-  child.once("error", reject);
-  child.once("exit", (code) => resolve(code ?? 1));
-});
-clearTimeout(timeout);
-cleanupWindowsListeners();
-
-if (exitCode !== 0) {
+  } else child.kill("SIGTERM");
+}, timeoutMs);
+let exitCode;
+try {
+  exitCode = await new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => resolve(code ?? 1));
+  });
+} finally {
+  clearTimeout(timeout);
+  cleanupWindowsListeners();
+}
+if (timedOut || exitCode !== 0) {
   throw new Error(
-    `Firebase emulator suite failed or was inconclusive: exit ${exitCode}`,
+    `Firebase Emulator suite failed or was inconclusive: exit ${exitCode}, timedOut=${timedOut}; logs ${logDir}`,
   );
 }
-
-process.stdout.write(
-  loadEvidenceMode
-    ? "Firebase Emulator Booking load evidence completed; production capacity remains unproven.\n"
-    : "Firebase emulator R0, RAW-C transaction, contention, security, cleanup and default-deny gates passed.\n",
-);
