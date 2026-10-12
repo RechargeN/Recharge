@@ -1,0 +1,547 @@
+{
+  "head": "b1e678a23a4db584e496a9d44593fbcf86c45dc0",
+  "branch": "",
+  "baseD38Fingerprint": "51a55dd34b12027e15f1ec22de76d85bf94da05d629d7eb750e09e18e8e2e0ce",
+  "fingerprint": "a10b8df9a266a68a4fd7b7759cfb47a4d3620fac0eeea0dee1357af1f2eb8b04",
+  "normalization": "UTF-8 bytes CRLF to LF; tracked diffs vs HEAD plus nonignored untracked files; docs/evidence excluded; fingerprint SHA256 compact sorted-key JSON files list",
+  "files": [
+    {
+      "path": "apps/backend/README.md",
+      "sha256": "926f34e04bcc38fc102f8ba6729c58ae7e333cb1b691035fc7e4054d050bd905"
+    },
+    {
+      "path": "apps/backend/functions/package.json",
+      "sha256": "98892eb01f5d1ae3ec9c28a8da47f7f64e73fe4a4c05e9c8ab26b1208af04b0c"
+    },
+    {
+      "path": "apps/backend/functions/src/content_entry.ts",
+      "sha256": "4d77d27867e6722610a11ddcab6ce9879a2f6ff3ad40f4f1b32f9e6cc648c26b"
+    },
+    {
+      "path": "apps/backend/functions/src/contracts/content_v1.ts",
+      "sha256": "0ffcbc7f9bf407ca3c02fdf0e4be627abe7dc7d3a96bf3a2feca5c823b6e8374"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/application/catalog_projector.ts",
+      "sha256": "f7856e85d7f0e7e9c75025f14f1bbfe846518c54086c7f0535d7c80b98a2bd28"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/application/catalog_query_service.ts",
+      "sha256": "5db3fc398c6a1e68a1fe196ecf1dda71b6c71bb7f160ca922a6d10c0329a9950"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/application/discover_query_handler.ts",
+      "sha256": "d55043dd6948edb64cd5f05d5ae74a3be4f7c9d4ad03be3517652277f2b5c0f4"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/application/place_link_service.ts",
+      "sha256": "fef16c90000418526fde730ee39e4a62247bad7017d0b38c58de7a893524a45b"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/application/ports.ts",
+      "sha256": "ef98a548785a084cc3247a1a5e2ded3580566b3c1800631b3d3bf963871f4b51"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/activity_projection.ts",
+      "sha256": "87586fb58311672c5ce7701298ce8318a112c4178fca0f1a7c4681a3be0ac1e0"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/catalog_config.ts",
+      "sha256": "60ea74a2519b6c29f2ea0bcd609ea6482c49d7bf0e326e16cf3df4ba29bf6da6"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/catalog_item.ts",
+      "sha256": "1de6b47a226aa66e28156046a49677942c28e8cab85e74efeed667f5b0ce086a"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/discover_query.ts",
+      "sha256": "50c401c2600223294b4833c7b3aaef94c8e2bed380b2dfaeef3003242606c24b"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/evaluation.ts",
+      "sha256": "03db1d8d4e7c2c0176a59ed2eb3d960fe7be96d395251d1d7c5452b263b7d8a9"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/place_link.ts",
+      "sha256": "1a93b99000c7152139c81868b1a6aa6db087b756320f3fa70ef53107cecfa2af"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/repositories.ts",
+      "sha256": "753b2c101b30d9c63d49ba302099bdef1674f0268be0854ed004ab1787fc5229"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/domain/snapshot.ts",
+      "sha256": "725a7014d43d7991418c6c767e33f2568c028d593fb244acb9a84de4a0020b44"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/infrastructure/content_catalog_source.ts",
+      "sha256": "6446d6e645a55dff68b3603c3481cff419ec8048d36a304ed1dc69ffc5efe6eb"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/catalog/infrastructure/emulator_catalog_composition.ts",
+      "sha256": "c682ed55c95a822773f4679937b6d4c0cae96e4fc61dbd288d2b0d0ad360cbde"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/application/content_publication_service.ts",
+      "sha256": "5acbfa4e51a3d486f23a02b83b2f747c6690cc0069cc7b68f90376d054b30130"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/application/ports/linked_place_eligibility_port.ts",
+      "sha256": "3bb86a3b725061b526cc1228181a426ccd007df63c1f22fd5136b770b9124ed6"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/application/ports/reference_data_port.ts",
+      "sha256": "673160fa0b8cd8b2877fbd503c0d8be336b3e955ef5df046ae04ac8e61f7bd20"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/domain/failures.ts",
+      "sha256": "ccac56123d87c216f256970f24334b452c24d4dc3b2a2a8dbab84553fa4ad1ff"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/domain/type_rules/activity_rules.ts",
+      "sha256": "1335f5b0eda2b306e163933aca956c2b42ab9d4218851cb70233b4f57f298d3a"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/domain/validation_details.ts",
+      "sha256": "aeef9dd78473b1d735bda8ed0c3e55f0ee9f3d16faa2561aa80abe39e02ce7fe"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/infrastructure/content_publication_feed.ts",
+      "sha256": "b7d2638ae373c052fa3f132fb81b8b709a64ebc160687c1fd6033b981509fe0f"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/content/infrastructure/emulator_reference_data.ts",
+      "sha256": "5cb41f79970e0f45062eb8fa9476472198154923989e433d34b007cc20c7716f"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/reference_data/domain/taxonomy_dataset.ts",
+      "sha256": "296e81d686b100ce66373242d70648351a6f488680052637274cedf0f3977a68"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/reference_data/infrastructure/local_taxonomy_reader.ts",
+      "sha256": "fbe7c81b9e24180b2abcd32790c4e3cfd5eae33aaaeb6b0eb336e6e48d0ca650"
+    },
+    {
+      "path": "apps/backend/functions/src/modules/reference_data/infrastructure/taxonomy_dataset.generated.ts",
+      "sha256": "7e9432de1dafafaf424a9b2ad9da9b382a4f9e8229d7fabe28389a2de6bb9d62"
+    },
+    {
+      "path": "apps/backend/functions/test/contract/catalog_activity_fixture.test.ts",
+      "sha256": "48b4559fc1400474d5f6350ec1d086259d7f32c20b8a771d414fbd6226b780e0"
+    },
+    {
+      "path": "apps/backend/functions/test/contract/content_fixture_parity.test.ts",
+      "sha256": "9c99862693a3eb67e7f1bb63ee0fe77453432ab8f6b90ac6eb2579c159c65c0d"
+    },
+    {
+      "path": "apps/backend/functions/test/contract/place_link_fixture.test.ts",
+      "sha256": "6bbe3eee03c39a8626198cdbea4f5ae41f0834f743b9933bd2a38c7bf036e2a2"
+    },
+    {
+      "path": "apps/backend/functions/test/emulator/activity_catalog_emulator_flow.test.ts",
+      "sha256": "ecc0a827d4f93b14078bab7cf40f0b50c705f7d6af5d5b51c648f463419e28fc"
+    },
+    {
+      "path": "apps/backend/functions/test/emulator/catalog_emulator_flow.test.ts",
+      "sha256": "26f75f17eb869ca893a219482dd6941c25acdedae489b07ebe5fa91303c4e116"
+    },
+    {
+      "path": "apps/backend/functions/test/emulator/content_activity_callable.test.ts",
+      "sha256": "ea41cc75cc84ea79484721a39ddf4b65a784baea43de7c489695c3e83cee14f6"
+    },
+    {
+      "path": "apps/backend/functions/test/integration/content_activity_enablement.test.ts",
+      "sha256": "9af2cb39e342bf4240821fe5255b65cf3da7b6e17de1dc462db475dbd90313d3"
+    },
+    {
+      "path": "apps/backend/functions/test/reference_data/unit/taxonomy_dataset.test.ts",
+      "sha256": "13ef88e65cebe6b8c0bd53a021e503bea9d31321f841e353e8b74b3979554dad"
+    },
+    {
+      "path": "apps/backend/functions/test/stand/stand_catalog.ts",
+      "sha256": "f5630a1462be67069ce3f6139752e6b5a27588e89d739604e13bc43500b02a90"
+    },
+    {
+      "path": "apps/backend/functions/test/support/content_activity_world.ts",
+      "sha256": "305e008fe5bfd1f5c4f30711af6c02e75fc772f93d21956e1f80d60c6e5b3f73"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/catalog/activity_projection.test.ts",
+      "sha256": "dbf6059eec4214c4fc794a80d2f9372933d489d6b23272abc8e6ccb6e3e0d855"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/catalog/catalog_domain.test.ts",
+      "sha256": "44fcc18205957e0864d22c024f0135db354b7b622ccc24d4cd80343c901d92cd"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/catalog/place_link.test.ts",
+      "sha256": "783d8a67cbca751d3b86eaa5eee5f486e20f42326eb65a6a83b99090ecee4e95"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/content/emulator_activity_taxonomy.test.ts",
+      "sha256": "2454b8ceb15fa9a14eea6f9e42c41c2b1b06137b835be58a89f4647385e627c0"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/content/type_rules_activity.test.ts",
+      "sha256": "171273332c9d74d0442bf8f94606e58fdb104daa2725f271cf0c7ac79c600141"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/content/type_rules_activity_create_compat.test.ts",
+      "sha256": "b0124072bd3f9134ff9971d5930a3c1d273abf3994fb55de5bd457fdeadec40d"
+    },
+    {
+      "path": "apps/backend/functions/test/unit/content/validation_details.test.ts",
+      "sha256": "6f5589ac43e479997ecd9b0b34863bc6b862e34bab8268803e9aec6ec292ebff"
+    },
+    {
+      "path": "apps/backend/scripts/build-taxonomy-dataset.mjs",
+      "sha256": "caa8269943d14fa0d62f0220a178c28c50e809aeb316196762c4fb552b0aa69e"
+    },
+    {
+      "path": "apps/backend/scripts/run-emulator-test-groups.mjs",
+      "sha256": "c453bff725b91dd5c724a038b258332eb4229558a0924106e5779ddce93259e3"
+    },
+    {
+      "path": "apps/backend/scripts/run-emulator-test-groups.test.mjs",
+      "sha256": "425ce8e08e912595644558c4afd729b86360670ba226137cbb6ffa585520c2ea"
+    },
+    {
+      "path": "apps/backend/scripts/run-emulator-tests.mjs",
+      "sha256": "79c5c567686140a9e7b7389aaffc0c3fbc0e0c4f81b6edabda54d91331bb55ef"
+    },
+    {
+      "path": "apps/backend/scripts/stand-d3-8-gate.mjs",
+      "sha256": "1c10698a110e431b79ffcfef70d6dab33f508bc8b471a3689f1efc3bc81bf310"
+    },
+    {
+      "path": "apps/mobile/lib/app/adapters/discover_scenario_intake_adapter.dart",
+      "sha256": "f752105bc853da9bfe89cc155f321f55cfde218663a8b5dd9e4b69cebb4290be"
+    },
+    {
+      "path": "apps/mobile/lib/app/di/activity_publication_composition.dart",
+      "sha256": "bdbae18c4c9eb26ac0759668a5840ecd4b5af7d783a8eb19d7955bc4495296ad"
+    },
+    {
+      "path": "apps/mobile/lib/app/di/discover_catalog_composition.dart",
+      "sha256": "908c6e1e2e90bba2dc77d69e73b61bccc994a64f0c70e1bb4db84a950962ef81"
+    },
+    {
+      "path": "apps/mobile/lib/app/di/service_locator.dart",
+      "sha256": "60fc661fac9cd19e0a728f8a6d9388004b8731aff38bc40a48c981a2e4ccdf39"
+    },
+    {
+      "path": "apps/mobile/lib/app/presentation/activity_publication_panel.dart",
+      "sha256": "c96b19f97007651017b3e60be3ed2b788a222b4ccbeffc3b0330c0ce864087cd"
+    },
+    {
+      "path": "apps/mobile/lib/features/auth/presentation/pages/discover_hub_page.dart",
+      "sha256": "cd213bd7a9e256435ef0f1fc8517a05b5348ccf3ac62aeb8d5245783a66cbf71"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/activity_place_link_controller.dart",
+      "sha256": "231ad35cff1d88fcfbe0a4418b27fea0309e83335f6b985413bbfb08119196c1"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/activity_publication_controller.dart",
+      "sha256": "f6c4e22245600280443ae0dbf6ddd49686a5b36da363bb7a2d07178747a4e757"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/activity_validation_feedback.dart",
+      "sha256": "f8c07b5482927fb39c5ebffa1812cf333783517ad264e25030f32950a244014d"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/activity_validation_feedback_provider.dart",
+      "sha256": "88db681143411df22a6cc913d4157f072a5931c5795a1c173a94bd4342373fc1"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/create_providers.dart",
+      "sha256": "9161567771f214c19c93c2a82f01296bfe1e4727c9f1e69e9b8dc62da638819e"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/data/functions_event_publication_gateway.dart",
+      "sha256": "a2ed8c12b53d5984afad61ba9fb15ecfe0db9159def9a04af54d260fdaef1579"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/data/repositories/catalog_activity_place_link_repository.dart",
+      "sha256": "e579e79f2a512f287011e0f8b4ef4c41c57bbb2f97f303db572a0e239bc16c0f"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/entities/activity_publication.dart",
+      "sha256": "06e085a7f57af1541970d393be41c17e89bc6f5fc96eae470dd3b3dcb955d546"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/entities/content_validation_violation.dart",
+      "sha256": "c38fbcb2b441e66d5d7e94d2a2726c209162c8ea8dbdc1af0f1f2d8d98adaaf5"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/entities/event_publication.dart",
+      "sha256": "83df1e715e0b396dbcfa115dd453ddf91c8cf9b590705b75fbbce30cd0446048"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/repositories/activity_place_link_repository.dart",
+      "sha256": "6d1b12fa2b72f13df33c9569206dabaa7d4bdb5d1d84e8d26db337f5d54e7599"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/repositories/event_publication_gateway.dart",
+      "sha256": "9df15cce191d7d837356e0d6934d6c1f899e1d943b05b9067bdb7403bee23d5b"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/usecases/build_activity_content_body.dart",
+      "sha256": "be81c2aeefdc90537bd2928d46b6b516c5901a8c2a77e84a40db1f8ab3352585"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/domain/usecases/validate_activity_draft_usecase.dart",
+      "sha256": "2da99cc46e54dedf8da40e9efb3c2814a6defc435387c06502f3d244b2aa1d26"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/presentation/pages/create_page.dart",
+      "sha256": "83f575ad5edc54a18f9f5ebb340ffeac9f2cdf9bc284c7e8311a0731f615ce9a"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/presentation/widgets/activity_create_block.dart",
+      "sha256": "776c4ca3460e324a7bd3143b0a5c3b74070119ca24180546c47e0c84580c6558"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/presentation/widgets/activity_publication_section.dart",
+      "sha256": "e758cc3c431b45814daea228d3abe2349f729b0eb4b9be74da92f23944ccd24f"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/data/models/catalog_wire_models.dart",
+      "sha256": "14c0279110547e242b66522b08129e17efece263a349a397564ad7da9070ad51"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/data/repositories/catalog_discover_repository.dart",
+      "sha256": "a5c3d3949598cd2dd69c9aa1f5377ae5e05d03ace87ab1cd0b8053690e1e0c5b"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/data/repositories/discover_repository_impl.dart",
+      "sha256": "a25dfcd62349d1ba0b4526b5c7220fb73cec72dc862f582929673140a61ddb6b"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/domain/entities/activity_catalog_facts.dart",
+      "sha256": "b074067a06e3ebf1e549cf828d4816305f655fb3c303b4a47bee27a11b4a7f60"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/domain/entities/discover_item_entity.dart",
+      "sha256": "f5a1dd821f08c2a8a4ccc8dee7505fe97509b4db6d007cafad71c234fac5f99c"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/domain/usecases/apply_time_window_usecase.dart",
+      "sha256": "2d51d2c7d9e9b564ce685a775ce91b9ec101c8b9811573c33eb186a517d87e93"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+      "sha256": "8170f9cae7b5193cf0ad2162d8fc28e90940a067e640d651a27eba529a43d945"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart",
+      "sha256": "e39f6abe1d6a4c29ed60332f402668733a88ad3322628e532429f267147ddb53"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/presentation/pages/discover_results_page.dart",
+      "sha256": "2a79f6affbe4ba474ce2241ba20a207169fe54b8d399adfe0d0505fe11647f4b"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/presentation/shell/compatibility_object_renderer.dart",
+      "sha256": "f88cc6504769ed2bbb5e82bb334805cf7f29c4c4598d54fe223c041459cbb636"
+    },
+    {
+      "path": "apps/mobile/lib/features/discover/presentation/widgets/discover_feed_section.dart",
+      "sha256": "f2aa4e4065d73887698b2346f989fdf77e330fdc505cfc5e1c578b290609d348"
+    },
+    {
+      "path": "apps/mobile/lib/features/favorites/data/models/favorite_item_model.dart",
+      "sha256": "3a6156d8c4929c23f400b60273912ffaaa61c567ee05c54bfed2b3dc6160f8eb"
+    },
+    {
+      "path": "apps/mobile/lib/features/favorites/domain/entities/favorite_item_entity.dart",
+      "sha256": "d634786891162fc28c78738d3b605254be52feee96e8d485dd7ba9c62b68279c"
+    },
+    {
+      "path": "apps/mobile/lib/features/favorites/presentation/pages/favorites_page.dart",
+      "sha256": "e0783542ca9109569232b9faefde480371fea5812777d8f37d147607a52645fd"
+    },
+    {
+      "path": "apps/mobile/test/backend_local/activity_catalog_stand_test.dart",
+      "sha256": "f1fe9c28588c02a61de49eac1022b0347bbdc1d67ab6e0965142f7be5008b178"
+    },
+    {
+      "path": "apps/mobile/test/backend_local/activity_linked_place_stand_test.dart",
+      "sha256": "2b7c536232aa0302bc627efd334852fcdb1313efe6e8db1b7d3fe0d3ef918190"
+    },
+    {
+      "path": "apps/mobile/test/backend_local/activity_publication_stand_test.dart",
+      "sha256": "0d092a92389a1ae40b4fd57b89844f2875e34efd8be34d9a7b9a138fa2c2467e"
+    },
+    {
+      "path": "apps/mobile/test/backend_local/activity_publication_ui_stand_test.dart",
+      "sha256": "19ec380dee8af8d733083a4a72ca47f0b9c12625cfb1cc32754f4944226f1768"
+    },
+    {
+      "path": "apps/mobile/test/backend_local/support/stand_backend.dart",
+      "sha256": "6e32ee826aa5d8b14dfb890b990e43b5b82b566055dbc86f6436bdbd1f4bf366"
+    },
+    {
+      "path": "apps/mobile/test/fixtures/create/user_activity_draft.dart",
+      "sha256": "b416ca1b632db72c4c31fba4927a90cc08ca8864b1719d96c9e4b62e01d77681"
+    },
+    {
+      "path": "apps/mobile/test/unit/activity_content_body_mapper_test.dart",
+      "sha256": "3b575b5b3b6754e5cd022cc5397c10832b6b365e8382b4c82d940d280159969b"
+    },
+    {
+      "path": "apps/mobile/test/unit/activity_draft_validation_test.dart",
+      "sha256": "75d8294a5333b9e72e187c464c1509f63e4eff253993fc27332649bdf5b33ae6"
+    },
+    {
+      "path": "apps/mobile/test/unit/activity_place_link_controller_test.dart",
+      "sha256": "ff6f6c6367c0bebf707fb096f3bfef1b20b880bcc1d770af8049e82a176e50f0"
+    },
+    {
+      "path": "apps/mobile/test/unit/activity_publication_controller_test.dart",
+      "sha256": "c6a1231686de49da053f1d34f175647f0ab29bb80c93d1840c2248637e6b825f"
+    },
+    {
+      "path": "apps/mobile/test/unit/activity_validation_feedback_test.dart",
+      "sha256": "0a8cae3f03fc5a19f46e5fffb7b4c3c13d38a238116c922f93277ae8ca2439ab"
+    },
+    {
+      "path": "apps/mobile/test/unit/catalog_discover_repository_test.dart",
+      "sha256": "f19591e9632862aa0da974e7968c0f52cf0f078bc6a81a521ce5421bad81d9e0"
+    },
+    {
+      "path": "apps/mobile/test/unit/content_publication_gateway_type_test.dart",
+      "sha256": "5807b63574e3e4fbcf85206619447e25a0baee172f217c77ae265cb0d181d821"
+    },
+    {
+      "path": "apps/mobile/test/unit/discover_activity_item_test.dart",
+      "sha256": "b8ea0bb167ed4b33c3fc2eea7a774571d19aabda49ed92ad1fb2f6a3f64b735e"
+    },
+    {
+      "path": "apps/mobile/test/unit/favorite_item_model_test.dart",
+      "sha256": "22c0c3ac5fb4f6508275de5e5131031443efbeb4701919d05ae12f5193b71c32"
+    },
+    {
+      "path": "apps/mobile/test/widget/activity_create_block_location_test.dart",
+      "sha256": "69010ce20558f04028aa71ccf7a0eea16193d8798049d9161e5c8432f6b2b4b8"
+    },
+    {
+      "path": "apps/mobile/test/widget/activity_create_block_test.dart",
+      "sha256": "1ea21e0ec1568ffe054f867bcf4b6aaffaa42b0f62c28f5b1ed9bec4af5825a1"
+    },
+    {
+      "path": "apps/mobile/test/widget/search_page_test.dart",
+      "sha256": "9f90fe391e4d19c7cdd68570ea93a530cfcc793e3e2f12976afe94c83e0f3721"
+    },
+    {
+      "path": "docs/architecture/LAUNCH_STATUS.md",
+      "sha256": "b4889554f55fb8a481af7e157892acd89ea36e55b73cef053bc17ba8cc8bf90b"
+    },
+    {
+      "path": "docs/product/ACTIVITY_BCK20_CATALOG_PREREQUISITE_PLAN.md",
+      "sha256": "8b6bd0d97e3fa74cecc566a35e2e09f170be762600dd0dcfc3141af9cbe9f924"
+    },
+    {
+      "path": "docs/product/ACTIVITY_BCK20_TAXONOMY_SLICE_SPEC.md",
+      "sha256": "61726d4597cb935c707e8db8baa4b962e79d34f9d4f212381f9ce8139b08dca9"
+    },
+    {
+      "path": "docs/product/ACTIVITY_CATALOG_DISCOVER_OD04_PROPOSAL.md",
+      "sha256": "cb28505e8eb890493b6157585d406bd44fe2f6432b59846a1c355f949fa108cb"
+    },
+    {
+      "path": "docs/product/ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md",
+      "sha256": "f41ea605144659aef82b4692c53841542a69a89ddce5cde235698687c0a8d41b"
+    },
+    {
+      "path": "docs/product/ACTIVITY_LINKED_PLACE_D3_9_PROPOSAL.md",
+      "sha256": "0551ebfafea4d8216f50b87eeeec102d0857319c8742f7a5a842adef5deed7f3"
+    },
+    {
+      "path": "docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md",
+      "sha256": "f3a9bc9352375f3cdee016bae55881edd1c393981f323b164c2c41c753c84930"
+    },
+    {
+      "path": "packages/api_contracts/schema/content/v1/content_result.schema.json",
+      "sha256": "7eef68ea344e30e4174c4655db4bcc9653dbef85bdd0d93fc9922afd842ab287"
+    },
+    {
+      "path": "packages/api_contracts/schema/content/v1/fixtures/activity_create_compat.json",
+      "sha256": "f9e3c56eff2f695881efc07681ec61c154dce48f8ebbdcb8bb5db3fd338905aa"
+    },
+    {
+      "path": "packages/api_contracts/schema/discover/v1/catalog_activity_item.schema.json",
+      "sha256": "f0382a6ac6fa81af69610215992911cc3d7119a966cb7d8584dadc433ec8e6d3"
+    },
+    {
+      "path": "packages/api_contracts/schema/discover/v1/fixtures/activity.json",
+      "sha256": "08de818567f43230c6d1cbd3451df768f17011c055ee4e4f3697556d89e370ae"
+    },
+    {
+      "path": "packages/api_contracts/schema/discover/v1/fixtures/place_link.json",
+      "sha256": "e9f6795f67b588e0cee1db5b437a954f04ce87b34e5a92d7493ea477c26f8dde"
+    },
+    {
+      "path": "packages/api_contracts/schema/discover/v1/place_link_result.schema.json",
+      "sha256": "465e6a79df6411d27f125f7f071579eec572be3d688ef5e1998e5bdbb9478889"
+    },
+    {
+      "path": "packages/api_contracts/schema/reference_data/v1/artifacts/category-system-1.4.3.json",
+      "sha256": "d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822"
+    },
+    {
+      "path": "packages/api_contracts/schema/reference_data/v1/artifacts/taxonomy_manifest.json",
+      "sha256": "c46905c86bf6fe5c2d8720bf2736dfd65c97800924cf543e216aef308f58d619"
+    },
+    {
+      "path": "packages/api_contracts/schema/reference_data/v1/taxonomy_dataset.schema.json",
+      "sha256": "7a964efd6fe46e81bd556c61c9eec88b234f55a710e05b4da4d264a2de0b9c55"
+    }
+  ],
+  "d39ChangedFiles": [
+    "apps/backend/functions/src/content_entry.ts",
+    "apps/backend/functions/src/modules/catalog/application/catalog_query_service.ts",
+    "apps/backend/functions/src/modules/catalog/application/discover_query_handler.ts",
+    "apps/backend/functions/src/modules/catalog/application/place_link_service.ts",
+    "apps/backend/functions/src/modules/catalog/application/ports.ts",
+    "apps/backend/functions/src/modules/catalog/domain/activity_projection.ts",
+    "apps/backend/functions/src/modules/catalog/domain/catalog_item.ts",
+    "apps/backend/functions/src/modules/catalog/domain/place_link.ts",
+    "apps/backend/functions/src/modules/catalog/infrastructure/content_catalog_source.ts",
+    "apps/backend/functions/src/modules/catalog/infrastructure/emulator_catalog_composition.ts",
+    "apps/backend/functions/src/modules/content/application/content_publication_service.ts",
+    "apps/backend/functions/src/modules/content/application/ports/linked_place_eligibility_port.ts",
+    "apps/backend/functions/src/modules/content/domain/validation_details.ts",
+    "apps/backend/functions/src/modules/content/infrastructure/content_publication_feed.ts",
+    "apps/backend/functions/test/contract/place_link_fixture.test.ts",
+    "apps/backend/functions/test/emulator/activity_catalog_emulator_flow.test.ts",
+    "apps/backend/functions/test/integration/content_activity_enablement.test.ts",
+    "apps/backend/functions/test/unit/catalog/place_link.test.ts",
+    "apps/backend/scripts/stand-d3-8-gate.mjs",
+    "apps/mobile/lib/app/di/activity_publication_composition.dart",
+    "apps/mobile/lib/app/di/discover_catalog_composition.dart",
+    "apps/mobile/lib/app/di/service_locator.dart",
+    "apps/mobile/lib/features/create/application/activity_place_link_controller.dart",
+    "apps/mobile/lib/features/create/application/activity_validation_feedback.dart",
+    "apps/mobile/lib/features/create/application/create_providers.dart",
+    "apps/mobile/lib/features/create/data/repositories/catalog_activity_place_link_repository.dart",
+    "apps/mobile/lib/features/create/domain/repositories/activity_place_link_repository.dart",
+    "apps/mobile/lib/features/create/domain/usecases/build_activity_content_body.dart",
+    "apps/mobile/lib/features/create/presentation/pages/create_page.dart",
+    "apps/mobile/lib/features/create/presentation/widgets/activity_create_block.dart",
+    "apps/mobile/lib/features/discover/data/models/catalog_wire_models.dart",
+    "apps/mobile/lib/features/discover/domain/entities/activity_catalog_facts.dart",
+    "apps/mobile/lib/features/discover/presentation/shell/compatibility_object_renderer.dart",
+    "apps/mobile/test/backend_local/activity_linked_place_stand_test.dart",
+    "apps/mobile/test/unit/activity_content_body_mapper_test.dart",
+    "apps/mobile/test/unit/activity_place_link_controller_test.dart",
+    "apps/mobile/test/unit/activity_validation_feedback_test.dart",
+    "apps/mobile/test/widget/activity_create_block_location_test.dart",
+    "docs/architecture/LAUNCH_STATUS.md",
+    "docs/product/ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md",
+    "docs/product/ACTIVITY_LINKED_PLACE_D3_9_PROPOSAL.md",
+    "packages/api_contracts/schema/discover/v1/catalog_activity_item.schema.json",
+    "packages/api_contracts/schema/discover/v1/fixtures/place_link.json",
+    "packages/api_contracts/schema/discover/v1/place_link_result.schema.json"
+  ]
+}

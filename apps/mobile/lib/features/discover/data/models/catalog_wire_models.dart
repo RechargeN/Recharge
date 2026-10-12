@@ -1,3 +1,4 @@
+import '../../domain/entities/activity_catalog_facts.dart';
 // Strict readers for the Emulator-only `discoverQuery` v1 answers (E2). A
 // shape the client does not know is a FormatException, never a guess.
 
@@ -117,11 +118,39 @@ final class CatalogCard {
     required this.endAtUtc,
     required this.price,
     required this.distanceMeters,
+    this.activity,
   });
 
   factory CatalogCard.fromWire(Object? value) {
     final Map<String, Object?> map = _map(value, 'card');
     final Map<String, Object?> ref = _map(map['ref'], 'card.ref');
+    if (ref['typeId'] == 'activity') {
+      final CatalogActivityItem item = CatalogActivityItem.fromWire(
+        <String, Object?>{
+          ...map,
+          'typeId': 'activity',
+          'contentId': ref['contentId'],
+        },
+      );
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: null,
+        point: item.point,
+        timezoneId: '',
+        occurrenceId: '',
+        startAtUtc: null,
+        endAtUtc: null,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        activity: item,
+      );
+    }
     if (ref['typeId'] != 'event') {
       throw FormatException('catalog.card.ref.typeId ${ref['typeId']}');
     }
@@ -159,10 +188,11 @@ final class CatalogCard {
   final CatalogPoint? point;
   final String timezoneId;
   final String occurrenceId;
-  final DateTime startAtUtc;
-  final DateTime endAtUtc;
+  final DateTime? startAtUtc;
+  final DateTime? endAtUtc;
   final CatalogPrice? price;
   final double? distanceMeters;
+  final CatalogActivityItem? activity;
 }
 
 final class CatalogFeedPage {
@@ -315,6 +345,161 @@ final class CatalogEventItem {
   final DateTime publishedAtUtc;
 }
 
+final class CatalogActivityItem {
+  const CatalogActivityItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.point,
+    required this.facts,
+  });
+  factory CatalogActivityItem.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'activity');
+    if (map['typeId'] != 'activity' ||
+        map['schemaRevision'] != 'catalog-activity-projection-v1') {
+      throw const FormatException('catalog.activity.schema');
+    }
+    for (final String field in <String>[
+      'occurrences',
+      'price',
+      'timezoneId',
+      'bookingRef',
+      'criteria',
+    ]) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.activity.forbidden:$field');
+      }
+    }
+    final Map<String, Object?> refs = _map(
+      map['referenceRevisions'],
+      'referenceRevisions',
+    );
+    if (_string(refs, 'taxonomyRevisionId') !=
+        'taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822') {
+      throw const FormatException('catalog.activity.taxonomy');
+    }
+    final Map<String, Object?> duration = _map(
+      map['typicalDurationMinutes'],
+      'duration',
+    );
+    final int min = _int(duration, 'min'), max = _int(duration, 'max');
+    if (min <= 0 || max < min) {
+      throw const FormatException('catalog.activity.duration');
+    }
+    final Map<String, Object?>? group = map['suggestedGroupSize'] == null
+        ? null
+        : _map(map['suggestedGroupSize'], 'suggestedGroupSize');
+    if (group != null &&
+        (_int(group, 'min') <= 0 || _int(group, 'max') < _int(group, 'min'))) {
+      throw const FormatException('catalog.activity.group');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    if (point == null ||
+        !point.latitude.isFinite ||
+        !point.longitude.isFinite ||
+        point.latitude.abs() > 90 ||
+        point.longitude.abs() > 180) {
+      throw const FormatException('catalog.activity.point');
+    }
+    final Map<String, Object?> best = map['bestTime'] == null
+        ? <String, Object?>{}
+        : _map(map['bestTime'], 'bestTime');
+    final String? time = _optionalString(best, 'timeOfDay'),
+        season = _optionalString(best, 'season');
+    if (time != null &&
+            !<String>[
+              'morning',
+              'afternoon',
+              'evening',
+              'night',
+              'any',
+            ].contains(time) ||
+        season != null &&
+            !<String>[
+              'winter',
+              'spring',
+              'summer',
+              'autumn',
+              'any',
+            ].contains(season)) {
+      throw const FormatException('catalog.activity.bestTime');
+    }
+    final Map<String, Object?> caution = map['accessCaution'] == null
+        ? <String, Object?>{}
+        : _map(map['accessCaution'], 'accessCaution');
+    final Map<String, Object?>? contribution =
+        map['optionalContribution'] == null
+        ? null
+        : _map(map['optionalContribution'], 'optionalContribution');
+    final Map<String, Object?>? amount = contribution?['amountHint'] == null
+        ? null
+        : _map(contribution!['amountHint'], 'amountHint');
+    if (contribution != null &&
+        !<String>[
+          'purchase',
+          'donation',
+          'other',
+        ].contains(contribution['kind'])) {
+      throw const FormatException('catalog.activity.contribution');
+    }
+    if (amount != null && _int(amount, 'amountMinor') <= 0) {
+      throw const FormatException('catalog.activity.amount');
+    }
+    final List<String> gallery = _list(map, 'galleryMediaIds')
+        .map((Object? id) {
+          if (id is! String || id.isEmpty) {
+            throw const FormatException('catalog.activity.gallery');
+          }
+          return id;
+        })
+        .toList(growable: false);
+    return CatalogActivityItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      point: point,
+      facts: ActivityCatalogFacts(
+        durationMinMinutes: min,
+        durationMaxMinutes: max,
+        suggestedGroupMin: group == null ? null : _int(group, 'min'),
+        suggestedGroupMax: group == null ? null : _int(group, 'max'),
+        fullDescription: _optionalString(map, 'fullDescription') ?? '',
+        addressLine: _optionalString(map, 'addressLine') ?? '',
+        accessNotes: _optionalString(map, 'accessNotes') ?? '',
+        isInformal: caution['isInformal'] == true,
+        cautionNote: _optionalString(caution, 'note') ?? '',
+        timeOfDay: time,
+        season: season,
+        contributionKind: contribution == null
+            ? null
+            : _string(contribution, 'kind'),
+        contributionNote: contribution == null
+            ? null
+            : _string(contribution, 'note'),
+        amountMinor: amount == null ? null : _int(amount, 'amountMinor'),
+        currencyCode: amount == null ? null : _string(amount, 'currencyCode'),
+        galleryMediaIds: gallery,
+        linkedPlaceId: map['linkedPlace'] == null ? null : _string(_map(map['linkedPlace'], 'linkedPlace'), 'contentId'),
+        linkedPlaceTitle: map['linkedPlace'] == null ? null : _string(_map(map['linkedPlace'], 'linkedPlace'), 'title'),
+      ),
+    );
+  }
+  final String contentId,
+      publishedRevisionId,
+      title,
+      shortDescription,
+      categoryId,
+      subcategoryId;
+  final CatalogPoint point;
+  final ActivityCatalogFacts facts;
+}
+
 /// `listed` carries the item; `excluded`/`absent` never do.
 final class CatalogDetails {
   const CatalogDetails({
@@ -322,6 +507,7 @@ final class CatalogDetails {
     required this.reason,
     required this.item,
     required this.changedSinceSnapshot,
+    this.activity,
   });
 
   factory CatalogDetails.fromWire(Object? value) {
@@ -330,6 +516,13 @@ final class CatalogDetails {
     if (state != 'listed' && state != 'excluded' && state != 'absent') {
       throw FormatException('catalog.details.state $state');
     }
+    if (state == 'listed' &&
+        !<String>[
+          'event',
+          'activity',
+        ].contains(_map(map['item'], 'item')['typeId'])) {
+      throw const FormatException('catalog.details.typeId');
+    }
     final Object? changed = map['changedSinceSnapshot'];
     if (changed is! bool) {
       throw const FormatException('catalog.details.changedSinceSnapshot');
@@ -337,7 +530,13 @@ final class CatalogDetails {
     return CatalogDetails(
       state: state,
       reason: _optionalString(map, 'reason'),
-      item: state == 'listed' ? CatalogEventItem.fromWire(map['item']) : null,
+      item: state == 'listed' && _map(map['item'], 'item')['typeId'] == 'event'
+          ? CatalogEventItem.fromWire(map['item'])
+          : null,
+      activity:
+          state == 'listed' && _map(map['item'], 'item')['typeId'] == 'activity'
+          ? CatalogActivityItem.fromWire(map['item'])
+          : null,
       changedSinceSnapshot: changed,
     );
   }
@@ -345,6 +544,7 @@ final class CatalogDetails {
   final String state;
   final String? reason;
   final CatalogEventItem? item;
+  final CatalogActivityItem? activity;
   final bool changedSinceSnapshot;
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../application/activity_place_link_controller.dart';
 
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../application/activity_create_config.dart';
@@ -16,11 +17,19 @@ class ActivityCreateBlock extends StatefulWidget {
     required this.controller,
     required this.state,
     required this.onPublished,
+    this.serverErrors = const {},
+    this.serverValidationFailed = false,
+    this.publicationEditing = false,
+    this.placeLinks,
   });
 
   final CreateController controller;
   final CreateState state;
   final VoidCallback onPublished;
+  final Map<String, String> serverErrors;
+  final bool serverValidationFailed;
+  final bool publicationEditing;
+  final ActivityPlaceLinkController? placeLinks;
 
   @override
   State<ActivityCreateBlock> createState() => _ActivityCreateBlockState();
@@ -51,6 +60,21 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     super.dispose();
   }
 
+  String? _serverError(String path) {
+    if (path == '/body/optionalContribution/amountHint/amountMinor') {
+      final currency = widget
+          .serverErrors['/body/optionalContribution/amountHint/currencyCode'];
+      if (currency != null) return currency;
+    }
+    var current = path;
+    while (current != '/body') {
+      final error = widget.serverErrors[current];
+      if (error != null) return error;
+      current = current.substring(0, current.lastIndexOf('/'));
+    }
+    return null;
+  }
+
   List<ActivityValidationIssue> _issuesFor(String sectionId) => widget
       .state
       .activityValidationIssues
@@ -72,6 +96,18 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        if (widget.publicationEditing)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              'Editing draft only. The published version stays unchanged until review and publication.',
+            ),
+          ),
+        if (widget.serverValidationFailed)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text('Check the Activity fields and submit again.'),
+          ),
         _ActivityProgressHeader(
           steps: activityCreateSteps,
           currentIndex: widget.state.activityStep,
@@ -125,7 +161,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
       children: <Widget>[
         TextFormField(
           controller: _field('title', draft.title),
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(
+            labelText: 'Title',
+            errorText: _serverError('/body/title'),
+          ),
           onChanged: widget.controller.updateTitle,
         ),
         const SizedBox(height: 12),
@@ -135,7 +174,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           // shrink-wrapped dropdown Row (AC-14 accessibility gate) — expand
           // to the field width so the label ellipsizes instead.
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Category'),
+          decoration: InputDecoration(
+            labelText: 'Category',
+            errorText: _serverError('/body/categoryId'),
+          ),
           items: <DropdownMenuItem<CreateTaxonomyCategory>>[
             for (final CreateTaxonomyCategory category in categories)
               DropdownMenuItem<CreateTaxonomyCategory>(
@@ -152,7 +194,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         DropdownButtonFormField<CreateTaxonomySubcategory>(
           initialValue: selectedSubcategory,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Subcategory'),
+          decoration: InputDecoration(
+            labelText: 'Subcategory',
+            errorText: _serverError('/body/subcategoryId'),
+          ),
           items: <DropdownMenuItem<CreateTaxonomySubcategory>>[
             for (final CreateTaxonomySubcategory sub
                 in selectedCategory?.subcategories ??
@@ -172,14 +217,18 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('shortDescription', draft.shortDescription),
-          decoration: const InputDecoration(labelText: 'Short description'),
+          decoration: InputDecoration(
+            labelText: 'Short description',
+            errorText: _serverError('/body/shortDescription'),
+          ),
           onChanged: widget.controller.updateShortDescription,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('fullDescription', draft.fullDescription),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Full description (optional)',
+            errorText: _serverError('/body/fullDescription'),
           ),
           maxLines: 4,
           onChanged: widget.controller.updateFullDescription,
@@ -187,9 +236,18 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('coverImage', draft.media.coverImage),
-          decoration: const InputDecoration(labelText: 'Cover image URL'),
+          decoration: InputDecoration(
+            labelText: 'Cover image URL',
+            errorText: _serverError('/body/media/coverImage'),
+          ),
           onChanged: widget.controller.updateCoverImage,
         ),
+        for (final path in const ['/body/media', '/body/media/gallery'])
+          if (widget.serverErrors[path] case final String error)
+            Text(
+              error,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
         for (final ActivityValidationIssue issue in _issuesFor('basics'))
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -200,6 +258,81 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           ),
       ],
     );
+  }
+
+  Widget _placePicker(ActivityDraftData activity) {
+    final links = widget.placeLinks;
+    Widget body() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Text('Linked Place (optional)'),
+        if (activity.location.linkedPlaceId != null)
+          Text(
+            links?.selected?.title ??
+                'Selected Place: ${activity.location.linkedPlaceId}',
+          ),
+        if (activity.location.linkedPlaceId != null)
+          TextButton(
+            onPressed: () {
+              links?.clear();
+              widget.controller.updateActivityLinkedPlaceId('');
+            },
+            child: const Text('Remove linked Place'),
+          ),
+        if (links == null ||
+            <String>[
+              'unknown',
+              'forbidden',
+              'unavailable',
+            ].contains(links.status))
+          const Text(
+            'Linked Place is unavailable. Remove or replace the link.',
+          ),
+        if (_serverError('/body/location/linkedPlaceId')
+            case final String error)
+          Text(error),
+        if (links != null) ...<Widget>[
+          TextField(
+            controller: _field('placeSearch', ''),
+            decoration: const InputDecoration(
+              labelText: 'Search published Places',
+            ),
+            onSubmitted: links.search,
+          ),
+          TextButton(
+            onPressed: links.status == 'loading'
+                ? null
+                : () => links.search(_fields['placeSearch']!.text),
+            child: const Text('Search Places'),
+          ),
+          if (links.status == 'loading') const LinearProgressIndicator(),
+          if (links.status == 'available' && links.items.isEmpty)
+            const Text('No matching Places on this page.'),
+          for (final place in links.items)
+            ListTile(
+              title: Text(place.title),
+              trailing: const Icon(Icons.add_link),
+              onTap: () async {
+                final id = await links.resolve(place.id);
+                if (mounted && id != null) {
+                  widget.controller.updateActivityLinkedPlaceId(id);
+                }
+              },
+            ),
+          if (links.nextCursor != null)
+            TextButton(
+              onPressed: links.status == 'loading' ? null : links.more,
+              child: const Text('More Places'),
+            ),
+        ],
+      ],
+    );
+    return links == null
+        ? body()
+        : AnimatedBuilder(
+            animation: links,
+            builder: (context, child) => body(),
+          );
   }
 
   Widget _locationStep(ActivityDraftData activity) {
@@ -218,7 +351,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   'latitude',
                   activity.location.latitude?.toString() ?? '',
                 ),
-                decoration: const InputDecoration(labelText: 'Latitude'),
+                decoration: InputDecoration(
+                  labelText: 'Latitude',
+                  errorText: _serverError('/body/location'),
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
                   signed: true,
                   decimal: true,
@@ -237,7 +373,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   'longitude',
                   activity.location.longitude?.toString() ?? '',
                 ),
-                decoration: const InputDecoration(labelText: 'Longitude'),
+                decoration: InputDecoration(
+                  labelText: 'Longitude',
+                  errorText: _serverError('/body/location'),
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
                   signed: true,
                   decimal: true,
@@ -252,6 +391,12 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           ],
         ),
         const SizedBox(height: 12),
+        if (widget.serverErrors['/body/location/pinConfirmed']
+            case final String error)
+          Text(
+            error,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         FilledButton(
           onPressed: widget.controller.confirmActivityPin,
           child: Text(
@@ -266,15 +411,19 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             'addressLine',
             activity.location.addressLine ?? '',
           ),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Address line (optional)',
+            errorText: _serverError('/body/location/addressLine'),
           ),
           onChanged: widget.controller.updateActivityAddressLine,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('accessNotes', activity.location.accessNotes),
-          decoration: const InputDecoration(labelText: 'Access notes'),
+          decoration: InputDecoration(
+            labelText: 'Access notes',
+            errorText: _serverError('/body/location/accessNotes'),
+          ),
           maxLines: 2,
           onChanged: widget.controller.updateActivityAccessNotes,
         ),
@@ -287,27 +436,23 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                 note: caution?.note,
               ),
         ),
-        if (isInformal)
+        if (isInformal || (caution?.note ?? '').trim().isNotEmpty)
           TextFormField(
             controller: _field('accessCautionNote', caution?.note ?? ''),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'What to know before you go',
+              errorText:
+                  widget.serverErrors['/body/location/accessCaution/note'],
             ),
             maxLines: 2,
-            onChanged: (String value) => widget.controller
-                .updateActivityAccessCaution(isInformal: true, note: value),
+            onChanged: (String value) =>
+                widget.controller.updateActivityAccessCaution(
+                  isInformal: isInformal,
+                  note: value,
+                ),
           ),
         const SizedBox(height: 12),
-        TextFormField(
-          controller: _field(
-            'linkedPlaceId',
-            activity.location.linkedPlaceId ?? '',
-          ),
-          decoration: const InputDecoration(
-            labelText: 'Linked Place id (optional)',
-          ),
-          onChanged: widget.controller.updateActivityLinkedPlaceId,
-        ),
+        _placePicker(activity),
         SwitchListTile(
           title: const Text('It is customary to leave something here'),
           value: contribution != null,
@@ -324,7 +469,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         if (contribution != null) ...<Widget>[
           DropdownButtonFormField<ActivityContributionKind>(
             initialValue: contribution.kind,
-            decoration: const InputDecoration(labelText: 'Contribution kind'),
+            decoration: InputDecoration(
+              labelText: 'Contribution kind',
+              errorText: _serverError('/body/optionalContribution/kind'),
+            ),
             items: const <DropdownMenuItem<ActivityContributionKind>>[
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.purchase,
@@ -351,8 +499,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           ),
           TextFormField(
             controller: _field('contributionNote', contribution.note ?? ''),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'e.g. "Coffee on the counter, optional"',
+              errorText: _serverError('/body/optionalContribution/note'),
             ),
             onChanged: (String value) =>
                 widget.controller.updateActivityOptionalContribution(
@@ -369,8 +518,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   : (contribution.amountHint!.amountMinor / 100)
                         .toStringAsFixed(2),
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Approximate amount (optional)',
+              errorText: widget
+                  .serverErrors['/body/optionalContribution/amountHint/amountMinor'],
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
@@ -410,8 +561,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
       children: <Widget>[
         DropdownButtonFormField<ActivityTimeOfDay>(
           initialValue: activity.bestTime?.timeOfDay,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Best time of day (optional)',
+            errorText: _serverError('/body/bestTime/timeOfDay'),
           ),
           items: <DropdownMenuItem<ActivityTimeOfDay>>[
             for (final ActivityTimeOfDay value in ActivityTimeOfDay.values)
@@ -429,8 +581,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         DropdownButtonFormField<ActivitySeason>(
           initialValue: activity.bestTime?.season,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Best season (optional)',
+            errorText: _serverError('/body/bestTime/season'),
           ),
           items: <DropdownMenuItem<ActivitySeason>>[
             for (final ActivitySeason value in ActivitySeason.values)
@@ -454,8 +607,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   'durationMin',
                   activity.typicalDurationMinutes.min.toString(),
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Typical duration, min (minutes)',
+                  errorText:
+                      widget.serverErrors['/body/typicalDurationMinutes'],
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (String value) {
@@ -476,8 +631,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   'durationMax',
                   activity.typicalDurationMinutes.max.toString(),
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Typical duration, max (minutes)',
+                  errorText:
+                      widget.serverErrors['/body/typicalDurationMinutes'],
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (String value) {
@@ -513,8 +670,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               Expanded(
                 child: TextFormField(
                   controller: _field('groupMin', groupSize.min.toString()),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Group, min people',
+                    errorText: _serverError('/body/suggestedGroupSize'),
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (String value) {
@@ -532,8 +690,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               Expanded(
                 child: TextFormField(
                   controller: _field('groupMax', groupSize.max.toString()),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Group, max people',
+                    errorText: _serverError('/body/suggestedGroupSize'),
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (String value) {
@@ -549,6 +708,11 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               ),
             ],
           ),
+        if (widget.serverErrors['/body/criteria'] case final String error)
+          Text(
+            error,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         if (criteria != null)
           for (final RechargeCriteriaFieldDefinition field in criteria.fields)
             Padding(
@@ -557,6 +721,17 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   ? SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(field.id.replaceAll('_', ' ')),
+                      subtitle:
+                          widget.serverErrors['/body/criteria/${field.id}'] ==
+                              null
+                          ? null
+                          : Text(
+                              widget
+                                  .serverErrors['/body/criteria/${field.id}']!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
                       value: criteriaValues[field.id] as bool? ?? false,
                       onChanged: (bool value) => widget.controller
                           .updateCategoryCriterion(field.id, value),
@@ -568,6 +743,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                       ),
                       decoration: InputDecoration(
                         labelText: field.id.replaceAll('_', ' '),
+                        errorText:
+                            widget.serverErrors['/body/criteria/${field.id}'],
                       ),
                       onChanged: (String value) => widget.controller
                           .updateCategoryCriterion(field.id, value),
@@ -638,13 +815,25 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             child: FilledButton(
               onPressed: isLast
                   ? () async {
+                      if (widget.publicationEditing) {
+                        await widget.controller.saveDraft();
+                        if (widget.controller.state.saveStatus ==
+                            CreateSaveStatus.saved) {
+                          widget.onPublished();
+                        }
+                        return;
+                      }
                       final bool published = await widget.controller
                           .publishDraft();
                       if (published) widget.onPublished();
                     }
                   : () => widget.controller.goToActivityStep(step + 1),
               child: Text(
-                isLast ? 'Send for review' : 'Save & continue',
+                isLast
+                    ? (widget.publicationEditing
+                          ? 'Save draft & return'
+                          : 'Send for review')
+                    : 'Save & continue',
                 textAlign: TextAlign.center,
               ),
             ),

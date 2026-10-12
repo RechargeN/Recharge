@@ -19,6 +19,8 @@ import 'booking_test_entry_guard.dart';
 import 'event_publication_composition.dart';
 import 'media_composition.dart';
 import 'service_locator.dart';
+import 'discover_catalog_composition.dart';
+import '../../features/create/domain/usecases/build_activity_content_body.dart';
 
 /// Compile-time switch of its own, separate from the Booking, Event and Place
 /// ones. `bool.fromEnvironment` only recognises `true`:
@@ -105,6 +107,7 @@ ActivityPublicationController activityPublicationControllerFor({
       );
   return ActivityPublicationController(
     accountId: accountId,
+    mapper: const ActivityContentBodyMapper(allowLinkedPlace: activityLinkedPlaceTestEntryDefined && !kReleaseMode),
     drafts: drafts,
     gateway: gateway,
     reader: gateway,

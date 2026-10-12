@@ -1,3 +1,5 @@
+import 'activity_place_link_controller.dart';
+import '../domain/repositories/activity_place_link_repository.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,3 +125,16 @@ final scenarioTransitPickerControllerProvider =
       ref.onDispose(controller.dispose);
       return controller;
     });
+
+final activityPlaceLinkControllerProvider = ChangeNotifierProvider.autoDispose
+    .family<
+      ActivityPlaceLinkController,
+      ({String draftId, String? selectedId})
+    >(
+      (ref, key) => ActivityPlaceLinkController(
+        sl.isRegistered<ActivityPlaceLinkRepository>()
+            ? sl<ActivityPlaceLinkRepository>()
+            : const UnavailableActivityPlaceLinkRepository(),
+        selectedId: key.selectedId,
+      ),
+    );

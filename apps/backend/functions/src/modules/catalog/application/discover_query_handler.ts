@@ -18,14 +18,24 @@ import type {
  *            details     { contentId, snapshotToken?, query? } }
  * ```
  */
-export type DiscoverQueryType = 'feed' | 'search' | 'map' | 'details';
+export type DiscoverQueryType =
+  'feed' | 'search' | 'map' | 'details' | 'placeLink' | 'placeCandidates';
 
 export type DiscoverWireResult = Readonly<Record<string, unknown>>;
 
 type MapViewport = NonNullable<Parameters<CatalogQueryService['map']>[0]['viewport']>;
 
-const queryTypes = new Set<string>(['feed', 'search', 'map', 'details']);
+const queryTypes = new Set<string>([
+  'feed',
+  'search',
+  'map',
+  'details',
+  'placeLink',
+  'placeCandidates',
+]);
 const payloadKeys: Readonly<Record<DiscoverQueryType, ReadonlySet<string>>> = {
+  placeLink: new Set(['marketId', 'placeId']),
+  placeCandidates: new Set(['marketId', 'text', 'after', 'limit']),
   feed: new Set(['query', 'snapshotToken', 'cursor']),
   search: new Set(['query', 'snapshotToken', 'cursor']),
   map: new Set(['query', 'snapshotToken', 'viewport']),
@@ -142,6 +152,40 @@ export async function handleDiscoverQueryRequest(
   });
   const snapshotToken = payload.snapshotToken;
 
+  if (queryType === 'placeLink' || queryType === 'placeCandidates') {
+    if (payload.marketId !== 'LV')
+      return refusal(queryType, requestId, 'unsupported', 'market_disabled');
+    if (queryType === 'placeLink') {
+      if (typeof payload.placeId !== 'string' || !contentIdPattern.test(payload.placeId))
+        return refusal(queryType, requestId, 'rejected', 'place_id_invalid');
+      return ok({
+        placeLink: await service.placeLink({
+          placeId: payload.placeId,
+          marketId: payload.marketId,
+        }),
+      });
+    }
+    if (
+      (payload.text !== undefined &&
+        (typeof payload.text !== 'string' || payload.text.length > 100)) ||
+      (payload.after !== undefined &&
+        (typeof payload.after !== 'string' || !contentIdPattern.test(payload.after))) ||
+      (payload.limit !== undefined &&
+        (typeof payload.limit !== 'number' ||
+          !Number.isInteger(payload.limit) ||
+          payload.limit < 1 ||
+          payload.limit > 50))
+    )
+      return refusal(queryType, requestId, 'rejected', 'place_candidates_invalid');
+    return ok({
+      placeCandidates: await service.placeCandidates({
+        marketId: payload.marketId,
+        text: typeof payload.text === 'string' ? payload.text : '',
+        limit: typeof payload.limit === 'number' ? payload.limit : 20,
+        ...(typeof payload.after === 'string' ? { after: payload.after } : {}),
+      }),
+    });
+  }
   if (queryType === 'details') {
     if (typeof payload.contentId !== 'string' || !contentIdPattern.test(payload.contentId))
       return refusal(queryType, requestId, 'rejected', 'content_id_invalid');

@@ -9,6 +9,8 @@ import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
 import 'discover_catalog_composition.dart';
+import '../../features/create/domain/repositories/activity_place_link_repository.dart';
+import '../../features/create/data/repositories/catalog_activity_place_link_repository.dart';
 import 'notifications_inbox_composition.dart';
 import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
@@ -312,6 +314,7 @@ Future<void> setupDependencies() async {
         guard: sl(),
       ),
     )
+    ..registerLazySingleton<ActivityPlaceLinkRepository>(() => CatalogActivityPlaceLinkRepository(query: sl<CatalogQueryPort>().query, marketId: sl<MarketConfig>().countryCode, enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode))
     ..registerLazySingleton<BookingSupportDirectoryProvider>(
       () => getApplicationSupportDirectory,
     )

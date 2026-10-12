@@ -1,3 +1,4 @@
+import '../../application/activity_validation_feedback_provider.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -248,10 +249,21 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 CreateObjectType.activity) ...<Widget>[
               const SizedBox(height: 12),
               ActivityCreateBlock(
+                placeLinks: ref.watch(activityPlaceLinkControllerProvider((draftId: state.draft.id, selectedId: state.draft.activityData?.location.linkedPlaceId))),
+                publicationEditing:
+                    widget.seedParameters['publicationEdit'] == 'activity',
+                serverErrors: ref
+                    .watch(activityValidationFeedbackProvider)
+                    .fieldsFor(user.id, state.draft),
+                serverValidationFailed: ref
+                    .watch(activityValidationFeedbackProvider)
+                    .matches(user.id, state.draft),
                 controller: controller,
                 state: state,
                 onPublished: () =>
-                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+                    widget.seedParameters['publicationEdit'] == 'activity'
+                    ? context.pop()
+                    : ref.read(appRouterProvider).go(RouteNames.createSuccess),
               ),
             ] else if (state.draft.objectType ==
                 CreateObjectType.route) ...<Widget>[

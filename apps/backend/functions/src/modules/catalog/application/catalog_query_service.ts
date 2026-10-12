@@ -1,6 +1,12 @@
+import type { PlaceLinkService } from './place_link_service.js';
 import type { ServerClock } from '../../../shared/server_clock.js';
 import { availabilityNotConnectedReason, catalogTestOnlyConfig } from '../domain/catalog_config.js';
-import type { CatalogEventItem, CatalogOccurrence } from '../domain/catalog_item.js';
+import type {
+  CatalogEventItem,
+  CatalogActivityItem,
+  CatalogItem,
+  CatalogOccurrence,
+} from '../domain/catalog_item.js';
 import { parseDiscoverQuery, type DiscoverQuery } from '../domain/discover_query.js';
 import {
   compareKeys,
@@ -31,7 +37,7 @@ export type CatalogQueryFailure = {
   readonly code: string;
 };
 
-export interface CatalogCard {
+export interface CatalogEventCard {
   readonly ref: { readonly typeId: 'event'; readonly contentId: string };
   readonly publishedRevisionId: string;
   readonly title: string;
@@ -55,6 +61,15 @@ export interface CatalogCard {
   readonly changedSinceSnapshot: boolean;
   readonly projectedAtUtc: string;
 }
+
+export type CatalogCard =
+  | CatalogEventCard
+  | (CatalogActivityItem & {
+      readonly ref: { readonly typeId: 'activity'; readonly contentId: string };
+      readonly distanceMeters: number | null;
+      readonly changedSinceSnapshot: boolean;
+      readonly projectedAtUtc: string;
+    });
 
 export interface CatalogFreshness {
   readonly overall: Freshness;
@@ -80,7 +95,7 @@ export interface MapResult {
   readonly freshness: CatalogFreshness;
   /** Every leaf is a member of the Feed result of the same token. */
   readonly leaves: readonly {
-    readonly ref: { readonly typeId: 'event'; readonly contentId: string };
+    readonly ref: { readonly typeId: 'event' | 'activity'; readonly contentId: string };
     readonly point: NonNullable<CatalogEventItem['point']>;
     readonly title: string;
   }[];
@@ -92,15 +107,15 @@ export interface DetailsResult {
   readonly kind: 'succeeded';
   readonly state: 'listed' | 'excluded' | 'absent';
   readonly reason: string | null;
-  readonly item: CatalogEventItem | null;
+  readonly item: CatalogItem | null;
   readonly changedSinceSnapshot: boolean;
 }
 
 interface Eligible {
   readonly version: ItemVersionRecord;
-  readonly item: CatalogEventItem;
+  readonly item: CatalogItem;
   readonly key: SortKey;
-  readonly occurrence: CatalogOccurrence;
+  readonly occurrence: CatalogOccurrence | null;
   /** At the snapshot's pinned server time. */
   readonly occurrenceState: 'running' | 'upcoming';
   readonly remaining: number;
@@ -130,7 +145,30 @@ export class CatalogQueryService {
     private readonly repository: CatalogRepository,
     private readonly references: ReferenceRevisionsPort,
     private readonly clock: ServerClock,
+    private readonly activityEnabled = false,
+    private readonly placeLinks?: PlaceLinkService,
   ) {}
+
+  placeLink(input: { readonly placeId: string; readonly marketId: string }) {
+    return this.placeLinks?.check(input) ?? Promise.resolve({ status: 'unavailable' as const });
+  }
+  placeCandidates(input: {
+    readonly marketId: string;
+    readonly text: string;
+    readonly after?: string;
+    readonly limit: number;
+  }) {
+    return (
+      this.placeLinks?.candidates(input) ?? Promise.resolve({ status: 'unavailable' as const })
+    );
+  }
+  async #publicActivity(item: CatalogActivityItem): Promise<CatalogActivityItem> {
+    const { linkedPlaceId, linkedPlace: ignored, ...publicItem } = item;
+    void ignored;
+    if (!linkedPlaceId) return publicItem;
+    const result = await this.placeLink({ placeId: linkedPlaceId, marketId: item.marketId });
+    return result.status === 'eligible' ? { ...publicItem, linkedPlace: result.place } : publicItem;
+  }
 
   async feed(request: {
     readonly query: unknown;
@@ -170,7 +208,7 @@ export class CatalogQueryService {
     readonly snapshotToken?: string;
     readonly cursor?: string;
   }): Promise<FeedPage | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(request.query);
+    const parsed = parseDiscoverQuery(request.query, this.activityEnabled);
     if (parsed.ok && parsed.query.textTokens.length === 0)
       return { kind: 'invalid', code: 'text_required' };
     return this.feed(request);
@@ -220,7 +258,7 @@ export class CatalogQueryService {
       )
         continue;
       leaves.push({
-        ref: { typeId: 'event' as const, contentId: entry.item.contentId },
+        ref: { typeId: entry.item.typeId, contentId: entry.item.contentId },
         point,
         title: entry.item.title,
       });
@@ -254,9 +292,17 @@ export class CatalogQueryService {
         item: null,
         changedSinceSnapshot: false,
       };
+    if (current.item?.typeId === 'activity') {
+      if (!this.activityEnabled) return { kind: 'unsupported', code: 'type_disabled:activity' };
+      const pinned = await this.references.readTaxonomyRevision?.(
+        current.item.referenceRevisions.taxonomyRevisionId ?? '',
+      );
+      if (!pinned?.ok)
+        return { kind: 'unavailable', code: pinned?.code ?? 'taxonomy_revision_unavailable' };
+    }
     let changed = false;
     if (request.snapshotToken !== undefined && request.query !== undefined) {
-      const parsed = parseDiscoverQuery(request.query);
+      const parsed = parseDiscoverQuery(request.query, this.activityEnabled);
       if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
       const check = verifySnapshot(
         request.snapshotToken,
@@ -273,7 +319,12 @@ export class CatalogQueryService {
       kind: 'succeeded',
       state: current.state,
       reason: current.reason,
-      item: current.state === 'listed' ? current.item : null,
+      item:
+        current.state === 'listed'
+          ? current.item?.typeId === 'activity'
+            ? await this.#publicActivity(current.item)
+            : current.item
+          : null,
       changedSinceSnapshot: changed,
     };
   }
@@ -290,14 +341,32 @@ export class CatalogQueryService {
     snapshotToken: string | undefined,
     paging: boolean,
   ): Promise<Resolved | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(rawQuery);
+    const parsed = parseDiscoverQuery(rawQuery, this.activityEnabled);
     if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
     const requestNow = this.clock.now().getTime();
     const set = await this.#activeSet();
     if (set === null) return { kind: 'unavailable', code: 'catalog_not_initialized' };
-    const current = await this.references.current(parsed.query.marketId, 'event');
+    const currents = new Map(
+      await Promise.all(
+        parsed.query.typeIds.map(
+          async (typeId) =>
+            [typeId, await this.references.current(parsed.query.marketId, typeId)] as const,
+        ),
+      ),
+    );
+    const current = currents.get(parsed.query.typeIds[0] ?? 'event') ?? null;
     const referenceRevision =
-      current === null ? 'unknown' : Object.values(current).sort().join('|');
+      parsed.query.typeIds.length === 1
+        ? current === null
+          ? 'unknown'
+          : Object.values(current).sort().join('|')
+        : [...currents]
+            .map(
+              ([typeId, refs]) =>
+                typeId + ':' + (refs === null ? 'unknown' : Object.values(refs).sort().join('|')),
+            )
+            .sort()
+            .join(';');
 
     let token: string;
     let claims: SnapshotClaims;
@@ -326,12 +395,18 @@ export class CatalogQueryService {
       claims = issued.claims;
     }
 
-    const versions = await this.repository.versionsForSet(
-      set.setId,
-      parsed.query.marketId,
-      'event',
-      catalogTestOnlyConfig.candidateLimit * 4 + 1,
-    );
+    const versions = (
+      await Promise.all(
+        parsed.query.typeIds.map((typeId) =>
+          this.repository.versionsForSet(
+            set.setId,
+            parsed.query.marketId,
+            typeId,
+            catalogTestOnlyConfig.candidateLimit * 4 + 1,
+          ),
+        ),
+      )
+    ).flat();
     const byContent = new Map<string, ItemVersionRecord[]>();
     for (const version of versions) {
       const list = byContent.get(version.contentId) ?? [];
@@ -353,19 +428,56 @@ export class CatalogQueryService {
       if (atSnapshot?.state !== 'listed' || atSnapshot.item === null) continue;
       // Tombstone wins over the snapshot: hidden now means not served.
       if (latest !== undefined && latest.state !== 'listed') continue;
-      const evaluation = evaluate(atSnapshot.item, parsed.query, snapshotNow);
+      if (atSnapshot.item.typeId === 'activity') {
+        if (!this.activityEnabled) continue;
+        const pinned = await this.references.readTaxonomyRevision?.(
+          atSnapshot.item.referenceRevisions.taxonomyRevisionId ?? '',
+        );
+        if (!pinned?.ok)
+          return { kind: 'unavailable', code: pinned?.code ?? 'taxonomy_revision_unavailable' };
+      }
+      // Media suppression from the current pointer wins over old snapshots.
+      const latestActivity = latest?.item?.typeId === 'activity' ? latest.item : null;
+      const rawSnapshotItem =
+        latest?.item && latest.sourcePointerRevision > atSnapshot.sourcePointerRevision
+          ? {
+              ...atSnapshot.item,
+              coverMediaId:
+                latest.item.coverMediaId === null ||
+                latest.publishedRevisionId !== atSnapshot.publishedRevisionId
+                  ? null
+                  : atSnapshot.item.coverMediaId,
+              ...(atSnapshot.item.typeId === 'activity' && latestActivity
+                ? {
+                    galleryMediaIds: atSnapshot.item.galleryMediaIds.filter((id) =>
+                      latestActivity.galleryMediaIds.includes(id),
+                    ),
+                  }
+                : {}),
+            }
+          : atSnapshot.item;
+      const snapshotItem =
+        rawSnapshotItem.typeId === 'activity'
+          ? await this.#publicActivity(rawSnapshotItem)
+          : rawSnapshotItem;
+      const evaluation = evaluate(snapshotItem, parsed.query, snapshotNow);
       if (!evaluation.eligible) continue;
       reference = strictest(
         reference,
-        referenceFreshness(atSnapshot.item.referenceRevisions, current),
+        referenceFreshness(
+          atSnapshot.item.referenceRevisions,
+          currents.get(atSnapshot.item.typeId) ?? null,
+        ),
       );
       eligible.push({
         version: atSnapshot,
-        item: atSnapshot.item,
+        item: snapshotItem,
         key: evaluation.key,
         occurrence: evaluation.occurrence,
         occurrenceState:
-          occurrenceState(evaluation.occurrence, snapshotNow) === 'upcoming'
+          (evaluation.occurrence === null
+            ? 'running'
+            : occurrenceState(evaluation.occurrence, snapshotNow)) === 'upcoming'
             ? 'upcoming'
             : 'running',
         remaining: evaluation.remainingOccurrences,
@@ -394,6 +506,15 @@ export class CatalogQueryService {
 
   #card(entry: Eligible): CatalogCard {
     const item = entry.item;
+    if (item.typeId === 'activity')
+      return {
+        ...item,
+        ref: { typeId: 'activity', contentId: item.contentId },
+        distanceMeters: entry.distance,
+        changedSinceSnapshot: entry.changed,
+        projectedAtUtc: entry.version.projectedAtUtc,
+      };
+    if (entry.occurrence === null) throw new Error('catalog_event_occurrence_missing');
     return {
       ref: { typeId: 'event', contentId: item.contentId },
       publishedRevisionId: item.publishedRevisionId,

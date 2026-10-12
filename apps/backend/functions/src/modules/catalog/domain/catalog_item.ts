@@ -1,3 +1,6 @@
+import type { EligiblePlaceLink } from './place_link.js';
+import type { TaxonomyDataset } from '../../reference_data/domain/taxonomy_dataset.js';
+import { projectActivity } from './activity_projection.js';
 import { bookingRefsFor } from '../../content/domain/event_internal_registration.js';
 import { catalogEnabledTypes, catalogPolicyRevisions } from './catalog_config.js';
 
@@ -109,8 +112,44 @@ export interface CatalogEventItem {
   readonly searchText: string;
 }
 
+export interface CatalogActivityItem {
+  readonly schemaRevision: 'catalog-activity-projection-v1';
+  readonly typeId: 'activity';
+  readonly contentId: string;
+  readonly publishedRevisionId: string;
+  readonly sourcePointerRevision: number;
+  readonly marketId: string;
+  readonly publisherRef: { readonly type: string; readonly id: string };
+  readonly title: string;
+  readonly shortDescription: string;
+  readonly fullDescription?: string;
+  readonly categoryId: string;
+  readonly subcategoryId: string;
+  readonly point: CatalogPoint;
+  readonly addressLine?: string;
+  readonly accessNotes?: string;
+  readonly accessCaution?: { readonly isInformal: boolean; readonly note?: string };
+  /** Source relation id; never serialized without a fresh Catalog-owned check. */
+  readonly linkedPlaceId?: string;
+  readonly linkedPlace?: EligiblePlaceLink;
+  readonly typicalDurationMinutes: { readonly min: number; readonly max: number };
+  readonly suggestedGroupSize?: { readonly min: number; readonly max: number };
+  readonly bestTime?: { readonly timeOfDay?: string; readonly season?: string };
+  readonly optionalContribution?: {
+    readonly kind: string;
+    readonly note: string;
+    readonly amountHint?: { readonly amountMinor: number; readonly currencyCode: string };
+  };
+  readonly coverMediaId: string | null;
+  readonly galleryMediaIds: readonly string[];
+  readonly referenceRevisions: Readonly<Record<string, string>>;
+  readonly publishedAtUtc: string;
+  readonly searchText: string;
+}
+export type CatalogItem = CatalogEventItem | CatalogActivityItem;
+
 export type ProjectionOutcome =
-  | { readonly state: 'listed'; readonly item: CatalogEventItem }
+  | { readonly state: 'listed'; readonly item: CatalogItem }
   | { readonly state: 'excluded'; readonly reason: CatalogExclusionReason };
 
 /** NFKC, lower case, letters and digits only, single spaces. */
@@ -149,6 +188,8 @@ export function projectFact(input: {
   readonly fact: ContentFact;
   readonly revision: SourceRevision | null;
   readonly typeVisibilityPolicy: string | undefined;
+  readonly activityEnabled?: boolean;
+  readonly taxonomy?: TaxonomyDataset;
 }): ProjectionOutcome {
   const { fact, revision } = input;
   if (
@@ -158,17 +199,29 @@ export function projectFact(input: {
   )
     return { state: 'excluded', reason: fact.visibility };
   if (fact.visibility !== 'visible') return { state: 'excluded', reason: 'invalid_projection' };
-  if (!catalogEnabledTypes.has(fact.typeId)) return { state: 'excluded', reason: 'type_disabled' };
+  if (
+    !catalogEnabledTypes.has(fact.typeId) &&
+    !(fact.typeId === 'activity' && input.activityEnabled === true)
+  )
+    return { state: 'excluded', reason: 'type_disabled' };
   if (input.typeVisibilityPolicy !== 'public_catalog')
     return { state: 'excluded', reason: 'consent_limited' };
   if (
     revision === null ||
     revision.contentId !== fact.contentId ||
     revision.publishedRevisionId !== fact.publishedRevisionId ||
-    revision.typeId !== fact.typeId
+    revision.typeId !== fact.typeId ||
+    revision.marketId !== fact.marketId ||
+    (fact.typeId === 'activity' &&
+      revision.referenceRevisions.taxonomyRevisionId !== fact.referenceRevisions.taxonomyRevisionId)
   )
     return { state: 'excluded', reason: 'invalid_projection' };
   const body = revision.body;
+  // Activity has no authoring visibility field: the public pointer and registry own it.
+  if (fact.typeId === 'activity') {
+    if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };
+    return projectActivity(fact, revision, input.taxonomy);
+  }
   if (body.visibility === 'unlisted') return { state: 'excluded', reason: 'unlisted' };
   if (body.visibility === 'private') return { state: 'excluded', reason: 'private' };
   if (body.visibility !== 'public') return { state: 'excluded', reason: 'invalid_projection' };

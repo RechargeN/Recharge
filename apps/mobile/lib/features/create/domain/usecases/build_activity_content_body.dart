@@ -87,10 +87,11 @@ final class ActivityContentBody {
 /// trimmed and empty optionals are left out (§13 step 4); a caution that is not
 /// informal and has no note is no caution (§8 step 2). Nothing is invented: a
 /// value the draft does not hold is not sent, and the server's own rules
-/// decide the rest. A linked Place is never sent: the server cannot resolve it
-/// yet (§2.4), so a draft that has one is refused before anything is sent.
+/// decide the rest. Linked Place is sent only in the explicitly enabled test
+/// composition; Catalog revalidates it at each server lifecycle boundary.
 final class ActivityContentBodyMapper {
-  const ActivityContentBodyMapper();
+  const ActivityContentBodyMapper({this.allowLinkedPlace = false});
+  final bool allowLinkedPlace;
 
   ActivityContentBody map(
     CreateDraftEntity draft, {
@@ -102,7 +103,7 @@ final class ActivityContentBodyMapper {
       throw ArgumentError('Not an Activity draft');
     }
     final List<String> unsupported = <String>[
-      if (_text(activity.location.linkedPlaceId) != null)
+      if (!allowLinkedPlace && _text(activity.location.linkedPlaceId) != null)
         'location.linked_place',
       if (draft.tags.isNotEmpty) 'tags',
       if (activity.unknownFields.isNotEmpty) 'unknown_fields',
@@ -135,7 +136,7 @@ final class ActivityContentBodyMapper {
               <String, Object?>{'mediaId': mediaId(item)},
         ],
       },
-      'location': _location(activity.location),
+      'location': <String,Object?>{..._location(activity.location), if (allowLinkedPlace && _text(activity.location.linkedPlaceId) != null) 'linkedPlaceId': _text(activity.location.linkedPlaceId)},
       'typicalDurationMinutes': _range(activity.typicalDurationMinutes),
       if (activity.suggestedGroupSize case final ActivityIntRangeDraft range)
         'suggestedGroupSize': _range(range),

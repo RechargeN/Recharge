@@ -1,3 +1,5 @@
+import type { LinkedPlaceEligibilityPort } from './ports/linked_place_eligibility_port.js';
+import { publicValidationDetails } from '../domain/validation_details.js';
 import type {
   ApplyModerationDispositionCommandV1,
   ChangeClass,
@@ -105,6 +107,8 @@ export interface DelegatedModuleCaller {
 }
 
 export interface ContentPublicationServiceDeps {
+  readonly linkedPlaceEligibility?: LinkedPlaceEligibilityPort;
+  readonly enforceLinkedPlaceEligibility?: boolean;
   readonly repository: ContentRepository;
   readonly eligibility: PublisherEligibilityPort;
   readonly referenceData: ReferenceDataPort;
@@ -420,7 +424,7 @@ export class ContentPublicationService {
   }
 
   private toRefusal<T>(error: unknown): ContentResult<T> {
-    if (error instanceof ContentDomainRefusal) return rejected(error.code);
+    if (error instanceof ContentDomainRefusal) return rejected(error.code, error.violations);
     if (error instanceof ContentRepositoryConflict) return rejected('revision_conflict');
     throw error;
   }
@@ -525,6 +529,7 @@ export class ContentPublicationService {
     await this.assertChangeClass(context, draft, payload.changeClass);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
     this.assertValid(entry, draft, resolved, context.nowUtc, principalId(context.principal));
+    await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     // Early feedback only: the binding check runs where the pointer switches.
     await this.assertTransition(
       context.tx,
@@ -586,6 +591,7 @@ export class ContentPublicationService {
     );
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
     this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal));
+    await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
     const pointer = await tx.pointer(submission.contentId);
@@ -710,6 +716,7 @@ export class ContentPublicationService {
       target.body,
       this.validationContext(draft, resolved, nowUtc, principalId(context.principal)),
     );
+    await this.assertLinkedPlace(target.typeId, target.body, target.marketId);
     // Rollback verifies exactly the references stored in the target revision; the
     // evidence was taken for this very immutable revision before the transaction.
     const evidence = context.media;
@@ -954,7 +961,8 @@ export class ContentPublicationService {
   ): void {
     const context = this.validationContext(draft, resolved, nowUtc, actorUserId);
     const issues = entry.validate?.(draft.body, context) ?? ['no_source_contract'];
-    if (issues.length > 0) throw new ContentDomainRefusal('validation_failed');
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
     this.assertCompositionRules(draft.typeId, draft.body, context);
   }
 
@@ -964,13 +972,47 @@ export class ContentPublicationService {
    * immutable revision at activation. A revision published before a rule
    * existed cannot be made public again past it.
    */
+  private async assertLinkedPlace(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<void> {
+    if (
+      typeId !== 'activity' ||
+      (!this.deps.enforceLinkedPlaceEligibility && !this.deps.linkedPlaceEligibility)
+    )
+      return;
+    const location = body.location;
+    if (typeof location !== 'object' || location === null || Array.isArray(location)) return;
+    const id = (location as Readonly<Record<string, unknown>>).linkedPlaceId;
+    if (id === undefined) return;
+    let status: string = 'unavailable';
+    try {
+      status =
+        typeof id === 'string'
+          ? ((await this.deps.linkedPlaceEligibility?.check({ placeId: id, marketId }))?.status ??
+            'unavailable')
+          : 'unknown';
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'eligible')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([
+          `activity.linked_place_${status === 'unknown' ? 'unknown' : status === 'forbidden' ? 'forbidden' : 'unresolved'}`,
+        ]),
+      );
+  }
+
   private assertCompositionRules(
     typeId: ContentTypeId,
     body: ContentBody,
     context: ContentValidationContext,
   ): void {
     const added = this.deps.compositionRules?.get(typeId)?.(body, context) ?? [];
-    if (added.length > 0) throw new ContentDomainRefusal('validation_failed');
+    if (added.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(added));
   }
 
   /**

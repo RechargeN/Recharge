@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recharge:catalog:place-link:v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "place"
+      ],
+      "properties": {
+        "status": {
+          "const": "eligible"
+        },
+        "place": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contentId",
+            "publishedRevisionId",
+            "pointerRevision",
+            "marketId",
+            "title"
+          ],
+          "properties": {
+            "contentId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "publishedRevisionId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pointerRevision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "marketId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "unknown",
+            "forbidden",
+            "unavailable"
+          ]
+        }
+      }
+    }
+  ]
+}

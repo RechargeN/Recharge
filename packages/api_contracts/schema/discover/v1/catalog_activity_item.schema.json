@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "catalog-activity-projection-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaRevision",
+    "typeId",
+    "contentId",
+    "publishedRevisionId",
+    "sourcePointerRevision",
+    "marketId",
+    "publisherRef",
+    "title",
+    "shortDescription",
+    "categoryId",
+    "subcategoryId",
+    "point",
+    "typicalDurationMinutes",
+    "coverMediaId",
+    "galleryMediaIds",
+    "referenceRevisions",
+    "publishedAtUtc",
+    "searchText"
+  ],
+  "properties": {
+    "schemaRevision": {
+      "const": "catalog-activity-projection-v1"
+    },
+    "typeId": {
+      "const": "activity"
+    },
+    "contentId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publishedRevisionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourcePointerRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "marketId": {
+      "type": "string"
+    },
+    "publisherRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "enum": ["user", "page"]
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 80
+    },
+    "shortDescription": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 180
+    },
+    "fullDescription": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "categoryId": {
+      "type": "string"
+    },
+    "subcategoryId": {
+      "type": "string"
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
+      }
+    },
+    "addressLine": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "accessNotes": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "accessCaution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isInformal"],
+      "properties": {
+        "isInformal": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "typicalDurationMinutes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "suggestedGroupSize": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "bestTime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeOfDay": {
+          "enum": ["morning", "afternoon", "evening", "night", "any"]
+        },
+        "season": {
+          "enum": ["winter", "spring", "summer", "autumn", "any"]
+        }
+      }
+    },
+    "optionalContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "note"],
+      "properties": {
+        "kind": {
+          "enum": ["purchase", "donation", "other"]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 140
+        },
+        "amountHint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["amountMinor", "currencyCode"],
+          "properties": {
+            "amountMinor": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "currencyCode": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            }
+          }
+        }
+      }
+    },
+    "coverMediaId": {
+      "type": ["string", "null"]
+    },
+    "galleryMediaIds": {
+      "type": "array",
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "referenceRevisions": {
+      "type": "object",
+      "required": ["taxonomyRevisionId"],
+      "additionalProperties": {
+        "type": "string"
+      },
+      "properties": {
+        "taxonomyRevisionId": {
+          "const": "taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822"
+        }
+      }
+    },
+    "publishedAtUtc": {
+      "type": "string"
+    },
+    "searchText": {
+      "type": "string"
+    },
+    "linkedPlace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contentId",
+        "publishedRevisionId",
+        "pointerRevision",
+        "marketId",
+        "title"
+      ],
+      "properties": {
+        "contentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publishedRevisionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pointerRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "marketId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

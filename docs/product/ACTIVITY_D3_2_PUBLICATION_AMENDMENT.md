@@ -355,3 +355,54 @@ publisher; чужие записи хранятся, но не возвраща�
 без правила, можно было снова сделать публичной. Теперь правило применяется к
 телу целевой immutable revision (§2.4); тесты A5 без исправления падают (2 из 9),
 с ним проходят.
+
+## D3.7 — explicit mobile Activate and publication editing (2026-10-11)
+
+The owner's direct instruction for pass 7 extends the former §5.1 exclusion
+only in the existing default-off loopback Emulator Activity publication entry.
+It does not enable production or accept the publication slice on behalf of its
+owner. Existing backend Activate composition validation is reused unchanged.
+
+Activate targets the current immutable published revision with the server's
+pointer revision. Its exact target/fence/idempotency key is journaled before
+sending; a transport failure retains it for explicit retry after restart.
+A definitive refusal retains the server code and never automatically retries
+with another pointer fence. Every call uses existing client and server guards.
+
+Edit opens the existing Create Activity form in draft-only editing mode. It
+preserves the Content/local draft IDs and media bindings and records which
+published revision is being edited. Save creates a new revision of the existing
+mutable server draft; submit snapshots it for fresh review, and publish only
+switches the pointer after approval. Immutable published history is not written.
+The journal's optional editing/recovery fields read legacy records unchanged.
+The UI labels published version and draft revision separately and requires a
+new Save after local form edits before Submit. Draft-only mode saves back to
+Create instead of invoking its separate local/mock publication action.
+
+Acceptance: real stand controller and UI perform hide → explicit Activate and
+Edit in Create → new draft save → submit → staff review → publish; old immutable
+revision data remains byte-equivalent. Unit regressions cover lost Activate
+response/restart, optimistic conflict, closed gate and stale unsaved Create body.
+Device, real D1 Activity bytes, Linux/cloud/production and previous dependencies
+are not closed. Rollback: hide Activate/Edit actions and restore normal Create
+entry; stored immutable history and lifecycle contracts remain compatible.
+
+Activity Catalog/Discover is still excluded. Pass 8's proposed OD-04 decision is
+[ACTIVITY_CATALOG_DISCOVER_OD04_PROPOSAL.md](ACTIVITY_CATALOG_DISCOVER_OD04_PROPOSAL.md),
+awaiting owner acceptance before dependent implementation.
+
+## D3.8 — Activity Catalog/Discover bounded extension (2026-10-11)
+
+BCK08-OD-04-A Activity-only design принят владельцем; отдельно подтверждено отсутствие dynamic criteria в первой версии. Runtime использует immutable artifact Category System v1.4.3 через existing ReferenceDataPort exact-revision reader. CatalogActivityItem публикует confirmed standalone location, duration range, suggested group, best time, informal warning и optional contribution, без Event occurrence/price/Booking или private authoring fields. D2 suppressedMediaIds уже передаются Content feed; projection и reads соблюдают их при duplicate/stale replay, rebuild, activation и rollback. Media restore не снимает suppression без explicit Content owner Activate.
+
+Backend env RECHARGE_TEST_ACTIVITY_CATALOG=true и mobile dart-define того же имени включают только разрешённый local Emulator path совместно с existing Discover/testBackend guards. Оба default-off; release composition не активируется. Existing controller/gateway/form lifecycle не меняется. Старые drafts/revisions не переписываются; linked Place по-прежнему fail closed.
+
+Evidence: ../evidence/backend/d3/D3_ACTIVITY_CATALOG_2026-10-11.md. Status Review, владельческая приёмка не объявлена. Dynamic public criteria, dedicated bestTime/duration filters, linked Place authority, BCK-22 threshold, другие Catalog types и production/device/Linux gates остаются отдельным долгом. Rollback: выключить Activity backend/mobile flags; при последующем включении reconcile/rebuild и atomic activation обязательны для записей, ранее исключённых type_disabled.
+
+## D3.9 — Catalog-owned linked Place bounded extension (2026-10-11)
+
+Owner approved OD-01 A and the file plan in ACTIVITY_LINKED_PLACE_D3_9_PROPOSAL.md: Activity remains visible when Place is hidden/restricted/unavailable; only its public relation disappears. Submit, publish of an earlier approved submission and activation of the exact immutable target body require fresh Catalog-owned eligibility. Unknown, wrong type/market, nonpublic, missing publication, changed source pointer or dependency outage refuse with allowlisted validation details at /body/location/linkedPlaceId. Content retains only the relation ID, never Place visibility authority. Old drafts/revisions are not rewritten.
+
+Backend RECHARGE_TEST_ACTIVITY_LINKED_PLACE=true and mobile dart-define of that name enable only the existing guarded local path; defaults remain off with the previous deny. The existing location step provides bounded Catalog lookup/pagination/select/explicit clear. Public Activity Feed/Search/Map/Details filter the relation again against the current owner source, including old snapshots and rebuilt/rolled-back projection sets. Source body integrity is verified; public DTO contains only current ID/revision/pointer/market/title. No full Place Catalog/Discover/Details is enabled.
+
+Eligibility is a current source read, not a cross-aggregate atomic lease: a later Place change is reflected by the next public read. No stronger guarantee is claimed. Rollback: disable linked Place on backend/mobile, retaining published Activity without a public Place relation and restoring command deny; do not rewrite immutable history. Evidence: ../evidence/backend/d3/D3_ACTIVITY_LINKED_PLACE_2026-10-11.md. Implementation status Review, finished slice acceptance remains with the owner.
