@@ -1,17 +1,30 @@
-import type { ContentFailureCode } from '../../../contracts/content_v1.js';
+import type {
+  ContentFailureCode,
+  ContentValidationViolationV1,
+} from '../../../contracts/content_v1.js';
 
 export type ContentResult<T> =
   | Readonly<{ kind: 'succeeded'; data: T }>
-  | Readonly<{ kind: 'rejected'; code: ContentFailureCode }>
+  | Readonly<{
+      kind: 'rejected';
+      code: ContentFailureCode;
+      violations?: readonly ContentValidationViolationV1[];
+    }>
   | Readonly<{
       kind: 'unsupportedContract';
       code: 'unsupported_version' | 'content_type_unsupported';
     }>;
 
 export const succeeded = <T>(data: T): ContentResult<T> => ({ kind: 'succeeded', data });
-export const rejected = <T = never>(code: ContentFailureCode): ContentResult<T> => ({
+export const rejected = <T = never>(
+  code: ContentFailureCode,
+  violations?: readonly ContentValidationViolationV1[],
+): ContentResult<T> => ({
   kind: 'rejected',
   code,
+  ...(code === 'validation_failed' && violations !== undefined && violations.length > 0
+    ? { violations }
+    : {}),
 });
 export const unsupported = <T = never>(
   code: 'unsupported_version' | 'content_type_unsupported',
@@ -19,7 +32,10 @@ export const unsupported = <T = never>(
 
 /** Thrown inside a transaction to abort it with a typed, non-mutating outcome. */
 export class ContentDomainRefusal extends Error {
-  constructor(readonly code: ContentFailureCode) {
+  constructor(
+    readonly code: ContentFailureCode,
+    readonly violations?: readonly ContentValidationViolationV1[],
+  ) {
     super(code);
     this.name = 'ContentDomainRefusal';
   }
@@ -47,5 +63,14 @@ export function toContentWireResult<T>(
 ): Readonly<Record<string, unknown>> {
   if (result.kind === 'succeeded')
     return { schemaVersion: 1, kind: 'succeeded', resultType, data: result.data };
-  return { schemaVersion: 1, kind: result.kind, code: result.code };
+  return {
+    schemaVersion: 1,
+    kind: result.kind,
+    code: result.code,
+    ...(result.kind === 'rejected' &&
+    result.code === 'validation_failed' &&
+    result.violations !== undefined
+      ? { violations: result.violations }
+      : {}),
+  };
 }

@@ -1847,3 +1847,29 @@ or market activation.
   to the client.
 - Catalog keeps Activity excluded (`type_disabled`, BCK08-OD-04); Booking
   ignores Activity effects; D2 applies to Activity media.
+
+
+## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
+
+Authorized bounded local/Emulator change: optional public details for
+`validation_failed`. This addendum supersedes the general-only wording for
+Activity in §38; the existing general response remains valid.
+
+A rejected v1 result may contain `violations: [{code, fieldPath}]` only when
+`code == validation_failed`. The list has 1–50 entries. Each violation contains
+only a stable rule code and a JSON Pointer rooted at `/body`; no field value,
+user-supplied unknown key, coordinates, contact text, stack or internal policy
+reason is returned. Server projection uses an explicit public allowlist;
+unknown/internal violations keep the general refusal. Known dynamic criterion
+failures use `activity.criterion_required` and a public criterion field path.
+
+Clients accept both the old general response and the additive response.
+Activity uses local client messages for known code/path pairs, renders errors
+by the existing Create fields, and retains a general message for an unknown
+code or unavailable field. Malformed details degrade to the general response.
+Feedback is transient, account/publisher/draft scoped and invalidated by a
+new local draft timestamp or the next command. Submit/publish/activate guards,
+transaction atomicity, authority and lifecycle are unchanged.
+
+Rollback: remove this optional projection and field feedback; the unchanged
+`validation_failed` response remains sufficient. No draft migration is needed.
