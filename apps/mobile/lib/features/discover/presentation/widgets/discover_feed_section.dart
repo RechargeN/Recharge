@@ -151,13 +151,19 @@ class _DiscoverFeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final DateTime localStart = item.startsAtUtc.toLocal();
-    final String hour = localStart.hour.toString().padLeft(2, '0');
-    final String minute = localStart.minute.toString().padLeft(2, '0');
-    final String dateLabel = '$hour:$minute';
-    final String priceLabel = item.isFree
+    final DateTime? localStart = item.startsAtUtc?.toLocal();
+    final String hour = localStart?.hour.toString().padLeft(2, '0') ?? '';
+    final String minute = localStart?.minute.toString().padLeft(2, '0') ?? '';
+    final String dateLabel = localStart == null
+        ? (item.activityCatalog?.durationLabel ?? 'Any time')
+        : '$hour:$minute';
+    final String priceLabel = item.activityCatalog != null
+        ? (item.activityCatalog!.contributionKind == null
+              ? 'No contribution specified'
+              : 'Optional contribution')
+        : item.isFree
         ? 'Free'
-        : '${item.priceAmount.toStringAsFixed(0)} €';
+        : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
 
     return Card(
       clipBehavior: Clip.antiAlias,

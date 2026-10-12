@@ -112,7 +112,8 @@ function item(
     typeVisibilityPolicy: 'public_catalog',
   });
   assert.equal(outcome.state, 'listed', JSON.stringify(outcome));
-  if (outcome.state !== 'listed') throw new Error('not listed');
+  if (outcome.state !== 'listed' || outcome.item.typeId !== 'event')
+    throw new Error('not listed Event');
   return outcome.item;
 }
 

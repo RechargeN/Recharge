@@ -46,6 +46,7 @@ export const catalogTestOnlyConfig = Object.freeze({
 /** Revisions every snapshot pins (TEST-ONLY baselines, see BCK08-OD-05). */
 export const catalogPolicyRevisions = Object.freeze({
   projectionSchema: 'catalog-event-projection-v3',
+  projectionFamilies: 'catalog-families-event-v3-activity-v1',
   ranking: 'test-only-catalog-ranking-1',
   visibility: 'test-only-catalog-visibility-1',
   /** Booking availability is not connected to E1. */

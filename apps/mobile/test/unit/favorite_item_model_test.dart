@@ -4,6 +4,32 @@ import 'package:recharge/features/favorites/domain/entities/favorite_item_entity
 import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
+  test('evergreen favorite roundtrip preserves absent time and price', () {
+    final model = FavoriteItemModel(
+      id: 'activity-1',
+      title: 'Forest walk',
+      subtitle: 'Quiet trail',
+      city: '',
+      category: 'outdoor_nature_walking',
+      startsAtUtcIso: null,
+      distanceKm: 0,
+      priceAmount: null,
+      isFree: false,
+      savedAtUtcIso: DateTime.utc(2035).toIso8601String(),
+      targetRoute: null,
+      planningTargetKind: null,
+      planningTargetId: null,
+      coverImageUrl: '',
+    );
+    final restored = FavoriteItemModel.fromJson(
+      model.toJson(),
+      defaultCurrencyCode: 'EUR',
+    ).toEntity();
+    expect(restored.startsAtUtc, isNull);
+    expect(restored.priceAmount, isNull);
+    expect(restored.isFree, isFalse);
+  });
+
   test('fromJson supports older favorites without targetRoute', () {
     final FavoriteItemModel model =
         FavoriteItemModel.fromJson(<String, dynamic>{

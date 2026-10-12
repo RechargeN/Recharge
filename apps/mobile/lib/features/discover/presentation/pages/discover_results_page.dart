@@ -1332,9 +1332,13 @@ class _SearchResultCard extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String trailingLabel = item.isPublishedRoute
         ? _routeDurationLabel(item.durationMinutes)
+        : item.activityCatalog != null
+        ? (item.activityCatalog!.contributionKind == null
+              ? 'No contribution specified'
+              : 'Optional contribution')
         : item.isFree
         ? 'Free'
-        : '${item.priceAmount.toStringAsFixed(0)} €';
+        : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
 
     return Card(
       clipBehavior: Clip.antiAlias,

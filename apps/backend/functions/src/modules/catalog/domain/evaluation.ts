@@ -1,5 +1,10 @@
 import { catalogTestOnlyConfig } from './catalog_config.js';
-import type { CatalogEventItem, CatalogOccurrence, CatalogPoint } from './catalog_item.js';
+import type {
+  CatalogEventItem,
+  CatalogItem,
+  CatalogOccurrence,
+  CatalogPoint,
+} from './catalog_item.js';
 import type { DiscoverQuery } from './discover_query.js';
 
 /**
@@ -73,7 +78,7 @@ export function compareKeys(left: SortKey, right: SortKey): number {
 export type Evaluation =
   | {
       readonly eligible: true;
-      readonly occurrence: CatalogOccurrence;
+      readonly occurrence: CatalogOccurrence | null;
       readonly remainingOccurrences: number;
       readonly distanceMeters: number | null;
       readonly key: SortKey;
@@ -81,13 +86,37 @@ export type Evaluation =
   | { readonly eligible: false; readonly reason: string };
 
 /** Exact evaluation of one listed item against the applied query at `nowMs`. */
-export function evaluate(item: CatalogEventItem, query: DiscoverQuery, nowMs: number): Evaluation {
+export function evaluate(item: CatalogItem, query: DiscoverQuery, nowMs: number): Evaluation {
   if (item.marketId !== query.marketId) return { eligible: false, reason: 'market' };
   if (!query.typeIds.includes(item.typeId)) return { eligible: false, reason: 'type' };
   if (query.categoryIds.length > 0 && !query.categoryIds.includes(item.categoryId))
     return { eligible: false, reason: 'category' };
   if (query.subcategoryIds.length > 0 && !query.subcategoryIds.includes(item.subcategoryId))
     return { eligible: false, reason: 'subcategory' };
+  if (item.typeId === 'activity') {
+    if (
+      query.timeWindow !== null ||
+      query.free ||
+      query.maxAmountMinor !== null ||
+      query.wheelchairAccessible
+    )
+      return { eligible: false, reason: 'activity_filter_inapplicable' };
+    if (query.textTokens.some((token) => !item.searchText.includes(token)))
+      return { eligible: false, reason: 'text' };
+    const distance = query.center === null ? null : distanceMeters(query.center, item.point);
+    if (query.radiusKm !== null && (distance ?? Infinity) > query.radiusKm * 1000)
+      return { eligible: false, reason: 'radius' };
+    return {
+      eligible: true,
+      occurrence: null,
+      remainingOccurrences: 0,
+      distanceMeters: distance,
+      key:
+        query.sort === 'distance'
+          ? [0, distance ?? 0, nowMs, item.contentId]
+          : [0, nowMs, 0, item.contentId],
+    };
+  }
   if (query.wheelchairAccessible && !item.wheelchairAccessible)
     return { eligible: false, reason: 'accessibility' };
   if (query.free && item.price?.mode !== 'free') return { eligible: false, reason: 'price' };

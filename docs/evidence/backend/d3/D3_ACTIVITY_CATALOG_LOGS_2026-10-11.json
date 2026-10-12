@@ -1,0 +1,75 @@
+{
+  "sourceFingerprint": "51a55dd34b12027e15f1ec22de76d85bf94da05d629d7eb750e09e18e8e2e0ce",
+  "logs": [
+    {
+      "file": "content-media-summary.json",
+      "sha256": "c38e0ef5f694d7952d3cded179210c2f31cafc2e3a9d5fcaedf0c96ed60206ea",
+      "bytes": 2847
+    },
+    {
+      "file": "content-media.log",
+      "sha256": "655a2d6d091c7b550e46280d860347535f22e1cbdf4c70dfbecae638f5ad76b9",
+      "bytes": 20497
+    },
+    {
+      "file": "place-activity-summary.json",
+      "sha256": "1e61e2f276b2605dbf5cb2c7ca31d762a33ae2ee23a9999a38019494097fcbdd",
+      "bytes": 1332
+    },
+    {
+      "file": "place-activity.log",
+      "sha256": "003c6980acb63b7940bca34d1f18b5d89e8196d61143b59478c313d1fcd45166",
+      "bytes": 8049
+    },
+    {
+      "file": "recharge-d3-8-activity-integration-final.log",
+      "sha256": "d06a740d1495b26d4eb7db867b4c26e1cd70dfa257a53d277ae34da3f479774c",
+      "bytes": 2268
+    },
+    {
+      "file": "recharge-d3-8-backend-all-final.log",
+      "sha256": "cfb95a36a356d85ed80130297f158f681a71f8365e51459514b7389942296ace",
+      "bytes": 142217
+    },
+    {
+      "file": "recharge-d3-8-boundary-final.log",
+      "sha256": "d3a6a77ff95cc71abd3ed7880e95d60a11f20bb97ed3893a674240e51254b0c6",
+      "bytes": 204
+    },
+    {
+      "file": "recharge-d3-8-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "file": "recharge-d3-8-mobile-all-final.log",
+      "sha256": "d3fafd489a8d9de3c16a6ad0994261c43329418c5fae155f16b9ce10d595fbf2",
+      "bytes": 287625
+    },
+    {
+      "file": "recharge-d3-8-mobile-analyze-final.log",
+      "sha256": "89197e9e83c7f3b634a21cec166b91c954f77192cbebb6537ac173dff6947cdb",
+      "bytes": 98
+    },
+    {
+      "file": "recharge-d3-8-mobile-focused-final.log",
+      "sha256": "b4d7195fa4bfd46b70f4c2f20c42523d22ef1223ef5ac3fcc8cde2a3d2e37ebe",
+      "bytes": 2075
+    },
+    {
+      "file": "recharge-d3-8-stand-current.log",
+      "sha256": "6bd2ffe028360993751242d8109ac12e6637d90b5f5b35941ba0c845fd2cf402",
+      "bytes": 1936
+    },
+    {
+      "file": "recharge-d3-8-stand-final.log",
+      "sha256": "c52ff532a5353768101667c9cd924d621e20b24e0ca889b057ddaca179d1dea7",
+      "bytes": 1041
+    },
+    {
+      "file": "recharge-d3-8-stand-repeat.log",
+      "sha256": "6e875d0108ca4fef6c83f34259a195677b0d63c7fff9a896b23c9cfc6b5fed74",
+      "bytes": 7542
+    }
+  ]
+}

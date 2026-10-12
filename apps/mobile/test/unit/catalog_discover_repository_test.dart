@@ -133,6 +133,106 @@ DiscoverQuery _query({String text = ''}) => DiscoverQuery.defaults(
 
 void main() {
   test(
+    'Activity reads Catalog facts without Event price/time and honors local kill switch',
+    () async {
+      final Map<String, Object?> activity = <String, Object?>{
+        'schemaRevision': 'catalog-activity-projection-v1',
+        'typeId': 'activity',
+        'ref': <String, Object?>{'typeId': 'activity', 'contentId': 'a'},
+        'contentId': 'a',
+        'publishedRevisionId': 'r',
+        'title': 'Forest walk',
+        'shortDescription': 'A quiet walk along the forest trail',
+        'categoryId': 'outdoor_nature_walking',
+        'subcategoryId': 'forest_walk',
+        'point': <String, Object?>{'latitude': 56.95, 'longitude': 24.1},
+        'typicalDurationMinutes': <String, Object?>{'min': 60, 'max': 120},
+        'bestTime': <String, Object?>{'timeOfDay': 'morning', 'season': 'any'},
+        'galleryMediaIds': <String>[],
+        'referenceRevisions': <String, Object?>{
+          'taxonomyRevisionId':
+              'taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822',
+        },
+      };
+      final _ScriptedPort port = _ScriptedPort(<Object>[
+        _page(<Map<String, Object?>>[activity]),
+        <String, Object?>{
+          'schemaVersion': 1,
+          'kind': 'succeeded',
+          'details': <String, Object?>{
+            'state': 'listed',
+            'reason': null,
+            'item': activity,
+            'changedSinceSnapshot': false,
+          },
+        },
+      ]);
+      final CatalogDiscoverRepository repo = CatalogDiscoverRepository(
+        port: port,
+        session: CatalogSnapshotSession(),
+        marketId: 'LV',
+        currencyCode: 'EUR',
+        activityEnabled: true,
+      );
+      final DiscoverItemEntity card = (await repo.getFeed(
+        DiscoverQuery.defaults(centerLat: 56.95, centerLng: 24.1),
+      )).single;
+      expect(card.objectKind, DiscoverObjectKind.activity);
+      expect(card.startsAtUtc, isNull);
+      expect(card.priceAmount, isNull);
+      expect(card.isFree, isFalse);
+      expect(card.activityCatalog!.durationMaxMinutes, 120);
+      expect(
+        (await repo.getDetails('a')).activityCatalog!.timeOfDay,
+        'morning',
+      );
+      final changed = CatalogDiscoverRepository(
+        port: _ScriptedPort(<Object>[
+          <String, Object?>{
+            'schemaVersion': 1,
+            'kind': 'succeeded',
+            'details': <String, Object?>{
+              'state': 'listed',
+              'reason': null,
+              'item': activity,
+              'changedSinceSnapshot': true,
+            },
+          },
+        ]),
+        session: CatalogSnapshotSession()
+          ..remember('snap', <String, Object?>{}),
+        marketId: 'LV',
+        currencyCode: 'EUR',
+        activityEnabled: true,
+      );
+      await expectLater(
+        changed.getDetails('a'),
+        throwsA(
+          isA<DiscoverException>().having(
+            (e) => e.code,
+            'code',
+            'CATALOG_REVISION_CHANGED',
+          ),
+        ),
+      );
+      final CatalogDiscoverRepository disabled = CatalogDiscoverRepository(
+        port: _ScriptedPort(<Object>[
+          _page(<Map<String, Object?>>[activity]),
+        ]),
+        session: CatalogSnapshotSession(),
+        marketId: 'LV',
+        currencyCode: 'EUR',
+      );
+      await expectLater(
+        disabled.getFeed(
+          DiscoverQuery.defaults(centerLat: 56.95, centerLng: 24.1),
+        ),
+        throwsA(isA<DiscoverException>()),
+      );
+    },
+  );
+
+  test(
     'a listing reads every page on the first snapshot and keeps it',
     () async {
       final _ScriptedPort port = _ScriptedPort(<Object>[

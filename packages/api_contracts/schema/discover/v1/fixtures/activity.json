@@ -1,0 +1,49 @@
+{
+  "schemaRevision": "catalog-activity-projection-v1",
+  "typeId": "activity",
+  "contentId": "activity-fixture",
+  "publishedRevisionId": "revision-fixture",
+  "sourcePointerRevision": 1,
+  "marketId": "LV",
+  "publisherRef": {
+    "type": "user",
+    "id": "publisher-fixture"
+  },
+  "title": "Ķemeri bog boardwalk loop",
+  "shortDescription": "Easy boardwalk loop across the bog with a viewing tower",
+  "categoryId": "outdoor_nature_walking",
+  "subcategoryId": "forest_walk",
+  "point": {
+    "latitude": 56.9142,
+    "longitude": 23.4706
+  },
+  "typicalDurationMinutes": {
+    "min": 60,
+    "max": 120
+  },
+  "coverMediaId": "cover-fixture",
+  "galleryMediaIds": [],
+  "referenceRevisions": {
+    "taxonomyRevisionId": "taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822"
+  },
+  "publishedAtUtc": "2026-10-11T00:00:00.000Z",
+  "searchText": "ķemeri bog boardwalk loop easy boardwalk loop across the bog with a viewing tower outdoor nature walking forest walk ķemeri national park jūrmala start at the car park by the visitor trail sign",
+  "addressLine": "Ķemeri National Park, Jūrmala",
+  "accessNotes": "Start at the car park by the visitor trail sign",
+  "suggestedGroupSize": {
+    "min": 1,
+    "max": 6
+  },
+  "bestTime": {
+    "timeOfDay": "morning",
+    "season": "any"
+  },
+  "optionalContribution": {
+    "kind": "donation",
+    "note": "Optional local group donation",
+    "amountHint": {
+      "amountMinor": 250,
+      "currencyCode": "EUR"
+    }
+  }
+}

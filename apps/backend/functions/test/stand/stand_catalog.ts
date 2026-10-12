@@ -46,8 +46,8 @@ export async function runCatalog(firestore: Firestore, args: readonly string[]):
       items: page.items.map((item) => ({
         contentId: item.ref.contentId,
         title: item.title,
-        start: item.occurrence.startAtUtc,
-        availability: item.availability.status,
+        ...('occurrence' in item ? { start: item.occurrence.startAtUtc } : {}),
+        ...('availability' in item ? { availability: item.availability.status } : {}),
       })),
     };
   }

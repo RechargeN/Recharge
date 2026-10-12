@@ -1,4 +1,5 @@
 import '../../../../shared/primitives/money/money.dart';
+
 enum FavoritePlanningTargetKind { quickPlan, scenario, route }
 
 class FavoriteItemEntity {
@@ -24,9 +25,9 @@ class FavoriteItemEntity {
   final String subtitle;
   final String city;
   final String category;
-  final DateTime startsAtUtc;
+  final DateTime? startsAtUtc;
   final double distanceKm;
-  final Money priceAmount;
+  final Money? priceAmount;
   final bool isFree;
   final DateTime savedAtUtc;
   final String? targetRoute;

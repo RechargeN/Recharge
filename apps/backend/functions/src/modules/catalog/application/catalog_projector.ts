@@ -51,6 +51,7 @@ export interface CatalogProjectorDependencies {
   readonly repository: CatalogRepository;
   readonly source: ContentCatalogSource;
   readonly clock: ServerClock;
+  readonly activityEnabled?: boolean;
 }
 
 function canonical(value: unknown): string {
@@ -146,7 +147,15 @@ export class CatalogProjector {
         return { outcome: 'refused', code: 'source_unavailable' };
       }
     }
+    const taxonomyRead =
+      fact.typeId === 'activity' && revision !== null
+        ? await this.#deps.source.readTaxonomyRevision?.(
+            revision.referenceRevisions.taxonomyRevisionId ?? '',
+          )
+        : undefined;
     const outcome: ProjectionOutcome = projectFact({
+      activityEnabled: this.#deps.activityEnabled === true,
+      ...(taxonomyRead?.ok ? { taxonomy: taxonomyRead.dataset } : {}),
       fact,
       revision,
       typeVisibilityPolicy: this.#deps.source.typeVisibilityPolicy(fact.typeId),

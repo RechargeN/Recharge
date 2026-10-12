@@ -120,6 +120,8 @@ final class StandBackend {
     return (exitCode: result.exitCode, json: _lastJson(result, args));
   }
 
+  Future<Map<String,Object?>> catalog(List<String> args) => _stand(<String>['catalog',...args]);
+
   String _script(String name) {
     final separator = Platform.pathSeparator;
     return '$repoRoot${separator}apps${separator}backend${separator}scripts'

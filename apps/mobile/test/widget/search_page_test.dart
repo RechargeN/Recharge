@@ -867,7 +867,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
             return false;
           }
           if (query.freeOnly && !item.isFree) return false;
-          if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+          if (query.budgetMax != null && item.priceAmount! > query.budgetMax!) {
             return false;
           }
           return true;
