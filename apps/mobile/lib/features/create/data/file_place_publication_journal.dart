@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
+import 'publication_journal_file.dart';
 
 import '../domain/entities/place_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -11,25 +11,19 @@ import '../domain/repositories/place_publication_gateway.dart';
 /// the file but never returned for this one. It is a list of references, not a
 /// source of truth; every status shown next to it is read from the server.
 final class FilePlacePublicationJournal implements PlacePublicationJournal {
-  FilePlacePublicationJournal(this._file);
+  FilePlacePublicationJournal(File file)
+    : _storage = PublicationJournalFile<PlacePublicationRecord>(
+        file,
+        decode: PlacePublicationRecord.fromJson,
+        encode: (record) => record.toJson(),
+        maxRecords: maxRecords,
+      );
 
   static const int maxRecords = 100;
 
-  final File _file;
+  final PublicationJournalFile<PlacePublicationRecord> _storage;
 
-  Future<List<PlacePublicationRecord>> _all() async {
-    if (!await _file.exists()) return <PlacePublicationRecord>[];
-    try {
-      final Object? decoded = jsonDecode(await _file.readAsString());
-      if (decoded is! List) return <PlacePublicationRecord>[];
-      return decoded
-          .map(PlacePublicationRecord.fromJson)
-          .whereType<PlacePublicationRecord>()
-          .toList();
-    } on FormatException {
-      return <PlacePublicationRecord>[];
-    }
-  }
+  Future<List<PlacePublicationRecord>> _all() => _storage.read();
 
   @override
   Future<List<PlacePublicationRecord>> list(String accountId) async =>
@@ -59,16 +53,6 @@ final class FilePlacePublicationJournal implements PlacePublicationJournal {
             item.belongsTo(record.accountId, record.publisherRef),
       )
       ..insert(0, record);
-    final List<PlacePublicationRecord> bounded = records
-        .take(maxRecords)
-        .toList();
-    await _file.parent.create(recursive: true);
-    // Write-then-rename, so an interrupted save never leaves half a file.
-    final File temporary = File('${_file.path}.tmp');
-    await temporary.writeAsString(
-      jsonEncode(bounded.map((item) => item.toJson()).toList()),
-      flush: true,
-    );
-    await temporary.rename(_file.path);
+    await _storage.write(records);
   }
 }

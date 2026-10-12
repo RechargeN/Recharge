@@ -1,3 +1,4 @@
+import 'publication_media_type.dart';
 import '../domain/entities/content_validation_violation.dart';
 import 'dart:convert';
 
@@ -176,7 +177,7 @@ final class ActivityPublicationController extends ChangeNotifier {
         // The same bytes of the same photo always replay the same upload.
         intentId: scope.uploadIntentId(item.attachmentId, digest),
         bytes: bytes,
-        declaredMediaType: _declaredMediaType(item.localRef),
+        declaredMediaType: declaredPublicationMediaType(item.localRef),
         publisherRef: scope.publisherRef,
         contentId: record.contentId,
       );
@@ -605,15 +606,6 @@ final class ActivityPublicationController extends ChangeNotifier {
       publisherRef: ref,
       localDraftId: draft.id,
     );
-  }
-
-  /// What the client claims; the server detects the real type from the bytes.
-  static String _declaredMediaType(String reference) {
-    final String lower = reference.toLowerCase();
-    if (lower.endsWith('.png')) return 'image/png';
-    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
-    if (lower.endsWith('.webp')) return 'image/webp';
-    return 'application/octet-stream';
   }
 }
 

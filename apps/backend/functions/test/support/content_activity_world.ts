@@ -6,12 +6,7 @@ import { eventAuthoringComposition } from '../../src/content_entry.js';
 import type { EmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { mediaComposition } from '../../src/media_entry.js';
 import { standActivityBody, standSeedActivity } from '../stand/stand_content_activity.js';
-import { createFirebaseActor, registerSessionContext } from './booking_emulator.js';
-import {
-  createPublishingActors,
-  uploadReadyImage,
-  type PublishingActor,
-} from './content_event_world.js';
+import { createSignedPublishingActors, uploadReadyImage } from './content_event_world.js';
 import { expectData } from './content_place_world.js';
 
 export { expectData };
@@ -49,23 +44,7 @@ export function createActivityWorld(
   let sequence = 0;
   const key = (name: string) => `${scope}-${name}-${(sequence += 1)}`;
 
-  const actors = (async () => {
-    const created = await createPublishingActors(firestore, scope);
-    const signIn = async (actor: PublishingActor) => {
-      const idToken = await createFirebaseActor(actor.firebaseUid);
-      registerSessionContext(idToken, {
-        sessionId: actor.actor.sessionId,
-        sessionHandle: actor.sessionHandle,
-        installationId: actor.installationId,
-      });
-      return { ...actor, idToken };
-    };
-    return {
-      pageId: created.pageId,
-      creator: await signIn(created.creator),
-      staff: await signIn(created.staff),
-    };
-  })();
+  const actors = createSignedPublishingActors(firestore, scope);
 
   const execute = async (command: Record<string, unknown>): Promise<Answer> => {
     const { creator } = await actors;
