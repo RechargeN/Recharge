@@ -1,3 +1,4 @@
+import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
 import '../domain/repositories/event_publication_gateway.dart';
@@ -26,7 +27,10 @@ final class ContentTransportFailure implements Exception {
 /// default; Place for D3.1); every other command addresses ids the server
 /// already bound to a type.
 final class FunctionsEventPublicationGateway
-    implements EventPublicationGateway, ContentDraftReader {
+    implements
+        EventPublicationGateway,
+        ContentDraftReader,
+        ContentActivationGateway {
   FunctionsEventPublicationGateway({
     required ContentCallablePort port,
     required EventPublicationCommandGate gate,
@@ -113,6 +117,24 @@ final class FunctionsEventPublicationGateway
   }
 
   @override
+  Future<void> activatePublishedRevision({
+    required String contentId,
+    required String publishedRevisionId,
+    required int expectedPointerRevision,
+    required String idempotencyKey,
+  }) async {
+    await _command(
+      'activatePublishedRevision',
+      idempotencyKey,
+      <String, Object?>{
+        'contentId': contentId,
+        'publishedRevisionId': publishedRevisionId,
+        'expectedPointerRevision': expectedPointerRevision,
+      },
+    );
+  }
+
+  @override
   Future<EventPublicationStatus> status(String contentId) async {
     _gate.assertAllowed();
     final Map<String, Object?> data = await _call(
@@ -195,6 +217,9 @@ final class FunctionsEventPublicationGateway
     if (result['kind'] != 'succeeded') {
       throw EventPublicationRejected(
         result['code'] as String? ?? 'invalid_contract',
+        violations: result['code'] == 'validation_failed'
+            ? ContentValidationViolation.fromWire(result['violations'])
+            : const [],
       );
     }
     final Object? value = result['data'];

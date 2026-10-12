@@ -53,6 +53,10 @@ final class ActivityPublicationRecord {
     this.bodySaved = false,
     this.attachments = const <ActivityAttachmentRecord>[],
     this.submissionId,
+    this.editingFromRevisionId,
+    this.savedLocalBodyDigest,
+    this.pendingActivationRevisionId,
+    this.pendingActivationPointerRevision,
   });
 
   final String accountId;
@@ -72,6 +76,11 @@ final class ActivityPublicationRecord {
   final DateTime createdAtUtc;
   final List<ActivityAttachmentRecord> attachments;
   final String? submissionId;
+  final String? editingFromRevisionId;
+  final String? savedLocalBodyDigest;
+  // Persist the exact optimistic fence before sending; transport retry replays it.
+  final String? pendingActivationRevisionId;
+  final int? pendingActivationPointerRevision;
 
   bool belongsTo(String account, PublisherRef publisher) =>
       accountId == account &&
@@ -91,6 +100,12 @@ final class ActivityPublicationRecord {
     String? title,
     List<ActivityAttachmentRecord>? attachments,
     String? submissionId,
+    String? editingFromRevisionId,
+    String? savedLocalBodyDigest,
+    String? pendingActivationRevisionId,
+    int? pendingActivationPointerRevision,
+    bool clearPendingActivation = false,
+    bool clearEditing = false,
   }) => ActivityPublicationRecord(
     accountId: accountId,
     publisherRef: publisherRef,
@@ -104,6 +119,17 @@ final class ActivityPublicationRecord {
     createdAtUtc: createdAtUtc,
     attachments: attachments ?? this.attachments,
     submissionId: submissionId ?? this.submissionId,
+    savedLocalBodyDigest: savedLocalBodyDigest ?? this.savedLocalBodyDigest,
+    editingFromRevisionId: clearEditing
+        ? null
+        : editingFromRevisionId ?? this.editingFromRevisionId,
+    pendingActivationRevisionId: clearPendingActivation
+        ? null
+        : pendingActivationRevisionId ?? this.pendingActivationRevisionId,
+    pendingActivationPointerRevision: clearPendingActivation
+        ? null
+        : pendingActivationPointerRevision ??
+              this.pendingActivationPointerRevision,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -120,6 +146,14 @@ final class ActivityPublicationRecord {
     'createdAtUtc': createdAtUtc.toUtc().toIso8601String(),
     'attachments': attachments.map((item) => item.toJson()).toList(),
     if (submissionId != null) 'submissionId': submissionId,
+    if (editingFromRevisionId != null)
+      'editingFromRevisionId': editingFromRevisionId,
+    if (savedLocalBodyDigest != null)
+      'savedLocalBodyDigest': savedLocalBodyDigest,
+    if (pendingActivationRevisionId != null)
+      'pendingActivationRevisionId': pendingActivationRevisionId,
+    if (pendingActivationPointerRevision != null)
+      'pendingActivationPointerRevision': pendingActivationPointerRevision,
   };
 
   /// A malformed or foreign-shaped entry is skipped, never repaired.
@@ -154,7 +188,17 @@ final class ActivityPublicationRecord {
         title is! String ||
         createdAt == null ||
         attachments is! List ||
-        (submissionId != null && submissionId is! String)) {
+        (submissionId != null && submissionId is! String) ||
+        (value['savedLocalBodyDigest'] != null &&
+            value['savedLocalBodyDigest'] is! String) ||
+        (value['editingFromRevisionId'] != null &&
+            value['editingFromRevisionId'] is! String) ||
+        (value['pendingActivationRevisionId'] != null &&
+            value['pendingActivationRevisionId'] is! String) ||
+        (value['pendingActivationPointerRevision'] != null &&
+            value['pendingActivationPointerRevision'] is! int) ||
+        ((value['pendingActivationRevisionId'] == null) !=
+            (value['pendingActivationPointerRevision'] == null))) {
       return null;
     }
     final List<ActivityAttachmentRecord> parsed = <ActivityAttachmentRecord>[];
@@ -177,6 +221,12 @@ final class ActivityPublicationRecord {
       createdAtUtc: createdAt.toUtc(),
       attachments: List<ActivityAttachmentRecord>.unmodifiable(parsed),
       submissionId: submissionId as String?,
+      editingFromRevisionId: value['editingFromRevisionId'] as String?,
+      savedLocalBodyDigest: value['savedLocalBodyDigest'] as String?,
+      pendingActivationRevisionId:
+          value['pendingActivationRevisionId'] as String?,
+      pendingActivationPointerRevision:
+          value['pendingActivationPointerRevision'] as int?,
     );
   }
 }

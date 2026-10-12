@@ -162,8 +162,10 @@ export function createActivityWorld(firestore: Firestore, label: string) {
   }
 
   /** The whole owner path: bound draft, submit, staff approval, owner publish. */
-  async function publishedActivity() {
-    const activity = await boundActivity();
+  async function publishedActivity(
+    change: (body: Record<string, unknown>) => Record<string, unknown> = (b) => b,
+  ) {
+    const activity = await boundActivity(change);
     const submission = expectData<{ submissionId: string }>(
       await submit(activity.draftId, activity.revision),
       'submit',

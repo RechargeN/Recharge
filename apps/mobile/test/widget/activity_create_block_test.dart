@@ -13,58 +13,66 @@ import 'package:recharge/features/create/presentation/widgets/activity_create_bl
 import '../support/event_create_test_support.dart';
 
 void main() {
-  testWidgets('renders the Basics step title field for a fresh activity draft', (
-    WidgetTester tester,
-  ) async {
-    final _MemoryRepository repository = _MemoryRepository();
-    final CreateController controller = CreateController(
-      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
-      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
-      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
-      analyticsService: _NoopAnalyticsService(),
-      eventCreateCoordinator: createTestEventCoordinator(),
-      runtimeDefaults: const CreateRuntimeDefaults(
-        marketCityId: 'riga',
-        timezone: 'Europe/Riga',
-        country: 'LV',
-        city: 'Riga',
-        currency: 'EUR',
-      ),
-    );
-    addTearDown(controller.dispose);
-    await controller.ensureLoaded(
-      userId: 'user-1',
-      organizerEmail: 'user@example.com',
-      organizerName: 'Creator',
-    );
-    controller.setObjectType(CreateObjectType.activity);
+  testWidgets(
+    'renders server validation feedback beside the existing title field',
+    (WidgetTester tester) async {
+      final _MemoryRepository repository = _MemoryRepository();
+      final CreateController controller = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'Creator',
+      );
+      controller.setObjectType(CreateObjectType.activity);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AnimatedBuilder(
-            animation: controller,
-            builder: (BuildContext context, Widget? child) {
-              return SingleChildScrollView(
-                child: ActivityCreateBlock(
-                  controller: controller,
-                  state: controller.state,
-                  onPublished: () {},
-                ),
-              );
-            },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnimatedBuilder(
+              animation: controller,
+              builder: (BuildContext context, Widget? child) {
+                return SingleChildScrollView(
+                  child: ActivityCreateBlock(
+                    controller: controller,
+                    state: controller.state,
+                    onPublished: () {},
+                    serverValidationFailed: true,
+                    serverErrors: const {'/body/title': 'Use 5–80 characters.'},
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    // Flush the 700ms autosave timer scheduled by setObjectType(activity)
-    // so no pending Timer remains when the test ends.
-    await tester.pump(const Duration(milliseconds: 800));
+      );
+      await tester.pumpAndSettle();
+      // Flush the 700ms autosave timer scheduled by setObjectType(activity)
+      // so no pending Timer remains when the test ends.
+      await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.text('Title'), findsOneWidget);
-    expect(find.byType(TextFormField), findsWidgets);
-  });
+      expect(find.text('Title'), findsOneWidget);
+      expect(find.text('Use 5–80 characters.'), findsOneWidget);
+      expect(
+        find.text('Check the Activity fields and submit again.'),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsWidgets);
+    },
+  );
 
   testWidgets('Basics step fits 360 dp at 1.5 text scale without overflow', (
     WidgetTester tester,

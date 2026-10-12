@@ -1,3 +1,5 @@
+import 'package:recharge/features/create/application/activity_validation_feedback_provider.dart';
+import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -63,6 +65,153 @@ void main() {
     accountId: account,
     publisherRef: current.activityData!.publisherRef,
     localDraftId: current.id,
+  );
+
+  Future<ActivityPublicationController> publishedController() async {
+    final c = controller(draft());
+    await c.load();
+    await c.save();
+    await c.submit();
+    server.approve(c.state.status!.latestSubmissionId!);
+    await c.refresh();
+    await c.publish();
+    await c.hide();
+    return c;
+  }
+
+  test(
+    'Activate resumes an applied command with a lost response after restart',
+    () async {
+      final c = await publishedController();
+      server.loseAnswerOf.add('activate');
+      await c.activate();
+      expect(c.state.phase, ActivityPublicationPhase.offline);
+      final pending = await journal.forLocalDraft(
+        accountId: 'account-a',
+        publisherRef: draft().activityData!.publisherRef,
+        localDraftId: draft().id,
+      );
+      expect(pending!.pendingActivationPointerRevision, 2);
+      c.dispose();
+      final again = controller(draft());
+      addTearDown(again.dispose);
+      await again.load();
+      await again.activate();
+      expect(again.state.message, isNull);
+      expect(again.state.status!.visibility, 'visible');
+      expect(again.state.status!.pointerRevision, 3);
+      expect(server.activationKeys[0], server.activationKeys[1]);
+      expect(again.state.record!.pendingActivationRevisionId, isNull);
+    },
+  );
+
+  test(
+    'Activate preserves pointer conflict and capability refusal without retry',
+    () async {
+      final c = await publishedController();
+      addTearDown(c.dispose);
+      gate.open = false;
+      final before = server.activationKeys.length;
+      await c.activate();
+      expect(c.state.message, 'not_allowed');
+      expect(server.activationKeys.length, before);
+      gate.open = true;
+      server.activationFailure = const EventPublicationRejected(
+        'revision_conflict',
+      );
+      await c.activate();
+      expect(c.state.message, 'revision_conflict');
+      expect(server.activationKeys.length, before + 1);
+      expect(c.state.status!.visibility, 'withdrawn');
+      expect(c.state.record!.pendingActivationRevisionId, isNull);
+    },
+  );
+
+  test(
+    'Edit is journaled, uses fresh Create body and keeps immutable pointer until publish',
+    () async {
+      final source = _Drafts(draft());
+      final c = ActivityPublicationController(
+        accountId: 'account-a',
+        drafts: source,
+        gateway: server,
+        reader: server,
+        uploader: uploader,
+        mediaSource: media,
+        journal: journal,
+        gate: gate,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+      await c.save();
+      await c.submit();
+      server.approve(c.state.status!.latestSubmissionId!);
+      await c.refresh();
+      await c.publish();
+      final id = c.state.record!.contentId;
+      final revision = c.state.record!.draftRevision;
+      await c.beginEditing();
+      expect(c.state.record!.editingFromRevisionId, 'revision-1');
+      expect(c.state.canSubmit, isFalse);
+      source.draft = source.draft.copyWith(title: 'Changed Activity title');
+      await c.submit();
+      expect(c.state.message, 'save_required');
+      await c.save();
+      expect(c.state.record!.contentId, id);
+      expect(c.state.record!.draftRevision, revision + 1);
+      expect(
+        server.drafts.values.single.body['title'],
+        'Changed Activity title',
+      );
+      expect(c.state.status!.currentPublishedRevisionId, 'revision-1');
+      source.draft = source.draft.copyWith(title: 'Another edit after Save');
+      await c.refresh();
+      expect(c.state.canSubmit, isFalse);
+    },
+  );
+
+  test(
+    'server violations survive submit and clear on a later successful action',
+    () async {
+      final c = controller(draft());
+      addTearDown(c.dispose);
+      await c.load();
+      await c.save();
+      server.submitFailure = const EventPublicationRejected(
+        'validation_failed',
+        violations: [
+          ContentValidationViolation(
+            code: 'activity.title_length',
+            fieldPath: '/body/title',
+          ),
+        ],
+      );
+      await c.submit();
+      expect(c.state.message, 'validation_failed');
+      expect(c.state.violations.single.fieldPath, '/body/title');
+      final feedback = ActivityValidationFeedbackStore()..capture(c);
+      addTearDown(feedback.dispose);
+      expect(feedback.fieldsFor('account-a', c.currentDraft!), isNotEmpty);
+      expect(feedback.fieldsFor('account-b', c.currentDraft!), isEmpty);
+      expect(
+        feedback.fieldsFor(
+          'account-a',
+          c.currentDraft!.copyWith(id: 'another-draft'),
+        ),
+        isEmpty,
+      );
+      expect(
+        feedback.fieldsFor(
+          'account-a',
+          c.currentDraft!.copyWith(updatedAtUtc: DateTime.utc(2027)),
+        ),
+        isEmpty,
+      );
+      server.submitFailure = null;
+      await c.submit();
+      expect(c.state.message, isNull);
+      expect(c.state.violations, isEmpty);
+    },
   );
 
   setUp(() async {
@@ -150,11 +299,7 @@ void main() {
         ),
         localDraftId: 'local-activity-1',
       );
-      expect(
-        recorded?.bodySaved,
-        isFalse,
-        reason: 'created, body not saved',
-      );
+      expect(recorded?.bodySaved, isFalse, reason: 'created, body not saved');
       expect(c.state.canSubmit, isFalse);
       await c.save();
       expect(
@@ -353,7 +498,7 @@ void main() {
 final class _Drafts implements ActivityDraftSource {
   _Drafts(this.draft);
 
-  final CreateDraftEntity draft;
+  CreateDraftEntity draft;
 
   @override
   Future<CreateDraftEntity?> current() async => draft;
@@ -422,8 +567,13 @@ final class _Draft {
 
 /// In-memory Content: drafts with revisions and authors, idempotent keys
 /// (same key and payload replay the stored answer), and injected failures.
-final class _Server implements EventPublicationGateway, ContentDraftReader {
+final class _Server
+    implements
+        EventPublicationGateway,
+        ContentDraftReader,
+        ContentActivationGateway {
   final Map<String, _Draft> drafts = <String, _Draft>{};
+  EventPublicationRejected? submitFailure;
   final List<String> calls = <String>[];
   final List<({String key, Map<String, Object?> body})> creates =
       <({String key, Map<String, Object?> body})>[];
@@ -554,6 +704,7 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
     required String idempotencyKey,
   }) async {
     calls.add('submitForPublication');
+    if (submitFailure != null) throw submitFailure!;
     _latestSubmission = 'submission-1';
     _submissionStates['submission-1'] = 'under_review';
     return 'submission-1';
@@ -580,6 +731,36 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
     calls.add('withdrawPublication');
     _pointerRevision = (_pointerRevision ?? 0) + 1;
     _visibility = 'withdrawn';
+  }
+
+  EventPublicationRejected? activationFailure;
+  final List<String> activationKeys = [];
+  @override
+  Future<void> activatePublishedRevision({
+    required String contentId,
+    required String publishedRevisionId,
+    required int expectedPointerRevision,
+    required String idempotencyKey,
+  }) async {
+    activationKeys.add(idempotencyKey);
+    await _idempotent(
+      'activate',
+      idempotencyKey,
+      {
+        'contentId': contentId,
+        'target': publishedRevisionId,
+        'pointer': expectedPointerRevision,
+      },
+      () {
+        if (activationFailure != null) throw activationFailure!;
+        if (_pointerRevision != expectedPointerRevision) {
+          throw const EventPublicationRejected('revision_conflict');
+        }
+        _pointerRevision = expectedPointerRevision + 1;
+        _visibility = 'visible';
+        return _ref(drafts.keys.first);
+      },
+    );
   }
 
   @override

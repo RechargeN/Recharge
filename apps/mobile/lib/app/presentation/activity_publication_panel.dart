@@ -1,4 +1,9 @@
+import '../../features/create/application/activity_validation_feedback_provider.dart';
+import '../../features/create/application/create_providers.dart';
+import '../../features/create/application/state/create_state.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../router/route_names.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_providers.dart';
@@ -40,8 +45,16 @@ class _ActivityPublicationPanelState
 
   @override
   void dispose() {
+    _created?.removeListener(_captureFeedback);
     _created?.dispose();
     super.dispose();
+  }
+
+  void _captureFeedback() {
+    final controller = _created;
+    if (mounted && controller != null) {
+      ref.read(activityValidationFeedbackProvider).capture(controller);
+    }
   }
 
   @override
@@ -56,12 +69,14 @@ class _ActivityPublicationPanelState
     // A change of account builds a new controller bound to that account.
     if (_controller == null || _userId != userId) {
       _userId = userId;
+      _created?.removeListener(_captureFeedback);
       _created?.dispose();
       _created = null;
       _controller = createActivityPublicationController(userId: userId).then((
         ActivityPublicationController? controller,
       ) {
         _created = controller;
+        controller?.addListener(_captureFeedback);
         controller?.load();
         return controller;
       });
@@ -75,7 +90,40 @@ class _ActivityPublicationPanelState
           ) {
             final ActivityPublicationController? controller = snapshot.data;
             if (controller == null) return const SizedBox.shrink();
-            return ActivityPublicationSection(controller: controller);
+            return ActivityPublicationSection(
+              controller: controller,
+              onEdit: () async {
+                // Flush existing Create work before replacing its cached
+                // controller. A different current draft is then refused by
+                // beginEditing, rather than overwritten or discarded.
+                final create = ref.read(createControllerProvider);
+                if (create.state.isLoaded) {
+                  await create.saveDraft();
+                  if (!context.mounted) {
+                    return;
+                  }
+                  if (create.state.saveStatus != CreateSaveStatus.saved) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Save your Create draft before editing this publication.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                }
+                await controller.beginEditing();
+                if (!context.mounted || controller.state.message != null) {
+                  return;
+                }
+                ref.invalidate(createControllerProvider);
+                await context.push<void>(
+                  '${RouteNames.createObjectFor('activity')}?publicationEdit=activity',
+                );
+                if (context.mounted) await controller.refresh();
+              },
+            );
           },
     );
   }

@@ -45,6 +45,16 @@ abstract interface class EventPublicationGateway {
   Future<EventPublicationStatus> status(String contentId);
 }
 
+/// Optional owner activation capability of the existing Content gateway.
+abstract interface class ContentActivationGateway {
+  Future<void> activatePublishedRevision({
+    required String contentId,
+    required String publishedRevisionId,
+    required int expectedPointerRevision,
+    required String idempotencyKey,
+  });
+}
+
 /// Media upload of the Event cover, bound to the exact Content draft.
 abstract interface class EventCoverUploader {
   /// Returns the ready Media asset id.

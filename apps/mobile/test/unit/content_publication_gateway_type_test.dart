@@ -7,6 +7,56 @@ import 'package:recharge/features/create/domain/repositories/event_publication_g
 /// D3.1 §1: the shared Content gateway only gained a type parameter (Event by
 /// default, unchanged for C3) and reads the author the server recorded.
 void main() {
+  test(
+    'gateway preserves public details and accepts the legacy general answer',
+    () async {
+      for (final detailed in [false, true]) {
+        final port = _RejectedPort(detailed);
+        final gateway = FunctionsEventPublicationGateway(
+          port: port,
+          gate: const _Open(),
+        );
+        try {
+          await gateway.submit(
+            draftId: 'draft-1',
+            expectedDraftRevision: 1,
+            idempotencyKey: 'submit',
+          );
+          fail('expected refusal');
+        } on EventPublicationRejected catch (error) {
+          expect(error.code, 'validation_failed');
+          expect(error.violations.length, detailed ? 1 : 0);
+          if (detailed) {
+            expect(error.violations.single.fieldPath, '/body/title');
+          }
+        }
+      }
+    },
+  );
+
+  test('Activate sends the exact immutable target and pointer fence', () async {
+    final port = _RecordingPort();
+    await FunctionsEventPublicationGateway(
+      port: port,
+      gate: const _Open(),
+      typeId: 'activity',
+    ).activatePublishedRevision(
+      contentId: 'content-1',
+      publishedRevisionId: 'published-1',
+      expectedPointerRevision: 4,
+      idempotencyKey: 'activate-1',
+    );
+    final sent = port.calls.single;
+    expect(sent.callable, 'contentCommandV1');
+    expect(sent.data['commandType'], 'activatePublishedRevision');
+    expect(sent.data['idempotencyKey'], 'activate-1');
+    expect(sent.data['payload'], {
+      'contentId': 'content-1',
+      'publishedRevisionId': 'published-1',
+      'expectedPointerRevision': 4,
+    });
+  });
+
   test('Event stays the default type of createDraft', () async {
     final _RecordingPort port = _RecordingPort();
     await FunctionsEventPublicationGateway(
@@ -136,4 +186,22 @@ final class _RecordingPort implements ContentCallablePort {
       },
     };
   }
+}
+
+final class _RejectedPort implements ContentCallablePort {
+  const _RejectedPort(this.detailed);
+  final bool detailed;
+  @override
+  Future<Map<String, Object?>> invoke(
+    String callableName,
+    Map<String, Object?> data,
+  ) async => {
+    'schemaVersion': 1,
+    'kind': 'rejected',
+    'code': 'validation_failed',
+    if (detailed)
+      'violations': [
+        {'code': 'activity.title_length', 'fieldPath': '/body/title'},
+      ],
+  };
 }
