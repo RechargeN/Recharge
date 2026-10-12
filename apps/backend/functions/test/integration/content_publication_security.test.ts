@@ -883,6 +883,9 @@ void test('delegated import never reaches Content storage except through the Con
       'ReferenceDataPort',
       'resolveContentType',
       'ContentPublicationFeed',
+      // D9 (901bf0d): the source re-verifies the published body hash.
+      'canonicalJson',
+      'sha256Hex',
     ],
     'modules/catalog/infrastructure/emulator_catalog_composition.ts': [
       'ContentPublicationFeed',
