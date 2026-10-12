@@ -109,10 +109,12 @@ class ValidateActivityDraftUseCase {
       final String note = (caution.note ?? '').trim();
       if (note.isEmpty) {
         error('access_caution_note_required', 'location', 'accessCautionNote');
-      } else if (note.length > 200) {
-        error('access_caution_note_length', 'location', 'accessCautionNote');
       }
       warning('informal_access_notice', 'location', 'accessCautionNote');
+    }
+
+    if ((caution?.note ?? '').trim().runes.length > 200) {
+      error('access_caution_note_length', 'location', 'accessCautionNote');
     }
 
     final ActivityOptionalContributionDraft? contribution =
