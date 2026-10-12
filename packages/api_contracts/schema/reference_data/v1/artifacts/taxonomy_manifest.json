@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "taxonomyRevisionId": "taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822",
+  "artifactSha256": "d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822",
+  "sourceRecordId": "SRCREC-CATEGORY-143-001",
+  "sourceDocumentSha256": "5dfe5347363eeb7d72933812424f22667e730a6edfb16aeb7c79fbeb8ef259f9",
+  "semanticVersion": "1.4.3",
+  "derivation": "deterministic canonical Category System sections 6 and 7; verified Activity parity; no new public criteria"
+}

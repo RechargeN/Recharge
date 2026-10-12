@@ -1,3 +1,4 @@
+import type { TaxonomyRead } from '../../../reference_data/domain/taxonomy_dataset.js';
 import type {
   ContentReferenceRevisionsV1,
   ContentTypeId,
@@ -18,6 +19,8 @@ export type ReferenceResolution =
 
 /** BCK-20 MarketConfig/taxonomy/localization revisions pinned at command time. */
 export interface ReferenceDataPort {
+  /** Additive exact-revision capability: absence is explicitly unavailable to consumers. */
+  readTaxonomyRevision?(input: { readonly taxonomyRevisionId: string }): Promise<TaxonomyRead>;
   resolve(input: {
     readonly marketId: MarketId;
     readonly typeId: ContentTypeId;
