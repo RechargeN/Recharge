@@ -128,6 +128,12 @@ export interface ContentPublicationServiceDeps {
    * composition cannot resolve fails closed here (D3.2 §2.4).
    */
   readonly compositionRules?: ReadonlyMap<ContentTypeId, ContentTypeRule>;
+  /**
+   * Types whose `activatePublishedRevision` this composition does not offer
+   * (default: none). Activation is refused before any state is read further,
+   * so the pointer, revisions and effects stay as they are (D3.3 §2 Q4).
+   */
+  readonly activationClosedTypes?: ReadonlySet<ContentTypeId>;
 }
 
 export type ContentCommandData =
@@ -703,6 +709,8 @@ export class ContentPublicationService {
     const draft = await tx.draftByContentId(payload.contentId);
     if (draft === null) throw new ContentDomainRefusal('not_found');
     const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
+    if (this.deps.activationClosedTypes?.has(draft.typeId) === true)
+      throw new ContentDomainRefusal('type_disabled');
     await this.authorize(context, draft.publisherRef, draft.typeId, 'publish', draft.marketId);
     const target = await tx.publishedRevision(payload.publishedRevisionId);
     if (target === null || target.contentId !== payload.contentId)

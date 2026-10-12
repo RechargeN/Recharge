@@ -82,6 +82,8 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/content_place_enablement.test.ts",
   // D3.2 (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md §8): Activity enablement matrix.
   "apps/backend/functions/test/integration/content_activity_enablement.test.ts",
+  // D3.3 (RENTAL_D3_3_PUBLICATION_AMENDMENT.md §11): Rental enablement matrix.
+  "apps/backend/functions/test/integration/content_rental_enablement.test.ts",
 ];
 
 if (

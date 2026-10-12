@@ -69,7 +69,7 @@ production processing are authorized.
 | `scenario` | BCK-07 distribution manifest | Scenario aggregate remains BCK-10 | Typed local personal flow; BCK-10 absent |
 | `find_people` | BCK-07 with OD-11/privacy gate | Consent/access input from BCK-06 | Typed local/mock; production gated |
 | `class_workshop` | BCK-07 | Dedicated product spec present but not Approved by this doc | Generic local runtime |
-| `rental` | BCK-07; direct publish only explicit policy | Rental inventory/fulfillment remains domain-owned | Generic local; trusted gate not production-authorized |
+| `rental` | BCK-07; direct publish only explicit policy | Rental inventory/fulfillment remains domain-owned | D3.3 ([amendment](RENTAL_D3_3_PUBLICATION_AMENDMENT.md)): Emulator-only lifecycle through Content, Media and C2 behind `content.rental.authoring` with a TEST-ONLY policy; re-activation closed; Catalog/Discover excluded (BCK08-OD-04); trusted gate not production-authorized |
 | `collection` | BCK-07 | Collection item refs/removal behavior remain domain-owned | Generic/local; dedicated spec absent here |
 
 `quick_plan` is not an eleventh type. It is a private/invited utility owned by

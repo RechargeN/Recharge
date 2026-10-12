@@ -1036,6 +1036,9 @@ async function prepareContentCaller(
     activityAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.activityAuthoring,
     ),
+    rentalAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.rentalAuthoring,
+    ),
   });
   if (enabledTypes.size === 0) return refuse('type_disabled');
   return {

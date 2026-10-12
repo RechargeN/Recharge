@@ -90,6 +90,7 @@
     "test:emulator:content-media": "node ../scripts/run-emulator-tests.mjs --group content-media",
     "test:emulator:handoff-notifications": "node ../scripts/run-emulator-tests.mjs --group handoff-notifications",
     "test:emulator:place-activity": "node ../scripts/run-emulator-tests.mjs --group place-activity",
+    "test:emulator:rental": "node ../scripts/run-emulator-tests.mjs --group rental",
     "test:emulator:rules-reference": "node ../scripts/run-emulator-tests.mjs --group rules-reference",
     "test:emulator:runner": "node --test ../scripts/run-emulator-test-groups.test.mjs",
     "build:taxonomy": "node ../scripts/build-taxonomy-dataset.mjs",

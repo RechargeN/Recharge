@@ -198,6 +198,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
   for (const [manifestKey, tag] of [
     ['contentPlace', 'seed-place'],
     ['contentActivity', 'seed-activity'],
+    ['contentRental', 'seed-rental'],
   ] as const) {
     const seeded = manifest?.[manifestKey] as Record<string, unknown> | undefined;
     if (seeded === undefined) continue;

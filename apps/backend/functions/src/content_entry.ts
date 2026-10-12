@@ -11,6 +11,7 @@ import {
 import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
 import { createEmulatorCatalogComposition } from './modules/catalog/infrastructure/emulator_catalog_composition.js';
 import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
+import { emulatorActivationClosedTypes } from './modules/content/infrastructure/emulator_rental_dependencies.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
 import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
@@ -28,25 +29,28 @@ import { mediaComposition } from './media_entry.js';
 
 /**
  * Types the Emulator-only authoring path may ever enable: Event (C3), Place
- * (D3.1) and Recharge Activity (D3.2). Every other type stays off here, with
- * or without a validator.
+ * (D3.1), Recharge Activity (D3.2) and Rental / Equipment (D3.3). Every other
+ * type stays off here, with or without a validator.
  */
 export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'event',
   'place',
   'activity',
+  'rental',
 ]);
 
-/** D3.1 §2.2, D3.2 §2.2: the authoring types whose own flag is on. */
+/** D3.1 §2.2, D3.2 §2.2, D3.3: the authoring types whose own flag is on. */
 export function authoringTypesFor(flags: {
   readonly eventAuthoring: boolean;
   readonly placeAuthoring: boolean;
   readonly activityAuthoring: boolean;
+  readonly rentalAuthoring: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
     ...(flags.placeAuthoring ? (['place'] as const) : []),
     ...(flags.activityAuthoring ? (['activity'] as const) : []),
+    ...(flags.rentalAuthoring ? (['rental'] as const) : []),
   ]);
 }
 
@@ -110,6 +114,8 @@ export function eventAuthoringComposition(
       clock,
       ids: { newId: () => randomUUID() as EntityId },
       enabledTypes,
+      // D3.3 Q4: re-activating a Rental revision stays closed (§2 Q4).
+      activationClosedTypes: emulatorActivationClosedTypes,
       compositionRules:
         process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
           ? new Map([...emulatorCompositionRules].filter(([type]) => type !== 'activity'))

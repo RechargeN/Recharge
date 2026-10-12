@@ -1849,6 +1849,35 @@ or market activation.
   ignores Activity effects; D2 applies to Activity media.
 
 
+
+## 42. D3.3 local amendment — Rental / Equipment through Content in the Emulator
+
+Authoritative text:
+[RENTAL_D3_3_PUBLICATION_AMENDMENT.md](RENTAL_D3_3_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts `rental` too, only with its
+  available validator and its own default-off flag `content.rental.authoring`;
+  Collection and every type without a validator stay off. The accepted Rental
+  validator, `rental.cover_required` and the type registry are unchanged.
+- Emulator reference data answers `rentalPolicy` for Rental only, from a
+  TEST-ONLY policy (`test-only-rental-policy-1`, not an accepted policy; BCK-20
+  has no Rental policy contract) for an explicit list of pairs that must exist
+  in the pinned BCK-20 taxonomy revision; anything else has no policy and fails
+  closed.
+- The Content service takes optional `activationClosedTypes`; the Emulator
+  composition closes `activatePublishedRevision` for Rental (`type_disabled`,
+  nothing changes) until a re-activation semantics is accepted.
+- Only the attesting user can publish (the validator checks the acting user at
+  submit and publish); validator codes are not sent to the client.
+- Catalog keeps Rental excluded (`type_disabled`, BCK08-OD-04); Booking ignores
+  Rental effects; D2 applies to Rental media.
+- Limitation until a shared Content slice adds an owner's withdrawal of an
+  approved submission (new submit, review and publish with the same
+  `contentId`): an approved Rental whose confirmation expired can be neither
+  published nor edited. A suppressed Rental photo comes back only with a newly
+  reviewed and published revision after the restriction is lifted.
 ## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
 
 Authorized bounded local/Emulator change: optional public details for

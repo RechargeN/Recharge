@@ -871,6 +871,8 @@ void test('delegated import never reaches Content storage except through the Con
       'resolveContentType',
       // D3.2 §2.4: Emulator rules that refuse what the composition cannot resolve.
       'emulatorCompositionRules',
+      // D3.3 §2 Q4: activation the Emulator composition does not offer.
+      'emulatorActivationClosedTypes',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',

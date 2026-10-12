@@ -124,6 +124,37 @@ async function main(args: readonly string[]): Promise<void> {
     }
     throw new Error('usage: activity seed | verify | manifest | status');
   }
+  if (command === 'rental') {
+    // D3.3: loaded only for this command, like the Place and Activity commands.
+    const { seedContentRental, standRentalStatus, verifyStandRental } =
+      await import('./stand_content_rental.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentRental(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} rental=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandRental(firestore);
+      if (problems.length > 0)
+        throw new Error(`rental invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified rental invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentRental;
+      if (manifest === undefined) throw new Error('stand Rental is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standRentalStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: rental seed | verify | manifest | status');
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);
