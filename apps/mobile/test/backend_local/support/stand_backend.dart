@@ -89,6 +89,23 @@ final class StandBackend {
   Future<Map<String, Object?>> placeManifest() =>
       _stand(<String>['place', 'manifest']);
 
+  /// D3.3: seeds (or reuses) the stand Rental and enables Rental authoring on
+  /// the stand only; prints no JSON, so only its exit code is checked.
+  Future<void> rentalSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'rental',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('rental seed failed: ${result.stderr}${result.stdout}');
+    }
+  }
+
+  /// D3.3: the ids the owner services returned for the stand Rental.
+  Future<Map<String, Object?>> rentalManifest() =>
+      _stand(<String>['rental', 'manifest']);
+
   /// D3.2: seeds (or reuses) the stand Activity and enables Activity authoring
   /// on the stand only; prints no JSON, so only its exit code is checked.
   Future<void> activitySeed() async {
@@ -120,7 +137,8 @@ final class StandBackend {
     return (exitCode: result.exitCode, json: _lastJson(result, args));
   }
 
-  Future<Map<String,Object?>> catalog(List<String> args) => _stand(<String>['catalog',...args]);
+  Future<Map<String, Object?>> catalog(List<String> args) =>
+      _stand(<String>['catalog', ...args]);
 
   String _script(String name) {
     final separator = Platform.pathSeparator;

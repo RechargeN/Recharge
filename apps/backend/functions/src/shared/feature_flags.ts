@@ -42,6 +42,8 @@ export const contentFlagIds = Object.freeze({
   placeAuthoring: 'content.place.authoring',
   /** D3.2: Emulator-only Recharge Activity authoring through Content (default off). */
   activityAuthoring: 'content.activity.authoring',
+  /** D3.3: Emulator-only Rental / Equipment authoring through Content (default off). */
+  rentalAuthoring: 'content.rental.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */

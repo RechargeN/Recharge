@@ -85,6 +85,17 @@ export const emulatorTestGroups = Object.freeze([
     ],
   },
   {
+    // D3.3 (RENTAL_D3_3_PUBLICATION_AMENDMENT.md §7): its own group, so the
+    // Place/Activity bound keeps its measured headroom.
+    name: "rental",
+    baselineMs: 88186,
+    timeoutMs: 210000,
+    tasks: [
+      ["lib/test/emulator/content_rental_callable.test.js"],
+      ["lib/test/emulator/content_rental_emulator_flow.test.js"],
+    ],
+  },
+  {
     name: "rules-reference",
     baselineMs: 6749,
     timeoutMs: 120000,

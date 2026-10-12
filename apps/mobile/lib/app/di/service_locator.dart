@@ -15,6 +15,7 @@ import 'notifications_inbox_composition.dart';
 import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
 import 'activity_publication_composition.dart';
+import 'rental_publication_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
@@ -304,6 +305,10 @@ Future<void> setupDependencies() async {
     // D3.2: default-off Recharge Activity publication test entry, its own define.
     ..registerLazySingleton<ActivityPublicationTestEntryGuard>(
       () => ActivityPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.3: default-off Rental publication test entry, its own define.
+    ..registerLazySingleton<RentalPublicationTestEntryGuard>(
+      () => RentalPublicationTestEntryGuard.fromEnvironment(sl()),
     )
     // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
     ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(

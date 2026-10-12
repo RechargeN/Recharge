@@ -1,0 +1,1118 @@
+{
+  "schemaVersion": 1,
+  "typeId": "rental",
+  "source": "RENTAL_D3_3_PUBLICATION_AMENDMENT.md §4: the exact body RentalContentBodyMapper produces for each Create draft case (apps/mobile/test/fixtures/create/user_rental_draft.dart) for the signed-in account whose server id is actorUserId, and the codes validateRentalBody returns under the Emulator TEST-ONLY Rental policy at nowUtc; the server answers every non-empty case with validation_failed only.",
+  "actorUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+  "nowUtc": "2026-10-12T10:00:00.000Z",
+  "cases": [
+    {
+      "name": "valid",
+      "createCase": "the accepted draft under the Emulator TEST-ONLY Rental policy",
+      "expectedIssues": [],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "cover_missing",
+      "createCase": "no cover photo in the Create media",
+      "expectedIssues": [
+        "rental.cover_required"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "subcategory_empty",
+      "createCase": "the free-text subcategory is empty",
+      "expectedIssues": [
+        "rental.subcategory_required"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "pair_without_policy",
+      "createCase": "sport/yoga exists in BCK-20 but has no Rental policy",
+      "expectedIssues": [
+        "rental.policy_unavailable"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "sport",
+        "subcategoryId": "yoga",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "coverage_stale",
+      "createCase": "availability confirmed eight days before now (proposal: 7-day window)",
+      "expectedIssues": [
+        "rental.coverage_stale"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-04T00:00:00.000Z",
+            "endsAtUtc": "2026-11-03T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-04T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-06T00:00:00.000Z",
+              "endsAtUtc": "2026-10-07T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-04T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-04T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-04T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "attestation_policy_version_changed",
+      "createCase": "the attestation names another policy version",
+      "expectedIssues": [
+        "rental.attestation_stale_policy"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "0.9",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "precision_too_fine",
+      "createCase": "an approximate area with 100 m precision (proposal: at least 500 m)",
+      "expectedIssues": [
+        "rental.handover_precision_too_fine"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 100,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "delivery_radius_too_far",
+      "createCase": "delivery radius 80 km (proposal: at most 50 km)",
+      "expectedIssues": [
+        "rental.delivery_radius"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": true,
+          "deliveryRadiusKm": 80,
+          "deliveryFee": {
+            "minorUnits": 0,
+            "currencyCode": "EUR"
+          },
+          "deliveryTerms": "Delivered to the shore by arrangement."
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "external_url_fragment",
+      "createCase": "the external booking link has a #fragment",
+      "expectedIssues": [
+        "rental.external_url_fragment"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "safetyNotice": "Life vests are mandatory on the water; stay within the marked area.",
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak#book"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    },
+    {
+      "name": "safety_notice_missing",
+      "createCase": "water activities need a safety notice",
+      "expectedIssues": [
+        "rental.safety_notice_required"
+      ],
+      "body": {
+        "title": "Kipsala sea kayak rental",
+        "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
+        "fullDescription": "Stable two-seat sea kayaks for calm-water trips along the Daugava. Paddles and life vests are included; a short safety briefing is given at handover.",
+        "categoryId": "water_activities",
+        "subcategoryId": "kayak",
+        "categoryConfirmed": true,
+        "mediaRefs": [
+          "asset-cover",
+          "asset-gallery-1",
+          "asset-gallery-2"
+        ],
+        "inventoryGroups": [
+          {
+            "id": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+            "label": "Two-seat sea kayak",
+            "quantity": 4,
+            "condition": "good",
+            "includedAccessories": [
+              "paddle",
+              "life vest"
+            ],
+            "status": "available"
+          }
+        ],
+        "availability": {
+          "timeZoneId": "Europe/Riga",
+          "coverage": {
+            "startsAtUtc": "2026-10-12T00:00:00.000Z",
+            "endsAtUtc": "2026-11-11T00:00:00.000Z",
+            "confirmedAtUtc": "2026-10-12T00:00:00.000Z"
+          },
+          "blocks": [
+            {
+              "id": "5404ee23-ecc8-5de1-9e4b-35373093ab7f",
+              "groupId": "425f2542-795c-5220-a6d6-d7c58cb7ad34",
+              "startsAtUtc": "2026-10-14T00:00:00.000Z",
+              "endsAtUtc": "2026-10-15T00:00:00.000Z",
+              "unitsBlocked": 1,
+              "source": "maintenance",
+              "status": "active",
+              "revision": 1,
+              "createdByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+              "createdAtUtc": "2026-10-12T00:00:00.000Z",
+              "updatedAtUtc": "2026-10-12T00:00:00.000Z"
+            }
+          ]
+        },
+        "handover": {
+          "pickupPlaceName": "Kipsala boat dock",
+          "publicAreaLabel": "Kipsala, Riga",
+          "publicGeo": {
+            "latitude": 56.9535,
+            "longitude": 24.079
+          },
+          "publicGeoPrecisionMeters": 500,
+          "disclosure": "approximate_area",
+          "scheduleMode": "by_arrangement",
+          "deliveryAvailable": false
+        },
+        "terms": {
+          "offeredMinMinutes": 60,
+          "offeredMaxMinutes": 4320,
+          "idRequiredAtHandover": false,
+          "includedAccessoriesConfirmation": true
+        },
+        "pricing": {
+          "currencyCode": "EUR",
+          "billingUnitMinutes": 60,
+          "rateSteps": [
+            {
+              "minUnits": 1,
+              "unitPrice": {
+                "minorUnits": 1500,
+                "currencyCode": "EUR"
+              }
+            }
+          ],
+          "billingRounding": "started_unit",
+          "deposit": {
+            "amount": {
+              "minorUnits": 5000,
+              "currencyCode": "EUR"
+            },
+            "collectionMethod": "at_handover",
+            "terms": "Returned after the kayak is inspected at return."
+          },
+          "damagePolicy": "Damage beyond normal wear is charged at repair cost.",
+          "cancellationPolicyId": "standard"
+        },
+        "fulfillment": {
+          "mode": "external_link",
+          "externalBookingUrl": "https://rent.example.lv/kayak"
+        },
+        "attestation": {
+          "policyVersion": "1.0",
+          "acceptedAtUtc": "2026-10-12T00:00:00.000Z",
+          "acceptedByUserId": "01HZZZZZZZZZZZZZZZZZZZZZZ1",
+          "hasRightToOffer": true,
+          "listingAccurate": true,
+          "prohibitedItemsAcknowledged": true
+        }
+      }
+    }
+  ]
+}

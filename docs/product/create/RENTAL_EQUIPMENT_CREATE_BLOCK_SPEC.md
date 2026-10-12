@@ -793,6 +793,15 @@ Author не выбирает moderation result. Application policy возвра�
 - full submit validation выполняется на Step 8 и authoritative boundary;
 - focus/announcement ведёт к первой ошибке без потери введённых данных.
 
+D3.3 (2026-10-12, [RENTAL_D3_3_PUBLICATION_AMENDMENT.md](../RENTAL_D3_3_PUBLICATION_AMENDMENT.md)):
+отдельный тестовый серверный путь, выключенный по умолчанию, проводит черновик
+Rental из этой формы через Content, Media (обложка и галерея из общих медиа
+формы) и модерацию C2 только в локальном Emulator, по тестовой политике
+Emulator (не принятой). Форма Create и её локальная публикация RNT-PUB-01 не
+меняются; повторная активация опубликованной ревизии закрыта; публикует только
+подтвердивший пользователь. Совместимость формы с сервером — проверенное
+подмножество.
+
 ## 14. Validation contract
 
 Limits ниже — Recommended V1 `RentalCreatePolicy`, а не widget constants.

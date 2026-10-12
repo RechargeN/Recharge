@@ -871,6 +871,8 @@ void test('delegated import never reaches Content storage except through the Con
       'resolveContentType',
       // D3.2 §2.4: Emulator rules that refuse what the composition cannot resolve.
       'emulatorCompositionRules',
+      // D3.3 §2 Q4: activation the Emulator composition does not offer.
+      'emulatorActivationClosedTypes',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',
@@ -883,6 +885,9 @@ void test('delegated import never reaches Content storage except through the Con
       'ReferenceDataPort',
       'resolveContentType',
       'ContentPublicationFeed',
+      // D9 (901bf0d): the source re-verifies the published body hash.
+      'canonicalJson',
+      'sha256Hex',
     ],
     'modules/catalog/infrastructure/emulator_catalog_composition.ts': [
       'ContentPublicationFeed',

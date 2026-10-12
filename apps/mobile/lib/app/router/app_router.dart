@@ -10,6 +10,7 @@ import '../di/service_locator.dart';
 import '../di/booking_test_entry_guard.dart';
 import '../di/event_publication_composition.dart';
 import '../di/activity_publication_composition.dart';
+import '../di/rental_publication_composition.dart';
 import '../di/place_publication_composition.dart';
 import '../testing/seeded_event_fixture.dart';
 import '../adapters/legacy_planning_link_classifier.dart';
@@ -40,6 +41,7 @@ import '../../features/discover/presentation/pages/discover_details_page.dart';
 import '../presentation/event_details_page.dart';
 import '../presentation/event_publication_panel.dart';
 import '../presentation/activity_publication_panel.dart';
+import '../presentation/rental_publication_panel.dart';
 import '../presentation/place_publication_panel.dart';
 import '../presentation/bookable_session_details_page.dart';
 import '../presentation/find_people_details_page.dart';
@@ -345,6 +347,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
         builder: (BuildContext context, GoRouterState state) =>
             const ActivityPublicationPage(),
+      ),
+      // Default-off Rental / Equipment publication test entry (D3.3), the same
+      // rule with its own guard and define.
+      GoRoute(
+        name: 'test_rental_publication',
+        path: RouteNames.testRentalPublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            rentalPublicationTestEntryRedirect(
+              sl.isRegistered<RentalPublicationTestEntryGuard>()
+                  ? sl<RentalPublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const RentalPublicationPage(),
       ),
       GoRoute(
         name: 'discover_details',

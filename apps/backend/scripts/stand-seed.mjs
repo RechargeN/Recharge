@@ -38,6 +38,8 @@ const commands = new Set([
   "place",
   // D3.2: the stand Activity (its own flag) — seed | verify | manifest | status.
   "activity",
+  // D3.3: the stand Rental (its own flag) — seed | verify | manifest | status.
+  "rental",
 ]);
 
 export function standEnvironment(base) {

@@ -8,6 +8,7 @@ import {
   taxonomyRevisionId,
   type TaxonomyRead,
 } from '../../reference_data/infrastructure/local_taxonomy_reader.js';
+import { emulatorRentalPolicy } from './emulator_rental_policy.js';
 import {
   emulatorPlaceTaxonomyRevisionId,
   placeRequiredCriteria,
@@ -16,7 +17,9 @@ import {
 
 /** Local demo-recharge composition: synthetic LV market/localization and Place fixture;
  * Activity uses the deterministic immutable BCK-20 artifact derived from the
- * accepted Category System v1.4.3 semantic source. No production MarketConfig.
+ * accepted Category System v1.4.3 semantic source. Rental (D3.3) checks its
+ * pairs against the same BCK-20 revision and answers a TEST-ONLY policy
+ * (`emulator_rental_policy.ts`, not an accepted policy). No production MarketConfig.
  */
 export const emulatorReferenceEvidence =
   'synthetic LV market/localization and Place fixture; Activity taxonomy derived from accepted Category System v1.4.3';
@@ -32,8 +35,10 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     if (input.marketId !== 'LV') return Promise.resolve({ ok: false, code: 'market_disabled' });
     const place = input.typeId === 'place';
     const activity = input.typeId === 'activity';
+    const rental = input.typeId === 'rental';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
-    if (activity && !taxonomy.ok) return Promise.resolve({ ok: false, code: 'policy_unavailable' });
+    if ((activity || rental) && !taxonomy.ok)
+      return Promise.resolve({ ok: false, code: 'policy_unavailable' });
     const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
     return Promise.resolve({
       ok: true,
@@ -41,7 +46,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity
+          : activity || rental
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
@@ -68,6 +73,13 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
           return dataset.profiles.find((profile) => profile.id === pair.profileId)
             ?.requiredFieldIds;
         },
+        // D3.3: only for Rental; every other type keeps having no Rental policy.
+        ...(rental && dataset !== undefined
+          ? {
+              rentalPolicy: (categoryId: string, subcategoryId: string) =>
+                emulatorRentalPolicy(dataset, categoryId, subcategoryId),
+            }
+          : {}),
         pointInServiceArea: (latitude: number, longitude: number) =>
           latitude > 55.6 && latitude < 58.1 && longitude > 20.9 && longitude < 28.3,
       },

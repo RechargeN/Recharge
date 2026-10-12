@@ -749,6 +749,33 @@ Limits: Create-form compatibility is a verified subset; validator codes are not
 sent to the client; no linked Place, no Catalog/Discover for Activity; fake
 scanner/processor; no device, Linux or cloud claim.
 
+## D3.3 Rental / Equipment through Content, Media and moderation (Emulator only)
+
+`node ../scripts/stand-d3-3-gate.mjs --yes` (from apps/backend/functions) proves
+the path end to end on the local stand and this PC
+([amendment](../../docs/product/RENTAL_D3_3_PUBLICATION_AMENDMENT.md)).
+
+Backend. Rental uses the same Emulator-only `contentCommandV1` and
+`contentQueryV1` behind its own default-off local flag `content.rental.authoring`.
+The accepted Rental validator is unchanged (the cover stays required). Emulator
+reference data answers a TEST-ONLY Rental policy (`emulator_rental_policy.ts`,
+equal to `packages/api_contracts/schema/content/v1/fixtures/rental_reference_policy.json`)
+for an explicit list of pairs checked against the pinned BCK-20 taxonomy
+revision; it is not an accepted policy. Re-activating a Rental revision is
+closed (`activationClosedTypes`). Catalog keeps Rental excluded, Discover
+refuses it and the Booking handoff ignores it; D2 applies to Rental media.
+Emulator tests run in their own group: `npm run test:emulator:rental`.
+
+Stand. `stand-seed.mjs rental seed | verify | manifest | status`: only `rental
+seed` enables the Rental flag on the stand; the body is confirmed and attested
+by the Creator at the start of the current UTC day
+(`STAND_SEED_INTERRUPT_AFTER=gallery-1` is the gate's resume hook).
+
+Limits: TEST-ONLY policy; Create-form compatibility is a verified subset;
+validator codes are not sent to the client; no Rental activation, no
+Catalog/Discover for Rental; fake scanner/processor; no device, Linux or cloud
+claim.
+
 ## Sequential Emulator test groups (2026-10-11)
 
 From `apps/backend/functions`, `npm run test:emulator` builds once before
