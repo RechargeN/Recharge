@@ -15,6 +15,7 @@ import {
 } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { EmulatorStaffAuthority } from '../../src/modules/moderation/infrastructure/emulator_staff_authority.js';
 import type { EntityId } from '../../src/shared/ids.js';
+import { createFirebaseActor, registerSessionContext } from './booking_emulator.js';
 import { standEventBody } from '../stand/stand_content.js';
 
 const png = Buffer.from(
@@ -130,6 +131,25 @@ export async function createPublishingActors(firestore: Firestore, scope: string
     };
   };
   return { pageId, creator: await session(creator), staff: await session(staff) };
+}
+
+/** Identical Auth/Session binding used by the explicit Place and Activity worlds. */
+export async function createSignedPublishingActors(firestore: Firestore, scope: string) {
+  const created = await createPublishingActors(firestore, scope);
+  const signIn = async (actor: PublishingActor) => {
+    const idToken = await createFirebaseActor(actor.firebaseUid);
+    registerSessionContext(idToken, {
+      sessionId: actor.actor.sessionId,
+      sessionHandle: actor.sessionHandle,
+      installationId: actor.installationId,
+    });
+    return { ...actor, idToken };
+  };
+  return {
+    pageId: created.pageId,
+    creator: await signIn(created.creator),
+    staff: await signIn(created.staff),
+  };
 }
 
 /**

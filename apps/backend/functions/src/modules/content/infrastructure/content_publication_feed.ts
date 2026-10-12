@@ -76,6 +76,10 @@ export class ContentPublicationFeed {
     });
   }
 
+  pointer(contentId: string): Promise<PublicationPointer | null> {
+    return this.repository.transact((tx) => tx.pointer(contentId));
+  }
+
   publishedRevision(publishedRevisionId: string): Promise<PublishedRevision | null> {
     return this.repository.transact((tx) => tx.publishedRevision(publishedRevisionId));
   }

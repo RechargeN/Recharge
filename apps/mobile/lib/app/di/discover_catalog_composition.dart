@@ -17,6 +17,12 @@ import 'booking_test_entry_guard.dart';
 
 /// Capability id under which the Discover read binding is recorded in a
 /// [BackendBindingManifest] (E2).
+const bool activityLinkedPlaceTestEntryDefined = bool.fromEnvironment('RECHARGE_TEST_ACTIVITY_LINKED_PLACE');
+
+const bool activityCatalogTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_ACTIVITY_CATALOG',
+);
+
 const String discoverCatalogCapabilityId = 'discover.catalog';
 
 /// Compile-time switch, separate from the Booking and Publication ones:
@@ -138,6 +144,7 @@ DiscoverRepository discoverRepositoryFor({
     session: session,
     marketId: marketId,
     currencyCode: currencyCode,
+    activityEnabled: activityCatalogTestEntryDefined && !kReleaseMode,
   ),
   BackendBindingMode.localOnly => local(),
   BackendBindingMode.disabled => const DisabledDiscoverRepository(),

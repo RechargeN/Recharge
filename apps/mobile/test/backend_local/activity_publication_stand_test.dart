@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -108,6 +110,20 @@ void main() {
         title: title ?? 'Ķemeri bog boardwalk loop',
       );
 
+  // Read-only inspection of this stand's immutable history. The owner API
+  // returns only the current revision, so inspect the old one on loopback.
+  Future<Map<String, dynamic>> storedRevision(String id) async {
+    final response = await http.get(
+      Uri.parse(
+        'http://127.0.0.1:8080/v1/projects/demo-recharge/databases/(default)/documents/contentPublishedRevisions/$id',
+      ),
+      // Synthetic Emulator admin fixture, never a user credential or runtime read.
+      headers: {'Authorization': 'Bearer owner'},
+    );
+    expect(response.statusCode, 200);
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   setUpAll(() async {
     if (stand == null) return;
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
@@ -181,20 +197,81 @@ void main() {
       expect(mine.record.contentId, c.state.record!.contentId);
       expect(mine.status?.visibility, 'visible');
 
-      // The owner hides it; then staff restricts it: moderation wins the view.
+      final originalRevisionId = c.state.status!.currentPublishedRevisionId!;
+      final originalRevision = await storedRevision(originalRevisionId);
+      final originalContentId = c.state.record!.contentId;
+      final originalDraftRevision = c.state.record!.draftRevision;
       await c.hide();
-      expect(c.state.status?.visibility, 'withdrawn');
+      expect(c.state.status!.visibility, 'withdrawn');
+      await c.activate();
+      expect(c.state.message, isNull, reason: c.state.message);
+      expect(c.state.status!.visibility, 'visible');
+      expect(c.state.status!.currentPublishedRevisionId, originalRevisionId);
+      await c.beginEditing();
+      expect(c.state.canSubmit, isFalse);
+      c.dispose();
+      // Resume editing after restart, preserving the Content binding and media.
+      final edited = await controllerFor(
+        'creator',
+        draft.copyWith(title: 'Edited boardwalk Activity'),
+      );
+      await edited.load();
+      expect(edited.state.record!.editingFromRevisionId, originalRevisionId);
+      await edited.save();
+      expect(edited.state.message, isNull, reason: edited.state.message);
+      expect(edited.state.record!.contentId, originalContentId);
+      expect(
+        edited.state.record!.draftRevision,
+        greaterThan(originalDraftRevision),
+      );
+      expect(
+        edited.state.status!.currentPublishedRevisionId,
+        originalRevisionId,
+      );
+      expect(await storedRevision(originalRevisionId), originalRevision);
+      await edited.submit();
+      expect(edited.state.status!.latestSubmissionState, 'under_review');
+      await edited.publish();
+      expect(edited.state.message, 'moderation_required');
+      expect(
+        edited.state.status!.currentPublishedRevisionId,
+        originalRevisionId,
+      );
+      final editApproved = await stand.moderate(<String>[
+        'approve',
+        edited.state.status!.latestSubmissionId!,
+        '--reason',
+        'd3.7: revised draft approved',
+      ]);
+      expect(editApproved.exitCode, 0, reason: '${editApproved.json}');
+      await edited.refresh();
+      await edited.publish();
+      expect(edited.state.message, isNull, reason: edited.state.message);
+      expect(
+        edited.state.status!.currentPublishedRevisionId,
+        isNot(originalRevisionId),
+      );
+      expect(
+        edited.state.status!.previousPublishedRevisionId,
+        originalRevisionId,
+      );
+      expect(edited.state.record!.editingFromRevisionId, isNull);
+      expect(await storedRevision(originalRevisionId), originalRevision);
+
+      // The owner hides it; then staff restricts it: moderation wins the view.
+      await edited.hide();
+      expect(edited.state.status?.visibility, 'withdrawn');
       final restricted = await stand.moderate(<String>[
         'restrict',
-        c.state.record!.contentId,
+        edited.state.record!.contentId,
         '--reason',
         'd3.2 local: restricted by staff',
       ]);
       expect(restricted.exitCode, 0, reason: '${restricted.json}');
-      await c.refresh();
-      expect(c.state.status?.visibility, 'restricted');
-      expect(c.state.status?.ownerHold, 'withdrawn');
-      c.dispose();
+      await edited.refresh();
+      expect(edited.state.status?.visibility, 'restricted');
+      expect(edited.state.status?.ownerHold, 'withdrawn');
+      edited.dispose();
     },
     skip: stand == null,
     timeout: const Timeout(Duration(minutes: 4)),

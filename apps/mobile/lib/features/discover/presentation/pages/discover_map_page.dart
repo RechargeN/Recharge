@@ -715,9 +715,13 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               : '$scenarioOrder. ${item.title}',
           snippet: item.isPublishedRoute
               ? _publishedRouteMapMetric(item)
+              : item.activityCatalog != null
+              ? (item.activityCatalog!.contributionKind == null
+                    ? 'No contribution specified'
+                    : 'Optional contribution')
               : item.isFree
               ? 'Free'
-              : '${item.priceAmount.toStringAsFixed(0)} €',
+              : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €',
         ),
       );
     }).toSet();
@@ -3110,7 +3114,7 @@ String _metaLabel(DiscoverItemEntity item) {
   }
   final String price = item.isFree
       ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} €';
+      : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
   return '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
       '${item.distanceKm.toStringAsFixed(1)} км · $price';
 }

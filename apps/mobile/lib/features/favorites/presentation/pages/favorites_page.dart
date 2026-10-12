@@ -951,7 +951,8 @@ String _favoriteSubtitle(FavoriteItemEntity item, _FavoriteKind kind) {
   return '$date · ${item.city}';
 }
 
-String _compactDate(DateTime value) {
+String _compactDate(DateTime? value) {
+  if (value == null) return 'Any time';
   final DateTime local = value.toLocal();
   final String day = local.day.toString().padLeft(2, '0');
   final String month = local.month.toString().padLeft(2, '0');

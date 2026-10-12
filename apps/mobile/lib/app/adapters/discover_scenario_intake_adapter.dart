@@ -171,12 +171,12 @@ class DiscoverScenarioIntakeAdapter {
     final duration = item.durationMinutes;
     final fixedEnd = duration == null
         ? null
-        : item.startsAtUtc.toUtc().add(Duration(minutes: duration));
+        : item.startsAtUtc?.toUtc().add(Duration(minutes: duration));
     final schedule = item.objectKind == DiscoverObjectKind.event
         ? ScenarioScheduleDraft(
             mode: ScenarioTimeMode.fixed,
             planned: ScenarioDatedPlannedTimeDraft(
-              fixedStartAtUtc: item.startsAtUtc.toUtc(),
+              fixedStartAtUtc: item.startsAtUtc!.toUtc(),
               fixedEndAtUtc: fixedEnd,
               startTimezoneId: _nullable(item.timezoneId),
               endTimezoneId: _nullable(item.timezoneId),

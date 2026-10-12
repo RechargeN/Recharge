@@ -90,7 +90,7 @@ const invalid = (code: string): QueryParse => ({ ok: false, kind: 'invalid', cod
  * Parses and canonicalizes a `DiscoverQueryV1`. An unknown field, version,
  * type or currency is a typed refusal; nothing is mapped to a default query.
  */
-export function parseDiscoverQuery(raw: unknown): QueryParse {
+export function parseDiscoverQuery(raw: unknown, activityEnabled = false): QueryParse {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
     return invalid('query_invalid');
   const value = raw as Record<string, unknown>;
@@ -108,7 +108,8 @@ export function parseDiscoverQuery(raw: unknown): QueryParse {
   const typeIds = idList(value.typeIds);
   if (typeIds === null) return invalid('type_ids_invalid');
   for (const typeId of typeIds)
-    if (!catalogEnabledTypes.has(typeId)) return unsupported(`type_disabled:${typeId}`);
+    if (!catalogEnabledTypes.has(typeId) && !(activityEnabled && typeId === 'activity'))
+      return unsupported(`type_disabled:${typeId}`);
   const categoryIds = idList(value.categoryIds);
   const subcategoryIds = idList(value.subcategoryIds);
   if (categoryIds === null) return invalid('category_ids_invalid');

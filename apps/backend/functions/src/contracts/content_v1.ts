@@ -237,6 +237,13 @@ export interface PublicationPointerV1 {
   readonly mediaSuppression?: readonly MediaSuppressionV1[];
 }
 
+/** Optional public validation details; values and internal diagnostics are excluded. */
+export interface ContentValidationViolationV1 {
+  readonly code: string;
+  /** JSON Pointer into the submitted Content body. */
+  readonly fieldPath: string;
+}
+
 export type ContentFailureCode =
   | 'unauthenticated'
   | 'capability_denied'

@@ -1,3 +1,5 @@
+import 'content_validation_violation.dart';
+
 /// Server-side state of an Event the user is publishing through Content (C3).
 /// Every value here comes from the backend; the client never decides it.
 final class EventServerDraftRef {
@@ -143,9 +145,10 @@ final class EventPublicationRecord {
 
 /// The server refused the command; [code] is its typed reason.
 final class EventPublicationRejected implements Exception {
-  const EventPublicationRejected(this.code);
+  const EventPublicationRejected(this.code, {this.violations = const []});
 
   final String code;
+  final List<ContentValidationViolation> violations;
 
   @override
   String toString() => 'EventPublicationRejected($code)';

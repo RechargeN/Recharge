@@ -53,3 +53,22 @@ void test('schema type enum equals the exact ten-type registry list', async () =
   assert.equal(contentTypeIds.length, 10);
   assert.equal(contentTypeIds.includes('quick_plan' as never), false);
 });
+
+void test('validation details are optional, bounded and limited to validation_failed', async () => {
+  const legacy = { schemaVersion: 1, kind: 'rejected', code: 'validation_failed' };
+  const violation = { code: 'activity.title_length', fieldPath: '/body/title' };
+  for (const result of [
+    legacy,
+    { ...legacy, violations: [violation] },
+    { ...legacy, violations: [{ code: 'future.unknown', fieldPath: '/body/title' }] },
+  ])
+    assert.equal((await validateContentContract('result', result)).ok, true);
+  for (const result of [
+    { ...legacy, code: 'capability_denied', violations: [violation] },
+    { ...legacy, violations: [{ ...violation, value: 'private input' }] },
+    { ...legacy, violations: [{ ...violation, fieldPath: '/internal/secret' }] },
+    { ...legacy, violations: [] },
+    { ...legacy, violations: Array.from({ length: 51 }, () => violation) },
+  ])
+    assert.equal((await validateContentContract('result', result)).ok, false);
+});

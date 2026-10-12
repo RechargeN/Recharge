@@ -1,0 +1,99 @@
+{
+  "logs": [
+    {
+      "path": "live-summary.json",
+      "bytes": 694,
+      "sha256": "03f98086dd3c9476e65179eff5af5c7bb1de0cb09f4ad5c9d3206a2b39debdd5"
+    },
+    {
+      "path": "recharge-d11-activity-media-after-extraction.log",
+      "bytes": 283,
+      "sha256": "7608bc9cfda0ee1c28e815abde5a4a523b58067d6f848eae473e465a9fbc38e9"
+    },
+    {
+      "path": "recharge-d11-analyze.log",
+      "bytes": 99,
+      "sha256": "22ba3a0a3eef794ed893a164bcfe68863016255ea81bc9ba8b3b5be9b17b10a6"
+    },
+    {
+      "path": "recharge-d11-backend-preflight.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "recharge-d11-boundary.log",
+      "bytes": 204,
+      "sha256": "aa10769e59fcdf586bc996f50f41b5d4b9436c2b299974d079e3c5162a15ef9e"
+    },
+    {
+      "path": "recharge-d11-controller-focused.log",
+      "bytes": 7614,
+      "sha256": "75ea73781d463cdcd1db9eb4f4f1e255c90c2338894928e5723099726016f8bd"
+    },
+    {
+      "path": "recharge-d11-diff-warnings.log",
+      "bytes": 459,
+      "sha256": "b00be97bb31d056e72457d954adad448016272e2bc355c083be149082a940f8b"
+    },
+    {
+      "path": "recharge-d11-emulator-content-media.log",
+      "bytes": 417846,
+      "sha256": "15355fac7606f195df72d2d17f7142809a98f3c25f69449f5110f0e40e55b132"
+    },
+    {
+      "path": "recharge-d11-emulator-place-activity.log",
+      "bytes": 87587,
+      "sha256": "43026675e0575ab91641acaaf51e3261dc2a6c7f68bf4879ed00465247b7f46b"
+    },
+    {
+      "path": "recharge-d11-flutter-full.log",
+      "bytes": 292766,
+      "sha256": "3cc5aa14d4d60d42f4646256d3f0d25d0428b41491c032d57693042d56155364"
+    },
+    {
+      "path": "recharge-d11-journal-focused.log",
+      "bytes": 5237,
+      "sha256": "c36644e2f700cc741f60ee758cca5f86589a4503188daf7937213dd215190318"
+    },
+    {
+      "path": "recharge-d11-stand-c3.log",
+      "bytes": 1926,
+      "sha256": "eaf959cc307aa6ef1d52537eeff2bf3d06a141fba27cd2d4e374228059e1bfd3"
+    },
+    {
+      "path": "recharge-d11-stand-d3-1.log",
+      "bytes": 2458,
+      "sha256": "405069f9c307dc287fedb24fb1493ea04367993874480781463fa8ce874410df"
+    },
+    {
+      "path": "recharge-d11-stand-d3-2.log",
+      "bytes": 2193,
+      "sha256": "2509410c2fee373eedc174b5ff724b63df43bc2b0da1b97d71cf26a257ee72e9"
+    },
+    {
+      "path": "recharge-d11-stand-unit.log",
+      "bytes": 4422,
+      "sha256": "cea23cb0a4707e7762ab468eba1fa1a727da884b63ca84394867d2d1b3cb12a7"
+    },
+    {
+      "path": "recharge-emulator-tests-26Ixg9-content-media.log",
+      "bytes": 20779,
+      "sha256": "4833641527ca47373d4f70245aa356966a6286754e2ac2987799b91d972a41e9"
+    },
+    {
+      "path": "recharge-emulator-tests-26Ixg9-summary.json",
+      "bytes": 2848,
+      "sha256": "899d52aa62cbe964ccea447e3dabff4e1fb10b24587344cf3f85387c3ae5d6ef"
+    },
+    {
+      "path": "recharge-emulator-tests-ea2wBH-place-activity.log",
+      "bytes": 8055,
+      "sha256": "85b438d7a13660b193560ed40a428dcb4bb0494ace44cd67a2fd0ef9120f2518"
+    },
+    {
+      "path": "recharge-emulator-tests-ea2wBH-summary.json",
+      "bytes": 1332,
+      "sha256": "6b57a46ad45417c9b08794a4b9ebaa4bec57219b6c7d2ab2f8d4558235eb291f"
+    }
+  ]
+}

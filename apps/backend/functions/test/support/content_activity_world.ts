@@ -3,14 +3,10 @@ import { randomUUID } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { eventAuthoringComposition } from '../../src/content_entry.js';
+import type { EmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { mediaComposition } from '../../src/media_entry.js';
 import { standActivityBody, standSeedActivity } from '../stand/stand_content_activity.js';
-import { createFirebaseActor, registerSessionContext } from './booking_emulator.js';
-import {
-  createPublishingActors,
-  uploadReadyImage,
-  type PublishingActor,
-} from './content_event_world.js';
+import { createSignedPublishingActors, uploadReadyImage } from './content_event_world.js';
 import { expectData } from './content_place_world.js';
 
 export { expectData };
@@ -26,9 +22,20 @@ type Answer = { readonly kind: string; readonly code?: string; readonly data?: u
  * through Content, Media and C2 moderation only; nothing is written to Content
  * storage directly. Every label is unique per run.
  */
-export function createActivityWorld(firestore: Firestore, label: string) {
-  const media = mediaComposition(firestore);
-  const images = standSeedActivity.images;
+export function createActivityWorld(
+  firestore: Firestore,
+  label: string,
+  options: {
+    readonly media?: EmulatorMediaComposition;
+    readonly images?: {
+      readonly cover: Buffer;
+      readonly gallery: readonly Buffer[];
+      readonly mediaType: string;
+    };
+  } = {},
+) {
+  const media = options.media ?? mediaComposition(firestore);
+  const images = options.images ?? { ...standSeedActivity.images, mediaType: 'image/png' };
   const composition = eventAuthoringComposition(firestore, {
     media,
     enabledTypes: new Set(['event', 'activity'] as const),
@@ -37,23 +44,7 @@ export function createActivityWorld(firestore: Firestore, label: string) {
   let sequence = 0;
   const key = (name: string) => `${scope}-${name}-${(sequence += 1)}`;
 
-  const actors = (async () => {
-    const created = await createPublishingActors(firestore, scope);
-    const signIn = async (actor: PublishingActor) => {
-      const idToken = await createFirebaseActor(actor.firebaseUid);
-      registerSessionContext(idToken, {
-        sessionId: actor.actor.sessionId,
-        sessionHandle: actor.sessionHandle,
-        installationId: actor.installationId,
-      });
-      return { ...actor, idToken };
-    };
-    return {
-      pageId: created.pageId,
-      creator: await signIn(created.creator),
-      staff: await signIn(created.staff),
-    };
-  })();
+  const actors = createSignedPublishingActors(firestore, scope);
 
   const execute = async (command: Record<string, unknown>): Promise<Answer> => {
     const { creator } = await actors;
@@ -92,7 +83,7 @@ export function createActivityWorld(firestore: Firestore, label: string) {
       publisherRef: { type: 'page', id: pageId },
       contentId,
       bytes,
-      mediaType: 'image/png',
+      mediaType: images.mediaType,
       key,
     });
     return result.assetId;
@@ -162,8 +153,10 @@ export function createActivityWorld(firestore: Firestore, label: string) {
   }
 
   /** The whole owner path: bound draft, submit, staff approval, owner publish. */
-  async function publishedActivity() {
-    const activity = await boundActivity();
+  async function publishedActivity(
+    change: (body: Record<string, unknown>) => Record<string, unknown> = (b) => b,
+  ) {
+    const activity = await boundActivity(change);
     const submission = expectData<{ submissionId: string }>(
       await submit(activity.draftId, activity.revision),
       'submit',

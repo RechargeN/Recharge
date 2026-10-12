@@ -1,0 +1,38 @@
+{
+  "differences": 1,
+  "entries": [
+    {
+      "categoryId": "other",
+      "subcategoryId": "other_event",
+      "canonical": {
+        "applicableTypes": [
+          "activity",
+          "class_workshop",
+          "collection",
+          "event",
+          "find_people",
+          "place",
+          "rental",
+          "route",
+          "scenario",
+          "session"
+        ],
+        "id": "other_event",
+        "profileId": "open_event"
+      },
+      "mobile": {
+        "id": "other_event",
+        "profileId": "open_event",
+        "applicableTypes": [
+          "activity",
+          "class_workshop",
+          "event",
+          "place",
+          "route",
+          "session"
+        ]
+      }
+    }
+  ],
+  "wireIdNormalization": "classWorkshop→class_workshop; findPeople→find_people; quickPlan→quick_plan"
+}

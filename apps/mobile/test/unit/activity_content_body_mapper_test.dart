@@ -35,6 +35,31 @@ void main() {
   Map<String, Object?> location(Map<String, Object?> body) =>
       body['location']! as Map<String, Object?>;
 
+  test(
+    'explicit linked Place capability maps only the ID and preserves own location',
+    () {
+      final draft = withActivity(
+        (value) => value.copyWith(
+          location: value.location.copyWith(
+            linkedPlaceId: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+          ),
+        ),
+      );
+      expect(map(draft).unsupported, contains('location.linked_place'));
+      final mapped = const ActivityContentBodyMapper(
+        allowLinkedPlace: true,
+      ).map(draft, scope: compatScope(), assetIds: compatAssetIds());
+      expect(mapped.unsupported, isEmpty);
+      expect(
+        location(mapped.body)['linkedPlaceId'],
+        '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      );
+      final own = Map<String, Object?>.from(location(mapped.body))
+        ..remove('linkedPlaceId');
+      expect(own, location(map(base()).body));
+    },
+  );
+
   group('compatibility fixture', () {
     final Map<String, Object?> fixture =
         jsonDecode(

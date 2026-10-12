@@ -1,3 +1,4 @@
+import { canonicalJson, sha256Hex } from '../../content/domain/published_revision.js';
 import type { ContentEffectV1 } from '../../../contracts/content_v1.js';
 import type { ReferenceDataPort } from '../../content/application/ports/reference_data_port.js';
 import { resolveContentType } from '../../content/domain/content_type_registry.js';
@@ -33,7 +34,31 @@ function toFact(effect: ContentEffectV1): ContentFact {
 
 /** Content as the Catalog sees it: only through Content's own read feed. */
 export class ContentFeedCatalogSource implements ContentCatalogSource {
-  constructor(private readonly feed: ContentPublicationFeed) {}
+  constructor(
+    private readonly feed: ContentPublicationFeed,
+    private readonly referenceData?: ReferenceDataPort,
+  ) {}
+
+  async pointer(contentId: string): Promise<SourcePointer | null> {
+    const pointer = await this.feed.pointer(contentId);
+    return pointer === null
+      ? null
+      : {
+          contentId: pointer.contentId,
+          revision: pointer.revision,
+          currentPublishedRevisionId: pointer.currentPublishedRevisionId,
+          visibility: pointer.visibility,
+        };
+  }
+
+  async readTaxonomyRevision(revisionId: string) {
+    return (
+      this.referenceData?.readTaxonomyRevision?.({ taxonomyRevisionId: revisionId }) ?? {
+        ok: false as const,
+        code: 'taxonomy_revision_unavailable' as const,
+      }
+    );
+  }
 
   async effectsAfter(after: FeedCheckpoint | null, limit: number): Promise<readonly ContentFact[]> {
     return (await this.feed.effectsAfter(after, limit)).map(toFact);
@@ -66,6 +91,12 @@ export class ContentFeedCatalogSource implements ContentCatalogSource {
   async publishedRevision(publishedRevisionId: string): Promise<SourceRevision | null> {
     const revision = await this.feed.publishedRevision(publishedRevisionId);
     if (revision === null) return null;
+    if (
+      (revision.typeId === 'activity' || revision.typeId === 'place') &&
+      revision.bodyHash !== sha256Hex(canonicalJson(revision.body))
+    ) {
+      throw new Error('catalog_source_integrity_failed');
+    }
     return {
       contentId: revision.contentId,
       publishedRevisionId: revision.publishedRevisionId,
@@ -85,6 +116,14 @@ export class ContentFeedCatalogSource implements ContentCatalogSource {
 /** Current reference revisions, from the same port Content pins them with. */
 export class ReferenceDataRevisions implements ReferenceRevisionsPort {
   constructor(private readonly referenceData: ReferenceDataPort) {}
+  async readTaxonomyRevision(revisionId: string) {
+    return (
+      this.referenceData.readTaxonomyRevision?.({ taxonomyRevisionId: revisionId }) ?? {
+        ok: false as const,
+        code: 'taxonomy_revision_unavailable' as const,
+      }
+    );
+  }
 
   async current(
     marketId: string,

@@ -1,3 +1,5 @@
+import 'publication_media_type.dart';
+import '../domain/entities/content_validation_violation.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -36,6 +38,7 @@ final class ActivityPublicationViewState {
     this.record,
     this.status,
     this.message,
+    this.violations = const [],
     this.myObjects = const <ActivityPublicationObjectView>[],
   });
 
@@ -50,6 +53,7 @@ final class ActivityPublicationViewState {
 
   /// Last refusal or failure code (server code, or a local one).
   final String? message;
+  final List<ContentValidationViolation> violations;
   final List<ActivityPublicationObjectView> myObjects;
 
   bool get _idle => phase == ActivityPublicationPhase.ready;
@@ -58,6 +62,8 @@ final class ActivityPublicationViewState {
   bool get canSubmit => _idle && (record?.bodySaved ?? false);
   bool get canPublish => _idle && (status?.approvedForPublication ?? false);
   bool get canHide => _idle && status?.visibility == 'visible';
+  bool get canActivate => _idle && (status?.published ?? false);
+  bool get canEdit => _idle && (status?.published ?? false);
 }
 
 /// Test-path coordinator of one Recharge Activity publication (D3.2 §5): the
@@ -65,8 +71,8 @@ final class ActivityPublicationViewState {
 /// body) -> Media cover and gallery -> submit -> (staff review) -> status ->
 /// publish or hide, plus "my activities". It owns no authority and no business
 /// rule: Content, Media and moderation decide on the server, and every call is
-/// gated by the default-off Activity test entry. Activate and edits after
-/// publication are not offered here (§5.1).
+/// gated by the default-off Activity test entry. Explicit activation and editing
+/// use existing Content commands and never write immutable published bodies.
 final class ActivityPublicationController extends ChangeNotifier {
   ActivityPublicationController({
     required String accountId,
@@ -115,6 +121,8 @@ final class ActivityPublicationController extends ChangeNotifier {
   );
 
   ActivityPublicationViewState get state => _state;
+  String get accountId => _accountId;
+  CreateDraftEntity? get currentDraft => _draft;
 
   Future<void> load() async {
     if (!_gate.allowed) {
@@ -137,7 +145,7 @@ final class ActivityPublicationController extends ChangeNotifier {
   /// Creates the Content draft if needed (empty body, §5.4) and saves the full
   /// body with the uploaded media.
   Future<void> save() => _run(() async {
-    final CreateDraftEntity draft = _requireDraft();
+    final CreateDraftEntity draft = await _reloadCurrentDraft();
     final ActivityPublicationScope scope = _scope(draft);
     // Nothing is sent, not even the empty draft, for a draft that cannot map.
     _assertSupported(draft, scope);
@@ -149,7 +157,7 @@ final class ActivityPublicationController extends ChangeNotifier {
 
   /// Uploads the cover and every gallery photo that changed, then binds them.
   Future<void> uploadMedia() => _run(() async {
-    final CreateDraftEntity draft = _requireDraft();
+    final CreateDraftEntity draft = await _reloadCurrentDraft();
     final ActivityPublicationScope scope = _scope(draft);
     ActivityPublicationRecord record = await _requireRecord(scope);
     final List<ActivityAttachmentRecord> uploaded =
@@ -169,7 +177,7 @@ final class ActivityPublicationController extends ChangeNotifier {
         // The same bytes of the same photo always replay the same upload.
         intentId: scope.uploadIntentId(item.attachmentId, digest),
         bytes: bytes,
-        declaredMediaType: _declaredMediaType(item.localRef),
+        declaredMediaType: declaredPublicationMediaType(item.localRef),
         publisherRef: scope.publisherRef,
         contentId: record.contentId,
       );
@@ -199,10 +207,14 @@ final class ActivityPublicationController extends ChangeNotifier {
   });
 
   Future<void> submit() => _run(() async {
-    final CreateDraftEntity draft = _requireDraft();
+    final CreateDraftEntity draft = await _reloadCurrentDraft();
     final ActivityPublicationScope scope = _scope(draft);
     final ActivityPublicationRecord record = await _requireRecord(scope);
-    if (!record.bodySaved) throw const _LocalRefusal('save_required');
+    if (!record.bodySaved ||
+        (record.savedLocalBodyDigest != null &&
+            record.savedLocalBodyDigest != _localBodyDigest(draft))) {
+      throw const _LocalRefusal('save_required');
+    }
     final String submissionId = await _gateway.submit(
       draftId: record.draftId,
       expectedDraftRevision: record.draftRevision,
@@ -212,7 +224,10 @@ final class ActivityPublicationController extends ChangeNotifier {
     await _refreshAll();
   });
 
-  Future<void> refresh() => _run(_refreshAll);
+  Future<void> refresh() => _run(() async {
+    if (_draft != null) await _reloadCurrentDraft();
+    await _refreshAll();
+  });
 
   /// Publishes the revision staff approved (the owner's own command).
   Future<void> publish() => _run(() async {
@@ -230,6 +245,7 @@ final class ActivityPublicationController extends ChangeNotifier {
       expectedPointerRevision: status.pointerRevision ?? 0,
       idempotencyKey: '$submissionId:publish',
     );
+    await _journal.save(record.copyWith(clearEditing: true));
     await _refreshAll();
   });
 
@@ -249,6 +265,88 @@ final class ActivityPublicationController extends ChangeNotifier {
     );
     await _refreshAll();
   });
+
+  /// The next Save creates a new draft revision of the same Content. The
+  /// user edits it in the existing Create form; publication stays immutable.
+  Future<void> beginEditing() => _run(() async {
+    await _reloadCurrentDraft();
+    final record = await _requireRecord(_scope(_requireDraft()));
+    final status = await _gateway.status(record.contentId);
+    final published = status.currentPublishedRevisionId;
+    if (published == null) throw const _LocalRefusal('publication_required');
+    if (record.editingFromRevisionId == null) {
+      await _journal.save(
+        record.copyWith(editingFromRevisionId: published, bodySaved: false),
+      );
+    }
+    await _refreshAll();
+  });
+
+  Future<void> activate() => _run(() async {
+    final Object gateway = _gateway;
+    if (gateway is! ContentActivationGateway) {
+      throw const _LocalRefusal('unsupported_capability:activate');
+    }
+    var record = await _requireRecord(_scope(_requireDraft()));
+    if (record.pendingActivationRevisionId == null) {
+      final status = await _gateway.status(record.contentId);
+      final target = status.currentPublishedRevisionId;
+      final pointer = status.pointerRevision;
+      if (target == null || pointer == null) {
+        throw const _LocalRefusal('publication_required');
+      }
+      record = record.copyWith(
+        pendingActivationRevisionId: target,
+        pendingActivationPointerRevision: pointer,
+      );
+      await _journal.save(record);
+    }
+    try {
+      await gateway.activatePublishedRevision(
+        contentId: record.contentId,
+        publishedRevisionId: record.pendingActivationRevisionId!,
+        expectedPointerRevision: record.pendingActivationPointerRevision!,
+        idempotencyKey:
+            '${record.contentId}:activate:${record.pendingActivationRevisionId}:${record.pendingActivationPointerRevision}',
+      );
+    } on EventPublicationRejected {
+      // A definitive refusal ends this intent. A lost transport response keeps
+      // the same payload for exact replay after restart. No automatic CAS retry.
+      await _journal.save(record.copyWith(clearPendingActivation: true));
+      await _refreshAll();
+      rethrow;
+    }
+    await _journal.save(record.copyWith(clearPendingActivation: true));
+    await _refreshAll();
+  });
+
+  String _localBodyDigest(CreateDraftEntity draft) => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode({
+            'body': _mapper.map(draft, scope: _scope(draft)).body,
+            'photos': _attachments(
+              draft,
+              _scope(draft),
+            ).map((item) => item.localRef).toList(),
+          }),
+        ),
+      )
+      .toString();
+
+  Future<CreateDraftEntity> _reloadCurrentDraft() async {
+    final previous = _requireDraft();
+    final current = await _drafts.current();
+    if (current == null ||
+        current.id != previous.id ||
+        current.objectType != CreateObjectType.activity ||
+        current.activityData?.publisherRef !=
+            previous.activityData?.publisherRef) {
+      throw const _LocalRefusal('activity_draft_changed');
+    }
+    _draft = current;
+    return current;
+  }
 
   /// §5.4 steps 1–2: an empty draft under a stable key (a replay returns the
   /// same draft), recorded with the author the server stored.
@@ -318,6 +416,7 @@ final class ActivityPublicationController extends ChangeNotifier {
       record.copyWith(
         draftRevision: updated.revision,
         bodySaved: true,
+        savedLocalBodyDigest: _localBodyDigest(draft),
         title: draft.title,
       ),
     );
@@ -403,9 +502,16 @@ final class ActivityPublicationController extends ChangeNotifier {
 
   Future<void> _refreshAll() async {
     final CreateDraftEntity? draft = _draft;
-    final ActivityPublicationRecord? record = draft == null
+    ActivityPublicationRecord? record = draft == null
         ? null
         : await _usableRecord(_scope(draft));
+    if (record != null &&
+        draft != null &&
+        record.savedLocalBodyDigest != null &&
+        record.savedLocalBodyDigest != _localBodyDigest(draft)) {
+      record = record.copyWith(bodySaved: false);
+      await _journal.save(record);
+    }
     final EventPublicationStatus? status = record == null
         ? null
         : await _gateway.status(record.contentId);
@@ -456,7 +562,7 @@ final class ActivityPublicationController extends ChangeNotifier {
       await action();
       _emit(phase: done, message: null);
     } on EventPublicationRejected catch (refusal) {
-      _emit(phase: done, message: refusal.code);
+      _emit(phase: done, message: refusal.code, violations: refusal.violations);
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);
     } on EventPublicationUnavailable catch (failure) {
@@ -467,13 +573,18 @@ final class ActivityPublicationController extends ChangeNotifier {
     }
   }
 
-  void _emit({required ActivityPublicationPhase phase, String? message}) {
+  void _emit({
+    required ActivityPublicationPhase phase,
+    String? message,
+    List<ContentValidationViolation> violations = const [],
+  }) {
     _state = ActivityPublicationViewState(
       phase: phase,
-      draftTitle: _state.draftTitle ?? _draft?.title,
+      draftTitle: _draft?.title,
       record: _state.record,
       status: _state.status,
       message: message,
+      violations: violations,
       myObjects: _state.myObjects,
     );
     notifyListeners();
@@ -495,15 +606,6 @@ final class ActivityPublicationController extends ChangeNotifier {
       publisherRef: ref,
       localDraftId: draft.id,
     );
-  }
-
-  /// What the client claims; the server detects the real type from the bytes.
-  static String _declaredMediaType(String reference) {
-    final String lower = reference.toLowerCase();
-    if (lower.endsWith('.png')) return 'image/png';
-    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
-    if (lower.endsWith('.webp')) return 'image/webp';
-    return 'application/octet-stream';
   }
 }
 

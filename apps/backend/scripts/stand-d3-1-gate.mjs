@@ -39,10 +39,12 @@ function counts(output) {
  * publisher's activation, real bytes again after the activation. Runs on its
  * own Emulator suite (auth, firestore, storage) while the stand is stopped.
  */
-async function realDelivery() {
+async function realDelivery(contentType = "place") {
+  const instance =
+    contentType === "activity" ? "d10-activity-gate" : toolsInstance;
   let running = false;
   try {
-    await start({ instance: toolsInstance, standSignaturesOnly: true });
+    await start({ instance, standSignaturesOnly: true });
     running = true;
     const result = spawnSync(
       process.execPath,
@@ -53,7 +55,7 @@ async function realDelivery() {
         "demo-recharge",
         "--only",
         "auth,firestore,storage",
-        `cd functions && node ${deliveryFlow}`,
+        `cd functions && "${process.execPath}" ${deliveryFlow}`,
       ],
       {
         cwd: path.join(here, ".."),
@@ -63,12 +65,13 @@ async function realDelivery() {
         env: {
           ...process.env,
           CI: "true",
+          RECHARGE_MEDIA_DELIVERY_CONTENT_TYPE: contentType,
           FUNCTIONS_EMULATOR: "true",
           GCLOUD_PROJECT: "demo-recharge",
           RECHARGE_MEDIA_TOOLS_ACCESS: path.join(
             toolsRoot,
             "run",
-            toolsInstance,
+            instance,
             "access.json",
           ),
         },
@@ -83,11 +86,11 @@ async function realDelivery() {
       tally.pass !== deliveryFlowTests
     ) {
       process.stdout.write(output);
-      throw new Error(`Place delivery flow: ${JSON.stringify(tally)}`);
+      throw new Error(`${contentType} delivery flow: ${JSON.stringify(tally)}`);
     }
     process.stdout.write(`  ${tally.pass} passed\n`);
   } finally {
-    if (running) await stop({ instance: toolsInstance });
+    if (running) await stop({ instance });
   }
 }
 
@@ -157,10 +160,38 @@ function flutter(files, defines = []) {
  * Local Emulator only; it resets the stand data first, so it needs --yes.
  */
 export async function main(args) {
-  if (args.length !== 1 || args[0] !== "--yes") {
+  const activityOnly =
+    args.length === 2 &&
+    args[0] === "--yes" &&
+    args[1] === "--activity-delivery-only";
+  if (!activityOnly && (args.length !== 1 || args[0] !== "--yes")) {
     throw new Error(
-      "WARNING: this permanently deletes the stand data folder. Usage: stand-d3-1-gate.mjs --yes",
+      "WARNING: this permanently deletes the stand data folder. Usage: stand-d3-1-gate.mjs --yes [--activity-delivery-only]",
     );
+  }
+  if (activityOnly) {
+    run(standCli, ["stop"], {
+      LOCALAPPDATA:
+        process.env.RECHARGE_D10_STAND_LOCALAPPDATA ?? process.env.LOCALAPPDATA,
+    });
+    const built = spawnSync(
+      process.execPath,
+      [
+        path.join(functionsDir, "node_modules/typescript/bin/tsc"),
+        "--pretty",
+        "false",
+      ],
+      { cwd: functionsDir, stdio: "inherit", shell: false },
+    );
+    if (built.error || built.status !== 0)
+      throw new Error(
+        "Activity delivery build failed before live tools/Emulator start",
+      );
+    await realDelivery("activity");
+    process.stdout.write(
+      "D10 Activity real-photo delivery: 4/4; L1 Windows-local; tools stopped; no F2a/device/production claim.\n",
+    );
+    return;
   }
   const step = (name, action) => {
     process.stdout.write(`- ${name}\n`);

@@ -1,4 +1,4 @@
-import type { CatalogEventItem } from './catalog_item.js';
+import type { CatalogItem } from './catalog_item.js';
 
 /** Global delivery position in the Content fact feed. */
 export interface FeedCheckpoint {
@@ -43,7 +43,7 @@ export interface ItemVersionRecord {
   readonly validToRevision: number | null;
   readonly state: 'listed' | 'excluded';
   readonly reason: string | null;
-  readonly item: CatalogEventItem | null;
+  readonly item: CatalogItem | null;
   readonly sourcePointerRevision: number;
   readonly effectId: string;
   readonly publishedRevisionId: string;

@@ -1,3 +1,4 @@
+import type { LinkedPlaceEligibilityPort } from '../../src/modules/content/application/ports/linked_place_eligibility_port.js';
 // D3.2 §2.2, §2.4 (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md): the Content
 // service with in-memory ports under the Emulator authoring sets. Activity
 // needs its own type in the set; Rental and Collection stay disabled under
@@ -97,7 +98,11 @@ class ReadyMedia implements MediaReadinessPort {
 function service(
   repository: InMemoryContentRepository,
   enabled: readonly ContentTypeId[],
-  options: { readonly compositionRules?: boolean } = {},
+  options: {
+    readonly compositionRules?: boolean;
+    readonly linkedPlaceEligibility?: LinkedPlaceEligibilityPort;
+    readonly enforceLinkedPlaceEligibility?: boolean;
+  } = {},
 ) {
   return new ContentPublicationService({
     repository,
@@ -109,6 +114,13 @@ function service(
     clock: new FakeClock(new Date('2026-10-11T10:00:00.000Z')),
     ids: new SequentialIds(),
     enabledTypes: new Set(enabled),
+    ...(options.linkedPlaceEligibility
+      ? {
+          linkedPlaceEligibility: options.linkedPlaceEligibility,
+          enforceLinkedPlaceEligibility: true,
+        }
+      : {}),
+    ...(options.enforceLinkedPlaceEligibility ? { enforceLinkedPlaceEligibility: true } : {}),
     // As composed by the Emulator authoring path (content_entry.ts).
     ...(options.compositionRules === false ? {} : { compositionRules: emulatorCompositionRules }),
   });
@@ -504,4 +516,105 @@ void test('publish of a linked-Place submission approved before the rule is refu
   // Control: without the rule the same approved submission publishes.
   await succeeded(plain.execute(actorA, publish()));
   assert.equal(stateOf(repository, draft.contentId).pointer?.visibility, 'visible');
+});
+
+void test('D3.9 exact target linked Place is checked freshly at submit, publish and activation; positive and refusal preserve lifecycle invariants', async () => {
+  const repository = new InMemoryContentRepository();
+  let status: 'eligible' | 'unknown' | 'forbidden' | 'unavailable' = 'eligible';
+  const seen: string[] = [];
+  const guarded = service(repository, ['activity'], {
+    compositionRules: false,
+    linkedPlaceEligibility: {
+      check: (input) => {
+        seen.push(input.placeId);
+        return Promise.resolve({ status });
+      },
+    },
+  });
+  const draft = await boundDraft(guarded, linkedBody);
+  const missing = service(repository, ['activity'], {
+    compositionRules: false,
+    enforceLinkedPlaceEligibility: true,
+  });
+  status = 'unknown';
+  const beforeSubmit = stateOf(repository, draft.contentId);
+  await refusedWith(
+    missing.execute(actorA, submit(draft.draftId, draft.revision)),
+    'validation_failed',
+    'missing Catalog dependency on submit',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforeSubmit);
+  await refusedWith(
+    guarded.execute(actorA, submit(draft.draftId, draft.revision)),
+    'validation_failed',
+    'unknown linked Place',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforeSubmit);
+  status = 'eligible';
+  const submitted = await succeeded<{ submissionId: EntityId }>(
+    guarded.execute(actorA, submit(draft.draftId, draft.revision)),
+  );
+  const publish = () => ({
+    schemaVersion: 1,
+    commandType: 'publishApprovedRevision',
+    idempotencyKey: key('d39-publish'),
+    payload: { submissionId: submitted.submissionId, expectedPointerRevision: 0 },
+  });
+  status = 'forbidden';
+  const beforePublish = stateOf(repository, draft.contentId);
+  await refusedWith(
+    missing.execute(actorA, publish()),
+    'validation_failed',
+    'missing Catalog dependency on publish',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforePublish);
+  await refusedWith(
+    guarded.execute(actorA, publish()),
+    'validation_failed',
+    'Place hidden after approval',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforePublish);
+  status = 'eligible';
+  const published = await succeeded<{ publishedRevisionId: EntityId }>(
+    guarded.execute(actorA, publish()),
+  );
+  await succeeded(
+    guarded.execute(actorA, {
+      schemaVersion: 1,
+      commandType: 'withdrawPublication',
+      idempotencyKey: key('d39-hide'),
+      payload: { contentId: draft.contentId, expectedPointerRevision: 1, mode: 'withdraw' },
+    }),
+  );
+  status = 'unavailable';
+  const beforeActivate = stateOf(repository, draft.contentId);
+  await refusedWith(
+    missing.execute(actorA, activate(draft.contentId, published.publishedRevisionId, 2)),
+    'validation_failed',
+    'missing Catalog dependency on activate',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforeActivate);
+  await refusedWith(
+    guarded.execute(actorA, activate(draft.contentId, published.publishedRevisionId, 2)),
+    'validation_failed',
+    'Catalog outage',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforeActivate);
+  status = 'forbidden';
+  await refusedWith(
+    guarded.execute(actorA, activate(draft.contentId, published.publishedRevisionId, 2)),
+    'validation_failed',
+    'old linked target forbidden',
+  );
+  assert.deepEqual(stateOf(repository, draft.contentId), beforeActivate);
+  status = 'eligible';
+  await succeeded(
+    guarded.execute(actorA, activate(draft.contentId, published.publishedRevisionId, 2)),
+  );
+  assert.ok(
+    seen.length >= 7 &&
+      seen.every(
+        (id) => id === String((linkedBody.location as Record<string, unknown>).linkedPlaceId),
+      ),
+  );
 });

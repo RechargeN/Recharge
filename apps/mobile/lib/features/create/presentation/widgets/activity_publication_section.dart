@@ -7,9 +7,14 @@ import '../../domain/entities/event_publication.dart';
 /// controller's state and forwards taps; it holds no rule and no second form:
 /// the Activity itself is the user's Create draft.
 class ActivityPublicationSection extends StatelessWidget {
-  const ActivityPublicationSection({super.key, required this.controller});
+  const ActivityPublicationSection({
+    super.key,
+    required this.controller,
+    this.onEdit,
+  });
 
   final ActivityPublicationController controller;
+  final Future<void> Function()? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +46,19 @@ class ActivityPublicationSection extends StatelessWidget {
               ),
             if (status?.currentPublishedRevisionId != null)
               Text(
-                'Revision ${status!.currentPublishedRevisionId}',
+                'Published version: ${status!.currentPublishedRevisionId}',
                 key: const Key('activity-publication-revision'),
+              ),
+            if (state.record != null)
+              Text(
+                'Draft revision: ${state.record!.draftRevision}${state.record!.editingFromRevisionId != null ? ' — unpublished changes; review required' : ''}',
+                key: const Key('activity-publication-editing'),
               ),
             if (state.message != null)
               Text(
-                state.message!,
+                state.message == 'validation_failed'
+                    ? 'Check the Activity fields in Create and submit again.'
+                    : state.message!,
                 key: const Key('activity-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
@@ -86,6 +98,19 @@ class ActivityPublicationSection extends StatelessWidget {
                   state.canPublish,
                   controller.publish,
                 ),
+                _action(
+                  'activity-publication-activate',
+                  'Activate published version',
+                  state.canActivate,
+                  controller.activate,
+                ),
+                if (onEdit != null)
+                  _action(
+                    'activity-publication-edit',
+                    'Edit in Create',
+                    state.canEdit,
+                    onEdit!,
+                  ),
                 _action(
                   'activity-publication-hide',
                   'Hide',

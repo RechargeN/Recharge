@@ -21,6 +21,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     required String marketId,
     required String currencyCode,
     this.maxPages = 5,
+    this.activityEnabled = false,
     String Function()? newRequestId,
   }) : _port = port,
        _session = session,
@@ -36,12 +37,14 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
 
   /// Upper bound of pages read for one listing (test-only Catalog config).
   final int maxPages;
+  final bool activityEnabled;
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
     final Map<String, Object?> wire = catalogWireQuery(
       query,
       marketId: _marketId,
+      activityEnabled: activityEnabled,
     );
     final String queryType = wire.containsKey('literalText')
         ? 'search'
@@ -69,8 +72,25 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
   @override
   Future<DiscoverItemEntity> getDetails(String itemId) async {
     final CatalogDetails details = CatalogDetails.fromWire(
-      await _ask('details', <String, Object?>{'contentId': itemId}),
+      await _ask('details', <String, Object?>{
+        'contentId': itemId,
+        if (_session.snapshotToken != null &&
+            _session.query != null) ...<String, Object?>{
+          'snapshotToken': _session.snapshotToken,
+          'query': _session.query,
+        },
+      }),
     );
+    if (details.activity != null) {
+      if (details.changedSinceSnapshot) {
+        throw const DiscoverException(
+          code: 'CATALOG_REVISION_CHANGED',
+          message:
+              'Версия изменилась. Обновите список и откройте объект снова.',
+        );
+      }
+      return _activity(details.activity!, null);
+    }
     final CatalogEventItem? item = details.item;
     if (item == null) {
       throw const DiscoverException(
@@ -135,23 +155,55 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     return answer.body;
   }
 
-  DiscoverItemEntity _card(CatalogCard card) => _event(
-    contentId: card.contentId,
-    revisionId: card.publishedRevisionId,
-    title: card.title,
-    subtitle: card.shortDescription,
-    categoryId: card.categoryId,
-    subcategoryId: card.subcategoryId,
-    city: card.city,
-    venueName: card.venueName,
-    point: card.point,
-    timezoneId: card.timezoneId,
-    occurrenceId: card.occurrenceId,
-    startAtUtc: card.startAtUtc,
-    endAtUtc: card.endAtUtc,
-    price: card.price,
-    distanceMeters: card.distanceMeters,
-  );
+  DiscoverItemEntity _card(CatalogCard card) => card.activity != null
+      ? _activity(card.activity!, card.distanceMeters)
+      : _event(
+          contentId: card.contentId,
+          revisionId: card.publishedRevisionId,
+          title: card.title,
+          subtitle: card.shortDescription,
+          categoryId: card.categoryId,
+          subcategoryId: card.subcategoryId,
+          city: card.city,
+          venueName: card.venueName,
+          point: card.point,
+          timezoneId: card.timezoneId,
+          occurrenceId: card.occurrenceId,
+          startAtUtc: card.startAtUtc!,
+          endAtUtc: card.endAtUtc!,
+          price: card.price,
+          distanceMeters: card.distanceMeters,
+        );
+
+  DiscoverItemEntity _activity(CatalogActivityItem item, double? distance) {
+    if (!activityEnabled) {
+      throw const DiscoverException(
+        code: 'CATALOG_ACTIVITY_DISABLED',
+        message: 'Activity Catalog отключён',
+      );
+    }
+    return DiscoverItemEntity(
+      id: item.contentId,
+      title: item.title,
+      subtitle: item.shortDescription,
+      city: '',
+      category: item.categoryId,
+      subcategory: item.subcategoryId,
+      startsAtUtc: null,
+      latitude: item.point.latitude,
+      longitude: item.point.longitude,
+      priceAmount: null,
+      distanceKm: (distance ?? 0) / 1000,
+      isFree: false,
+      objectKind: DiscoverObjectKind.activity,
+      availabilityKind: AvailabilityKind.none,
+      durationMinutes: item.facts.durationMinMinutes,
+      durationConfidence: DurationConfidence.estimated,
+      addressLine: item.facts.addressLine,
+      revisionRef: item.publishedRevisionId,
+      activityCatalog: item.facts,
+    );
+  }
 
   DiscoverItemEntity _event({
     required String contentId,
@@ -216,6 +268,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
 Map<String, Object?> catalogWireQuery(
   DiscoverQuery query, {
   required String marketId,
+  bool activityEnabled = false,
 }) {
   final List<String> unsupported = <String>[
     if (query.budgetMin != null) 'budgetMin',
@@ -239,7 +292,7 @@ Map<String, Object?> catalogWireQuery(
   return <String, Object?>{
     'schemaVersion': 1,
     'marketId': marketId,
-    'typeIds': const <String>['event'],
+    'typeIds': <String>['event', if (activityEnabled) 'activity'],
     if (query.selectedCategoryIds.isNotEmpty)
       'categoryIds': query.selectedCategoryIds
           .map(normalizeRechargeContentGroupId)

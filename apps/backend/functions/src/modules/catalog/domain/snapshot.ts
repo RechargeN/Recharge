@@ -12,6 +12,7 @@ const testOnlySnapshotKey = 'test-only-emulator-catalog-snapshot-key-v1';
 /** One snapshot shared by Feed, Map, Search and Details for one applied query. */
 export interface SnapshotClaims {
   readonly v: 1;
+  readonly projectionFamilies?: string;
   readonly queryFingerprint: string;
   readonly projectionSetId: string;
   readonly projectionSetRevision: number;
@@ -65,6 +66,7 @@ export function issueSnapshot(input: {
   const now = new Date(input.nowMs).toISOString();
   const claims: SnapshotClaims = {
     v: 1,
+    projectionFamilies: catalogPolicyRevisions.projectionFamilies,
     queryFingerprint: input.queryFingerprint,
     projectionSetId: input.projectionSetId,
     projectionSetRevision: input.projectionSetRevision,
@@ -103,7 +105,13 @@ export function verifySnapshot(
   nowMs: number,
 ): SnapshotCheck {
   const claims = decode(token) as SnapshotClaims | null;
-  if (claims === null || claims.v !== 1) return { ok: false, code: 'snapshot_invalid' };
+  if (
+    claims === null ||
+    claims.v !== 1 ||
+    (claims.projectionFamilies !== undefined &&
+      claims.projectionFamilies !== catalogPolicyRevisions.projectionFamilies)
+  )
+    return { ok: false, code: 'snapshot_invalid' };
   if (Date.parse(claims.expiresAtUtc) <= nowMs) return { ok: false, code: 'snapshot_expired' };
   if (claims.queryFingerprint !== queryFingerprint)
     return { ok: false, code: 'snapshot_query_mismatch' };

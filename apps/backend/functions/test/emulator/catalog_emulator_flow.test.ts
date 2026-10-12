@@ -320,7 +320,12 @@ void test(
     const page = await feed();
     assert.deepEqual(titles(page), ['Clay A', 'Clay B online'], 'unlisted is never listed');
     assert.equal(page.freshness.availability, 'not_connected');
-    assert.deepEqual(page.items[0]?.availability.status, 'not_connected');
+    assert.deepEqual(
+      page.items[0] && 'availability' in page.items[0]
+        ? page.items[0].availability.status
+        : undefined,
+      'not_connected',
+    );
     const map = await catalog.query.map({ query: base, snapshotToken: page.snapshotToken });
     assert.equal(map.kind, 'succeeded');
     if (map.kind !== 'succeeded') return;
@@ -640,7 +645,12 @@ void test(
       clock.fixedMs = Date.parse('2035-10-11T16:00:00.000Z');
       const running = await feed();
       assert.equal(running.items[0]?.title, 'Clay G1');
-      assert.equal(running.items[0]?.occurrence.state, 'running');
+      assert.equal(
+        running.items[0] && 'occurrence' in running.items[0]
+          ? running.items[0].occurrence.state
+          : undefined,
+        'running',
+      );
       for (const ended of ['Clay B online', 'Clay D', 'Clay E', 'Clay F', 'Clay H'])
         assert.equal(titles(running).includes(ended), false, `${ended} has ended`);
     } finally {

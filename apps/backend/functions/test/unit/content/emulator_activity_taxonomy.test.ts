@@ -1,3 +1,4 @@
+import { taxonomyRevisionId } from '../../../src/modules/reference_data/infrastructure/local_taxonomy_reader.js';
 // D3.2 §2.3–§2.4 (ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md): the Emulator
 // Activity taxonomy equals the canonical fixture file the mobile test checks
 // against the mobile taxonomy; the Emulator reference data answers Activity
@@ -60,7 +61,7 @@ void test('reference data uses the Activity taxonomy for Activity only', async (
   const place = await data.resolve({ marketId: 'LV', typeId: 'place' });
   const event = await data.resolve({ marketId: 'LV', typeId: 'event' });
   assert.ok(activity.ok && place.ok && event.ok);
-  assert.equal(activity.revisions.taxonomyRevisionId, 'test-only-tx-activity-1');
+  assert.equal(activity.revisions.taxonomyRevisionId, taxonomyRevisionId);
   assert.equal(place.revisions.taxonomyRevisionId, 'test-only-tx-place-1');
   assert.equal(event.revisions.taxonomyRevisionId, 'test-only-tx-1');
   assert.equal(activity.lookups.subcategoryApplies('activity', 'any', 'sub-random'), false);

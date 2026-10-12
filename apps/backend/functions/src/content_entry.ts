@@ -9,6 +9,7 @@ import {
   resolveContentType,
 } from './modules/content/domain/content_type_registry.js';
 import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
+import { createEmulatorCatalogComposition } from './modules/catalog/infrastructure/emulator_catalog_composition.js';
 import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
@@ -109,7 +110,16 @@ export function eventAuthoringComposition(
       clock,
       ids: { newId: () => randomUUID() as EntityId },
       enabledTypes,
-      compositionRules: emulatorCompositionRules,
+      compositionRules:
+        process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
+          ? new Map([...emulatorCompositionRules].filter(([type]) => type !== 'activity'))
+          : emulatorCompositionRules,
+      ...(process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
+        ? {
+            enforceLinkedPlaceEligibility: true,
+            linkedPlaceEligibility: createEmulatorCatalogComposition(firestore).placeLinks,
+          }
+        : {}),
     },
   });
   const moderation = createEmulatorModerationService({

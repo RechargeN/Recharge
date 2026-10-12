@@ -483,3 +483,28 @@ void test('contribution currency follows the pinned market rather than a hard-co
   );
   assert.ok(check(body).includes('activity.contribution_currency_unsupported'));
 });
+
+void test('required criteria treats whitespace as missing and preserves false and zero', () => {
+  const needing = context({ lookups: { ...lookups, requiredCriteria: () => ['difficulty'] } });
+  for (const value of [undefined, null, '', '   ']) {
+    assert.ok(
+      check(
+        withChange((b) => {
+          b.criteria = { difficulty: value };
+        }),
+        needing,
+      ).includes('activity.criterion_required:difficulty'),
+    );
+  }
+  for (const value of [false, 0]) {
+    assert.deepEqual(
+      check(
+        withChange((b) => {
+          b.criteria = { difficulty: value };
+        }),
+        needing,
+      ),
+      [],
+    );
+  }
+});

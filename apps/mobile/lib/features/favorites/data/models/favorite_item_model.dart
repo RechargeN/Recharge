@@ -24,9 +24,9 @@ class FavoriteItemModel {
   final String subtitle;
   final String city;
   final String category;
-  final String startsAtUtcIso;
+  final String? startsAtUtcIso;
   final double distanceKm;
-  final Money priceAmount;
+  final Money? priceAmount;
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
@@ -44,18 +44,24 @@ class FavoriteItemModel {
       subtitle: json['subtitle'] as String,
       city: json['city'] as String,
       category: json['category'] as String,
-      startsAtUtcIso: json['startsAtUtcIso'] as String,
+      startsAtUtcIso: json['evergreen'] == true
+          ? json['startsAtUtcIso'] as String?
+          : json['startsAtUtcIso'] as String,
       distanceKm: (json['distanceKm'] as num).toDouble(),
       priceAmount:
-          Money.fromJsonOrNull(
-            json['price'],
-            legacyCurrencyCode: defaultCurrencyCode,
-          ) ??
-          Money.fromJsonOrNull(
-            json['priceAmount'],
-            legacyCurrencyCode: defaultCurrencyCode,
-          ) ??
-          (throw const FormatException('Favorite Money is invalid')),
+          json['evergreen'] == true &&
+              json['price'] == null &&
+              json['priceAmount'] == null
+          ? null
+          : Money.fromJsonOrNull(
+                  json['price'],
+                  legacyCurrencyCode: defaultCurrencyCode,
+                ) ??
+                Money.fromJsonOrNull(
+                  json['priceAmount'],
+                  legacyCurrencyCode: defaultCurrencyCode,
+                ) ??
+                (throw const FormatException('Favorite Money is invalid')),
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
@@ -74,7 +80,8 @@ class FavoriteItemModel {
       'category': category,
       'startsAtUtcIso': startsAtUtcIso,
       'distanceKm': distanceKm,
-      'price': priceAmount.toJson(),
+      'price': priceAmount?.toJson(),
+      if (startsAtUtcIso == null && priceAmount == null) 'evergreen': true,
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,
@@ -91,7 +98,7 @@ class FavoriteItemModel {
       subtitle: entity.subtitle,
       city: entity.city,
       category: entity.category,
-      startsAtUtcIso: entity.startsAtUtc.toUtc().toIso8601String(),
+      startsAtUtcIso: entity.startsAtUtc?.toUtc().toIso8601String(),
       distanceKm: entity.distanceKm,
       priceAmount: entity.priceAmount,
       isFree: entity.isFree,
@@ -110,7 +117,9 @@ class FavoriteItemModel {
       subtitle: subtitle,
       city: city,
       category: category,
-      startsAtUtc: DateTime.parse(startsAtUtcIso).toUtc(),
+      startsAtUtc: startsAtUtcIso == null
+          ? null
+          : DateTime.parse(startsAtUtcIso!).toUtc(),
       distanceKm: distanceKm,
       priceAmount: priceAmount,
       isFree: isFree,

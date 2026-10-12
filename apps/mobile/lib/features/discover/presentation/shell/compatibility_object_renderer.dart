@@ -91,6 +91,49 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           SummaryCard(item: item),
+          if (item.activityCatalog != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Typical duration: ${item.activityCatalog!.durationLabel}',
+                    ),
+                    if (item.activityCatalog!.suggestedGroupMin != null)
+                      Text(
+                        'Suggested group: ${item.activityCatalog!.suggestedGroupMin}–${item.activityCatalog!.suggestedGroupMax}',
+                      ),
+                    if (item.activityCatalog!.linkedPlaceTitle != null) Text('Linked Place: ${item.activityCatalog!.linkedPlaceTitle}'),
+                    if (item.activityCatalog!.fullDescription.isNotEmpty)
+                      Text(item.activityCatalog!.fullDescription),
+                    if (item.activityCatalog!.timeOfDay != null)
+                      Text('Best time: ${item.activityCatalog!.timeOfDay}'),
+                    if (item.activityCatalog!.season != null)
+                      Text('Season: ${item.activityCatalog!.season}'),
+                    if (item.activityCatalog!.addressLine.isNotEmpty)
+                      Text(item.activityCatalog!.addressLine),
+                    if (item.activityCatalog!.accessNotes.isNotEmpty)
+                      Text(item.activityCatalog!.accessNotes),
+                    if (item.activityCatalog!.isInformal)
+                      Text(
+                        'Informal access: ${item.activityCatalog!.cautionNote}',
+                      ),
+                    if (item.activityCatalog!.contributionKind != null)
+                      Text(
+                        'Optional ${item.activityCatalog!.contributionKind}: ${item.activityCatalog!.contributionNote}',
+                      ),
+                    if (item.activityCatalog!.amountMinor != null)
+                      Text(
+                        'Amount hint: ${(item.activityCatalog!.amountMinor! / 100).toStringAsFixed(2)} ${item.activityCatalog!.currencyCode}',
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           if (item.isPublishedRoute) ...<Widget>[
             const SizedBox(height: 12),
             _PublishedRouteCard(item: item, onReport: onReportRoute),
@@ -325,8 +368,12 @@ class _PublishedRouteCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                DetailsPill(label: routeProfileLabelForDetails(route.routingProfileId)),
-                DetailsPill(label: routeDifficultyLabelForDetails(route.difficultyId)),
+                DetailsPill(
+                  label: routeProfileLabelForDetails(route.routingProfileId),
+                ),
+                DetailsPill(
+                  label: routeDifficultyLabelForDetails(route.difficultyId),
+                ),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
                   DetailsPill(
@@ -1109,11 +1156,7 @@ class HighlightsCard extends StatelessWidget {
 }
 
 class LocationCard extends StatelessWidget {
-  const LocationCard({
-    super.key,
-    required this.item,
-    required this.onOpenMap,
-  });
+  const LocationCard({super.key, required this.item, required this.onOpenMap});
 
   final DiscoverItemEntity item;
   final VoidCallback onOpenMap;
@@ -1261,7 +1304,8 @@ class _CategoryBadge extends StatelessWidget {
   }
 }
 
-String dateTimeLabelForDetails(DateTime value) {
+String dateTimeLabelForDetails(DateTime? value) {
+  if (value == null) return 'Any time';
   final DateTime local = value.toLocal();
   final String day = local.day.toString().padLeft(2, '0');
   final String month = local.month.toString().padLeft(2, '0');
@@ -1298,8 +1342,13 @@ String routeDifficultyLabelForDetails(String difficultyId) {
 }
 
 String priceLabelForDetails(DiscoverItemEntity item) {
+  if (item.activityCatalog != null) {
+    return item.activityCatalog!.contributionKind == null
+        ? 'No contribution specified'
+        : 'Optional contribution';
+  }
   if (item.isFree) return 'Free';
-  return '${item.priceAmount.toStringAsFixed(0)} €';
+  return '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
 }
 
 String timeFitLabelForDetails(TimeFitEvaluation evaluation) =>
@@ -1324,6 +1373,7 @@ String participantsLabelForDetails(DiscoverItemEntity item) {
 }
 
 String durationLabelForDetails(DiscoverItemEntity item) {
+  if (item.activityCatalog != null) return item.activityCatalog!.durationLabel;
   final int? duration = item.durationMinutes;
   if (duration == null) return 'Flexible';
   if (duration < 60) return '$duration min';

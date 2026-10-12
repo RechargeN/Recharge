@@ -125,7 +125,11 @@ function validateAbout(
       if (criteria !== undefined && !isRecord(criteria)) issues.add('activity.criteria_invalid');
       for (const fieldId of required) {
         const value = (criteria as Json | undefined)?.[fieldId];
-        if (value === undefined || value === null || value === '')
+        if (
+          value === undefined ||
+          value === null ||
+          (typeof value === 'string' && value.trim() === '')
+        )
           issues.add(`activity.criterion_required:${fieldId}`);
       }
     }
@@ -198,8 +202,9 @@ function validateCaution(value: unknown, issues: IssueCollector): void {
   const note = typeof caution.note === 'string' ? caution.note.trim() : '';
   if (caution.isInformal === true) {
     if (note.length === 0) issues.add('activity.access_caution_note_required');
-    else issues.require(isText(caution.note, 1, 200), 'activity.access_caution_note_length');
   }
+  if (note.length > 0)
+    issues.require(isText(caution.note, 1, 200), 'activity.access_caution_note_length');
   // isInformal=false with an empty note normalizes to no caution (§8 step 2).
 }
 
@@ -253,7 +258,7 @@ function validateWhenAndFor(body: ContentBody, issues: IssueCollector): void {
     hasOnlyKeys(pair, new Set(['min', 'max']), issues, `activity.${label}`);
     if (
       !issues.require(
-        isInt(pair.min, 1, 100000) && isInt(pair.max, 1, 100000),
+        isInt(pair.min, 1, Number.MAX_SAFE_INTEGER) && isInt(pair.max, 1, Number.MAX_SAFE_INTEGER),
         `activity.${label}_not_positive`,
       )
     )

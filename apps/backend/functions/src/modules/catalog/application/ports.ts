@@ -1,3 +1,4 @@
+import type { TaxonomyRead } from '../../reference_data/domain/taxonomy_dataset.js';
 import type { ContentFact, SourceRevision } from '../domain/catalog_item.js';
 import type { FeedCheckpoint } from '../domain/repositories.js';
 
@@ -15,6 +16,8 @@ export interface SourcePointer {
  * writes Content and never reads its drafts.
  */
 export interface ContentCatalogSource {
+  pointer?(contentId: string): Promise<SourcePointer | null>;
+  readTaxonomyRevision?(revisionId: string): Promise<TaxonomyRead>;
   /** Committed facts of every object in `(occurredAtUtc, effectId)` order. */
   effectsAfter(after: FeedCheckpoint | null, limit: number): Promise<readonly ContentFact[]>;
   /** Stored facts of one object in `(pointerRevision, effectId)` order. */
@@ -31,5 +34,6 @@ export interface ContentCatalogSource {
 
 /** Current reference revisions (market, taxonomy, localization) of a market/type. */
 export interface ReferenceRevisionsPort {
+  readTaxonomyRevision?(revisionId: string): Promise<TaxonomyRead>;
   current(marketId: string, typeId: string): Promise<Readonly<Record<string, string>> | null>;
 }

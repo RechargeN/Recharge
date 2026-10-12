@@ -551,9 +551,11 @@ String _createLocationForDetails(DiscoverItemEntity item) {
       'venue': item.venueName,
       'address': item.addressLine,
       'free': item.isFree ? '1' : '0',
-      if (!item.isFree) 'budgetMax': item.priceAmount.toStringAsFixed(0),
+      if (!item.isFree && item.priceAmount != null)
+        'budgetMax': item.priceAmount?.toStringAsFixed(0) ?? '—',
       'cover': item.coverImageUrl,
-      'start': item.startsAtUtc.toIso8601String(),
+      if (item.startsAtUtc != null)
+        'start': item.startsAtUtc!.toIso8601String(),
     },
   ).toString();
 }

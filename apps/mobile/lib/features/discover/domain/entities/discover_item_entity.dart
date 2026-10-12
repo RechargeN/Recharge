@@ -1,3 +1,4 @@
+import 'activity_catalog_facts.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
@@ -50,6 +51,7 @@ class DiscoverItemEntity {
     this.highlights = const <String>[],
     this.publishedRoute,
     this.revisionRef = '',
+    this.activityCatalog,
   }) : assert(durationMinutes == null || durationMinutes > 0),
        assert(capacity == null || capacity > 0),
        assert(participantsCount == null || participantsCount >= 0),
@@ -65,10 +67,10 @@ class DiscoverItemEntity {
   final String city;
   final String category;
   final String subcategory;
-  final DateTime startsAtUtc;
+  final DateTime? startsAtUtc;
   final double latitude;
   final double longitude;
-  final Money priceAmount;
+  final Money? priceAmount;
   final double distanceKm;
   final bool isFree;
   final DiscoverObjectKind objectKind;
@@ -99,6 +101,13 @@ class DiscoverItemEntity {
   /// Opaque id of the exact published revision this card shows, when the
   /// source is the server Catalog (E2); empty for local sources.
   final String revisionRef;
+  final ActivityCatalogFacts? activityCatalog;
+
+  int compareStart(DiscoverItemEntity other) {
+    final DateTime? left = startsAtUtc, right = other.startsAtUtc;
+    if (left == null) return right == null ? id.compareTo(other.id) : 1;
+    return right == null ? -1 : left.compareTo(right);
+  }
 
   bool get isPublishedRoute => publishedRoute != null;
 
@@ -184,6 +193,7 @@ class DiscoverItemEntity {
           ? null
           : (publishedRoute ?? this.publishedRoute),
       revisionRef: revisionRef,
+      activityCatalog: activityCatalog,
     );
   }
 }

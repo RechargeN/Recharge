@@ -1,3 +1,4 @@
+import { PlaceLinkService } from '../application/place_link_service.js';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { systemServerClock, type ServerClock } from '../../../shared/server_clock.js';
@@ -14,8 +15,9 @@ import { FirestoreCatalogRepository } from './firestore_catalog_repository.js';
 
 /**
  * Local Catalog on the Emulator (E1). It has no Functions entry and no
- * automatic trigger: delivery runs only when the stand tooling or a test calls
- * the projector. Reference revisions are the synthetic Emulator constants.
+ * runtime entry itself: E2 triggers and stand tooling call this composition.
+ * Activity taxonomy is the pinned canonical local artifact; other reference
+ * revisions retain their existing synthetic Emulator constants.
  */
 export function createEmulatorCatalogComposition(
   firestore: Firestore,
@@ -30,17 +32,26 @@ export function createEmulatorCatalogComposition(
   const environment = options.environment ?? process.env;
   const repository = new FirestoreCatalogRepository(firestore, environment);
   const contentRepository = new FirestoreContentRepository(firestore, { environment });
+  const activityEnabled = environment.RECHARGE_TEST_ACTIVITY_CATALOG === 'true';
+  const references = new EmulatorSyntheticReferenceData();
   const base = new ContentFeedCatalogSource(
     new ContentPublicationFeed(firestore, contentRepository),
+    references,
   );
   const source = options.source === undefined ? base : options.source(base);
-  const projector = new CatalogProjector({ repository, source, clock });
+  const placeLinks = new PlaceLinkService(
+    source,
+    environment.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true',
+  );
+  const projector = new CatalogProjector({ repository, source, clock, activityEnabled });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
   const sets = new CatalogSets(repository, source, projector, reconciler, clock);
   const query = new CatalogQueryService(
     repository,
-    new ReferenceDataRevisions(new EmulatorSyntheticReferenceData()),
+    new ReferenceDataRevisions(references),
     clock,
+    activityEnabled,
+    placeLinks,
   );
-  return Object.freeze({ repository, source, projector, reconciler, sets, query });
+  return Object.freeze({ repository, source, projector, reconciler, sets, query, placeLinks });
 }

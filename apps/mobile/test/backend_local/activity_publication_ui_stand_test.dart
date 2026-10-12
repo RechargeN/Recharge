@@ -1,4 +1,16 @@
 import 'dart:io';
+import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_providers.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
+import 'package:recharge/features/create/presentation/pages/create_page.dart';
+import 'package:recharge/app/application/active_create_publisher_provider.dart';
+import 'package:recharge/app/application/active_creator_verification_provider.dart';
+import '../support/event_create_test_support.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,18 +51,20 @@ void main() {
   late Directory temp;
   late File cover;
   late List<File> gallery;
+  late CreateRepository repository;
+  late String pageId;
 
   Future<void> boot() async {
     await sl.reset();
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     await stand!.activitySeed();
-    final String pageId = (await stand.activityManifest())['pageId']! as String;
+    pageId = (await stand.activityManifest())['pageId']! as String;
     final binding = BookingBackendBindingController(
       emulatorBase: StandBackend.functionsBase,
       releaseMode: false,
       initial: BackendBindingMode.testBackend,
     );
-    final repository = CreateRepositoryImpl(
+    repository = CreateRepositoryImpl(
       localDataSource: CreateLocalDataSource(const FlutterSecureStorage()),
       idGenerator: UuidV4IdGenerator(),
     );
@@ -180,6 +194,13 @@ void main() {
             builder: (context, state) => const ActivityPublicationPage(),
           ),
           GoRoute(
+            path: '/create/new/activity',
+            builder: (context, state) => CreatePage(
+              initialObjectType: CreateObjectType.activity,
+              seedParameters: state.uri.queryParameters,
+            ),
+          ),
+          GoRoute(
             path: '/blocked',
             builder: (context, state) => const Text('blocked'),
           ),
@@ -189,6 +210,26 @@ void main() {
         ProviderScope(
           overrides: <Override>[
             authControllerProvider.overrideWith((ref) => auth!),
+            activeCreatePublisherProvider.overrideWith((ref) => null),
+            activeCreatorVerificationProvider.overrideWith((ref) => true),
+            createControllerProvider.overrideWith(
+              (ref) => CreateController(
+                loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+                saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+                publishCreateDraftUseCase: PublishCreateDraftUseCase(
+                  repository,
+                ),
+                analyticsService: ConsoleAnalyticsService(),
+                eventCreateCoordinator: createTestEventCoordinator(),
+                runtimeDefaults: const CreateRuntimeDefaults(
+                  marketCityId: 'riga',
+                  timezone: 'Europe/Riga',
+                  country: 'LV',
+                  city: 'Riga',
+                  currency: 'EUR',
+                ),
+              ),
+            ),
           ],
           child: MaterialApp.router(routerConfig: router),
         ),
@@ -248,6 +289,85 @@ void main() {
       expect(
         find.descendant(of: tile, matching: find.textContaining('withdrawn')),
         findsOneWidget,
+      );
+      await tapKey(tester, 'activity-publication-activate');
+      await waitFor(tester, statusText('visibility: visible'));
+      final originalRevisionText = tester
+          .widget<Text>(find.byKey(const Key('activity-publication-revision')))
+          .data;
+      await tapKey(tester, 'activity-publication-edit');
+      await waitFor(tester, find.text('Title'));
+      expect(find.textContaining('Editing draft only.'), findsOneWidget);
+      final titleField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField && widget.decoration?.labelText == 'Title',
+      );
+      // Edit the original shared form, then let its existing autosave persist.
+      await tester.enterText(titleField, 'Edited bog loop from Create');
+      await tester.pump(const Duration(milliseconds: 900));
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+      final stored = await tester.runAsync(
+        () => repository.loadDraft('user-1'),
+      );
+      expect(stored!.title, 'Edited bog loop from Create');
+      for (var step = 0; step < 3; step++) {
+        final next = find.text('Save & continue');
+        await tester.ensureVisible(next);
+        await tester.tap(next);
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      expect(find.text('Send for review'), findsNothing);
+      final returnButton = find.text('Save draft & return');
+      await tester.ensureVisible(returnButton);
+      await tester.tap(returnButton);
+      await waitFor(
+        tester,
+        find.textContaining('unpublished changes; review required'),
+      );
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const Key('activity-publication-revision')),
+            )
+            .data,
+        originalRevisionText,
+      );
+      await tapKey(tester, 'activity-publication-save');
+      await tapKey(tester, 'activity-publication-submit');
+      await waitFor(tester, statusText('review: under_review'));
+      final editedQueue = await tester.runAsync(
+        () => stand!.moderate(<String>['queue']),
+      );
+      final editedPending =
+          ((editedQueue!.json['data']! as Map)['pending']! as List)
+              .cast<Map<Object?, Object?>>()
+              .singleWhere((item) => item['contentId'] == contentId);
+      final editedApproved = await tester.runAsync(
+        () => stand!.moderate(<String>[
+          'approve',
+          editedPending['submissionId']! as String,
+          '--reason',
+          'd3.7 UI: edited Activity approved',
+        ]),
+      );
+      expect(editedApproved!.exitCode, 0, reason: '${editedApproved.json}');
+      await tapKey(tester, 'activity-publication-refresh');
+      await waitFor(tester, statusText('approved_for_publication'));
+      await tapKey(tester, 'activity-publication-publish');
+      await waitFor(tester, statusText('review: published'));
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const Key('activity-publication-revision')),
+            )
+            .data,
+        isNot(originalRevisionText),
+      );
+      expect(
+        find.textContaining('unpublished changes; review required'),
+        findsNothing,
       );
     },
     skip: stand == null || !activityPublicationTestEntryDefined,

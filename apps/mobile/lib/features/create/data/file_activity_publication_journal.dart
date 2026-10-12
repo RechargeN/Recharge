@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
+import 'publication_journal_file.dart';
 
 import '../domain/entities/activity_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -13,25 +13,19 @@ import '../domain/repositories/activity_publication_gateway.dart';
 /// from the server.
 final class FileActivityPublicationJournal
     implements ActivityPublicationJournal {
-  FileActivityPublicationJournal(this._file);
+  FileActivityPublicationJournal(File file)
+    : _storage = PublicationJournalFile<ActivityPublicationRecord>(
+        file,
+        decode: ActivityPublicationRecord.fromJson,
+        encode: (record) => record.toJson(),
+        maxRecords: maxRecords,
+      );
 
   static const int maxRecords = 100;
 
-  final File _file;
+  final PublicationJournalFile<ActivityPublicationRecord> _storage;
 
-  Future<List<ActivityPublicationRecord>> _all() async {
-    if (!await _file.exists()) return <ActivityPublicationRecord>[];
-    try {
-      final Object? decoded = jsonDecode(await _file.readAsString());
-      if (decoded is! List) return <ActivityPublicationRecord>[];
-      return decoded
-          .map(ActivityPublicationRecord.fromJson)
-          .whereType<ActivityPublicationRecord>()
-          .toList();
-    } on FormatException {
-      return <ActivityPublicationRecord>[];
-    }
-  }
+  Future<List<ActivityPublicationRecord>> _all() => _storage.read();
 
   @override
   Future<List<ActivityPublicationRecord>> list(String accountId) async =>
@@ -61,16 +55,6 @@ final class FileActivityPublicationJournal
             item.belongsTo(record.accountId, record.publisherRef),
       )
       ..insert(0, record);
-    final List<ActivityPublicationRecord> bounded = records
-        .take(maxRecords)
-        .toList();
-    await _file.parent.create(recursive: true);
-    // Write-then-rename, so an interrupted save never leaves half a file.
-    final File temporary = File('${_file.path}.tmp');
-    await temporary.writeAsString(
-      jsonEncode(bounded.map((item) => item.toJson()).toList()),
-      flush: true,
-    );
-    await temporary.rename(_file.path);
+    await _storage.write(records);
   }
 }

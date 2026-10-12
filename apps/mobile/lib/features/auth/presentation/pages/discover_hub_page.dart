@@ -499,7 +499,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                   icon: Icons.payments,
                   label: scenario.isFree
                       ? 'Free'
-                      : '${scenario.priceAmount.toStringAsFixed(0)} EUR',
+                      : '${scenario.priceAmount?.toStringAsFixed(0) ?? '—'} EUR',
                 ),
               ],
             ),
@@ -1109,10 +1109,7 @@ class _HomeActivitySections extends StatelessWidget {
 
   List<DiscoverItemEntity> _newItems(List<DiscoverItemEntity> items) {
     final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
-      ..sort(
-        (DiscoverItemEntity a, DiscoverItemEntity b) =>
-            a.startsAtUtc.compareTo(b.startsAtUtc),
-      );
+      ..sort((DiscoverItemEntity a, DiscoverItemEntity b) => a.compareStart(b));
     return sorted.take(6).toList(growable: false);
   }
 
@@ -1139,7 +1136,7 @@ class _HomeActivitySections extends StatelessWidget {
           b,
         ).compareTo(_quickDurationRank(a));
         if (durationCompare != 0) return durationCompare;
-        return a.startsAtUtc.compareTo(b.startsAtUtc);
+        return a.compareStart(b);
       });
     return sorted.take(6).toList(growable: false);
   }
@@ -1810,14 +1807,14 @@ class _HomeRouteTemplate {
 }
 
 String _homeCardMeta(DiscoverItemEntity item) {
-  final DateTime local = item.startsAtUtc.toLocal();
-  final String hour = local.hour.toString().padLeft(2, '0');
-  final String minute = local.minute.toString().padLeft(2, '0');
+  final DateTime? local = item.startsAtUtc?.toLocal();
+  final String hour = local?.hour.toString().padLeft(2, '0') ?? '';
+  final String minute = local?.minute.toString().padLeft(2, '0') ?? '';
   final String price = item.isFree
       ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} EUR';
+      : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} EUR';
   final String venue = item.venueName.isEmpty ? item.city : item.venueName;
-  return '$price · $hour:$minute · $venue';
+  return '$price · ${local == null ? (item.activityCatalog?.durationLabel ?? 'Any time') : '$hour:$minute'} · $venue';
 }
 
 IconData _categoryIconForHome(String category) {

@@ -1,0 +1,123 @@
+{
+  "complete": true,
+  "code": 0,
+  "groups": [
+    {
+      "name": "content-media",
+      "ms": 231290,
+      "timeoutMs": 330000,
+      "log": "C:\\Users\\User\\AppData\\Local\\Temp\\recharge-emulator-tests-26Ixg9\\content-media.log",
+      "code": 0,
+      "tests": 65,
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0,
+      "tasks": [
+        {
+          "args": [
+            "lib/test/emulator/content_emulator_guard.test.js"
+          ],
+          "ms": 3158,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_firestore_repository.test.js"
+          ],
+          "ms": 62936,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_concurrency.test.js"
+          ],
+          "ms": 6929,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_recovery.test.js"
+          ],
+          "ms": 5167,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_rules_default_deny.test.js"
+          ],
+          "ms": 5801,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/media_emulator_flow.test.js"
+          ],
+          "ms": 6411,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/moderation_emulator_flow.test.js"
+          ],
+          "ms": 17117,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_event_emulator_flow.test.js"
+          ],
+          "ms": 27682,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/catalog_emulator_flow.test.js"
+          ],
+          "ms": 39752,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/activity_catalog_emulator_flow.test.js"
+          ],
+          "ms": 28315,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/discover_query_emulator_flow.test.js"
+          ],
+          "ms": 9060,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_effect_delivery_emulator.test.js"
+          ],
+          "ms": 9521,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_transition_guard.test.js"
+          ],
+          "ms": 9420,
+          "code": 0,
+          "timedOut": false
+        }
+      ]
+    }
+  ]
+}

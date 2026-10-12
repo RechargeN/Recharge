@@ -5,7 +5,7 @@
 // owner services first; the flags are restored exactly as they were before
 // this file. It also sends every body of the shared Create compatibility
 // fixture (§5.7) over the wire: the answer is `validation_failed` and carries
-// no validator code.
+// stable public codes and field paths, without field values.
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import type { DocumentData } from 'firebase-admin/firestore';
@@ -265,12 +265,13 @@ void test('row all on: each of the three types may be authored', async () => {
   assert.equal(code(await createOf('activity')), 'succeeded');
 });
 
-void test('§5.7: every Create compatibility body is refused over the wire with validation_failed only', async () => {
+void test('§5.7: every Create compatibility body is refused over the wire with stable field violations', async () => {
   await setFlags(false, false, true);
   const { cases } = (await readContentJson('fixtures/activity_create_compat.json')) as {
     cases: readonly {
       name: string;
       expectedIssues: readonly string[];
+      expectedViolations: readonly { code: string; fieldPath: string }[];
       body: Record<string, unknown>;
     }[];
   };
@@ -312,7 +313,8 @@ void test('§5.7: every Create compatibility body is refused over the wire with 
     });
   }
 
-  const [valid, ...refused] = cases;
+  const [valid] = cases;
+  const refused = cases.filter((item) => item.expectedIssues.length > 0);
   assert.ok(valid !== undefined && valid.expectedIssues.length === 0);
   // The accepted body passes with real media; with the fixture's placeholder
   // media it passes validation and stops at Media readiness, which Content
@@ -320,10 +322,18 @@ void test('§5.7: every Create compatibility body is refused over the wire with 
   // validation (or the composition rules), not by its placeholder media.
   assert.equal(code(await submitCase(valid, true)), 'succeeded', valid.name);
   assert.equal(code(await submitCase(valid, false)), 'rejected:media_not_ready', valid.name);
+  // Boundary controls need only domain acceptance + readiness: avoid extra uploads.
+  for (const item of cases.filter((entry) => entry !== valid && entry.expectedIssues.length === 0))
+    assert.equal(code(await submitCase(item, false)), 'rejected:media_not_ready', item.name);
   for (const item of refused)
     assert.deepEqual(
       await submitCase(item, false),
-      { schemaVersion: 1, kind: 'rejected', code: 'validation_failed' },
+      {
+        schemaVersion: 1,
+        kind: 'rejected',
+        code: 'validation_failed',
+        violations: item.expectedViolations,
+      },
       item.name,
     );
 });

@@ -115,60 +115,142 @@ ActivityLocationDraft _location({
 );
 
 /// A Create draft per case: the accepted one, then one per row of §5.7.
-final Map<String, CreateDraftEntity Function()> activityCompatCases =
-    <String, CreateDraftEntity Function()>{
-      'valid': _compatBase,
-      'cover_missing': () => _compatBase().copyWith(
-        media: const MediaEntity(coverImage: '', gallery: compatGallery),
+final Map<String, CreateDraftEntity Function()>
+activityCompatCases = <String, CreateDraftEntity Function()>{
+  'valid': _compatBase,
+  'cover_missing': () => _compatBase().copyWith(
+    media: const MediaEntity(coverImage: '', gallery: compatGallery),
+  ),
+  'short_description_short': () =>
+      _compatBase().copyWith(shortDescription: 'Bog walk'),
+  'pin_unconfirmed': () => _withActivity(
+    (activity) => activity.copyWith(location: _location(pinConfirmed: false)),
+  ),
+  'access_notes_missing': () => _withActivity(
+    (activity) => activity.copyWith(location: _location(accessNotes: '')),
+  ),
+  'informal_access_without_note': () => _withActivity(
+    (activity) => activity.copyWith(
+      location: _location(
+        accessCaution: const ActivityAccessCautionDraft(isInformal: true),
       ),
-      'short_description_short': () =>
-          _compatBase().copyWith(shortDescription: 'Bog walk'),
-      'pin_unconfirmed': () => _withActivity(
-        (activity) =>
-            activity.copyWith(location: _location(pinConfirmed: false)),
+    ),
+  ),
+  'contribution_note_missing': () => _withActivity(
+    (activity) => activity.copyWith(
+      optionalContribution: const ActivityOptionalContributionDraft(
+        kind: ActivityContributionKind.donation,
       ),
-      'access_notes_missing': () => _withActivity(
-        (activity) => activity.copyWith(location: _location(accessNotes: '')),
-      ),
-      'informal_access_without_note': () => _withActivity(
-        (activity) => activity.copyWith(
-          location: _location(
-            accessCaution: const ActivityAccessCautionDraft(isInformal: true),
-          ),
+    ),
+  ),
+  'contribution_currency_mismatch': () => _withActivity(
+    (activity) => activity.copyWith(
+      optionalContribution: const ActivityOptionalContributionDraft(
+        kind: ActivityContributionKind.purchase,
+        note: 'Parking at the trail head is paid',
+        amountHint: ActivityContributionAmountDraft(
+          amountMinor: 300,
+          currencyCode: 'USD',
         ),
       ),
-      'contribution_note_missing': () => _withActivity(
-        (activity) => activity.copyWith(
-          optionalContribution: const ActivityOptionalContributionDraft(
-            kind: ActivityContributionKind.donation,
-          ),
+    ),
+  ),
+  'duration_range_invalid': () => _withActivity(
+    (activity) => activity.copyWith(
+      typicalDurationMinutes: const ActivityIntRangeDraft(min: 120, max: 60),
+    ),
+  ),
+  'subcategory_not_applicable': () => _compatBase().copyWith(
+    mainCategory: 'wellness_recharge',
+    subcategory: 'sauna',
+    sectionData: const <String, Object?>{},
+  ),
+  'criterion_missing': () =>
+      _compatBase().copyWith(sectionData: const <String, Object?>{}),
+  'title_missing': () => _compatBase().copyWith(title: ''),
+  'title_upper_boundary': () =>
+      _compatBase().copyWith(title: List.filled(80, 'T').join()),
+  'short_description_upper_boundary': () =>
+      _compatBase().copyWith(shortDescription: List.filled(180, 'S').join()),
+  'short_description_too_long': () =>
+      _compatBase().copyWith(shortDescription: List.filled(181, 'S').join()),
+  'access_notes_lower_boundary': () => _withActivity(
+    (a) => a.copyWith(location: a.location.copyWith(accessNotes: 'AAAAAAAAAA')),
+  ),
+  'access_notes_upper_boundary': () => _withActivity(
+    (a) => a.copyWith(
+      location: a.location.copyWith(accessNotes: List.filled(300, 'A').join()),
+    ),
+  ),
+  'noninformal_caution_too_long': () => _withActivity(
+    (a) => a.copyWith(
+      location: a.location.copyWith(
+        accessCaution: ActivityAccessCautionDraft(
+          isInformal: false,
+          note: List.filled(201, 'N').join(),
         ),
       ),
-      'contribution_currency_mismatch': () => _withActivity(
-        (activity) => activity.copyWith(
-          optionalContribution: const ActivityOptionalContributionDraft(
-            kind: ActivityContributionKind.purchase,
-            note: 'Parking at the trail head is paid',
-            amountHint: ActivityContributionAmountDraft(
-              amountMinor: 300,
-              currencyCode: 'USD',
-            ),
-          ),
+    ),
+  ),
+  'informal_caution_upper_boundary': () => _withActivity(
+    (a) => a.copyWith(
+      location: a.location.copyWith(
+        accessCaution: ActivityAccessCautionDraft(
+          isInformal: true,
+          note: List.filled(200, 'N').join(),
         ),
       ),
-      'duration_range_invalid': () => _withActivity(
-        (activity) => activity.copyWith(
-          typicalDurationMinutes: const ActivityIntRangeDraft(
-            min: 120,
-            max: 60,
-          ),
+    ),
+  ),
+  'duration_zero': () => _withActivity(
+    (a) => a.copyWith(
+      typicalDurationMinutes: const ActivityIntRangeDraft(min: 0, max: 60),
+    ),
+  ),
+  'group_zero': () => _withActivity(
+    (a) => a.copyWith(
+      suggestedGroupSize: const ActivityIntRangeDraft(min: 0, max: 6),
+    ),
+  ),
+  'contribution_note_upper_boundary': () => _withActivity(
+    (a) => a.copyWith(
+      optionalContribution: ActivityOptionalContributionDraft(
+        kind: ActivityContributionKind.donation,
+        note: List.filled(140, 'N').join(),
+      ),
+    ),
+  ),
+  'contribution_note_too_long': () => _withActivity(
+    (a) => a.copyWith(
+      optionalContribution: ActivityOptionalContributionDraft(
+        kind: ActivityContributionKind.donation,
+        note: List.filled(141, 'N').join(),
+      ),
+    ),
+  ),
+  'amount_without_kind': () => _withActivity(
+    (a) => a.copyWith(
+      optionalContribution: const ActivityOptionalContributionDraft(
+        amountHint: ActivityContributionAmountDraft(
+          amountMinor: 100,
+          currencyCode: 'EUR',
         ),
       ),
-      'subcategory_not_applicable': () => _compatBase().copyWith(
-        mainCategory: 'wellness_recharge',
-        subcategory: 'sauna',
-        sectionData: const <String, Object?>{},
+    ),
+  ),
+
+  'large_recommendations': () => _withActivity(
+    (a) => a.copyWith(
+      typicalDurationMinutes: const ActivityIntRangeDraft(
+        min: 100001,
+        max: 100002,
       ),
-      'criterion_missing': () =>
-          _compatBase().copyWith(sectionData: const <String, Object?>{}),
-    };
+      suggestedGroupSize: const ActivityIntRangeDraft(min: 100001, max: 100002),
+    ),
+  ),
+  'criterion_whitespace': () => _compatBase().copyWith(
+    sectionData: const {
+      'criteria': {'difficulty': '   '},
+    },
+  ),
+};
