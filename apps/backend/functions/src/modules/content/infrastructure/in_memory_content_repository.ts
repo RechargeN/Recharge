@@ -3,6 +3,7 @@ import { deepFreeze } from '../../../shared/immutable.js';
 import type { ContentDraft } from '../domain/content_draft.js';
 import { resolveContentType } from '../domain/content_type_registry.js';
 import { ContentRepositoryConflict } from '../domain/failures.js';
+import type { LocalImportBinding } from '../domain/local_import_binding.js';
 import {
   assertDocumentWithinLimit,
   assertMediaIdsWithinLimit,
@@ -28,6 +29,8 @@ import {
 
 interface Store {
   readonly drafts: Map<string, ContentDraft>;
+  /** D4.1: local import bindings by author and `loc_*` key. */
+  readonly importBindings: Map<string, LocalImportBinding>;
   readonly submissions: Map<string, PublicationSubmission>;
   readonly revisions: Map<string, PublishedRevision>;
   readonly pointers: Map<string, PublicationPointer>;
@@ -92,6 +95,7 @@ export class InMemoryContentRepository implements ContentRepository {
 function emptyStore(): Store {
   return {
     drafts: new Map(),
+    importBindings: new Map(),
     submissions: new Map(),
     revisions: new Map(),
     pointers: new Map(),
@@ -107,6 +111,7 @@ function cloneStore(store: Store): Store {
   // Stored values are deep-frozen and never mutated; copying containers suffices.
   return {
     drafts: new Map(store.drafts),
+    importBindings: new Map(store.importBindings),
     submissions: new Map(store.submissions),
     revisions: new Map(store.revisions),
     pointers: new Map(store.pointers),
@@ -126,6 +131,10 @@ function idempotencyKey(actorUserId: string, commandType: string, key: string): 
   return `${actorUserId.length}:${actorUserId}|${commandType}|${key}`;
 }
 
+function importBindingKey(createdByUserId: string, importSourceKey: string): string {
+  return `${createdByUserId.length}:${createdByUserId}|${importSourceKey}`;
+}
+
 function transactionFor(store: Store, limits: ContentStorageLimits): ContentTransaction {
   return {
     draft: (draftId) => Promise.resolve(store.drafts.get(draftId) ?? null),
@@ -133,13 +142,30 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
       Promise.resolve(
         [...store.drafts.values()].find((item) => item.contentId === contentId) ?? null,
       ),
-    draftByImportSource: (createdByUserId, importSourceKey) =>
+    draftByImportSource: (createdByUserId, importSourceKey) => {
+      const binding = store.importBindings.get(importBindingKey(createdByUserId, importSourceKey));
+      if (binding === undefined || binding.state !== 'active') return Promise.resolve(null);
+      const draft = store.drafts.get(binding.draftId) ?? null;
+      // A binding is trusted only for the exact author and key it names.
+      return Promise.resolve(
+        draft !== null &&
+          draft.createdByUserId === createdByUserId &&
+          draft.importSourceKey === importSourceKey
+          ? draft
+          : null,
+      );
+    },
+    importBinding: (createdByUserId, importSourceKey) =>
       Promise.resolve(
-        [...store.drafts.values()].find(
-          (item) =>
-            item.createdByUserId === createdByUserId && item.importSourceKey === importSourceKey,
-        ) ?? null,
+        store.importBindings.get(importBindingKey(createdByUserId, importSourceKey)) ?? null,
       ),
+    putImportBinding(binding, expectedStoredRevision) {
+      const key = importBindingKey(binding.createdByUserId, binding.importSourceKey);
+      const stored = store.importBindings.get(key)?.bindingRevision ?? 0;
+      if (stored !== expectedStoredRevision)
+        throw new ContentRepositoryConflict('binding_revision');
+      store.importBindings.set(key, copy(binding));
+    },
     draftByExternalBinding: (externalBindingRef) =>
       Promise.resolve(
         [...store.drafts.values()].find(
@@ -166,18 +192,7 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
         )
       )
         throw new ContentRepositoryConflict('duplicate_id');
-      // D4: one author's local import source binds to at most one draft.
-      if (
-        draft.createdByUserId !== null &&
-        draft.importSourceKey !== undefined &&
-        [...store.drafts.values()].some(
-          (other) =>
-            other.draftId !== draft.draftId &&
-            other.createdByUserId === draft.createdByUserId &&
-            other.importSourceKey === draft.importSourceKey,
-        )
-      )
-        throw new ContentRepositoryConflict('duplicate_id');
+      // D4.1: a local import binding is written only through `putImportBinding`.
       store.drafts.set(draft.draftId, copy(draft));
     },
     submission: (submissionId) => Promise.resolve(store.submissions.get(submissionId) ?? null),
@@ -219,8 +234,11 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
         [...store.revisions.values()].some((revision) =>
           revision.mediaAttachments.some((item) => item.assetId === assetId),
         ) ||
-          [...store.drafts.values()].some((draft) =>
-            (resolveContentType(draft.typeId)?.mediaIds?.(draft.body) ?? []).includes(assetId),
+          [...store.drafts.values()].some(
+            (draft) =>
+              // D4.1: the body of a rolled-back import references nothing.
+              draft.status !== 'rolledBack' &&
+              (resolveContentType(draft.typeId)?.mediaIds?.(draft.body) ?? []).includes(assetId),
           ),
       ),
     contentIdsAttachingMedia: (assetId, limit) =>

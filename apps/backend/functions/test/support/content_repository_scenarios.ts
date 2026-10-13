@@ -20,9 +20,14 @@ import {
   createContentDraft,
   directProvenance,
   importProvenance,
+  rollBackImportedDraft,
   withDraftStatus,
   type ContentDraft,
 } from '../../src/modules/content/domain/content_draft.js';
+import {
+  openImportGeneration,
+  rollBackBinding,
+} from '../../src/modules/content/domain/local_import_binding.js';
 import {
   ContentDomainRefusal,
   ContentRepositoryConflict,
@@ -130,6 +135,7 @@ function draftOf(input: {
   body?: Record<string, unknown>;
   owner?: EntityId;
   importSourceKey?: string;
+  importGeneration?: number;
 }): ContentDraft {
   const owner = input.owner ?? newId();
   return createContentDraft({
@@ -154,6 +160,7 @@ function draftOf(input: {
             correctionRemovalPolicyRef: 'removal-policy-1',
           }),
     ...(input.importSourceKey === undefined ? {} : { importSourceKey: input.importSourceKey }),
+    ...(input.importGeneration === undefined ? {} : { importGeneration: input.importGeneration }),
     nowUtc: now,
   });
 }
@@ -677,17 +684,25 @@ export const repositoryScenarios: readonly ContentScenario[] = [
       const source = `loc_${uniqueToken()}`;
       const first = draftOf({ owner, importSourceKey: source });
       await repository.transact((tx) => {
+        tx.putImportBinding(openImportGeneration(owner, source, null, first.draftId), 0);
         tx.putDraft(first);
       });
+      // D4.1: the binding is a compare-and-set; a second first generation is refused.
       await assert.rejects(
         repository.transact((tx) => {
-          tx.putDraft(draftOf({ owner, importSourceKey: source }));
+          const second = draftOf({ owner, importSourceKey: source });
+          tx.putImportBinding(openImportGeneration(owner, source, null, second.draftId), 0);
+          tx.putDraft(second);
         }),
-        conflict('duplicate_id'),
+        conflict('binding_revision'),
       );
       // Another author may import a local draft with the same local key.
       const other = draftOf({ importSourceKey: source });
       await repository.transact((tx) => {
+        tx.putImportBinding(
+          openImportGeneration(other.createdByUserId!, source, null, other.draftId),
+          0,
+        );
         tx.putDraft(other);
         // The same draft is updated under its own binding.
         tx.putDraft(withDraftStatus(first, 'ready', later));
@@ -701,6 +716,76 @@ export const repositoryScenarios: readonly ContentScenario[] = [
         );
         assert.equal(await tx.draftByImportSource(owner, `loc_${uniqueToken()}`), null);
         assert.equal(await tx.draftByImportSource(newId(), source), null);
+        assert.equal((await tx.importBinding(owner, source))?.generation, 1);
+        assert.equal(await tx.importBinding(newId(), source), null);
+      });
+    },
+  },
+  {
+    name: 'D4.1: a rolled-back generation is a tombstone and the next one binds one new draft',
+    async run(make) {
+      const repository = make();
+      const owner = newId();
+      const source = `loc_${uniqueToken()}`;
+      const asset = `media-${uniqueToken()}`;
+      const first = draftOf({
+        owner,
+        importSourceKey: source,
+        importGeneration: 1,
+        mediaIds: [asset],
+      });
+      const g1 = openImportGeneration(owner, source, null, first.draftId);
+      await repository.transact((tx) => {
+        tx.putImportBinding(g1, 0);
+        tx.putDraft(first);
+      });
+      await repository.transact(async (tx) => {
+        assert.equal(await tx.isMediaReferenced(asset), true);
+      });
+      const rolled = rollBackBinding(g1, later);
+      await repository.transact((tx) => {
+        tx.putImportBinding(rolled, g1.bindingRevision);
+        tx.putDraft(rollBackImportedDraft(first, first.revision, later));
+      });
+      await repository.transact(async (tx) => {
+        assert.equal(await tx.draftByImportSource(owner, source), null);
+        assert.equal((await tx.importBinding(owner, source))?.state, 'rolledBack');
+        assert.equal((await tx.draft(first.draftId))?.status, 'rolledBack');
+        // The tombstone keeps its body, but it no longer holds the Media asset.
+        assert.deepEqual((await tx.draft(first.draftId))?.body, first.body);
+        assert.equal(await tx.isMediaReferenced(asset), false);
+      });
+      // A writer holding the old binding revision loses the compare-and-set.
+      await assert.rejects(
+        repository.transact((tx) => {
+          tx.putImportBinding(rollBackBinding(g1, later), g1.bindingRevision);
+        }),
+        conflict('binding_revision'),
+      );
+      const second = draftOf({
+        owner,
+        importSourceKey: source,
+        importGeneration: 2,
+        mediaIds: [asset],
+      });
+      await repository.transact(async (tx) => {
+        const stored = await tx.importBinding(owner, source);
+        assert.ok(stored);
+        tx.putImportBinding(
+          openImportGeneration(owner, source, stored, second.draftId),
+          stored.bindingRevision,
+        );
+        tx.putDraft(second);
+      });
+      await repository.transact(async (tx) => {
+        assert.equal((await tx.draftByImportSource(owner, source))?.draftId, second.draftId);
+        const binding = await tx.importBinding(owner, source);
+        assert.equal(binding?.generation, 2);
+        assert.equal(binding?.state, 'active');
+        assert.equal(binding?.bindingRevision, 3);
+        assert.equal(binding?.cleanup, null);
+        assert.equal(await tx.isMediaReferenced(asset), true);
+        assert.equal((await tx.draft(first.draftId))?.status, 'rolledBack');
       });
     },
   },
@@ -1155,3 +1240,351 @@ export function serviceHarness(
   }
   return { service, ports, actor, commands: c, publishOne };
 }
+
+// ---------------------------------------------------------------------------
+// D4.1 local import rollback and cleanup reservation: the same scenarios run
+// over the in-memory adapter (integration) and the Firestore adapter (Emulator)
+// ---------------------------------------------------------------------------
+
+type Outcome = { readonly kind: string; readonly data?: unknown; readonly code?: string };
+
+interface ImportedDraft {
+  readonly draftId: EntityId;
+  readonly contentId: EntityId;
+  readonly revision: number;
+  readonly status: string;
+  readonly importGeneration?: number;
+  readonly body: unknown;
+}
+
+interface BindingView {
+  readonly generation: number;
+  readonly state: string;
+  readonly draftId: string;
+  readonly bindingRevision: number;
+  readonly cleanup: {
+    readonly state: string;
+    readonly installationId: string;
+    readonly leaseExpiresAtUtc: string;
+  } | null;
+}
+
+/** A movable clock so a lease can be seen to expire. */
+export class ScenarioClock {
+  #ms = Date.parse('2026-10-13T10:00:00.000Z');
+  now(): Date {
+    return new Date(this.#ms);
+  }
+  advance(seconds: number): void {
+    this.#ms += seconds * 1000;
+  }
+}
+
+const refusal = (code: string) => ({ kind: 'rejected', code });
+
+/** One author's commands for one local source, over the real service. */
+export function importHarness(
+  repository: ContentRepository,
+  options: { readonly owner?: EntityId; readonly clock?: ScenarioClock } = {},
+) {
+  const clock = options.clock ?? new ScenarioClock();
+  const service = new ContentPublicationService({ repository, ...servicePorts(), clock });
+  const owner = options.owner ?? newId();
+  const actor: ContentActor = { userId: owner, sessionId: newId() };
+  const source = `loc_${uniqueToken()}`;
+  const envelope = (commandType: string, payload: unknown, idempotencyKey = key(commandType)) => ({
+    schemaVersion: 1,
+    commandType,
+    idempotencyKey,
+    payload,
+  });
+  const run = (command: unknown, as: ContentActor = actor) =>
+    service.execute(as, command) as Promise<Outcome>;
+  return {
+    service,
+    clock,
+    owner,
+    actor,
+    source,
+    commands: commands(owner),
+    run,
+    importCommand: (idempotencyKey = key('import'), body = bodyFor(owner)) =>
+      envelope(
+        'createDraft',
+        {
+          typeId: 'place',
+          publisherRef: { type: 'user', id: owner },
+          marketId: 'LV',
+          body,
+          importSourceKey: source,
+        },
+        idempotencyKey,
+      ),
+    rollback: (
+      draftId: string,
+      generation: number,
+      expectedRevision: number,
+      idempotencyKey?: string,
+    ) =>
+      envelope(
+        'rollbackImportedDraft',
+        { draftId, importSourceKey: source, generation, expectedRevision },
+        idempotencyKey,
+      ),
+    reserve: (
+      draftId: string,
+      generation: number,
+      installationId: string,
+      fencingToken: string,
+      idempotencyKey?: string,
+    ) =>
+      envelope(
+        'reserveImportCleanup',
+        { importSourceKey: source, generation, draftId, installationId, fencingToken },
+        idempotencyKey,
+      ),
+    complete: (generation: number, fencingToken: string, idempotencyKey?: string) =>
+      envelope(
+        'completeImportCleanup',
+        { importSourceKey: source, generation, fencingToken },
+        idempotencyKey,
+      ),
+    release: (generation: number, fencingToken: string, idempotencyKey?: string) =>
+      envelope(
+        'releaseImportCleanup',
+        { importSourceKey: source, generation, fencingToken },
+        idempotencyKey,
+      ),
+    binding: async (as: ContentActor = actor) =>
+      (await service.query(as, {
+        schemaVersion: 1,
+        queryType: 'getImportBinding',
+        payload: { importSourceKey: source },
+      })) as Outcome,
+    draft: async (draftId: string) =>
+      data<ImportedDraft>(
+        service.query(actor, { schemaVersion: 1, queryType: 'getDraft', payload: { draftId } }),
+      ),
+  };
+}
+
+export const fencingTokenA = 'token-a-0123456789abcdef';
+export const fencingTokenB = 'token-b-0123456789abcdef';
+
+export const localImportRollbackScenarios: readonly ContentScenario[] = [
+  {
+    name: 'D4.1: rollback tombstones the draft and its generation; cleanup is then refused',
+    async run(make) {
+      const h = importHarness(make());
+      const imported = await data<ImportedDraft>(h.run(h.importCommand()));
+      assert.equal(imported.importGeneration, 1);
+      const edited = await data<ImportedDraft>(
+        h.run(h.commands.update(imported.draftId, 1, { ...bodyFor(h.owner), title: 'Edited' })),
+      );
+      const command = h.rollback(imported.draftId, 1, edited.revision);
+      const tombstone = await data<ImportedDraft>(h.run(command));
+      assert.equal(tombstone.status, 'rolledBack');
+      assert.equal(tombstone.revision, edited.revision + 1);
+      assert.deepEqual(tombstone.body, edited.body);
+      // A lost answer is recovered by the same key; another key finds it done.
+      assert.deepEqual(await data<ImportedDraft>(h.run(command)), tombstone);
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, tombstone.revision)),
+        refusal('import_rolled_back'),
+      );
+      const binding = await data<BindingView>(h.binding());
+      assert.equal(binding.state, 'rolledBack');
+      assert.equal(binding.generation, 1);
+      assert.equal(binding.draftId, imported.draftId);
+      assert.equal(binding.cleanup, null);
+      // `rolledBack` withdraws the right to clean up this original for good.
+      assert.deepEqual(
+        await h.run(h.reserve(imported.draftId, 1, 'install-1', fencingTokenA)),
+        refusal('import_rolled_back'),
+      );
+      assert.deepEqual(await h.run(h.complete(1, fencingTokenA)), refusal('cleanup_not_reserved'));
+      assert.deepEqual(await h.run(h.release(1, fencingTokenA)), refusal('cleanup_not_reserved'));
+      // The tombstone is never edited or submitted again.
+      assert.deepEqual(
+        await h.run(h.commands.update(imported.draftId, tombstone.revision, bodyFor(h.owner))),
+        refusal('import_rolled_back'),
+      );
+      assert.deepEqual(
+        await h.run(h.commands.submit(imported.draftId, tombstone.revision)),
+        refusal('import_rolled_back'),
+      );
+      assert.equal((await h.draft(imported.draftId)).status, 'rolledBack');
+    },
+  },
+  {
+    name: 'D4.1: rollback is refused for another author, a stale revision or generation, and anything submitted or published',
+    async run(make) {
+      const repository = make();
+      const h = importHarness(repository);
+      const imported = await data<ImportedDraft>(h.run(h.importCommand()));
+      const stranger: ContentActor = { userId: newId(), sessionId: newId() };
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 1), stranger),
+        refusal('not_found'),
+      );
+      assert.deepEqual(await h.binding(stranger), refusal('not_found'));
+      const plain = await data<ImportedDraft>(h.run(h.commands.create()));
+      assert.deepEqual(await h.run(h.rollback(plain.draftId, 1, 1)), refusal('not_found'));
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 2, 1)),
+        refusal('import_generation_mismatch'),
+      );
+      await data(h.run(h.commands.update(imported.draftId, 1, bodyFor(h.owner))));
+      // The server copy changed since the receipt: no override.
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 1)),
+        refusal('revision_conflict'),
+      );
+      assert.equal((await h.draft(imported.draftId)).status, 'editing');
+      // A delegated module never reaches the lifecycle commands.
+      assert.deepEqual(
+        await h.service.executeDelegated(
+          { moduleId: 'event-ingestion', operation: 'syncSource' },
+          h.rollback(imported.draftId, 1, 2),
+        ),
+        refusal('capability_denied'),
+      );
+      const submission = await data<{ submissionId: string }>(
+        h.run(h.commands.submit(imported.draftId, 2)),
+      );
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 2)),
+        refusal('import_rollback_not_allowed'),
+      );
+      await data(h.run(h.commands.publish(submission.submissionId, 0)));
+      const published = await h.draft(imported.draftId);
+      assert.equal(published.status, 'editing');
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, published.revision)),
+        refusal('import_rollback_not_allowed'),
+      );
+      assert.equal((await data<BindingView>(h.binding())).state, 'active');
+    },
+  },
+  {
+    name: 'D4.1: a cleanup reservation is fenced by its token, also after its lease expired',
+    async run(make) {
+      const h = importHarness(make());
+      const imported = await data<ImportedDraft>(h.run(h.importCommand()));
+      const reserved = await data<BindingView>(
+        h.run(h.reserve(imported.draftId, 1, 'install-1', fencingTokenA)),
+      );
+      assert.equal(reserved.cleanup?.state, 'reserved');
+      assert.equal(reserved.cleanup?.installationId, 'install-1');
+      assert.equal(reserved.cleanup?.leaseExpiresAtUtc, '2026-10-13T10:15:00.000Z');
+      // The same reservation again is the same state, not a new one.
+      assert.deepEqual(
+        await data<BindingView>(h.run(h.reserve(imported.draftId, 1, 'install-1', fencingTokenA))),
+        reserved,
+      );
+      assert.deepEqual(
+        await h.run(h.reserve(imported.draftId, 1, 'install-2', fencingTokenB)),
+        refusal('cleanup_reserved'),
+      );
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 1)),
+        refusal('cleanup_reserved'),
+      );
+      // An expired lease is not taken over and does not open rollback.
+      h.clock.advance(3600);
+      assert.deepEqual(
+        await h.run(h.reserve(imported.draftId, 1, 'install-2', fencingTokenB)),
+        refusal('cleanup_reserved'),
+      );
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 1)),
+        refusal('cleanup_reserved'),
+      );
+      assert.deepEqual(
+        await h.run(h.complete(1, fencingTokenB)),
+        refusal('cleanup_token_mismatch'),
+      );
+      assert.deepEqual(await h.run(h.release(1, fencingTokenB)), refusal('cleanup_token_mismatch'));
+      assert.deepEqual(
+        await h.run(h.complete(2, fencingTokenA)),
+        refusal('import_generation_mismatch'),
+      );
+      // Only the reserving token releases; then another installation may reserve.
+      assert.equal((await data<BindingView>(h.run(h.release(1, fencingTokenA)))).cleanup, null);
+      await data(h.run(h.reserve(imported.draftId, 1, 'install-2', fencingTokenB)));
+      const completeCommand = h.complete(1, fencingTokenB);
+      const done = await data<BindingView>(h.run(completeCommand));
+      assert.equal(done.cleanup?.state, 'done');
+      // A lost answer is recovered by repeating complete, under any key.
+      assert.deepEqual(await data<BindingView>(h.run(completeCommand)), done);
+      assert.deepEqual(await data<BindingView>(h.run(h.complete(1, fencingTokenB))), done);
+      // A stale token never completes nor lifts anything.
+      assert.deepEqual(
+        await h.run(h.complete(1, fencingTokenA)),
+        refusal('cleanup_token_mismatch'),
+      );
+      assert.deepEqual(await h.run(h.release(1, fencingTokenB)), refusal('original_removed'));
+      assert.deepEqual(
+        await h.run(h.rollback(imported.draftId, 1, 1)),
+        refusal('original_removed'),
+      );
+      assert.deepEqual(
+        await h.run(h.reserve(imported.draftId, 1, 'install-1', fencingTokenA)),
+        refusal('original_removed'),
+      );
+      assert.equal((await h.draft(imported.draftId)).status, 'editing');
+    },
+  },
+  {
+    name: 'D4.1: an old retry after rollback returns its own generation; the next import opens one new draft',
+    async run(make) {
+      const repository = make();
+      const h = importHarness(repository);
+      const firstCommand = h.importCommand();
+      const first = await data<ImportedDraft>(h.run(firstCommand));
+      await data(h.run(h.rollback(first.draftId, 1, 1)));
+      // The old command replays its stored outcome and creates nothing.
+      const replay = await data<ImportedDraft>(h.run(firstCommand));
+      assert.equal(replay.draftId, first.draftId);
+      assert.equal(replay.importGeneration, 1);
+      const afterReplay = await data<BindingView>(h.binding());
+      assert.equal(afterReplay.generation, 1);
+      assert.equal(afterReplay.state, 'rolledBack');
+      // A newly approved import opens generation 2.
+      const second = await data<ImportedDraft>(h.run(h.importCommand()));
+      assert.notEqual(second.draftId, first.draftId);
+      assert.equal(second.importGeneration, 2);
+      assert.equal(second.status, 'editing');
+      assert.equal(
+        (await data<ImportedDraft>(h.run(h.importCommand()))).draftId,
+        second.draftId,
+        'generation 2 deduplicates like D4',
+      );
+      assert.deepEqual(
+        await h.run(h.rollback(first.draftId, 1, 2)),
+        refusal('import_generation_mismatch'),
+      );
+      assert.deepEqual(
+        await h.run(h.rollback(second.draftId, 1, 1)),
+        refusal('import_generation_mismatch'),
+      );
+      await data(h.run(h.rollback(second.draftId, 2, 1)));
+      // Concurrent new imports open generation 3 with exactly one draft.
+      const results = await Promise.all([1, 2, 3].map(() => h.run(h.importCommand())));
+      const ids = new Set<string>();
+      for (const result of results)
+        if (result.kind === 'succeeded') ids.add((result.data as ImportedDraft).draftId);
+        else assert.equal(result.code, 'revision_conflict');
+      const retried = await data<ImportedDraft>(h.run(h.importCommand()));
+      ids.add(retried.draftId);
+      assert.equal(ids.size, 1);
+      assert.equal(retried.importGeneration, 3);
+      const binding = await data<BindingView>(h.binding());
+      assert.equal(binding.generation, 3);
+      assert.equal(binding.state, 'active');
+      assert.equal(binding.draftId, retried.draftId);
+      assert.equal((await h.draft(first.draftId)).status, 'rolledBack');
+      assert.equal((await h.draft(second.draftId)).status, 'rolledBack');
+    },
+  },
+];

@@ -69,8 +69,14 @@ function flutter(files, defines = []) {
  * server draft after a restart, lost receipts and a repeated import never
  * create a second draft (Content returns the author's draft for the import
  * source), and the local original is removed only after verification,
- * explicit confirmation and the recovery period. Local Emulator only; it
- * resets the stand data first, so it needs --yes.
+ * explicit confirmation and the recovery period. D4.1
+ * (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §4): a rollback tombstones the
+ * server draft and keeps the local original byte for byte, a lost rollback
+ * answer survives a restart, a cleanup reservation on one installation stops
+ * a rollback on another, lost answers before and after the deletion of the
+ * original are recovered with the same fencing token, and a re-import opens
+ * the next generation. Local Emulator only; it resets the stand data first,
+ * so it needs --yes.
  */
 export async function main(args) {
   if (args.length !== 1 || args[0] !== "--yes") {
@@ -93,7 +99,7 @@ export async function main(args) {
     step("Place seed (enables Place authoring, provides the Page)", () =>
       assert.match(run(seedCli, ["place", "seed"]), /^seeded place=/m),
     );
-    step("flutter test local import (controller, real stand)", () =>
+    step("flutter test local import and D4.1 rollback (real stand)", () =>
       flutter(["test/backend_local/local_import_stand_test.dart"]),
     );
     step("base and Place invariants still hold", () => {
@@ -111,7 +117,7 @@ export async function main(args) {
   }
   if (failure) throw failure;
   process.stdout.write(
-    "D4 local import gate passed (local Emulator and PC host only; one server draft per author and import source, resume after a lost answer, guarded removal of the local original; fake scanner/processor on the stand; no device, LAN or cloud claim)\n",
+    "D4 local import gate passed (local Emulator and PC host only; one server draft per author and import source, resume after a lost answer, guarded removal of the local original; D4.1 rollback, fenced cleanup and generations; fake scanner/processor on the stand; no device, LAN or cloud claim)\n",
   );
 }
 

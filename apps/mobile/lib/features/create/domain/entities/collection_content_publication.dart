@@ -1,4 +1,5 @@
 import 'collection_item_draft.dart';
+import 'event_publication.dart';
 import 'publisher_ref.dart';
 
 /// One uploaded medium of a Collection publication: the stable attachment id
@@ -54,6 +55,8 @@ final class CollectionPublicationRecord {
     this.bodySaved = false,
     this.attachments = const <CollectionAttachmentRecord>[],
     this.submissionId,
+    this.pendingUpdate,
+    this.publishIntent,
   });
 
   final String accountId;
@@ -74,6 +77,12 @@ final class CollectionPublicationRecord {
   final List<CollectionAttachmentRecord> attachments;
   final String? submissionId;
 
+  /// A body save sent but not yet answered (M1 D2).
+  final PendingDraftUpdate? pendingUpdate;
+
+  /// The publish command as first sent (M1 D1).
+  final PublishIntent? publishIntent;
+
   bool belongsTo(String account, PublisherRef publisher) =>
       accountId == account &&
       publisherRef.type == publisher.type &&
@@ -92,6 +101,9 @@ final class CollectionPublicationRecord {
     String? title,
     List<CollectionAttachmentRecord>? attachments,
     String? submissionId,
+    PendingDraftUpdate? pendingUpdate,
+    bool clearPendingUpdate = false,
+    PublishIntent? publishIntent,
   }) => CollectionPublicationRecord(
     accountId: accountId,
     publisherRef: publisherRef,
@@ -105,6 +117,10 @@ final class CollectionPublicationRecord {
     createdAtUtc: createdAtUtc,
     attachments: attachments ?? this.attachments,
     submissionId: submissionId ?? this.submissionId,
+    pendingUpdate: clearPendingUpdate
+        ? null
+        : pendingUpdate ?? this.pendingUpdate,
+    publishIntent: publishIntent ?? this.publishIntent,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -121,6 +137,8 @@ final class CollectionPublicationRecord {
     'createdAtUtc': createdAtUtc.toUtc().toIso8601String(),
     'attachments': attachments.map((item) => item.toJson()).toList(),
     if (submissionId != null) 'submissionId': submissionId,
+    if (pendingUpdate != null) 'pendingUpdate': pendingUpdate!.toJson(),
+    if (publishIntent != null) 'publishIntent': publishIntent!.toJson(),
   };
 
   /// A malformed or foreign-shaped entry is skipped, never repaired.
@@ -179,6 +197,8 @@ final class CollectionPublicationRecord {
       createdAtUtc: createdAt.toUtc(),
       attachments: List<CollectionAttachmentRecord>.unmodifiable(parsed),
       submissionId: submissionId as String?,
+      pendingUpdate: PendingDraftUpdate.fromJson(value['pendingUpdate']),
+      publishIntent: PublishIntent.fromJson(value['publishIntent']),
     );
   }
 }

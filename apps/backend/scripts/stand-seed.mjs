@@ -42,6 +42,8 @@ const commands = new Set([
   "rental",
   // D3.4: the stand Collection and its member Places — seed | verify | manifest | status.
   "collection",
+  // M1 stage 2: reversible Page access through the Identity owner services.
+  "page-access",
 ]);
 
 export function standEnvironment(base) {

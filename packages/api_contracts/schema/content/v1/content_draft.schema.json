@@ -51,7 +51,8 @@
         "editing",
         "ready",
         "submitted",
-        "revision_requested"
+        "revision_requested",
+        "rolledBack"
       ]
     },
     "revision": {
@@ -76,6 +77,9 @@
     "importSourceKey": {
       "type": "string",
       "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+    },
+    "importGeneration": {
+      "$ref": "content_common.schema.json#/$defs/positiveRevision"
     },
     "createdAtUtc": {
       "$ref": "content_common.schema.json#/$defs/utcInstant"

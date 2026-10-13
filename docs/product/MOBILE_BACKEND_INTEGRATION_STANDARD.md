@@ -1296,3 +1296,22 @@ verification, and no local deletion before verification, explicit user
 confirmation and a 30-day recovery period. Imports create server drafts only;
 no submit, publish or mock authority is imported. Every other family, OD-08,
 production and cloud remain as stated above.
+
+## Addendum D4.1 — import rollback and fenced cleanup (2026-10-13)
+
+Adds to Addendum D4, local/Emulator only
+([LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md](LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md)).
+The user may roll back their own verified import that was never submitted or
+published: the client first journals `rollbackPending` with its key and the
+receipt revision, repeats exactly that intent after an unknown outcome or a
+restart, and resolves a refusal through `getImportBinding`. A server copy
+changed since the receipt is never overridden. `rolledBack` withdraws the
+right to remove that local original for good; importing it again is a new
+explicit choice and opens the next binding generation, whose keys carry
+`:g<N>`. Removing a local original runs durable intent with a new fencing
+token → server reservation → deletion of the unchanged original → completion
+with that token; a reservation of any age blocks a rollback on every
+installation, a lost completion is repeated after a restart, and release is
+possible only while the original exists. The import no longer writes over a
+newer server revision: the item reports `revision_conflict`. Invariant: no
+reachable state loses both the local original and a usable server copy.

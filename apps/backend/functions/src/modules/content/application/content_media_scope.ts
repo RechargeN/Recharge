@@ -54,8 +54,9 @@ export class ContentMediaScope {
       draft.marketId !== request.marketId
     )
       return denied;
-    // A submitted draft is frozen: media cannot be bound to it.
-    if (draft.status === 'submitted') return denied;
+    // A submitted draft is frozen and a rolled-back import (D4.1) is a tombstone:
+    // media cannot be bound to either.
+    if (draft.status === 'submitted' || draft.status === 'rolledBack') return denied;
     const entry = resolveContentType(draft.typeId);
     if (entry === null || !isContentTypeAvailable(entry)) return denied;
     try {

@@ -4,7 +4,18 @@ import { mediaCollections } from '../../src/modules/media/infrastructure/firesto
 import { moderationCollections } from '../../src/modules/moderation/infrastructure/firestore_moderation_repository.js';
 import { standManifestCollection } from './stand_content_event.js';
 import type { RawStandState } from './stand_digest.js';
+import { createOwnerMembership } from '../../src/modules/identity_publisher/domain/page_membership.js';
 import { standBookings, standEvent, standPages, standUsers } from './stand_plan.js';
+
+/** The capabilities the owner path gives a new owner membership, sorted. */
+const seededOwnerCapabilities = [
+  ...createOwnerMembership({
+    membershipId: '5d1e0000-0000-4000-8000-00000000b001',
+    pageId: '5d1e0000-0000-4000-8000-00000000a001',
+    userId: '5d1e0000-0000-4000-8000-00000000e001',
+    nowUtc: '2026-01-01T00:00:00.000Z',
+  }).capabilityIds,
+].sort();
 
 /** Returns every violated seed invariant; an empty list means the stand is correctly seeded. */
 export function standInvariantProblems(raw: RawStandState): string[] {
@@ -126,6 +137,18 @@ export function standInvariantProblems(raw: RawStandState): string[] {
   }
   const memberships = docs(identityAuthorityCollections.pageMemberships);
   if (memberships.length !== standPages.length) problems.push(`memberships=${memberships.length}`);
+  // M1 stage 2 Page access fixtures must leave every owner membership as seeded.
+  for (const [id, membership] of memberships) {
+    const capabilities = Array.isArray(membership.capabilityIds)
+      ? [...(membership.capabilityIds as unknown[])].map(String).sort()
+      : [];
+    if (
+      membership.status !== 'active' ||
+      capabilities.join(',') !== seededOwnerCapabilities.join(',')
+    ) {
+      problems.push(`membership ${id} is not the seeded active owner membership`);
+    }
+  }
 
   const projections = docs('bookingEventProjections');
   // The Booking-test Event is a separate synthetic Event-outbox fixture, not the

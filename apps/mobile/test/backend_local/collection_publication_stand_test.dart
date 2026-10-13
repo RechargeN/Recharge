@@ -21,6 +21,7 @@ import 'package:recharge/features/create/domain/repositories/collection_catalog_
 import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_collection_draft.dart';
+import 'support/content_fault_client.dart';
 import 'support/stand_backend.dart';
 
 /// D3.4: the Create item picker over the real Catalog of the local
@@ -42,6 +43,8 @@ void main() {
   late File cover;
   late Map<String, Object?> seeded;
   final runtimes = <String, Future<BookingTransportRuntime>>{};
+  // M1 stage 2: real HTTP that a test can sever or make lose one answer.
+  final faults = ContentFaultClient();
 
   Future<BookingTransportRuntime> runtimeFor(
     String label,
@@ -54,7 +57,7 @@ void main() {
     final sessions = FileSessionStore(File('${temp.path}/session-$label.json'));
     final runtime = await BookingTransportRuntimeFactory(
       endpoint: binding.endpoint,
-      client: CountingClient(),
+      client: faults,
       tokens: AuthEmulatorTokenProvider('stand-user-$label'),
       sessions: sessions,
       installations: FixedInstallationId('d34-local-installation-$label'),
@@ -95,10 +98,12 @@ void main() {
     );
   }
 
+  /// [journal] names a separate journal file (a restart reuses it).
   Future<CollectionContentPublicationController> controllerFor(
     String label,
-    CreateDraftEntity draft,
-  ) async {
+    CreateDraftEntity draft, {
+    String? journal,
+  }) async {
     final repository = CreateRepositoryImpl(
       localDataSource: CreateLocalDataSource(const FlutterSecureStorage()),
       idGenerator: UuidV4IdGenerator(),
@@ -111,12 +116,63 @@ void main() {
       guard: guard(),
       drafts: CreateRepositoryCollectionDraftSource(repository, 'user-$label'),
       membership: await pickerFor(label),
-      journalFile: File('${temp.path}/journal-$label.json'),
+      journalFile: File('${temp.path}/${journal ?? 'journal-$label'}.json'),
     );
   }
 
   List<Map<String, Object?>> members() =>
       (seeded['members']! as List<Object?>).cast<Map<String, Object?>>();
+
+  /// A Collection draft over exactly the published members the picker resolves.
+  Future<CreateDraftEntity> resolvedDraft(String localId) async {
+    final picker = await pickerFor('creator');
+    final resolved = await picker.resolve(<CollectionObjectRef>[
+      for (final member in members())
+        CollectionObjectRef(
+          objectId: member['contentId']! as String,
+          objectType: CollectionCatalogObjectType.place,
+        ),
+    ]);
+    expect(resolved, hasLength(3));
+    return userCollectionDraft(
+      pageId: seeded['pageId']! as String,
+      members: <CollectionFixtureMember>[
+        for (final result in resolved.values)
+          CollectionFixtureMember(
+            objectId: result.ref.objectId,
+            title: result.snapshot.title,
+          ),
+      ],
+      coverPath: cover.path,
+      localId: localId,
+      title: 'Quiet corners (M1 stage 2)',
+    );
+  }
+
+  PublicationProbe probe(CollectionContentPublicationController c) =>
+      PublicationProbe(
+        load: c.load,
+        save: c.save,
+        uploadMedia: c.uploadMedia,
+        submit: c.submit,
+        publish: c.publish,
+        refresh: c.refresh,
+        dispose: c.dispose,
+        message: () => c.state.message,
+        offline: () => c.state.phase == CollectionPublicationPhase.offline,
+        journaledSubmissionId: () => c.state.record?.submissionId,
+        status: () => c.state.status,
+      );
+
+  Future<void> approve(String submissionId) async {
+    final approved = await stand!.moderate(<String>[
+      'approve',
+      submissionId,
+      '--reason',
+      'm1 stage 2: the Collection is fine',
+    ]);
+    expect(approved.exitCode, 0, reason: '${approved.json}');
+  }
 
   setUpAll(() async {
     if (stand == null) return;
@@ -314,5 +370,68 @@ void main() {
     },
     skip: stand == null,
     timeout: const Timeout(Duration(minutes: 3)),
+  );
+
+  test(
+    'M1 S4: a repeated save after a fresh start reuses the same server draft',
+    () async {
+      final draft = await resolvedDraft(
+        'loc_m1_collection_repeat_${const Uuid().v4()}',
+      );
+      final first = await controllerFor('creator', draft, journal: 'repeat');
+      await first.load();
+      await first.save();
+      expect(first.state.message, isNull, reason: first.state.message);
+      final contentId = first.state.record!.contentId;
+      final draftId = first.state.record!.draftId;
+      first.dispose();
+      // A new controller (app restart) with the same journal and draft.
+      final again = await controllerFor('creator', draft, journal: 'repeat');
+      await again.load();
+      expect(again.state.record?.contentId, contentId);
+      await again.save();
+      expect(again.state.message, isNull, reason: again.state.message);
+      expect(again.state.record?.contentId, contentId);
+      expect(again.state.record?.draftId, draftId);
+      expect(again.state.myObjects, hasLength(1));
+      again.dispose();
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 3)),
+  );
+
+  test(
+    'M1 S1-S3 submit: severed, lost answer, restart and retry give one submission',
+    () async {
+      final draft = await resolvedDraft(
+        'loc_m1_collection_submit_${const Uuid().v4()}',
+      );
+      await expectSubmitSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'submit-faults'),
+        ),
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+
+  test(
+    'M1 S1-S3 publish: severed, lost answer, restart and retry give one publication',
+    () async {
+      final draft = await resolvedDraft(
+        'loc_m1_collection_publish_${const Uuid().v4()}',
+      );
+      await expectPublishSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'publish-faults'),
+        ),
+        approve,
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }

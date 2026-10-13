@@ -4,10 +4,10 @@ import '../../application/local_import_cleanup_policy.dart';
 import '../../application/local_import_controller.dart';
 import '../../domain/entities/local_import.dart';
 
-/// Test-path view of the local→server import (D4). It renders the dry run,
-/// the session and each item's server state, and forwards taps; it holds no
-/// rule: what may be imported or removed is decided by the controller and the
-/// server.
+/// Test-path view of the local→server import (D4, D4.1). It renders the dry
+/// run, the session and each item's server state, and forwards taps; it holds
+/// no rule: what may be imported, rolled back or removed is decided by the
+/// controller and the server.
 class LocalImportSection extends StatelessWidget {
   const LocalImportSection({super.key, required this.controller});
 
@@ -42,6 +42,19 @@ class LocalImportSection extends StatelessWidget {
                 key: const Key('local-import-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
+            if (state.pendingCleanups > 0) ...<Widget>[
+              Text(
+                '${state.pendingCleanups} deleted local copies to record '
+                'on the server',
+                key: const Key('local-import-pending-cleanups'),
+              ),
+              _action(
+                'local-import-finish-cleanup',
+                'Finish cleanup',
+                idle || state.phase == LocalImportPhase.offline,
+                controller.finishCleanups,
+              ),
+            ],
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -71,7 +84,12 @@ class LocalImportSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             for (final LocalImportItemView item in state.items)
-              _ItemTile(item: item, controller: controller, idle: idle),
+              _ItemTile(
+                item: item,
+                controller: controller,
+                // An unknown outcome is retried from the item itself.
+                idle: idle || state.phase == LocalImportPhase.offline,
+              ),
           ],
         );
       },
@@ -144,11 +162,36 @@ class _ItemTile extends StatelessWidget {
                     onPressed: idle ? () => controller.confirm(id) : null,
                     child: const Text('Keep the server copy'),
                   ),
-                if (item.cleanup.stage == LocalImportCleanupStage.eligible)
+                if (item.cleanup.stage == LocalImportCleanupStage.eligible ||
+                    item.cleanup.stage ==
+                        LocalImportCleanupStage.cleanupReserved)
                   TextButton(
                     key: Key('local-import-delete-$id'),
                     onPressed: idle ? () => controller.deleteLocal(id) : null,
-                    child: const Text('Delete local copy'),
+                    child: Text(
+                      item.cleanup.stage ==
+                              LocalImportCleanupStage.cleanupReserved
+                          ? 'Finish deleting local copy'
+                          : 'Delete local copy',
+                    ),
+                  ),
+                if (item.canCancelCleanup)
+                  TextButton(
+                    key: Key('local-import-cancel-cleanup-$id'),
+                    onPressed: idle ? () => controller.cancelCleanup(id) : null,
+                    child: const Text('Keep local copy'),
+                  ),
+                if (item.canRollBack)
+                  TextButton(
+                    key: Key('local-import-rollback-$id'),
+                    onPressed: idle
+                        ? () => _confirmRollback(context, id)
+                        : null,
+                    child: Text(
+                      receipt?.state == LocalImportItemState.rollbackPending
+                          ? 'Retry rollback'
+                          : 'Roll back import',
+                    ),
                   ),
               ],
             ),
@@ -156,6 +199,34 @@ class _ItemTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// D4.1 §3.4: the server draft becomes a tombstone; the local copy stays.
+  Future<void> _confirmRollback(BuildContext context, String id) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        key: const Key('local-import-rollback-dialog'),
+        title: const Text('Roll back this import?'),
+        content: const Text(
+          'The imported server draft is closed for good. Your local copy '
+          'stays and can be imported again later.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            key: const Key('local-import-rollback-cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('local-import-rollback-confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Roll back'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await controller.rollback(id);
   }
 
   static String _cleanupLine(LocalImportCleanupStatus status) =>
@@ -168,6 +239,11 @@ class _ItemTile extends StatelessWidget {
         LocalImportCleanupStage.recoveryPeriod =>
           'kept until ${status.eligibleAtUtc!.toIso8601String()}',
         LocalImportCleanupStage.eligible => 'may be deleted',
+        LocalImportCleanupStage.cleanupReserved =>
+          'being deleted (reserved on the server)',
         LocalImportCleanupStage.deleted => 'deleted',
+        LocalImportCleanupStage.rollbackPending =>
+          'kept (rollback waiting for the server)',
+        LocalImportCleanupStage.rolledBack => 'kept (import rolled back)',
       };
 }

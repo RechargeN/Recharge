@@ -106,6 +106,14 @@ export const emulatorTestGroups = Object.freeze([
     ],
   },
   {
+    // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §4): import rollback and
+    // cleanup races on real Firestore transactions.
+    name: "import",
+    baselineMs: 54164,
+    timeoutMs: 150000,
+    tasks: [["lib/test/emulator/content_local_import_rollback.test.js"]],
+  },
+  {
     name: "rules-reference",
     baselineMs: 6749,
     timeoutMs: 120000,

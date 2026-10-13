@@ -512,6 +512,310 @@ void main() {
       expect(server.calls, isEmpty);
     },
   );
+
+  // ------------------------------------------------------------------ D4.1
+
+  Future<LocalImportController> eligible(CreateDraftEntity draft) async {
+    final LocalImportController c = await imported(draft);
+    await c.confirm(draft.id);
+    now = now.add(const Duration(days: 31));
+    await c.load();
+    return c;
+  }
+
+  test(
+    'D4.1: rollback tombstones the server draft; the local original stays byte for byte and is never cleaned up',
+    () async {
+      final CreateDraftEntity original = place();
+      final LocalImportController c = await imported(original);
+      final String draftId = server.drafts.keys.single;
+      final Uint8List coverBytes = Uint8List.fromList(media.files[cover]!);
+      expect(itemOf(c, 'loc_place_1').canRollBack, isTrue);
+      await c.rollback('loc_place_1');
+      expect(c.state.message, isNull);
+      expect(server.drafts[draftId]!.status, 'rolledBack');
+      expect(server.bindings['loc_place_1']!.state, 'rolledBack');
+      final LocalImportItemView item = itemOf(c, 'loc_place_1');
+      expect(item.receipt?.state, LocalImportItemState.rolledBack);
+      expect(item.receipt?.rolledBackAtUtc, now);
+      expect(item.cleanup.stage, LocalImportCleanupStage.rolledBack);
+      expect(item.candidate.classification, LocalImportClass.conflict);
+      expect(item.candidate.reason, 'rolled_back');
+      expect(item.canRollBack, isFalse);
+      // The local original is exactly what was imported.
+      expect(source.drafts.single, original);
+      expect(media.files[cover], coverBytes);
+      // Cleanup is refused for good, also after the recovery period.
+      now = now.add(const Duration(days: 60));
+      await c.load();
+      await c.deleteLocal('loc_place_1');
+      expect(c.state.message, 'cleanup_rolledBack');
+      expect(originals.deleted, isEmpty);
+      expect(server.calls, isNot(contains('reserveImportCleanup')));
+    },
+  );
+
+  test(
+    'D4.1: a lost rollback answer and a restart keep rollbackPending; the same intent is sent again',
+    () async {
+      final LocalImportController first = await imported(place());
+      server.loseAnswerOf.add('rollbackImportedDraft');
+      await first.rollback('loc_place_1');
+      expect(first.state.phase, LocalImportPhase.offline);
+      final LocalImportReceipt pending = itemOf(first, 'loc_place_1').receipt!;
+      expect(pending.state, LocalImportItemState.rollbackPending);
+      expect(pending.rollbackKey, contains(':g1:rollback:2'));
+      expect(pending.rollbackExpectedRevision, 2);
+      first.dispose();
+
+      final LocalImportController restarted = controller();
+      await restarted.load();
+      final LocalImportItemView item = itemOf(restarted, 'loc_place_1');
+      expect(item.cleanup.stage, LocalImportCleanupStage.rollbackPending);
+      expect(item.candidate.reason, 'rollback_pending');
+      // Nothing else may touch the item while the outcome is unknown.
+      await restarted.deleteLocal('loc_place_1');
+      expect(restarted.state.message, 'cleanup_rollbackPending');
+      expect(restarted.state.canApprove, isFalse);
+      await restarted.rollback('loc_place_1');
+      expect(restarted.state.message, isNull);
+      expect(
+        itemOf(restarted, 'loc_place_1').receipt?.state,
+        LocalImportItemState.rolledBack,
+      );
+      final List<String> rollbackKeys = server.keyed
+          .where((e) => e.$1 == 'rollbackImportedDraft')
+          .map((e) => e.$2)
+          .toList();
+      expect(rollbackKeys, hasLength(2));
+      expect(rollbackKeys.toSet(), hasLength(1), reason: 'the same key');
+      expect(server.drafts.values.single.revision, 3, reason: 'applied once');
+    },
+  );
+
+  test(
+    'D4.1: a server copy changed since the receipt refuses the rollback without override',
+    () async {
+      final LocalImportController c = await imported(place());
+      server.editElsewhere(server.drafts.keys.single);
+      await c.rollback('loc_place_1');
+      expect(c.state.message, 'revision_conflict');
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.state, LocalImportItemState.verified);
+      expect(receipt.failureCode, 'revision_conflict');
+      expect(receipt.rollbackKey, isNull);
+      expect(server.drafts.values.single.status, 'editing');
+      expect(server.drafts.values.single.body['title'], 'Edited elsewhere');
+    },
+  );
+
+  test(
+    'D4.1: a rollback refused because another installation already rolled back records it',
+    () async {
+      final LocalImportController c = await imported(place());
+      server.rollBackElsewhere('loc_place_1');
+      await c.rollback('loc_place_1');
+      expect(c.state.message, isNull);
+      expect(
+        itemOf(c, 'loc_place_1').receipt?.state,
+        LocalImportItemState.rolledBack,
+      );
+      expect(server.calls, contains('getImportBinding'));
+    },
+  );
+
+  test(
+    'D4.1: cleanup runs intent, reservation, deletion and completion in that order',
+    () async {
+      final LocalImportController c = await eligible(place());
+      server.calls.clear();
+      await c.deleteLocal('loc_place_1');
+      expect(c.state.message, isNull);
+      expect(server.calls, <String>[
+        'getDraft',
+        'reserveImportCleanup',
+        'completeImportCleanup',
+      ]);
+      expect(originals.deleted, <String>['loc_place_1']);
+      expect(server.bindings['loc_place_1']!.cleanupState, 'done');
+      final LocalImportReceipt receipt = (await journal.receipts(
+        account,
+      )).single;
+      expect(receipt.localDeletedAtUtc, now);
+      expect(receipt.cleanupCompletedAtUtc, now);
+      expect(receipt.cleanupToken, startsWith('ct-'));
+      expect(c.state.pendingCleanups, 0);
+    },
+  );
+
+  test(
+    'D4.1: a lost completion after the deletion is finished after a restart with the same token',
+    () async {
+      final LocalImportController first = await eligible(place());
+      server.loseAnswerOf.add('completeImportCleanup');
+      await first.deleteLocal('loc_place_1');
+      expect(first.state.phase, LocalImportPhase.offline);
+      expect(originals.deleted, <String>['loc_place_1']);
+      first.dispose();
+
+      final LocalImportController restarted = controller();
+      await restarted.load();
+      expect(restarted.state.items, isEmpty);
+      expect(restarted.state.pendingCleanups, 1);
+      await restarted.finishCleanups();
+      expect(restarted.state.message, isNull);
+      expect(restarted.state.pendingCleanups, 0);
+      final List<String> completeKeys = server.keyed
+          .where((e) => e.$1 == 'completeImportCleanup')
+          .map((e) => e.$2)
+          .toList();
+      expect(completeKeys, hasLength(2));
+      expect(completeKeys.toSet(), hasLength(1));
+      expect(server.bindings['loc_place_1']!.cleanupState, 'done');
+    },
+  );
+
+  test(
+    'D4.1: a lost reservation answer keeps the intent; rollback is refused locally; the retry reuses the token',
+    () async {
+      final LocalImportController first = await eligible(place());
+      server.loseAnswerOf.add('reserveImportCleanup');
+      await first.deleteLocal('loc_place_1');
+      expect(first.state.phase, LocalImportPhase.offline);
+      expect(originals.deleted, isEmpty, reason: 'not before the reservation');
+      first.dispose();
+
+      final LocalImportController restarted = controller();
+      await restarted.load();
+      final LocalImportItemView item = itemOf(restarted, 'loc_place_1');
+      expect(item.candidate.reason, 'cleanup_pending');
+      expect(item.canRollBack, isFalse);
+      await restarted.rollback('loc_place_1');
+      expect(restarted.state.message, 'cleanup_reserved');
+      expect(server.calls, isNot(contains('rollbackImportedDraft')));
+      await restarted.deleteLocal('loc_place_1');
+      expect(restarted.state.message, isNull);
+      expect(originals.deleted, <String>['loc_place_1']);
+      final List<String> reserveKeys = server.keyed
+          .where((e) => e.$1 == 'reserveImportCleanup')
+          .map((e) => e.$2)
+          .toList();
+      expect(reserveKeys.toSet(), hasLength(1));
+    },
+  );
+
+  test(
+    'D4.1: cleanup after another installation rolled back keeps the original',
+    () async {
+      final LocalImportController c = await eligible(place());
+      server.rollBackElsewhere('loc_place_1');
+      await c.deleteLocal('loc_place_1');
+      expect(c.state.message, 'server_check_failed');
+      expect(originals.deleted, isEmpty);
+      expect(server.calls, isNot(contains('reserveImportCleanup')));
+    },
+  );
+
+  test(
+    'D4.1: a rollback that wins the race against the reservation drops the cleanup intent',
+    () async {
+      final LocalImportController c = await eligible(place());
+      server.beforeReserve = () => server.rollBackElsewhere('loc_place_1');
+      await c.deleteLocal('loc_place_1');
+      expect(c.state.message, 'import_rolled_back');
+      expect(originals.deleted, isEmpty);
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.cleanupToken, isNull);
+      expect(receipt.failureCode, 'import_rolled_back');
+      expect(receipt.state, LocalImportItemState.verified);
+    },
+  );
+
+  test(
+    'D4.1: a rollback against a reservation of another installation is refused; nothing is lost',
+    () async {
+      final LocalImportController c = await imported(place());
+      server.reserveElsewhere('loc_place_1');
+      await c.rollback('loc_place_1');
+      expect(c.state.message, 'cleanup_reserved');
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.state, LocalImportItemState.verified);
+      expect(receipt.failureCode, 'cleanup_reserved');
+      expect(server.drafts.values.single.status, 'editing');
+      expect(source.drafts, hasLength(1));
+    },
+  );
+
+  test(
+    'D4.1: a local change after the reservation releases it with the same token',
+    () async {
+      final LocalImportController c = await eligible(place());
+      originals.refuseNext = true;
+      await c.deleteLocal('loc_place_1');
+      expect(c.state.message, 'local_changed_since_import');
+      expect(server.bindings['loc_place_1']!.cleanupState, isNull);
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.state, LocalImportItemState.verified);
+      expect(receipt.cleanupToken, isNull);
+      expect(originals.deleted, isEmpty);
+      // Rollback is open again once nothing is reserved.
+      expect(itemOf(c, 'loc_place_1').canRollBack, isTrue);
+    },
+  );
+
+  test(
+    'D4.1: importing again after a rollback is an explicit choice and opens generation 2',
+    () async {
+      final LocalImportController c = await imported(place());
+      final String firstDraft = server.drafts.keys.single;
+      await c.rollback('loc_place_1');
+      expect(c.state.canApprove, isFalse, reason: 'not without a new choice');
+      c.chooseUpdate('loc_place_1');
+      await c.approve();
+      await c.run();
+      expect(c.state.message, isNull);
+      expect(server.drafts, hasLength(2));
+      final String secondDraft = server.drafts.keys.last;
+      expect(secondDraft, isNot(firstDraft));
+      expect(server.drafts[secondDraft]!.generation, 2);
+      expect(server.drafts[firstDraft]!.status, 'rolledBack');
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.generation, 2);
+      expect(receipt.draftId, secondDraft);
+      expect(receipt.state, LocalImportItemState.verified);
+      // Generation 2 keys and media intents differ from generation 1.
+      expect(server.creates.last.key, contains(':g2:create'));
+      expect(uploader.intents, hasLength(4));
+      // A restart reads the generation back from the journal.
+      final LocalImportController restarted = controller();
+      await restarted.load();
+      expect(itemOf(restarted, 'loc_place_1').receipt?.generation, 2);
+    },
+  );
+
+  test(
+    'D4.1 §3.3: a server edit after the create is kept; the import fails with revision_conflict',
+    () async {
+      source.set(<CreateDraftEntity>[place()]);
+      final LocalImportController c = controller();
+      await c.load();
+      await c.approve();
+      server.loseAnswerOf.add('createDraft');
+      await c.run();
+      // The draft exists on the server; another installation edits it.
+      server.editElsewhere(server.drafts.keys.single);
+      await c.run();
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.state, LocalImportItemState.failed);
+      expect(receipt.failureCode, 'revision_conflict');
+      expect(server.drafts.values.single.body['title'], 'Edited elsewhere');
+      expect(
+        server.calls.where((String call) => call == 'updateDraft'),
+        hasLength(1),
+        reason: 'no second write over the edit',
+      );
+    },
+  );
 }
 
 final class _Source implements LocalImportSource {
@@ -544,6 +848,9 @@ final class _Originals implements LocalImportOriginalStore {
   final _Source source;
   final List<String> deleted = <String>[];
 
+  /// The next deletion finds the stored draft changed.
+  bool refuseNext = false;
+
   @override
   Future<bool> deleteIfUnchanged({
     required String accountId,
@@ -553,6 +860,10 @@ final class _Originals implements LocalImportOriginalStore {
     final int index = source.drafts.indexWhere(
       (CreateDraftEntity draft) => draft.id == localDraftId,
     );
+    if (refuseNext) {
+      refuseNext = false;
+      return false;
+    }
     if (index < 0 || !unchanged(source.drafts[index])) return false;
     source.drafts.removeAt(index);
     deleted.add(localDraftId);
@@ -648,6 +959,7 @@ final class _Draft {
     required this.owner,
     required this.importSourceKey,
     required this.body,
+    this.generation = 1,
   });
 
   final String contentId;
@@ -656,21 +968,42 @@ final class _Draft {
   String owner;
   final String importSourceKey;
   Map<String, Object?> body;
+  final int generation;
+  String status = 'editing';
+}
+
+/// D4.1: the server's binding of one local source to its current generation.
+final class _Binding {
+  _Binding(this.draftId);
+
+  int generation = 1;
+  String state = 'active';
+  String draftId;
+  String? cleanupState;
+  String? cleanupToken;
+  String? cleanupInstallationId;
 }
 
 /// In-memory Content: drafts with revisions and authors, idempotent keys,
-/// one draft per author and import source, and injected failures.
+/// one draft per author and import source and generation (D4.1), the cleanup
+/// reservation with its fencing token, and injected failures.
 final class _Server implements LocalImportContentGateway {
   final Map<String, _Draft> drafts = <String, _Draft>{};
+  final Map<String, _Binding> bindings = <String, _Binding>{};
   final List<String> calls = <String>[];
+
+  /// Every keyed command as (command, idempotency key), in order.
+  final List<(String, String)> keyed = <(String, String)>[];
   final List<({String key, Map<String, Object?> body, String importSourceKey})>
   creates =
       <({String key, Map<String, Object?> body, String importSourceKey})>[];
   final Set<String> loseAnswerOf = <String>{};
-  final Map<String, (String, LocalImportServerDraft)> _replies =
-      <String, (String, LocalImportServerDraft)>{};
+  final Map<String, (String, Object)> _replies = <String, (String, Object)>{};
   String? refuseCreate;
   int _counter = 0;
+
+  /// Runs once inside the next reservation, before its checks (a race).
+  void Function()? beforeReserve;
 
   LocalImportServerDraft _of(String draftId) {
     final _Draft draft = drafts[draftId]!;
@@ -682,24 +1015,38 @@ final class _Server implements LocalImportContentGateway {
       createdByUserId: draft.owner,
       importSourceKey: draft.importSourceKey,
       body: jsonDecode(jsonEncode(draft.body)) as Map<String, Object?>,
+      status: draft.status,
+      importGeneration: draft.generation,
     );
   }
 
-  Future<LocalImportServerDraft> _idempotent(
+  LocalImportBindingView _view(String importSourceKey) {
+    final _Binding binding = bindings[importSourceKey]!;
+    return LocalImportBindingView(
+      generation: binding.generation,
+      rolledBack: binding.state == 'rolledBack',
+      draftId: binding.draftId,
+      cleanupState: binding.cleanupState,
+      cleanupInstallationId: binding.cleanupInstallationId,
+    );
+  }
+
+  Future<T> _idempotent<T extends Object>(
     String command,
     String key,
     Map<String, Object?> payload,
-    LocalImportServerDraft Function() apply,
+    T Function() apply,
   ) async {
     calls.add(command);
+    keyed.add((command, key));
     final String fingerprint = jsonEncode(payload);
-    final (String, LocalImportServerDraft)? stored = _replies[key];
-    final LocalImportServerDraft reply;
+    final (String, Object)? stored = _replies[key];
+    final T reply;
     if (stored != null) {
       if (stored.$1 != fingerprint) {
         throw const EventPublicationRejected('idempotency_conflict');
       }
-      reply = stored.$2;
+      reply = stored.$2 as T;
     } else {
       reply = apply();
       _replies[key] = (fingerprint, reply);
@@ -708,6 +1055,32 @@ final class _Server implements LocalImportContentGateway {
       throw const EventPublicationUnavailable('transport');
     }
     return reply;
+  }
+
+  /// Another installation of the same author edits the server draft.
+  void editElsewhere(String draftId) {
+    final _Draft draft = drafts[draftId]!;
+    draft
+      ..revision = draft.revision + 1
+      ..body = <String, Object?>{...draft.body, 'title': 'Edited elsewhere'};
+  }
+
+  /// Another installation reserves the cleanup of this source.
+  void reserveElsewhere(String importSourceKey) {
+    bindings[importSourceKey]!
+      ..cleanupState = 'reserved'
+      ..cleanupToken = 'ct-other-installation-token'
+      ..cleanupInstallationId = 'install-other';
+  }
+
+  /// Another installation rolls this source's generation back.
+  void rollBackElsewhere(String importSourceKey) {
+    final _Binding binding = bindings[importSourceKey]!;
+    final _Draft draft = drafts[binding.draftId]!;
+    draft
+      ..status = 'rolledBack'
+      ..revision = draft.revision + 1;
+    binding.state = 'rolledBack';
   }
 
   @override
@@ -736,12 +1109,11 @@ final class _Server implements LocalImportContentGateway {
         'importSourceKey': importSourceKey,
       },
       () {
-        for (final MapEntry<String, _Draft> entry in drafts.entries) {
-          if (entry.value.importSourceKey == importSourceKey &&
-              entry.value.owner == 'server-user-a') {
-            return _of(entry.key);
-          }
+        final _Binding? binding = bindings[importSourceKey];
+        if (binding != null && binding.state == 'active') {
+          return _of(binding.draftId);
         }
+        final int generation = (binding?.generation ?? 0) + 1;
         _counter += 1;
         final String draftId = 'draft-$_counter';
         drafts[draftId] = _Draft(
@@ -751,7 +1123,9 @@ final class _Server implements LocalImportContentGateway {
           owner: 'server-user-a',
           importSourceKey: importSourceKey,
           body: <String, Object?>{},
+          generation: generation,
         );
+        bindings[importSourceKey] = _Binding(draftId)..generation = generation;
         return _of(draftId);
       },
     );
@@ -773,6 +1147,9 @@ final class _Server implements LocalImportContentGateway {
     },
     () {
       final _Draft current = drafts[draftId]!;
+      if (current.status == 'rolledBack') {
+        throw const EventPublicationRejected('import_rolled_back');
+      }
       if (current.revision != expectedRevision) {
         throw const EventPublicationRejected('revision_conflict');
       }
@@ -790,5 +1167,166 @@ final class _Server implements LocalImportContentGateway {
       throw const EventPublicationRejected('not_found');
     }
     return _of(draftId);
+  }
+
+  @override
+  Future<LocalImportServerDraft> rollbackImportedDraft({
+    required String draftId,
+    required String importSourceKey,
+    required int generation,
+    required int expectedRevision,
+    required String idempotencyKey,
+  }) => _idempotent(
+    'rollbackImportedDraft',
+    idempotencyKey,
+    <String, Object?>{
+      'draftId': draftId,
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'expectedRevision': expectedRevision,
+    },
+    () {
+      final _Binding? binding = bindings[importSourceKey];
+      final _Draft? draft = drafts[draftId];
+      if (binding == null || draft == null) {
+        throw const EventPublicationRejected('not_found');
+      }
+      if (binding.generation != generation) {
+        throw const EventPublicationRejected('import_generation_mismatch');
+      }
+      if (binding.state == 'rolledBack') {
+        throw const EventPublicationRejected('import_rolled_back');
+      }
+      if (binding.cleanupState == 'done') {
+        throw const EventPublicationRejected('original_removed');
+      }
+      if (binding.cleanupState == 'reserved') {
+        throw const EventPublicationRejected('cleanup_reserved');
+      }
+      if (draft.revision != expectedRevision) {
+        throw const EventPublicationRejected('revision_conflict');
+      }
+      draft
+        ..status = 'rolledBack'
+        ..revision = draft.revision + 1;
+      binding.state = 'rolledBack';
+      return _of(draftId);
+    },
+  );
+
+  @override
+  Future<LocalImportBindingView> reserveImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String draftId,
+    required String installationId,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) => _idempotent(
+    'reserveImportCleanup',
+    idempotencyKey,
+    <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'draftId': draftId,
+      'installationId': installationId,
+      'fencingToken': fencingToken,
+    },
+    () {
+      final void Function()? race = beforeReserve;
+      beforeReserve = null;
+      race?.call();
+      final _Binding? binding = bindings[importSourceKey];
+      if (binding == null || binding.draftId != draftId) {
+        throw const EventPublicationRejected('not_found');
+      }
+      if (binding.generation != generation) {
+        throw const EventPublicationRejected('import_generation_mismatch');
+      }
+      if (binding.state == 'rolledBack') {
+        throw const EventPublicationRejected('import_rolled_back');
+      }
+      if (binding.cleanupState == 'done') {
+        throw const EventPublicationRejected('original_removed');
+      }
+      if (binding.cleanupState == 'reserved' &&
+          binding.cleanupToken != fencingToken) {
+        throw const EventPublicationRejected('cleanup_reserved');
+      }
+      binding
+        ..cleanupState = 'reserved'
+        ..cleanupToken = fencingToken
+        ..cleanupInstallationId = installationId;
+      return _view(importSourceKey);
+    },
+  );
+
+  @override
+  Future<LocalImportBindingView> completeImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) => _idempotent(
+    'completeImportCleanup',
+    idempotencyKey,
+    <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'fencingToken': fencingToken,
+    },
+    () {
+      final _Binding binding = bindings[importSourceKey]!;
+      if (binding.cleanupState == null) {
+        throw const EventPublicationRejected('cleanup_not_reserved');
+      }
+      if (binding.cleanupToken != fencingToken) {
+        throw const EventPublicationRejected('cleanup_token_mismatch');
+      }
+      binding.cleanupState = 'done';
+      return _view(importSourceKey);
+    },
+  );
+
+  @override
+  Future<LocalImportBindingView> releaseImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) => _idempotent(
+    'releaseImportCleanup',
+    idempotencyKey,
+    <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'fencingToken': fencingToken,
+    },
+    () {
+      final _Binding binding = bindings[importSourceKey]!;
+      if (binding.cleanupState == null) {
+        throw const EventPublicationRejected('cleanup_not_reserved');
+      }
+      if (binding.cleanupState == 'done') {
+        throw const EventPublicationRejected('original_removed');
+      }
+      if (binding.cleanupToken != fencingToken) {
+        throw const EventPublicationRejected('cleanup_token_mismatch');
+      }
+      binding
+        ..cleanupState = null
+        ..cleanupToken = null
+        ..cleanupInstallationId = null;
+      return _view(importSourceKey);
+    },
+  );
+
+  @override
+  Future<LocalImportBindingView> importBinding(String importSourceKey) async {
+    calls.add('getImportBinding');
+    if (!bindings.containsKey(importSourceKey)) {
+      throw const EventPublicationRejected('not_found');
+    }
+    return _view(importSourceKey);
   }
 }

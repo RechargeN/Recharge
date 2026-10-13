@@ -260,4 +260,104 @@ void main() {
       );
     },
   );
+
+  test(
+    'D4.1: a pending or completed rollback forbids cleanup; a reservation goes on',
+    () {
+      const LocalImportCleanupPolicy policy = LocalImportCleanupPolicy();
+      final DateTime confirmed = DateTime.utc(2026, 10, 13, 12);
+      final DateTime later = confirmed.add(const Duration(days: 90));
+      LocalImportCleanupStage stage(LocalImportItemState state) => policy
+          .statusOf(
+            receipt(
+              state: state,
+              verifiedAt: confirmed,
+              confirmedAt: confirmed,
+            ),
+            later,
+          )
+          .stage;
+      expect(
+        stage(LocalImportItemState.rollbackPending),
+        LocalImportCleanupStage.rollbackPending,
+      );
+      expect(
+        stage(LocalImportItemState.rolledBack),
+        LocalImportCleanupStage.rolledBack,
+      );
+      expect(
+        stage(LocalImportItemState.cleanupReserved),
+        LocalImportCleanupStage.cleanupReserved,
+      );
+      // Once the original is gone, that is what counts.
+      expect(
+        policy
+            .statusOf(
+              receipt(
+                state: LocalImportItemState.cleanupReserved,
+                deletedAt: later,
+              ),
+              later,
+            )
+            .stage,
+        LocalImportCleanupStage.deleted,
+      );
+    },
+  );
+
+  test(
+    'D4.1: generation, rollback and cleanup intents round-trip; a D4 receipt is generation 1',
+    () {
+      final LocalImportReceipt d41 =
+          receipt(state: LocalImportItemState.cleanupReserved).copyWith(
+            rollbackKey: 'li1-key:g2:rollback:3',
+            rollbackExpectedRevision: 3,
+            rolledBackAtUtc: DateTime.utc(2026, 10, 13, 3),
+            cleanupToken: 'ct-0123456789abcdefghijkl',
+            cleanupInstallationId: 'install-a',
+            cleanupCompletedAtUtc: DateTime.utc(2026, 10, 13, 4),
+          );
+      final LocalImportReceipt second = LocalImportReceipt.fromJson(
+        <String, Object?>{...d41.toJson(), 'generation': 2},
+      )!;
+      expect(second.generation, 2);
+      expect(second.toJson(), <String, Object?>{
+        ...d41.toJson(),
+        'generation': 2,
+      });
+      expect(second.state, LocalImportItemState.cleanupReserved);
+      expect(second.cleanupToken, 'ct-0123456789abcdefghijkl');
+      // A D4 receipt has no generation field and stays readable.
+      final Map<String, Object?> d4 = receipt().toJson();
+      expect(d4.containsKey('generation'), isFalse);
+      expect(LocalImportReceipt.fromJson(d4)?.generation, 1);
+      // Clearing an intent removes exactly its fields.
+      final LocalImportReceipt cleared = second.copyWith(
+        clearRollback: true,
+        clearCleanup: true,
+      );
+      expect(cleared.rollbackKey, isNull);
+      expect(cleared.rollbackExpectedRevision, isNull);
+      expect(cleared.cleanupToken, isNull);
+      expect(cleared.cleanupInstallationId, isNull);
+      expect(cleared.generation, 2);
+      for (final Object? generation in <Object?>[0, -1, '2', 1.5]) {
+        expect(
+          LocalImportReceipt.fromJson(<String, Object?>{
+            ...d4,
+            'generation': generation,
+          }),
+          isNull,
+          reason: '$generation',
+        );
+      }
+      expect(
+        LocalImportReceipt.fromJson(<String, Object?>{
+          ...d4,
+          'rollbackExpectedRevision': '3',
+        }),
+        isNull,
+      );
+    },
+  );
 }

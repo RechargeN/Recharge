@@ -260,6 +260,37 @@ export async function main(args) {
       run(seedCli, ["verify"]);
       run(seedCli, ["place", "verify"]);
     });
+
+    // M1 stage 2. Each file runs on its own fresh stand: the Session issue
+    // budget is 5 per Account in 15 minutes and every client install needs one.
+    const freshWithPlace = () => {
+      fresh();
+      assert.match(run(seedCli, ["place", "seed"]), /^seeded place=/m);
+    };
+    step(
+      "fresh stand with the base and Place seeds (M1 S5/S6)",
+      freshWithPlace,
+    );
+    step(
+      "flutter test Page access withdrawn and restored (M1 S5/S6, controller and UI)",
+      () =>
+        flutter(
+          ["test/backend_local/page_access_revocation_stand_test.dart"],
+          ["RECHARGE_TEST_PLACE_PUBLICATION=true"],
+        ),
+    );
+    step("Page access is restored: base and Place invariants hold", () => {
+      run(seedCli, ["verify"]);
+      run(seedCli, ["place", "verify"]);
+    });
+    step("fresh stand with the base and Place seeds (M1 S7)", freshWithPlace);
+    step("flutter test one user, two installations (M1 S7)", () =>
+      flutter(["test/backend_local/publication_two_installs_stand_test.dart"]),
+    );
+    step("base and Place invariants still hold", () => {
+      run(seedCli, ["verify"]);
+      run(seedCli, ["place", "verify"]);
+    });
   } catch (error) {
     failure = error;
   } finally {

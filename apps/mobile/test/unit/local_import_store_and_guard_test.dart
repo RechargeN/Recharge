@@ -11,6 +11,7 @@ import 'package:recharge/features/create/data/functions_local_import_gateway.dar
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/entities/event_publication.dart';
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/create/domain/repositories/local_import_gateway.dart';
 import 'package:recharge/app/di/event_publication_composition.dart';
@@ -221,12 +222,123 @@ void main() {
         });
       },
     );
+
+    test(
+      'D4.1 commands carry the generation through contentCommandV1; the binding query reads no token',
+      () async {
+        final _CountingPort closed = _CountingPort();
+        final FunctionsLocalImportGateway shut = FunctionsLocalImportGateway(
+          port: BookingPortContentAdapter(closed),
+          gate: guard(flag: false),
+        );
+        await expectLater(
+          shut.rollbackImportedDraft(
+            draftId: 'd-1',
+            importSourceKey: 'loc_1',
+            generation: 1,
+            expectedRevision: 2,
+            idempotencyKey: 'li1-key:g1:rollback:2',
+          ),
+          throwsStateError,
+        );
+        await expectLater(shut.importBinding('loc_1'), throwsStateError);
+        expect(closed.calls, 0);
+
+        final _CountingPort port = _CountingPort();
+        final FunctionsLocalImportGateway gateway = FunctionsLocalImportGateway(
+          port: BookingPortContentAdapter(port),
+          gate: guard(),
+        );
+        await gateway.rollbackImportedDraft(
+          draftId: 'd-1',
+          importSourceKey: 'loc_1',
+          generation: 2,
+          expectedRevision: 3,
+          idempotencyKey: 'li1-key:g2:rollback:3',
+        );
+        expect(port.last, <String, Object?>{
+          'schemaVersion': 1,
+          'commandType': 'rollbackImportedDraft',
+          'idempotencyKey': 'li1-key:g2:rollback:3',
+          'payload': <String, Object?>{
+            'draftId': 'd-1',
+            'importSourceKey': 'loc_1',
+            'generation': 2,
+            'expectedRevision': 3,
+          },
+        });
+        port.reply = <String, Object?>{
+          'importSourceKey': 'loc_1',
+          'generation': 2,
+          'state': 'active',
+          'draftId': 'd-1',
+          'bindingRevision': 4,
+          'cleanup': <String, Object?>{
+            'state': 'reserved',
+            'generation': 2,
+            'installationId': 'install-a',
+            'reservedAtUtc': '2026-10-13T10:00:00.000Z',
+            'leaseExpiresAtUtc': '2026-10-13T10:15:00.000Z',
+          },
+        };
+        final LocalImportBindingView reserved = await gateway
+            .reserveImportCleanup(
+              importSourceKey: 'loc_1',
+              generation: 2,
+              draftId: 'd-1',
+              installationId: 'install-a',
+              fencingToken: 'ct-0123456789abcdefghijkl',
+              idempotencyKey:
+                  'li1-key:g2:cleanup:ct-0123456789abcdefghijkl:reserve',
+            );
+        expect(reserved.cleanupState, 'reserved');
+        expect(reserved.cleanupInstallationId, 'install-a');
+        expect(
+          (port.last!['payload']! as Map<String, Object?>)['fencingToken'],
+          'ct-0123456789abcdefghijkl',
+        );
+        await gateway.completeImportCleanup(
+          importSourceKey: 'loc_1',
+          generation: 2,
+          fencingToken: 'ct-0123456789abcdefghijkl',
+          idempotencyKey:
+              'li1-key:g2:cleanup:ct-0123456789abcdefghijkl:complete',
+        );
+        expect(port.last!['commandType'], 'completeImportCleanup');
+        await gateway.releaseImportCleanup(
+          importSourceKey: 'loc_1',
+          generation: 2,
+          fencingToken: 'ct-0123456789abcdefghijkl',
+          idempotencyKey:
+              'li1-key:g2:cleanup:ct-0123456789abcdefghijkl:release',
+        );
+        expect(port.last!['commandType'], 'releaseImportCleanup');
+        final LocalImportBindingView binding = await gateway.importBinding(
+          'loc_1',
+        );
+        expect(binding.generation, 2);
+        expect(binding.rolledBack, isFalse);
+        expect(port.last, <String, Object?>{
+          'schemaVersion': 1,
+          'queryType': 'getImportBinding',
+          'payload': <String, Object?>{'importSourceKey': 'loc_1'},
+        });
+        port.reply = <String, Object?>{'generation': 2, 'state': 'unknown'};
+        await expectLater(
+          gateway.importBinding('loc_1'),
+          throwsA(isA<EventPublicationRejected>()),
+        );
+      },
+    );
   });
 }
 
 final class _CountingPort implements BookingCallablePort {
   int calls = 0;
   Map<String, Object?>? last;
+
+  /// The `data` of the next answers; a draft by default.
+  Map<String, Object?>? reply;
 
   @override
   Future<Map<String, Object?>> invoke(
@@ -237,14 +349,16 @@ final class _CountingPort implements BookingCallablePort {
     last = data;
     return <String, Object?>{
       'kind': 'succeeded',
-      'data': <String, Object?>{
-        'contentId': 'c-1',
-        'draftId': 'd-1',
-        'revision': 1,
-        'createdByUserId': 'server-user',
-        'importSourceKey': 'loc_1',
-        'body': <String, Object?>{},
-      },
+      'data':
+          reply ??
+          <String, Object?>{
+            'contentId': 'c-1',
+            'draftId': 'd-1',
+            'revision': 1,
+            'createdByUserId': 'server-user',
+            'importSourceKey': 'loc_1',
+            'body': <String, Object?>{},
+          },
     };
   }
 }

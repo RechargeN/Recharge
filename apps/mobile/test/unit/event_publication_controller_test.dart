@@ -137,6 +137,35 @@ void main() {
     expect(c.state.message, 'unsupported_capability:admission');
   });
 
+  test(
+    'M1 D1: a lost publish answer is retried with the journaled payload',
+    () async {
+      final c = controller();
+      await c.load();
+      await c.save();
+      await c.submit();
+      gateway.submissionState = 'approved_for_publication';
+      await c.refresh();
+      gateway.losePublishAnswer = true;
+      await c.publish();
+      expect(c.state.phase, EventPublicationPhase.offline);
+      expect(gateway.publications, 1, reason: 'the server applied it');
+      // A restart: a new controller over the same journal retries the same payload.
+      final again = controller();
+      await again.load();
+      await again.publish();
+      expect(again.state.message, isNull, reason: again.state.message);
+      expect(gateway.publications, 1, reason: 'exactly one publication');
+      expect(
+        gateway.calls
+            .where((call) => call.$1 == 'publishApproved')
+            .map((call) => call.$2['expectedPointerRevision']),
+        <Object?>[0, 0],
+        reason: 'the retry sends the first payload, not the moved pointer',
+      );
+    },
+  );
+
   test('a server refusal is shown as its code', () async {
     gateway.refuseCreate = 'creator_verification_required';
     final c = controller();
@@ -227,6 +256,9 @@ final class _Gateway implements EventPublicationGateway {
   String? visibility;
   int pointerRevision = 0;
   String? refuseCreate;
+  final Map<String, String> publishReplies = <String, String>{};
+  int publications = 0;
+  bool losePublishAnswer = false;
 
   @override
   Future<EventServerDraftRef> createDraft({
@@ -299,9 +331,24 @@ final class _Gateway implements EventPublicationGateway {
         'expectedPointerRevision': expectedPointerRevision,
       },
     ));
-    submissionState = 'published';
-    visibility = 'visible';
-    pointerRevision = 1;
+    // Like Content: a key replays its stored answer only for the same payload.
+    final String fingerprint = '$submissionId:$expectedPointerRevision';
+    final String? stored = publishReplies[idempotencyKey];
+    if (stored != null) {
+      if (stored != fingerprint) {
+        throw const EventPublicationRejected('idempotency_conflict');
+      }
+    } else {
+      publishReplies[idempotencyKey] = fingerprint;
+      publications += 1;
+      submissionState = 'published';
+      visibility = 'visible';
+      pointerRevision = 1;
+    }
+    if (losePublishAnswer) {
+      losePublishAnswer = false;
+      throw const EventPublicationUnavailable('transport');
+    }
   }
 
   @override

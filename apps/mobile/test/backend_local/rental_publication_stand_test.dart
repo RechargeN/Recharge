@@ -17,6 +17,7 @@ import 'package:recharge/features/create/domain/entities/create_draft_entity.dar
 import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_rental_draft.dart';
+import 'support/content_fault_client.dart';
 import 'support/stand_backend.dart';
 
 /// D3.3: the user's own Create Rental draft goes through the real Content,
@@ -42,6 +43,8 @@ void main() {
   late List<File> gallery;
   late Map<String, Object?> seededRental;
   final runtimes = <String, Future<BookingTransportRuntime>>{};
+  // M1 stage 2: real HTTP that a test can sever or make lose one answer.
+  final faults = ContentFaultClient();
 
   Future<BookingTransportRuntime> runtimeFor(
     String label,
@@ -54,7 +57,7 @@ void main() {
     final sessions = FileSessionStore(File('${temp.path}/session-$label.json'));
     final runtime = await BookingTransportRuntimeFactory(
       endpoint: binding.endpoint,
-      client: CountingClient(),
+      client: faults,
       tokens: AuthEmulatorTokenProvider('stand-user-$label'),
       sessions: sessions,
       installations: FixedInstallationId('d33-local-installation-$label'),
@@ -104,6 +107,30 @@ void main() {
   }
 
   // Confirmed and attested today by the stand Creator account (§2 Q3, Q5).
+  PublicationProbe probe(RentalPublicationController c) => PublicationProbe(
+    load: c.load,
+    save: c.save,
+    uploadMedia: c.uploadMedia,
+    submit: c.submit,
+    publish: c.publish,
+    refresh: c.refresh,
+    dispose: c.dispose,
+    message: () => c.state.message,
+    offline: () => c.state.phase == RentalPublicationPhase.offline,
+    journaledSubmissionId: () => c.state.record?.submissionId,
+    status: () => c.state.status,
+  );
+
+  Future<void> approve(String submissionId) async {
+    final approved = await stand!.moderate(<String>[
+      'approve',
+      submissionId,
+      '--reason',
+      'm1 stage 2: the Rental is fine',
+    ]);
+    expect(approved.exitCode, 0, reason: '${approved.json}');
+  }
+
   CreateDraftEntity draftOf(String localId, {String? title}) => userRentalDraft(
     pageId: seededRental['pageId']! as String,
     coverPath: cover.path,
@@ -270,5 +297,36 @@ void main() {
     },
     skip: stand == null,
     timeout: const Timeout(Duration(minutes: 3)),
+  );
+
+  test(
+    'M1 S1-S3 submit: severed, lost answer, restart and retry give one submission',
+    () async {
+      final draft = draftOf('loc_m1_rental_submit_${const Uuid().v4()}');
+      await expectSubmitSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'submit-faults'),
+        ),
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+
+  test(
+    'M1 S1-S3 publish: severed, lost answer, restart and retry give one publication',
+    () async {
+      final draft = draftOf('loc_m1_rental_publish_${const Uuid().v4()}');
+      await expectPublishSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'publish-faults'),
+        ),
+        approve,
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }

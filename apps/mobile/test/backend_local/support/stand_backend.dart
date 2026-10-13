@@ -64,6 +64,11 @@ final class StandBackend {
   Future<Map<String, Object?>> sessionFixture(List<String> args) =>
       _stand(<String>['session-fixture', ...args]);
 
+  /// M1 stage 2: reversible Page access through the Identity owner services
+  /// (`withdraw-publish`, `restore-publish`, `suspend`, `reverify`, `status`).
+  Future<Map<String, Object?>> pageAccess(List<String> args) =>
+      _stand(<String>['page-access', ...args]);
+
   /// F1 operator steps (flags, reconcile, receipts, stored-data faults) run on
   /// the stand in its trusted backend context, never by the client.
   Future<Map<String, Object?>> notifications(List<String> args) =>

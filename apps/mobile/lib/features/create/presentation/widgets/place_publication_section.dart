@@ -50,6 +50,15 @@ class PlacePublicationSection extends StatelessWidget {
                 key: const Key('place-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
+            // M1 D2: someone else's newer revision; nothing is overwritten
+            // until the user explicitly saves their version.
+            if (state.conflict != null)
+              Text(
+                'The server has a newer version '
+                '(revision ${state.conflict!.serverRevision}). Your edit is '
+                'kept here; nothing was overwritten.',
+                key: const Key('place-publication-conflict'),
+              ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -92,6 +101,13 @@ class PlacePublicationSection extends StatelessWidget {
                   state.canHide,
                   controller.hide,
                 ),
+                if (state.conflict != null)
+                  _action(
+                    'place-publication-save-over-server',
+                    'Save my version',
+                    state.canSaveOverServerVersion,
+                    controller.saveOverServerVersion,
+                  ),
               ],
             ),
             const SizedBox(height: 12),

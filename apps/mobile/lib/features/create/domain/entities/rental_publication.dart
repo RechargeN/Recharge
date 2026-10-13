@@ -1,3 +1,4 @@
+import 'event_publication.dart';
 import 'publisher_ref.dart';
 
 /// One uploaded medium of a Rental publication: the stable attachment id of the
@@ -53,6 +54,8 @@ final class RentalPublicationRecord {
     this.authorApplied = false,
     this.attachments = const <RentalAttachmentRecord>[],
     this.submissionId,
+    this.pendingUpdate,
+    this.publishIntent,
   });
 
   final String accountId;
@@ -72,6 +75,12 @@ final class RentalPublicationRecord {
   final List<RentalAttachmentRecord> attachments;
   final String? submissionId;
 
+  /// A body save sent but not yet answered (M1 D2).
+  final PendingDraftUpdate? pendingUpdate;
+
+  /// The publish command as first sent (M1 D1).
+  final PublishIntent? publishIntent;
+
   bool belongsTo(String account, PublisherRef publisher) =>
       accountId == account &&
       publisherRef.type == publisher.type &&
@@ -90,6 +99,9 @@ final class RentalPublicationRecord {
     String? title,
     List<RentalAttachmentRecord>? attachments,
     String? submissionId,
+    PendingDraftUpdate? pendingUpdate,
+    bool clearPendingUpdate = false,
+    PublishIntent? publishIntent,
   }) => RentalPublicationRecord(
     accountId: accountId,
     publisherRef: publisherRef,
@@ -103,6 +115,10 @@ final class RentalPublicationRecord {
     createdAtUtc: createdAtUtc,
     attachments: attachments ?? this.attachments,
     submissionId: submissionId ?? this.submissionId,
+    pendingUpdate: clearPendingUpdate
+        ? null
+        : pendingUpdate ?? this.pendingUpdate,
+    publishIntent: publishIntent ?? this.publishIntent,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -119,6 +135,8 @@ final class RentalPublicationRecord {
     'createdAtUtc': createdAtUtc.toUtc().toIso8601String(),
     'attachments': attachments.map((item) => item.toJson()).toList(),
     if (submissionId != null) 'submissionId': submissionId,
+    if (pendingUpdate != null) 'pendingUpdate': pendingUpdate!.toJson(),
+    if (publishIntent != null) 'publishIntent': publishIntent!.toJson(),
   };
 
   /// A malformed or foreign-shaped entry is skipped, never repaired.
@@ -176,6 +194,8 @@ final class RentalPublicationRecord {
       createdAtUtc: createdAt.toUtc(),
       attachments: List<RentalAttachmentRecord>.unmodifiable(parsed),
       submissionId: submissionId as String?,
+      pendingUpdate: PendingDraftUpdate.fromJson(value['pendingUpdate']),
+      publishIntent: PublishIntent.fromJson(value['publishIntent']),
     );
   }
 }

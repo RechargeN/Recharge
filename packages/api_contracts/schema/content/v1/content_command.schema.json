@@ -274,6 +274,190 @@
           "const": 1
         },
         "commandType": {
+          "const": "rollbackImportedDraft"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "draftId",
+            "importSourceKey",
+            "generation",
+            "expectedRevision"
+          ],
+          "properties": {
+            "draftId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            },
+            "generation": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "expectedRevision": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "reserveImportCleanup"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "importSourceKey",
+            "generation",
+            "draftId",
+            "installationId",
+            "fencingToken"
+          ],
+          "properties": {
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            },
+            "generation": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "draftId": {
+              "$ref": "content_common.schema.json#/$defs/entityId"
+            },
+            "installationId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+            },
+            "fencingToken": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "completeImportCleanup"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "importSourceKey",
+            "generation",
+            "fencingToken"
+          ],
+          "properties": {
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            },
+            "generation": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "fencingToken": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "releaseImportCleanup"
+        },
+        "idempotencyKey": {
+          "$ref": "content_common.schema.json#/$defs/idempotencyKey"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "importSourceKey",
+            "generation",
+            "fencingToken"
+          ],
+          "properties": {
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            },
+            "generation": {
+              "$ref": "content_common.schema.json#/$defs/positiveRevision"
+            },
+            "fencingToken": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "idempotencyKey",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
           "const": "applyModerationDisposition"
         },
         "idempotencyKey": {

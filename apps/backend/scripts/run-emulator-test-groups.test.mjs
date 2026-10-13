@@ -22,15 +22,16 @@ function cleanup(logDir) {
 
 void test("all 40 original invocations, flags, globs and their order are retained", () => {
   const tasks = emulatorTestGroups.flatMap((group) => group.tasks);
-  assert.equal(tasks.length, 45);
-  // Added after the snapshot: D3.8 Activity Catalog, the D3.3 Rental group and
-  // the D3.4 Collection group.
+  assert.equal(tasks.length, 46);
+  // Added after the snapshot: D3.8 Activity Catalog, the D3.3 Rental group,
+  // the D3.4 Collection group and the D4.1 import group.
   const added = new Set([
     "lib/test/emulator/activity_catalog_emulator_flow.test.js",
     "lib/test/emulator/content_rental_callable.test.js",
     "lib/test/emulator/content_rental_emulator_flow.test.js",
     "lib/test/emulator/content_collection_callable.test.js",
     "lib/test/emulator/content_collection_emulator_flow.test.js",
+    "lib/test/emulator/content_local_import_rollback.test.js",
   ]);
   const originalTasks = tasks.filter((task) => !added.has(task[0]));
   assert.equal(originalTasks.length, 40);
@@ -41,7 +42,7 @@ void test("all 40 original invocations, flags, globs and their order are retaine
   );
 });
 void test("group selection is explicit and every measured bound has headroom", () => {
-  assert.equal(selectGroups().length, 8);
+  assert.equal(selectGroups().length, 9);
   for (const group of emulatorTestGroups) {
     assert.deepEqual(selectGroups(group.name), [group]);
     assert.ok(group.timeoutMs >= group.baselineMs * 1.75 + 30_000);

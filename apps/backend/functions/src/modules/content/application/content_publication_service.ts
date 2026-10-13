@@ -16,6 +16,7 @@ import type {
   ContentReferenceRevisionsV1,
   ContentTypeId,
   ExternalBindingLookupV1,
+  LocalImportBindingV1,
   ModerationAcknowledgementV1,
   PublicationStatusV1,
 } from '../../../contracts/content_v1.js';
@@ -79,6 +80,15 @@ import type {
   ContentRepository,
   ContentTransaction,
 } from '../domain/repositories.js';
+import { openImportGeneration } from '../domain/local_import_binding.js';
+import {
+  completeImportCleanup,
+  getImportBinding,
+  releaseImportCleanup,
+  reserveImportCleanup,
+  rollbackImportedDraft,
+  type LocalImportLifecycleContext,
+} from './content_local_import_lifecycle.js';
 import type { MediaReadiness, MediaReadinessPort } from './ports/media_readiness_port.js';
 import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
 import type {
@@ -149,8 +159,13 @@ export interface ContentPublicationServiceDeps {
 }
 
 export type ContentCommandData =
-  ContentDraft | PublicationSubmission | PublishedRevision | PublicationPointer;
-export type ContentQueryData = ContentDraft | PublicationStatusV1 | PublishedRevision;
+  | ContentDraft
+  | PublicationSubmission
+  | PublishedRevision
+  | PublicationPointer
+  | LocalImportBindingV1;
+export type ContentQueryData =
+  ContentDraft | PublicationStatusV1 | PublishedRevision | LocalImportBindingV1;
 
 type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
 
@@ -442,6 +457,10 @@ export class ContentPublicationService {
             if (revision === null) throw new ContentDomainRefusal('not_found');
             return succeeded<ContentQueryData>(revision);
           }
+          case 'getImportBinding':
+            return succeeded<ContentQueryData>(
+              await getImportBinding(tx, actor.userId, query.payload.importSourceKey),
+            );
         }
       });
     } catch (error) {
@@ -476,7 +495,31 @@ export class ContentPublicationService {
         return this.withdraw(context, command.payload);
       case 'activatePublishedRevision':
         return this.activate(context, command.payload);
+      case 'rollbackImportedDraft':
+        return rollbackImportedDraft(this.lifecycle(context), command.payload);
+      case 'reserveImportCleanup':
+        return reserveImportCleanup(this.lifecycle(context), command.payload);
+      case 'completeImportCleanup':
+        return completeImportCleanup(this.lifecycle(context), command.payload);
+      case 'releaseImportCleanup':
+        return releaseImportCleanup(this.lifecycle(context), command.payload);
     }
+  }
+
+  /** D4.1: lifecycle commands act for the signed-in author only. */
+  private lifecycle(context: CommandContext): LocalImportLifecycleContext {
+    const { principal } = context;
+    if (principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+    return {
+      tx: context.tx,
+      userId: principal.actor.userId,
+      nowUtc: context.nowUtc,
+      authorizeDraftChange: async (draft) => {
+        this.usableType(draft.typeId, draft.typeSchemaMajor);
+        await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
+      },
+      audit: (action, subjectId) => this.audit(context, action, subjectId),
+    };
   }
 
   private async createDraft(
@@ -496,22 +539,31 @@ export class ContentPublicationService {
     // D4: a user's local import source maps to exactly one draft. Importing it
     // again, under any idempotency key, returns that draft; the same source for
     // another type, publisher or market is a conflict, never a second draft.
-    if (principal.kind === 'session' && payload.importSourceKey !== undefined) {
+    // D4.1: after a rollback the next import opens the next generation, in the
+    // same transaction as its one new draft.
+    const importBinding =
+      principal.kind === 'session' && payload.importSourceKey !== undefined
+        ? await context.tx.importBinding(principal.actor.userId, payload.importSourceKey)
+        : null;
+    if (
+      principal.kind === 'session' &&
+      payload.importSourceKey !== undefined &&
+      importBinding?.state === 'active'
+    ) {
       const imported = await context.tx.draftByImportSource(
         principal.actor.userId,
         payload.importSourceKey,
       );
-      if (imported !== null) {
-        if (
-          imported.typeId !== payload.typeId ||
-          imported.marketId !== payload.marketId ||
-          imported.publisherRef.type !== payload.publisherRef.type ||
-          imported.publisherRef.id !== payload.publisherRef.id
-        )
-          throw new ContentDomainRefusal('idempotency_conflict');
-        this.audit(context, 'content.draft.import_replayed', imported.draftId);
-        return imported;
-      }
+      if (imported === null) throw new ContentDomainRefusal('revision_conflict');
+      if (
+        imported.typeId !== payload.typeId ||
+        imported.marketId !== payload.marketId ||
+        imported.publisherRef.type !== payload.publisherRef.type ||
+        imported.publisherRef.id !== payload.publisherRef.id
+      )
+        throw new ContentDomainRefusal('idempotency_conflict');
+      this.audit(context, 'content.draft.import_replayed', imported.draftId);
+      return imported;
     }
     const references = await this.pin(payload.marketId, payload.typeId, context.nowUtc);
     const draft = createContentDraft({
@@ -530,8 +582,21 @@ export class ContentPublicationService {
       ...(payload.importSourceKey === undefined
         ? {}
         : { importSourceKey: payload.importSourceKey }),
+      ...(payload.importSourceKey === undefined || principal.kind !== 'session'
+        ? {}
+        : { importGeneration: (importBinding?.generation ?? 0) + 1 }),
       nowUtc: context.nowUtc,
     });
+    if (principal.kind === 'session' && payload.importSourceKey !== undefined)
+      context.tx.putImportBinding(
+        openImportGeneration(
+          principal.actor.userId,
+          payload.importSourceKey,
+          importBinding,
+          draft.draftId,
+        ),
+        importBinding?.bindingRevision ?? 0,
+      );
     context.tx.putDraft(draft);
     this.audit(context, 'content.draft.created', draft.draftId);
     return draft;

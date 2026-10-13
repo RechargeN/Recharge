@@ -25,7 +25,14 @@
         "unknown_outcome",
         "not_found",
         "invalid_contract",
-        "storage_limit_exceeded"
+        "storage_limit_exceeded",
+        "import_rollback_not_allowed",
+        "import_generation_mismatch",
+        "import_rolled_back",
+        "cleanup_reserved",
+        "cleanup_not_reserved",
+        "cleanup_token_mismatch",
+        "original_removed"
       ]
     },
     "validationViolation": {
@@ -74,7 +81,8 @@
             "publicationStatus",
             "publicationPointer",
             "moderationAcknowledgement",
-            "externalBindingLookup"
+            "externalBindingLookup",
+            "importBinding"
           ]
         },
         "data": {

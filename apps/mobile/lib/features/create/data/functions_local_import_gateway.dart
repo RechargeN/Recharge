@@ -64,6 +64,80 @@ final class FunctionsLocalImportGateway implements LocalImportContentGateway {
     );
   }
 
+  @override
+  Future<LocalImportServerDraft> rollbackImportedDraft({
+    required String draftId,
+    required String importSourceKey,
+    required int generation,
+    required int expectedRevision,
+    required String idempotencyKey,
+  }) async => _draft(
+    await _command('rollbackImportedDraft', idempotencyKey, <String, Object?>{
+      'draftId': draftId,
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'expectedRevision': expectedRevision,
+    }),
+  );
+
+  @override
+  Future<LocalImportBindingView> reserveImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String draftId,
+    required String installationId,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) async => _binding(
+    await _command('reserveImportCleanup', idempotencyKey, <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'draftId': draftId,
+      'installationId': installationId,
+      'fencingToken': fencingToken,
+    }),
+  );
+
+  @override
+  Future<LocalImportBindingView> completeImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) async => _binding(
+    await _command('completeImportCleanup', idempotencyKey, <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'fencingToken': fencingToken,
+    }),
+  );
+
+  @override
+  Future<LocalImportBindingView> releaseImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  }) async => _binding(
+    await _command('releaseImportCleanup', idempotencyKey, <String, Object?>{
+      'importSourceKey': importSourceKey,
+      'generation': generation,
+      'fencingToken': fencingToken,
+    }),
+  );
+
+  @override
+  Future<LocalImportBindingView> importBinding(String importSourceKey) async {
+    _gate.assertAllowed();
+    return _binding(
+      await _call('contentQueryV1', <String, Object?>{
+        'schemaVersion': 1,
+        'queryType': 'getImportBinding',
+        'payload': <String, Object?>{'importSourceKey': importSourceKey},
+      }),
+    );
+  }
+
   Future<Map<String, Object?>> _command(
     String commandType,
     String idempotencyKey,
@@ -118,6 +192,34 @@ final class FunctionsLocalImportGateway implements LocalImportContentGateway {
           ? data['importSourceKey']! as String
           : null,
       body: body is Map ? Map<String, Object?>.from(body) : null,
+      status: data['status'] is String ? data['status']! as String : null,
+      importGeneration: data['importGeneration'] is int
+          ? data['importGeneration']! as int
+          : null,
+    );
+  }
+
+  static LocalImportBindingView _binding(Map<String, Object?> data) {
+    final Object? generation = data['generation'];
+    final Object? state = data['state'];
+    final Object? draftId = data['draftId'];
+    final Object? cleanup = data['cleanup'];
+    if (generation is! int ||
+        (state != 'active' && state != 'rolledBack') ||
+        draftId is! String ||
+        (cleanup != null && cleanup is! Map)) {
+      throw const EventPublicationRejected('invalid_contract');
+    }
+    final Object? cleanupState = cleanup is Map ? cleanup['state'] : null;
+    final Object? installationId = cleanup is Map
+        ? cleanup['installationId']
+        : null;
+    return LocalImportBindingView(
+      generation: generation,
+      rolledBack: state == 'rolledBack',
+      draftId: draftId,
+      cleanupState: cleanupState is String ? cleanupState : null,
+      cleanupInstallationId: installationId is String ? installationId : null,
     );
   }
 }

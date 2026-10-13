@@ -195,3 +195,40 @@ void test('an imported draft keeps its body: the replay never resets it', async 
   assert.equal(replay.revision, updated.revision);
   assert.deepEqual((replay as unknown as { body: unknown }).body, { title: 'Imported' });
 });
+
+// D4.1 §2.1: generations. A first import is generation 1 and replays as D4; after
+// a rollback a new approval opens generation 2, to which the D4 rules apply again.
+void test('D4.1: a rolled-back source opens the next generation; the D4 rules hold within it', async () => {
+  const repository = new InMemoryContentRepository();
+  const content = service(repository, ['place', 'collection']);
+  const source = 'loc_1760000000004';
+  const first = await draftOf(content.execute(actorA, create(userA, 'place', source)));
+  assert.equal((first as { importGeneration?: number }).importGeneration, 1);
+  const rolledBack = await content.execute(actorA, {
+    schemaVersion: 1,
+    commandType: 'rollbackImportedDraft',
+    idempotencyKey: 'd4-1-rollback-1',
+    payload: {
+      draftId: first.draftId,
+      importSourceKey: source,
+      generation: 1,
+      expectedRevision: 1,
+    },
+  });
+  assert.equal(rolledBack.kind, 'succeeded');
+  const second = await draftOf(content.execute(actorA, create(userA, 'place', source)));
+  assert.notEqual(second.draftId, first.draftId);
+  assert.equal((second as { importGeneration?: number }).importGeneration, 2);
+  assert.equal(
+    (await draftOf(content.execute(actorA, create(userA, 'place', source)))).draftId,
+    second.draftId,
+  );
+  assert.deepEqual(await content.execute(actorA, create(userA, 'collection', source)), {
+    kind: 'rejected',
+    code: 'idempotency_conflict',
+  });
+  // Another author's equal key is untouched by A's generations.
+  const b = await draftOf(content.execute(actorB, create(userB, 'place', source)));
+  assert.equal((b as { importGeneration?: number }).importGeneration, 1);
+  assert.equal(repository.snapshot().drafts.length, 3);
+});

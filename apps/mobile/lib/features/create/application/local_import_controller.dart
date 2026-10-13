@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 
@@ -32,6 +35,26 @@ final class LocalImportItemView {
   /// The server's refusal of the item's create in this run (no server object
   /// exists for it, so there is no receipt to hold it).
   final String? failureCode;
+
+  /// D4.1 §3.1: only a verified import (or a rollback whose outcome is still
+  /// unknown) may be rolled back, and never while a cleanup is under way or
+  /// after the original is gone.
+  bool get canRollBack {
+    final LocalImportReceipt? value = receipt;
+    return value != null &&
+        (value.state == LocalImportItemState.verified ||
+            value.state == LocalImportItemState.rollbackPending) &&
+        value.cleanupToken == null &&
+        value.localDeletedAtUtc == null;
+  }
+
+  /// A cleanup intent whose original is still here can be released.
+  bool get canCancelCleanup {
+    final LocalImportReceipt? value = receipt;
+    return value != null &&
+        value.cleanupToken != null &&
+        value.localDeletedAtUtc == null;
+  }
 }
 
 final class LocalImportViewState {
@@ -41,11 +64,16 @@ final class LocalImportViewState {
     this.session,
     this.chosenUpdates = const <String>{},
     this.message,
+    this.pendingCleanups = 0,
   });
 
   final LocalImportPhase phase;
   final List<LocalImportItemView> items;
   final LocalImportSession? session;
+
+  /// D4.1: originals already deleted whose server completion is still owed
+  /// (the item is no longer in the inventory).
+  final int pendingCleanups;
 
   /// Conflicting items the user chose to import again into their server draft.
   final Set<String> chosenUpdates;
@@ -94,6 +122,8 @@ final class LocalImportController extends ChangeNotifier {
     String marketId = 'LV',
     DateTime Function()? clock,
     String Function()? newSessionId,
+    String Function()? newFencingToken,
+    String? installationId,
   }) : _accountId = accountId,
        _source = source,
        _journal = journal,
@@ -110,7 +140,9 @@ final class LocalImportController extends ChangeNotifier {
        _clock = clock ?? (() => DateTime.now().toUtc()),
        _newSessionId =
            newSessionId ??
-           (() => 'imp-${DateTime.now().toUtc().microsecondsSinceEpoch}');
+           (() => 'imp-${DateTime.now().toUtc().microsecondsSinceEpoch}'),
+       _newFencingToken = newFencingToken ?? (() => 'ct-${_randomToken()}'),
+       _installationId = installationId ?? 'install-${_randomToken()}';
 
   /// Upload attempts one run spends on one medium whose sessions keep
   /// expiring; the next run goes on from the saved attempt.
@@ -131,6 +163,11 @@ final class LocalImportController extends ChangeNotifier {
   final String _marketId;
   final DateTime Function() _clock;
   final String Function() _newSessionId;
+  final String Function() _newFencingToken;
+
+  /// Recorded with every cleanup reservation of this controller; the fencing
+  /// token, not this id, is what completes or releases it.
+  final String _installationId;
 
   /// The drafts behind the current dry run, by local id.
   final Map<String, CreateDraftEntity> _drafts = <String, CreateDraftEntity>{};
@@ -155,6 +192,7 @@ final class LocalImportController extends ChangeNotifier {
       session: _state.session,
       chosenUpdates: <String>{..._state.chosenUpdates, localDraftId},
       message: _state.message,
+      pendingCleanups: _state.pendingCleanups,
     );
     notifyListeners();
   }
@@ -266,17 +304,23 @@ final class LocalImportController extends ChangeNotifier {
   /// Removes the local original once the policy allows it, after a fresh
   /// server check and only while the local draft is still exactly the
   /// imported one (same source hash, and the same stored draft at deletion).
+  /// D4.1 §1 order: (1) a durable intent with a new fencing token, (2) the
+  /// server reservation, (3) the deletion, (4) `completeImportCleanup` with
+  /// that exact token. A reservation forbids a rollback on every installation.
   Future<void> deleteLocal(String localDraftId) => _run(() async {
-    final LocalImportReceipt receipt = await _requireReceipt(localDraftId);
+    LocalImportReceipt receipt = await _requireReceipt(localDraftId);
     final LocalImportCleanupStatus status = _policy.statusOf(receipt, _clock());
-    if (status.stage != LocalImportCleanupStage.eligible) {
+    final bool reserved =
+        status.stage == LocalImportCleanupStage.cleanupReserved;
+    if (status.stage != LocalImportCleanupStage.eligible && !reserved) {
       throw _LocalRefusal('cleanup_${status.stage.name}');
     }
     final LocalImportServerDraft server = await _gateway.draft(receipt.draftId);
     if (server.createdByUserId != receipt.serverOwnerUserId ||
         server.contentId != receipt.contentId ||
         server.importSourceKey != receipt.importSourceKey ||
-        server.revision < receipt.serverRevision) {
+        server.revision < receipt.serverRevision ||
+        server.status == 'rolledBack') {
       throw const _LocalRefusal('server_check_failed');
     }
     await _dryRun();
@@ -292,7 +336,48 @@ final class LocalImportController extends ChangeNotifier {
               _scopeOf(draft, receipt.publisherRef),
             ) !=
             receipt.sourceHash) {
+      if (receipt.cleanupToken != null) {
+        await _releaseCleanup(receipt, 'local_changed_since_import');
+      }
       throw const _LocalRefusal('local_changed_since_import');
+    }
+    if (receipt.cleanupToken == null) {
+      receipt = receipt.copyWith(
+        cleanupToken: _newFencingToken(),
+        cleanupInstallationId: _installationId,
+        clearFailure: true,
+        updatedAtUtc: _clock(),
+      );
+      await _journal.saveReceipt(receipt);
+    }
+    if (receipt.state != LocalImportItemState.cleanupReserved) {
+      try {
+        await _gateway.reserveImportCleanup(
+          importSourceKey: receipt.importSourceKey,
+          generation: receipt.generation,
+          draftId: receipt.draftId,
+          installationId: receipt.cleanupInstallationId!,
+          fencingToken: receipt.cleanupToken!,
+          idempotencyKey: _cleanupKey(receipt, 'reserve'),
+        );
+      } on EventPublicationRejected catch (refusal) {
+        // Refused (rolled back, held by another installation, gone): nothing
+        // is deleted and the intent is dropped.
+        await _journal.saveReceipt(
+          receipt.copyWith(
+            clearCleanup: true,
+            failureCode: refusal.code,
+            updatedAtUtc: _clock(),
+          ),
+        );
+        await _dryRun();
+        rethrow;
+      }
+      receipt = receipt.copyWith(
+        state: LocalImportItemState.cleanupReserved,
+        updatedAtUtc: _clock(),
+      );
+      await _journal.saveReceipt(receipt);
     }
     final bool deleted = await _originals.deleteIfUnchanged(
       accountId: _accountId,
@@ -303,10 +388,101 @@ final class LocalImportController extends ChangeNotifier {
           stored.updatedAtUtc == draft.updatedAtUtc &&
           stored.objectType == draft.objectType,
     );
-    if (!deleted) throw const _LocalRefusal('local_changed_since_import');
-    await _journal.saveReceipt(
-      receipt.copyWith(localDeletedAtUtc: _clock(), updatedAtUtc: _clock()),
+    if (!deleted) {
+      await _releaseCleanup(receipt, 'local_changed_since_import');
+      throw const _LocalRefusal('local_changed_since_import');
+    }
+    receipt = receipt.copyWith(
+      localDeletedAtUtc: _clock(),
+      updatedAtUtc: _clock(),
     );
+    await _journal.saveReceipt(receipt);
+    await _completeCleanup(receipt);
+    await _dryRun();
+  });
+
+  /// Releases this installation's cleanup intent while the original is here.
+  Future<void> cancelCleanup(String localDraftId) => _run(() async {
+    final LocalImportReceipt receipt = await _requireReceipt(localDraftId);
+    if (receipt.cleanupToken == null || receipt.localDeletedAtUtc != null) {
+      throw const _LocalRefusal('cleanup_not_reserved');
+    }
+    await _releaseCleanup(receipt, null);
+    await _dryRun();
+  });
+
+  /// Completes, with the journaled token, every cleanup whose original was
+  /// deleted before the server recorded it (a lost answer or a restart).
+  Future<void> finishCleanups() => _run(() async {
+    for (final LocalImportReceipt receipt in await _journal.receipts(
+      _accountId,
+    )) {
+      if (_owesCompletion(receipt)) await _completeCleanup(receipt);
+    }
+    await _dryRun();
+  });
+
+  /// D4.1 rollback of a verified import: the durable `rollbackPending` intent
+  /// is written first and sent again unchanged until the server's outcome is
+  /// known. Only while the local original is still here, no cleanup is under
+  /// way, and at exactly the revision the receipt verified.
+  Future<void> rollback(String localDraftId) => _run(() async {
+    // The local original must still be here: a rollback never leaves the
+    // user without both copies (D4.1 §1 invariant).
+    await _dryRun();
+    final LocalImportItemView? view = _itemOf(localDraftId);
+    if (view == null) throw const _LocalRefusal('original_missing');
+    LocalImportReceipt receipt = await _requireReceipt(localDraftId);
+    if (receipt.state == LocalImportItemState.rolledBack) {
+      throw const _LocalRefusal('import_rolled_back');
+    }
+    if (receipt.localDeletedAtUtc != null) {
+      throw const _LocalRefusal('original_removed');
+    }
+    if (receipt.cleanupToken != null) {
+      throw const _LocalRefusal('cleanup_reserved');
+    }
+    if (!view.canRollBack) throw const _LocalRefusal('rollback_not_allowed');
+    if (receipt.state == LocalImportItemState.verified) {
+      final int revision = receipt.serverRevision;
+      receipt = receipt.copyWith(
+        state: LocalImportItemState.rollbackPending,
+        rollbackKey: _lifecycleKey(receipt, 'rollback:$revision'),
+        rollbackExpectedRevision: revision,
+        clearFailure: true,
+        updatedAtUtc: _clock(),
+      );
+      await _journal.saveReceipt(receipt);
+    }
+    try {
+      final LocalImportServerDraft tombstone = await _gateway
+          .rollbackImportedDraft(
+            draftId: receipt.draftId,
+            importSourceKey: receipt.importSourceKey,
+            generation: receipt.generation,
+            expectedRevision: receipt.rollbackExpectedRevision!,
+            idempotencyKey: receipt.rollbackKey!,
+          );
+      await _rolledBack(receipt, tombstone.revision);
+    } on EventPublicationRejected catch (refusal) {
+      // A definitive answer to this intent: the binding says whether this
+      // generation is rolled back anyway (another installation, or an earlier
+      // attempt). Otherwise nothing changed and the receipt is as before.
+      if (await _generationRolledBack(receipt)) {
+        await _rolledBack(receipt, null);
+      } else {
+        await _journal.saveReceipt(
+          receipt.copyWith(
+            state: LocalImportItemState.verified,
+            clearRollback: true,
+            failureCode: refusal.code,
+            updatedAtUtc: _clock(),
+          ),
+        );
+        await _dryRun();
+        rethrow;
+      }
+    }
     await _dryRun();
   });
 
@@ -338,12 +514,19 @@ final class LocalImportController extends ChangeNotifier {
         ),
       );
     }
+    int pending = 0;
+    for (final LocalImportReceipt receipt in await _journal.receipts(
+      _accountId,
+    )) {
+      if (_owesCompletion(receipt)) pending += 1;
+    }
     _state = LocalImportViewState(
       phase: _state.phase,
       items: List<LocalImportItemView>.unmodifiable(items),
       session: await _journal.currentSession(_accountId),
       chosenUpdates: _state.chosenUpdates,
       message: _state.message,
+      pendingCleanups: pending,
     );
   }
 
@@ -439,6 +622,40 @@ final class LocalImportController extends ChangeNotifier {
       localDraftId: draft.id,
     );
     if (receipt != null) {
+      switch (receipt.state) {
+        // D4.1: importing again after a rollback is a new, explicit choice.
+        case LocalImportItemState.rolledBack:
+          return of(
+            LocalImportClass.conflict,
+            reason: 'rolled_back',
+            serverContentId: receipt.contentId,
+          );
+        case LocalImportItemState.rollbackPending:
+          return of(
+            LocalImportClass.alreadyMapped,
+            reason: 'rollback_pending',
+            serverContentId: receipt.contentId,
+          );
+        case LocalImportItemState.cleanupReserved:
+          return of(
+            LocalImportClass.alreadyMapped,
+            reason: 'cleanup_reserved',
+            serverContentId: receipt.contentId,
+          );
+        case LocalImportItemState.created:
+        case LocalImportItemState.mediaUploaded:
+        case LocalImportItemState.bodySaved:
+        case LocalImportItemState.verified:
+        case LocalImportItemState.failed:
+          break;
+      }
+      if (receipt.cleanupToken != null) {
+        return of(
+          LocalImportClass.alreadyMapped,
+          reason: 'cleanup_pending',
+          serverContentId: receipt.contentId,
+        );
+      }
       if (receipt.state != LocalImportItemState.verified) {
         return of(
           LocalImportClass.create,
@@ -497,9 +714,18 @@ final class LocalImportController extends ChangeNotifier {
     final String importSourceKey = importSourceKeyOf(draft.id)!;
 
     LocalImportReceipt? receipt = view!.receipt;
-    if (receipt == null) {
+    // A pending rollback or cleanup of this item is never mixed with an import.
+    if (receipt != null &&
+        (receipt.state == LocalImportItemState.rollbackPending ||
+            receipt.state == LocalImportItemState.cleanupReserved ||
+            receipt.cleanupToken != null)) {
+      return;
+    }
+    if (receipt == null || receipt.state == LocalImportItemState.rolledBack) {
       // §5.3 step 1: the server returns this author's draft for this source
-      // if it already has one, whatever key the earlier attempt used.
+      // if it already has one, whatever key the earlier attempt used. After a
+      // rollback (D4.1) the keys name the next generation.
+      final int generation = (receipt?.generation ?? 0) + 1;
       final LocalImportServerDraft created;
       try {
         created = await _gateway.createImportDraft(
@@ -507,7 +733,7 @@ final class LocalImportController extends ChangeNotifier {
           publisherRef: publisher,
           marketId: _marketId,
           importSourceKey: importSourceKey,
-          idempotencyKey: '${scope.keyBase}:create',
+          idempotencyKey: '${_keyBase(scope, generation)}:create',
         );
       } on EventPublicationRejected catch (refusal) {
         // A definitive refusal: nothing exists on the server for this item.
@@ -533,6 +759,9 @@ final class LocalImportController extends ChangeNotifier {
         state: LocalImportItemState.created,
         updatedAtUtc: _clock(),
         title: candidate.title,
+        // The server decides the generation (another installation may have
+        // opened it already).
+        generation: created.importGeneration ?? 1,
       );
       await _journal.saveReceipt(receipt);
     }
@@ -548,7 +777,11 @@ final class LocalImportController extends ChangeNotifier {
           current;
       await _journal.saveReceipt(
         latest.copyWith(
-          state: LocalImportItemState.failed,
+          // D4.1: the server says this generation is a tombstone; a new
+          // import of it is a new, explicit choice.
+          state: code == 'import_rolled_back'
+              ? LocalImportItemState.rolledBack
+              : LocalImportItemState.failed,
           failureCode: code,
           updatedAtUtc: _clock(),
         ),
@@ -600,10 +833,12 @@ final class LocalImportController extends ChangeNotifier {
       for (int tries = 1; ; tries += 1) {
         try {
           assetId = await _uploader.upload(
-            intentId: scope.uploadIntentId(
+            intentId: _uploadIntentId(
+              scope,
+              receipt.generation,
               item.attachmentId,
               digest,
-              attempt: attempt,
+              attempt,
             ),
             bytes: bytes,
             declaredMediaType: declaredPublicationMediaType(item.localRef),
@@ -657,9 +892,11 @@ final class LocalImportController extends ChangeNotifier {
     return receipt;
   }
 
-  /// §5.3 step 3: the full body. A revision the server moved past is read
-  /// back once and the body mapped again for it (the Collection review belongs
-  /// to the revision the save produces).
+  /// §5.3 step 3: the full body, at exactly the revision the receipt holds
+  /// (the Collection review belongs to the revision the save produces). A lost
+  /// answer is repeated under the same key. A revision the server moved past
+  /// is someone else's edit: it is kept, and the item fails with
+  /// `revision_conflict` instead of being written over (D4.1 §3.3).
   Future<LocalImportReceipt> _saveBody(
     CreateDraftEntity draft,
     LocalImportTypeAdapter adapter,
@@ -686,24 +923,15 @@ final class LocalImportController extends ChangeNotifier {
         expectedRevision: revision,
         body: body,
         idempotencyKey:
-            '${scope.keyBase}:update:$revision:${bodyHash.substring(0, 16)}',
+            '${_keyBase(scope, receipt.generation)}:update:$revision:'
+            '${bodyHash.substring(0, 16)}',
       );
       return (saved, bodyHash);
     }
 
-    (LocalImportServerDraft, String) result;
-    try {
-      result = await update(receipt.serverRevision);
-    } on EventPublicationRejected catch (refusal) {
-      if (refusal.code != 'revision_conflict') rethrow;
-      final LocalImportServerDraft server = await _gateway.draft(
-        receipt.draftId,
-      );
-      if (server.createdByUserId != receipt.serverOwnerUserId) {
-        throw const _LocalRefusal('foreign_record');
-      }
-      result = await update(server.revision);
-    }
+    final (LocalImportServerDraft, String) result = await update(
+      receipt.serverRevision,
+    );
     final LocalImportReceipt saved = receipt.copyWith(
       serverRevision: result.$1.revision,
       sentBodyHash: result.$2,
@@ -724,6 +952,8 @@ final class LocalImportController extends ChangeNotifier {
         server.contentId == receipt.contentId &&
         server.createdByUserId == receipt.serverOwnerUserId &&
         server.importSourceKey == receipt.importSourceKey &&
+        (server.importGeneration ?? 1) == receipt.generation &&
+        server.status != 'rolledBack' &&
         // A replayed save may answer with the revision it stored first; the
         // server copy is what counts: exactly the body that was sent.
         server.revision >= receipt.serverRevision &&
@@ -750,6 +980,106 @@ final class LocalImportController extends ChangeNotifier {
         publisherRef: publisher,
         localDraftId: draft.id,
       );
+
+  /// D4.1 §3.2: generation 1 keeps the D4 keys; a later one names itself.
+  static String _keyBase(LocalImportScope scope, int generation) =>
+      generation <= 1 ? scope.keyBase : '${scope.keyBase}:g$generation';
+
+  static String _uploadIntentId(
+    LocalImportScope scope,
+    int generation,
+    String attachmentId,
+    String digest,
+    int attempt,
+  ) => generation <= 1
+      ? scope.uploadIntentId(attachmentId, digest, attempt: attempt)
+      : scope.id(
+          'g$generation:upload:$attachmentId:$digest'
+          '${attempt == 0 ? '' : ':$attempt'}',
+        );
+
+  /// Keys of the rollback and cleanup commands always name the generation.
+  String _lifecycleKey(LocalImportReceipt receipt, String step) {
+    final LocalImportScope scope = LocalImportScope(
+      accountId: _accountId,
+      publisherRef: receipt.publisherRef,
+      localDraftId: receipt.localDraftId,
+    );
+    return '${scope.keyBase}:g${receipt.generation}:$step';
+  }
+
+  String _cleanupKey(LocalImportReceipt receipt, String step) =>
+      _lifecycleKey(receipt, 'cleanup:${receipt.cleanupToken}:$step');
+
+  static bool _owesCompletion(LocalImportReceipt receipt) =>
+      receipt.localDeletedAtUtc != null &&
+      receipt.cleanupToken != null &&
+      receipt.cleanupCompletedAtUtc == null;
+
+  Future<void> _completeCleanup(LocalImportReceipt receipt) async {
+    // A lost answer is repeated with the same token under the same key.
+    await _gateway.completeImportCleanup(
+      importSourceKey: receipt.importSourceKey,
+      generation: receipt.generation,
+      fencingToken: receipt.cleanupToken!,
+      idempotencyKey: _cleanupKey(receipt, 'complete'),
+    );
+    await _journal.saveReceipt(
+      receipt.copyWith(cleanupCompletedAtUtc: _clock(), updatedAtUtc: _clock()),
+    );
+  }
+
+  /// Gives the reservation back while the original is still here; a server
+  /// that holds nothing for this token leaves only the local intent to drop.
+  Future<void> _releaseCleanup(LocalImportReceipt receipt, String? code) async {
+    try {
+      await _gateway.releaseImportCleanup(
+        importSourceKey: receipt.importSourceKey,
+        generation: receipt.generation,
+        fencingToken: receipt.cleanupToken!,
+        idempotencyKey: _cleanupKey(receipt, 'release'),
+      );
+    } on EventPublicationRejected catch (refusal) {
+      if (refusal.code != 'cleanup_not_reserved') rethrow;
+    }
+    await _journal.saveReceipt(
+      receipt.copyWith(
+        state: LocalImportItemState.verified,
+        clearCleanup: true,
+        failureCode: code,
+        clearFailure: code == null,
+        updatedAtUtc: _clock(),
+      ),
+    );
+    await _dryRun();
+  }
+
+  Future<void> _rolledBack(LocalImportReceipt receipt, int? revision) =>
+      _journal.saveReceipt(
+        receipt.copyWith(
+          state: LocalImportItemState.rolledBack,
+          serverRevision: revision,
+          rolledBackAtUtc: _clock(),
+          clearRollback: true,
+          clearFailure: true,
+          updatedAtUtc: _clock(),
+        ),
+      );
+
+  /// Whether the server's binding shows this receipt's generation rolled back.
+  Future<bool> _generationRolledBack(LocalImportReceipt receipt) async {
+    final LocalImportBindingView binding;
+    try {
+      binding = await _gateway.importBinding(receipt.importSourceKey);
+    } on EventPublicationRejected {
+      return false;
+    }
+    // A later generation exists only after this one was rolled back.
+    return binding.generation > receipt.generation ||
+        (binding.generation == receipt.generation &&
+            binding.rolledBack &&
+            binding.draftId == receipt.draftId);
+  }
 
   /// The canonical local source: the mapped body as the dry run sees it (no
   /// server author, no server media) and the SHA-256 of every medium's bytes.
@@ -816,10 +1146,20 @@ final class LocalImportController extends ChangeNotifier {
     } on _LocalRefusal catch (refusal) {
       _emit(phase: LocalImportPhase.ready, message: refusal.code);
     } on EventPublicationUnavailable catch (failure) {
+      // An unknown outcome: the view shows the journal as it now stands.
+      await _refresh();
       _emit(phase: LocalImportPhase.offline, message: failure.code);
     } on StateError {
       // The gate closed between the check and the call: nothing was sent.
       _emit(phase: LocalImportPhase.ready, message: 'not_allowed');
+    }
+  }
+
+  Future<void> _refresh() async {
+    try {
+      await _dryRun();
+    } on Exception {
+      // The previous view stays; the journal is what the next action reads.
     }
   }
 
@@ -830,9 +1170,18 @@ final class LocalImportController extends ChangeNotifier {
       session: _state.session,
       chosenUpdates: _state.chosenUpdates,
       message: message,
+      pendingCleanups: _state.pendingCleanups,
     );
     notifyListeners();
   }
+}
+
+/// 128 random bits, URL-safe and unpadded.
+String _randomToken() {
+  final Random random = Random.secure();
+  return base64Url
+      .encode(List<int>.generate(16, (_) => random.nextInt(256)))
+      .replaceAll('=', '');
 }
 
 extension on LocalImportViewState {

@@ -16,6 +16,7 @@ import 'package:recharge/features/create/domain/entities/create_draft_entity.dar
 import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_event_draft.dart';
+import 'support/content_fault_client.dart';
 import 'support/stand_backend.dart';
 
 /// C3: the user's own Create Event draft goes through the real Content,
@@ -32,6 +33,8 @@ void main() {
   late File cover;
   late Map<String, Object?> seededEvent;
   final runtimes = <String, Future<BookingTransportRuntime>>{};
+  // M1 stage 2: real HTTP that a test can sever or make lose one answer.
+  final faults = ContentFaultClient();
 
   Future<BookingTransportRuntime> runtimeFor(
     String label,
@@ -44,7 +47,7 @@ void main() {
     final sessions = FileSessionStore(File('${temp.path}/session-$label.json'));
     final runtime = await BookingTransportRuntimeFactory(
       endpoint: binding.endpoint,
-      client: CountingClient(),
+      client: faults,
       tokens: AuthEmulatorTokenProvider('stand-user-$label'),
       sessions: sessions,
       installations: FixedInstallationId('c3-local-installation-$label'),
@@ -71,11 +74,13 @@ void main() {
     ),
   );
 
-  /// The draft is saved and read back through the real Create repository.
+  /// The draft is saved and read back through the real Create repository;
+  /// [journal] names a separate journal file (a restart reuses it).
   Future<EventPublicationController> controllerFor(
     String label,
-    CreateDraftEntity draft,
-  ) async {
+    CreateDraftEntity draft, {
+    String? journal,
+  }) async {
     final repository = CreateRepositoryImpl(
       localDataSource: CreateLocalDataSource(const FlutterSecureStorage()),
       idGenerator: UuidV4IdGenerator(),
@@ -86,8 +91,32 @@ void main() {
       port: runtime.port!,
       guard: guard(),
       drafts: CreateRepositoryEventDraftSource(repository, 'user-$label'),
-      journalFile: File('${temp.path}/journal-$label.json'),
+      journalFile: File('${temp.path}/${journal ?? 'journal-$label'}.json'),
     );
+  }
+
+  PublicationProbe probe(EventPublicationController c) => PublicationProbe(
+    load: c.load,
+    save: c.save,
+    uploadMedia: c.uploadCover,
+    submit: c.submit,
+    publish: c.publish,
+    refresh: c.refresh,
+    dispose: c.dispose,
+    message: () => c.state.message,
+    offline: () => c.state.phase == EventPublicationPhase.offline,
+    journaledSubmissionId: () => c.state.record?.submissionId,
+    status: () => c.state.status,
+  );
+
+  Future<void> approve(String submissionId) async {
+    final approved = await stand!.moderate(<String>[
+      'approve',
+      submissionId,
+      '--reason',
+      'm1 stage 2: the Event is fine',
+    ]);
+    expect(approved.exitCode, 0, reason: '${approved.json}');
   }
 
   setUpAll(() async {
@@ -212,5 +241,74 @@ void main() {
     },
     skip: stand == null,
     timeout: const Timeout(Duration(minutes: 3)),
+  );
+
+  test(
+    'M1 S4: a repeated save after a fresh start reuses the same server draft',
+    () async {
+      final draft = userEventDraft(
+        pageId: seededEvent['pageId']! as String,
+        coverPath: cover.path,
+        localId: 'loc_m1_event_repeat_${const Uuid().v4()}',
+      );
+      final first = await controllerFor('creator', draft, journal: 'repeat');
+      await first.load();
+      await first.save();
+      expect(first.state.message, isNull, reason: first.state.message);
+      final contentId = first.state.record!.contentId;
+      final draftId = first.state.record!.draftId;
+      first.dispose();
+      // A new controller (app restart) with the same journal and draft.
+      final again = await controllerFor('creator', draft, journal: 'repeat');
+      await again.load();
+      expect(again.state.record?.contentId, contentId);
+      await again.save();
+      expect(again.state.message, isNull, reason: again.state.message);
+      expect(again.state.record?.contentId, contentId);
+      expect(again.state.record?.draftId, draftId);
+      expect(again.state.myObjects, hasLength(1));
+      again.dispose();
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 3)),
+  );
+
+  test(
+    'M1 S1-S3 submit: severed, lost answer, restart and retry give one submission',
+    () async {
+      final draft = userEventDraft(
+        pageId: seededEvent['pageId']! as String,
+        coverPath: cover.path,
+        localId: 'loc_m1_event_submit_${const Uuid().v4()}',
+      );
+      await expectSubmitSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'submit-faults'),
+        ),
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+
+  test(
+    'M1 S1-S3 publish: severed, lost answer, restart and retry give one publication',
+    () async {
+      final draft = userEventDraft(
+        pageId: seededEvent['pageId']! as String,
+        coverPath: cover.path,
+        localId: 'loc_m1_event_publish_${const Uuid().v4()}',
+      );
+      await expectPublishSurvivesFaults(
+        faults,
+        () async => probe(
+          await controllerFor('creator', draft, journal: 'publish-faults'),
+        ),
+        approve,
+      );
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }
