@@ -343,6 +343,80 @@ void main() {
       expect(server.calls, isEmpty);
     },
   );
+
+  test(
+    'M1 D1: a lost publish answer is retried with the journaled payload',
+    () async {
+      final PlacePublicationController c = controller(draft());
+      await c.load();
+      await c.save();
+      await c.submit();
+      expect(c.state.message, isNull, reason: c.state.message);
+      server.approve('submission-1');
+      await c.refresh();
+      server.loseAnswerOf.add('publishApprovedRevision');
+      await c.publish();
+      expect(c.state.phase, PlacePublicationPhase.offline);
+      expect(server.publications, 1, reason: 'the server applied it');
+      // A restart: a new controller over the same journal retries the same payload.
+      final PlacePublicationController again = controller(draft());
+      await again.load();
+      await again.publish();
+      expect(again.state.message, isNull, reason: again.state.message);
+      expect(server.publications, 1, reason: 'exactly one publication');
+    },
+  );
+
+  test(
+    'M1 D2: a newer revision written elsewhere is a conflict; only the explicit choice saves over it',
+    () async {
+      final PlacePublicationController c = controller(draft());
+      await c.load();
+      await c.save();
+      expect(c.state.message, isNull, reason: c.state.message);
+      final String draftId = c.state.record!.draftId;
+      final int saved = server.drafts[draftId]!.revision;
+      const Map<String, Object?> elsewhere = <String, Object?>{
+        'title': 'elsewhere',
+      };
+      server.writeElsewhere(draftId, elsewhere);
+      final PlacePublicationController mine = controller(
+        draft().copyWith(title: 'Edited on this install'),
+      );
+      await mine.load();
+      await mine.save();
+      expect(mine.state.message, 'revision_conflict');
+      expect(mine.state.conflict?.serverRevision, saved + 1);
+      expect(
+        server.drafts[draftId]!.body,
+        elsewhere,
+        reason: 'nothing overwritten',
+      );
+      await mine.save();
+      expect(mine.state.message, 'revision_conflict');
+      expect(
+        server.drafts[draftId]!.revision,
+        saved + 1,
+        reason: 'no automatic overwrite',
+      );
+      server.writeElsewhere(draftId, const <String, Object?>{'title': 'again'});
+      await mine.refresh();
+      expect(
+        mine.state.conflict?.serverRevision,
+        saved + 2,
+        reason: 'the actual revision',
+      );
+      expect(mine.state.canSaveOverServerVersion, isTrue);
+      await mine.saveOverServerVersion();
+      expect(mine.state.message, isNull, reason: mine.state.message);
+      expect(mine.state.conflict, isNull);
+      expect(server.drafts[draftId]!.revision, saved + 3);
+      expect(
+        server.drafts[draftId]!.body,
+        isNot(<String, Object?>{'title': 'again'}),
+      );
+    },
+  );
 }
 
 final class _Drafts implements PlaceDraftSource {
@@ -423,6 +497,8 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
   final List<({String key, Map<String, Object?> body})> creates =
       <({String key, Map<String, Object?> body})>[];
   final Set<String> loseAnswerOf = <String>{};
+  final Map<String, String> _publishReplies = <String, String>{};
+  int publications = 0;
   final Set<String> failBefore = <String>{};
   final Map<String, (String, EventServerDraftRef)> _replies =
       <String, (String, EventServerDraftRef)>{};
@@ -437,6 +513,17 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
 
   void approve(String submissionId) =>
       _submissionStates[submissionId] = 'approved_for_publication';
+
+  /// M1 D2: another install of the same author saves the draft.
+  void writeElsewhere(String draftId, Map<String, Object?> body) {
+    final _Draft current = drafts[draftId]!;
+    drafts[draftId] = _Draft(
+      contentId: current.contentId,
+      revision: current.revision + 1,
+      owner: current.owner,
+      body: body,
+    );
+  }
 
   EventServerDraftRef _ref(String draftId) {
     final _Draft draft = drafts[draftId]!;
@@ -561,9 +648,23 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
     required String idempotencyKey,
   }) async {
     calls.add('publishApprovedRevision');
-    _submissionStates[submissionId] = 'published';
-    _pointerRevision = 1;
-    _visibility = 'visible';
+    // Like Content: a key replays its stored answer only for the same payload.
+    final String fingerprint = '$submissionId:$expectedPointerRevision';
+    final String? stored = _publishReplies[idempotencyKey];
+    if (stored != null) {
+      if (stored != fingerprint) {
+        throw const EventPublicationRejected('idempotency_conflict');
+      }
+    } else {
+      _publishReplies[idempotencyKey] = fingerprint;
+      publications += 1;
+      _submissionStates[submissionId] = 'published';
+      _pointerRevision = (_pointerRevision ?? 0) + 1;
+      _visibility = 'visible';
+    }
+    if (loseAnswerOf.remove('publishApprovedRevision')) {
+      throw const EventPublicationUnavailable('transport');
+    }
   }
 
   @override

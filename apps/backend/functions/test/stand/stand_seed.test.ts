@@ -206,7 +206,16 @@ function raw(prefix: string): MutableState {
     ],
     [
       'identityPageMemberships',
-      new Map<string, Plain>(standPages.map((page) => [page.membershipId, { role: 'owner' }])),
+      new Map<string, Plain>(
+        standPages.map((page) => [
+          page.membershipId,
+          {
+            role: 'owner',
+            status: 'active',
+            capabilityIds: ['content.create', 'content.publish', 'content.submit', 'manage_page'],
+          },
+        ]),
+      ),
     ],
     [
       'bookingEventProjections',
@@ -260,6 +269,18 @@ void test('invariants accept the seed shape and reject elevated ordinary account
     capabilityIds: ['booking.self_service', 'content.publish'],
   });
   assert.ok(standInvariantProblems(staffCapabilities).length > 0);
+});
+
+void test('invariants reject an owner membership left without its Content capabilities', () => {
+  const prefix = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  const withdrawn = raw(prefix);
+  const membershipId = standPages[0]?.membershipId ?? '';
+  withdrawn.get('identityPageMemberships')?.set(membershipId, {
+    role: 'owner',
+    status: 'active',
+    capabilityIds: ['manage_page'],
+  });
+  assert.ok(standInvariantProblems(withdrawn).some((problem) => problem.includes(membershipId)));
 });
 
 void test('invariants require the moderation grant on exactly the staff Account', () => {

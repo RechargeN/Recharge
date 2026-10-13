@@ -172,10 +172,20 @@ final class EventPublicationController extends ChangeNotifier {
     final String? submissionId =
         status.latestSubmissionId ?? record.submissionId;
     if (submissionId == null) throw const _LocalRefusal('submission_required');
+    // M1 D1: the first attempt is journaled before the call; a retry after an
+    // unknown outcome sends that same payload, never a fresh pointer revision.
+    PublishIntent? intent = record.publishIntent;
+    if (intent == null || intent.submissionId != submissionId) {
+      intent = PublishIntent(
+        submissionId: submissionId,
+        expectedPointerRevision: status.pointerRevision ?? 0,
+      );
+      await _journal.save(record.copyWith(publishIntent: intent));
+    }
     await _gateway.publishApproved(
-      submissionId: submissionId,
-      expectedPointerRevision: status.pointerRevision ?? 0,
-      idempotencyKey: '$submissionId:publish',
+      submissionId: intent.submissionId,
+      expectedPointerRevision: intent.expectedPointerRevision,
+      idempotencyKey: intent.idempotencyKey,
     );
     await _refreshAll();
   });

@@ -829,6 +829,35 @@ session with durable receipts and resume, and the guarded removal of the local
 original (verification, explicit confirmation, 30 days). It never submits or
 publishes. The gate seeds the D3.1 Place first (Place authoring flag and Page).
 
+## M1 stage 2: Page access and publication reliability (Emulator only)
+
+Client evidence for the M1 checklist
+([S1–S7](../../docs/verification/M1_LOCAL_CONTOUR_CHECKLIST.md)); no new
+authority path, no runtime change on the backend.
+
+- `stand-seed.mjs page-access` (test-only, `functions/test/stand/stand_page_access_fixture.ts`)
+  withdraws and restores Page access only through the Identity owner services:
+  `withdraw-publish <label> <pageId>` (`setCapabilities`: the owner keeps
+  `manage_page` and loses `content.create|submit|publish`; it prints the saved
+  set), `restore-publish <label> <pageId> <saved,set>`, `suspend <pageId>` and
+  `reverify <pageId>` (`decidePage` by the stand staff), `status <label> <pageId>`.
+  The terminal `revokeMembership` has no admissible fixture (no owner path adds a
+  second member) and stays backend-only evidence.
+- `stand verify` also checks that every owner membership is active with the
+  seeded capabilities, so a withdrawal that was not restored fails the gate.
+- The C3 and D3.1–D3.4 stand tests sever or lose the answer of `submit` and
+  `publish` through `test/backend_local/support/content_fault_client.dart` and
+  retry from a new controller over the same journal.
+- `stand-d3-1-gate.mjs` then runs, each on its own fresh stand (the Session
+  issue budget is 5 per Account in 15 minutes), the Page access tests
+  (controller and UI, Event and Place) and the two-installation conflict test.
+
+Mobile fixes found by these tests: publish journals its exact payload before
+the call so a retry after a lost answer replays it (no `idempotency_conflict`),
+and a body save never writes over a newer revision of another install by
+itself: the client reports `revision_conflict` and saves over it only on the
+user's explicit "Save my version".
+
 ## Sequential Emulator test groups (2026-10-11)
 
 From `apps/backend/functions`, `npm run test:emulator` builds once before

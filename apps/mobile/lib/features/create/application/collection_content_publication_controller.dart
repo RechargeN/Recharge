@@ -40,6 +40,7 @@ final class CollectionPublicationViewState {
     this.message,
     this.members = const <CollectionMemberStatus>[],
     this.myObjects = const <CollectionPublicationObjectView>[],
+    this.conflict,
   });
 
   final CollectionPublicationPhase phase;
@@ -58,7 +59,12 @@ final class CollectionPublicationViewState {
   final List<CollectionMemberStatus> members;
   final List<CollectionPublicationObjectView> myObjects;
 
+  /// A newer server revision that is not this install's own write (M1 D2);
+  /// the local edit waits for the user's explicit choice.
+  final DraftConflict? conflict;
+
   bool get _idle => phase == CollectionPublicationPhase.ready;
+  bool get canSaveOverServerVersion => _idle && conflict != null;
   bool get canSave => _idle && draftTitle != null;
   bool get canUploadMedia => _idle && record != null;
   bool get canSubmit => _idle && (record?.bodySaved ?? false);
@@ -122,6 +128,7 @@ final class CollectionContentPublicationController extends ChangeNotifier {
   /// Records whose server author was checked in this session.
   final Set<String> _verifiedDrafts = <String>{};
 
+  DraftConflict? _conflict;
   CreateDraftEntity? _draft;
   CollectionPublicationViewState _state = const CollectionPublicationViewState(
     phase: CollectionPublicationPhase.loading,
@@ -230,6 +237,23 @@ final class CollectionContentPublicationController extends ChangeNotifier {
 
   Future<void> refresh() => _run(_refreshAll);
 
+  /// M1 D2: the user's explicit choice to save the local version on top of the
+  /// newer server revision a conflict reported. Nothing else saves over it.
+  Future<void> saveOverServerVersion() => _run(() async {
+    final DraftConflict? conflict = _conflict;
+    if (conflict == null) throw const _LocalRefusal('no_conflict');
+    final CreateDraftEntity draft = _requireDraft();
+    final CollectionPublicationScope scope = _scope(draft);
+    final CollectionPublicationRecord record = await _requireRecord(scope);
+    await _saveBody(
+      draft,
+      scope,
+      record,
+      overServerRevision: conflict.serverRevision,
+    );
+    await _refreshAll();
+  });
+
   /// Publishes the revision staff approved (the owner's own command).
   Future<void> publish() => _run(() async {
     final CollectionPublicationRecord record = await _requireRecord(
@@ -241,10 +265,20 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     final String? submissionId =
         status.latestSubmissionId ?? record.submissionId;
     if (submissionId == null) throw const _LocalRefusal('submission_required');
+    // M1 D1: the first attempt is journaled before the call; a retry after an
+    // unknown outcome sends that same payload, never a fresh pointer revision.
+    PublishIntent? intent = record.publishIntent;
+    if (intent == null || intent.submissionId != submissionId) {
+      intent = PublishIntent(
+        submissionId: submissionId,
+        expectedPointerRevision: status.pointerRevision ?? 0,
+      );
+      await _journal.save(record.copyWith(publishIntent: intent));
+    }
     await _gateway.publishApproved(
-      submissionId: submissionId,
-      expectedPointerRevision: status.pointerRevision ?? 0,
-      idempotencyKey: '$submissionId:publish',
+      submissionId: intent.submissionId,
+      expectedPointerRevision: intent.expectedPointerRevision,
+      idempotencyKey: intent.idempotencyKey,
     );
     await _refreshAll();
   });
@@ -297,56 +331,121 @@ final class CollectionContentPublicationController extends ChangeNotifier {
   }
 
   /// §5.4: the full body. Its composition review belongs to the revision this
-  /// update produces, so a revision the server already moved past is read
-  /// back once and the body mapped and saved again for it.
+  /// update produces, so the body is mapped for the revision it is sent on.
+  ///
+  /// M1 D2: every write is journaled with its exact payload before the call.
+  /// A write whose answer never came is replayed first, unchanged: the server
+  /// answers a write it applied from its stored result, so that newer revision
+  /// is this install's own. A revision the server holds for any other reason
+  /// is someone else's edit: the save stops with `revision_conflict` and the
+  /// local edit waits for [saveOverServerVersion]; nothing overwrites it here.
   Future<void> _saveBody(
     CreateDraftEntity draft,
     CollectionPublicationScope scope,
-    CollectionPublicationRecord record,
-  ) async {
+    CollectionPublicationRecord record, {
+    int? overServerRevision,
+  }) async {
     final Map<String, String> assets = await _currentAssets(
       draft,
       scope,
       record,
     );
-    Future<EventServerDraftRef> update(int revision) {
-      final CollectionContentBody mapped = _mapper.map(
-        draft,
-        scope: scope,
-        reviewedRevision: revision + 1,
-        assetIds: assets,
-      );
-      _refuseUnsupported(mapped);
-      final String bodyDigest = sha256
-          .convert(utf8.encode(jsonEncode(mapped.body)))
-          .toString()
-          .substring(0, 16);
-      return _gateway.updateDraft(
-        draftId: record.draftId,
-        expectedRevision: revision,
-        body: mapped.body,
-        idempotencyKey: '${scope.keyBase}:update:$revision:$bodyDigest',
-      );
-    }
-
-    EventServerDraftRef updated;
-    try {
-      updated = await update(record.draftRevision);
-    } on EventPublicationRejected catch (refusal) {
-      if (refusal.code != 'revision_conflict') rethrow;
-      final EventServerDraftRef server = await _reader.draft(record.draftId);
-      if (server.createdByUserId != record.serverOwnerUserId) {
-        throw const _LocalRefusal('foreign_record');
+    String digestOf(Map<String, Object?> body) => sha256
+        .convert(utf8.encode(jsonEncode(body)))
+        .toString()
+        .substring(0, 16);
+    // The local content without the revision-bound review: it tells whether a
+    // replayed write already holds this content.
+    final String contentDigest = digestOf(
+      _mapper
+          .map(draft, scope: scope, reviewedRevision: 0, assetIds: assets)
+          .body,
+    );
+    CollectionPublicationRecord current = record;
+    final PendingDraftUpdate? pending = current.pendingUpdate;
+    if (pending != null) {
+      final EventServerDraftRef replayed;
+      try {
+        replayed = await _gateway.updateDraft(
+          draftId: current.draftId,
+          expectedRevision: pending.baseRevision,
+          body: pending.body,
+          idempotencyKey: pending.idempotencyKey,
+        );
+      } on EventPublicationRejected catch (refusal) {
+        // A refused write was never applied: it is no longer pending.
+        current = current.copyWith(clearPendingUpdate: true);
+        await _journal.save(current);
+        if (refusal.code == 'revision_conflict') await _conflictOn(current);
+        rethrow;
       }
-      updated = await update(server.revision);
+      current = current.copyWith(
+        draftRevision: replayed.revision,
+        clearPendingUpdate: true,
+      );
+      await _journal.save(current);
+      if (overServerRevision == null && pending.bodyDigest == contentDigest) {
+        await _journal.save(
+          current.copyWith(bodySaved: true, title: draft.title),
+        );
+        _conflict = null;
+        return;
+      }
     }
+    final int base = overServerRevision ?? current.draftRevision;
+    final CollectionContentBody mapped = _mapper.map(
+      draft,
+      scope: scope,
+      reviewedRevision: base + 1,
+      assetIds: assets,
+    );
+    _refuseUnsupported(mapped);
+    final String key = '${scope.keyBase}:update:$base:${digestOf(mapped.body)}';
+    final CollectionPublicationRecord sending = current.copyWith(
+      pendingUpdate: PendingDraftUpdate(
+        baseRevision: base,
+        idempotencyKey: key,
+        bodyDigest: contentDigest,
+        body: mapped.body,
+      ),
+    );
+    await _journal.save(sending);
+    final EventServerDraftRef updated;
+    try {
+      updated = await _gateway.updateDraft(
+        draftId: current.draftId,
+        expectedRevision: base,
+        body: mapped.body,
+        idempotencyKey: key,
+      );
+    } on EventPublicationRejected catch (refusal) {
+      final CollectionPublicationRecord refused = sending.copyWith(
+        clearPendingUpdate: true,
+      );
+      await _journal.save(refused);
+      if (refusal.code == 'revision_conflict') await _conflictOn(refused);
+      rethrow;
+    }
+    // A lost answer (EventPublicationUnavailable) leaves the write pending.
     await _journal.save(
-      record.copyWith(
+      sending.copyWith(
         draftRevision: updated.revision,
         bodySaved: true,
         title: draft.title,
+        clearPendingUpdate: true,
       ),
     );
+    _conflict = null;
+  }
+
+  /// Reads the server revision that won, so the user sees what they would
+  /// save over; a draft of another author is never touched.
+  Future<void> _conflictOn(CollectionPublicationRecord record) async {
+    final EventServerDraftRef server = await _reader.draft(record.draftId);
+    if (server.createdByUserId != record.serverOwnerUserId) {
+      throw const _LocalRefusal('foreign_record');
+    }
+    _conflict = DraftConflict(serverRevision: server.revision);
   }
 
   static void _refuseUnsupported(CollectionContentBody mapped) {
@@ -422,6 +521,8 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     final EventPublicationStatus? status = record == null
         ? null
         : await _gateway.status(record.contentId);
+    // M1 D2: a refresh fetches the revision the user would save over now.
+    if (_conflict != null && record != null) await _conflictOn(record);
     final List<CollectionMemberStatus> members = <CollectionMemberStatus>[];
     for (final CollectionItemDraft item
         in (draft?.collectionData?.items ?? const <CollectionItemDraft>[]).take(
@@ -458,6 +559,7 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       message: _state.message,
       members: List<CollectionMemberStatus>.unmodifiable(members),
       myObjects: List<CollectionPublicationObjectView>.unmodifiable(objects),
+      conflict: _conflict,
     );
   }
 
@@ -497,6 +599,7 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       message: message,
       members: _state.members,
       myObjects: _state.myObjects,
+      conflict: _conflict,
     );
     notifyListeners();
   }

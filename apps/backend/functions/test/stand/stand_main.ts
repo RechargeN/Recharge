@@ -186,6 +186,12 @@ async function main(args: readonly string[]): Promise<void> {
     }
     throw new Error('usage: collection seed | verify | manifest | status');
   }
+  if (command === 'page-access') {
+    // M1 stage 2: loaded only for this command, like the D3.x commands.
+    const { runPageAccess } = await import('./stand_page_access_fixture.js');
+    process.stdout.write(`${JSON.stringify(await runPageAccess(firestore, rest))}\n`);
+    return;
+  }
   if (command === 'creator-fixture') {
     const result = await ensureSecondCreator(firestore, new Date().toISOString());
     process.stdout.write(`${JSON.stringify(result)}\n`);

@@ -51,6 +51,92 @@ final class EventPublicationStatus {
       latestSubmissionState == 'approved_for_publication';
 }
 
+/// The owner's publish command as it was first sent (M1 D1). It is journaled
+/// before the call, so a retry after an unknown outcome sends exactly the same
+/// payload under the same key and the server replays its stored answer.
+final class PublishIntent {
+  const PublishIntent({
+    required this.submissionId,
+    required this.expectedPointerRevision,
+  });
+
+  final String submissionId;
+  final int expectedPointerRevision;
+
+  String get idempotencyKey => '$submissionId:publish';
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'submissionId': submissionId,
+    'expectedPointerRevision': expectedPointerRevision,
+  };
+
+  static PublishIntent? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final Object? submissionId = value['submissionId'];
+    final Object? expected = value['expectedPointerRevision'];
+    if (submissionId is! String || expected is! int) return null;
+    return PublishIntent(
+      submissionId: submissionId,
+      expectedPointerRevision: expected,
+    );
+  }
+}
+
+/// A body save whose answer has not arrived yet (M1 D2), journaled before the
+/// call with its exact payload. The next save first replays exactly this
+/// write: the server answers a write it did apply from its stored result, so a
+/// newer server revision is known to be this install's own; anything else is
+/// someone else's edit and is never overwritten without the user.
+final class PendingDraftUpdate {
+  const PendingDraftUpdate({
+    required this.baseRevision,
+    required this.idempotencyKey,
+    required this.bodyDigest,
+    required this.body,
+  });
+
+  final int baseRevision;
+  final String idempotencyKey;
+  final String bodyDigest;
+  final Map<String, Object?> body;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'baseRevision': baseRevision,
+    'idempotencyKey': idempotencyKey,
+    'bodyDigest': bodyDigest,
+    'body': body,
+  };
+
+  static PendingDraftUpdate? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final Object? baseRevision = value['baseRevision'];
+    final Object? idempotencyKey = value['idempotencyKey'];
+    final Object? bodyDigest = value['bodyDigest'];
+    final Object? body = value['body'];
+    if (baseRevision is! int ||
+        idempotencyKey is! String ||
+        bodyDigest is! String ||
+        body is! Map) {
+      return null;
+    }
+    return PendingDraftUpdate(
+      baseRevision: baseRevision,
+      idempotencyKey: idempotencyKey,
+      bodyDigest: bodyDigest,
+      body: Map<String, Object?>.from(body),
+    );
+  }
+}
+
+/// The server holds a newer revision of the draft that is not this install's
+/// own write (M1 D2). The local edit is kept; nothing is saved until the user
+/// explicitly chooses to save their version on top of [serverRevision].
+final class DraftConflict {
+  const DraftConflict({required this.serverRevision});
+
+  final int serverRevision;
+}
+
 /// One object this installation created through the publication path: the
 /// local "my objects" journal. It lists ids only; every status is read from the
 /// server with the owner's Session.
@@ -65,6 +151,7 @@ final class EventPublicationRecord {
     this.coverAssetId,
     this.coverDigest,
     this.submissionId,
+    this.publishIntent,
   });
 
   final String localDraftId;
@@ -79,12 +166,16 @@ final class EventPublicationRecord {
   final String? coverDigest;
   final String? submissionId;
 
+  /// The publish command as first sent, replayed unchanged on a retry (M1 D1).
+  final PublishIntent? publishIntent;
+
   EventPublicationRecord copyWith({
     int? draftRevision,
     String? title,
     String? coverAssetId,
     String? coverDigest,
     String? submissionId,
+    PublishIntent? publishIntent,
   }) => EventPublicationRecord(
     localDraftId: localDraftId,
     contentId: contentId,
@@ -95,6 +186,7 @@ final class EventPublicationRecord {
     coverAssetId: coverAssetId ?? this.coverAssetId,
     coverDigest: coverDigest ?? this.coverDigest,
     submissionId: submissionId ?? this.submissionId,
+    publishIntent: publishIntent ?? this.publishIntent,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -107,6 +199,7 @@ final class EventPublicationRecord {
     'coverAssetId': coverAssetId,
     'coverDigest': coverDigest,
     'submissionId': submissionId,
+    if (publishIntent != null) 'publishIntent': publishIntent!.toJson(),
   };
 
   static EventPublicationRecord? fromJson(Object? value) {
@@ -139,6 +232,7 @@ final class EventPublicationRecord {
       coverAssetId: optional('coverAssetId'),
       coverDigest: optional('coverDigest'),
       submissionId: optional('submissionId'),
+      publishIntent: PublishIntent.fromJson(value['publishIntent']),
     );
   }
 }

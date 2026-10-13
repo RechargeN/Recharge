@@ -1,3 +1,4 @@
+import 'event_publication.dart';
 import 'publisher_ref.dart';
 
 /// One uploaded medium of an Activity publication: the stable attachment id of
@@ -57,6 +58,8 @@ final class ActivityPublicationRecord {
     this.savedLocalBodyDigest,
     this.pendingActivationRevisionId,
     this.pendingActivationPointerRevision,
+    this.pendingUpdate,
+    this.publishIntent,
   });
 
   final String accountId;
@@ -82,6 +85,12 @@ final class ActivityPublicationRecord {
   final String? pendingActivationRevisionId;
   final int? pendingActivationPointerRevision;
 
+  /// A body save sent but not yet answered (M1 D2).
+  final PendingDraftUpdate? pendingUpdate;
+
+  /// The publish command as first sent (M1 D1).
+  final PublishIntent? publishIntent;
+
   bool belongsTo(String account, PublisherRef publisher) =>
       accountId == account &&
       publisherRef.type == publisher.type &&
@@ -106,6 +115,9 @@ final class ActivityPublicationRecord {
     int? pendingActivationPointerRevision,
     bool clearPendingActivation = false,
     bool clearEditing = false,
+    PendingDraftUpdate? pendingUpdate,
+    bool clearPendingUpdate = false,
+    PublishIntent? publishIntent,
   }) => ActivityPublicationRecord(
     accountId: accountId,
     publisherRef: publisherRef,
@@ -130,6 +142,10 @@ final class ActivityPublicationRecord {
         ? null
         : pendingActivationPointerRevision ??
               this.pendingActivationPointerRevision,
+    pendingUpdate: clearPendingUpdate
+        ? null
+        : pendingUpdate ?? this.pendingUpdate,
+    publishIntent: publishIntent ?? this.publishIntent,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -154,6 +170,8 @@ final class ActivityPublicationRecord {
       'pendingActivationRevisionId': pendingActivationRevisionId,
     if (pendingActivationPointerRevision != null)
       'pendingActivationPointerRevision': pendingActivationPointerRevision,
+    if (pendingUpdate != null) 'pendingUpdate': pendingUpdate!.toJson(),
+    if (publishIntent != null) 'publishIntent': publishIntent!.toJson(),
   };
 
   /// A malformed or foreign-shaped entry is skipped, never repaired.
@@ -227,6 +245,8 @@ final class ActivityPublicationRecord {
           value['pendingActivationRevisionId'] as String?,
       pendingActivationPointerRevision:
           value['pendingActivationPointerRevision'] as int?,
+      pendingUpdate: PendingDraftUpdate.fromJson(value['pendingUpdate']),
+      publishIntent: PublishIntent.fromJson(value['publishIntent']),
     );
   }
 }
