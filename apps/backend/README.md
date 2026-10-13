@@ -783,6 +783,25 @@ Limits: Create-form compatibility is a verified subset; validator codes are not
 sent to the client; no removal-only/archive, no Catalog/Discover for
 Collection; fake scanner/processor; no device, Linux or cloud claim.
 
+## D4 safe local → server import (Emulator only)
+
+`node ../scripts/stand-d4-gate.mjs --yes` (from apps/backend/functions) proves
+the mobile import end to end on the local stand and this PC
+([amendment](../../docs/product/LOCAL_IMPORT_D4_AMENDMENT.md)).
+
+Backend. A Session `createDraft` with `importSourceKey` (`loc_*`) now maps one
+author's local source to exactly one Content draft: the binding
+`local-import:v1:<user>:<key>` is stored with the delegated import bindings
+(`contentExternalBindings`) and the same commit-time uniqueness check. Creating
+again under any idempotency key returns that draft; the same key for another
+type, market or PublisherRef is `idempotency_conflict`; a race leaves one draft.
+
+Mobile. The default-off test entry (`RECHARGE_TEST_LOCAL_IMPORT=true`, plus
+`testBackend` and the loopback Emulator) runs dry run, approval, the import
+session with durable receipts and resume, and the guarded removal of the local
+original (verification, explicit confirmation, 30 days). It never submits or
+publishes. The gate seeds the D3.1 Place first (Place authoring flag and Page).
+
 ## Sequential Emulator test groups (2026-10-11)
 
 From `apps/backend/functions`, `npm run test:emulator` builds once before

@@ -16,6 +16,7 @@ import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
 import 'activity_publication_composition.dart';
 import 'collection_content_publication_composition.dart';
+import 'local_import_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
@@ -310,6 +311,10 @@ Future<void> setupDependencies() async {
     // D3.4: default-off Collection / Guide publication test entry, its own define.
     ..registerLazySingleton<CollectionPublicationTestEntryGuard>(
       () => CollectionPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D4: default-off local→server import test entry, its own define.
+    ..registerLazySingleton<LocalImportTestEntryGuard>(
+      () => LocalImportTestEntryGuard.fromEnvironment(sl()),
     )
     // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
     ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(

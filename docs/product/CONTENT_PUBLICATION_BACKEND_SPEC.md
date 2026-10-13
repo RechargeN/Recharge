@@ -1877,6 +1877,22 @@ or market activation. (Section 42 is reserved for D3.3 Rental.)
   any existing pair applies (as in the mobile taxonomy); an unknown pair does
   not; validator codes are not sent to the client.
 
+## 44. D4 local amendment — one draft per local import source
+
+Authoritative text:
+[LOCAL_IMPORT_D4_AMENDMENT.md](LOCAL_IMPORT_D4_AMENDMENT.md). Local/Emulator
+only; it narrows nothing above.
+
+- A Session `createDraft` with `importSourceKey` binds
+  `local-import:v1:<createdByUserId>:<importSourceKey>` to the draft in
+  `contentExternalBindings`, with the same commit-time uniqueness check as a
+  delegated import binding.
+- Creating again for the same author and key, under any idempotency key,
+  returns that draft as stored (audit `content.draft.import_replayed`); the
+  same key for another type, market or PublisherRef is `idempotency_conflict`.
+  Type flags and authority are checked before the lookup. Delegated imports,
+  drafts without an import source key and the response contract are unchanged.
+
 ## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
 
 Authorized bounded local/Emulator change: optional public details for

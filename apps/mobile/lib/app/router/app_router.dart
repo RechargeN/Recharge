@@ -11,6 +11,7 @@ import '../di/booking_test_entry_guard.dart';
 import '../di/event_publication_composition.dart';
 import '../di/activity_publication_composition.dart';
 import '../di/collection_content_publication_composition.dart';
+import '../di/local_import_composition.dart';
 import '../di/place_publication_composition.dart';
 import '../testing/seeded_event_fixture.dart';
 import '../adapters/legacy_planning_link_classifier.dart';
@@ -42,6 +43,7 @@ import '../presentation/event_details_page.dart';
 import '../presentation/event_publication_panel.dart';
 import '../presentation/activity_publication_panel.dart';
 import '../presentation/collection_content_publication_panel.dart';
+import '../presentation/local_import_panel.dart';
 import '../presentation/place_publication_panel.dart';
 import '../presentation/bookable_session_details_page.dart';
 import '../presentation/find_people_details_page.dart';
@@ -362,6 +364,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
         builder: (BuildContext context, GoRouterState state) =>
             const CollectionContentPublicationPage(),
+      ),
+      // Default-off local→server import test entry (D4), its own guard and define.
+      GoRoute(
+        name: 'test_local_import',
+        path: RouteNames.testLocalImport,
+        redirect: (BuildContext context, GoRouterState state) =>
+            localImportTestEntryRedirect(
+              sl.isRegistered<LocalImportTestEntryGuard>()
+                  ? sl<LocalImportTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const LocalImportPage(),
       ),
       GoRoute(
         name: 'discover_details',

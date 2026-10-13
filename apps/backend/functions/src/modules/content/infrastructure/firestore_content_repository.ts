@@ -10,7 +10,7 @@ import {
 
 import type { ContentEffectV1 } from '../../../contracts/content_v1.js';
 import { deepFreeze } from '../../../shared/immutable.js';
-import type { ContentDraft } from '../domain/content_draft.js';
+import { localImportBindingRef, type ContentDraft } from '../domain/content_draft.js';
 import { resolveContentType } from '../domain/content_type_registry.js';
 import { ContentDomainRefusal, ContentRepositoryConflict } from '../domain/failures.js';
 import type { PublicationPointer } from '../domain/publication_pointer.js';
@@ -284,6 +284,21 @@ class BufferedContentTransaction implements ContentTransaction {
     return first === undefined ? null : draftFromStored(first);
   }
 
+  async draftByImportSource(
+    createdByUserId: string,
+    importSourceKey: string,
+  ): Promise<ContentDraft | null> {
+    const draft = await this.draftByExternalBinding(
+      localImportBindingRef(createdByUserId, importSourceKey),
+    );
+    // A binding is trusted only for the exact author and key it names.
+    return draft !== null &&
+      draft.createdByUserId === createdByUserId &&
+      draft.importSourceKey === importSourceKey
+      ? draft
+      : null;
+  }
+
   async draftByExternalBinding(externalBindingRef: string): Promise<ContentDraft | null> {
     const binding = await this.read(
       contentCollections.externalBindings,
@@ -311,6 +326,16 @@ class BufferedContentTransaction implements ContentTransaction {
         data: { draftId: draft.draftId, externalBindingRef: binding.externalBindingRef },
         check: { kind: 'binding', draftId: draft.draftId },
       });
+    // D4: a user's local import source binds to one draft, with the same check.
+    if (draft.createdByUserId !== null && draft.importSourceKey !== undefined) {
+      const ref = localImportBindingRef(draft.createdByUserId, draft.importSourceKey);
+      this.stage({
+        collection: contentCollections.externalBindings,
+        id: sha256(ref),
+        data: { draftId: draft.draftId, externalBindingRef: ref },
+        check: { kind: 'binding', draftId: draft.draftId },
+      });
+    }
   }
 
   // ------------------------------------------------------------- submissions

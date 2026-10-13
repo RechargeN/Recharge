@@ -487,6 +487,26 @@ export class ContentPublicationService {
       const bound = await context.tx.draftByExternalBinding(payload.origin.externalBindingRef);
       if (bound !== null) throw new ContentDomainRefusal('revision_conflict');
     }
+    // D4: a user's local import source maps to exactly one draft. Importing it
+    // again, under any idempotency key, returns that draft; the same source for
+    // another type, publisher or market is a conflict, never a second draft.
+    if (principal.kind === 'session' && payload.importSourceKey !== undefined) {
+      const imported = await context.tx.draftByImportSource(
+        principal.actor.userId,
+        payload.importSourceKey,
+      );
+      if (imported !== null) {
+        if (
+          imported.typeId !== payload.typeId ||
+          imported.marketId !== payload.marketId ||
+          imported.publisherRef.type !== payload.publisherRef.type ||
+          imported.publisherRef.id !== payload.publisherRef.id
+        )
+          throw new ContentDomainRefusal('idempotency_conflict');
+        this.audit(context, 'content.draft.import_replayed', imported.draftId);
+        return imported;
+      }
+    }
     const references = await this.pin(payload.marketId, payload.typeId, context.nowUtc);
     const draft = createContentDraft({
       draftId: this.deps.ids.newId(),

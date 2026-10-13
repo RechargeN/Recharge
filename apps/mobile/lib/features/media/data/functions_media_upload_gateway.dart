@@ -76,7 +76,22 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
             'bytesBase64': base64Encode(request.bytes),
           });
       if (transfer['kind'] != 'succeeded') {
-        return _rejected(transfer['code'] as String? ?? 'invalid_contract');
+        final code = transfer['code'] as String? ?? 'invalid_contract';
+        // A retry of an intent whose answer was lost replays the same, now
+        // completed, session: the bytes are already there, so the server's
+        // record of the asset decides, never a second transfer.
+        if (code != 'session_expired' && code != 'invalid_state') {
+          return _rejected(code);
+        }
+        final accepted = await _acceptedEarlier(assetId, request, sha256Hex);
+        if (accepted == null) return _rejected(code);
+        if (accepted.lifecycle == 'ready') {
+          return MediaUploadResult(
+            MediaUploadOutcome.ready,
+            assetId: assetId,
+            assetRevision: accepted.revision,
+          );
+        }
       }
 
       final confirmed = await _command(<String, Object?>{
@@ -133,6 +148,45 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
       failure: result['code'] as String? ?? 'invalid_contract',
     );
   }
+
+  /// The asset this intent's earlier attempt already filled with exactly these
+  /// bytes for the same entity, or null when the server holds nothing usable.
+  Future<({String lifecycle, int revision})?> _acceptedEarlier(
+    String assetId,
+    MediaUploadRequest request,
+    String sha256Hex,
+  ) async {
+    final result = await _port.invoke('mediaQueryV1', <String, Object?>{
+      'schemaVersion': 1,
+      'queryType': 'getAssetStatus',
+      'payload': <String, Object?>{'assetId': assetId},
+    });
+    if (result['kind'] != 'succeeded') return null;
+    final asset = result['data'];
+    if (asset is! Map) return null;
+    final lifecycle = asset['lifecycle'];
+    final revision = asset['revision'];
+    final source = asset['sourceGenerationRef'];
+    final binding = asset['entityBinding'];
+    if (lifecycle is! String || !_acceptedLifecycles.contains(lifecycle)) {
+      return null;
+    }
+    if (revision is! int || source is! Map) return null;
+    if (source['sha256'] != sha256Hex ||
+        source['byteLength'] != request.bytes.length) {
+      return null;
+    }
+    if (binding is Map && binding['entityId'] != request.contentId) return null;
+    return (lifecycle: lifecycle, revision: revision);
+  }
+
+  /// States reached only after the server confirmed the uploaded bytes.
+  static const Set<String> _acceptedLifecycles = <String>{
+    'uploaded',
+    'validating',
+    'processing',
+    'ready',
+  };
 
   MediaUploadResult _rejected(String code) =>
       MediaUploadResult(MediaUploadOutcome.rejected, failureCode: code);

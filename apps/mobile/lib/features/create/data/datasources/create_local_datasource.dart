@@ -107,6 +107,27 @@ class CreateLocalDataSource {
     );
   }
 
+  /// D4 §6: removes the account's current draft slot, only while the stored
+  /// draft passes [unchanged]. Serialized with every other write of the slot,
+  /// so a concurrent save cannot slip between the check and the removal. An
+  /// unreadable slot is never removed.
+  Future<bool> deleteDraftIfUnchanged(
+    String userId,
+    bool Function(CreateDraftModel stored) unchanged,
+  ) {
+    return _enqueueDraftMutation(_draftKey(userId), () async {
+      final CreateDraftModel? stored;
+      try {
+        stored = await _loadDraftStrict(userId);
+      } on Object {
+        return false;
+      }
+      if (stored == null || !unchanged(stored)) return false;
+      await _storage.delete(key: _draftKey(userId));
+      return true;
+    });
+  }
+
   Future<void> _writeDraftUnlocked(
     String userId,
     CreateDraftModel model,

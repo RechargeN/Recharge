@@ -26,6 +26,10 @@ class RouteNames {
   /// `CollectionPublicationTestEntryGuard`.
   static const String testCollectionPublication =
       '/test/collection-publication';
+
+  /// Default-off local→server import test entry (D4); see
+  /// `LocalImportTestEntryGuard`.
+  static const String testLocalImport = '/test/local-import';
   static const String discoverDetails = '/discover/details';
   static const String collectionDetails = '/collection/details';
   static const String discoverMap = '/discover/map';

@@ -84,6 +84,8 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/content_activity_enablement.test.ts",
   // D3.4 (COLLECTION_D3_4_PUBLICATION_AMENDMENT.md §8): Collection enablement and membership.
   "apps/backend/functions/test/integration/content_collection_enablement.test.ts",
+  // D4 (LOCAL_IMPORT_D4_AMENDMENT.md §8): one draft per local import source.
+  "apps/backend/functions/test/integration/content_local_import.test.ts",
 ];
 
 if (
