@@ -3,7 +3,10 @@
 Статус: **утверждён владельцем 2026-10-13** — состав §1 (включая строки
 «восстановлено после реализации»), исключение §3 и waiver §6 приняты указанием
 владельца закрыть все заходы M1 без остановки на формальные подтверждения.
-Заход 2 закрыл S1–S7 (§8).
+Заход 2 закрыл S1–S7, заход 3 — импорт, откат и итоговую приёмку (§8).
+**Итог: «первый локальный контур проверен»** на runtime SHA
+`e3710f65ba595e14d4ebd578bcb208670eb81a1d`
+([M1_ACCEPTANCE.md](../evidence/backend/m1/M1_ACCEPTANCE.md)).
 База: `3738cce02f7c580b416182da674e7a5f5dd8bd50` (`codex/recharge-integration`).
 Норматив: Latvia roadmap §3.7 «Release M1 и Release M2».
 
@@ -176,37 +179,12 @@ CRLF: сравнение коммитов идёт по blob-ам, нормал�
 
 ## 7. Skipped-тесты и гейты
 
-Полный `flutter test` пропускает 44 теста в 20 файлах `test/backend_local/`:
+Полный `flutter test` пропускает 67 тестов в 22 файлах `test/backend_local/`:
 им нужен стенд. Каждый файл прогоняет свой гейт. Сопоставление построено
-JSON-отчётом `flutter test --no-pub test/backend_local -r json` на `3738cce`.
-В итоговой приёмке оно строится заново на финальном SHA.
-
-| Файл | Skipped | Гейт |
-|---|---:|---|
-| `booking_session_lifecycle_stand_test.dart` | 4 | B1 |
-| `event_booking_ui_stand_test.dart` | 5 | B2 |
-| `media_upload_stand_test.dart` | 3 (ещё 1 тест проходит в обычном наборе) | C1 |
-| `event_publication_stand_test.dart` | 3 | C3 |
-| `event_publication_ui_stand_test.dart` | 1 | C3 |
-| `discover_catalog_stand_test.dart` | 1 | E2a |
-| `e2_client_test.dart` | 1 (два процесса A и B) | E2 |
-| `notifications_inbox_client_test.dart` | 1 | F1 |
-| `f2_client_test.dart` | 1 (два процесса) | F2 |
-| `place_publication_stand_test.dart` | 4 | D3.1 |
-| `place_publication_ui_stand_test.dart` | 1 | D3.1 |
-| `activity_publication_stand_test.dart` | 4 | D3.2 |
-| `activity_publication_ui_stand_test.dart` | 1 | D3.2 |
-| `rental_publication_stand_test.dart` | 4 | D3.3 |
-| `rental_publication_ui_stand_test.dart` | 1 | D3.3 |
-| `collection_publication_stand_test.dart` | 4 | D3.4 |
-| `collection_publication_ui_stand_test.dart` | 1 | D3.4 |
-| `activity_catalog_stand_test.dart` | 1 | D3.8 |
-| `activity_linked_place_stand_test.dart` | 1 | D3.9 (`--linked-place`) |
-| `local_import_stand_test.dart` | 2 | D4 |
-
-Ранее записанная разбивка из прогона 2026-10-13 ошибалась в двух строках
-(`booking_session_lifecycle` — 3 вместо 4, `collection_publication` — 5 вместо
-4); итог 44 был верным. Таблица выше её заменяет.
+JSON-отчётом `flutter test --no-pub test/backend_local -r json` на итоговом
+runtime SHA `e3710f6`; таблица — в
+[M1_ACCEPTANCE.md](../evidence/backend/m1/M1_ACCEPTANCE.md#skipped-тесты-и-гейты).
+На `3738cce` их было 44 в 20 файлах; заход 2 добавил 21, заход 3b — 2.
 
 ## 8. Клиентское покрытие
 
@@ -222,7 +200,7 @@ diff-check, которые закрыл заход 1.
 | Откат серверного результата импорта (roadmap §3.7 п. 3) | закрыт, заход 3b (D4.1) | гейт D4, Emulator-группа `import`, integration; [evidence](../evidence/backend/d4/D4_1_ROLLBACK.md) |
 | Гонка cleanup оригинала и rollback, на одной и на двух установках | закрыт, заход 3b | гейт D4 (две установки), Emulator-группа `import` (настоящие транзакции), unit контроллера |
 | UI импорта и отката | закрыт, заход 3b | widget `test/widget/local_import_section_test.dart` |
-| Итоговая приёмка всех gates на одном финальном SHA | открыт | заход 3 |
+| Итоговая приёмка всех gates на одном финальном SHA | закрыт, заход 3c | чистый worktree `e3710f6`, все gates §5; [M1_ACCEPTANCE.md](../evidence/backend/m1/M1_ACCEPTANCE.md) |
 
 Заход 2 нашёл и исправил два runtime-дефекта клиента:
 
@@ -238,5 +216,5 @@ diff-check, которые закрыл заход 1.
   заходе 3b (D4.1 §3.3): элемент получает `revision_conflict`, правка на
   сервере сохраняется.
 
-Новые стенд-тесты увеличили число skipped в полном `flutter test`; новое
-сопоставление строится в итоговой приёмке (§7).
+Новые стенд-тесты увеличили число skipped в полном `flutter test` до 67;
+сопоставление построено в итоговой приёмке (§7).
