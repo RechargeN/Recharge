@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { eventAuthoringComposition } from '../../src/content_entry.js';
+import type { ContentTypeId } from '../../src/contracts/content_v1.js';
 import type { EmulatorMediaComposition } from '../../src/modules/media/infrastructure/emulator_media_composition.js';
 import { mediaComposition } from '../../src/media_entry.js';
 import { standPlaceBody, standSeedPlace } from '../stand/stand_content_place.js';
@@ -35,13 +36,15 @@ export function createPlaceWorld(
       readonly gallery: readonly Buffer[];
       readonly mediaType: string;
     };
+    /** D3.4: the enabled authoring set (default: Event and Place, as in D3.1). */
+    readonly enabledTypes?: ReadonlySet<ContentTypeId>;
   } = {},
 ) {
   const media = options.media ?? mediaComposition(firestore);
   const images = options.images ?? { ...standSeedPlace.images, mediaType: 'image/png' };
   const composition = eventAuthoringComposition(firestore, {
     media,
-    enabledTypes: new Set(['event', 'place'] as const),
+    enabledTypes: options.enabledTypes ?? new Set(['event', 'place'] as const),
   });
   const scope = `${label}-${randomUUID().slice(0, 8)}`;
   let sequence = 0;

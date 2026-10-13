@@ -25,6 +25,15 @@ class RouteNames {
   /// Default-off Rental / Equipment publication test entry (D3.3); see
   /// `RentalPublicationTestEntryGuard`.
   static const String testRentalPublication = '/test/rental-publication';
+
+  /// Default-off Collection / Guide publication test entry (D3.4); see
+  /// `CollectionPublicationTestEntryGuard`.
+  static const String testCollectionPublication =
+      '/test/collection-publication';
+
+  /// Default-off local→server import test entry (D4); see
+  /// `LocalImportTestEntryGuard`.
+  static const String testLocalImport = '/test/local-import';
   static const String discoverDetails = '/discover/details';
   static const String collectionDetails = '/collection/details';
   static const String discoverMap = '/discover/map';

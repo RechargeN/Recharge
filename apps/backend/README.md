@@ -776,6 +776,59 @@ validator codes are not sent to the client; no Rental activation, no
 Catalog/Discover for Rental; fake scanner/processor; no device, Linux or cloud
 claim.
 
+## D3.4 Collection / Guide through Content, Media and moderation (Emulator only)
+
+`node ../scripts/stand-d3-4-gate.mjs --yes` (from apps/backend/functions) proves
+the path end to end on the local stand and this PC
+([amendment](../../docs/product/COLLECTION_D3_4_PUBLICATION_AMENDMENT.md)).
+
+Backend. Collection uses the same Emulator-only `contentCommandV1` and
+`contentQueryV1` behind its own default-off local flag
+`content.collection.authoring`; the per-type gating is the D3.1 rule. The
+accepted Collection validator is unchanged. Items may only reference allowed
+published objects by exact id: Content asks the Catalog-owned evaluator
+(`published_object_link_service.ts`, the same one the D3.9 Place relation now
+delegates to) about every item at submit, publish and activation. A hidden or
+restricted listing needs the author's acknowledgement; an unknown id, another
+type or market, and an unanswered question are refused. The evaluator, and the
+additive Discover queries `publishedObject` / `publishedObjectCandidates`, are
+on only with `RECHARGE_TEST_COLLECTION_MEMBERSHIP=true`; without it Collection
+fails closed. Collection reference data is the pinned BCK-20 artifact (any
+existing pair applies). Catalog keeps Collection excluded (`type_disabled`,
+BCK08-OD-04, no Collection model), Discover refuses it and the Booking handoff
+ignores it; D2 applies to Collection media.
+
+Stand. `stand-seed.mjs collection seed | verify | manifest | status`: only
+`collection seed` enables the Place and Collection flags on the stand. It
+publishes three member Places and the Collection that references them, each
+from an empty draft through a cover, the full body, submit, staff approval and
+owner publish (`STAND_SEED_INTERRUPT_AFTER=member-2` is the gate's resume
+hook). The stand must run with `RECHARGE_TEST_COLLECTION_MEMBERSHIP=true` (the
+gate sets it).
+
+Limits: Create-form compatibility is a verified subset; validator codes are not
+sent to the client; no removal-only/archive, no Catalog/Discover for
+Collection; fake scanner/processor; no device, Linux or cloud claim.
+
+## D4 safe local → server import (Emulator only)
+
+`node ../scripts/stand-d4-gate.mjs --yes` (from apps/backend/functions) proves
+the mobile import end to end on the local stand and this PC
+([amendment](../../docs/product/LOCAL_IMPORT_D4_AMENDMENT.md)).
+
+Backend. A Session `createDraft` with `importSourceKey` (`loc_*`) now maps one
+author's local source to exactly one Content draft: the binding
+`local-import:v1:<user>:<key>` is stored with the delegated import bindings
+(`contentExternalBindings`) and the same commit-time uniqueness check. Creating
+again under any idempotency key returns that draft; the same key for another
+type, market or PublisherRef is `idempotency_conflict`; a race leaves one draft.
+
+Mobile. The default-off test entry (`RECHARGE_TEST_LOCAL_IMPORT=true`, plus
+`testBackend` and the loopback Emulator) runs dry run, approval, the import
+session with durable receipts and resume, and the guarded removal of the local
+original (verification, explicit confirmation, 30 days). It never submits or
+publishes. The gate seeds the D3.1 Place first (Place authoring flag and Page).
+
 ## Sequential Emulator test groups (2026-10-11)
 
 From `apps/backend/functions`, `npm run test:emulator` builds once before
@@ -796,10 +849,11 @@ All 40 original Node invocations (including the final three globs) are retained.
 | `content-media` | 158.5 s | 330 s |
 | `handoff-notifications` | 233.8 s | 450 s |
 | `place-activity` | 148.2 s | 300 s |
+| `collection` (D3.4) | 192.2 s | 390 s |
 | `rules-reference` | 6.7 s | 120 s |
 
 Each limit is rounded up to 30 s from `1.75 × measured duration + 30 s`, with
-a 120 s floor. The outer full-run limit is 1800 s: the sum of group limits plus
+a 120 s floor. The outer full-run limit is 2190 s: the sum of group limits plus
 180 s for startup and 60 s for shutdown. These are local hang bounds, not an SLO.
 A group's deadline includes all of its invocations; timeout or any nonzero exit
 makes the full run fail. Later groups still report their results sequentially.

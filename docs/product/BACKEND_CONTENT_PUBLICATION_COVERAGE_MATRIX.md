@@ -70,7 +70,7 @@ production processing are authorized.
 | `find_people` | BCK-07 with OD-11/privacy gate | Consent/access input from BCK-06 | Typed local/mock; production gated |
 | `class_workshop` | BCK-07 | Dedicated product spec present but not Approved by this doc | Generic local runtime |
 | `rental` | BCK-07; direct publish only explicit policy | Rental inventory/fulfillment remains domain-owned | D3.3 ([amendment](RENTAL_D3_3_PUBLICATION_AMENDMENT.md)): Emulator-only lifecycle through Content, Media and C2 behind `content.rental.authoring` with a TEST-ONLY policy; re-activation closed; Catalog/Discover excluded (BCK08-OD-04); trusted gate not production-authorized |
-| `collection` | BCK-07 | Collection item refs/removal behavior remain domain-owned | Generic/local; dedicated spec absent here |
+| `collection` | BCK-07 | Collection item refs/removal behavior remain domain-owned | D3.4 ([amendment](COLLECTION_D3_4_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.collection.authoring`; items only reference allowed published objects by exact id, answered by the Catalog-owned evaluator; removal-only/archive absent; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04, no Collection model); cloud absent |
 
 `quick_plan` is not an eleventh type. It is a private/invited utility owned by
 BCK-10 and is accepted only as a legacy-read discriminator. It cannot enter a

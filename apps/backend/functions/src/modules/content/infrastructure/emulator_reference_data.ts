@@ -6,6 +6,7 @@ import {
   readLocalTaxonomy,
   taxonomyPair,
   taxonomyRevisionId,
+  type TaxonomyDataset,
   type TaxonomyRead,
 } from '../../reference_data/infrastructure/local_taxonomy_reader.js';
 import { emulatorRentalPolicy } from './emulator_rental_policy.js';
@@ -16,13 +17,30 @@ import {
 } from './emulator_place_taxonomy.js';
 
 /** Local demo-recharge composition: synthetic LV market/localization and Place fixture;
- * Activity uses the deterministic immutable BCK-20 artifact derived from the
- * accepted Category System v1.4.3 semantic source. Rental (D3.3) checks its
- * pairs against the same BCK-20 revision and answers a TEST-ONLY policy
+ * Activity and Collection use the deterministic immutable BCK-20 artifact derived
+ * from the accepted Category System v1.4.3 semantic source. Rental (D3.3) checks
+ * its pairs against the same BCK-20 revision and answers a TEST-ONLY policy
  * (`emulator_rental_policy.ts`, not an accepted policy). No production MarketConfig.
  */
 export const emulatorReferenceEvidence =
-  'synthetic LV market/localization and Place fixture; Activity taxonomy derived from accepted Category System v1.4.3';
+  'synthetic LV market/localization and Place fixture; Activity and Collection taxonomy derived from accepted Category System v1.4.3';
+
+/**
+ * D3.4 §2.4: a Collection may be filed under any existing pair of the pinned
+ * taxonomy, as the mobile taxonomy makes Collection applicable everywhere
+ * (`effectiveApplicableTypes`). The artifact does not encode that implicit
+ * rule, so here only the existence of the pair decides; an unknown pair does
+ * not apply, and a missing artifact cannot be answered (fail closed).
+ */
+export function collectionSubcategoryApplies(
+  dataset: TaxonomyDataset | undefined,
+  categoryId: string,
+  subcategoryId: string,
+): boolean | undefined {
+  return dataset === undefined
+    ? undefined
+    : taxonomyPair(dataset, categoryId, subcategoryId) !== undefined;
+}
 
 export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
   readTaxonomyRevision(input: { readonly taxonomyRevisionId: string }): Promise<TaxonomyRead> {
@@ -36,8 +54,9 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     const place = input.typeId === 'place';
     const activity = input.typeId === 'activity';
     const rental = input.typeId === 'rental';
+    const collection = input.typeId === 'collection';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
-    if ((activity || rental) && !taxonomy.ok)
+    if ((activity || rental || collection) && !taxonomy.ok)
       return Promise.resolve({ ok: false, code: 'policy_unavailable' });
     const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
     return Promise.resolve({
@@ -46,7 +65,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity || rental
+          : activity || rental || collection
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
@@ -63,7 +82,9 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
                 : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
                     'activity',
                   ) ?? false)
-              : true,
+              : typeId === 'collection'
+                ? collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
+                : true,
         requiredCriteria: (typeId: string, categoryId: string, subcategoryId: string) => {
           if (typeId === 'place') return placeRequiredCriteria(categoryId, subcategoryId);
           if (typeId !== 'activity') return [];

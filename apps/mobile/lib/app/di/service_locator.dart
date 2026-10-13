@@ -16,6 +16,8 @@ import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
 import 'activity_publication_composition.dart';
 import 'rental_publication_composition.dart';
+import 'collection_content_publication_composition.dart';
+import 'local_import_composition.dart';
 import '../config/travel_policy_config.dart';
 import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
@@ -90,6 +92,7 @@ import '../../features/create/data/datasources/collection_publication_local_data
 import '../../features/create/data/datasources/collection_publication_store.dart';
 import '../../features/create/data/datasources/google_places_search_datasource.dart';
 import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
+import '../../features/create/data/repositories/catalog_collection_catalog_search_repository.dart';
 import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
 import '../../features/create/data/repositories/location_search_repository_impl.dart';
 import '../../features/create/data/repositories/route_gpx_repository_impl.dart';
@@ -309,6 +312,14 @@ Future<void> setupDependencies() async {
     // D3.3: default-off Rental publication test entry, its own define.
     ..registerLazySingleton<RentalPublicationTestEntryGuard>(
       () => RentalPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.4: default-off Collection / Guide publication test entry, its own define.
+    ..registerLazySingleton<CollectionPublicationTestEntryGuard>(
+      () => CollectionPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D4: default-off local→server import test entry, its own define.
+    ..registerLazySingleton<LocalImportTestEntryGuard>(
+      () => LocalImportTestEntryGuard.fromEnvironment(sl()),
     )
     // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
     ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(
@@ -575,8 +586,23 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<CollectionCatalogSearchMockDatasource>(
       CollectionCatalogSearchMockDatasource.new,
     )
+    // D3.4: the Create item picker reads the server Catalog only while the
+    // Collection test entry is allowed; otherwise the existing local catalog.
+    ..registerLazySingleton<CatalogCollectionCatalogSearchRepository>(
+      () => CatalogCollectionCatalogSearchRepository(
+        query: collectionCatalogQueryFor(
+          guard: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
+        marketId: sl<MarketConfig>().countryCode,
+      ),
+    )
     ..registerLazySingleton<CollectionCatalogSearchRepository>(
-      () => CollectionCatalogSearchRepositoryImpl(datasource: sl()),
+      () => TestEntryCollectionCatalogSearchRepository(
+        guard: sl(),
+        server: sl<CatalogCollectionCatalogSearchRepository>(),
+        local: CollectionCatalogSearchRepositoryImpl(datasource: sl()),
+      ),
     )
     // LOC-SRCH prerequisite: key comes from the gitignored
     // google_maps.properties via --dart-define-from-file (documented in

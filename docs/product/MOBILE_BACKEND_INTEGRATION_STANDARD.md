@@ -1280,3 +1280,19 @@ pretend that a local action was published, indexed or authorized remotely.
     and changes only the attempt request ID.
 101. **BCK-18-AC-101:** revoked/expired Session state clears local authority
     before a bounded establish/recovery path; no mock grant is copied.
+
+## Addendum D4 — bounded local import (2026-10-13)
+
+Owner instruction D4 and its recorded answers are the OD-04 / BCK18-OD-01
+decision **only** for the local/Emulator import of the user's own Create
+drafts of Event, Place, Activity and Collection
+([LOCAL_IMPORT_D4_AMENDMENT.md](LOCAL_IMPORT_D4_AMENDMENT.md)). It follows §16
+and §33.5 without weakening them: dry run without server mutation, explicit
+approval, typed owning-domain commands only (BCK-07 `createDraft` with
+`importSourceKey`, `updateDraft`, Media C1), durable receipt before every
+checkpoint advance, resume with the same idempotency keys, server-side
+deduplication of the import source per author, explicit conflicts, server
+verification, and no local deletion before verification, explicit user
+confirmation and a 30-day recovery period. Imports create server drafts only;
+no submit, publish or mock authority is imported. Every other family, OD-08,
+production and cloud remain as stated above.

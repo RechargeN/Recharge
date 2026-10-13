@@ -128,8 +128,10 @@ function draftOf(input: {
   mediaIds?: string[];
   binding?: string;
   body?: Record<string, unknown>;
+  owner?: EntityId;
+  importSourceKey?: string;
 }): ContentDraft {
-  const owner = newId();
+  const owner = input.owner ?? newId();
   return createContentDraft({
     draftId: input.draftId ?? newId(),
     contentId: input.contentId ?? newId(),
@@ -151,6 +153,7 @@ function draftOf(input: {
             acquiredAtUtc: now,
             correctionRemovalPolicyRef: 'removal-policy-1',
           }),
+    ...(input.importSourceKey === undefined ? {} : { importSourceKey: input.importSourceKey }),
     nowUtc: now,
   });
 }
@@ -667,6 +670,41 @@ export const repositoryScenarios: readonly ContentScenario[] = [
     },
   },
   {
+    name: "D4: one author's local import source binds to at most one draft",
+    async run(make) {
+      const repository = make();
+      const owner = newId();
+      const source = `loc_${uniqueToken()}`;
+      const first = draftOf({ owner, importSourceKey: source });
+      await repository.transact((tx) => {
+        tx.putDraft(first);
+      });
+      await assert.rejects(
+        repository.transact((tx) => {
+          tx.putDraft(draftOf({ owner, importSourceKey: source }));
+        }),
+        conflict('duplicate_id'),
+      );
+      // Another author may import a local draft with the same local key.
+      const other = draftOf({ importSourceKey: source });
+      await repository.transact((tx) => {
+        tx.putDraft(other);
+        // The same draft is updated under its own binding.
+        tx.putDraft(withDraftStatus(first, 'ready', later));
+      });
+      await repository.transact(async (tx) => {
+        assert.equal((await tx.draftByImportSource(owner, source))?.draftId, first.draftId);
+        assert.equal((await tx.draftByImportSource(owner, source))?.status, 'ready');
+        assert.equal(
+          (await tx.draftByImportSource(other.createdByUserId!, source))?.draftId,
+          other.draftId,
+        );
+        assert.equal(await tx.draftByImportSource(owner, `loc_${uniqueToken()}`), null);
+        assert.equal(await tx.draftByImportSource(newId(), source), null);
+      });
+    },
+  },
+  {
     name: 'history and document size are bounded with a typed refusal and nothing is written',
     async run(make) {
       const repository = make({
@@ -979,6 +1017,77 @@ export const serviceScenarios: readonly ContentScenario[] = [
       await repository.transact(async (tx) => {
         assert.equal((await tx.publishedRevisionsForContent(draft.contentId)).length, 1);
         assert.equal((await allEffects(tx, draft.contentId)).length, 1);
+      });
+    },
+  },
+  {
+    name: 'D4: importing the same local source again returns the same draft under any key',
+    async run(make) {
+      const repository = make();
+      const service = serviceOver(repository);
+      const owner = newId();
+      const actor: ContentActor = { userId: owner, sessionId: newId() };
+      const c = commands(owner);
+      const source = `loc_${uniqueToken()}`;
+      const importCommand = (idempotencyKey: string, payload: Record<string, unknown> = {}) => {
+        const command = c.create({}, idempotencyKey);
+        return { ...command, payload: { ...command.payload, importSourceKey: source, ...payload } };
+      };
+      const first = await data<Wire>(service.execute(actor, importCommand(key('import-1'))));
+      const edited = await data<Wire>(
+        service.execute(actor, c.update(first.draftId, 1, bodyFor(owner))),
+      );
+      // A lost receipt: another key, same source -> the same, current draft.
+      const again = await data<Wire>(service.execute(actor, importCommand(key('import-2'))));
+      assert.equal(again.draftId, first.draftId);
+      assert.equal(again.revision, edited.revision);
+      // The same source for another publisher or market is a conflict, never a second draft.
+      assert.deepEqual(
+        await service.execute(
+          actor,
+          importCommand(key('import-3'), { publisherRef: { type: 'page', id: newId() } }),
+        ),
+        { kind: 'rejected', code: 'idempotency_conflict' },
+      );
+      assert.deepEqual(
+        await service.execute(actor, importCommand(key('import-4'), { marketId: 'EE' })),
+        { kind: 'rejected', code: 'idempotency_conflict' },
+      );
+      // Without an import source nothing is deduplicated.
+      const plain = await data<Wire>(service.execute(actor, c.create({}, key('plain'))));
+      assert.notEqual(plain.draftId, first.draftId);
+      await repository.transact(async (tx) => {
+        assert.equal((await tx.draftByImportSource(owner, source))?.draftId, first.draftId);
+      });
+    },
+  },
+  {
+    name: 'D4: concurrent imports of one local source leave exactly one draft',
+    async run(make) {
+      const repository = make();
+      const service = serviceOver(repository);
+      const owner = newId();
+      const actor: ContentActor = { userId: owner, sessionId: newId() };
+      const c = commands(owner);
+      const source = `loc_${uniqueToken()}`;
+      const importCommand = (idempotencyKey: string) => {
+        const command = c.create({}, idempotencyKey);
+        return { ...command, payload: { ...command.payload, importSourceKey: source } };
+      };
+      const results = await Promise.all(
+        [1, 2, 3].map((index) => service.execute(actor, importCommand(key(`race-${index}`)))),
+      );
+      const ids = new Set<string>();
+      for (const result of results) {
+        if (result.kind === 'succeeded') ids.add((result.data as unknown as Wire).draftId);
+        else assert.equal((result as { code?: string }).code, 'revision_conflict');
+      }
+      // A loser that retries gets the winner's draft.
+      const retried = await data<Wire>(service.execute(actor, importCommand(key('race-retry'))));
+      ids.add(retried.draftId);
+      assert.equal(ids.size, 1);
+      await repository.transact(async (tx) => {
+        assert.equal((await tx.draftByImportSource(owner, source))?.draftId, retried.draftId);
       });
     },
   },

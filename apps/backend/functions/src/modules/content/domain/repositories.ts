@@ -95,6 +95,11 @@ export interface ContentTransaction {
   draftByContentId(contentId: string): Promise<ContentDraft | null>;
   /** Draft bound to an external source record by `originBinding.externalBindingRef`. */
   draftByExternalBinding(externalBindingRef: string): Promise<ContentDraft | null>;
+  /** D4: the draft this author imported from this local `loc_*` key, if any. */
+  draftByImportSource(
+    createdByUserId: string,
+    importSourceKey: string,
+  ): Promise<ContentDraft | null>;
   putDraft(draft: ContentDraft): void;
   submission(submissionId: string): Promise<PublicationSubmission | null>;
   submissionsForContent(contentId: string): Promise<readonly PublicationSubmission[]>;

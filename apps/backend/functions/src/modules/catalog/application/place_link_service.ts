@@ -1,55 +1,31 @@
 import type { ContentCatalogSource } from './ports.js';
+import { PublishedObjectLinkService } from './published_object_link_service.js';
+import type { EligiblePublishedObject } from '../domain/published_object_link.js';
 import type { EligiblePlaceLink, PlaceLinkReader, PlaceLinkResult } from '../domain/place_link.js';
-import { normalizeText } from '../domain/catalog_item.js';
+
+/**
+ * D3.9 Activity → Place relation over the shared Catalog evaluator. Its
+ * answers are unchanged: a hidden or restricted Place is `forbidden`.
+ */
 export class PlaceLinkService implements PlaceLinkReader {
-  constructor(
-    private readonly source: ContentCatalogSource,
-    private readonly enabled = false,
-  ) {}
+  readonly #objects: PublishedObjectLinkService;
+
+  constructor(source: ContentCatalogSource, enabled = false) {
+    this.#objects = new PublishedObjectLinkService(source, enabled);
+  }
+
   async check(input: {
     readonly placeId: string;
     readonly marketId: string;
   }): Promise<PlaceLinkResult> {
-    if (!this.enabled || !this.source.pointer) return { status: 'unavailable' };
-    try {
-      const pointer = await this.source.pointer(input.placeId);
-      if (!pointer) return { status: 'unknown' };
-      if (pointer.visibility !== 'visible' || !pointer.currentPublishedRevisionId)
-        return { status: 'forbidden' };
-      const revision = await this.source.publishedRevision(pointer.currentPublishedRevisionId);
-      if (!revision) return { status: 'unavailable' };
-      if (
-        revision.typeId !== 'place' ||
-        revision.contentId !== input.placeId ||
-        revision.marketId !== input.marketId ||
-        this.source.typeVisibilityPolicy('place') !== 'public_catalog' ||
-        typeof revision.body.title !== 'string' ||
-        !revision.body.title.trim() ||
-        (revision.body.visibility !== undefined && revision.body.visibility !== 'public')
-      )
-        return { status: 'forbidden' };
-      const current = await this.source.pointer(input.placeId);
-      if (
-        !current ||
-        current.revision !== pointer.revision ||
-        current.visibility !== 'visible' ||
-        current.currentPublishedRevisionId !== revision.publishedRevisionId
-      )
-        return { status: 'unavailable' };
-      return {
-        status: 'eligible',
-        place: {
-          contentId: input.placeId,
-          publishedRevisionId: revision.publishedRevisionId,
-          pointerRevision: current.revision,
-          marketId: revision.marketId,
-          title: revision.body.title,
-        },
-      };
-    } catch {
-      return { status: 'unavailable' };
-    }
+    const result = await this.#objects.status(
+      { typeId: 'place', contentId: input.placeId, marketId: input.marketId },
+      false,
+    );
+    if (result.status === 'eligible') return { status: 'eligible', place: place(result.object) };
+    return { status: result.status === 'withheld' ? 'forbidden' : result.status };
   }
+
   async candidates(input: {
     readonly marketId: string;
     readonly text: string;
@@ -63,34 +39,19 @@ export class PlaceLinkService implements PlaceLinkReader {
       }
     | { readonly status: 'unavailable' }
   > {
-    if (!this.enabled || !this.source.pointer) return { status: 'unavailable' };
-    if (
-      !Number.isInteger(input.limit) ||
-      input.limit < 1 ||
-      input.limit > 50 ||
-      input.text.length > 100
-    )
-      return { status: 'unavailable' };
-    try {
-      const pointers = await this.source.pointersPage(input.after ?? null, input.limit);
-      const items: EligiblePlaceLink[] = [];
-      for (const pointer of pointers) {
-        const result = await this.check({ placeId: pointer.contentId, marketId: input.marketId });
-        if (result.status === 'unavailable') return { status: 'unavailable' };
-        if (
-          result.status === 'eligible' &&
-          normalizeText(result.place.title).includes(normalizeText(input.text))
-        )
-          items.push(result.place);
-      }
-      return {
-        status: 'available',
-        items,
-        nextCursor:
-          pointers.length === input.limit ? pointers[pointers.length - 1]!.contentId : null,
-      };
-    } catch {
-      return { status: 'unavailable' };
-    }
+    const result = await this.#objects.candidates({ typeId: 'place', ...input });
+    return result.status === 'available'
+      ? { status: 'available', items: result.items.map(place), nextCursor: result.nextCursor }
+      : result;
   }
+}
+
+function place(object: EligiblePublishedObject): EligiblePlaceLink {
+  return {
+    contentId: object.contentId,
+    publishedRevisionId: object.publishedRevisionId,
+    pointerRevision: object.pointerRevision,
+    marketId: object.marketId,
+    title: object.title,
+  };
 }

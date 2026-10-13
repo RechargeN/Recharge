@@ -1,0 +1,11 @@
+{
+  "status": "eligible",
+  "object": {
+    "typeId": "place",
+    "contentId": "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+    "publishedRevisionId": "01HZZZZZZZZZZZZZZZZZZZZZZY",
+    "pointerRevision": 3,
+    "marketId": "LV",
+    "title": "Quiet Place"
+  }
+}

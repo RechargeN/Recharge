@@ -12,6 +12,7 @@ import { toContentWireResult, type ContentResultType } from './modules/content/d
 import { createEmulatorCatalogComposition } from './modules/catalog/infrastructure/emulator_catalog_composition.js';
 import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
 import { emulatorActivationClosedTypes } from './modules/content/infrastructure/emulator_rental_dependencies.js';
+import { CatalogCollectionMembership } from './modules/content/infrastructure/catalog_collection_membership.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
 import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
@@ -29,28 +30,31 @@ import { mediaComposition } from './media_entry.js';
 
 /**
  * Types the Emulator-only authoring path may ever enable: Event (C3), Place
- * (D3.1), Recharge Activity (D3.2) and Rental / Equipment (D3.3). Every other
- * type stays off here, with or without a validator.
+ * (D3.1), Recharge Activity (D3.2), Rental / Equipment (D3.3) and Collection /
+ * Guide (D3.4). Every other type stays off here, with or without a validator.
  */
 export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'event',
   'place',
   'activity',
   'rental',
+  'collection',
 ]);
 
-/** D3.1 §2.2, D3.2 §2.2, D3.3: the authoring types whose own flag is on. */
+/** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
 export function authoringTypesFor(flags: {
   readonly eventAuthoring: boolean;
   readonly placeAuthoring: boolean;
   readonly activityAuthoring: boolean;
   readonly rentalAuthoring: boolean;
+  readonly collectionAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
     ...(flags.placeAuthoring ? (['place'] as const) : []),
     ...(flags.activityAuthoring ? (['activity'] as const) : []),
     ...(flags.rentalAuthoring ? (['rental'] as const) : []),
+    ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
   ]);
 }
 
@@ -71,14 +75,17 @@ export function assertEmulatorAuthoringTypes(types: ReadonlySet<string>): void {
 }
 
 /**
- * C3/D3.1/D3.2 Emulator-only authoring. Content is composed with the real ports it
+ * C3/D3.1/D3.2/D3.4 Emulator-only authoring. Content is composed with the real ports it
  * already has: Identity publisher eligibility (Session, verified Creator, exact
  * Page), Media readiness of the exact revision, and the C2 moderation verifier,
  * which makes review mandatory before publication. Only the given authoring
  * types are enabled (default `event`), and only here; the default composition
  * enables nothing. Reference data is the synthetic Emulator data (see
  * `EmulatorSyntheticReferenceData`); what this composition cannot resolve
- * fails closed through `emulatorCompositionRules` (D3.2 §2.4).
+ * fails closed through `emulatorCompositionRules` (D3.2 §2.4). Collection
+ * membership is asked from the Catalog-owned exact-id evaluator (D3.4 §2.3),
+ * which stays unavailable, and so refuses, unless the local
+ * `RECHARGE_TEST_COLLECTION_MEMBERSHIP` switch is on.
  */
 export interface EventAuthoringComposition {
   readonly content: ContentPublicationService;
@@ -101,6 +108,7 @@ export function eventAuthoringComposition(
   const media = options.media ?? mediaComposition(firestore);
   const clock = options.clock ?? systemServerClock;
   const moderationPorts = createEmulatorModerationPorts(firestore);
+  const catalog = createEmulatorCatalogComposition(firestore);
   const { service, repository } = createEmulatorContentService({
     contentPersistenceEnabled: true,
     firestore,
@@ -123,9 +131,10 @@ export function eventAuthoringComposition(
       ...(process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
         ? {
             enforceLinkedPlaceEligibility: true,
-            linkedPlaceEligibility: createEmulatorCatalogComposition(firestore).placeLinks,
+            linkedPlaceEligibility: catalog.placeLinks,
           }
         : {}),
+      publishedObjectMembership: new CatalogCollectionMembership(catalog.publishedObjects),
     },
   });
   const moderation = createEmulatorModerationService({

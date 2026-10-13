@@ -873,6 +873,8 @@ void test('delegated import never reaches Content storage except through the Con
       'emulatorCompositionRules',
       // D3.3 §2 Q4: activation the Emulator composition does not offer.
       'emulatorActivationClosedTypes',
+      // D3.4 §2.3: Collection membership asked from the Catalog-owned evaluator.
+      'CatalogCollectionMembership',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',

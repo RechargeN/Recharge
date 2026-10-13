@@ -133,6 +133,13 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
       Promise.resolve(
         [...store.drafts.values()].find((item) => item.contentId === contentId) ?? null,
       ),
+    draftByImportSource: (createdByUserId, importSourceKey) =>
+      Promise.resolve(
+        [...store.drafts.values()].find(
+          (item) =>
+            item.createdByUserId === createdByUserId && item.importSourceKey === importSourceKey,
+        ) ?? null,
+      ),
     draftByExternalBinding: (externalBindingRef) =>
       Promise.resolve(
         [...store.drafts.values()].find(
@@ -156,6 +163,18 @@ function transactionFor(store: Store, limits: ContentStorageLimits): ContentTran
             other.draftId !== draft.draftId &&
             other.provenance.originBinding.kind === 'delegatedImport' &&
             other.provenance.originBinding.externalBindingRef === binding.externalBindingRef,
+        )
+      )
+        throw new ContentRepositoryConflict('duplicate_id');
+      // D4: one author's local import source binds to at most one draft.
+      if (
+        draft.createdByUserId !== null &&
+        draft.importSourceKey !== undefined &&
+        [...store.drafts.values()].some(
+          (other) =>
+            other.draftId !== draft.draftId &&
+            other.createdByUserId === draft.createdByUserId &&
+            other.importSourceKey === draft.importSourceKey,
         )
       )
         throw new ContentRepositoryConflict('duplicate_id');

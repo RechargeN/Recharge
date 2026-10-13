@@ -89,6 +89,15 @@ function depthOf(value: unknown, level: number): number {
   return deepest;
 }
 
+/**
+ * D4: the binding of a user's local import source to one Content draft. One
+ * author's `loc_*` key binds to at most one draft; it lives with the delegated
+ * import bindings and has the same uniqueness rule.
+ */
+export function localImportBindingRef(createdByUserId: string, importSourceKey: string): string {
+  return `local-import:v1:${createdByUserId}:${importSourceKey}`;
+}
+
 export function createContentDraft(input: {
   readonly draftId: EntityId;
   readonly contentId: EntityId;

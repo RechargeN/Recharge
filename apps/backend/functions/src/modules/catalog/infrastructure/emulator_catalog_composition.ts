@@ -1,4 +1,5 @@
 import { PlaceLinkService } from '../application/place_link_service.js';
+import { PublishedObjectLinkService } from '../application/published_object_link_service.js';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { systemServerClock, type ServerClock } from '../../../shared/server_clock.js';
@@ -43,6 +44,11 @@ export function createEmulatorCatalogComposition(
     source,
     environment.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true',
   );
+  // D3.4: exact-id relations to every listing type, for Collection membership.
+  const publishedObjects = new PublishedObjectLinkService(
+    source,
+    environment.RECHARGE_TEST_COLLECTION_MEMBERSHIP === 'true',
+  );
   const projector = new CatalogProjector({ repository, source, clock, activityEnabled });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
   const sets = new CatalogSets(repository, source, projector, reconciler, clock);
@@ -52,6 +58,16 @@ export function createEmulatorCatalogComposition(
     clock,
     activityEnabled,
     placeLinks,
+    publishedObjects,
   );
-  return Object.freeze({ repository, source, projector, reconciler, sets, query, placeLinks });
+  return Object.freeze({
+    repository,
+    source,
+    projector,
+    reconciler,
+    sets,
+    query,
+    placeLinks,
+    publishedObjects,
+  });
 }

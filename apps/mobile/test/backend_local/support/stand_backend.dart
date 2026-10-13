@@ -125,6 +125,27 @@ final class StandBackend {
   Future<Map<String, Object?>> activityManifest() =>
       _stand(<String>['activity', 'manifest']);
 
+  /// D3.4: seeds (or reuses) the stand Collection and its member Places and
+  /// enables Place and Collection authoring on the stand only; prints no JSON,
+  /// so only its exit code is checked. Membership needs the stand started with
+  /// `RECHARGE_TEST_COLLECTION_MEMBERSHIP=true` (the D3.4 gate does).
+  Future<void> collectionSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'collection',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'collection seed failed: ${result.stderr}${result.stdout}',
+      );
+    }
+  }
+
+  /// D3.4: the ids the owner services returned for the stand Collection.
+  Future<Map<String, Object?>> collectionManifest() =>
+      _stand(<String>['collection', 'manifest']);
+
   /// The C2 staff script. It holds no authority: the backend checks the staff
   /// Session and registry. A refusal (non-zero exit) still returns its JSON.
   Future<({int exitCode, Map<String, Object?> json})> moderate(
