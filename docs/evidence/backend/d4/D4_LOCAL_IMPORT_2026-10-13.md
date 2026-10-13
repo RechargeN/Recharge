@@ -68,6 +68,35 @@ shared stand was stopped with verification after every gate and is stopped now.
   ports free). The stand was reset through `emulator-stand.mjs reset --yes`; the
   locator file was moved to the review folder, not deleted.
 
+## Follow-up: expired upload session (after the D4 commit)
+
+Found by review after `3d77018`, not by a test: an upload interrupted between
+`createUploadSession` and the accepted bytes, retried after the session TTL
+(900 s on the stand), replayed the same intent forever and kept the item at
+`failed: session_expired`. The controller now moves such a medium to the next
+upload attempt (a new UUIDv5 intent; attempt 0 is the earlier one), saves the
+attempt in the receipt (`uploadAttempts`) before using it, spends at most 4
+attempts per medium in one run and goes on from the saved attempt in the next
+one. With lost receipts the walk starts at 0 again and an attempt that worked
+returns the same asset. No duplicate draft or asset, the local original stays.
+
+Checked state `3d77018+wt:585dab2a6852` (5 files, same rule; identical before
+the gate and after the last check):
+
+| Check | Result |
+|---|---|
+| D4 unit tests (controller, hash/journal, store/guard, Media replay) | 28/28; 2 new controller tests (new intent saved before use; per-run bound, restart and lost receipts without a dead intent) |
+| gate D4 (`stand-d4-gate.mjs --yes`) | pass: stand test 2/2, invariants, verified stop |
+| `flutter analyze` / `flutter test` | 0 issues / 1545 passed, 39 skipped (all `backend_local`), 0 failed |
+| `git diff --check` | clean |
+
+The first gate attempt on this state stopped at the base seed: the Functions
+worker needed 26 s to load while a new worktree was being checked out on the
+same disk, and the seed request has no timeout. That run was stopped and the
+stand stopped with verification; the repeated gate passed on an idle disk.
+The expiry itself is not reproduced on the stand (it needs 15 minutes); the
+unit tests drive it through the uploader port.
+
 ## Not covered
 
 Scenario/Route library import (listed only; BCK-10/BCK-11), favorites, visits

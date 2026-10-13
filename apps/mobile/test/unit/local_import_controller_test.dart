@@ -279,6 +279,90 @@ void main() {
   );
 
   test(
+    'an upload session that expired unfinished moves to a new intent, saved before it is used',
+    () async {
+      uploader.expireNext = 1;
+      final LocalImportController c = await imported(place());
+      final LocalImportReceipt receipt = itemOf(c, 'loc_place_1').receipt!;
+      expect(receipt.state, LocalImportItemState.verified);
+      expect(receipt.uploadAttempts.values, <int>[1]);
+      expect(uploader.tried, hasLength(3), reason: 'one expired, two uploaded');
+      expect(uploader.dead, hasLength(1));
+      expect(uploader.intents, isNot(contains(uploader.dead.single)));
+      expect(receipt.attachments.map((item) => item.assetId), <String>[
+        'asset-1',
+        'asset-2',
+      ]);
+      expect(server.drafts, hasLength(1));
+    },
+  );
+
+  test(
+    'sessions that keep expiring fail the item after the per-run bound; the next run and lost receipts go on without a dead intent',
+    () async {
+      const int bound = LocalImportController.uploadAttemptsPerRun;
+      uploader.expireNext = bound;
+      source.set(<CreateDraftEntity>[place()]);
+      final LocalImportController first = controller();
+      await first.load();
+      await first.approve();
+      await first.run();
+      final LocalImportReceipt failed = itemOf(first, 'loc_place_1').receipt!;
+      expect(failed.state, LocalImportItemState.failed);
+      expect(failed.failureCode, 'session_expired');
+      expect(uploader.tried, hasLength(bound));
+      expect(failed.uploadAttempts.values, <int>[bound]);
+      first.dispose();
+
+      // A restart goes on from the saved attempt: no dead intent again.
+      final int before = uploader.tried.length;
+      final LocalImportController restarted = controller();
+      await restarted.load();
+      expect(itemOf(restarted, 'loc_place_1').candidate.reason, 'resume');
+      await restarted.approve();
+      await restarted.run();
+      expect(
+        itemOf(restarted, 'loc_place_1').receipt?.state,
+        LocalImportItemState.verified,
+      );
+      expect(
+        uploader.tried.skip(before).where(uploader.dead.contains),
+        isEmpty,
+      );
+      expect(server.drafts, hasLength(1));
+      restarted.dispose();
+
+      // Receipts lost: the walk passes the dead intents (one run's bound) and
+      // the next run reuses the asset of the attempt that worked.
+      final FileLocalImportJournal fresh = FileLocalImportJournal(
+        receipts: File('${temp.path}/other-receipts.json'),
+        sessions: File('${temp.path}/other-sessions.json'),
+      );
+      final int assets = uploader.intents.length;
+      LocalImportController again = controller(withJournal: fresh);
+      await again.load();
+      await again.approve();
+      await again.run();
+      expect(
+        itemOf(again, 'loc_place_1').receipt?.failureCode,
+        'session_expired',
+      );
+      again.dispose();
+      again = controller(withJournal: fresh);
+      await again.load();
+      await again.approve();
+      await again.run();
+      expect(
+        itemOf(again, 'loc_place_1').receipt?.state,
+        LocalImportItemState.verified,
+      );
+      expect(uploader.intents, hasLength(assets), reason: 'no new asset');
+      expect(server.drafts, hasLength(1));
+      again.dispose();
+    },
+  );
+
+  test(
     'a local change after import is a conflict; importing again updates the same draft',
     () async {
       final LocalImportController c = await imported(place());
@@ -525,6 +609,14 @@ final class _Uploader implements EventCoverUploader {
   final List<String> intents = <String>[];
   final Map<String, String> _assets = <String, String>{};
 
+  /// Every intent the controller tried, in order.
+  final List<String> tried = <String>[];
+
+  /// The next this many new intents get an upload session that expires before
+  /// the bytes are accepted; such an intent stays dead for good.
+  int expireNext = 0;
+  final Set<String> dead = <String>{};
+
   @override
   Future<String> upload({
     required String intentId,
@@ -533,7 +625,16 @@ final class _Uploader implements EventCoverUploader {
     required PublisherRef publisherRef,
     required String contentId,
   }) async {
+    tried.add(intentId);
+    if (dead.contains(intentId)) {
+      throw const EventPublicationRejected('session_expired');
+    }
     if (_assets.containsKey(intentId)) return _assets[intentId]!;
+    if (expireNext > 0) {
+      expireNext -= 1;
+      dead.add(intentId);
+      throw const EventPublicationRejected('session_expired');
+    }
     intents.add(intentId);
     return _assets[intentId] = 'asset-${_assets.length + 1}';
   }

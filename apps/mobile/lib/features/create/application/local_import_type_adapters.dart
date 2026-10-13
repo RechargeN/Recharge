@@ -35,9 +35,16 @@ final class LocalImportScope {
 
   String id(String name) => const Uuid().v5(namespace, '$value:$name');
 
-  /// The Media intent of one exact upload: same attachment and bytes, same id.
-  String uploadIntentId(String attachmentId, String sha256Hex) =>
-      id('upload:$attachmentId:$sha256Hex');
+  /// The Media intent of one exact upload: same attachment, bytes and
+  /// attempt, same id. Attempt 0 is the first; a later one exists only after
+  /// an earlier attempt's upload session expired unfinished.
+  String uploadIntentId(
+    String attachmentId,
+    String sha256Hex, {
+    int attempt = 0,
+  }) => attempt == 0
+      ? id('upload:$attachmentId:$sha256Hex')
+      : id('upload:$attachmentId:$sha256Hex:$attempt');
 
   /// Prefix of every Content idempotency key of this import.
   String get keyBase =>

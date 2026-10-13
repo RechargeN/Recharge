@@ -112,6 +112,10 @@ final class LocalImportController extends ChangeNotifier {
            newSessionId ??
            (() => 'imp-${DateTime.now().toUtc().microsecondsSinceEpoch}');
 
+  /// Upload attempts one run spends on one medium whose sessions keep
+  /// expiring; the next run goes on from the saved attempt.
+  static const int uploadAttemptsPerRun = 4;
+
   final String _accountId;
   final LocalImportSource _source;
   final LocalImportJournal _journal;
@@ -591,13 +595,40 @@ final class LocalImportController extends ChangeNotifier {
         uploaded.add(known);
         continue;
       }
-      final String assetId = await _uploader.upload(
-        intentId: scope.uploadIntentId(item.attachmentId, digest),
-        bytes: bytes,
-        declaredMediaType: declaredPublicationMediaType(item.localRef),
-        publisherRef: scope.publisherRef,
-        contentId: receipt.contentId,
-      );
+      int attempt = receipt.uploadAttempts[item.attachmentId] ?? 0;
+      String assetId;
+      for (int tries = 1; ; tries += 1) {
+        try {
+          assetId = await _uploader.upload(
+            intentId: scope.uploadIntentId(
+              item.attachmentId,
+              digest,
+              attempt: attempt,
+            ),
+            bytes: bytes,
+            declaredMediaType: declaredPublicationMediaType(item.localRef),
+            publisherRef: scope.publisherRef,
+            contentId: receipt.contentId,
+          );
+          break;
+        } on EventPublicationRejected catch (refusal) {
+          // The attempt's upload session expired before the server accepted
+          // the bytes (an accepted one is reused by the gateway): its intent
+          // can never be finished. The next attempt is saved before it is
+          // used, so a restart never goes back to the dead one.
+          if (refusal.code != 'session_expired') rethrow;
+          attempt += 1;
+          receipt = receipt.copyWith(
+            uploadAttempts: <String, int>{
+              ...receipt.uploadAttempts,
+              item.attachmentId: attempt,
+            },
+            updatedAtUtc: _clock(),
+          );
+          await _journal.saveReceipt(receipt);
+          if (tries >= uploadAttemptsPerRun) rethrow;
+        }
+      }
       uploaded.add(
         LocalImportAttachmentRecord(
           attachmentId: item.attachmentId,

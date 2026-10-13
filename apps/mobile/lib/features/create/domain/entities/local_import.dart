@@ -120,6 +120,7 @@ final class LocalImportReceipt {
     required this.updatedAtUtc,
     this.title = '',
     this.attachments = const <LocalImportAttachmentRecord>[],
+    this.uploadAttempts = const <String, int>{},
     this.sentBodyHash,
     this.verifiedAtUtc,
     this.confirmedAtUtc,
@@ -145,6 +146,11 @@ final class LocalImportReceipt {
   final DateTime updatedAtUtc;
   final String title;
   final List<LocalImportAttachmentRecord> attachments;
+
+  /// Per attachment id, the upload attempt to use next (absent: 0). It moves
+  /// on only when the attempt's upload session expired before the server
+  /// accepted the bytes: that intent can never be finished.
+  final Map<String, int> uploadAttempts;
 
   /// Hash of the body the client saved, compared with the server's on verify.
   final String? sentBodyHash;
@@ -174,6 +180,7 @@ final class LocalImportReceipt {
     DateTime? updatedAtUtc,
     String? title,
     List<LocalImportAttachmentRecord>? attachments,
+    Map<String, int>? uploadAttempts,
     String? sentBodyHash,
     DateTime? verifiedAtUtc,
     bool clearVerified = false,
@@ -197,6 +204,7 @@ final class LocalImportReceipt {
     updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
     title: title ?? this.title,
     attachments: attachments ?? this.attachments,
+    uploadAttempts: uploadAttempts ?? this.uploadAttempts,
     sentBodyHash: sentBodyHash ?? this.sentBodyHash,
     verifiedAtUtc: clearVerified ? null : (verifiedAtUtc ?? this.verifiedAtUtc),
     confirmedAtUtc: clearConfirmed
@@ -222,6 +230,7 @@ final class LocalImportReceipt {
     'updatedAtUtc': updatedAtUtc.toUtc().toIso8601String(),
     'title': title,
     'attachments': attachments.map((item) => item.toJson()).toList(),
+    if (uploadAttempts.isNotEmpty) 'uploadAttempts': uploadAttempts,
     if (sentBodyHash != null) 'sentBodyHash': sentBodyHash,
     if (verifiedAtUtc != null)
       'verifiedAtUtc': verifiedAtUtc!.toUtc().toIso8601String(),
@@ -241,6 +250,7 @@ final class LocalImportReceipt {
     final LocalImportItemState? state = localImportItemStateOf(value['state']);
     final DateTime? updatedAt = _instant(value['updatedAtUtc']);
     final Object? attachments = value['attachments'];
+    final Map<String, int>? uploadAttempts = _attempts(value['uploadAttempts']);
     final List<String?> strings = <String?>[
       _string(value['accountId']),
       _string(value['publisherId']),
@@ -259,6 +269,7 @@ final class LocalImportReceipt {
         strings.contains(null) ||
         value['serverRevision'] is! int ||
         attachments is! List ||
+        uploadAttempts == null ||
         !_optionalString(value['sentBodyHash']) ||
         !_optionalString(value['failureCode']) ||
         !_optionalInstant(value['verifiedAtUtc']) ||
@@ -289,6 +300,7 @@ final class LocalImportReceipt {
       state: state,
       updatedAtUtc: updatedAt,
       attachments: List<LocalImportAttachmentRecord>.unmodifiable(parsed),
+      uploadAttempts: uploadAttempts,
       sentBodyHash: value['sentBodyHash'] as String?,
       verifiedAtUtc: _instant(value['verifiedAtUtc']),
       confirmedAtUtc: _instant(value['confirmedAtUtc']),
@@ -417,3 +429,17 @@ DateTime? _instant(Object? value) =>
 
 bool _optionalInstant(Object? value) =>
     value == null || (value is String && DateTime.tryParse(value) != null);
+
+/// Absent → empty; anything but attachment id → positive attempt is malformed.
+Map<String, int>? _attempts(Object? value) {
+  if (value == null) return const <String, int>{};
+  if (value is! Map) return null;
+  final Map<String, int> parsed = <String, int>{};
+  for (final MapEntry<Object?, Object?> entry in value.entries) {
+    final Object? key = entry.key;
+    final Object? attempt = entry.value;
+    if (key is! String || attempt is! int || attempt < 1) return null;
+    parsed[key] = attempt;
+  }
+  return Map<String, int>.unmodifiable(parsed);
+}

@@ -99,6 +99,15 @@ void main() {
         scope.uploadIntentId('a', 'h'),
         isNot(scope.uploadIntentId('a', 'g')),
       );
+      // Attempt 0 is the first intent; every later attempt is a new one.
+      expect(
+        scope.uploadIntentId('a', 'h', attempt: 0),
+        scope.uploadIntentId('a', 'h'),
+      );
+      expect(<String>{
+        for (int attempt = 0; attempt < 4; attempt += 1)
+          scope.uploadIntentId('a', 'h', attempt: attempt),
+      }, hasLength(4));
       final LocalImportScope other = LocalImportScope(
         accountId: 'account-b',
         publisherRef: page,
@@ -129,7 +138,7 @@ void main() {
       final LocalImportReceipt mine = receipt(
         verifiedAt: DateTime.utc(2026, 10, 13, 1),
         confirmedAt: DateTime.utc(2026, 10, 13, 2),
-      );
+      ).copyWith(uploadAttempts: const <String, int>{'att-1': 2});
       await journal.saveReceipt(mine);
       await journal.saveReceipt(receipt(account: 'account-b'));
       final LocalImportReceipt? read = await journal.receiptFor(
@@ -169,6 +178,22 @@ void main() {
         LocalImportReceipt.fromJson(<String, Object?>{'accountId': 'a'}),
         isNull,
       );
+      expect(read?.uploadAttempts, const <String, int>{'att-1': 2});
+      expect(receipt().toJson().containsKey('uploadAttempts'), isFalse);
+      for (final Object? attempts in <Object?>[
+        <String, Object?>{'att-1': 0},
+        <String, Object?>{'att-1': '1'},
+        <Object?>['att-1'],
+      ]) {
+        expect(
+          LocalImportReceipt.fromJson(<String, Object?>{
+            ...mine.toJson(),
+            'uploadAttempts': attempts,
+          }),
+          isNull,
+          reason: '$attempts',
+        );
+      }
       expect(
         LocalImportSession.fromJson(<String, Object?>{
           ...session.toJson(),
