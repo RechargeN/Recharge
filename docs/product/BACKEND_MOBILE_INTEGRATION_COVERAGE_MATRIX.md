@@ -161,7 +161,7 @@ runtime completion are not claimed.
 
 | ID | Decision | Owner | Gate | Default |
 |---|---|---|---|---|
-| BCK18-OD-01 / OD-04 | Import session, checkpoint, conflict, dedupe, retry, disclosure and rollback | Mobile Platform + domains | Any import | Disabled, except D4 ([amendment](LOCAL_IMPORT_D4_AMENDMENT.md)): local/Emulator import of Create drafts of Event, Place, Activity and Collection only |
+| BCK18-OD-01 / OD-04 | Import session, checkpoint, conflict, dedupe, retry, disclosure and rollback | Mobile Platform + domains | Any import | Disabled, except D4 ([amendment](LOCAL_IMPORT_D4_AMENDMENT.md)): local/Emulator import of Create drafts of Event, Place, Activity and Collection only, with the D4.1 rollback of an unsubmitted import and the fenced cleanup of the local original ([amendment](LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md)) |
 | BCK18-OD-02 / OD-08 | Local user/page mapping to production identity | Identity + Mobile | Identity/import | No inference/import |
 | BCK18-OD-03 | Common mobile transport/client generation strategy after Booking exception | API + Mobile | Non-Booking remote adapters | No new generated contract family |
 | BCK18-OD-04 | Canonical cache/read-state semantic algebra and freshness defaults | Mobile + domains | M8/M9 | Domain-specific local state only; no server claim |

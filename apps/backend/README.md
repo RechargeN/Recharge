@@ -829,6 +829,41 @@ session with durable receipts and resume, and the guarded removal of the local
 original (verification, explicit confirmation, 30 days). It never submits or
 publishes. The gate seeds the D3.1 Place first (Place authoring flag and Page).
 
+### D4.1 import rollback and fenced cleanup
+
+([amendment](../../docs/product/LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md)) The
+same `stand-d4-gate.mjs --yes` also runs the D4.1 stand scenarios.
+
+Backend. The local import binding now has a `generation`, a `state`
+(`active` | `rolledBack`), an optional `cleanup` reservation and a
+`bindingRevision` compare-and-set; a D4 binding without these fields reads as
+generation 1, active, revision 0. Drafts no longer write the binding: only the
+Content service does, in the transaction that creates the draft or changes the
+lifecycle. Four Session commands through the existing `contentCommandV1`:
+`rollbackImportedDraft` (own draft of the current generation, never submitted
+or published, exact revision; draft and generation become tombstones,
+`content.draft.import_rolled_back`), `reserveImportCleanup` (fencing token,
+installation id, a 900 s lease that is a stand constant and never taken over),
+`completeImportCleanup` and `releaseImportCleanup` (only with the reserving
+token; release is refused once the original is gone). Query `getImportBinding`
+returns the author's view without the token. After a rollback the next import
+opens `generation + 1`; an old retry replays its stored result. The body of a
+rolled-back draft is no Media reference, so its asset is left to the orphan
+reconcile; a tombstone accepts no new Media binding.
+
+Mobile. The receipt gains `generation`, the `rollbackPending`, `rolledBack`
+and `cleanupReserved` states and the journaled rollback and cleanup intents;
+keys of generation 2+ carry `:g<N>`. Cleanup runs intent → reservation →
+deletion → completion; an unknown outcome keeps the intent and is repeated with
+the same key (`finishCleanups` after a restart). The import no longer writes
+over a newer server revision: the item fails with `revision_conflict`.
+
+Tests: `test/integration/content_local_import_rollback.test.ts` and the shared
+scenarios in `test/support/content_repository_scenarios.ts` (in-memory), the
+Emulator group `import` (`test/emulator/content_local_import_rollback.test.ts`:
+the same scenarios on Firestore plus rollback/submit, rollback/reservation and
+reservation/reservation races and a D4 binding without generation fields).
+
 ## M1 stage 2: Page access and publication reliability (Emulator only)
 
 Client evidence for the M1 checklist
@@ -879,10 +914,14 @@ All 40 original Node invocations (including the final three globs) are retained.
 | `handoff-notifications` | 233.8 s | 450 s |
 | `place-activity` | 148.2 s | 300 s |
 | `collection` (D3.4) | 192.2 s | 390 s |
+| `import` (D4.1) | 54.2 s | 150 s |
 | `rules-reference` | 6.7 s | 120 s |
 
+The `rental` group (D3.3) is bounded the same way (88.2 s, 210 s); see
+`scripts/run-emulator-test-groups.mjs`.
+
 Each limit is rounded up to 30 s from `1.75 × measured duration + 30 s`, with
-a 120 s floor. The outer full-run limit is 2190 s: the sum of group limits plus
+a 120 s floor. The outer full-run limit is 2550 s: the sum of group limits plus
 180 s for startup and 60 s for shutdown. These are local hang bounds, not an SLO.
 A group's deadline includes all of its invocations; timeout or any nonzero exit
 makes the full run fail. Later groups still report their results sequentially.

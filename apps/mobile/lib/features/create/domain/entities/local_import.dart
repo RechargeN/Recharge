@@ -20,12 +20,19 @@ enum LocalImportClass {
 
 /// Progress of one item through the import (D4 §5.3). Each state is written
 /// only after the server answered the step, so a resume restarts the step.
+/// D4.1 §3.1: `rollbackPending` is written before the rollback is sent and
+/// stays until the server's answer or binding is known; `rolledBack` is final
+/// for this generation; `cleanupReserved` holds the server's reservation of
+/// the local original's deletion.
 enum LocalImportItemState {
   created,
   mediaUploaded,
   bodySaved,
   verified,
   failed,
+  rollbackPending,
+  rolledBack,
+  cleanupReserved,
 }
 
 LocalImportItemState? localImportItemStateOf(Object? value) {
@@ -126,6 +133,13 @@ final class LocalImportReceipt {
     this.confirmedAtUtc,
     this.localDeletedAtUtc,
     this.failureCode,
+    this.generation = 1,
+    this.rollbackKey,
+    this.rollbackExpectedRevision,
+    this.rolledBackAtUtc,
+    this.cleanupToken,
+    this.cleanupInstallationId,
+    this.cleanupCompletedAtUtc,
   });
 
   final String accountId;
@@ -161,6 +175,24 @@ final class LocalImportReceipt {
   final DateTime? localDeletedAtUtc;
   final String? failureCode;
 
+  /// D4.1: generation of the server binding this receipt imported into. D4
+  /// receipts without the field are generation 1.
+  final int generation;
+
+  /// D4.1: the journaled rollback intent, sent again unchanged until the
+  /// server's outcome is known.
+  final String? rollbackKey;
+  final int? rollbackExpectedRevision;
+  final DateTime? rolledBackAtUtc;
+
+  /// D4.1: the cleanup intent's fencing token, journaled before the server
+  /// reservation; only this token completes or releases it.
+  final String? cleanupToken;
+  final String? cleanupInstallationId;
+
+  /// The server recorded the original as deleted (`completeImportCleanup`).
+  final DateTime? cleanupCompletedAtUtc;
+
   bool belongsTo(String account, PublisherRef publisher) =>
       accountId == account &&
       publisherRef.type == publisher.type &&
@@ -189,6 +221,14 @@ final class LocalImportReceipt {
     DateTime? localDeletedAtUtc,
     String? failureCode,
     bool clearFailure = false,
+    String? rollbackKey,
+    int? rollbackExpectedRevision,
+    bool clearRollback = false,
+    DateTime? rolledBackAtUtc,
+    String? cleanupToken,
+    String? cleanupInstallationId,
+    bool clearCleanup = false,
+    DateTime? cleanupCompletedAtUtc,
   }) => LocalImportReceipt(
     accountId: accountId,
     publisherRef: publisherRef,
@@ -212,6 +252,17 @@ final class LocalImportReceipt {
         : (confirmedAtUtc ?? this.confirmedAtUtc),
     localDeletedAtUtc: localDeletedAtUtc ?? this.localDeletedAtUtc,
     failureCode: clearFailure ? null : (failureCode ?? this.failureCode),
+    generation: generation,
+    rollbackKey: clearRollback ? null : (rollbackKey ?? this.rollbackKey),
+    rollbackExpectedRevision: clearRollback
+        ? null
+        : (rollbackExpectedRevision ?? this.rollbackExpectedRevision),
+    rolledBackAtUtc: rolledBackAtUtc ?? this.rolledBackAtUtc,
+    cleanupToken: clearCleanup ? null : (cleanupToken ?? this.cleanupToken),
+    cleanupInstallationId: clearCleanup
+        ? null
+        : (cleanupInstallationId ?? this.cleanupInstallationId),
+    cleanupCompletedAtUtc: cleanupCompletedAtUtc ?? this.cleanupCompletedAtUtc,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -239,6 +290,17 @@ final class LocalImportReceipt {
     if (localDeletedAtUtc != null)
       'localDeletedAtUtc': localDeletedAtUtc!.toUtc().toIso8601String(),
     if (failureCode != null) 'failureCode': failureCode,
+    if (generation != 1) 'generation': generation,
+    if (rollbackKey != null) 'rollbackKey': rollbackKey,
+    if (rollbackExpectedRevision != null)
+      'rollbackExpectedRevision': rollbackExpectedRevision,
+    if (rolledBackAtUtc != null)
+      'rolledBackAtUtc': rolledBackAtUtc!.toUtc().toIso8601String(),
+    if (cleanupToken != null) 'cleanupToken': cleanupToken,
+    if (cleanupInstallationId != null)
+      'cleanupInstallationId': cleanupInstallationId,
+    if (cleanupCompletedAtUtc != null)
+      'cleanupCompletedAtUtc': cleanupCompletedAtUtc!.toUtc().toIso8601String(),
   };
 
   /// A malformed or foreign-shaped entry is skipped, never repaired.
@@ -274,7 +336,15 @@ final class LocalImportReceipt {
         !_optionalString(value['failureCode']) ||
         !_optionalInstant(value['verifiedAtUtc']) ||
         !_optionalInstant(value['confirmedAtUtc']) ||
-        !_optionalInstant(value['localDeletedAtUtc'])) {
+        !_optionalInstant(value['localDeletedAtUtc']) ||
+        !_optionalGeneration(value['generation']) ||
+        !_optionalString(value['rollbackKey']) ||
+        !(value['rollbackExpectedRevision'] == null ||
+            value['rollbackExpectedRevision'] is int) ||
+        !_optionalInstant(value['rolledBackAtUtc']) ||
+        !_optionalString(value['cleanupToken']) ||
+        !_optionalString(value['cleanupInstallationId']) ||
+        !_optionalInstant(value['cleanupCompletedAtUtc'])) {
       return null;
     }
     final List<LocalImportAttachmentRecord> parsed =
@@ -306,6 +376,13 @@ final class LocalImportReceipt {
       confirmedAtUtc: _instant(value['confirmedAtUtc']),
       localDeletedAtUtc: _instant(value['localDeletedAtUtc']),
       failureCode: value['failureCode'] as String?,
+      generation: value['generation'] as int? ?? 1,
+      rollbackKey: value['rollbackKey'] as String?,
+      rollbackExpectedRevision: value['rollbackExpectedRevision'] as int?,
+      rolledBackAtUtc: _instant(value['rolledBackAtUtc']),
+      cleanupToken: value['cleanupToken'] as String?,
+      cleanupInstallationId: value['cleanupInstallationId'] as String?,
+      cleanupCompletedAtUtc: _instant(value['cleanupCompletedAtUtc']),
     );
   }
 }
@@ -423,6 +500,9 @@ final class LocalImportSession {
 String? _string(Object? value) => value is String ? value : null;
 
 bool _optionalString(Object? value) => value == null || value is String;
+
+bool _optionalGeneration(Object? value) =>
+    value == null || (value is int && value >= 1);
 
 DateTime? _instant(Object? value) =>
     value is String ? DateTime.tryParse(value)?.toUtc() : null;

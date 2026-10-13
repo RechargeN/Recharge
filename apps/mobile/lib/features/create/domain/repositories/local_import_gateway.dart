@@ -73,6 +73,8 @@ final class LocalImportServerDraft {
     this.createdByUserId,
     this.importSourceKey,
     this.body,
+    this.status,
+    this.importGeneration,
   });
 
   final String contentId;
@@ -82,6 +84,32 @@ final class LocalImportServerDraft {
   final String? createdByUserId;
   final String? importSourceKey;
   final Map<String, Object?>? body;
+
+  /// Server draft status; `rolledBack` is a D4.1 tombstone.
+  final String? status;
+
+  /// D4.1: the binding generation of this draft (absent on D4 drafts: 1).
+  final int? importGeneration;
+}
+
+/// D4.1: the author's view of a local import binding (`getImportBinding`).
+/// It never carries the fencing token of a reservation.
+final class LocalImportBindingView {
+  const LocalImportBindingView({
+    required this.generation,
+    required this.rolledBack,
+    required this.draftId,
+    this.cleanupState,
+    this.cleanupInstallationId,
+  });
+
+  final int generation;
+  final bool rolledBack;
+  final String draftId;
+
+  /// `reserved`, `done`, or null without a reservation.
+  final String? cleanupState;
+  final String? cleanupInstallationId;
 }
 
 /// Content owner commands of the import (D4 §5.3). Failures are the same typed
@@ -106,6 +134,43 @@ abstract interface class LocalImportContentGateway {
   });
 
   Future<LocalImportServerDraft> draft(String draftId);
+
+  /// D4.1: tombstones the author's imported draft of [generation] at exactly
+  /// [expectedRevision], together with the binding generation.
+  Future<LocalImportServerDraft> rollbackImportedDraft({
+    required String draftId,
+    required String importSourceKey,
+    required int generation,
+    required int expectedRevision,
+    required String idempotencyKey,
+  });
+
+  /// D4.1: the server reservation of the local original's deletion.
+  Future<LocalImportBindingView> reserveImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String draftId,
+    required String installationId,
+    required String fencingToken,
+    required String idempotencyKey,
+  });
+
+  Future<LocalImportBindingView> completeImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  });
+
+  Future<LocalImportBindingView> releaseImportCleanup({
+    required String importSourceKey,
+    required int generation,
+    required String fencingToken,
+    required String idempotencyKey,
+  });
+
+  /// D4.1: how an unknown outcome is resolved (`getImportBinding`).
+  Future<LocalImportBindingView> importBinding(String importSourceKey);
 }
 
 /// Every command asks it first; the default-off import test entry implements it.

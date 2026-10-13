@@ -13,6 +13,7 @@ import { deepFreeze } from '../../../shared/immutable.js';
 import { localImportBindingRef, type ContentDraft } from '../domain/content_draft.js';
 import { resolveContentType } from '../domain/content_type_registry.js';
 import { ContentDomainRefusal, ContentRepositoryConflict } from '../domain/failures.js';
+import { bindingFromStored, type LocalImportBinding } from '../domain/local_import_binding.js';
 import type { PublicationPointer } from '../domain/publication_pointer.js';
 import type { PublicationSubmission } from '../domain/publication_submission.js';
 import type { PublishedRevision } from '../domain/published_revision.js';
@@ -180,6 +181,8 @@ type WriteCheck =
   | { readonly kind: 'create'; readonly conflict: 'immutable_revision' | 'duplicate_id' }
   | { readonly kind: 'cas'; readonly expected: number }
   | { readonly kind: 'binding'; readonly draftId: string }
+  /** D4.1: compare-and-set on a local import binding's `bindingRevision`. */
+  | { readonly kind: 'bindingCas'; readonly expected: number }
   | {
       readonly kind: 'history';
       readonly field: 'contentId';
@@ -288,15 +291,35 @@ class BufferedContentTransaction implements ContentTransaction {
     createdByUserId: string,
     importSourceKey: string,
   ): Promise<ContentDraft | null> {
-    const draft = await this.draftByExternalBinding(
-      localImportBindingRef(createdByUserId, importSourceKey),
-    );
+    const binding = await this.importBinding(createdByUserId, importSourceKey);
+    if (binding === null || binding.state !== 'active') return null;
+    const draft = await this.draft(binding.draftId);
     // A binding is trusted only for the exact author and key it names.
     return draft !== null &&
       draft.createdByUserId === createdByUserId &&
       draft.importSourceKey === importSourceKey
       ? draft
       : null;
+  }
+
+  async importBinding(
+    createdByUserId: string,
+    importSourceKey: string,
+  ): Promise<LocalImportBinding | null> {
+    const ref = localImportBindingRef(createdByUserId, importSourceKey);
+    const stored = await this.read(contentCollections.externalBindings, sha256(ref));
+    if (stored === null || stored.externalBindingRef !== ref) return null;
+    return bindingFromStored(createdByUserId, importSourceKey, stored);
+  }
+
+  putImportBinding(binding: LocalImportBinding, expectedStoredRevision: number): void {
+    const ref = localImportBindingRef(binding.createdByUserId, binding.importSourceKey);
+    this.stage({
+      collection: contentCollections.externalBindings,
+      id: sha256(ref),
+      data: { ...plain(binding), externalBindingRef: ref },
+      check: { kind: 'bindingCas', expected: expectedStoredRevision },
+    });
   }
 
   async draftByExternalBinding(externalBindingRef: string): Promise<ContentDraft | null> {
@@ -309,7 +332,8 @@ class BufferedContentTransaction implements ContentTransaction {
   }
 
   putDraft(draft: ContentDraft): void {
-    const mediaAssetIds = mediaIdsOf(draft);
+    // D4.1: the body of a rolled-back import references no Media asset any more.
+    const mediaAssetIds = draft.status === 'rolledBack' ? [] : mediaIdsOf(draft);
     assertMediaIdsWithinLimit(mediaAssetIds.length, this.limits);
     const { body, ...rest } = draft;
     this.stage({
@@ -326,16 +350,7 @@ class BufferedContentTransaction implements ContentTransaction {
         data: { draftId: draft.draftId, externalBindingRef: binding.externalBindingRef },
         check: { kind: 'binding', draftId: draft.draftId },
       });
-    // D4: a user's local import source binds to one draft, with the same check.
-    if (draft.createdByUserId !== null && draft.importSourceKey !== undefined) {
-      const ref = localImportBindingRef(draft.createdByUserId, draft.importSourceKey);
-      this.stage({
-        collection: contentCollections.externalBindings,
-        id: sha256(ref),
-        data: { draftId: draft.draftId, externalBindingRef: ref },
-        check: { kind: 'binding', draftId: draft.draftId },
-      });
-    }
+    // D4.1: a local import binding is written only through `putImportBinding`.
   }
 
   // ------------------------------------------------------------- submissions
@@ -678,6 +693,15 @@ class BufferedContentTransaction implements ContentTransaction {
           const stored = documents.get(key);
           if (stored !== null && stored !== undefined && stored.draftId !== check.draftId)
             throw new ContentRepositoryConflict('duplicate_id');
+          documents.set(key, item.data);
+          break;
+        }
+        case 'bindingCas': {
+          const stored = documents.get(key);
+          const storedRevision =
+            typeof stored?.bindingRevision === 'number' ? stored.bindingRevision : 0;
+          if (storedRevision !== check.expected)
+            throw new ContentRepositoryConflict('binding_revision');
           documents.set(key, item.data);
           break;
         }

@@ -3,6 +3,7 @@ import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
 import type { MarketId } from '../../reference_data/domain/identifiers.js';
 import type { ContentAction } from './content_type_registry.js';
 import type { ContentDraft } from './content_draft.js';
+import type { LocalImportBinding } from './local_import_binding.js';
 import type { PublicationPointer } from './publication_pointer.js';
 import type { PublicationSubmission } from './publication_submission.js';
 import type { PublishedRevision } from './published_revision.js';
@@ -95,11 +96,21 @@ export interface ContentTransaction {
   draftByContentId(contentId: string): Promise<ContentDraft | null>;
   /** Draft bound to an external source record by `originBinding.externalBindingRef`. */
   draftByExternalBinding(externalBindingRef: string): Promise<ContentDraft | null>;
-  /** D4: the draft this author imported from this local `loc_*` key, if any. */
+  /** D4: the draft of the active generation this author imported from this `loc_*` key. */
   draftByImportSource(
     createdByUserId: string,
     importSourceKey: string,
   ): Promise<ContentDraft | null>;
+  /** D4.1: the binding of this author's `loc_*` key, in any state, if any. */
+  importBinding(
+    createdByUserId: string,
+    importSourceKey: string,
+  ): Promise<LocalImportBinding | null>;
+  /**
+   * D4.1: compare-and-set on the stored `bindingRevision` (0 = absent or a D4
+   * binding). The only writer of local import bindings; drafts never write one.
+   */
+  putImportBinding(binding: LocalImportBinding, expectedStoredRevision: number): void;
   putDraft(draft: ContentDraft): void;
   submission(submissionId: string): Promise<PublicationSubmission | null>;
   submissionsForContent(contentId: string): Promise<readonly PublicationSubmission[]>;
@@ -108,7 +119,10 @@ export interface ContentTransaction {
   publishedRevisionsForContent(contentId: string): Promise<readonly PublishedRevision[]>;
   /** Fails with a repository conflict if the id already exists (immutability). */
   putPublishedRevision(revision: PublishedRevision): void;
-  /** Whether any draft body or immutable revision still references the Media asset. */
+  /**
+   * Whether any draft body or immutable revision still references the Media asset.
+   * The body of a rolled-back import (D4.1) is not a reference.
+   */
   isMediaReferenced(assetId: string): Promise<boolean>;
   /** Content ids with an immutable revision that attaches the asset (bounded, sorted). */
   contentIdsAttachingMedia(assetId: string, limit: number): Promise<readonly string[]>;

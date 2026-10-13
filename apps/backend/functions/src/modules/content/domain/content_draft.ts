@@ -109,6 +109,7 @@ export function createContentDraft(input: {
   readonly createdByUserId: EntityId | null;
   readonly provenance: ContentProvenanceV1;
   readonly importSourceKey?: string;
+  readonly importGeneration?: number;
   readonly nowUtc: UtcInstant;
 }): ContentDraft {
   assertBoundedBody(input.body);
@@ -129,6 +130,7 @@ export function createContentDraft(input: {
     createdByUserId: input.createdByUserId,
     provenance: structuredClone(input.provenance),
     ...(input.importSourceKey === undefined ? {} : { importSourceKey: input.importSourceKey }),
+    ...(input.importGeneration === undefined ? {} : { importGeneration: input.importGeneration }),
     createdAtUtc: input.nowUtc,
     updatedAtUtc: input.nowUtc,
   } satisfies ContentDraftV1);
@@ -142,6 +144,7 @@ export function updateContentDraftBody(
   nowUtc: UtcInstant,
   sourceRefresh?: SourceRefreshV1,
 ): ContentDraft {
+  assertNotRolledBack(draft);
   if (draft.revision !== expectedRevision) throw new ContentDomainRefusal('revision_conflict');
   if (draft.status === 'submitted') throw new ContentDomainRefusal('revision_conflict');
   assertBoundedBody(body);
@@ -173,6 +176,32 @@ export function withDraftStatus(
 }
 
 export function assertSubmittable(draft: ContentDraft, expectedRevision: number): void {
+  assertNotRolledBack(draft);
   if (draft.revision !== expectedRevision) throw new ContentDomainRefusal('revision_conflict');
   if (draft.status === 'submitted') throw new ContentDomainRefusal('revision_conflict');
+}
+
+/** D4.1: a rolled-back import is a terminal tombstone; it is never edited or revived. */
+export function assertNotRolledBack(draft: ContentDraft): void {
+  if (draft.status === 'rolledBack') throw new ContentDomainRefusal('import_rolled_back');
+}
+
+/**
+ * D4.1: the tombstone of a rolled-back import. Only the exact revision the
+ * author confirmed is rolled back; the body is kept for audit, never deleted.
+ */
+export function rollBackImportedDraft(
+  draft: ContentDraft,
+  expectedRevision: number,
+  nowUtc: UtcInstant,
+): ContentDraft {
+  assertNotRolledBack(draft);
+  if (draft.status === 'submitted') throw new ContentDomainRefusal('import_rollback_not_allowed');
+  if (draft.revision !== expectedRevision) throw new ContentDomainRefusal('revision_conflict');
+  return deepFreeze({
+    ...structuredClone(draft),
+    status: 'rolledBack',
+    revision: draft.revision + 1,
+    updatedAtUtc: nowUtc,
+  });
 }

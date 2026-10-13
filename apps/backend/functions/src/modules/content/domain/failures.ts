@@ -43,7 +43,10 @@ export class ContentDomainRefusal extends Error {
 
 /** Raised by repositories when an optimistic/immutability guard fails. */
 export class ContentRepositoryConflict extends Error {
-  constructor(readonly reason: 'pointer_revision' | 'immutable_revision' | 'duplicate_id') {
+  constructor(
+    readonly reason:
+      'pointer_revision' | 'immutable_revision' | 'duplicate_id' | 'binding_revision',
+  ) {
     super(reason);
     this.name = 'ContentRepositoryConflict';
   }
@@ -55,7 +58,9 @@ export type ContentResultType =
   | 'publishedRevision'
   | 'publicationStatus'
   | 'publicationPointer'
-  | 'moderationAcknowledgement';
+  | 'moderationAcknowledgement'
+  /** D4.1: the author's view of a local import binding. */
+  | 'importBinding';
 
 export function toContentWireResult<T>(
   resultType: ContentResultType,

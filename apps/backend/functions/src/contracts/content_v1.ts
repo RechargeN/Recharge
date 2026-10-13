@@ -17,7 +17,9 @@ export const contentTypeIds = [
 ] as const;
 export type ContentTypeId = (typeof contentTypeIds)[number];
 
-export type ContentDraftStatus = 'editing' | 'ready' | 'submitted' | 'revision_requested';
+/** `rolledBack` (D4.1): tombstone of a rolled-back local import; terminal. */
+export type ContentDraftStatus =
+  'editing' | 'ready' | 'submitted' | 'revision_requested' | 'rolledBack';
 export type PublicationSubmissionState =
   | 'submitted'
   | 'under_review'
@@ -118,8 +120,31 @@ export interface ContentDraftV1 {
   readonly createdByUserId: EntityId | null;
   readonly provenance: ContentProvenanceV1;
   readonly importSourceKey?: string;
+  /** D4.1: generation of the import binding this draft belongs to (absent = 1). */
+  readonly importGeneration?: number;
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
+}
+
+/**
+ * D4.1: the author's view of a local import binding. The fencing token of a
+ * cleanup reservation is never returned; the reserving installation keeps it.
+ */
+export interface LocalImportBindingV1 {
+  readonly importSourceKey: string;
+  readonly generation: number;
+  readonly state: 'active' | 'rolledBack';
+  readonly draftId: EntityId;
+  readonly bindingRevision: number;
+  readonly rolledBackAtUtc?: UtcInstant;
+  readonly cleanup: {
+    readonly state: 'reserved' | 'done';
+    readonly generation: number;
+    readonly installationId: string;
+    readonly reservedAtUtc: UtcInstant;
+    readonly leaseExpiresAtUtc: UtcInstant;
+    readonly completedAtUtc?: UtcInstant;
+  } | null;
 }
 
 export interface PublicationSubmissionV1 {
@@ -266,7 +291,15 @@ export type ContentFailureCode =
   | 'unknown_outcome'
   | 'not_found'
   | 'invalid_contract'
-  | 'storage_limit_exceeded';
+  | 'storage_limit_exceeded'
+  // D4.1: local import rollback and cleanup reservation.
+  | 'import_rollback_not_allowed'
+  | 'import_generation_mismatch'
+  | 'import_rolled_back'
+  | 'cleanup_reserved'
+  | 'cleanup_not_reserved'
+  | 'cleanup_token_mismatch'
+  | 'original_removed';
 
 interface CommandEnvelope<Type extends string, Payload> {
   readonly schemaVersion: 1;
@@ -351,6 +384,42 @@ export type ApplyModerationDispositionCommandV1 = CommandEnvelope<
   }
 >;
 
+/** D4.1: roll back the caller's own imported draft of one binding generation. */
+export type RollbackImportedDraftCommandV1 = CommandEnvelope<
+  'rollbackImportedDraft',
+  {
+    readonly draftId: EntityId;
+    readonly importSourceKey: string;
+    readonly generation: number;
+    readonly expectedRevision: number;
+  }
+>;
+/** D4.1: reserve the deletion of the local original for one installation. */
+export type ReserveImportCleanupCommandV1 = CommandEnvelope<
+  'reserveImportCleanup',
+  {
+    readonly importSourceKey: string;
+    readonly generation: number;
+    readonly draftId: EntityId;
+    readonly installationId: string;
+    readonly fencingToken: string;
+  }
+>;
+export type CompleteImportCleanupCommandV1 = CommandEnvelope<
+  'completeImportCleanup',
+  { readonly importSourceKey: string; readonly generation: number; readonly fencingToken: string }
+>;
+export type ReleaseImportCleanupCommandV1 = CommandEnvelope<
+  'releaseImportCleanup',
+  { readonly importSourceKey: string; readonly generation: number; readonly fencingToken: string }
+>;
+
+export type LocalImportLifecycleCommandV1 =
+  | RollbackImportedDraftCommandV1
+  | ReserveImportCleanupCommandV1
+  | CompleteImportCleanupCommandV1
+  | ReleaseImportCleanupCommandV1;
+
 /** Commands a signed-in actor may issue through `ContentPublicationService.execute`. */
 export type ContentCommandV1 =
   | CreateDraftCommandV1
@@ -358,7 +427,8 @@ export type ContentCommandV1 =
   | SubmitForPublicationCommandV1
   | PublishApprovedRevisionCommandV1
   | WithdrawPublicationCommandV1
-  | ActivatePublishedRevisionCommandV1;
+  | ActivatePublishedRevisionCommandV1
+  | LocalImportLifecycleCommandV1;
 
 export interface ModerationAcknowledgementV1 {
   readonly instructionId: string;
@@ -379,6 +449,11 @@ export type ContentQueryV1 =
       readonly schemaVersion: 1;
       readonly queryType: 'getPublicationStatus' | 'getPublishedRevision';
       readonly payload: { readonly contentId: EntityId };
+    }
+  | {
+      readonly schemaVersion: 1;
+      readonly queryType: 'getImportBinding';
+      readonly payload: { readonly importSourceKey: string };
     };
 
 export type ContentQueryByBindingV1 = {

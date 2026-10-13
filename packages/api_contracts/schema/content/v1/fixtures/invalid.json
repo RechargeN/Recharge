@@ -440,6 +440,95 @@
           "externalBindingRef": "src-1|uid-42|"
         }
       }
+    },
+    {
+      "schemaVersion": 1,
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "typeId": "place",
+      "typeSchemaMajor": 1,
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "publisherBindingOrigin": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "status": "editing",
+      "revision": 1,
+      "body": {
+        "title": "Vermanes garden greenhouse",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "geoVisibility": "exact",
+        "location": {
+          "latitude": 56.9496,
+          "longitude": 24.1052
+        }
+      },
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "importSourceKey": "loc_abc123",
+      "createdAtUtc": "2026-09-29T00:00:00.000Z",
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "provenance": {
+        "kind": "creatorSubmission",
+        "importerActorRef": "user:018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "originBinding": {
+          "kind": "directAuthoring"
+        }
+      },
+      "importGeneration": 0
+    },
+    {
+      "schemaVersion": 1,
+      "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+      "contentId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+      "typeId": "place",
+      "typeSchemaMajor": 1,
+      "publisherRef": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "publisherBindingOrigin": {
+        "type": "page",
+        "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YB"
+      },
+      "marketId": "LV",
+      "status": "rolled_back",
+      "revision": 1,
+      "body": {
+        "title": "Vermanes garden greenhouse",
+        "categoryId": "art_culture_museums",
+        "subcategoryId": "museum",
+        "geoVisibility": "exact",
+        "location": {
+          "latitude": 56.9496,
+          "longitude": 24.1052
+        }
+      },
+      "referenceRevisions": {
+        "marketConfigRevisionId": "mc-lv-1",
+        "taxonomyRevisionId": "tx-1",
+        "localizationRevisionId": "loc-1"
+      },
+      "createdByUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+      "importSourceKey": "loc_abc123",
+      "createdAtUtc": "2026-09-29T00:00:00.000Z",
+      "updatedAtUtc": "2026-09-29T00:00:00.000Z",
+      "provenance": {
+        "kind": "creatorSubmission",
+        "importerActorRef": "user:018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "originBinding": {
+          "kind": "directAuthoring"
+        }
+      }
     }
   ],
   "submission": [
@@ -1017,6 +1106,61 @@
           "snapshotHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         }
       }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "rollbackImportedDraft",
+      "idempotencyKey": "local-import:g1:loc_abc123:rollback",
+      "payload": {
+        "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "importSourceKey": "loc_abc123",
+        "expectedRevision": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reserveImportCleanup",
+      "idempotencyKey": "local-import:g1:loc_abc123:cleanup:reserve",
+      "payload": {
+        "importSourceKey": "loc_abc123",
+        "generation": 1,
+        "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "installationId": "inst-7f3c2a",
+        "fencingToken": "short"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "completeImportCleanup",
+      "idempotencyKey": "local-import:g1:loc_abc123:cleanup:complete",
+      "payload": {
+        "importSourceKey": "loc_abc123",
+        "generation": 0,
+        "fencingToken": "tok_8f3a9c2e41b7d605"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "releaseImportCleanup",
+      "idempotencyKey": "local-import:g1:loc_abc123:cleanup:release",
+      "payload": {
+        "importSourceKey": "loc_abc123",
+        "generation": 1,
+        "fencingToken": "tok_8f3a9c2e41b7d605",
+        "installationId": "inst-7f3c2a"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reserveImportCleanup",
+      "idempotencyKey": "local-import:g1:loc_abc123:cleanup:reserve",
+      "payload": {
+        "importSourceKey": "abc123",
+        "generation": 1,
+        "draftId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "installationId": "inst-7f3c2a",
+        "fencingToken": "tok_8f3a9c2e41b7d605"
+      }
     }
   ],
   "query": [
@@ -1033,6 +1177,13 @@
       "payload": {
         "externalBindingRef": ""
       }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getImportBinding",
+      "payload": {
+        "importSourceKey": "loc_"
+      }
     }
   ],
   "result": [
@@ -1040,6 +1191,11 @@
       "schemaVersion": 1,
       "kind": "rejected",
       "code": "boom"
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "rejected",
+      "code": "cleanup_lost"
     }
   ]
 }

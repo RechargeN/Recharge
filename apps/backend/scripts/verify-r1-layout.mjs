@@ -88,6 +88,8 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/content_collection_enablement.test.ts",
   // D4 (LOCAL_IMPORT_D4_AMENDMENT.md §8): one draft per local import source.
   "apps/backend/functions/test/integration/content_local_import.test.ts",
+  // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §5): import rollback and cleanup fencing.
+  "apps/backend/functions/test/integration/content_local_import_rollback.test.ts",
 ];
 
 if (

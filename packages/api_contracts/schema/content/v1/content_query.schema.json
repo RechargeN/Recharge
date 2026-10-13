@@ -102,6 +102,36 @@
           "const": 1
         },
         "queryType": {
+          "const": "getImportBinding"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "importSourceKey"
+          ],
+          "properties": {
+            "importSourceKey": {
+              "type": "string",
+              "pattern": "^loc_[A-Za-z0-9_-]{1,120}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "queryType",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "queryType": {
           "const": "findByExternalBinding"
         },
         "payload": {

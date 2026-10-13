@@ -166,11 +166,17 @@ const commandResultTypes: Readonly<Record<string, ContentResultType>> = Object.f
   publishApprovedRevision: 'publishedRevision',
   withdrawPublication: 'publicationPointer',
   activatePublishedRevision: 'publicationPointer',
+  // D4.1: local import rollback and cleanup reservation.
+  rollbackImportedDraft: 'draft',
+  reserveImportCleanup: 'importBinding',
+  completeImportCleanup: 'importBinding',
+  releaseImportCleanup: 'importBinding',
 });
 const queryResultTypes: Readonly<Record<string, ContentResultType>> = Object.freeze({
   getDraft: 'draft',
   getPublicationStatus: 'publicationStatus',
   getPublishedRevision: 'publishedRevision',
+  getImportBinding: 'importBinding',
 });
 
 function stripTransport(data: unknown): unknown {

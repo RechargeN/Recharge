@@ -1924,6 +1924,42 @@ only; it narrows nothing above.
   Type flags and authority are checked before the lookup. Delegated imports,
   drafts without an import source key and the response contract are unchanged.
 
+## 45. D4.1 local amendment — import rollback and fenced cleanup
+
+Authoritative text:
+[LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md](LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and adds to §44.
+
+- The local import binding carries `generation` (≥ 1), `state` (`active` |
+  `rolledBack`), an optional `cleanup` reservation and a `bindingRevision`
+  compare-and-set. A §44 binding without them is generation 1, active, with no
+  reservation and revision 0. Only the Content service writes it, in the
+  transaction of the draft change; `putDraft` never does.
+- `createDraft` with `importSourceKey`: an active binding deduplicates as in
+  §44; a rolled-back one opens `generation + 1` with exactly one new draft in
+  the same transaction (`importGeneration` on the draft). A repeated command
+  replays its stored result of its own generation.
+- Session-only commands through `contentCommandV1`, resultType in brackets:
+  `rollbackImportedDraft` [`draft`] — own draft of the current generation at
+  the exact `expectedRevision`, no submission and no pointer, no reservation
+  of any age and no completed cleanup; the draft becomes `status: rolledBack`
+  (revision + 1, body kept) and the generation `rolledBack`, audit
+  `content.draft.import_rolled_back`. `reserveImportCleanup`,
+  `completeImportCleanup`, `releaseImportCleanup` [`importBinding`] — a
+  reservation names a fencing token, generation and installation id; another
+  token is refused even after the lease (a stand constant of 900 s) expired;
+  complete repeats idempotently; release is refused once the cleanup is done.
+  Query `getImportBinding` [`importBinding`] returns the author's view without
+  the token. Delegated modules are refused (`capability_denied`).
+- New failure codes: `import_rollback_not_allowed`,
+  `import_generation_mismatch`, `import_rolled_back`, `cleanup_reserved`,
+  `cleanup_not_reserved`, `cleanup_token_mismatch`, `original_removed`.
+  `updateDraft` and `submitForPublication` of a tombstone are
+  `import_rolled_back`.
+- Media: the body of a rolled-back draft is not a reference
+  (`isMediaReferenced`), so the asset is deleted only by the orphan reconcile
+  after grace under its fenced hold; a tombstone accepts no new Media binding.
+
 ## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
 
 Authorized bounded local/Emulator change: optional public details for
