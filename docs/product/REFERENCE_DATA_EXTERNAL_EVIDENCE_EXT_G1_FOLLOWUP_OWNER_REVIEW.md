@@ -125,4 +125,3 @@ markets остаются closed/disabled; source/BCK/OD статусы не по
 8. **BCK20-OD02-EXT-EV-G1-FU-REV-AC-08:** successful transport proves only endpoint metadata.
 9. **BCK20-OD02-EXT-EV-G1-FU-REV-AC-09:** EXT-G2–G6, source/market/BCK/OD/runtime and deployment gates remain closed.
 10. **BCK20-OD02-EXT-EV-G1-FU-REV-AC-10:** the review itself grants no network, repository, cloud, push or merge authority.
-

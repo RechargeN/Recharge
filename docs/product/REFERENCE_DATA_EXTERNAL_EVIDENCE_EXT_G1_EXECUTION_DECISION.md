@@ -70,4 +70,3 @@ Preparation authority grants no network access.
 4. **BCK20-OD02-EXT-EV-G1-EXEC-DEC-AC-04:** preferred follow-up URIs remain candidates and receive no authority from this decision.
 5. **BCK20-OD02-EXT-EV-G1-EXEC-DEC-AC-05:** only a documentation-only follow-up authorization package may be prepared.
 6. **BCK20-OD02-EXT-EV-G1-EXEC-DEC-AC-06:** EXT-G2–G6, source approval, markets, runtime, Firebase, deployment, push and merge remain closed.
-
