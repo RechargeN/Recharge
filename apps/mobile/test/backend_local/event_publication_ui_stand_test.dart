@@ -222,13 +222,14 @@ void main() {
         (widget) =>
             widget is TextField && widget.decoration?.labelText == label,
       );
-      await waitFor(tester, field('Title *'));
-      await tester.enterText(field('Title *'), 'Clay evening (UI path)');
+      await waitFor(tester, field('event-title'));
+      await tester.enterText(field('event-title'), 'Clay evening (UI path)');
       await tester.enterText(
-        field('Short description'),
+        field('event-short-description'),
         'A ceramic workshop created through the real Event form.',
       );
-      await tester.enterText(field('Cover image *'), cover.path);
+      await tester.ensureVisible(field('event-cover'));
+      await tester.enterText(field('event-cover'), cover.path);
       await tester.ensureVisible(find.text('Save draft'));
       await tester.tap(find.text('Save draft'));
       await waitFor(tester, find.text('Saved'));

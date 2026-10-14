@@ -224,7 +224,12 @@ void main() {
     'a double tap sends one command and creates one booking',
     (WidgetTester tester) async {
       await bootClient(tester);
+      final loading = Completer<void>();
+      client.holdNextRead = loading;
       await pumpPage(tester);
+      await waitFor(tester, find.text('Loading your booking...'));
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      loading.complete();
       final create = find.byKey(const Key('event-booking-create'));
       await waitFor(tester, create);
 
@@ -333,11 +338,17 @@ final class FaultClient extends http.BaseClient {
   bool dropNextCreateResponse = false;
   int createCommands = 0;
   Completer<void>? holdNextCreate;
+  Completer<void>? holdNextRead;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final isCreate = request.url.path.endsWith('/createInternalBookingV1');
     if (severed) throw const SocketException('simulated: no connection');
+    if (!isCreate && holdNextRead != null) {
+      final held = holdNextRead!;
+      holdNextRead = null;
+      await held.future;
+    }
     if (isCreate) {
       createCommands += 1;
       final held = holdNextCreate;
