@@ -297,7 +297,9 @@ Emulator-only callables behind the `media.upload` flag: `mediaCommandV1`
 `uploadMediaBytesV1`. The last is the byte channel: the contract hides the
 upload target and the Emulator cannot sign URLs, so the owner of an open session
 sends the bytes and the backend writes them. It is not the production upload
-mechanism. Content checks the exact Media revision through the existing
+mechanism. The owner accepted this channel on 2026-10-14, after it was
+implemented, for the Emulator only; no production upload channel is approved
+by that decision (`docs/verification/M1_REOPEN_REGISTER.md`, Р-12). Content checks the exact Media revision through the existing
 readiness adapter, and a mandatory Event cover is unchanged.
 
 Evidence limits: the scanner and processor are the existing FAKES

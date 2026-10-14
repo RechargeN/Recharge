@@ -1,8 +1,8 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.32**
-- Date: **2026-10-05**
+- Version: **1.33**
+- Date: **2026-10-14**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
 - Accountable owner: **Platform Architecture**
@@ -10,6 +10,12 @@
 - Primary launch market: Latvia (`LV`)
 - Parallel expansion markets: Estonia (`EE`), Lithuania (`LT`)
 - Runtime effect: **none**
+
+Revision 1.33 records two owner decisions of 2026-10-14 in §3.7 (Release M1):
+an independent review of the final M1 composition is added to the M1
+criterion, and the reconstructed M1 file map is recorded as an explicit
+exception to "written before code". Documentation only; the merge conditions
+of §3.6 stay Proposed and are not changed.
 
 Revision 1.32 adds §3.7: Release R1 naming, the stage order, the ten Create
 types with the five deferred-in-implementation types and their return
@@ -536,13 +542,23 @@ SLO и error-budget остаются Proposed; численные пороги e
 
 | Точка | Единственное допустимое название | Критерий |
 |---|---|---|
-| Release M1 | «первый локальный контур проверен» | первый локальный контур, состав которого записан в плане файлов этапа до кода, прошёл все применимые проверки: чистое дерево одного итогового SHA, зелёные backend/Emulator/Rules и mobile gates (`flutter analyze`, `flutter test`, boundary, diff), нет открытых P1/P2 |
+| Release M1 | «первый локальный контур проверен» | первый локальный контур, состав которого записан в плане файлов этапа до кода, прошёл все применимые проверки: чистое дерево одного итогового SHA, зелёные backend/Emulator/Rules и mobile gates (`flutter analyze`, `flutter test`, boundary, diff), нет открытых P1/P2; **независимое ревью финального состава M1** без открытых P1/P2 (решение владельца 2026-10-14, Р-07) |
 | Release M2 | «R1 функционально проверен локально» | весь согласованный Release R1 проверен локально, включая **10/10 Create-типов**; все обязательные gates зелёные на одном итоговом SHA; Deferred из этого раздела остаются выключенными |
 
 Release M1 и Release M2 не называются cloud-ready, production-ready,
 staging-ready или Market-готовностью и не включают проверку на физических
 устройствах: она следует отдельным шагом порядка. Ни одна из точек не включает
 тип, рынок или флаг.
+
+**Исключение для Release M1 (решение владельца 2026-10-14, Р-03).** Состав
+первого локального контура, восстановленный после реализации (класс
+«восстановлено после реализации» в
+[M1_LOCAL_CONTOUR_CHECKLIST.md](../verification/M1_LOCAL_CONTOUR_CHECKLIST.md) §1),
+принят как **реконструкция**, а не как план файлов до кода. Фактическая
+хронология коммитов сохраняется; исключение действует только для M1 и не
+распространяется на Release M2 и последующие этапы. Независимое ревью
+(строка Release M1) — отдельное требование M1; условия merge §3.6 остаются
+Proposed и в M1 не переносятся.
 
 #### Границы сред
 
