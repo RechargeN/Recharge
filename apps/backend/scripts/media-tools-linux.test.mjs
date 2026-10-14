@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   attemptProbe,
+  clamdLaunchEnv,
   clamdVersion,
   cvdCertFile,
   cvdCerts,
@@ -733,4 +734,20 @@ test("DEF-10: L2 and L3 probes go through attemptProbe and a dead host fails L3"
     /check\("L3", false, \{ reason: "the service host is not alive after L2" \}\)/u,
   );
   assert.match(body, /journal: scopeJournal\(units, since\)/u);
+});
+
+test("clamd loads the official CVDs with the .deb certificates in CVD_CERTS_DIR", () => {
+  const tools = {
+    libraryPath: "/opt/clamav/lib",
+    certs: "/tmp/Recharge/tools/clamav-1.5.4-linux/usr/local/etc/certs",
+  };
+  assert.deepEqual(clamdLaunchEnv(tools), {
+    LD_LIBRARY_PATH: "/opt/clamav/lib",
+    CVD_CERTS_DIR: tools.certs,
+  });
+  const linux = fs.readFileSync(
+    new URL("./media-tools-linux.mjs", import.meta.url),
+    "utf8",
+  );
+  assert.match(linux, /role: "clamd",\s*env: clamdLaunchEnv\(tools\),/u);
 });

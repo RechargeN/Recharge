@@ -766,7 +766,7 @@ export async function startLinux({
       cwd: runDir,
       runDir,
       role: "clamd",
-      env: { LD_LIBRARY_PATH: tools.libraryPath },
+      env: clamdLaunchEnv(tools),
     });
     const helpers = await hostHelpers();
     let version = null;
@@ -929,6 +929,16 @@ export async function statusLinux({ instance = "stand" } = {}) {
     scopes,
     health,
   };
+}
+
+/**
+ * The environment of clamd inside its scope. clamd loads and verifies the
+ * official CVDs in libclamav 1.5.4, the same code that ignored the
+ * configuration directive in freshclam's test load (DEF-08) and knows only
+ * `CVD_CERTS_DIR`; the `CVDCertsDirectory` line in clamd.conf stays.
+ */
+export function clamdLaunchEnv(tools) {
+  return { LD_LIBRARY_PATH: tools.libraryPath, CVD_CERTS_DIR: tools.certs };
 }
 
 /** A probe that fails becomes data for a check instead of ending the gate. */
