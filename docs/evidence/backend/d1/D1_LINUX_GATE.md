@@ -143,7 +143,7 @@ moderate — без изменений, DEF-05).
 
 Дефект: DEF-10. Backend R0 run `38555622810` — как прежде (DEF-05).
 
-## Попытка 5 — не запущена (исправление DEF-10, вариант А)
+## Попытка 5 — исправление DEF-10 и окружение `clamd`
 
 Исправление (план одобрен владельцем 2026-10-14): scope сервиса и `clamd`
 создаются с `-p OOMPolicy=continue` — OOM-kill завершает только процесс сверх
@@ -169,3 +169,21 @@ push в рамках D1, 2026-10-14): `clamd` с официальными баз
 статическая проверка, что L2 и L3 идут через `attemptProbe`); `format:check`,
 `lint`, `typecheck`, `verify:toolchain`, `test:media-tools`, `build` — pass;
 Windows D1-гейт — pass. Это не Linux evidence.
+
+### Результат попытки 5 — failed на L4
+
+Run `38565997591` (https://github.com/RechargeN/Recharge/actions/runs/38565997591),
+2026-10-14 12:43:26Z, SHA `c50dc72`, стадия `test`, push в рамках разрешения на
+серию D1. Прошли: базы и `inspect`, build, unit-тесты D1 и Media guard 37/37;
+самопроверка L1, L6; **L2 ok** (`answer.kind=exit`, `oomKills` 1, пик 768 MiB,
+scope активен, хост жив — DEF-10 подтверждён); **L3 ok** (зависший воркер
+завершён, освобождено 420 MiB, следующая обработка `succeeded` новым воркером);
+L5 ok. **L4 FAILED**: процесс `node` в scope `MemoryMax` 16 MiB, `TasksMax` 64
+продолжал работать (`memoryCurrent` ≈ 7,9 MiB). Причина: реализация L4
+ограничивала память, а J4 по §3.8 — «запуск с лимитом процессов 1». Шаги с
+официальными базами, tool tests, EICAR и Storage не выполнялись. DEF-11.
+
+## Попытка 6 — исправление DEF-11
+
+L4 приведена к J4: `l4Limits` = `TasksMax` 1, `MemoryMax` 64 MiB (память с
+запасом, чтобы отказ шёл только от лимита задач). Тесты 27/27.

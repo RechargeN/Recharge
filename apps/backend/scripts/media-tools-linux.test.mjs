@@ -15,6 +15,7 @@ import {
   freshclamInvocation,
   journalArgs,
   l2Verdict,
+  l4Limits,
   inspectionMarkdown,
   noticePattern,
   officialAllowance,
@@ -750,4 +751,13 @@ test("clamd loads the official CVDs with the .deb certificates in CVD_CERTS_DIR"
     "utf8",
   );
   assert.match(linux, /role: "clamd",\s*env: clamdLaunchEnv\(tools\),/u);
+});
+
+test("L4 mirrors J4: a task limit of 1 refuses the start, memory cannot be the reason", () => {
+  assert.deepEqual(l4Limits, { memoryMax: 64 * MiB, tasksMax: 1 });
+  const linux = fs.readFileSync(
+    new URL("./media-tools-linux.mjs", import.meta.url),
+    "utf8",
+  );
+  assert.match(linux, /unit: l4Unit,\s*limits: l4Limits,/u);
 });

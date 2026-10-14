@@ -941,6 +941,14 @@ export function clamdLaunchEnv(tools) {
   return { LD_LIBRARY_PATH: tools.libraryPath, CVD_CERTS_DIR: tools.certs };
 }
 
+/**
+ * L4, the counterpart of J4 "start with a process limit of 1" (amendment §3.8):
+ * one task cannot hold the threads node needs, so the process must not start
+ * and nothing may keep running. Memory is generous on purpose, so that only the
+ * task limit can refuse it (run 38565997591: with 16 MiB and 64 tasks node ran).
+ */
+export const l4Limits = Object.freeze({ memoryMax: 64 * MiB, tasksMax: 1 });
+
 /** A probe that fails becomes data for a check instead of ending the gate. */
 export async function attemptProbe(run) {
   try {
@@ -1167,7 +1175,7 @@ export async function selftestLinux() {
     try {
       await launchInScope({
         unit: l4Unit,
-        limits: { memoryMax: 16 * MiB, tasksMax: 64 },
+        limits: l4Limits,
         exe: process.execPath,
         args: ["-e", "setTimeout(() => {}, 60000)"],
         cwd: l4Dir,
