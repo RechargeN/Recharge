@@ -1,11 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
   clamdVersion,
+  cvdCertFile,
+  cvdCerts,
   databaseSetProblems,
+  debCertsPath,
+  freshclamInvocation,
   inspectionMarkdown,
   noticePattern,
   officialAllowance,
@@ -137,6 +142,7 @@ test("the inspection report names a missing COPYING and a failed check", () => {
       deb: { size: 1, sha256: "c".repeat(64) },
       gpg: { signingKeyFingerprint: "F".repeat(40) },
       clamd: "ClamAV 1.5.4",
+      certs: { file: "clamav.crt", size: 1976, sha256: "d".repeat(64) },
     },
     inspection,
     [
@@ -149,6 +155,10 @@ test("the inspection report names a missing COPYING and a failed check", () => {
     ],
   );
   assert.match(markdown, /\| main\.cvd \| 62 .*\| FAILED \|.*\| NOT FOUND \|/u);
+  assert.match(
+    markdown,
+    /CVD certificate: `usr\/local\/etc\/certs\/clamav\.crt` from the \.deb, 1976 bytes, SHA-256 `d{64}`/u,
+  );
   assert.match(
     markdown,
     /@img\/sharp-libvips-linux-x64@1\.3\.4 \(LGPL-3\.0-or-later\)/u,
@@ -494,4 +504,126 @@ test("the fetch step asks clamd for its version only through clamdVersion", () =
     "no clamd --version without a configuration file",
   );
   assert.match(linux, /const version = clamdVersion\(tools\);/u);
+});
+
+/** A fake extracted .deb root; `shape` builds its certificate directory. */
+function debRoot(shape) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "d1-certs-test-"));
+  shape(path.join(root, ...debCertsPath), root);
+  return root;
+}
+
+test("DEF-08: the CVD certificate comes from the .deb as a plain, readable, non-empty file", () => {
+  const pem = "-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----\n";
+  const root = debRoot((dir) => {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, cvdCertFile), pem);
+  });
+  try {
+    const certs = cvdCerts(root);
+    assert.equal(certs.dir, path.join(root, "usr", "local", "etc", "certs"));
+    assert.equal(certs.file, "clamav.crt");
+    assert.equal(certs.size, Buffer.byteLength(pem));
+    assert.equal(certs.sha256, createHash("sha256").update(pem).digest("hex"));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("DEF-08: a missing, empty, non-file or linked certificate stops the gate", () => {
+  const cases = [
+    ["no directory", () => {}, /does not exist in the ClamAV \.deb/u],
+    [
+      "no clamav.crt",
+      (dir) => fs.mkdirSync(dir, { recursive: true }),
+      /CVD certificates missing: .*clamav\.crt/u,
+    ],
+    [
+      "empty clamav.crt",
+      (dir) => {
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, cvdCertFile), "");
+      },
+      /is empty/u,
+    ],
+    [
+      "clamav.crt is a directory",
+      (dir) => fs.mkdirSync(path.join(dir, cvdCertFile), { recursive: true }),
+      /is not a plain file/u,
+    ],
+    [
+      "the certificate directory is a link",
+      (dir, root) => {
+        const elsewhere = path.join(root, "elsewhere");
+        fs.mkdirSync(elsewhere, { recursive: true });
+        fs.writeFileSync(path.join(elsewhere, cvdCertFile), "x");
+        fs.mkdirSync(path.dirname(dir), { recursive: true });
+        fs.symlinkSync(elsewhere, dir, "junction");
+      },
+      /is not a plain directory/u,
+    ],
+  ];
+  for (const [name, shape, expected] of cases) {
+    const root = debRoot(shape);
+    try {
+      assert.throws(() => cvdCerts(root), expected, name);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("DEF-08: freshclam gets the .deb certificates as CVD_CERTS_DIR and in its configuration", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "d1-freshclam-test-"));
+  try {
+    const tools = {
+      freshclam: "/opt/clamav/bin/freshclam",
+      certs: "/tmp/Recharge/tools/clamav-1.5.4-linux/usr/local/etc/certs",
+      env: { LD_LIBRARY_PATH: "/opt/clamav/lib", PATH: "/usr/bin" },
+    };
+    const dir = path.join(root, "official-db");
+    const run = freshclamInvocation(tools, { dir, root });
+    assert.equal(run.command, tools.freshclam);
+    assert.deepEqual(run.args, [`--config-file=${run.conf}`, "--stdout"]);
+    assert.equal(
+      run.args.some((arg) => arg.includes("cvdcertsdir")),
+      false,
+      "--cvdcertsdir is not added without evidence",
+    );
+    assert.equal(run.options.env.CVD_CERTS_DIR, tools.certs);
+    assert.equal(run.options.env.LD_LIBRARY_PATH, tools.env.LD_LIBRARY_PATH);
+    assert.equal(run.options.env.PATH, tools.env.PATH);
+    assert.equal(path.dirname(run.conf), root);
+    const conf = fs.readFileSync(run.conf, "utf8").split("\n");
+    assert.ok(conf.includes(`DatabaseDirectory ${dir}`));
+    assert.ok(conf.includes(`CVDCertsDirectory ${tools.certs}`));
+    assert.equal(
+      conf.filter((line) => line.startsWith("CVDCertsDirectory")).length,
+      1,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("DEF-08: freshclam runs only through freshclamInvocation and certificates are never optional", () => {
+  const linux = fs.readFileSync(
+    new URL("./media-tools-linux.mjs", import.meta.url),
+    "utf8",
+  );
+  assert.equal(
+    (linux.match(/tools\.freshclam\b/gu) ?? []).length,
+    1,
+    "tools.freshclam is used only to build the invocation",
+  );
+  assert.match(
+    linux,
+    /const freshclam = freshclamInvocation\(tools, \{ dir \}\);/u,
+  );
+  assert.match(
+    linux,
+    /freshclam\.command,\s*freshclam\.args,\s*freshclam\.options,/u,
+  );
+  assert.match(linux, /const certsFile = cvdCerts\(root\);/u);
+  assert.equal(/let certs = null/u.test(linux), false);
 });

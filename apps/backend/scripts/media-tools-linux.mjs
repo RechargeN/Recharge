@@ -71,6 +71,46 @@ function walk(dir, visit) {
   }
 }
 
+/** Where the verified .deb keeps the root certificate of CVD signatures. */
+export const debCertsPath = Object.freeze(["usr", "local", "etc", "certs"]);
+export const cvdCertFile = "clamav.crt";
+
+/**
+ * DEF-08: the certificate that verifies CVD signatures comes only from the
+ * extracted, SHA-256 and GPG checked .deb. The directory and `clamav.crt`
+ * must be a plain directory and a plain, readable, non-empty file (no
+ * symbolic link or junction); otherwise the gate stops before freshclam runs
+ * and downloads anything, instead of ClamAV falling back to its compiled
+ * default path.
+ */
+export function cvdCerts(root) {
+  const dir = path.join(root, ...debCertsPath);
+  const file = path.join(dir, cvdCertFile);
+  const entry = (target) => {
+    try {
+      return fs.lstatSync(target);
+    } catch {
+      return null;
+    }
+  };
+  const folder = entry(dir);
+  if (folder === null)
+    fail(`CVD certificates missing: ${dir} does not exist in the ClamAV .deb`);
+  if (folder.isSymbolicLink() || !folder.isDirectory())
+    fail(`CVD certificates refused: ${dir} is not a plain directory`);
+  const cert = entry(file);
+  if (cert === null) fail(`CVD certificates missing: ${file}`);
+  if (cert.isSymbolicLink() || !cert.isFile())
+    fail(`CVD certificates refused: ${file} is not a plain file`);
+  if (cert.size === 0) fail(`CVD certificates refused: ${file} is empty`);
+  try {
+    fs.accessSync(file, fs.constants.R_OK);
+  } catch {
+    fail(`CVD certificates refused: ${file} is not readable`);
+  }
+  return { dir, file: cvdCertFile, size: cert.size, sha256: sha256File(file) };
+}
+
 /** The extracted ClamAV: executables, library directories and certificates. */
 export function linuxTools(lock = readLock()) {
   const root = path.join(toolsRoot, lock.linux.clamav.directory);
@@ -78,23 +118,22 @@ export function linuxTools(lock = readLock()) {
     fail("ClamAV for Linux is not extracted; run fetch");
   const found = {};
   const libDirs = new Set();
-  let certs = null;
   walk(root, (file) => {
     const base = path.basename(file);
     if (["clamd", "freshclam", "sigtool"].includes(base)) found[base] = file;
     if (/^libclamav\.so/u.test(base)) libDirs.add(path.dirname(file));
-    if (path.basename(path.dirname(file)) === "certs" && certs === null)
-      certs = path.dirname(file);
   });
   for (const name of ["clamd", "freshclam", "sigtool"])
     if (found[name] === undefined) fail(`${name} not found in the ClamAV .deb`);
+  const certsFile = cvdCerts(root);
   const libraryPath = [...libDirs, process.env.LD_LIBRARY_PATH]
     .filter(Boolean)
     .join(":");
   return {
     root,
     ...found,
-    certs,
+    certs: certsFile.dir,
+    certsFile,
     libraryPath,
     env: { ...process.env, LD_LIBRARY_PATH: libraryPath },
   };
@@ -180,12 +219,15 @@ export async function fetchLinux() {
     path.join(toolsRoot, "clamav-linux.binaries.txt"),
     lines.join("\n") + "\n",
   );
-  log(`  ${version}; certs ${tools.certs ?? "not packaged"}`);
+  log(
+    `  ${version}; certs ${tools.certs}; ${cvdCertFile} ${tools.certsFile.size} bytes, SHA-256 ${tools.certsFile.sha256}`,
+  );
   return {
     deb: { size: fs.statSync(deb).size, sha256: sha256File(deb) },
     gpg: { good: gpg.good, signingKeyFingerprint: gpg.signingKeyFingerprint },
     keySha256,
     clamd: version,
+    certs: tools.certsFile,
     binaries: lines,
   };
 }
@@ -265,6 +307,37 @@ export function databaseSetProblems(names) {
 export const officialDatabaseDir = () => path.join(runRoot, "official-db");
 
 /**
+ * The freshclam run of the gate (DEF-08). `CVDCertsDirectory` serves freshclam
+ * itself; the test load of a downloaded database happens in libclamav 1.5.4,
+ * which knows only `CVD_CERTS_DIR` and its compiled default (run 38547611633
+ * failed on `/usr/local/etc/certs`). Both point to the verified .deb directory.
+ * `--cvdcertsdir` is not added: no evidence needs it. Download TLS is
+ * unchanged.
+ */
+export function freshclamInvocation(tools, { dir, root = runRoot }) {
+  const conf = path.join(root, "freshclam.conf");
+  fs.writeFileSync(
+    conf,
+    [
+      `DatabaseDirectory ${dir}`,
+      `UpdateLogFile ${path.join(root, "freshclam.log")}`,
+      "DatabaseMirror database.clamav.net",
+      "DNSDatabaseInfo current.cvd.clamav.net",
+      "ScriptedUpdates yes",
+      "Foreground yes",
+      `CVDCertsDirectory ${tools.certs}`,
+      "",
+    ].join("\n"),
+  );
+  return {
+    command: tools.freshclam,
+    args: [`--config-file=${conf}`, "--stdout"],
+    options: { env: { ...tools.env, CVD_CERTS_DIR: tools.certs } },
+    conf,
+  };
+}
+
+/**
  * One freshclam run into a runner-local directory. The growth is checked
  * against the allowance at exit and the ledger total against the D1-L budget;
  * an incomplete set fails as well. A refused directory moves to _rejected.
@@ -275,28 +348,15 @@ export async function fetchOfficialDatabases(lock = readLock()) {
   if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0)
     fail(`${dir} is not empty; the gate downloads into a fresh directory`);
   fs.mkdirSync(dir, { recursive: true });
-  const conf = path.join(runRoot, "freshclam.conf");
-  fs.writeFileSync(
-    conf,
-    [
-      `DatabaseDirectory ${dir}`,
-      `UpdateLogFile ${path.join(runRoot, "freshclam.log")}`,
-      "DatabaseMirror database.clamav.net",
-      "DNSDatabaseInfo current.cvd.clamav.net",
-      "ScriptedUpdates yes",
-      "Foreground yes",
-      ...(tools.certs === null ? [] : [`CVDCertsDirectory ${tools.certs}`]),
-      "",
-    ].join("\n"),
-  );
+  const freshclam = freshclamInvocation(tools, { dir });
   const allowance = officialAllowance(lock.linux, readLedger());
   log(`official databases through freshclam (allowance ${allowance} bytes)`);
   let grown;
   try {
     grown = await watched(
-      tools.freshclam,
-      [`--config-file=${conf}`, "--stdout"],
-      { env: tools.env },
+      freshclam.command,
+      freshclam.args,
+      freshclam.options,
       dir,
       allowance,
     );
@@ -424,6 +484,7 @@ export function inspectionMarkdown(fetched, inspection, packages) {
     "",
     `- ClamAV .deb: ${fetched.deb.size} bytes, SHA-256 \`${fetched.deb.sha256}\`; GPG good, key \`${fetched.gpg.signingKeyFingerprint}\``,
     `- ${fetched.clamd}`,
+    `- CVD certificate: \`${[...debCertsPath, fetched.certs.file].join("/")}\` from the .deb, ${fetched.certs.size} bytes, SHA-256 \`${fetched.certs.sha256}\``,
     "",
     "| Database | Version | Build time | Signatures | Signature check | Bytes | SHA-256 | COPYING |",
     "|---|---|---|---|---|---|---|---|",

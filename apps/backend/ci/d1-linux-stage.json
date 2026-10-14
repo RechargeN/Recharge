@@ -1,4 +1,4 @@
 {
   "stage": "inspect",
-  "note": "D1-L: inspect downloads and checks ClamAV and the official databases only; the owner switches to test after reading the report (docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §15). Attempt 2 (2026-10-14): clamd --version now gets --config-file; attempt 1 (run 38246774477) failed without it."
+  "note": "D1-L: inspect downloads and checks ClamAV and the official databases only; the owner switches to test after reading the report (docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §15). Attempt 3 (2026-10-14): freshclam gets CVD_CERTS_DIR from the verified .deb (DEF-08); attempt 2 (run 38547611633) fixed clamd --version; attempt 1 (run 38246774477) failed on it."
 }

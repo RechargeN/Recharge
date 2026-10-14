@@ -68,3 +68,22 @@ moderate, цепочка `gaxios`/`teeny-request`/`@google-cloud/storage`/
 `lint`, `typecheck`, `verify:toolchain`, `test:media-tools` — pass; Windows
 D1-гейт `stand-d1-gate.mjs --yes` — pass (Windows-path модуль Linux не
 загружает). Это не Linux evidence.
+
+## Попытка 3 — не запущена (исправление DEF-08)
+
+Исправление: сертификат проверки CVD берётся только из проверенного `.deb`
+(`usr/local/etc/certs/clamav.crt`): каталог и файл обязаны быть обычными (не
+ссылкой и не junction), читаемыми и непустыми, иначе гейт останавливается до
+`freshclam` и до любого скачивания (`cvdCerts()`). `freshclam` получает
+`CVD_CERTS_DIR` (единственная форма, которую знает `libclamav` 1.5.4) и прежнюю
+директиву `CVDCertsDirectory` (`freshclamInvocation()`); `--cvdcertsdir` не
+добавлен; `sigtool` и `clamd` не менялись; TLS скачивания не менялся. SHA-256 и
+размер `clamav.crt` попадают в журнал и в отчёт `inspect`.
+
+Локальная проверка до push (2026-10-14, этот ПК): `media-tools-linux.test.mjs`
+20/20 (4 новых: сертификат из `.deb`; отказ при отсутствии каталога, файла,
+пустом файле, файле-каталоге и каталоге-junction; запуск `freshclam` с
+`CVD_CERTS_DIR` и директивой без `--cvdcertsdir`; статическая проверка, что
+`freshclam` запускается только через `freshclamInvocation()`);
+`format:check`, `lint`, `typecheck`, `verify:toolchain`, `test:media-tools`,
+`build` — pass; Windows D1-гейт — pass. Это не Linux evidence.
