@@ -23,6 +23,11 @@ import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_event_draft.dart';
 import 'support/stand_backend.dart';
+import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/data/repositories/discover_preferences_repository_impl.dart';
+import 'package:recharge/features/discover/data/datasources/discover_preferences_local_datasource.dart';
+import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import 'support/event_details_harness.dart';
 
 /// E2a: an Event the Creator publishes through the real C3 path reaches the
 /// server Catalog through the Emulator-only Content effect trigger (no manual
@@ -219,7 +224,30 @@ void main() {
       expect(event.title, draft.title);
       expect(event.fullDescription, draft.fullDescription);
 
-      // The owner hides it: it leaves Feed, Search, Map (same listing) and Details.
+      // Map's actual controller and adapter path, independently loaded.
+      final map = DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(listing),
+        discoverPreferencesRepository: DiscoverPreferencesRepositoryImpl(
+          localDataSource: DiscoverPreferencesLocalDataSource(
+            const FlutterSecureStorage(),
+            defaultMarketCityId: 'riga',
+            defaultCenterLat: 56.9496,
+            defaultCenterLng: 24.1052,
+            defaultCurrencyCode: 'EUR',
+          ),
+        ),
+        analyticsService: SpyAnalytics(),
+        initialQuery: query,
+      );
+      await map.applySearchArea();
+      final mapCard = map.state.items.singleWhere(
+        (item) => item.id == contentId,
+      );
+      expect(mapCard.revisionRef, card.revisionRef);
+      expect(mapCard.revisionRef, event.revisionRef);
+      expect(mapCard.latitude, card.latitude);
+      expect(mapCard.longitude, card.longitude);
+      // The owner hides it: it leaves Feed, Search, Map controller and Details.
       await c.hide();
       expect(c.state.status?.visibility, 'withdrawn');
       await eventually(
@@ -229,6 +257,9 @@ void main() {
       );
       expect(await listing.getFeed(query.copyWith(queryText: marker)), isEmpty);
       expect(await details.getActiveEvent(contentId), isNull);
+      await map.applySearchArea();
+      expect(map.state.items.any((item) => item.id == contentId), isFalse);
+      map.dispose();
       c.dispose();
     },
     skip: stand == null,

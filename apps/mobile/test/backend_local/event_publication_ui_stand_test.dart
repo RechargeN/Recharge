@@ -23,6 +23,14 @@ import 'package:uuid/uuid.dart';
 import '../fixtures/create/user_event_draft.dart';
 import 'support/event_details_harness.dart';
 import 'support/stand_backend.dart';
+import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_providers.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
+import 'package:recharge/features/create/presentation/pages/create_page.dart';
+import '../support/event_create_test_support.dart';
 
 /// C3 through the UI: the signed-in user's Create Event draft is published from
 /// the default-off test page with the real controller, Create repository,
@@ -37,6 +45,7 @@ void main() {
   final stand = StandBackend.fromEnvironment();
   late Directory temp;
   late File cover;
+  late CreateController createController;
 
   Future<String> pageId() async {
     final manifest = await stand!.manifest();
@@ -60,10 +69,29 @@ void main() {
       'user-1',
       userEventDraft(
         pageId: await pageId(),
-        coverPath: cover.path,
+        coverPath: '',
         localId: 'loc_c3_ui_${const Uuid().v4()}',
-        title: 'Clay evening (UI path)',
+        title: 'Event template baseline',
       ),
+    );
+    createController = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: SpyAnalytics(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    await createController.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
     );
     final sessions = FileSessionStore(File('${temp.path}/session.json'));
     final runtime = await BookingTransportRuntimeFactory(
@@ -161,8 +189,12 @@ void main() {
       final auth = await tester.runAsync(signedInAuthController);
       // The route is guarded by the same guard that gates every command.
       final router = GoRouter(
-        initialLocation: '/test/event-publication',
+        initialLocation: '/create',
         routes: <RouteBase>[
+          GoRoute(
+            path: '/create',
+            builder: (context, state) => const CreatePage(),
+          ),
           GoRoute(
             path: '/test/event-publication',
             redirect: (context, state) => eventPublicationTestEntryRedirect(
@@ -181,10 +213,33 @@ void main() {
         ProviderScope(
           overrides: <Override>[
             authControllerProvider.overrideWith((ref) => auth!),
+            createControllerProvider.overrideWith((ref) => createController),
           ],
           child: MaterialApp.router(routerConfig: router),
         ),
       );
+      Finder field(String label) => find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField && widget.decoration?.labelText == label,
+      );
+      await waitFor(tester, field('Title *'));
+      await tester.enterText(field('Title *'), 'Clay evening (UI path)');
+      await tester.enterText(
+        field('Short description'),
+        'A ceramic workshop created through the real Event form.',
+      );
+      await tester.enterText(field('Cover image *'), cover.path);
+      await tester.ensureVisible(find.text('Save draft'));
+      await tester.tap(find.text('Save draft'));
+      await waitFor(tester, find.text('Saved'));
+      final stored = await tester.runAsync(
+        () => sl<CreateRepository>().loadDraft('user-1'),
+      );
+      expect(stored!.title, 'Clay evening (UI path)');
+      expect(stored.media.coverImage, cover.path);
+      // Continue the same saved form draft through the existing server panel.
+      // Test harness route transition; production navigation is not claimed.
+      router.go('/test/event-publication');
       await waitFor(tester, find.text('Clay evening (UI path)'));
 
       await tapKey(tester, 'event-publication-save');

@@ -29,6 +29,11 @@ function run(script, args) {
  * needs an explicit --yes.
  */
 export function main(args) {
+  if (args.length === 3 && args[0] === "--yes" && args[1] === "--android") {
+    return import("./stand-b1-platform-gate.mjs").then(({ platformGate }) =>
+      platformGate(args[2]),
+    );
+  }
   if (args.length !== 1 || args[0] !== "--yes") {
     throw new Error(
       "WARNING: this permanently deletes the stand data folder. Usage: stand-mobile-gate.mjs --yes",
@@ -91,7 +96,7 @@ if (
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
   try {
-    main(process.argv.slice(2));
+    await main(process.argv.slice(2));
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;
