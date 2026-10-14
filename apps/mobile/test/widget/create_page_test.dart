@@ -29,11 +29,180 @@ import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/server_publication_requirements.dart';
 
+import 'package:recharge/features/create/application/content_server_path.dart';
+import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
+
+import '../fixtures/create/user_collection_draft.dart';
+import '../fixtures/create/user_place_draft.dart';
+import '../fixtures/create/user_rental_draft.dart';
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // M1 stage 3 (3-Б): the real Create page shows what the server publication
+  // still needs, only while the type's server path is enabled.
+  Future<CreateController> pumpCreate(
+    WidgetTester tester,
+    CreateDraftEntity draft, {
+    ContentServerPath? path,
+    ContentValidationFeedbackStore? refusals,
+  }) async {
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'server-requirements',
+    );
+    final createRepository = _FakeCreateRepository();
+    await createRepository.saveDraft('u', draft);
+    final createController = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
+    );
+    await createController.ensureLoaded(
+      userId: 'u',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          createControllerProvider.overrideWith((ref) => createController),
+          // The same overrides on every pump (Riverpod forbids changing them).
+          contentServerPathProvider.overrideWithValue(
+            path ?? ContentServerPath.disabled,
+          ),
+          contentValidationFeedbackProvider(
+            draft.objectType,
+          ).overrideWith((ref) => refusals ?? ContentValidationFeedbackStore()),
+        ],
+        child: const MaterialApp(home: CreatePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return createController;
+  }
+
+  final ContentServerPath serverOn = ContentServerPath(
+    isEnabled: (CreateObjectType type) => true,
+    marketCurrencyCode: 'EUR',
+    clock: () => DateTime.utc(2026, 10, 12, 10),
+  );
+  const Key card = Key('server-publication-requirements');
+
+  fullPageTestWidgets(
+    'M1 stage 3: Place requirements show only while the server path is on',
+    (tester) async {
+      final CreateDraftEntity draft =
+          placeCompatCases['short_description_short']!();
+      await pumpCreate(tester, draft);
+      expect(find.byKey(card), findsNothing, reason: 'server path off');
+
+      await pumpCreate(tester, draft, path: serverOn);
+      expect(find.byKey(card), findsOneWidget);
+      expect(
+        find.byKey(const Key('server-requirement-/body/shortDescription')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Short description: Use 20–180 characters.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: an accepted Place draft needs nothing more',
+    (tester) async {
+      await pumpCreate(tester, placeCompatCases['valid']!(), path: serverOn);
+      expect(find.byKey(card), findsNothing);
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: a server refusal of this draft names its field',
+    (tester) async {
+      final CreateDraftEntity draft = placeCompatCases['valid']!();
+      final ContentValidationFeedbackStore refusals =
+          ContentValidationFeedbackStore();
+      final CreateController created = await pumpCreate(
+        tester,
+        draft,
+        path: serverOn,
+        refusals: refusals,
+      );
+      refusals.capture(
+        accountId: 'u',
+        draft: created.state.draft,
+        message: 'validation_failed',
+        violations: const <ContentValidationViolation>[
+          ContentValidationViolation(
+            code: 'place.location.outside_service_area',
+            fieldPath: '/body/location/point',
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Map pin: The pin is outside the service area.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: Rental names the booking link with a fragment',
+    (tester) async {
+      await pumpCreate(
+        tester,
+        rentalCompatCases['external_url_fragment']!(),
+        path: serverOn,
+      );
+      expect(
+        find.text('Booking link: Remove the # part from the booking link.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('M1 stage 3: Collection names the missing short description', (
+    tester,
+  ) async {
+    final CollectionCompatCase item = collectionCompatCases().firstWhere(
+      (CollectionCompatCase c) => c.name == 'short_description_missing',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          contentServerPathProvider.overrideWithValue(serverOn),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: DraftServerRequirements(draft: item.draft, accountId: 'u'),
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.text('Short description: Add a short description.'),
+      findsOneWidget,
+    );
+  });
+
   fullPageTestWidgets(
     'accepts converted Scenario handoff without seed rewrite',
     (tester) async {
@@ -284,7 +453,10 @@ void main() {
 
     expect(categoryField.controller?.text, 'workshops_masterclasses');
     expect(subcategoryField.controller?.text, 'masterclass');
-    expect(createController.state.draft.mainCategory, 'workshops_masterclasses');
+    expect(
+      createController.state.draft.mainCategory,
+      'workshops_masterclasses',
+    );
     expect(createController.state.draft.subcategory, 'masterclass');
   });
 

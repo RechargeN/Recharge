@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/create/domain/entities/create_draft_entity.dart';
+
 import '../../features/auth/application/auth_providers.dart';
+import '../../features/create/application/content_server_path.dart';
 import '../../features/create/application/rental_publication_controller.dart';
 import '../../features/create/presentation/widgets/rental_publication_section.dart';
 import '../di/rental_publication_composition.dart';
@@ -40,8 +43,24 @@ class _RentalPublicationPanelState
 
   @override
   void dispose() {
+    _created?.removeListener(_captureFeedback);
     _created?.dispose();
     super.dispose();
+  }
+
+  /// M1 stage 3: the Create form shows this draft's validation refusal.
+  void _captureFeedback() {
+    final controller = _created;
+    if (mounted && controller != null) {
+      ref
+          .read(contentValidationFeedbackProvider(CreateObjectType.rental))
+          .capture(
+            accountId: controller.accountId,
+            draft: controller.currentDraft,
+            message: controller.state.message,
+            violations: controller.state.violations,
+          );
+    }
   }
 
   @override
@@ -56,12 +75,14 @@ class _RentalPublicationPanelState
     // A change of account builds a new controller bound to that account.
     if (_controller == null || _userId != userId) {
       _userId = userId;
+      _created?.removeListener(_captureFeedback);
       _created?.dispose();
       _created = null;
       _controller = createRentalPublicationController(userId: userId).then((
         RentalPublicationController? controller,
       ) {
         _created = controller;
+        controller?.addListener(_captureFeedback);
         controller?.load();
         return controller;
       });

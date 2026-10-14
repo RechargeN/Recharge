@@ -210,7 +210,7 @@ function shifted(value: unknown, shiftMs: number): unknown {
   return value;
 }
 
-void test('every Create compatibility body is refused over the wire with validation_failed only', async () => {
+void test('every Create compatibility body is refused over the wire with its public fields', async () => {
   await setFlags({ event: false, place: false, activity: false, rental: true });
   const fixture = (await readContentJson('fixtures/rental_create_compat.json')) as {
     actorUserId: string;
@@ -218,6 +218,7 @@ void test('every Create compatibility body is refused over the wire with validat
     cases: readonly {
       name: string;
       expectedIssues: readonly string[];
+      expectedViolations: readonly { code: string; fieldPath: string }[];
       body: Record<string, unknown>;
     }[];
   };
@@ -266,6 +267,11 @@ void test('every Create compatibility body is refused over the wire with validat
     const answer = await submitCase(item, false);
     assert.equal(answer.kind, 'rejected', item.name);
     assert.equal(answer.code, 'validation_failed', item.name);
-    assert.equal(JSON.stringify(answer).includes('rental.'), false, item.name);
+    // M1 stage 3 (3-A): exactly the public fields of the fixture, no other detail.
+    assert.deepEqual(
+      (answer as { violations?: unknown }).violations,
+      item.expectedViolations,
+      item.name,
+    );
   }
 });

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/booking/data/booking_callable_adapter.dart';
 import '../../features/booking/data/booking_transport_runtime.dart';
+import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/place_publication_controller.dart';
 import '../../features/create/data/file_event_publication_journal.dart';
 import '../../features/create/data/file_place_publication_journal.dart';
@@ -95,6 +96,7 @@ PlacePublicationController placePublicationControllerFor({
   required PlacePublicationTestEntryGuard guard,
   required PlaceDraftSource drafts,
   required File journalFile,
+  required String marketCurrencyCode,
   EventCoverSource mediaSource = const FileEventCoverSource(),
 }) {
   final FunctionsEventPublicationGateway gateway =
@@ -115,6 +117,7 @@ PlacePublicationController placePublicationControllerFor({
     mediaSource: mediaSource,
     journal: FilePlacePublicationJournal(journalFile),
     gate: guard,
+    marketCurrencyCode: marketCurrencyCode,
   );
 }
 
@@ -135,6 +138,8 @@ Future<PlacePublicationController?> createPlacePublicationController({
   final String separator = Platform.pathSeparator;
   return placePublicationControllerFor(
     accountId: userId,
+    // The market currency of the Create runtime, never a literal (AGENTS 5).
+    marketCurrencyCode: sl<CreateRuntimeDefaults>().currency,
     port: port,
     guard: guard,
     drafts: CreateRepositoryPlaceDraftSource(sl<CreateRepository>(), userId),

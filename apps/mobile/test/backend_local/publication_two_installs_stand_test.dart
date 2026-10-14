@@ -85,6 +85,7 @@ void main() {
     File journal,
   ) => placePublicationControllerFor(
     accountId: 'user-creator',
+    marketCurrencyCode: 'EUR',
     port: runtime.port!,
     guard: PlacePublicationTestEntryGuard(
       flag: true,

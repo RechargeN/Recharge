@@ -9,6 +9,7 @@
       "name": "valid",
       "createCase": "the accepted draft under the Emulator TEST-ONLY Rental policy",
       "expectedIssues": [],
+      "expectedViolations": [],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -120,6 +121,12 @@
       "expectedIssues": [
         "rental.cover_required"
       ],
+      "expectedViolations": [
+        {
+          "code": "rental.cover_required",
+          "fieldPath": "/body/mediaRefs"
+        }
+      ],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -226,6 +233,12 @@
       "createCase": "the free-text subcategory is empty",
       "expectedIssues": [
         "rental.subcategory_required"
+      ],
+      "expectedViolations": [
+        {
+          "code": "rental.subcategory_required",
+          "fieldPath": "/body/subcategoryId"
+        }
       ],
       "body": {
         "title": "Kipsala sea kayak rental",
@@ -338,6 +351,12 @@
       "expectedIssues": [
         "rental.policy_unavailable"
       ],
+      "expectedViolations": [
+        {
+          "code": "rental.policy_unavailable",
+          "fieldPath": "/body/subcategoryId"
+        }
+      ],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -448,6 +467,12 @@
       "createCase": "availability confirmed eight days before now (proposal: 7-day window)",
       "expectedIssues": [
         "rental.coverage_stale"
+      ],
+      "expectedViolations": [
+        {
+          "code": "rental.coverage_stale",
+          "fieldPath": "/body/availability/coverage/confirmedAtUtc"
+        }
       ],
       "body": {
         "title": "Kipsala sea kayak rental",
@@ -560,6 +585,12 @@
       "expectedIssues": [
         "rental.attestation_stale_policy"
       ],
+      "expectedViolations": [
+        {
+          "code": "rental.attestation_stale_policy",
+          "fieldPath": "/body/attestation/policyVersion"
+        }
+      ],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -671,6 +702,12 @@
       "expectedIssues": [
         "rental.handover_precision_too_fine"
       ],
+      "expectedViolations": [
+        {
+          "code": "rental.handover_precision_too_fine",
+          "fieldPath": "/body/handover/publicGeoPrecisionMeters"
+        }
+      ],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -781,6 +818,12 @@
       "createCase": "delivery radius 80 km (proposal: at most 50 km)",
       "expectedIssues": [
         "rental.delivery_radius"
+      ],
+      "expectedViolations": [
+        {
+          "code": "rental.delivery_radius",
+          "fieldPath": "/body/handover/deliveryRadiusKm"
+        }
       ],
       "body": {
         "title": "Kipsala sea kayak rental",
@@ -899,6 +942,12 @@
       "expectedIssues": [
         "rental.external_url_fragment"
       ],
+      "expectedViolations": [
+        {
+          "code": "rental.external_url_fragment",
+          "fieldPath": "/body/fulfillment/externalBookingUrl"
+        }
+      ],
       "body": {
         "title": "Kipsala sea kayak rental",
         "shortDescription": "Two-seat sea kayaks with paddles and life vests for day trips",
@@ -1009,6 +1058,12 @@
       "createCase": "water activities need a safety notice",
       "expectedIssues": [
         "rental.safety_notice_required"
+      ],
+      "expectedViolations": [
+        {
+          "code": "rental.safety_notice_required",
+          "fieldPath": "/body/terms/safetyNotice"
+        }
       ],
       "body": {
         "title": "Kipsala sea kayak rental",

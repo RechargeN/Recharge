@@ -5,6 +5,7 @@
 // where each case's exact reason is proven.
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { publicValidationDetails } from '../../../src/modules/content/domain/validation_details.js';
 
 import { readContentJson } from '../../../src/contracts/content_schema_registry.js';
 import type { ContentBody } from '../../../src/contracts/content_v1.js';
@@ -15,6 +16,7 @@ interface CompatCase {
   readonly name: string;
   readonly createCase: string;
   readonly expectedIssues: readonly string[];
+  readonly expectedViolations: readonly { code: string; fieldPath: string }[];
   readonly body: ContentBody;
 }
 
@@ -46,6 +48,8 @@ void test('each Create case gets exactly its validator codes under the Emulator 
       lookups: resolution.lookups,
     });
     assert.deepEqual(issues, item.expectedIssues, `${item.name}: ${item.createCase}`);
+    // M1 stage 3 (3-A): the public details the client maps to Create fields.
+    assert.deepEqual(publicValidationDetails(issues), item.expectedViolations, item.name);
     // Every case carries exactly one reason, so the fixture isolates each rule.
     assert.ok(item.expectedIssues.length <= 1, item.name);
   }

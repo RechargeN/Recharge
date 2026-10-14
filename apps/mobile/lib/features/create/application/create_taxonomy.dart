@@ -237,6 +237,23 @@ List<CreateTaxonomyCategory> createTaxonomyForObjectType(
       .toList(growable: false);
 }
 
+/// The server answer to "does this pair apply to [type]" from the canonical
+/// taxonomy (M1 stage 3): the pair must exist; for Activity it must also apply
+/// to Activity. Collection accepts any existing pair.
+bool canonicalSubcategoryApplies(
+  RechargeContentType type,
+  String categoryId,
+  String subcategoryId,
+) {
+  final RechargeActivityCategory? pair = rechargeActivityCategoryByPath(
+    contentGroupId: categoryId,
+    categorySlug: subcategoryId,
+  );
+  if (pair == null) return false;
+  return type == RechargeContentType.collection ||
+      pair.applicableTypes.contains(type);
+}
+
 CreateTaxonomyCategory? createTaxonomyCategoryById(String id) {
   final String normalized = normalizeRechargeContentGroupId(id);
   for (final CreateTaxonomyCategory category in rechargeCreateTaxonomy) {

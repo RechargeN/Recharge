@@ -256,12 +256,13 @@ void test('row on/on: both types may be authored', async () => {
   assert.equal(code(await createOf('place')), 'succeeded');
 });
 
-void test('§5.7: every Create compatibility body is refused over the wire with validation_failed only', async () => {
+void test('§5.7: every Create compatibility body is refused over the wire with its public fields', async () => {
   await setFlags(false, true);
   const { cases } = (await readContentJson('fixtures/place_create_compat.json')) as {
     cases: readonly {
       name: string;
       expectedIssues: readonly string[];
+      expectedViolations: readonly { code: string; fieldPath: string }[];
       body: Record<string, unknown>;
     }[];
   };
@@ -318,10 +319,16 @@ void test('§5.7: every Create compatibility body is refused over the wire with 
   // validation, not by its placeholder media.
   assert.equal(code(await submitCase(valid, true)), 'succeeded', valid.name);
   assert.equal(code(await submitCase(valid, false)), 'rejected:media_not_ready', valid.name);
+  // M1 stage 3 (3-A): each refusal names its public field, exactly as the fixture.
   for (const item of refused)
     assert.deepEqual(
       await submitCase(item, false),
-      { schemaVersion: 1, kind: 'rejected', code: 'validation_failed' },
+      {
+        schemaVersion: 1,
+        kind: 'rejected',
+        code: 'validation_failed',
+        violations: item.expectedViolations,
+      },
       item.name,
     );
 });

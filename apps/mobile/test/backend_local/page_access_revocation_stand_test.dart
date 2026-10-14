@@ -131,6 +131,7 @@ void main() {
     await repo.saveDraft('user-creator', draft);
     return placePublicationControllerFor(
       accountId: 'user-creator',
+      marketCurrencyCode: 'EUR',
       port: (await runtime()).port!,
       guard: PlacePublicationTestEntryGuard(
         flag: true,

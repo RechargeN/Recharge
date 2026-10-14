@@ -15,6 +15,7 @@
       "createCase": "the accepted draft: three ready Places, canonical taxonomy",
       "unavailableStableKeys": [],
       "expectedIssues": [],
+      "expectedViolations": [],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -99,6 +100,7 @@
         "place:b7a9c1d2-0000-4000-8000-00000000d342"
       ],
       "expectedIssues": [],
+      "expectedViolations": [],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -187,6 +189,12 @@
       "expectedIssues": [
         "collection.composition_review_mismatch"
       ],
+      "expectedViolations": [
+        {
+          "code": "collection.composition_review_mismatch",
+          "fieldPath": "/body/compositionReview"
+        }
+      ],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -271,6 +279,12 @@
       "expectedIssues": [
         "collection.min_items"
       ],
+      "expectedViolations": [
+        {
+          "code": "collection.min_items",
+          "fieldPath": "/body/items"
+        }
+      ],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -341,6 +355,12 @@
       "unavailableStableKeys": [],
       "expectedIssues": [
         "collection.area_required"
+      ],
+      "expectedViolations": [
+        {
+          "code": "collection.area_required",
+          "fieldPath": "/body/areaLabel"
+        }
       ],
       "body": {
         "title": "Quiet corners of central Riga",
@@ -425,6 +445,12 @@
       "expectedIssues": [
         "collection.short_description_required"
       ],
+      "expectedViolations": [
+        {
+          "code": "collection.short_description_required",
+          "fieldPath": "/body/shortDescription"
+        }
+      ],
       "body": {
         "title": "Quiet corners of central Riga",
         "categoryId": "travel_tours",
@@ -508,6 +534,12 @@
       "expectedIssues": [
         "collection.cover_image_required"
       ],
+      "expectedViolations": [
+        {
+          "code": "collection.cover_image_required",
+          "fieldPath": "/body/media/coverImage"
+        }
+      ],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -588,6 +620,12 @@
       "unavailableStableKeys": [],
       "expectedIssues": [
         "collection.subcategory_not_applicable"
+      ],
+      "expectedViolations": [
+        {
+          "code": "collection.subcategory_not_applicable",
+          "fieldPath": "/body/subcategoryId"
+        }
       ],
       "body": {
         "title": "Quiet corners of central Riga",
@@ -673,6 +711,12 @@
       "expectedIssues": [
         "collection.curator_note_length"
       ],
+      "expectedViolations": [
+        {
+          "code": "collection.curator_note_length",
+          "fieldPath": "/body/items"
+        }
+      ],
       "body": {
         "title": "Quiet corners of central Riga",
         "shortDescription": "Three calm stops a short walk apart",
@@ -755,6 +799,16 @@
       "expectedIssues": [
         "collection.item_ref_invalid",
         "collection.local_id_unreplaced"
+      ],
+      "expectedViolations": [
+        {
+          "code": "collection.item_ref_invalid",
+          "fieldPath": "/body/items"
+        },
+        {
+          "code": "collection.local_id_unreplaced",
+          "fieldPath": "/body"
+        }
       ],
       "body": {
         "title": "Quiet corners of central Riga",

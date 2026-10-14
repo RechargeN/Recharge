@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/place_publication_controller.dart';
 import 'package:recharge/features/create/data/file_place_publication_journal.dart';
+import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/event_publication.dart';
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
@@ -79,6 +80,47 @@ void main() {
   tearDown(() async {
     await temp.delete(recursive: true);
   });
+
+  test(
+    'M1 stage 3: a body the server would refuse is not submitted; its fields stay',
+    () async {
+      final PlacePublicationController c = controller(
+        draft().copyWith(shortDescription: 'Too short'),
+      );
+      await c.load();
+      await c.save();
+      await c.submit();
+      expect(c.state.message, 'validation_failed');
+      expect(
+        c.state.violations.map((v) => '${v.code} ${v.fieldPath}'),
+        contains('place.short_description /body/shortDescription'),
+      );
+      expect(server.calls, isNot(contains('submitForPublication')));
+    },
+  );
+
+  test(
+    'M1 stage 3: a server validation refusal keeps its public fields',
+    () async {
+      final PlacePublicationController c = controller(draft());
+      await c.load();
+      await c.save();
+      server.refuseSubmit = const EventPublicationRejected(
+        'validation_failed',
+        violations: <ContentValidationViolation>[
+          ContentValidationViolation(
+            code: 'place.location.outside_service_area',
+            fieldPath: '/body/location/point',
+          ),
+        ],
+      );
+      await c.submit();
+      expect(c.state.message, 'validation_failed');
+      expect(c.state.violations.single.fieldPath, '/body/location/point');
+      await c.refresh();
+      expect(c.state.violations, isEmpty, reason: 'a new action clears it');
+    },
+  );
 
   test('a closed entry sends nothing', () async {
     gate.open = false;
@@ -629,6 +671,9 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
     return _ref(draftId);
   }
 
+  /// M1 stage 3: the next submit is refused with these details.
+  EventPublicationRejected? refuseSubmit;
+
   @override
   Future<String> submit({
     required String draftId,
@@ -636,6 +681,11 @@ final class _Server implements EventPublicationGateway, ContentDraftReader {
     required String idempotencyKey,
   }) async {
     calls.add('submitForPublication');
+    final EventPublicationRejected? refusal = refuseSubmit;
+    if (refusal != null) {
+      refuseSubmit = null;
+      throw refusal;
+    }
     _latestSubmission = 'submission-1';
     _submissionStates['submission-1'] = 'under_review';
     return 'submission-1';

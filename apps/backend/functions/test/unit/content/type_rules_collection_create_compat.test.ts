@@ -6,6 +6,7 @@
 // reason is proven; the Dart mapper test proves the bodies.
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { publicValidationDetails } from '../../../src/modules/content/domain/validation_details.js';
 
 import { readContentJson } from '../../../src/contracts/content_schema_registry.js';
 import type { ContentBody } from '../../../src/contracts/content_v1.js';
@@ -17,6 +18,7 @@ interface CompatCase {
   readonly createCase: string;
   readonly unavailableStableKeys: readonly string[];
   readonly expectedIssues: readonly string[];
+  readonly expectedViolations: readonly { code: string; fieldPath: string }[];
   readonly body: ContentBody;
 }
 
@@ -54,12 +56,12 @@ void test('each Create case gets exactly its validator codes under the Emulator 
   const { reviewedRevision, cases } = await fixture();
   assert.equal(cases.length, 10);
   assert.deepEqual(cases[0]?.expectedIssues, [], 'the first case is the accepted draft');
-  for (const item of cases)
-    assert.deepEqual(
-      await check(item, reviewedRevision),
-      item.expectedIssues,
-      `${item.name}: ${item.createCase}`,
-    );
+  for (const item of cases) {
+    const issues = await check(item, reviewedRevision);
+    assert.deepEqual(issues, item.expectedIssues, `${item.name}: ${item.createCase}`);
+    // M1 stage 3 (3-A): the public details the client maps to Create fields.
+    assert.deepEqual(publicValidationDetails(issues), item.expectedViolations, item.name);
+  }
 });
 
 void test('the review belongs to the revision the save produced: any other revision is stale', async () => {

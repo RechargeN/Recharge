@@ -517,10 +517,21 @@ void test('incomplete drafts are storable but cannot be submitted', async () => 
   const draft = await data<DraftLike>(
     service.execute(actorA, createCommand({ body: { title: 'only a title' } })),
   );
-  assert.deepEqual(await service.execute(actorA, submitCommand(draft.draftId, 1)), {
-    kind: 'rejected',
-    code: 'validation_failed',
-  });
+  const refused = (await service.execute(actorA, submitCommand(draft.draftId, 1))) as {
+    kind: string;
+    code: string;
+    violations?: readonly { code: string; fieldPath: string }[];
+  };
+  assert.equal(refused.kind, 'rejected');
+  assert.equal(refused.code, 'validation_failed');
+  // M1 stage 3 (3-A): Place refusals name the public fields, only from the allowlist.
+  assert.ok(
+    refused.violations?.some(
+      (item) =>
+        item.code === 'place.short_description' && item.fieldPath === '/body/shortDescription',
+    ),
+  );
+  assert.ok(refused.violations?.every((item) => item.fieldPath.startsWith('/body')));
   assert.equal(repository.snapshot().submissions.length, 0);
   assert.deepEqual(await service.execute(actorA, createCommand({ body: [] })), {
     kind: 'rejected',

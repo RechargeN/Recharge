@@ -3947,7 +3947,8 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Не удалось отправить. Черновик сохранён, попробуйте ещё раз.',
+          message:
+              'Не удалось отправить. Черновик сохранён, попробуйте ещё раз.',
           clearPublishedDraft: true,
         ),
       );
@@ -5332,11 +5333,18 @@ class CreateController extends ChangeNotifier {
     final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
       target.mainCategory,
     );
+    // The subcategory must belong to the category and apply to Activity in the
+    // canonical taxonomy, as the server checks it (M1 stage 3).
     final bool subcategoryAllowed =
-        category?.subcategories.any(
-          (CreateTaxonomySubcategory item) => item.id == target.subcategory,
-        ) ??
-        false;
+        (category?.subcategories.any(
+              (CreateTaxonomySubcategory item) => item.id == target.subcategory,
+            ) ??
+            false) &&
+        canonicalSubcategoryApplies(
+          RechargeContentType.activity,
+          target.mainCategory,
+          target.subcategory,
+        );
     if (!subcategoryAllowed && target.subcategory.isNotEmpty) {
       issues.add(
         const ActivityValidationIssue(

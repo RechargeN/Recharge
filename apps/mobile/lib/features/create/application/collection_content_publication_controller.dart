@@ -1,3 +1,4 @@
+import 'content_server_requirements.dart';
 import 'publication_media_type.dart';
 import 'dart:convert';
 
@@ -6,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/entities/collection_content_publication.dart';
 import '../domain/entities/collection_item_draft.dart';
+import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -41,6 +43,7 @@ final class CollectionPublicationViewState {
     this.members = const <CollectionMemberStatus>[],
     this.myObjects = const <CollectionPublicationObjectView>[],
     this.conflict,
+    this.violations = const <ContentValidationViolation>[],
   });
 
   final CollectionPublicationPhase phase;
@@ -62,6 +65,10 @@ final class CollectionPublicationViewState {
   /// A newer server revision that is not this install's own write (M1 D2);
   /// the local edit waits for the user's explicit choice.
   final DraftConflict? conflict;
+
+  /// Public fields of the last validation refusal, from the server or from
+  /// the readiness check before submit (M1 stage 3).
+  final List<ContentValidationViolation> violations;
 
   bool get _idle => phase == CollectionPublicationPhase.ready;
   bool get canSaveOverServerVersion => _idle && conflict != null;
@@ -135,6 +142,11 @@ final class CollectionContentPublicationController extends ChangeNotifier {
   );
 
   CollectionPublicationViewState get state => _state;
+
+  /// The account this controller acts for and its current Create draft, so
+  /// the Create form can show this draft's refusal (M1 stage 3).
+  String get accountId => _accountId;
+  CreateDraftEntity? get currentDraft => _draft;
 
   Future<void> load() async {
     if (!_gate.allowed) {
@@ -226,6 +238,15 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     final CollectionPublicationScope scope = _scope(draft);
     final CollectionPublicationRecord record = await _requireRecord(scope);
     if (!record.bodySaved) throw const _LocalRefusal('save_required');
+    // M1 stage 3: nothing is sent when the saved body would be refused.
+    final List<ContentValidationViolation> missing =
+        collectionServerRequirements(
+          draft,
+          accountId: _accountId,
+          assetIds: await _currentAssets(draft, scope, record),
+          mapper: _mapper,
+        );
+    if (missing.isNotEmpty) throw _ReadinessRefusal(missing);
     final String submissionId = await _gateway.submit(
       draftId: record.draftId,
       expectedDraftRevision: record.draftRevision,
@@ -579,7 +600,13 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       await action();
       _emit(phase: done, message: null);
     } on EventPublicationRejected catch (refusal) {
-      _emit(phase: done, message: refusal.code);
+      _emit(phase: done, message: refusal.code, violations: refusal.violations);
+    } on _ReadinessRefusal catch (refusal) {
+      _emit(
+        phase: done,
+        message: 'validation_failed',
+        violations: refusal.violations,
+      );
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);
     } on EventPublicationUnavailable catch (failure) {
@@ -590,7 +617,12 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     }
   }
 
-  void _emit({required CollectionPublicationPhase phase, String? message}) {
+  void _emit({
+    required CollectionPublicationPhase phase,
+    String? message,
+    List<ContentValidationViolation> violations =
+        const <ContentValidationViolation>[],
+  }) {
     _state = CollectionPublicationViewState(
       phase: phase,
       draftTitle: _state.draftTitle ?? _draft?.title,
@@ -600,6 +632,7 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       members: _state.members,
       myObjects: _state.myObjects,
       conflict: _conflict,
+      violations: violations,
     );
     notifyListeners();
   }
@@ -628,4 +661,12 @@ final class _LocalRefusal implements Exception {
   const _LocalRefusal(this.code);
 
   final String code;
+}
+
+/// The saved body would be refused: the server's public fields, computed on
+/// the client (M1 stage 3).
+final class _ReadinessRefusal implements Exception {
+  const _ReadinessRefusal(this.violations);
+
+  final List<ContentValidationViolation> violations;
 }

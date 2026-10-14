@@ -95,6 +95,26 @@ void main() {
     await temp.delete(recursive: true);
   });
 
+  test(
+    'M1 stage 3: a guide without a short description is refused before submit',
+    () async {
+      final CollectionContentPublicationController c = controller(
+        draft().copyWith(shortDescription: ''),
+      );
+      await c.load();
+      await c.save();
+      await c.submit();
+      expect(c.state.message, 'validation_failed');
+      expect(
+        c.state.violations.map((v) => '${v.code} ${v.fieldPath}'),
+        contains(
+          'collection.short_description_required /body/shortDescription',
+        ),
+      );
+      expect(server.calls, isNot(contains('submitForPublication')));
+    },
+  );
+
   test('a closed entry sends nothing and asks no membership', () async {
     gate.open = false;
     final CollectionContentPublicationController c = controller(draft());

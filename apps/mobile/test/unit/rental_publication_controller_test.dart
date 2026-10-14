@@ -86,6 +86,32 @@ void main() {
     await temp.delete(recursive: true);
   });
 
+  test(
+    'M1 stage 3: a booking link with a fragment is refused before submit',
+    () async {
+      final RentalPublicationController c = controller(
+        draft().copyWith(
+          rentalData: draft().rentalData!.copyWith(
+            fulfillment: const RentalExternalFulfillment(
+              externalBookingUrl: 'https://rent.example.lv/kayak#book',
+            ),
+          ),
+        ),
+      );
+      await c.load();
+      await c.save();
+      await c.submit();
+      expect(c.state.message, 'validation_failed');
+      expect(
+        c.state.violations.map((v) => '${v.code} ${v.fieldPath}'),
+        contains(
+          'rental.external_url_fragment /body/fulfillment/externalBookingUrl',
+        ),
+      );
+      expect(server.calls, isNot(contains('submitForPublication')));
+    },
+  );
+
   test('a closed entry sends nothing', () async {
     gate.open = false;
     final RentalPublicationController c = controller(draft());

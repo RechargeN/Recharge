@@ -310,7 +310,19 @@ void test('over the wire a complete Collection follows the Functions membership 
     payload: { draftId: draft.draftId, expectedDraftRevision: bound.revision },
   });
   assert.equal(code(submitted), functionsSwitch ? 'succeeded' : 'rejected:validation_failed');
-  // A refusal carries no internal membership code.
-  if (!functionsSwitch)
-    assert.deepEqual(submitted, { schemaVersion: 1, kind: 'rejected', code: 'validation_failed' });
+  // A refusal carries no internal membership code: only allowlisted public
+  // Collection codes on the items (M1 stage 3, 3-A).
+  if (!functionsSwitch) {
+    const refusal = submitted as {
+      kind: string;
+      code: string;
+      violations?: readonly { code: string; fieldPath: string }[];
+    };
+    assert.equal(refusal.kind, 'rejected');
+    assert.equal(refusal.code, 'validation_failed');
+    for (const item of refusal.violations ?? []) {
+      assert.match(item.code, /^collection.[a-z_]+$/u);
+      assert.equal(item.fieldPath, '/body/items');
+    }
+  }
 });

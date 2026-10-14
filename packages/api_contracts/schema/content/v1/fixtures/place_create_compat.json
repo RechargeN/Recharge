@@ -8,6 +8,7 @@
       "name": "valid",
       "createCase": "the accepted draft: strict v1.0 rules and the Emulator Place taxonomy",
       "expectedIssues": [],
+      "expectedViolations": [],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -86,6 +87,12 @@
       "expectedIssues": [
         "place.media.cover_missing"
       ],
+      "expectedViolations": [
+        {
+          "code": "place.media.cover_missing",
+          "fieldPath": "/body/media/coverImage"
+        }
+      ],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -160,6 +167,12 @@
       "createCase": "short description under 20 characters",
       "expectedIssues": [
         "place.shortDescription"
+      ],
+      "expectedViolations": [
+        {
+          "code": "place.short_description",
+          "fieldPath": "/body/shortDescription"
+        }
       ],
       "body": {
         "title": "Kronvalda park pond",
@@ -239,6 +252,12 @@
       "expectedIssues": [
         "place.hours"
       ],
+      "expectedViolations": [
+        {
+          "code": "place.hours",
+          "fieldPath": "/body/hours"
+        }
+      ],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -303,6 +322,12 @@
       "createCase": "no entry type chosen (optional for the profile)",
       "expectedIssues": [
         "place.pricing.entryType"
+      ],
+      "expectedViolations": [
+        {
+          "code": "place.pricing.entry_type",
+          "fieldPath": "/body/pricing/entryType"
+        }
       ],
       "body": {
         "title": "Kronvalda park pond",
@@ -380,6 +405,12 @@
       "createCase": "draft currency differs from the market currency",
       "expectedIssues": [
         "place.pricing.currencyCode"
+      ],
+      "expectedViolations": [
+        {
+          "code": "place.pricing.currency_code",
+          "fieldPath": "/body/pricing/currencyCode"
+        }
       ],
       "body": {
         "title": "Kronvalda park pond",
@@ -459,6 +490,12 @@
       "expectedIssues": [
         "place.contacts.phone"
       ],
+      "expectedViolations": [
+        {
+          "code": "place.contacts.phone",
+          "fieldPath": "/body/contacts/phone"
+        }
+      ],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -536,6 +573,12 @@
       "createCase": "relationship owner with a creator source type",
       "expectedIssues": [
         "place.provenance.sourceType"
+      ],
+      "expectedViolations": [
+        {
+          "code": "place.provenance.source_type",
+          "fieldPath": "/body/provenance/sourceType"
+        }
       ],
       "body": {
         "title": "Kronvalda park pond",
@@ -615,6 +658,12 @@
       "expectedIssues": [
         "place.location.outside_service_area"
       ],
+      "expectedViolations": [
+        {
+          "code": "place.location.outside_service_area",
+          "fieldPath": "/body/location/point"
+        }
+      ],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -693,6 +742,12 @@
       "expectedIssues": [
         "place.subcategory.not_applicable"
       ],
+      "expectedViolations": [
+        {
+          "code": "place.subcategory.not_applicable",
+          "fieldPath": "/body/subcategoryId"
+        }
+      ],
       "body": {
         "title": "Kronvalda park pond",
         "placeKind": "publicSpace",
@@ -767,6 +822,12 @@
       "createCase": "park without its required criterion",
       "expectedIssues": [
         "place.criteria.required_missing:difficulty"
+      ],
+      "expectedViolations": [
+        {
+          "code": "place.criteria.required_missing",
+          "fieldPath": "/body/criteria/difficulty"
+        }
       ],
       "body": {
         "title": "Kronvalda park pond",

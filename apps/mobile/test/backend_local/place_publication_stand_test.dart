@@ -93,6 +93,7 @@ void main() {
     final runtime = await runtimeFor(label);
     return placePublicationControllerFor(
       accountId: 'user-$label',
+      marketCurrencyCode: 'EUR',
       port: runtime.port!,
       guard: guard(),
       drafts: CreateRepositoryPlaceDraftSource(repository, 'user-$label'),

@@ -27,6 +27,7 @@ import '../widgets/find_people_create_block.dart';
 import '../widgets/session_create_block.dart';
 import '../widgets/place_create_block.dart';
 import '../widgets/rental_create_block.dart';
+import '../widgets/server_publication_requirements.dart';
 import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 
@@ -221,6 +222,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             ] else if (state.draft.objectType ==
                 CreateObjectType.place) ...<Widget>[
               const SizedBox(height: 12),
+              DraftServerRequirements(draft: state.draft, accountId: user.id),
               PlaceCreateBlock(
                 controller: controller,
                 state: state,
@@ -249,7 +251,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 CreateObjectType.activity) ...<Widget>[
               const SizedBox(height: 12),
               ActivityCreateBlock(
-                placeLinks: ref.watch(activityPlaceLinkControllerProvider((draftId: state.draft.id, selectedId: state.draft.activityData?.location.linkedPlaceId))),
+                placeLinks: ref.watch(
+                  activityPlaceLinkControllerProvider((
+                    draftId: state.draft.id,
+                    selectedId:
+                        state.draft.activityData?.location.linkedPlaceId,
+                  )),
+                ),
                 publicationEditing:
                     widget.seedParameters['publicationEdit'] == 'activity',
                 serverErrors: ref
@@ -277,6 +285,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             ] else if (state.draft.objectType ==
                 CreateObjectType.rental) ...<Widget>[
               const SizedBox(height: 12),
+              DraftServerRequirements(draft: state.draft, accountId: user.id),
               RentalCreateBlock(
                 controller: controller,
                 state: state,
@@ -297,6 +306,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             ] else if (state.draft.objectType ==
                 CreateObjectType.collection) ...<Widget>[
               const SizedBox(height: 12),
+              DraftServerRequirements(draft: state.draft, accountId: user.id),
               CollectionCreateBlock(
                 controller: controller,
                 state: state,

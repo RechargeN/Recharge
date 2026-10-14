@@ -1,9 +1,11 @@
+import 'content_server_requirements.dart';
 import 'publication_media_type.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 
+import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/place_creation_policy.dart';
@@ -39,6 +41,7 @@ final class PlacePublicationViewState {
     this.message,
     this.myObjects = const <PlacePublicationObjectView>[],
     this.conflict,
+    this.violations = const <ContentValidationViolation>[],
   });
 
   final PlacePublicationPhase phase;
@@ -57,6 +60,10 @@ final class PlacePublicationViewState {
   /// A newer server revision that is not this install's own write (M1 D2);
   /// the local edit waits for the user's explicit choice.
   final DraftConflict? conflict;
+
+  /// Public fields of the last validation refusal, from the server or from
+  /// the readiness check before submit (M1 stage 3).
+  final List<ContentValidationViolation> violations;
 
   bool get _idle => phase == PlacePublicationPhase.ready;
   bool get canSaveOverServerVersion => _idle && conflict != null;
@@ -88,6 +95,7 @@ final class PlacePublicationController extends ChangeNotifier {
         placeCreationPolicyFor,
     PlaceContentBodyMapper mapper = const PlaceContentBodyMapper(),
     String marketId = 'LV',
+    String marketCurrencyCode = 'EUR',
     DateTime Function()? clock,
   }) : _accountId = accountId,
        _drafts = drafts,
@@ -100,6 +108,7 @@ final class PlacePublicationController extends ChangeNotifier {
        _policyFor = policyFor,
        _mapper = mapper,
        _marketId = marketId,
+       _marketCurrencyCode = marketCurrencyCode,
        _clock = clock ?? (() => DateTime.now().toUtc());
 
   static const int maxListed = 20;
@@ -115,6 +124,9 @@ final class PlacePublicationController extends ChangeNotifier {
   final PlaceCreationPolicy Function(String subcategoryId) _policyFor;
   final PlaceContentBodyMapper _mapper;
   final String _marketId;
+
+  /// The market currency of the Create runtime (`CreateRuntimeDefaults`).
+  final String _marketCurrencyCode;
   final DateTime Function() _clock;
 
   /// Records whose server author was checked in this session.
@@ -127,6 +139,11 @@ final class PlacePublicationController extends ChangeNotifier {
   );
 
   PlacePublicationViewState get state => _state;
+
+  /// The account this controller acts for and its current Create draft, so
+  /// the Create form can show this draft's refusal (M1 stage 3).
+  String get accountId => _accountId;
+  CreateDraftEntity? get currentDraft => _draft;
 
   Future<void> load() async {
     if (!_gate.allowed) {
@@ -211,6 +228,16 @@ final class PlacePublicationController extends ChangeNotifier {
     final PlacePublicationScope scope = _scope(draft);
     final PlacePublicationRecord record = await _requireRecord(scope);
     if (!record.authorApplied) throw const _LocalRefusal('save_required');
+    // M1 stage 3: nothing is sent when the saved body would be refused.
+    final List<ContentValidationViolation> missing = placeServerRequirements(
+      draft,
+      accountId: _accountId,
+      marketCurrencyCode: _marketCurrencyCode,
+      serverOwnerUserId: record.serverOwnerUserId,
+      assetIds: await _currentAssets(draft, scope, record),
+      mapper: _mapper,
+    );
+    if (missing.isNotEmpty) throw _ReadinessRefusal(missing);
     final String submissionId = await _gateway.submit(
       draftId: record.draftId,
       expectedDraftRevision: record.draftRevision,
@@ -551,7 +578,13 @@ final class PlacePublicationController extends ChangeNotifier {
       await action();
       _emit(phase: done, message: null);
     } on EventPublicationRejected catch (refusal) {
-      _emit(phase: done, message: refusal.code);
+      _emit(phase: done, message: refusal.code, violations: refusal.violations);
+    } on _ReadinessRefusal catch (refusal) {
+      _emit(
+        phase: done,
+        message: 'validation_failed',
+        violations: refusal.violations,
+      );
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);
     } on EventPublicationUnavailable catch (failure) {
@@ -562,7 +595,12 @@ final class PlacePublicationController extends ChangeNotifier {
     }
   }
 
-  void _emit({required PlacePublicationPhase phase, String? message}) {
+  void _emit({
+    required PlacePublicationPhase phase,
+    String? message,
+    List<ContentValidationViolation> violations =
+        const <ContentValidationViolation>[],
+  }) {
     _state = PlacePublicationViewState(
       phase: phase,
       draftTitle: _state.draftTitle ?? _draft?.title,
@@ -571,6 +609,7 @@ final class PlacePublicationController extends ChangeNotifier {
       message: message,
       myObjects: _state.myObjects,
       conflict: _conflict,
+      violations: violations,
     );
     notifyListeners();
   }
@@ -599,4 +638,12 @@ final class _LocalRefusal implements Exception {
   const _LocalRefusal(this.code);
 
   final String code;
+}
+
+/// The saved body would be refused: the server's public fields, computed on
+/// the client (M1 stage 3).
+final class _ReadinessRefusal implements Exception {
+  const _ReadinessRefusal(this.violations);
+
+  final List<ContentValidationViolation> violations;
 }
