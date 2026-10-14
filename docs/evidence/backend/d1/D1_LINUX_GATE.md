@@ -24,7 +24,39 @@
 Дефекты: DEF-01, DEF-02 в
 [M1_DEFECT_REGISTER.md](../../../verification/M1_DEFECT_REGISTER.md).
 
-## Попытка 2 — не запущена
+## Попытка 2 — failed (проверка версии исправлена)
+
+| Поле | Значение |
+|---|---|
+| Run | `38547611633`, https://github.com/RechargeN/Recharge/actions/runs/38547611633 |
+| Дата | 2026-10-14 10:09:44Z, триггер push `e87883f..dd0f58b` (разрешение владельца на один push) |
+| SHA | `dd0f58b` (`codex/recharge-integration`) |
+| Стадия | `inspect` |
+| Итог | failed за 33 с на шаге «D1 Linux gate» |
+| ClamAV `.deb` | артефакт `clamav-linux` 105 819 396 Б, SHA-256 `28d6efc5b4423e7830c3559339552eb53870a9eac51ac4efb37d60530d329886`; подпись 801 Б, SHA-256 `1fa7a94df398345b89aeaf8eb4098834946296560266ff17b4cd05f9d8679a15`; ключ Talos 3858 Б, SHA-256 `5bfca75f112f04b89cd992f5f925018e8dfc28e0e7f6e33f6a4c33ed9e29d911`; GPG good signature, ключ `5BADCA2665EF59DCF8A23D8B707F0DB480836771` |
+| Проверка версии (DEF-01) | **прошла**: `ClamAV 1.5.4`; certs `/tmp/Recharge/tools/clamav-1.5.4-linux/usr/local/etc/certs` |
+| `freshclam` | `daily` remote version 28153 скачан во временный каталог; проверочная загрузка: «Failed to create a new code-signature verifier: Can't verify: Invalid certs directory '/usr/local/etc/certs'» → «Broken or not a CVD file» → «Database test FAILED», exit 8 |
+| Реакция гейта | каталог баз перенесён в `_rejected` (по §15.2), гейт остановлен |
+| Не получено | `main`, `bytecode`, `sigtool --info`, SHA-256 баз, тексты `COPYING`/уведомлений, отчёт `inspect`; стадия `test` и EICAR не запускались |
+| Причина (гипотеза) | каталог сертификатов задан только директивой `CVDCertsDirectory` в `freshclam.conf`; проверочная загрузка базы берёт путь по умолчанию. `freshclam` 1.5.4 принимает также `--cvdcertsdir=DIR` и переменную `CVD_CERTS_DIR` (по `freshclam.exe --help` Windows-сборки той же версии). Не проверено на Linux |
+
+Дефекты: DEF-01 — подтверждён проверкой версии; новый DEF-08 — сертификаты
+для проверки баз.
+
+### Backend R0 на том же push
+
+Run `38547610509` (`dd0f58b`): failed на обоих runner'ах (`ubuntu-24.04`,
+`windows-2025`), шаг «Audit production dependency graph»
+(`npm audit --omit=dev --audit-level=high`); следующие шаги не выполнялись.
+Отчёт: 10 уязвимостей (1 critical, 2 high, 7 moderate): `proxy-addr`
+1.1.0–2.0.7 critical (GHSA-jqcg-44mw-7w3h), `@grpc/grpc-js` 1.14.0–1.14.4 high
+(GHSA-m9gg-hp2v-232j, GHSA-f596-whhp-79r4), `brace-expansion` 2.0.0–2.1.6 high
+(GHSA-q2hr-2g5m-vwhr, GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p), `qs` и `uuid`
+moderate, цепочка `gaxios`/`teeny-request`/`@google-cloud/storage`/
+`firebase-admin` (исправление npm предлагает через `firebase-admin@14.5.0`, вне
+заявленного диапазона). Учитывается отдельно (DEF-05), не D1.
+
+### Исправление попытки 2 (до push)
 
 Исправление: `clamdVersion()` в `apps/backend/scripts/media-tools-linux.mjs`
 пишет `clamdConf` во временный каталог, вызывает
@@ -36,5 +68,3 @@
 `lint`, `typecheck`, `verify:toolchain`, `test:media-tools` — pass; Windows
 D1-гейт `stand-d1-gate.mjs --yes` — pass (Windows-path модуль Linux не
 загружает). Это не Linux evidence.
-
-Run, SHA и итог записываются сюда после отдельного разрешения на push и CI.
