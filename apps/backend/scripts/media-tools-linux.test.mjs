@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
+  clamdVersion,
   databaseSetProblems,
   inspectionMarkdown,
   noticePattern,
@@ -12,10 +13,11 @@ import {
   requiredDatabases,
   scopeArgs,
   scopeLimits,
+  versionProbePort,
   watched,
 } from "./media-tools-linux.mjs";
 import { openPoints, readStage, stageFile } from "./stand-d1-linux-gate.mjs";
-import { readLock } from "./media-tools.mjs";
+import { clamdConf, readLock } from "./media-tools.mjs";
 
 const MiB = 1024 * 1024;
 
@@ -344,4 +346,152 @@ test("selftest probes stay reserved for the self-check on Linux too", () => {
   );
   assert.equal(gate.includes("selftestProbes: true"), false);
   assert.equal(gate.includes("--selftest-probes"), false);
+});
+
+/**
+ * Drives clamdVersion with a recorded spawn: the probe the fetch step really
+ * runs (run 38246774477 failed without a configuration file).
+ */
+function versionProbe(answer) {
+  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "d1-version-test-"));
+  const tools = {
+    clamd: "/opt/clamav/sbin/clamd",
+    env: { LD_LIBRARY_PATH: "/x" },
+  };
+  const calls = [];
+  const spawn = (command, args, options) => {
+    const flag = args.find((arg) => arg.startsWith("--config-file="));
+    const conf = flag?.slice("--config-file=".length);
+    calls.push({
+      command,
+      args,
+      options,
+      conf,
+      written:
+        conf !== undefined && fs.existsSync(conf)
+          ? fs.readFileSync(conf, "utf8")
+          : null,
+    });
+    return answer();
+  };
+  const leftovers = () => fs.readdirSync(tmpRoot);
+  return { tmpRoot, tools, calls, spawn, leftovers };
+}
+
+test("clamd --version gets a written clamdConf through --config-file, then the directory is gone", () => {
+  const probe = versionProbe(() => ({
+    status: 0,
+    stdout: "ClamAV 1.5.4/27800/Thu Oct  9 09:21:00 2026\n",
+    stderr: "",
+  }));
+  try {
+    const version = clamdVersion(probe.tools, {
+      spawn: probe.spawn,
+      tmpRoot: probe.tmpRoot,
+    });
+    assert.equal(version, "ClamAV 1.5.4/27800/Thu Oct  9 09:21:00 2026");
+    assert.equal(probe.calls.length, 1);
+    const [call] = probe.calls;
+    assert.equal(call.command, probe.tools.clamd);
+    assert.deepEqual(call.args, [`--config-file=${call.conf}`, "--version"]);
+    assert.equal(call.options.env, probe.tools.env);
+    assert.equal(path.basename(call.conf), "clamd.conf");
+    assert.equal(
+      path.dirname(path.dirname(call.conf)),
+      probe.tmpRoot,
+      "the configuration lives in a fresh directory under tmpRoot",
+    );
+    assert.equal(
+      call.written,
+      clamdConf(path.dirname(call.conf), versionProbePort),
+      "the file passed to clamd is exactly clamdConf",
+    );
+    assert.deepEqual(
+      probe.leftovers(),
+      [],
+      "the temporary directory is removed",
+    );
+  } finally {
+    fs.rmSync(probe.tmpRoot, { recursive: true, force: true });
+  }
+});
+
+test("a failing clamd --version keeps exit code and output and still cleans up", () => {
+  const probe = versionProbe(() => ({
+    status: 1,
+    stdout: "",
+    stderr:
+      "ERROR: Can't open/parse the config file /usr/local/etc/clamd.conf\n",
+  }));
+  try {
+    assert.throws(
+      () =>
+        clamdVersion(probe.tools, {
+          spawn: probe.spawn,
+          tmpRoot: probe.tmpRoot,
+        }),
+      /clamd --version exited 1: ERROR: Can't open\/parse the config file/u,
+    );
+    assert.equal(
+      probe.calls[0].written !== null,
+      true,
+      "the file existed during the call",
+    );
+    assert.deepEqual(probe.leftovers(), []);
+  } finally {
+    fs.rmSync(probe.tmpRoot, { recursive: true, force: true });
+  }
+});
+
+test("clamd that cannot start, dies by signal or throws still leaves no directory", () => {
+  const cases = [
+    [
+      () => ({
+        error: new Error("spawn ENOENT"),
+        status: null,
+        stdout: "",
+        stderr: "",
+      }),
+      /could not start: spawn ENOENT/u,
+    ],
+    [
+      () => ({ status: null, signal: "SIGKILL", stdout: "", stderr: "" }),
+      /exited by signal SIGKILL: \(no output\)/u,
+    ],
+    [
+      () => {
+        throw new Error("spawn threw");
+      },
+      /spawn threw/u,
+    ],
+  ];
+  for (const [answer, expected] of cases) {
+    const probe = versionProbe(answer);
+    try {
+      assert.throws(
+        () =>
+          clamdVersion(probe.tools, {
+            spawn: probe.spawn,
+            tmpRoot: probe.tmpRoot,
+          }),
+        expected,
+      );
+      assert.deepEqual(probe.leftovers(), []);
+    } finally {
+      fs.rmSync(probe.tmpRoot, { recursive: true, force: true });
+    }
+  }
+});
+
+test("the fetch step asks clamd for its version only through clamdVersion", () => {
+  const linux = fs.readFileSync(
+    new URL("./media-tools-linux.mjs", import.meta.url),
+    "utf8",
+  );
+  assert.equal(
+    /tools\.clamd,\s*\[\s*["']--version["']/u.test(linux),
+    false,
+    "no clamd --version without a configuration file",
+  );
+  assert.match(linux, /const version = clamdVersion\(tools\);/u);
 });

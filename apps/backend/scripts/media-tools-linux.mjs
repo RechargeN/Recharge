@@ -6,6 +6,7 @@
 // cgroup v2 scopes created with systemd-run, and stopping a scope ends every
 // process in it (the Linux counterpart of the Windows Job Object).
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
@@ -99,6 +100,48 @@ export function linuxTools(lock = readLock()) {
   };
 }
 
+/** Any port parses; `--version` exits before clamd listens. */
+export const versionProbePort = 3310;
+
+/**
+ * clamd 1.5.4 parses its configuration before it answers `--version`, and the
+ * extracted .deb has no default clamd.conf (D1-L run 38246774477). The probe
+ * writes the project configuration (`clamdConf`) into a fresh temporary
+ * directory, passes it with `--config-file` and removes the directory
+ * afterwards, also when clamd fails or cannot start. A failure keeps the exit
+ * code and the output in the error for diagnosis.
+ */
+export function clamdVersion(
+  tools,
+  { spawn = spawnSync, tmpRoot = os.tmpdir() } = {},
+) {
+  const dir = fs.mkdtempSync(path.join(tmpRoot, "recharge-clamd-version-"));
+  try {
+    const conf = path.join(dir, "clamd.conf");
+    fs.writeFileSync(conf, clamdConf(dir, versionProbePort));
+    const args = [`--config-file=${conf}`, "--version"];
+    const result = spawn(tools.clamd, args, {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024,
+      env: tools.env,
+    });
+    const output = [result.stdout, result.stderr]
+      .filter((text) => typeof text === "string" && text.trim() !== "")
+      .map((text) => text.trim())
+      .join("\n")
+      .slice(-800);
+    if (result.error)
+      fail(`clamd --version could not start: ${result.error.message}`);
+    if (result.status !== 0)
+      fail(
+        `clamd --version exited ${result.status ?? `by signal ${result.signal}`}: ${output || "(no output)"}`,
+      );
+    return result.stdout.trim();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 function binaryLines(tools) {
   return ["clamd", "freshclam", "sigtool"]
     .map((name) => `${name} ${sha256File(tools[name])}`)
@@ -129,7 +172,7 @@ export async function fetchLinux() {
     fs.renameSync(staging, dir);
   }
   const tools = linuxTools(lock);
-  const version = run(tools.clamd, ["--version"], { env: tools.env }).trim();
+  const version = clamdVersion(tools);
   if (!version.startsWith("ClamAV 1.5.4"))
     fail(`unexpected clamd version: ${version}`);
   const lines = binaryLines(tools);

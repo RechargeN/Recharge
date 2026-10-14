@@ -1,6 +1,7 @@
 # D1 — поправка: реальные локальные Media-инструменты (scanner и processor)
 
-Статус: **D1 Windows-local verified / Linux gate open** (2026-10-09).
+Статус: **D1 Windows-local verified / Linux gate open** (2026-10-09; Linux
+gate, попытка 1 2026-10-12 — failed на `inspect`, см. §12 и §15.8).
 Владелец разрешил локальный D1 с вариантом L1 и бюджетом скачивания 300 МБ
 (2026-10-09); замечания к плану, включая записку §3.6, закрыты. D1-gate пройден
 на этом PC (§14); D1 не Done и не зелёный, пока открыт Linux gate (§12).
@@ -803,7 +804,9 @@ Emulator-тесты, Booking и Notifications. Отклонения дописы
 |---|---|
 | до реализации | D1 planned / Windows verification pending / Linux gate open |
 | **сейчас** (2026-10-09, D1-gate пройден, §14) | **Windows-local verified (тестовая сигнатура, без EICAR) / Linux gate open** |
-| Linux gate | EICAR, официальные базы и их условия, нативная Linux-сборка, лимит памяти через cgroup/`prlimit`; на этом PC нет ни Docker, ни WSL-дистрибутива; runner `ubuntu-24.04` из `toolchain.lock.json` не запускается (нет push и разрешения на cloud) |
+| Linux gate | EICAR, официальные базы и их условия, нативная Linux-сборка, лимит памяти через cgroup/`prlimit`; на этом PC нет ни Docker, ни WSL-дистрибутива. Запись от 2026-10-09 «runner не запускается» **устарела**: после push интеграции 2026-10-12 runner запустился (§15.8) |
+| Linux, попытка 1 (2026-10-12) | **failed**, стадия `inspect`, run `38246774477` на `e87883f`: `clamd --version` без файла конфигурации → «Can't open/parse the config file /usr/local/etc/clamd.conf»; у распакованного `.deb` нет конфигурации по умолчанию |
+| Linux, попытка 2 | исправление готово (заход 2 пересмотра M1, 2026-10-14): `clamdVersion()` пишет `clamdConf` во временный каталог, передаёт `--config-file` и удаляет каталог и при ошибке; ждёт отдельного разрешения на push и CI |
 
 D1 не объявляется Done и не считается зелёным, пока открыт Linux gate.
 `LAUNCH_STATUS` пишет оба статуса явно. OD-03/04/05 остаются открытыми.
@@ -1003,8 +1006,13 @@ diff и состав коммитов.
 
 ### 15.8 Статус
 
+Запуски Linux gate и их итоги —
+[D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md). Попытка 1
+(2026-10-12, run `38246774477`) упала на стадии `inspect` до скачивания баз:
+`clamd --version` без `--config-file`. Исправление — попытка 2 (§12).
+
 До зелёной стадии `test` статус остаётся **Windows-local verified / Linux gate
-open**. После неё — «Windows-local verified / Linux CI verified (official
+open**. Зелёный `inspect` подтверждает только проверку версии и баз, не D1. После неё — «Windows-local verified / Linux CI verified (official
 databases, EICAR, image pipeline, Storage path)»; OD-03/04/05 по-прежнему
 открыты.
 
