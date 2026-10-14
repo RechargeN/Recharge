@@ -187,3 +187,17 @@ L5 ok. **L4 FAILED**: процесс `node` в scope `MemoryMax` 16 MiB, `TasksM
 
 L4 приведена к J4: `l4Limits` = `TasksMax` 1, `MemoryMax` 64 MiB (память с
 запасом, чтобы отказ шёл только от лимита задач). Тесты 27/27.
+
+### Результат попытки 6 — success, Linux CI verified
+
+| Поле | Значение |
+|---|---|
+| Run | `38567123384`, https://github.com/RechargeN/Recharge/actions/runs/38567123384 |
+| Дата | 2026-10-14 12:52:06Z, push `c50dc72..83e05cd` (серия D1 по разрешению владельца) |
+| SHA | `83e05cdb4b92656eb443edf5a4c5b9490feb4dba`, стадия `test` |
+| Базы | bytecode v339, daily v28153 (сборка 14 Oct 2026 06:24 +0000), main v63; inspect без открытых пунктов |
+| Unit-тесты D1 и Media guard | 37/37, skipped 0 |
+| cgroup L1–L6 | все ok; L2 — воркер убит по OOM (`oomKills` 1), хост жив; L3 — освобождено 422 MiB, следующая обработка `succeeded`; L4 — процесс не стартовал (`started: false`, scope неактивен) |
+| Tool tests (official) | 24: 22 pass, 0 fail, 2 skip «L1 only» (тесты режима L1, неприменимы при официальных базах; гейт требует ровно их); EICAR отклонён официальными сигнатурами |
+| Путь Storage на Emulator | 7/7, skipped 0; EICAR через Storage заблокирован |
+| Итог | «D1-L gate passed: Linux CI verified»; OD-03/04/05 открыты; без Firebase deployment |

@@ -1,7 +1,8 @@
 # D1 — поправка: реальные локальные Media-инструменты (scanner и processor)
 
-Статус: **D1 Windows-local verified / Linux gate open** (2026-10-09; Linux
-gate, попытка 1 2026-10-12 — failed на `inspect`, см. §12 и §15.8).
+Статус: **D1 Windows-local verified / Linux CI verified** (2026-10-14, run
+`38567123384` на `83e05cd`; до этого 2026-10-09 — Windows-local verified / Linux
+gate open; история попыток — §12 и §15.8). Статус Done — решением владельца.
 Владелец разрешил локальный D1 с вариантом L1 и бюджетом скачивания 300 МБ
 (2026-10-09); замечания к плану, включая записку §3.6, закрыты. D1-gate пройден
 на этом PC (§14); D1 не Done и не зелёный, пока открыт Linux gate (§12).
@@ -803,13 +804,16 @@ Emulator-тесты, Booking и Notifications. Отклонения дописы
 | Этап | Статус |
 |---|---|
 | до реализации | D1 planned / Windows verification pending / Linux gate open |
-| **сейчас** (2026-10-09, D1-gate пройден, §14) | **Windows-local verified (тестовая сигнатура, без EICAR) / Linux gate open** |
+| 2026-10-09 (D1-gate пройден, §14) | **Windows-local verified (тестовая сигнатура, без EICAR) / Linux gate open** |
 | Linux gate | EICAR, официальные базы и их условия, нативная Linux-сборка, лимит памяти через cgroup/`prlimit`; на этом PC нет ни Docker, ни WSL-дистрибутива. Запись от 2026-10-09 «runner не запускается» **устарела**: после push интеграции 2026-10-12 runner запустился (§15.8) |
 | Linux, попытка 1 (2026-10-12) | **failed**, стадия `inspect`, run `38246774477` на `e87883f`: `clamd --version` без файла конфигурации → «Can't open/parse the config file /usr/local/etc/clamd.conf»; у распакованного `.deb` нет конфигурации по умолчанию |
 | Linux, попытка 2 | исправление готово (заход 2 пересмотра M1, 2026-10-14): `clamdVersion()` пишет `clamdConf` во временный каталог, передаёт `--config-file` и удаляет каталог и при ошибке; запущена 2026-10-14, run `38547611633` на `dd0f58b`: проверка версии прошла (`ClamAV 1.5.4`); **failed** на `freshclam` — проверочная загрузка `daily` (28153) не нашла сертификаты (`/usr/local/etc/certs`), базы отклонены, отчёта `inspect` нет |
 | Linux, попытка 3 | исправление DEF-08 готово: сертификат только из проверенного `.deb` (fail closed до `freshclam`), `freshclam` получает `CVD_CERTS_DIR`; запущена 2026-10-14, run `38554932983` на `3c32e1c`: **`inspect` success** — три базы проверены, у каждой `COPYING` (GPL v2); открыт пробел уведомлений `sharp-libvips-linux-x64` (DEF-09); `test` и EICAR не запускались |
+| Linux, попытки 4–5 (`test`) | 4: run `38555622591` — L2 обрывал соединение (DEF-10, `OOMPolicy`); 5: run `38565997591` — L2, L3 ok, L4 не соответствовала J4 (DEF-11) |
+| **сейчас** (2026-10-14, попытка 6, `test`) | **Windows-local verified / Linux CI verified**: run `38567123384` на `83e05cd` — official databases, L1–L6, нативный sharp/libvips, EICAR отклонён напрямую и через путь Storage (7/7) |
 
-D1 не объявляется Done и не считается зелёным, пока открыт Linux gate.
+D1 не объявляется Done и не считается зелёным, пока открыт Linux gate. Linux gate
+закрыт 2026-10-14 (попытка 6); перевод D1 в Done — решение владельца.
 `LAUNCH_STATUS` пишет оба статуса явно. OD-03/04/05 остаются открытыми.
 
 ## 13. Порядок
@@ -1025,8 +1029,10 @@ databases, EICAR, image pipeline, Storage path)»; OD-03/04/05 по-прежне
 коммитом.
 
 Попытка 4 (`test`, run `38555622591`, `db3121f`) упала на самопроверке cgroup
-L2 (DEF-10), до tool tests и EICAR. Исправление (попытка 5): `OOMPolicy=continue`
-для scope и диагностика L2/L3 с фактами и журналом; ждёт разрешения на push.
+L2 (DEF-10), до tool tests и EICAR. Попытка 5 (`38565997591`, `c50dc72`):
+`OOMPolicy=continue` подтверждён (L2, L3 ok), L4 расходилась с J4 (DEF-11).
+**Попытка 6 (`38567123384`, `83e05cd`) — Linux gate зелёный**: «D1-L gate passed:
+Linux CI verified».
 
 ## Приложение A. Проверенный состав F2 (до первой правки D1)
 
