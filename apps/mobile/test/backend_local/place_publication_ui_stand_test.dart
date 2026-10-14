@@ -18,6 +18,7 @@ import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_place_draft.dart';
@@ -81,6 +82,15 @@ void main() {
       )
       ..registerSingleton<BookingSupportDirectoryProvider>(
         () async => Directory('${temp.path}/support').create(recursive: true),
+      )
+      ..registerSingleton<CreateRuntimeDefaults>(
+        const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
       )
       ..registerSingleton<CreateRepository>(repository)
       ..registerLazySingletonAsync<BookingTransportRuntime>(
