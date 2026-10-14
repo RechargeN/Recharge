@@ -25,8 +25,8 @@
 | DEF-02 | Документы D1 не отражают запуск и падение Linux gate: §12 пишет, что runner не запускается | `MEDIA_D1_REAL_TOOLS_AMENDMENT.md` §12, §15.8; LAUNCH_STATUS D1 | P2 | заход 2: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают попытку 1; строка D1 в LAUNCH_STATUS | закрывается после сверки с evidence попытки 2 (run, SHA, итог) | закрыт: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают обе попытки с run, SHA и итогом |
 | DEF-03 | Форма Create допускает черновики, которые сервер отклоняет общим `validation_failed`; пользователь не видит поле. Place 10, Activity 10 (+8 граничных отказов), Rental 9, Collection 8 случаев | `*_create_compat.json`, §5.7 D3.1–D3.4 | P2: корректные черновики проходят (обход есть), но обязателен к закрытию для M1 по Р-09 | заход 3 | корректные формы проходят, известные нарушения объясняются, Flutter/boundary/diff зелёные | открыт |
 | DEF-04 | `M1_ACCEPTANCE.md` относит «binding rollback» к D4.1 (откат импорта); фактическое evidence — гейт B1 | `M1_ACCEPTANCE.md`, таблица «Требования M1»; журнал гейта B1 | P2 | заход 5 | исправленная ссылка на гейт B1 | открыт |
-| DEF-05 | Backend R0 в GitHub Actions красный на шаге «Audit production dependency graph» (npm audit) | runs `38246774323` (`e87883f`), `36916471771` (`42f8850`), `38547610509` (`dd0f58b`, 2026-10-14: 10 уязвимостей — 1 critical `proxy-addr`, 2 high `@grpc/grpc-js` и `brace-expansion`, 7 moderate; оба runner) | не назначен: Linux-паритет вне M1 (checklist §3) | отдельный слайс | — | открыт, вне M1 |
-| DEF-08 | `freshclam` не проверяет скачанную базу на Linux: проверочная загрузка ищет сертификаты в `/usr/local/etc/certs`, директива `CVDCertsDirectory` в `freshclam.conf` до неё не доходит; гейт отклоняет базы | run `38547611633`, `dd0f58b`, 2026-10-14 | P1 для D1 (блокирует `inspect`); вне M1 по Р-06 А | отдельный bounded-план: передать каталог через `--cvdcertsdir`/`CVD_CERTS_DIR` | новый Linux `inspect` | открыт |
+| DEF-05 | Backend R0 в GitHub Actions красный на шаге «Audit production dependency graph» (npm audit) | runs `38246774323` (`e87883f`), `36916471771` (`42f8850`), `38547610509` (`dd0f58b`, 2026-10-14: 10 уязвимостей — 1 critical `proxy-addr`, 2 high `@grpc/grpc-js` и `brace-expansion`, 7 moderate; оба runner) | не назначен; после D1 — отдельный слайс (решение 2026-10-14). Оценка применимости ниже: эксплуатируемой уязвимости в текущем runtime не найдено | отдельный слайс после D1 | — | открыт, вне M1 |
+| DEF-08 | `freshclam` не проверяет скачанную базу на Linux: проверочная загрузка ищет сертификаты в `/usr/local/etc/certs`, директива `CVDCertsDirectory` в `freshclam.conf` до неё не доходит; гейт отклоняет базы | run `38547611633`, `dd0f58b`, 2026-10-14 | P1 для D1 (блокирует `inspect`); вне M1 по Р-06 А | план 2026-10-14 (на рассмотрении): каталог из проверенного `.deb` обязателен (fail closed до `freshclam`), `freshclam` получает `CVD_CERTS_DIR` — `libclamav` 1.5.4 знает только переменную, не директиву; `--cvdcertsdir` не добавляется без подтверждённой необходимости; TLS не меняется | новый Linux `inspect`: `freshclam` и `sigtool --info` проходят | открыт |
 | DEF-07 | Существующий тест workflow в `media-tools-linux.test.mjs` читает YAML сырым текстом и падает на CRLF-checkout (Windows, `core.autocrlf=true`); на LF-checkout и на Linux runner проходит | 2026-10-14, свежий worktree `claude/d1-linux-fix`: 15/16 до перевыгрузки файла с LF, 16/16 после; на worktree 7275 (LF) 12/12 | P3 | отдельный слайс (нормализация переводов строк в тесте) | — | открыт |
 | DEF-06 | В рамках M1 «только проверка» выполнены исправления (заход 2) и новая функциональность D4.1 (3a/3b) без отдельной записи основания | checklist §8, `M1_STAGE2_PAGE_RELIABILITY.md`, `D4_1_ROLLBACK.md` | P2 (процесс) | заход 5: записать основание D4.1 отдельно от приёмки | — | открыт |
 
@@ -38,3 +38,25 @@
 | M1-D2 | Контроллеры Place/Activity/Rental/Collection перезаписывали чужую правку при `revision_conflict` | `a93707d`; импорт — `e3710f6` (D4.1 §3.3) | те же гейты и гейт D4 на `e3710f6` |
 
 Эти две записи не переоценивались по шкале Р-08.
+
+## DEF-05: оценка применимости (2026-10-14)
+
+Источник: R0 run `38547610509` на `dd0f58b`, `npm audit --omit=dev --audit-level=high`;
+граф — `npm ls --omit=dev` в `apps/backend/functions`; использование — поиск по
+`apps/backend/functions/src`. Runtime сейчас только Emulator на loopback,
+`firebase.json` запрещает deploy (`predeploy` → `deny-cloud-deploy.mjs`).
+Оценка по чтению кода, без эксплуатационных проверок.
+
+| Пакет | Уровень | Путь в графе | Применимость сейчас |
+|---|---|---|---|
+| `proxy-addr` 2.0.7 | critical (GHSA-jqcg-44mw-7w3h) | `firebase-functions` → `express` | подмена IP при `trust proxy` с доверенной подсетью; `trust proxy` в коде не задаётся; без сетевой экспозиции не эксплуатируется. Обязательно пересмотреть до любого cloud/staging |
+| `@grpc/grpc-js` 1.14.4 | high (GHSA-m9gg-hp2v-232j, GHSA-f596-whhp-79r4) | `firebase-admin` → Firestore → `google-gax` | обе касаются gRPC-**сервера** (mTLS auth context, сообщения ошибок); мы клиент, своего gRPC-сервера нет — не применимо |
+| `brace-expansion` 2.1.4 | high (3 DoS) | `google-gax` → `rimraf` → `glob` → `minimatch` | DoS на шаблонах от пользователя; недоверенные шаблоны в glob не попадают — не применимо |
+| `qs` 6.15.3 | moderate | `firebase-functions` → `express`/`body-parser` | разбор тела/запроса HTTP; сейчас только loopback Emulator; актуально при сетевой экспозиции |
+| `uuid` 9.0.1 | moderate | `@google-cloud/storage` → `gaxios`/`teeny-request` | только v3/v5/v6 с переданным `buf`; код проекта `uuid` не импортирует — не применимо |
+
+Вывод: эксплуатируемой уязвимости в текущем runtime не найдено; приоритет не
+повышается. `proxy-addr` и `qs` становятся значимыми при сетевой экспозиции —
+обязательный пункт перед любым cloud/staging. npm предлагает исправление через
+`firebase-admin@14.5.0` (вне заявленного диапазона) — решается в слайсе DEF-05,
+не в D1.
