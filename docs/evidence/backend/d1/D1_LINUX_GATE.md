@@ -69,7 +69,42 @@ moderate, цепочка `gaxios`/`teeny-request`/`@google-cloud/storage`/
 D1-гейт `stand-d1-gate.mjs --yes` — pass (Windows-path модуль Linux не
 загружает). Это не Linux evidence.
 
-## Попытка 3 — не запущена (исправление DEF-08)
+## Попытка 3 — inspect success (исправление DEF-08)
+
+| Поле | Значение |
+|---|---|
+| Run | `38554932983`, https://github.com/RechargeN/Recharge/actions/runs/38554932983 |
+| Дата | 2026-10-14 11:12:22Z, push `dd0f58b..3c32e1c` (разрешение владельца) |
+| SHA | `3c32e1c` |
+| Стадия | `inspect`; итог **success**: «every database verified and carries COPYING»; тесты не запускались |
+| ClamAV `.deb` | 105 819 396 Б, SHA-256 `28d6efc5b4423e7830c3559339552eb53870a9eac51ac4efb37d60530d329886`; GPG good, ключ `5BADCA2665EF59DCF8A23D8B707F0DB480836771`; `clamd` — ClamAV 1.5.4 |
+| Сертификат CVD | `usr/local/etc/certs/clamav.crt` из `.deb`, 1976 Б, SHA-256 `60200e4b4b1b1b7257bb4550487aeb142034341f3300a8526e77a3134a940e9d` |
+| `freshclam` | `daily`, `main`, `bytecode`: «Database test passed» для каждой; всего 112 824 212 Б из 400 000 000 |
+
+| База | Версия | Сборка | Сигнатур | Проверка подписи (`sigtool --info`) | Байт | SHA-256 | COPYING |
+|---|---|---|---|---|---|---|---|
+| bytecode.cvd | 339 | 11 Sep 2025 08:29 -0400 | 80 | OK | 281 702 | `6d4aa01f219e988060fc419f495d07f27e0cdf1a2cccc065971da922c76f7ffb` | есть |
+| daily.cvd | 28153 | 14 Oct 2026 06:24 +0000 | 355 765 | OK | 23 442 609 | `19e1680c80116ac7c53d87572b4df8746bd976b774da082a1be962cda8be50bb` | есть |
+| main.cvd | 63 | 16 Dec 2025 23:18 +0000 | 3 287 027 | OK | 89 072 577 | `0b2182d229f46981ec8f535382222f7c9dfdd656b250ad47988b910a8d302365` | есть |
+
+Лицензионные уведомления баз: в каждой из трёх баз один файл `COPYING`, 17 992 Б,
+SHA-256 `32b1062f7da84967e7019d01ab805935caa7ab7321a7ced0e30ebe75e5df1670` (одинаковый);
+текст — GNU General Public License, Version 2, June 1991. Других файлов
+уведомлений (`LICENSE*`, `NOTICE*`, `README*`) в базах нет. Полный текст — в
+step summary run.
+
+Пакеты sharp для Linux: `@img/sharp-linux-x64@0.35.5` (Apache-2.0) — `LICENSE`
+10 273 Б, SHA-256 `73ba74dfaa520b49a401b5d21459a8523a146f3b7518a833eea5efa85130bf68`;
+`@img/sharp-libvips-linux-x64@1.3.4` (LGPL-3.0-or-later) — **ни одного файла
+уведомлений не записано**: `npmNotices()` ищет только в корне пакета, а там их
+нет. §15.5 требует записать имена, размеры и SHA-256 уведомлений пакета — пробел
+открыт (DEF-09) и выносится владельцу до стадии `test`.
+
+Backend R0 на том же push: run `38554933834` — failed на обоих runner (шаг
+«Audit production dependency graph», 10 уязвимостей: 1 critical, 2 high, 7
+moderate — без изменений, DEF-05).
+
+### Исправление попытки 3 (до push)
 
 Исправление: сертификат проверки CVD берётся только из проверенного `.deb`
 (`usr/local/etc/certs/clamav.crt`): каталог и файл обязаны быть обычными (не
