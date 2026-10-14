@@ -218,10 +218,7 @@ void main() {
           child: MaterialApp.router(routerConfig: router),
         ),
       );
-      Finder field(String label) => find.byWidgetPredicate(
-        (widget) =>
-            widget is TextField && widget.decoration?.labelText == label,
-      );
+      Finder field(String id) => find.byKey(Key(id));
       await waitFor(tester, field('event-title'));
       await tester.enterText(field('event-title'), 'Clay evening (UI path)');
       await tester.enterText(
