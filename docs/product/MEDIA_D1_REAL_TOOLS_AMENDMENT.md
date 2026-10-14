@@ -1013,7 +1013,14 @@ diff и состав коммитов.
 `clamd --version` без `--config-file`. Исправление — попытка 2 (§12).
 
 До зелёной стадии `test` статус остаётся **Windows-local verified / Linux gate
-open**. Зелёный `inspect` подтверждает только проверку версии и баз, не D1. После неё — «Windows-local verified / Linux CI verified (official
+open**. Зелёный `inspect` подтверждает только проверку версии и баз, не D1.
+
+**Решение владельца 2026-10-14:** отчёт `inspect` run `38554932983` (`3c32e1c`)
+принят: три официальные базы, `COPYING` (GPL v2) в каждой, сертификат CVD из
+`.deb`. Пробел DEF-09 (не записаны уведомления `@img/sharp-libvips-linux-x64`
+1.3.4) принят явно как исключение для этого пакета и версии; требование §15.5
+для других пакетов не меняется. Стадия переключена на `test` отдельным
+коммитом. После неё — «Windows-local verified / Linux CI verified (official
 databases, EICAR, image pipeline, Storage path)»; OD-03/04/05 по-прежнему
 открыты.
 

@@ -122,3 +122,9 @@ moderate — без изменений, DEF-05).
 `freshclam` запускается только через `freshclamInvocation()`);
 `format:check`, `lint`, `typecheck`, `verify:toolchain`, `test:media-tools`,
 `build` — pass; Windows D1-гейт — pass. Это не Linux evidence.
+
+## Решение владельца после попытки 3
+
+2026-10-14: отчёт `inspect` принят; пробел DEF-09 принят явно (только
+`@img/sharp-libvips-linux-x64` 1.3.4); стадия переключена на `test` отдельным
+коммитом; push разрешён владельцем.

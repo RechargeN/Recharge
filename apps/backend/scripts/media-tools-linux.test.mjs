@@ -289,9 +289,12 @@ test("the set check guards the download, the inspection and the start", () => {
   );
 });
 
-test("the committed stage is inspect until the owner switches it", () => {
-  assert.equal(JSON.parse(fs.readFileSync(stageFile, "utf8")).stage, "inspect");
-  assert.equal(readStage([]), "inspect");
+test("the committed stage is the owner decision: test since 2026-10-14", () => {
+  // The owner accepted the inspect report of run 38554932983 and switched the
+  // gate to test (MEDIA_D1_REAL_TOOLS_AMENDMENT.md §15.8).
+  assert.equal(JSON.parse(fs.readFileSync(stageFile, "utf8")).stage, "test");
+  assert.equal(readStage([]), "test");
+  assert.equal(readStage(["--stage=inspect"]), "inspect");
   assert.equal(readStage(["--stage=test"]), "test");
   assert.throws(() => readStage(["--stage=deploy"]), /unknown stage/u);
 });
