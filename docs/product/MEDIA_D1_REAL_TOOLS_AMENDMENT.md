@@ -1025,7 +1025,8 @@ databases, EICAR, image pipeline, Storage path)»; OD-03/04/05 по-прежне
 коммитом.
 
 Попытка 4 (`test`, run `38555622591`, `db3121f`) упала на самопроверке cgroup
-L2 (DEF-10), до tool tests и EICAR.
+L2 (DEF-10), до tool tests и EICAR. Исправление (попытка 5): `OOMPolicy=continue`
+для scope и диагностика L2/L3 с фактами и журналом; ждёт разрешения на push.
 
 ## Приложение A. Проверенный состав F2 (до первой правки D1)
 

@@ -544,6 +544,11 @@ export function scopeArgs({ unit, limits, uid, gid, env = {}, exe, args }) {
     "MemorySwapMax=0",
     "-p",
     `TasksMax=${limits.tasksMax}`,
+    // DEF-10: systemd's DefaultOOMPolicy=stop ends the whole unit after a
+    // kernel OOM kill; the cap must end only the process over it (the worker),
+    // as the Windows Job Object refuses the allocation (J2).
+    "-p",
+    "OOMPolicy=continue",
     "--",
     "/usr/bin/env",
     ...Object.entries(env).map(([name, value]) => `${name}=${value}`),
@@ -926,9 +931,99 @@ export async function statusLinux({ instance = "stand" } = {}) {
   };
 }
 
+/** A probe that fails becomes data for a check instead of ending the gate. */
+export async function attemptProbe(run) {
+  try {
+    return { ok: true, value: await run() };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+}
+
+/**
+ * L2 verdict (DEF-10): the worker cannot use more than the scope allows and
+ * the host survives. A broken connection is a failed check with the scope
+ * facts, not a crash of the gate.
+ */
+export function l2Verdict({ probe, before, after, hostAlive, memoryMax }) {
+  const answer = probe.ok ? (probe.value.json?.answer ?? {}) : {};
+  const ok =
+    probe.ok &&
+    probe.value.status === 200 &&
+    (answer.kind === "exit" || answer.refused === true) &&
+    after.memoryPeak <= memoryMax &&
+    hostAlive;
+  return {
+    ok,
+    facts: {
+      ...(probe.ok ? { answer } : { error: probe.error }),
+      scopeActive: after.active,
+      oomKills: after.oomKills - before.oomKills,
+      peakMiB: Math.round(after.memoryPeak / MiB),
+      hostAlive,
+    },
+  };
+}
+
+/** journalctl arguments for the scopes of a self-check (read through sudo). */
+export function journalArgs(units, since) {
+  return {
+    scopes: [
+      "-n",
+      "journalctl",
+      "--no-pager",
+      "-o",
+      "short-iso",
+      `--since=${since}`,
+      ...Object.values(units).flatMap((unit) => ["-u", `${unit}.scope`]),
+    ],
+    kernel: [
+      "-n",
+      "journalctl",
+      "--no-pager",
+      "-o",
+      "short-iso",
+      "-k",
+      `--since=${since}`,
+    ],
+  };
+}
+
+/** The last journal lines of the scopes and the kernel OOM lines, or why not. */
+function scopeJournal(units, since) {
+  const args = journalArgs(units, since);
+  const tail = (lines, count) => lines.slice(-count).join("\n");
+  const read = (list) => {
+    const result = spawnSync("sudo", list, {
+      encoding: "utf8",
+      maxBuffer: 8 * 1024 * 1024,
+    });
+    if (result.status !== 0)
+      return {
+        error: `journalctl exited ${result.status}: ${(result.stderr || "").trim().slice(-300)}`,
+      };
+    return { lines: (result.stdout || "").split("\n").filter(Boolean) };
+  };
+  const scopes = read(args.scopes);
+  const kernel = read(args.kernel);
+  return {
+    scopes: scopes.error ?? tail(scopes.lines, 40),
+    kernelOom:
+      kernel.error ??
+      tail(
+        kernel.lines.filter((line) =>
+          /oom|out of memory|killed process/iu.test(line),
+        ),
+        20,
+      ),
+  };
+}
+
 /** L1–L6: the Linux counterparts of J1–J6 (amendment §3.8, §15.3). */
 export async function selftestLinux() {
   const instance = `selftest-${stamp()}`;
+  // journalctl --since: "YYYY-MM-DD HH:MM:SS UTC", one minute of margin.
+  const since = `${new Date(Date.now() - 60_000).toISOString().slice(0, 19).replace("T", " ")} UTC`;
   const report = {
     instance,
     at: new Date().toISOString(),
@@ -964,75 +1059,95 @@ export async function selftestLinux() {
     );
 
     // L2: the worker cannot use more than the scope allows; the host survives.
-    const oomBefore = describeScope(units.service).oomKills;
-    const l2 = await http(
-      port,
-      "POST",
-      "/v1/selftest/probe",
-      controlToken,
-      Buffer.from(JSON.stringify({ kind: "allocate", mib: 1024 })),
+    // A failed probe is a failed check with facts and the journal (DEF-10).
+    const beforeL2 = describeScope(units.service);
+    const l2Probe = await attemptProbe(() =>
+      http(
+        port,
+        "POST",
+        "/v1/selftest/probe",
+        controlToken,
+        Buffer.from(JSON.stringify({ kind: "allocate", mib: 1024 })),
+      ),
     );
     const afterL2 = describeScope(units.service);
-    const hostAlive =
-      (await http(port, "GET", "/v1/health", token)).status === 200;
-    const answer = l2.json?.answer ?? {};
+    const healthAfterL2 = await attemptProbe(() =>
+      http(port, "GET", "/v1/health", token),
+    );
+    const hostAlive = healthAfterL2.ok && healthAfterL2.value.status === 200;
+    const l2 = l2Verdict({
+      probe: l2Probe,
+      before: beforeL2,
+      after: afterL2,
+      hostAlive,
+      memoryMax: scopeLimits.service.memoryMax,
+    });
     check(
       "L2",
-      l2.status === 200 &&
-        (answer.kind === "exit" || answer.refused === true) &&
-        afterL2.memoryPeak <= scopeLimits.service.memoryMax &&
-        hostAlive,
-      {
-        answer,
-        oomKills: afterL2.oomKills - oomBefore,
-        peakMiB: Math.round(afterL2.memoryPeak / MiB),
-        hostAlive,
-      },
+      l2.ok,
+      l2.ok ? l2.facts : { ...l2.facts, journal: scopeJournal(units, since) },
     );
 
     // L3: a hung worker is ended at the deadline and its memory is released.
-    const hung = http(
-      port,
-      "POST",
-      "/v1/selftest/probe",
-      controlToken,
-      Buffer.from(JSON.stringify({ kind: "hang", mib: 400 })),
-    );
-    await sleep(4_000);
-    const during = describeScope(units.service);
-    const hungWorker = (await http(port, "GET", "/v1/health", token)).json
-      .worker?.pid;
-    const l3 = await hung;
-    const after = describeScope(units.service);
-    const releasedMiB = Math.round(
-      (during.memoryCurrent - after.memoryCurrent) / MiB,
-    );
-    const next = await http(port, "POST", "/v1/process", token, tinyJpeg, {
-      "content-type": "application/octet-stream",
-      "x-recharge-request-id": randomBytes(8).toString("hex"),
-      "x-recharge-sha256": createHash("sha256").update(tinyJpeg).digest("hex"),
-      "x-recharge-profiles": "display,thumb",
-    });
-    const nextWorker = (await http(port, "GET", "/v1/health", token)).json
-      .worker?.pid;
-    check(
-      "L3",
-      l3.json?.answer?.kind === "timeout" &&
-        !after.pids.includes(hungWorker) &&
-        releasedMiB >= 380 &&
-        next.status === 200 &&
-        next.json.result === "succeeded" &&
-        nextWorker !== undefined &&
-        nextWorker !== hungWorker,
-      {
-        hungWorker,
-        memoryDuringMiB: Math.round(during.memoryCurrent / MiB),
-        memoryAfterMiB: Math.round(after.memoryCurrent / MiB),
-        releasedMiB,
-        nextResult: next.json?.result,
-        nextWorker,
-      },
-    );
+    // Without a living host it cannot run; that is a failed check, not a skip.
+    if (!hostAlive)
+      check("L3", false, { reason: "the service host is not alive after L2" });
+    else {
+      const l3Run = await attemptProbe(() => hungWorkerCheck());
+      if (l3Run.ok) check("L3", l3Run.value.ok, l3Run.value.facts);
+      else
+        check("L3", false, {
+          error: l3Run.error,
+          journal: scopeJournal(units, since),
+        });
+    }
+
+    async function hungWorkerCheck() {
+      const hung = http(
+        port,
+        "POST",
+        "/v1/selftest/probe",
+        controlToken,
+        Buffer.from(JSON.stringify({ kind: "hang", mib: 400 })),
+      );
+      await sleep(4_000);
+      const during = describeScope(units.service);
+      const hungWorker = (await http(port, "GET", "/v1/health", token)).json
+        .worker?.pid;
+      const l3 = await hung;
+      const after = describeScope(units.service);
+      const releasedMiB = Math.round(
+        (during.memoryCurrent - after.memoryCurrent) / MiB,
+      );
+      const next = await http(port, "POST", "/v1/process", token, tinyJpeg, {
+        "content-type": "application/octet-stream",
+        "x-recharge-request-id": randomBytes(8).toString("hex"),
+        "x-recharge-sha256": createHash("sha256")
+          .update(tinyJpeg)
+          .digest("hex"),
+        "x-recharge-profiles": "display,thumb",
+      });
+      const nextWorker = (await http(port, "GET", "/v1/health", token)).json
+        .worker?.pid;
+      return {
+        ok:
+          l3.json?.answer?.kind === "timeout" &&
+          !after.pids.includes(hungWorker) &&
+          releasedMiB >= 380 &&
+          next.status === 200 &&
+          next.json.result === "succeeded" &&
+          nextWorker !== undefined &&
+          nextWorker !== hungWorker,
+        facts: {
+          hungWorker,
+          memoryDuringMiB: Math.round(during.memoryCurrent / MiB),
+          memoryAfterMiB: Math.round(after.memoryCurrent / MiB),
+          releasedMiB,
+          nextResult: next.json?.result,
+          nextWorker,
+        },
+      };
+    }
 
     // L4: a scope that does not admit the process keeps nothing running.
     const l4Dir = path.join(instanceDir(instance), "l4");

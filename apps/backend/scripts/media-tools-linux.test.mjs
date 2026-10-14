@@ -5,12 +5,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
+  attemptProbe,
   clamdVersion,
   cvdCertFile,
   cvdCerts,
   databaseSetProblems,
   debCertsPath,
   freshclamInvocation,
+  journalArgs,
+  l2Verdict,
   inspectionMarkdown,
   noticePattern,
   officialAllowance,
@@ -78,6 +81,9 @@ test("a cgroup scope: hard memory cap, no swap, task cap, no secret on the comma
   assert.ok(args.includes(`MemoryMax=${768 * MiB}`));
   assert.ok(args.includes("MemorySwapMax=0"));
   assert.ok(args.includes(`TasksMax=${scopeLimits.service.tasksMax}`));
+  // DEF-10: an OOM kill ends only the process over the cap, not the scope.
+  assert.equal(args[args.indexOf("OOMPolicy=continue") - 1], "-p");
+  assert.ok(args.indexOf("OOMPolicy=continue") < args.indexOf("--"));
   assert.ok(args.includes("--uid=1001") && args.includes("--gid=1001"));
   const command = args.slice(args.indexOf("--") + 1);
   assert.deepEqual(command, [
@@ -629,4 +635,102 @@ test("DEF-08: freshclam runs only through freshclamInvocation and certificates a
   );
   assert.match(linux, /const certsFile = cvdCerts\(root\);/u);
   assert.equal(/let certs = null/u.test(linux), false);
+});
+
+const scopeAt = (facts) => ({
+  active: true,
+  memoryPeak: 100 * MiB,
+  oomKills: 0,
+  ...facts,
+});
+
+test("DEF-10: a broken L2 connection is a failed check with the scope facts", () => {
+  const verdict = l2Verdict({
+    probe: { ok: false, error: "socket hang up" },
+    before: scopeAt({ oomKills: 0 }),
+    after: scopeAt({ active: false, oomKills: 1, memoryPeak: 768 * MiB }),
+    hostAlive: false,
+    memoryMax: 768 * MiB,
+  });
+  assert.equal(verdict.ok, false);
+  assert.deepEqual(verdict.facts, {
+    error: "socket hang up",
+    scopeActive: false,
+    oomKills: 1,
+    peakMiB: 768,
+    hostAlive: false,
+  });
+});
+
+test("DEF-10: L2 passes only when the worker is capped and the host lives", () => {
+  const base = {
+    probe: {
+      ok: true,
+      value: { status: 200, json: { answer: { kind: "exit", code: 137 } } },
+    },
+    before: scopeAt({}),
+    after: scopeAt({ oomKills: 1, memoryPeak: 760 * MiB }),
+    hostAlive: true,
+    memoryMax: 768 * MiB,
+  };
+  const passed = l2Verdict(base);
+  assert.equal(passed.ok, true);
+  assert.equal(passed.facts.oomKills, 1);
+  assert.equal(l2Verdict({ ...base, hostAlive: false }).ok, false);
+  assert.equal(
+    l2Verdict({ ...base, after: scopeAt({ memoryPeak: 900 * MiB }) }).ok,
+    false,
+  );
+  assert.equal(
+    l2Verdict({
+      ...base,
+      probe: {
+        ok: true,
+        value: { status: 200, json: { answer: { kind: "ok" } } },
+      },
+    }).ok,
+    false,
+  );
+});
+
+test("DEF-10: a failing probe resolves to data instead of throwing", async () => {
+  assert.deepEqual(await attemptProbe(async () => 7), { ok: true, value: 7 });
+  assert.deepEqual(
+    await attemptProbe(async () => {
+      throw new Error("socket hang up");
+    }),
+    { ok: false, error: "socket hang up" },
+  );
+});
+
+test("DEF-10: journalctl reads every scope of the self-check and kernel lines since its start", () => {
+  const args = journalArgs(
+    { service: "recharge-media-tools-s", clamd: "recharge-media-clamd-s" },
+    "2026-10-14 11:18:07 UTC",
+  );
+  assert.deepEqual(args.scopes.slice(0, 2), ["-n", "journalctl"]);
+  assert.ok(args.scopes.includes("--since=2026-10-14 11:18:07 UTC"));
+  assert.ok(args.scopes.includes("recharge-media-tools-s.scope"));
+  assert.ok(args.scopes.includes("recharge-media-clamd-s.scope"));
+  assert.deepEqual(args.kernel.slice(0, 2), ["-n", "journalctl"]);
+  assert.ok(args.kernel.includes("-k"));
+});
+
+test("DEF-10: L2 and L3 probes go through attemptProbe and a dead host fails L3", () => {
+  const linux = fs.readFileSync(
+    new URL("./media-tools-linux.mjs", import.meta.url),
+    "utf8",
+  );
+  const start = linux.indexOf("export async function selftestLinux");
+  const body = linux.slice(start, linux.indexOf("// L4:", start));
+  assert.match(body, /const l2Probe = await attemptProbe\(/u);
+  assert.match(
+    body,
+    /const l3Run = await attemptProbe\(\(\) => hungWorkerCheck\(\)\)/u,
+  );
+  assert.match(
+    body,
+    /check\("L3", false, \{ reason: "the service host is not alive after L2" \}\)/u,
+  );
+  assert.match(body, /journal: scopeJournal\(units, since\)/u);
 });
