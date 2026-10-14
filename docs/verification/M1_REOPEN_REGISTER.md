@@ -1,3 +1,5 @@
+> **Текущее состояние 2026-10-15:** обязательные критерии принятого scope M1 закрыты, исключения приняты; первый локальный контур проверен. Исторический аудит и решения ниже сохранены. Полная приёмка 20 заходов остаётся отдельной.
+
 # Release M1 и 20 заходов — реестр незакрытых критериев (заход 1)
 
 Дата 2026-10-14. Ветка `claude/m1-reopen` от `ce6014a` (`codex/recharge-integration`).
@@ -40,23 +42,23 @@ evidence `e3710f6`. После любого runtime-изменения захо�
 |---|---|---|---|---|---|
 | K-01 | Заход Р: единственная рабочая копия, правило общих файлов, судьба WIP, политика worktree | О (для Р) | IDP WIP `be17822` перенесён как `941f618`, сверка `e87883f` (`IDP_WIP_DISPOSITION_2026_10_12.md`); карта 27 пересечений в `C1_E2_CLOSURE_REVIEW.md` (`2529a54`) | решения владельца нет; roadmap §3.7 и BCK-02 называют содержание Р blocker | решение Р-01, Р-02 (§2) |
 | K-02 | D1: Linux gate — EICAR, официальные базы, нативная сборка, cgroup (D1 §1, §8, §12) | О для D1; В для M1 | Windows-local гейт pass на `e3710f6`, EICAR «not run here»; GitHub run `38246774477` на `e87883f` 2026-10-12 — **failed**, стадия inspect: `clamd --version` → «Can't open/parse the config file /usr/local/etc/clamd.conf» | гейт красный; D1 §12/§15.8 и LAUNCH_STATUS не отражают запуск и падение | заход 2 |
-| K-03 | B1-local: «автоматические проверки mobile adapters и Session lifecycle» | О | гейт B1 4/4 на `e3710f6`: вход через REST Auth Emulator (`AuthEmulatorTokenProvider`, тест), Session в `FileSessionStore` (тест) | приложенческий `FirebaseAuthIdTokenProvider` (`booking_firebase_auth_emulator.dart`) и Session store на `flutter_secure_storage` (`booking_functions_transport.dart`) не исполнялись | заход 4; платформа — решение Р-10 |
-| K-04 | E2: «одна revision объекта в Map, Feed и Details» | О | `discover_catalog_stand_test.dart`: Feed, Search, Details и исчезновение после hide; Map — только вывод «тот же listing» | Map через свой адаптер/экран не проверен | заход 4 |
-| K-05 | C3: «Event через mobile Create … в локально проверяемом mobile flow» | Р | контроллер 6/6 и UI 1/1 через тестовую страницу `/test/event-publication`, черновик из `CreateRepository` | форма Create не пройдена; LAUNCH_STATUS C3 держит «full Create form interaction evidence» открытым | заход 4; трактовка — решение Р-11 |
+| K-03 | B1 real FirebaseAuth и secure storage | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
+| K-04 | Map revisionRef и hide через настоящий controller | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
+| K-05 | CreatePage draft edit/save/cover и дальнейший Event lifecycle | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
 | K-06 | Совместимость Create → сервер, Place (D3.1 §5.7) | Р | закрыт заходом 3: runtime `4e82352`, тестовые исправления до `b91e819`; [evidence](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md) | readiness/поля отказа и корректные стендовые черновики проверены; пределы SHA описаны в evidence | заход 3 закрыт; финальные SHA-гейты — заходы 4–5 |
 | K-07 | То же, Activity (D3.2 §5.7) | Р | закрыт заходом 3: runtime `4e82352`, тестовые исправления до `b91e819`; [evidence](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md) | readiness/поля отказа и корректные стендовые черновики проверены; пределы SHA описаны в evidence | заход 3 закрыт; финальные SHA-гейты — заходы 4–5 |
 | K-08 | То же, Rental (D3.3 §5.7) | Р | закрыт заходом 3: runtime `4e82352`, тестовые исправления до `b91e819`; [evidence](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md) | readiness/поля отказа и корректные стендовые черновики проверены; пределы SHA описаны в evidence | заход 3 закрыт; финальные SHA-гейты — заходы 4–5 |
 | K-09 | То же, Collection (D3.4 §5.7) | Р | закрыт заходом 3: runtime `4e82352`, тестовые исправления до `b91e819`; [evidence](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md) | readiness/поля отказа и корректные стендовые черновики проверены; пределы SHA описаны в evidence | заход 3 закрыт; финальные SHA-гейты — заходы 4–5 |
 | K-10 | M1: «состав записан в плане файлов этапа до кода» (roadmap §3.7) | О | checklist §1: у большинства строк класс «восстановлено после реализации» | реконструкция не является планом до кода; одобрение выведено из общего указания | решение Р-03 |
-| K-11 | M1: «нет открытых P1/P2» (roadmap §3.7) | О | в M1-документах только самооценка «открытых дефектов M1 нет» | учёта P1/P2 и шкалы приоритетов не было | `M1_DEFECT_REGISTER.md`; шкала — Р-08; заход 5 |
+| K-11 | Учёт P1/P2 и независимое ревью финального состава M1 | О | [реестр дефектов](M1_DEFECT_REGISTER.md), [независимое ревью](../evidence/backend/m1/M1_STAGE5_INDEPENDENT_REVIEW.md) на `7cb07fa` и финальных документах | закрыт в scope M1; DEF-05 вне M1 и DEF-07 P3 сохраняются | заход 5 |
 | K-12 | M1: исключение терминального `revokeMembership` из клиентского M1 (checklist §3) | Р | backend-only тест `identity_publisher_authority.test.ts` | исключение не подтверждено явно | решение Р-04 |
 | K-13 | M1: waiver трёх документов в diff-check (checklist §6) | Р | SHA-256 трёх blob совпали в 3c | waiver не подтверждён явно | решение Р-05 |
 | K-14 | M1: исключение Linux gate D1 из M1 (checklist §3) | Р | — | исключение не подтверждено явно, а D1 по своей поправке без Linux не Done | решение Р-06 |
-| K-15 | M1: «binding rollback» | О | фактическое evidence — гейт B1, тест «testBackend returns to localOnly … and back»; unit `booking_backend_selection_test.dart` | `M1_ACCEPTANCE.md` относит пункт к D4.1 (откат импорта) | заход 5 |
-| K-16 | M1: «только проверка, исправления не смешивать с приёмкой» | О | приёмка 3c — отдельный документальный коммит `56796d2` | внутри M1 выполнены исправления (заход 2) и новая функциональность D4.1 (3a/3b) без отдельного основания в реестре | заход 5 |
+| K-15 | Binding rollback — B1, import rollback — отдельно D4.1 | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
+| K-16 | D4.1 имеет отдельное прямое human-основание и implementation/acceptance commits | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
 | K-17 | C1: «иной способ upload — сначала варианты и отдельное подтверждение» | О (процесс) | `uploadMediaBytesV1` описан в `apps/backend/README.md` §C1 | записи о вариантах и подтверждении до кода нет | решение Р-12 |
-| K-18 | B2: состояние loading | О (мелкое) | offline, unknown outcome, отказ и restart покрыты тестами | отдельного теста loading нет | заход 4 (добавить или явно принять) |
-| K-19 | Полный `test:emulator` на итоговом SHA | О | 250/250 на `e3710f6` (история) | после runtime-изменений заходов 2–4 нужен новый прогон | заход 4 / 5 |
+| K-18 | B2 Loading и mutation busy, три прогона по пять тестов | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
+| K-19 | Новый полный Emulator: 250 passed / 0 failed / 0 skipped, девять групп | О | финальный SHA `7cb07fa`; [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт в принятом локальном scope; пределы записаны в evidence | заходы 4–5 |
 
 ## 2. Решения владельца, нужные до заходов 2–5
 
@@ -184,3 +186,7 @@ C3: тест прохождения формы Create Event на стенде; `
   ([D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md)). Дефекты DEF-01,
   DEF-02, DEF-08, DEF-10, DEF-11 закрыты; DEF-09 принят владельцем. D1 Done —
   принято владельцем 2026-10-14.
+
+## Заходы 4–5: текущая сверка
+
+Все обязательные runtime gates повторены на `7cb07fa`; прежнее `250/250` на `e3710f6` — только история. 67 пропущенных общим suite тестов имеют конкретные отдельные успешные прогоны. K-11 закрыт независимым ревью финального состава без открытых P1/P2 в scope M1; текущая приёмка записана в M1_ACCEPTANCE. Принятые решения §2.1 сохраняются; полная приёмка всех 20 заходов не следует из M1 автоматически.

@@ -1,8 +1,8 @@
 # Recharge Backend — Latvia Launch и Baltic Expansion Roadmap
 
 - ID: **BCK-02-A1**
-- Version: **1.33**
-- Date: **2026-10-14**
+- Version: **1.34**
+- Date: **2026-10-15**
 - Spec status: **Draft — review required, documentation only**
 - Runtime status: **N/A — execution roadmap only**
 - Accountable owner: **Platform Architecture**
@@ -559,6 +559,8 @@ staging-ready или Market-готовностью и не включают пр
 распространяется на Release M2 и последующие этапы. Независимое ревью
 (строка Release M1) — отдельное требование M1; условия merge §3.6 остаются
 Proposed и в M1 не переносятся.
+
+**Приёмка M1 2026-10-15.** Первый локальный контур проверен на `7cb07fa`; [итог и пределы evidence](../evidence/backend/m1/M1_ACCEPTANCE.md), независимое ревью и учёт P1/P2 закрывают согласованный scope M1. D4.1 — отдельная разрешённая реализация 3b, а не изменение внутри приёмки 3c/5 ([прямое основание](../evidence/backend/m1/M1_D4_1_OWNER_BASIS.md)). Binding rollback относится к гейту B1; import rollback — к D4. Статусы остальных этапов определяются их собственным scope; M1 не принимает автоматически все 20 заходов и не выполняет Proposed условия merge §3.6.
 
 #### Границы сред
 

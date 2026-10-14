@@ -1,13 +1,17 @@
-# Release M1 — итоговая приёмка (заход 3c)
+# Release M1 — приёмка и история
+
+## Текущая приёмка захода 5 — принята 2026-10-15
+
+Все обязательные runtime gates завершены на `7cb07fa9a1b531d08660f51800172f506459bc5b`; [прямое evidence захода 4](M1_STAGE4_ADAPTERS_CREATE.md), [67 skipped mappings](M1_STAGE4_SKIPPED_EVIDENCE.json), [основание D4.1](M1_D4_1_OWNER_BASIS.md). **Вердикт: «первый локальный контур проверен».** Независимое [ревью финального состава](M1_STAGE5_INDEPENDENT_REVIEW.md) не выявило открытых P1/P2 в принятом scope M1. Принятые исключения Р-03/04/05/06/12 сохраняются. Physical-device, cloud/staging/production и вся совокупность 20 заходов не приняты этим отчётом.
+
+## Историческая приёмка 3c на e3710f6
+
+Все утверждения и числа ниже описывают прежний SHA, включая 250/250; они не являются evidence финального runtime.
 
 Дата 2026-10-13. Checklist:
 [M1_LOCAL_CONTOUR_CHECKLIST.md](../../../verification/M1_LOCAL_CONTOUR_CHECKLIST.md).
 
-> **Пересмотр 2026-10-14.** Результаты прогонов ниже остаются evidence runtime
-> `e3710f6`; вердикт не подтверждён до решений и проверок
-> [реестра](../../../verification/M1_REOPEN_REGISTER.md). Известная ошибка:
-> «Откат binding» относится к гейту B1, а не к D4.1
-> ([DEF-04](../../../verification/M1_DEFECT_REGISTER.md)).
+> **Исторический пересмотр 2026-10-14:** вердикт ниже был отозван и затем заново проверен в заходах 4–5. Ошибка DEF-04 исправлена: binding rollback — B1, import rollback — отдельно D4.1. Текущий результат находится выше.
 
 **Вердикт: «первый локальный контур проверен».** Все обязательные пункты
 checklist — состав §1, сценарии §2, клиентское покрытие §8 и gates §5 — зелёные
@@ -107,7 +111,8 @@ gates) → `a93707d` (заход 2, доступ Page и надёжность п
 | Конкурентное редактирование и Booking | S7 (`revision_conflict`, запись поверх только по «Save my version»); Emulator `booking` (contention) и `handoff-notifications` (action races); E2, F2; D4.1 гонки rollback/submit и rollback/reserve (Emulator `import`) | S7 и D4.1 — клиент на стенде; гонки транзакций — Emulator |
 | Import | гейт D4 (D4 и D4.1) | `local_import_stand_test.dart`, 4 сценария |
 | Восстановление стенда | `stand:acceptance` (A1/A2), `test:stand` | — |
-| Откат binding | D4.1: rollback, поколения, fenced cleanup | integration, Emulator `import`, unit, widget, гейт D4 |
+| Откат binding | B1: testBackend → localOnly → testBackend (исправление DEF-04 в заходе 5) | исторический B1; финальный native и host B1 на `7cb07fa`, [evidence](M1_STAGE4_ADAPTERS_CREATE.md) |
+| Откат импорта D4.1 | rollback, поколения, fenced cleanup | отдельный гейт D4 и Emulator `import`; [основание](M1_D4_1_OWNER_BASIS.md) |
 | Полные gates | все строки таблицы результатов | — |
 
 ## Skipped-тесты и гейты

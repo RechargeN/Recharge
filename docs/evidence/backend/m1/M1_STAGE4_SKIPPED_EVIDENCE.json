@@ -1,0 +1,1346 @@
+{
+  "skipped": 67,
+  "complete": true,
+  "tests": [
+    {
+      "file": "activity_catalog_stand_test.dart",
+      "name": "Activity Catalog real Feed Search Map Details and existing renderer",
+      "gate": "d3-8",
+      "run": {
+        "startedUtc": "2026-10-14T21:01:24.7623603+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-8.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-8",
+        "command": "node apps/backend/scripts/stand-d3-8-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:03:35.4842104+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-8.log",
+      "logSha256": "05e53092c97dd70f19542a8b67581afdbedf09e9eea3565ec0e71f5c9cb518d3",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_linked_place_stand_test.dart",
+      "name": "real Catalog picker to Activity save/media/submit/review/publish/activate; restriction hides relation only",
+      "gate": "d3-9",
+      "run": {
+        "startedUtc": "2026-10-14T21:03:35.4864733+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-9.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-9",
+        "command": "node apps/backend/scripts/stand-d3-8-gate.mjs --yes --linked-place",
+        "endedUtc": "2026-10-14T21:06:50.0758456+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-9.log",
+      "logSha256": "7008d9f2dbaa1373c12818e4c505e4808338e82aa4b51a7555603a2e72f75e43",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "the Creator publishes the Create Activity draft through Content, Media and review",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "a repeated save after a fresh start reuses the same server draft",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "another account on the same install never uses the record, and cannot author for the Page",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "the seeded Activity of the stand is a Content publication (manifest ids)",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "M1 S1-S3 submit: severed, lost answer, restart and retry give one submission",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_stand_test.dart",
+      "name": "M1 S1-S3 publish: severed, lost answer, restart and retry give one publication",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "activity_publication_ui_stand_test.dart",
+      "name": "the user publishes their Create Activity draft from the test page",
+      "gate": "d3-2",
+      "run": {
+        "startedUtc": "2026-10-14T20:43:18.2637029+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-2",
+        "command": "node apps/backend/scripts/stand-d3-2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:49:45.1194106+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-2.log",
+      "logSha256": "60cd31544362206e4f4a6189f99037118fcd57983121d78de448978cc227411b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "booking_session_lifecycle_stand_test.dart",
+      "name": "sign-in establishes a server-issued Session that survives a restart",
+      "gate": "mobile",
+      "run": {
+        "endedUtc": "2026-10-14T19:24:28.1411060+00:00",
+        "gate": "mobile",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-mobile.log",
+        "command": "node apps/backend/scripts/stand-mobile-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:22:33.4017838+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-mobile.log",
+      "logSha256": "7d4c3fbe6efb88538d46067a446a987c80d50de39d9690a5e7487f1b0a20444d",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "booking_session_lifecycle_stand_test.dart",
+      "name": "a revoked Session is repaired through the owner path, not reused",
+      "gate": "mobile",
+      "run": {
+        "endedUtc": "2026-10-14T19:24:28.1411060+00:00",
+        "gate": "mobile",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-mobile.log",
+        "command": "node apps/backend/scripts/stand-mobile-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:22:33.4017838+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-mobile.log",
+      "logSha256": "7d4c3fbe6efb88538d46067a446a987c80d50de39d9690a5e7487f1b0a20444d",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "booking_session_lifecycle_stand_test.dart",
+      "name": "an expired Session is replaced and the command is retried once",
+      "gate": "mobile",
+      "run": {
+        "endedUtc": "2026-10-14T19:24:28.1411060+00:00",
+        "gate": "mobile",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-mobile.log",
+        "command": "node apps/backend/scripts/stand-mobile-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:22:33.4017838+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-mobile.log",
+      "logSha256": "7d4c3fbe6efb88538d46067a446a987c80d50de39d9690a5e7487f1b0a20444d",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "booking_session_lifecycle_stand_test.dart",
+      "name": "testBackend returns to localOnly without a call or data loss, and back",
+      "gate": "mobile",
+      "run": {
+        "endedUtc": "2026-10-14T19:24:28.1411060+00:00",
+        "gate": "mobile",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-mobile.log",
+        "command": "node apps/backend/scripts/stand-mobile-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:22:33.4017838+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-mobile.log",
+      "logSha256": "7d4c3fbe6efb88538d46067a446a987c80d50de39d9690a5e7487f1b0a20444d",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "the picker finds the published member Places; the Catalog answers exact statuses",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "the Creator publishes the Create Collection draft through Content, Media and review",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "a reference to an unknown object is refused by the server, not by the client",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "the seeded Collection of the stand is a Content publication (manifest ids)",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "M1 S4: a repeated save after a fresh start reuses the same server draft",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "M1 S1-S3 submit: severed, lost answer, restart and retry give one submission",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_stand_test.dart",
+      "name": "M1 S1-S3 publish: severed, lost answer, restart and retry give one publication",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "collection_publication_ui_stand_test.dart",
+      "name": "the user publishes their Create Collection draft from the test page",
+      "gate": "d3-4",
+      "run": {
+        "startedUtc": "2026-10-14T20:55:17.7296157+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-4",
+        "command": "node apps/backend/scripts/stand-d3-4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:01:24.7600728+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-4.log",
+      "logSha256": "26909564e0be836f71ad8130efb4dd54f25e720d43af16c5b35285a146ceca3b",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "discover_catalog_stand_test.dart",
+      "name": "one revision in Feed, Search and Details for another user; hidden, it leaves all of them",
+      "gate": "e2a",
+      "run": {
+        "endedUtc": "2026-10-14T19:13:49.7884407+00:00",
+        "gate": "e2a",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-e2a.log",
+        "command": "node apps/backend/scripts/stand-e2a-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:11:05.3502243+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-e2a.log",
+      "logSha256": "a746c14a2b1d05985895f129135e8d2942fc20e74b32c45f484427af5c79d283",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "e2_client_test.dart",
+      "name": "E2 client: Create → moderation → Catalog → Details → Booking → cancel, then the hide race",
+      "gate": "e2",
+      "run": {
+        "startedUtc": "2026-10-14T20:13:53.1038410+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-e2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "e2",
+        "command": "node apps/backend/scripts/stand-e2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:17:28.7002500+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-e2.log",
+      "logSha256": "680d82fd0f8664044fff704c53047a39542ef8d87669090d7d6673a55c481fc1",
+      "namePresentInGateLog": false,
+      "singleTestEvidence": true,
+      "matchingEvidence": "Gate selects this exact one-test source file; +1 All tests passed (A and B separately for E2/F2); child reports removed by existing gate.",
+      "gatePassed": true
+    },
+    {
+      "file": "event_booking_ui_stand_test.dart",
+      "name": "the test entry is on only with the real define, and a booking can be created, shown and cancelled",
+      "gate": "b2",
+      "run": {
+        "endedUtc": "2026-10-14T19:22:33.3988959+00:00",
+        "gate": "b2",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-b2.log",
+        "command": "node apps/backend/scripts/stand-b2-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:13:49.7902543+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-b2.log",
+      "logSha256": "5efd963ce0e20e8b0ac908dc6c54ba17c1dd1498278688121549a4d0155a60ba",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_booking_ui_stand_test.dart",
+      "name": "a double tap sends one command and creates one booking",
+      "gate": "b2",
+      "run": {
+        "endedUtc": "2026-10-14T19:22:33.3988959+00:00",
+        "gate": "b2",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-b2.log",
+        "command": "node apps/backend/scripts/stand-b2-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:13:49.7902543+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-b2.log",
+      "logSha256": "5efd963ce0e20e8b0ac908dc6c54ba17c1dd1498278688121549a4d0155a60ba",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_booking_ui_stand_test.dart",
+      "name": "a lost response is an unknown outcome; checking again does not duplicate",
+      "gate": "b2",
+      "run": {
+        "endedUtc": "2026-10-14T19:22:33.3988959+00:00",
+        "gate": "b2",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-b2.log",
+        "command": "node apps/backend/scripts/stand-b2-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:13:49.7902543+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-b2.log",
+      "logSha256": "5efd963ce0e20e8b0ac908dc6c54ba17c1dd1498278688121549a4d0155a60ba",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_booking_ui_stand_test.dart",
+      "name": "the journaled intent survives a restart and recovers without a second booking",
+      "gate": "b2",
+      "run": {
+        "endedUtc": "2026-10-14T19:22:33.3988959+00:00",
+        "gate": "b2",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-b2.log",
+        "command": "node apps/backend/scripts/stand-b2-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:13:49.7902543+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-b2.log",
+      "logSha256": "5efd963ce0e20e8b0ac908dc6c54ba17c1dd1498278688121549a4d0155a60ba",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_booking_ui_stand_test.dart",
+      "name": "offline is shown honestly and the saved request is sent once afterwards",
+      "gate": "b2",
+      "run": {
+        "endedUtc": "2026-10-14T19:22:33.3988959+00:00",
+        "gate": "b2",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-b2.log",
+        "command": "node apps/backend/scripts/stand-b2-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:13:49.7902543+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-b2.log",
+      "logSha256": "5efd963ce0e20e8b0ac908dc6c54ba17c1dd1498278688121549a4d0155a60ba",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "the Creator publishes the Create draft through Content, Media and review",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "a user without Creator authority for the Page cannot create it",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "the seeded Event of the stand is a Content publication (manifest ids)",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "M1 S4: a repeated save after a fresh start reuses the same server draft",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "M1 S1-S3 submit: severed, lost answer, restart and retry give one submission",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_stand_test.dart",
+      "name": "M1 S1-S3 publish: severed, lost answer, restart and retry give one publication",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "event_publication_ui_stand_test.dart",
+      "name": "the user publishes their Create Event draft from the test page",
+      "gate": "c3",
+      "run": {
+        "endedUtc": "2026-10-14T19:11:05.3459881+00:00",
+        "gate": "c3",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c3.log",
+        "command": "node apps/backend/scripts/stand-c3-gate.mjs --yes",
+        "startedUtc": "2026-10-14T19:06:04.3344926+00:00",
+        "exitCode": 0
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c3.log",
+      "logSha256": "720cf1e66be825b858f89a5edf814f7d74134bcd922796076650a7d81f3346f5",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "f2_client_test.dart",
+      "name": "F2 client: reschedule through Create, reconfirm, stale answer, removed date",
+      "gate": "f2",
+      "run": {
+        "startedUtc": "2026-10-14T20:20:35.2209046+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-f2.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "f2",
+        "command": "node apps/backend/scripts/stand-f2-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:24:41.8614171+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-f2.log",
+      "logSha256": "3472a70a006e7c1c7a3270f33e0670d5af7c5e45b18d1af3e27883263fb4dbdb",
+      "namePresentInGateLog": false,
+      "singleTestEvidence": true,
+      "matchingEvidence": "Gate selects this exact one-test source file; +1 All tests passed (A and B separately for E2/F2); child reports removed by existing gate.",
+      "gatePassed": true
+    },
+    {
+      "file": "local_import_stand_test.dart",
+      "name": "an interrupted import resumes into the same server draft; lost receipts and repeats never duplicate it",
+      "gate": "d4",
+      "run": {
+        "startedUtc": "2026-10-14T21:06:50.0774193+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d4",
+        "command": "node apps/backend/scripts/stand-d4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:09:16.3107296+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d4.log",
+      "logSha256": "e5b2298ed74f13af8698a8b406750909060132a921200d6acde48f3435dc98c0",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "local_import_stand_test.dart",
+      "name": "the local original goes only after verification, confirmation and the recovery period",
+      "gate": "d4",
+      "run": {
+        "startedUtc": "2026-10-14T21:06:50.0774193+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d4",
+        "command": "node apps/backend/scripts/stand-d4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:09:16.3107296+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d4.log",
+      "logSha256": "e5b2298ed74f13af8698a8b406750909060132a921200d6acde48f3435dc98c0",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "local_import_stand_test.dart",
+      "name": "D4.1: rollback keeps the local original, survives a lost answer and a restart, and a re-import opens generation 2",
+      "gate": "d4",
+      "run": {
+        "startedUtc": "2026-10-14T21:06:50.0774193+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d4",
+        "command": "node apps/backend/scripts/stand-d4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:09:16.3107296+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d4.log",
+      "logSha256": "e5b2298ed74f13af8698a8b406750909060132a921200d6acde48f3435dc98c0",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "local_import_stand_test.dart",
+      "name": "D4.1: a cleanup reservation on one installation stops a rollback on another; lost answers around the deletion are recovered",
+      "gate": "d4",
+      "run": {
+        "startedUtc": "2026-10-14T21:06:50.0774193+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d4.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d4",
+        "command": "node apps/backend/scripts/stand-d4-gate.mjs --yes",
+        "endedUtc": "2026-10-14T21:09:16.3107296+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d4.log",
+      "logSha256": "e5b2298ed74f13af8698a8b406750909060132a921200d6acde48f3435dc98c0",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "media_upload_stand_test.dart",
+      "name": "the creator uploads the fixture and Content accepts that exact revision",
+      "gate": "c1",
+      "run": {
+        "startedUtc": "2026-10-14T20:05:03.7485245+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "c1",
+        "command": "node apps/backend/scripts/stand-c1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:07:03.0045473+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c1.log",
+      "logSha256": "897333e8958c089a786c329853666777d7c7150abc2e9df15f78533c922f7aa9",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "media_upload_stand_test.dart",
+      "name": "a user without Creator authority cannot start an upload for that draft",
+      "gate": "c1",
+      "run": {
+        "startedUtc": "2026-10-14T20:05:03.7485245+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "c1",
+        "command": "node apps/backend/scripts/stand-c1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:07:03.0045473+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c1.log",
+      "logSha256": "897333e8958c089a786c329853666777d7c7150abc2e9df15f78533c922f7aa9",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "media_upload_stand_test.dart",
+      "name": "bytes that are not the declared image type are refused at confirm",
+      "gate": "c1",
+      "run": {
+        "startedUtc": "2026-10-14T20:05:03.7485245+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-c1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "c1",
+        "command": "node apps/backend/scripts/stand-c1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:07:03.0045473+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-c1.log",
+      "logSha256": "897333e8958c089a786c329853666777d7c7150abc2e9df15f78533c922f7aa9",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "notifications_inbox_client_test.dart",
+      "name": "F1 client: Booking effects reach the server inbox once; an unreadable Notifications state never blocks cancellation",
+      "gate": "f1",
+      "run": {
+        "startedUtc": "2026-10-14T20:17:28.7035633+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-f1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "f1",
+        "command": "node apps/backend/scripts/stand-f1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:20:35.2185066+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-f1.log",
+      "logSha256": "42fbda41c463b4c3c3601713b293b4349bf01efd5554feb00bd04c7016f8faf3",
+      "namePresentInGateLog": false,
+      "singleTestEvidence": true,
+      "matchingEvidence": "Gate selects this exact one-test source file; +1 All tests passed (A and B separately for E2/F2); child reports removed by existing gate.",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Event save: refused while withdrawn, draft and binding kept, then saved once",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Event submit: refused while withdrawn, no submission, then one submission",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Event publish: refused while withdrawn, nothing published, then one publication",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Place save: refused while withdrawn, draft and binding kept, then saved once",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Place submit: refused while withdrawn, no submission, then one submission",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Place publish: refused while withdrawn, nothing published, then one publication",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S6 Place: save, submit and publish are refused while the Page is suspended, then complete once",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "page_access_revocation_stand_test.dart",
+      "name": "S5 Place UI: publish shows the server refusal while withdrawn, then publishes",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "the Creator publishes the Create Place draft through Content, Media and review",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "a repeated save after a fresh start reuses the same server draft",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "another account on the same install never uses the record, and cannot author for the Page",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "the seeded Place of the stand is a Content publication (manifest ids)",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "M1 S1-S3 submit: severed, lost answer, restart and retry give one submission",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_stand_test.dart",
+      "name": "M1 S1-S3 publish: severed, lost answer, restart and retry give one publication",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "place_publication_ui_stand_test.dart",
+      "name": "the user publishes their Create Place draft from the test page",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "publication_two_installs_stand_test.dart",
+      "name": "S7: a save on the older revision from the second install is a revision_conflict; nothing is overwritten until the user saves their version",
+      "gate": "d3-1",
+      "run": {
+        "startedUtc": "2026-10-14T20:28:04.3160017+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-1.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-1",
+        "command": "node apps/backend/scripts/stand-d3-1-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:43:18.2613219+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-1.log",
+      "logSha256": "151db5e245e4d0dfac772669247bec175a8cc60bfa326fb0bf6f403ea298a5b8",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "the Creator publishes the Create Rental draft through Content, Media and review",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "a repeated save after a fresh start reuses the same server draft",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "another account on the same install never sends the Creator's confirmation",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "the seeded Rental of the stand is a Content publication (manifest ids)",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "M1 S1-S3 submit: severed, lost answer, restart and retry give one submission",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_stand_test.dart",
+      "name": "M1 S1-S3 publish: severed, lost answer, restart and retry give one publication",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    },
+    {
+      "file": "rental_publication_ui_stand_test.dart",
+      "name": "the user publishes their Create Rental draft from the test page",
+      "gate": "d3-3",
+      "run": {
+        "startedUtc": "2026-10-14T20:49:45.1222038+00:00",
+        "log": "C:\\Users\\User\\Documents\\Codex\\2026-10-14\\4-b1-e2-c3-runtime-2\\work\\stage4-gate-d3-3.log",
+        "sha": "7cb07fa9a1b531d08660f51800172f506459bc5b",
+        "exitCode": 0,
+        "gate": "d3-3",
+        "command": "node apps/backend/scripts/stand-d3-3-gate.mjs --yes",
+        "endedUtc": "2026-10-14T20:55:17.7270555+00:00"
+      },
+      "artifact": "stage4-5-logs/stage4-gate-d3-3.log",
+      "logSha256": "7fbbebb22aafabcce0b9ae6bdb1eb85721e2323d80dc4d99461954e0d9026389",
+      "namePresentInGateLog": true,
+      "singleTestEvidence": false,
+      "matchingEvidence": "exact test name in gate log",
+      "gatePassed": true
+    }
+  ]
+}
