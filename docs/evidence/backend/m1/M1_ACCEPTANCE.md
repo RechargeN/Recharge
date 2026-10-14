@@ -3,6 +3,12 @@
 Дата 2026-10-13. Checklist:
 [M1_LOCAL_CONTOUR_CHECKLIST.md](../../../verification/M1_LOCAL_CONTOUR_CHECKLIST.md).
 
+> **Пересмотр 2026-10-14.** Результаты прогонов ниже остаются evidence runtime
+> `e3710f6`; вердикт не подтверждён до решений и проверок
+> [реестра](../../../verification/M1_REOPEN_REGISTER.md). Известная ошибка:
+> «Откат binding» относится к гейту B1, а не к D4.1
+> ([DEF-04](../../../verification/M1_DEFECT_REGISTER.md)).
+
 **Вердикт: «первый локальный контур проверен».** Все обязательные пункты
 checklist — состав §1, сценарии §2, клиентское покрытие §8 и gates §5 — зелёные
 на одном runtime SHA, на чистом изолированном worktree; открытых обязательных
