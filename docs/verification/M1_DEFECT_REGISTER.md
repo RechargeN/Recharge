@@ -69,3 +69,9 @@
 обязательный пункт перед любым cloud/staging. npm предлагает исправление через
 `firebase-admin@14.5.0` (вне заявленного диапазона) — решается в слайсе DEF-05,
 не в D1.
+
+## Заход 4: обнаруженные дефекты
+
+| ID | Приоритет | Дефект | Evidence | Состояние |
+|---|---|---|---|---|
+| M1-ST4-01 | P1 для B1/M1 | Android debug запрещает HTTP к loopback, настоящий firebase_auth не может использовать Auth Emulator | stage4-b1-platform-repeat.log: Cleartext HTTP traffic to 127.0.0.1 not permitted | исправлена debug-only network policy только для 127.0.0.1; повтор B1 требуется |
