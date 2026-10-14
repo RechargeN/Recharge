@@ -128,3 +128,17 @@ moderate — без изменений, DEF-05).
 2026-10-14: отчёт `inspect` принят; пробел DEF-09 принят явно (только
 `@img/sharp-libvips-linux-x64` 1.3.4); стадия переключена на `test` отдельным
 коммитом; push разрешён владельцем.
+
+## Попытка 4 — test, failed на самопроверке cgroup
+
+| Поле | Значение |
+|---|---|
+| Run | `38555622591`, https://github.com/RechargeN/Recharge/actions/runs/38555622591 |
+| Дата | 2026-10-14 11:18:19Z, push `3c32e1c..db3121f` (разрешение владельца) |
+| SHA | `db3121f`, стадия `test` |
+| Прошло | ClamAV `.deb` и сертификат (как в попытке 3); `freshclam` — три базы, «Database test passed»; inspect без открытых пунктов; build; «D1 unit tests and the Media guard» 37/37, skipped 0; самопроверка cgroup: L1 ok, L6 ok |
+| Ошибка | сразу после запроса пробы L2 (`allocate` 1024 MiB при `MemoryMax` 768 MiB): `stand-d1-linux-gate: socket hang up`; L2, L3, L4 не записаны; в `finally` L5 ok (scope остановлены, порты закрыты) |
+| Не дошло до | запуск инструментов с официальными базами, tool tests, EICAR, путь Storage |
+| Гипотеза (не подтверждена) | на Linux превышение `MemoryMax` вызывает OOM-kill; у systemd для unit по умолчанию `DefaultOOMPolicy=stop` — после OOM-kill останавливается весь scope вместе с хостом сервиса, соединение обрывается. Scope создаются без `OOMPolicy`. Журнал systemd/ядра в выводе гейта не сохраняется, поэтому причина не доказана |
+
+Дефект: DEF-10. Backend R0 run `38555622810` — как прежде (DEF-05).
