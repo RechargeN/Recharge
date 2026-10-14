@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -227,8 +228,14 @@ void main() {
       final create = find.byKey(const Key('event-booking-create'));
       await waitFor(tester, create);
 
+      final held = Completer<void>();
+      client.holdNextCreate = held;
       await tester.tap(create);
       await tester.tap(create);
+      await waitFor(tester, find.byKey(const Key('event-booking-busy')));
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      expect(find.byKey(const Key('event-booking-mine')), findsNothing);
+      held.complete();
 
       await waitFor(tester, find.byKey(const Key('event-booking-mine')));
       await expectActive(1, 'double tap');
@@ -325,12 +332,18 @@ final class FaultClient extends http.BaseClient {
   bool severed = false;
   bool dropNextCreateResponse = false;
   int createCommands = 0;
+  Completer<void>? holdNextCreate;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final isCreate = request.url.path.endsWith('/createInternalBookingV1');
     if (severed) throw const SocketException('simulated: no connection');
-    if (isCreate) createCommands += 1;
+    if (isCreate) {
+      createCommands += 1;
+      final held = holdNextCreate;
+      holdNextCreate = null;
+      if (held != null) await held.future;
+    }
     // F2: every request on a fresh connection. The stand command before a
     // cancel can idle ~5 s, Node's keep-alive limit; a reused socket closed by
     // the server would turn a real cancel into an unknown outcome. The lost
