@@ -85,6 +85,7 @@
     "stand:d1-gate": "node ../scripts/stand-d1-gate.mjs",
     "stand:manifest": "node ../scripts/stand-seed.mjs manifest",
     "test:stand": "node --test ../scripts/emulator-stand.test.mjs lib/test/stand/*.test.js",
+    "test:emulator:library": "node ../scripts/run-emulator-tests.mjs --group library",
     "test:emulator:platform": "node ../scripts/run-emulator-tests.mjs --group platform",
     "test:emulator:booking": "node ../scripts/run-emulator-tests.mjs --group booking",
     "test:emulator:content-media": "node ../scripts/run-emulator-tests.mjs --group content-media",

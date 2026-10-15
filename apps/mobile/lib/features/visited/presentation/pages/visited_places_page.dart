@@ -40,6 +40,14 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
       appBar: AppBar(
         title: const Text('Visit history'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Refresh visit history',
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                controller.loadVisitedPlaces(userId: widget.userId),
+          ),
+        ],
         backgroundColor: colors.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
       ),

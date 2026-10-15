@@ -579,4 +579,6 @@ const Set<String> _bookingCallableAllowlist = <String>{
   // F1: default-off Emulator-only Notifications inbox.
   'notificationsQueryV1',
   'notificationsCommandV1',
+  'libraryCommandV1',
+  'libraryQueryV1',
 };

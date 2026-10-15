@@ -417,8 +417,15 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       return;
     }
 
-    final DateTime now = DateTime.now();
-    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime today;
+    try {
+      today = ref.read(visitHistoryFacadeProvider).todayAtPlace(item);
+    } on ArgumentError {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Place timezone is unavailable')),
+      );
+      return;
+    }
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: today,
@@ -431,12 +438,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     try {
       await ref
           .read(visitHistoryFacadeProvider)
-          .recordSelfReported(
-            userId: user.id,
-            item: item,
-            visitedOn: selected,
-            today: today,
-          );
+          .recordSelfReported(userId: user.id, item: item, visitedOn: selected);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -485,6 +487,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
     return FavoriteItemEntity(
       id: item.id,
+      objectType: item.objectKind.name,
       title: item.title,
       subtitle: item.subtitle,
       city: item.city,

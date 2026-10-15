@@ -491,10 +491,11 @@ class _SavedScenarioPanel extends StatelessWidget {
               children: <Widget>[
                 _SavedScenarioChip(icon: Icons.flag, label: 'Saved route'),
                 _SavedScenarioChip(icon: Icons.place, label: scenario.city),
-                _SavedScenarioChip(
-                  icon: Icons.near_me,
-                  label: '${scenario.distanceKm.toStringAsFixed(1)} km',
-                ),
+                if (scenario.distanceKm case final double distanceKm)
+                  _SavedScenarioChip(
+                    icon: Icons.near_me,
+                    label: '${distanceKm.toStringAsFixed(1)} km',
+                  ),
                 _SavedScenarioChip(
                   icon: Icons.payments,
                   label: scenario.isFree

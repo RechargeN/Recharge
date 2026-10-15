@@ -1,3 +1,4 @@
+import '../../../../shared/models/catalog_object_ref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,6 +62,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Refresh favorites',
+            icon: const Icon(Icons.refresh),
+            onPressed: controller.loadFavorites,
+          ),
+        ],
         title: const Text(
           'RECHARGE',
           style: TextStyle(fontWeight: FontWeight.w900),
@@ -136,7 +144,19 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                       context.go(item.targetRoute!);
                       return;
                     }
-                    context.push('${RouteNames.discoverDetails}/${item.id}');
+                    final type = item.objectType == null
+                        ? null
+                        : catalogObjectTypeFromTaxonomyId(item.objectType!);
+                    context.push(
+                      type == null
+                          ? '${RouteNames.discoverDetails}/${item.id}'
+                          : RouteNames.discoverDetailsCanonicalFor(
+                              CatalogObjectRef(
+                                objectType: type,
+                                objectId: item.id,
+                              ),
+                            ),
+                    );
                   },
                   onMap: () => context.go(_mapRouteForFavorite(item)),
                   onRemove: () {
@@ -913,11 +933,13 @@ _FavoriteKind _favoriteKind(FavoriteItemEntity item) {
 }
 
 bool _isRouteFavorite(FavoriteItemEntity item) {
+  if (item.objectType != null) return item.objectType == 'route';
   final String category = item.category.trim().toLowerCase();
   return category.contains('route') || category.contains('tour');
 }
 
 bool _isLegacyScenarioFavorite(FavoriteItemEntity item) {
+  if (item.objectType != null && item.planningTargetKind == null) return false;
   final category = item.category.trim().toLowerCase();
   final targetRoute = item.targetRoute?.toLowerCase();
   return category == 'scenario' ||
@@ -926,6 +948,7 @@ bool _isLegacyScenarioFavorite(FavoriteItemEntity item) {
 }
 
 bool _isPlaceFavorite(FavoriteItemEntity item) {
+  if (item.objectType != null) return item.objectType == 'place';
   if (_isRouteFavorite(item)) return false;
   final String category = item.category.trim().toLowerCase();
   return category.contains('place') ||
@@ -942,9 +965,12 @@ bool _isEventFavorite(FavoriteItemEntity item) {
 
 String _favoriteSubtitle(FavoriteItemEntity item, _FavoriteKind kind) {
   if (kind.isRoute) {
-    final String distance = item.distanceKm >= 100
-        ? '${item.distanceKm.toStringAsFixed(0)} km'
-        : '${item.distanceKm.toStringAsFixed(1)} km';
+    final double? distanceKm = item.distanceKm;
+    // An unknown distance is omitted rather than rendered as a fake value.
+    if (distanceKm == null) return item.city;
+    final String distance = distanceKm >= 100
+        ? '${distanceKm.toStringAsFixed(0)} km'
+        : '${distanceKm.toStringAsFixed(1)} km';
     return '${item.city} · $distance';
   }
   final String date = _compactDate(item.startsAtUtc);

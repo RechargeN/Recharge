@@ -382,6 +382,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         projection.displayOccurrence?.startAtUtc ?? projection.publishedAtUtc;
     return FavoriteItemEntity(
       id: projection.eventId,
+      objectType: 'event',
       title: projection.title,
       subtitle: projection.subtitle,
       city: projection.city,

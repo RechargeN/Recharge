@@ -5,6 +5,7 @@ enum FavoritePlanningTargetKind { quickPlan, scenario, route }
 class FavoriteItemEntity {
   const FavoriteItemEntity({
     required this.id,
+    this.objectType,
     required this.title,
     required this.subtitle,
     required this.city,
@@ -21,12 +22,15 @@ class FavoriteItemEntity {
   });
 
   final String id;
+  final String? objectType;
   final String title;
   final String subtitle;
   final String city;
   final String category;
   final DateTime? startsAtUtc;
-  final double distanceKm;
+
+  /// Null when the distance is unknown, e.g. for server-owned Library entries.
+  final double? distanceKm;
   final Money? priceAmount;
   final bool isFree;
   final DateTime savedAtUtc;
@@ -45,6 +49,7 @@ class FavoriteItemEntity {
   }) {
     return FavoriteItemEntity(
       id: id,
+      objectType: objectType,
       title: title,
       subtitle: subtitle,
       city: city,

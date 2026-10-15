@@ -919,6 +919,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
     return FavoriteItemEntity(
       id: item.id,
+      objectType: item.objectKind.name,
       title: item.title,
       subtitle: item.subtitle,
       city: item.city,

@@ -10,6 +10,12 @@ import { fileURLToPath } from "node:url";
 
 export const emulatorTestGroups = Object.freeze([
   {
+    name: "library",
+    baselineMs: 10000,
+    timeoutMs: 120000,
+    tasks: [["lib/test/emulator/library.test.js"]],
+  },
+  {
     name: "platform",
     baselineMs: 10741,
     timeoutMs: 120000,

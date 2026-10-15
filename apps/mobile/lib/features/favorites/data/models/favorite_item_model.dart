@@ -4,6 +4,7 @@ import '../../../../shared/primitives/money/money.dart';
 class FavoriteItemModel {
   const FavoriteItemModel({
     required this.id,
+    this.objectType,
     required this.title,
     required this.subtitle,
     required this.city,
@@ -20,12 +21,15 @@ class FavoriteItemModel {
   });
 
   final String id;
+  final String? objectType;
   final String title;
   final String subtitle;
   final String city;
   final String category;
   final String? startsAtUtcIso;
-  final double distanceKm;
+
+  /// Null when the distance is unknown, e.g. for server-owned Library entries.
+  final double? distanceKm;
   final Money? priceAmount;
   final bool isFree;
   final String savedAtUtcIso;
@@ -40,6 +44,7 @@ class FavoriteItemModel {
   }) {
     return FavoriteItemModel(
       id: json['id'] as String,
+      objectType: json['objectType'] as String?,
       title: json['title'] as String,
       subtitle: json['subtitle'] as String,
       city: json['city'] as String,
@@ -47,7 +52,7 @@ class FavoriteItemModel {
       startsAtUtcIso: json['evergreen'] == true
           ? json['startsAtUtcIso'] as String?
           : json['startsAtUtcIso'] as String,
-      distanceKm: (json['distanceKm'] as num).toDouble(),
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
       priceAmount:
           json['evergreen'] == true &&
               json['price'] == null &&
@@ -74,6 +79,7 @@ class FavoriteItemModel {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
+      'objectType': objectType,
       'title': title,
       'subtitle': subtitle,
       'city': city,
@@ -94,6 +100,7 @@ class FavoriteItemModel {
   factory FavoriteItemModel.fromEntity(FavoriteItemEntity entity) {
     return FavoriteItemModel(
       id: entity.id,
+      objectType: entity.objectType,
       title: entity.title,
       subtitle: entity.subtitle,
       city: entity.city,
@@ -113,6 +120,7 @@ class FavoriteItemModel {
   FavoriteItemEntity toEntity() {
     return FavoriteItemEntity(
       id: id,
+      objectType: objectType,
       title: title,
       subtitle: subtitle,
       city: city,

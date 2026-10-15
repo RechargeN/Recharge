@@ -27,6 +27,13 @@ class VisitedPlacesController extends ChangeNotifier {
   VisitedPlacesState get state => _state;
 
   String? _loadedUserId;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   Future<void> ensureLoaded({required String userId}) async {
     if (_loadedUserId == userId && _state.status == VisitedPlacesStatus.ready) {
@@ -62,6 +69,8 @@ class VisitedPlacesController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: VisitedPlacesStatus.error,
+          items: const [],
+          visibleItems: const [],
           message: 'Не удалось загрузить историю посещений',
         ),
       );
@@ -199,6 +208,7 @@ class VisitedPlacesController extends ChangeNotifier {
   }
 
   void _setState(VisitedPlacesState nextState) {
+    if (_disposed) return;
     _state = nextState;
     notifyListeners();
   }

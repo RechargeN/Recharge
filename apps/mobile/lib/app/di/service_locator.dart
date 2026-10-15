@@ -1,3 +1,6 @@
+import 'library_composition.dart';
+import '../adapters/server_library_repositories.dart';
+import '../../features/library/data/library_sync_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -332,7 +335,13 @@ Future<void> setupDependencies() async {
         guard: sl(),
       ),
     )
-    ..registerLazySingleton<ActivityPlaceLinkRepository>(() => CatalogActivityPlaceLinkRepository(query: sl<CatalogQueryPort>().query, marketId: sl<MarketConfig>().countryCode, enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode))
+    ..registerLazySingleton<ActivityPlaceLinkRepository>(
+      () => CatalogActivityPlaceLinkRepository(
+        query: sl<CatalogQueryPort>().query,
+        marketId: sl<MarketConfig>().countryCode,
+        enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode,
+      ),
+    )
     ..registerLazySingleton<BookingSupportDirectoryProvider>(
       () => getApplicationSupportDirectory,
     )
@@ -865,8 +874,23 @@ Future<void> setupDependencies() async {
         defaultCurrencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
+    ..registerLazySingleton<LibrarySyncClient>(
+      () => LibrarySyncClient(
+        invoke: libraryInvoke(
+          binding: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
+        storage: sl(),
+      ),
+    )
     ..registerLazySingleton<FavoritesRepository>(
-      () => FavoritesRepositoryImpl(localDataSource: sl()),
+      () => libraryRemoteAllowed(sl())
+          ? ServerFavoritesRepository(sl())
+          : FavoritesRepositoryImpl(
+              localDataSource: sl(),
+              currentOwnerId: () async =>
+                  (await sl<AuthRepository>().getCurrentUser())?.id,
+            ),
     )
     ..registerLazySingleton<NotificationsLocalDataSource>(
       () => NotificationsLocalDataSource(sl()),
@@ -896,7 +920,9 @@ Future<void> setupDependencies() async {
       () => VisitedPlacesLocalDataSource(sl()),
     )
     ..registerLazySingleton<VisitedPlacesRepository>(
-      () => VisitedPlacesRepositoryImpl(localDataSource: sl()),
+      () => libraryRemoteAllowed(sl())
+          ? ServerVisitedPlacesRepository(sl())
+          : VisitedPlacesRepositoryImpl(localDataSource: sl()),
     )
     ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))
     ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))

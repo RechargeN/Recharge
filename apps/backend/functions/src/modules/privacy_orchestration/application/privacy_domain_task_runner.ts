@@ -1,3 +1,4 @@
+import { LibraryPrivacyTaskHandler } from '../../library/library_privacy_task_handler.js';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 import { BookingPrivacyTaskHandler } from '../../../booking/booking_privacy_task_handler.js';
@@ -76,7 +77,21 @@ export class PrivacyDomainTaskRunner {
     return this.#record(task, result, input.nowUtc);
   }
 
-  async #prepare<D extends 'booking' | 'notifications'>(
+  async runLibraryTask(input: {
+    readonly requestId: string;
+    readonly taskId: string;
+    readonly nowUtc: string;
+  }): Promise<RunOutcome | 'not_library'> {
+    const prepared = await this.#prepare(input, 'library');
+    if (prepared.kind !== 'ready') return prepared.outcome;
+    const { task, requestType } = prepared;
+    const result = await new LibraryPrivacyTaskHandler(this.firestore).handle({
+      taskType: requestType,
+      subjectId: task.subjectId,
+    });
+    return this.#record(task, result, input.nowUtc);
+  }
+  async #prepare<D extends 'booking' | 'notifications' | 'library'>(
     input: { readonly requestId: string; readonly taskId: string; readonly nowUtc: string },
     domainId: D,
   ): Promise<

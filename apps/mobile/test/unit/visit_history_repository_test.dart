@@ -16,6 +16,47 @@ void main() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
   });
 
+  test(
+    'concurrent duplicate visits and colliding legacy owner ids stay isolated',
+    () async {
+      final repository = VisitedPlacesRepositoryImpl(
+        localDataSource: VisitedPlacesLocalDataSource(
+          const FlutterSecureStorage(),
+        ),
+      );
+      final useCase = RecordPlaceVisitUseCase(
+        repository: repository,
+        idGenerator: _SequenceIdGenerator(),
+      );
+      final results = await Future.wait([
+        _record(useCase, visitedOn: DateTime(2026, 7, 21)),
+        _record(useCase, visitedOn: DateTime(2026, 7, 21)),
+      ]);
+      expect(results[0].id, results[1].id);
+      await _record(
+        useCase,
+        visitedOn: DateTime(2026, 7, 22),
+        userId: 'user_1',
+      );
+      expect(
+        (await repository.getVisitedPlaces(
+          userId: 'user:1',
+        )).single.localDayKey,
+        '2026-07-21',
+      );
+      expect(
+        (await repository.getVisitedPlaces(
+          userId: 'user_1',
+        )).single.localDayKey,
+        '2026-07-22',
+      );
+      await repository.removeVisit(userId: 'user:1', visitId: results[0].id);
+      await repository.removeVisit(userId: 'user:1', visitId: results[0].id);
+      expect(await repository.getVisitedPlaces(userId: 'user:1'), isEmpty);
+      expect(await repository.getVisitedPlaces(userId: 'user_1'), hasLength(1));
+    },
+  );
+
   test('fresh v2 is empty and legacy seeded v1 is ignored', () async {
     FlutterSecureStorage.setMockInitialValues(<String, String>{
       'visited_places_v1_user_1': jsonEncode(<Map<String, Object?>>[
@@ -108,9 +149,9 @@ void main() {
     ).toJson();
     FlutterSecureStorage.setMockInitialValues(<String, String>{
       '${VisitedPlacesLocalDataSource.keyPrefix}user_1': jsonEncode(<Object?>[
-          valid,
-          foreign,
-          <String, Object?>{'schemaVersion': 99, 'id': 'future'},
+        valid,
+        foreign,
+        <String, Object?>{'schemaVersion': 99, 'id': 'future'},
       ]),
     });
     final repository = VisitedPlacesRepositoryImpl(
@@ -127,9 +168,10 @@ void main() {
 Future<VisitedPlaceEntity> _record(
   RecordPlaceVisitUseCase useCase, {
   required DateTime visitedOn,
+  String userId = 'user:1',
 }) {
   return useCase(
-    userId: 'user:1',
+    userId: userId,
     placeId: 'place-1',
     title: 'Library',
     subtitle: 'Quiet reading room',

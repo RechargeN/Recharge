@@ -80,6 +80,46 @@ void main() {
     expect(find.text('Утренняя йога'), findsOneWidget);
   });
 
+  fullPageTestWidgets(
+    'route favorite with unknown distance shows no km value',
+    (tester) async {
+      final repository = _FakeFavoritesRepository(
+        initial: <FavoriteItemEntity>[
+          _favorite(
+            'route_1',
+            'Server route',
+            category: 'route',
+            distanceKm: null,
+          ),
+          _favorite('route_2', 'Local route', category: 'route'),
+        ],
+      );
+      final controller = FavoritesController(
+        getFavoritesUseCase: GetFavoritesUseCase(repository),
+        addFavoriteUseCase: AddFavoriteUseCase(repository),
+        removeFavoriteUseCase: RemoveFavoriteUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            favoritesControllerProvider.overrideWith((ref) => controller),
+            discoverFeedControllerProvider.overrideWith(
+              (ref) => _discoverController(),
+            ),
+          ],
+          child: const MaterialApp(home: FavoritesPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Server route'), findsOneWidget);
+      expect(find.textContaining('0.0 km'), findsNothing);
+      expect(find.textContaining('Rezekne · 1.8 km'), findsOneWidget);
+    },
+  );
+
   fullPageTestWidgets('type filters show only matching saved plans', (
     tester,
   ) async {
@@ -560,6 +600,7 @@ FavoriteItemEntity _favorite(
   Money priceAmount = const Money(minorUnits: 0, currencyCode: 'EUR'),
   String category = 'wellness',
   String? targetRoute,
+  double? distanceKm = 1.8,
 }) {
   return FavoriteItemEntity(
     id: id,
@@ -568,7 +609,7 @@ FavoriteItemEntity _favorite(
     city: 'Rezekne',
     category: category,
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
-    distanceKm: 1.8,
+    distanceKm: distanceKm,
     priceAmount: priceAmount,
     isFree: isFree,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),

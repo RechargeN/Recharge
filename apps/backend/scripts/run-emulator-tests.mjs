@@ -174,6 +174,8 @@ const expectedBoundedCallableExports = [
   // F1: default-off, Emulator-only Notifications inbox and Booking-effect trigger.
   "notificationsQueryV1",
   "notificationsCommandV1",
+  "libraryCommandV1",
+  "libraryQueryV1",
   "consumeNotificationEffectV1",
   // D2: default-off, Emulator-only delivery gate, Media-fact trigger and sweeps.
   "mediaDeliveryV1",

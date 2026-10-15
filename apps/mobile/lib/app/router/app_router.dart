@@ -59,6 +59,9 @@ import '../../features/discover/presentation/shell/details_shell.dart';
 import '../../features/explore/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/pages/settings_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
+import '../../features/favorites/application/favorites_providers.dart';
+import '../../features/visited/application/visited_places_providers.dart';
+
 import '../../features/identity/presentation/pages/professional_page_workspace_page.dart';
 import '../../features/identity/presentation/pages/public_professional_page.dart';
 import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
@@ -70,6 +73,14 @@ import 'route_names.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider);
+  ref.listen<String?>(
+    authControllerProvider.select((controller) => controller.state.user?.id),
+    (previous, next) {
+      if (previous == next) return;
+      ref.invalidate(favoritesControllerProvider);
+      ref.invalidate(visitedPlacesControllerProvider);
+    },
+  );
   final AnalyticsService analyticsService = sl<AnalyticsService>();
 
   return GoRouter(

@@ -3,12 +3,16 @@
 - ID: **BCK-12**
 - Version: **0.3**
 - Spec status: **Review — documentation only; approval and owner decisions pending**
-- Runtime status: **Absent**
+- Runtime status: **Favorites/Visit History implemented only in local Emulator G slice; Reviews/ratings absent**
 - Date: **2026-09-20**
 - Accountable owner: **User Platform owner**
 - Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Required reviewers: **API Platform, Security/Privacy, Identity, Discover,
   Mobile Platform, Trust & Safety, Legal/Privacy and Operations**
+
+
+Local G implementation (2026-10-15): see [bounded slice and evidence](LIBRARY_G_LOCAL_SLICE_SPEC.md).
+This does not approve the broader Review contract or activate cloud/production.
 
 ## 0. Changelog
 

@@ -28,7 +28,7 @@ export class FirestoreBookingAccessAuthority implements BookingAccessAuthority {
     transaction: Transaction,
     hint: BookingAccessHint,
     now: Date,
-    requiredCapability: typeof bookingAccessCapability,
+    requiredCapability?: typeof bookingAccessCapability,
   ): Promise<BookingAccessDecision> {
     return this.authorizeWithReader(transaction, hint, now, requiredCapability);
   }

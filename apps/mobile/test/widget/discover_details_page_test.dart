@@ -22,6 +22,8 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
+import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_details_page.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
@@ -46,6 +48,7 @@ void main() {
     _detailsKindForTest = DiscoverObjectKind.activity;
     await sl.reset();
     sl.registerSingleton<AnalyticsService>(_NoopAnalyticsService());
+    sl.registerSingleton<TimezoneRepository>(TimezoneRepositoryImpl());
     sl.registerFactory<GetDiscoverDetailsUseCase>(
       () => GetDiscoverDetailsUseCase(_FakeDiscoverRepository()),
     );
@@ -431,6 +434,7 @@ DiscoverItemEntity _detailsItem({
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,
+    timezoneId: 'Europe/Riga',
     organizerName: 'Recharge Studio',
     organizerHandle: '@recharge',
     venueName: 'Green studio',

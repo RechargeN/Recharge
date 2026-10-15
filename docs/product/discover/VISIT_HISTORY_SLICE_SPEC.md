@@ -80,3 +80,9 @@ into user history. The old key may remain on device for rollback safety.
 - Existing Discover and profile flows remain usable.
 - `flutter analyze`, `flutter test`, boundary check, and diff check are run;
   the slice remains `Review` while any global gate is red.
+
+## G local persistence/sync follow-up — 2026-10-15
+
+See [G slice](../LIBRARY_G_LOCAL_SLICE_SPEC.md) for exact-owner v3 storage,
+v2 fallback, Place-IANA calendar validation, default-off Emulator sync and DSR
+linkage. The original explicit-only self-report invariant is unchanged.

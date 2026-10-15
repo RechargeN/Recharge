@@ -27,6 +27,13 @@ class FavoritesController extends ChangeNotifier {
   FavoritesState get state => _state;
 
   bool _requestedOnce = false;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   Future<void> ensureLoaded() async {
     if (_requestedOnce) return;
@@ -55,6 +62,7 @@ class FavoritesController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: FavoritesStatus.error,
+          items: const [],
           message: 'Не удалось загрузить избранное',
         ),
       );
@@ -125,6 +133,7 @@ class FavoritesController extends ChangeNotifier {
   }
 
   void _setState(FavoritesState state) {
+    if (_disposed) return;
     _state = state;
     notifyListeners();
   }

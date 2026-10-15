@@ -1,4 +1,5 @@
 import '../../features/discover/domain/entities/discover_item_entity.dart';
+import '../../features/discover/domain/repositories/timezone_repository.dart';
 import '../../features/visited/application/controllers/visited_places_controller.dart';
 import '../../features/visited/domain/entities/visited_place_entity.dart';
 
@@ -42,10 +43,25 @@ class VisitHistorySummary {
 
 /// App-level bridge that maps a Discover place into private Visit History.
 class VisitHistoryFacade {
-  const VisitHistoryFacade({required VisitedPlacesController controller})
-    : _controller = controller;
+  const VisitHistoryFacade({
+    required VisitedPlacesController controller,
+    required TimezoneRepository Function() timezoneRepository,
+  }) : _controller = controller,
+       _timezoneRepository = timezoneRepository;
 
   final VisitedPlacesController _controller;
+  final TimezoneRepository Function() _timezoneRepository;
+
+  DateTime todayAtPlace(DiscoverItemEntity item, {DateTime? nowUtc}) {
+    final timezoneRepository = _timezoneRepository();
+    if (!timezoneRepository.isValidTimezone(item.timezoneId)) {
+      throw ArgumentError('A valid place timezone is required');
+    }
+    final date = timezoneRepository
+        .toLocal(nowUtc ?? DateTime.now().toUtc(), item.timezoneId)
+        .date;
+    return DateTime(date.year, date.month, date.day);
+  }
 
   Future<void> ensureLoaded({required String userId}) {
     return _controller.ensureLoaded(userId: userId);
@@ -55,7 +71,6 @@ class VisitHistoryFacade {
     required String userId,
     required DiscoverItemEntity item,
     required DateTime visitedOn,
-    required DateTime today,
   }) {
     if (item.objectKind != DiscoverObjectKind.place) {
       throw ArgumentError('Only a place can be added to Visit History');
@@ -68,8 +83,8 @@ class VisitHistoryFacade {
       city: item.city,
       category: item.category,
       visitedOn: visitedOn,
-      today: today,
-      timezoneId: item.timezoneId.isEmpty ? 'Europe/Riga' : item.timezoneId,
+      today: todayAtPlace(item),
+      timezoneId: item.timezoneId,
       coverImageUrl: item.coverImageUrl,
     );
   }
