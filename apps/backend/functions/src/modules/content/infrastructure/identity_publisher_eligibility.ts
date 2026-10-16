@@ -14,9 +14,31 @@ import type {
  * grant in this slice, so they are never eligible.
  */
 export class IdentityPublisherEligibility implements PublisherEligibilityPort {
-  constructor(private readonly repository: IdentityAuthorityRepository) {}
+  constructor(
+    private readonly repository: IdentityAuthorityRepository,
+    private readonly safetyRestricted?: (
+      userId: string,
+      publisher: { type: string; id: string },
+      now: Date,
+    ) => Promise<boolean>,
+  ) {}
 
   async evaluate(request: PublisherEligibilityRequest): Promise<PublisherEligibilityV1> {
+    if (
+      await this.safetyRestricted?.(
+        request.actor.userId,
+        request.publisherRef,
+        new Date(request.nowUtc),
+      )
+    )
+      return {
+        schemaVersion: 1,
+        publisherRef: request.publisherRef,
+        eligible: false,
+        reason: 'capability_denied',
+        authorityRevision: 0,
+        evaluatedAtUtc: parseUtcInstant(request.nowUtc),
+      };
     const decision = await this.repository.transact((transaction) =>
       evaluatePublisherAccess(transaction, {
         userId: request.actor.userId,

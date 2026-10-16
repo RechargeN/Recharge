@@ -16,6 +16,7 @@ export class PublishedObjectLinkService {
   constructor(
     private readonly source: ContentCatalogSource,
     private readonly enabled = false,
+    private readonly safetyAllowed?: (contentId: string) => Promise<boolean>,
   ) {}
 
   /**
@@ -41,6 +42,8 @@ export class PublishedObjectLinkService {
       const revision = await this.source.publishedRevision(pointer.currentPublishedRevisionId);
       if (!revision) return { status: 'unavailable' };
       if (!this.isPublicListing(revision, input)) return { status: 'forbidden' };
+      if (this.safetyAllowed && !(await this.safetyAllowed(input.contentId)))
+        return { status: reportWithheld ? 'withheld' : 'forbidden' };
       const current = await this.source.pointer(input.contentId);
       if (!stable(pointer, current, revision)) return { status: 'unavailable' };
       if (!visible) return { status: 'withheld' };

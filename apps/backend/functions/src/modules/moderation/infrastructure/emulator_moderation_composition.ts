@@ -22,7 +22,17 @@ export function createEmulatorModerationPorts(
   environment: NodeJS.ProcessEnv = process.env,
 ) {
   const repository = new FirestoreModerationRepository(firestore, environment);
-  return Object.freeze({ repository, verifier: new ModerationDecisionVerifier(repository) });
+  return Object.freeze({
+    repository,
+    verifier: new ModerationDecisionVerifier(
+      repository,
+      new EmulatorStaffAuthority(
+        firestore,
+        new FirestoreIdentityAuthorityRepository(firestore),
+        environment,
+      ),
+    ),
+  });
 }
 
 export function createEmulatorModerationService(input: {

@@ -1,3 +1,5 @@
+import { safetyRestricted } from '../../../shared/safety_instruction.js';
+import { publisherUser, relationEffects } from '../../../shared/safety_visibility.js';
 import { PlaceLinkService } from '../application/place_link_service.js';
 import { PublishedObjectLinkService } from '../application/published_object_link_service.js';
 import type { Firestore } from 'firebase-admin/firestore';
@@ -23,6 +25,7 @@ import { FirestoreCatalogRepository } from './firestore_catalog_repository.js';
 export function createEmulatorCatalogComposition(
   firestore: Firestore,
   options: {
+    readonly viewerId?: string;
     readonly clock?: ServerClock;
     readonly environment?: NodeJS.ProcessEnv;
     /** Tests wrap the source to simulate an unavailable read. */
@@ -40,14 +43,26 @@ export function createEmulatorCatalogComposition(
     references,
   );
   const source = options.source === undefined ? base : options.source(base);
+  const safetyAllowed = async (contentId: string) => {
+    const pointer = await contentRepository.transact((tx) => tx.pointer(contentId));
+    if (!pointer?.currentPublishedRevisionId) return false;
+    const revision = await contentRepository.transact((tx) =>
+      tx.publishedRevision(pointer.currentPublishedRevisionId!),
+    );
+    if (!revision) return false;
+    const user = await publisherUser(firestore, revision.publisherRef);
+    return !(await safetyRestricted(firestore, 'catalog', user ?? '', clock.now(), contentId));
+  };
   const placeLinks = new PlaceLinkService(
     source,
     environment.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true',
+    safetyAllowed,
   );
   // D3.4: exact-id relations to every listing type, for Collection membership.
   const publishedObjects = new PublishedObjectLinkService(
     source,
     environment.RECHARGE_TEST_COLLECTION_MEMBERSHIP === 'true',
+    safetyAllowed,
   );
   const projector = new CatalogProjector({ repository, source, clock, activityEnabled });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
@@ -59,6 +74,16 @@ export function createEmulatorCatalogComposition(
     activityEnabled,
     placeLinks,
     publishedObjects,
+    async (item, direct) => {
+      const user = await publisherUser(firestore, item.publisherRef);
+      if (user === null)
+        return !(await safetyRestricted(firestore, 'catalog', '', clock.now(), item.contentId));
+      if (await safetyRestricted(firestore, 'catalog', user, clock.now(), item.contentId))
+        return false;
+      if (!options.viewerId) return true;
+      const effects = await relationEffects(firestore, options.viewerId, user);
+      return !(effects.blocked || effects.muted) || (direct && item.typeId === 'event');
+    },
   );
   return Object.freeze({
     repository,

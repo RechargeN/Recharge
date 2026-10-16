@@ -1,4 +1,4 @@
-import type { Firestore } from 'firebase-admin/firestore';
+import { FieldPath, type Firestore } from 'firebase-admin/firestore';
 
 import type { ContentPublicationService } from '../../content/application/content_publication_service.js';
 import {
@@ -25,12 +25,18 @@ export class ContentModerationAdapter implements ContentModerationPort {
     private readonly content: ContentPublicationService,
   ) {}
 
-  async reviewQueue(limit: number): Promise<readonly SubmissionView[]> {
-    const snapshot = await this.firestore
+  async reviewQueue(
+    limit: number,
+    scope?: { marketId: string; typeId: string; after?: string },
+  ): Promise<readonly SubmissionView[]> {
+    let query = this.firestore
       .collection(contentCollections.submissions)
-      .where('state', '==', 'under_review')
-      .limit(limit)
-      .get();
+      .where('state', '==', 'under_review');
+    if (scope)
+      query = query.where('marketId', '==', scope.marketId).where('typeId', '==', scope.typeId);
+    query = query.orderBy(FieldPath.documentId());
+    if (scope?.after) query = query.startAfter(scope.after);
+    const snapshot = await query.limit(limit).get();
     const items: SubmissionView[] = [];
     for (const document of snapshot.docs) {
       const view = await this.submission(document.id);
@@ -43,6 +49,7 @@ export class ContentModerationAdapter implements ContentModerationPort {
     const submission = await this.repository.transact((tx) => tx.submission(submissionId));
     if (submission === null) return null;
     return {
+      marketId: submission.marketId,
       submissionId: submission.submissionId,
       contentId: submission.contentId,
       state: submission.state,
@@ -56,7 +63,14 @@ export class ContentModerationAdapter implements ContentModerationPort {
   async publication(contentId: string): Promise<PublicationView | null> {
     const pointer = await this.repository.transact((tx) => tx.pointer(contentId));
     if (pointer === null) return null;
+    const revision =
+      pointer.currentPublishedRevisionId === null
+        ? null
+        : await this.repository.transact((tx) =>
+            tx.publishedRevision(pointer.currentPublishedRevisionId!),
+          );
     return {
+      ...(revision === null ? {} : { marketId: revision.marketId, typeId: revision.typeId }),
       contentId: pointer.contentId,
       pointerRevision: pointer.revision,
       currentPublishedRevisionId: pointer.currentPublishedRevisionId,

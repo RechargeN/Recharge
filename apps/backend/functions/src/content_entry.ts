@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { safetyRestricted } from './shared/safety_instruction.js';
+import { publisherUser } from './shared/safety_visibility.js';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import type { ContentTypeId } from './contracts/content_v1.js';
@@ -115,6 +117,13 @@ export function eventAuthoringComposition(
     ports: {
       eligibility: new IdentityPublisherEligibility(
         new FirestoreIdentityAuthorityRepository(firestore),
+        async (user, publisher, now) => {
+          const owner = await publisherUser(firestore, publisher);
+          return (
+            (await safetyRestricted(firestore, 'content', user, now)) ||
+            (owner !== null && (await safetyRestricted(firestore, 'content', owner, now)))
+          );
+        },
       ),
       referenceData: new EmulatorSyntheticReferenceData(),
       moderation: moderationPorts.verifier,

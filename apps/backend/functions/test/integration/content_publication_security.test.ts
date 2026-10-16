@@ -833,6 +833,15 @@ void test('delegated import never reaches Content storage except through the Con
   // C1–E2: exact reviewed consumers; unknown modules still cannot reach Content.
   // Persistence symbols are additionally checked by verify-content-persistence-layout.
   const approved = [
+    // G/H/K1/K2: exact local read adapters and verified owner-command composition.
+    'modules/library/firestore_library_service.ts',
+    'modules/library/library_contract.ts',
+    'modules/library/library_privacy_task_handler.ts',
+    'modules/moderation/application/k1_workflows.ts',
+    'modules/moderation/application/report_service.ts',
+    'modules/reviews/firestore_review_service.ts',
+    'modules/reviews/review_target.ts',
+    'modules/trust_safety/firestore_safety_service.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -856,6 +865,27 @@ void test('delegated import never reaches Content storage except through the Con
   assert.equal(approved.includes('modules/other/application/x.ts'), false);
   assert.equal(approved.includes('modules/catalog/domain/other.ts'), false);
   const symbols: Readonly<Record<string, readonly string[]>> = {
+    'modules/library/firestore_library_service.ts': [
+      'assertContentEmulatorContext',
+      'contentCollections',
+      'canonicalJson',
+      'sha256Hex',
+      'resolveContentType',
+    ],
+    'modules/library/library_contract.ts': ['canonicalJson', 'sha256Hex'],
+    'modules/library/library_privacy_task_handler.ts': ['assertContentEmulatorContext'],
+    'modules/moderation/application/k1_workflows.ts': [
+      'assertContentEmulatorContext',
+      'canonicalJson',
+    ],
+    'modules/moderation/application/report_service.ts': ['assertContentEmulatorContext'],
+    'modules/reviews/firestore_review_service.ts': ['assertContentEmulatorContext'],
+    'modules/reviews/review_target.ts': ['contentCollections', 'canonicalJson', 'sha256Hex'],
+    'modules/trust_safety/firestore_safety_service.ts': [
+      'assertContentEmulatorContext',
+      'contentCollections',
+      'applyContentSafety',
+    ],
     'content_effects_entry.ts': ['createEmulatorEventBookingHandoff'],
     'content_entry.ts': [
       'ContentPublicationService',
@@ -971,6 +1001,7 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
   const emulatorOnly = new Set([
     path.join('infrastructure', 'firestore_content_repository.ts'),
     path.join('infrastructure', 'emulator_content_composition.ts'),
+    path.join('infrastructure', 'content_safety_commands.ts'),
     path.join('infrastructure', 'content_publication_feed.ts'),
     path.join('infrastructure', 'firestore_event_booking_handoff_repository.ts'),
   ]);

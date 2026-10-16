@@ -1,5 +1,11 @@
 import type { ModerationAction } from '../domain/moderation.js';
 
+export interface ModerationScope {
+  readonly marketId: string;
+  readonly typeId: string;
+  readonly action: string;
+}
+
 export interface StaffActor {
   readonly userId: string;
   readonly sessionId: string;
@@ -18,10 +24,12 @@ export interface StaffAuthorityPort {
   evaluate(request: {
     readonly actor: StaffActor;
     readonly nowUtc: string;
+    readonly scope?: ModerationScope;
   }): Promise<StaffAuthorityResult>;
 }
 
 export interface SubmissionView {
+  readonly marketId?: string;
   readonly submissionId: string;
   readonly contentId: string;
   readonly state: string;
@@ -32,6 +40,8 @@ export interface SubmissionView {
 }
 
 export interface PublicationView {
+  readonly marketId?: string;
+  readonly typeId?: string;
   readonly contentId: string;
   readonly pointerRevision: number;
   readonly currentPublishedRevisionId: string | null;
@@ -92,7 +102,10 @@ export interface MediaModerationPort {
  * Moderation never edits Content documents.
  */
 export interface ContentModerationPort {
-  reviewQueue(limit: number): Promise<readonly SubmissionView[]>;
+  reviewQueue(
+    limit: number,
+    scope?: { marketId: string; typeId: string; after?: string },
+  ): Promise<readonly SubmissionView[]>;
   submission(submissionId: string): Promise<SubmissionView | null>;
   publication(contentId: string): Promise<PublicationView | null>;
   enforce(instruction: EnforcementInstruction): Promise<EnforcementOutcome>;

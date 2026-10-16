@@ -85,6 +85,8 @@
     "stand:d1-gate": "node ../scripts/stand-d1-gate.mjs",
     "stand:manifest": "node ../scripts/stand-seed.mjs manifest",
     "test:stand": "node --test ../scripts/emulator-stand.test.mjs lib/test/stand/*.test.js",
+    "test:emulator:moderation-k1": "node ../scripts/run-emulator-tests.mjs --group moderation-k1",
+    "test:emulator:reviews-safety": "node ../scripts/run-emulator-tests.mjs --group reviews-safety",
     "test:emulator:library": "node ../scripts/run-emulator-tests.mjs --group library",
     "test:emulator:platform": "node ../scripts/run-emulator-tests.mjs --group platform",
     "test:emulator:booking": "node ../scripts/run-emulator-tests.mjs --group booking",

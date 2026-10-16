@@ -1,3 +1,5 @@
+import { FirestoreFeatureFlagGate } from '../../../platform/config/firestore_feature_flag_gate.js';
+import type { ModerationScope } from '../application/ports.js';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
@@ -43,9 +45,41 @@ export class EmulatorStaffAuthority implements StaffAuthorityPort {
     }
   }
 
+  /** Trusted local bootstrap only; not a staff/user command. */
+  async grantScoped(
+    userId: string,
+    scopes: readonly { marketId: string; typeId: string; actions: readonly string[] }[],
+    expiresAtUtc: string,
+    grantedAtUtc: string,
+  ): Promise<void> {
+    if (
+      scopes.length === 0 ||
+      scopes.length > 50 ||
+      !Number.isFinite(Date.parse(expiresAtUtc)) ||
+      Date.parse(expiresAtUtc) <= Date.parse(grantedAtUtc) ||
+      scopes.some(
+        (s) =>
+          !/^[A-Z]{2}$/.test(s.marketId) ||
+          !/^[a-z_]{1,40}$/.test(s.typeId) ||
+          s.actions.length === 0 ||
+          s.actions.some((a) => !/^[a-zA-Z]{1,40}$/.test(a)),
+      )
+    )
+      throw new TypeError('invalid_staff_scope');
+    await this.firestore.collection(moderationCollections.staffAuthority).doc(userId).set({
+      userId,
+      scope: 'moderation',
+      source: staffAuthoritySource,
+      scopes,
+      expiresAtUtc,
+      grantedAtUtc,
+    });
+  }
+
   async evaluate(request: {
     readonly actor: { readonly userId: string; readonly sessionId: string };
     readonly nowUtc: string;
+    readonly scope?: ModerationScope;
   }): Promise<StaffAuthorityResult> {
     const sessionValid = await this.identity.transact(async (transaction) => {
       const account = await transaction.account(request.actor.userId);
@@ -70,6 +104,31 @@ export class EmulatorStaffAuthority implements StaffAuthorityPort {
       entry.get('source') !== staffAuthoritySource
     )
       return { allowed: false, reason: 'staff_denied' };
+    if (request.scope !== undefined) {
+      const scope = request.scope;
+      const grants: unknown = entry.get('scopes');
+      const expiry: unknown = entry.get('expiresAtUtc');
+      if (
+        !(await new FirestoreFeatureFlagGate(this.firestore, 'local', 'LV').isEnabled(
+          'moderation.staff',
+        )) ||
+        typeof expiry !== 'string' ||
+        !Number.isFinite(Date.parse(expiry)) ||
+        Date.parse(expiry) <= Date.parse(request.nowUtc) ||
+        !Array.isArray(grants) ||
+        !grants.some((g: unknown) => {
+          if (typeof g !== 'object' || g === null) return false;
+          const grant = g as Record<string, unknown>;
+          return (
+            grant.marketId === scope.marketId &&
+            grant.typeId === scope.typeId &&
+            Array.isArray(grant.actions) &&
+            grant.actions.includes(scope.action)
+          );
+        })
+      )
+        return { allowed: false, reason: 'staff_denied' };
+    }
     return { allowed: true };
   }
 }

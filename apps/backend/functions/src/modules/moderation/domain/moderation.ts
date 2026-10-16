@@ -61,6 +61,8 @@ export const moderationRejected = <T = never>(
 
 /** The exact thing a decision acted on, as it was when the staff member decided. */
 export interface ModerationTarget {
+  readonly marketId?: string;
+  readonly typeId?: string;
   readonly contentId: string;
   /** Review actions: the exact submission under review. */
   readonly submissionId?: string;
@@ -83,6 +85,7 @@ export interface StaffModerationCommand {
   /** Content actions name `contentId`; Media actions name only `assetId`. */
   readonly target: {
     readonly contentId?: string;
+    readonly expectedRevision?: number;
     readonly submissionId?: string;
     readonly assetId?: string;
   };

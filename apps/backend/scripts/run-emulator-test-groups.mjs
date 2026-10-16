@@ -133,6 +133,23 @@ export const emulatorTestGroups = Object.freeze([
       ],
     ],
   },
+  // H/K2 and K1 run after the established groups: they warm shared Booking
+  // triggers, and older timing-sensitive suites predate them.
+  {
+    name: "reviews-safety",
+    baselineMs: 20000,
+    timeoutMs: 180000,
+    tasks: [["lib/test/emulator/reviews_safety.test.js"]],
+  },
+  {
+    name: "moderation-k1",
+    baselineMs: 20000,
+    timeoutMs: 180000,
+    tasks: [
+      ["lib/test/emulator/k1.test.js"],
+      ["lib/test/emulator/moderation_emulator_flow.test.js"],
+    ],
+  },
 ]);
 
 export function selectGroups(name) {

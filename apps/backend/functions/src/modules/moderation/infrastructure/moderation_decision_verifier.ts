@@ -5,6 +5,7 @@ import type {
   VerifiedDisposition,
 } from '../../content/application/ports/moderation_disposition_port.js';
 import { attest, moderationIssuer, moderationPolicyRevision } from '../domain/moderation.js';
+import type { StaffAuthorityPort } from '../application/ports.js';
 import type { ModerationRepository } from '../domain/repositories.js';
 
 /**
@@ -15,7 +16,10 @@ import type { ModerationRepository } from '../domain/repositories.js';
  * creates no Content mutation. TEST-ONLY: a hash check, not a signature.
  */
 export class ModerationDecisionVerifier implements ModerationDispositionPort {
-  constructor(private readonly repository: ModerationRepository) {}
+  constructor(
+    private readonly repository: ModerationRepository,
+    private readonly scopedStaff?: StaffAuthorityPort,
+  ) {}
 
   profileFor(): Promise<ModerationProfileResolution> {
     return Promise.resolve({
@@ -47,6 +51,26 @@ export class ModerationDecisionVerifier implements ModerationDispositionPort {
       payload.effectiveAtUtc === decision.decidedAtUtc &&
       payload.attestation === attestation &&
       attestation === attest(unsigned);
-    return matches ? { verified: true, issuer: moderationIssuer } : { verified: false };
+    if (!matches) return { verified: false };
+    if (target.marketId !== undefined || target.typeId !== undefined) {
+      if (!this.scopedStaff || !target.marketId || !target.typeId) return { verified: false };
+      const authority = await this.scopedStaff.evaluate({
+        actor: { userId: decision.staffUserId, sessionId: decision.staffSessionId },
+        nowUtc: input.nowUtc,
+        scope: { marketId: target.marketId, typeId: target.typeId, action: decision.action },
+      });
+      if (!authority.allowed) return { verified: false };
+      return {
+        verified: true,
+        issuer: moderationIssuer,
+        ...(target.pointerRevision === undefined
+          ? {}
+          : { expectedPointerRevision: target.pointerRevision }),
+        ...(target.submissionRevision === undefined
+          ? {}
+          : { expectedSubmissionRevision: target.submissionRevision }),
+      };
+    }
+    return { verified: true, issuer: moderationIssuer };
   }
 }

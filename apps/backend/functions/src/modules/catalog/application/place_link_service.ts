@@ -10,8 +10,12 @@ import type { EligiblePlaceLink, PlaceLinkReader, PlaceLinkResult } from '../dom
 export class PlaceLinkService implements PlaceLinkReader {
   readonly #objects: PublishedObjectLinkService;
 
-  constructor(source: ContentCatalogSource, enabled = false) {
-    this.#objects = new PublishedObjectLinkService(source, enabled);
+  constructor(
+    source: ContentCatalogSource,
+    enabled = false,
+    safetyAllowed?: (contentId: string) => Promise<boolean>,
+  ) {
+    this.#objects = new PublishedObjectLinkService(source, enabled, safetyAllowed);
   }
 
   async check(input: {

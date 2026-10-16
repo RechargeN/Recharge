@@ -43,4 +43,10 @@ export interface ModerationDispositionPort {
 }
 
 export type VerifiedDisposition =
-  { readonly verified: true; readonly issuer: string } | { readonly verified: false };
+  | {
+      readonly verified: true;
+      readonly issuer: string;
+      readonly expectedPointerRevision?: number;
+      readonly expectedSubmissionRevision?: number;
+    }
+  | { readonly verified: false };

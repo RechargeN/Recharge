@@ -1,3 +1,6 @@
+import { handleK2 } from './safety_entry.js';
+import { FirestoreReviewService } from './modules/reviews/firestore_review_service.js';
+import { handleK1 } from './moderation_entry.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -1085,7 +1088,7 @@ async function prepareDiscoverCaller(
   if (!(await access.composition.featureFlags.isEnabled(catalogFlagIds.discoverRead))) {
     return refuse('feature_disabled');
   }
-  return { ok: true, caller: { firestore: access.firestore } };
+  return { ok: true, caller: { firestore: access.firestore, userId: decision.userId } };
 }
 
 // Emulator-only delivery of committed Content effects (E2). Every enabled
@@ -1200,3 +1203,52 @@ export const libraryQueryV1 = onCall<unknown>(callableOptions, async (request) =
     data,
   );
 });
+
+async function k1Request(request: CallableRequest<unknown>, surface: string) {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const data = request.data;
+  if (typeof data !== 'object' || data === null || Array.isArray(data))
+    return { kind: 'rejected', code: 'invalid_contract' };
+  const { sessionContext, ...payload } = data as Record<string, unknown>;
+  void sessionContext;
+  if (surface === 'safetyCommandV1' || surface === 'safetyQueryV1')
+    return handleK2(access.firestore, access.accessHint, surface, payload, systemServerClock);
+  if (surface === 'reviewCommandV1')
+    return new FirestoreReviewService(access.firestore, systemServerClock).command(
+      access.accessHint,
+      payload,
+    );
+  if (surface === 'reviewQueryV1')
+    return new FirestoreReviewService(access.firestore, systemServerClock).query(
+      access.accessHint,
+      payload,
+    );
+  return handleK1(access.firestore, access.accessHint, surface, payload, systemServerClock);
+}
+export const moderationCommandV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'moderationCommandV1'),
+);
+export const moderationQueryV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'moderationQueryV1'),
+);
+export const reportCommandV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'reportCommandV1'),
+);
+export const reportQueryV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'reportQueryV1'),
+);
+
+export const reviewCommandV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'reviewCommandV1'),
+);
+export const reviewQueryV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'reviewQueryV1'),
+);
+
+export const safetyCommandV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'safetyCommandV1'),
+);
+export const safetyQueryV1 = onCall<unknown>(callableOptions, (request) =>
+  k1Request(request, 'safetyQueryV1'),
+);

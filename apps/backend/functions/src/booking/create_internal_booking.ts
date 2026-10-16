@@ -1,3 +1,4 @@
+import { safetyRestricted } from '../shared/safety_instruction.js';
 import { randomBytes } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 import type { CreateBookingCommand } from '../contracts/booking_v1.js';
@@ -143,6 +144,17 @@ export async function createInternalBooking(
       ) {
         throw new BookingDomainRefusal('revision_conflict');
       }
+      if (
+        await safetyRestricted(
+          dependencies.firestore,
+          'booking',
+          actorId,
+          now,
+          event.eventId,
+          transaction,
+        )
+      )
+        throw new BookingDomainRefusal('permission_denied');
       assertGuestPolicy(event, command.payload.participantUnits, command.payload.namedGuests);
       if (event.occurrenceEndsAt === undefined) {
         throw new BookingDomainRefusal('event_unavailable');

@@ -951,7 +951,13 @@ export class ContentPublicationService {
           const stored = deepFreeze(structuredClone(prior.outcome)) as ModerationAcknowledgementV1;
           return succeeded<ModerationAcknowledgementV1>({ ...stored, outcome: 'already_applied' });
         }
-        const pointerRevision = await this.applyDisposition(tx, payload, systemActor, nowUtc);
+        const pointerRevision = await this.applyDisposition(
+          tx,
+          payload,
+          systemActor,
+          nowUtc,
+          verification,
+        );
         const ack: ModerationAcknowledgementV1 = {
           instructionId: payload.instructionId,
           decisionId: payload.decisionId,
@@ -982,6 +988,10 @@ export class ContentPublicationService {
     payload: ApplyModerationDispositionCommandV1['payload'],
     systemActor: string,
     nowUtc: UtcInstant,
+    expectations: {
+      readonly expectedPointerRevision?: number;
+      readonly expectedSubmissionRevision?: number;
+    },
   ): Promise<number | null> {
     const { disposition, target, decisionId } = payload;
     if (
@@ -992,7 +1002,12 @@ export class ContentPublicationService {
       // Exact submission only; a foreign or unknown target is a stale decision.
       const submission =
         target.submissionId === undefined ? null : await tx.submission(target.submissionId);
-      if (submission === null || submission.contentId !== target.contentId)
+      if (
+        submission === null ||
+        submission.contentId !== target.contentId ||
+        (expectations.expectedSubmissionRevision !== undefined &&
+          submission.revision !== expectations.expectedSubmissionRevision)
+      )
         throw new ContentDomainRefusal('moderation_decision_stale');
       const updated = applyReviewDisposition(submission, disposition, decisionId, nowUtc);
       tx.putSubmission(updated);
@@ -1022,6 +1037,11 @@ export class ContentPublicationService {
       return null;
     }
     const pointer = await tx.pointer(target.contentId);
+    if (
+      expectations.expectedPointerRevision !== undefined &&
+      pointer?.revision !== expectations.expectedPointerRevision
+    )
+      throw new ContentDomainRefusal('moderation_decision_stale');
     let next: PublicationPointer;
     if (disposition === 'restore') {
       if (payload.restoresDecisionId === undefined)

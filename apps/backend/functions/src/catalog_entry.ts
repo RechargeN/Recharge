@@ -6,6 +6,7 @@ import { createEmulatorCatalogComposition } from './modules/catalog/infrastructu
 /** The verified Session behind a Discover read; the query itself is not per user. */
 export interface DiscoverCaller {
   readonly firestore: Firestore;
+  readonly userId?: string;
 }
 
 function stripTransport(data: unknown): unknown {
@@ -23,6 +24,9 @@ export function handleDiscoverQuery(
   caller: DiscoverCaller,
   data: unknown,
 ): Promise<Readonly<Record<string, unknown>>> {
-  const catalog = createEmulatorCatalogComposition(caller.firestore);
+  const catalog = createEmulatorCatalogComposition(
+    caller.firestore,
+    caller.userId ? { viewerId: caller.userId } : {},
+  );
   return handleDiscoverQueryRequest(catalog.query, stripTransport(data));
 }

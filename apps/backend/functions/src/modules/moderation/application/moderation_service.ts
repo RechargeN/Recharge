@@ -37,6 +37,7 @@ export interface ModerationServiceDependencies {
   readonly media?: MediaModerationPort;
   readonly clock: ServerClock;
   readonly newId?: () => string;
+  readonly requireScope?: boolean;
 }
 
 const idPattern = /^[A-Za-z0-9._:-]{1,128}$/u;
@@ -55,9 +56,47 @@ export class ModerationService {
     this.#deps = deps;
   }
 
-  async queue(actor: StaffActor, limit = 50) {
+  async queue(
+    actor: StaffActor,
+    limit = 50,
+    scope?: { marketId: string; typeId: string; after?: string },
+  ) {
     const denied = await this.#authorize(actor);
     if (denied !== undefined) return denied;
+    if (this.#deps.requireScope) {
+      if (!scope) return moderationRejected('invalid_contract');
+      const permitted = await this.#authorizeScope(
+        actor,
+        { contentId: 'queue', marketId: scope.marketId, typeId: scope.typeId },
+        'queue',
+      );
+      if (permitted !== undefined) return permitted;
+      const pending = [];
+      for (const item of await this.#deps.content.reviewQueue(
+        Math.min(Math.max(limit, 1), 100),
+        scope,
+      )) {
+        if (
+          (await this.#authorizeScope(
+            actor,
+            { contentId: item.contentId, marketId: item.marketId!, typeId: item.typeId },
+            'queue',
+          )) === undefined
+        )
+          pending.push(item);
+      }
+      const recent = [];
+      for (const item of await this.#deps.repository.recent(100)) {
+        if (
+          item.decision.target.marketId !== scope.marketId ||
+          item.decision.target.typeId !== scope.typeId
+        )
+          continue;
+        if ((await this.#authorizeScope(actor, item.decision.target, 'queue')) === undefined)
+          recent.push(item);
+      }
+      return moderationSucceeded({ pending, recent: recent.slice(0, 20) });
+    }
     return moderationSucceeded({
       pending: await this.#deps.content.reviewQueue(Math.min(Math.max(limit, 1), 100)),
       recent: await this.#deps.repository.recent(20),
@@ -76,6 +115,10 @@ export class ModerationService {
       const receipt = await tx.receipt(decisionId);
       return decision === null || receipt === null ? null : { decision, receipt };
     });
+    if (view !== null && this.#deps.requireScope) {
+      const scoped = await this.#authorizeScope(actor, view.decision.target, 'queue');
+      if (scoped !== undefined) return scoped;
+    }
     return view === null ? moderationRejected('target_not_found') : moderationSucceeded(view);
   }
 
@@ -87,6 +130,8 @@ export class ModerationService {
     if (command === null) return moderationRejected('invalid_contract');
     const denied = await this.#authorize(actor);
     if (denied !== undefined) return denied;
+    if (this.#deps.requireScope && command.target.expectedRevision === undefined)
+      return moderationRejected('invalid_contract');
     const semanticHash = commandHash(command);
 
     const prior = await this.#deps.repository.transact((tx) =>
@@ -99,6 +144,10 @@ export class ModerationService {
 
     const resolved = await this.#resolveTarget(command);
     if (resolved.kind === 'rejected') return resolved;
+    if (this.#deps.requireScope) {
+      const scoped = await this.#authorizeScope(actor, resolved.data, command.action);
+      if (scoped !== undefined) return scoped;
+    }
 
     const decidedAtUtc = this.#deps.clock.now().toISOString();
     const unsigned = {
@@ -154,6 +203,16 @@ export class ModerationService {
     }));
     if (stored.decision === null) return moderationRejected('unknown_outcome');
     const decision = stored.decision;
+    if (this.#deps.requireScope && (!decision.target.marketId || !decision.target.typeId))
+      return moderationRejected('staff_denied');
+    if (decision.target.marketId !== undefined) {
+      const denied = await this.#authorizeScope(
+        { userId: decision.staffUserId, sessionId: decision.staffSessionId },
+        decision.target,
+        decision.action,
+      );
+      if (denied !== undefined) return denied;
+    }
     if (stored.receipt !== null) return moderationSucceeded({ decision, receipt: stored.receipt });
 
     let enforcement: EnforcementOutcome;
@@ -232,6 +291,21 @@ export class ModerationService {
     );
   }
 
+  async #authorizeScope(actor: StaffActor, target: ModerationTarget, action: string) {
+    if (target.marketId === undefined || target.typeId === undefined)
+      return moderationRejected('staff_denied');
+    const result = await this.#deps.staff.evaluate({
+      actor,
+      nowUtc: this.#deps.clock.now().toISOString(),
+      scope: { marketId: target.marketId, typeId: target.typeId, action },
+    });
+    return result.allowed
+      ? undefined
+      : moderationRejected(
+          result.reason === 'session_invalid' ? 'unauthenticated' : 'staff_denied',
+        );
+  }
+
   /** The exact submission or published revision the decision acts on, as it is now. */
   async #resolveTarget(
     command: StaffModerationCommand,
@@ -245,7 +319,17 @@ export class ModerationService {
       if (submission === null) return moderationRejected('target_not_found');
       if (submission.contentId !== contentId || submission.state !== 'under_review')
         return moderationRejected('target_stale');
+      if (
+        command.target.expectedRevision !== undefined &&
+        command.target.expectedRevision !== submission.revision
+      )
+        return moderationRejected('target_stale');
+      if (this.#deps.requireScope && submission.marketId === undefined)
+        return moderationRejected('staff_denied');
       return moderationSucceeded({
+        ...(this.#deps.requireScope
+          ? { marketId: submission.marketId!, typeId: submission.typeId }
+          : {}),
         contentId,
         submissionId,
         submissionRevision: submission.revision,
@@ -255,6 +339,16 @@ export class ModerationService {
     const publication = await this.#deps.content.publication(contentId);
     if (publication === null || publication.currentPublishedRevisionId === null)
       return moderationRejected('target_not_found');
+    if (
+      command.target.expectedRevision !== undefined &&
+      command.target.expectedRevision !== publication.pointerRevision
+    )
+      return moderationRejected('target_stale');
+    if (
+      this.#deps.requireScope &&
+      (publication.marketId === undefined || publication.typeId === undefined)
+    )
+      return moderationRejected('staff_denied');
     if (command.action === 'restore') {
       const restored = await this.#deps.repository.transact((tx) =>
         tx.decision(command.restoresDecisionId ?? ''),
@@ -267,6 +361,9 @@ export class ModerationService {
         return moderationRejected('target_not_found');
     }
     return moderationSucceeded({
+      ...(this.#deps.requireScope
+        ? { marketId: publication.marketId!, typeId: publication.typeId! }
+        : {}),
       contentId,
       publishedRevisionId: publication.currentPublishedRevisionId,
       pointerRevision: publication.pointerRevision,
@@ -330,7 +427,12 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     target === null
   )
     return null;
-  const { contentId, submissionId, assetId } = target as Record<string, unknown>;
+  const { contentId, submissionId, assetId, expectedRevision } = target as Record<string, unknown>;
+  if (
+    expectedRevision !== undefined &&
+    (!Number.isSafeInteger(expectedRevision) || Number(expectedRevision) < 1)
+  )
+    return null;
   const restoresDecisionId = value.restoresDecisionId;
   const action = value.action as ModerationAction;
   if (isMediaAction(action)) {
@@ -377,7 +479,11 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     action,
     idempotencyKey: value.idempotencyKey,
     reason: value.reason,
-    target: { contentId, ...(submissionId === undefined ? {} : { submissionId }) },
+    target: {
+      contentId,
+      ...(expectedRevision === undefined ? {} : { expectedRevision: Number(expectedRevision) }),
+      ...(submissionId === undefined ? {} : { submissionId }),
+    },
     ...(restoresDecisionId === undefined ? {} : { restoresDecisionId }),
   };
 }

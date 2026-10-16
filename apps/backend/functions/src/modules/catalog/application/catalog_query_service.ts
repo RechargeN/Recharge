@@ -150,6 +150,7 @@ export class CatalogQueryService {
     private readonly activityEnabled = false,
     private readonly placeLinks?: PlaceLinkService,
     private readonly publishedObjects?: PublishedObjectLinkService,
+    private readonly safetyVisible?: (item: CatalogItem, direct: boolean) => Promise<boolean>,
   ) {}
 
   /** D3.4: exact-id status of a published listing (any listing type). */
@@ -326,6 +327,14 @@ export class CatalogQueryService {
       if (!pinned?.ok)
         return { kind: 'unavailable', code: pinned?.code ?? 'taxonomy_revision_unavailable' };
     }
+    if (current.item && this.safetyVisible && !(await this.safetyVisible(current.item, true)))
+      return {
+        kind: 'succeeded',
+        state: 'absent',
+        reason: null,
+        item: null,
+        changedSinceSnapshot: false,
+      };
     let changed = false;
     if (request.snapshotToken !== undefined && request.query !== undefined) {
       const parsed = parseDiscoverQuery(request.query, this.activityEnabled);
@@ -452,6 +461,7 @@ export class CatalogQueryService {
       const atSnapshot = versionAt(list, claims.projectionSetRevision);
       const latest = list.find((version) => version.validToRevision === null);
       if (atSnapshot?.state !== 'listed' || atSnapshot.item === null) continue;
+      if (this.safetyVisible && !(await this.safetyVisible(atSnapshot.item, false))) continue;
       // Tombstone wins over the snapshot: hidden now means not served.
       if (latest !== undefined && latest.state !== 'listed') continue;
       if (atSnapshot.item.typeId === 'activity') {
