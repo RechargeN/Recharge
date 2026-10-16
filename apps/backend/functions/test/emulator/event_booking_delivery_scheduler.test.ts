@@ -16,6 +16,7 @@ import {
 } from '../support/booking_emulator.js';
 import { seedEventBookingOutbox } from '../support/event_outbox_seed.js';
 import { finiteEvent } from '../support/booking_fixtures.js';
+import { withFunctionTriggersDisabled } from '../support/functions_emulator_triggers.js';
 
 const firestore = emulatorFirestore();
 // Keep scheduler time strictly after the server-owned source timestamp so a
@@ -42,57 +43,65 @@ beforeEach(async () => {
 after(async () => cleanupBookingEmulator(firestore));
 
 void test('scheduler reaches pending work after more than twenty delivered source facts', async () => {
-  for (let index = 1; index <= 26; index += 1) {
-    const outboxId = `scheduler-source-${String(index).padStart(2, '0')}`;
-    await seedEventBookingOutbox(firestore, { outboxId, event: event(index) });
-    if (index <= 25) {
-      await firestore.collection(eventBookingDeliveryCollections.deliveries).doc(outboxId).set({
-        schemaVersion: 1,
-        outboxId,
-        status: 'delivered',
-        attempts: 1,
-        nextAttemptAtUtc: nowUtc,
-        deliveredAtUtc: nowUtc,
-      });
+  // Triggers stay off for the whole scenario: a warm consumeEventBookingOutboxV1 would
+  // otherwise read the enabled flags and deliver the pending source before discovery.
+  await withFunctionTriggersDisabled(async () => {
+    for (let index = 1; index <= 26; index += 1) {
+      const outboxId = `scheduler-source-${String(index).padStart(2, '0')}`;
+      await seedEventBookingOutbox(firestore, { outboxId, event: event(index) });
+      if (index <= 25) {
+        await firestore.collection(eventBookingDeliveryCollections.deliveries).doc(outboxId).set({
+          schemaVersion: 1,
+          outboxId,
+          status: 'delivered',
+          attempts: 1,
+          nextAttemptAtUtc: nowUtc,
+          deliveredAtUtc: nowUtc,
+        });
+      }
     }
-  }
-  await setBookingFlags(true, firestore);
-  const result = await runPendingEventBookingDeliveries(firestore, nowUtc, 20);
-  assert.equal(result.discovered, 1);
-  assert.equal(
-    (
-      await firestore
-        .collection(eventBookingDeliveryCollections.deliveries)
-        .doc('scheduler-source-26')
-        .get()
-    ).get('status'),
-    'delivered',
-  );
+    await setBookingFlags(true, firestore);
+    const result = await runPendingEventBookingDeliveries(firestore, nowUtc, 20);
+    assert.equal(result.discovered, 1);
+    assert.equal(
+      (
+        await firestore
+          .collection(eventBookingDeliveryCollections.deliveries)
+          .doc('scheduler-source-26')
+          .get()
+      ).get('status'),
+      'delivered',
+    );
+  });
 });
 
 void test('discovery repairs a source fact that never received a trigger delivery', async () => {
-  await seedEventBookingOutbox(firestore, { outboxId: 'missed-trigger', event: event(1) });
-  assert.equal(
-    (
-      await firestore
-        .collection(eventBookingDeliveryCollections.deliveries)
-        .doc('missed-trigger')
-        .get()
-    ).exists,
-    false,
-  );
-  await setBookingFlags(true, firestore);
-  const result = await runPendingEventBookingDeliveries(firestore, nowUtc, 20);
-  assert.equal(result.discovered, 1);
-  assert.equal(
-    (
-      await firestore
-        .collection(eventBookingDeliveryCollections.deliveries)
-        .doc('missed-trigger')
-        .get()
-    ).get('status'),
-    'delivered',
-  );
+  // The source is written while background triggers are disabled, so the Emulator
+  // never invokes consumeEventBookingOutboxV1 for it; only discovery can repair it.
+  await withFunctionTriggersDisabled(async () => {
+    await seedEventBookingOutbox(firestore, { outboxId: 'missed-trigger', event: event(1) });
+    assert.equal(
+      (
+        await firestore
+          .collection(eventBookingDeliveryCollections.deliveries)
+          .doc('missed-trigger')
+          .get()
+      ).exists,
+      false,
+    );
+    await setBookingFlags(true, firestore);
+    const result = await runPendingEventBookingDeliveries(firestore, nowUtc, 20);
+    assert.equal(result.discovered, 1);
+    assert.equal(
+      (
+        await firestore
+          .collection(eventBookingDeliveryCollections.deliveries)
+          .doc('missed-trigger')
+          .get()
+      ).get('status'),
+      'delivered',
+    );
+  });
 });
 
 void test('parallel delivery acquires one fenced lease and counts one attempt', async () => {

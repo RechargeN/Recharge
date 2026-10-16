@@ -103,6 +103,14 @@ the established ones. A pre-existing timing race remains in the booking test "di
 repairs a source fact that never received a trigger delivery": it assumes the outbox
 trigger has not yet fired, which a warm Functions Emulator can violate.
 
+Race fixed (2026-10-16, test-only; the observed failure is explained by the test race and
+no product change was needed): that test and "scheduler reaches
+pending work after more than twenty delivered source facts" (same pattern) now run inside
+test/support/functions_emulator_triggers.ts `withFunctionTriggersDisabled`, the Emulator
+Hub disable/enable endpoints. The outbox write is acknowledged but never delivered to
+consumeEventBookingOutboxV1, so the trigger is genuinely missed and only discovery can
+create the delivery; `discovered === 1` no longer depends on trigger timing.
+
 ## Remaining scope and rollback
 No mobile/staff UI, nonexistent contact/profile/message service integration, production
 staff IAM, queue operations staffing/SLO, legal retention/DSR expansion, qualified
