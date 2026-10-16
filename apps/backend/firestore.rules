@@ -82,6 +82,13 @@ service cloud.firestore {
     match /bookingReconfirmationDeadlineJobs/{document} { allow read, write: if false; }
     match /bookingReconfirmationDeadlineCheckpoints/{document} { allow read, write: if false; }
     match /bookingReconfirmationDeadlineOperatorAudit/{document} { allow read, write: if false; }
+    match /libraryEntries/{document} { allow read, write: if false; }
+    match /moderationRemoderationQueue/{document} { allow read, write: if false; }
+    match /trustSafetyReports/{document} { allow read, write: if false; }
+    match /reviews/{document} { allow read, write: if false; }
+    match /contentSafetyHolds/{document} { allow read, write: if false; }
+    match /catalogSafetyHolds/{document} { allow read, write: if false; }
+    match /bookingSafetyHolds/{document} { allow read, write: if false; }
 
     match /{document=**} {
       allow read, write: if false;

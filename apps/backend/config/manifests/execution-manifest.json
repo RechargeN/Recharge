@@ -602,11 +602,6 @@
             "__name__:ASCENDING"
           ],
           [
-            "reconfirmationState:ASCENDING",
-            "reconfirmationDeadlineUtc:ASCENDING",
-            "__name__:ASCENDING"
-          ],
-          [
             "userId:ASCENDING",
             "createdAt:DESCENDING",
             "__name__:DESCENDING"
@@ -616,6 +611,15 @@
             "state:ASCENDING",
             "createdAt:DESCENDING",
             "__name__:DESCENDING"
+          ],
+          [
+            "reconfirmationState:ASCENDING",
+            "reconfirmationDeadlineUtc:ASCENDING",
+            "__name__:ASCENDING"
+          ],
+          [
+            "userId:ASCENDING",
+            "eventId:ASCENDING"
           ]
         ]
       },
@@ -697,7 +701,13 @@
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
-        "compositeIndexes": []
+        "compositeIndexes": [
+          [
+            "state:ASCENDING",
+            "marketId:ASCENDING",
+            "typeId:ASCENDING"
+          ]
+        ]
       },
       {
         "name": "eventBookingHandoffCheckpoints",
@@ -954,6 +964,103 @@
           "expiresAt"
         ],
         "compositeIndexes": []
+      },
+      {
+        "name": "libraryEntries",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "ownerId:ASCENDING",
+            "ownerRevision:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "moderationRemoderationQueue",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "marketId:ASCENDING",
+            "typeId:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "trustSafetyReports",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "marketId:ASCENDING",
+            "typeId:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "reviews",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "contentId:ASCENDING",
+            "deleted:ASCENDING",
+            "moderationHold:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "contentSafetyHolds",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "subjectUserId:ASCENDING",
+            "desired:ASCENDING"
+          ],
+          [
+            "contentId:ASCENDING",
+            "desired:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "catalogSafetyHolds",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "subjectUserId:ASCENDING",
+            "desired:ASCENDING"
+          ],
+          [
+            "contentId:ASCENDING",
+            "desired:ASCENDING"
+          ]
+        ]
+      },
+      {
+        "name": "bookingSafetyHolds",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": [
+          [
+            "subjectUserId:ASCENDING",
+            "desired:ASCENDING"
+          ],
+          [
+            "contentId:ASCENDING",
+            "desired:ASCENDING"
+          ]
+        ]
       }
     ]
   },

@@ -35,14 +35,16 @@ function sourceFiles(directory) {
 }
 const cloudImport = /firebase-(?:admin|functions)|@google-cloud/u;
 // Emulator-only adapters: the repository, its composition, the read-only
-// publication feed the local Catalog reads (E1) and the Event → Booking
-// handoff store (E2.0).
+// publication feed the local Catalog reads (E1), the Event → Booking
+// handoff store (E2.0) and the K2 safety-hold adapter (a type-only
+// Firestore import; holds are written by shared/safety_instruction.ts).
 const allowedCloud = new Set(
   [
     "firestore_content_repository.ts",
     "emulator_content_composition.ts",
     "content_publication_feed.ts",
     "firestore_event_booking_handoff_repository.ts",
+    "content_safety_commands.ts",
   ].map((name) => path.join("modules", "content", "infrastructure", name)),
 );
 for (const file of sourceFiles(path.join(functionsSrc, "modules", "content"))) {
@@ -101,6 +103,31 @@ const approvedOutsideUsers = {
     firestore_content_repository: ["FirestoreContentRepository"],
   },
   "modules/catalog/infrastructure/firestore_catalog_repository.ts": guardOnly,
+  // Library (favorites and visits): read-only checks of the published pointer
+  // and revision inside its own transaction, under the Emulator guard; it
+  // writes nothing of Content.
+  // H/K1/K2 and Library privacy (d4e3971, 8f26a98): only the Emulator guard,
+  // or read-only checks of Content pointers, revisions and drafts; none of
+  // them writes Content. Reviewed 2026-10-16 when the baseline gate was fixed.
+  "modules/library/library_privacy_task_handler.ts": guardOnly,
+  "modules/moderation/application/k1_workflows.ts": guardOnly,
+  "modules/moderation/application/report_service.ts": guardOnly,
+  "modules/reviews/firestore_review_service.ts": guardOnly,
+  "modules/reviews/review_target.ts": {
+    firestore_content_repository: ["contentCollections"],
+  },
+  "modules/trust_safety/firestore_safety_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "contentCollections",
+    ],
+  },
+  "modules/library/firestore_library_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "contentCollections",
+    ],
+  },
 };
 const importStatement =
   /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'[^']*\/(firestore_content_repository|emulator_content_composition)\.js';/gu;
@@ -185,6 +212,12 @@ const expected = [
     "contentPublishedRevisions",
     ["contentId:ASCENDING", "revisionNumber:ASCENDING"],
   ],
+  // K1 (d4e3971): the moderation queue scoped by market and type,
+  // content_moderation_adapter.reviewQueue.
+  [
+    "contentSubmissions",
+    ["state:ASCENDING", "marketId:ASCENDING", "typeId:ASCENDING"],
+  ],
 ];
 const actual = contentIndexes
   .map((entry) => [
@@ -194,9 +227,9 @@ const actual = contentIndexes
   .sort((left, right) => left[0].localeCompare(right[0]));
 if (JSON.stringify(actual) !== JSON.stringify(expected))
   throw new Error(
-    `Content composite indexes must be exactly the two approved ones, found ${JSON.stringify(actual)}`,
+    `Content composite indexes must be exactly the ${expected.length} approved ones, found ${JSON.stringify(actual)}`,
   );
 
 process.stdout.write(
-  `Content persistence layout gate passed: ${required.length} required paths, eight explicit denies, exactly two composite indexes, cloud SDK confined to ${allowedCloud.size} Emulator-only files, ${Object.keys(approvedOutsideUsers).length} approved outside users with exact symbols, Content exports ${contentExports.join(", ")}.\n`,
+  `Content persistence layout gate passed: ${required.length} required paths, eight explicit denies, exactly ${expected.length} composite indexes, cloud SDK confined to ${allowedCloud.size} Emulator-only files, ${Object.keys(approvedOutsideUsers).length} approved outside users with exact symbols, Content exports ${contentExports.join(", ")}.\n`,
 );
