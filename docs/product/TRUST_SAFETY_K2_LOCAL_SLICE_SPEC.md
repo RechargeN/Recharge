@@ -1,5 +1,5 @@
 # K2 — Trust & Safety (local backend)
-Status: Review. Local owner policy accepted 2026-10-15.
+Status: Done — bounded local/Emulator backend only; owner requested completion on 2026-10-16. Local owner policy accepted 2026-10-15.
 Policy: [H/K2 owner decision](REVIEWS_TRUST_SAFETY_LOCAL_OWNER_POLICY.md).
 This is bounded local/Emulator runtime, not production BCK-22 approval.
 
@@ -118,3 +118,7 @@ Security/Privacy/Legal verdict, cloud/staging/device gate or deployment is deliv
 K2 is not end-to-end product completion across these surfaces.
 Disable runtime flags to stop new commands; existing holds are intentionally not erased
 by a flag. Use owner compensation and reconciliation for reversal, preserving audit.
+
+## Local backend closure (2026-10-16)
+
+Owner instruction: «закончи тогда.» after the distinction between local backend acceptance and end-to-end product completion. This closes only the delivered default-off Emulator backend scope. Integration includes source revision `2e698f733144c6cafaf56103e75e0e6b96b3d2bc`; see [closure evidence](../verification/H_K1_K2_LOCAL_CLOSURE_2026_10_16.md). All remaining UI, external-service, privacy/legal, operations, device/cloud and production gates stated above remain open.

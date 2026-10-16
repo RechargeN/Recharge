@@ -1,6 +1,6 @@
 # K1 — Moderation queues and reports (local Emulator slice)
 
-Status: Review. Implementation authorized by owner on 2026-10-15.
+Status: Done — bounded local/Emulator backend only; owner requested completion on 2026-10-16. Implementation authorized by owner on 2026-10-15.
 Scope: backend commands and queries in the local Firebase Emulator only.
 This is partial BCK-22 runtime evidence; the canonical Trust & Safety specification remains Draft.
 
@@ -74,3 +74,7 @@ Canonical BCK-22 owner decisions, Security/Privacy/Legal review and cloud activa
 Backlog (not in this slice): the scoped moderation `queue` reads the 100 most recent
 decisions across all scopes before filtering, so its `recent` list can be incomplete,
 and it returns no `nextCursor`; the K2 `staffQueue` has the same 50-item limit.
+
+## Local backend closure (2026-10-16)
+
+Owner instruction: «закончи тогда.» after the distinction between local backend acceptance and end-to-end product completion. This closes only the delivered default-off Emulator backend scope. Integration includes source revision `2e698f733144c6cafaf56103e75e0e6b96b3d2bc`; see [closure evidence](../verification/H_K1_K2_LOCAL_CLOSURE_2026_10_16.md). All remaining UI, external-service, privacy/legal, operations, device/cloud and production gates stated above remain open.
