@@ -1,0 +1,13 @@
+{
+  "defect": "DEF-05",
+  "advisory": "GHSA-vfj7-8cjw-p6xm",
+  "package": "braces",
+  "via": "firebase-tools",
+  "cliVersion": "15.34.0",
+  "createdAt": "2026-10-17T00:00:00Z",
+  "expiresAt": "2026-11-16T00:00:00Z",
+  "status": "proposed",
+  "approvedBy": null,
+  "approvedAt": null,
+  "reason": "Temporary proposal for the dev-only Firebase CLI watcher dependency. Production audit stays strict. No patched braces release is currently published. Not enabled in CI before explicit owner approval."
+}

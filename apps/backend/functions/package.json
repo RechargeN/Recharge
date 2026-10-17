@@ -101,7 +101,9 @@
     "test:emulator:rules-reference": "node ../scripts/run-emulator-tests.mjs --group rules-reference",
     "test:emulator:runner": "node --test ../scripts/run-emulator-test-groups.test.mjs",
     "build:taxonomy": "node ../scripts/build-taxonomy-dataset.mjs",
-    "verify:taxonomy": "node ../scripts/build-taxonomy-dataset.mjs --check"
+    "verify:taxonomy": "node ../scripts/build-taxonomy-dataset.mjs --check",
+    "verify:audit:full": "node ../scripts/verify-npm-audit.mjs",
+    "test:audit-policy": "node --test ../scripts/verify-npm-audit.test.mjs"
   },
   "dependencies": {
     "firebase-admin": "14.3.0",
@@ -113,7 +115,7 @@
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "eslint": "9.39.5",
-    "firebase-tools": "15.28.1",
+    "firebase-tools": "15.34.0",
     "prettier": "3.9.6",
     "typescript": "6.0.3",
     "typescript-eslint": "8.67.0"

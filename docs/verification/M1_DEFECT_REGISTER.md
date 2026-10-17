@@ -25,7 +25,7 @@
 | DEF-02 | Документы D1 не отражают запуск и падение Linux gate: §12 пишет, что runner не запускается | `MEDIA_D1_REAL_TOOLS_AMENDMENT.md` §12, §15.8; LAUNCH_STATUS D1 | P2 | заход 2: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают попытку 1; строка D1 в LAUNCH_STATUS | закрывается после сверки с evidence попытки 2 (run, SHA, итог) | закрыт: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают обе попытки с run, SHA и итогом |
 | DEF-03 | Форма Create допускает черновики, которые сервер отклоняет общим `validation_failed`; пользователь не видит поле. Place 10, Activity 10 (+8 граничных отказов), Rental 9, Collection 8 случаев | `*_create_compat.json`, §5.7 D3.1–D3.4 | P2: корректные черновики проходят (обход есть), но обязателен к закрытию для M1 по Р-09 | `4e82352`; тестовые DI-регистрации `5b3060f`, `b91e819` | readiness fixtures, CreatePage widgets, D3.1 полный повтор и D3.2–D3.4; [журналы и пределы](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md), проверил Codex 2026-10-14 | закрыт в scope захода 3; обязательные финальные SHA-гейты остаются |
 | DEF-04 | Ошибочная привязка binding rollback к D4.1 | прежняя таблица M1_ACCEPTANCE | P2 | заход 5: ссылка исправлена на B1; import rollback выделен отдельно | native B1 и host B1 на `7cb07fa`, [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт; независимое ревью финальных документов pass |
-| DEF-05 | Backend R0 в GitHub Actions красный на шаге «Audit production dependency graph» (npm audit) | runs `38246774323` (`e87883f`), `36916471771` (`42f8850`), `38547610509` (`dd0f58b`), `38554933834` (`3c32e1c`) (2026-10-14: 10 уязвимостей — 1 critical `proxy-addr`, 2 high `@grpc/grpc-js` и `brace-expansion`, 7 moderate; оба runner) | не назначен; после D1 — отдельный слайс (решение 2026-10-14). Оценка применимости ниже: эксплуатируемой уязвимости в текущем runtime не найдено | отдельный слайс после D1 | — | открыт, вне M1 |
+| DEF-05 | Backend R0 npm audit blocks the gate; historical production and current dev-CLI findings | Historical runs retained below; 2026-10-17: CLI 15.34.0, production high/critical 0, full graph 3 high from GHSA-vfj7-8cjw-p6xm | Blocking for R0; outside accepted M1 | Compatible security patches + CLI upgrade; time-limited exception proposed, not activated | Strict production audit exit 0; policy tests and live local review; final 21–26 evidence linked below | Open: owner approval of the proposed exception and CI activation/verification remain pending |
 | DEF-08 | `freshclam` не проверяет скачанную базу на Linux: проверочная загрузка ищет сертификаты в `/usr/local/etc/certs`, директива `CVDCertsDirectory` в `freshclam.conf` до неё не доходит; гейт отклоняет базы | run `38547611633`, `dd0f58b`, 2026-10-14 | P1 для D1 (блокирует `inspect`); вне M1 по Р-06 А | план одобрен 2026-10-14, реализован в ветке `claude/d1-linux-fix`: каталог из проверенного `.deb` обязателен (fail closed до `freshclam`), `freshclam` получает `CVD_CERTS_DIR` — `libclamav` 1.5.4 знает только переменную, не директиву; `--cvdcertsdir` не добавляется без подтверждённой необходимости; TLS не меняется | Linux `inspect` run `38554932983` на `3c32e1c`: «Database test passed» для `daily`, `main`, `bytecode`; `sigtool --info` — OK для всех трёх | исправлен (`3c32e1c`) и подтверждён на Linux (`inspect` и `test`, run `38567123384`) |
 | DEF-09 | Отчёт `inspect` не записывает ни одного файла уведомлений `@img/sharp-libvips-linux-x64@1.3.4` (LGPL-3.0-or-later): `npmNotices()` ищет только в корне пакета; §15.5 требует имена, размеры и SHA-256 уведомлений этого пакета | run `38554932983`, `3c32e1c`, раздел «Linux sharp packages» | P2 для D1 (неполный обязательный отчёт); вне M1 по Р-06 А | пробел принят владельцем 2026-10-14 как исключение для этого пакета и версии | решение записано в D1 §15.8 | закрыт как «принято», не «исправлено» |
 | DEF-10 | Самопроверка cgroup L2 на Linux обрывает соединение с сервисом (`socket hang up`): гейт падает до L3/L4, tool tests и EICAR; ошибка L2 не превращается в проверку с фактами | run `38555622591`, `db3121f`, стадия `test` | P1 для D1 (блокирует `test`); вне M1 по Р-06 А | вариант А одобрен 2026-10-14: `OOMPolicy=continue` для scope и диагностика L2/L3 с фактами и journal (ветка `claude/d1-linux-fix`) | Linux run `38565997591` (`c50dc72`): L2 ok (`oomKills` 1, хост жив), L3 ok | исправлен и подтверждён на Linux (run `38567123384`) |
@@ -79,3 +79,53 @@
 ## Итоговая проверка scope M1 (заход 5)
 
 В финальном runtime `7cb07fa` обязательные локальные дефекты исправлены или исключения явно приняты. DEF-05 остаётся открытым вне M1 по отдельному решению владельца, DEF-07 — P3. Это не утверждение об отсутствии дефектов во всём продукте. [Финальное независимое ревью](../evidence/backend/m1/M1_STAGE5_INDEPENDENT_REVIEW.md) завершено без открытых P1/P2 в принятом scope M1.
+
+## DEF-05 follow-up — 2026-10-17, proposal awaiting owner approval
+
+Owner selected preparation of option 2 with explicit conditions in the 21–26
+integration chat. This authorizes the CLI update and preparation/testing of the
+exception; **it does not approve its activation in CI**.
+
+- Firebase CLI is pinned to **15.34.0** in package manifest, lock and toolchain.
+  Existing Firestore 1.22.0 / Storage rules 1.1.3 versions, sizes and checksums
+  still match the new CLI download metadata; no Media artifact change is claimed.
+- Production `npm audit --omit=dev --audit-level=high` remains strict, with no
+  exceptions: 6 moderate / **0 high / 0 critical**, exit 0.
+- Full strict audit: 8 moderate / 3 high / 0 critical, exit 1. The three high
+  records are the one advisory propagated through braces → chokidar → CLI.
+- Proposed exception: **GHSA-vfj7-8cjw-p6xm only**, braces <=3.0.3, exclusively
+  through dev Firebase CLI 15.34.0. Any other high/critical, malformed audit,
+  production braces, non-CLI dependency path or unproved dependency scope fails.
+- Created **2026-10-17**, expires **2026-11-16 00:00 UTC** (03:00 Moscow).
+  At expiry the exception stops applying and requires a fresh upstream review.
+  Every attempted use queries published braces versions. A release outside the
+  reviewed affected range disables the exception and requires dependency update
+  and removal of the exception; registry failure also fails closed.
+- Rationale for review: the affected watcher/parser is a development CLI
+  dependency used for credential-free local Emulator/CI verification, with
+  repository-owned inputs. Residual risk is a CLI/job availability failure from
+  a malicious deeply nested brace pattern. This is no production or blanket CLI
+  risk acceptance and does not authorize cloud commands or network exposure.
+- [Policy JSON](../../apps/backend/config/security/npm-audit-exception.json)
+  has `status: proposed`, `approvedBy/approvedAt: null`.
+  [Wrapper](../../apps/backend/scripts/verify-npm-audit.mjs) runs its own strict
+  production audit, full JSON audit, lock/installed graph checks and upstream
+  check. By default it fails `Owner approval pending`. `--review-proposal` is
+  local-only and explicitly refuses CI; it is not an activation flag.
+- [Policy tests](../../apps/backend/scripts/verify-npm-audit.test.mjs) exercise
+  adversarial advisories, production/second hoisted paths, graph/report drift,
+  expiry, upstream release and approval guards. Live proposal review succeeds;
+  default mode fails as required. Commands: `npm run test:audit-policy`,
+  `npm run verify:audit:full -- --review-proposal`, and default
+  `npm run verify:audit:full` (expected failure pending approval).
+- `.github/workflows/backend-r0.yml` still runs the original strict full
+  `npm audit --audit-level=high`; **it does not invoke the exception wrapper**.
+  After explicit owner approval, a separate bounded change must record the
+  approver/time in policy and replace only that full-graph audit step with
+  `npm run verify:audit:full`, retaining the strict production step and adding
+  `npm run test:audit-policy` as a required check. Then run GitHub CI on the exact
+  published SHA. Until that happens DEF-05 is open, not fixed or accepted.
+
+Upstream reference: [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+The 2026-10-14 applicability assessment above is historical; this follow-up
+records the narrowed current findings and does not retroactively approve them.
