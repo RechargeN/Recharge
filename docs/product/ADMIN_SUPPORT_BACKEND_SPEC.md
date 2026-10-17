@@ -1,10 +1,10 @@
 # Recharge Backend — Admin & Support Specification
 
 - ID: **BCK-19**
-- Version: **0.3**
-- Date: **2026-09-20**
+- Version: **0.3.1**
+- Date: **2026-10-16**
 - Spec status: **Review — documentation only; approval pending**
-- Runtime status: **Absent**
+- Runtime status: **Bounded local-only K3 Done; production absent**
 - Accountable owner: **Admin Operations owner**
 - Review owners: **Security/Privacy, Platform Operations, Identity, API
   Platform, owning-domain owners, Trust & Safety, Mobile, Support and Legal/Privacy**
@@ -12,9 +12,16 @@
 - Coordination baseline: [BCK-02 v2.4.81](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Coverage evidence: [BCK-19-PRE v0.2](BACKEND_ADMIN_SUPPORT_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/ADMIN_SUPPORT_BACKEND_SPEC.md`
-- Runtime effect of this revision: **none**
+- Runtime effect: **K3 local Emulator subset only, separately authorized by owner; no production access**
 
 ## 0. Changelog
+
+### v0.3.1 — 2026-10-16
+
+- records the separately owner-authorized, local-only K3 implementation in §35;
+- preserves Review status and open production decisions; synthetic test policy
+  is not staff identity, MFA/JIT, production approval or retention authority;
+- tracks measured results and remaining gates in the linked K3 record.
 
 ### v0.3 — 2026-09-20
 
@@ -53,7 +60,7 @@
 ## 1. Verdict and status semantics
 
 BCK-19 defines the target Admin & Support authority for Recharge. It is ready
-for cross-owner Review, not Approval or implementation. Runtime is **Absent**.
+for cross-owner Review, not production Approval or implementation. Production runtime is **Absent**. The separately owner-authorized K3 local subset is bounded by §35.
 
 The current Flutter application contains a local/mock Admin experience preview,
 mock Admin capabilities and local/in-memory Route moderation and safety queues.
@@ -973,3 +980,53 @@ to backups; product analytics receives only catalogued aggregate events.
 73. **BCK-19-AC-73:** Notes exclude secrets, tokens, full media/payment and reporter evidence.
 74. **BCK-19-AC-74:** Admin operational evidence never becomes product analytics authority.
 75. **BCK-19-AC-75:** v0.3 authorizes no staff runtime, Firebase, repair execution or deployment.
+
+## 35. K3 — separately authorized bounded local operations (2026-10-16)
+
+The owner explicitly authorized K3 on integration base `a1fcde5`, implemented
+on its own `codex/k3` worktree. [K3 scope, matrix and verification](K3_ADMIN_SUPPORT_READINESS.md)
+is the executable slice record. It supersedes the earlier wrong-checkout
+absence assessment, not this specification's production decision gates.
+
+One local-only service addresses only Admin-owned case/proposal/approval/audit/
+execution records. Fixed reveal fields are contentId, pointer revision and
+visibility. Read audit commits before a response can reveal data; audit failure
+returns no protected data. Proposals are immutable revisions; approval is a
+separate immutable record bound to the exact hash and revision. Author and
+approver differ. Current executor/approver session, scope, grants, case-policy
+hash and approval expiry are rechecked before each owner dispatch.
+
+Only existing Moderation `restrict`/`restore` commands dispatch to verified
+Content owner transactions. The two action grants are checked separately.
+Expected object revisions are enforced by the existing owners. Per-target
+stable idempotency keys and owner receipts make lost responses resumable;
+unknown/partial steps remain visible. Success requires all necessary receipts.
+The repair takes effect at the Content transaction commit, independently of
+whether the K3 checkpoint was written. Compensation requires a new approved
+owner command; no Admin direct domain patch or automatic global rollback exists.
+
+The service has no public callable, UI, production initialization or deployment.
+Its `test-only-k3-two-person-v1` case configuration and `adminRead/Propose/
+Approve/Execute` action IDs are synthetic Emulator fixtures, not accepted
+production policy. Missing policy denies access; no default TTL or grant is
+invented. BCK19-OD decisions, staff identity/MFA/JIT, risk tiers, retention,
+RUN-03/G5 and production access remain gated. General case lifecycle,
+simulation, other domain repairs, emergency disable and staffing are outside K3.
+
+Final acceptance requires the K3 real-owner runtime and ownership positive
+controls, launcher self-tests, verified own-fixture cleanup and full Emulator
+suite in one session, plus typecheck/lint, affected unit/integration, boundary
+and diff checks. Targeted green alone cannot close K3; detailed results and
+limitations belong in the linked slice record.
+
+K3 review follow-up registers all five Admin-owned collections explicitly in
+Firestore Rules and the execution manifest: client read/write denied,
+Firebase-CLI resource ownership, no TTL/index activation. Missing registrations
+are contract-test failures even without indexes; anonymous and authenticated
+client denial is exercised in the Emulator. The baseline fix `36fabec` precedes
+K3 integration; combined-snapshot evidence is recorded in the linked K3 record.
+The registration follow-up and final full single-session Emulator suite passed
+on the combined baseline-plus-K3 snapshot. K3 is Done within its bounded
+local/Emulator scope; the earlier incomplete run is retained in the evidence
+record. BCK-19 remains Review, production absent, and baseline integration is
+still a separate action. No production staff or policy authority is implied.

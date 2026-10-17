@@ -135,3 +135,28 @@ void test('unknown Firestore and Storage paths remain denied', async () => {
   assertDenied(await storageRead('unknown-root/probe.txt', identity.token));
   assertDenied(await storageWrite('unknown-root/probe.txt', identity.token));
 });
+
+void test('K3 Admin/Support collections explicitly deny anonymous and authenticated client access', async () => {
+  const { adminCollections } =
+    await import('../../src/modules/admin_support/admin_support_service.js');
+  const identity = await createSyntheticEmulatorIdentity();
+  try {
+    for (const name of Object.values(adminCollections)) {
+      const probe = `${name}/k3-rules-probe`;
+      for (const token of [undefined, identity.token]) {
+        assertDenied(await firestoreRead(probe, token));
+        assertDenied(await firestoreWrite(probe, token));
+      }
+    }
+  } finally {
+    const response = await fetch(
+      `http://${requireHost('FIREBASE_AUTH_EMULATOR_HOST')}/identitytoolkit.googleapis.com/v1/accounts:delete?key=fake-api-key`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ idToken: identity.token }),
+      },
+    );
+    assert.equal(response.status, 200, 'K3 Rules identity fixture cleanup');
+  }
+});

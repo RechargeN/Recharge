@@ -75,6 +75,8 @@ const guardOnly = {
   firestore_content_repository: ["assertContentEmulatorContext"],
 };
 const approvedOutsideUsers = {
+  // K3 borrows only the Emulator guard, never Content storage symbols.
+  "modules/admin_support/admin_support_service.ts": guardOnly,
   "content_entry.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
     emulator_content_composition: ["createEmulatorContentService"],

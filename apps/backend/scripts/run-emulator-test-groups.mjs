@@ -156,6 +156,12 @@ export const emulatorTestGroups = Object.freeze([
       ["lib/test/emulator/moderation_emulator_flow.test.js"],
     ],
   },
+  {
+    name: "admin-support-k3",
+    baselineMs: 30000,
+    timeoutMs: 240000,
+    tasks: [["lib/test/emulator/admin_support.test.js"]],
+  },
 ]);
 
 export function selectGroups(name) {

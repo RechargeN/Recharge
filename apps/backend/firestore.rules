@@ -11,6 +11,13 @@ service cloud.firestore {
     match /referenceMarketConfigRevisions/{document} { allow read, write: if false; }
     match /referenceActivationPointers/{document} { allow read, write: if false; }
 
+    // K3 Admin/Support records are server-owned; no client role grants direct access.
+    match /adminReadAudit/{document} { allow read, write: if false; }
+    match /adminRepairApprovals/{document} { allow read, write: if false; }
+    match /adminRepairExecutions/{document} { allow read, write: if false; }
+    match /adminRepairProposals/{document} { allow read, write: if false; }
+    match /adminSupportCases/{document} { allow read, write: if false; }
+
     // Security/Privacy foundation records are server-owned. The actor-owned
     // direct-client allowlist is intentionally empty until an owning domain
     // approves an exact record contract and Rules slice.

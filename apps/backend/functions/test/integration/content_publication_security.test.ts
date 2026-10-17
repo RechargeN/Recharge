@@ -833,6 +833,7 @@ void test('delegated import never reaches Content storage except through the Con
   // C1–E2: exact reviewed consumers; unknown modules still cannot reach Content.
   // Persistence symbols are additionally checked by verify-content-persistence-layout.
   const approved = [
+    'modules/admin_support/admin_support_service.ts',
     // G/H/K1/K2: exact local read adapters and verified owner-command composition.
     'modules/library/firestore_library_service.ts',
     'modules/library/library_contract.ts',
@@ -866,8 +867,11 @@ void test('delegated import never reaches Content storage except through the Con
     approved.sort(),
   );
   assert.equal(approved.includes('modules/other/application/x.ts'), false);
+  // K3 reuses the Emulator guard only; it receives no Content persistence symbols.
+
   assert.equal(approved.includes('modules/catalog/domain/other.ts'), false);
   const symbols: Readonly<Record<string, readonly string[]>> = {
+    'modules/admin_support/admin_support_service.ts': ['assertContentEmulatorContext'],
     'modules/library/firestore_library_service.ts': [
       'assertContentEmulatorContext',
       'contentCollections',
@@ -979,6 +983,14 @@ void test('delegated import never reaches Content storage except through the Con
     }
   }
   assert.equal(allowedSymbol('modules/other/application/x.ts', 'ContentPublicationService'), false);
+  assert.equal(
+    allowedSymbol('modules/admin_support/admin_support_service.ts', 'FirestoreContentRepository'),
+    false,
+  );
+  assert.equal(
+    allowedSymbol('modules/admin_support/admin_support_service.ts', 'ContentTransaction'),
+    false,
+  );
   assert.equal(
     allowedSymbol(
       'modules/catalog/infrastructure/firestore_catalog_repository.ts',
