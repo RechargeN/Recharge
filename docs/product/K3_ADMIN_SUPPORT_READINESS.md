@@ -212,3 +212,11 @@ artifacts во время общей сессии не было.
 mobile и function exports не менялись. Rollback регистрации удаляет только пять новых explicit deny/manifest entries; fallback deny продолжает закрывать клиентский доступ.
 Staging/production access, BCK19 owner decisions и RUN-03/G5 остаются gated.
 Нет commit, push, merge или deploy.
+
+## Общая интеграционная приёмка 21–26 (2026-10-17)
+
+Предыдущие записи, включая «Нет commit, push, merge», относятся к исходному K3 worktree.
+Его snapshot перенесён без изменения исходной работы: `022bcb0` поверх I1,
+общая runtime revision `9db93bb`. Финальный single-session Emulator: 14/14 групп,
+299 pass / 0 skip, K3 7/7 и cleanup. [Полный отчёт](../verification/LOCAL_21_26_ACCEPTANCE_2026_10_17.md).
+DEF-05 proposal не активирована в CI; BCK-19/production gates остаются открытыми.

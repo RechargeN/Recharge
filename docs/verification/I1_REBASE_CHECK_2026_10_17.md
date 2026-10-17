@@ -1,5 +1,7 @@
 # I1 Quick Plan на исправленной базе — проверка, 2026-10-17
 
+> Исторический I1-only отчёт. Текущая общая приёмка с K3: [21–26](LOCAL_21_26_ACCEPTANCE_2026_10_17.md).
+
 Ветка `claude/i1-quick-plan-rebase` от `bde8b79` (`codex/recharge-integration`
 локально: `a1fcde5` → `36fabec` → `bde8b79`, fast-forward, без push). Код I1 —
 snapshot незакоммиченной работы worktree `codex/i1-quick-plan` (7ed5, база

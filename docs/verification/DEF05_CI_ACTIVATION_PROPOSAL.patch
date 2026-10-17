@@ -1,0 +1,10 @@
+--- a/.github/workflows/backend-r0.yml
++++ b/.github/workflows/backend-r0.yml
+@@ -119,0 +120,4 @@
++      - name: Test bounded audit policy
++        working-directory: apps/backend/functions
++        run: npm run test:audit-policy
++
+@@ -122 +126 @@
+-        run: npm audit --audit-level=high
++        run: npm run verify:audit:full

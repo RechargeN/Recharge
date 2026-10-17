@@ -129,3 +129,8 @@ exception; **it does not approve its activation in CI**.
 Upstream reference: [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
 The 2026-10-14 applicability assessment above is historical; this follow-up
 records the narrowed current findings and does not retroactively approve them.
+
+Final local runtime validation: `9db93bb`; [21–26 acceptance](LOCAL_21_26_ACCEPTANCE_2026_10_17.md).
+Policy tests 13/13; full Emulator 14/14 groups with no skips.
+[Exact inactive CI patch](DEF05_CI_ACTIVATION_PROPOSAL.patch) passes `git apply --check --unidiff-zero`; not applied.
+DEF-05 remains open pending explicit owner approval and subsequent remote CI.

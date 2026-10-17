@@ -2,7 +2,7 @@
 
 Date: 2026-10-16. Scope authorized by the I1 task; Emulator-local only.
 Verification updated: 2026-10-17.
-Status: Local/Emulator implementation verified on f32b97f; CI/toolchain follow-up recorded in the rebase check. Production gates remain open. BCK-10 remains Draft.
+Status: Done — bounded local/Emulator scope; common runtime 9db93bb verified. DEF-05 approval/CI/publication and production gates remain open. BCK-10 remains Draft.
 
 ## Boundary and implementation
 
@@ -70,7 +70,7 @@ entry; retain journals, receipts and tombstones. Production activation, invited
 authority, retention/DSR integration and user conflict-resolution UI are outside
 this local slice and must be reported as limitations.
 
-## Implementation and verification record
+## Implementation and verification record (historical source worktree)
 
 Base: `a1fcde5cb53fa99fe034611cbfdc1063e7b96ae8`, branch
 `codex/i1-quick-plan`; no commit/push/deploy authorized or performed.
@@ -89,10 +89,10 @@ Base: `a1fcde5cb53fa99fe034611cbfdc1063e7b96ae8`, branch
 - Emulator runner uses its own Node directory for Functions subprocesses;
   this avoids accidentally discovering Functions with the system Node 20.
 
-Reproduction (backend working directory): Node 22.23.2,
+Reproduction (working directory: `apps/backend/functions`): Node 22.23.2,
 `RECHARGE_DART=C:\src\flutter\bin\cache\dart-sdk\bin\dart.exe`,
 `RECHARGE_FLUTTER_TOOL=C:\src\flutter\bin\cache\flutter_tools.snapshot`,
-then `node scripts/run-emulator-tests.mjs` (all 13 groups in one session), or
+then `npm run test:emulator` (all 14 groups in one session), or
 `--group quick-plan` for the focused group. Both Flutter executable paths are
 required; the I1 mobile probe fails rather than silently skipping them.
 For Flutter analyze/test use `apps/mobile` and `FLUTTER_ROOT=C:\src\flutter`
@@ -159,3 +159,9 @@ import, conflict-resolution UI and receipt/tombstone retention/DSR remain
 separate gates. Historical success receipts retain their original response;
 replay never mutates current state and the client queries current state before
 publishing a receipt result, so a deleted plan stays deleted.
+
+## Общая приёмка 21–26 (2026-10-17)
+
+Предыдущие implementation/rebase records выше — история отдельных прогонов.
+Текущая общая ревизия `9db93bb`, [acceptance](../verification/LOCAL_21_26_ACCEPTANCE_2026_10_17.md).
+I1 включён вместе с K3; default-off и owner-only boundaries сохранены.
