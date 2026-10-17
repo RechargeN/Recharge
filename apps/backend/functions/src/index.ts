@@ -2,6 +2,7 @@ import { handleK2 } from './safety_entry.js';
 import { FirestoreReviewService } from './modules/reviews/firestore_review_service.js';
 import { handleK1 } from './moderation_entry.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
+import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
@@ -1199,6 +1200,27 @@ export const libraryQueryV1 = onCall<unknown>(callableOptions, async (request) =
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
   return new FirestoreLibraryService(access.firestore, systemServerClock).query(
+    access.accessHint,
+    data,
+  );
+});
+
+export const quickPlanCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreQuickPlanService(access.firestore, systemServerClock).command(
+    access.accessHint,
+    data,
+  );
+});
+export const quickPlanQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreQuickPlanService(access.firestore, systemServerClock).query(
     access.accessHint,
     data,
   );

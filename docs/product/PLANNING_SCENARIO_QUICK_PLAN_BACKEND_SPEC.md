@@ -1,15 +1,24 @@
 # Recharge Backend — Planning: Scenario & Quick Plan Specification
 
 - ID: **BCK-10**
-- Version: **0.3.1**
-- Date: **2026-09-21**
+- Version: **0.3.2**
+- Date: **2026-10-16**
 - Spec status: **Draft — Present; owner and cross-boundary review pending**
-- Runtime status: **Absent — local/mobile implementation is compatibility input only**
+- Runtime status: **Partial — I1 owner-only Emulator implementation; production/invited authority absent**
 - Accountable owner: **Planning owner**
 - Coordination baseline: [BCK-02 v2.4.82](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Delivery stage: **D4 / R7**
 
 ## 0. Changelog
+
+### v0.3.2 — 2026-10-16
+
+- bounded I1 task authorization adds owner-only Quick Plan persistence, CAS
+  conflicts, terminal deletion, durable owner queues and atomic create-only import;
+- [I1 slice contract](QUICK_PLAN_I1_SLICE_SPEC.md) owns its exact rules and evidence;
+  this does not approve the remaining Draft BCK-10 or activate production/sharing;
+- I1 reuses the existing mobile aggregate and session/callable/Firestore paths;
+  Catalog, Scenario creation and Expand are outside its writes.
 
 ### v0.3.1 — 2026-09-21
 
@@ -48,6 +57,10 @@ This document is the canonical BCK-10 design input, not runtime evidence and
 not an activation decision. `Draft` means that all requirements below are
 normative for review, while unresolved owner decisions and parent approvals
 still block `Approved` and every persistent backend implementation slice.
+
+Exception: the explicit I1 task authorizes only the bounded Emulator-local
+owner-command slice in `QUICK_PLAN_I1_SLICE_SPEC.md`. Its evidence is tracked
+separately; no production or invited/unlisted authority is implied.
 
 The current local Scenario/Quick Plan behavior proves product intent only. It
 does not prove remote authorization, multi-device conflict handling,
@@ -334,7 +347,8 @@ to catalog collections.
 
 ## 13. IDs, time, reference data and money
 
-- permanent IDs are server-issued immutable ULID/UUID-style IDs;
+- permanent IDs are immutable ULID/UUID-style IDs; I1 uses client-generated UUIDs
+  in accordance with the Accepted ADR/repository ID rule, with server validation;
 - `loc_*` identifiers are import-only temporary IDs and require explicit map;
 - instants use UTC; local calendar values carry an IANA timezone ID;
 - timezone/date interpretation uses the item's/place's accepted timezone;

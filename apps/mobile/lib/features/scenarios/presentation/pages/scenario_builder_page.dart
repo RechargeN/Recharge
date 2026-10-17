@@ -38,6 +38,7 @@ typedef ScenarioBuilderPage = QuickPlanPage;
 class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
   String? _seedKey;
   bool _intentLoadScheduled = false;
+  String? _storedPlanId;
   late bool _previewMode;
 
   @override
@@ -51,6 +52,25 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
     final ScenarioBuilderController controller = ref.watch(
       scenarioBuilderControllerProvider,
     );
+    ref.listen(authControllerProvider.select((c) => c.state.user?.id), (
+      previous,
+      next,
+    ) {
+      if (previous != null &&
+          previous != next &&
+          controller.persistenceEnabled) {
+        controller.clearOwner();
+      }
+    });
+    final storedPlanId = widget.seedParameters['quickPlanId'];
+    if (controller.persistenceEnabled &&
+        storedPlanId != null &&
+        storedPlanId != _storedPlanId) {
+      _storedPlanId = storedPlanId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) controller.openStoredPlan(storedPlanId);
+      });
+    }
     final ScenarioBuilderState state = controller.state;
     final ScenarioDraftEntity draft = state.draft;
     final List<ScenarioStepEntity> suggestedSteps = controller.suggestedSteps;
@@ -68,6 +88,12 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
       appBar: AppBar(
         title: Text(_previewMode ? 'My quick plan' : 'Quick Plan'),
         actions: <Widget>[
+          if (controller.persistenceEnabled)
+            IconButton(
+              tooltip: 'Refresh',
+              onPressed: controller.syncBusy ? null : () => controller.sync(),
+              icon: const Icon(Icons.refresh),
+            ),
           if (_previewMode)
             TextButton.icon(
               onPressed: () => setState(() => _previewMode = false),
@@ -248,6 +274,22 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
       return;
     }
 
+    final controller = ref.read(scenarioBuilderControllerProvider);
+    if (controller.persistenceEnabled) {
+      if (controller.syncBusy) return;
+      await controller.sync(save: true);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            controller.syncError == null
+                ? 'Quick Plan saved'
+                : 'Not synced. Your local changes are retained; refresh to retry.',
+          ),
+        ),
+      );
+      return;
+    }
     final FavoriteItemEntity favorite = _favoriteFromScenario(draft);
     await ref
         .read(favoritesControllerProvider)

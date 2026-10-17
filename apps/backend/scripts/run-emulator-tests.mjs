@@ -176,6 +176,8 @@ const expectedBoundedCallableExports = [
   "notificationsCommandV1",
   "libraryCommandV1",
   "libraryQueryV1",
+  "quickPlanCommandV1",
+  "quickPlanQueryV1",
   "moderationCommandV1",
   "moderationQueryV1",
   "reportCommandV1",
@@ -225,6 +227,11 @@ const child = spawn(
     cwd: backendRoot,
     env: {
       ...process.env,
+      // Functions discovery spawns node; keep it on the runner's approved runtime.
+      PATH:
+        path.dirname(process.execPath) +
+        path.delimiter +
+        (process.env.PATH ?? ""),
       CI: "true",
       FUNCTIONS_EMULATOR: "true",
       FUNCTIONS_DISCOVERY_TIMEOUT: "30",

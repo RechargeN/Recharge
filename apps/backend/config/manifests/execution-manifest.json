@@ -1061,6 +1061,20 @@
             "desired:ASCENDING"
           ]
         ]
+      },
+      {
+        "name": "quickPlans",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "quickPlanCommandReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
       }
     ]
   },

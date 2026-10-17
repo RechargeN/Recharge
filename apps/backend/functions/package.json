@@ -88,6 +88,7 @@
     "test:emulator:moderation-k1": "node ../scripts/run-emulator-tests.mjs --group moderation-k1",
     "test:emulator:reviews-safety": "node ../scripts/run-emulator-tests.mjs --group reviews-safety",
     "test:emulator:library": "node ../scripts/run-emulator-tests.mjs --group library",
+    "test:emulator:quick-plan": "node ../scripts/run-emulator-tests.mjs --group quick-plan",
     "test:emulator:platform": "node ../scripts/run-emulator-tests.mjs --group platform",
     "test:emulator:booking": "node ../scripts/run-emulator-tests.mjs --group booking",
     "test:emulator:content-media": "node ../scripts/run-emulator-tests.mjs --group content-media",

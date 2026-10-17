@@ -114,6 +114,20 @@ void test('cross-user and cross-page writes remain denied by default', async () 
   assertDenied(await storageWrite('pages/another-page/probe.txt', identity.token));
 });
 
+void test('I1 Quick Plan collections explicitly deny anonymous and authenticated client access', async () => {
+  const { quickPlanCollections } =
+    await import('../../src/modules/quick_plan/quick_plan_contract.js');
+  const identity = await createSyntheticEmulatorIdentity();
+  for (const name of Object.values(quickPlanCollections)) {
+    for (const probe of [`${name}/i1-rules-probe`, `${name}/${identity.uid}:i1-rules-probe`]) {
+      for (const token of [undefined, identity.token]) {
+        assertDenied(await firestoreRead(probe, token));
+        assertDenied(await firestoreWrite(probe, token));
+      }
+    }
+  }
+});
+
 void test('unknown Firestore and Storage paths remain denied', async () => {
   const identity = await createSyntheticEmulatorIdentity();
   assertDenied(await firestoreRead('unknown-root/probe', identity.token));

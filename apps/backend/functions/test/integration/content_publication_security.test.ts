@@ -842,6 +842,9 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/reviews/firestore_review_service.ts',
     'modules/reviews/review_target.ts',
     'modules/trust_safety/firestore_safety_service.ts',
+    // I1 Quick Plan: Emulator guard and pure canonical hashing only.
+    'modules/quick_plan/firestore_quick_plan_service.ts',
+    'modules/quick_plan/quick_plan_contract.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -881,6 +884,11 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/moderation/application/report_service.ts': ['assertContentEmulatorContext'],
     'modules/reviews/firestore_review_service.ts': ['assertContentEmulatorContext'],
     'modules/reviews/review_target.ts': ['contentCollections', 'canonicalJson', 'sha256Hex'],
+    'modules/quick_plan/firestore_quick_plan_service.ts': [
+      'assertContentEmulatorContext',
+      'sha256Hex',
+    ],
+    'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/trust_safety/firestore_safety_service.ts': [
       'assertContentEmulatorContext',
       'contentCollections',

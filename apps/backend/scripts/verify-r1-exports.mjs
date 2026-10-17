@@ -43,6 +43,8 @@ const expected = [
   "notificationsCommandV1",
   "libraryCommandV1",
   "libraryQueryV1",
+  "quickPlanCommandV1",
+  "quickPlanQueryV1",
   "moderationCommandV1",
   "moderationQueryV1",
   "reportCommandV1",
