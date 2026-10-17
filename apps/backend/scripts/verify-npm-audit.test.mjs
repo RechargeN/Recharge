@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { evaluateAudit } from "./verify-npm-audit.mjs";
 
 function report(vulnerabilities = {}) {
@@ -246,4 +247,24 @@ test("installed optional extra roots are traced without inheriting CLI provenanc
     () => evaluateAudit({ ...fixture(), installedExtraRoots: ["braces"] }),
     /outside firebase-tools/,
   );
+});
+
+test("a proposed DEF-05 record cannot be activated in the R0 workflow", () => {
+  const policy = JSON.parse(
+    readFileSync(
+      new URL("../config/security/npm-audit-exception.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const workflow = readFileSync(
+    new URL("../../../.github/workflows/backend-r0.yml", import.meta.url),
+    "utf8",
+  );
+  assert.ok(workflow.includes("npm audit --omit=dev --audit-level=high"));
+  if (policy.status === "proposed") {
+    assert.equal(policy.approvedBy, null);
+    assert.equal(policy.approvedAt, null);
+    assert.ok(workflow.includes("npm audit --audit-level=high"));
+    assert.ok(!workflow.includes("npm run verify:audit:full"));
+  }
 });

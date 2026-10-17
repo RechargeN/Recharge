@@ -58,6 +58,8 @@ const approvedSecurityPrivacyExtensionPaths = [
 // Later approved slices share directories owned by the historical R1 gate.
 // BCK-05 §36.6, BCK-07 §34/38 and BCK-14 local file maps; no wildcard grants.
 const approvedSubsequentSlicePaths = [
+  // DEF-05: owner-authorized exception proposal, not CI activation.
+  "apps/backend/config/security/npm-audit-exception.json",
   "apps/backend/config/budget-policy.schema.json",
   "apps/backend/config/execution-manifest.schema.json",
   "apps/backend/config/flag-policy.schema.json",
