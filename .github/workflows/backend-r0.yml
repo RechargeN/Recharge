@@ -89,7 +89,7 @@ jobs:
           const d=p.join(r,'bin','cache','dart-sdk','bin',process.platform==='win32'?'dart.exe':'dart');
           const f=p.join(r,'bin','cache','flutter_tools.snapshot');
           for(const x of [d,f])if(!fs.existsSync(x))throw Error('Flutter tool missing: '+x);
-          fs.appendFileSync(process.env.GITHUB_ENV,'RECHARGE_DART='+d+'\nRECHARGE_FLUTTER_TOOL='+f+'\n');"
+          fs.appendFileSync(process.env.GITHUB_ENV,'RECHARGE_DART='+d+'\nRECHARGE_FLUTTER_TOOL='+f+'\nRECHARGE_G_MOBILE=1\n');"
 
       - name: Record sanitized runner identity
         run: >-
