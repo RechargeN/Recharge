@@ -64,3 +64,23 @@ Toolchain: Node 22.23.2, Java `Temurin-21.0.12+8 (build 21.0.12+8-LTS)` —
 | verify:content-persistence:layout | pass: 3 индекса Content, SDK в 5 Emulator-файлах, 17 одобренных внешних пользователей; негативный self-test 1/1 |
 | verify:r1 layout/config/exports, verify:toolchain, test:emulator:runner, test:stand | pass |
 | test:emulator (полный) | 12/12 групп PASS: 284 pass, 0 fail, 1 skip — Library «real Flutter repositories synchronize…» (`RECHARGE_G_MOBILE=1`, отдельный клиентский прогон Library; не относится к этим изменениям) |
+
+## Поправка 2026-10-17: два гейта в таблице выше не были зелёными
+
+Сводка прогона писала `rc` команды `date`, а не гейта (`$(date …)` в строке
+`echo` раскрывался раньше `$?`). Повторная проверка по самим журналам:
+
+- **`format:check` — fail** на `36fabec` и раньше: 11 однострочных индексов
+  `firestore.indexes.json` из `d4e3971` не в стиле Prettier. Исправлено
+  `prettier --write` (JSON семантически идентичен: 27 индексов, 14 overrides).
+- **`verify:toolchain` — fail**: «terraform version command failed». Закреплённого
+  Terraform 1.15.9 на этом ПК нет (каталог `.r0-tools` в worktree `g-library-sync`
+  больше не содержит `terraform/`, архива в кэше нет). Это окружение, не код;
+  локально зелёным станет после `scripts/install-terraform.mjs` (загрузка с
+  проверкой SHA-256 и GPG — отдельное разрешение владельца).
+- **Инвентарь границ mobile устарел** (`--check-output`: 619 → 620 файлов) — в
+  этот прогон не входил; перегенерирован, нарушений 0, исключений 71/71.
+
+Остальные строки таблицы подтверждены по журналам (счётчики тестов, группы
+Emulator, сообщения verify-скриптов). Скрипт сводки исправлен: `rc` берётся
+сразу после команды.

@@ -141,17 +141,96 @@
         { "fieldPath": "ownerRevision", "order": "ASCENDING" }
       ]
     },
-    {"collectionGroup":"contentSubmissions","queryScope":"COLLECTION","fields":[{"fieldPath":"state","order":"ASCENDING"},{"fieldPath":"marketId","order":"ASCENDING"},{"fieldPath":"typeId","order":"ASCENDING"}]},
-    {"collectionGroup":"moderationRemoderationQueue","queryScope":"COLLECTION","fields":[{"fieldPath":"marketId","order":"ASCENDING"},{"fieldPath":"typeId","order":"ASCENDING"}]},
-    {"collectionGroup":"trustSafetyReports","queryScope":"COLLECTION","fields":[{"fieldPath":"marketId","order":"ASCENDING"},{"fieldPath":"typeId","order":"ASCENDING"}]},
-    {"collectionGroup":"reviews","queryScope":"COLLECTION","fields":[{"fieldPath":"contentId","order":"ASCENDING"},{"fieldPath":"deleted","order":"ASCENDING"},{"fieldPath":"moderationHold","order":"ASCENDING"}]},
-    {"collectionGroup":"bookings","queryScope":"COLLECTION","fields":[{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"eventId","order":"ASCENDING"}]},
-    {"collectionGroup":"contentSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"subjectUserId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]},
-    {"collectionGroup":"contentSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"contentId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]},
-    {"collectionGroup":"catalogSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"subjectUserId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]},
-    {"collectionGroup":"catalogSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"contentId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]},
-    {"collectionGroup":"bookingSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"subjectUserId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]},
-    {"collectionGroup":"bookingSafetyHolds","queryScope":"COLLECTION","fields":[{"fieldPath":"contentId","order":"ASCENDING"},{"fieldPath":"desired","order":"ASCENDING"}]}
+    {
+      "collectionGroup": "contentSubmissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "state", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "moderationRemoderationQueue",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "trustSafetyReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "deleted", "order": "ASCENDING" },
+        { "fieldPath": "moderationHold", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "eventId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    }
   ],
   "fieldOverrides": [
     {
