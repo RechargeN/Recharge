@@ -21,13 +21,13 @@ interface HttpResult {
 }
 
 const compactCommand =
-  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt:raw-b","idempotencyKey":"idempotency-raw-b","occurredAgainstEventRevision":4,"payload":{"occurrenceId":"01JOCCURRENCE000000000001","inventoryPoolId":"01JPOOL000000000000000001","channel":"onsite","participantUnits":2,"namedGuests":[{"displayName":"Guest"}]}}';
+  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt-raw-b","idempotencyKey":"idempotency-raw-b","occurredAgainstEventRevision":4,"payload":{"occurrenceId":"01JOCCURRENCE000000000001","inventoryPoolId":"01JPOOL000000000000000001","channel":"onsite","participantUnits":2,"namedGuests":[{"displayName":"Guest"}]}}';
 const reorderedCommand =
-  '{"payload":{"namedGuests":[{"displayName":"Guest"}],"participantUnits":2,"channel":"onsite","inventoryPoolId":"01JPOOL000000000000000001","occurrenceId":"01JOCCURRENCE000000000001"},"occurredAgainstEventRevision":4,"idempotencyKey":"idempotency-raw-b","requestId":"attempt:raw-b","commandType":"createBooking","schemaVersion":1}';
+  '{"payload":{"namedGuests":[{"displayName":"Guest"}],"participantUnits":2,"channel":"onsite","inventoryPoolId":"01JPOOL000000000000000001","occurrenceId":"01JOCCURRENCE000000000001"},"occurredAgainstEventRevision":4,"idempotencyKey":"idempotency-raw-b","requestId":"attempt-raw-b","commandType":"createBooking","schemaVersion":1}';
 const literalUnicodeCommand =
-  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt-😀","idempotencyKey":"idempotency-unicode","payload":{"occurrenceId":"01JOCCURRENCE000000000001","participantUnits":1}}';
+  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt-unicode","idempotencyKey":"idempotency-unicode","payload":{"occurrenceId":"01JOCCURRENCE000000000001","participantUnits":1,"namedGuests":[{"displayName":"Guest 😀"}]}}';
 const escapedUnicodeCommand =
-  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt-\\ud83d\\ude00","idempotencyKey":"idempotency-unicode","payload":{"occurrenceId":"01JOCCURRENCE000000000001","participantUnits":1}}';
+  '{"schemaVersion":1,"commandType":"createBooking","requestId":"attempt-unicode","idempotencyKey":"idempotency-unicode","payload":{"occurrenceId":"01JOCCURRENCE000000000001","participantUnits":1,"namedGuests":[{"displayName":"Guest \\ud83d\\ude00"}]}}';
 
 const vectors: readonly ProbeVector[] = [
   {
@@ -51,6 +51,11 @@ const vectors: readonly ProbeVector[] = [
     expected: { kind: 'accepted', semanticGroup: 'unicode' },
   },
   {
+    id: 'schema-invalid-request-id',
+    body: envelope(compactCommand.replace('attempt-raw-b', 'attempt:raw-b')),
+    expected: { kind: 'rejected', reason: 'invalid_contract' },
+  },
+  {
     id: 'duplicate-nested-key',
     body: envelope(
       compactCommand.replace('"participantUnits":2', '"participantUnits":1,"participantUnits":2'),
@@ -64,7 +69,7 @@ const vectors: readonly ProbeVector[] = [
   },
   {
     id: 'unpaired-surrogate',
-    body: envelope(compactCommand.replace('attempt:raw-b', 'attempt-\\ud800')),
+    body: envelope(compactCommand.replace('attempt-raw-b', 'attempt-\\ud800')),
     expected: { kind: 'rejected', reason: 'unpaired_surrogate' },
   },
   {
