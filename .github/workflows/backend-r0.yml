@@ -31,7 +31,7 @@ jobs:
   verify:
     name: R0 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -70,6 +70,26 @@ jobs:
           check-latest: false
           verify-signature: true
           overwrite-settings: false
+
+      - name: Set up exact Flutter for required I1 adapters
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.44.9"
+          channel: stable
+          cache: false
+
+      - name: Prepare mobile adapter dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Export native Dart and Flutter tool paths
+        run: >-
+          node -e "const fs=require('node:fs'),p=require('node:path'),r=process.env.FLUTTER_ROOT;
+          if(!r)throw Error('FLUTTER_ROOT missing');
+          const d=p.join(r,'bin','cache','dart-sdk','bin',process.platform==='win32'?'dart.exe':'dart');
+          const f=p.join(r,'bin','cache','flutter_tools.snapshot');
+          for(const x of [d,f])if(!fs.existsSync(x))throw Error('Flutter tool missing: '+x);
+          fs.appendFileSync(process.env.GITHUB_ENV,'RECHARGE_DART='+d+'\nRECHARGE_FLUTTER_TOOL='+f+'\n');"
 
       - name: Record sanitized runner identity
         run: >-

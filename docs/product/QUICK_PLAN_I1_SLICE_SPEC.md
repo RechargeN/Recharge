@@ -2,7 +2,7 @@
 
 Date: 2026-10-16. Scope authorized by the I1 task; Emulator-local only.
 Verification updated: 2026-10-17.
-Status: In progress; common execution-manifest gate is failing. BCK-10 remains Draft.
+Status: Local/Emulator implementation verified on f32b97f; CI/toolchain follow-up recorded in the rebase check. Production gates remain open. BCK-10 remains Draft.
 
 ## Boundary and implementation
 

@@ -73,18 +73,32 @@ Toolchain: Node 22.23.2, Java `Temurin-21.0.12+8 (build 21.0.12+8-LTS)`
 | Emulator `library` (`RECHARGE_G_MOBILE=1`) | library_client (1) — исполнен выше |
 | Emulator `quick-plan` | quick_plan_client (1) — исполнен выше |
 
-## Открыто, решения владельца
+## Закрытие оставшихся пунктов, 2026-10-17
 
-1. **R0 CI и группа quick-plan.** `backend-r0.yml` запускает
-   `npm run test:emulator` на раннерах без Flutter; группа quick-plan без
-   `RECHARGE_DART`/`RECHARGE_FLUTTER_TOOL` падает по замыслу. После push I1 в
-   этом виде Backend R0 станет красным. Варианты: поставить Flutter в R0 и
-   задать переменные, или явный CI-маркер по образцу Library
-   (`RECHARGE_G_MOBILE`) с локальным обязательным прогоном. Ослаблять тест без
-   решения не стал.
-2. **Terraform 1.15.9** для `verify:toolchain` — установка через
-   `scripts/install-terraform.mjs` (загрузка с проверкой SHA-256 и GPG).
-3. Push и merge — отдельное разрешение (Р-14). K3 сюда не входит: его агент
-   сам добавляет deny и манифест для пяти коллекций; вставки I1 размещены в
-   других местах тех же файлов, чтобы последовательный merge прошёл без
-   конфликта.
+По запросу владельца «закончи заход полностью» подготовлены локальная
+интеграция и публикация I1; K3 остаётся вне этого захода.
+
+- R0 устанавливает Flutter 3.44.9 через `subosito/flutter-action`, закреплённый
+  SHA `1a449444c387b1966244ae4d4f8c696479add0b2` также внесён в toolchain lock.
+  Выполняется `flutter pub get`, затем проверяются и экспортируются пути
+  `RECHARGE_DART` и `RECHARGE_FLUTTER_TOOL`. Обязательный тест настоящих
+  адаптеров сохранён без skip-маркера. Timeout job увеличен до 60 минут.
+- Terraform 1.15.9 установлен в `.r0-tools` штатным installer с проверками
+  SHA-256, fingerprint ключа и GPG-подписи manifest. Системная Java оказалась
+  21.0.12.1+1; для точного гейта отдельно загружена Temurin 21.0.12+8 из
+  официального release с проверкой SHA-256. Глобальные установки не менялись.
+- `verify:toolchain` через npm 10.9.8 / Node 22.23.2 с точными JDK/Terraform:
+  exit 0, `Exact R0 toolchain and workflow manifest verified`.
+- Полный backend `format:check`: exit 0. YAML workflow разобран; извлечённый
+  из него шаг экспорта путей выполнен локально, оба файла существуют.
+- Повтор `quick-plan` с путями из нового CI-шага: 5/5 pass, 0 skip,
+  включая два настоящих Flutter-адаптера; cleanup подтверждён, runner exit 0.
+  Этот повтор использовал системную Java 21.0.12.1+1; точная 21.0.12+8
+  использована отдельно в успешном `verify:toolchain`.
+- Boundary: 623 файла, 71/71 прежних исключений, 0 нарушений, exit 0.
+
+Полные backend/Flutter/AVD результаты выше относятся к исходному коммиту I1
+`f32b97f`. В закрытии меняются только CI, toolchain lock и документация;
+полные suite и AVD повторно не запускались. Проверка CI на GitHub до push
+не считается выполненной; локальная проверка не является Linux evidence.
+Локальные журналы закрытия: `apps/backend/.r0-tools/i1-closure-*.log`.
