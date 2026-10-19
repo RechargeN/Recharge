@@ -1,16 +1,24 @@
 # BCK-07 — Content Publication Backend Coverage Matrix
 
 - ID: **BCK-07-PRE**
-- Version: **0.2**
-- Date: **2026-08-25**
+- Version: **0.3**
+- Date: **2026-10-18**
 - Status: **Review — coverage and reconciliation evidence**
 - Runtime status: **N/A; no product backend authority**
 - Accountable owner: **Content Platform owner**
-- Target: [BCK-07 v0.2](CONTENT_PUBLICATION_BACKEND_SPEC.md)
+- Target: [BCK-07 v0.15](CONTENT_PUBLICATION_BACKEND_SPEC.md)
 - Coordination baseline: [BCK-02 v2.4.36](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md`
 
 ## 0. Changelog
+
+### v0.3 — 2026-10-18
+
+- Session source is now v1.2 Approved by explicit owner decision; D3.5 is a
+  Review plan for local/LV Emulator only; owner subsequently accepted §6 and
+  authorized implementation and local gates. Final evidence remains separate.
+- Current scope is documentation only; historical v0.2 evidence and local-commit
+  permission below do not authorize a T1 commit, runtime, push or deployment.
 
 ### v0.2 — 2026-08-25
 
@@ -65,7 +73,7 @@ production processing are authorized.
 | `activity` | BCK-07 | Activity product rules required | D3.2 ([amendment](ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.activity.authoring`; linked Place fails closed; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04); cloud absent |
 | `route` | BCK-07 manifest/handoff | Route aggregate and GPX remain BCK-11 | Separate local publication path; BCK-11 absent |
 | `place` | BCK-07 | Place typed schema and provenance | D3.1 ([amendment](PLACE_D3_1_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.place.authoring`; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04); cloud absent |
-| `session` | BCK-07 | Bookable Session source; Booking authority separate | Generic/local; dedicated spec absent here |
+| `session` | BCK-07; proposed D3.5 | [Session v1.2](create/BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md) Approved by owner 2026-10-18; externalBookingUrl only; no ECL-03/BCK-09 or hold/capacity/confirmed authority | Typed local/mobile exists on 638f752; backend Session return is implemented locally after separate acceptance of [D3.5](D3_5_SESSION_PUBLICATION_AMENDMENT.md) §6; D3.5 stays Review; authorized local gates passed (15/15 Emulator groups, 307 tests; stand real controller/UI, cleanup, backend/Flutter/boundary/diff). Independent default-off content.session.authoring, local/LV Emulator, personal only; rules/exceptions validation without backend slots/availability, legacy refusal. Catalog/Discover excluded (OD-04); Collection eligible permitted after publication. Docs-only checkpoint followed by explicit plan acceptance; local runtime/gates authorized, no commit/push/deploy |
 | `scenario` | BCK-07 distribution manifest | Scenario aggregate remains BCK-10 | Typed local personal flow; BCK-10 absent |
 | `find_people` | BCK-07 with OD-11/privacy gate | Consent/access input from BCK-06 | Typed local/mock; production gated |
 | `class_workshop` | BCK-07 | Dedicated product spec present but not Approved by this doc | Generic local runtime |
@@ -150,7 +158,7 @@ implementation, deployment and enablement are not claimed.
 | BCK07-GAP-05 | PublisherRef representation is incomplete across ten types | BCK-06/BCK-18 reconciliation before remote write |
 | BCK07-GAP-06 | Route/Rental/Collection may use parallel local publication paths | One BCK-07 publication command/record; domain adapters cannot become writers |
 | BCK07-GAP-07 | BCK-10/BCK-11/BCK-22 are absent | Scenario/Route/moderation integrations disabled |
-| BCK07-GAP-08 | Activity/Session/Rental/Collection complete specs are absent in this checkout | Type-specific remote publish disabled until canonical source and tests exist |
+| BCK07-GAP-08 | Historical type-source inventory gap; Session source is now v1.2 Approved for bounded D3.5 | Session follows its current row above; production remains gated; other types retain their own scope |
 | BCK07-GAP-09 | Money remains `double` in normalized models | M2 completion required before price-bearing remote writes |
 | BCK07-GAP-10 | Media values are URL strings | BCK-14 ready asset generation refs required |
 | BCK07-GAP-11 | OD-03 cold-start license/provenance/removal is Open | No seeded catalog population |
@@ -204,7 +212,7 @@ implementation, deployment and enablement are not claimed.
 23. **BCK-07-PRE-AC-23:** Future executable files remain conditional.
 24. **BCK-07-PRE-AC-24:** Runtime, Firebase, push and `main` remain untouched.
 
-## 10. Evidence summary
+## 10. Historical preparatory evidence summary
 
 - repository/source/runtime audit: complete for this Review revision;
 - target coverage: 22/22;

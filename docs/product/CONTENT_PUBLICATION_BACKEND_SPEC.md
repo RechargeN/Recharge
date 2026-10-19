@@ -1,8 +1,8 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.14**
-- Date: **2026-09-30**
+- Version: **0.15**
+- Date: **2026-10-18**
 - Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
 - Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
@@ -15,6 +15,16 @@
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.15 — 2026-10-18
+
+- records the explicit owner decision T1 and Approved Session create spec
+  v1.2; adds the D3.5 documentation amendment (§46) and exact planned paths;
+- Session backend validation covers schedule rules and closing exceptions,
+  never slot materialization, stored availability or ECL-03/BCK-09 authority;
+- D3.5 file plan remains Review: this revision authorizes documents only,
+  changes no runtime, registry, flag, schema, migration or environment.
+
 
 ### v0.14 — 2026-09-30
 
@@ -1984,3 +1994,67 @@ transaction atomicity, authority and lifecycle are unchanged.
 
 Rollback: remove this optional projection and field feedback; the unchanged
 `validation_failed` response remains sufficient. No draft migration is needed.
+
+
+## 46. D3.5 amendment — Bookable Session, local Emulator only
+
+Owner decision: 2026-10-18, recorded separately in
+[Session v1.2 §22](create/BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md) and
+[D3.5 §1](D3_5_SESSION_PUBLICATION_AMENDMENT.md). Session v1.2 is an
+**Approved slice spec**; this BCK-07 parent stays **Review**. D3.5 is a
+**Review**; the file plan was separately accepted (§46.1), without production
+authorization. Base:
+`638f75284c710314517adb51260785600bbef1e8`, separate worktree.
+
+The planned typed validator path is
+`apps/backend/functions/src/modules/content/domain/type_rules/session_rules.ts`;
+its tests are
+`apps/backend/functions/test/unit/content/type_rules_session.test.ts` and
+`apps/backend/functions/test/unit/content/type_rules_session_create_compat.test.ts`.
+These files are implemented within the accepted D3.5 §6 map. At the initial
+docs-only checkpoint Session stayed unavailable; the subsequent §46.1
+authorization permits its personal-only registry entry under an independent
+default-off local/LV Emulator flag. Spec approval alone did not enable it.
+
+Future scope: independent default-off `content.session.authoring`, only
+local/LV Emulator, personal publisher resolved by Identity owner; C3 Content,
+C2 review, C1/D2 Media and the existing mobile Create flow (Q4 D3.1).
+Submit, approved publish and immutable activate must enforce the same Session
+validator, additive composition rules, reference policy, authority/eligibility
+and media readiness. Missing/stale/unavailable dependencies refuse explicitly.
+No permissive fallback or client-derived authority is allowed.
+
+The server validates weekly schedule rules/timezone and closing exceptions,
+rejects legacy eventSlots and unsupported fields, never materializes slots or
+stores availability. Only externalBookingUrl; ECL-03/BCK-09, internal Booking,
+hold/capacity/confirmed, Payments and providers are outside Session scope.
+Do not copy Event/Activity product rules. Only owner-service commands may
+change their domains. No parallel schedule engine, Booking engine or Create flow.
+Catalog/Discover stay excluded (BCK08-OD-04); the existing Collection evaluator
+may return eligible for a published Session without enabling its projection.
+
+Owner clarification: activate preserves the target's scheduleRevision and
+projectionWindowDays snapshot; expected-current-pointer CAS is mandatory.
+Only newly authored schedule revisions form a monotonic sequence; the active
+number can decrease on rollback. New scheduleRevision requires a new draft
+on schedule change. Current reference revision supplies window (Emulator 30);
+a different client value is validation_failed, never substituted. Activate
+refuses snapshot/current-reference mismatch as in D3.1.
+
+The initial T1 checkpoint changed documents only and stopped for plan
+confirmation. The policy answer alone did not authorize runtime; explicit
+plan acceptance followed in §46.1. No commit, push or deployment is authorized.
+Gates and limits are D3.5 §7–§9.
+
+
+### 46.1 File plan accepted — 2026-10-18
+
+After the documentation-only checkpoint, the owner explicitly accepted the
+D3.5 §6 plan: “сейчас принимаю план, реализуй”. Bounded implementation and
+local Emulator gates are now authorized. Session source rules, personal-only
+registry, trusted reference window=30 and immutable activation checks are
+present in this worktree. Authorized gates passed: full single-session Emulator
+15/15 groups (307 tests), stand clean/resumed/repeated with real controller/UI,
+backend local 1059 and Flutter analyze/full test 1665 (71 env skips). Details:
+[D3.5 evidence](../evidence/backend/d3/D3_5_SESSION_2026_10_18.md).
+This parent and D3.5 remain Review; no commit/push/deploy is authorized.

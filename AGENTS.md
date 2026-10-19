@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-10-10. Канонический файл инструкций репозитория.
+Версия: 2026-10-19. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -167,7 +167,7 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 | Область | Статус |
 |---|---|
 | Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract. Типизированные Details: Rental (DTL-OBJ-01 Done), Bookable Session и Class / Workshop (DTL-SES-01, DTL-CLS-01 — Review); у Collection отдельная `CollectionDetailsPage` |
-| Create Hub: 10 типов | config-driven runtime на mock для всех 10 типов. Типизированные блоки: Place (PLC-ADP-01), Event (EVT-CRT-01, шаблоны CRT-TPL-01), Find People, Scenario, Route, Collection / Guide (CLG-CRT-01 Done, публикация и Discover включены); в Review — Recharge Activity (ACT-CRT-01), Bookable Session (SES-CRT-01, спека ещё Draft), Rental / Equipment (RNT-CRT-01). У Class / Workshop типизированного блока нет. Поиск места через Google Places (LOC-SRCH-01, Review) — только Place и Collection. `quickPlan` — скрытый legacy read-compatibility тип. Общее открытое до Done: Creator-capability и Page-scope на publish (IDP-03A/04A), l10n, тесты 360 dp/150%. Подробности — LAUNCH_STATUS |
+| Create Hub: 10 типов | config-driven runtime на mock для всех 10 типов. Типизированные блоки: Place (PLC-ADP-01), Event (EVT-CRT-01, шаблоны CRT-TPL-01), Find People, Scenario, Route, Collection / Guide (CLG-CRT-01 Done, публикация и Discover включены); в Review — Recharge Activity (ACT-CRT-01), Bookable Session (SES-CRT-01, спека v1.2 Approved; публикация D3.5 — Review, только local/LV Emulator, default-off), Rental / Equipment (RNT-CRT-01). У Class / Workshop типизированного блока нет. Поиск места через Google Places (LOC-SRCH-01, Review) — только Place и Collection. `quickPlan` — скрытый legacy read-compatibility тип. Общее открытое до Done: Creator-capability и Page-scope на publish (IDP-03A/04A), l10n, тесты 360 dp/150%. Подробности — LAUNCH_STATUS |
 | Event Classification v2.2.3 | Accepted canonical contract; ECL-00–03B Done. BCK-09 v1.25: disabled local/Emulator Booking vertical с Identity, reconfirmation, deadline release и privacy/retention; после объединения общий mobile gate остаётся открытым. BCK-13 delivery, cloud/production, markets, independent Security/Legal, оставшиеся ECL-03D–H, provider sync и Payments отсутствуют |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |

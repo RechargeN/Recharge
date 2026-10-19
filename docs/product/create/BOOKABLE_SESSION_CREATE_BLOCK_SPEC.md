@@ -1,18 +1,21 @@
 # RECHARGE — Bookable Session Create Block Spec
 
-- Статус: **Draft for review** — Proposed; не Accepted и не Approved slice spec
-- Версия: **1.1**
-- Дата: 2026-08-20
+- Статус: **Approved slice spec** — решение владельца от 2026-10-18; границы T1/D3.5 в §22
+- Версия: **1.2**
+- Дата: 2026-10-18
 - Канонический type id: `session`
 - Название в UI: `Bookable session`
 - Предлагаемое имя implementation slice: `SES-CRT-01`
-- Эффект на runtime на дату документа: **none**
+- Runtime: D3.5 implementation отдельно разрешён после docs-only checkpoint;
+  default-off local/LV Emulator; required gates passed, D3.5 remains Review.
 
-Документ фиксирует целевую продуктовую и доменную модель раздела
-Create → Bookable Session. Он не разрешает изменения Flutter runtime,
-Firebase, backend, Payments, production moderation или authoritative
-Booking. Реализация может начаться только после отдельного утверждения
-slice и его точного file plan.
+Документ фиксирует принятую продуктовую и доменную модель Create → Bookable
+Session. SES-D01…D15 подтверждены владельцем 2026-10-18, SES-OD-01 закрыт
+для v1 (§22). Владелец разрешил подготовить возврат только в local/LV
+Emulator D3.5. После docs-only checkpoint владелец отдельно принял план файлов
+[D3.5](../D3_5_SESSION_PUBLICATION_AMENDMENT.md): «сейчас принимаю план, реализуй».
+Реализация и local Emulator gates разрешены в его границах; статус Review
+не означает production approval. Commit/push/deploy не разрешены.
 
 > Эта версия — не патч поверх черновиков от 2026-08-17–19. Это независимая
 > сквозная ревизия после contradiction audit: часть более ранних решений
@@ -54,14 +57,21 @@ slice и его точного file plan.
 1. Accepted ADR;
 2. Approved spec активного slice;
 3. `LAUNCH_STATUS.md`;
-4. `VISION.md`;
-5. этот Draft.
+4. `VISION.md`.
 
-До отдельного product-owner approval все новые решения этого файла имеют
-статус **Proposed**. Фактический runtime описан отдельно от target
-contract и не выводится из наличия документа.
+Этот Approved slice spec относится к пункту 2; исторические baseline и
+changelog не являются текущим разрешением runtime.
 
-## 2. Фактический baseline на 2026-08-20
+Решения SES-D01…D15 утверждены владельцем 2026-10-18. Фактический runtime
+описывается отдельно от принятого контракта и не выводится из статуса
+Approved. Для T1 применяются более узкие границы §22.1.
+
+## 2. Исторический baseline на 2026-08-20
+
+Это исторический снимок v1.1, не состояние базы T1 `638f752`. На базе T1
+уже существуют typed mobile draft/mapper/coordinator и local/mock preview;
+на базе backend Session был unavailable. D3.5 отдельно разрешён после
+docs-only checkpoint; actual implementation/gates — D3.5, сверка — §3.
 
 ### 2.1 Что уже есть
 
@@ -136,7 +146,7 @@ inventory/resource model. v1 не кодирует это одним число�
 | `slotKey` | Стабильный внутри schedule revision технический ключ projected-слота; не Booking id |
 | `offered_by_schedule` | Creator объявил это время и локальные правила его не закрыли; фактическая availability провайдера неизвестна |
 | `maxPartySize` | Максимум людей в одной брони ресурса; v1: 1–20 |
-| `scheduleRevision` | Монотонная revision активного расписания листинга |
+| `scheduleRevision` | Монотонная последовательность новых schedule revisions; active pointer может вернуться к старому snapshot (§10) |
 | `externalBookingUrl` | HTTPS-страница конкретного ресурса/услуги у внешнего провайдера; не обещает deep link выбранного времени |
 | `legacyOneTimeSlots` | Read-only compatibility payload текущего generic Session draft |
 
@@ -256,10 +266,11 @@ Session v1 публикует расписание и внешний handoff, н
 1. оставаться personal-publisher local/mock slice; либо
 2. зависеть от отдельно разрешённой all-ten-type PublisherRef migration.
 
-Он не может молча расширить IDP stabilization exception, добавить
-production page authority или создать backend.
+Исходный SES-CRT-01 не мог расширять IDP stabilization exception, добавлять
+production page authority или создавать backend. Для T1 действует только
+явное ограниченное исключение §22.1; production page authority исключена.
 
-## 7. Категории и unresolved taxonomy gap
+## 7. Категории и решение taxonomy gap для v1
 
 Category picker использует только канонический каталог и проверяет
 `applicableTypes` с marker `S`. Собственный whitelist запрещён.
@@ -284,11 +295,9 @@ Category picker использует только канонический ка�
   не однозначно аренду студии или фотосессию как услугу; отдельного generic
   `photo_studio`/`photo_session` item нет.
 
-`SES-OD-01` — **требуется решение владельца продукта до начала
-реализации**: подтвердить, что `photography` покрывает Bookable Session
-«фотосессия/студия», либо отдельной ревизией Category System добавить
-точный item/profile. Этот Draft не переопределяет семантику Accepted
-taxonomy молча.
+`SES-OD-01` закрыт владельцем 2026-10-18 для v1: отдельной подкатегории
+фото/видеостудий нет; Creator выбирает ближайшую существующую, применимую
+к Session. Новые category/profile ids не добавляются. Пересмотр — в BCK-20.
 
 Адаптивные defaults — только подсказки. Они живут в declarative
 `SessionCreateConfig`, а eligibility остаётся в Category System.
@@ -302,8 +311,8 @@ taxonomy молча.
 заставляет отвечать на вопросы про обучение, чтобы опубликоваться — но не
 закрывает сам таксономический вопрос: по смыслу `hands_on_class` остаётся
 профилем про преподавание, а не про бронирование ресурса, и это всё ещё
-может путать Creator при заполнении необязательных полей. `SES-OD-01`
-остаётся открытым.
+может путать Creator при заполнении необязательных полей. В v1.2
+SES-OD-01 закрыт указанным выше решением; дальнейший пересмотр — BCK-20.
 
 ## 8. Scope v1
 
@@ -386,7 +395,19 @@ stateDiagram-v2
 Schedule имеет `scheduleRevision`: draft начинается с `0`, первая active
 published schedule — с `1`. Изменение timezone, weekly rules, duration,
 buffer, notice, projection policy или exceptions увеличивает schedule
-revision и создаёт material content revision. Изменение location, max
+revision и создаёт material content revision.
+
+Уточнение владельца T1/D3.5 от 2026-10-18: монотонна последовательность
+новых scheduleRevision, не активный pointer. Activate старой immutable
+revision сохраняет её scheduleRevision и projectionWindowDays snapshot;
+активный номер может уменьшиться. Pointer переключается только через CAS
+по ожидаемой текущей revision. Новый scheduleRevision создаётся только
+через новый draft при изменении расписания. При activate snapshot window
+сверяется с текущей reference revision; расхождение — отказ. В T1 Emulator
+текущая platform policy задаёт 30; другое клиентское значение получает
+validation_failed без подмены.
+
+Изменение location, max
 party size, price или external URL создаёт content revision, но не
 вращает slot keys без изменения schedule. Пока candidate revision не
 принята, public Details продолжает показывать предыдущую active revision.
@@ -1020,8 +1041,10 @@ document state.
 - tests: unit/widget/migration/boundary;
 - docs: factual status update after gates.
 
-Не разрешены `apps/backend`, Firebase config, Payments, Event ECL-03
-changes, ADR edits или production Identity expansion.
+Первоначальный SES-CRT-01 не разрешал backend. В v1.2 только D3.5 (§22.1)
+описывает будущий ограниченный backend-возврат; до подтверждения его file
+plan код не разрешён. Firebase config, Payments, Event ECL-03 changes,
+ADR edits и production Identity expansion исключены.
 
 ### 19.2 Acceptance criteria
 
@@ -1134,7 +1157,7 @@ external CTA только если product policy это разрешает.
 - Нет packages, deposits, waitlist, contact host или internal chat.
 - DST transition-intersecting slots консервативно пропускаются.
 - Один listing имеет одну duration, timezone и location.
-- `projectionWindowDays = 30` — proposed platform default, не обещание
+- `projectionWindowDays = 30` — approved platform default, не обещание
   provider booking horizon.
 - Полная Professional Page authority и localization зависят от отдельных
   platform slices.
@@ -1143,27 +1166,82 @@ external CTA только если product policy это разрешает.
 
 | ID | Решение | Статус |
 |---|---|---|
-| SES-D01 | Session = один resource/одна location/одна timezone | Proposed |
-| SES-D02 | v1: один независимый booking на слот; `maxPartySize` 1–20 | Proposed |
-| SES-D03 | Booking MVP только `externalBookingUrl` | Canon-aligned; Proposed in this spec |
-| SES-D04 | Public offers называются schedule projection, не availability | Proposed |
-| SES-D05 | Duration 30–180, одна на listing | VISION-aligned; Proposed in this spec |
-| SES-D06 | Buffer после слота 0–180 | Proposed |
-| SES-D07 | Projection window задаётся платформой, default 30, максимум 90 | Proposed |
-| SES-D08 | Offers, пересекающие DST transition, пропускаются | Proposed |
-| SES-D09 | Только закрывающие exceptions; overnight исключён | Proposed |
-| SES-D10 | Packages/deposit/contact_host исключены из v1 | Proposed |
-| SES-D11 | `create`/`submit`/`direct-publish` остаются раздельной capability-семантикой | Canonical dependency |
-| SES-D12 | Legacy payload сохраняется на протяжении rollout; очистка не входит в SES-CRT-01 | Canonical migration policy |
-| SES-OD-01 | Решить вопрос покрытия таксономии для generic photo/video студии | **Требуется решение владельца продукта** (практическая срочность снята SES-D14, семантический вопрос открыт) |
-| SES-D13 | Create flow — guard + 3 обязательных блока на одной прокручиваемой странице вместо 6-шагового визарда; заблокированные даты/amenities/вместимость/детали категории — ненавязчивая необязательная зона | Proposed |
-| SES-D14 | Категорийные dynamic criteria (`skill_level`, `equipment_provided` и т.д., включая `*`-поля профиля) для Session — advisory-only, никогда не блокируют publish | Proposed |
-| SES-D15 | `maxPartySize` предзаполняется дефолтом при создании черновика вместо пустого обязательного поля | Proposed |
+| SES-D01 | Session = один resource/одна location/одна timezone | Approved владельцем 2026-10-18 |
+| SES-D02 | v1: один независимый booking на слот; `maxPartySize` 1–20 | Approved владельцем 2026-10-18 |
+| SES-D03 | Booking MVP только `externalBookingUrl` | Approved владельцем 2026-10-18 |
+| SES-D04 | Public offers называются schedule projection, не availability | Approved владельцем 2026-10-18 |
+| SES-D05 | Duration 30–180, одна на listing | Approved владельцем 2026-10-18 |
+| SES-D06 | Buffer после слота 0–180 | Approved владельцем 2026-10-18 |
+| SES-D07 | Projection window задаётся платформой, default 30, максимум 90 | Approved владельцем 2026-10-18 |
+| SES-D08 | Offers, пересекающие DST transition, пропускаются | Approved владельцем 2026-10-18 |
+| SES-D09 | Только закрывающие exceptions; overnight исключён | Approved владельцем 2026-10-18 |
+| SES-D10 | Packages/deposit/contact_host исключены из v1 | Approved владельцем 2026-10-18 |
+| SES-D11 | `create`/`submit`/`direct-publish` остаются раздельной capability-семантикой | Approved владельцем 2026-10-18 |
+| SES-D12 | Legacy payload сохраняется на протяжении rollout; очистка не входит в SES-CRT-01 | Approved владельцем 2026-10-18 |
+| SES-OD-01 | В v1 у фото/видеостудий нет отдельной подкатегории; Creator выбирает ближайшую существующую, применимую к Session; пересмотр — BCK-20 | Closed / Approved владельцем 2026-10-18 |
+| SES-D13 | Create flow — guard + 3 обязательных блока на одной прокручиваемой странице вместо 6-шагового визарда; заблокированные даты/amenities/вместимость/детали категории — ненавязчивая необязательная зона | Approved владельцем 2026-10-18 |
+| SES-D14 | Категорийные dynamic criteria (`skill_level`, `equipment_provided` и т.д., включая `*`-поля профиля) для Session — advisory-only, никогда не блокируют publish | Approved владельцем 2026-10-18 |
+| SES-D15 | `maxPartySize` предзаполняется дефолтом при создании черновика вместо пустого обязательного поля | Approved владельцем 2026-10-18 |
 
-Документ нельзя переводить в Accepted, пока `SES-OD-01` не закрыт явным
-решением и Proposed decisions не подтверждены владельцем продукта.
+### 22.1 Решение владельца T1 от 2026-10-18
+
+Источник: явное сообщение владельца в чате T1 от 2026-10-18; запись
+решения — этот раздел и D3.5 §1. Это отдельное решение о возврате, а не
+вывод из mobile flow или контракта Event/Activity.
+
+1. Возврат backend Bookable Session разрешён по образцу D3.1–D3.4 только
+   в Emulator, amendment D3.5, база `638f752`, отдельный worktree.
+2. Эта спецификация v1.2 — Approved slice spec; SES-D01…D15 подтверждены
+   без изменения содержания. SES-D02 описывает внешнюю бронь ресурса,
+   не внутреннюю Booking/capacity authority Recharge.
+3. SES-OD-01 закрыт для v1 согласно таблице; пересмотр только BCK-20.
+4. Только `externalBookingUrl`. ECL-03/BCK-09 к Session не применяются;
+   hold/capacity/confirmed и внутренние Booking/attendance claims запрещены.
+   `maxPartySize` остаётся декларацией размера внешней группы, не inventory.
+5. Будущий `content.session.authoring` default-off, только local/LV Emulator.
+6. Сервер валидирует правила расписания и закрывающие исключения; слоты не
+   материализует и availability не хранит. Legacy `eventSlots` отклоняются.
+   §11 materializer/DST/slotKey и projection AC относятся к mobile local
+   preview; они не требуют серверного materializer. Legacy read/round-trip
+   §15.4 сохраняется локально, но не даёт права отправить legacy на backend.
+7. Catalog/Discover исключены (BCK08-OD-04). После публикации допустим
+   `eligible` существующего owner evaluator для пункта Collection типа
+   Session; это не Catalog projection или Discover enablement.
+8. Mobile — Q4 D3.1: существующий Create flow, только personal publisher;
+   без Activate и правки после публикации на mobile. Полный C3 — backend.
+   Общая target Page-модель §6/§9 этим slice не включается.
+9. Activate старой immutable revision сохраняет её scheduleRevision и
+   projectionWindowDays snapshot. Pointer меняется только через CAS по
+   ожидаемому текущему pointer. Монотонна последовательность новых
+   scheduleRevision; активный номер после rollback может уменьшиться.
+   Новый scheduleRevision — только через новый draft при изменении расписания.
+10. projectionWindowDays берётся из текущей reference revision (Emulator 30).
+    Другое значение клиента — validation_failed без подмены. При activate
+    snapshot сверяется с текущей reference revision; расхождение — отказ,
+    как для справочных данных D3.1.
+11. **Первоначальный docs-only checkpoint T1:** эта v1.2, BCK-07 v0.15, строка session
+    в coverage matrix, D3.5 Review с решениями и планом файлов. После этого
+    остановка до явного подтверждения плана. Runtime, флаги, реестр,
+    Emulator gates и commit/push — только отдельным следующим шагом.
+    Ответ на вопросы пп. 9–10 сам по себе не был подтверждением runtime-плана.
+
+После этого checkpoint владелец отдельно принял план: «сейчас принимаю план,
+реализуй». D3.5 implementation и local Emulator gates разрешены, commit/push/
+deploy — нет. Статусы Review не повышаются агентом.
 
 ## 23. Changelog
+
+- `v1.2` (2026-10-18) — по явному решению владельца статус Approved slice
+  spec, SES-D01…D15 подтверждены без изменения содержания; SES-OD-01 закрыт
+  для v1 без новых taxonomy ids, пересмотр — BCK-20. §22.1 фиксирует границы
+  будущего D3.5: local/LV Emulator, default-off, personal publisher, external
+  URL без Booking authority, серверная проверка rules/exceptions без
+  materialization/availability, отказ legacy, Catalog/Discover excluded при
+  допустимом Collection eligible. §10/§22 уточняют immutable snapshots,
+  pointer CAS, монотонную authoring sequence и current-reference window=30.
+  Первый checkpoint — только документы; затем владелец отдельно принял план
+  словами «сейчас принимаю план, реализуй». Local implementation и Emulator
+  gates разрешены, commit/push/deploy — нет. Родитель BCK-07 остаётся Review.
 
 - `v1.1` (2026-08-20) — упрощение create flow по итогам обсуждения UX
   фотостудии. Guard + 6-шаговый визард заменён на guard + 3 обязательных
