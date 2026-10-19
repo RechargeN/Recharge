@@ -79,6 +79,21 @@ final class StandBackend {
 
   /// D3.1: seeds (or reuses) the stand Place and enables Place authoring on
   /// the stand only; prints no JSON, so only its exit code is checked.
+  Future<void> sessionSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'session',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('session seed failed: ${result.stderr}${result.stdout}');
+    }
+  }
+
+  /// D3.1: the ids the owner services returned for the stand Session.
+  Future<Map<String, Object?>> sessionManifest() =>
+      _stand(<String>['session', 'manifest']);
+
   Future<void> placeSeed() async {
     final result = await Process.run(node, <String>[
       _script('stand-seed.mjs'),

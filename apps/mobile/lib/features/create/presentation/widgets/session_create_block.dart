@@ -191,6 +191,50 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
           decoration: const InputDecoration(labelText: 'Cover image URL'),
           onChanged: widget.controller.updateCoverImage,
         ),
+        DropdownButtonFormField<String>(
+          initialValue: widget.controller.sessionContentLocale,
+          decoration: const InputDecoration(labelText: 'Content language'),
+          items: <DropdownMenuItem<String>>[
+            for (final locale in widget.controller.supportedContentLocales)
+              DropdownMenuItem(value: locale, child: Text(locale)),
+          ],
+          onChanged: (value) =>
+              widget.controller.updateSessionMediaMetadata(locale: value),
+        ),
+        TextFormField(
+          controller: _field(
+            'sessionCoverAlt:${widget.controller.sessionContentLocale}',
+            widget.controller.sessionMediaAltText(),
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Cover image description',
+          ),
+          onChanged: (value) =>
+              widget.controller.updateSessionMediaMetadata(coverAltText: value),
+        ),
+        for (final reference in draft.media.gallery)
+          TextFormField(
+            controller: _field(
+              'sessionGalleryAlt:$reference:${widget.controller.sessionContentLocale}',
+              widget.controller.sessionMediaAltText(reference),
+            ),
+            decoration: const InputDecoration(
+              labelText: 'Gallery image description',
+            ),
+            onChanged: (value) => widget.controller.updateSessionMediaMetadata(
+              galleryRef: reference,
+              galleryAltText: value,
+            ),
+          ),
+        CheckboxListTile(
+          value:
+              widget.controller.sessionMediaMetadata['rightsConfirmed'] == true,
+          title: const Text('I have permission to use these images'),
+          onChanged: (value) => widget.controller.updateSessionMediaMetadata(
+            rightsConfirmed: value ?? false,
+          ),
+        ),
+
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('resourceName', session.resourceName),
@@ -233,6 +277,35 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               child: Text(session.timezoneConfirmed ? 'Confirmed' : 'Confirm'),
             ),
           ],
+        ),
+        TextFormField(
+          controller: _field(
+            'sessionLatitude',
+            draft.latitude?.toString() ?? '',
+          ),
+          decoration: const InputDecoration(labelText: 'Latitude'),
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+            signed: true,
+          ),
+        ),
+        TextFormField(
+          controller: _field(
+            'sessionLongitude',
+            draft.longitude?.toString() ?? '',
+          ),
+          decoration: const InputDecoration(labelText: 'Longitude'),
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+            signed: true,
+          ),
+        ),
+        OutlinedButton(
+          onPressed: () => widget.controller.confirmSessionLocation(
+            latitude: _fields['sessionLatitude']?.text ?? '',
+            longitude: _fields['sessionLongitude']?.text ?? '',
+          ),
+          child: const Text('Confirm this location'),
         ),
         ..._fieldIssues(<String>{
           'title',

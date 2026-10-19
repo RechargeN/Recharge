@@ -16,6 +16,7 @@ class RouteNames {
 
   /// Default-off Place publication test entry (D3.1); see
   /// `PlacePublicationTestEntryGuard`.
+  static const String testSessionPublication = '/test/session-publication';
   static const String testPlacePublication = '/test/place-publication';
 
   /// Default-off Recharge Activity publication test entry (D3.2); see

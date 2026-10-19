@@ -1,3 +1,5 @@
+import '../di/session_publication_composition.dart';
+import '../presentation/session_publication_panel.dart';
 import 'package:flutter/widgets.dart';
 import '../presentation/class_workshop_details_page.dart';
 import '../../features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
@@ -335,6 +337,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       // Default-off Place publication test entry (D3.1), the same rule with
       // its own guard and define.
+      GoRoute(
+        name: 'test_session_publication',
+        path: RouteNames.testSessionPublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            sessionPublicationTestEntryRedirect(
+              sl.isRegistered<SessionPublicationTestEntryGuard>()
+                  ? sl<SessionPublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const SessionPublicationPage(),
+      ),
       GoRoute(
         name: 'test_place_publication',
         path: RouteNames.testPlacePublication,

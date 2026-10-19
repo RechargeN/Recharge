@@ -1,3 +1,4 @@
+import '../../domain/usecases/build_session_content_body.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -3502,6 +3503,102 @@ class CreateController extends ChangeNotifier {
 
   String _sessionLocalId() =>
       'loc_session_${DateTime.now().microsecondsSinceEpoch}_${_localIdCounter++}';
+  Map<String, Object?> get sessionMediaMetadata =>
+      _state.draft.sectionData['session_media'] is Map<String, Object?>
+      ? Map<String, Object?>.from(
+          _state.draft.sectionData['session_media']! as Map<String, Object?>,
+        )
+      : <String, Object?>{};
+  String get sessionContentLocale {
+    final value = sessionMediaMetadata['contentLocale'];
+    return value is String && supportedContentLocales.contains(value)
+        ? value
+        : _runtimeDefaults.defaultContentLocale;
+  }
+
+  String sessionMediaAltText([String? reference]) {
+    final metadata = sessionMediaMetadata;
+    final gallery = metadata['galleryAltText'];
+    final alt = reference == null
+        ? metadata['coverAltText']
+        : gallery is Map
+        ? gallery[reference]
+        : null;
+    return alt is Map && alt[sessionContentLocale] is String
+        ? alt[sessionContentLocale] as String
+        : '';
+  }
+
+  void updateSessionMediaMetadata({
+    String? locale,
+    String? coverAltText,
+    bool? rightsConfirmed,
+    String? galleryRef,
+    String? galleryAltText,
+  }) {
+    if (_state.draft.objectType != CreateObjectType.session) return;
+    if (locale != null && !supportedContentLocales.contains(locale)) return;
+    final metadata = sessionMediaMetadata;
+    final selected = locale ?? sessionContentLocale;
+    metadata['contentLocale'] = selected;
+    if (rightsConfirmed != null) metadata['rightsConfirmed'] = rightsConfirmed;
+    if (coverAltText != null) {
+      final raw = metadata['coverAltText'];
+      metadata['coverAltText'] = <String, Object?>{
+        if (raw is Map<String, Object?>) ...raw,
+        selected: coverAltText,
+      };
+    }
+    if (galleryRef != null && galleryAltText != null) {
+      final raw = metadata['galleryAltText'];
+      final gallery = <String, Object?>{
+        if (raw is Map<String, Object?>) ...raw,
+      };
+      final prior = gallery[galleryRef];
+      gallery[galleryRef] = <String, Object?>{
+        if (prior is Map<String, Object?>) ...prior,
+        selected: galleryAltText,
+      };
+      metadata['galleryAltText'] = gallery;
+    }
+    _updateDraft(
+      _state.draft.copyWith(
+        sectionData: <String, Object?>{
+          ..._state.draft.sectionData,
+          'session_media': metadata,
+        },
+      ),
+    );
+  }
+
+  void confirmSessionLocation({
+    required String latitude,
+    required String longitude,
+  }) {
+    final lat = double.tryParse(latitude);
+    final lng = double.tryParse(longitude);
+    if (_state.draft.objectType != CreateObjectType.session ||
+        lat == null ||
+        lng == null ||
+        !lat.isFinite ||
+        !lng.isFinite ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180) {
+      return;
+    }
+    final next = _state.draft.copyWith(latitude: lat, longitude: lng);
+    _updateDraft(
+      next.copyWith(
+        sectionData: <String, Object?>{
+          ...next.sectionData,
+          'session_pin': SessionContentBodyMapper.pinEvidence(next),
+        },
+      ),
+    );
+  }
+
   void updateSessionResourceName(String value) =>
       _updateSession((s) => s.copyWith(resourceName: value));
   void confirmSessionTimezone(String value) => _updateSession(

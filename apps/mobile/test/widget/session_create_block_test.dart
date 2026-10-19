@@ -85,7 +85,10 @@ void main() {
       expect(find.text('What and where'), findsOneWidget);
       expect(find.text('When'), findsOneWidget);
       expect(find.text('Price and booking'), findsOneWidget);
-      expect(find.text('Optional — add now or after publishing'), findsOneWidget);
+      expect(
+        find.text('Optional — add now or after publishing'),
+        findsOneWidget,
+      );
       expect(find.text('Publish'), findsOneWidget);
       // Everything not marked "required" stays collapsed by default.
       expect(find.text('Blocked dates'), findsNothing);
@@ -93,10 +96,10 @@ void main() {
   );
 
   testWidgets(
-    'a weekly preset tap materializes offers shown as chips',
+    'media confirmation and localized description persist through the existing form',
     (WidgetTester tester) async {
-      final _MemoryRepository repository = _MemoryRepository();
-      final CreateController controller = _buildController(repository);
+      final repository = _MemoryRepository();
+      final controller = _buildController(repository);
       addTearDown(controller.dispose);
       await controller.ensureLoaded(
         userId: 'user-1',
@@ -104,21 +107,56 @@ void main() {
         organizerName: 'Creator',
       );
       controller.setObjectType(CreateObjectType.session);
-      controller.confirmSessionTimezone('Europe/Riga');
-
       await _pumpSessionBlock(tester, controller);
-
-      expect(find.text('Every day 9:00–21:00'), findsOneWidget);
-      await tester.ensureVisible(find.text('Every day 9:00–21:00'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Every day 9:00–21:00'));
+      final alt = find.widgetWithText(TextFormField, 'Cover image description');
+      await tester.ensureVisible(alt);
+      await tester.enterText(alt, 'Court seen from the entrance');
+      await tester.ensureVisible(
+        find.text('I have permission to use these images'),
+      );
+      await tester.tap(find.text('I have permission to use these images'));
       await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 800));
-
-      expect(controller.state.draft.sessionData!.schedule.weeklyRules, hasLength(7));
-      expect(find.text('Next offers'), findsOneWidget);
+      final metadata =
+          repository.stored!.sectionData['session_media']
+              as Map<String, Object?>;
+      expect(metadata['rightsConfirmed'], true);
+      expect(metadata['contentLocale'], controller.sessionContentLocale);
+      expect(metadata['coverAltText'], {
+        controller.sessionContentLocale: 'Court seen from the entrance',
+      });
     },
   );
+
+  testWidgets('a weekly preset tap materializes offers shown as chips', (
+    WidgetTester tester,
+  ) async {
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = _buildController(repository);
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.session);
+    controller.confirmSessionTimezone('Europe/Riga');
+
+    await _pumpSessionBlock(tester, controller);
+
+    expect(find.text('Every day 9:00–21:00'), findsOneWidget);
+    await tester.ensureVisible(find.text('Every day 9:00–21:00'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Every day 9:00–21:00'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(
+      controller.state.draft.sessionData!.schedule.weeklyRules,
+      hasLength(7),
+    );
+    expect(find.text('Next offers'), findsOneWidget);
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
