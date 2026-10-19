@@ -826,7 +826,7 @@ async function replaceStoredDraft(
 void test('stored records of an unavailable type fail closed on every later command', async () => {
   const { service, repository } = harness([...contentTypeIds]);
   const draft = await data<DraftLike>(service.execute(actorA, createCommand()));
-  await replaceStoredDraft(repository, draft.draftId, { typeId: 'session' });
+  await replaceStoredDraft(repository, draft.draftId, { typeId: 'class_workshop' });
   assert.deepEqual(await service.execute(actorA, updateCommand(draft.draftId, 1, placeBody)), {
     kind: 'rejected',
     code: 'content_type_unsupported',

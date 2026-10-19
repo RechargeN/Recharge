@@ -46,6 +46,7 @@ export const contentFlagIds = Object.freeze({
   rentalAuthoring: 'content.rental.authoring',
   /** D3.4: Emulator-only Collection / Guide authoring through Content (default off). */
   collectionAuthoring: 'content.collection.authoring',
+  sessionAuthoring: 'content.session.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */

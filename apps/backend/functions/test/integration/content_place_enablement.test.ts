@@ -145,7 +145,7 @@ const emulatorSets: readonly (readonly ContentTypeId[])[] = [
 ];
 
 void test('types without a validator are refused as unsupported even when listed', async () => {
-  const unvalidated = ['route', 'session', 'scenario', 'find_people', 'class_workshop'] as const;
+  const unvalidated = ['route', 'scenario', 'find_people', 'class_workshop'] as const;
   const content = service(new InMemoryContentRepository(), [...unvalidated, 'place']);
   for (const typeId of unvalidated)
     await refusedWith(content.execute(actorA, create(typeId)), 'content_type_unsupported', typeId);

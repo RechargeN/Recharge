@@ -41,6 +41,7 @@ export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'activity',
   'rental',
   'collection',
+  'session',
 ]);
 
 /** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
@@ -50,6 +51,7 @@ export function authoringTypesFor(flags: {
   readonly activityAuthoring: boolean;
   readonly rentalAuthoring: boolean;
   readonly collectionAuthoring?: boolean;
+  readonly sessionAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
@@ -57,6 +59,7 @@ export function authoringTypesFor(flags: {
     ...(flags.activityAuthoring ? (['activity'] as const) : []),
     ...(flags.rentalAuthoring ? (['rental'] as const) : []),
     ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
+    ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
   ]);
 }
 

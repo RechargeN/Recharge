@@ -1037,6 +1037,9 @@ async function prepareContentCaller(
   );
   if (!decision.allowed) return refuse('unauthenticated');
   const enabledTypes = authoringTypesFor({
+    sessionAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.sessionAuthoring,
+    ),
     eventAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring),
     placeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.placeAuthoring),
     activityAuthoring: await access.composition.featureFlags.isEnabled(

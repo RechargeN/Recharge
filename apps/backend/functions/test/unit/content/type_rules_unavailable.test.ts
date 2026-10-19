@@ -16,7 +16,6 @@ import { FakeClock } from '../../support/fake_clock.js';
  * reason; none may be served by a generic or Event fallback validator.
  */
 const stillUnavailable = [
-  ['session', 'spec_not_approved'],
   ['class_workshop', 'spec_not_approved'],
   ['find_people', 'consent_gate_pending'],
   ['route', 'dependency_pending'],

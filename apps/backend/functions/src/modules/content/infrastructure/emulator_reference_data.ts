@@ -55,8 +55,9 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     const activity = input.typeId === 'activity';
     const rental = input.typeId === 'rental';
     const collection = input.typeId === 'collection';
+    const session = input.typeId === 'session';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
-    if ((activity || rental || collection) && !taxonomy.ok)
+    if ((activity || rental || collection || session) && !taxonomy.ok)
       return Promise.resolve({ ok: false, code: 'policy_unavailable' });
     const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
     return Promise.resolve({
@@ -65,13 +66,14 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity || rental || collection
+          : activity || rental || collection || session
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
       },
       market: { currencyCode: 'EUR', timezoneId: 'Europe/Riga' },
       lookups: {
+        ...(session ? { sessionProjectionWindowDays: () => 30 } : {}),
         supportsLocale: (locale: string) => ['en', 'ru', 'lv'].includes(locale),
         subcategoryApplies: (typeId: string, categoryId: string, subcategoryId: string) =>
           typeId === 'place'
@@ -82,9 +84,15 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
                 : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
                     'activity',
                   ) ?? false)
-              : typeId === 'collection'
-                ? collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
-                : true,
+              : typeId === 'session'
+                ? dataset === undefined
+                  ? undefined
+                  : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
+                      'session',
+                    ) ?? false)
+                : typeId === 'collection'
+                  ? collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
+                  : true,
         requiredCriteria: (typeId: string, categoryId: string, subcategoryId: string) => {
           if (typeId === 'place') return placeRequiredCriteria(categoryId, subcategoryId);
           if (typeId !== 'activity') return [];

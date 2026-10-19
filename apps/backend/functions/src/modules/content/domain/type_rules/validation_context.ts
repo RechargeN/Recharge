@@ -27,6 +27,8 @@ export interface RentalMarketPolicy {
 }
 
 export interface ReferenceLookups {
+  /** D3.5: snapshot of the current reference revision; absent means unavailable. */
+  sessionProjectionWindowDays?(): number | undefined;
   supportsLocale(locale: string): boolean | undefined;
   subcategoryApplies(
     typeId: ContentTypeId,

@@ -3,6 +3,7 @@ import {
   type ContentBody,
   type ContentTypeId,
 } from '../../../contracts/content_v1.js';
+import { sessionMediaIds, validateSessionBody } from './type_rules/session_rules.js';
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
@@ -14,7 +15,7 @@ import type { ContentValidationContext } from './type_rules/validation_context.j
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v6';
+export const contentTypeRegistryRevision = 'content-type-registry-v7';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -126,7 +127,9 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
     sourceAuthority: input.sourceAuthority,
     sourceResolver: input.sourceResolver,
     requiredCapabilities: capabilities,
-    allowedPublisherTypes: Object.freeze(['user', 'page'] as const),
+    allowedPublisherTypes: Object.freeze(
+      typeId === 'session' ? (['user'] as const) : (['user', 'page'] as const),
+    ),
     moderationProfileId: `${typeId}.default`,
     visibilityPolicy: input.visibilityPolicy ?? 'public_catalog',
     marketPolicy: 'single_market_per_content',
@@ -183,7 +186,7 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
     discoverFamily: 'Session',
     sourceAuthority: 'Bookable Session create block (SES-CRT-01)',
     sourceResolver: 'inline_body',
-    unavailable: { reason: 'spec_not_approved', dependency: 'SES-CRT-01 spec Draft' },
+    rules: { validate: validateSessionBody, mediaIds: sessionMediaIds },
   }),
   entry('scenario', {
     discoverFamily: 'Scenario',

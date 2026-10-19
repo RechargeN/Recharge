@@ -1,3 +1,4 @@
+import { isRecord, isInt } from '../domain/type_rules/validation_context.js';
 import type { LinkedPlaceEligibilityPort } from './ports/linked_place_eligibility_port.js';
 import type {
   PublishedObjectMembershipPort,
@@ -652,6 +653,7 @@ export class ContentPublicationService {
       principalId(context.principal),
       membership,
     );
+    await this.assertSessionScheduleSequence(context, draft);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     // Early feedback only: the binding check runs where the pointer switches.
     await this.assertTransition(
@@ -716,6 +718,7 @@ export class ContentPublicationService {
     // Membership is read again: the submit-time answer is not reused.
     const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
     this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal), membership);
+    await this.assertSessionScheduleSequence(context, draft);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
@@ -837,6 +840,22 @@ export class ContentPublicationService {
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    // D3.5: revalidate the immutable Session target, never the mutable draft.
+    if (target.typeId === 'session') {
+      if (canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions))
+        throw new ContentDomainRefusal('source_revision_stale');
+      const issues = entry.validate?.(
+        target.body,
+        this.validationContext(
+          { ...draft, body: target.body },
+          resolved,
+          nowUtc,
+          principalId(context.principal),
+        ),
+      ) ?? ['no_source_contract'];
+      if (issues.length > 0)
+        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+    }
     // The composition's rules apply to the target immutable body, not the draft.
     this.assertCompositionRules(
       target.typeId,
@@ -1060,6 +1079,45 @@ export class ContentPublicationService {
     tx.effects.append(await this.visibilityEffect(tx, next, nowUtc));
     this.auditAs(tx, systemActor, `content.moderation.${disposition}`, target.contentId, nowUtc);
     return next.revision;
+  }
+
+  /** D3.5: authoring allocates the next schedule number; rollback never allocates. */
+  private async assertSessionScheduleSequence(
+    context: CommandContext,
+    draft: ContentDraft,
+  ): Promise<void> {
+    if (draft.typeId !== 'session') return;
+    type Payload = { timezone_id: string; schedule: Record<string, unknown>; exceptions: unknown };
+    const payloadOf = (body: ContentBody): Payload => {
+      if (
+        !isRecord(body.session) ||
+        !isRecord(body.session.schedule) ||
+        !isInt(body.session.schedule.schedule_revision, 1, Number.MAX_SAFE_INTEGER)
+      )
+        throw new ContentDomainRefusal('source_revision_stale');
+      return body.session as Payload;
+    };
+    const next = payloadOf(draft.body);
+    const pointer = await context.tx.pointer(draft.contentId);
+    const current =
+      pointer?.currentPublishedRevisionId == null
+        ? null
+        : await context.tx.publishedRevision(pointer.currentPublishedRevisionId);
+    const fingerprint = (body: ContentBody) => {
+      const value = payloadOf(body);
+      const { schedule_revision, ...rules } = value.schedule;
+      void schedule_revision;
+      return canonicalJson({ timezone: value.timezone_id, rules, exceptions: value.exceptions });
+    };
+    const history = await context.tx.publishedRevisionsForContent(draft.contentId);
+    const maximum = history.reduce(
+      (max, revision) => Math.max(max, Number(payloadOf(revision.body).schedule.schedule_revision)),
+      0,
+    );
+    const same = current !== null && fingerprint(current.body) === fingerprint(draft.body);
+    const expected = same ? payloadOf(current.body).schedule.schedule_revision : maximum + 1;
+    if (next.schedule.schedule_revision !== expected)
+      throw new ContentDomainRefusal('source_revision_stale');
   }
 
   private usableType(typeId: ContentTypeId, storedSchemaMajor?: number): ContentTypeRegistryEntry {
@@ -1345,7 +1403,13 @@ export class ContentPublicationService {
     typeId: ContentTypeId,
     nowUtc: UtcInstant,
   ): Promise<ResolvedReferences> {
-    const resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
+    let resolution: ReferenceResolution;
+    try {
+      resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
+    } catch (error) {
+      if (typeId === 'session') throw new ContentDomainRefusal('policy_unavailable');
+      throw error;
+    }
     if (!resolution.ok) throw new ContentDomainRefusal(resolution.code);
     return resolution;
   }

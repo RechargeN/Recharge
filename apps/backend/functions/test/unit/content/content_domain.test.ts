@@ -97,17 +97,23 @@ const expectedUnavailable: Readonly<
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
   scenario: { reason: 'dependency_pending', dependency: 'BCK-10' },
   find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
-  session: { reason: 'spec_not_approved', dependency: 'SES-CRT-01 spec Draft' },
   class_workshop: {
     reason: 'spec_not_approved',
     dependency: 'Class/Workshop spec Ready for approval',
   },
 };
 /** Types whose approved source rules are implemented; grows one type per commit. */
-const expectedAvailable = ['place', 'activity', 'collection', 'rental', 'event'] as const;
+const expectedAvailable = [
+  'place',
+  'activity',
+  'collection',
+  'rental',
+  'event',
+  'session',
+] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v6');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v7');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
@@ -119,7 +125,10 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
     assert.equal(item.mapperRevision, `${item.typeId}-mapper-v1`);
     assert.equal(item.marketPolicy, 'single_market_per_content');
     assert.equal(item.localizedTextPolicy, 'per_locale_with_declared_fallback');
-    assert.deepEqual(item.allowedPublisherTypes, ['user', 'page']);
+    assert.deepEqual(
+      item.allowedPublisherTypes,
+      item.typeId === 'session' ? ['user'] : ['user', 'page'],
+    );
     assert.equal(item.requiredCapabilities.create, 'content.create');
     assert.equal(item.requiredCapabilities.submit, 'content.submit');
     assert.equal(item.requiredCapabilities.publish, 'content.publish');
