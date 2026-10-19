@@ -173,3 +173,38 @@ runtime, таймаутов и тестов. Конкуренция ресурс
 - Production, invited/unlisted Quick Plan authority, публикация и Route вне
   scope; `planning.scenarioI2` остаётся default-off. Offline-устройство не
   позволяет гарантированно отозвать уже доставленные данные.
+
+## Owner acceptance и интеграция, 2026-10-19/20
+
+Owner принял I2 в заявленном local/Emulator объёме 2026-10-19 и разрешил commit,
+перенос в интеграционную ветку и полный Emulator-прогон; push и deploy не разрешались.
+
+- `1505b18` — исходный I2 на `f32b97f` (ветка `codex/i2-scenario`, worktree `721e`).
+- `51d3f29` — cherry-pick на `codex/recharge-integration` после D3.5 (`0b131ab`).
+  Конфликты: R0 workflow оставляет закреплённый `subosito/flutter-action` из
+  интеграции вместо отдельного checkout Flutter SDK из I2; self-test раннера
+  проверяет этот вариант. Job timeout 60 → 90 мин: ограничение 16 групп — 68 мин,
+  60 уже не покрывало набор вместе с подготовительными gates. `scenario-i2` — 16-я
+  группа (55 invocations). Boundary inventory был устаревшим после D3.5, обновлён до 630 файлов.
+
+Проверка `51d3f29` в чистом detached worktree, `node_modules` идентичного lockfile
+(firebase-tools 15.34.0), Node 22.23.2 / npm 10.9.8 / Temurin 21.0.12+8 /
+Terraform 1.15.9 / Flutter 3.44.9:
+
+| Гейт | Результат |
+|---|---|
+| verify:toolchain, format, lint, typecheck | exit 0 |
+| Backend unit / contract / integration / stand | 744 / 58 / 257 / 43 pass, 0 fail/skip |
+| Runner self-tests / audit policy | 7/7 / 13/13 |
+| Manifest, Content layout, R1 layout/config/exports, generated, reproducibility | exit 0; digest `dffd5873b7e2dd6405e9c9d04acc72d793905e370383254fce8fbffd2186a52b` |
+| Production audit strict | exit 0; 6 moderate, 0 high/critical |
+| Boundary self-test / repo / inventory, diff check | exit 0; 630 files, 71/71, 0 violations |
+| Flutter analyze / full test | 0 issues / 1674 pass, 72 skip, 0 fail |
+| Raw-body probe | exit 0, cleanup выполнен |
+| Full Emulator — одна сессия `recharge-emulator-tests-X4toqb` | **16/16 groups, 323 pass, 0 fail, 0 skip, complete:true, code:0**; I2 15/15, cleanup подтверждён |
+
+Summary SHA-256: `5531c253b16a67d4f31c3a47223d66599dfbd8a6977c8777c52d168148a2368a`.
+Предыдущий полный прогон в интеграционном worktree (тоже 323/323) не засчитан:
+его `node_modules` отставали от lockfile (firebase-tools 15.28.1), и
+`verify:toolchain` там был красным. Hosted CI, native AVD для I2, unlisted, публикация
+и production остаются открытыми.

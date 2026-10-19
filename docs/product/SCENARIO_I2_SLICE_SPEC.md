@@ -1,8 +1,8 @@
 # I2 — Scenario persistence and collaboration
 
-Date: 2026-10-18. Status: Review — local/Emulator implementation complete, final
-gates green. Owner accepted the declared local/Emulator scope on 2026-10-19;
-Done after the full suite passes on the integration branch. Evidence:
+Date: 2026-10-18. Status: **Done — bounded local/Emulator scope**. Owner accepted
+the declared local/Emulator scope on 2026-10-19; integrated as `51d3f29` on
+`codex/recharge-integration` and verified there on the exact toolchain. Evidence:
 `docs/verification/SCENARIO_I2_VERIFICATION.md`.
 Task authorization covers bounded local/Emulator implementation, not deployment.
 
