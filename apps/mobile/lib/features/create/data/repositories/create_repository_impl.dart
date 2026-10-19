@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import '../../../../core/id/id_generator.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
@@ -12,6 +14,7 @@ import '../../domain/repositories/route_draft_persistence_repository.dart';
 import '../../domain/repositories/rental_promotion_repository.dart';
 import '../datasources/create_local_datasource.dart';
 import '../models/create_draft_model.dart';
+import '../models/scenario_draft_mapper.dart';
 
 class CreateRepositoryImpl
     implements
@@ -22,11 +25,14 @@ class CreateRepositoryImpl
   CreateRepositoryImpl({
     required CreateLocalDataSource localDataSource,
     required IdGenerator idGenerator,
+    CreateDraftCollectionRepository? scenarioSync,
   }) : _localDataSource = localDataSource,
-       _idGenerator = idGenerator;
+       _idGenerator = idGenerator,
+       _scenarioSync = scenarioSync;
 
   final CreateLocalDataSource _localDataSource;
   final IdGenerator _idGenerator;
+  final CreateDraftCollectionRepository? _scenarioSync;
 
   @override
   Future<CreateDraftEntity?> loadDraft(String userId) async {
@@ -35,7 +41,26 @@ class CreateRepositoryImpl
   }
 
   @override
-  Future<void> saveDraft(String userId, CreateDraftEntity draft) {
+  Future<void> saveDraft(String userId, CreateDraftEntity draft) async {
+    if (_scenarioSync != null &&
+        draft.objectType == CreateObjectType.scenario) {
+      final scenario = draft.scenarioData;
+      if (scenario == null || scenario.revision < 1) {
+        throw StateError('Scenario server save requires an explicit revision.');
+      }
+      final result = await saveIfRevision(
+        ownerId: userId,
+        draft: draft,
+        expectedScenarioRevision: scenario.revision - 1,
+        idempotencyKey:
+            'scenario-save:${sha256.convert(utf8.encode(ScenarioDraftMapper.canonicalJson({'actor': userId, 'id': draft.id, 'title': draft.title, 'scenario': ScenarioDraftMapper.toJson(scenario)})))}',
+      );
+      if (result.status != CreateDraftCollectionSaveStatus.saved &&
+          result.status != CreateDraftCollectionSaveStatus.replayed) {
+        throw StateError('Scenario save conflict.');
+      }
+      return;
+    }
     final CreateDraftEntity stored = draft.copyWith(
       draftStatus: DraftStatus.draft,
       publishStatus: PublishStatus.draft,
@@ -53,6 +78,9 @@ class CreateRepositoryImpl
     required String ownerId,
     required CreateObjectType type,
   }) async {
+    if (type == CreateObjectType.scenario && _scenarioSync != null) {
+      return _scenarioSync.listDrafts(ownerId: ownerId, type: type);
+    }
     final models = await _localDataSource.listCollectionDrafts(
       ownerId: ownerId,
       objectType: type.taxonomyId,
@@ -95,6 +123,12 @@ class CreateRepositoryImpl
       ownerId: ownerId,
       draftId: draftId,
     );
+    if (_scenarioSync != null &&
+        (model == null ||
+            createObjectTypeFromId(model.objectType) ==
+                CreateObjectType.scenario)) {
+      return _scenarioSync.loadDraftById(ownerId: ownerId, draftId: draftId);
+    }
     return model?.toEntity();
   }
 
@@ -105,6 +139,15 @@ class CreateRepositoryImpl
     required int expectedScenarioRevision,
     required String idempotencyKey,
   }) async {
+    if (_scenarioSync != null &&
+        draft.objectType == CreateObjectType.scenario) {
+      return _scenarioSync.saveIfRevision(
+        ownerId: ownerId,
+        draft: draft,
+        expectedScenarioRevision: expectedScenarioRevision,
+        idempotencyKey: idempotencyKey,
+      );
+    }
     final scenario = draft.scenarioData;
     if (draft.objectType != CreateObjectType.scenario ||
         scenario == null ||

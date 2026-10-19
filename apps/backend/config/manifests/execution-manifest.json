@@ -1110,6 +1110,34 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": []
+      },
+      {
+        "name": "scenarios",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "scenarioMembers",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "scenarioInvites",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "scenarioCommandReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
       }
     ]
   },
@@ -1178,6 +1206,11 @@
       {
         "id": "identity.session.rotate.incidentDisable",
         "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "planning.scenarioI2",
+        "kind": "feature",
         "defaultState": "off"
       }
     ]

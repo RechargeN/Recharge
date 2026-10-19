@@ -66,7 +66,11 @@ function repositoryFacts() {
     denied,
     ttl,
     composite,
-    features: [...idsOf("bookingFlagIds"), ...idsOf("identityFlagIds")],
+    features: [
+      ...idsOf("bookingFlagIds"),
+      ...idsOf("identityFlagIds"),
+      ...idsOf("scenarioFlagIds"),
+    ],
     emergency: idsOf("abuseEmergencySwitchIds"),
     region: readJson(path.join(configRoot, "region-policy.schema.json"))
       .properties,

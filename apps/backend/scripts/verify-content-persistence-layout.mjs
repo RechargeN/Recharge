@@ -118,6 +118,7 @@ const approvedOutsideUsers = {
   // I1 Quick Plan (2026-10-17): only the Emulator guard; its own collections,
   // no Content read or write.
   "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
+  "modules/quick_plan/firestore_scenario_service.ts": guardOnly,
   "modules/reviews/review_target.ts": {
     firestore_content_repository: ["contentCollections"],
   },

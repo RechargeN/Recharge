@@ -1,3 +1,4 @@
+import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenario_service.js';
 import { handleK2 } from './safety_entry.js';
 import { FirestoreReviewService } from './modules/reviews/firestore_review_service.js';
 import { handleK1 } from './moderation_entry.js';
@@ -1203,6 +1204,27 @@ export const libraryQueryV1 = onCall<unknown>(callableOptions, async (request) =
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
   return new FirestoreLibraryService(access.firestore, systemServerClock).query(
+    access.accessHint,
+    data,
+  );
+});
+
+export const scenarioCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreScenarioService(access.firestore, systemServerClock).command(
+    access.accessHint,
+    data,
+  );
+});
+export const scenarioQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreScenarioService(access.firestore, systemServerClock).query(
     access.accessHint,
     data,
   );

@@ -583,4 +583,6 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'libraryQueryV1',
   'quickPlanCommandV1',
   'quickPlanQueryV1',
+  'scenarioCommandV1',
+  'scenarioQueryV1',
 };

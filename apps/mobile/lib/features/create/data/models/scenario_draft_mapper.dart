@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../../domain/entities/scenario_budget_draft.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/entities/scenario_item_draft.dart';
@@ -5,6 +6,23 @@ import '../../domain/entities/scenario_logistics_draft.dart';
 
 class ScenarioDraftMapper {
   const ScenarioDraftMapper._();
+
+  /// Stable wire encoding shared by save fingerprints and expansion intents.
+  static String canonicalJson(Object? value) {
+    Object? sort(Object? v) {
+      if (v is Map) {
+        final keys = v.keys.cast<String>().toList()..sort();
+        return {for (final key in keys) key: sort(v[key])};
+      }
+      if (v is List) return v.map(sort).toList();
+      if (v is double && v.isFinite && v == v.truncateToDouble()) {
+        return v.toInt();
+      }
+      return v;
+    }
+
+    return jsonEncode(sort(value));
+  }
 
   static const Set<String> _knownScheduleSnapshotKeys = <String>{
     'freshness',

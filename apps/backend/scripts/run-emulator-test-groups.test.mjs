@@ -30,12 +30,13 @@ void test("all 40 original invocations, flags, globs and their order are retaine
     "moderation-k1",
     "quick-plan",
     "admin-support-k3",
+    "scenario-i2",
   ]);
   const tasks = emulatorTestGroups
     .filter((group) => !addedGroups.has(group.name))
     .flatMap((group) => group.tasks);
   assert.equal(tasks.length, 46);
-  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 54);
+  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 55);
   // Added after the snapshot: D3.8 Activity Catalog, the D3.3 Rental group,
   // the D3.4 Collection group and the D4.1 import group.
   const added = new Set([
@@ -55,7 +56,7 @@ void test("all 40 original invocations, flags, globs and their order are retaine
   );
 });
 void test("group selection is explicit and every measured bound has headroom", () => {
-  assert.equal(selectGroups().length, 15);
+  assert.equal(selectGroups().length, 16);
   for (const group of emulatorTestGroups) {
     assert.deepEqual(selectGroups(group.name), [group]);
     assert.ok(group.timeoutMs >= group.baselineMs * 1.75 + 30_000);
@@ -79,6 +80,33 @@ void test("inside scripts contain no build and named scripts launch the outer ru
       scripts[`test:emulator:${group.name}`],
       `node ../scripts/run-emulator-tests.mjs --group ${group.name}`,
     );
+});
+void test("R0 prepares the exact Flutter runtime and executes every mobile Emulator gate", () => {
+  const workflow = readFileSync(
+    path.resolve(functionsRoot, "../../../.github/workflows/backend-r0.yml"),
+    "utf8",
+  ).replace(/\r\n/g, "\n");
+  assert.ok(
+    workflow.includes(
+      "uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+    ),
+  );
+  assert.match(workflow, /flutter-version: "3\.44\.9"/);
+  for (const setting of [
+    "RECHARGE_DART=",
+    "RECHARGE_FLUTTER_TOOL=",
+    "RECHARGE_G_MOBILE=1",
+  ])
+    assert.ok(workflow.includes(setting), setting);
+  const timeout = Number(workflow.match(/timeout-minutes: (\d+)/)?.[1]);
+  assert.ok(
+    timeout * 60000 > suiteTimeoutMs(selectGroups()) + 10 * 60000,
+    "job must allow bounded suite plus prerequisite gates",
+  );
+  assert.ok(
+    workflow.indexOf("run: flutter pub get") <
+      workflow.indexOf("run: npm run test:emulator\n"),
+  );
 });
 void test("an invalid group fails before building or starting Emulator", () => {
   const result = spawnSync(

@@ -24,6 +24,79 @@ void main() {
     installationId: 'installation-001',
   );
 
+  test(
+    'Scenario content capabilities are data only at the exact DTO path',
+    () async {
+      var dispatched = 0;
+      final sessions = InMemoryBookingIdentitySessionStore();
+      await sessions.saveServerIssued(session);
+      final port = FunctionsBookingCallablePort(
+        endpoint: endpoint,
+        client: MockClient((_) async {
+          dispatched++;
+          return http.Response(
+            jsonEncode({
+              'result': {'kind': 'succeeded'},
+            }),
+            200,
+          );
+        }),
+        tokens: const _TokenProvider('token'),
+        sessions: sessions,
+      );
+      final content = <String, Object?>{
+        'draft': {
+          'scenario': {
+            'capabilities': {
+              'publicPublish': false,
+              'unlistedShare': false,
+              'liveLogistics': false,
+              'plannedTransport': true,
+            },
+          },
+        },
+      };
+      expect(
+        (await port.invoke('scenarioCommandV1', content))['kind'],
+        'succeeded',
+      );
+      for (final command in [
+        {
+          'capabilities': {'plannedTransport': true},
+        },
+        {
+          'draft': {
+            'scenario': {
+              'capabilities': {'Admin': true},
+            },
+          },
+        },
+        {
+          'draft': {
+            'scenario': {
+              'roles': ['owner'],
+            },
+          },
+        },
+        {
+          'draft': {
+            'scenario': {'userId': 'forged'},
+          },
+        },
+      ]) {
+        await expectLater(
+          port.invoke('scenarioCommandV1', command),
+          throwsA(isA<BookingCallableFailure>()),
+        );
+      }
+      await expectLater(
+        port.invoke('createInternalBookingV1', content),
+        throwsA(isA<BookingCallableFailure>()),
+      );
+      expect(dispatched, 1);
+    },
+  );
+
   test('Functions port injects only server-issued Identity Session', () async {
     late Map<String, Object?> sent;
     late Map<String, String> headers;

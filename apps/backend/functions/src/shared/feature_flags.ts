@@ -69,3 +69,8 @@ export const abuseEmergencySwitchIds = Object.freeze({
 });
 
 export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds];
+
+/** I2 bounded Scenario persistence and collaboration, Emulator only. */
+export const scenarioFlagIds = Object.freeze({
+  sync: 'planning.scenarioI2',
+});

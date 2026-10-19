@@ -91,6 +91,34 @@ function assertDenied(response: Response): void {
   );
 }
 
+void test('I2 Scenario, memberships, invites and receipts deny direct client reads/writes', async () => {
+  const identity = await createSyntheticEmulatorIdentity();
+  try {
+    for (const collection of [
+      'scenarios',
+      'scenarioMembers',
+      'scenarioInvites',
+      'scenarioCommandReceipts',
+    ]) {
+      for (const token of [undefined, identity.token]) {
+        assertDenied(await firestoreRead(`${collection}/${identity.uid}`, token));
+        assertDenied(await firestoreWrite(`${collection}/${identity.uid}`, token));
+      }
+    }
+  } finally {
+    const host = requireHost('FIREBASE_AUTH_EMULATOR_HOST');
+    const deleted = await fetch(
+      `http://${host}/identitytoolkit.googleapis.com/v1/accounts:delete?key=fake-api-key`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ idToken: identity.token }),
+      },
+    );
+    assert.equal(deleted.status, 200);
+  }
+});
+
 void test('Firestore and Storage deny unauthenticated client writes', async () => {
   assertDenied(await firestoreWrite('users/anonymous/private/probe'));
   assertDenied(await storageWrite('users/anonymous/probe.txt'));

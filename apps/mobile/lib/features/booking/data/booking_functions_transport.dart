@@ -185,9 +185,7 @@ final class FunctionsIdentitySessionClient {
       callableName: 'establishIdentitySessionV1',
       commandType: 'establishIdentitySession',
       requestId: requestId,
-      body: <String, Object?>{
-        'installationId': await _installations.current(),
-      },
+      body: <String, Object?>{'installationId': await _installations.current()},
     );
   }
 
@@ -221,9 +219,7 @@ final class FunctionsIdentitySessionClient {
       commandType: 'recoverIdentitySessions',
       requestId: requestId,
       forceRefreshToken: true,
-      body: <String, Object?>{
-        'installationId': await _installations.current(),
-      },
+      body: <String, Object?>{'installationId': await _installations.current()},
     );
   }
 
@@ -234,9 +230,7 @@ final class FunctionsIdentitySessionClient {
     required Map<String, Object?> body,
     bool forceRefreshToken = false,
   }) async {
-    final token = await _tokens.currentIdToken(
-      forceRefresh: forceRefreshToken,
-    );
+    final token = await _tokens.currentIdToken(forceRefresh: forceRefreshToken);
     if (token == null || token.isEmpty) {
       throw const BookingCallableFailure(
         code: 'unauthenticated',
@@ -326,7 +320,10 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
         dispatched: false,
       );
     }
-    _rejectTransportAuthority(command);
+    _rejectTransportAuthority(
+      command,
+      scenarioContent: callableName == 'scenarioCommandV1',
+    );
     final payload = Map<String, Object?>.from(command)
       ..remove('sessionContext')
       ..['sessionContext'] = session.toJson();
@@ -363,11 +360,7 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
       await _identitySessions.refresh(requestId: const Uuid().v4());
       final retry = Map<String, Object?>.from(command)
         ..['requestId'] = const Uuid().v4();
-      return _invokeWithSession(
-        callableName,
-        retry,
-        allowSessionRepair: false,
-      );
+      return _invokeWithSession(callableName, retry, allowSessionRepair: false);
     }
     return result;
   }
@@ -451,7 +444,12 @@ Future<Map<String, Object?>> _invokeCallable({
   return Map<String, Object?>.from(result);
 }
 
-void _rejectTransportAuthority(Object? value, {bool root = true}) {
+void _rejectTransportAuthority(
+  Object? value, {
+  bool root = true,
+  bool scenarioContent = false,
+  String path = '',
+}) {
   const forbidden = <String>{
     'actorid',
     'userid',
@@ -466,17 +464,54 @@ void _rejectTransportAuthority(Object? value, {bool root = true}) {
   if (value is Map) {
     for (final entry in value.entries) {
       final key = entry.key.toString().toLowerCase();
-      if (forbidden.contains(key) || (!root && key == 'sessioncontext')) {
+      final childPath = path.isEmpty ? key : '$path.$key';
+      final contentCapabilities =
+          scenarioContent &&
+          childPath == 'draft.scenario.capabilities' &&
+          entry.value is Map &&
+          (entry.value as Map).entries.every(
+            (e) =>
+                const {
+                  'multiDay',
+                  'stay',
+                  'plannedTransport',
+                  'alternatives',
+                  'multiCurrency',
+                  'optimizer',
+                  'unlistedShare',
+                  'publicPublish',
+                  'liveLogistics',
+                }.contains(e.key) &&
+                e.value is bool,
+          );
+      final snapshotPublisher =
+          scenarioContent &&
+          childPath == 'draft.scenario.items.[].source.snapshot.publisherid' &&
+          (entry.value == null || entry.value is String);
+      if ((forbidden.contains(key) &&
+              !contentCapabilities &&
+              !snapshotPublisher) ||
+          (!root && key == 'sessioncontext')) {
         throw const BookingCallableFailure(
           code: 'invalid-argument',
           dispatched: false,
         );
       }
-      _rejectTransportAuthority(entry.value, root: false);
+      _rejectTransportAuthority(
+        entry.value,
+        root: false,
+        scenarioContent: scenarioContent,
+        path: childPath,
+      );
     }
   } else if (value is List) {
     for (final item in value) {
-      _rejectTransportAuthority(item, root: false);
+      _rejectTransportAuthority(
+        item,
+        root: false,
+        scenarioContent: scenarioContent,
+        path: '$path.[]',
+      );
     }
   }
 }

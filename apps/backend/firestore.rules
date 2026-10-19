@@ -98,6 +98,10 @@ service cloud.firestore {
     match /bookingSafetyHolds/{document} { allow read, write: if false; }
     // I1 Quick Plan records are owner-scoped on the server (quickPlanCommandV1/QueryV1);
     // no client identity reads or writes them directly.
+    match /scenarios/{document} { allow read, write: if false; }
+    match /scenarioMembers/{document} { allow read, write: if false; }
+    match /scenarioInvites/{document} { allow read, write: if false; }
+    match /scenarioCommandReceipts/{document} { allow read, write: if false; }
     match /quickPlans/{document} { allow read, write: if false; }
     match /quickPlanCommandReceipts/{document} { allow read, write: if false; }
 

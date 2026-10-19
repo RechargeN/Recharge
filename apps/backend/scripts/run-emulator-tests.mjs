@@ -178,6 +178,8 @@ const expectedBoundedCallableExports = [
   "libraryQueryV1",
   "quickPlanCommandV1",
   "quickPlanQueryV1",
+  "scenarioCommandV1",
+  "scenarioQueryV1",
   "moderationCommandV1",
   "moderationQueryV1",
   "reportCommandV1",
