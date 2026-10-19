@@ -36,6 +36,7 @@ const commands = new Set([
   "media-reconcile",
   // D3.1: the stand Place (its own flag) — seed | verify | manifest | status.
   "place",
+  "session",
   // D3.2: the stand Activity (its own flag) — seed | verify | manifest | status.
   "activity",
   // D3.3: the stand Rental (its own flag) — seed | verify | manifest | status.

@@ -916,6 +916,7 @@ All 40 original Node invocations (including the final three globs) are retained.
 | `handoff-notifications` | 233.8 s | 450 s |
 | `place-activity` | 148.2 s | 300 s |
 | `collection` (D3.4) | 192.2 s | 390 s |
+| `session` (D3.5) | initial budget 120 s; actual duration in evidence | 390 s |
 | `import` (D4.1) | 54.2 s | 150 s |
 | `rules-reference` | 6.7 s | 120 s |
 
@@ -923,7 +924,7 @@ The `rental` group (D3.3) is bounded the same way (88.2 s, 210 s); see
 `scripts/run-emulator-test-groups.mjs`.
 
 Each limit is rounded up to 30 s from `1.75 × measured duration + 30 s`, with
-a 120 s floor. The outer full-run limit is 2550 s: the sum of group limits plus
+a 120 s floor. The current outer full-run limit is 3840 s (15 groups / 54 tasks): the sum of group limits plus
 180 s for startup and 60 s for shutdown. These are local hang bounds, not an SLO.
 A group's deadline includes all of its invocations; timeout or any nonzero exit
 makes the full run fail. Later groups still report their results sequentially.
@@ -942,3 +943,32 @@ Rollback: restore `scripts/run-emulator-tests.mjs`,
 ### D3.8 standalone Activity Catalog (local Emulator only)
 
 `RECHARGE_TEST_ACTIVITY_CATALOG=true` enables the backend Activity projection/query family. Mobile requires `--dart-define=RECHARGE_TEST_DISCOVER_CATALOG=true` and `--dart-define=RECHARGE_TEST_ACTIVITY_CATALOG=true` plus existing testBackend/non-release/loopback guards. Both Activity switches default off. `node scripts/build-taxonomy-dataset.mjs --check` verifies canonical artifact, bundled mirror and manifest; `node scripts/stand-d3-8-gate.mjs --yes` builds before starting the verified demo stand, resets only its owned data, tests real mobile Feed/Search/Map/Details and stops it. Use the existing pinned Node/Java/Flutter toolchain. The stand gate is a Windows host test, not device or production evidence. No dynamic criteria or dedicated duration/bestTime facets in this first projection. Rollback: disable both Activity switches. Re-enable with reconcile/rebuild and atomic activation if an earlier set recorded `type_disabled`.
+
+
+### T1 / D3.5 — Bookable Session (local Emulator only)
+
+Owner-approved Session v1.2; default-off `content.session.authoring`, local/LV,
+personal Publisher only. The server validates schedule rules and closing
+exceptions, never materializes slots or stores provider availability. Only
+external HTTPS booking; no Session Booking/capacity/hold/confirmed authority.
+Catalog/Discover stay excluded. See
+[`D3.5`](../../docs/product/D3_5_SESSION_PUBLICATION_AMENDMENT.md).
+
+Use the pinned Node/Java toolchain from `toolchain.lock.json` on PATH (including
+`JAVA_HOME/bin`, so the supervisor can verify the executable it owns):
+
+- `node scripts/stand-d3-5-gate.mjs --yes` from `apps/backend`: clean,
+  interrupted/resumed, repeated equality, actual Flutter controller/UI, verified
+  stop and cleanup. Its stand root is isolated outside Git under OS temp and
+  never resets another worktree's stand data.
+- `node scripts/run-emulator-tests.mjs --group session`: focused backend gate.
+- `node scripts/run-emulator-tests.mjs`: full shared session. Set
+  `RECHARGE_DART` to the Flutter SDK `bin/cache/dart-sdk/bin/dart.exe`,
+  `RECHARGE_FLUTTER_TOOL` to `bin/cache/flutter_tools.snapshot`, and
+  `RECHARGE_G_MOBILE=1` so existing Quick Plan/Library real-adapter gates run.
+- `node --test scripts/stand-d3-5-gate.test.mjs scripts/run-emulator-test-groups.test.mjs`:
+  launcher self-tests, including failure cleanup.
+
+Emulator fixtures use owner-service commands. Session test worlds remove and
+verify only their own UUID-bound fixtures and source objects; flags are restored.
+This is PC-host Emulator evidence, not device, staging, Linux or production.

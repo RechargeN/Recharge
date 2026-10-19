@@ -63,6 +63,37 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'session') {
+    // D3.1: loaded only for this command, like the F1/F2 and D2 commands.
+    const { seedContentSession, standSessionStatus, verifyStandSession } =
+      await import('./stand_content_session.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentSession(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} session=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandSession(firestore);
+      if (problems.length > 0)
+        throw new Error(`session invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified session invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentSession;
+      if (manifest === undefined) throw new Error('stand Session is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standSessionStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: session seed | verify | manifest | status');
+  }
   if (command === 'place') {
     // D3.1: loaded only for this command, like the F1/F2 and D2 commands.
     const { seedContentPlace, standPlaceStatus, verifyStandPlace } =

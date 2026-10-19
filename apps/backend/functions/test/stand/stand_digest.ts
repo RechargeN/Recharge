@@ -200,6 +200,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
   const members = Array.isArray(collection?.members) ? (collection.members as unknown[]) : [];
   const seededObjects: Array<readonly [Record<string, unknown> | undefined, string]> = [
     [manifest?.contentPlace as Record<string, unknown> | undefined, 'seed-place'],
+    [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
     [manifest?.contentRental as Record<string, unknown> | undefined, 'seed-rental'],
     [collection, 'seed-collection'],
