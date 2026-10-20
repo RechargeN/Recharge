@@ -18,7 +18,10 @@ export type ModerationAction =
   | 'restore'
   /** D2: restrict or restore one Media asset (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md` §7). */
   | 'restrict_media'
-  | 'restore_media';
+  | 'restore_media'
+  /** SCN-PUB-01 SP-03: restrict or restore one unlisted Scenario share. */
+  | 'restrict_share'
+  | 'restore_share';
 
 export const moderationActions: readonly ModerationAction[] = Object.freeze([
   'approve',
@@ -28,11 +31,18 @@ export const moderationActions: readonly ModerationAction[] = Object.freeze([
   'restore',
   'restrict_media',
   'restore_media',
+  'restrict_share',
+  'restore_share',
 ]);
 
 /** Actions that act on a Media asset instead of a Content publication. */
 export function isMediaAction(action: ModerationAction): boolean {
   return action === 'restrict_media' || action === 'restore_media';
+}
+
+/** Actions that act on an unlisted Scenario share; `contentId` holds its Scenario. */
+export function isShareAction(action: ModerationAction): boolean {
+  return action === 'restrict_share' || action === 'restore_share';
 }
 
 export type ModerationFailureCode =
@@ -74,6 +84,8 @@ export interface ModerationTarget {
   /** Media actions: the asset and its revision; `contentId` is its Content binding. */
   readonly assetId?: string;
   readonly assetRevision?: number;
+  /** Share actions: the share id (hash of its token, never the token). */
+  readonly shareId?: string;
 }
 
 export interface StaffModerationCommand {
@@ -88,6 +100,7 @@ export interface StaffModerationCommand {
     readonly expectedRevision?: number;
     readonly submissionId?: string;
     readonly assetId?: string;
+    readonly shareId?: string;
   };
   /** `restore` / `restore_media` only: the exact decision that is lifted. */
   readonly restoresDecisionId?: string;

@@ -56,8 +56,14 @@ export type CollectionObjectType =
  * rule fails closed; a client-supplied snapshot is never authority.
  */
 export interface PublishedObjectLookup {
-  statusOf(objectType: CollectionObjectType, objectId: string): 'ready' | 'unavailable' | undefined;
+  statusOf(
+    objectType: CollectionObjectType | ScenarioStopType,
+    objectId: string,
+  ): 'ready' | 'unavailable' | undefined;
 }
+
+/** Catalog object types a distributed Scenario stop may reference (SCN-PUB-01). */
+export type ScenarioStopType = 'event' | 'place' | 'activity' | 'bookable_session';
 
 export interface ContentValidationContext {
   readonly typeId: ContentTypeId;

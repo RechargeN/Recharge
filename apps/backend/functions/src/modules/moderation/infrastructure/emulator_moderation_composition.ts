@@ -5,7 +5,7 @@ import type { ContentPublicationService } from '../../content/application/conten
 import type { FirestoreContentRepository } from '../../content/infrastructure/firestore_content_repository.js';
 import { FirestoreIdentityAuthorityRepository } from '../../identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { ModerationService } from '../application/moderation_service.js';
-import type { MediaModerationPort } from '../application/ports.js';
+import type { MediaModerationPort, ShareModerationPort } from '../application/ports.js';
 import { ContentModerationAdapter } from './content_moderation_adapter.js';
 import { EmulatorStaffAuthority } from './emulator_staff_authority.js';
 import { FirestoreModerationRepository } from './firestore_moderation_repository.js';
@@ -42,6 +42,8 @@ export function createEmulatorModerationService(input: {
   readonly contentService: ContentPublicationService;
   /** D2: Media's verified restriction path for `restrict_media` / `restore_media`. */
   readonly media?: MediaModerationPort;
+  /** SCN-PUB-01: Planning's verified share restriction path. */
+  readonly shares?: ShareModerationPort;
   readonly clock?: ServerClock;
   readonly environment?: NodeJS.ProcessEnv;
 }) {
@@ -60,6 +62,7 @@ export function createEmulatorModerationService(input: {
       input.contentService,
     ),
     ...(input.media === undefined ? {} : { media: input.media }),
+    ...(input.shares === undefined ? {} : { shares: input.shares }),
     clock: input.clock ?? systemServerClock,
   });
   return Object.freeze({ service, staff, repository: input.repository });

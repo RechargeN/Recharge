@@ -7,6 +7,7 @@ import type {
   CatalogActivityItem,
   CatalogItem,
   CatalogOccurrence,
+  CatalogScenarioItem,
 } from '../domain/catalog_item.js';
 import { parseDiscoverQuery, type DiscoverQuery } from '../domain/discover_query.js';
 import type { ListingTypeId } from '../domain/published_object_link.js';
@@ -64,8 +65,17 @@ export interface CatalogEventCard {
   readonly projectedAtUtc: string;
 }
 
+/** SP-12 card: no itinerary and no stop references; Details resolves them fresh. */
+export type CatalogScenarioCard = Omit<CatalogScenarioItem, 'itinerary' | 'stops'> & {
+  readonly ref: { readonly typeId: 'scenario'; readonly contentId: string };
+  readonly distanceMeters: number | null;
+  readonly changedSinceSnapshot: boolean;
+  readonly projectedAtUtc: string;
+};
+
 export type CatalogCard =
   | CatalogEventCard
+  | CatalogScenarioCard
   | (CatalogActivityItem & {
       readonly ref: { readonly typeId: 'activity'; readonly contentId: string };
       readonly distanceMeters: number | null;
@@ -97,7 +107,10 @@ export interface MapResult {
   readonly freshness: CatalogFreshness;
   /** Every leaf is a member of the Feed result of the same token. */
   readonly leaves: readonly {
-    readonly ref: { readonly typeId: 'event' | 'activity'; readonly contentId: string };
+    readonly ref: {
+      readonly typeId: 'event' | 'activity' | 'scenario';
+      readonly contentId: string;
+    };
     readonly point: NonNullable<CatalogEventItem['point']>;
     readonly title: string;
   }[];
@@ -151,7 +164,73 @@ export class CatalogQueryService {
     private readonly placeLinks?: PlaceLinkService,
     private readonly publishedObjects?: PublishedObjectLinkService,
     private readonly safetyVisible?: (item: CatalogItem, direct: boolean) => Promise<boolean>,
+    /** I3: the local Scenario family and the exact-id status of its stops. */
+    private readonly scenario: {
+      readonly enabled: boolean;
+      readonly stops?: PublishedObjectLinkService;
+    } = { enabled: false },
   ) {}
+
+  /** SP-09: fresh status of one stop; anything but `eligible` is unavailable. */
+  async #stop(item: CatalogScenarioItem, objectType: string, objectId: string) {
+    const typeId =
+      objectType === 'bookable_session'
+        ? 'session'
+        : (objectType as 'event' | 'place' | 'activity');
+    if (!['event', 'place', 'activity', 'session'].includes(typeId)) return null;
+    const result = await this.scenario.stops?.status({
+      typeId,
+      contentId: objectId,
+      marketId: item.marketId,
+    });
+    return result?.status === 'eligible' ? result.object : null;
+  }
+
+  /** SP-09: at least two active stops are available now (own items always are). */
+  async #scenarioAvailable(item: CatalogScenarioItem): Promise<boolean> {
+    let available = item.ownActiveItems;
+    for (const stop of item.stops) {
+      if (available >= 2) break;
+      if ((await this.#stop(item, stop.objectType, stop.objectId)) !== null) available++;
+    }
+    return available >= 2;
+  }
+
+  /**
+   * SP-09/SP-10 Details: every catalog stop is resolved now; an unavailable one
+   * becomes `unavailable` with its item id and kind only, never its data.
+   */
+  async #publicScenario(item: CatalogScenarioItem) {
+    const { stops: ignored, ...publicItem } = item;
+    void ignored;
+    const items = Array.isArray(item.itinerary.items) ? item.itinerary.items : [];
+    const resolved = [];
+    let available = item.ownActiveItems;
+    for (const raw of items as Record<string, unknown>[]) {
+      const stop = raw.stop as Record<string, unknown>;
+      if (stop?.type !== 'catalog') {
+        resolved.push(raw);
+        continue;
+      }
+      const object = await this.#stop(item, String(stop.objectType), String(stop.objectId));
+      const active = raw.role !== 'alternative' || raw.selected === true;
+      if (object !== null && active) available++;
+      resolved.push(
+        object === null
+          ? {
+              id: raw.id,
+              dayId: raw.dayId,
+              kind: raw.kind,
+              role: raw.role,
+              stop: { type: 'unavailable' },
+            }
+          : { ...raw, stop: { ...stop, title: object.title } },
+      );
+    }
+    if (available < 2) return null;
+    // Stop references are not repeated: the itinerary carries only available ones.
+    return { ...publicItem, stops: [], itinerary: { ...item.itinerary, items: resolved } };
+  }
 
   /** D3.4: exact-id status of a published listing (any listing type). */
   publishedObject(input: {
@@ -235,7 +314,7 @@ export class CatalogQueryService {
     readonly snapshotToken?: string;
     readonly cursor?: string;
   }): Promise<FeedPage | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(request.query, this.activityEnabled);
+    const parsed = parseDiscoverQuery(request.query, this.activityEnabled, this.scenario.enabled);
     if (parsed.ok && parsed.query.textTokens.length === 0)
       return { kind: 'invalid', code: 'text_required' };
     return this.feed(request);
@@ -319,6 +398,8 @@ export class CatalogQueryService {
         item: null,
         changedSinceSnapshot: false,
       };
+    if (current.item?.typeId === 'scenario' && !this.scenario.enabled)
+      return { kind: 'unsupported', code: 'type_disabled:scenario' };
     if (current.item?.typeId === 'activity') {
       if (!this.activityEnabled) return { kind: 'unsupported', code: 'type_disabled:activity' };
       const pinned = await this.references.readTaxonomyRevision?.(
@@ -337,7 +418,7 @@ export class CatalogQueryService {
       };
     let changed = false;
     if (request.snapshotToken !== undefined && request.query !== undefined) {
-      const parsed = parseDiscoverQuery(request.query, this.activityEnabled);
+      const parsed = parseDiscoverQuery(request.query, this.activityEnabled, this.scenario.enabled);
       if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
       const check = verifySnapshot(
         request.snapshotToken,
@@ -349,6 +430,24 @@ export class CatalogQueryService {
       changed =
         atSnapshot?.publishedRevisionId !== current.publishedRevisionId ||
         atSnapshot?.state !== current.state;
+    }
+    if (current.state === 'listed' && current.item?.typeId === 'scenario') {
+      const scenario = await this.#publicScenario(current.item);
+      return scenario === null
+        ? {
+            kind: 'succeeded',
+            state: 'excluded',
+            reason: 'stops_unavailable',
+            item: null,
+            changedSinceSnapshot: changed,
+          }
+        : {
+            kind: 'succeeded',
+            state: 'listed',
+            reason: null,
+            item: scenario,
+            changedSinceSnapshot: changed,
+          };
     }
     return {
       kind: 'succeeded',
@@ -376,7 +475,7 @@ export class CatalogQueryService {
     snapshotToken: string | undefined,
     paging: boolean,
   ): Promise<Resolved | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(rawQuery, this.activityEnabled);
+    const parsed = parseDiscoverQuery(rawQuery, this.activityEnabled, this.scenario.enabled);
     if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
     const requestNow = this.clock.now().getTime();
     const set = await this.#activeSet();
@@ -464,6 +563,10 @@ export class CatalogQueryService {
       if (this.safetyVisible && !(await this.safetyVisible(atSnapshot.item, false))) continue;
       // Tombstone wins over the snapshot: hidden now means not served.
       if (latest !== undefined && latest.state !== 'listed') continue;
+      if (atSnapshot.item.typeId === 'scenario') {
+        // SP-09: fewer than two available stops now means not listed now.
+        if (!this.scenario.enabled || !(await this.#scenarioAvailable(atSnapshot.item))) continue;
+      }
       if (atSnapshot.item.typeId === 'activity') {
         if (!this.activityEnabled) continue;
         const pinned = await this.references.readTaxonomyRevision?.(
@@ -542,6 +645,18 @@ export class CatalogQueryService {
 
   #card(entry: Eligible): CatalogCard {
     const item = entry.item;
+    if (item.typeId === 'scenario') {
+      const { itinerary: hidden, stops: refs, ...card } = item;
+      void hidden;
+      void refs;
+      return {
+        ...card,
+        ref: { typeId: 'scenario', contentId: item.contentId },
+        distanceMeters: entry.distance,
+        changedSinceSnapshot: entry.changed,
+        projectedAtUtc: entry.version.projectedAtUtc,
+      };
+    }
     if (item.typeId === 'activity')
       return {
         ...item,

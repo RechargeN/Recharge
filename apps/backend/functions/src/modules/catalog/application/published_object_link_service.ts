@@ -2,6 +2,7 @@ import type { ContentCatalogSource, SourcePointer } from './ports.js';
 import { normalizeText, type SourceRevision } from '../domain/catalog_item.js';
 import type {
   ListingTypeId,
+  RelationTypeId,
   PublishedObjectCandidatesResult,
   PublishedObjectLinkResult,
 } from '../domain/published_object_link.js';
@@ -26,7 +27,7 @@ export class PublishedObjectLinkService {
    */
   async status(
     input: {
-      readonly typeId: ListingTypeId;
+      readonly typeId: RelationTypeId;
       readonly contentId: string;
       readonly marketId: string;
     },
@@ -108,7 +109,7 @@ export class PublishedObjectLinkService {
   private isPublicListing(
     revision: SourceRevision,
     input: {
-      readonly typeId: ListingTypeId;
+      readonly typeId: RelationTypeId;
       readonly contentId: string;
       readonly marketId: string;
     },

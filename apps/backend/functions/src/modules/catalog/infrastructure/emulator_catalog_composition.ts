@@ -37,6 +37,8 @@ export function createEmulatorCatalogComposition(
   const repository = new FirestoreCatalogRepository(firestore, environment);
   const contentRepository = new FirestoreContentRepository(firestore, { environment });
   const activityEnabled = environment.RECHARGE_TEST_ACTIVITY_CATALOG === 'true';
+  // I3 / BCK08-OD-04-S: the local Scenario family, off unless switched on.
+  const scenarioEnabled = environment.RECHARGE_TEST_SCENARIO_CATALOG === 'true';
   const references = new EmulatorSyntheticReferenceData();
   const base = new ContentFeedCatalogSource(
     new ContentPublicationFeed(firestore, contentRepository),
@@ -64,7 +66,16 @@ export function createEmulatorCatalogComposition(
     environment.RECHARGE_TEST_COLLECTION_MEMBERSHIP === 'true',
     safetyAllowed,
   );
-  const projector = new CatalogProjector({ repository, source, clock, activityEnabled });
+  // SCN-PUB-01 SP-08: exact-id status of Scenario stops. Read-only; Content and
+  // Planning ask it only behind their own Scenario flags.
+  const scenarioStops = new PublishedObjectLinkService(source, true, safetyAllowed);
+  const projector = new CatalogProjector({
+    repository,
+    source,
+    clock,
+    activityEnabled,
+    scenarioEnabled,
+  });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
   const sets = new CatalogSets(repository, source, projector, reconciler, clock);
   const query = new CatalogQueryService(
@@ -84,6 +95,7 @@ export function createEmulatorCatalogComposition(
       const effects = await relationEffects(firestore, options.viewerId, user);
       return !(effects.blocked || effects.muted) || (direct && item.typeId === 'event');
     },
+    { enabled: scenarioEnabled, stops: scenarioStops },
   );
   return Object.freeze({
     repository,
@@ -94,5 +106,6 @@ export function createEmulatorCatalogComposition(
     query,
     placeLinks,
     publishedObjects,
+    scenarioStops,
   });
 }

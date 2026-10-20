@@ -19,7 +19,6 @@ const stillUnavailable = [
   ['class_workshop', 'spec_not_approved'],
   ['find_people', 'consent_gate_pending'],
   ['route', 'dependency_pending'],
-  ['scenario', 'dependency_pending'],
 ] as const;
 
 const actor = {
@@ -104,7 +103,7 @@ for (const [typeId, reason] of stillUnavailable)
     assert.equal(repository.snapshot().audit.length, 0);
   });
 
-void test("these five types are never served by another type's rules", () => {
+void test("the remaining unavailable types are never served by another type's rules", () => {
   const rules = new Set(
     contentTypeIds
       .map((typeId) => resolveContentType(typeId))

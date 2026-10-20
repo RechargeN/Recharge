@@ -5,6 +5,7 @@ import {
   attest,
   commandHash,
   isMediaAction,
+  isShareAction,
   moderationActions,
   moderationIssuer,
   moderationPolicyRevision,
@@ -24,6 +25,7 @@ import type {
   ContentModerationPort,
   EnforcementOutcome,
   MediaModerationPort,
+  ShareModerationPort,
   StaffActor,
   StaffAuthorityPort,
   SubmissionView,
@@ -35,6 +37,8 @@ export interface ModerationServiceDependencies {
   readonly content: ContentModerationPort;
   /** D2: Media actions; without it they find no target. */
   readonly media?: MediaModerationPort;
+  /** SCN-PUB-01: share actions; without it they find no target. */
+  readonly shares?: ShareModerationPort;
   readonly clock: ServerClock;
   readonly newId?: () => string;
   readonly requireScope?: boolean;
@@ -218,7 +222,17 @@ export class ModerationService {
     let enforcement: EnforcementOutcome;
     try {
       const media = this.#deps.media;
-      if (isMediaAction(decision.action)) {
+      const shares = this.#deps.shares;
+      if (isShareAction(decision.action)) {
+        if (shares === undefined || decision.target.shareId === undefined)
+          return moderationRejected('unknown_outcome');
+        // Planning verifies the recorded decision itself before it changes anything.
+        enforcement = await shares.enforce({
+          decisionId: decision.decisionId,
+          shareId: decision.target.shareId,
+          restricted: decision.action === 'restrict_share',
+        });
+      } else if (isMediaAction(decision.action)) {
         if (media === undefined || decision.target.assetId === undefined)
           return moderationRejected('unknown_outcome');
         // Media verifies the recorded decision itself before it changes anything.
@@ -311,6 +325,7 @@ export class ModerationService {
     command: StaffModerationCommand,
   ): Promise<ModerationResult<ModerationTarget>> {
     if (isMediaAction(command.action)) return this.#resolveMediaTarget(command);
+    if (isShareAction(command.action)) return this.#resolveShareTarget(command);
     const { submissionId } = command.target;
     const contentId = command.target.contentId ?? '';
     if (command.action === 'approve' || command.action === 'reject') {
@@ -367,6 +382,31 @@ export class ModerationService {
       contentId,
       publishedRevisionId: publication.currentPublishedRevisionId,
       pointerRevision: publication.pointerRevision,
+    });
+  }
+
+  /** SCN-PUB-01: the share as Planning knows it; a restore names a `restrict_share` of it. */
+  async #resolveShareTarget(
+    command: StaffModerationCommand,
+  ): Promise<ModerationResult<ModerationTarget>> {
+    const shareId = command.target.shareId ?? '';
+    const share = await this.#deps.shares?.share(shareId);
+    if (share === undefined || share === null) return moderationRejected('target_not_found');
+    if (command.action === 'restore_share') {
+      const restored = await this.#deps.repository.transact((tx) =>
+        tx.decision(command.restoresDecisionId ?? ''),
+      );
+      if (
+        restored === null ||
+        restored.action !== 'restrict_share' ||
+        restored.target.shareId !== shareId
+      )
+        return moderationRejected('target_not_found');
+    }
+    return moderationSucceeded({
+      ...(this.#deps.requireScope ? { marketId: 'LV', typeId: 'scenario' } : {}),
+      contentId: share.scenarioId,
+      shareId,
     });
   }
 
@@ -427,7 +467,10 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     target === null
   )
     return null;
-  const { contentId, submissionId, assetId, expectedRevision } = target as Record<string, unknown>;
+  const { contentId, submissionId, assetId, shareId, expectedRevision } = target as Record<
+    string,
+    unknown
+  >;
   if (
     expectedRevision !== undefined &&
     (!Number.isSafeInteger(expectedRevision) || Number(expectedRevision) < 1)
@@ -435,6 +478,33 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
     return null;
   const restoresDecisionId = value.restoresDecisionId;
   const action = value.action as ModerationAction;
+  if (isShareAction(action)) {
+    // A share action names exactly one share id (64 hex) and nothing else.
+    if (
+      typeof shareId !== 'string' ||
+      !/^[a-f0-9]{64}$/u.test(shareId) ||
+      contentId !== undefined ||
+      submissionId !== undefined ||
+      assetId !== undefined ||
+      expectedRevision !== undefined
+    )
+      return null;
+    if (
+      restoresDecisionId !== undefined &&
+      (typeof restoresDecisionId !== 'string' || !idPattern.test(restoresDecisionId))
+    )
+      return null;
+    if ((action === 'restore_share') !== (typeof restoresDecisionId === 'string')) return null;
+    return {
+      schemaVersion: 1,
+      action,
+      idempotencyKey: value.idempotencyKey,
+      reason: value.reason,
+      target: { shareId },
+      ...(typeof restoresDecisionId === 'string' ? { restoresDecisionId } : {}),
+    };
+  }
+  if (shareId !== undefined) return null;
   if (isMediaAction(action)) {
     // D2: a Media action names exactly one asset and nothing of Content.
     if (

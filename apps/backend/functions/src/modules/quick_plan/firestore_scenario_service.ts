@@ -1,13 +1,33 @@
+import { randomUUID } from 'node:crypto';
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
 import { FirestoreBookingAccessAuthority } from '../../booking/firestore_booking_access_authority.js';
 import type { BookingAccessHint } from '../../shared/booking_access_authority.js';
 import type { ServerClock } from '../../shared/server_clock.js';
 import { isEntityId, isIdempotencyKey } from '../../shared/ids.js';
-import { assertContentEmulatorContext } from '../content/infrastructure/firestore_content_repository.js';
+import {
+  assertContentEmulatorContext,
+  scenarioPublicationStanding,
+} from '../content/infrastructure/firestore_content_repository.js';
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
 import { FirestoreFeatureFlagGate } from '../../platform/config/firestore_feature_flag_gate.js';
 import { exact, record } from '../library/library_contract.js';
 import { quickPlanCollections, quickPlanFlag, reject, type Result } from './quick_plan_contract.js';
+import { scenarioFlagIds } from '../../shared/feature_flags.js';
+import { relationEffects } from '../../shared/safety_visibility.js';
+import { safetyRestricted } from '../../shared/safety_instruction.js';
+import { mapScenarioDistribution, type DistributionResult } from './scenario_distribution.js';
+import {
+  isShareToken,
+  newShareToken,
+  scenarioPublicationCollections,
+  scenarioStopLookup,
+  shareHashMatches,
+  shareTokenHash,
+  shareTtlDays,
+  type ScenarioRevisionRecord,
+  type ScenarioShareRecord,
+  type ScenarioStopsPort,
+} from './scenario_publication.js';
 
 interface Child {
   id: string;
@@ -45,6 +65,8 @@ interface Plan {
   revision: number;
   draft: ScenarioDto | null;
   updatedAtUtc: string;
+  /** SCN-PUB-01: the one active unlisted share, if any. */
+  activeShare?: { shareId: string; expiresAtUtc: string } | null;
 }
 interface Member {
   actorId: string;
@@ -82,13 +104,15 @@ interface QuickSource {
   plan: { id: string; currencyCode: string; steps: QuickStep[] };
 }
 
-export const scenarioFlag = 'planning.scenarioI2';
+export const scenarioFlag = scenarioFlagIds.sync;
 export const scenarioCollections = Object.freeze({
   plans: 'scenarios',
   members: 'scenarioMembers',
   invites: 'scenarioInvites',
   receipts: 'scenarioCommandReceipts',
+  ...scenarioPublicationCollections,
 });
+const publicationCommands = ['distribute', 'share', 'unshare'];
 const ulid = (v: unknown): v is string =>
   typeof v === 'string' && /^[0-7][0-9A-HJKMNP-TV-Z]{25}$/.test(v);
 const revision = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >= 0;
@@ -111,6 +135,7 @@ const fields = [
   'sourceHash',
   'selectedStopIds',
   'replayHash',
+  'ttlDays',
 ];
 
 /** Bounded canonical Scenario DTO. No Create envelope, publisher, Route or grants. */
@@ -244,8 +269,13 @@ export class FirestoreScenarioService {
   constructor(
     private readonly db: Firestore,
     private readonly clock: ServerClock,
+    /** SCN-PUB-01: Catalog-owned stop status; without it catalog stops fail closed. */
+    private readonly stops?: ScenarioStopsPort,
   ) {
     assertContentEmulatorContext(db);
+  }
+  private flag(tx: Transaction, id: string) {
+    return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(id, tx);
   }
   private async actor(tx: Transaction, hint: BookingAccessHint) {
     try {
@@ -288,13 +318,24 @@ export class FirestoreScenarioService {
     const r = record(raw);
     if (
       !r ||
-      !exact(r, ['schemaVersion', 'requestId', 'scenarioId', 'recipientId', 'cursor']) ||
+      !exact(r, [
+        'schemaVersion',
+        'requestId',
+        'scenarioId',
+        'recipientId',
+        'cursor',
+        'shareToken',
+      ]) ||
       r.schemaVersion !== 1 ||
       !isEntityId(r.requestId) ||
       (r.scenarioId !== undefined && !ulid(r.scenarioId)) ||
       (r.recipientId !== undefined && (!isEntityId(r.recipientId) || r.scenarioId === undefined))
     )
       return reject('request_invalid');
+    if (r.shareToken !== undefined)
+      return r.scenarioId === undefined && r.recipientId === undefined && r.cursor === undefined
+        ? this.resolveShare(hint, r.shareToken)
+        : reject('request_invalid');
     const cursor = record(r.cursor);
     if (
       r.cursor !== undefined &&
@@ -402,9 +443,17 @@ export class FirestoreScenarioService {
       !ulid(c.scenarioId) ||
       !revision(c.expectedRevision) ||
       !revision(c.generation) ||
-      !['save', 'delete', 'invite', 'accept', 'cancel', 'revoke', 'role', 'expand'].includes(
-        String(c.commandType),
-      )
+      ![
+        'save',
+        'delete',
+        'invite',
+        'accept',
+        'cancel',
+        'revoke',
+        'role',
+        'expand',
+        ...publicationCommands,
+      ].includes(String(c.commandType))
     )
       return reject('request_invalid');
     const type = String(c.commandType),
@@ -425,6 +474,9 @@ export class FirestoreScenarioService {
         'selectedStopIds',
         'replayHash',
       ],
+      distribute: [],
+      share: ['ttlDays'],
+      unshare: [],
     };
     if (
       !exact(c, [
@@ -467,6 +519,20 @@ export class FirestoreScenarioService {
         !c.selectedStopIds.every(isEntityId))
     )
       return reject('request_invalid');
+    if (
+      type === 'share' &&
+      c.ttlDays !== undefined &&
+      (!Number.isInteger(c.ttlDays) ||
+        Number(c.ttlDays) < 1 ||
+        Number(c.ttlDays) > shareTtlDays.max)
+    )
+      return reject('request_invalid');
+    // SCN-PUB-01: the distribution is mapped and its stops resolved before any
+    // transaction; the transaction then requires exactly the revision mapped.
+    const prepared =
+      type === 'distribute' || type === 'share'
+        ? await this.prepareDistribution(id, type === 'share' ? 'unlisted' : 'public')
+        : undefined;
     return this.db.runTransaction(async (tx) => {
       const actor = await this.actor(tx, hint);
       if (!actor) return reject('unauthenticated');
@@ -552,6 +618,23 @@ export class FirestoreScenarioService {
         tx.create(receiptRef, { actorId: actor, hash, binding, result });
         return result;
       };
+      if (publicationCommands.includes(type)) {
+        // Editing a shared Scenario never grants publication (SP-01).
+        if (!owner) return reject('not_found_or_forbidden');
+        return this.publicationCommand(
+          tx,
+          type,
+          c,
+          p,
+          planRef,
+          actor,
+          prepared,
+          (result, stored) => {
+            tx.create(receiptRef, { actorId: actor, hash, binding, result: stored ?? result });
+            return result;
+          },
+        );
+      }
       if (['invite', 'cancel', 'revoke', 'role', 'delete'].includes(type) && !owner)
         return reject('not_found_or_forbidden');
       if (type === 'save' && !creating && !owner && m?.role !== 'editor')
@@ -579,6 +662,12 @@ export class FirestoreScenarioService {
       }
       if (type === 'delete') {
         if (p!.revision !== c.expectedRevision) return reject('revision_conflict');
+        // SP-11: no implicit cascade; withdraw the publication and revoke the share first.
+        if (
+          (await this.shareStanding(tx, p!)) ||
+          (await scenarioPublicationStanding(this.db, tx, id))
+        )
+          return reject('publication_active');
         tx.set(planRef, { ...p, status: 'deleted', draft: null, revision: p!.revision + 1 });
         return finish({ schemaVersion: 1, kind: 'succeeded' });
       }
@@ -679,9 +768,170 @@ export class FirestoreScenarioService {
       revision: (current?.revision ?? 0) + 1,
       updatedAtUtc: this.clock.now().toISOString(),
       draft,
+      // A share points at an immutable revision; saving the draft keeps it as it is.
+      ...(current?.activeShare ? { activeShare: current.activeShare } : {}),
     };
     tx.set(ref, next);
     return next;
+  }
+  private async prepareDistribution(
+    id: string,
+    mode: 'public' | 'unlisted',
+  ): Promise<{ revision: number; draftHash: string; result: DistributionResult } | undefined> {
+    const p = (await this.db.collection(scenarioCollections.plans).doc(id).get()).data() as
+      Plan | undefined;
+    if (p?.status !== 'active' || p.draft === null) return undefined;
+    const lookup = await scenarioStopLookup(p.draft, this.stops);
+    return {
+      revision: p.revision,
+      draftHash: sha256Hex(canonicalJson(p.draft)),
+      result: mapScenarioDistribution(p.draft, mode, lookup),
+    };
+  }
+  private async shareStanding(tx: Transaction, p: Plan): Promise<boolean> {
+    if (!p.activeShare) return false;
+    const share = (
+      await tx.get(this.db.collection(scenarioCollections.shares).doc(p.activeShare.shareId))
+    ).data() as ScenarioShareRecord | undefined;
+    return (
+      share?.status === 'active' && Date.parse(share.expiresAtUtc) > this.clock.now().getTime()
+    );
+  }
+  /** SCN-PUB-01 owner commands: immutable public revision, unlisted share, revocation. */
+  private async publicationCommand(
+    tx: Transaction,
+    type: string,
+    c: Record<string, unknown>,
+    p: Plan,
+    planRef: FirebaseFirestore.DocumentReference,
+    actor: string,
+    prepared: Awaited<ReturnType<FirestoreScenarioService['prepareDistribution']>>,
+    finish: (result: Result, stored?: Result) => Result,
+  ): Promise<Result> {
+    const now = this.clock.now();
+    const shares = this.db.collection(scenarioCollections.shares);
+    if (type === 'unshare') {
+      // Reducing access is never gated by the share flag.
+      if (!p.activeShare) return finish({ schemaVersion: 1, kind: 'succeeded', revoked: false });
+      const ref = shares.doc(p.activeShare.shareId);
+      const share = (await tx.get(ref)).data() as ScenarioShareRecord | undefined;
+      if (share?.status === 'active') tx.update(ref, { status: 'revoked' });
+      tx.update(planRef, { activeShare: null });
+      return finish({ schemaVersion: 1, kind: 'succeeded', revoked: true });
+    }
+    const flag = type === 'share' ? scenarioFlagIds.share : scenarioFlagIds.publication;
+    if (!(await this.flag(tx, flag))) return reject('feature_disabled');
+    // Concurrent edits: the mapped revision must be exactly the current one.
+    if (
+      prepared === undefined ||
+      p.revision !== c.expectedRevision ||
+      prepared.revision !== p.revision ||
+      prepared.draftHash !== sha256Hex(canonicalJson(p.draft))
+    )
+      return reject('revision_conflict');
+    if (!prepared.result.ok)
+      return reject('distribution_invalid', { issues: prepared.result.issues });
+    const { distribution, contentHash } = prepared.result;
+    const previous =
+      type === 'share' && p.activeShare
+        ? ((await tx.get(shares.doc(p.activeShare.shareId))).data() as
+            ScenarioShareRecord | undefined)
+        : undefined;
+    const revisionId = randomUUID();
+    const revision: ScenarioRevisionRecord = {
+      scenarioId: p.scenarioId,
+      ownerId: actor,
+      purpose: type === 'share' ? 'unlisted' : 'public',
+      sourceRevision: p.revision,
+      contentHash,
+      distribution,
+      createdAtUtc: now.toISOString(),
+    };
+    tx.create(this.db.collection(scenarioCollections.revisions).doc(revisionId), revision);
+    if (type === 'distribute')
+      return finish({
+        schemaVersion: 1,
+        kind: 'succeeded',
+        scenarioRevisionId: revisionId,
+        contentHash,
+        distribution,
+      });
+    const days = c.ttlDays === undefined ? shareTtlDays.default : Number(c.ttlDays);
+    const expiresAtUtc = new Date(now.getTime() + days * 86400000).toISOString();
+    const token = newShareToken();
+    const shareId = shareTokenHash(token);
+    // One active link per Scenario: a new one rotates the previous immediately.
+    if (previous?.status === 'active')
+      tx.update(shares.doc(p.activeShare!.shareId), { status: 'rotated' });
+    const share: ScenarioShareRecord = {
+      scenarioId: p.scenarioId,
+      ownerId: actor,
+      revisionId,
+      status: 'active',
+      expiresAtUtc,
+      restriction: null,
+      createdAtUtc: now.toISOString(),
+    };
+    tx.create(shares.doc(shareId), share);
+    tx.update(planRef, { activeShare: { shareId, expiresAtUtc } });
+    const result = {
+      schemaVersion: 1,
+      kind: 'succeeded',
+      scenarioRevisionId: revisionId,
+      expiresAtUtc,
+    };
+    // The receipt never holds the token: a lost answer is recovered by rotation.
+    return finish({ ...result, token }, { ...result, tokenUnavailable: true });
+  }
+  /** SP-03: an authenticated reader with the current token sees the share snapshot only. */
+  private resolveShare(hint: BookingAccessHint, token: unknown): Promise<Result> {
+    if (!isShareToken(token)) return Promise.resolve(reject('not_found'));
+    const shareId = shareTokenHash(token);
+    return this.db.runTransaction(async (tx) => {
+      const actor = await this.actor(tx, hint);
+      if (!actor) return reject('unauthenticated');
+      if (!(await this.flag(tx, scenarioFlagIds.share))) return reject('feature_disabled');
+      const share = (
+        await tx.get(this.db.collection(scenarioCollections.shares).doc(shareId))
+      ).data() as ScenarioShareRecord | undefined;
+      if (!share || !shareHashMatches(shareId, token)) return reject('not_found');
+      const p = (
+        await tx.get(this.db.collection(scenarioCollections.plans).doc(share.scenarioId))
+      ).data() as Plan | undefined;
+      if (
+        share.status !== 'active' ||
+        share.restriction !== null ||
+        p?.status !== 'active' ||
+        p.ownerId !== share.ownerId ||
+        p.activeShare?.shareId !== shareId
+      )
+        return reject('not_found');
+      if (Date.parse(share.expiresAtUtc) <= this.clock.now().getTime())
+        return reject('token_expired');
+      const revision = (
+        await tx.get(this.db.collection(scenarioCollections.revisions).doc(share.revisionId))
+      ).data() as ScenarioRevisionRecord | undefined;
+      if (revision?.purpose !== 'unlisted' || revision.scenarioId !== share.scenarioId)
+        return reject('not_found');
+      // K2: a restricted owner or a block between the two hides the share.
+      const now = this.clock.now();
+      if (await safetyRestricted(this.db, 'catalog', share.ownerId, now, undefined, tx))
+        return reject('not_found');
+      if (
+        actor !== share.ownerId &&
+        (await relationEffects(this.db, actor, share.ownerId, tx)).blocked
+      )
+        return reject('not_found');
+      return {
+        schemaVersion: 1,
+        kind: 'succeeded',
+        share: {
+          scenarioId: share.scenarioId,
+          expiresAtUtc: share.expiresAtUtc,
+          distribution: revision.distribution,
+        },
+      };
+    });
   }
   private conversionMatches(c: Record<string, unknown>, source: QuickSource['plan']) {
     const draft = c.draft as ScenarioDto,

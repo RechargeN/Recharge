@@ -89,6 +89,38 @@ export type Evaluation =
 export function evaluate(item: CatalogItem, query: DiscoverQuery, nowMs: number): Evaluation {
   if (item.marketId !== query.marketId) return { eligible: false, reason: 'market' };
   if (!query.typeIds.includes(item.typeId)) return { eligible: false, reason: 'type' };
+  if (item.typeId === 'scenario') {
+    // SP-12: no category, time, price or accessibility facts; text and geo only.
+    if (
+      query.categoryIds.length > 0 ||
+      query.subcategoryIds.length > 0 ||
+      query.timeWindow !== null ||
+      query.free ||
+      query.maxAmountMinor !== null ||
+      query.wheelchairAccessible
+    )
+      return { eligible: false, reason: 'scenario_filter_inapplicable' };
+    if (query.textTokens.some((token) => !item.searchText.includes(token)))
+      return { eligible: false, reason: 'text' };
+    const distance =
+      query.center === null || item.point === null
+        ? null
+        : distanceMeters(query.center, item.point);
+    if (query.radiusKm !== null && (distance ?? Infinity) > query.radiusKm * 1000)
+      return { eligible: false, reason: item.point === null ? 'not_mappable' : 'radius' };
+    return {
+      eligible: true,
+      occurrence: null,
+      remainingOccurrences: 0,
+      distanceMeters: distance,
+      key:
+        query.sort === 'distance'
+          ? distance === null
+            ? [1, 0, nowMs, item.contentId]
+            : [0, distance, nowMs, item.contentId]
+          : [0, nowMs, 0, item.contentId],
+    };
+  }
   if (query.categoryIds.length > 0 && !query.categoryIds.includes(item.categoryId))
     return { eligible: false, reason: 'category' };
   if (query.subcategoryIds.length > 0 && !query.subcategoryIds.includes(item.subcategoryId))

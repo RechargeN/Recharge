@@ -64,7 +64,7 @@ void test('each authoring flag enables exactly its own type', () => {
 void test('the Emulator authoring list is Event, Place, Activity, Rental and Collection, each with an available validator', () => {
   assert.deepEqual(
     [...emulatorAuthoringTypes],
-    ['event', 'place', 'activity', 'rental', 'collection', 'session'],
+    ['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario'],
   );
   for (const typeId of emulatorAuthoringTypes) {
     const entry = resolveContentType(typeId);
@@ -73,14 +73,14 @@ void test('the Emulator authoring list is Event, Place, Activity, Rental and Col
   assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set()));
   assert.doesNotThrow(() =>
     assertEmulatorAuthoringTypes(
-      new Set(['event', 'place', 'activity', 'rental', 'collection', 'session']),
+      new Set(['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario']),
     ),
   );
 });
 
 void test('no other type can be enabled, with or without a validator', () => {
   const others = contentTypeIds.filter((typeId) => !emulatorAuthoringTypes.includes(typeId));
-  assert.deepEqual(others.length, contentTypeIds.length - 6);
+  assert.deepEqual(others.length, contentTypeIds.length - 7);
   for (const typeId of others) {
     assert.throws(
       () => assertEmulatorAuthoringTypes(new Set(['collection', typeId])),
@@ -88,7 +88,7 @@ void test('no other type can be enabled, with or without a validator', () => {
     );
   }
   // Types without a validator are unavailable in the registry as well.
-  for (const typeId of ['route', 'scenario', 'find_people', 'class_workshop'] as const) {
+  for (const typeId of ['route', 'find_people', 'class_workshop'] as const) {
     const entry = resolveContentType(typeId);
     assert.ok(entry !== null && !isContentTypeAvailable(entry));
   }
@@ -96,6 +96,18 @@ void test('no other type can be enabled, with or without a validator', () => {
     () => assertEmulatorAuthoringTypes(new Set(['unknown_type'])),
     /content_authoring_type_not_allowed:unknown_type$/,
   );
+});
+
+void test('I3 Scenario flag is independent and absent means off', () => {
+  const flags = {
+    eventAuthoring: false,
+    placeAuthoring: false,
+    activityAuthoring: false,
+    rentalAuthoring: false,
+  };
+  assert.deepEqual([...authoringTypesFor(flags)], []);
+  assert.deepEqual([...authoringTypesFor({ ...flags, scenarioAuthoring: true })], ['scenario']);
+  assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set(['scenario'])));
 });
 
 void test('D3.5 Session flag is independent and absent means off', () => {

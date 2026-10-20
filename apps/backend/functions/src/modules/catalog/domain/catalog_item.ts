@@ -1,6 +1,7 @@
 import type { EligiblePlaceLink } from './place_link.js';
 import type { TaxonomyDataset } from '../../reference_data/domain/taxonomy_dataset.js';
 import { projectActivity } from './activity_projection.js';
+import { projectScenario, type CatalogScenarioItem } from './scenario_projection.js';
 import { bookingRefsFor } from '../../content/domain/event_internal_registration.js';
 import { catalogEnabledTypes, catalogPolicyRevisions } from './catalog_config.js';
 
@@ -146,7 +147,8 @@ export interface CatalogActivityItem {
   readonly publishedAtUtc: string;
   readonly searchText: string;
 }
-export type CatalogItem = CatalogEventItem | CatalogActivityItem;
+export type CatalogItem = CatalogEventItem | CatalogActivityItem | CatalogScenarioItem;
+export type { CatalogScenarioItem };
 
 export type ProjectionOutcome =
   | { readonly state: 'listed'; readonly item: CatalogItem }
@@ -189,6 +191,8 @@ export function projectFact(input: {
   readonly revision: SourceRevision | null;
   readonly typeVisibilityPolicy: string | undefined;
   readonly activityEnabled?: boolean;
+  /** I3 / BCK08-OD-04-S: the local Scenario family switch (default off). */
+  readonly scenarioEnabled?: boolean;
   readonly taxonomy?: TaxonomyDataset;
 }): ProjectionOutcome {
   const { fact, revision } = input;
@@ -201,7 +205,8 @@ export function projectFact(input: {
   if (fact.visibility !== 'visible') return { state: 'excluded', reason: 'invalid_projection' };
   if (
     !catalogEnabledTypes.has(fact.typeId) &&
-    !(fact.typeId === 'activity' && input.activityEnabled === true)
+    !(fact.typeId === 'activity' && input.activityEnabled === true) &&
+    !(fact.typeId === 'scenario' && input.scenarioEnabled === true)
   )
     return { state: 'excluded', reason: 'type_disabled' };
   if (input.typeVisibilityPolicy !== 'public_catalog')
@@ -221,6 +226,11 @@ export function projectFact(input: {
   if (fact.typeId === 'activity') {
     if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };
     return projectActivity(fact, revision, input.taxonomy);
+  }
+  // A public Scenario is public by its type: unlisted lives in Planning only (SP-03).
+  if (fact.typeId === 'scenario') {
+    if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };
+    return projectScenario(fact, revision);
   }
   if (body.visibility === 'unlisted') return { state: 'excluded', reason: 'unlisted' };
   if (body.visibility === 'private') return { state: 'excluded', reason: 'private' };

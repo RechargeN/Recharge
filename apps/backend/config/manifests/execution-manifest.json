@@ -1138,6 +1138,20 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": []
+      },
+      {
+        "name": "scenarioRevisions",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "scenarioShares",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
       }
     ]
   },
@@ -1210,6 +1224,16 @@
       },
       {
         "id": "planning.scenarioI2",
+        "kind": "feature",
+        "defaultState": "off"
+      },
+      {
+        "id": "planning.scenarioPublication",
+        "kind": "feature",
+        "defaultState": "off"
+      },
+      {
+        "id": "planning.scenarioShare",
         "kind": "feature",
         "defaultState": "off"
       }

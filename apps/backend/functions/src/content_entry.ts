@@ -15,6 +15,8 @@ import { createEmulatorCatalogComposition } from './modules/catalog/infrastructu
 import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
 import { emulatorActivationClosedTypes } from './modules/content/infrastructure/emulator_rental_dependencies.js';
 import { CatalogCollectionMembership } from './modules/content/infrastructure/catalog_collection_membership.js';
+import { CatalogScenarioStops } from './modules/content/infrastructure/catalog_scenario_stops.js';
+import { FirestoreScenarioRevisionReader } from './modules/quick_plan/scenario_publication.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
 import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
@@ -26,6 +28,7 @@ import {
   createEmulatorModerationService,
 } from './modules/moderation/infrastructure/emulator_moderation_composition.js';
 import { MediaModerationAdapter } from './modules/moderation/infrastructure/media_moderation_adapter.js';
+import { ScenarioShareModerationAdapter } from './modules/moderation/infrastructure/share_moderation_adapter.js';
 import type { EntityId } from './shared/ids.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 import { mediaComposition } from './media_entry.js';
@@ -42,6 +45,8 @@ export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'rental',
   'collection',
   'session',
+  // I3 / SCN-PUB-01: public Scenario pinned to an immutable BCK-10 revision.
+  'scenario',
 ]);
 
 /** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
@@ -52,6 +57,7 @@ export function authoringTypesFor(flags: {
   readonly rentalAuthoring: boolean;
   readonly collectionAuthoring?: boolean;
   readonly sessionAuthoring?: boolean;
+  readonly scenarioAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
@@ -60,6 +66,7 @@ export function authoringTypesFor(flags: {
     ...(flags.rentalAuthoring ? (['rental'] as const) : []),
     ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
     ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
+    ...(flags.scenarioAuthoring === true ? (['scenario'] as const) : []),
   ]);
 }
 
@@ -147,6 +154,8 @@ export function eventAuthoringComposition(
           }
         : {}),
       publishedObjectMembership: new CatalogCollectionMembership(catalog.publishedObjects),
+      scenarioRevisions: new FirestoreScenarioRevisionReader(firestore),
+      scenarioStops: new CatalogScenarioStops(catalog.scenarioStops),
     },
   });
   const moderation = createEmulatorModerationService({
@@ -156,9 +165,16 @@ export function eventAuthoringComposition(
     contentService: service,
     // D2 §7: staff restrict or restore one Media asset through Media's own path.
     media: new MediaModerationAdapter(media.repository, media.deletion),
+    // SCN-PUB-01: staff restrict or restore one unlisted share through Planning.
+    shares: new ScenarioShareModerationAdapter(firestore, moderationPorts.repository),
     clock,
   });
   return Object.freeze({ content: service, contentRepository: repository, media, moderation });
+}
+
+/** SCN-PUB-01 SP-08: Catalog-owned status of Scenario stops, for Planning. */
+export function scenarioStopsFor(firestore: Firestore): CatalogScenarioStops {
+  return new CatalogScenarioStops(createEmulatorCatalogComposition(firestore).scenarioStops);
 }
 
 /** Server-resolved caller. The Session was already validated by the access authority. */

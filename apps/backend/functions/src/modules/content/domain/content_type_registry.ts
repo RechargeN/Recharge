@@ -4,6 +4,7 @@ import {
   type ContentTypeId,
 } from '../../../contracts/content_v1.js';
 import { sessionMediaIds, validateSessionBody } from './type_rules/session_rules.js';
+import { scenarioMediaIds, validateScenarioBody } from './type_rules/scenario_rules.js';
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
@@ -15,7 +16,7 @@ import type { ContentValidationContext } from './type_rules/validation_context.j
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v7';
+export const contentTypeRegistryRevision = 'content-type-registry-v8';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -128,7 +129,9 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
     sourceResolver: input.sourceResolver,
     requiredCapabilities: capabilities,
     allowedPublisherTypes: Object.freeze(
-      typeId === 'session' ? (['user'] as const) : (['user', 'page'] as const),
+      typeId === 'session' || typeId === 'scenario'
+        ? (['user'] as const)
+        : (['user', 'page'] as const),
     ),
     moderationProfileId: `${typeId}.default`,
     visibilityPolicy: input.visibilityPolicy ?? 'public_catalog',
@@ -190,9 +193,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('scenario', {
     discoverFamily: 'Scenario',
-    sourceAuthority: 'BCK-10 immutable ScenarioRevision',
+    sourceAuthority: 'BCK-10 immutable ScenarioRevision (SCN-PUB-01, BCK-10 v0.4 §33)',
     sourceResolver: 'pinned_immutable_revision',
-    unavailable: { reason: 'dependency_pending', dependency: 'BCK-10' },
+    rules: { validate: validateScenarioBody, mediaIds: scenarioMediaIds },
   }),
   entry('find_people', {
     discoverFamily: 'Find People',

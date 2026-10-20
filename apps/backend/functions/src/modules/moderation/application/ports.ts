@@ -96,6 +96,16 @@ export interface MediaModerationPort {
   }): Promise<EnforcementOutcome>;
 }
 
+/** SCN-PUB-01: Moderation's view of one unlisted share; the write is Planning's verified path. */
+export interface ShareModerationPort {
+  share(shareId: string): Promise<{ readonly shareId: string; readonly scenarioId: string } | null>;
+  enforce(instruction: {
+    readonly decisionId: string;
+    readonly shareId: string;
+    readonly restricted: boolean;
+  }): Promise<EnforcementOutcome>;
+}
+
 /**
  * Moderation's view of Content: read-only state of the exact target, and the
  * one write path, which is Content's own verified `applyModerationDisposition`.

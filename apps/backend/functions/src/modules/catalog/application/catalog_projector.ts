@@ -52,6 +52,7 @@ export interface CatalogProjectorDependencies {
   readonly source: ContentCatalogSource;
   readonly clock: ServerClock;
   readonly activityEnabled?: boolean;
+  readonly scenarioEnabled?: boolean;
 }
 
 function canonical(value: unknown): string {
@@ -155,6 +156,7 @@ export class CatalogProjector {
         : undefined;
     const outcome: ProjectionOutcome = projectFact({
       activityEnabled: this.#deps.activityEnabled === true,
+      scenarioEnabled: this.#deps.scenarioEnabled === true,
       ...(taxonomyRead?.ok ? { taxonomy: taxonomyRead.dataset } : {}),
       fact,
       revision,

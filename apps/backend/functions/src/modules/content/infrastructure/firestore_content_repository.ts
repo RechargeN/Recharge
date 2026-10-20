@@ -741,3 +741,24 @@ function revisionFromStored(data: Fields): PublishedRevision {
     body: JSON.parse(bodyJson as string) as unknown,
   }) as unknown as PublishedRevision;
 }
+
+/**
+ * SP-11 (SCN-PUB-01): whether the Content publication of a Scenario
+ * (`contentId = scenarioId`) still stands — published and not taken down by its
+ * owner. A moderation hold counts as standing, so a restriction cannot be
+ * escaped by deleting the source. Read-only, inside the caller's transaction.
+ */
+export async function scenarioPublicationStanding(
+  firestore: Firestore,
+  tx: Transaction,
+  scenarioId: string,
+): Promise<boolean> {
+  const pointer = (
+    await tx.get(firestore.collection(contentCollections.pointers).doc(scenarioId))
+  ).data();
+  return (
+    pointer !== undefined &&
+    typeof pointer.currentPublishedRevisionId === 'string' &&
+    (pointer.ownerHold === null || pointer.ownerHold === undefined)
+  );
+}

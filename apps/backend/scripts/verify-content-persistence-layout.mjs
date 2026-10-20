@@ -118,7 +118,13 @@ const approvedOutsideUsers = {
   // I1 Quick Plan (2026-10-17): only the Emulator guard; its own collections,
   // no Content read or write.
   "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
-  "modules/quick_plan/firestore_scenario_service.ts": guardOnly,
+  // I3 / SCN-PUB-01 (2026-10-20): plus one read-only pointer check, SP-11.
+  "modules/quick_plan/firestore_scenario_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "scenarioPublicationStanding",
+    ],
+  },
   "modules/reviews/review_target.ts": {
     firestore_content_repository: ["contentCollections"],
   },

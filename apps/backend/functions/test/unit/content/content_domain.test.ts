@@ -95,7 +95,6 @@ const expectedUnavailable: Readonly<
   Record<string, { readonly reason: string; readonly dependency: string | undefined }>
 > = {
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
-  scenario: { reason: 'dependency_pending', dependency: 'BCK-10' },
   find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
   class_workshop: {
     reason: 'spec_not_approved',
@@ -110,10 +109,11 @@ const expectedAvailable = [
   'rental',
   'event',
   'session',
+  'scenario',
 ] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v7');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v8');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
@@ -127,7 +127,7 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
     assert.equal(item.localizedTextPolicy, 'per_locale_with_declared_fallback');
     assert.deepEqual(
       item.allowedPublisherTypes,
-      item.typeId === 'session' ? ['user'] : ['user', 'page'],
+      item.typeId === 'session' || item.typeId === 'scenario' ? ['user'] : ['user', 'page'],
     );
     assert.equal(item.requiredCapabilities.create, 'content.create');
     assert.equal(item.requiredCapabilities.submit, 'content.submit');

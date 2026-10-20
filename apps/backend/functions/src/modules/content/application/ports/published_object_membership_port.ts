@@ -1,4 +1,7 @@
-import type { CollectionObjectType } from '../../domain/type_rules/validation_context.js';
+import type {
+  CollectionObjectType,
+  ScenarioStopType,
+} from '../../domain/type_rules/validation_context.js';
 
 /**
  * Consumer boundary only (D3.4): whether a Collection item references an
@@ -17,7 +20,7 @@ export type PublishedObjectMembershipStatus =
 
 export interface PublishedObjectMembershipPort {
   statusOf(input: {
-    readonly objectType: CollectionObjectType;
+    readonly objectType: CollectionObjectType | ScenarioStopType;
     readonly objectId: string;
     readonly marketId: string;
   }): Promise<PublishedObjectMembershipStatus>;

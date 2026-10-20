@@ -15,13 +15,20 @@ export const listingTypeIds = Object.freeze([
 
 export type ListingTypeId = (typeof listingTypeIds)[number];
 
+/**
+ * SCN-PUB-01: a Scenario stop may also name a published Event or Activity by
+ * exact id. They stay out of the listing relation above; only the exact-id
+ * status answers for them.
+ */
+export type RelationTypeId = ListingTypeId | 'event' | 'activity';
+
 export function isListingTypeId(value: unknown): value is ListingTypeId {
   return typeof value === 'string' && (listingTypeIds as readonly string[]).includes(value);
 }
 
 /** Allowlisted public facts of an eligible object; never draft, private or moderation data. */
 export interface EligiblePublishedObject {
-  readonly typeId: ListingTypeId;
+  readonly typeId: RelationTypeId;
   readonly contentId: string;
   readonly publishedRevisionId: string;
   readonly pointerRevision: number;

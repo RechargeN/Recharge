@@ -5,7 +5,7 @@ import { handleK1 } from './moderation_entry.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
@@ -75,6 +75,7 @@ import {
 import { deliverMediaEffects, reconcileMediaReferences } from './media_effects_entry.js';
 import {
   authoringTypesFor,
+  scenarioStopsFor,
   handleContentCommand,
   handleContentQuery,
   type ContentCaller,
@@ -1041,6 +1042,9 @@ async function prepareContentCaller(
     sessionAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.sessionAuthoring,
     ),
+    scenarioAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.scenarioAuthoring,
+    ),
     eventAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring),
     placeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.placeAuthoring),
     activityAuthoring: await access.composition.featureFlags.isEnabled(
@@ -1209,25 +1213,24 @@ export const libraryQueryV1 = onCall<unknown>(callableOptions, async (request) =
   );
 });
 
+/** I2 persistence plus SCN-PUB-01 publication, with Catalog-owned stop status. */
+function scenarioService(firestore: Firestore): FirestoreScenarioService {
+  return new FirestoreScenarioService(firestore, systemServerClock, scenarioStopsFor(firestore));
+}
+
 export const scenarioCommandV1 = onCall<unknown>(callableOptions, async (request) => {
   const access = prepareTransport(request);
   if (!access.ok) return access.result;
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
-  return new FirestoreScenarioService(access.firestore, systemServerClock).command(
-    access.accessHint,
-    data,
-  );
+  return scenarioService(access.firestore).command(access.accessHint, data);
 });
 export const scenarioQueryV1 = onCall<unknown>(callableOptions, async (request) => {
   const access = prepareTransport(request);
   if (!access.ok) return access.result;
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
-  return new FirestoreScenarioService(access.firestore, systemServerClock).query(
-    access.accessHint,
-    data,
-  );
+  return scenarioService(access.firestore).query(access.accessHint, data);
 });
 
 export const quickPlanCommandV1 = onCall<unknown>(callableOptions, async (request) => {

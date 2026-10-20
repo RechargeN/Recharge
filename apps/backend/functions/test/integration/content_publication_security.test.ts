@@ -847,6 +847,11 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/quick_plan/firestore_quick_plan_service.ts',
     'modules/quick_plan/quick_plan_contract.ts',
     'modules/quick_plan/firestore_scenario_service.ts',
+    // I3 / SCN-PUB-01: the one shared Scenario distribution validator and the
+    // ports Planning answers; Catalog projects the same validated body.
+    'modules/quick_plan/scenario_distribution.ts',
+    'modules/quick_plan/scenario_publication.ts',
+    'modules/catalog/domain/scenario_projection.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -896,8 +901,27 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_scenario_service.ts': [
       'assertContentEmulatorContext',
+      'scenarioPublicationStanding',
       'canonicalJson',
       'sha256Hex',
+    ],
+    'modules/quick_plan/scenario_distribution.ts': [
+      'roundApproximate',
+      'scenarioDistributionHash',
+      'validateScenarioDistribution',
+      'ScenarioDistributionMode',
+      'ScenarioStopLookup',
+    ],
+    'modules/quick_plan/scenario_publication.ts': [
+      'ScenarioRevisionPort',
+      'ScenarioRevisionStatus',
+      'scenarioStopRefs',
+      'ScenarioStopLookup',
+      'ScenarioStopObjectType',
+    ],
+    'modules/catalog/domain/scenario_projection.ts': [
+      'scenarioDistributionHash',
+      'validateScenarioDistribution',
     ],
     'modules/trust_safety/firestore_safety_service.ts': [
       'assertContentEmulatorContext',
@@ -923,6 +947,8 @@ void test('delegated import never reaches Content storage except through the Con
       'emulatorActivationClosedTypes',
       // D3.4 §2.3: Collection membership asked from the Catalog-owned evaluator.
       'CatalogCollectionMembership',
+      // I3 / SCN-PUB-01: Scenario stops asked from the same Catalog-owned evaluator.
+      'CatalogScenarioStops',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',

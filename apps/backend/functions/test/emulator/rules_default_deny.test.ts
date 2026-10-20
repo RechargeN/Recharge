@@ -99,6 +99,8 @@ void test('I2 Scenario, memberships, invites and receipts deny direct client rea
       'scenarioMembers',
       'scenarioInvites',
       'scenarioCommandReceipts',
+      'scenarioRevisions',
+      'scenarioShares',
     ]) {
       for (const token of [undefined, identity.token]) {
         assertDenied(await firestoreRead(`${collection}/${identity.uid}`, token));

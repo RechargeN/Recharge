@@ -615,7 +615,9 @@ void test('canonical creation command invoked once; interrupted transaction roll
     'utf8',
   );
   assert.equal((text.match(/this\.saveInTransaction\(/g) ?? []).length, 1);
-  assert.doesNotMatch(text, /from ['"].*(?:route|publication|catalog).*['"]/);
+  assert.doesNotMatch(text, /from ['"].*(?:route|catalog).*['"]/);
+  // I3 / SCN-PUB-01: the one accepted publication seam is Planning's own module.
+  assert.doesNotMatch(text, /from ['"](?!\.\/scenario_publication\.js['"]).*publication.*['"]/);
   assert.doesNotMatch(text, /RouteMode|routeData|publishDraft|PublisherRef/);
 });
 void test('source edit racing Expand serializes a pinned snapshot or conflict; plans remain independent', async () => {

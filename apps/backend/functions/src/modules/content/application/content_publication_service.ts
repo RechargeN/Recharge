@@ -99,6 +99,9 @@ import type {
 } from './ports/publisher_eligibility_port.js';
 import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
 import { collectionRuleConfig } from '../domain/type_rules/collection_rules.js';
+import { scenarioStopRefs } from '../domain/type_rules/scenario_rules.js';
+import type { ScenarioRevisionPort } from './ports/scenario_revision_port.js';
+import { isEntityId } from '../../../shared/ids.js';
 import type {
   CollectionObjectType,
   ContentValidationContext,
@@ -143,6 +146,13 @@ export interface ContentPublicationServiceDeps {
    * `publishedObjects` for Collection (default: none, behaviour unchanged).
    */
   readonly publishedObjectMembership?: PublishedObjectMembershipPort;
+  /**
+   * SCN-PUB-01: Planning's answer about the pinned immutable revision, and the
+   * Catalog-owned status of every catalog stop, read fresh at submit, publish and
+   * activation. Without them a Scenario is refused (fail closed).
+   */
+  readonly scenarioRevisions?: ScenarioRevisionPort;
+  readonly scenarioStops?: PublishedObjectMembershipPort;
   /** Approved delegated-import modules by module id (default: none). */
   readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
   /**
@@ -567,9 +577,10 @@ export class ContentPublicationService {
       return imported;
     }
     const references = await this.pin(payload.marketId, payload.typeId, context.nowUtc);
+    const contentId = await this.newContentId(context, payload.typeId, payload.body);
     const draft = createContentDraft({
       draftId: this.deps.ids.newId(),
-      contentId: this.deps.ids.newId(),
+      contentId,
       typeId: payload.typeId,
       publisherRef: payload.publisherRef,
       marketId: payload.marketId,
@@ -601,6 +612,28 @@ export class ContentPublicationService {
     context.tx.putDraft(draft);
     this.audit(context, 'content.draft.created', draft.draftId);
     return draft;
+  }
+
+  /**
+   * SCN-PUB-01 §9: a Scenario has exactly one publication, identified by the
+   * Scenario id itself; a second draft for the same Scenario is a conflict.
+   */
+  private async newContentId(
+    context: CommandContext,
+    typeId: ContentTypeId,
+    body: ContentBody,
+  ): Promise<EntityId> {
+    if (typeId !== 'scenario') return this.deps.ids.newId();
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const ref = isRecord(scenario?.ref) ? scenario.ref : undefined;
+    if (!isEntityId(ref?.scenarioId))
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails(['scenario.ref']),
+      );
+    if ((await context.tx.draftByContentId(ref.scenarioId)) !== null)
+      throw new ContentDomainRefusal('revision_conflict');
+    return ref.scenarioId;
   }
 
   private async updateDraft(
@@ -655,6 +688,7 @@ export class ContentPublicationService {
     );
     await this.assertSessionScheduleSequence(context, draft);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
+    await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
     // Early feedback only: the binding check runs where the pointer switches.
     await this.assertTransition(
       context.tx,
@@ -720,6 +754,7 @@ export class ContentPublicationService {
     this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal), membership);
     await this.assertSessionScheduleSequence(context, draft);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
+    await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
     const pointer = await tx.pointer(submission.contentId);
@@ -840,10 +875,15 @@ export class ContentPublicationService {
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
-    // D3.5: revalidate the immutable Session target, never the mutable draft.
-    if (target.typeId === 'session') {
+    // D3.5 / SCN-PUB-01: revalidate the immutable target, never the mutable draft.
+    if (target.typeId === 'session' || target.typeId === 'scenario') {
       if (canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions))
         throw new ContentDomainRefusal('source_revision_stale');
+      const membership = await this.collectionMembership(
+        target.typeId,
+        target.body,
+        target.marketId,
+      );
       const issues = entry.validate?.(
         target.body,
         this.validationContext(
@@ -851,6 +891,7 @@ export class ContentPublicationService {
           resolved,
           nowUtc,
           principalId(context.principal),
+          membership?.lookup ?? this.deps.publishedObjects,
         ),
       ) ?? ['no_source_contract'];
       if (issues.length > 0)
@@ -863,6 +904,7 @@ export class ContentPublicationService {
       this.validationContext(draft, resolved, nowUtc, principalId(context.principal)),
     );
     await this.assertLinkedPlace(target.typeId, target.body, target.marketId);
+    await this.assertScenarioSource(target.typeId, target.body, target.publisherRef);
     await this.assertCollectionTargetMembership(target.typeId, target.body, target.marketId);
     // Rollback verifies exactly the references stored in the target revision; the
     // evidence was taken for this very immutable revision before the transaction.
@@ -1230,6 +1272,7 @@ export class ContentPublicationService {
     body: ContentBody,
     marketId: string,
   ): Promise<CollectionMembership | undefined> {
+    if (typeId === 'scenario') return this.scenarioStopMembership(body, marketId);
     const port = this.deps.publishedObjectMembership;
     if (typeId !== 'collection' || port === undefined) return undefined;
     const statuses = new Map<string, PublishedObjectMembershipStatus>();
@@ -1265,6 +1308,66 @@ export class ContentPublicationService {
       ],
       unresolved: values.includes('unavailable'),
     };
+  }
+
+  /**
+   * SCN-PUB-01 SP-08: every catalog stop of the exact distribution must be
+   * published and visible now. Anything else is `unavailable`, an outage is
+   * unresolved; no stop data is ever returned with the refusal.
+   */
+  private async scenarioStopMembership(
+    body: ContentBody,
+    marketId: string,
+  ): Promise<CollectionMembership> {
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const statuses = new Map<string, 'ready' | 'unavailable' | undefined>();
+    for (const ref of scenarioStopRefs(scenario?.distribution)) {
+      let status: PublishedObjectMembershipStatus = 'unavailable';
+      try {
+        status = (await this.deps.scenarioStops?.statusOf({ ...ref, marketId })) ?? 'unavailable';
+      } catch {
+        status = 'unavailable';
+      }
+      statuses.set(
+        `${ref.objectType}:${ref.objectId}`,
+        status === 'ready' ? 'ready' : status === 'unavailable' ? undefined : 'unavailable',
+      );
+    }
+    return {
+      lookup: { statusOf: (objectType, objectId) => statuses.get(`${objectType}:${objectId}`) },
+      refusals: [],
+      unresolved: [...statuses.values()].includes(undefined),
+    };
+  }
+
+  /** SP-06: the body is pinned to the publisher's own immutable public revision. */
+  private async assertScenarioSource(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    publisherRef: PublisherRefV1,
+  ): Promise<void> {
+    if (typeId !== 'scenario') return;
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const ref = isRecord(scenario?.ref) ? scenario.ref : undefined;
+    let status: string = 'unavailable';
+    try {
+      status =
+        ref === undefined || publisherRef.type !== 'user'
+          ? 'forbidden'
+          : ((await this.deps.scenarioRevisions?.verify({
+              scenarioId: String(ref.scenarioId),
+              scenarioRevisionId: String(ref.scenarioRevisionId),
+              contentHash: String(ref.contentHash),
+              ownerUserId: publisherRef.id,
+            })) ?? 'unavailable');
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'ok')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([`scenario.source_${status}`]),
+      );
   }
 
   /**

@@ -47,6 +47,8 @@ export const contentFlagIds = Object.freeze({
   /** D3.4: Emulator-only Collection / Guide authoring through Content (default off). */
   collectionAuthoring: 'content.collection.authoring',
   sessionAuthoring: 'content.session.authoring',
+  /** I3 / SCN-PUB-01: Emulator-only public Scenario through Content (default off). */
+  scenarioAuthoring: 'content.scenario.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */
@@ -73,4 +75,8 @@ export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds]
 /** I2 bounded Scenario persistence and collaboration, Emulator only. */
 export const scenarioFlagIds = Object.freeze({
   sync: 'planning.scenarioI2',
+  /** SCN-PUB-01 / I3: immutable public distribution revisions (default off). */
+  publication: 'planning.scenarioPublication',
+  /** SCN-PUB-01 / I3: unlisted share tokens (default off). */
+  share: 'planning.scenarioShare',
 });
