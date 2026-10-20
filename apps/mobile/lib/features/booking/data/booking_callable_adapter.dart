@@ -585,4 +585,7 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'quickPlanQueryV1',
   'scenarioCommandV1',
   'scenarioQueryV1',
+  // J1: default-off Emulator-only owner Route storage and sync.
+  'routeCommandV1',
+  'routeQueryV1',
 };

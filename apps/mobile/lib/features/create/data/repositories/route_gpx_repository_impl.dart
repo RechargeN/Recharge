@@ -1,3 +1,4 @@
+import '../../domain/entities/route_sync_data.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 import '../../domain/repositories/route_gpx_source_store.dart';
 import '../gpx/route_gpx_inspector.dart';
@@ -42,6 +43,24 @@ class RouteGpxRepositoryImpl implements RouteGpxRepository {
   @override
   Future<RouteSafeFileRef> export(RouteGpxExportRequest request) async {
     final bytes = _exporter.export(request);
+    return _sourceStore.register(
+      displayName: 'recharge-route.gpx',
+      mediaType: 'application/gpx+xml',
+      bytes: bytes,
+    );
+  }
+
+  @override
+  Future<RouteSafeFileRef> exportTrimmed(
+    RouteTrimmedView view, {
+    required bool includeElevation,
+    required bool includeWaypoints,
+  }) {
+    final bytes = _exporter.exportTrimmed(
+      view,
+      includeElevation: includeElevation,
+      includeWaypoints: includeWaypoints,
+    );
     return _sourceStore.register(
       displayName: 'recharge-route.gpx',
       mediaType: 'application/gpx+xml',

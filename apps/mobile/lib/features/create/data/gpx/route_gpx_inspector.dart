@@ -19,13 +19,34 @@ class RouteGpxInspector {
   RouteGpxInspection inspect({
     required RouteSafeFileRef file,
     required Uint8List bytes,
+  }) => _run(file: file, bytes: bytes, collect: const <String>{}).inspection;
+
+  /// The same single streaming pass, additionally collecting the ordered
+  /// `<trkseg>`/`<rte>` point lists of the selected candidates. Limits are
+  /// checked before a point is allocated, so nothing is buffered beyond them.
+  ({RouteGpxInspection inspection, Map<String, List<List<GeoPoint>>> points})
+  inspectAndCollect({
+    required RouteSafeFileRef file,
+    required Uint8List bytes,
+    required Set<String> candidateKeys,
+  }) => _run(file: file, bytes: bytes, collect: candidateKeys);
+
+  ({RouteGpxInspection inspection, Map<String, List<List<GeoPoint>>> points})
+  _run({
+    required RouteSafeFileRef file,
+    required Uint8List bytes,
+    required Set<String> collect,
   }) {
     final config = _config.validated();
     _validateFile(file, bytes, config);
     final source = _decode(bytes);
     _rejectDangerousDeclarations(source);
 
-    final parser = _InspectionParser(file: file, config: config);
+    final parser = _InspectionParser(
+      file: file,
+      config: config,
+      collect: collect,
+    );
     try {
       for (final event in parseEvents(
         source,
@@ -43,7 +64,12 @@ class RouteGpxInspector {
     } on FormatException {
       throw const RouteGpxException('gpx_xml_malformed');
     }
-    return parser.finish(contentSha256: sha256.convert(bytes).toString());
+    return (
+      inspection: parser.finish(
+        contentSha256: sha256.convert(bytes).toString(),
+      ),
+      points: parser.collected,
+    );
   }
 
   void _validateFile(
@@ -64,6 +90,16 @@ class RouteGpxInspector {
     if (bytes.length > config.maximumFileBytes) {
       throw const RouteGpxException('gpx_file_too_large');
     }
+    // The bytes decide, not the name or MIME type: archives and compressed
+    // streams are refused before any decoding.
+    for (final magic in _archiveMagic) {
+      if (bytes.length >= magic.length &&
+          Iterable<int>.generate(
+            magic.length,
+          ).every((index) => bytes[index] == magic[index])) {
+        throw const RouteGpxException('gpx_compressed_forbidden');
+      }
+    }
     const allowedMediaTypes = <String>{
       '',
       'application/gpx+xml',
@@ -77,12 +113,17 @@ class RouteGpxInspector {
   }
 
   String _decode(Uint8List bytes) {
+    final String text;
     try {
       final decoded = utf8.decode(bytes, allowMalformed: false);
-      return decoded.startsWith('\uFEFF') ? decoded.substring(1) : decoded;
+      text = decoded.startsWith('\uFEFF') ? decoded.substring(1) : decoded;
     } on FormatException {
       throw const RouteGpxException('gpx_encoding_invalid');
     }
+    if (!text.trimLeft().startsWith('<')) {
+      throw const RouteGpxException('gpx_not_xml');
+    }
+    return text;
   }
 
   void _rejectDangerousDeclarations(String source) {
@@ -101,11 +142,36 @@ class RouteGpxInspector {
   }
 }
 
+const List<List<int>> _archiveMagic = <List<int>>[
+  <int>[0x1F, 0x8B], // gzip
+  <int>[0x50, 0x4B, 0x03, 0x04], // zip
+  <int>[0x50, 0x4B, 0x05, 0x06], // empty zip
+  <int>[0x50, 0x4B, 0x07, 0x08], // spanned zip
+  <int>[0x42, 0x5A, 0x68], // bzip2
+  <int>[0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00], // xz
+  <int>[0x28, 0xB5, 0x2F, 0xFD], // zstd
+  <int>[0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C], // 7z
+  <int>[0x52, 0x61, 0x72, 0x21], // rar
+];
+
+// Lexical decimal only: no exponent, NaN, Infinity or hexadecimal forms.
+final RegExp _decimal = RegExp(r'^[+-]?(\d+(\.\d*)?|\.\d+)$');
+// C0 controls except tab, newline and carriage return.
+final RegExp _controls = RegExp(r'[\u0000-\u0008\u000B\u000C\u000E-\u001F]');
+const String _xincludeNamespace = 'http://www.w3.org/2001/XInclude';
+
 class _InspectionParser {
-  _InspectionParser({required this.file, required this.config});
+  _InspectionParser({
+    required this.file,
+    required this.config,
+    required this.collect,
+  });
 
   final RouteSafeFileRef file;
   final RouteGpxImportConfig config;
+  final Set<String> collect;
+  final Map<String, List<List<GeoPoint>>> collected =
+      <String, List<List<GeoPoint>>>{};
   final List<String> _stack = <String>[];
   final List<RouteGpxCandidateSummary> _candidates =
       <RouteGpxCandidateSummary>[];
@@ -167,6 +233,18 @@ class _InspectionParser {
     if (_stack.length > config.maximumXmlDepth) {
       throw const RouteGpxException('gpx_xml_depth_limit_exceeded');
     }
+    if (event.attributes.length > config.maximumAttributesPerElement) {
+      throw const RouteGpxException('gpx_attribute_limit_exceeded');
+    }
+    for (final attribute in event.attributes) {
+      if (attribute.value.length > config.maximumAttributeCharacters) {
+        throw const RouteGpxException('gpx_attribute_limit_exceeded');
+      }
+      // XInclude is never resolved; its namespace is refused outright.
+      if (attribute.value.trim() == _xincludeNamespace) {
+        throw const RouteGpxException('gpx_xinclude_forbidden');
+      }
+    }
     if (!_rootSeen) {
       if (name != 'gpx' || _stack.length != 1) {
         throw const RouteGpxException('gpx_root_invalid');
@@ -220,6 +298,8 @@ class _InspectionParser {
         }
         _registerSegment();
         _candidate!.startSegment();
+        final key = _collectKey;
+        if (key != null) collected[key]!.add(<GeoPoint>[]);
       case 'trkpt':
         if (_candidate?.kind != RouteGpxCandidateKind.track ||
             parent != 'trkseg') {
@@ -256,9 +336,12 @@ class _InspectionParser {
         ? _trackIndex++
         : _routeIndex++;
     _candidate = _CandidateBuilder(kind: kind, sourceIndex: index);
+    final key = _collectKey;
+    if (key != null) collected[key] = <List<GeoPoint>>[];
     if (kind == RouteGpxCandidateKind.route) {
       _registerSegment();
       _candidate!.startSegment();
+      if (key != null) collected[key]!.add(<GeoPoint>[]);
     }
   }
 
@@ -290,6 +373,16 @@ class _InspectionParser {
     _point = _PointBuilder(kind: kind, position: position);
   }
 
+  String? get _collectKey {
+    final candidate = _candidate;
+    if (candidate == null) return null;
+    final kind = candidate.kind == RouteGpxCandidateKind.track
+        ? 'track'
+        : 'route';
+    final key = '$kind:${candidate.sourceIndex}';
+    return collect.contains(key) ? key : null;
+  }
+
   bool _shouldCapture(String name, String? parent) {
     if (_captureName != null) return false;
     if (_point != null &&
@@ -310,6 +403,10 @@ class _InspectionParser {
   }
 
   void _appendText(String value) {
+    // Every text node is bounded, captured or not (extensions included).
+    if (value.length > config.maximumTextCharacters) {
+      throw const RouteGpxException('gpx_text_limit_exceeded');
+    }
     final buffer = _captureBuffer;
     if (buffer == null) return;
     if (buffer.length + value.length > config.maximumTextCharacters) {
@@ -323,7 +420,11 @@ class _InspectionParser {
       throw const RouteGpxException('gpx_xml_malformed');
     }
     if (_captureName == name && _captureDepth == _stack.length) {
-      _consumeCapture(name, _captureBuffer.toString().trim());
+      final value = _captureBuffer.toString().trim();
+      if (_controls.hasMatch(value)) {
+        throw const RouteGpxException('gpx_control_character_forbidden');
+      }
+      _consumeCapture(name, value);
       _captureName = null;
       _captureDepth = null;
       _captureBuffer = null;
@@ -358,6 +459,9 @@ class _InspectionParser {
         case 'ele':
           if (value.isNotEmpty) {
             final elevation = _finiteDouble(value);
+            if (elevation < -500 || elevation > 9000) {
+              throw const RouteGpxException('gpx_elevation_invalid');
+            }
             _point!.position = GeoPoint(
               latitude: _point!.position.latitude,
               longitude: _point!.position.longitude,
@@ -390,6 +494,8 @@ class _InspectionParser {
       throw const RouteGpxException('gpx_point_state_invalid');
     }
     candidate.addPoint(point);
+    final key = _collectKey;
+    if (key != null) collected[key]!.last.add(point.position);
     _point = null;
   }
 
@@ -454,7 +560,10 @@ class _InspectionParser {
   }
 
   double _finiteDouble(String? value) {
-    final parsed = value == null ? null : double.tryParse(value.trim());
+    final text = value?.trim();
+    final parsed = text == null || !_decimal.hasMatch(text)
+        ? null
+        : double.tryParse(text);
     if (parsed == null || !parsed.isFinite) {
       throw const RouteGpxException('gpx_number_invalid');
     }

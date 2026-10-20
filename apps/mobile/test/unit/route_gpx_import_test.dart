@@ -37,8 +37,10 @@ void main() {
       nowUtc: DateTime.utc(2026, 7, 25),
     );
 
+    // The confirmed direct gap keeps both source parts intact.
     expect(result.tracks, hasLength(1));
-    expect(result.tracks.single, hasLength(4));
+    expect(result.tracks.single.parts, hasLength(2));
+    expect(result.tracks.single.pointCount, 4);
     expect(result.waypoints.single.typeId, 'water');
     expect(
       result.waypoints.single.trackState,
@@ -169,9 +171,26 @@ void main() {
     );
     expect(accepted.accepted, isTrue);
     expect(accepted.draft.creationMethod, RouteCreationMethod.importedGpx);
+    // Source parts stay importedGpx; the confirmed gap is a typed direct
+    // segment between them instead of an invented imported line.
     expect(
-      accepted.draft.segments.single.source,
-      RouteSegmentSource.importedGpx,
+      accepted.draft.orderedSegments.map((segment) => segment.source),
+      <RouteSegmentSource>[
+        RouteSegmentSource.importedGpx,
+        RouteSegmentSource.intentionalDirect,
+        RouteSegmentSource.importedGpx,
+      ],
+    );
+    final ordered = accepted.draft.orderedSegments;
+    expect(ordered[1].geometry.points, hasLength(2));
+    expect(ordered[1].geometry.points.first, ordered[0].geometry.points.last);
+    expect(ordered[1].geometry.points.last, ordered[2].geometry.points.first);
+    for (var index = 1; index < ordered.length; index++) {
+      expect(ordered[index].fromAnchorId, ordered[index - 1].toAnchorId);
+    }
+    expect(
+      ordered.fold<int>(0, (n, s) => n + s.geometry.points.length),
+      2 + 2 + 2,
     );
     expect(accepted.draft.revision, draft.revision + 1);
     expect(accepted.draft.geometryRevision, draft.geometryRevision + 1);

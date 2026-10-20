@@ -1,6 +1,7 @@
 import '../../../../shared/primitives/geo/geo_bounds.dart';
 import '../../../../shared/primitives/geo/geo_point.dart';
 import '../entities/route_draft_data.dart';
+import '../entities/route_sync_data.dart';
 
 enum RouteGpxCandidateKind { track, route }
 
@@ -18,6 +19,8 @@ class RouteGpxImportConfig {
     this.maximumXmlDepth = 64,
     this.maximumXmlEvents = 1000000,
     this.maximumTextCharacters = 10000,
+    this.maximumAttributesPerElement = 32,
+    this.maximumAttributeCharacters = 2048,
   });
 
   final int maximumFileBytes;
@@ -28,6 +31,8 @@ class RouteGpxImportConfig {
   final int maximumXmlDepth;
   final int maximumXmlEvents;
   final int maximumTextCharacters;
+  final int maximumAttributesPerElement;
+  final int maximumAttributeCharacters;
 
   RouteGpxImportConfig validated() {
     if (maximumFileBytes <= 0 ||
@@ -37,7 +42,9 @@ class RouteGpxImportConfig {
         maximumWaypoints < 0 ||
         maximumXmlDepth < 4 ||
         maximumXmlEvents <= 0 ||
-        maximumTextCharacters <= 0) {
+        maximumTextCharacters <= 0 ||
+        maximumAttributesPerElement <= 0 ||
+        maximumAttributeCharacters <= 0) {
       throw const RouteGpxException('gpx_config_invalid');
     }
     return this;
@@ -187,21 +194,34 @@ class RouteGpxImportedWaypoint {
   final String? note;
 }
 
+/// One imported track: ordered parts of source geometry. Consecutive parts
+/// were separated by a gap the author confirmed as direct; they are joined by
+/// an explicit `intentionalDirect` segment, never spliced into the source line.
+class RouteGpxImportedTrack {
+  RouteGpxImportedTrack(Iterable<List<GeoPoint>> parts)
+    : parts = List<List<GeoPoint>>.unmodifiable(
+        parts.map((List<GeoPoint> part) => List<GeoPoint>.unmodifiable(part)),
+      );
+
+  final List<List<GeoPoint>> parts;
+
+  int get pointCount =>
+      parts.fold<int>(0, (int total, List<GeoPoint> p) => total + p.length);
+}
+
 class RouteGpxImportResult {
   RouteGpxImportResult({
-    required Iterable<List<GeoPoint>> tracks,
+    required Iterable<RouteGpxImportedTrack> tracks,
     required Iterable<RouteGpxImportedWaypoint> waypoints,
     required Iterable<RouteSourceIssueDraft> sourceIssues,
     required this.provenance,
-  }) : tracks = List<List<GeoPoint>>.unmodifiable(
-         tracks.map(
-           (List<GeoPoint> track) => List<GeoPoint>.unmodifiable(track),
-         ),
-       ),
+  }) : tracks = List<RouteGpxImportedTrack>.unmodifiable(tracks),
        waypoints = List<RouteGpxImportedWaypoint>.unmodifiable(waypoints),
        sourceIssues = List<RouteSourceIssueDraft>.unmodifiable(sourceIssues);
 
-  final List<List<GeoPoint>> tracks;
+  static const String parserVersion = 'gpx-inspector-v2';
+
+  final List<RouteGpxImportedTrack> tracks;
   final List<RouteGpxImportedWaypoint> waypoints;
   final List<RouteSourceIssueDraft> sourceIssues;
   final RouteProvenanceDraft provenance;
@@ -238,6 +258,13 @@ abstract interface class RouteGpxRepository {
   Future<RouteGpxImportResult> import(RouteGpxImportSelection selection);
 
   Future<RouteSafeFileRef> export(RouteGpxExportRequest request);
+
+  /// Builds GPX only from a server-trimmed view; there is no draft fallback.
+  Future<RouteSafeFileRef> exportTrimmed(
+    RouteTrimmedView view, {
+    required bool includeElevation,
+    required bool includeWaypoints,
+  });
 
   Future<void> discard(RouteSafeFileRef file);
 }

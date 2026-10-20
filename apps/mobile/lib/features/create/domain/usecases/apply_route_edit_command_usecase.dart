@@ -82,6 +82,8 @@ class ApplyRouteEditCommandUseCase {
         draft,
         command,
         nowUtc,
+        maximumAnchors,
+        maximumSegments,
         maximumWaypoints,
         maximumGeometryPoints,
       ),
@@ -148,6 +150,8 @@ class ApplyRouteEditCommandUseCase {
     RouteDraftData draft,
     ApplyRouteGpxImport command,
     DateTime nowUtc,
+    int maximumAnchors,
+    int maximumSegments,
     int maximumWaypoints,
     int maximumGeometryPoints,
   ) {
@@ -163,44 +167,100 @@ class ApplyRouteEditCommandUseCase {
         RouteEditFailureCode.multipleGpxTracksRequireSeparateDrafts,
       );
     }
-    final points = <GeoPoint>[];
-    for (final point in command.result.tracks.single) {
-      if (!point.isValid) {
+    final parts = command.result.tracks.single.parts;
+    var pointCount = 0;
+    for (final part in parts) {
+      // The importer already removed (and counted) consecutive duplicates;
+      // nothing is dropped or corrected here.
+      if (part.length < 2 || part.any((GeoPoint point) => !point.isValid)) {
         return _reject(draft, RouteEditFailureCode.invalidGpxImport);
       }
-      if (points.isEmpty || points.last != point) points.add(point);
+      pointCount += part.length;
     }
-    if (points.length < 2 ||
-        points.length > maximumGeometryPoints ||
+    if (parts.isEmpty ||
+        pointCount > maximumGeometryPoints ||
         command.result.waypoints.length > maximumWaypoints) {
       return _reject(draft, RouteEditFailureCode.invalidGpxImport);
     }
-    final first = RouteAnchorDraft(id: _localId(), position: points.first);
-    final last = RouteAnchorDraft(id: _localId(), position: points.last);
-    final geometry = RouteGeometryDraft.fromPoints(
-      points,
-      encodingPolicy: draft.encodingPolicy,
-    );
-    final segmentId = _localId();
-    final segment = RouteSegmentDraft(
-      id: segmentId,
-      fromAnchorId: first.id,
-      toAnchorId: last.id,
-      order: 0,
-      source: RouteSegmentSource.importedGpx,
-      derivation: RouteSegmentDerivation.original,
-      geometry: geometry,
-      provenance: command.result.provenance,
-      geometryRevision: draft.geometryRevision + 1,
-      rawStats: RouteSegmentRawStats(distanceMeters: geometry.lengthMeters),
-    );
+    final anchors = <RouteAnchorDraft>[
+      RouteAnchorDraft(id: _localId(), position: parts.first.first),
+    ];
+    final segments = <RouteSegmentDraft>[];
+    RouteSegmentDraft segment({
+      required RouteSegmentSource source,
+      required List<GeoPoint> points,
+      required String fromAnchorId,
+      required String toAnchorId,
+      required RouteProvenanceDraft provenance,
+    }) {
+      final geometry = RouteGeometryDraft.fromPoints(
+        points,
+        encodingPolicy: draft.encodingPolicy,
+      );
+      return RouteSegmentDraft(
+        id: _localId(),
+        fromAnchorId: fromAnchorId,
+        toAnchorId: toAnchorId,
+        order: segments.length,
+        source: source,
+        derivation: RouteSegmentDerivation.original,
+        geometry: geometry,
+        provenance: provenance,
+        geometryRevision: draft.geometryRevision + 1,
+        rawStats: source == RouteSegmentSource.importedGpx
+            ? RouteSegmentRawStats(distanceMeters: geometry.lengthMeters)
+            : null,
+      );
+    }
+
+    for (var index = 0; index < parts.length; index++) {
+      final part = parts[index];
+      if (index > 0) {
+        final previousEnd = anchors.last;
+        if (previousEnd.position != part.first) {
+          // The confirmed direct gap is its own typed segment, so source
+          // geometry never contains an invented line.
+          final start = RouteAnchorDraft(id: _localId(), position: part.first);
+          anchors.add(start);
+          segments.add(
+            segment(
+              source: RouteSegmentSource.intentionalDirect,
+              points: <GeoPoint>[previousEnd.position, part.first],
+              fromAnchorId: previousEnd.id,
+              toAnchorId: start.id,
+              provenance: RouteProvenanceDraft(
+                sourceId: 'author-direct',
+                sourceRevision: draft.revision + 1,
+                createdAtUtc: nowUtc,
+                algorithmVersion: 'direct-v1',
+              ),
+            ),
+          );
+        }
+      }
+      final end = RouteAnchorDraft(id: _localId(), position: part.last);
+      segments.add(
+        segment(
+          source: RouteSegmentSource.importedGpx,
+          points: part,
+          fromAnchorId: anchors.last.id,
+          toAnchorId: end.id,
+          provenance: command.result.provenance,
+        ),
+      );
+      anchors.add(end);
+    }
+    if (anchors.length > maximumAnchors || segments.length > maximumSegments) {
+      return _reject(draft, RouteEditFailureCode.invalidGpxImport);
+    }
+    final firstSegmentId = segments.first.id;
     final waypoints = command.result.waypoints
         .map(
           (waypoint) => RouteWaypointDraft(
             id: _localId(),
             segmentId: waypoint.trackState == RouteWaypointTrackState.unresolved
                 ? null
-                : segmentId,
+                : firstSegmentId,
             position: waypoint.position,
             typeId: waypoint.typeId,
             trackState: waypoint.trackState,
@@ -215,7 +275,7 @@ class ApplyRouteEditCommandUseCase {
             id: _localId(),
             code: issue.code,
             severity: issue.severity,
-            segmentId: issue.segmentId == null ? null : segmentId,
+            segmentId: issue.segmentId == null ? null : firstSegmentId,
             safeMetrics: issue.safeMetrics,
           ),
         )
@@ -226,8 +286,8 @@ class ApplyRouteEditCommandUseCase {
       creationMethod: RouteCreationMethod.importedGpx,
       shape: RouteShape.oneWay,
       clearTurningAnchorId: true,
-      anchors: <RouteAnchorDraft>[first, last],
-      segments: <RouteSegmentDraft>[segment],
+      anchors: anchors,
+      segments: segments,
       waypoints: waypoints,
       sourceIssues: issues,
     );

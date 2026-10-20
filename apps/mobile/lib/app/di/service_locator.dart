@@ -662,7 +662,7 @@ Future<void> setupDependencies() async {
       () => RouteGpxMemorySourceStore(idGenerator: sl(), config: sl()),
     )
     ..registerLazySingleton<RouteGpxFilePickerPort>(
-      () => RouteGpxFileSelectorAdapter(sl()),
+      () => RouteGpxFileSelectorAdapter(sl(), config: sl()),
     )
     ..registerLazySingleton<RouteGpxInspector>(
       () => RouteGpxInspector(config: sl()),
