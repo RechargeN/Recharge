@@ -24,6 +24,14 @@ export const emulatorTestGroups = Object.freeze([
     tasks: [["lib/test/emulator/scenario_i3.test.js"]],
   },
   {
+    // J1: owner Route storage/sync with real Flutter GPX/sync adapters; owns
+    // and removes its fixtures, flags and Auth users.
+    name: "route-j1",
+    baselineMs: 60000,
+    timeoutMs: 300000,
+    tasks: [["lib/test/emulator/route_j1.test.js"]],
+  },
+  {
     name: "quick-plan",
     baselineMs: 20000,
     timeoutMs: 180000,

@@ -986,3 +986,14 @@ token share; Catalog family behind `RECHARGE_TEST_SCENARIO_CATALOG=true`. See
   page, verified stop and cleanup of an isolated stand root.
 - `node scripts/run-emulator-tests.mjs --group scenario-i3`: focused backend gate.
 - `node --test scripts/stand-i3-gate.test.mjs`: launcher self-tests.
+
+### J1 Route storage and sync (local Emulator)
+
+Default-off `route.owner_sync`; owner-only `routeCommandV1`/`routeQueryV1` over
+canonical `wgs84-e7-dm-v1` geometry with CAS, compact receipts, tombstones,
+server-stamped provenance and the `endpoint-radius-v1` trimmed view. No GPX
+bytes reach the server. See
+[`J1`](../../docs/product/route/ROUTE_J1_STORAGE_SYNC_GPX_SLICE_SPEC.md).
+
+- `node scripts/run-emulator-tests.mjs --group route-j1`: service matrix plus the
+  real Flutter GPX/sync adapters (`RECHARGE_DART`, `RECHARGE_FLUTTER_TOOL`).
