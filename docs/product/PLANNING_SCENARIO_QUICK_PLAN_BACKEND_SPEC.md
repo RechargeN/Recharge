@@ -1,15 +1,25 @@
 # Recharge Backend — Planning: Scenario & Quick Plan Specification
 
 - ID: **BCK-10**
-- Version: **0.3.2**
-- Date: **2026-10-16**
+- Version: **0.4**
+- Date: **2026-10-20**
 - Spec status: **Draft — Present; owner and cross-boundary review pending**
-- Runtime status: **Partial — I1 owner-only Emulator implementation; production/invited authority absent**
+- Runtime status: **Partial — I1 Quick Plan and I2 Scenario persistence/collaboration Emulator implementations; publication, unlisted share, production and invited Quick Plan authority absent**
 - Accountable owner: **Planning owner**
 - Coordination baseline: [BCK-02 v2.4.82](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Delivery stage: **D4 / R7**
 
 ## 0. Changelog
+
+### v0.4 — 2026-10-20
+
+- adds §33: owner-accepted Scenario publication contract SCN-PUB-01
+  ([amendment](SCENARIO_PUBLICATION_BCK10_AMENDMENT.md), SP-01…SP-14);
+- resolves for the bounded local/LV Emulator scope the §29 rows on
+  collaboration roles (SP-01), unlisted token TTL/rotation (SP-03/SP-04) and
+  public Scenario moderation classes (SP-05); other §29 rows stay open;
+- records I2 ([slice](SCENARIO_I2_SLICE_SPEC.md)) as Done in local Emulator scope;
+- the remaining BCK-10 stays Draft; no production, Firebase or cloud authority.
 
 ### v0.3.2 — 2026-10-16
 
@@ -724,3 +734,30 @@ data.
 73. **BCK-10-AC-73:** Private source and public projection retain distinct privacy/retention classes.
 74. **BCK-10-AC-74:** Rollback never republishes private data or merges planning aggregates.
 75. **BCK-10-AC-75:** v0.3.1 authorizes no persistence, Firebase, collaboration or publication runtime.
+
+## 33. Scenario publication contract SCN-PUB-01 (v0.4)
+
+The owner accepted SP-01…SP-14 of
+[SCENARIO_PUBLICATION_BCK10_AMENDMENT.md](SCENARIO_PUBLICATION_BCK10_AMENDMENT.md)
+on 2026-10-20; that amendment owns the exact rules. Summary:
+
+- only the owner submits, withdraws, activates and manages shares; editors edit
+  the live draft only; v1 PublisherRef is personal `{user, ownerUserId}` of a
+  verified Creator;
+- unlisted is a BCK-10 share token (≥128 bit, hash only, scope `read_copy`,
+  default 30 / max 90 days, revoke/rotate) over an immutable share snapshot; an
+  ID without a token returns `not_found`; unlisted never enters Catalog;
+- public submit pins an immutable ScenarioRevision `{scenarioId,
+  scenarioRevisionId, contentHash}`, goes to `pendingReview` without
+  auto-approve and is template-only in v1;
+- submit, publish and activate share one validator: public allowlist, privacy,
+  `publishTemplate` readiness and currently public dependencies; Route items
+  block v1 distribution;
+- public revisions store dependency references only; unavailable dependencies are
+  omitted on fresh reads without source data, and fewer than two available items
+  exclude the Scenario from Catalog without withdrawing it;
+- published visibility is immutable; deletion requires prior withdraw/revoke;
+  collaboration revocation does not withdraw a publication.
+
+76. **BCK-10-AC-76:** Scenario publication and unlisted share follow the
+    accepted SCN-PUB-01 decisions and run only in bounded local/LV Emulator scope.
