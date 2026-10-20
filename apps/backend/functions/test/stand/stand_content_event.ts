@@ -1,4 +1,5 @@
 import type { StandContentSessionManifest } from './stand_content_session.js';
+import type { StandContentScenarioManifest } from './stand_content_scenario.js';
 import { createHash } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
@@ -37,6 +38,8 @@ export interface StandManifest {
   /** D3.1: written only by `stand-seed.mjs place seed`. */
   readonly contentPlace?: StandContentPlaceManifest;
   readonly contentSession?: StandContentSessionManifest;
+  /** I3: written only by `stand-seed.mjs scenario seed`. */
+  readonly contentScenario?: StandContentScenarioManifest;
   /** D3.2: written only by `stand-seed.mjs activity seed`. */
   readonly contentActivity?: StandContentActivityManifest;
   /** D3.3: written only by `stand-seed.mjs rental seed`. */

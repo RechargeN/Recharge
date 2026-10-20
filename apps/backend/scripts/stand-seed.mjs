@@ -37,6 +37,8 @@ const commands = new Set([
   // D3.1: the stand Place (its own flag) — seed | verify | manifest | status.
   "place",
   "session",
+  // I3: the stand Scenario (Planning, Content, Media, moderation) — seed | verify | manifest | status.
+  "scenario",
   // D3.2: the stand Activity (its own flag) — seed | verify | manifest | status.
   "activity",
   // D3.3: the stand Rental (its own flag) — seed | verify | manifest | status.

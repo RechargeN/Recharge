@@ -16,6 +16,14 @@ export const emulatorTestGroups = Object.freeze([
     tasks: [["lib/test/emulator/scenario_i2.test.js"]],
   },
   {
+    // I3 / SCN-PUB-01: Scenario publication through Planning, Content, Media,
+    // moderation and Catalog; owns and removes every fixture it creates.
+    name: "scenario-i3",
+    baselineMs: 120000,
+    timeoutMs: 390000,
+    tasks: [["lib/test/emulator/scenario_i3.test.js"]],
+  },
+  {
     name: "quick-plan",
     baselineMs: 20000,
     timeoutMs: 180000,

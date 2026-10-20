@@ -94,6 +94,25 @@ final class StandBackend {
   Future<Map<String, Object?>> sessionManifest() =>
       _stand(<String>['session', 'manifest']);
 
+  /// I3: seeds (or reuses) the stand Scenario and enables the Scenario flags
+  /// on the stand only; prints no JSON, so only its exit code is checked.
+  Future<void> scenarioSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'scenario',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'scenario seed failed: ${result.stderr}${result.stdout}',
+      );
+    }
+  }
+
+  /// I3: the ids the owner services returned for the stand Scenario.
+  Future<Map<String, Object?>> scenarioManifest() =>
+      _stand(<String>['scenario', 'manifest']);
+
   Future<void> placeSeed() async {
     final result = await Process.run(node, <String>[
       _script('stand-seed.mjs'),

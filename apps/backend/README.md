@@ -972,3 +972,17 @@ Use the pinned Node/Java toolchain from `toolchain.lock.json` on PATH (including
 Emulator fixtures use owner-service commands. Session test worlds remove and
 verify only their own UUID-bound fixtures and source objects; flags are restored.
 This is PC-host Emulator evidence, not device, staging, Linux or production.
+
+### I3 Scenario publication (local Emulator)
+
+SCN-PUB-01 (owner-accepted SP-01…SP-14): default-off `planning.scenarioPublication`,
+`planning.scenarioShare` and `content.scenario.authoring`; personal publisher only;
+template-only public Scenario pinned to an immutable Planning revision; unlisted
+token share; Catalog family behind `RECHARGE_TEST_SCENARIO_CATALOG=true`. See
+[`SCN-PUB-01`](../../docs/product/SCENARIO_PUBLICATION_BCK10_AMENDMENT.md).
+
+- `node scripts/stand-i3-gate.mjs --yes` from `apps/backend`: clean,
+  interrupted/resumed, repeated equality, the real Flutter Scenario publication
+  page, verified stop and cleanup of an isolated stand root.
+- `node scripts/run-emulator-tests.mjs --group scenario-i3`: focused backend gate.
+- `node --test scripts/stand-i3-gate.test.mjs`: launcher self-tests.

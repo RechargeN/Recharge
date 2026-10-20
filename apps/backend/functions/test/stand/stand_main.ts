@@ -63,6 +63,37 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'scenario') {
+    // I3: loaded only for this command, like the other typed seeds.
+    const { seedContentScenario, standScenarioStatus, verifyStandScenario } =
+      await import('./stand_content_scenario.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentScenario(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} scenario=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandScenario(firestore);
+      if (problems.length > 0)
+        throw new Error(`scenario invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified scenario invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentScenario;
+      if (manifest === undefined) throw new Error('stand Scenario is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standScenarioStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: scenario seed | verify | manifest | status');
+  }
   if (command === 'session') {
     // D3.1: loaded only for this command, like the F1/F2 and D2 commands.
     const { seedContentSession, standSessionStatus, verifyStandSession } =

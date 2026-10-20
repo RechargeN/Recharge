@@ -12,6 +12,7 @@ import { contentCollections } from '../../src/modules/content/infrastructure/fir
 import { mediaCollections } from '../../src/modules/media/infrastructure/firestore_media_repository.js';
 import { moderationCollections } from '../../src/modules/moderation/infrastructure/firestore_moderation_repository.js';
 import { standManifestCollection } from './stand_content_event.js';
+import { standScenarioSeedInstallation } from './stand_content_scenario.js';
 import { isAuthUserNotFound } from './stand_guard.js';
 import { standEvent, standUsers } from './stand_plan.js';
 
@@ -115,7 +116,24 @@ export async function computeStandDigest(firestore: Firestore): Promise<StandDig
 export function digestStandState(raw: RawStandState, auth: unknown): StandDigest {
   const labels = deriveLabels(raw);
   const collections: Record<string, unknown[]> = {};
-  for (const [collection, documents] of raw) {
+  // I3: the scenario seed's own Planning Session is per run by design (the
+  // stand never stores a handle); its Session and access snapshot are left out.
+  const seedSessions = new Set(
+    [...(raw.get(identityAuthorityCollections.sessions) ?? [])]
+      .filter(([, session]) => session.installationId === standScenarioSeedInstallation)
+      .map(([sessionId]) => sessionId),
+  );
+  for (const [collection, all] of raw) {
+    const documents = new Map(
+      [...all].filter(
+        ([documentId, data]) =>
+          !(
+            (collection === identityAuthorityCollections.sessions ||
+              collection === identityAuthorityCollections.accessSnapshots) &&
+            seedSessions.has(typeof data.sessionId === 'string' ? data.sessionId : documentId)
+          ),
+      ),
+    );
     const normalizer = new Normalizer(labels, assetSortedKeysIn[collection]);
     // Hash-named documents can collapse to one normalized id, so entries stay a sorted list.
     const entries = [...documents].map(([id, data]) => ({
@@ -201,6 +219,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
   const seededObjects: Array<readonly [Record<string, unknown> | undefined, string]> = [
     [manifest?.contentPlace as Record<string, unknown> | undefined, 'seed-place'],
     [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
+    [manifest?.contentScenario as Record<string, unknown> | undefined, 'seed-scenario'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
     [manifest?.contentRental as Record<string, unknown> | undefined, 'seed-rental'],
     [collection, 'seed-collection'],
@@ -217,6 +236,8 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
       submissionId: 'submission',
       publishedRevisionId: 'revision',
       approveDecisionId: 'decision',
+      // I3: the immutable Planning revision a Scenario body is pinned to.
+      scenarioRevisionId: 'scenario-revision',
     })) {
       const value = seeded[key];
       if (typeof value === 'string') labels.set(value, `${name}:${tag}`);
