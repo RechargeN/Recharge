@@ -1,4 +1,5 @@
 import 'session_publication_composition.dart';
+import 'scenario_publication_composition.dart';
 import 'library_composition.dart';
 import '../adapters/server_library_repositories.dart';
 import '../../features/library/data/library_sync_client.dart';
@@ -308,6 +309,10 @@ Future<void> setupDependencies() async {
     // D3.1: default-off Place publication test entry, its own define.
     ..registerLazySingleton<SessionPublicationTestEntryGuard>(
       () => SessionPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // I3: default-off Scenario publication test entry, its own define.
+    ..registerLazySingleton<ScenarioPublicationTestEntryGuard>(
+      () => ScenarioPublicationTestEntryGuard.fromEnvironment(sl()),
     )
     ..registerLazySingleton<PlacePublicationTestEntryGuard>(
       () => PlacePublicationTestEntryGuard.fromEnvironment(sl()),

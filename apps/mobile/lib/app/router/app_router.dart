@@ -1,5 +1,7 @@
 import '../di/session_publication_composition.dart';
 import '../presentation/session_publication_panel.dart';
+import '../presentation/scenario_publication_panel.dart';
+import '../di/scenario_publication_composition.dart';
 import 'package:flutter/widgets.dart';
 import '../presentation/class_workshop_details_page.dart';
 import '../../features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
@@ -349,6 +351,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
         builder: (BuildContext context, GoRouterState state) =>
             const SessionPublicationPage(),
+      ),
+      GoRoute(
+        name: 'test_scenario_publication',
+        path: RouteNames.testScenarioPublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            scenarioPublicationTestEntryRedirect(
+              sl.isRegistered<ScenarioPublicationTestEntryGuard>()
+                  ? sl<ScenarioPublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const ScenarioPublicationPage(),
       ),
       GoRoute(
         name: 'test_place_publication',
