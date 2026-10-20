@@ -106,6 +106,9 @@ service cloud.firestore {
     match /scenarioShares/{document} { allow read, write: if false; }
     match /quickPlans/{document} { allow read, write: if false; }
     match /quickPlanCommandReceipts/{document} { allow read, write: if false; }
+    // J1 Route geometry is owner-scoped on the server (routeCommandV1/QueryV1) only.
+    match /routes/{document} { allow read, write: if false; }
+    match /routeCommandReceipts/{document} { allow read, write: if false; }
 
     match /{document=**} {
       allow read, write: if false;

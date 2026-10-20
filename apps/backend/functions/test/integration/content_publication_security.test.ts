@@ -852,6 +852,9 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/quick_plan/scenario_distribution.ts',
     'modules/quick_plan/scenario_publication.ts',
     'modules/catalog/domain/scenario_projection.ts',
+    // J1 Route: Emulator guard and pure canonical hashing only.
+    'modules/route/firestore_route_service.ts',
+    'modules/route/route_contract.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -899,6 +902,12 @@ void test('delegated import never reaches Content storage except through the Con
       'sha256Hex',
     ],
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
+    'modules/route/firestore_route_service.ts': [
+      'assertContentEmulatorContext',
+      'canonicalJson',
+      'sha256Hex',
+    ],
+    'modules/route/route_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_scenario_service.ts': [
       'assertContentEmulatorContext',
       'scenarioPublicationStanding',

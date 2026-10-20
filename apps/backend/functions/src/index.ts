@@ -4,6 +4,7 @@ import { FirestoreReviewService } from './modules/reviews/firestore_review_servi
 import { handleK1 } from './moderation_entry.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
+import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
@@ -1249,6 +1250,28 @@ export const quickPlanQueryV1 = onCall<unknown>(callableOptions, async (request)
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
   return new FirestoreQuickPlanService(access.firestore, systemServerClock).query(
+    access.accessHint,
+    data,
+  );
+});
+
+// J1: default-off, Emulator-only owner Route storage/sync; session rechecked in the transaction.
+export const routeCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreRouteService(access.firestore, systemServerClock).command(
+    access.accessHint,
+    data,
+  );
+});
+export const routeQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreRouteService(access.firestore, systemServerClock).query(
     access.accessHint,
     data,
   );
