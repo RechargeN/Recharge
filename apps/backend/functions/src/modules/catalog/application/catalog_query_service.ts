@@ -9,6 +9,7 @@ import type {
   CatalogItem,
   CatalogOccurrence,
   CatalogScenarioItem,
+  CatalogRouteItem,
 } from '../domain/catalog_item.js';
 import { parseDiscoverQuery, type DiscoverQuery } from '../domain/discover_query.js';
 import type { ListingTypeId } from '../domain/published_object_link.js';
@@ -101,9 +102,18 @@ export interface CatalogFindPeopleCard {
   readonly projectedAtUtc: string;
 }
 
+/** RP-12 card: summary and preview line; the full trimmed track is in Details only. */
+export type CatalogRouteCard = Omit<CatalogRouteItem, 'track'> & {
+  readonly ref: { readonly typeId: 'route'; readonly contentId: string };
+  readonly distanceMeters: number | null;
+  readonly changedSinceSnapshot: boolean;
+  readonly projectedAtUtc: string;
+};
+
 export type CatalogCard =
   | CatalogEventCard
   | CatalogScenarioCard
+  | CatalogRouteCard
   | CatalogFindPeopleCard
   | (CatalogActivityItem & {
       readonly ref: { readonly typeId: 'activity'; readonly contentId: string };
@@ -137,11 +147,13 @@ export interface MapResult {
   /** Every leaf is a member of the Feed result of the same token. */
   readonly leaves: readonly {
     readonly ref: {
-      readonly typeId: 'event' | 'activity' | 'scenario' | 'find_people';
+      readonly typeId: 'event' | 'activity' | 'scenario' | 'find_people' | 'route';
       readonly contentId: string;
     };
     readonly point: NonNullable<CatalogEventItem['point']>;
     readonly title: string;
+    /** RP-12: a Route leaf carries its preview line. */
+    readonly preview?: CatalogRouteItem['preview'];
   }[];
   readonly notMappable: number;
   readonly totalEligible: number;
@@ -200,6 +212,8 @@ export class CatalogQueryService {
     } = { enabled: false },
     /** D3.7: default-off local `catalog.findPeople`; its items need `safetyVisible`. */
     private readonly findPeopleEnabled = false,
+    /** J2 / BCK08-OD-04-R: the default-off local Route family. */
+    private readonly routeEnabled = false,
   ) {}
 
   /** SP-09: fresh status of one stop; anything but `eligible` is unavailable. */
@@ -350,6 +364,7 @@ export class CatalogQueryService {
       this.activityEnabled,
       this.scenario.enabled,
       this.findPeopleEnabled,
+      this.routeEnabled,
     );
     if (parsed.ok && parsed.query.textTokens.length === 0)
       return { kind: 'invalid', code: 'text_required' };
@@ -403,6 +418,7 @@ export class CatalogQueryService {
         ref: { typeId: entry.item.typeId, contentId: entry.item.contentId },
         point,
         title: entry.item.title,
+        ...(entry.item.typeId === 'route' ? { preview: entry.item.preview } : {}),
       });
     }
     return {
@@ -436,6 +452,8 @@ export class CatalogQueryService {
       };
     if (current.item?.typeId === 'scenario' && !this.scenario.enabled)
       return { kind: 'unsupported', code: 'type_disabled:scenario' };
+    if (current.item?.typeId === 'route' && !this.routeEnabled)
+      return { kind: 'unsupported', code: 'type_disabled:route' };
     if (current.item?.typeId === 'activity') {
       if (!this.activityEnabled) return { kind: 'unsupported', code: 'type_disabled:activity' };
       const pinned = await this.references.readTaxonomyRevision?.(
@@ -466,6 +484,7 @@ export class CatalogQueryService {
         this.activityEnabled,
         this.scenario.enabled,
         this.findPeopleEnabled,
+        this.routeEnabled,
       );
       if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
       const check = verifySnapshot(
@@ -528,6 +547,7 @@ export class CatalogQueryService {
       this.activityEnabled,
       this.scenario.enabled,
       this.findPeopleEnabled,
+      this.routeEnabled,
     );
     if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
     const requestNow = this.clock.now().getTime();
@@ -726,6 +746,17 @@ export class CatalogQueryService {
         targetGroupSize: item.targetGroupSize,
         costType: item.costType,
         expectedSpend: item.expectedSpend,
+        distanceMeters: entry.distance,
+        changedSinceSnapshot: entry.changed,
+        projectedAtUtc: entry.version.projectedAtUtc,
+      };
+    }
+    if (item.typeId === 'route') {
+      const { track: hidden, ...card } = item;
+      void hidden;
+      return {
+        ...card,
+        ref: { typeId: 'route', contentId: item.contentId },
         distanceMeters: entry.distance,
         changedSinceSnapshot: entry.changed,
         projectedAtUtc: entry.version.projectedAtUtc,

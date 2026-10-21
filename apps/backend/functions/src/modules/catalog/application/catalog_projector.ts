@@ -55,6 +55,8 @@ export interface CatalogProjectorDependencies {
   readonly scenarioEnabled?: boolean;
   /** D3.7: default-off local `catalog.findPeople`. */
   readonly findPeopleEnabled?: boolean;
+  /** J2 / BCK08-OD-04-R: the local Route family (default off). */
+  readonly routeEnabled?: boolean;
 }
 
 function canonical(value: unknown): string {
@@ -160,6 +162,7 @@ export class CatalogProjector {
       activityEnabled: this.#deps.activityEnabled === true,
       scenarioEnabled: this.#deps.scenarioEnabled === true,
       findPeopleEnabled: this.#deps.findPeopleEnabled === true,
+      routeEnabled: this.#deps.routeEnabled === true,
       ...(taxonomyRead?.ok ? { taxonomy: taxonomyRead.dataset } : {}),
       fact,
       revision,

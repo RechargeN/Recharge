@@ -91,7 +91,7 @@ function assertDenied(response: Response): void {
   );
 }
 
-void test('I2 Scenario, memberships, invites and receipts deny direct client reads/writes', async () => {
+void test('I2 Scenario, memberships, invites, receipts and J2 Route revisions/trust deny direct client reads/writes', async () => {
   const identity = await createSyntheticEmulatorIdentity();
   try {
     for (const collection of [
@@ -100,6 +100,8 @@ void test('I2 Scenario, memberships, invites and receipts deny direct client rea
       'scenarioInvites',
       'scenarioCommandReceipts',
       'scenarioRevisions',
+      'routeRevisions',
+      'moderationPublisherTrust',
       'scenarioShares',
     ]) {
       for (const token of [undefined, identity.token]) {

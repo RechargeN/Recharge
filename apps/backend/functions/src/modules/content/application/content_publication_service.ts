@@ -109,6 +109,7 @@ import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_d
 import { collectionRuleConfig } from '../domain/type_rules/collection_rules.js';
 import { scenarioStopRefs } from '../domain/type_rules/scenario_rules.js';
 import type { ScenarioRevisionPort } from './ports/scenario_revision_port.js';
+import type { RouteRevisionPort } from './ports/route_revision_port.js';
 import { isEntityId } from '../../../shared/ids.js';
 import type {
   CollectionObjectType,
@@ -161,6 +162,12 @@ export interface ContentPublicationServiceDeps {
    */
   readonly scenarioRevisions?: ScenarioRevisionPort;
   readonly scenarioStops?: PublishedObjectMembershipPort;
+  /**
+   * J2 / RTE-PUB-01: Route's answer about the pinned immutable revision, read
+   * fresh at create, submit, publish and activation. Without it a Route is
+   * refused (fail closed).
+   */
+  readonly routeRevisions?: RouteRevisionPort;
   /** Approved delegated-import modules by module id (default: none). */
   readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
   /**
@@ -653,12 +660,25 @@ export class ContentPublicationService {
   /**
    * SCN-PUB-01 §9: a Scenario has exactly one publication, identified by the
    * Scenario id itself; a second draft for the same Scenario is a conflict.
+   * J2 / RTE-PUB-01: the same for a Route, and only its author may reserve the
+   * id, so nobody can hold another user's Route hostage with an early draft.
    */
   private async newContentId(
     context: CommandContext,
     typeId: ContentTypeId,
     body: ContentBody,
   ): Promise<EntityId> {
+    if (typeId === 'route') {
+      const route = isRecord(body.route) ? body.route : undefined;
+      const ref = isRecord(route?.ref) ? route.ref : undefined;
+      if (!isEntityId(ref?.routeId))
+        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(['route.ref']));
+      if (context.principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+      await this.assertRouteSource('route', body, context.principal.actor.userId);
+      if ((await context.tx.draftByContentId(ref.routeId)) !== null)
+        throw new ContentDomainRefusal('revision_conflict');
+      return ref.routeId;
+    }
     if (typeId !== 'scenario') return this.deps.ids.newId();
     const scenario = isRecord(body.scenario) ? body.scenario : undefined;
     const ref = isRecord(scenario?.ref) ? scenario.ref : undefined;
@@ -728,6 +748,7 @@ export class ContentPublicationService {
     this.assertClassWorkshopFuture(draft, context.nowUtc);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
+    await this.assertRouteSource(draft.typeId, draft.body, draft.createdByUserId);
     // Early feedback only: the binding check runs where the pointer switches.
     await this.assertTransition(
       context.tx,
@@ -796,6 +817,7 @@ export class ContentPublicationService {
     this.assertClassWorkshopFuture(draft, context.nowUtc);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
+    await this.assertRouteSource(draft.typeId, draft.body, draft.createdByUserId);
     const references = resolved.revisions;
     const media = this.mediaEvidence(context, draft);
     const pointer = await tx.pointer(submission.contentId);
@@ -926,7 +948,8 @@ export class ContentPublicationService {
     if (
       target.typeId === 'session' ||
       target.typeId === 'class_workshop' ||
-      target.typeId === 'scenario'
+      target.typeId === 'scenario' ||
+      target.typeId === 'route'
     ) {
       if (
         target.typeId !== 'class_workshop' &&
@@ -972,6 +995,7 @@ export class ContentPublicationService {
     );
     await this.assertLinkedPlace(target.typeId, target.body, target.marketId);
     await this.assertScenarioSource(target.typeId, target.body, target.publisherRef);
+    await this.assertRouteSource(target.typeId, target.body, draft.createdByUserId);
     await this.assertCollectionTargetMembership(target.typeId, target.body, target.marketId);
     // Rollback verifies exactly the references stored in the target revision; the
     // evidence was taken for this very immutable revision before the transaction.
@@ -1531,6 +1555,39 @@ export class ContentPublicationService {
       throw new ContentDomainRefusal(
         'validation_failed',
         publicValidationDetails([`scenario.source_${status}`]),
+      );
+  }
+
+  /**
+   * RP-01: the body is pinned to the author's own immutable Route revision. The
+   * author owns the Route even when a Page publishes it (RP-04).
+   */
+  private async assertRouteSource(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    authorUserId: string | null,
+  ): Promise<void> {
+    if (typeId !== 'route') return;
+    const route = isRecord(body.route) ? body.route : undefined;
+    const ref = isRecord(route?.ref) ? route.ref : undefined;
+    let status: string = 'unavailable';
+    try {
+      status =
+        ref === undefined || authorUserId === null
+          ? 'forbidden'
+          : ((await this.deps.routeRevisions?.verify({
+              routeId: String(ref.routeId),
+              routeRevisionId: String(ref.routeRevisionId),
+              contentHash: String(ref.contentHash),
+              authorUserId,
+            })) ?? 'unavailable');
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'ok')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([`route.source_${status}`]),
       );
   }
 

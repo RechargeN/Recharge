@@ -93,9 +93,7 @@ void test('registry has exactly the ten accepted types and never Quick Plan', ()
 
 const expectedUnavailable: Readonly<
   Record<string, { readonly reason: string; readonly dependency: string | undefined }>
-> = {
-  route: { reason: 'dependency_pending', dependency: 'BCK-11' },
-};
+> = {};
 /** Types whose approved source rules are implemented; grows one type per commit. */
 const expectedAvailable = [
   'place',
@@ -107,10 +105,11 @@ const expectedAvailable = [
   'scenario',
   'class_workshop',
   'find_people',
+  'route',
 ] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v9');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v10');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);

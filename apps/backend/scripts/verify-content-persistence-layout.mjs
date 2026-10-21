@@ -130,7 +130,13 @@ const approvedOutsideUsers = {
   // no Content read or write.
   "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
   // J1 Route (2026-10-20): only the Emulator guard; its own collections.
-  "modules/route/firestore_route_service.ts": guardOnly,
+  // J2 / RTE-PUB-01 (2026-10-21): plus one read-only standing check, RP-11.
+  "modules/route/firestore_route_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "routePublicationStanding",
+    ],
+  },
   // I3 / SCN-PUB-01 (2026-10-20): plus one read-only pointer check, SP-11.
   "modules/quick_plan/firestore_scenario_service.ts": {
     firestore_content_repository: [

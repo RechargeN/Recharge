@@ -70,7 +70,13 @@ export class ContentModerationAdapter implements ContentModerationPort {
             tx.publishedRevision(pointer.currentPublishedRevisionId!),
           );
     return {
-      ...(revision === null ? {} : { marketId: revision.marketId, typeId: revision.typeId }),
+      ...(revision === null
+        ? {}
+        : {
+            marketId: revision.marketId,
+            typeId: revision.typeId,
+            publisherRef: { type: revision.publisherRef.type, id: revision.publisherRef.id },
+          }),
       contentId: pointer.contentId,
       pointerRevision: pointer.revision,
       currentPublishedRevisionId: pointer.currentPublishedRevisionId,

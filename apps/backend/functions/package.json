@@ -92,6 +92,7 @@
     "test:emulator:scenario-i2": "node ../scripts/run-emulator-tests.mjs --group scenario-i2",
     "test:emulator:scenario-i3": "node ../scripts/run-emulator-tests.mjs --group scenario-i3",
     "test:emulator:route-j1": "node ../scripts/run-emulator-tests.mjs --group route-j1",
+    "test:emulator:route-j2": "node ../scripts/run-emulator-tests.mjs --group route-j2",
     "test:emulator:quick-plan": "node ../scripts/run-emulator-tests.mjs --group quick-plan",
     "test:emulator:platform": "node ../scripts/run-emulator-tests.mjs --group platform",
     "test:emulator:booking": "node ../scripts/run-emulator-tests.mjs --group booking",

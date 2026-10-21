@@ -1126,6 +1126,20 @@
         "compositeIndexes": []
       },
       {
+        "name": "routeRevisions",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "moderationPublisherTrust",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "scenarios",
         "clientAccess": "deny",
         "owner": "firebase_cli",

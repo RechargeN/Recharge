@@ -32,6 +32,14 @@ export const emulatorTestGroups = Object.freeze([
     tasks: [["lib/test/emulator/route_j1.test.js"]],
   },
   {
+    // J2 / RTE-PUB-01: Route publication through Route, Content, moderation
+    // (publisher trust) and Catalog; owns and removes every fixture it creates.
+    name: "route-j2",
+    baselineMs: 90000,
+    timeoutMs: 360000,
+    tasks: [["lib/test/emulator/route_j2.test.js"]],
+  },
+  {
     name: "quick-plan",
     baselineMs: 20000,
     timeoutMs: 180000,

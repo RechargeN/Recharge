@@ -16,9 +16,13 @@ import {
 
 /** J1: default-off, Emulator-only owner Route storage and sync. */
 export const routeFlag = 'route.owner_sync';
+/** J2 / RTE-PUB-01: immutable public distribution revisions (default off). */
+export const routePublicationFlag = 'route.publication';
 export const routeCollections = Object.freeze({
   routes: 'routes',
   receipts: 'routeCommandReceipts',
+  /** J2: immutable `RouteRevision` snapshots, one per distributed J1 revision. */
+  revisions: 'routeRevisions',
 });
 export const routeLimits = Object.freeze({
   routeJsonBytes: 204_800,
@@ -30,6 +34,8 @@ export const routeLimits = Object.freeze({
   waypointTitle: 120,
   longText: 1_000,
   listPage: 50,
+  /** J2: distributed revisions kept per Route (each one is an immutable snapshot). */
+  distributions: 100,
 });
 /** Provider geometry (`routed`, `generated`) is not storable without license evidence. */
 export const storableSourceKinds = Object.freeze([
@@ -64,11 +70,11 @@ function keys(value: Record<string, unknown>, expected: readonly string[]): bool
 }
 const integer = (v: unknown, min: number, max: number): v is number =>
   Number.isSafeInteger(v) && (v as number) >= min && (v as number) <= max;
-const token = (v: unknown): v is string =>
+export const token = (v: unknown): v is string =>
   typeof v === 'string' && /^[A-Za-z0-9._:-]{1,64}$/.test(v);
 // Control characters other than tab/newline and lone surrogates are refused.
 const controls = /[\u0000-\u0008\u000B-\u001F\u007F]/;
-function safeText(v: unknown, max: number): boolean {
+export function safeText(v: unknown, max: number): boolean {
   if (typeof v !== 'string' || v.length > max || controls.test(v)) return false;
   for (let i = 0; i < v.length; i++) {
     const c = v.charCodeAt(i);
@@ -266,7 +272,7 @@ export interface RouteCommand {
   requestId: string;
   ownerContext: string;
   idempotencyKey: string;
-  commandType: 'import' | 'save' | 'setPrivacyTrim' | 'delete';
+  commandType: 'import' | 'save' | 'setPrivacyTrim' | 'delete' | 'distribute';
   routeId: string;
   expectedRevision: number;
   route?: ParsedRoute;
@@ -331,6 +337,7 @@ export function parseCommand(raw: unknown): Parsed<RouteCommand> {
     save: ['route'],
     setPrivacyTrim: ['privacyTrim'],
     delete: [],
+    distribute: [],
   };
   const type = String(r?.commandType);
   const fields = extra[type];

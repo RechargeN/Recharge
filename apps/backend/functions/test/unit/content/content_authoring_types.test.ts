@@ -61,7 +61,7 @@ void test('each authoring flag enables exactly its own type', () => {
   );
 });
 
-void test('the Emulator authoring list is Event, Place, Activity, Rental and Collection, each with an available validator', () => {
+void test('the Emulator authoring list holds all ten accepted types, each with an available validator', () => {
   assert.deepEqual(
     [...emulatorAuthoringTypes],
     [
@@ -72,6 +72,7 @@ void test('the Emulator authoring list is Event, Place, Activity, Rental and Col
       'collection',
       'session',
       'scenario',
+      'route',
       'class_workshop',
       'find_people',
     ],
@@ -91,6 +92,7 @@ void test('the Emulator authoring list is Event, Place, Activity, Rental and Col
         'collection',
         'session',
         'scenario',
+        'route',
         'class_workshop',
         'find_people',
       ]),
@@ -99,19 +101,9 @@ void test('the Emulator authoring list is Event, Place, Activity, Rental and Col
 });
 
 void test('no other type can be enabled, with or without a validator', () => {
+  // J2: Route was the last accepted type without authoring; all ten are listed now.
   const others = contentTypeIds.filter((typeId) => !emulatorAuthoringTypes.includes(typeId));
-  assert.deepEqual(others, ['route']);
-  for (const typeId of others) {
-    assert.throws(
-      () => assertEmulatorAuthoringTypes(new Set(['collection', typeId])),
-      new RegExp(`content_authoring_type_not_allowed:${typeId}$`),
-    );
-  }
-  // Types without a validator are unavailable in the registry as well.
-  for (const typeId of ['route'] as const) {
-    const entry = resolveContentType(typeId);
-    assert.ok(entry !== null && !isContentTypeAvailable(entry));
-  }
+  assert.deepEqual(others, []);
   assert.throws(
     () => assertEmulatorAuthoringTypes(new Set(['unknown_type'])),
     /content_authoring_type_not_allowed:unknown_type$/,

@@ -65,6 +65,9 @@ class InMemoryModerationRepository implements ModerationRepository {
             throw new ModerationRepositoryConflict('already_exists');
           decisions.set(decision.decisionId, decision);
         },
+        // RP-06 Route trust is not exercised by these Media tests.
+        publisherTrust: () => Promise.resolve(null),
+        putPublisherTrust() {},
         receipt: (decisionId) => Promise.resolve(receipts.get(decisionId) ?? null),
         putReceipt(receipt) {
           if (receipts.has(receipt.decisionId))

@@ -64,9 +64,10 @@ void test('other types keep their answers', async () => {
   const rental = await data.resolve({ marketId: 'LV', typeId: 'rental' });
   assert.ok(rental.ok);
   assert.equal(rental.revisions.taxonomyRevisionId, taxonomyRevisionId);
+  // J2 / RTE-PUB-01 RP-10: Route answers from the pinned BCK-20 revision too.
   const route = await data.resolve({ marketId: 'LV', typeId: 'route' });
   assert.ok(route.ok);
-  assert.equal(route.revisions.taxonomyRevisionId, 'test-only-tx-1');
+  assert.equal(route.revisions.taxonomyRevisionId, taxonomyRevisionId);
   const other = await data.resolve({ marketId: 'EE', typeId: 'collection' });
   assert.deepEqual(other, { ok: false, code: 'market_disabled' });
 });

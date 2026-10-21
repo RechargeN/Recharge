@@ -42,6 +42,8 @@ export function createEmulatorCatalogComposition(
   const activityEnabled = environment.RECHARGE_TEST_ACTIVITY_CATALOG === 'true';
   // I3 / BCK08-OD-04-S: the local Scenario family, off unless switched on.
   const scenarioEnabled = environment.RECHARGE_TEST_SCENARIO_CATALOG === 'true';
+  // J2 / BCK08-OD-04-R: the local Route family, off unless switched on.
+  const routeEnabled = environment.RECHARGE_TEST_ROUTE_CATALOG === 'true';
   const references = new EmulatorSyntheticReferenceData();
   const base = new ContentFeedCatalogSource(
     new ContentPublicationFeed(firestore, contentRepository),
@@ -81,6 +83,7 @@ export function createEmulatorCatalogComposition(
     activityEnabled,
     scenarioEnabled,
     findPeopleEnabled,
+    routeEnabled,
   });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
   const sets = new CatalogSets(repository, source, projector, reconciler, clock);
@@ -114,6 +117,7 @@ export function createEmulatorCatalogComposition(
     },
     { enabled: scenarioEnabled, stops: scenarioStops },
     findPeopleEnabled,
+    routeEnabled,
   );
   return Object.freeze({
     repository,

@@ -3,6 +3,7 @@ import type { TaxonomyDataset } from '../../reference_data/domain/taxonomy_datas
 import { projectActivity } from './activity_projection.js';
 import { projectScenario, type CatalogScenarioItem } from './scenario_projection.js';
 import { projectFindPeople, type CatalogFindPeopleItem } from './find_people_projection.js';
+import { projectRoute, type CatalogRouteItem } from './route_projection.js';
 import { bookingRefsFor } from '../../content/domain/event_internal_registration.js';
 import { catalogEnabledTypes, catalogPolicyRevisions } from './catalog_config.js';
 
@@ -149,8 +150,12 @@ export interface CatalogActivityItem {
   readonly searchText: string;
 }
 export type CatalogItem =
-  CatalogEventItem | CatalogActivityItem | CatalogScenarioItem | CatalogFindPeopleItem;
-export type { CatalogScenarioItem, CatalogFindPeopleItem };
+  | CatalogEventItem
+  | CatalogActivityItem
+  | CatalogScenarioItem
+  | CatalogFindPeopleItem
+  | CatalogRouteItem;
+export type { CatalogScenarioItem, CatalogFindPeopleItem, CatalogRouteItem };
 
 export type ProjectionOutcome =
   | { readonly state: 'listed'; readonly item: CatalogItem }
@@ -197,6 +202,8 @@ export function projectFact(input: {
   readonly scenarioEnabled?: boolean;
   /** D3.7: the default-off local `catalog.findPeople` flag. */
   readonly findPeopleEnabled?: boolean;
+  /** J2 / BCK08-OD-04-R: the local Route family switch (default off). */
+  readonly routeEnabled?: boolean;
   readonly taxonomy?: TaxonomyDataset;
 }): ProjectionOutcome {
   const { fact, revision } = input;
@@ -212,6 +219,7 @@ export function projectFact(input: {
     !catalogEnabledTypes.has(fact.typeId) &&
     !(fact.typeId === 'activity' && input.activityEnabled === true) &&
     !(fact.typeId === 'scenario' && input.scenarioEnabled === true) &&
+    !(fact.typeId === 'route' && input.routeEnabled === true) &&
     !findPeople
   )
     return { state: 'excluded', reason: 'type_disabled' };
@@ -242,6 +250,11 @@ export function projectFact(input: {
   if (fact.typeId === 'scenario') {
     if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };
     return projectScenario(fact, revision);
+  }
+  // A Route is public by its type (RP-05): no unlisted or private variant exists.
+  if (fact.typeId === 'route') {
+    if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };
+    return projectRoute(fact, revision);
   }
   if (body.visibility === 'unlisted') return { state: 'excluded', reason: 'unlisted' };
   if (body.visibility === 'private') return { state: 'excluded', reason: 'private' };

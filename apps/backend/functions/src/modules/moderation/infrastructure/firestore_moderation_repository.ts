@@ -6,6 +6,7 @@ import type {
   EnforcementReceipt,
   ModerationAuditEntry,
   ModerationDecision,
+  PublisherTrustRecord,
 } from '../domain/moderation.js';
 import {
   ModerationRepositoryConflict,
@@ -21,6 +22,8 @@ export const moderationCollections = Object.freeze({
   receipts: 'moderationEnforcementReceipts',
   idempotency: 'moderationIdempotency',
   audit: 'moderationAudit',
+  /** J2 / RTE-PUB-01 RP-06: Route publisher trust, one record per publisher. */
+  publisherTrust: 'moderationPublisherTrust',
 });
 
 function plain<T>(value: T): Record<string, unknown> {
@@ -84,6 +87,7 @@ class BufferedModerationTransaction implements ModerationTransaction {
   readonly #receipts = new Map<string, Record<string, unknown>>();
   readonly #idempotency = new Map<string, Record<string, unknown>>();
   readonly #audit: Record<string, unknown>[] = [];
+  readonly #trust = new Map<string, Record<string, unknown>>();
 
   constructor(
     private readonly firestore: Firestore,
@@ -137,6 +141,16 @@ class BufferedModerationTransaction implements ModerationTransaction {
     this.#audit.push(plain(entry));
   }
 
+  async publisherTrust(trustKey: string): Promise<PublisherTrustRecord | null> {
+    const buffered = this.#trust.get(trustKey);
+    if (buffered !== undefined) return buffered as unknown as PublisherTrustRecord;
+    return this.read<PublisherTrustRecord>(moderationCollections.publisherTrust, trustKey);
+  }
+
+  putPublisherTrust(record: PublisherTrustRecord): void {
+    this.#trust.set(record.trustKey, plain(record));
+  }
+
   /** Every create fails if the document exists; all reads happen before the first write. */
   async flush(): Promise<void> {
     const creates: Array<[string, string, Record<string, unknown>]> = [
@@ -172,5 +186,11 @@ class BufferedModerationTransaction implements ModerationTransaction {
     for (const [collection, id, value] of creates) {
       this.transaction.create(this.firestore.collection(collection).doc(id), value);
     }
+    // Trust is the one replaceable record; it is written after the creates.
+    for (const [id, value] of this.#trust)
+      this.transaction.set(
+        this.firestore.collection(moderationCollections.publisherTrust).doc(id),
+        value,
+      );
   }
 }

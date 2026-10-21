@@ -45,6 +45,49 @@ export function isShareAction(action: ModerationAction): boolean {
   return action === 'restrict_share' || action === 'restore_share';
 }
 
+/**
+ * J2 / RTE-PUB-01 RP-06: reason classes of a Route decision that finds a
+ * violation. A staff `reject`, `restrict` or `withdraw` of a Route names one;
+ * other types and actions carry none.
+ */
+export const routeReasonCodes = Object.freeze([
+  'route.unsafe_or_private_location',
+  'route.misleading_difficulty_or_conditions',
+  'route.prohibited_content',
+  'route.mass_duplicate',
+  'route.provenance_or_license',
+]);
+
+/** Actions that find a violation of the publisher (RP-06). */
+export function isViolationAction(action: ModerationAction): boolean {
+  return action === 'reject' || action === 'restrict' || action === 'withdraw';
+}
+
+/**
+ * RP-06: whether the publisher's next Route submissions skip manual review.
+ * Earned by a staff `approve`, lost only by a staff-confirmed violation
+ * (`reject`, `restrict`, `withdraw`); the author's own withdraw or archive and
+ * anything that is not a staff decision never change it. Moderation is the
+ * only writer; the newest decision wins.
+ */
+export interface PublisherTrustRecord {
+  readonly schemaVersion: 1;
+  readonly trustKey: string;
+  readonly typeId: 'route';
+  readonly publisherRef: { readonly type: string; readonly id: string };
+  readonly state: 'trusted' | 'untrusted';
+  readonly decisionId: string;
+  readonly action: ModerationAction;
+  readonly decidedAtUtc: string;
+}
+
+export function publisherTrustKey(
+  typeId: string,
+  publisherRef: { readonly type: string; readonly id: string },
+): string {
+  return `${typeId}:${publisherRef.type}:${publisherRef.id}`;
+}
+
 export type ModerationFailureCode =
   | 'invalid_contract'
   | 'unauthenticated'
@@ -104,6 +147,8 @@ export interface StaffModerationCommand {
   };
   /** `restore` / `restore_media` only: the exact decision that is lifted. */
   readonly restoresDecisionId?: string;
+  /** RP-06: the reason class of a Route violation decision. */
+  readonly reasonCode?: string;
 }
 
 export interface ModerationDecision {
@@ -114,6 +159,8 @@ export interface ModerationDecision {
   readonly staffSessionId: string;
   readonly reason: string;
   readonly reasonCategory: 'operator_decision';
+  /** RP-06: present exactly on a Route violation decision. */
+  readonly reasonCode?: string;
   readonly target: ModerationTarget;
   readonly restoresDecisionId?: string;
   readonly policyRevision: string;
@@ -192,6 +239,8 @@ export function commandHash(command: StaffModerationCommand): string {
       reason: command.reason,
       target: command.target,
       restoresDecisionId: command.restoresDecisionId ?? null,
+      // Absent for every earlier command, so their hashes are unchanged.
+      reasonCode: command.reasonCode,
     }),
   );
 }

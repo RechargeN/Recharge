@@ -17,6 +17,7 @@ import { emulatorActivationClosedTypes } from './modules/content/infrastructure/
 import { CatalogCollectionMembership } from './modules/content/infrastructure/catalog_collection_membership.js';
 import { CatalogScenarioStops } from './modules/content/infrastructure/catalog_scenario_stops.js';
 import { FirestoreScenarioRevisionReader } from './modules/quick_plan/scenario_publication.js';
+import { FirestoreRouteRevisionReader } from './modules/route/route_publication.js';
 import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
 import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
 import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
@@ -52,6 +53,8 @@ export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'session',
   // I3 / SCN-PUB-01: public Scenario pinned to an immutable BCK-10 revision.
   'scenario',
+  // J2 / RTE-PUB-01: public Route pinned to an immutable BCK-11 revision.
+  'route',
   'class_workshop',
   // D3.7: Find People, with BCK-06 consent and the synthetic 18+ attestation.
   'find_people',
@@ -66,6 +69,7 @@ export function authoringTypesFor(flags: {
   readonly collectionAuthoring?: boolean;
   readonly sessionAuthoring?: boolean;
   readonly scenarioAuthoring?: boolean;
+  readonly routeAuthoring?: boolean;
   readonly classWorkshopAuthoring?: boolean;
   readonly findPeopleAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
@@ -77,6 +81,7 @@ export function authoringTypesFor(flags: {
     ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
     ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
     ...(flags.scenarioAuthoring === true ? (['scenario'] as const) : []),
+    ...(flags.routeAuthoring === true ? (['route'] as const) : []),
     ...(flags.classWorkshopAuthoring === true ? (['class_workshop'] as const) : []),
     ...(flags.findPeopleAuthoring === true ? (['find_people'] as const) : []),
   ]);
@@ -167,6 +172,7 @@ export function eventAuthoringComposition(
         : {}),
       publishedObjectMembership: new CatalogCollectionMembership(catalog.publishedObjects),
       scenarioRevisions: new FirestoreScenarioRevisionReader(firestore),
+      routeRevisions: new FirestoreRouteRevisionReader(firestore),
       scenarioStops: new CatalogScenarioStops(catalog.scenarioStops),
       findPeoplePrivacy: new FirestoreFindPeoplePrivacy(firestore),
     },

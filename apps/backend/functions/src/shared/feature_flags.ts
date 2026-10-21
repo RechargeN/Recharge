@@ -51,6 +51,8 @@ export const contentFlagIds = Object.freeze({
   sessionAuthoring: 'content.session.authoring',
   /** I3 / SCN-PUB-01: Emulator-only public Scenario through Content (default off). */
   scenarioAuthoring: 'content.scenario.authoring',
+  /** J2 / RTE-PUB-01: Emulator-only public Route through Content (default off). */
+  routeAuthoring: 'content.route.authoring',
   /** D3.6: Emulator-only Class / Workshop authoring through Content (default off). */
   classWorkshopAuthoring: 'content.class_workshop.authoring',
   /** D3.7: Emulator-only Find People authoring through Content (default off). */

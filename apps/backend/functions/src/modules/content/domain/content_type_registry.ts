@@ -5,6 +5,7 @@ import {
 } from '../../../contracts/content_v1.js';
 import { sessionMediaIds, validateSessionBody } from './type_rules/session_rules.js';
 import { scenarioMediaIds, validateScenarioBody } from './type_rules/scenario_rules.js';
+import { routeMediaIds, validateRouteBody } from './type_rules/route_rules.js';
 import {
   classWorkshopMediaIds,
   validateClassWorkshopBody,
@@ -21,7 +22,7 @@ import type { ContentValidationContext } from './type_rules/validation_context.j
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v9';
+export const contentTypeRegistryRevision = 'content-type-registry-v10';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -180,9 +181,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('route', {
     discoverFamily: 'Route',
-    sourceAuthority: 'BCK-11 immutable RouteRevision',
+    sourceAuthority: 'BCK-11 immutable RouteRevision (RTE-PUB-01)',
     sourceResolver: 'pinned_immutable_revision',
-    unavailable: { reason: 'dependency_pending', dependency: 'BCK-11' },
+    rules: { validate: validateRouteBody, mediaIds: routeMediaIds },
   }),
   entry('place', {
     discoverFamily: 'Place',

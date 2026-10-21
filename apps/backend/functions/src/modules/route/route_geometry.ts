@@ -187,6 +187,8 @@ export function summarize(track: readonly TrackSegment[]): Summary {
 
 export interface TrimResult {
   readonly track: TrackSegment[];
+  /** Index of the original segment each surviving segment comes from. */
+  readonly sources: number[];
   readonly removedStart: number;
   readonly removedEnd: number;
   readonly reenteredStart: boolean;
@@ -216,11 +218,15 @@ export function trimTrack(
   if (endMeters > 0) while (to > from && distanceMeters(last.p, flat[to - 1]!.p) < endMeters) to--;
   const kept = flat.slice(from, to);
   const out: TrackSegment[] = [];
+  const sources: number[] = [];
   let currentIndex = -1;
   let current: Point[] = [];
   let connected = false;
   const flush = () => {
-    if (current.length >= 2) out.push({ points: current, connected: out.length > 0 && connected });
+    if (current.length >= 2) {
+      out.push({ points: current, connected: out.length > 0 && connected });
+      sources.push(currentIndex);
+    }
     current = [];
   };
   for (const { s, p } of kept) {
@@ -237,10 +243,103 @@ export function trimTrack(
     throw new GeometryError('privacy_trim_empty');
   return {
     track: out,
+    sources,
     removedStart: from,
     removedEnd: flat.length - to,
     reenteredStart:
       startMeters > 0 && kept.some(({ p }) => distanceMeters(first.p, p) < startMeters),
     reenteredEnd: endMeters > 0 && kept.some(({ p }) => distanceMeters(last.p, p) < endMeters),
   };
+}
+
+/** RP-12: the Catalog preview line of a published Route. */
+export const previewPolicy = 'route-preview-dp-v1';
+export const previewMaxPoints = 256;
+
+/**
+ * `route-preview-dp-v1`: a deterministic Douglas–Peucker ranking of an already
+ * trimmed track. Every segment keeps its first and last point (so gaps and the
+ * visible ends stay exactly where the trimmed track has them); the remaining
+ * budget goes to the interior points with the largest deviation, ties by
+ * segment and point order. Nothing outside the input is ever produced and no
+ * elevation is kept.
+ */
+export function previewTrack(
+  track: readonly TrackSegment[],
+  maxPoints: number = previewMaxPoints,
+): TrackSegment[] {
+  const strip = (p: Point): Point => ({ latE7: p.latE7, lonE7: p.lonE7, eleDm: null });
+  const total = track.reduce((n, s) => n + s.points.length, 0);
+  if (total <= maxPoints)
+    return track.map((s) => ({ points: s.points.map(strip), connected: s.connected }));
+  // A local planar metric: longitude scaled by the cosine of the mean latitude.
+  const meanLat = track.reduce((sum, s) => sum + s.points[0]!.latE7, 0) / track.length;
+  const k = Math.cos((meanLat / 1e7) * (Math.PI / 180));
+  const candidates: { s: number; i: number; error: number }[] = [];
+  track.forEach((segment, s) => {
+    const pts = segment.points;
+    const stack: [number, number, number][] = [[0, pts.length - 1, Infinity]];
+    while (stack.length > 0) {
+      const [from, to, parent] = stack.pop()!;
+      let best = -1,
+        bestError = -1;
+      for (let i = from + 1; i < to; i++) {
+        const error = deviation(pts[i]!, pts[from]!, pts[to]!, k);
+        if (error > bestError) {
+          best = i;
+          bestError = error;
+        }
+      }
+      if (best < 0) continue;
+      // Clamped to the parent split, so any top-N selection is a valid DP prefix.
+      const error = Math.min(bestError, parent);
+      candidates.push({ s, i: best, error });
+      stack.push([from, best, error], [best, to, error]);
+    }
+  });
+  const budget = Math.max(0, maxPoints - 2 * track.length);
+  candidates.sort((a, b) => b.error - a.error || a.s - b.s || a.i - b.i);
+  const keep = track.map((s) => new Set([0, s.points.length - 1]));
+  for (const c of candidates.slice(0, budget)) keep[c.s]!.add(c.i);
+  return track.map((segment, s) => ({
+    points: [...keep[s]!].sort((a, b) => a - b).map((i) => strip(segment.points[i]!)),
+    connected: segment.connected,
+  }));
+}
+
+function deviation(p: Point, a: Point, b: Point, k: number): number {
+  const ax = a.lonE7 * k,
+    ay = a.latE7,
+    bx = b.lonE7 * k,
+    by = b.latE7,
+    px = p.lonE7 * k,
+    py = p.latE7;
+  const dx = bx - ax,
+    dy = by - ay;
+  const length = dx * dx + dy * dy;
+  const t = length === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / length));
+  const ex = ax + t * dx - px,
+    ey = ay + t * dy - py;
+  return ex * ex + ey * ey;
+}
+
+/**
+ * RP-09: distance from the start, along the given track, to the track point
+ * nearest to `p` (the first one on a tie). Gaps add no distance.
+ */
+export function distanceAlongTrack(track: readonly TrackSegment[], p: Point): number {
+  let along = 0,
+    best = Infinity,
+    result = 0;
+  for (const segment of track)
+    segment.points.forEach((point, i) => {
+      const prev = segment.points[i - 1];
+      if (prev) along += distanceMeters(prev, point);
+      const d = distanceMeters(point, p);
+      if (d < best) {
+        best = d;
+        result = along;
+      }
+    });
+  return round2(result);
 }

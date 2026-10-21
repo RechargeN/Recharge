@@ -4,7 +4,14 @@ import type {
   ModerationProfileResolution,
   VerifiedDisposition,
 } from '../../content/application/ports/moderation_disposition_port.js';
-import { attest, moderationIssuer, moderationPolicyRevision } from '../domain/moderation.js';
+import type { ContentTypeId } from '../../../contracts/content_v1.js';
+import type { PublisherRefV1 } from '../../../contracts/identity_v1.js';
+import {
+  attest,
+  moderationIssuer,
+  moderationPolicyRevision,
+  publisherTrustKey,
+} from '../domain/moderation.js';
 import type { StaffAuthorityPort } from '../application/ports.js';
 import type { ModerationRepository } from '../domain/repositories.js';
 
@@ -21,13 +28,38 @@ export class ModerationDecisionVerifier implements ModerationDispositionPort {
     private readonly scopedStaff?: StaffAuthorityPort,
   ) {}
 
-  profileFor(): Promise<ModerationProfileResolution> {
-    return Promise.resolve({
+  /**
+   * Review is required, except RP-06: a Route of a publisher whose newest staff
+   * decision was an approval is approved by that recorded decision. Any doubt
+   * (no record, a violation, an unreadable record) means manual review.
+   */
+  async profileFor(input?: {
+    readonly typeId: ContentTypeId;
+    readonly publisherRef: PublisherRefV1;
+  }): Promise<ModerationProfileResolution> {
+    const review: ModerationProfileResolution = {
       available: true,
       profileId: 'emulator.operator-review',
       requiresPrePublicationModeration: true,
       policyRevision: moderationPolicyRevision,
-    });
+    };
+    if (input?.typeId !== 'route') return review;
+    try {
+      const trust = await this.repository.transact((tx) =>
+        tx.publisherTrust(publisherTrustKey('route', input.publisherRef)),
+      );
+      return trust?.state === 'trusted'
+        ? {
+            available: true,
+            profileId: 'route.trusted-publisher',
+            requiresPrePublicationModeration: false,
+            policyRevision: moderationPolicyRevision,
+            policyDecisionId: trust.decisionId,
+          }
+        : review;
+    } catch {
+      return review;
+    }
   }
 
   async verifyDisposition(input: {

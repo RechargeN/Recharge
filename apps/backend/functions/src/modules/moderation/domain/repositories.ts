@@ -1,4 +1,9 @@
-import type { EnforcementReceipt, ModerationAuditEntry, ModerationDecision } from './moderation.js';
+import type {
+  EnforcementReceipt,
+  ModerationAuditEntry,
+  ModerationDecision,
+  PublisherTrustRecord,
+} from './moderation.js';
 
 export interface ModerationIdempotencyRecord {
   readonly actorUserId: string;
@@ -20,6 +25,10 @@ export interface ModerationTransaction {
   ): Promise<ModerationIdempotencyRecord | null>;
   putIdempotency(record: ModerationIdempotencyRecord): void;
   appendAudit(entry: ModerationAuditEntry): void;
+  /** RP-06: the publisher's current Route trust, if any decision set it. */
+  publisherTrust(trustKey: string): Promise<PublisherTrustRecord | null>;
+  /** RP-06: replaces the trust record (the caller keeps the newest decision). */
+  putPublisherTrust(record: PublisherTrustRecord): void;
 }
 
 export interface ModerationRepository {

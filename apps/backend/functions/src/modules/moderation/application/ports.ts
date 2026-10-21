@@ -48,6 +48,8 @@ export interface PublicationView {
   readonly visibility: string;
   readonly ownerHold: string | null;
   readonly moderationHold: { readonly kind: string; readonly decisionId: string } | null;
+  /** RP-06: the publisher of the current revision (absent without one). */
+  readonly publisherRef?: { readonly type: string; readonly id: string };
 }
 
 export interface EnforcementInstruction {

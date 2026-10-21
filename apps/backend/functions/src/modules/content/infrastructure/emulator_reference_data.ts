@@ -59,9 +59,10 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     const session = input.typeId === 'session';
     const classWorkshop = input.typeId === 'class_workshop';
     const findPeople = input.typeId === 'find_people';
+    const route = input.typeId === 'route';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
     if (
-      (activity || rental || collection || session || classWorkshop || findPeople) &&
+      (activity || rental || collection || session || classWorkshop || findPeople || route) &&
       !taxonomy.ok
     )
       return Promise.resolve({ ok: false, code: 'policy_unavailable' });
@@ -72,7 +73,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity || rental || collection || session || classWorkshop || findPeople
+          : activity || rental || collection || session || classWorkshop || findPeople || route
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
@@ -99,7 +100,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
                 : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
                     'activity',
                   ) ?? false)
-              : typeId === 'session' || typeId === 'class_workshop'
+              : typeId === 'session' || typeId === 'class_workshop' || typeId === 'route'
                 ? dataset === undefined
                   ? undefined
                   : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(

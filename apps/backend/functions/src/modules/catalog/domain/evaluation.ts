@@ -125,6 +125,33 @@ export function evaluate(item: CatalogItem, query: DiscoverQuery, nowMs: number)
     return { eligible: false, reason: 'category' };
   if (query.subcategoryIds.length > 0 && !query.subcategoryIds.includes(item.subcategoryId))
     return { eligible: false, reason: 'subcategory' };
+  if (item.typeId === 'route') {
+    // RP-13: text, category, market and geo; no time, price or accessibility facts.
+    if (
+      query.timeWindow !== null ||
+      query.free ||
+      query.maxAmountMinor !== null ||
+      query.wheelchairAccessible
+    )
+      return { eligible: false, reason: 'route_filter_inapplicable' };
+    if (query.textTokens.some((token) => !item.searchText.includes(token)))
+      return { eligible: false, reason: 'text' };
+    const distance = query.center === null ? null : distanceMeters(query.center, item.point);
+    if (query.radiusKm !== null && (distance ?? Infinity) > query.radiusKm * 1000)
+      return { eligible: false, reason: 'radius' };
+    return {
+      eligible: true,
+      occurrence: null,
+      remainingOccurrences: 0,
+      distanceMeters: distance,
+      key:
+        query.sort === 'distance'
+          ? distance === null
+            ? [1, 0, nowMs, item.contentId]
+            : [0, distance, nowMs, item.contentId]
+          : [0, nowMs, 0, item.contentId],
+    };
+  }
   if (item.typeId === 'activity') {
     if (
       query.timeWindow !== null ||

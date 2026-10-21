@@ -1059,6 +1059,7 @@ async function prepareContentCaller(
     scenarioAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.scenarioAuthoring,
     ),
+    routeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.routeAuthoring),
     classWorkshopAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.classWorkshopAuthoring,
     ),

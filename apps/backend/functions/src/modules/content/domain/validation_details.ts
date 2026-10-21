@@ -386,8 +386,40 @@ const findPeopleFields: Readonly<Record<string, string>> = {
   'find_people.adult_only': `${fp}/confirmations/ageRequirementConfirmed`,
 };
 
+/** J2 / RTE-PUB-01: Route body and source codes with their public field. */
+const routeFields: Readonly<Record<string, string>> = Object.freeze({
+  'route.market': '/marketId',
+  route_publisher_ineligible: '/publisherRef',
+  'route.shortDescription': '/body/shortDescription',
+  'route.fullDescription': '/body/fullDescription',
+  'route.locale': '/body/contentLocale',
+  'route.locale_unavailable': '/body/contentLocale',
+  'route.category_required': '/body/categoryId',
+  'route.category': '/body/subcategoryId',
+  'route.taxonomy_unavailable': '/body/subcategoryId',
+  'route.media': '/body/media',
+  'route.cover': '/body/media/coverImage',
+  'route.media_rights': '/body/media/rightsConfirmed',
+  'route.ref': '/body/route/ref',
+  'route.distribution_hash': '/body/route/ref/contentHash',
+  'route.title_mismatch': '/body/title',
+  'route.distribution': '/body/route/distribution',
+  'route.distribution_policy': '/body/route/distribution',
+  'route.title': '/body/route/distribution/title',
+  'route.shape': '/body/route/distribution/shape',
+  'route.profile': '/body/route/distribution/profile',
+  'route.geometry': '/body/route/distribution/segments',
+  'route.waypoints': '/body/route/distribution/waypoints',
+  'route.derived_mismatch': '/body/route/distribution',
+  'route.source_unknown': '/body/route/ref',
+  'route.source_forbidden': '/body/route/ref',
+  'route.source_stale': '/body/route/ref',
+  'route.source_unavailable': '/body/route/ref',
+});
+
 const exactFields: Readonly<Record<string, string>> = Object.freeze({
   ...findPeopleFields,
+  ...routeFields,
   ...activityFields,
   ...placeFields,
   ...rentalFields,

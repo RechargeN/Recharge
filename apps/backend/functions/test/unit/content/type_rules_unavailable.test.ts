@@ -12,10 +12,11 @@ import { parseEntityId } from '../../../src/shared/ids.js';
 import { FakeClock } from '../../support/fake_clock.js';
 
 /**
- * Types that stay registered but unavailable after 2.2b. Each has an explicit
- * reason; none may be served by a generic or Event fallback validator.
+ * Types that stay registered but unavailable. Each has an explicit reason; none
+ * may be served by a generic or Event fallback validator. J2 (RTE-PUB-01) made
+ * Route, the last one, available; the checks stay for any future type.
  */
-const stillUnavailable = [['route', 'dependency_pending']] as const;
+const stillUnavailable: readonly (readonly [ContentTypeId, string])[] = [];
 
 const actor = {
   userId: parseEntityId('018FQ2Z8Q9N4M7K2T6V3W1X5YA'),
@@ -113,6 +114,12 @@ void test("the remaining unavailable types are never served by another type's ru
   }
   // Quick Plan is not a Content type at all.
   assert.equal(resolveContentType('quick_plan'), null);
+});
+
+void test('after J2 every accepted type is available with its own validator', () => {
+  const validators = contentTypeIds.map((typeId) => resolveContentType(typeId)?.validate);
+  assert.equal(validators.includes(undefined), false);
+  assert.equal(new Set(validators).size, contentTypeIds.length);
 });
 
 void test('route, scenario and quick plan stay separate source authorities', () => {

@@ -6,11 +6,14 @@ import {
   commandHash,
   isMediaAction,
   isShareAction,
+  isViolationAction,
   moderationActions,
   moderationIssuer,
   moderationPolicyRevision,
   moderationRejected,
   moderationSucceeded,
+  publisherTrustKey,
+  routeReasonCodes,
   validReason,
   type EnforcementReceipt,
   type ModerationAction,
@@ -18,6 +21,7 @@ import {
   type ModerationDecisionView,
   type ModerationResult,
   type ModerationTarget,
+  type PublisherTrustRecord,
   type StaffModerationCommand,
 } from '../domain/moderation.js';
 import type { ModerationRepository } from '../domain/repositories.js';
@@ -148,6 +152,15 @@ export class ModerationService {
 
     const resolved = await this.#resolveTarget(command);
     if (resolved.kind === 'rejected') return resolved;
+    // RP-06: a Route rejection names its class; only a Route violation may carry
+    // one (K1 re-moderation restricts or withdraws without one).
+    const subject = await this.#subject(command.action, resolved.data);
+    const routeViolation = subject?.typeId === 'route' && isViolationAction(command.action);
+    if (
+      (command.reasonCode !== undefined && !routeViolation) ||
+      (routeViolation && command.action === 'reject' && command.reasonCode === undefined)
+    )
+      return moderationRejected('invalid_contract');
     if (this.#deps.requireScope) {
       const scoped = await this.#authorizeScope(actor, resolved.data, command.action);
       if (scoped !== undefined) return scoped;
@@ -162,6 +175,7 @@ export class ModerationService {
       staffSessionId: actor.sessionId,
       reason: command.reason,
       reasonCategory: 'operator_decision' as const,
+      ...(command.reasonCode === undefined ? {} : { reasonCode: command.reasonCode }),
       target: resolved.data,
       ...(command.restoresDecisionId === undefined
         ? {}
@@ -260,6 +274,11 @@ export class ModerationService {
       return moderationRejected('unknown_outcome');
     }
 
+    // RP-06: who this decision is about, read before the receipt transaction.
+    const subject =
+      enforcement.kind === 'applied' && enforcement.outcome === 'applied'
+        ? await this.#subject(decision.action, decision.target)
+        : null;
     const recordedAtUtc = this.#deps.clock.now().toISOString();
     const receipt: EnforcementReceipt = {
       schemaVersion: 1,
@@ -279,6 +298,8 @@ export class ModerationService {
     const written = await this.#deps.repository.transact(async (tx) => {
       const existing = await tx.receipt(decision.decisionId);
       if (existing !== null) return existing;
+      if (subject?.typeId === 'route' && subject.publisherRef !== undefined)
+        await this.#updateTrust(tx, decision, subject.publisherRef);
       tx.putReceipt(receipt);
       tx.appendAudit({
         auditId: `${decision.decisionId}:enforcement`,
@@ -292,6 +313,65 @@ export class ModerationService {
       return receipt;
     });
     return moderationSucceeded({ decision, receipt: written });
+  }
+
+  /** The type and publisher a Content decision is about; `null` for Media and shares. */
+  async #subject(
+    action: ModerationAction,
+    target: ModerationTarget,
+  ): Promise<{ typeId?: string; publisherRef?: { type: string; id: string } } | null> {
+    if (isMediaAction(action) || isShareAction(action)) return null;
+    if (target.submissionId !== undefined) {
+      const submission = await this.#deps.content.submission(target.submissionId);
+      return submission === null
+        ? null
+        : { typeId: submission.typeId, publisherRef: submission.publisherRef };
+    }
+    const publication = await this.#deps.content.publication(target.contentId);
+    if (publication === null) return null;
+    return {
+      ...(publication.typeId === undefined ? {} : { typeId: publication.typeId }),
+      ...(publication.publisherRef === undefined ? {} : { publisherRef: publication.publisherRef }),
+    };
+  }
+
+  /**
+   * RP-06: an applied staff approval trusts the Route publisher, an applied
+   * violation decision withdraws the trust; `restore` changes nothing. The
+   * newest decision wins, so a late retry of an older one cannot undo it.
+   */
+  async #updateTrust(
+    tx: Parameters<Parameters<ModerationRepository['transact']>[0]>[0],
+    decision: ModerationDecision,
+    publisherRef: { type: string; id: string },
+  ): Promise<void> {
+    const state =
+      decision.action === 'approve'
+        ? 'trusted'
+        : isViolationAction(decision.action)
+          ? 'untrusted'
+          : null;
+    if (state === null) return;
+    const trustKey = publisherTrustKey('route', publisherRef);
+    const current = await tx.publisherTrust(trustKey);
+    if (
+      current !== null &&
+      (current.decidedAtUtc > decision.decidedAtUtc ||
+        (current.decidedAtUtc === decision.decidedAtUtc &&
+          current.decisionId > decision.decisionId))
+    )
+      return;
+    const record: PublisherTrustRecord = {
+      schemaVersion: 1,
+      trustKey,
+      typeId: 'route',
+      publisherRef: { type: publisherRef.type, id: publisherRef.id },
+      state,
+      decisionId: decision.decisionId,
+      action: decision.action,
+      decidedAtUtc: decision.decidedAtUtc,
+    };
+    tx.putPublisherTrust(record);
   }
 
   async #authorize(actor: StaffActor): Promise<ModerationResult<never> | undefined> {
@@ -544,11 +624,18 @@ function parseCommand(raw: unknown): StaffModerationCommand | null {
   const review = action === 'approve' || action === 'reject';
   if (review !== (submissionId !== undefined)) return null;
   if ((action === 'restore') !== (restoresDecisionId !== undefined)) return null;
+  const reasonCode = value.reasonCode;
+  if (
+    reasonCode !== undefined &&
+    (typeof reasonCode !== 'string' || !routeReasonCodes.includes(reasonCode))
+  )
+    return null;
   return {
     schemaVersion: 1,
     action,
     idempotencyKey: value.idempotencyKey,
     reason: value.reason,
+    ...(reasonCode === undefined ? {} : { reasonCode }),
     target: {
       contentId,
       ...(expectedRevision === undefined ? {} : { expectedRevision: Number(expectedRevision) }),

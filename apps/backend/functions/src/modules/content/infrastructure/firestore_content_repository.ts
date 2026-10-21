@@ -762,3 +762,22 @@ export async function scenarioPublicationStanding(
     (pointer.ownerHold === null || pointer.ownerHold === undefined)
   );
 }
+
+/**
+ * J2 / RTE-PUB-01 RP-11: a Route (contentId = routeId) cannot be deleted while
+ * its publication stands (as for Scenario) or while a submission of it is
+ * pending review or publication. Read-only, inside the caller's transaction.
+ */
+export async function routePublicationStanding(
+  firestore: Firestore,
+  tx: Transaction,
+  routeId: string,
+): Promise<boolean> {
+  if (await scenarioPublicationStanding(firestore, tx, routeId)) return true;
+  const submissions = await tx.get(
+    firestore.collection(contentCollections.submissions).where('contentId', '==', routeId),
+  );
+  return submissions.docs.some((doc) =>
+    ['submitted', 'under_review', 'approved_for_publication'].includes(String(doc.get('state'))),
+  );
+}
