@@ -5,6 +5,10 @@
 // suite owns and removes every fixture it creates.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { spawn } from 'node:child_process';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { after, before, test } from 'node:test';
 
 import { createEmulatorCatalogComposition } from '../../src/modules/catalog/infrastructure/emulator_catalog_composition.js';
@@ -18,7 +22,13 @@ import {
   routePublicationFlag,
 } from '../../src/modules/route/route_contract.js';
 import { contentFlagIds } from '../../src/shared/feature_flags.js';
-import { emulatorFirestore } from '../support/booking_emulator.js';
+import { createFirebaseActor, emulatorFirestore } from '../support/booking_emulator.js';
+import { getAuth } from 'firebase-admin/auth';
+import { IdentityPublisherAuthority } from '../../src/modules/identity_publisher/application/identity_publisher_authority.js';
+import { FirestoreIdentityAuthorityRepository } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { LocalPageCreationPolicy } from '../../src/modules/identity_publisher/infrastructure/local_page_creation_policy.js';
+import { LocalVerificationDecisionAdapter } from '../../src/modules/identity_publisher/infrastructure/local_verification_decision_adapter.js';
+import { SyntheticProviderIdentityVerifier } from '../../src/modules/identity_publisher/infrastructure/synthetic_provider_identity_verifier.js';
 import { cleanupContentEmulatorState } from '../support/content_emulator_cleanup.js';
 import { createPlaceWorld, expectData } from '../support/content_place_world.js';
 import { setLocalFlag } from '../support/notifications_world.js';
@@ -63,6 +73,7 @@ const extra = [...Object.values(routeCollections), ...Object.values(quickPlanCol
 let world: ReturnType<typeof createPlaceWorld>;
 let owner: Actor, stranger: Actor, pageId: string;
 let unrelatedDigest: string;
+const flutterUid = 'j2-flutter-' + randomUUID();
 
 /** Scenario and Quick Plan must never change because of a Route publication. */
 async function unrelated() {
@@ -103,6 +114,11 @@ after(async () => {
   try {
     assert.equal(await unrelated(), unrelatedDigest, 'J2 must not touch Scenario or Quick Plan');
   } finally {
+    try {
+      await getAuth().deleteUser(flutterUid);
+    } catch (e) {
+      if ((e as { code?: string }).code !== 'auth/user-not-found') throw e;
+    }
     for (const flag of flags) await setLocalFlag(db, flag, false);
     await cleanupContentEmulatorState(db, extra);
     for (const name of [...extra, moderationCollections.publisherTrust])
@@ -546,3 +562,126 @@ void test('7. flags: publication and the Catalog family are default-off and fail
       assert.equal(json.includes(word), false, word);
   }
 });
+
+void test(
+  '8. real Flutter adapters: GPX import, J1 sync, trim, distribute, Content and publish',
+  { timeout: 240000 },
+  async () => {
+    const dart = process.env.RECHARGE_DART,
+      flutter = process.env.RECHARGE_FLUTTER_TOOL;
+    assert.ok(
+      dart && flutter,
+      'J2 requires real Flutter adapters: set RECHARGE_DART and RECHARGE_FLUTTER_TOOL',
+    );
+    // The Flutter user is its own account (its Firebase uid is its proof):
+    // verified as Creator here, then it earns trust with one reviewed Route.
+    await createFirebaseActor(flutterUid);
+    const account = await i3Identity(db, flutterUid, new Date());
+    const reviewer = randomUUID();
+    const authority = new IdentityPublisherAuthority({
+      repository: new FirestoreIdentityAuthorityRepository(db),
+      providerVerifier: new SyntheticProviderIdentityVerifier(),
+      verificationDecisions: new LocalVerificationDecisionAdapter(new Set([reviewer])),
+      pagePolicy: new LocalPageCreationPolicy(true, 2),
+    });
+    const nowUtc = new Date().toISOString();
+    await authority.accounts.ensureAccount({
+      proof: {
+        provider: 'google',
+        providerTenant: 'demo-recharge-emulator',
+        proof: `local-test:google:${flutterUid}-reviewer`,
+      },
+      proposedUserId: reviewer,
+      proposedIdentityId: randomUUID(),
+      nowUtc,
+      accountCreationEnabled: true,
+    });
+    await authority.creatorVerification.submit({
+      userId: account.userId,
+      verificationId: randomUUID(),
+      evidenceRefIds: [randomUUID()],
+      nowUtc,
+    });
+    await authority.creatorVerification.decide({
+      reviewerId: reviewer,
+      userId: account.userId,
+      status: 'verified',
+      nowUtc,
+    });
+    // The verification decision changes the authority: a fresh Session follows it.
+    const mobile = await i3Identity(db, flutterUid, new Date());
+    assert.equal(mobile.userId, account.userId);
+    const first = await storedRoute(undefined, undefined, mobile);
+    const pinned = ok(
+      await command(mobile, first.routeId, 'distribute', first.revision),
+      'mobile distribute',
+    );
+    const asMobile = (commandType: string, payload: Json) =>
+      world.composition.content.execute(
+        { userId: mobile.userId, sessionId: mobile.hint.sessionId },
+        { schemaVersion: 1, idempotencyKey: randomUUID(), commandType, payload },
+      );
+    const firstDraft = expectData<{ draftId: string; revision: number }>(
+      await asMobile('createDraft', {
+        typeId: 'route',
+        publisherRef: { type: 'user', id: mobile.userId },
+        marketId: 'LV',
+        body: routeContentBody({
+          routeId: first.routeId,
+          routeRevisionId: String(pinned.routeRevisionId),
+          contentHash: String(pinned.contentHash),
+          distribution: pinned.distribution as Json,
+        }),
+      }),
+      'mobile first draft',
+    );
+    const firstSubmission = expectData<Submission>(
+      await asMobile('submitForPublication', {
+        draftId: firstDraft.draftId,
+        expectedDraftRevision: firstDraft.revision,
+      }),
+      'mobile first submit',
+    );
+    assert.equal(firstSubmission.state, 'under_review');
+    await approve(first.routeId, firstSubmission.submissionId);
+    assert.equal((await trust({ type: 'user', id: mobile.userId }))?.state, 'trusted');
+    const out = path.join(mkdtempSync(path.join(tmpdir(), 'j2-flutter-')), 'result.json');
+    const result = await new Promise<number>((resolve, reject) => {
+      const child = spawn(
+        dart,
+        [
+          flutter,
+          'test',
+          '--no-pub',
+          '--dart-define=RECHARGE_TEST_ROUTE_PUBLICATION=true',
+          'test/backend_local/route_j2_publication_test.dart',
+        ],
+        {
+          cwd: path.resolve(process.cwd(), '../../mobile'),
+          env: {
+            ...process.env,
+            RECHARGE_J2_LOCAL: '1',
+            RECHARGE_J2_UID: flutterUid,
+            RECHARGE_J2_OUT: out,
+          },
+          stdio: ['ignore', 'pipe', 'pipe'],
+          shell: false,
+        },
+      );
+      child.stdout.on('data', (d: Buffer) => process.stdout.write(d));
+      child.stderr.on('data', (d: Buffer) => process.stderr.write(d));
+      child.once('error', reject);
+      child.once('close', (code) => resolve(code ?? 1));
+    });
+    assert.equal(result, 0);
+    const { routeId } = JSON.parse(readFileSync(out, 'utf8')) as { routeId: string };
+    const page = await feed();
+    const card = page.items.find((item) => item.ref.contentId === routeId) as Json | undefined;
+    assert.ok(card, 'the Route published from Flutter is listed');
+    assert.ok(card.preview, 'with its preview line');
+    const json = JSON.stringify(page);
+    for (const marker of ['J2-PRIVATE-home', 'J2 Private Author', 'J2 private track'])
+      assert.equal(json.includes(marker), false, `leak: ${marker}`);
+    leaks(page);
+  },
+);
