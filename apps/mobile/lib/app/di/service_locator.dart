@@ -1,5 +1,6 @@
 import 'session_publication_composition.dart';
 import 'scenario_publication_composition.dart';
+import 'route_content_publication_composition.dart';
 import 'class_workshop_publication_composition.dart';
 import 'find_people_publication_composition.dart';
 import 'library_composition.dart';
@@ -317,6 +318,10 @@ Future<void> setupDependencies() async {
     // I3: default-off Scenario publication test entry, its own define.
     ..registerLazySingleton<ScenarioPublicationTestEntryGuard>(
       () => ScenarioPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // J2: default-off Route publication test entry, its own define.
+    ..registerLazySingleton<RoutePublicationTestEntryGuard>(
+      () => RoutePublicationTestEntryGuard.fromEnvironment(sl()),
     )
     ..registerLazySingleton<ClassWorkshopPublicationTestEntryGuard>(
       () => ClassWorkshopPublicationTestEntryGuard.fromEnvironment(sl()),
