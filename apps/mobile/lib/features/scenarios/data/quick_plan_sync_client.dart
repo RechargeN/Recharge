@@ -30,6 +30,8 @@ class QuickPlanSyncClient implements QuickPlanRepository {
   final FlutterSecureStorage _storage;
   final String _installation;
   final String? Function() _currentOwner;
+  @override
+  String? get actorId => _currentOwner();
   Future<void> _tail = Future.value();
   String? _visibleOwner;
   Map<String, dynamic> _journal = {};
@@ -60,6 +62,9 @@ class QuickPlanSyncClient implements QuickPlanRepository {
     // Offline drafts survive a restart even before a server save is possible.
     for (final raw in (_journal['pending'] as List? ?? []).reversed) {
       final request = raw as Map;
+      if (!['save', 'delete', 'import'].contains(request['commandType'])) {
+        continue;
+      }
       if (request['planId'] == id) {
         return request['commandType'] == 'delete'
             ? null
@@ -136,6 +141,108 @@ class QuickPlanSyncClient implements QuickPlanRepository {
     final p = parseQuickPlanImport(source);
     return _enqueue('import', p.id, 0, p, quickPlanImportKey(p));
   }
+
+  @override
+  Future<List<QuickPlanInvitation>> invitations() => _serial(() async {
+    final actor = _currentOwner();
+    if (actor == null) throw const QuickPlanFailure('unauthenticated');
+    await _load(actor);
+    await _drain(actor);
+    final r = await _invoke('quickPlanQueryV1', {
+      'schemaVersion': 1,
+      'requestId': const Uuid().v4(),
+      'queryType': 'invitations',
+    });
+    _check(actor);
+    if (r['kind'] != 'succeeded') {
+      throw QuickPlanFailure(r['code'] as String? ?? 'answer_invalid');
+    }
+    if (r['ownerId'] != actor) throw const QuickPlanFailure('owner_changed');
+    return (r['invitations'] as List)
+        .map((g) => QuickPlanInvitation.fromMap(g as Map))
+        .toList();
+  });
+
+  @override
+  Future<void> invite(
+    String planId,
+    String userId, {
+    QuickPlanInvitation? previous,
+  }) => _access(
+    'invite',
+    QuickPlanInvitation(
+      planId: planId,
+      ownerId: _currentOwner() ?? '',
+      inviteeId: userId,
+      invitationId: const Uuid().v4(),
+      generation: previous?.generation ?? 0,
+      status: previous?.status ?? 'none',
+    ),
+  );
+
+  @override
+  Future<void> invitationAction(String action, QuickPlanInvitation invitation) {
+    if (!['accept', 'decline', 'cancel', 'revoke', 'leave'].contains(action)) {
+      return Future.error(const QuickPlanFailure('request_invalid'));
+    }
+    return _access(action, invitation);
+  }
+
+  Future<void> _access(String action, QuickPlanInvitation g) {
+    final actor = _currentOwner();
+    if (actor == null) {
+      return Future.error(const QuickPlanFailure('unauthenticated'));
+    }
+    return _serial(() async {
+      _check(actor);
+      await _load(actor);
+      (_journal['pending'] as List).add({
+        'schemaVersion': 1,
+        'requestId': const Uuid().v4(),
+        'ownerContext': actor,
+        'idempotencyKey': const Uuid().v4(),
+        'commandType': action,
+        'planId': g.planId,
+        'expectedRevision': 0,
+        'planOwnerId': g.ownerId,
+        'targetUserId': g.inviteeId,
+        'invitationId': g.invitationId,
+        'generation': g.generation,
+        if (action == 'invite') 'previousStatus': g.status,
+      });
+      await _persist(actor);
+      await _drain(actor);
+    });
+  }
+
+  /// Online-only projection. Never put invited payload into cache, conflicts or journal.
+  @override
+  Future<ScenarioDraftEntity> readInvited(QuickPlanInvitation g) => _serial(
+    () async {
+      final actor = _currentOwner();
+      if (actor == null) throw const QuickPlanFailure('unauthenticated');
+      await _load(actor);
+      await _drain(actor);
+      final r = await _invoke('quickPlanQueryV1', {
+        'schemaVersion': 1,
+        'requestId': const Uuid().v4(),
+        'planId': g.planId,
+        'planOwnerId': g.ownerId,
+        'invitationId': g.invitationId,
+        'generation': g.generation,
+      });
+      _check(actor);
+      if (r['kind'] != 'succeeded') {
+        throw QuickPlanFailure(r['code'] as String? ?? 'answer_invalid');
+      }
+      if (r['ownerId'] != actor) throw const QuickPlanFailure('owner_changed');
+      final entry = r['entry'] as Map?;
+      if (entry?['status'] != 'active') {
+        throw const QuickPlanFailure('access_revoked');
+      }
+      return decodeQuickPlan(entry!['plan']);
+    },
+  );
 
   Future<void> _enqueue(
     String type,
@@ -229,12 +336,21 @@ class QuickPlanSyncClient implements QuickPlanRepository {
             'id_collision',
             'idempotency_conflict',
             'request_invalid',
+            'access_denied',
+            'access_revoked',
+            'permission_denied',
+            'invite_limit',
+            'target_unavailable',
           ].contains(code)) {
         throw QuickPlanFailure(code as String? ?? 'answer_invalid');
       }
       if (r['kind'] == 'rejected') {
         (_journal['conflicts'] as List).add({'request': request, 'result': r});
-      } else {
+      } else if ([
+        'save',
+        'delete',
+        'import',
+      ].contains(request['commandType'])) {
         // Historical receipt replay must not resurrect a deleted cached plan.
         final current = await _query(owner, request['planId']! as String);
         (_journal['cache'] as Map)[request['planId']] = current['entry'];

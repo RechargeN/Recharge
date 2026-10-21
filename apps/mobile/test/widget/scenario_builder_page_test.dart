@@ -42,9 +42,94 @@ import 'package:recharge/features/create/data/datasources/quick_plan_conversion_
 import 'package:recharge/features/create/domain/usecases/expand_quick_plan_to_scenario_usecase.dart';
 import 'package:recharge/features/scenarios/presentation/pages/scenario_builder_page.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
+import 'package:recharge/features/scenarios/application/scenario_builder_providers.dart';
+import 'package:recharge/features/scenarios/data/quick_plan_sync_client.dart';
+import 'package:recharge/features/scenarios/data/quick_plan_codec.dart';
+
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets(
+    'invitation controls open online read-only content and hide it after revoke',
+    (tester) async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final seed = ScenarioBuilderController();
+      final shared = seed.state.draft.copyWith(
+        sourcePrompt: 'Private invited stops',
+      );
+      seed.dispose();
+      var status = 'pending';
+      final g = <String, Object?>{
+        'planId': shared.id,
+        'ownerId': 'owner',
+        'inviteeId': 'viewer',
+        'invitationId': 'invitation',
+        'generation': 1,
+        'status': status,
+      };
+      final client = QuickPlanSyncClient(
+        storage: const FlutterSecureStorage(),
+        installationId: 'widget',
+        currentOwner: () => 'viewer',
+        invoke: (surface, request) async {
+          if (surface == 'quickPlanCommandV1') {
+            status = 'accepted';
+            return {'kind': 'succeeded'};
+          }
+          if (request['queryType'] == 'invitations') {
+            return {
+              'kind': 'succeeded',
+              'ownerId': 'viewer',
+              'invitations': [
+                {...g, 'status': status},
+              ],
+            };
+          }
+          if (request['planOwnerId'] != null) {
+            return status == 'accepted'
+                ? {
+                    'kind': 'succeeded',
+                    'ownerId': 'viewer',
+                    'entry': {
+                      'status': 'active',
+                      'plan': encodeQuickPlan(shared),
+                    },
+                  }
+                : {'kind': 'rejected', 'code': 'access_revoked'};
+          }
+          return {'kind': 'succeeded', 'ownerId': 'viewer', 'entry': null};
+        },
+      );
+      await tester.pumpWidget(
+        _scenarioProviderScope(
+          overrides: [quickPlanRepositoryProvider.overrideWithValue(client)],
+          child: const MaterialApp(home: QuickPlanPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Invitations and access'));
+      await tester.pumpAndSettle();
+      expect(find.text('Open read-only'), findsNothing);
+      await tester.tap(find.text('Accept'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Open read-only'));
+      await tester.pumpAndSettle();
+      expect(find.text('Private invited stops'), findsOneWidget);
+      expect(find.text('Leave plan'), findsOneWidget);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Expand to Scenario'), findsNothing);
+      expect(find.byTooltip('Reset'), findsNothing);
+      status = 'revoked';
+      await tester.tap(find.byTooltip('Refresh access'));
+      await tester.pumpAndSettle();
+      expect(find.text('Private invited stops'), findsNothing);
+      expect(find.textContaining('Content hidden'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   fullPageTestWidgets('previews one-way Expand to Scenario losses', (
     tester,
   ) async {

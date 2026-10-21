@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,12 @@ class QuickPlanPage extends ConsumerStatefulWidget {
 
 typedef ScenarioBuilderPage = QuickPlanPage;
 
-class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
+class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
+    with WidgetsBindingObserver {
+  Timer? _accessTimer;
+  ScenarioBuilderController? _pageController;
+  bool _checkingAccess = false;
+  bool _foreground = true;
   String? _seedKey;
   bool _intentLoadScheduled = false;
   String? _storedPlanId;
@@ -44,7 +50,45 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _previewMode = widget.seedParameters['preview'] == '1';
+  }
+
+  void _startAccessTimer() {
+    if (_accessTimer != null) return;
+    _accessTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      final c = ref.read(scenarioBuilderControllerProvider);
+      if (!c.invitedMode ||
+          _checkingAccess ||
+          !_foreground ||
+          ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
+      _checkingAccess = true;
+      try {
+        await c.sync();
+      } finally {
+        _checkingAccess = false;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _accessTimer?.cancel();
+    _pageController?.clearInvitedOnExit();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    final c = ref.read(scenarioBuilderControllerProvider);
+    if (c.invitedMode) {
+      c.hideInvitedContent();
+      if (state == AppLifecycleState.resumed) unawaited(c.sync());
+    }
   }
 
   @override
@@ -52,6 +96,7 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
     final ScenarioBuilderController controller = ref.watch(
       scenarioBuilderControllerProvider,
     );
+    _pageController = controller;
     ref.listen(authControllerProvider.select((c) => c.state.user?.id), (
       previous,
       next,
@@ -81,6 +126,12 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
         discoverController.state.savedSearches;
     final List<SmartSearchHistoryEntity> smartSearchHistory =
         discoverController.state.smartSearchHistory;
+    if (controller.invitedMode) {
+      _startAccessTimer();
+      return _invitedView(controller);
+    }
+    _accessTimer?.cancel();
+    _accessTimer = null;
     _scheduleSeed();
     _scheduleIntentLoad();
 
@@ -88,6 +139,12 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
       appBar: AppBar(
         title: Text(_previewMode ? 'My quick plan' : 'Quick Plan'),
         actions: <Widget>[
+          if (controller.persistenceEnabled)
+            IconButton(
+              tooltip: 'Invitations and access',
+              icon: const Icon(Icons.group_outlined),
+              onPressed: () => _showAccess(controller),
+            ),
           if (controller.persistenceEnabled)
             IconButton(
               tooltip: 'Refresh',
@@ -215,6 +272,192 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage> {
                 ],
               ],
             ),
+    );
+  }
+
+  Widget _invitedView(ScenarioBuilderController c) {
+    final p = c.invitedPlan;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Invited Quick Plan'),
+        actions: [
+          IconButton(
+            tooltip: 'Close invited plan',
+            onPressed: c.closeInvited,
+            icon: const Icon(Icons.close),
+          ),
+          IconButton(
+            tooltip: 'Refresh access',
+            onPressed: () => c.sync(),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text('Read-only · online access required'),
+          if (c.syncError != null) Text('Access unavailable: ${c.syncError}'),
+          if (p == null)
+            const Text('Content hidden. Refresh to verify access.')
+          else ...[
+            Text(p.sourcePrompt),
+            for (final step in p.steps)
+              ListTile(title: Text(step.title), subtitle: Text(step.subtitle)),
+          ],
+          OutlinedButton(
+            onPressed: () => c.actOnInvitation('leave', c.selectedInvitation!),
+            child: const Text('Leave plan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _askText(String title) async {
+    final input = TextEditingController();
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: TextField(controller: input, maxLines: 4),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, input.text.trim()),
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      input.dispose();
+    }
+  }
+
+  Future<void> _showAccess(ScenarioBuilderController c) async {
+    await c.loadInvitations();
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => ListenableBuilder(
+        listenable: c,
+        builder: (context, _) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height * .75,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const Text('Quick Plan invitations'),
+                const Text(
+                  'Use a known user ID. Pending actions take effect after server confirmation.',
+                ),
+                if (c.syncError != null)
+                  Text('Not confirmed: ${c.syncError}. Refresh to retry.'),
+                TextButton(
+                  onPressed: c.loadInvitations,
+                  child: const Text('Refresh / retry pending'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final id = await _askText('Invite existing user ID');
+                    if (id != null && id.isNotEmpty) await c.inviteUser(id);
+                  },
+                  child: const Text('Invite to current saved plan'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final source = await _askText(
+                      'Import recharge.quickPlan JSON',
+                    );
+                    if (source != null && source.isNotEmpty) {
+                      await c.importPlan(source);
+                    }
+                  },
+                  child: const Text('Import personal plan'),
+                ),
+                TextButton(
+                  onPressed: c.deletePlan,
+                  child: const Text('Delete current personal plan'),
+                ),
+                for (final g in c.invitations)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Plan ${g.planId} · ${g.status}'),
+                          Text(
+                            c.ownsInvitation(g)
+                                ? 'Invitee ${g.inviteeId}'
+                                : 'Owner ${g.ownerId}',
+                          ),
+                          Wrap(
+                            children: [
+                              if (c.ownsInvitation(g)) ...[
+                                if (g.status == 'pending')
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.actOnInvitation('cancel', g),
+                                    child: const Text('Cancel invite'),
+                                  ),
+                                if (g.status == 'accepted')
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.actOnInvitation('revoke', g),
+                                    child: const Text('Revoke'),
+                                  ),
+                                if (!['pending', 'accepted'].contains(g.status))
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.inviteUser(g.inviteeId, previous: g),
+                                    child: const Text('Re-invite'),
+                                  ),
+                              ] else ...[
+                                if (g.status == 'pending') ...[
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.actOnInvitation('accept', g),
+                                    child: const Text('Accept'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.actOnInvitation('decline', g),
+                                    child: const Text('Decline'),
+                                  ),
+                                ],
+                                if (g.status == 'accepted') ...[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(sheetContext);
+                                      c.openInvited(g);
+                                    },
+                                    child: const Text('Open read-only'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        c.actOnInvitation('leave', g),
+                                    child: const Text('Leave'),
+                                  ),
+                                ],
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

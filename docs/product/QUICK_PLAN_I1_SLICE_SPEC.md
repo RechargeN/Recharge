@@ -2,7 +2,7 @@
 
 Date: 2026-10-16. Scope authorized by the I1 task; Emulator-local only.
 Verification updated: 2026-10-17.
-Status: Done — bounded local/Emulator scope; common runtime 9db93bb verified. DEF-05 approval/CI/publication and production gates remain open. BCK-10 remains Draft.
+Status: Review — owner scope retained; accepted invited viewer extension implemented in bounded local/Emulator scope. DEF-05 approval/CI/publication and production gates remain open. BCK-10 remains Draft.
 
 ## Boundary and implementation
 
@@ -10,7 +10,7 @@ Extend the existing `features/scenarios` Quick Plan `ScenarioDraftEntity`, not
 the canonical Scenario aggregate. Reuse session authority, callable transport,
 Firestore transactions, secure storage and the existing Emulator group runner.
 No Catalog writer, PublisherRef, Scenario creation or Expand changes.
-Invited/unlisted access has no implemented authority: owner-only, fail closed.
+Invited viewer authority is authorized by the owner on 2026-10-20 as specified below. Unlisted access remains fail closed.
 Client owner fields are assertions checked against verified session identity.
 
 ## Identity and conflicts
@@ -66,7 +66,7 @@ Register I1 in the full single-session Emulator suite; cleanup own fixtures and
 verify runner self-tests, backend gates, full Flutter analyze/test, boundary and
 diff. Incomplete execution is not green.
 Rollback disables the default-off quick_plan.owner_sync flag and mobile test
-entry; retain journals, receipts and tombstones. Production activation, invited
+entry; retain journals, receipts and tombstones. Production activation, wider invited/editor/unlisted
 authority, retention/DSR integration and user conflict-resolution UI are outside
 this local slice and must be reported as limitations.
 
@@ -165,3 +165,75 @@ publishing a receipt result, so a deleted plan stays deleted.
 Предыдущие implementation/rebase records выше — история отдельных прогонов.
 Текущая общая ревизия `9db93bb`, [acceptance](../verification/LOCAL_21_26_ACCEPTANCE_2026_10_17.md).
 I1 включён вместе с K3; default-off и owner-only boundaries сохранены.
+
+
+## I1 invited viewer extension — owner accepted 2026-10-20
+
+Owner approval: user accepted the concrete I1_INVITED_CONTRACT_PROPOSAL.md with
+«выполняй». This accepts only this bounded local/Emulator extension and its file
+plan; BCK-10 remains Draft overall. No commit/push/deploy/production activation.
+Baseline: clean integration 9881c48, isolated worktree work/recharge-i1.
+
+### Authority and lifecycle
+
+Owner retains edit/import/delete/Expand/invite/cancel/revoke. Invited viewer can
+read and Leave; no shared mutation, import, delete, Expand or onward invitation.
+Independent personal create-only import remains permitted without grant copying.
+Known authenticated user IDs only; no identity search, external messages, links,
+unlisted access, new aggregate, parallel plan store, publisher or Catalog writer.
+Invitation metadata belongs to the existing quickPlans record, max 32 distinct
+invitees per plan; same command/query endpoints and encrypted actor journal.
+
+pending -> accepted/declined/cancelled; accepted -> revoked/left. Owner performs
+invite/cancel/revoke; only target performs accept/decline/leave. Duplicate delivery
+is idempotent. Re-invite after a terminal state requires a new invitation ID and
+increments generation; old generations never gain authority. Invite intents also
+bind the previous status observed by the owner so a queued active duplicate cannot
+become a new grant after revoke. Concurrent transitions are transactional.
+
+Every invited read and access receipt replay checks the active plan, active owner
+account, authenticated actor/session and current invitation ID/generation/status
+in the transaction. Only the same terminal leave/revoke/cancel/decline may return
+safe acknowledgement; no plan payload in invitation receipts. Old owner personal
+receipts preserve historical semantics; they cannot modify current state. Existing
+owner CAS, create-only import, durable conflicts and terminal delete-wins remain.
+Deleted/inactive owner accounts close remote reads and replay; no ownership transfer
+or new retention/DSR completion claim.
+
+### Projection and offline behavior
+
+Before accept, invitation query returns IDs/status/generation only, no title or
+content. Owner can see its invitations, invitee sees own invitation and owner only,
+not a participant roster. Invited content is online-only and volatile: never in
+persistent cache, pending payload or conflict journal. The read-only page clears
+content before revalidation, every 5 seconds while foreground/current, and on
+background/account changes; late results after clearing are discarded. Revocation
+closes server access immediately at transaction ordering, but cannot recall already
+returned/copied content or guarantee instantaneous client notification. Offline or
+failed revalidation hides content; no offline invited-content browsing.
+
+Accept/decline/Leave and owner access intents use the existing journal, actor,
+installation, immutable request/key, invitation ID and generation. Pending action
+is not a new permission or a confirmed revoke. Persist-before-dispatch, lost response,
+restart and user isolation apply; a terminal rejection moves metadata-only request
+to durable conflicts and removes it from pending. A changed user never drains the
+previous actor queue. Refresh retries pending without another user action.
+
+### Existing flow and rollback
+
+Existing Quick Plan page has Invitations and access, accept/decline/cancel/revoke/
+re-invite/Leave, online read-only open, personal import/delete and refresh/retry.
+Existing controller/repository/sync client implement operations; production provider
+remains explicitly injected/default-off. Disable quick_plan.owner_sync or injection
+to roll back. Preserve receipts, invitation generations, tombstones and journals.
+
+### Verification required before Done
+
+Two real Flutter callable adapters against Auth/Functions/Firestore Emulator,
+owner and invitee identities/installations, plus same-owner second adapter for CAS.
+Verify pre/post accept; denied mutations/import/delete/Expand; cancel/accept and
+delete/accept races; revoke/query/replay and re-invite; old duplicate invite;
+offline queue, lost response, restart and account switch; personal regressions,
+Catalog/Content/Scenario digest invariant, cleanup, Flutter analyze/full tests,
+backend affected/unit/contract gates, boundary/diff. Incomplete runs are not green.
+Evidence and current outcome are recorded in the extension verification document.

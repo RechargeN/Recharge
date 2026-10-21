@@ -253,8 +253,194 @@ void main() {
         'expectedRevision': 1,
       });
       expect(forged['code'], 'owner_changed');
+      // Two identities through real callable adapters; invited projection is never journalled.
+      final shared = plan('invited-ephemeral-payload');
+      await a.save(shared, expectedRevision: 0);
+      String? viewerActor = other;
+      var viewerOffline = false, viewerLost = false;
+      final sent = <Map<String, Object?>>[];
+      Future<Map<String, Object?>> viewerInvoke(
+        String surface,
+        Map<String, Object?> req,
+      ) async {
+        if (viewerOffline) throw const SocketException('offline viewer');
+        final answer = await (viewerActor == other ? invokeOther : invokeA)(
+          surface,
+          req,
+        );
+        if (surface == 'quickPlanCommandV1') {
+          sent.add(Map.of(req));
+          if (viewerLost) {
+            viewerLost = false;
+            throw const SocketException('lost viewer response');
+          }
+        }
+        return answer;
+      }
+
+      QuickPlanSyncClient viewerBoot() => QuickPlanSyncClient(
+        invoke: viewerInvoke,
+        storage: const FlutterSecureStorage(),
+        installationId: 'i1-viewer-device',
+        currentOwner: () => viewerActor,
+      );
+      var viewer = viewerBoot();
+      await a.invite(shared.id, other);
+      var g = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      expect(g.status, 'pending');
+      await expectLater(viewer.readInvited(g), failure);
+      // Offline accept is metadata only; a changed user never dispatches its intent.
+      viewerOffline = true;
+      await expectLater(
+        viewer.invitationAction('accept', g),
+        throwsA(isA<SocketException>()),
+      );
+      viewer = viewerBoot();
+      await viewer.restore();
+      expect(viewer.cached(shared.id), null);
+      viewerActor = owner;
+      viewerOffline = false;
+      final beforeSwitch = sent.length;
+      await viewer.invitations();
+      expect(sent.length, beforeSwitch);
+      viewerActor = other;
+      viewer = viewerBoot();
+      await viewer.invitations();
+      g = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      expect(g.status, 'accepted');
+      expect(
+        (await viewer.readInvited(g)).sourcePrompt,
+        'invited-ephemeral-payload',
+      );
+      final oldAccept = sent.last;
+      expect(viewer.cached(shared.id), null);
+      final key =
+          'quick_plan_v1_${base64Url.encode(utf8.encode('i1-viewer-device:$other'))}';
+      expect(
+        (await const FlutterSecureStorage().read(key: key))!,
+        isNot(contains('invited-ephemeral-payload')),
+      );
+      for (final type in ['save', 'delete', 'import']) {
+        final denied = await invokeOther('quickPlanCommandV1', {
+          'schemaVersion': 1,
+          'requestId': const Uuid().v4(),
+          'ownerContext': other,
+          'idempotencyKey': const Uuid().v4(),
+          'commandType': type,
+          'planId': shared.id,
+          'planOwnerId': owner,
+          'expectedRevision': type == 'import' ? 0 : 1,
+          if (type != 'delete') 'plan': encodeQuickPlan(shared),
+        });
+        expect(denied['code'], 'permission_denied');
+      }
+      await a.save(
+        shared.copyWith(sourcePrompt: 'owner update'),
+        expectedRevision: 1,
+      );
+      expect((await viewer.readInvited(g)).sourcePrompt, 'owner update');
+      await a.invitationAction('revoke', g);
+      await expectLater(viewer.readInvited(g), failure);
+      expect(
+        (await invokeOther('quickPlanCommandV1', oldAccept))['code'],
+        'access_revoked',
+      );
+      await a.invite(
+        shared.id,
+        other,
+        previous: (await a.invitations()).singleWhere(
+          (i) => i.planId == shared.id,
+        ),
+      );
+      var next = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      expect(next.generation, g.generation + 1);
+      await expectLater(viewer.readInvited(g), failure);
+      // Lost accept response, revoke, restart: old queued success receipt cannot grant access.
+      viewerLost = true;
+      await expectLater(
+        viewer.invitationAction('accept', next),
+        throwsA(isA<SocketException>()),
+      );
+      final staleAccept = sent.last;
+      await a.invitationAction('revoke', next);
+      viewer = viewerBoot();
+      await expectLater(viewer.invitations(), failure);
+      expect(viewer.hasPending(shared.id), false);
+      expect(
+        (await invokeOther('quickPlanCommandV1', staleAccept))['code'],
+        'access_revoked',
+      );
+      await a.invite(
+        shared.id,
+        other,
+        previous: (await a.invitations()).singleWhere(
+          (i) => i.planId == shared.id,
+        ),
+      );
+      next = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      await viewer.invitationAction('accept', next);
+      await expectLater(viewer.readInvited(g), failure);
+      viewerOffline = true;
+      await expectLater(
+        viewer.readInvited(next),
+        throwsA(isA<SocketException>()),
+      );
+      await expectLater(
+        viewer.invitationAction('leave', next),
+        throwsA(isA<SocketException>()),
+      );
+      viewer = viewerBoot();
+      viewerOffline = false;
+      await viewer.invitations();
+      await expectLater(viewer.readInvited(next), failure);
+      // Cancel pending, decline, and re-invite; stale actions stay fenced.
+      await a.invite(
+        shared.id,
+        other,
+        previous: (await a.invitations()).singleWhere(
+          (i) => i.planId == shared.id,
+        ),
+      );
+      next = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      await a.invitationAction('cancel', next);
+      await expectLater(viewer.invitationAction('accept', next), failure);
+      await a.invite(
+        shared.id,
+        other,
+        previous: (await a.invitations()).singleWhere(
+          (i) => i.planId == shared.id,
+        ),
+      );
+      next = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      await viewer.invitationAction('decline', next);
+      await a.invite(
+        shared.id,
+        other,
+        previous: (await a.invitations()).singleWhere(
+          (i) => i.planId == shared.id,
+        ),
+      );
+      next = (await viewer.invitations()).singleWhere(
+        (g) => g.planId == shared.id,
+      );
+      await viewer.invitationAction('accept', next);
+      await a.delete(shared.id, expectedRevision: 2);
+      await expectLater(viewer.readInvited(next), failure);
+      expect(viewerBoot().cached(shared.id), null);
     },
     skip: enabled ? false : 'Run the quick-plan Emulator group.',
-    timeout: const Timeout(Duration(minutes: 2)),
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }

@@ -98,10 +98,16 @@ export interface QuickPlanCommand {
   requestId: string;
   ownerContext: string;
   idempotencyKey: string;
-  commandType: 'save' | 'delete' | 'import';
+  commandType:
+    'save' | 'delete' | 'import' | 'invite' | 'accept' | 'decline' | 'cancel' | 'revoke' | 'leave';
   planId: string;
   expectedRevision: number;
   plan?: Record<string, unknown>;
+  planOwnerId?: string;
+  targetUserId?: string;
+  invitationId?: string;
+  generation?: number;
+  previousStatus?: string;
 }
 export function parseCommand(raw: unknown): QuickPlanCommand | null {
   const r = record(raw);
@@ -116,6 +122,11 @@ export function parseCommand(raw: unknown): QuickPlanCommand | null {
       'planId',
       'expectedRevision',
       'plan',
+      'planOwnerId',
+      'targetUserId',
+      'invitationId',
+      'generation',
+      'previousStatus',
     ]) ||
     r.schemaVersion !== 1 ||
     !isEntityId(r.requestId) ||
@@ -123,7 +134,44 @@ export function parseCommand(raw: unknown): QuickPlanCommand | null {
     !isIdempotencyKey(r.idempotencyKey) ||
     !isEntityId(r.planId) ||
     !integer(r.expectedRevision, Number.MAX_SAFE_INTEGER) ||
-    !['save', 'delete', 'import'].includes(String(r.commandType))
+    ![
+      'save',
+      'delete',
+      'import',
+      'invite',
+      'accept',
+      'decline',
+      'cancel',
+      'revoke',
+      'leave',
+    ].includes(String(r.commandType))
+  )
+    return null;
+  if (r.planOwnerId !== undefined && !isEntityId(r.planOwnerId)) return null;
+  if (!['save', 'delete', 'import'].includes(String(r.commandType))) {
+    if (
+      !isEntityId(r.planOwnerId) ||
+      !isEntityId(r.targetUserId) ||
+      !isEntityId(r.invitationId) ||
+      !integer(r.generation, Number.MAX_SAFE_INTEGER - 1) ||
+      r.plan !== undefined
+    )
+      return null;
+    if (
+      r.commandType === 'invite'
+        ? !['none', 'pending', 'accepted', 'revoked', 'left', 'cancelled', 'declined'].includes(
+            String(r.previousStatus),
+          )
+        : r.previousStatus !== undefined
+    )
+      return null;
+    return r as unknown as QuickPlanCommand;
+  }
+  if (
+    r.targetUserId !== undefined ||
+    r.invitationId !== undefined ||
+    r.generation !== undefined ||
+    r.previousStatus !== undefined
   )
     return null;
   if (
@@ -142,5 +190,10 @@ export const hashCommand = (c: QuickPlanCommand) =>
       planId: c.planId,
       expectedRevision: c.expectedRevision,
       ...(c.plan ? { plan: c.plan } : {}),
+      ...(c.planOwnerId ? { planOwnerId: c.planOwnerId } : {}),
+      ...(c.previousStatus ? { previousStatus: c.previousStatus } : {}),
+      ...(c.targetUserId
+        ? { targetUserId: c.targetUserId, invitationId: c.invitationId, generation: c.generation }
+        : {}),
     }),
   );

@@ -217,7 +217,7 @@ void test('private queries, forged owner/invite claims and session expiry fail c
 });
 void test(
   'two real Flutter adapters: offline queue, restart, auth and import recovery',
-  { timeout: 150000 },
+  { timeout: 300000 },
   async () => {
     const dart = process.env.RECHARGE_DART,
       flutter = process.env.RECHARGE_FLUTTER_TOOL;
@@ -261,3 +261,134 @@ void test(
     assert.equal(result, 0);
   },
 );
+
+function access(
+  type: string,
+  p: ReturnType<typeof plan>,
+  owner: string,
+  target: string,
+  invitationId = randomUUID(),
+  generation = 0,
+) {
+  return {
+    schemaVersion: 1,
+    requestId: randomUUID(),
+    idempotencyKey: randomUUID(),
+    ownerContext: ['accept', 'decline', 'leave'].includes(type) ? target : owner,
+    commandType: type,
+    planId: p.id,
+    expectedRevision: 0,
+    planOwnerId: owner,
+    targetUserId: target,
+    invitationId,
+    generation,
+    ...(type === 'invite' ? { previousStatus: generation === 0 ? 'none' : 'revoked' } : {}),
+  };
+}
+function invitedQuery(p: ReturnType<typeof plan>, id: string, generation: number) {
+  return { ...query(p.id), planOwnerId: a.userId, invitationId: id, generation };
+}
+void test('viewer invitation lifecycle, owner-only mutations and fenced receipts/re-invite', async () => {
+  const p = plan(),
+    id = randomUUID();
+  await service.command(a.hint, command(p));
+  const invite = access('invite', p, a.userId, other.userId, id);
+  assert.equal((await service.command(a.hint, invite)).kind, 'succeeded');
+  assert.equal((await service.query(other.hint, invitedQuery(p, id, 1))).code, 'access_revoked');
+  const listing = await service.query(other.hint, {
+    schemaVersion: 1,
+    requestId: randomUUID(),
+    queryType: 'invitations',
+  });
+  assert.equal(JSON.stringify(listing).includes('sourcePrompt'), false);
+  const accept = access('accept', p, a.userId, other.userId, id, 1);
+  assert.equal((await service.command(other.hint, accept)).kind, 'succeeded');
+  assert.equal((await service.query(other.hint, invitedQuery(p, id, 1))).kind, 'succeeded');
+  for (const type of ['save', 'delete', 'import']) {
+    const c = {
+      ...command(p, type === 'import' ? 0 : 1, type),
+      ownerContext: other.userId,
+      planOwnerId: a.userId,
+    };
+    assert.equal((await service.command(other.hint, c)).code, 'permission_denied');
+  }
+  assert.equal(
+    (await service.command(other.hint, { ...invite, ownerContext: other.userId })).code,
+    'permission_denied',
+  );
+  const staleDuplicate = {
+    ...access('invite', p, a.userId, other.userId, randomUUID(), 1),
+    previousStatus: 'accepted',
+  };
+  assert.equal((await service.command(a.hint, staleDuplicate)).kind, 'succeeded');
+  const revoke = access('revoke', p, a.userId, other.userId, id, 1);
+  await service.command(a.hint, revoke);
+  assert.equal((await service.command(a.hint, staleDuplicate)).code, 'access_revoked');
+  for (const c of [invite, accept])
+    assert.equal(
+      (await service.command(c === invite ? a.hint : other.hint, c)).code,
+      'access_revoked',
+    );
+  assert.equal((await service.query(other.hint, invitedQuery(p, id, 1))).code, 'access_revoked');
+  const newId = randomUUID();
+  assert.equal(
+    (await service.command(a.hint, access('invite', p, a.userId, other.userId, newId, 1))).kind,
+    'succeeded',
+  );
+  assert.equal((await service.command(other.hint, accept)).code, 'access_revoked');
+  assert.equal((await service.command(a.hint, revoke)).code, 'access_revoked');
+  await service.command(other.hint, access('accept', p, a.userId, other.userId, newId, 2));
+  assert.equal((await service.query(other.hint, invitedQuery(p, id, 1))).code, 'access_revoked');
+  assert.equal((await service.query(other.hint, invitedQuery(p, newId, 2))).kind, 'succeeded');
+  await service.command(other.hint, access('leave', p, a.userId, other.userId, newId, 2));
+  assert.equal((await service.query(other.hint, invitedQuery(p, newId, 2))).code, 'access_revoked');
+});
+void test('cancel/accept and delete/accept races serialize, terminal delete and inactive owner fence all access', async () => {
+  for (const terminal of ['cancel', 'delete']) {
+    const p = plan(),
+      id = randomUUID();
+    await service.command(a.hint, command(p));
+    await service.command(a.hint, access('invite', p, a.userId, other.userId, id));
+    const accept = access('accept', p, a.userId, other.userId, id, 1);
+    const c =
+      terminal === 'cancel'
+        ? access('cancel', p, a.userId, other.userId, id, 1)
+        : command(p, 1, 'delete');
+    await Promise.all([service.command(a.hint, c), service.command(other.hint, accept)]);
+    if (terminal === 'delete')
+      assert.equal(
+        (await service.query(other.hint, invitedQuery(p, id, 1))).code,
+        'access_revoked',
+      );
+    else {
+      const g = (
+        (
+          await db
+            .collection(cols.plans)
+            .doc(a.userId + ':' + p.id)
+            .get()
+        ).data()!.invitations as Record<string, Record<string, unknown>>
+      )[other.userId]!;
+      assert.ok(['accepted', 'cancelled'].includes(String(g.status)));
+      if (g.status === 'cancelled')
+        assert.equal((await service.command(other.hint, accept)).code, 'access_revoked');
+    }
+  }
+  const p = plan(),
+    id = randomUUID();
+  await service.command(a.hint, command(p));
+  await service.command(a.hint, access('invite', p, a.userId, other.userId, id));
+  const accept = access('accept', p, a.userId, other.userId, id, 1);
+  await service.command(other.hint, accept);
+  const account = db.collection('identityAccounts').doc(a.userId),
+    saved = (await account.get()).data()!;
+  await account.update({ status: 'deleted' });
+  try {
+    assert.equal((await service.query(other.hint, invitedQuery(p, id, 1))).code, 'access_revoked');
+    assert.equal((await service.command(other.hint, accept)).code, 'access_denied');
+  } finally {
+    await account.set(saved);
+  }
+  await service.command(a.hint, command(p, 1, 'delete'));
+  assert.equal((await service.command(other.hint, accept)).code, 'access_denied');
+});

@@ -4081,3 +4081,13 @@ method — a non-normative reader index, not a new requirement.
 | Let `public` visibility be reachable through the same control as `unlisted`, or treat visibility as one uniform owner-editable enum instead of two differently-gated transitions | §5.2, §4.3(14), `VP-AC-40` |
 | Present "invite a known person" and "publish a `find_people` request" as one feature, or route them through a shared entry point / capability check | §5.1, §11, §4.3(15), `VP-AC-42` |
 | Read `displayName`/`avatar` directly from `UserProfile` for the baseline Public User Projection once an `IdentityFieldModerationOverlay` row exists for that account | §12.2, §4.3(16), `VP-AC-43` |
+
+
+### VP-D02 bounded I1 local clarification — 2026-10-20
+
+Owner accepted viewer-only Quick Plan invitations in QUICK_PLAN_I1_SLICE_SPEC.md
+(I1 invited viewer extension). Invited users can read online and Leave, without
+mutating/deleting the owner aggregate, importing into it, inviting others or Expand.
+Accept/decline/cancel/revoke, terminal status/generation fencing, actor queue isolation
+and online-only projection are specified there. Wider VP-D02 product/profile scope
+and BCK-10 overall approval remain open; this is no production readiness claim.

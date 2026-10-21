@@ -27,10 +27,133 @@ class ScenarioBuilderController extends ChangeNotifier {
   Object? syncError;
   bool get syncBusy => _syncBusy;
   bool get persistenceEnabled => _repository != null;
+  List<QuickPlanInvitation> invitations = const [];
+  QuickPlanInvitation? selectedInvitation;
+  ScenarioDraftEntity? _invitedPlan;
+  String? _invitedActor;
+  int _accessEpoch = 0;
+  bool get invitedMode => selectedInvitation != null;
+  ScenarioDraftEntity? get invitedPlan =>
+      _invitedActor == _repository?.actorId ? _invitedPlan : null;
+  bool ownsInvitation(QuickPlanInvitation g) =>
+      g.ownerId == _repository?.actorId;
+
+  Future<void> loadInvitations() async {
+    try {
+      syncError = null;
+      invitations = await _repository!.invitations();
+    } on Object catch (e) {
+      invitations = const [];
+      syncError = e;
+    }
+    notifyListeners();
+  }
+
+  Future<void> inviteUser(
+    String userId, {
+    QuickPlanInvitation? previous,
+  }) async {
+    try {
+      if (invitedMode) return;
+      await _repository!.invite(
+        previous?.planId ?? _state.draft.id,
+        userId,
+        previous: previous,
+      );
+    } on Object catch (e) {
+      syncError = e;
+      notifyListeners();
+      return;
+    }
+    await loadInvitations();
+  }
+
+  Future<void> actOnInvitation(String action, QuickPlanInvitation g) async {
+    hideInvitedContent();
+    try {
+      await _repository!.invitationAction(action, g);
+    } on Object catch (e) {
+      syncError = e;
+      notifyListeners();
+      return;
+    }
+    if (action == 'leave') selectedInvitation = null;
+    await loadInvitations();
+  }
+
+  void hideInvitedContent() {
+    _accessEpoch++;
+    _invitedPlan = null;
+    _invitedActor = null;
+    notifyListeners();
+  }
+
+  Future<void> openInvited(QuickPlanInvitation g) async {
+    selectedInvitation = g;
+    hideInvitedContent();
+    final epoch = _accessEpoch;
+    final actor = _repository?.actorId;
+    try {
+      final plan = await _repository!.readInvited(g);
+      if (selectedInvitation != g ||
+          actor != _repository.actorId ||
+          epoch != _accessEpoch) {
+        return;
+      }
+      _invitedPlan = plan;
+      _invitedActor = actor;
+      syncError = null;
+    } on Object catch (e) {
+      syncError = e;
+    }
+    notifyListeners();
+  }
+
+  /// Widget disposal must invalidate late responses without notifying a dying tree.
+  void clearInvitedOnExit() {
+    _accessEpoch++;
+    selectedInvitation = null;
+    _invitedPlan = null;
+    _invitedActor = null;
+  }
+
+  void closeInvited() {
+    selectedInvitation = null;
+    hideInvitedContent();
+  }
+
+  Future<void> importPlan(String source) async {
+    if (invitedMode) return;
+    try {
+      await _repository!.importJson(source);
+      syncError = null;
+    } on Object catch (e) {
+      syncError = e;
+    }
+    notifyListeners();
+  }
+
+  Future<void> deletePlan() async {
+    if (invitedMode) return;
+    try {
+      await _repository!.delete(
+        _state.draft.id,
+        expectedRevision: _serverRevision,
+      );
+      syncError = null;
+      reset();
+    } on Object catch (e) {
+      syncError = e;
+      notifyListeners();
+    }
+  }
+
   List<Map<String, Object?>> get syncConflicts =>
       _repository?.conflicts ?? const [];
 
   void clearOwner() {
+    closeInvited();
+    invitations = const [];
     _repository?.clearVisible();
     reset();
   }
@@ -54,6 +177,10 @@ class ScenarioBuilderController extends ChangeNotifier {
 
   /// Explicit save/refresh: a refresh also replays durable pending commands.
   Future<void> sync({bool save = false}) async {
+    if (invitedMode) {
+      if (!save) await openInvited(selectedInvitation!);
+      return;
+    }
     final repository = _repository;
     if (repository == null || _syncBusy) return;
     _syncBusy = true;
@@ -196,6 +323,7 @@ class ScenarioBuilderController extends ChangeNotifier {
   }
 
   void _updateDraft(ScenarioDraftEntity next, {bool regenerateSteps = true}) {
+    if (invitedMode) return;
     _dirty = true;
     final List<ScenarioStepEntity> steps = regenerateSteps
         ? scenarioStepsFor(
@@ -221,6 +349,7 @@ class ScenarioBuilderController extends ChangeNotifier {
   }
 
   void _setDraftSteps(List<ScenarioStepEntity> steps) {
+    if (invitedMode) return;
     _dirty = true;
     _state = _state.copyWith(
       draft: _state.draft.copyWith(
