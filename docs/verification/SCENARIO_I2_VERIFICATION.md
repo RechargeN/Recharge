@@ -208,3 +208,12 @@ Summary SHA-256: `5531c253b16a67d4f31c3a47223d66599dfbd8a6977c8777c52d168148a236
 его `node_modules` отставали от lockfile (firebase-tools 15.28.1), и
 `verify:toolchain` там был красным. Hosted CI, native AVD для I2, unlisted, публикация
 и production остаются открытыми.
+
+
+## Task 27 — повторная проверка после I1, 2026-10-20
+
+Исторические результаты выше сохранены. Текущая общая версия включает незакоммиченный
+I1 invited viewer overlay поверх integration 9881c48 и I2 client hardening.
+Актуальные матрица прав, evidence и точные ограничения приведены в
+[SCENARIO_I2_COMMON_I1_VERIFICATION.md](SCENARIO_I2_COMMON_I1_VERIFICATION.md).
+Ни старые результаты, ни принятый ранее локальный scope не заменяют текущие gates.

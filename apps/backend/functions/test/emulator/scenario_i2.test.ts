@@ -481,7 +481,7 @@ void test('viewer cannot edit; role downgrade invalidates successful receipts', 
     'access_revoked',
   );
 });
-async function source() {
+async function source(actor: Actor = owner) {
   const id = randomUUID(),
     plan = {
       id,
@@ -497,14 +497,14 @@ async function source() {
   const c = {
     schemaVersion: 1,
     requestId: randomUUID(),
-    ownerContext: owner.userId,
+    ownerContext: actor.userId,
     idempotencyKey: randomUUID(),
     commandType: 'save',
     planId: id,
     expectedRevision: 0,
     plan,
   };
-  assert.equal((await quick.command(owner.hint, c)).kind, 'succeeded');
+  assert.equal((await quick.command(actor.hint, c)).kind, 'succeeded');
   return { id, plan, c };
 }
 function expansion(id: string, s: Awaited<ReturnType<typeof source>>) {
@@ -731,3 +731,139 @@ void test(
     assert.equal(result, 0);
   },
 );
+
+void test('edit/delete keeps Scenario CAS, terminal deletion and no replay resurrection in both orders and a race', async () => {
+  for (const order of ['edit-first', 'delete-first', 'race']) {
+    const id = await create();
+    await accept(id);
+    const edit = command(editor, id, 'save', 1, {
+      generation: 1,
+      draft: draft('concurrent edit', 2),
+    });
+    const del = command(owner, id, 'delete', 1);
+    if (order === 'edit-first') {
+      assert.equal((await service.command(editor.hint, edit)).kind, 'succeeded');
+      assert.equal((await service.command(owner.hint, del)).code, 'revision_conflict');
+      assert.equal(
+        (await service.command(owner.hint, command(owner, id, 'delete', 2))).kind,
+        'succeeded',
+      );
+    } else if (order === 'delete-first') {
+      assert.equal((await service.command(owner.hint, del)).kind, 'succeeded');
+      assert.equal((await service.command(editor.hint, edit)).code, 'not_found_or_forbidden');
+    } else {
+      const results = await Promise.all([
+        service.command(editor.hint, edit),
+        service.command(owner.hint, del),
+      ]);
+      assert.equal(results.filter((r) => r.kind === 'succeeded').length, 1);
+      if (results[0].kind === 'succeeded')
+        assert.equal(
+          (await service.command(owner.hint, command(owner, id, 'delete', 2))).kind,
+          'succeeded',
+        );
+    }
+    assert.equal((await service.command(editor.hint, edit)).code, 'not_found_or_forbidden');
+    const stored = (await db.collection(cols.plans).doc(id).get()).data()!;
+    assert.equal(stored.status, 'deleted');
+    assert.equal(stored.draft, null);
+  }
+});
+void test('I1/I2 Expand matrix: Scenario roles never grant Quick Plan copy; invited viewer read is not Expand authority', async () => {
+  for (const role of ['owner', 'editor', 'viewer']) {
+    const collaborative = await create(),
+      actor = role === 'owner' ? owner : editor;
+    if (role !== 'owner') await service.command(actor.hint, await invite(collaborative, role));
+    assert.equal(
+      ((await service.query(actor.hint, query(collaborative))).entry as { role: string }).role,
+      role,
+    );
+    const owned = await source(actor),
+      target = ulid();
+    const before = service.calls;
+    const allowed = await service.command(actor.hint, {
+      ...expansion(target, owned),
+      actorContext: actor.userId,
+    });
+    assert.equal(
+      allowed.kind,
+      'succeeded',
+      role + ' may expand its own Quick Plan into a new owned Scenario',
+    );
+    assert.equal(service.calls, before + 1);
+    assert.equal(
+      ((await service.query(actor.hint, query(target))).entry as { role: string }).role,
+      'owner',
+    );
+    const sourceOwner = actor === owner ? stranger : owner,
+      foreign = await source(sourceOwner),
+      invitationId = randomUUID();
+    const inviteCommand = {
+      schemaVersion: 1,
+      requestId: randomUUID(),
+      ownerContext: sourceOwner.userId,
+      idempotencyKey: randomUUID(),
+      commandType: 'invite',
+      planId: foreign.id,
+      expectedRevision: 0,
+      planOwnerId: sourceOwner.userId,
+      targetUserId: actor.userId,
+      invitationId,
+      generation: 0,
+      previousStatus: 'none',
+    };
+    assert.equal((await quick.command(sourceOwner.hint, inviteCommand)).kind, 'succeeded');
+    const deniedTarget = ulid(),
+      attempt = { ...expansion(deniedTarget, foreign), actorContext: actor.userId };
+    const writes = service.calls;
+    assert.equal(
+      (await service.command(actor.hint, attempt)).code,
+      'source_unavailable',
+      'pending invite conveys no copy authority',
+    );
+    const acceptCommand = {
+      ...inviteCommand,
+      requestId: randomUUID(),
+      idempotencyKey: randomUUID(),
+      ownerContext: actor.userId,
+      commandType: 'accept',
+      generation: 1,
+    };
+    delete (acceptCommand as Record<string, unknown>).previousStatus;
+    assert.equal((await quick.command(actor.hint, acceptCommand)).kind, 'succeeded');
+    assert.equal(
+      (
+        await quick.query(actor.hint, {
+          schemaVersion: 1,
+          requestId: randomUUID(),
+          planId: foreign.id,
+          planOwnerId: sourceOwner.userId,
+          invitationId,
+          generation: 1,
+        })
+      ).kind,
+      'succeeded',
+    );
+    assert.equal(
+      (await service.command(actor.hint, attempt)).code,
+      'source_unavailable',
+      'I1 viewer can read but cannot Expand, regardless of Scenario role',
+    );
+    const revokeCommand = {
+      ...inviteCommand,
+      requestId: randomUUID(),
+      idempotencyKey: randomUUID(),
+      commandType: 'revoke',
+      generation: 1,
+    };
+    delete (revokeCommand as Record<string, unknown>).previousStatus;
+    assert.equal((await quick.command(sourceOwner.hint, revokeCommand)).kind, 'succeeded');
+    assert.equal((await service.command(actor.hint, attempt)).code, 'source_unavailable');
+    assert.equal(
+      service.calls,
+      writes,
+      'denied expansion must never invoke the canonical creation writer',
+    );
+    assert.equal((await db.collection(cols.plans).doc(deniedTarget).get()).exists, false);
+  }
+});

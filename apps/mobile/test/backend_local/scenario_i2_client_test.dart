@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -330,6 +331,200 @@ void main() {
       expect((await a.read(id))['revision'], 4);
       await expectLater(c.read(id), throwsA(isA<ScenarioSyncFailure>()));
 
+      // Re-invite has a new membership generation; the prior successful receipt stays fenced.
+      final reinvite = const Uuid().v4();
+      expect(
+        (await a.membership(
+          scenarioId: id,
+          commandType: 'invite',
+          intentId: const Uuid().v4(),
+          expectedRevision: 3,
+          recipientId: member,
+          role: 'viewer',
+          inviteId: reinvite,
+          expiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        ))['kind'],
+        'succeeded',
+      );
+      final reaccepted = await invokeB('scenarioCommandV1', {
+        'schemaVersion': 1,
+        'requestId': const Uuid().v4(),
+        'actorContext': member,
+        'idempotencyKey': const Uuid().v4(),
+        'commandType': 'accept',
+        'scenarioId': id,
+        'expectedRevision': 0,
+        'generation': 0,
+        'inviteId': reinvite,
+      });
+      expect(reaccepted['generation'], greaterThan(1));
+      expect((await c.read(id))['role'], 'viewer');
+      final staleReplay = await invokeB('scenarioCommandV1', {
+        'schemaVersion': 1,
+        'requestId': const Uuid().v4(),
+        'actorContext': member,
+        'idempotencyKey': editKey,
+        'commandType': 'save',
+        'scenarioId': id,
+        'expectedRevision': 1,
+        'generation': 1,
+        'draft': ScenarioSyncClient.encode(draft('member edit', 2)),
+      });
+      expect(staleReplay['code'], 'access_revoked');
+      expect(
+        (await c.saveIfRevision(
+          ownerId: member,
+          draft: draft('viewer forbidden', 5),
+          expectedScenarioRevision: 4,
+          idempotencyKey: const Uuid().v4(),
+        )).status,
+        CreateDraftCollectionSaveStatus.conflict,
+      );
+      // Delay an actual authorized HTTP response, commit revoke, then deliver it late.
+      final responseReady = Completer<void>(),
+          releaseResponse = Completer<void>();
+      final late = ScenarioSyncClient(
+        invoke: (surface, request) async {
+          final response = await invokeB(surface, request);
+          expect(response['kind'], 'succeeded');
+          responseReady.complete();
+          await releaseResponse.future;
+          return response;
+        },
+        storage: const FlutterSecureStorage(),
+        installationId: 'i2-late-http',
+        currentActor: () => member,
+      );
+      final inFlight = late.read(id);
+      final rejectedLate = expectLater(
+        inFlight,
+        throwsA(
+          isA<ScenarioSyncFailure>().having(
+            (e) => e.code,
+            'code',
+            'access_revoked',
+          ),
+        ),
+      );
+      await responseReady.future;
+      expect(
+        (await a.membership(
+          scenarioId: id,
+          commandType: 'revoke',
+          intentId: const Uuid().v4(),
+          expectedRevision: 5,
+          recipientId: member,
+        ))['kind'],
+        'succeeded',
+      );
+      final clearLate = late.receiveRevoke(id);
+      expect(late.cached(id), null);
+      releaseResponse.complete();
+      await rejectedLate;
+      await clearLate;
+      expect(late.cached(id), null);
+      await expectLater(
+        invokeB('scenarioQueryV1', {
+          'schemaVersion': 1,
+          'requestId': const Uuid().v4(),
+          'scenarioId': id,
+        }).then((r) {
+          expect(r['code'], 'not_found_or_forbidden');
+        }),
+        completes,
+      );
+      // Actual clients: editor edit / owner delete with a shared revision in both delivery orders.
+      for (final deleteFirst in [false, true]) {
+        final doomedId = ids.generate(), invitation = const Uuid().v4();
+        final doomed = draft('delete race', 1).copyWith(id: doomedId);
+        await a.saveIfRevision(
+          ownerId: owner,
+          draft: doomed,
+          expectedScenarioRevision: 0,
+          idempotencyKey: const Uuid().v4(),
+        );
+        await a.membership(
+          scenarioId: doomedId,
+          commandType: 'invite',
+          intentId: const Uuid().v4(),
+          expectedRevision: 0,
+          recipientId: member,
+          role: 'editor',
+          inviteId: invitation,
+          expiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        );
+        await invokeB('scenarioCommandV1', {
+          'schemaVersion': 1,
+          'requestId': const Uuid().v4(),
+          'actorContext': member,
+          'idempotencyKey': const Uuid().v4(),
+          'commandType': 'accept',
+          'scenarioId': doomedId,
+          'expectedRevision': 0,
+          'generation': 0,
+          'inviteId': invitation,
+        });
+        final deletion = {
+          'schemaVersion': 1,
+          'requestId': const Uuid().v4(),
+          'actorContext': owner,
+          'idempotencyKey': const Uuid().v4(),
+          'commandType': 'delete',
+          'scenarioId': doomedId,
+          'expectedRevision': 1,
+          'generation': 0,
+        };
+        if (deleteFirst) {
+          expect(
+            (await invokeA('scenarioCommandV1', deletion))['kind'],
+            'succeeded',
+          );
+          await expectLater(
+            b.saveIfRevision(
+              ownerId: member,
+              draft: doomed.copyWith(
+                title: 'late edit',
+                scenarioData: doomed.scenarioData!.copyWith(revision: 2),
+              ),
+              expectedScenarioRevision: 1,
+              idempotencyKey: const Uuid().v4(),
+            ),
+            throwsA(isA<ScenarioSyncFailure>()),
+          );
+        } else {
+          expect(
+            (await b.saveIfRevision(
+              ownerId: member,
+              draft: doomed.copyWith(
+                title: 'wins CAS',
+                scenarioData: doomed.scenarioData!.copyWith(revision: 2),
+              ),
+              expectedScenarioRevision: 1,
+              idempotencyKey: const Uuid().v4(),
+            )).status,
+            CreateDraftCollectionSaveStatus.saved,
+          );
+          expect(
+            (await invokeA('scenarioCommandV1', deletion))['code'],
+            'revision_conflict',
+          );
+          expect(
+            (await invokeA('scenarioCommandV1', {
+              ...deletion,
+              'requestId': const Uuid().v4(),
+              'idempotencyKey': const Uuid().v4(),
+              'expectedRevision': 2,
+            }))['kind'],
+            'succeeded',
+          );
+        }
+        await expectLater(
+          b.read(doomedId),
+          throwsA(isA<ScenarioSyncFailure>()),
+        );
+        expect(b.cached(doomedId), null);
+      }
+
       final sourceId = const Uuid().v4(), stopId = const Uuid().v4();
       final source = <String, Object?>{
         'id': sourceId,
@@ -395,12 +590,12 @@ void main() {
         runtimeDefaults: defaults,
       );
       var materializations = 0;
-      Future<CreateDraftEntity> materialize() async {
+      Future<CreateDraftEntity> materialize([String? requester]) async {
         materializations++;
         final result = await facade.expand(
           ExpandLegacyQuickPlanRequest(
             draft: decodeQuickPlan({...source, 'revision': 1}),
-            requesterId: owner,
+            requesterId: requester ?? owner,
             requesterEmail: '',
             requesterName: '',
             scenarioTitle: 'Expanded',
@@ -414,6 +609,60 @@ void main() {
         );
       }
 
+      // I1 invited read is deliberately insufficient for Expand on I2's creation path.
+      final quickInvite = const Uuid().v4();
+      final quickAccess = <String, Object?>{
+        'schemaVersion': 1,
+        'requestId': const Uuid().v4(),
+        'ownerContext': owner,
+        'idempotencyKey': const Uuid().v4(),
+        'commandType': 'invite',
+        'planId': sourceId,
+        'expectedRevision': 0,
+        'planOwnerId': owner,
+        'targetUserId': member,
+        'invitationId': quickInvite,
+        'generation': 0,
+        'previousStatus': 'none',
+      };
+      expect(
+        (await invokeA('quickPlanCommandV1', quickAccess))['kind'],
+        'succeeded',
+      );
+      final quickAccept = Map<String, Object?>.from(quickAccess)
+        ..remove('previousStatus');
+      quickAccept.addAll({
+        'requestId': const Uuid().v4(),
+        'ownerContext': member,
+        'idempotencyKey': const Uuid().v4(),
+        'commandType': 'accept',
+        'generation': 1,
+      });
+      expect(
+        (await invokeB('quickPlanCommandV1', quickAccept))['kind'],
+        'succeeded',
+      );
+      expect(
+        (await invokeB('quickPlanQueryV1', {
+          'schemaVersion': 1,
+          'requestId': const Uuid().v4(),
+          'planId': sourceId,
+          'planOwnerId': owner,
+          'invitationId': quickInvite,
+          'generation': 1,
+        }))['kind'],
+        'succeeded',
+      );
+      final deniedExpansion = await b.expand(
+        intentId: const Uuid().v4(),
+        sourceId: sourceId,
+        sourceRevision: 1,
+        source: source,
+        selectedStopIds: {stopId},
+        materialize: () => materialize(member),
+      );
+      expect(deniedExpansion['code'], 'source_unavailable');
+      final beforeOwnerMaterializations = materializations;
       var drop = true;
       final lossy = ScenarioSyncClient(
         invoke: (surface, request) async {
@@ -456,13 +705,13 @@ void main() {
       );
       final result = await expand(restarted, intent);
       expect(result['kind'], 'succeeded', reason: result.toString());
-      expect(materializations, 1);
+      expect(materializations, beforeOwnerMaterializations + 1);
       final entry = result['entry'] as Map,
           target = entry['scenarioId'] as String;
       expect(target, matches(RegExp(r'^[0-7][0-9A-HJKMNP-TV-Z]{25}$')));
       expect(target, isNot(sourceId));
       expect((await expand(restarted, intent))['entry'], entry);
-      expect(materializations, 1);
+      expect(materializations, beforeOwnerMaterializations + 1);
       expect(compactReplays, 1);
       final fresh = await expand(restarted, const Uuid().v4());
       expect((fresh['entry'] as Map)['scenarioId'], isNot(target));

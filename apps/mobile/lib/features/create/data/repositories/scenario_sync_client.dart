@@ -38,6 +38,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   Map<String, dynamic> _journal = {};
   String? _actor;
   Future<void> _tail = Future.value();
+  int _visibilityEpoch = 0;
   final Set<String> _revoked = {};
   final Map<String, int> _revokeEpoch = {};
   final Set<String> _validatedShared = {};
@@ -53,6 +54,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   }
 
   void clearVisible() {
+    _visibilityEpoch++;
     _actor = null;
     _journal = {};
     _revoked.clear();
@@ -60,15 +62,24 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   }
 
   Future<T> _serial<T>(Future<T> Function() f) {
-    final result = _tail.then((_) => f());
+    final actor = _currentActor(), epoch = _visibilityEpoch;
+    final result = _tail.then((_) {
+      if (actor == null ||
+          _currentActor() != actor ||
+          _visibilityEpoch != epoch) {
+        throw const ScenarioSyncFailure('actor_changed');
+      }
+      return f();
+    });
     _tail = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
     return result;
   }
 
   Future<void> _load() async {
     final actor = _check();
+    final epoch = _visibilityEpoch;
     final raw = await _storage.read(key: _key(actor));
-    if (_currentActor() != actor) {
+    if (_currentActor() != actor || _visibilityEpoch != epoch) {
       clearVisible();
       throw const ScenarioSyncFailure('actor_changed');
     }
@@ -81,6 +92,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
 
   Future<void> _persist() async {
     final actor = _check();
+    final epoch = _visibilityEpoch;
     _journal['revoked'] = _revoked.toList();
     var encoded = jsonEncode(_journal);
     // Evict only re-fetchable cache. Pending payloads, conflicts and creation
@@ -96,7 +108,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
       throw const ScenarioSyncFailure('journal_capacity_exceeded');
     }
     await _storage.write(key: _key(actor), value: encoded);
-    if (_currentActor() != actor) {
+    if (_currentActor() != actor || _visibilityEpoch != epoch) {
       clearVisible();
       throw const ScenarioSyncFailure('actor_changed');
     }
@@ -143,13 +155,16 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   Future<Map<String, Object?>> read(String id) => _serial(() async {
     await _load();
     final actor = _check();
+    final visibilityEpoch = _visibilityEpoch;
     final revokeEpoch = _revokeEpoch[id] ?? 0;
     final result = await _invoke('scenarioQueryV1', {
       'schemaVersion': 1,
       'requestId': const Uuid().v4(),
       'scenarioId': id,
     });
-    if (_check() != actor) throw const ScenarioSyncFailure('actor_changed');
+    if (_check() != actor || _visibilityEpoch != visibilityEpoch) {
+      throw const ScenarioSyncFailure('actor_changed');
+    }
     if (result['kind'] != 'succeeded') {
       if ([
         'not_found_or_forbidden',
@@ -169,6 +184,12 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
     final entry = Map<String, Object?>.from(result['entry'] as Map);
     (_journal['cache'] as Map)[id] = entry;
     await _persist();
+    if (_check() != actor || _visibilityEpoch != visibilityEpoch) {
+      throw const ScenarioSyncFailure('actor_changed');
+    }
+    if ((_revokeEpoch[id] ?? 0) != revokeEpoch) {
+      throw const ScenarioSyncFailure('access_revoked');
+    }
     return entry;
   });
   Map<String, Object?> _base(
@@ -194,6 +215,9 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   Future<Map<String, Object?>> dispatch(Map<String, Object?> command) =>
       _serial(() async {
         await _load();
+        if (command['actorContext'] != _check()) {
+          throw const ScenarioSyncFailure('actor_changed');
+        }
         final key = command['idempotencyKey']! as String;
         final pending = _journal['pending'] as Map;
         final old = pending[key];
@@ -213,6 +237,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
       (_journal['pending'] as Map)[key] as Map,
     );
     final actor = _check(), id = command['scenarioId']! as String;
+    final visibilityEpoch = _visibilityEpoch;
     final accepting = command['commandType'] == 'accept';
     final revokeEpoch = _revokeEpoch[id] ?? 0;
     if (command['actorContext'] != actor) {
@@ -222,7 +247,9 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
       throw const ScenarioSyncFailure('access_revoked');
     }
     final result = await _invoke('scenarioCommandV1', command);
-    if (_check() != actor) throw const ScenarioSyncFailure('actor_changed');
+    if (_check() != actor || _visibilityEpoch != visibilityEpoch) {
+      throw const ScenarioSyncFailure('actor_changed');
+    }
     if ((_revokeEpoch[id] ?? 0) != revokeEpoch ||
         (_revoked.contains(id) && !accepting)) {
       throw const ScenarioSyncFailure('access_revoked');
@@ -267,6 +294,12 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
     }
     (_journal['pending'] as Map).remove(key);
     await _persist();
+    if (_check() != actor || _visibilityEpoch != visibilityEpoch) {
+      throw const ScenarioSyncFailure('actor_changed');
+    }
+    if ((_revokeEpoch[id] ?? 0) != revokeEpoch) {
+      throw const ScenarioSyncFailure('access_revoked');
+    }
     return result;
   }
 
@@ -314,6 +347,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
     required Future<CreateDraftEntity> Function() materialize,
   }) => _serial(() async {
     await _load();
+    final actor = _check(), visibilityEpoch = _visibilityEpoch;
     final pending = _journal['pending'] as Map;
     final sourceHash = sha256
         .convert(utf8.encode(canonical(source)))
@@ -350,6 +384,9 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
       throw const ScenarioSyncFailure('intent_rejected');
     }
     final draft = await materialize();
+    if (_check() != actor || _visibilityEpoch != visibilityEpoch) {
+      throw const ScenarioSyncFailure('actor_changed');
+    }
     final command = {
       ..._base(draft.id, 'expand', intentId, 0, 0),
       'draft': encode(draft),
@@ -371,12 +408,14 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   }) async {
     if (_check() != ownerId) throw const ScenarioSyncFailure('actor_changed');
     await restore();
+    if (_check() != ownerId) throw const ScenarioSyncFailure('actor_changed');
     // A persisted generation may queue an offline edit; it never grants a write.
     // Without one, obtain current server access instead of guessing generation 0.
     var entry = (_journal['cache'] as Map)[draft.id] as Map?;
     if (entry == null && expectedScenarioRevision > 0) {
       entry = await read(draft.id);
     }
+    if (_check() != ownerId) throw const ScenarioSyncFailure('actor_changed');
     final result = await dispatch({
       ..._base(
         draft.id,
@@ -424,6 +463,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
   }) async {
     if (_check() != ownerId) throw const ScenarioSyncFailure('actor_changed');
     if (type != CreateObjectType.scenario) return const [];
+    final visibilityEpoch = _visibilityEpoch;
     final entries = <Map>[];
     Object? cursor;
     do {
@@ -432,7 +472,9 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
         'requestId': const Uuid().v4(),
         if (cursor != null) 'cursor': cursor,
       });
-      if (_check() != ownerId) throw const ScenarioSyncFailure('actor_changed');
+      if (_check() != ownerId || _visibilityEpoch != visibilityEpoch) {
+        throw const ScenarioSyncFailure('actor_changed');
+      }
       if (result['kind'] != 'succeeded') {
         throw ScenarioSyncFailure('${result['code']}');
       }

@@ -4,7 +4,7 @@
 - Version: **0.4**
 - Date: **2026-10-20**
 - Spec status: **Draft — Present; owner and cross-boundary review pending**
-- Runtime status: **Partial — I1 Quick Plan and I2 Scenario persistence/collaboration Emulator implementations; publication, unlisted share, production and invited Quick Plan authority absent**
+- Runtime status: **Partial — I1 Quick Plan personal/invited viewer extension (Review) and existing Scenario Emulator scopes; broader share/publication/production gates unchanged**
 - Accountable owner: **Planning owner**
 - Coordination baseline: [BCK-02 v2.4.82](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Delivery stage: **D4 / R7**
@@ -761,3 +761,15 @@ on 2026-10-20; that amendment owns the exact rules. Summary:
 
 76. **BCK-10-AC-76:** Scenario publication and unlisted share follow the
     accepted SCN-PUB-01 decisions and run only in bounded local/LV Emulator scope.
+
+
+## 34. Owner-accepted I1 invited viewer local amendment (2026-10-20)
+
+The owner accepted the bounded contract in QUICK_PLAN_I1_SLICE_SPEC.md, section
+“I1 invited viewer extension”. It authorizes viewer-only known-user invitations,
+accept/decline/cancel/revoke/Leave, generation/status-fenced receipt replay and
+online-only invited projection through the existing Quick Plan flow. Owner edit,
+create-only import, delete and Expand remain exclusive. No new plan aggregate,
+parallel persistence, unlisted/public access, Catalog writer or production binding.
+This bounded approval does not accept BCK-10 overall or change Scenario authority.
+Implementation/evidence status follows the I1 spec; approval is not test evidence.
