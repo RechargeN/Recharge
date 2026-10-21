@@ -49,6 +49,8 @@ export const contentFlagIds = Object.freeze({
   sessionAuthoring: 'content.session.authoring',
   /** I3 / SCN-PUB-01: Emulator-only public Scenario through Content (default off). */
   scenarioAuthoring: 'content.scenario.authoring',
+  /** D3.6: Emulator-only Class / Workshop authoring through Content (default off). */
+  classWorkshopAuthoring: 'content.class_workshop.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */

@@ -1,4 +1,5 @@
 import { isRecord, isInt } from '../domain/type_rules/validation_context.js';
+import { classWorkshopPastOccurrenceIssues } from '../domain/type_rules/class_workshop_rules.js';
 import type { LinkedPlaceEligibilityPort } from './ports/linked_place_eligibility_port.js';
 import type {
   PublishedObjectMembershipPort,
@@ -703,6 +704,7 @@ export class ContentPublicationService {
       membership,
     );
     await this.assertSessionScheduleSequence(context, draft);
+    this.assertClassWorkshopFuture(draft, context.nowUtc);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
     // Early feedback only: the binding check runs where the pointer switches.
@@ -769,6 +771,7 @@ export class ContentPublicationService {
     const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
     this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal), membership);
     await this.assertSessionScheduleSequence(context, draft);
+    this.assertClassWorkshopFuture(draft, context.nowUtc);
     await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
     await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
     const references = resolved.revisions;
@@ -891,9 +894,10 @@ export class ContentPublicationService {
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
-    // D3.5 / SCN-PUB-01: revalidate the immutable target, never the mutable draft.
-    if (target.typeId === 'session' || target.typeId === 'scenario') {
-      if (canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions))
+    // D3.5/D3.6/SCN-PUB-01: revalidate the immutable target, never the draft.
+    if (target.typeId === 'session' || target.typeId === 'class_workshop' || target.typeId === 'scenario') {
+      if (target.typeId !== 'class_workshop' &&
+        canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions))
         throw new ContentDomainRefusal('source_revision_stale');
       const membership = await this.collectionMembership(
         target.typeId,
@@ -910,8 +914,7 @@ export class ContentPublicationService {
           membership?.lookup ?? this.deps.publishedObjects,
         ),
       ) ?? ['no_source_contract'];
-      if (issues.length > 0)
-        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+      this.assertSourceIssues(target.typeId, issues);
     }
     // The composition's rules apply to the target immutable body, not the draft.
     this.assertCompositionRules(
@@ -1139,6 +1142,14 @@ export class ContentPublicationService {
     return next.revision;
   }
 
+  /** D3.6 CLS-OD-04: submit and approved publish need every declared class ahead. */
+  private assertClassWorkshopFuture(draft: ContentDraft, nowUtc: UtcInstant): void {
+    if (draft.typeId !== 'class_workshop') return;
+    const issues = classWorkshopPastOccurrenceIssues(draft.body, nowUtc);
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+  }
+
   /** D3.5: authoring allocates the next schedule number; rollback never allocates. */
   private async assertSessionScheduleSequence(
     context: CommandContext,
@@ -1215,6 +1226,14 @@ export class ContentPublicationService {
    * At submit and publish the draft is exactly the submitted revision (publish
    * refuses a draft that moved on), so its body is the body being published.
    */
+  private assertSourceIssues(typeId: ContentTypeId, issues: readonly string[]): void {
+    // CW-V1 §34.5: future schemas refuse identically on all publication paths.
+    if (typeId === 'class_workshop' && issues.includes('class_workshop.schema_unsupported'))
+      throw new ContentDomainRefusal('content_type_unsupported');
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+  }
+
   private assertValid(
     entry: ContentTypeRegistryEntry,
     draft: ContentDraft,
@@ -1234,8 +1253,7 @@ export class ContentPublicationService {
       ...(entry.validate?.(draft.body, context) ?? ['no_source_contract']),
       ...(membership?.refusals ?? []),
     ];
-    if (issues.length > 0)
-      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+    this.assertSourceIssues(draft.typeId, issues);
     this.assertCompositionRules(draft.typeId, draft.body, context);
   }
 
@@ -1526,7 +1544,8 @@ export class ContentPublicationService {
     try {
       resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
     } catch (error) {
-      if (typeId === 'session') throw new ContentDomainRefusal('policy_unavailable');
+      if (typeId === 'session' || typeId === 'class_workshop')
+        throw new ContentDomainRefusal('policy_unavailable');
       throw error;
     }
     if (!resolution.ok) throw new ContentDomainRefusal(resolution.code);

@@ -11,6 +11,7 @@ import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
 import 'session_create_coordinator.dart';
+import 'class_workshop_create_coordinator.dart';
 import 'location_search_config.dart';
 import '../domain/repositories/location_search_repository.dart';
 import 'scenario_create_coordinator.dart';
@@ -55,6 +56,7 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     runtimeDefaults: sl<CreateRuntimeDefaults>(),
     eventCreateCoordinator: sl<EventCreateCoordinator>(),
     sessionCreateCoordinator: sl<SessionCreateCoordinator>(),
+    classWorkshopCreateCoordinator: sl<ClassWorkshopCreateCoordinator>(),
     locationSearchRepository: sl<LocationSearchRepository>(),
     locationSearchConfig: sl<LocationSearchRuntimeConfig>(),
     eventAdmissionConfigurationEnabled: true,

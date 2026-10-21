@@ -56,8 +56,9 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     const rental = input.typeId === 'rental';
     const collection = input.typeId === 'collection';
     const session = input.typeId === 'session';
+    const classWorkshop = input.typeId === 'class_workshop';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
-    if ((activity || rental || collection || session) && !taxonomy.ok)
+    if ((activity || rental || collection || session || classWorkshop) && !taxonomy.ok)
       return Promise.resolve({ ok: false, code: 'policy_unavailable' });
     const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
     return Promise.resolve({
@@ -66,7 +67,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity || rental || collection || session
+          : activity || rental || collection || session || classWorkshop
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
@@ -84,21 +85,22 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
                 : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
                     'activity',
                   ) ?? false)
-              : typeId === 'session'
+              : typeId === 'session' || typeId === 'class_workshop'
                 ? dataset === undefined
                   ? undefined
                   : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
-                      'session',
+                      typeId,
                     ) ?? false)
                 : typeId === 'collection'
                   ? collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
                   : true,
         requiredCriteria: (typeId: string, categoryId: string, subcategoryId: string) => {
           if (typeId === 'place') return placeRequiredCriteria(categoryId, subcategoryId);
-          if (typeId !== 'activity') return [];
+          // D3.6 CLS-OD-06: Class required criteria block like Activity's.
+          if (typeId !== 'activity' && typeId !== 'class_workshop') return [];
           if (dataset === undefined) return undefined;
           const pair = taxonomyPair(dataset, categoryId, subcategoryId);
-          if (!pair?.applicableTypes.includes('activity')) return [];
+          if (!pair?.applicableTypes.includes(typeId)) return [];
           return dataset.profiles.find((profile) => profile.id === pair.profileId)
             ?.requiredFieldIds;
         },

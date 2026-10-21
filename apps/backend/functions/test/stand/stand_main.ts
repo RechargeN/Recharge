@@ -63,6 +63,39 @@ async function main(args: readonly string[]): Promise<void> {
 `);
     return;
   }
+  if (command === 'class-workshop') {
+    // D3.6: loaded only for this command, like the Session command.
+    const { seedContentClassWorkshop, standClassWorkshopStatus, verifyStandClassWorkshop } =
+      await import('./stand_content_class_workshop.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentClassWorkshop(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(
+        `${reused ? 'reused' : 'seeded'} class-workshop=${manifest.contentId}\n`,
+      );
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandClassWorkshop(firestore);
+      if (problems.length > 0)
+        throw new Error(`class-workshop invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified class-workshop invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentClassWorkshop;
+      if (manifest === undefined) throw new Error('stand Class / Workshop is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standClassWorkshopStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: class-workshop seed | verify | manifest | status');
+  }
   if (command === 'scenario') {
     // I3: loaded only for this command, like the other typed seeds.
     const { seedContentScenario, standScenarioStatus, verifyStandScenario } =

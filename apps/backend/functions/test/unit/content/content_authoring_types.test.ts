@@ -64,7 +64,7 @@ void test('each authoring flag enables exactly its own type', () => {
 void test('the Emulator authoring list is Event, Place, Activity, Rental and Collection, each with an available validator', () => {
   assert.deepEqual(
     [...emulatorAuthoringTypes],
-    ['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario'],
+    ['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario', 'class_workshop'],
   );
   for (const typeId of emulatorAuthoringTypes) {
     const entry = resolveContentType(typeId);
@@ -73,7 +73,7 @@ void test('the Emulator authoring list is Event, Place, Activity, Rental and Col
   assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set()));
   assert.doesNotThrow(() =>
     assertEmulatorAuthoringTypes(
-      new Set(['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario']),
+      new Set(['event', 'place', 'activity', 'rental', 'collection', 'session', 'scenario', 'class_workshop']),
     ),
   );
 });
@@ -88,7 +88,7 @@ void test('no other type can be enabled, with or without a validator', () => {
     );
   }
   // Types without a validator are unavailable in the registry as well.
-  for (const typeId of ['route', 'find_people', 'class_workshop'] as const) {
+  for (const typeId of ['route', 'find_people'] as const) {
     const entry = resolveContentType(typeId);
     assert.ok(entry !== null && !isContentTypeAvailable(entry));
   }
@@ -121,4 +121,22 @@ void test('D3.5 Session flag is independent and absent means off', () => {
   assert.deepEqual([...authoringTypesFor(flags)], []);
   assert.deepEqual([...authoringTypesFor({ ...flags, sessionAuthoring: true })], ['session']);
   assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set(['session'])));
+});
+
+void test('D3.6 Class flag is independent and absent means off', () => {
+  const flags = {
+    eventAuthoring: false,
+    placeAuthoring: false,
+    activityAuthoring: false,
+    rentalAuthoring: false,
+    collectionAuthoring: false,
+    sessionAuthoring: true,
+  };
+  assert.deepEqual([...authoringTypesFor(flags)], ['session']);
+  assert.deepEqual([...authoringTypesFor({ ...flags, sessionAuthoring: false })], []);
+  assert.deepEqual(
+    [...authoringTypesFor({ ...flags, sessionAuthoring: false, classWorkshopAuthoring: true })],
+    ['class_workshop'],
+  );
+  assert.doesNotThrow(() => assertEmulatorAuthoringTypes(new Set(['class_workshop'])));
 });

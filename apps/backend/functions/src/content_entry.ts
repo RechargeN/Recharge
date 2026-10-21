@@ -47,6 +47,7 @@ export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   'session',
   // I3 / SCN-PUB-01: public Scenario pinned to an immutable BCK-10 revision.
   'scenario',
+  'class_workshop',
 ]);
 
 /** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
@@ -58,6 +59,7 @@ export function authoringTypesFor(flags: {
   readonly collectionAuthoring?: boolean;
   readonly sessionAuthoring?: boolean;
   readonly scenarioAuthoring?: boolean;
+  readonly classWorkshopAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
@@ -67,6 +69,7 @@ export function authoringTypesFor(flags: {
     ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
     ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
     ...(flags.scenarioAuthoring === true ? (['scenario'] as const) : []),
+    ...(flags.classWorkshopAuthoring === true ? (['class_workshop'] as const) : []),
   ]);
 }
 

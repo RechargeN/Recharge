@@ -20,7 +20,9 @@ import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'session_draft_mapper.dart';
+import 'class_workshop_draft_mapper.dart';
 import '../../domain/entities/session_draft_data.dart';
+import '../../domain/entities/class_workshop_draft_data.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -237,6 +239,10 @@ class CreateDraftModel {
         entity.sessionData!,
       );
     }
+    if (entity.classWorkshopData != null) {
+      serializedSections['class_workshop_details'] =
+          ClassWorkshopDraftMapper.toJson(entity.classWorkshopData!);
+    }
     if (entity.collectionData != null) {
       serializedSections['collection_details'] = CollectionDraftMapper.toJson(
         entity.collectionData!,
@@ -435,6 +441,26 @@ class CreateDraftModel {
             ),
           )
         : null;
+    final Object? classWorkshopPayload =
+        migratedSectionData['class_workshop_details'];
+    // D3.6: a typed Class draft is read losslessly; a generic legacy Class
+    // draft gets empty typed defaults and keeps its legacy slots untouched. A
+    // newer schema stays raw in sectionData (guarded read-only, spec §7.4).
+    ClassWorkshopDraftData? classWorkshopData;
+    if (parsedObjectType == CreateObjectType.classWorkshop) {
+      try {
+        classWorkshopData = classWorkshopPayload is Map<String, Object?>
+            ? ClassWorkshopDraftMapper.fromJson(
+                classWorkshopPayload,
+                defaultTimezoneId: timezone,
+              )
+            : classWorkshopPayload == null
+            ? ClassWorkshopDraftData.defaults(timezoneId: timezone)
+            : null;
+      } on UnsupportedClassWorkshopSchemaException {
+        classWorkshopData = null;
+      }
+    }
     final Object? sessionPayload = migratedSectionData['session_details'];
     final SessionDraftData? sessionData =
         parsedObjectType != CreateObjectType.session
@@ -529,6 +555,7 @@ class CreateDraftModel {
       collectionData: collectionData,
       rentalData: rentalData,
       sessionData: sessionData,
+      classWorkshopData: classWorkshopData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),

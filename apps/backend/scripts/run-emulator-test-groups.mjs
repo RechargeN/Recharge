@@ -149,6 +149,16 @@ export const emulatorTestGroups = Object.freeze([
     ],
   },
   {
+    // D3.6 (D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md §6.3): Class / Workshop.
+    name: "class-workshop",
+    baselineMs: 120000,
+    timeoutMs: 390000,
+    tasks: [
+      ["lib/test/emulator/content_class_workshop_callable.test.js"],
+      ["lib/test/emulator/content_class_workshop_emulator_flow.test.js"],
+    ],
+  },
+  {
     // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §4): import rollback and
     // cleanup races on real Firestore transactions.
     name: "import",

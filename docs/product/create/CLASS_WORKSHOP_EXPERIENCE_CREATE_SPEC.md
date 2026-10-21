@@ -1,9 +1,17 @@
 # CLASS / WORKSHOP / EXPERIENCE CREATE — полная логика блока
 
-Статус: **Full-product specification — Ready for approval**  
-Версия: 1.1  
-Дата: 2026-07-18  
+Статус: **v1.2 — §2.6 и §34 (CW-V1) Approved slice spec по решению владельца
+2026-10-19; §1–§33 — Full-product specification, Ready for approval**\
+Версия: 1.2 (1.1 — 2026-07-18)\
+Дата: 2026-10-19\
 Область: полная production-логика `classWorkshop` в едином Create Hub
+
+> **v1.2 (2026-10-19).** Владелец явно принял рекомендации
+> [D3.6 §1](../D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md) CLS-OD-01…10:
+> §2.6 (вариант A) и §34 CW-V1 — Approved slice spec. Полный продукт
+> §1–§33 этим решением не утверждается. План D3.6 §6 и Event Classification
+> 2.2.4 приняты владельцем отдельно 2026-10-19; реализация — default-off,
+> только local/LV Emulator. Записи решений — §34.8.
 
 > Документ описывает полноценный действующий продукт без искусственного
 > ограничения MVP-срезом. Он не утверждает, что перечисленные возможности уже
@@ -287,6 +295,41 @@ UI может показать ненавязчивую рекомендацию
 Первый Create flow создаёт Offering и минимум один публикуемый Cohort либо
 on-demand access configuration. Следующие cohorts создаются из Offering без
 дублирования описания. Все связи используют immutable ID.
+
+### 2.6 Граница с Event Classification (v1.2 Approved, CLS-OD-01)
+
+[Event Classification v2.2.3](../EVENT_CLASSIFICATION_SPEC.md) (Accepted)
+имеет Event-архетипы `class_session` и `workshop` и в §1/§1.2 не называет
+Class / Workshop смежным типом. Порядок §2.4 этого документа не может
+переопределить Accepted-контракт. Владелец выбрал вариант A (2026-10-19);
+в Event Classification он вступает только ревизией 2.2.4, которую владелец
+принимает отдельно; ревизия 2.2.4 принята 2026-10-19.
+
+Вариант A:
+
+1. `class_workshop` — тот же единственный Create-тип и Content type
+   из принятой десятки; новый aggregate не создаётся. `classWorkshop`
+   (enum), `CreateObjectType.classWorkshop` и `class_workshop` (wire) —
+   одно понятие.
+2. Тип выбирает Creator; категория тип не выбирает (Event Classification
+   §6.1). Подкатегории `workshops_masterclasses` разрешают `[E, C, S]`.
+   Автоматическая смена типа и перенос данных запрещены.
+3. Class / Workshop — самостоятельное учебное предложение Publisher'а:
+   обязательны outcomes и instructor, расписание — объявленные occurrences.
+4. Event с archetype `workshop`/`class_session` — занятие как организованное
+   событие или часть Event-программы (Program Item/child Event). Его
+   admission, inventory и Booking следуют ECL, а не этому документу.
+5. Class не хранит Event archetype, admission, ECL-03 inventory или
+   `childEventRef`; Event не хранит outcomes/curriculum/instructor Class.
+   Связь между ними — только по ID, без копирования моделей.
+
+Строки для Event Classification 2.2.4 §1.2 (вносит владелец отдельной ревизией):
+
+| Ситуация | Канонический тип |
+|---|---|
+| «Курс керамики: 4 занятия, программа, ведущий; Publisher продаёт как учебное предложение» | Class / Workshop |
+| «Мастер-класс по керамике в программе фестиваля» | Event + Program Item либо child Event (`workshop`) |
+| «Гончарный круг можно забронировать на любой свободный час» | Bookable Session |
 
 ## 3. Taxonomy и dynamic criteria
 
@@ -2264,3 +2307,199 @@ contract, load, security и reconciliation gates. До завершения ак
 
 Feature flag или phased rollout может ограничить аудиторию, но не позволяет
 объявить capability готовой без её собственных критериев Product Ready.
+
+## 34. CW-V1 — bounded typed Create contract (v1.2, Approved slice spec)
+
+Раздел задаёт минимальное подмножество для T2/D3.6. Он не урезает полный
+продукт §30: остальные возможности остаются целевыми и требуют своих slices.
+Числовые лимиты, которых не было в v1.1, приняты владельцем 2026-10-19
+(CLS-OD-03) и закреплены здесь как значения CW-V1.
+
+### 34.1 Границы CW-V1
+
+CW-V1 зеркалит Approved read-контракт DTL-CLS-01 §3, чтобы каждое
+опубликованное значение имело честное место в Details и ничего не
+сплющивалось:
+
+- одно Offering и один контекст показа; Cohort aggregate не создаётся;
+- `single_class` — ровно одна occurrence; `fixed_series` — от двух явных
+  occurrences; recurrence rule, rolling и on-demand не поддерживаются;
+- один IANA timezone на контекст, один primary instructor, одна public
+  location variant;
+- delivery `offline | online_live | hybrid`;
+- цена `not_provided | free | fixed` с явным scope;
+- запись — только внешняя HTTPS-ссылка или information-only;
+- personal publisher (CLS-OD-05).
+
+Не входят: inventory, holds, Booking, waitlist, approval, Payments,
+material add-ons и `materialsPolicy`, waiver, guardian и структурированный
+возраст (CLS-OD-07), learning resources/progress/certificates,
+collaborators, page publisher, состояние «расписание не объявлено»
+(read-состояние DTL `notAnnounced` в CW-V1 не публикуется: §2.1 п.4 и §14
+п.9 требуют конкретного расписания).
+
+### 34.2 Канонический тип
+
+`classWorkshop` (Category System) = `CreateObjectType.classWorkshop`
+(mobile) = `class_workshop` (wire, Content type, deep link). Отдельного
+aggregate для Event-архетипов не создаётся (§2.6).
+
+### 34.3 Wire body
+
+Конверт — как у принятых D3 типов: общие camelCase поля и типовой payload
+под ключом type ID со snake_case внутри.
+
+```yaml
+title: string
+shortDescription: string
+fullDescription: string
+contentLocale: languageTag
+categoryId: string              # applicability C в текущей reference revision
+subcategoryId: string
+tags: [string]                  # общий Content contract, без нового лимита
+criteria: { fieldId: value }    # только активный profile
+location:                       # offline/hybrid; отсутствует для online_live
+  countryCode, city, venueName, addressLine1,
+  latitude, longitude, pinConfirmed: true
+media:
+  coverImage: { mediaId, altText: { languageTag: string } }
+  gallery: [{ mediaId, altText }]
+  rightsConfirmed: true
+class_workshop:
+  schema_version: 1
+  offering_kind: class | workshop | masterclass | course | experience
+  context_kind: single_class | fixed_series
+  delivery_format: offline | online_live | hybrid
+  public_location_mode: point | area_only        # offline/hybrid
+  safe_area_label: string?                       # обязателен для area_only
+  online_provider_label: string?                 # обязателен для online_live
+  timezone_id: IANA
+  timezone_confirmed: true
+  dst_policy_version: 1
+  occurrences:
+    - id: UUID/ULID (stable)
+      local_date: YYYY-MM-DD
+      start_minute_local: 0..1439
+      end_minute_local: 1..1440
+      fold: earlier | later | null               # только для DST overlap
+      start_at_utc: timestamp
+      end_at_utc: timestamp
+      title: string?
+  instructor:
+    same_as_publisher: boolean
+    display_name: string?                        # обязателен при false
+    short_bio: string?                           # обязателен при false и для masterclass
+  learning:
+    outcomes: [string]
+    modules: [{ id: UUID/ULID, title: string }]
+    prerequisites: { mode: none | listed, items: [string] }
+    take_home_result: string?                    # обязателен для workshop/masterclass/experience
+  included_materials: [string]
+  requirements: [string]
+  declared_group_limit: integer?
+  price:
+    mode: not_provided | free | fixed
+    amount_minor: integer?                       # только fixed
+    currency_code: ISO 4217?                     # только fixed, валюта market
+    scope: per_person_per_class | per_person_full_series   # только fixed
+  enrollment:
+    mode: external | information_only
+    external_url: https URL?                     # только external
+    information_reason: closed | on_site | not_provided    # только information_only
+```
+
+### 34.4 Поля, обязательность, defaults и семантика
+
+| Поле | Правило | Источник | Mobile default | Публично |
+|---|---|---|---|---|
+| title | 3–100 после trim, не только emoji/URL | §8.2 | пусто | да |
+| shortDescription | 20–180 | §8.2 | пусто | да |
+| fullDescription | 50–10 000 | §8.2 | пусто | да |
+| category/subcategory | applicability `C` | §3.1 | `workshops_masterclasses / workshop` | да |
+| criteria | required-поля profile блокируют | §3.2, CLS-OD-06 | по profile | по allowlist profile |
+| offering_kind | один из пяти | §2.2 | не выбран | да (DTL kind) |
+| context_kind | single_class: 1 occurrence; fixed_series: 2…60 | §10.3, DTL §3.3 | single_class | да |
+| delivery_format | location/online поля только по формату | §10.1–10.2 | offline | да |
+| location | offline/hybrid: адрес, finite geo, `pinConfirmed: true` | §10.2 | из runtime config, pin не подтверждён | point; area_only — только label |
+| online_provider_label | 2–60; без meeting URL/secret | §10.1, DTL §3.4 | пусто | да |
+| timezone | IANA, явное подтверждение | §10.4 | из runtime config, `confirmed: false` | да |
+| occurrences | сортированы, уникальны, без пересечений, end > start, длительность 15–720 мин, без multi-day | §10.4 | одна пустая | id/start/end/tz/title |
+| DST | gap — отказ; overlap — нужен `fold`; UTC пересчитывается сервером | §10.4, CLS-OD-04 | нет | нет (`fold` приватен) |
+| instructor | same_as_publisher либо name 2–80 + bio 20–500; verified — только сервер | §4.3, §9.3 | `true` | да, без verification Publisher |
+| outcomes | 1…10, 3–160 | §9.1 | пусто | да |
+| modules | 1…20 заголовков 3–120, stable ID | §9.1, §14 п.7 | пусто | нет в DTL v0.2 — хранится в revision, вывод в Details требует ревизии read-контракта |
+| prerequisites | явный выбор none/listed | §11.2 | не выбран | listed → requirements |
+| take_home_result | обязателен по kind | §9.2 | пусто | нет в DTL v0.2 — как modules |
+| included_materials / requirements | 0…20, 2–120 | §11.3 | пусто | да |
+| declared_group_limit | null или 1…500; не inventory | §11.1, DTL §3.1 | null | да, как объявленный размер группы |
+| price | default `not_provided`, не free; fixed — positive minor units, валюта market; single_class только per_person_per_class | §11.4, DTL §3.5 | not_provided | да |
+| enrollment.external_url | HTTPS, без user-info, safety check | §11.6, DTL §4 | нет | да |
+| enrollment.information_reason | closed / on_site / not_provided; `unsupported_internal` не создаётся | DTL §4 | not_provided | да |
+| media | ready cover, alt text, rights confirmation; gallery 0…10 | §8.3 | пусто | cover/gallery URL |
+
+Производные значения (`durationMinutes`, `durationScope`, `minorUnitDigits`,
+`displayContextId`) вычисляет сервер или read-адаптер, клиент их не задаёт.
+Client claims (verified, owner, publisher, availability, capacity,
+attendance, booking/payment state) в body отсутствуют; их наличие — unknown
+field и отказ.
+
+### 34.5 Неизвестные, будущие и legacy поля
+
+- Каждый объект проверяется exact allowlist: неизвестный ключ — отказ
+  `validation_failed` с путём; молчаливого удаления нет.
+- `schema_version` ≠ 1 — `content_type_unsupported`, без fallback.
+- Generic legacy (`eventSlots`, `bookingLink`, organizer-поля,
+  `scheduleSlots`) не конвертируется: mobile показывает явный отказ, сервер
+  отклоняет как unknown. Исходный draft не перезаписывается.
+- Mobile persistence mirror сохраняет нераспознанные поля; повторный typed
+  parse не теряет их, конфликт — явный отказ без перезаписи оригинала.
+
+### 34.6 Обязательные shared fixtures
+
+Positive: single offline; fixed_series hybrid area_only; online_live без
+location; free; fixed per class и full series; external и information_only;
+отдельный instructor; DST overlap с `fold`.
+
+Negative (по одному нарушению): неизвестный top-level и nested ключ;
+`schema_version: 2`; категория без `C`; пустые required criteria; single с
+двумя occurrences; fixed_series с одной; пересечение; end ≤ start;
+длительность вне bounds; DST gap; overlap без `fold`; UTC не совпадает с
+local+tz; прошедшая occurrence; online_live с location; offline без pin; HTTP
+или user-info URL; fixed без валюты, с чужой валютой или с нулём; free с
+amount; single_class с per_person_full_series; masterclass без bio; workshop
+без take_home_result; legacy `eventSlots`; client claim `spotsLeft`/`verified`.
+
+### 34.7 Связь с остальным документом
+
+CW-V1 не меняет §1–§33. Расширение до cohorts, recurrence, inventory,
+commerce или learning — отдельные slices по §32 с собственными решениями,
+ADR и ревизией read-контракта DTL-CLS-01.
+
+### 34.8 Решения владельца — 2026-10-19
+
+Источник — явное решение владельца в чате T2, записанное в
+[D3.6 §1](../D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md):
+
+> «Как владелец принимаю рекомендации D3.6 §1 по CLS-OD-01…10 (вариант A и предложенные значения OD). Запиши решения, переведи документы по CLS-OD-10 и остановись до принятия плана.»
+
+Приняты рекомендации CLS-OD-01…10 без изменений:
+
+1. `class_workshop` — тот же Create/Content type; вариант A §2.6.
+2. Подмножество CW-V1 §34.1, включая соответствия для masterclass
+   (`short_bio`), experience (`take_home_result`) и curriculum (modules).
+3. Числовые лимиты §34.4.
+4. Время и DST: сервер пересчитывает UTC, gap — отказ, overlap — `fold`,
+   все occurrences в будущем на submit/publish, хотя бы одна будущая на
+   activate.
+5. Только personal publisher.
+6. `C` applicability; required criteria блокируют; язык и уровень — из
+   criteria.
+7. Структурированный возраст, guardian и waiver не входят в CW-V1.
+8. Catalog/Discover исключены; Collection evaluator может вернуть eligible.
+9. Typed local Create block и Q4 publication в существующем form engine.
+10. Сначала docs-only checkpoint, затем остановка до принятия плана D3.6 §6.
+
+Эти решения сами не разрешали runtime и не утверждают §1–§33. Затем
+владелец отдельно принял план D3.6 §6 и Event Classification 2.2.4
+(«все принимаю, реалищзовывай»); bounded реализация CW-V1 разрешена только default-off в local/LV
+Emulator. Commit, push, deploy не разрешены.

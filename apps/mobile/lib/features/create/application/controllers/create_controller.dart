@@ -1,6 +1,11 @@
 import '../../domain/usecases/build_session_content_body.dart';
 import 'dart:async';
 
+import '../class_workshop_create_coordinator.dart';
+import '../../domain/entities/class_workshop_draft_data.dart';
+import '../../domain/entities/class_workshop_validation_issue.dart';
+import '../../domain/usecases/build_class_workshop_content_body.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -136,6 +141,7 @@ class CreateController extends ChangeNotifier {
     ScenarioGenerationCoordinator? scenarioGenerationCoordinator,
     PlaceEnrichmentCoordinator? placeEnrichmentCoordinator,
     SessionCreateCoordinator? sessionCreateCoordinator,
+    ClassWorkshopCreateCoordinator? classWorkshopCreateCoordinator,
     LocationSearchRepository? locationSearchRepository,
     LocationSearchRuntimeConfig locationSearchConfig =
         const LocationSearchRuntimeConfig(),
@@ -195,6 +201,7 @@ class CreateController extends ChangeNotifier {
        _scenarioGenerationCoordinator = scenarioGenerationCoordinator,
        _placeEnrichmentCoordinator = placeEnrichmentCoordinator,
        _sessionCreateCoordinator = sessionCreateCoordinator,
+       _classWorkshopCreateCoordinator = classWorkshopCreateCoordinator,
        _locationSearchRepository = locationSearchRepository,
        _locationSearchConfig = locationSearchConfig,
        _catalogObjectPicker = catalogObjectPicker,
@@ -236,6 +243,7 @@ class CreateController extends ChangeNotifier {
   final ScenarioGenerationCoordinator? _scenarioGenerationCoordinator;
   final PlaceEnrichmentCoordinator? _placeEnrichmentCoordinator;
   final SessionCreateCoordinator? _sessionCreateCoordinator;
+  final ClassWorkshopCreateCoordinator? _classWorkshopCreateCoordinator;
   final LocationSearchRepository? _locationSearchRepository;
   final LocationSearchRuntimeConfig _locationSearchConfig;
   int _placeLocationRequestSerial = 0;
@@ -544,6 +552,16 @@ class CreateController extends ChangeNotifier {
         incrementRevision: false,
       );
     }
+    if (draft.objectType == CreateObjectType.classWorkshop &&
+        _classWorkshopCreateCoordinator != null) {
+      final classWorkshop = _classWorkshopCreateCoordinator.ensureData(
+        draft,
+        timezoneId: draft.timezone,
+      );
+      if (classWorkshop != null) {
+        draft = _classWorkshopCreateCoordinator.apply(draft, classWorkshop);
+      }
+    }
     if (draft.objectType == CreateObjectType.scenario &&
         draft.scenarioData == null) {
       draft = draft.copyWith(scenarioData: _scenarioDefaults());
@@ -835,6 +853,13 @@ class CreateController extends ChangeNotifier {
                   ))
             : null,
         clearSessionData: type != CreateObjectType.session,
+        classWorkshopData: type == CreateObjectType.classWorkshop
+            ? (_state.draft.classWorkshopData ??
+                  ClassWorkshopDraftData.defaults(
+                    timezoneId: _runtimeDefaults.timezone,
+                  ))
+            : null,
+        clearClassWorkshopData: type != CreateObjectType.classWorkshop,
         collectionData: type == CreateObjectType.collection
             ? (_state.draft.collectionData ?? _collectionDefaults())
             : null,
@@ -3499,6 +3524,281 @@ class CreateController extends ChangeNotifier {
       timezoneId: _runtimeDefaults.timezone,
     );
     _updateDraft(coordinator.apply(_state.draft, change(data)));
+  }
+
+  // --- D3.6 Class / Workshop (CW-V1) ---
+
+  ClassWorkshopCreateCoordinator? get classWorkshopCoordinator =>
+      _classWorkshopCreateCoordinator;
+
+  /// Local readiness gaps; the server validator stays the authority.
+  List<ClassWorkshopValidationIssue> get classWorkshopIssues =>
+      _classWorkshopCreateCoordinator?.validate(
+        _state.draft,
+        rightsConfirmed: classWorkshopMediaMetadata['rightsConfirmed'] == true,
+      ) ??
+      const <ClassWorkshopValidationIssue>[];
+
+  void _updateClassWorkshop(
+    ClassWorkshopDraftData Function(ClassWorkshopDraftData) change,
+  ) {
+    final coordinator = _classWorkshopCreateCoordinator;
+    if (coordinator == null ||
+        _state.draft.objectType != CreateObjectType.classWorkshop) {
+      return;
+    }
+    final data = coordinator.ensureData(
+      _state.draft,
+      timezoneId: _runtimeDefaults.timezone,
+    );
+    // An unreadable newer payload stays read-only (spec §7.4).
+    if (data == null) return;
+    _updateDraft(coordinator.apply(_state.draft, change(data)));
+  }
+
+  String _classWorkshopLocalId() =>
+      'loc_class_${DateTime.now().microsecondsSinceEpoch}_${_localIdCounter++}';
+
+  void setClassWorkshopOfferingKind(ClassWorkshopOfferingKind value) =>
+      _updateClassWorkshop((d) => d.copyWith(offeringKind: value));
+  void setClassWorkshopContextKind(ClassWorkshopContextKind value) =>
+      _updateClassWorkshop((d) => d.copyWith(contextKind: value));
+  void setClassWorkshopDeliveryFormat(ClassWorkshopDeliveryFormat value) =>
+      _updateClassWorkshop((d) => d.copyWith(deliveryFormat: value));
+  void setClassWorkshopLocationMode(ClassWorkshopLocationMode value) =>
+      _updateClassWorkshop((d) => d.copyWith(locationMode: value));
+  void setClassWorkshopSafeAreaLabel(String value) =>
+      _updateClassWorkshop((d) => d.copyWith(safeAreaLabel: value));
+  void setClassWorkshopOnlineProviderLabel(String value) =>
+      _updateClassWorkshop((d) => d.copyWith(onlineProviderLabel: value));
+  void confirmClassWorkshopTimezone(String value) => _updateClassWorkshop(
+    (d) => d.copyWith(timezoneId: value, timezoneConfirmed: true),
+  );
+  void addClassWorkshopOccurrence({
+    required String localDate,
+    required int startMinuteLocal,
+    required int endMinuteLocal,
+  }) => _updateClassWorkshop(
+    (d) => _classWorkshopCreateCoordinator!.addOccurrence(
+      d,
+      id: _classWorkshopLocalId(),
+      localDate: localDate,
+      startMinuteLocal: startMinuteLocal,
+      endMinuteLocal: endMinuteLocal,
+    ),
+  );
+  void removeClassWorkshopOccurrence(String id) => _updateClassWorkshop(
+    (d) => _classWorkshopCreateCoordinator!.removeOccurrence(d, id),
+  );
+  void setClassWorkshopFold(String id, ClassWorkshopFold? fold) =>
+      _updateClassWorkshop(
+        (d) => _classWorkshopCreateCoordinator!.setFold(d, id, fold),
+      );
+  void setClassWorkshopInstructor({
+    bool? sameAsPublisher,
+    String? displayName,
+    String? shortBio,
+  }) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      instructor: d.instructor.copyWith(
+        sameAsPublisher: sameAsPublisher,
+        displayName: displayName,
+        shortBio: shortBio,
+      ),
+    ),
+  );
+  void setClassWorkshopOutcomes(String lines) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      outcomes: ClassWorkshopCreateCoordinator.linesToItems(lines),
+    ),
+  );
+  void setClassWorkshopModules(String lines) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      modules: ClassWorkshopCreateCoordinator.titlesToModules(
+        d.modules,
+        lines,
+        _classWorkshopLocalId,
+      ),
+    ),
+  );
+  void setClassWorkshopPrerequisites({required bool listed, String? lines}) =>
+      _updateClassWorkshop(
+        (d) => d.copyWith(
+          prerequisitesListed: listed,
+          prerequisites: listed && lines != null
+              ? ClassWorkshopCreateCoordinator.linesToItems(lines)
+              : (listed ? d.prerequisites : const <String>[]),
+        ),
+      );
+  void setClassWorkshopTakeHomeResult(String value) =>
+      _updateClassWorkshop((d) => d.copyWith(takeHomeResult: value));
+  void setClassWorkshopIncludedMaterials(String lines) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      includedMaterials: ClassWorkshopCreateCoordinator.linesToItems(lines),
+    ),
+  );
+  void setClassWorkshopRequirements(String lines) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      requirements: ClassWorkshopCreateCoordinator.linesToItems(lines),
+    ),
+  );
+  void setClassWorkshopGroupLimit(int? value) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      declaredGroupLimit: value,
+      clearDeclaredGroupLimit: value == null,
+    ),
+  );
+  void setClassWorkshopPriceNotProvided() => _updateClassWorkshop(
+    (d) => d.copyWith(price: ClassWorkshopPrice.notProvided),
+  );
+  void setClassWorkshopPriceFree() => _updateClassWorkshop(
+    (d) => d.copyWith(
+      price: const ClassWorkshopPrice(mode: ClassWorkshopPriceMode.free),
+    ),
+  );
+
+  /// The market currency comes from the Create runtime, never the widget.
+  void setClassWorkshopPriceFixed({
+    required int amountMinor,
+    required ClassWorkshopPriceScope scope,
+  }) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      price: ClassWorkshopPrice(
+        mode: ClassWorkshopPriceMode.fixed,
+        amountMinor: amountMinor,
+        currencyCode: _runtimeDefaults.currency,
+        scope: scope,
+      ),
+    ),
+  );
+  void setClassWorkshopExternalEnrollment(String url) => _updateClassWorkshop(
+    (d) => d.copyWith(
+      enrollment: ClassWorkshopEnrollment(
+        mode: ClassWorkshopEnrollmentMode.external,
+        externalUrl: url,
+      ),
+    ),
+  );
+  void setClassWorkshopInformationOnly(ClassWorkshopInformationReason reason) =>
+      _updateClassWorkshop(
+        (d) => d.copyWith(
+          enrollment: ClassWorkshopEnrollment(informationReason: reason),
+        ),
+      );
+
+  /// The Creator's explicit removal of a generic legacy schedule; it is never
+  /// dropped silently (CW-V1 §34.5).
+  void clearClassWorkshopLegacySchedule() {
+    if (_state.draft.objectType != CreateObjectType.classWorkshop) return;
+    _updateDraft(
+      _state.draft.copyWith(
+        scheduleSlots: const <CreateTimeSlotDraft>[],
+        updatedAtUtc: DateTime.now().toUtc(),
+      ),
+    );
+    // The envelope follows the declared classes again.
+    _updateClassWorkshop((d) => d);
+  }
+
+  Map<String, Object?> get classWorkshopMediaMetadata =>
+      _state.draft.sectionData[ClassWorkshopContentBodyMapper.mediaSection]
+          is Map<String, Object?>
+      ? Map<String, Object?>.from(
+          _state.draft.sectionData[ClassWorkshopContentBodyMapper.mediaSection]!
+              as Map<String, Object?>,
+        )
+      : <String, Object?>{};
+
+  String get classWorkshopContentLocale {
+    final value = classWorkshopMediaMetadata['contentLocale'];
+    return value is String && supportedContentLocales.contains(value)
+        ? value
+        : _runtimeDefaults.defaultContentLocale;
+  }
+
+  String classWorkshopMediaAltText([String? reference]) {
+    final metadata = classWorkshopMediaMetadata;
+    final gallery = metadata['galleryAltText'];
+    final alt = reference == null
+        ? metadata['coverAltText']
+        : gallery is Map
+        ? gallery[reference]
+        : null;
+    return alt is Map && alt[classWorkshopContentLocale] is String
+        ? alt[classWorkshopContentLocale] as String
+        : '';
+  }
+
+  void updateClassWorkshopMediaMetadata({
+    String? locale,
+    String? coverAltText,
+    bool? rightsConfirmed,
+    String? galleryRef,
+    String? galleryAltText,
+  }) {
+    if (_state.draft.objectType != CreateObjectType.classWorkshop) return;
+    if (locale != null && !supportedContentLocales.contains(locale)) return;
+    final metadata = classWorkshopMediaMetadata;
+    final selected = locale ?? classWorkshopContentLocale;
+    metadata['contentLocale'] = selected;
+    if (rightsConfirmed != null) metadata['rightsConfirmed'] = rightsConfirmed;
+    if (coverAltText != null) {
+      final raw = metadata['coverAltText'];
+      metadata['coverAltText'] = <String, Object?>{
+        if (raw is Map<String, Object?>) ...raw,
+        selected: coverAltText,
+      };
+    }
+    if (galleryRef != null && galleryAltText != null) {
+      final raw = metadata['galleryAltText'];
+      final gallery = <String, Object?>{
+        if (raw is Map<String, Object?>) ...raw,
+      };
+      final prior = gallery[galleryRef];
+      gallery[galleryRef] = <String, Object?>{
+        if (prior is Map<String, Object?>) ...prior,
+        selected: galleryAltText,
+      };
+      metadata['galleryAltText'] = gallery;
+    }
+    _updateDraft(
+      _state.draft.copyWith(
+        sectionData: <String, Object?>{
+          ..._state.draft.sectionData,
+          ClassWorkshopContentBodyMapper.mediaSection: metadata,
+        },
+      ),
+    );
+  }
+
+  /// Explicit pin confirmation of exactly this point and address.
+  void confirmClassWorkshopLocation({
+    required String latitude,
+    required String longitude,
+  }) {
+    final lat = double.tryParse(latitude);
+    final lng = double.tryParse(longitude);
+    if (_state.draft.objectType != CreateObjectType.classWorkshop ||
+        lat == null ||
+        lng == null ||
+        !lat.isFinite ||
+        !lng.isFinite ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180) {
+      return;
+    }
+    final next = _state.draft.copyWith(latitude: lat, longitude: lng);
+    _updateDraft(
+      next.copyWith(
+        sectionData: <String, Object?>{
+          ...next.sectionData,
+          ClassWorkshopContentBodyMapper.pinSection:
+              ClassWorkshopContentBodyMapper.pinEvidence(next),
+        },
+      ),
+    );
   }
 
   String _sessionLocalId() =>

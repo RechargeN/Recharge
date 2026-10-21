@@ -79,6 +79,24 @@ final class StandBackend {
 
   /// D3.1: seeds (or reuses) the stand Place and enables Place authoring on
   /// the stand only; prints no JSON, so only its exit code is checked.
+  /// D3.6: seeds the stand Class / Workshop (and its creator identity).
+  Future<void> classWorkshopSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'class-workshop',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'class-workshop seed failed: ${result.stderr}${result.stdout}',
+      );
+    }
+  }
+
+  /// D3.6: the ids the owner services returned for the stand Class.
+  Future<Map<String, Object?>> classWorkshopManifest() =>
+      _stand(<String>['class-workshop', 'manifest']);
+
   Future<void> sessionSeed() async {
     final result = await Process.run(node, <String>[
       _script('stand-seed.mjs'),

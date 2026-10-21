@@ -25,6 +25,7 @@ import '../widgets/activity_create_block.dart';
 import '../widgets/collection_create_block.dart';
 import '../widgets/find_people_create_block.dart';
 import '../widgets/session_create_block.dart';
+import '../widgets/class_workshop_create_block.dart';
 import '../widgets/place_create_block.dart';
 import '../widgets/rental_create_block.dart';
 import '../widgets/server_publication_requirements.dart';
@@ -308,6 +309,48 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               const SizedBox(height: 12),
               DraftServerRequirements(draft: state.draft, accountId: user.id),
               CollectionCreateBlock(
+                controller: controller,
+                state: state,
+                onPublished: () =>
+                    ref.read(appRouterProvider).go(RouteNames.createSuccess),
+              ),
+            ] else if (state.draft.objectType ==
+                CreateObjectType.classWorkshop) ...<Widget>[
+              // D3.6: shared taxonomy and criteria sections, then the typed
+              // CW-V1 block; no separate Create flow for the type.
+              const SizedBox(height: 12),
+              _CreateTaxonomyPicker(
+                objectType: state.draft.objectType,
+                selectedCategoryId: state.draft.mainCategory,
+                selectedSubcategoryId: state.draft.subcategory,
+                onCategorySelected: (CreateTaxonomyCategory category) {
+                  final CreateTaxonomySubcategory? defaultSubcategory =
+                      createDefaultSubcategoryFor(category);
+                  controller.applyTaxonomySelection(
+                    mainCategory: category.id,
+                    subcategory: defaultSubcategory?.id ?? '',
+                  );
+                },
+                onSubcategorySelected:
+                    (
+                      CreateTaxonomyCategory category,
+                      CreateTaxonomySubcategory subcategory,
+                    ) {
+                      controller.applyTaxonomySelection(
+                        mainCategory: category.id,
+                        subcategory: subcategory.id,
+                      );
+                    },
+              ),
+              if (state.draft.subcategory.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 16),
+                _DynamicCriteriaSection(
+                  draft: state.draft,
+                  onChanged: controller.updateCategoryCriterion,
+                ),
+              ],
+              const SizedBox(height: 12),
+              ClassWorkshopCreateBlock(
                 controller: controller,
                 state: state,
                 onPublished: () =>

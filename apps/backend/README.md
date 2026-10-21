@@ -997,3 +997,27 @@ bytes reach the server. See
 
 - `node scripts/run-emulator-tests.mjs --group route-j1`: service matrix plus the
   real Flutter GPX/sync adapters (`RECHARGE_DART`, `RECHARGE_FLUTTER_TOOL`).
+
+### T2 / D3.6 — Class / Workshop (local Emulator only)
+
+Owner-approved CW-V1 (Class spec v1.2 §34); default-off
+`content.class_workshop.authoring`, local/LV, personal Publisher only. The
+server validates a declared single class or fixed series in one IANA timezone
+(DST gap refused, overlap needs an explicit fold, UTC recomputed), never
+materializes recurrence or stores availability; the declared group size is not
+inventory. Only an external HTTPS enrollment link or an information-only state;
+no Class Booking/capacity/hold/confirmed authority. Catalog/Discover stay
+excluded. See [`D3.6`](../../docs/product/D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md).
+
+With the same pinned toolchain on PATH:
+
+- `node scripts/stand-d3-6-gate.mjs --yes` from `apps/backend`: clean,
+  interrupted/resumed, repeated equality, actual Flutter controller and Create
+  block/publication UI, verified stop and cleanup, on its own isolated stand root.
+- `node scripts/run-emulator-tests.mjs --group class-workshop`: focused backend gate.
+- `node --test scripts/stand-d3-6-gate.test.mjs scripts/run-emulator-test-groups.test.mjs`:
+  launcher self-tests, including failure cleanup.
+
+Class test worlds reuse the D3.5 world cleanup: only their own UUID-bound
+fixtures and source objects are removed; flags are restored. PC-host Emulator
+evidence only.

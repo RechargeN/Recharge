@@ -1,5 +1,6 @@
 import 'session_publication_composition.dart';
 import 'scenario_publication_composition.dart';
+import 'class_workshop_publication_composition.dart';
 import 'library_composition.dart';
 import '../adapters/server_library_repositories.dart';
 import '../../features/library/data/library_sync_client.dart';
@@ -206,6 +207,8 @@ import '../../features/identity/domain/repositories/identity_workspace_repositor
 import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
 import '../../features/identity/domain/repositories/managed_page_field_moderation_repository.dart';
 import '../../features/create/application/session_create_coordinator.dart';
+import '../../features/create/application/class_workshop_create_coordinator.dart';
+import '../../features/create/domain/usecases/build_class_workshop_content_body.dart';
 import '../../features/create/domain/usecases/materialize_session_schedule_usecase.dart';
 import '../../features/identity/data/datasources/managed_page_field_moderation_local_datasource.dart';
 import '../../features/identity/data/repositories/managed_page_field_moderation_repository_impl.dart';
@@ -313,6 +316,9 @@ Future<void> setupDependencies() async {
     // I3: default-off Scenario publication test entry, its own define.
     ..registerLazySingleton<ScenarioPublicationTestEntryGuard>(
       () => ScenarioPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<ClassWorkshopPublicationTestEntryGuard>(
+      () => ClassWorkshopPublicationTestEntryGuard.fromEnvironment(sl()),
     )
     ..registerLazySingleton<PlacePublicationTestEntryGuard>(
       () => PlacePublicationTestEntryGuard.fromEnvironment(sl()),
@@ -761,6 +767,11 @@ Future<void> setupDependencies() async {
         materializeSchedule: MaterializeSessionScheduleUseCase(
           sl<EventTimezoneRepository>(),
         ),
+      ),
+    )
+    ..registerLazySingleton<ClassWorkshopCreateCoordinator>(
+      () => ClassWorkshopCreateCoordinator(
+        mapper: ClassWorkshopContentBodyMapper(sl<EventTimezoneRepository>()),
       ),
     )
     ..registerLazySingleton<EventMockInventoryDataSource>(

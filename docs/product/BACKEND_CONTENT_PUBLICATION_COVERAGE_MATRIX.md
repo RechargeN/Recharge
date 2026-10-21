@@ -1,16 +1,24 @@
 # BCK-07 — Content Publication Backend Coverage Matrix
 
 - ID: **BCK-07-PRE**
-- Version: **0.3**
-- Date: **2026-10-18**
+- Version: **0.4**
+- Date: **2026-10-19**
 - Status: **Review — coverage and reconciliation evidence**
 - Runtime status: **N/A; no product backend authority**
 - Accountable owner: **Content Platform owner**
-- Target: [BCK-07 v0.15](CONTENT_PUBLICATION_BACKEND_SPEC.md)
+- Target: [BCK-07 v0.16](CONTENT_PUBLICATION_BACKEND_SPEC.md)
 - Coordination baseline: [BCK-02 v2.4.36](RECHARGE_BACKEND_DELIVERY_MAP.md)
 - Canonical path: `docs/product/BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md`
 
 ## 0. Changelog
+
+### v0.4 — 2026-10-19
+
+- Class / Workshop CW-V1 (Class spec v1.2 §2.6, §34) is Approved by explicit
+  owner decision T2; D3.6 is a Review plan for local/LV Emulator only, not yet
+  accepted at first; the owner then accepted the §6 plan and Event
+  Classification 2.2.4, authorizing bounded local/LV Emulator implementation.
+- No commit, push or deployment.
 
 ### v0.3 — 2026-10-18
 
@@ -76,7 +84,7 @@ production processing are authorized.
 | `session` | BCK-07; proposed D3.5 | [Session v1.2](create/BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md) Approved by owner 2026-10-18; externalBookingUrl only; no ECL-03/BCK-09 or hold/capacity/confirmed authority | Typed local/mobile exists on 638f752; backend Session return is implemented locally after separate acceptance of [D3.5](D3_5_SESSION_PUBLICATION_AMENDMENT.md) §6; D3.5 stays Review; authorized local gates passed (15/15 Emulator groups, 307 tests; stand real controller/UI, cleanup, backend/Flutter/boundary/diff). Independent default-off content.session.authoring, local/LV Emulator, personal only; rules/exceptions validation without backend slots/availability, legacy refusal. Catalog/Discover excluded (OD-04); Collection eligible permitted after publication. Docs-only checkpoint followed by explicit plan acceptance; local runtime/gates authorized, no commit/push/deploy |
 | `scenario` | BCK-07 distribution manifest | Scenario aggregate remains BCK-10 | Typed local personal flow; BCK-10 absent |
 | `find_people` | BCK-07 with OD-11/privacy gate | Consent/access input from BCK-06 | Typed local/mock; production gated |
-| `class_workshop` | BCK-07 | Dedicated product spec present but not Approved by this doc | Generic local runtime |
+| `class_workshop` | BCK-07; D3.6 | [Class/Workshop v1.2](create/CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md) CW-V1 (§2.6, §34) Approved by owner 2026-10-19; Event Classification 2.2.4 boundary; single/fixed series, external URL or information-only; no ECL-03/BCK-09, inventory or Payments | Typed mobile Create block and Emulator-only publication behind default-off content.class_workshop.authoring, personal only ([D3.6](D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md), Review); server validates declared classes, DST and UTC without materialization or stored availability; Catalog/Discover excluded (OD-04); Collection eligible permitted; local gates passed ([evidence](../evidence/backend/d3/D3_6_CLASS_WORKSHOP_2026_10_19.md)); no commit/push/deploy |
 | `rental` | BCK-07; direct publish only explicit policy | Rental inventory/fulfillment remains domain-owned | D3.3 ([amendment](RENTAL_D3_3_PUBLICATION_AMENDMENT.md)): Emulator-only lifecycle through Content, Media and C2 behind `content.rental.authoring` with a TEST-ONLY policy; re-activation closed; Catalog/Discover excluded (BCK08-OD-04); trusted gate not production-authorized |
 | `collection` | BCK-07 | Collection item refs/removal behavior remain domain-owned | D3.4 ([amendment](COLLECTION_D3_4_PUBLICATION_AMENDMENT.md)): Emulator-only publication lifecycle through Content, Media and C2 moderation behind `content.collection.authoring`; items only reference allowed published objects by exact id, answered by the Catalog-owned evaluator; removal-only/archive absent; Create-form compatibility is a verified subset; Catalog/Discover excluded (BCK08-OD-04, no Collection model); cloud absent |
 

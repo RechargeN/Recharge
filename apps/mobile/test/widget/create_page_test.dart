@@ -302,10 +302,9 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Class/Workshop still surfaces the generic 'Cover image обязательна'
-    // message; Recharge Activity, Bookable Session, Rental and Collection
-    // now have their own typed validation issues (ACT-CRT-01, SES-CRT-01,
-    // RNT-CRT-01, CLG-CRT-01) instead of this shared generic-form copy.
+    // D3.6: Class/Workshop renders its typed CW-V1 block; the shared publish
+    // validation still requires a cover and the block shows that error on
+    // its cover field.
     createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
@@ -320,29 +319,23 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Title *'),
+      find.byKey(const Key('class-workshop-title')),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Title *'),
-      'Event title',
+      find.byKey(const Key('class-workshop-title')),
+      'Class title',
     );
     await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Main category *'),
+      find.byKey(const Key('class-workshop-city')),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Main category *'),
-      'wellness',
+      find.byKey(const Key('class-workshop-city')),
+      'Rezekne',
     );
-    await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'City *'),
-      240,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.enterText(find.widgetWithText(TextField, 'City *'), 'Rezekne');
     await tester.scrollPageUntilVisible(
       find.text('Publish'),
       300,
@@ -351,6 +344,15 @@ void main() {
     await tester.tap(find.text('Publish'));
     await tester.pumpAndSettle();
 
+    expect(
+      createController.state.validationErrors['coverImage'],
+      'Cover image обязательна',
+    );
+    await tester.scrollPageUntilVisible(
+      find.text('Cover image обязательна'),
+      -240,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Cover image обязательна'), findsOneWidget);
   });
 
@@ -385,10 +387,9 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    // Class/Workshop has no dedicated Create block, so it still renders the
-    // generic _CreateTaxonomyPicker fallback this test exercises; Recharge
-    // Activity, Bookable Session, Rental and Collection now route to their
-    // own typed blocks (ACT-CRT-01, SES-CRT-01, RNT-CRT-01, CLG-CRT-01).
+    // D3.6: Class/Workshop keeps the shared _CreateTaxonomyPicker above its
+    // typed CW-V1 block (no generic text fields any more), so the picker's
+    // selection is asserted on the draft itself.
     createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
@@ -439,20 +440,10 @@ void main() {
     await tester.tap(find.text('Masterclass'));
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Main category *'),
-      240,
-      scrollable: find.byType(Scrollable).first,
+    expect(
+      find.byKey(const Key('class-workshop-section-basics')),
+      findsOneWidget,
     );
-    final TextField categoryField = tester.widget<TextField>(
-      find.widgetWithText(TextField, 'Main category *'),
-    );
-    final TextField subcategoryField = tester.widget<TextField>(
-      find.widgetWithText(TextField, 'Subcategory'),
-    );
-
-    expect(categoryField.controller?.text, 'workshops_masterclasses');
-    expect(subcategoryField.controller?.text, 'masterclass');
     expect(
       createController.state.draft.mainCategory,
       'workshops_masterclasses',

@@ -18,6 +18,11 @@ class RouteNames {
   /// `PlacePublicationTestEntryGuard`.
   static const String testSessionPublication = '/test/session-publication';
   static const String testScenarioPublication = '/test/scenario-publication';
+
+  /// Default-off Class / Workshop publication test entry (D3.6); see
+  /// `ClassWorkshopPublicationTestEntryGuard`.
+  static const String testClassWorkshopPublication =
+      '/test/class-workshop-publication';
   static const String testPlacePublication = '/test/place-publication';
 
   /// Default-off Recharge Activity publication test entry (D3.2); see

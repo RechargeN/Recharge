@@ -220,6 +220,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     [manifest?.contentPlace as Record<string, unknown> | undefined, 'seed-place'],
     [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
     [manifest?.contentScenario as Record<string, unknown> | undefined, 'seed-scenario'],
+    [manifest?.contentClassWorkshop as Record<string, unknown> | undefined, 'seed-class-workshop'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
     [manifest?.contentRental as Record<string, unknown> | undefined, 'seed-rental'],
     [collection, 'seed-collection'],

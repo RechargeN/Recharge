@@ -5,6 +5,10 @@ import {
 } from '../../../contracts/content_v1.js';
 import { sessionMediaIds, validateSessionBody } from './type_rules/session_rules.js';
 import { scenarioMediaIds, validateScenarioBody } from './type_rules/scenario_rules.js';
+import {
+  classWorkshopMediaIds,
+  validateClassWorkshopBody,
+} from './type_rules/class_workshop_rules.js';
 import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
 import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
 import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
@@ -129,7 +133,7 @@ function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEnt
     sourceResolver: input.sourceResolver,
     requiredCapabilities: capabilities,
     allowedPublisherTypes: Object.freeze(
-      typeId === 'session' || typeId === 'scenario'
+      typeId === 'session' || typeId === 'scenario' || typeId === 'class_workshop'
         ? (['user'] as const)
         : (['user', 'page'] as const),
     ),
@@ -206,12 +210,9 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
   }),
   entry('class_workshop', {
     discoverFamily: 'Class/Workshop',
-    sourceAuthority: 'typed Class / Workshop experience revision',
+    sourceAuthority: 'Class / Workshop CW-V1 (v1.2 §34, Approved slice spec)',
     sourceResolver: 'inline_body',
-    unavailable: {
-      reason: 'spec_not_approved',
-      dependency: 'Class/Workshop spec Ready for approval',
-    },
+    rules: { validate: validateClassWorkshopBody, mediaIds: classWorkshopMediaIds },
   }),
   entry('rental', {
     discoverFamily: 'Rental',

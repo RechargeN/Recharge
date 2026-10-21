@@ -89,6 +89,8 @@ const approvedSubsequentSlicePaths = [
   // D3.4 (COLLECTION_D3_4_PUBLICATION_AMENDMENT.md §8): Collection enablement and membership.
   "apps/backend/functions/test/integration/content_collection_enablement.test.ts",
   "apps/backend/functions/test/integration/content_session_enablement.test.ts",
+  // D3.6 (D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md §6.3): Class / Workshop enablement.
+  "apps/backend/functions/test/integration/content_class_workshop_enablement.test.ts",
   // D4 (LOCAL_IMPORT_D4_AMENDMENT.md §8): one draft per local import source.
   "apps/backend/functions/test/integration/content_local_import.test.ts",
   // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §5): import rollback and cleanup fencing.

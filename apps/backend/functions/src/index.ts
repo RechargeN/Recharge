@@ -1046,6 +1046,9 @@ async function prepareContentCaller(
     scenarioAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.scenarioAuthoring,
     ),
+    classWorkshopAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.classWorkshopAuthoring,
+    ),
     eventAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.eventAuthoring),
     placeAuthoring: await access.composition.featureFlags.isEnabled(contentFlagIds.placeAuthoring),
     activityAuthoring: await access.composition.featureFlags.isEnabled(

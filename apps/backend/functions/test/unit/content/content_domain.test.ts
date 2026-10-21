@@ -96,10 +96,6 @@ const expectedUnavailable: Readonly<
 > = {
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
   find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
-  class_workshop: {
-    reason: 'spec_not_approved',
-    dependency: 'Class/Workshop spec Ready for approval',
-  },
 };
 /** Types whose approved source rules are implemented; grows one type per commit. */
 const expectedAvailable = [
@@ -110,6 +106,7 @@ const expectedAvailable = [
   'event',
   'session',
   'scenario',
+  'class_workshop',
 ] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
@@ -127,7 +124,7 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
     assert.equal(item.localizedTextPolicy, 'per_locale_with_declared_fallback');
     assert.deepEqual(
       item.allowedPublisherTypes,
-      item.typeId === 'session' || item.typeId === 'scenario' ? ['user'] : ['user', 'page'],
+      item.typeId === 'session' || item.typeId === 'scenario' || item.typeId === 'class_workshop' ? ['user'] : ['user', 'page'],
     );
     assert.equal(item.requiredCapabilities.create, 'content.create');
     assert.equal(item.requiredCapabilities.submit, 'content.submit');

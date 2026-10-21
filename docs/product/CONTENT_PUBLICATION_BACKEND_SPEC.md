@@ -1,8 +1,8 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.15**
-- Date: **2026-10-18**
+- Version: **0.16**
+- Date: **2026-10-19**
 - Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
 - Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
@@ -10,11 +10,20 @@
   Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
 - Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
 - Coordination baseline: [BCK-02 v2.4.98](RECHARGE_BACKEND_DELIVERY_MAP.md)
-- Coverage evidence: [BCK-07-PRE v0.2](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
+- Coverage evidence: [BCK-07-PRE v0.4](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
 - Canonical path: `docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md`
 - Runtime effect of this revision: **none**
 
 ## 0. Changelog
+
+### v0.16 — 2026-10-19
+
+- records the explicit owner decision T2 (CLS-OD-01…10) and the Approved
+  Class / Workshop CW-V1 slice spec (Class spec v1.2 §2.6, §34); adds the
+  D3.6 documentation amendment (§47, Review) and exact planned paths;
+- the owner then accepted the D3.6 §6 file plan and Event Classification
+  2.2.4 (§47.1); bounded local/LV Emulator implementation is authorized,
+  default-off; no production, commit, push or deployment.
 
 ### v0.15 — 2026-10-18
 
@@ -2058,3 +2067,65 @@ present in this worktree. Authorized gates passed: full single-session Emulator
 backend local 1059 and Flutter analyze/full test 1665 (71 env skips). Details:
 [D3.5 evidence](../evidence/backend/d3/D3_5_SESSION_2026_10_18.md).
 This parent and D3.5 remain Review; no commit/push/deploy is authorized.
+
+
+## 47. D3.6 amendment — Class / Workshop, local Emulator only
+
+Owner decision: 2026-10-19, recorded in
+[D3.6 §1](D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md) and
+[Class/Workshop v1.2 §34.8](create/CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md).
+The CW-V1 subset (§2.6, §34) is an **Approved slice spec**; the full-product
+§1–§33 stay Ready for approval. This BCK-07 parent and D3.6 stay **Review**.
+The initial documentation-only checkpoint stopped before runtime. The subsequent
+owner acceptance of the D3.6 §6 plan and Event Classification 2.2.4 is recorded
+in §47.1; it supersedes the earlier plan-pending state.
+
+Implemented validator:
+`apps/backend/functions/src/modules/content/domain/type_rules/class_workshop_rules.ts`;
+shared fixture:
+`packages/api_contracts/schema/content/v1/fixtures/class_workshop_create_compat.json`.
+Registry v8 makes `class_workshop` available only behind the independent,
+default-off `content.class_workshop.authoring` flag, local/LV Emulator only.
+Personal publisher is resolved by the Identity owner; C3 Content, C2 review,
+C1/D2 Media and the existing config-driven mobile Create flow (Q4 D3.1) apply.
+Submit, approved publish and immutable activate enforce the same Class validator,
+composition rules, reference policy, authority/eligibility and media readiness;
+missing/stale/unavailable dependencies refuse explicitly. No permissive fallback
+or client-derived authority is allowed. A future Class schema refuses with
+`content_type_unsupported` on all three paths (Class §34.5).
+
+The server validates the CW-V1 body: explicit single/fixed-series
+occurrences (fixed series 2…60, 15…720 minutes each, no multi-day) in one
+IANA timezone, DST gap refusal and explicit overlap fold, server-recomputed
+UTC, all occurrences in the future at submit/publish and at least one at
+activate, exact allowlists refusing unknown/future/legacy fields. It never
+materializes recurrence, stores availability, treats `declared_group_limit`
+as inventory, or accepts hold/capacity/confirmed/paid claims. Only an external
+HTTPS enrollment URL or an information-only state; ECL-03/BCK-09, internal
+Booking, Payments and providers are out of scope. Do not copy Event
+archetype/admission or Session weekly-rule logic. No parallel schedule
+engine, Booking engine or Create flow. Catalog/Discover stay excluded
+(BCK08-OD-04); the existing Collection evaluator may return eligible for a
+published Class without enabling its projection.
+
+The documentation-only checkpoint is historical. Implementation and local gates
+are recorded in §47.1 and the D3.6 evidence; acceptance matrix: D3.6 §5–§7.
+
+
+### 47.1 File plan and Event Classification 2.2.4 accepted — 2026-10-19
+
+After the documentation-only checkpoint, the owner answered «все принимаю, реалищзовывай»,
+explicitly accepting the D3.6 §6 file plan and the Event Classification
+revision 2.2.4 (Class / Workshop boundary in §1.1, §1.2, §6.2). Bounded
+implementation and local Emulator gates are authorized within D3.6 §6.
+Implemented: Class source rules (`class_workshop_rules.ts`), registry v8 with a
+personal-only available `class_workshop`, independent default-off
+`content.class_workshop.authoring`, submit/publish future-occurrence check and
+immutable-target validation on activate. Other types' enablement is unchanged.
+Required local gates passed, including the single-session Emulator suite with
+the new `class-workshop` group and the isolated D3.6 stand gate; details in
+[D3.6 evidence](../evidence/backend/d3/D3_6_CLASS_WORKSHOP_2026_10_19.md).
+This parent and D3.6 remain Review. Implementation commits `f083d7c`, `ef1356c`,
+`0f80e12`, `32cc0d3` and documentation checkpoint `bed7b05` were subsequently
+authorized locally. The final contract correction is uncommitted; no new commit,
+push, merge or deploy is authorized by this closeout.

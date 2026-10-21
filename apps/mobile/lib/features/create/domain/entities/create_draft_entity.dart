@@ -1,4 +1,5 @@
 import 'activity_draft_data.dart';
+import 'class_workshop_draft_data.dart';
 import 'collection_draft_data.dart';
 import 'create_availability.dart';
 import 'event_draft_data.dart';
@@ -114,6 +115,7 @@ class CreateDraftEntity {
     this.collectionData,
     this.rentalData,
     this.sessionData,
+    this.classWorkshopData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -189,6 +191,9 @@ class CreateDraftEntity {
   final CollectionDraftData? collectionData;
   final RentalDraftData? rentalData;
   final SessionDraftData? sessionData;
+
+  /// D3.6 CW-V1 typed payload of a Class / Workshop draft.
+  final ClassWorkshopDraftData? classWorkshopData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -372,6 +377,8 @@ class CreateDraftEntity {
     bool clearRentalData = false,
     SessionDraftData? sessionData,
     bool clearSessionData = false,
+    ClassWorkshopDraftData? classWorkshopData,
+    bool clearClassWorkshopData = false,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -469,6 +476,9 @@ class CreateDraftEntity {
           : (collectionData ?? this.collectionData),
       rentalData: clearRentalData ? null : (rentalData ?? this.rentalData),
       sessionData: clearSessionData ? null : (sessionData ?? this.sessionData),
+      classWorkshopData: clearClassWorkshopData
+          ? null
+          : (classWorkshopData ?? this.classWorkshopData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),
