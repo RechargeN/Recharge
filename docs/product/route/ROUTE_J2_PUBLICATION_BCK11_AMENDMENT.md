@@ -1,7 +1,8 @@
 # RTE-PUB-01 — Route publication: амендмент BCK-11 (предложение)
 
-- Revision: **0.1**, 2026-10-21.
-- Status: **Proposed — ждёт решений владельца RP-01…RP-16.** Документ не
+- Revision: **0.2**, 2026-10-21.
+- Status: **Proposed — владелец ответил по RP-02, RP-04, RP-06, RP-12 (§3.1);
+  остальные решения и уточнения §3.1 ждут подтверждения.** Документ не
   разрешает Firebase, cloud, deploy, providers или production и не утверждает
   BCK-11 целиком. Код J2 не начат.
 - Базовая ревизия: `codex/recharge-integration` `b4368e0` (32/J1). Ветка
@@ -74,6 +75,37 @@
 | RP-14 | Media и export | Cover через C1/D1/D2. Фото waypoint и публичный GPX export — вне J2 | Включить публичный GPX export | Низкая |
 | RP-15 | Mobile | Существующий Route Create block + Q4 test-panel по образцу I3; RTE-07 in-memory публикация остаётся только mock-путём и не участвует в Emulator composition. Discover/Details для Route из Catalog — в J2, только если существующая Route Details сущность RTE-08 подходит без параллельной модели; иначе отдельный DTL-slice | Всегда отдельный DTL-slice | Средняя |
 | RP-16 | Включение | Флаги default-off: `content.route.authoring`, Catalog family `route`; требуется `route.owner_sync`. Только local/LV Emulator | — | Низкая |
+
+### 3.1 Ответы владельца 2026-10-21 и уточнения
+
+- **RP-02 — принято.** Обязательный trim ≥ 200 м для Route с `recordedGps`, по
+  образцу Strava и аналогов. О трудностях сообщать с вариантами решения. Уже
+  видна одна: GPS-Route короче ≈ 400 м после trim пуст (`privacy_trim_empty`) и
+  не публикуется. Вариант — понятное сообщение в readiness до submit.
+- **RP-04 — заменено.** Публикуют и личный профиль, и Professional Page: Route —
+  естественный тип для Page (тропы, дороги, маршруты). PublisherRef
+  `{user | page}` из active workspace, как у шести типов (Event, Place,
+  Activity, Find People, Rental, Collection); publish заново проверяет доступ
+  к Page через fresh Identity read (существующий `PublisherEligibilityPort`).
+  Требование ADR 0015 сохраняется: личная публикация — verified Creator, Page —
+  active membership с page-scoped capability. Для Route это закрывает часть
+  IDP-03B/04B (typed PublisherRef).
+- **RP-06 — заменено.** Первая публикация проходит ручную модерацию. Если она
+  одобрена без замечаний, следующие публикации одобряются автоматически.
+  Предлагаемые правила (на подтверждение):
+  - доверие хранится на publisherRef (личный профиль или Page отдельно), а не
+    на одном Route;
+  - автоодобрение не пропускает автоматические проверки (validator, RP-02,
+    RP-07, Media) — оно заменяет только ручной review;
+  - доверие теряется при reject, `changesRequested`, hide или restriction любого
+    Route этого publisher; вернуть — следующей чистой ручной модерацией;
+  - автоодобренная ревизия отмечается в audit и доступна report/hide как обычная;
+  - это новый механизм модерации: в коде Content/moderation автоодобрения нет.
+- **RP-12 — пояснено, выбор открыт.** Вариант A (рекомендация v0.1): в
+  выдаче Search/Feed/Map — только точка старта trimmed-трека и сводка; линия
+  рисуется после открытия Details. Вариант B: дополнительно упрощённая
+  линия-превью (до 256 точек, versioned политика упрощения, строится только
+  из trimmed-геометрии) на карточке и карте, как у Strava/Komoot.
 
 ## 4. Матрица visibility × actor
 
