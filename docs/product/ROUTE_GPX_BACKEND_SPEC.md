@@ -1,7 +1,7 @@
 # Recharge Backend — Route & GPX Specification
 
 - ID: **BCK-11**
-- Version: **0.3.1**
+- Version: **0.4**
 - Date: **2026-09-21**
 - Spec status: **Draft — Present; owner and cross-boundary review pending**
 - Runtime status: **Absent — local Route/GPS/GPX behavior is compatibility input only**
@@ -10,6 +10,12 @@
 - Delivery stage: **D4 / R7**
 
 ## 0. Changelog
+
+### v0.4 — 2026-10-21
+
+- added §36: the owner-accepted Route publication contract RTE-PUB-01
+  (RP-01…RP-16) for the bounded local/LV Emulator slice J2; the rest of BCK-11
+  stays Draft and every production gate stays closed.
 
 ### v0.3.1 — 2026-09-21
 
@@ -710,3 +716,26 @@ public projections without making quarantined/deleted/raw geometry public.
 73. **BCK-11-AC-73:** Media deletion uses attachment/hold/generation receipts across BCK-11/14.
 74. **BCK-11-AC-74:** Rollback cannot expose quarantined, deleted or untrimmed geometry.
 75. **BCK-11-AC-75:** v0.3.1 authorizes no Storage, parser, sync, provider or Firebase runtime.
+
+## 36. Accepted Route publication contract (RTE-PUB-01, J2)
+
+The owner accepted [RTE-PUB-01](route/ROUTE_J2_PUBLICATION_BCK11_AMENDMENT.md)
+on 2026-10-21 for the bounded local/LV Emulator slice J2. It closes, for that
+scope only, the §32 decisions on privacy trim and public precision and the
+BCK-07 handoff of §14/§35.3:
+
+- publication pins one immutable `RouteRevision` snapshot built only from the
+  `endpoint-radius-v1` trimmed track; recorded GPS needs 200 m hidden at both
+  ends; e7 coordinates without bounds; an exact allowlist without anchors,
+  trim radii, provenance or notes;
+- personal or Professional Page publisher; public visibility only;
+- the first submission of a publisher is reviewed by staff, later ones are
+  approved by the recorded approval until a staff-confirmed violation;
+- Catalog family `Route` with the trimmed start, summary and a
+  `route-preview-dp-v1` line of at most 256 points; the full trimmed track in
+  Details only;
+- delete waits for withdrawal; no Scenario handoff, `RouteMode` or Quick Plan
+  effect.
+
+Storage/Media for GPX bytes, providers, public GPX export, unlisted share,
+retention/DSR, Firebase and production remain gated by §32.

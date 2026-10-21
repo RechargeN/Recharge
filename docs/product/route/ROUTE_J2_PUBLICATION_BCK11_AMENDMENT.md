@@ -1,10 +1,15 @@
-# RTE-PUB-01 — Route publication: амендмент BCK-11 (предложение)
+# RTE-PUB-01 — Route publication: амендмент BCK-11
 
-- Revision: **0.2**, 2026-10-21.
-- Status: **Proposed — владелец ответил по RP-02, RP-04, RP-06, RP-12 (§3.1), RP-12 = B;
-  остальные решения и уточнения §3.1 ждут подтверждения.** Документ не
-  разрешает Firebase, cloud, deploy, providers или production и не утверждает
-  BCK-11 целиком. Код J2 не начат.
+- Revision: **0.3**, 2026-10-21.
+- Status: **Accepted — решения RP-01…RP-16 утверждены владельцем 2026-10-21**:
+  RP-02, RP-04, RP-06 и RP-12 (вариант B) — в редакции §3.1, остальные — по
+  рекомендациям («Остальные RP … принимаю по рекомендациям. Контракт RTE-PUB-01
+  утверждён, запускай J2 … без push и deploy»). Документ не разрешает
+  Firebase, cloud, deploy, providers или production и не утверждает BCK-11
+  целиком.
+- Runtime: **J2 Review в local/LV Emulator объёме (default-off)**; owner
+  acceptance открыт; evidence:
+  [ROUTE_J2_VERIFICATION.md](../../verification/ROUTE_J2_VERIFICATION.md).
 - Базовая ревизия: `codex/recharge-integration` `b4368e0` (32/J1). Ветка
   предложения: `claude/j2-route-publication`.
 - Родители: [BCK-11 v0.3.1](../ROUTE_GPX_BACKEND_SPEC.md) §5–10, §14, §32, §35.3;
@@ -92,7 +97,7 @@
   IDP-03B/04B (typed PublisherRef).
 - **RP-06 — заменено.** Первая публикация проходит ручную модерацию. Если она
   одобрена без замечаний, следующие публикации одобряются автоматически.
-  Предлагаемые правила (на подтверждение):
+  Правила (утверждены владельцем 2026-10-21):
   - доверие хранится на publisherRef (личный профиль или Page отдельно), а не
     на одном Route;
   - автоодобрение не пропускает автоматические проверки (validator, RP-02,
@@ -200,6 +205,64 @@ mobile-черновики не трогаются; опубликованные 
 ## 8. Остаётся закрытым
 
 Production auth/Page authority, cloud, deploy, providers (routing/elevation),
-unlisted share, публичный GPX export, фото waypoint, overview polyline,
-числовые фильтры, revision history сверх публикаций, retention/DSR и
+unlisted share, публичный GPX export, фото waypoint, числовые фильтры, revision history сверх публикаций, retention/DSR и
 cross-market policy. Local Emulator evidence не является production-готовностью.
+
+## 9. J2: реализация и уточнения (2026-10-21)
+
+Ветка `claude/j2-route-publication` от `b4368e0`, отдельный worktree. Уточнения
+ниже строже контракта и ничего не ослабляют.
+
+- **Флаги.** Кроме `content.route.authoring` и Catalog family `route`
+  (`RECHARGE_TEST_ROUTE_CATALOG`), команда `distribute` закрыта своим
+  default-off флагом `route.publication` (как `planning.scenarioPublication`
+  у I3). При выключенном флаге отказ ничего не записывает.
+- **Снимок.** `distribute` создаёт `routeRevisions/{routeRevisionId}` — один
+  снимок на J1-ревизию; повтор той же ревизии возвращает тот же снимок, не
+  меняя J1 revision. Квитанция компактна (ids и hash, без геометрии), повтор
+  перечитывает снимок. Лимит — 100 снимков на Route (`distribution_limit`).
+- **Проверка в Content.** Валидатор заново выводит сводку, число direct-
+  сегментов, старт, расстояния waypoints и превью из опубликованных сегментов,
+  поэтому тело нельзя подделать даже с верным hash. Порт ревизий сверяет
+  автора черновика (не publisher: Page не владеет Route), Route, hash и активный
+  Route на create, submit, publish и activate. `contentId = routeId`
+  резервирует только автор — чужой черновик не может «занять» Route.
+- **Удаление (RP-11).** Отказ `publication_active` при активной публикации и
+  при submission в `submitted`/`under_review`/`approved_for_publication`.
+  После withdraw delete стирает геометрию всех снимков (hash остаётся), и
+  activate прежней опубликованной ревизии отклоняется.
+- **Доверие (RP-06).** Запись `moderationPublisherTrust/route:{type}:{id}`
+  пишет только модуль модерации, в той же транзакции, что и квитанцию
+  применённого решения; побеждает более новое решение. Автоодобрение — это
+  профиль `route.trusted-publisher` с `policyDecisionId` одобрения,
+  записанный в submission; отдельной записи в журнале модерации нет.
+  Классы причин обязательны для staff `reject` Route; для `restrict` и
+  `withdraw` — по желанию, чтобы K1 re-moderation не ломалась.
+  Автоматического скрытия по жалобам в коде нет — правило о нём
+  выполняется тривиально.
+- **Превью (RP-12 B).** `route-preview-dp-v1`: детерминированный
+  Douglas–Peucker по trimmed-треку, первая и последняя точка каждого
+  сегмента всегда остаются, высоты отбрасываются, ≤ 256 точек. Превью есть в
+  карточке и на Map leaf, полный trimmed-трек — только в Details.
+- **Mobile.** Тестовая страница `/test/route-publication` за guard
+  `RECHARGE_TEST_ROUTE_PUBLICATION` (четыре условия). Контроллер сохраняет
+  Create Route через J1 sync, скрывает 200 м с концов, вызывает `distribute`,
+  создаёт и обновляет один Content draft, загружает обложку, отправляет и
+  публикует. Publisher берётся из active workspace при первой подготовке и
+  хранится в журнале публикации; Content draft сохраняет его дальше.
+
+**Сужения против плана файлов (честно).**
+
+- Typed `publisherRef` в `RouteDraftData` (IDP-04B для Route) не добавлен:
+  publisher фиксируется при первой подготовке публикации, а не при создании
+  черновика.
+- Mobile Discover/Details для семейства Route из Catalog не сделаны (RP-15):
+  локальная Route Details RTE-08 читает in-memory проекцию RTE-07 другой формы.
+  Подделывать её под Catalog было бы параллельной моделью. Это отдельный
+  DTL-slice. Backend Feed/Search/Map/Details готов.
+- Stand seed, `stand-j2-gate.mjs` и UI stand test не сделаны. Реальный
+  контроллер с реальными Flutter-адаптерами проверяется против Emulator в
+  группе `route-j2` (GPX import → J1 sync → trim → distribute → Content →
+  publish).
+- RTE-07 in-memory публикация и её fast-track остаются только mock-путём и не
+  участвуют в Emulator composition.
