@@ -196,8 +196,11 @@ export function createSessionWorld(
     return { ...session, submissionId: submission.submissionId, ...published };
   }
 
-  /** Only this world's UUID-bound fixtures, never a global Emulator reset. */
-  async function cleanup() {
+  /**
+   * Only this world's UUID-bound fixtures, never a global Emulator reset.
+   * `extraOwned` adds ids of further synthetic actors a derived world created.
+   */
+  async function cleanup(extraOwned: readonly string[] = []) {
     assert.equal(process.env.GCLOUD_PROJECT, 'demo-recharge');
     assert.match(process.env.FIRESTORE_EMULATOR_HOST ?? '', /^(127\.0\.0\.1|localhost):\d+$/u);
     const sharedCollections = new Set<string>([
@@ -237,6 +240,7 @@ export function createSessionWorld(
     );
     owned.add(scope);
     owned.add(reviewerKey);
+    for (const id of extraOwned) owned.add(id);
     if (reviewer !== null) owned.add(reviewer.userId);
     const keys = new Set<string>();
     const variants = new Set<string>();
@@ -303,6 +307,7 @@ export function createSessionWorld(
 
   return {
     cleanup,
+    scope,
     actors,
     media,
     composition,

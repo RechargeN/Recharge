@@ -11,7 +11,8 @@ import {
 import { featureFlagRevisionDocumentId } from '../../src/platform/config/firestore_feature_flag_gate.js';
 import { contentFlagIds } from '../../src/shared/feature_flags.js';
 import { callBookingFunction, emulatorFirestore } from '../support/booking_emulator.js';
-import { createSessionWorld } from '../support/content_session_world.js';
+import { randomUUID } from 'node:crypto';
+import { createSessionWorld, expectData } from '../support/content_session_world.js';
 
 const firestore = emulatorFirestore();
 const flags = [
@@ -151,4 +152,71 @@ void test('Session HTTP submits valid typed body with real Media; rejects legacy
   }
   const status = await query('getPublicationStatus', { contentId: d.contentId });
   assert.equal(status.kind, 'succeeded');
+});
+
+void test('Session HTTP source read is owner-only and does not leak private exception or audit data', async () => {
+  await setFlag(contentFlagIds.sessionAuthoring, true);
+  const { creator, staff } = await world.actors;
+  const marker = 'private-session-exception-' + randomUUID();
+  const d = await world.boundSession((body) => ({
+    ...body,
+    session: {
+      ...(body.session as Record<string, unknown>),
+      exceptions: [
+        {
+          id: randomUUID(),
+          start_date_local: '2026-10-25',
+          end_date_local: '2026-10-25',
+          all_day: true,
+          private_note: marker,
+          created_by_user_id: creator.actor.userId,
+          created_at_utc: '2026-10-18T00:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const sub = expectData<{ submissionId: string }>(
+    await command({
+      commandType: 'submitForPublication',
+      payload: { draftId: d.draftId, expectedDraftRevision: d.revision },
+    }),
+    'submit',
+  );
+  expectData(
+    await world.decide('approve', { contentId: d.contentId, submissionId: sub.submissionId }),
+    'review',
+  );
+  const pub = expectData<{ publishedRevisionId: string }>(
+    await command({
+      commandType: 'publishApprovedRevision',
+      payload: { submissionId: sub.submissionId, expectedPointerRevision: 0 },
+    }),
+    'publish',
+  );
+  const stored = await world.composition.contentRepository.transact((tx) =>
+    tx.publishedRevision(pub.publishedRevisionId),
+  );
+  assert.ok(stored);
+  const own = expectData<{ body: unknown; bodyHash: string }>(
+    await query('getPublishedRevision', { contentId: d.contentId }),
+    'owner source',
+  );
+  assert.deepEqual(own.body, stored.body);
+  assert.equal(own.bodyHash, stored.bodyHash);
+  assert.ok(JSON.stringify(own.body).includes(marker));
+  const response = await callBookingFunction(
+    'contentQueryV1',
+    { schemaVersion: 1, queryType: 'getPublishedRevision', payload: { contentId: d.contentId } },
+    staff.idToken,
+  );
+  const result = response.body.result as { kind: string; code?: string };
+  assert.equal(result.kind, 'rejected');
+  for (const forbidden of [marker, 'private_note', 'created_by_user_id', 'created_at_utc'])
+    assert.ok(!JSON.stringify(result).includes(forbidden), forbidden);
+  assert.deepEqual(
+    await world.composition.contentRepository.transact((tx) =>
+      tx.publishedRevision(pub.publishedRevisionId),
+    ),
+    stored,
+  );
 });

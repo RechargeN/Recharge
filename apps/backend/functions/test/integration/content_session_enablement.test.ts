@@ -354,3 +354,55 @@ void test('same current-policy violation refuses submit, approved publish and im
   );
   assert.deepEqual(w.repository.snapshot(), immutable);
 });
+
+void test('Session immutable source is owner-authorized; private exception data is never a public read', async () => {
+  const w = world(),
+    content = w.service();
+  const source = await body();
+  (source.session as Record<string, unknown>).exceptions = [
+    {
+      id: ulid(900),
+      start_date_local: '2026-10-25',
+      end_date_local: '2026-10-25',
+      all_day: true,
+      private_note: 'owner-only operational reason',
+      created_by_user_id: userA,
+      created_at_utc: '2026-10-18T00:00:00.000Z',
+    },
+  ];
+  const d = await prepare(content, source);
+  const sub = await ok<{ submissionId: EntityId }>(
+    content.execute(
+      actorA,
+      command('submitForPublication', { draftId: d.draftId, expectedDraftRevision: d.revision }),
+    ),
+  );
+  await ok(
+    content.execute(
+      actorA,
+      command('publishApprovedRevision', {
+        submissionId: sub.submissionId,
+        expectedPointerRevision: 0,
+      }),
+    ),
+  );
+  const before = w.repository.snapshot();
+  const request = {
+    schemaVersion: 1,
+    queryType: 'getPublishedRevision',
+    payload: { contentId: d.contentId },
+  };
+  const foreign: ContentActor = { userId: ulid(901), sessionId: ulid(902) };
+  // Even a permissive dependency cannot turn the private source into a public DTO.
+  await rejected(content.query(foreign, request), 'not_found');
+  const own = await ok<{ body: ContentBody; bodyHash: string }>(content.query(actorA, request));
+  assert.deepEqual(own.body, source);
+  assert.equal(own.bodyHash, before.revisions[0]!.bodyHash);
+  w.setAllowed(false);
+  assert.notEqual((await content.query(actorA, request)).kind, 'succeeded');
+  assert.deepEqual(
+    w.repository.snapshot(),
+    before,
+    'read refusal never changes the immutable source or pointer',
+  );
+});

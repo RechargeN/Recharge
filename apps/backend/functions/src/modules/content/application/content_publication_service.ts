@@ -466,6 +466,22 @@ export class ContentPublicationService {
               throw new ContentDomainRefusal('not_found');
             const revision = await tx.publishedRevision(pointer.currentPublishedRevisionId);
             if (revision === null) throw new ContentDomainRefusal('not_found');
+            // BCK-07: an authorized immutable source, not a Session public projection.
+            // D3.5/Session §11.3 keeps exception notes/audit and private location owner-only.
+            if (revision.typeId === 'session') {
+              if (
+                revision.publisherRef.type !== 'user' ||
+                revision.publisherRef.id !== actor.userId
+              )
+                throw new ContentDomainRefusal('not_found');
+              await this.authorize(
+                context,
+                revision.publisherRef,
+                'session',
+                'read',
+                revision.marketId,
+              );
+            }
             return succeeded<ContentQueryData>(revision);
           }
           case 'getImportBinding':
