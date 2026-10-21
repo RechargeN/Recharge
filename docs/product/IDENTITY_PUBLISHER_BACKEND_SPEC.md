@@ -449,6 +449,12 @@ Find People keeps a private source separate from:
 Exact purpose IDs, fields and age eligibility require the BCK-06/Find People
 contract and Accepted `OD-11`; all production paths remain disabled until then.
 
+Local D3.7 (2026-10-19, Review): purpose `find_people.public_listing`, one
+consent per author and publication, at most 30 days, revoke always allowed;
+the synthetic server 18+ attestation stands in for an age authority in the
+Emulator only. See [D3.7 §5](D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md). This
+does not accept OD-11 and adds no production path.
+
 ## 9. AccessSnapshot and authorization evaluation
 
 Logical snapshot:

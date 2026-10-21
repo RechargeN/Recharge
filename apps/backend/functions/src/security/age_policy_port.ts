@@ -4,6 +4,9 @@ export interface AgePolicyRequest {
   readonly marketId: MarketId;
   readonly surfaceId: string;
   readonly purposeId: string;
+  /** D3.7: the person the decision is about; a server-resolved Session subject. */
+  readonly subjectUserId?: string;
+  readonly nowUtc?: string;
 }
 
 export type AgePolicyDecision =

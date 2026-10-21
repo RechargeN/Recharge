@@ -7,6 +7,8 @@ import { createEmulatorCatalogComposition } from './modules/catalog/infrastructu
 export interface DiscoverCaller {
   readonly firestore: Firestore;
   readonly userId?: string;
+  /** D3.7: the local `catalog.findPeople` flag (default off). */
+  readonly findPeopleEnabled?: boolean;
 }
 
 function stripTransport(data: unknown): unknown {
@@ -24,9 +26,9 @@ export function handleDiscoverQuery(
   caller: DiscoverCaller,
   data: unknown,
 ): Promise<Readonly<Record<string, unknown>>> {
-  const catalog = createEmulatorCatalogComposition(
-    caller.firestore,
-    caller.userId ? { viewerId: caller.userId } : {},
-  );
+  const catalog = createEmulatorCatalogComposition(caller.firestore, {
+    ...(caller.userId ? { viewerId: caller.userId } : {}),
+    findPeopleEnabled: caller.findPeopleEnabled === true,
+  });
   return handleDiscoverQueryRequest(catalog.query, stripTransport(data));
 }

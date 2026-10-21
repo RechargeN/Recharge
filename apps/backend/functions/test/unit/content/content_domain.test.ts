@@ -95,7 +95,6 @@ const expectedUnavailable: Readonly<
   Record<string, { readonly reason: string; readonly dependency: string | undefined }>
 > = {
   route: { reason: 'dependency_pending', dependency: 'BCK-11' },
-  find_people: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
 };
 /** Types whose approved source rules are implemented; grows one type per commit. */
 const expectedAvailable = [
@@ -107,10 +106,11 @@ const expectedAvailable = [
   'session',
   'scenario',
   'class_workshop',
+  'find_people',
 ] as const;
 
 void test('every registry entry carries the full §33.1 policy and is frozen', () => {
-  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v8');
+  assert.equal(contentTypeRegistryRevision, 'content-type-registry-v9');
   const seen = new Set<string>();
   for (const item of contentTypeRegistry) {
     assert.equal(seen.has(item.typeId), false, `duplicate ${item.typeId}`);
@@ -124,7 +124,9 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
     assert.equal(item.localizedTextPolicy, 'per_locale_with_declared_fallback');
     assert.deepEqual(
       item.allowedPublisherTypes,
-      item.typeId === 'session' || item.typeId === 'scenario' || item.typeId === 'class_workshop' ? ['user'] : ['user', 'page'],
+      item.typeId === 'session' || item.typeId === 'scenario' || item.typeId === 'class_workshop'
+        ? ['user']
+        : ['user', 'page'],
     );
     assert.equal(item.requiredCapabilities.create, 'content.create');
     assert.equal(item.requiredCapabilities.submit, 'content.submit');
@@ -133,6 +135,8 @@ void test('every registry entry carries the full §33.1 policy and is frozen', (
     assert.equal(Object.isFrozen(item.availability), true, item.typeId);
   }
   assert.equal(resolveContentType('find_people')?.visibilityPolicy, 'consent_limited');
+  // D3.7: the draft body is the private source; publication builds the public projection.
+  assert.equal(resolveContentType('find_people')?.sourceResolver, 'inline_body');
   assert.equal(resolveContentType('place')?.visibilityPolicy, 'public_catalog');
   assert.equal(resolveContentType('route')?.sourceResolver, 'pinned_immutable_revision');
   assert.equal(resolveContentType('scenario')?.sourceResolver, 'pinned_immutable_revision');

@@ -406,7 +406,8 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           typeBackgroundColor: RechargeTheme.activityAccentSurface,
         ),
         DiscoverObjectKind.event ||
-        DiscoverObjectKind.route => delegate.buildHero(context),
+        DiscoverObjectKind.route ||
+        DiscoverObjectKind.findPeople => delegate.buildHero(context),
       };
     }
     if (_eventProjection != null) {

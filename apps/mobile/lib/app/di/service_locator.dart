@@ -1,6 +1,7 @@
 import 'session_publication_composition.dart';
 import 'scenario_publication_composition.dart';
 import 'class_workshop_publication_composition.dart';
+import 'find_people_publication_composition.dart';
 import 'library_composition.dart';
 import '../adapters/server_library_repositories.dart';
 import '../../features/library/data/library_sync_client.dart';
@@ -323,6 +324,10 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<PlacePublicationTestEntryGuard>(
       () => PlacePublicationTestEntryGuard.fromEnvironment(sl()),
     )
+    // D3.7: default-off Find People publication test entry, its own define.
+    ..registerLazySingleton<FindPeoplePublicationTestEntryGuard>(
+      () => FindPeoplePublicationTestEntryGuard.fromEnvironment(sl()),
+    )
     // D3.2: default-off Recharge Activity publication test entry, its own define.
     ..registerLazySingleton<ActivityPublicationTestEntryGuard>(
       () => ActivityPublicationTestEntryGuard.fromEnvironment(sl()),
@@ -547,8 +552,14 @@ Future<void> setupDependencies() async {
     )
     // Find People (DTL-FP-01) — public read-only mock projection. It is
     // deliberately independent from Create drafts and participation flows.
+    // D3.7: over the server Catalog only under `testBackend` with its own define.
     ..registerLazySingleton<PublishedFindPeopleDiscoveryPort>(
-      () => PublishedFindPeopleDiscoveryLocalDataSource(),
+      () => publishedFindPeopleDiscoveryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: PublishedFindPeopleDiscoveryLocalDataSource.new,
+        port: sl(),
+        session: sl(),
+      ),
     )
     // Bookable Session (DTL-SES-01) — read-only public schedule snapshots.
     // Provider calendar state and Create drafts never cross this boundary.

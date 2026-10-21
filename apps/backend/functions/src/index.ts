@@ -5,6 +5,7 @@ import { handleK1 } from './moderation_entry.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
 import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
+import { FirestoreFindPeopleConsentService } from './modules/identity_publisher/infrastructure/find_people_privacy_authority.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
@@ -79,6 +80,7 @@ import {
   scenarioStopsFor,
   handleContentCommand,
   handleContentQuery,
+  purgeFindPeopleRetention,
   type ContentCaller,
 } from './content_entry.js';
 import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
@@ -1001,6 +1003,17 @@ export const reconcileMediaReferencesV1 = onSchedule(
   },
 );
 
+// D3.7 §5.3: Emulator-only erasure of exact Find People meeting data 30 days
+// after its public life ended. Privacy deletion is never behind a feature flag.
+export const purgeFindPeoplePrivateLocationsV1 = onSchedule(
+  { schedule: 'every 24 hours', region: 'europe-west1', retryCount: 0 },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await purgeFindPeopleRetention(firestore, systemServerClock.now().toISOString());
+  },
+);
+
 // Emulator-only authoring through Content: Event (C3), Place (D3.1), Recharge
 // Activity (D3.2) and Collection / Guide (D3.4). The surface is open while at
 // least one local authoring flag (`content.event.authoring`,
@@ -1060,6 +1073,9 @@ async function prepareContentCaller(
     collectionAuthoring: await access.composition.featureFlags.isEnabled(
       contentFlagIds.collectionAuthoring,
     ),
+    findPeopleAuthoring: await access.composition.featureFlags.isEnabled(
+      contentFlagIds.findPeopleAuthoring,
+    ),
   });
   if (enabledTypes.size === 0) return refuse('type_disabled');
   return {
@@ -1101,7 +1117,14 @@ async function prepareDiscoverCaller(
   if (!(await access.composition.featureFlags.isEnabled(catalogFlagIds.discoverRead))) {
     return refuse('feature_disabled');
   }
-  return { ok: true, caller: { firestore: access.firestore, userId: decision.userId } };
+  return {
+    ok: true,
+    caller: {
+      firestore: access.firestore,
+      userId: decision.userId,
+      findPeopleEnabled: await access.composition.featureFlags.isEnabled(catalogFlagIds.findPeople),
+    },
+  };
 }
 
 // Emulator-only delivery of committed Content effects (E2). Every enabled
@@ -1253,6 +1276,30 @@ export const quickPlanQueryV1 = onCall<unknown>(callableOptions, async (request)
   const { sessionContext, ...data } = request.data as Record<string, unknown>;
   void sessionContext;
   return new FirestoreQuickPlanService(access.firestore, systemServerClock).query(
+    access.accessHint,
+    data,
+  );
+});
+
+// D3.7: Emulator-only BCK-06 Find People consent. Grant is behind the default-off
+// `identity.findPeople.consent` flag; revoke always works. The subject is the
+// verified Session user inside the transaction, never a payload id.
+export const findPeopleConsentCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreFindPeopleConsentService(access.firestore, systemServerClock).command(
+    access.accessHint,
+    data,
+  );
+});
+export const findPeopleConsentQueryV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return new FirestoreFindPeopleConsentService(access.firestore, systemServerClock).query(
     access.accessHint,
     data,
   );

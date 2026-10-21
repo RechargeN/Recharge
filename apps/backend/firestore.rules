@@ -109,6 +109,11 @@ service cloud.firestore {
     // J1 Route geometry is owner-scoped on the server (routeCommandV1/QueryV1) only.
     match /routes/{document} { allow read, write: if false; }
     match /routeCommandReceipts/{document} { allow read, write: if false; }
+    // D3.7 Find People (BCK-06): consent, its receipts and the synthetic 18+
+    // attestation are server-owned; the attestation is written by server fixtures only.
+    match /identityFindPeopleConsents/{document} { allow read, write: if false; }
+    match /identityFindPeopleConsentReceipts/{document} { allow read, write: if false; }
+    match /identityAgeAttestations/{document} { allow read, write: if false; }
 
     match /{document=**} {
       allow read, write: if false;

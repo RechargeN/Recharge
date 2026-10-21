@@ -588,4 +588,7 @@ const Set<String> _bookingCallableAllowlist = <String>{
   // J1: default-off Emulator-only owner Route storage and sync.
   'routeCommandV1',
   'routeQueryV1',
+  // D3.7: default-off Emulator-only BCK-06 Find People consent.
+  'findPeopleConsentCommandV1',
+  'findPeopleConsentQueryV1',
 };

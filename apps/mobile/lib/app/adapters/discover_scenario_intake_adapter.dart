@@ -8,6 +8,10 @@ class DiscoverScenarioIntakeAdapter {
   const DiscoverScenarioIntakeAdapter();
 
   String? supportIssue(DiscoverItemEntity item) {
+    // A Find People request is not a stop: its point is only an approximate area.
+    if (item.objectKind == DiscoverObjectKind.findPeople) {
+      return 'A Find People request cannot be added to a Scenario.';
+    }
     if (item.id.trim().isEmpty ||
         item.id.trim() != item.id ||
         item.title.trim().isEmpty) {
@@ -167,6 +171,9 @@ class DiscoverScenarioIntakeAdapter {
       DiscoverObjectKind.event => ScenarioCatalogObjectType.event,
       DiscoverObjectKind.route => ScenarioCatalogObjectType.route,
       DiscoverObjectKind.activity => ScenarioCatalogObjectType.activity,
+      DiscoverObjectKind.findPeople => throw const FormatException(
+        'A Find People request cannot be added to a Scenario.',
+      ),
     };
     final duration = item.durationMinutes;
     final fixedEnd = duration == null

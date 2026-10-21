@@ -299,7 +299,10 @@ export type ContentFailureCode =
   | 'cleanup_reserved'
   | 'cleanup_not_reserved'
   | 'cleanup_token_mismatch'
-  | 'original_removed';
+  | 'original_removed'
+  // D3.7: Find People consent (BCK-06) and synthetic 18+ attestation.
+  | 'privacy_consent_required'
+  | 'age_eligibility_required';
 
 interface CommandEnvelope<Type extends string, Payload> {
   readonly schemaVersion: 1;

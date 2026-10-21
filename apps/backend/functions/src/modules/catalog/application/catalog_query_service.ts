@@ -5,6 +5,7 @@ import { availabilityNotConnectedReason, catalogTestOnlyConfig } from '../domain
 import type {
   CatalogEventItem,
   CatalogActivityItem,
+  CatalogFindPeopleItem,
   CatalogItem,
   CatalogOccurrence,
   CatalogScenarioItem,
@@ -73,9 +74,37 @@ export type CatalogScenarioCard = Omit<CatalogScenarioItem, 'itinerary' | 'stops
   readonly projectedAtUtc: string;
 };
 
+/**
+ * D3.7 Find People card: public facts only. The point is the ~1 km cell
+ * centre and the distance is measured to it, never to the meeting point.
+ */
+export interface CatalogFindPeopleCard {
+  readonly ref: { readonly typeId: 'find_people'; readonly contentId: string };
+  readonly publishedRevisionId: string;
+  readonly title: string;
+  readonly shortDescription: string;
+  readonly categoryId: string;
+  readonly subcategoryId: string;
+  readonly publicAreaLabel: string;
+  readonly point: CatalogFindPeopleItem['point'];
+  readonly publicGeoPrecisionMeters: number;
+  readonly timezoneId: string;
+  readonly occurrence: CatalogOccurrence & { readonly state: 'running' | 'upcoming' };
+  readonly applicationDeadlineUtc: string;
+  readonly skillLevel: string;
+  readonly languageCodes: readonly string[];
+  readonly targetGroupSize: number;
+  readonly costType: string;
+  readonly expectedSpend: CatalogFindPeopleItem['expectedSpend'];
+  readonly distanceMeters: number | null;
+  readonly changedSinceSnapshot: boolean;
+  readonly projectedAtUtc: string;
+}
+
 export type CatalogCard =
   | CatalogEventCard
   | CatalogScenarioCard
+  | CatalogFindPeopleCard
   | (CatalogActivityItem & {
       readonly ref: { readonly typeId: 'activity'; readonly contentId: string };
       readonly distanceMeters: number | null;
@@ -108,7 +137,7 @@ export interface MapResult {
   /** Every leaf is a member of the Feed result of the same token. */
   readonly leaves: readonly {
     readonly ref: {
-      readonly typeId: 'event' | 'activity' | 'scenario';
+      readonly typeId: 'event' | 'activity' | 'scenario' | 'find_people';
       readonly contentId: string;
     };
     readonly point: NonNullable<CatalogEventItem['point']>;
@@ -169,6 +198,8 @@ export class CatalogQueryService {
       readonly enabled: boolean;
       readonly stops?: PublishedObjectLinkService;
     } = { enabled: false },
+    /** D3.7: default-off local `catalog.findPeople`; its items need `safetyVisible`. */
+    private readonly findPeopleEnabled = false,
   ) {}
 
   /** SP-09: fresh status of one stop; anything but `eligible` is unavailable. */
@@ -314,7 +345,12 @@ export class CatalogQueryService {
     readonly snapshotToken?: string;
     readonly cursor?: string;
   }): Promise<FeedPage | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(request.query, this.activityEnabled, this.scenario.enabled);
+    const parsed = parseDiscoverQuery(
+      request.query,
+      this.activityEnabled,
+      this.scenario.enabled,
+      this.findPeopleEnabled,
+    );
     if (parsed.ok && parsed.query.textTokens.length === 0)
       return { kind: 'invalid', code: 'text_required' };
     return this.feed(request);
@@ -408,7 +444,14 @@ export class CatalogQueryService {
       if (!pinned?.ok)
         return { kind: 'unavailable', code: pinned?.code ?? 'taxonomy_revision_unavailable' };
     }
-    if (current.item && this.safetyVisible && !(await this.safetyVisible(current.item, true)))
+    if (current.item?.typeId === 'find_people' && !this.findPeopleEnabled)
+      return { kind: 'unsupported', code: 'type_disabled:find_people' };
+    // D3.7 §6: a Find People object is served only after its fresh gate.
+    if (
+      current.item &&
+      ((current.item.typeId === 'find_people' && this.safetyVisible === undefined) ||
+        (this.safetyVisible && !(await this.safetyVisible(current.item, true))))
+    )
       return {
         kind: 'succeeded',
         state: 'absent',
@@ -418,7 +461,12 @@ export class CatalogQueryService {
       };
     let changed = false;
     if (request.snapshotToken !== undefined && request.query !== undefined) {
-      const parsed = parseDiscoverQuery(request.query, this.activityEnabled, this.scenario.enabled);
+      const parsed = parseDiscoverQuery(
+        request.query,
+        this.activityEnabled,
+        this.scenario.enabled,
+        this.findPeopleEnabled,
+      );
       if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
       const check = verifySnapshot(
         request.snapshotToken,
@@ -475,7 +523,12 @@ export class CatalogQueryService {
     snapshotToken: string | undefined,
     paging: boolean,
   ): Promise<Resolved | CatalogQueryFailure> {
-    const parsed = parseDiscoverQuery(rawQuery, this.activityEnabled, this.scenario.enabled);
+    const parsed = parseDiscoverQuery(
+      rawQuery,
+      this.activityEnabled,
+      this.scenario.enabled,
+      this.findPeopleEnabled,
+    );
     if (!parsed.ok) return { kind: parsed.kind, code: parsed.code };
     const requestNow = this.clock.now().getTime();
     const set = await this.#activeSet();
@@ -560,6 +613,11 @@ export class CatalogQueryService {
       const atSnapshot = versionAt(list, claims.projectionSetRevision);
       const latest = list.find((version) => version.validToRevision === null);
       if (atSnapshot?.state !== 'listed' || atSnapshot.item === null) continue;
+      if (
+        atSnapshot.item.typeId === 'find_people' &&
+        (!this.findPeopleEnabled || this.safetyVisible === undefined)
+      )
+        continue;
       if (this.safetyVisible && !(await this.safetyVisible(atSnapshot.item, false))) continue;
       // Tombstone wins over the snapshot: hidden now means not served.
       if (latest !== undefined && latest.state !== 'listed') continue;
@@ -578,7 +636,10 @@ export class CatalogQueryService {
       // Media suppression from the current pointer wins over old snapshots.
       const latestActivity = latest?.item?.typeId === 'activity' ? latest.item : null;
       const rawSnapshotItem =
-        latest?.item && latest.sourcePointerRevision > atSnapshot.sourcePointerRevision
+        atSnapshot.item.typeId !== 'find_people' &&
+        latest?.item &&
+        latest.item.typeId !== 'find_people' &&
+        latest.sourcePointerRevision > atSnapshot.sourcePointerRevision
           ? {
               ...atSnapshot.item,
               coverMediaId:
@@ -645,6 +706,31 @@ export class CatalogQueryService {
 
   #card(entry: Eligible): CatalogCard {
     const item = entry.item;
+    if (item.typeId === 'find_people') {
+      if (entry.occurrence === null) throw new Error('catalog_find_people_occurrence_missing');
+      return {
+        ref: { typeId: 'find_people', contentId: item.contentId },
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        publicAreaLabel: item.publicAreaLabel,
+        point: item.point,
+        publicGeoPrecisionMeters: item.publicGeoPrecisionMeters,
+        timezoneId: item.timezoneId,
+        occurrence: { ...entry.occurrence, state: entry.occurrenceState },
+        applicationDeadlineUtc: item.applicationDeadlineUtc,
+        skillLevel: item.skillLevel,
+        languageCodes: item.languageCodes,
+        targetGroupSize: item.targetGroupSize,
+        costType: item.costType,
+        expectedSpend: item.expectedSpend,
+        distanceMeters: entry.distance,
+        changedSinceSnapshot: entry.changed,
+        projectedAtUtc: entry.version.projectedAtUtc,
+      };
+    }
     if (item.typeId === 'scenario') {
       const { itinerary: hidden, stops: refs, ...card } = item;
       void hidden;

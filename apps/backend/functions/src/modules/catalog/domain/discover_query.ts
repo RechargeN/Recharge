@@ -94,6 +94,7 @@ export function parseDiscoverQuery(
   raw: unknown,
   activityEnabled = false,
   scenarioEnabled = false,
+  findPeopleEnabled = false,
 ): QueryParse {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
     return invalid('query_invalid');
@@ -115,7 +116,8 @@ export function parseDiscoverQuery(
     if (
       !catalogEnabledTypes.has(typeId) &&
       !(activityEnabled && typeId === 'activity') &&
-      !(scenarioEnabled && typeId === 'scenario')
+      !(scenarioEnabled && typeId === 'scenario') &&
+      !(findPeopleEnabled && typeId === 'find_people')
     )
       return unsupported(`type_disabled:${typeId}`);
   const categoryIds = idList(value.categoryIds);

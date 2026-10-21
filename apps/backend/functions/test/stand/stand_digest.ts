@@ -11,6 +11,7 @@ import {
 import { contentCollections } from '../../src/modules/content/infrastructure/firestore_content_repository.js';
 import { mediaCollections } from '../../src/modules/media/infrastructure/firestore_media_repository.js';
 import { moderationCollections } from '../../src/modules/moderation/infrastructure/firestore_moderation_repository.js';
+import { findPeopleIdentityCollections } from '../../src/modules/identity_publisher/infrastructure/find_people_privacy_authority.js';
 import { standManifestCollection } from './stand_content_event.js';
 import { standScenarioSeedInstallation } from './stand_content_scenario.js';
 import { isAuthUserNotFound } from './stand_guard.js';
@@ -43,6 +44,9 @@ export const digestCollections: readonly string[] = Object.freeze(
       moderationCollections.staffAuthority,
       // C3: the seeded Event is created through Content, Media and moderation.
       ...seededContentCollections,
+      // D3.7: the seeded consent and synthetic 18+ attestations are domain state.
+      findPeopleIdentityCollections.consents,
+      findPeopleIdentityCollections.ageAttestations,
       standManifestCollection,
     ]),
   ].sort(),
@@ -221,6 +225,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
     [manifest?.contentScenario as Record<string, unknown> | undefined, 'seed-scenario'],
     [manifest?.contentClassWorkshop as Record<string, unknown> | undefined, 'seed-class-workshop'],
+    [manifest?.contentFindPeople as Record<string, unknown> | undefined, 'seed-find-people'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
     [manifest?.contentRental as Record<string, unknown> | undefined, 'seed-rental'],
     [collection, 'seed-collection'],

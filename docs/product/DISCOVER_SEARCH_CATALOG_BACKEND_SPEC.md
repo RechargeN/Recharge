@@ -421,6 +421,11 @@ not expose private/unlisted/protected fields. Explicit-ID unlisted resolution,
 if enabled, validates BCK-07 visibility/authorization and uses a separate
 non-indexed path.
 
+Local exception (D3.7, Review, Emulator only): behind `catalog.findPeople`,
+Find People is projected from its server-built public body (~1 km cell centre)
+and every Feed/Search/Map/Details read re-checks Content's pointer, BCK-06
+consent, the synthetic 18+ attestation of host and viewer, meeting end, K2 and
+T&S; see [D3.7 §6](D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md). Otherwise,
 Find People and age-sensitive projection/query paths remain disabled until
 applicable OD-11/Legal/Privacy policy is Accepted and enforced upstream and in
 projection allowlists. Exact/private/live user location is never catalog data.

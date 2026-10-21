@@ -1,8 +1,8 @@
 # Recharge Backend — Content Publication Specification
 
 - ID: **BCK-07**
-- Version: **0.16**
-- Date: **2026-10-19**
+- Version: **0.17**
+- Date: **2026-10-20**
 - Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
 - Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
 - Accountable owner: **Content Platform owner**
@@ -16,6 +16,17 @@
 
 ## 0. Changelog
 
+### v0.17 — 2026-10-20 — common local integration (Review)
+
+- Consolidates the previously owner-authorized D3.5 Session, D3.6 CW-V1 and
+  D3.7 Find People contracts on the common I1/I2/Scenario publication base;
+  no new product scope, authority, type enablement or production permission.
+- Class keeps §47/§47.1; Find People moves from its branch-local §47 to §48.
+  Registry v9 records their combined availability; independent default-off
+  flags and each source's publisher/visibility policy remain unchanged.
+- Current common-build validation and acceptance boundary:
+  [28–29 evidence](../verification/T1_T2_COMMON_VERIFICATION.md).
+
 ### v0.16 — 2026-10-19
 
 - records the explicit owner decision T2 (CLS-OD-01…10) and the Approved
@@ -24,6 +35,11 @@
 - the owner then accepted the D3.6 §6 file plan and Event Classification
   2.2.4 (§47.1); bounded local/LV Emulator implementation is authorized,
   default-off; no production, commit, push or deployment.
+- records the T3 owner decisions FP-OD-01…04 and adds the D3.7 Find People
+  amendment (§48): the draft body is the private source, publication stores a
+  server-built public projection (~1 km cell centre), and submit, approved
+  publish, immutable activate and every exact-ID read check BCK-06 consent and
+  the synthetic 18+ attestation; local/LV Emulator only, default-off.
 
 ### v0.15 — 2026-10-18
 
@@ -2069,6 +2085,19 @@ backend local 1059 and Flutter analyze/full test 1665 (71 env skips). Details:
 This parent and D3.5 remain Review; no commit/push/deploy is authorized.
 
 
+### 46.2 Session immutable source-read boundary — 28 revalidation
+
+BCK-07 §10 defines `getPublishedRevision` as an **authorized immutable source
+snapshot**, not a public Session DTO. Session §11.3/§18 and D3.5 §3 Privacy
+keep exception private notes/audit and private source fields out of public
+responses. The Session query therefore requires the exact personal Publisher
+and a fresh Identity owner-service `read` authorization; foreign readers get
+`not_found` without source data. The original body/hash/revision is retained,
+so author reads and immutable activation remain lossless. The existing public
+Collection evaluator keeps its allowlist; no second projection/aggregate or
+new public Details endpoint is introduced. Integration and real HTTP privacy
+regressions are recorded in [28–29 evidence](../verification/T1_T2_COMMON_VERIFICATION.md).
+
 ## 47. D3.6 amendment — Class / Workshop, local Emulator only
 
 Owner decision: 2026-10-19, recorded in
@@ -2084,7 +2113,7 @@ Implemented validator:
 `apps/backend/functions/src/modules/content/domain/type_rules/class_workshop_rules.ts`;
 shared fixture:
 `packages/api_contracts/schema/content/v1/fixtures/class_workshop_create_compat.json`.
-Registry v8 makes `class_workshop` available only behind the independent,
+Combined registry v9 (T2 originally v8) makes `class_workshop` available only behind the independent,
 default-off `content.class_workshop.authoring` flag, local/LV Emulator only.
 Personal publisher is resolved by the Identity owner; C3 Content, C2 review,
 C1/D2 Media and the existing config-driven mobile Create flow (Q4 D3.1) apply.
@@ -2118,7 +2147,7 @@ After the documentation-only checkpoint, the owner answered «все прини�
 explicitly accepting the D3.6 §6 file plan and the Event Classification
 revision 2.2.4 (Class / Workshop boundary in §1.1, §1.2, §6.2). Bounded
 implementation and local Emulator gates are authorized within D3.6 §6.
-Implemented: Class source rules (`class_workshop_rules.ts`), registry v8 with a
+Implemented: Class source rules (`class_workshop_rules.ts`), combined registry v9 with a
 personal-only available `class_workshop`, independent default-off
 `content.class_workshop.authoring`, submit/publish future-occurrence check and
 immutable-target validation on activate. Other types' enablement is unchanged.
@@ -2129,3 +2158,30 @@ This parent and D3.6 remain Review. Implementation commits `f083d7c`, `ef1356c`,
 `0f80e12`, `32cc0d3` and documentation checkpoint `bed7b05` were subsequently
 authorized locally. The final contract correction is uncommitted; no new commit,
 push, merge or deploy is authorized by this closeout.
+## 48. D3.7 amendment — Find People, local Emulator only
+
+Owner decisions FP-OD-01…04 (T3 chat, 2026-10-19) are recorded in
+[D3.7 §1](D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md). They are a local owner
+policy, not OD-11 acceptance, Legal/Privacy approval or production
+authorization. D3.7 and this parent stay **Review**.
+
+`find_people` is available in combined registry v9 (T3 originally v8) with
+`apps/backend/functions/src/modules/content/domain/type_rules/find_people_rules.ts`;
+`visibilityPolicy` stays `consent_limited`, so Library, Collection membership
+and Reviews keep refusing it. The draft body is the private source: exact
+meeting data lives only in `findPeople.meeting.exact` and only its author reads
+it (`getDraft`, `getPublicationStatus`, every change; also inside a Page).
+`publishApprovedRevision` stores a new body built from an allowlist with the
+server-computed ~1 km cell centre; its `bodyHash` is over that public body.
+Activation validates exactly the immutable public body. Submit, approved
+publish and activate refuse `age_eligibility_required` without a current
+synthetic 18+ attestation and `privacy_consent_required` without active,
+unexpired BCK-06 consent; owner withdraw needs neither. A delegated module
+never authors Find People. `getPublishedRevision` applies the same fresh gate
+as the Catalog (§6 of D3.7).
+
+Retention: `find_people_private_location_retention.ts` erases `meeting.exact`
+from the draft and from its stored create/update answers 30 days after the
+earliest of consent revoke or expiry, meeting end and owner hide; never behind
+a feature flag. Only owner-service commands change domain state; no messaging,
+participation, live tracking or production infrastructure is added.

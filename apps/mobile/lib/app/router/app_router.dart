@@ -1,6 +1,8 @@
 import '../di/session_publication_composition.dart';
 import '../di/class_workshop_publication_composition.dart';
 import '../presentation/class_workshop_publication_panel.dart';
+import '../di/find_people_publication_composition.dart';
+import '../presentation/find_people_publication_panel.dart';
 import '../presentation/session_publication_panel.dart';
 import '../presentation/scenario_publication_panel.dart';
 import '../di/scenario_publication_composition.dart';
@@ -341,6 +343,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       // Default-off Place publication test entry (D3.1), the same rule with
       // its own guard and define.
+      GoRoute(
+        name: 'test_find_people_publication',
+        path: RouteNames.testFindPeoplePublication,
+        redirect: (BuildContext context, GoRouterState state) =>
+            findPeoplePublicationTestEntryRedirect(
+              sl.isRegistered<FindPeoplePublicationTestEntryGuard>()
+                  ? sl<FindPeoplePublicationTestEntryGuard>()
+                  : null,
+              fallback: RouteNames.discover,
+            ),
+        builder: (BuildContext context, GoRouterState state) =>
+            const FindPeoplePublicationPage(),
+      ),
       GoRoute(
         name: 'test_session_publication',
         path: RouteNames.testSessionPublication,

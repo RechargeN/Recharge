@@ -6,6 +6,13 @@ import type {
   PublishedObjectMembershipStatus,
 } from './ports/published_object_membership_port.js';
 import { publicValidationDetails } from '../domain/validation_details.js';
+import {
+  findPeopleHostUserId,
+  findPeopleMeetingEnd,
+  findPeoplePublicBody,
+  validateFindPeoplePublishedBody,
+} from '../domain/type_rules/find_people_rules.js';
+import type { FindPeoplePrivacyPort } from './ports/find_people_privacy_port.js';
 import type {
   ApplyModerationDispositionCommandV1,
   ChangeClass,
@@ -168,6 +175,11 @@ export interface ContentPublicationServiceDeps {
    * so the pointer, revisions and effects stay as they are (D3.3 §2 Q4).
    */
   readonly activationClosedTypes?: ReadonlySet<ContentTypeId>;
+  /**
+   * D3.7: consent, synthetic 18+ attestation and the public read gate of Find
+   * People. Without it every Find People path fails closed.
+   */
+  readonly findPeoplePrivacy?: FindPeoplePrivacyPort;
 }
 
 export type ContentCommandData =
@@ -447,12 +459,15 @@ export class ContentPublicationService {
             const draft = await tx.draft(query.payload.draftId);
             if (draft === null) throw new ContentDomainRefusal('not_found');
             await this.authorize(context, draft.publisherRef, draft.typeId, 'read', draft.marketId);
+            // D3.7 §4: the private source is read by its author only.
+            this.assertFindPeopleAuthor(context, draft);
             return succeeded<ContentQueryData>(draft);
           }
           case 'getPublicationStatus': {
             const draft = await tx.draftByContentId(query.payload.contentId);
             if (draft === null) throw new ContentDomainRefusal('not_found');
             await this.authorize(context, draft.publisherRef, draft.typeId, 'read', draft.marketId);
+            this.assertFindPeopleAuthor(context, draft);
             const status: PublicationStatusV1 = deepFreeze({
               contentId: draft.contentId,
               pointer: await tx.pointer(draft.contentId),
@@ -483,6 +498,8 @@ export class ContentPublicationService {
                 revision.marketId,
               );
             }
+            if (revision.typeId === 'find_people')
+              await this.assertFindPeoplePublicRead(actor.userId, revision, nowUtc);
             return succeeded<ContentQueryData>(revision);
           }
           case 'getImportBinding':
@@ -558,6 +575,8 @@ export class ContentPublicationService {
     if (!entry.allowedPublisherTypes.includes(payload.publisherRef.type))
       throw new ContentDomainRefusal('publisher_not_eligible');
     await this.authorize(context, payload.publisherRef, payload.typeId, 'create', payload.marketId);
+    if (payload.typeId === 'find_people')
+      await this.assertFindPeopleActor(context, payload.marketId, null);
     const { principal } = context;
     if (principal.kind === 'delegated' && payload.origin !== undefined) {
       // One external source record is bound to at most one Content draft.
@@ -662,6 +681,7 @@ export class ContentPublicationService {
     this.usableType(draft.typeId, draft.typeSchemaMajor);
     this.assertBoundToCaller(context, draft);
     await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
+    await this.assertFindPeopleActor(context, draft.marketId, draft);
     const references = await this.pin(draft.marketId, draft.typeId, context.nowUtc);
     const updated = updateContentDraftBody(
       draft,
@@ -692,6 +712,7 @@ export class ContentPublicationService {
       draft.marketId,
     );
     assertSubmittable(draft, payload.expectedDraftRevision);
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
     await this.assertChangeClass(context, draft, payload.changeClass);
     const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
     const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
@@ -766,6 +787,7 @@ export class ContentPublicationService {
       'publish',
       submission.marketId,
     );
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
     // Membership is read again: the submit-time answer is not reused.
     const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
@@ -783,7 +805,12 @@ export class ContentPublicationService {
     const revision = createPublishedRevision({
       publishedRevisionId: this.deps.ids.newId(),
       revisionNumber: existing.length + 1,
-      draft,
+      // D3.7 §3.2: Find People publishes the server-built public projection,
+      // never the private source; the validator above guaranteed its policy.
+      draft:
+        draft.typeId === 'find_people'
+          ? { ...draft, body: findPeoplePublicBody(draft.body, this.findPeopleGeo(resolved)) }
+          : draft,
       submission,
       referenceRevisions: references,
       mediaRevision: media.mediaRevision,
@@ -888,6 +915,7 @@ export class ContentPublicationService {
     if (this.deps.activationClosedTypes?.has(draft.typeId) === true)
       throw new ContentDomainRefusal('type_disabled');
     await this.authorize(context, draft.publisherRef, draft.typeId, 'publish', draft.marketId);
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
     const target = await tx.publishedRevision(payload.publishedRevisionId);
     if (target === null || target.contentId !== payload.contentId)
       throw new ContentDomainRefusal('not_found');
@@ -895,9 +923,15 @@ export class ContentPublicationService {
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
     const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
     // D3.5/D3.6/SCN-PUB-01: revalidate the immutable target, never the draft.
-    if (target.typeId === 'session' || target.typeId === 'class_workshop' || target.typeId === 'scenario') {
-      if (target.typeId !== 'class_workshop' &&
-        canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions))
+    if (
+      target.typeId === 'session' ||
+      target.typeId === 'class_workshop' ||
+      target.typeId === 'scenario'
+    ) {
+      if (
+        target.typeId !== 'class_workshop' &&
+        canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions)
+      )
         throw new ContentDomainRefusal('source_revision_stale');
       const membership = await this.collectionMembership(
         target.typeId,
@@ -915,6 +949,20 @@ export class ContentPublicationService {
         ),
       ) ?? ['no_source_contract'];
       this.assertSourceIssues(target.typeId, issues);
+    }
+    // D3.7 §8: Find People re-checks exactly the immutable public body.
+    if (target.typeId === 'find_people') {
+      const issues = validateFindPeoplePublishedBody(
+        target.body,
+        this.validationContext(
+          { ...draft, body: target.body },
+          resolved,
+          nowUtc,
+          principalId(context.principal),
+        ),
+      );
+      if (issues.length > 0)
+        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
     }
     // The composition's rules apply to the target immutable body, not the draft.
     this.assertCompositionRules(
@@ -1187,6 +1235,88 @@ export class ContentPublicationService {
     const expected = same ? payloadOf(current.body).schedule.schedule_revision : maximum + 1;
     if (next.schedule.schedule_revision !== expected)
       throw new ContentDomainRefusal('source_revision_stale');
+  }
+
+  /** D3.7 §4: only the draft's author reads or changes a Find People source. */
+  private assertFindPeopleAuthor(context: CommandContext, draft: ContentDraft): void {
+    if (draft.typeId !== 'find_people') return;
+    const { principal } = context;
+    if (principal.kind !== 'session' || principal.actor.userId !== draft.createdByUserId)
+      throw new ContentDomainRefusal('capability_denied');
+  }
+
+  /**
+   * D3.7 §7: the acting author of Find People must hold a current synthetic
+   * 18+ attestation (FP-OD-04) and, to submit, publish or activate, an active
+   * unexpired BCK-06 consent for exactly this publication. A missing port, a
+   * delegated module or a non-author is refused before anything is written.
+   */
+  private async assertFindPeopleActor(
+    context: CommandContext,
+    marketId: string,
+    draft: ContentDraft | null,
+    need?: 'consent',
+  ): Promise<void> {
+    if (draft !== null && draft.typeId !== 'find_people') return;
+    const { principal } = context;
+    if (principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+    if (draft !== null) this.assertFindPeopleAuthor(context, draft);
+    const privacy = this.deps.findPeoplePrivacy;
+    if (privacy === undefined) throw new ContentDomainRefusal('age_eligibility_required');
+    const userId = principal.actor.userId;
+    let adult = false;
+    try {
+      adult = await privacy.isAdult({ userId, marketId, nowUtc: context.nowUtc });
+    } catch {
+      adult = false;
+    }
+    if (!adult) throw new ContentDomainRefusal('age_eligibility_required');
+    if (need !== 'consent' || draft === null) return;
+    let state = 'unavailable';
+    try {
+      state = (
+        await privacy.consent({ contentId: draft.contentId, userId, nowUtc: context.nowUtc })
+      ).state;
+    } catch {
+      state = 'unavailable';
+    }
+    if (state !== 'active') throw new ContentDomainRefusal('privacy_consent_required');
+  }
+
+  /**
+   * D3.7 §6: an exact-ID read of a Find People revision is a public read; it
+   * applies the same fresh gate as the Catalog, including for the author.
+   */
+  private async assertFindPeoplePublicRead(
+    viewerUserId: string,
+    revision: PublishedRevision,
+    nowUtc: UtcInstant,
+  ): Promise<void> {
+    if (!this.deps.enabledTypes.has('find_people')) throw new ContentDomainRefusal('not_found');
+    let allowed = false;
+    try {
+      allowed =
+        (await this.deps.findPeoplePrivacy?.publicReadAllowed({
+          viewerUserId,
+          contentId: revision.contentId,
+          publisherRef: revision.publisherRef,
+          hostUserId: findPeopleHostUserId(revision.body),
+          meetingEndUtc: findPeopleMeetingEnd(revision.body),
+          nowUtc,
+        })) === true;
+    } catch {
+      allowed = false;
+    }
+    if (!allowed) throw new ContentDomainRefusal('not_found');
+  }
+
+  private findPeopleGeo(resolved: ResolvedReferences): {
+    readonly precisionMeters: number;
+    readonly policyRevision: string;
+  } {
+    const policy = resolved.lookups.findPeoplePublicGeo?.();
+    if (policy === undefined) throw new ContentDomainRefusal('policy_unavailable');
+    return policy;
   }
 
   private usableType(typeId: ContentTypeId, storedSchemaMajor?: number): ContentTypeRegistryEntry {

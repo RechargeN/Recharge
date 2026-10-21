@@ -209,3 +209,11 @@ owner acceptance of the whole parent or readiness of the full Class product.
 The out-of-scope production/device/commerce/recurrence limits above remain.
 The closeout changes two source/test files and four documents, uncommitted on
 `claude/t2-class-workshop` at `bed7b05`; no new commit, push, merge or deploy.
+
+## Common-build revalidation28–29 — 2026-10-20
+
+This file retains its original isolated-slice ledger. The final common I1/I2 +
+Session/Class + Scenario + Find People result, including the Session source-read
+privacy repair and repeated full Emulator/dedicated UI stands, is recorded in
+[common verification](../../../verification/T1_T2_COMMON_VERIFICATION.md).
+Technical gates are complete; bounded owner acceptance remains pending.

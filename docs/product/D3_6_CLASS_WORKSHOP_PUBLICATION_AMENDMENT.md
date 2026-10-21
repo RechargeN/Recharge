@@ -429,3 +429,21 @@ BCK-07 §47 и этот документ — Review; строка coverage matri
 в Accepted нет. Локальные коммиты: `f083d7c` (docs), `ef1356c` (backend),
 `0f80e12` (mobile), `32cc0d3` (stand/evidence); 72 файла без пересечений.
 Push, merge и deploy не выполнялись.
+
+
+## 10. Общая версия 28–29 — 2026-10-20
+
+Исторические base/worktree и числа §9 описывают исходный отдельный slice.
+Текущая проверка выполняется в изолированной общей копии поверх `9881c48`
+с итогом I1/I2 (26–27), CW-V1, Session, Scenario publication и существующим
+Find People WIP; исходные рабочие деревья сохранены. Основания владельца
+§1 не переутверждаются и scope не расширяется. Общий ledger и границы:
+[28–29 common verification](../verification/T1_T2_COMMON_VERIFICATION.md).
+Статус остаётся Review; окончательная приёмка bounded результата владельцем
+не подменяется прохождением технических gates. Commit/push/merge/deploy нет.
+
+
+Общие обязательные backend/Emulator и dedicated controller/UI gates повторены
+после Session source-read privacy repair и завершены. Clean/resumed/repeated,
+инварианты и verified cleanup прошли; готово к bounded-приёмке владельцем,
+статус Review сохранён. Подробности — общий ledger28–29 по ссылке выше.

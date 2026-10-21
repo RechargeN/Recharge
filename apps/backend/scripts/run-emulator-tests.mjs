@@ -182,6 +182,10 @@ const expectedBoundedCallableExports = [
   "routeQueryV1",
   "scenarioCommandV1",
   "scenarioQueryV1",
+  // D3.7: default-off, Emulator-only Find People consent and retention erasure.
+  "findPeopleConsentCommandV1",
+  "findPeopleConsentQueryV1",
+  "purgeFindPeoplePrivateLocationsV1",
   "moderationCommandV1",
   "moderationQueryV1",
   "reportCommandV1",

@@ -1166,6 +1166,27 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": []
+      },
+      {
+        "name": "identityFindPeopleConsents",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "identityFindPeopleConsentReceipts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "identityAgeAttestations",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
       }
     ]
   },

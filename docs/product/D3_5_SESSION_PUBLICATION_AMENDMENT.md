@@ -359,3 +359,31 @@ post-publication edit.
 providers. Scanner/processor — stand fakes, staff grants — test-only. Это
 PC-host evidence, не device/staging/production. Map picker/templates/l10n и
 production Identity/Privacy/Media gates остаются вне этого slice.
+
+
+## 10. Общая версия 28–29 — 2026-10-20
+
+Исторические base/worktree и числа §9 описывают исходный отдельный slice.
+Текущая проверка выполняется в изолированной общей копии поверх `9881c48`
+с итогом I1/I2 (26–27), CW-V1, Session, Scenario publication и существующим
+Find People WIP; исходные рабочие деревья сохранены. Основания владельца
+§1 не переутверждаются и scope не расширяется. Общий ledger и границы:
+[28–29 common verification](../verification/T1_T2_COMMON_VERIFICATION.md).
+Статус остаётся Review; окончательная приёмка bounded результата владельцем
+не подменяется прохождением технических gates. Commit/push/merge/deploy нет.
+
+
+Дополнительная контрактная сверка 28 выявила raw-source read gap:
+`getPublishedRevision` отдавал private_note/audit без Session owner-authorize.
+Исправление следует уже принятым BCK-07 §10, Session §11.3/§18 и строке Privacy
+§3: source читает только точный personal publisher после свежей Identity read
+проверки; чужой actor получает not_found. Body/hash не редактируются ради выдачи,
+public Collection allowlist сохраняется. Red-before/green-after regression и
+настоящая HTTP-проверка входят в обновлённое общее evidence; прежние gates до
+исправления не считаются финальным доказательством закрытия privacy.
+
+
+Общие обязательные backend/Emulator и dedicated controller/UI gates повторены
+после Session source-read privacy repair и завершены. Clean/resumed/repeated,
+инварианты и verified cleanup прошли; готово к bounded-приёмке владельцем,
+статус Review сохранён. Подробности — общий ledger28–29 по ссылке выше.

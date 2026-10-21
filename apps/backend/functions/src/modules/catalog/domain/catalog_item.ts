@@ -2,6 +2,7 @@ import type { EligiblePlaceLink } from './place_link.js';
 import type { TaxonomyDataset } from '../../reference_data/domain/taxonomy_dataset.js';
 import { projectActivity } from './activity_projection.js';
 import { projectScenario, type CatalogScenarioItem } from './scenario_projection.js';
+import { projectFindPeople, type CatalogFindPeopleItem } from './find_people_projection.js';
 import { bookingRefsFor } from '../../content/domain/event_internal_registration.js';
 import { catalogEnabledTypes, catalogPolicyRevisions } from './catalog_config.js';
 
@@ -147,8 +148,9 @@ export interface CatalogActivityItem {
   readonly publishedAtUtc: string;
   readonly searchText: string;
 }
-export type CatalogItem = CatalogEventItem | CatalogActivityItem | CatalogScenarioItem;
-export type { CatalogScenarioItem };
+export type CatalogItem =
+  CatalogEventItem | CatalogActivityItem | CatalogScenarioItem | CatalogFindPeopleItem;
+export type { CatalogScenarioItem, CatalogFindPeopleItem };
 
 export type ProjectionOutcome =
   | { readonly state: 'listed'; readonly item: CatalogItem }
@@ -193,6 +195,8 @@ export function projectFact(input: {
   readonly activityEnabled?: boolean;
   /** I3 / BCK08-OD-04-S: the local Scenario family switch (default off). */
   readonly scenarioEnabled?: boolean;
+  /** D3.7: the default-off local `catalog.findPeople` flag. */
+  readonly findPeopleEnabled?: boolean;
   readonly taxonomy?: TaxonomyDataset;
 }): ProjectionOutcome {
   const { fact, revision } = input;
@@ -203,13 +207,19 @@ export function projectFact(input: {
   )
     return { state: 'excluded', reason: fact.visibility };
   if (fact.visibility !== 'visible') return { state: 'excluded', reason: 'invalid_projection' };
+  const findPeople = fact.typeId === 'find_people' && input.findPeopleEnabled === true;
   if (
     !catalogEnabledTypes.has(fact.typeId) &&
     !(fact.typeId === 'activity' && input.activityEnabled === true) &&
-    !(fact.typeId === 'scenario' && input.scenarioEnabled === true)
+    !(fact.typeId === 'scenario' && input.scenarioEnabled === true) &&
+    !findPeople
   )
     return { state: 'excluded', reason: 'type_disabled' };
-  if (input.typeVisibilityPolicy !== 'public_catalog')
+  // D3.7: Find People is consent-limited; its consent is checked on every read.
+  if (
+    input.typeVisibilityPolicy !== 'public_catalog' &&
+    !(findPeople && input.typeVisibilityPolicy === 'consent_limited')
+  )
     return { state: 'excluded', reason: 'consent_limited' };
   if (
     revision === null ||
@@ -222,6 +232,7 @@ export function projectFact(input: {
   )
     return { state: 'excluded', reason: 'invalid_projection' };
   const body = revision.body;
+  if (fact.typeId === 'find_people') return projectFindPeople(fact, revision);
   // Activity has no authoring visibility field: the public pointer and registry own it.
   if (fact.typeId === 'activity') {
     if (body.visibility !== undefined) return { state: 'excluded', reason: 'invalid_projection' };

@@ -15,6 +15,7 @@ import { CatalogSets } from '../application/catalog_sets.js';
 import type { ContentCatalogSource } from '../application/ports.js';
 import { ContentFeedCatalogSource, ReferenceDataRevisions } from './content_catalog_source.js';
 import { FirestoreCatalogRepository } from './firestore_catalog_repository.js';
+import { FirestoreFindPeoplePrivacy } from '../../content/infrastructure/find_people_privacy_adapter.js';
 
 /**
  * Local Catalog on the Emulator (E1). It has no Functions entry and no
@@ -27,6 +28,8 @@ export function createEmulatorCatalogComposition(
   options: {
     readonly viewerId?: string;
     readonly clock?: ServerClock;
+    /** D3.7: the local `catalog.findPeople` flag, read by the caller (default off). */
+    readonly findPeopleEnabled?: boolean;
     readonly environment?: NodeJS.ProcessEnv;
     /** Tests wrap the source to simulate an unavailable read. */
     readonly source?: (source: ContentCatalogSource) => ContentCatalogSource;
@@ -69,12 +72,15 @@ export function createEmulatorCatalogComposition(
   // SCN-PUB-01 SP-08: exact-id status of Scenario stops. Read-only; Content and
   // Planning ask it only behind their own Scenario flags.
   const scenarioStops = new PublishedObjectLinkService(source, true, safetyAllowed);
+  const findPeopleEnabled = options.findPeopleEnabled === true;
+  const findPeoplePrivacy = new FirestoreFindPeoplePrivacy(firestore);
   const projector = new CatalogProjector({
     repository,
     source,
     clock,
     activityEnabled,
     scenarioEnabled,
+    findPeopleEnabled,
   });
   const reconciler = new CatalogReconciler(repository, source, projector, clock);
   const sets = new CatalogSets(repository, source, projector, reconciler, clock);
@@ -86,6 +92,17 @@ export function createEmulatorCatalogComposition(
     placeLinks,
     publishedObjects,
     async (item, direct) => {
+      // D3.7 §6: no anonymous reads; the fresh gate decides every response.
+      if (item.typeId === 'find_people')
+        return findPeoplePrivacy.catalogItemVisible({
+          viewerUserId: options.viewerId,
+          contentId: item.contentId,
+          publishedRevisionId: item.publishedRevisionId,
+          publisherRef: item.publisherRef,
+          hostUserId: item.hostUserId,
+          meetingEndUtc: item.occurrences[0]?.endAtUtc ?? null,
+          nowUtc: clock.now().toISOString(),
+        });
       const user = await publisherUser(firestore, item.publisherRef);
       if (user === null)
         return !(await safetyRestricted(firestore, 'catalog', '', clock.now(), item.contentId));
@@ -96,6 +113,7 @@ export function createEmulatorCatalogComposition(
       return !(effects.blocked || effects.muted) || (direct && item.typeId === 'event');
     },
     { enabled: scenarioEnabled, stops: scenarioStops },
+    findPeopleEnabled,
   );
   return Object.freeze({
     repository,

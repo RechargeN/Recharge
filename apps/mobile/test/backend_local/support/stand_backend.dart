@@ -112,6 +112,22 @@ final class StandBackend {
   Future<Map<String, Object?>> sessionManifest() =>
       _stand(<String>['session', 'manifest']);
 
+  /// D3.7: seeds (or reuses) the stand Find People request: its flags, the
+  /// synthetic 18+ attestations of the stand creator and viewer, consent,
+  /// review, publish and Catalog delivery. Prints no JSON; exit code only.
+  Future<void> findPeopleSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'find-people',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'find-people seed failed: ${result.stderr}${result.stdout}',
+      );
+    }
+  }
+
   /// I3: seeds (or reuses) the stand Scenario and enables the Scenario flags
   /// on the stand only; prints no JSON, so only its exit code is checked.
   Future<void> scenarioSeed() async {
@@ -130,6 +146,15 @@ final class StandBackend {
   /// I3: the ids the owner services returned for the stand Scenario.
   Future<Map<String, Object?>> scenarioManifest() =>
       _stand(<String>['scenario', 'manifest']);
+
+  /// D3.7: the ids the owner services returned for the stand Find People.
+  Future<Map<String, Object?>> findPeopleManifest() =>
+      _stand(<String>['find-people', 'manifest']);
+
+  /// D3.7 owner-path fixtures run in the stand's trusted backend context:
+  /// `approve <submissionId>`, `deliver`, `attest <label> adult|minor|none`.
+  Future<Map<String, Object?>> findPeopleFixture(List<String> args) =>
+      _stand(<String>['find-people-fixture', ...args]);
 
   Future<void> placeSeed() async {
     final result = await Process.run(node, <String>[

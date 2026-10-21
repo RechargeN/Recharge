@@ -203,7 +203,7 @@ void test('Rental and Collection stay disabled under every Emulator authoring se
 });
 
 void test('types without a validator are refused as unsupported even next to Activity', async () => {
-  const unvalidated = ['route', 'find_people'] as const;
+  const unvalidated = ['route'] as const;
   const content = service(new InMemoryContentRepository(), [...unvalidated, 'activity']);
   for (const typeId of unvalidated)
     await refusedWith(content.execute(actorA, create(typeId)), 'content_type_unsupported', typeId);

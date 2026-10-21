@@ -53,6 +53,8 @@ export interface CatalogProjectorDependencies {
   readonly clock: ServerClock;
   readonly activityEnabled?: boolean;
   readonly scenarioEnabled?: boolean;
+  /** D3.7: default-off local `catalog.findPeople`. */
+  readonly findPeopleEnabled?: boolean;
 }
 
 function canonical(value: unknown): string {
@@ -157,6 +159,7 @@ export class CatalogProjector {
     const outcome: ProjectionOutcome = projectFact({
       activityEnabled: this.#deps.activityEnabled === true,
       scenarioEnabled: this.#deps.scenarioEnabled === true,
+      findPeopleEnabled: this.#deps.findPeopleEnabled === true,
       ...(taxonomyRead?.ok ? { taxonomy: taxonomyRead.dataset } : {}),
       fact,
       revision,

@@ -15,6 +15,7 @@ import {
   placeRequiredCriteria,
   placeSubcategoryApplies,
 } from './emulator_place_taxonomy.js';
+import { findPeoplePolicy } from '../../../shared/find_people_policy.js';
 
 /** Local demo-recharge composition: synthetic LV market/localization and Place fixture;
  * Activity and Collection use the deterministic immutable BCK-20 artifact derived
@@ -57,8 +58,12 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
     const collection = input.typeId === 'collection';
     const session = input.typeId === 'session';
     const classWorkshop = input.typeId === 'class_workshop';
+    const findPeople = input.typeId === 'find_people';
     const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
-    if ((activity || rental || collection || session || classWorkshop) && !taxonomy.ok)
+    if (
+      (activity || rental || collection || session || classWorkshop || findPeople) &&
+      !taxonomy.ok
+    )
       return Promise.resolve({ ok: false, code: 'policy_unavailable' });
     const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
     return Promise.resolve({
@@ -67,7 +72,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
         marketConfigRevisionId: 'test-only-mc-lv-1',
         taxonomyRevisionId: place
           ? emulatorPlaceTaxonomyRevisionId
-          : activity || rental || collection || session || classWorkshop
+          : activity || rental || collection || session || classWorkshop || findPeople
             ? taxonomyRevisionId
             : 'test-only-tx-1',
         localizationRevisionId: 'test-only-loc-1',
@@ -75,6 +80,15 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
       market: { currencyCode: 'EUR', timezoneId: 'Europe/Riga' },
       lookups: {
         ...(session ? { sessionProjectionWindowDays: () => 30 } : {}),
+        // D3.7 FP-OD-02: the owner-decided ~1 km public cell, only for Find People.
+        ...(findPeople
+          ? {
+              findPeoplePublicGeo: () => ({
+                precisionMeters: findPeoplePolicy.publicGeoPrecisionMeters,
+                policyRevision: findPeoplePolicy.publicGeoPolicyRevision,
+              }),
+            }
+          : {}),
         supportsLocale: (locale: string) => ['en', 'ru', 'lv'].includes(locale),
         subcategoryApplies: (typeId: string, categoryId: string, subcategoryId: string) =>
           typeId === 'place'
@@ -91,8 +105,9 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
                   : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
                       typeId,
                     ) ?? false)
-                : typeId === 'collection'
-                  ? collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
+                : typeId === 'collection' || typeId === 'find_people'
+                  ? // Find People accepts any existing pair (spec v3.1 §3.3), like Collection.
+                    collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
                   : true,
         requiredCriteria: (typeId: string, categoryId: string, subcategoryId: string) => {
           if (typeId === 'place') return placeRequiredCriteria(categoryId, subcategoryId);

@@ -158,6 +158,42 @@ async function main(args: readonly string[]): Promise<void> {
     }
     throw new Error('usage: session seed | verify | manifest | status');
   }
+  if (command === 'find-people') {
+    // D3.7: loaded only for this command, like the D3.x commands.
+    const { seedContentFindPeople, standFindPeopleStatus, verifyStandFindPeople } =
+      await import('./stand_content_find_people.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentFindPeople(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} find-people=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandFindPeople(firestore);
+      if (problems.length > 0)
+        throw new Error(`find-people invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified find-people invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentFindPeople;
+      if (manifest === undefined) throw new Error('stand Find People is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standFindPeopleStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: find-people seed | verify | manifest | status');
+  }
+  if (command === 'find-people-fixture') {
+    const { runFindPeopleFixture } = await import('./stand_content_find_people.js');
+    process.stdout.write(`${JSON.stringify(await runFindPeopleFixture(firestore, rest))}\n`);
+    return;
+  }
   if (command === 'place') {
     // D3.1: loaded only for this command, like the F1/F2 and D2 commands.
     const { seedContentPlace, standPlaceStatus, verifyStandPlace } =

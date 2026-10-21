@@ -119,11 +119,36 @@ final class CatalogCard {
     required this.price,
     required this.distanceMeters,
     this.activity,
+    this.findPeople,
   });
 
   factory CatalogCard.fromWire(Object? value) {
     final Map<String, Object?> map = _map(value, 'card');
     final Map<String, Object?> ref = _map(map['ref'], 'card.ref');
+    if (ref['typeId'] == 'find_people') {
+      final CatalogFindPeopleItem item = CatalogFindPeopleItem.fromWire(
+        <String, Object?>{...map, 'contentId': ref['contentId']},
+        card: true,
+      );
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: item.publicAreaLabel,
+        point: item.point,
+        timezoneId: item.timezoneId,
+        occurrenceId: item.occurrenceId,
+        startAtUtc: item.startAtUtc,
+        endAtUtc: item.endAtUtc,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        findPeople: item,
+      );
+    }
     if (ref['typeId'] == 'activity') {
       final CatalogActivityItem item = CatalogActivityItem.fromWire(
         <String, Object?>{
@@ -193,6 +218,7 @@ final class CatalogCard {
   final CatalogPrice? price;
   final double? distanceMeters;
   final CatalogActivityItem? activity;
+  final CatalogFindPeopleItem? findPeople;
 }
 
 final class CatalogFeedPage {
@@ -500,6 +526,151 @@ final class CatalogActivityItem {
   final ActivityCatalogFacts facts;
 }
 
+/// D3.7 Find People public projection: the point is the server-computed
+/// centre of a ~1 km cell, never the meeting point. Any field that could carry
+/// private meeting data is refused here as well (defence in depth): the client
+/// fails on such an answer instead of showing it.
+final class CatalogFindPeopleItem {
+  const CatalogFindPeopleItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.publicAreaLabel,
+    required this.point,
+    required this.precisionMeters,
+    required this.timezoneId,
+    required this.occurrenceId,
+    required this.startAtUtc,
+    required this.endAtUtc,
+    required this.applicationDeadlineUtc,
+    required this.skillLevel,
+    required this.languageCodes,
+    required this.targetGroupSize,
+    required this.costType,
+    required this.expectedSpendMinor,
+    required this.currencyCode,
+    this.fullDescription,
+    this.publisherType,
+    this.publisherId,
+    this.publishedAtUtc,
+  });
+
+  static const Set<String> _privateFields = <String>{
+    'exact',
+    'exactGeo',
+    'addressLine',
+    'exactAddressLine',
+    'placeName',
+    'meetingPlaceName',
+    'instructions',
+    'meetingInstructions',
+    'confirmations',
+  };
+
+  factory CatalogFindPeopleItem.fromWire(Object? value, {required bool card}) {
+    final Map<String, Object?> map = _map(value, 'findPeople');
+    for (final String field in map.keys) {
+      if (_privateFields.contains(field)) {
+        throw FormatException('catalog.findPeople.forbidden:$field');
+      }
+    }
+    if (!card &&
+        (map['typeId'] != 'find_people' ||
+            map['schemaRevision'] != 'catalog-find-people-projection-v1')) {
+      throw const FormatException('catalog.findPeople.schema');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    if (point == null ||
+        !point.latitude.isFinite ||
+        !point.longitude.isFinite ||
+        point.latitude.abs() > 90 ||
+        point.longitude.abs() > 180) {
+      throw const FormatException('catalog.findPeople.point');
+    }
+    final int precision = _int(map, 'publicGeoPrecisionMeters');
+    if (precision <= 0) {
+      throw const FormatException('catalog.findPeople.precision');
+    }
+    final Map<String, Object?> occurrence;
+    if (card) {
+      occurrence = _map(map['occurrence'], 'findPeople.occurrence');
+    } else {
+      final List<Object?> occurrences = _list(map, 'occurrences');
+      if (occurrences.length != 1) {
+        throw const FormatException('catalog.findPeople.occurrences');
+      }
+      occurrence = _map(occurrences.single, 'findPeople.occurrence');
+    }
+    final Map<String, Object?>? spend = map['expectedSpend'] == null
+        ? null
+        : _map(map['expectedSpend'], 'findPeople.expectedSpend');
+    final Map<String, Object?>? publisher = card
+        ? null
+        : _map(map['publisherRef'], 'findPeople.publisherRef');
+    final List<String> languages = <String>[];
+    for (final Object? code in _list(map, 'languageCodes')) {
+      if (code is! String || code.isEmpty) {
+        throw const FormatException('catalog.findPeople.languages');
+      }
+      languages.add(code);
+    }
+    return CatalogFindPeopleItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      fullDescription: card ? null : _string(map, 'fullDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      publicAreaLabel: _string(map, 'publicAreaLabel'),
+      point: point,
+      precisionMeters: precision,
+      timezoneId: _string(map, 'timezoneId'),
+      occurrenceId: _string(occurrence, 'id'),
+      startAtUtc: _instant(occurrence, 'startAtUtc'),
+      endAtUtc: _instant(occurrence, 'endAtUtc'),
+      applicationDeadlineUtc: _instant(map, 'applicationDeadlineUtc'),
+      skillLevel: _string(map, 'skillLevel'),
+      languageCodes: List<String>.unmodifiable(languages),
+      targetGroupSize: _int(map, 'targetGroupSize'),
+      costType: _string(map, 'costType'),
+      expectedSpendMinor: spend == null ? null : _int(spend, 'amountMinor'),
+      currencyCode: spend == null ? null : _string(spend, 'currencyCode'),
+      publisherType: publisher == null ? null : _string(publisher, 'type'),
+      publisherId: publisher == null ? null : _string(publisher, 'id'),
+      publishedAtUtc: card ? null : _instant(map, 'publishedAtUtc'),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String title;
+  final String shortDescription;
+  final String? fullDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final String publicAreaLabel;
+  final CatalogPoint point;
+  final int precisionMeters;
+  final String timezoneId;
+  final String occurrenceId;
+  final DateTime startAtUtc;
+  final DateTime endAtUtc;
+  final DateTime applicationDeadlineUtc;
+  final String skillLevel;
+  final List<String> languageCodes;
+  final int targetGroupSize;
+  final String costType;
+  final int? expectedSpendMinor;
+  final String? currencyCode;
+  final String? publisherType;
+  final String? publisherId;
+  final DateTime? publishedAtUtc;
+}
+
 /// `listed` carries the item; `excluded`/`absent` never do.
 final class CatalogDetails {
   const CatalogDetails({
@@ -508,6 +679,7 @@ final class CatalogDetails {
     required this.item,
     required this.changedSinceSnapshot,
     this.activity,
+    this.findPeople,
   });
 
   factory CatalogDetails.fromWire(Object? value) {
@@ -520,6 +692,7 @@ final class CatalogDetails {
         !<String>[
           'event',
           'activity',
+          'find_people',
         ].contains(_map(map['item'], 'item')['typeId'])) {
       throw const FormatException('catalog.details.typeId');
     }
@@ -537,6 +710,11 @@ final class CatalogDetails {
           state == 'listed' && _map(map['item'], 'item')['typeId'] == 'activity'
           ? CatalogActivityItem.fromWire(map['item'])
           : null,
+      findPeople:
+          state == 'listed' &&
+              _map(map['item'], 'item')['typeId'] == 'find_people'
+          ? CatalogFindPeopleItem.fromWire(map['item'], card: false)
+          : null,
       changedSinceSnapshot: changed,
     );
   }
@@ -545,6 +723,7 @@ final class CatalogDetails {
   final String? reason;
   final CatalogEventItem? item;
   final CatalogActivityItem? activity;
+  final CatalogFindPeopleItem? findPeople;
   final bool changedSinceSnapshot;
 }
 

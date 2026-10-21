@@ -1,6 +1,7 @@
 import type { StandContentSessionManifest } from './stand_content_session.js';
 import type { StandContentScenarioManifest } from './stand_content_scenario.js';
 import type { StandContentClassWorkshopManifest } from './stand_content_class_workshop.js';
+import type { StandContentFindPeopleManifest } from './stand_content_find_people.js';
 import { createHash } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 
@@ -43,6 +44,8 @@ export interface StandManifest {
   readonly contentScenario?: StandContentScenarioManifest;
   /** D3.6: written only by `stand-seed.mjs class-workshop seed`. */
   readonly contentClassWorkshop?: StandContentClassWorkshopManifest;
+  /** D3.7: written only by `stand-seed.mjs find-people seed`. */
+  readonly contentFindPeople?: StandContentFindPeopleManifest;
   /** D3.2: written only by `stand-seed.mjs activity seed`. */
   readonly contentActivity?: StandContentActivityManifest;
   /** D3.3: written only by `stand-seed.mjs rental seed`. */

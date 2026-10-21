@@ -23,6 +23,11 @@ class RouteNames {
   /// `ClassWorkshopPublicationTestEntryGuard`.
   static const String testClassWorkshopPublication =
       '/test/class-workshop-publication';
+
+  /// Default-off Find People publication test entry (D3.7); see
+  /// `FindPeoplePublicationTestEntryGuard`.
+  static const String testFindPeoplePublication =
+      '/test/find-people-publication';
   static const String testPlacePublication = '/test/place-publication';
 
   /// Default-off Recharge Activity publication test entry (D3.2); see

@@ -1777,6 +1777,15 @@ Find People sections регистрируются декларативно че�
 Нельзя размещать domain logic в `presentation`, Firebase DTO в domain или
 создавать прямой импорт `discover ↔ find_people ↔ create`.
 
+### Серверный возврат T3: D3.7 (Review, только local/LV Emulator)
+
+Ограниченный серверный subset этой спецификации (single, in_person, public,
+без заявок, co-hosts и медиа) реализован по решениям владельца FP-OD-01…04 —
+см. [D3.7](../D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md). Точная точка, название
+места, адрес и инструкции приватны; публично только центр ячейки ~1 км и
+`publicAreaLabel`. Это не меняет продуктовую модель спецификации и не открывает
+production.
+
 ### Разрешённый slice во время стабилизации: FP-CRT-FIND-01
 
 Это завершение одного из утверждённых 10 Create-блоков и не является новой

@@ -5,12 +5,14 @@ import '../../features/booking/data/booking_transport_runtime.dart';
 import '../../features/discover/data/datasources/catalog_query_port.dart';
 import '../../features/discover/data/repositories/catalog_discover_repository.dart';
 import '../../features/discover/data/repositories/catalog_published_event_discovery.dart';
+import '../../features/discover/data/repositories/catalog_published_find_people_discovery.dart';
 import '../../features/discover/data/repositories/catalog_snapshot_session.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
 import '../../features/discover/domain/entities/discover_query.dart';
 import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
 import '../../features/discover/domain/repositories/published_event_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_find_people_discovery_port.dart';
 import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
@@ -21,6 +23,12 @@ const bool activityLinkedPlaceTestEntryDefined = bool.fromEnvironment('RECHARGE_
 
 const bool activityCatalogTestEntryDefined = bool.fromEnvironment(
   'RECHARGE_TEST_ACTIVITY_CATALOG',
+);
+
+/// D3.7: Find People in the server Catalog, its own compile-time switch:
+/// `--dart-define=RECHARGE_TEST_FIND_PEOPLE_CATALOG=true`.
+const bool findPeopleCatalogTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_FIND_PEOPLE_CATALOG',
 );
 
 const String discoverCatalogCapabilityId = 'discover.catalog';
@@ -145,10 +153,40 @@ DiscoverRepository discoverRepositoryFor({
     marketId: marketId,
     currencyCode: currencyCode,
     activityEnabled: activityCatalogTestEntryDefined && !kReleaseMode,
+    findPeopleEnabled: findPeopleCatalogTestEntryDefined && !kReleaseMode,
   ),
   BackendBindingMode.localOnly => local(),
   BackendBindingMode.disabled => const DisabledDiscoverRepository(),
 };
+
+/// D3.7: Find People Details over the Catalog only under `testBackend` with its
+/// own define; otherwise the existing local projection (or a refusal).
+PublishedFindPeopleDiscoveryPort publishedFindPeopleDiscoveryFor({
+  required BackendBindingManifest manifest,
+  required PublishedFindPeopleDiscoveryPort Function() local,
+  required CatalogQueryPort port,
+  required CatalogSnapshotSession session,
+  bool enabled = findPeopleCatalogTestEntryDefined && !kReleaseMode,
+}) => switch (manifest.modeFor(discoverCatalogCapabilityId)) {
+  BackendBindingMode.testBackend when enabled =>
+    CatalogPublishedFindPeopleDiscovery(port: port, session: session),
+  BackendBindingMode.testBackend || BackendBindingMode.localOnly => local(),
+  BackendBindingMode.disabled => const _DisabledFindPeopleDiscovery(),
+};
+
+final class _DisabledFindPeopleDiscovery
+    implements PublishedFindPeopleDiscoveryPort {
+  const _DisabledFindPeopleDiscovery();
+
+  @override
+  Future<Never> getActiveFindPeopleRequest(String requestId) =>
+      Future<Never>.error(
+        const DiscoverException(
+          code: 'DISCOVER_DISABLED',
+          message: 'Discover недоступен',
+        ),
+      );
+}
 
 /// Event Details for the binding, on the same snapshot as the listing.
 PublishedEventDiscoveryPort publishedEventDiscoveryFor({

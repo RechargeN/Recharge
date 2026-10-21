@@ -22,6 +22,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     required String currencyCode,
     this.maxPages = 5,
     this.activityEnabled = false,
+    this.findPeopleEnabled = false,
     String Function()? newRequestId,
   }) : _port = port,
        _session = session,
@@ -39,12 +40,16 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
   final int maxPages;
   final bool activityEnabled;
 
+  /// D3.7: Find People requests are listed only while their own test entry is on.
+  final bool findPeopleEnabled;
+
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
     final Map<String, Object?> wire = catalogWireQuery(
       query,
       marketId: _marketId,
       activityEnabled: activityEnabled,
+      findPeopleEnabled: findPeopleEnabled,
     );
     final String queryType = wire.containsKey('literalText')
         ? 'search'
@@ -53,12 +58,13 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     String? snapshotToken;
     String? cursor;
     for (int page = 0; page < maxPages; page += 1) {
-      final CatalogFeedPage result = CatalogFeedPage.fromWire(
-        await _ask(queryType, <String, Object?>{
-          'query': wire,
-          if (snapshotToken != null) 'snapshotToken': snapshotToken,
-          if (cursor != null) 'cursor': cursor,
-        }),
+      final Object? body = await _ask(queryType, <String, Object?>{
+        'query': wire,
+        if (snapshotToken != null) 'snapshotToken': snapshotToken,
+        if (cursor != null) 'cursor': cursor,
+      });
+      final CatalogFeedPage result = _parse(
+        () => CatalogFeedPage.fromWire(body),
       );
       snapshotToken ??= result.snapshotToken;
       items.addAll(result.cards.map(_card));
@@ -71,16 +77,27 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
 
   @override
   Future<DiscoverItemEntity> getDetails(String itemId) async {
-    final CatalogDetails details = CatalogDetails.fromWire(
-      await _ask('details', <String, Object?>{
-        'contentId': itemId,
-        if (_session.snapshotToken != null &&
-            _session.query != null) ...<String, Object?>{
-          'snapshotToken': _session.snapshotToken,
-          'query': _session.query,
-        },
-      }),
+    final Object? detailsBody = await _ask('details', <String, Object?>{
+      'contentId': itemId,
+      if (_session.snapshotToken != null &&
+          _session.query != null) ...<String, Object?>{
+        'snapshotToken': _session.snapshotToken,
+        'query': _session.query,
+      },
+    });
+    final CatalogDetails details = _parse(
+      () => CatalogDetails.fromWire(detailsBody),
     );
+    if (details.findPeople != null) {
+      if (details.changedSinceSnapshot) {
+        throw const DiscoverException(
+          code: 'CATALOG_REVISION_CHANGED',
+          message:
+              'Версия изменилась. Обновите список и откройте объект снова.',
+        );
+      }
+      return _findPeople(details.findPeople!, null);
+    }
     if (details.activity != null) {
       if (details.changedSinceSnapshot) {
         throw const DiscoverException(
@@ -122,6 +139,19 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     );
   }
 
+  /// A body the client does not know (for Find People also any private
+  /// meeting field) is a typed refusal, never a partial listing.
+  static T _parse<T>(T Function() read) {
+    try {
+      return read();
+    } on FormatException {
+      throw const DiscoverException(
+        code: 'CATALOG_CONTRACT_INVALID',
+        message: 'Неподдерживаемый ответ каталога',
+      );
+    }
+  }
+
   Future<Object?> _ask(String queryType, Map<String, Object?> payload) async {
     final Map<String, Object?> raw;
     try {
@@ -155,7 +185,9 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     return answer.body;
   }
 
-  DiscoverItemEntity _card(CatalogCard card) => card.activity != null
+  DiscoverItemEntity _card(CatalogCard card) => card.findPeople != null
+      ? _findPeople(card.findPeople!, card.distanceMeters)
+      : card.activity != null
       ? _activity(card.activity!, card.distanceMeters)
       : _event(
           contentId: card.contentId,
@@ -174,6 +206,49 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
           price: card.price,
           distanceMeters: card.distanceMeters,
         );
+
+  /// D3.7: the MapObject point is exactly the server's ~1 km cell centre; the
+  /// client never moves it, never refines it and never reads device location.
+  DiscoverItemEntity _findPeople(CatalogFindPeopleItem item, double? distance) {
+    if (!findPeopleEnabled) {
+      throw const DiscoverException(
+        code: 'CATALOG_FIND_PEOPLE_DISABLED',
+        message: 'Find People Catalog отключён',
+      );
+    }
+    final int duration = item.endAtUtc.difference(item.startAtUtc).inMinutes;
+    final int? spend = item.expectedSpendMinor;
+    return DiscoverItemEntity(
+      id: item.contentId,
+      title: item.title,
+      subtitle: item.shortDescription,
+      city: '',
+      category: item.categoryId,
+      subcategory: item.subcategoryId,
+      startsAtUtc: item.startAtUtc,
+      latitude: item.point.latitude,
+      longitude: item.point.longitude,
+      priceAmount: spend != null && item.currencyCode != null
+          ? Money(minorUnits: spend, currencyCode: item.currencyCode!)
+          : Money.zero(_currencyCode),
+      distanceKm: (distance ?? 0) / 1000,
+      isFree: item.costType == 'free',
+      objectKind: DiscoverObjectKind.findPeople,
+      venueName: item.publicAreaLabel,
+      timezoneId: item.timezoneId,
+      durationMinutes: duration > 0 ? duration : null,
+      durationConfidence: DurationConfidence.exact,
+      availabilityKind: AvailabilityKind.eventSlots,
+      scheduleSlots: <TimeSlot>[
+        TimeSlot(
+          slotId: item.occurrenceId,
+          startAtUtc: item.startAtUtc,
+          endAtUtc: item.endAtUtc,
+        ),
+      ],
+      revisionRef: item.publishedRevisionId,
+    );
+  }
 
   DiscoverItemEntity _activity(CatalogActivityItem item, double? distance) {
     if (!activityEnabled) {
@@ -269,6 +344,7 @@ Map<String, Object?> catalogWireQuery(
   DiscoverQuery query, {
   required String marketId,
   bool activityEnabled = false,
+  bool findPeopleEnabled = false,
 }) {
   final List<String> unsupported = <String>[
     if (query.budgetMin != null) 'budgetMin',
@@ -292,7 +368,11 @@ Map<String, Object?> catalogWireQuery(
   return <String, Object?>{
     'schemaVersion': 1,
     'marketId': marketId,
-    'typeIds': <String>['event', if (activityEnabled) 'activity'],
+    'typeIds': <String>[
+      'event',
+      if (activityEnabled) 'activity',
+      if (findPeopleEnabled) 'find_people',
+    ],
     if (query.selectedCategoryIds.isNotEmpty)
       'categoryIds': query.selectedCategoryIds
           .map(normalizeRechargeContentGroupId)

@@ -10,7 +10,7 @@ enum DurationConfidence { exact, estimated, unknown }
 
 enum AvailabilityKind { eventSlots, openingHours, none }
 
-enum DiscoverObjectKind { place, event, route, activity }
+enum DiscoverObjectKind { place, event, route, activity, findPeople }
 
 class DiscoverItemEntity {
   const DiscoverItemEntity({
@@ -216,6 +216,7 @@ extension DiscoverItemCatalogType on DiscoverItemEntity {
       DiscoverObjectKind.activity => CatalogObjectType.activity,
       DiscoverObjectKind.place => CatalogObjectType.place,
       DiscoverObjectKind.route => CatalogObjectType.route,
+      DiscoverObjectKind.findPeople => CatalogObjectType.findPeople,
     };
   }
 }

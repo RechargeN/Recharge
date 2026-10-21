@@ -243,9 +243,18 @@ void test('Class flag off, missing authority and page publisher refuse before an
 
 void test('other Create types keep their own enablement next to Class', async () => {
   const w = world();
-  for (const typeId of ['session', 'place', 'activity', 'rental', 'collection', 'event'] as const)
+  for (const typeId of [
+    'session',
+    'place',
+    'activity',
+    'rental',
+    'collection',
+    'event',
+    'scenario',
+    'find_people',
+  ] as const)
     await rejected(w.service(['class_workshop']).execute(actorA, create(typeId)), 'type_disabled');
-  for (const typeId of ['route', 'scenario', 'find_people'] as const)
+  for (const typeId of ['route'] as const)
     await rejected(
       w.service(['class_workshop', typeId]).execute(actorA, create(typeId)),
       'content_type_unsupported',

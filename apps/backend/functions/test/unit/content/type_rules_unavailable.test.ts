@@ -15,10 +15,7 @@ import { FakeClock } from '../../support/fake_clock.js';
  * Types that stay registered but unavailable after 2.2b. Each has an explicit
  * reason; none may be served by a generic or Event fallback validator.
  */
-const stillUnavailable = [
-  ['find_people', 'consent_gate_pending'],
-  ['route', 'dependency_pending'],
-] as const;
+const stillUnavailable = [['route', 'dependency_pending']] as const;
 
 const actor = {
   userId: parseEntityId('018FQ2Z8Q9N4M7K2T6V3W1X5YA'),

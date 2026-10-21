@@ -25,6 +25,8 @@ export const notificationsFlagIds = Object.freeze({
 
 export const identityFlagIds = Object.freeze({
   establishSession: 'identity.session.establish',
+  /** D3.7: Emulator-only grant of Find People consent (default off; revoke is never gated). */
+  findPeopleConsent: 'identity.findPeople.consent',
 });
 
 export const mediaFlagIds = Object.freeze({
@@ -51,6 +53,8 @@ export const contentFlagIds = Object.freeze({
   scenarioAuthoring: 'content.scenario.authoring',
   /** D3.6: Emulator-only Class / Workshop authoring through Content (default off). */
   classWorkshopAuthoring: 'content.class_workshop.authoring',
+  /** D3.7: Emulator-only Find People authoring through Content (default off). */
+  findPeopleAuthoring: 'content.findPeople.authoring',
   /** E2.0: Emulator-only Event → Booking handoff (default off). */
   eventBookingHandoff: 'content.event.bookingHandoff',
   /** D2: Emulator-only reaction to late Media restriction or deletion (default off). */
@@ -61,6 +65,8 @@ export const contentFlagIds = Object.freeze({
 export const catalogFlagIds = Object.freeze({
   discoverRead: 'catalog.discover.read',
   delivery: 'catalog.delivery',
+  /** D3.7: Emulator-only Find People projection and read (default off). */
+  findPeople: 'catalog.findPeople',
 });
 
 export const abuseEmergencySwitchIds = Object.freeze({

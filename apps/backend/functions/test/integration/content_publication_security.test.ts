@@ -855,6 +855,8 @@ void test('delegated import never reaches Content storage except through the Con
     // J1 Route: Emulator guard and pure canonical hashing only.
     'modules/route/firestore_route_service.ts',
     'modules/route/route_contract.ts',
+    // D3.7: Identity checks the exact Find People draft author before consent.
+    'modules/identity_publisher/infrastructure/find_people_privacy_authority.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -932,6 +934,10 @@ void test('delegated import never reaches Content storage except through the Con
       'scenarioDistributionHash',
       'validateScenarioDistribution',
     ],
+    'modules/identity_publisher/infrastructure/find_people_privacy_authority.ts': [
+      'assertContentEmulatorContext',
+      'contentCollections',
+    ],
     'modules/trust_safety/firestore_safety_service.ts': [
       'assertContentEmulatorContext',
       'contentCollections',
@@ -958,6 +964,10 @@ void test('delegated import never reaches Content storage except through the Con
       'CatalogCollectionMembership',
       // I3 / SCN-PUB-01: Scenario stops asked from the same Catalog-owned evaluator.
       'CatalogScenarioStops',
+      // D3.7 §5–§6: the Find People privacy adapter and the retention erasure.
+      'FirestoreFindPeoplePrivacy',
+      'purgeFindPeoplePrivateLocations',
+      'FindPeopleRetentionReport',
     ],
     'media_effects_entry.ts': [
       'ContentMediaAvailability',
@@ -978,6 +988,8 @@ void test('delegated import never reaches Content storage except through the Con
       'ContentPublicationFeed',
       'FirestoreContentRepository',
       'EmulatorSyntheticReferenceData',
+      // D3.7 §6: the fresh Find People read gate (Content pointer, consent, age, K2).
+      'FirestoreFindPeoplePrivacy',
     ],
     'modules/catalog/infrastructure/firestore_catalog_repository.ts': [
       'assertContentEmulatorContext',
@@ -1065,6 +1077,9 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
     path.join('infrastructure', 'content_safety_commands.ts'),
     path.join('infrastructure', 'content_publication_feed.ts'),
     path.join('infrastructure', 'firestore_event_booking_handoff_repository.ts'),
+    // D3.7: the Emulator-only Find People privacy adapter and retention erasure.
+    path.join('infrastructure', 'find_people_privacy_adapter.ts'),
+    path.join('infrastructure', 'find_people_private_location_retention.ts'),
   ]);
   for (const file of files) {
     const text = readFileSync(file, 'utf8');

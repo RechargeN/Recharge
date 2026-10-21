@@ -91,6 +91,8 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/content_session_enablement.test.ts",
   // D3.6 (D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md §6.3): Class / Workshop enablement.
   "apps/backend/functions/test/integration/content_class_workshop_enablement.test.ts",
+  // D3.7 amendment §9: Find People enablement and privacy matrix.
+  "apps/backend/functions/test/integration/content_find_people_enablement.test.ts",
   // D4 (LOCAL_IMPORT_D4_AMENDMENT.md §8): one draft per local import source.
   "apps/backend/functions/test/integration/content_local_import.test.ts",
   // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §5): import rollback and cleanup fencing.

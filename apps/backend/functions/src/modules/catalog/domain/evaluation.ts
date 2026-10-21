@@ -34,7 +34,7 @@ export function occurrenceState(occurrence: CatalogOccurrence, nowMs: number): O
 
 /** The earliest not-ended occurrence (inside the window when one is applied). */
 export function decidingOccurrence(
-  item: CatalogEventItem,
+  item: Pick<CatalogEventItem, 'occurrences'>,
   nowMs: number,
   window: DiscoverQuery['timeWindow'],
 ): CatalogOccurrence | null {
@@ -149,10 +149,15 @@ export function evaluate(item: CatalogItem, query: DiscoverQuery, nowMs: number)
           : [0, nowMs, 0, item.contentId],
     };
   }
-  if (query.wheelchairAccessible && !item.wheelchairAccessible)
+  if (item.typeId === 'find_people') {
+    // D3.7: price and accessibility facts are not part of the Find People projection.
+    if (query.free || query.maxAmountMinor !== null || query.wheelchairAccessible)
+      return { eligible: false, reason: 'find_people_filter_inapplicable' };
+  } else if (query.wheelchairAccessible && !item.wheelchairAccessible)
     return { eligible: false, reason: 'accessibility' };
-  if (query.free && item.price?.mode !== 'free') return { eligible: false, reason: 'price' };
-  if (query.maxAmountMinor !== null) {
+  if (item.typeId !== 'find_people' && query.free && item.price?.mode !== 'free')
+    return { eligible: false, reason: 'price' };
+  if (item.typeId !== 'find_people' && query.maxAmountMinor !== null) {
     const price = item.price;
     const fits =
       price !== null &&

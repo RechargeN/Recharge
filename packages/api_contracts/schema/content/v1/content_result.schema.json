@@ -32,7 +32,9 @@
         "cleanup_reserved",
         "cleanup_not_reserved",
         "cleanup_token_mismatch",
-        "original_removed"
+        "original_removed",
+        "privacy_consent_required",
+        "age_eligibility_required"
       ]
     },
     "validationViolation": {

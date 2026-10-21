@@ -32,6 +32,11 @@ import { ScenarioShareModerationAdapter } from './modules/moderation/infrastruct
 import type { EntityId } from './shared/ids.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 import { mediaComposition } from './media_entry.js';
+import { FirestoreFindPeoplePrivacy } from './modules/content/infrastructure/find_people_privacy_adapter.js';
+import {
+  purgeFindPeoplePrivateLocations,
+  type FindPeopleRetentionReport,
+} from './modules/content/infrastructure/find_people_private_location_retention.js';
 
 /**
  * Types the Emulator-only authoring path may ever enable: Event (C3), Place
@@ -48,6 +53,8 @@ export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
   // I3 / SCN-PUB-01: public Scenario pinned to an immutable BCK-10 revision.
   'scenario',
   'class_workshop',
+  // D3.7: Find People, with BCK-06 consent and the synthetic 18+ attestation.
+  'find_people',
 ]);
 
 /** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
@@ -60,6 +67,7 @@ export function authoringTypesFor(flags: {
   readonly sessionAuthoring?: boolean;
   readonly scenarioAuthoring?: boolean;
   readonly classWorkshopAuthoring?: boolean;
+  readonly findPeopleAuthoring?: boolean;
 }): ReadonlySet<ContentTypeId> {
   return new Set<ContentTypeId>([
     ...(flags.eventAuthoring ? (['event'] as const) : []),
@@ -70,6 +78,7 @@ export function authoringTypesFor(flags: {
     ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
     ...(flags.scenarioAuthoring === true ? (['scenario'] as const) : []),
     ...(flags.classWorkshopAuthoring === true ? (['class_workshop'] as const) : []),
+    ...(flags.findPeopleAuthoring === true ? (['find_people'] as const) : []),
   ]);
 }
 
@@ -159,6 +168,7 @@ export function eventAuthoringComposition(
       publishedObjectMembership: new CatalogCollectionMembership(catalog.publishedObjects),
       scenarioRevisions: new FirestoreScenarioRevisionReader(firestore),
       scenarioStops: new CatalogScenarioStops(catalog.scenarioStops),
+      findPeoplePrivacy: new FirestoreFindPeoplePrivacy(firestore),
     },
   });
   const moderation = createEmulatorModerationService({
@@ -178,6 +188,17 @@ export function eventAuthoringComposition(
 /** SCN-PUB-01 SP-08: Catalog-owned status of Scenario stops, for Planning. */
 export function scenarioStopsFor(firestore: Firestore): CatalogScenarioStops {
   return new CatalogScenarioStops(createEmulatorCatalogComposition(firestore).scenarioStops);
+}
+
+/**
+ * D3.7 §5.3: the Content-owned erasure of exact Find People meeting data,
+ * exposed for the Emulator schedule and the stand. Never behind a feature flag.
+ */
+export function purgeFindPeopleRetention(
+  firestore: Firestore,
+  nowUtc: string,
+): Promise<FindPeopleRetentionReport> {
+  return purgeFindPeoplePrivateLocations(firestore, nowUtc);
 }
 
 /** Server-resolved caller. The Session was already validated by the access authority. */

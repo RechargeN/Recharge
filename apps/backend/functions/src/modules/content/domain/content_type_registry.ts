@@ -15,12 +15,13 @@ import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js
 import { eventMediaIds, validateEventBody } from './type_rules/event_rules.js';
 import { eventTransitionIssues } from './event_internal_registration.js';
 import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
+import { findPeopleMediaIds, validateFindPeopleBody } from './type_rules/find_people_rules.js';
 import type { ContentValidationContext } from './type_rules/validation_context.js';
 
 export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
 
 /** Bump when an entry's policy or availability changes; pinned by tests. */
-export const contentTypeRegistryRevision = 'content-type-registry-v8';
+export const contentTypeRegistryRevision = 'content-type-registry-v9';
 
 /** How the publication adapter obtains and pins the type's source. */
 export type ContentSourceResolver =
@@ -201,12 +202,14 @@ const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
     sourceResolver: 'pinned_immutable_revision',
     rules: { validate: validateScenarioBody, mediaIds: scenarioMediaIds },
   }),
+  // D3.7: the draft body is the private source; publication stores a server-built
+  // public projection, and every read checks BCK-06 consent and age (§5–§6).
   entry('find_people', {
     discoverFamily: 'Find People',
-    sourceAuthority: 'BCK-06 purpose-limited consented profile revision',
-    sourceResolver: 'pinned_immutable_revision',
+    sourceAuthority: 'Find People create block v3.1, bounded T3 subset (D3.7) + BCK-06 consent',
+    sourceResolver: 'inline_body',
     visibilityPolicy: 'consent_limited',
-    unavailable: { reason: 'consent_gate_pending', dependency: 'BCK-06 + OD-11' },
+    rules: { validate: validateFindPeopleBody, mediaIds: findPeopleMediaIds },
   }),
   entry('class_workshop', {
     discoverFamily: 'Class/Workshop',

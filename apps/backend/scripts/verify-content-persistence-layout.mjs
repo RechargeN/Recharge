@@ -45,6 +45,9 @@ const allowedCloud = new Set(
     "content_publication_feed.ts",
     "firestore_event_booking_handoff_repository.ts",
     "content_safety_commands.ts",
+    // D3.7: Emulator-only privacy reads and Content-owned retention.
+    "find_people_privacy_adapter.ts",
+    "find_people_private_location_retention.ts",
   ].map((name) => path.join("modules", "content", "infrastructure", name)),
 );
 for (const file of sourceFiles(path.join(functionsSrc, "modules", "content"))) {
@@ -77,6 +80,14 @@ const guardOnly = {
 const approvedOutsideUsers = {
   // K3 borrows only the Emulator guard, never Content storage symbols.
   "modules/admin_support/admin_support_service.ts": guardOnly,
+  // D3.7: consent checks draft ownership; never writes Content.
+  "modules/identity_publisher/infrastructure/find_people_privacy_authority.ts":
+    {
+      firestore_content_repository: [
+        "assertContentEmulatorContext",
+        "contentCollections",
+      ],
+    },
   "content_entry.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
     emulator_content_composition: ["createEmulatorContentService"],

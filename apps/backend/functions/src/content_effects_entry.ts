@@ -5,6 +5,7 @@ import { mediaVerificationEffectConsumer } from './media_effects_entry.js';
 import { createEmulatorEventBookingHandoff } from './modules/content/infrastructure/firestore_event_booking_handoff_repository.js';
 import { catalogFlagIds, contentFlagIds } from './shared/feature_flags.js';
 import type { ServerClock } from './shared/server_clock.js';
+import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
 
 export interface EffectFlagPort {
   isEnabled(flagId: string): Promise<boolean>;
@@ -38,10 +39,13 @@ export function catalogEffectConsumer(clock?: ServerClock): ContentEffectConsume
     name: 'catalog',
     flagId: catalogFlagIds.delivery,
     async run(firestore) {
-      const catalog = createEmulatorCatalogComposition(
-        firestore,
-        clock === undefined ? {} : { clock },
-      );
+      const catalog = createEmulatorCatalogComposition(firestore, {
+        ...(clock === undefined ? {} : { clock }),
+        // D3.7: Find People is projected only while its own local flag is on.
+        findPeopleEnabled: await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
+          catalogFlagIds.findPeople,
+        ),
+      });
       const active = await catalog.sets.ensureActive();
       const report = await catalog.projector.deliverFromContent(active.setId);
       return report.stoppedAt === null

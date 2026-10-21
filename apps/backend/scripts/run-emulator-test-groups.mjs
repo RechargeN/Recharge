@@ -159,6 +159,14 @@ export const emulatorTestGroups = Object.freeze([
     ],
   },
   {
+    // D3.7 (D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md §10): Find People through
+    // Content, BCK-06 consent, the Catalog and K2.
+    name: "find-people",
+    baselineMs: 120000,
+    timeoutMs: 390000,
+    tasks: [["lib/test/emulator/content_find_people_emulator_flow.test.js"]],
+  },
+  {
     // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §4): import rollback and
     // cleanup races on real Firestore transactions.
     name: "import",

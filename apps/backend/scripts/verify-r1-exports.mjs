@@ -49,6 +49,10 @@ const expected = [
   "routeQueryV1",
   "scenarioCommandV1",
   "scenarioQueryV1",
+  // D3.7: default-off, Emulator-only Find People consent and retention erasure.
+  "findPeopleConsentCommandV1",
+  "findPeopleConsentQueryV1",
+  "purgeFindPeoplePrivateLocationsV1",
   "moderationCommandV1",
   "moderationQueryV1",
   "reportCommandV1",
@@ -72,6 +76,8 @@ const schedules = [
 if (
   JSON.stringify(schedules.sort()) !==
   JSON.stringify([
+    // D3.7 §5.3: Emulator-only Find People retention erasure (never flag-gated).
+    "purgeFindPeoplePrivateLocationsV1",
     "reconcileMediaReferencesV1",
     "releaseMissedReconfirmationsV1",
     "retryEventBookingProjectionDeliveriesV1",

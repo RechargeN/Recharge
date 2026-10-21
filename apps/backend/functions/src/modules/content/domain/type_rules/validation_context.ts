@@ -29,6 +29,9 @@ export interface RentalMarketPolicy {
 export interface ReferenceLookups {
   /** D3.5: snapshot of the current reference revision; absent means unavailable. */
   sessionProjectionWindowDays?(): number | undefined;
+  /** D3.7: current public geo policy of Find People; absent means unavailable. */
+  findPeoplePublicGeo?():
+    { readonly precisionMeters: number; readonly policyRevision: string } | undefined;
   supportsLocale(locale: string): boolean | undefined;
   subcategoryApplies(
     typeId: ContentTypeId,

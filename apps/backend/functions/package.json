@@ -101,6 +101,7 @@
     "test:emulator:rental": "node ../scripts/run-emulator-tests.mjs --group rental",
     "test:emulator:session": "node ../scripts/run-emulator-tests.mjs --group session",
     "test:emulator:class-workshop": "node ../scripts/run-emulator-tests.mjs --group class-workshop",
+    "test:emulator:find-people": "node ../scripts/run-emulator-tests.mjs --group find-people",
     "test:emulator:collection": "node ../scripts/run-emulator-tests.mjs --group collection",
     "test:emulator:import": "node ../scripts/run-emulator-tests.mjs --group import",
     "test:emulator:rules-reference": "node ../scripts/run-emulator-tests.mjs --group rules-reference",

@@ -917,6 +917,7 @@ All 40 original Node invocations (including the final three globs) are retained.
 | `place-activity` | 148.2 s | 300 s |
 | `collection` (D3.4) | 192.2 s | 390 s |
 | `session` (D3.5) | initial budget 120 s; actual duration in evidence | 390 s |
+| `find-people` (D3.7) | initial budget 120 s; actual duration in evidence | 390 s |
 | `import` (D4.1) | 54.2 s | 150 s |
 | `rules-reference` | 6.7 s | 120 s |
 
@@ -924,7 +925,7 @@ The `rental` group (D3.3) is bounded the same way (88.2 s, 210 s); see
 `scripts/run-emulator-test-groups.mjs`.
 
 Each limit is rounded up to 30 s from `1.75 × measured duration + 30 s`, with
-a 120 s floor. The current outer full-run limit is 3840 s (15 groups / 54 tasks): the sum of group limits plus
+a 120 s floor. The current outer full-run limit is 4230 s (16 groups / 55 tasks): the sum of group limits plus
 180 s for startup and 60 s for shutdown. These are local hang bounds, not an SLO.
 A group's deadline includes all of its invocations; timeout or any nonzero exit
 makes the full run fail. Later groups still report their results sequentially.
@@ -1021,3 +1022,22 @@ With the same pinned toolchain on PATH:
 Class test worlds reuse the D3.5 world cleanup: only their own UUID-bound
 fixtures and source objects are removed; flags are restored. PC-host Emulator
 evidence only.
+
+### T3 / D3.7 — Find People (local Emulator only)
+
+Owner decisions FP-OD-01…04 as a local owner policy; default-off
+`content.findPeople.authoring`, `identity.findPeople.consent` and
+`catalog.findPeople`, local/LV only. The draft body is the private source read
+by its author only; publication stores a server-built public body with the
+~1 km cell centre; consent (BCK-06) and a synthetic server 18+ attestation are
+re-checked on submit, publish, activate and every public read. The retention
+erasure (`purgeFindPeoplePrivateLocationsV1`) is never flag-gated. See
+[`D3.7`](../../docs/product/D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md).
+
+- `node scripts/stand-d3-7-gate.mjs --yes`: clean, interrupted/resumed,
+  repeated equality, the real Flutter controller, UI and Catalog/Map adapters,
+  verified stop and cleanup in an isolated stand root.
+- `node scripts/run-emulator-tests.mjs --group find-people`: focused backend gate.
+
+Rollback: turn the three flags off; re-enable the Catalog side with
+reconcile/rebuild if an earlier set recorded `type_disabled`.
