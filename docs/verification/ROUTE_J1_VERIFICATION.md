@@ -60,8 +60,14 @@ Toolchain: Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8, Flutter 3.44.9
   источника; содержимое более поздних `save` с `importedGpx` проверяется по
   lineage, а не по исходному файлу. `recordedGps` — `deviceDeclared`, не verified.
 - `routed`/`generated` геометрия не хранится (`license_blocked`).
-- Trim по радиусу от конечных точек; повторный вход в радиус не вырезается, а
-  сообщается предупреждением.
+- Trim по радиусу от конечных точек; повторный вход в радиус не вырезается. Диагностический признак не
+  создаёт popup или дополнительного подтверждения; результат виден в preview.
 - Не-геометрические детали Route (conditions, quality, media) не синхронизируются.
 - Нет UI-входа: test entry `RECHARGE_TEST_ROUTE_SYNC` и адаптеры.
 - Device, hosted CI, retention/DSR и production — не проверены.
+
+## 2026-10-21 common closure
+
+Task30–32 shared validation and privacy repairs: [common evidence](T3_I3_J1_COMMON_VERIFICATION.md).
+Bounded Review/owner acceptance boundary retained; historical results above
+are not substituted for the final common-version run.

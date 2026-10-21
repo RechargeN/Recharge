@@ -7,7 +7,7 @@ Evidence: `docs/verification/ROUTE_J1_VERIFICATION.md`.
 Task authorization covers bounded local/Emulator implementation only: no push,
 deploy, production data, Storage upload, publication or provider integration.
 BCK-11 v0.3.1 stays Draft; this slice fixes the bounded decisions it leaves to
-"an approved slice" (§16, §32) as proposals with fail-closed defaults.
+"an approved slice" (§16, §32) within the owner-authorized bounded implementation, with fail-closed defaults.
 
 ## 1. Verified starting point
 
@@ -82,7 +82,7 @@ GPX input (the single parser `RouteGpxInspector`; values are the existing
 | Raw bytes | 5 MiB (5 242 880) | picker: `XFile.length()` before any read, then a bounded stream read that stops at limit+1; source store `register`; inspector before decoding |
 | Archive/compressed bytes | rejected (gzip, zip, bzip2, xz, zstd, 7z, rar magic) | inspector, on the first bytes before decoding |
 | Encoding | strict UTF-8 (BOM allowed); first non-space byte `<` | before parsing |
-| DTD, `ENTITY`, `SYSTEM`, `PUBLIC` | rejected | byte pre-scan before parsing and `XmlDoctypeEvent` |
+| DTD and entity declarations (SYSTEM/PUBLIC identifiers inside declarations) | rejected | byte pre-scan before parsing and `XmlDoctypeEvent` |
 | Processing instructions (except the declaration), XInclude namespace/elements | rejected | parse events |
 | XML depth | 64 | each start element |
 | XML events (elements, text, …) | 1 000 000 | each event |
@@ -143,7 +143,9 @@ applied by the server when it builds the trimmed view:
   `privacy_trim_empty`; setting such a trim is refused for the current
   geometry; a later edit that makes it empty blocks export, never falls back;
 - points that re-enter a radius after the trimmed prefix stay and are reported
-  as `reenteredStart`/`reenteredEnd` warnings for the author;
+  as `reenteredStart`/`reenteredEnd` diagnostic flags; no popup or extra confirmation.
+  Preview shows the actual resulting geometry, with a short inline explanation
+  that only the beginning/end are hidden;
 - the trimmed view carries `revision` and `variantHash`; a query with a stale
   `expectedRevision` fails; preview and export are built from the same view object.
 
@@ -218,3 +220,12 @@ conflicts, recovery, account isolation, real Flutter adapters against
 Emulator, no Quick Plan/Scenario/network side effects) plus launcher
 self-tests, fixture cleanup, the full Emulator suite in one session, Flutter
 analyze/test, affected backend gates, boundary and diff checks.
+
+## 2026-10-21 common closure
+
+Owner task 32 authorizes the bounded local storage/sync/provenance/limits contract.
+Endpoint-radius-v1 remains the selected policy: later re-entry stays. No repeated
+warning or added confirmation is introduced. SYSTEM/PUBLIC words in ordinary XML
+text/attributes/CDATA are accepted; DTD/entities/XInclude remain forbidden.
+Route journal hashing is independent of Scenario mapper and byte-compatible.
+Review remains until final owner acceptance; no publication/cloud authorization.

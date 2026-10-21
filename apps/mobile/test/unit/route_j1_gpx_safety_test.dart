@@ -68,6 +68,21 @@ T _withoutIo<T>(T Function() body) => IOOverrides.runZoned(
 );
 
 void main() {
+  test('SYSTEM/PUBLIC in ordinary text, CDATA and attributes are safe', () {
+    for (final body in <String>[
+      "<metadata><desc>SYSTEM \"ordinary\" PUBLIC 'quoted'</desc></metadata>",
+      '<metadata><desc><![CDATA[SYSTEM "ordinary" PUBLIC "text"]]></desc></metadata>',
+      '<metadata><link href="https://example.invalid"><text>PUBLIC "park"</text></link></metadata>',
+    ]) {
+      _withoutIo(() => _inspect(_track(body)));
+    }
+    _withoutIo(
+      () => _inspect(
+        _track('', extra: " creator=\"SYSTEM 'ordinary' PUBLIC 'text'\""),
+      ),
+    );
+  });
+
   group('hostile XML', () {
     late Directory temp;
     late File secret;

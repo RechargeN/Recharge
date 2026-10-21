@@ -11,7 +11,6 @@ import '../../domain/repositories/route_gpx_repository.dart';
 import '../../domain/repositories/route_sync_repository.dart';
 import '../../domain/usecases/apply_route_edit_command_usecase.dart';
 import '../models/route_canonical_codec.dart';
-import '../models/scenario_draft_mapper.dart';
 
 typedef RouteInvoke =
     Future<Map<String, Object?>> Function(String, Map<String, Object?>);
@@ -140,7 +139,7 @@ class RouteSyncClient implements RouteSyncRepository {
   });
 
   static String _hash(Object? value) => sha256
-      .convert(utf8.encode(ScenarioDraftMapper.canonicalJson(value)))
+      .convert(utf8.encode(RouteCanonicalCodec.canonicalJson(value)))
       .toString()
       .substring(0, 40);
 

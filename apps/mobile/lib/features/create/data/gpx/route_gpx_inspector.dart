@@ -128,12 +128,7 @@ class RouteGpxInspector {
 
   void _rejectDangerousDeclarations(String source) {
     final normalized = source.toUpperCase();
-    if (normalized.contains('<!DOCTYPE') ||
-        normalized.contains('<!ENTITY') ||
-        normalized.contains('SYSTEM "') ||
-        normalized.contains("SYSTEM '") ||
-        normalized.contains('PUBLIC "') ||
-        normalized.contains("PUBLIC '")) {
+    if (normalized.contains('<!DOCTYPE') || normalized.contains('<!ENTITY')) {
       throw const RouteGpxException('gpx_dtd_or_entity_forbidden');
     }
     if (source.contains('\u0000')) {

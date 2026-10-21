@@ -16,6 +16,23 @@ class RouteCanonicalFailure implements Exception {
 /// device. Quantization to 1e-7° and 0.1 m is the one transformation applied
 /// here; decoding and re-encoding a canonical Route is an identity.
 abstract final class RouteCanonicalCodec {
+  // Byte-compatible legacy journal hashing; independent of Scenario mapping.
+  static String canonicalJson(Object? value) {
+    Object? sort(Object? v) {
+      if (v is Map) {
+        final keys = v.keys.cast<String>().toList()..sort();
+        return {for (final key in keys) key: sort(v[key])};
+      }
+      if (v is List) return v.map(sort).toList();
+      if (v is double && v.isFinite && v == v.truncateToDouble()) {
+        return v.toInt();
+      }
+      return v;
+    }
+
+    return jsonEncode(sort(value));
+  }
+
   static const String coordinatePolicy = 'wgs84-e7-dm-v1';
   static const int routeJsonBytes = 204800;
   static const int maximumPoints = 10000;
