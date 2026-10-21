@@ -96,3 +96,9 @@ seed исключена из digest как per-run by design (handle нигде 
   проверен Content-шаг D2 gate (deliverable pin). Байтовый шаг покрыт D1/D10 real tools.
 - Числовые лимиты (TTL, размеры) — TEST-ONLY; rate limit чтения ссылок не реализован.
 - Page publisher, dated public, Copy, Route stops — вне v1 по SP-02/SP-07/SP-13/SP-08.
+
+## 2026-10-21 common closure
+
+Task30–32 shared validation and privacy repairs: [common evidence](T3_I3_J1_COMMON_VERIFICATION.md).
+Bounded Review/owner acceptance boundary retained; historical results above
+are not substituted for the final common-version run.

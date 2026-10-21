@@ -11,7 +11,11 @@ import {
   FirestoreScenarioService,
   scenarioCollections,
 } from '../../src/modules/quick_plan/firestore_scenario_service.js';
-import { quickPlanCollections } from '../../src/modules/quick_plan/quick_plan_contract.js';
+import { FirestoreQuickPlanService } from '../../src/modules/quick_plan/firestore_quick_plan_service.js';
+import {
+  quickPlanCollections,
+  quickPlanFlag,
+} from '../../src/modules/quick_plan/quick_plan_contract.js';
 import { canonicalJson, sha256Hex } from '../../src/modules/content/domain/published_revision.js';
 import { contentFlagIds, scenarioFlagIds } from '../../src/shared/feature_flags.js';
 import { handleMediaDelivery } from '../../src/media_entry.js';
@@ -702,4 +706,94 @@ void test('11. Quick Plan and Route are untouched; Expand keeps its single creat
   // Expand stays the I2 path: an expanded Scenario is a separate, private plan.
   const planService = world.planning;
   assert.ok(planService instanceof FirestoreScenarioService);
+});
+
+void test('12. Quick Plan -> Expand -> independent edit -> Scenario publication pins its own hash', async () => {
+  await setLocalFlag(db, quickPlanFlag, true);
+  try {
+    const quick = new FirestoreQuickPlanService(db, { now: () => new Date() });
+    const sourceId = randomUUID();
+    const source = {
+      id: sourceId,
+      revision: 0,
+      mood: 'calm',
+      maxDurationMinutes: 150,
+      freeOnly: false,
+      walkingOnly: true,
+      sourcePrompt: 'PRIVATE-quick-source',
+      currencyCode: 'EUR',
+      steps: [],
+    };
+    const save = {
+      schemaVersion: 1,
+      requestId: randomUUID(),
+      ownerContext: owner.userId,
+      idempotencyKey: randomUUID(),
+      commandType: 'save',
+      planId: sourceId,
+      expectedRevision: 0,
+      plan: source,
+    };
+    ok(await quick.command(owner.hint, save), 'quick save');
+    const id = i3Ulid();
+    const expanded = i3ScenarioDraft({ placeId: place.contentId, minimal: true });
+    const scenario = expanded.scenario as Json;
+    scenario.items = [];
+    scenario.locations = [];
+    scenario.legs = [];
+    const days = scenario.days as Json[];
+    days[0]!.itemIds = [];
+    scenario.origin = { type: 'quick_plan_conversion', sourceId, sourceRevision: 1 };
+    const intent = world.command(owner, id, 'expand', 0, {
+      draft: expanded,
+      sourceId,
+      sourceRevision: 1,
+      sourceHash: sha256Hex(canonicalJson(source)),
+      selectedStopIds: [],
+    });
+    const created = ok(await world.planning.command(owner.hint, intent), 'expand');
+    assert.deepEqual(await world.planning.command(owner.hint, intent), created);
+    const independent = i3ScenarioDraft({ placeId: place.contentId, minimal: true, revision: 2 });
+    (independent.scenario as Json).origin = scenario.origin;
+    ok(
+      await world.planning.command(
+        owner.hint,
+        world.command(owner, id, 'save', 1, { draft: independent }),
+      ),
+      'edit independent scenario',
+    );
+    const stored = (await db.collection(scenarioCollections.plans).doc(id).get()).data();
+    ok(
+      await quick.command(owner.hint, {
+        ...save,
+        requestId: randomUUID(),
+        idempotencyKey: randomUUID(),
+        expectedRevision: 1,
+        plan: { ...source, revision: 1, sourcePrompt: 'PRIVATE-source-changed' },
+      }),
+      'edit quick source',
+    );
+    assert.deepEqual((await db.collection(scenarioCollections.plans).doc(id).get()).data(), stored);
+    const publication = await published(id, 2);
+    leaks(publication.body, sourceId, owner.userId);
+    const revisionDoc = (
+      await db.collection(scenarioCollections.revisions).where('scenarioId', '==', id).get()
+    ).docs[0]!;
+    const revision = revisionDoc.data();
+    const pinned = structuredClone(revision);
+    ok(
+      await quick.command(owner.hint, {
+        ...save,
+        requestId: randomUUID(),
+        idempotencyKey: randomUUID(),
+        expectedRevision: 2,
+        plan: { ...source, revision: 2, sourcePrompt: 'PRIVATE-source-changed-again' },
+      }),
+      'edit quick after publication',
+    );
+    assert.deepEqual((await revisionDoc.ref.get()).data(), pinned);
+    assert.ok(await catalogDetails(publication.contentId));
+  } finally {
+    await setLocalFlag(db, quickPlanFlag, false);
+  }
 });
