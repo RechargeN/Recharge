@@ -1,15 +1,15 @@
 # RTE-PUB-01 — Route publication: амендмент BCK-11
 
-- Revision: **0.3**, 2026-10-21.
+- Revision: **0.4**, 2026-10-22.
 - Status: **Accepted — решения RP-01…RP-16 утверждены владельцем 2026-10-21**:
   RP-02, RP-04, RP-06 и RP-12 (вариант B) — в редакции §3.1, остальные — по
   рекомендациям («Остальные RP … принимаю по рекомендациям. Контракт RTE-PUB-01
   утверждён, запускай J2 … без push и deploy»). Документ не разрешает
   Firebase, cloud, deploy, providers или production и не утверждает BCK-11
   целиком.
-- Runtime: **J2 Review в local/LV Emulator объёме (default-off)**; owner
-  acceptance открыт; evidence:
-  [ROUTE_J2_VERIFICATION.md](../../verification/ROUTE_J2_VERIFICATION.md).
+- Runtime: **J2 Done в local/LV Emulator объёме (default-off)** — owner accepted
+  2026-10-22 («Принимаю J2 в local/Emulator объёме. Без push и deploy.»);
+  evidence: [ROUTE_J2_VERIFICATION.md](../../verification/ROUTE_J2_VERIFICATION.md).
 - Базовая ревизия: `codex/recharge-integration` `b4368e0` (32/J1). Ветка
   предложения: `claude/j2-route-publication`.
 - Родители: [BCK-11 v0.3.1](../ROUTE_GPX_BACKEND_SPEC.md) §5–10, §14, §32, §35.3;

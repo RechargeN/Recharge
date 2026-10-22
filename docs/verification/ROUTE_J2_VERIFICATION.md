@@ -51,4 +51,8 @@ Toolchain: Node 22.23.2, Temurin 21.0.12+8, Flutter из `C:\src\flutter`. Вс�
 ## Не проверено
 
 Устройство Android/iOS, hosted CI, cloud и production; mobile Discover/Details
-для Route; stand seed/gate и UI stand test; owner acceptance.
+для Route; stand seed/gate и UI stand test.
+
+## Приёмка
+
+Владелец принял J2 в local/Emulator объёме 2026-10-22, без push и deploy.
