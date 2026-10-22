@@ -101,3 +101,9 @@ seed `route`, `stand-j2-gate.mjs` с самопроверками (3/3) и UI st
 Первый запуск stand-gate остановился на старте stand: Functions Emulator не
 загрузил код за 10 с по умолчанию на перегруженной машине (Android-эмулятор,
 Steam); с `FUNCTIONS_DISCOVERY_TIMEOUT=120` прошёл. Это отмечено в README.
+
+## DTL-RTE-02 (2026-10-22)
+
+Показ опубликованного Route в mobile Discover/Details выделен по RP-15 в
+отдельный slice; его проверка — в
+[DTL_RTE_02_VERIFICATION.md](DTL_RTE_02_VERIFICATION.md).

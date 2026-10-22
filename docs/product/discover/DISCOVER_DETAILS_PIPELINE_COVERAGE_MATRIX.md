@@ -127,11 +127,11 @@ Rental не означает Implemented Details для Rental.
 | Стадия | Статус | Источник | Ближайший разрыв |
 |---|---|---|---|
 | Create | P | `ROUTE_BUILDER_SPEC.md` v3.2; RTE-01–07 Done, RTE-08–11 Review | Реальная device-верификация GPS/GPX не пройдена |
-| Publish | I | RTE-07 | Самый зрелый publish-flow из десяти |
-| Feed | P | RTE-08: «default feed does not load Routes» | Осознанно вне дефолтной ленты |
-| Search | I | RTE-08 | — |
-| Map | I | `buildPublishedRoutePolyline` — чистая функция, теперь общая для Map и Details hero (`DTL-RTE-01`) | — |
-| Details | **I** | `RouteDetailsRenderer` (`DTL-RTE-01`, `7810a9e`) — интерактивная карта, elevation summary, difficulty/surface/POI/field-verified первоклассными секциями | Целевой контракт §6 выполнен для этого slice; elevation-график и public GPX-export осознанно не в scope (нет source-данных/отдельный будущий slice) |
+| Publish | I | RTE-07 (local); J2 / RTE-PUB-01 — сервер (Content, модерация с доверием автора, Catalog), Done в local/Emulator объёме | Device и production |
+| Feed | P | RTE-08: «default feed does not load Routes»; DTL-RTE-02 RD-05 — то же правило для Catalog | Осознанно вне дефолтной ленты |
+| Search | I | RTE-08 (local); DTL-RTE-02 — Catalog Search с карточкой и превью (Review) | — |
+| Map | I | `buildPublishedRoutePolyline` — чистая функция, общая для Map и Details hero (`DTL-RTE-01`); `buildRouteSegmentPolylines` — превью Catalog Route по сегментам, разрывы открыты (`DTL-RTE-02`, Review) | — |
+| Details | **I** | `RouteDetailsRenderer` (`DTL-RTE-01`, `7810a9e`) — интерактивная карта, elevation summary, difficulty/surface/POI/field-verified первоклассными секциями; `DTL-RTE-02` (Review) — тот же renderer для Catalog Route: полный trimmed-трек по сегментам, без duration/bounds/сложности, waypoints, тип publisher, состояния «обновился»/«недоступен»/«нет связи» | Elevation-график, public GPX-export, жалоба на Catalog-объект из mobile — вне scope; device не проверен |
 | Primary action | P | Safety report (в основном потоке) + navigation в Discover Map — оба I (`DTL-RTE-01`) | Turn-by-turn/внешнее приложение/GPX-кнопка — сознательно вне scope, не разрыв |
 | Lifecycle | I | RTE-07/09 | Самый зрелый lifecycle из десяти |
 
