@@ -251,18 +251,25 @@ cross-market policy. Local Emulator evidence не является production-г
   публикует. Publisher берётся из active workspace при первой подготовке и
   хранится в журнале публикации; Content draft сохраняет его дальше.
 
-**Сужения против плана файлов (честно).**
+**Закрытие J2 (2026-10-22).**
 
-- Typed `publisherRef` в `RouteDraftData` (IDP-04B для Route) не добавлен:
-  publisher фиксируется при первой подготовке публикации, а не при создании
-  черновика.
-- Mobile Discover/Details для семейства Route из Catalog не сделаны (RP-15):
-  локальная Route Details RTE-08 читает in-memory проекцию RTE-07 другой формы.
-  Подделывать её под Catalog было бы параллельной моделью. Это отдельный
-  DTL-slice. Backend Feed/Search/Map/Details готов.
-- Stand seed, `stand-j2-gate.mjs` и UI stand test не сделаны. Реальный
-  контроллер с реальными Flutter-адаптерами проверяется против Emulator в
-  группе `route-j2` (GPX import → J1 sync → trim → distribute → Content →
-  publish).
+- Typed `publisherRef` в `RouteDraftData` (IDP-04A-образец для Route): новый
+  Route-блок один раз берёт publisher из active workspace, маппер сохраняет
+  его, старые черновики читаются без него. Публикация использует publisher
+  черновика; только для старых черновиков — workspace на момент подготовки.
+- Stand: `stand-seed.mjs route seed|verify|manifest|status` и
+  `stand-j2-gate.mjs` — чистый, прерванный и возобновлённый, повторный seed
+  с равными digest, UI stand test тестовой страницы (автоодобрение доверием,
+  заработанным ручной модерацией seed), проверенная остановка и очистка.
+
+**Остаётся вне J2 (по самому контракту).**
+
+- Mobile Discover/Details для семейства Route из Catalog — отдельный
+  DTL-slice (RP-15). Существующая сущность Discover RTE-08
+  (`PublishedRouteDiscoveryEntity`) требует длительность > 0, bounds и одну
+  сплошную линию. В публичном снимке J2 длительности нет (модели расчёта в
+  J1 нет), bounds намеренно не публикуются (RP-03), а склейка сегментов
+  скрыла бы разрывы. Подгонка была бы параллельной моделью. Backend
+  Feed/Search/Map/Details готов.
 - RTE-07 in-memory публикация и её fast-track остаются только mock-путём и не
   участвуют в Emulator composition.

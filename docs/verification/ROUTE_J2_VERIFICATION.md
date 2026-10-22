@@ -51,7 +51,7 @@ Toolchain: Node 22.23.2, Temurin 21.0.12+8, Flutter из `C:\src\flutter`. Вс�
 ## Не проверено
 
 Устройство Android/iOS, hosted CI, cloud и production; mobile Discover/Details
-для Route; stand seed/gate и UI stand test.
+для Route (отдельный DTL-slice по RP-15, см. §9 контракта).
 
 ## Приёмка
 
@@ -76,3 +76,28 @@ exports, тесты раннера, boundary gate, `flutter analyze` (no issues)
 ответа callable за 82 с. Отдельный перезапуск на том же коммите: `scenario-i2`
 PASS (17/17, 105 с), `booking` PASS (62/62, 211 с). Код Scenario, Quick Plan и
 Booking в J2 не менялся.
+
+## Закрытие J2 (2026-10-22)
+
+Добавлено: typed publisher в черновике Route (новый Route-блок берёт его из
+active workspace; маппер, Create-контроллер и публикация; unit-тесты), stand
+seed `route`, `stand-j2-gate.mjs` с самопроверками (3/3) и UI stand test
+тестовой страницы.
+
+Финальный прогон одной сессией в checkout `codex/recharge-integration` на
+`75fd5c4` (машина занята меньше, `FUNCTIONS_DISCOVERY_TIMEOUT=120`):
+
+- build, typecheck, lint, format:check, unit 787/787, persistence layout,
+  execution manifest, r1 exports, тесты раннера, boundary gate — зелёные;
+- `flutter analyze` — no issues; `flutter test` — 1768 pass, 80 skip, rc 0;
+- полный Emulator-набор — 21/21 групп PASS, rc 0; сумма `# pass` 750,
+  `# fail` 0, строк `not ok` нет;
+- `stand-j2-gate.mjs --yes` — пройден: чистый, прерванный после
+  `distribute` и возобновлённый, повторный seed с равными digest; UI stand
+  test 1/1 (Save → hide ends → Prepare → cover → Submit с автоодобрением →
+  Publish → Hide, без приватных маркеров в опубликованной ревизии);
+  проверенная остановка и очистка stand.
+
+Первый запуск stand-gate остановился на старте stand: Functions Emulator не
+загрузил код за 10 с по умолчанию на перегруженной машине (Android-эмулятор,
+Steam); с `FUNCTIONS_DISCOVERY_TIMEOUT=120` прошёл. Это отмечено в README.
