@@ -50,6 +50,17 @@ void main() {
       );
     });
 
+    test('RTE-PUB-01: a new Route block captures the active Page', () async {
+      final CreateController controller = await _loaded(
+        _page,
+        capabilities: const <String>['create.route'],
+      );
+      addTearDown(controller.dispose);
+
+      controller.setObjectType(CreateObjectType.route);
+      expect(controller.state.draft.routeData!.publisherRef, _page);
+    });
+
     test('Rental captures the active Page', () async {
       final CreateController controller = await _loaded(_page);
       addTearDown(controller.dispose);

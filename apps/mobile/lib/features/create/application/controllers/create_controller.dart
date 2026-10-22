@@ -101,6 +101,7 @@ import '../rental_inventory_section.dart';
 import '../rental_pricing_section.dart';
 import '../rental_section_disclosure.dart';
 import '../rental_terms_section.dart';
+import '../../domain/entities/route_draft_data.dart';
 import '../route_create_config.dart';
 import '../route_create_coordinator.dart';
 import '../route_publication_coordinator.dart';
@@ -567,7 +568,7 @@ class CreateController extends ChangeNotifier {
       draft = draft.copyWith(scenarioData: _scenarioDefaults());
     }
     if (draft.objectType == CreateObjectType.route && draft.routeData == null) {
-      draft = draft.copyWith(routeData: createEmptyRouteDraft());
+      draft = draft.copyWith(routeData: _routeDefaults(userId));
     }
 
     _setState(
@@ -838,7 +839,7 @@ class CreateController extends ChangeNotifier {
             : null,
         clearScenarioData: type != CreateObjectType.scenario,
         routeData: type == CreateObjectType.route
-            ? (_state.draft.routeData ?? createEmptyRouteDraft())
+            ? (_state.draft.routeData ?? _routeDefaults(_state.userId))
             : null,
         clearRouteData: type != CreateObjectType.route,
         rentalData: type == CreateObjectType.rental
@@ -899,7 +900,7 @@ class CreateController extends ChangeNotifier {
     if (identical(_routeCoordinator, coordinator)) return;
     final draft = _state.draft.objectType == CreateObjectType.route
         ? _state.draft.copyWith(
-            routeData: _state.draft.routeData ?? createEmptyRouteDraft(),
+            routeData: _state.draft.routeData ?? _routeDefaults(_state.userId),
           )
         : _state.draft;
     if (draft.objectType != CreateObjectType.route || _state.userId.isEmpty) {
@@ -4881,6 +4882,11 @@ class CreateController extends ChangeNotifier {
       contentLocale: _runtimeDefaults.defaultContentLocale,
     ).copyWith(publisherRef: _defaultPublisher(userId));
   }
+
+  /// RTE-PUB-01 RP-04: a new Route block captures the active workspace's
+  /// publisher once, like the other typed blocks (IDP-04A).
+  RouteDraftData _routeDefaults(String userId) =>
+      createEmptyRouteDraft().copyWith(publisherRef: _defaultPublisher(userId));
 
   ActivityDraftData _activityDefaults(String userId) {
     return ActivityDraftData.defaults(

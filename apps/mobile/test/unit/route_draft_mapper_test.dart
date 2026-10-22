@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/models/route_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/create/domain/entities/route_draft_data.dart';
 
 import '../support/route_domain_fixtures.dart';
@@ -30,6 +31,26 @@ void main() {
       );
       expect(restored.metrics.distanceMeters, source.metrics.distanceMeters);
       expect(restoredJson, json);
+    });
+
+    test('RP-04: round-trips the captured publisher; older JSON has none', () {
+      const page = PublisherRef(type: PublisherType.page, id: 'page-1');
+      final source = routeFixture().copyWith(publisherRef: page);
+      final json = RouteDraftMapper.toJson(source);
+      expect(json['publisherRef'], <String, Object?>{
+        'type': 'page',
+        'id': 'page-1',
+      });
+      expect(RouteDraftMapper.fromJson(json).publisherRef, page);
+      final legacy = Map<String, Object?>.from(json)..remove('publisherRef');
+      expect(RouteDraftMapper.fromJson(legacy).publisherRef, isNull);
+      expect(
+        RouteDraftMapper.toJson(RouteDraftMapper.fromJson(legacy)),
+        legacy,
+      );
+      final foreign = Map<String, Object?>.from(json)
+        ..['publisherRef'] = <String, Object?>{'type': 'workspace', 'id': 'x'};
+      expect(RouteDraftMapper.fromJson(foreign).publisherRef, isNull);
     });
 
     test('round-trips an optional segment profile override', () {

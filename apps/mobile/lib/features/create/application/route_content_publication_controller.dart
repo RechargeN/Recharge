@@ -195,7 +195,7 @@ final class RouteContentPublicationController extends ChangeNotifier {
                   routeRevisionId: pinned.routeRevisionId,
                   contentHash: pinned.contentHash,
                   distribution: pinned.distribution,
-                  publisherRef: _publisher,
+                  publisherRef: _publisherFor(draft),
                 ))
             .copyWith(
               routeRevisionId: pinned.routeRevisionId,
@@ -284,6 +284,13 @@ final class RouteContentPublicationController extends ChangeNotifier {
       idempotencyKey: 'rte-hide:${status.contentId}:${status.pointerRevision}',
     );
   });
+
+  /// RP-04: the publisher the Route block captured; a draft from before that
+  /// field falls back to the publisher this controller was built with.
+  PublisherRef _publisherFor(CreateDraftEntity draft) {
+    final PublisherRef? captured = draft.routeData?.publisherRef;
+    return captured != null && captured.isValid ? captured : _publisher;
+  }
 
   Map<String, Object?> _body(
     CreateDraftEntity draft,

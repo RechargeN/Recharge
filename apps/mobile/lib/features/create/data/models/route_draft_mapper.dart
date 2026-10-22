@@ -1,5 +1,6 @@
 import '../../../../core/geo/geo_bounds.dart';
 import '../../../../core/geo/geo_point.dart';
+import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/route_quality_data.dart';
 
@@ -103,7 +104,17 @@ abstract final class RouteDraftMapper {
           )
           .toList(growable: false),
       unknownFields: _deepCopyMap(json),
+      publisherRef: _publisherRef(json['publisherRef']),
     );
+  }
+
+  /// Optional (RP-04): absent or unreadable means no captured publisher.
+  static PublisherRef? _publisherRef(Object? value) {
+    if (value is! Map) return null;
+    final PublisherType? type = PublisherType.fromWireName(value['type']);
+    final Object? id = value['id'];
+    if (type == null || id is! String || id.trim().isEmpty) return null;
+    return PublisherRef(type: type, id: id);
   }
 
   static Map<String, Object?> toJson(RouteDraftData value) {
@@ -132,6 +143,11 @@ abstract final class RouteDraftMapper {
       'operations': value.operations
           .map(_operationToJson)
           .toList(growable: false),
+      if (value.publisherRef != null)
+        'publisherRef': <String, Object?>{
+          'type': value.publisherRef!.type.wireName,
+          'id': value.publisherRef!.id,
+        },
     };
     return _deepMerge(value.unknownFields, known);
   }

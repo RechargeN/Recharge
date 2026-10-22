@@ -132,6 +132,17 @@ void main() {
     },
   );
 
+  test('RP-04: the publisher the Route block captured wins', () async {
+    draft = draft.copyWith(
+      routeData: draft.routeData!.copyWith(publisherRef: page),
+    );
+    final RouteContentPublicationController c = controller();
+    await c.load();
+    await c.syncRoute();
+    await c.prepare();
+    expect(content.publisher, page);
+  });
+
   test('RP-04: the active Page is captured once as the publisher', () async {
     final RouteContentPublicationController c = controller(publisher: page);
     await c.load();
