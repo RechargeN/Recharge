@@ -39,6 +39,8 @@ import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/map_marker_utils.dart';
 import '../widgets/map_style.dart';
 import '../widgets/published_route_polyline_builder.dart';
+import '../widgets/route_catalog_labels.dart';
+import '../widgets/route_segment_polylines.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -704,7 +706,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                   ? BitmapDescriptor.hueOrange
                   : selected
                   ? BitmapDescriptor.hueYellow
-                  : item.isPublishedRoute
+                  : item.isRoute
                   ? BitmapDescriptor.hueAzure
                   : BitmapDescriptor.hueGreen,
             ),
@@ -713,7 +715,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
           title: scenarioOrder == null
               ? item.title
               : '$scenarioOrder. ${item.title}',
-          snippet: item.isPublishedRoute
+          snippet: item.isRoute
               ? _publishedRouteMapMetric(item)
               : item.activityCatalog != null
               ? (item.activityCatalog!.contributionKind == null
@@ -761,6 +763,17 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       // Scenario-route branch below is untouched.
       final Polyline? polyline = buildPublishedRoutePolyline(publishedRoute);
       if (polyline != null) polylines.add(polyline);
+    }
+    // DTL-RTE-02 RD-04: a Catalog Route shows only its preview line, one line
+    // per segment, gaps left open.
+    final routeCatalog = selectedItem?.routeCatalog;
+    if (routeCatalog != null) {
+      polylines.addAll(
+        buildRouteSegmentPolylines(
+          routeCatalog.preview,
+          idPrefix: 'catalog_route_${selectedItem!.id}',
+        ),
+      );
     }
     if (scenarioRoute != null && scenarioRoute.stops.length >= 2) {
       polylines.add(
@@ -958,6 +971,8 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 }
 
 String _publishedRouteMapMetric(DiscoverItemEntity item) {
+  final routeCatalog = item.routeCatalog;
+  if (routeCatalog != null) return routeCatalogMetricLabel(routeCatalog);
   final route = item.publishedRoute;
   if (route == null) return 'Route';
   final String distance =
@@ -2832,7 +2847,7 @@ class _MapListItem extends StatelessWidget {
                 alignment: Alignment.center,
                 child: selectionOrder == null
                     ? Icon(
-                        item.isPublishedRoute
+                        item.isRoute
                             ? Icons.route_outlined
                             : Icons.place_outlined,
                         color: RechargeTheme.travelGreenDark,
@@ -3107,6 +3122,10 @@ String? _searchCategoryForScenarioRoute(_ScenarioMapRoute route) {
 }
 
 String _metaLabel(DiscoverItemEntity item) {
+  final routeCatalog = item.routeCatalog;
+  if (routeCatalog != null) {
+    return 'Route · ${routeCatalogMetricLabel(routeCatalog)}';
+  }
   final route = item.publishedRoute;
   if (route != null) {
     return '${item.city} · Route · '

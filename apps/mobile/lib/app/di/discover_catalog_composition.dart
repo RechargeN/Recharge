@@ -19,7 +19,9 @@ import 'booking_test_entry_guard.dart';
 
 /// Capability id under which the Discover read binding is recorded in a
 /// [BackendBindingManifest] (E2).
-const bool activityLinkedPlaceTestEntryDefined = bool.fromEnvironment('RECHARGE_TEST_ACTIVITY_LINKED_PLACE');
+const bool activityLinkedPlaceTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_ACTIVITY_LINKED_PLACE',
+);
 
 const bool activityCatalogTestEntryDefined = bool.fromEnvironment(
   'RECHARGE_TEST_ACTIVITY_CATALOG',
@@ -29,6 +31,13 @@ const bool activityCatalogTestEntryDefined = bool.fromEnvironment(
 /// `--dart-define=RECHARGE_TEST_FIND_PEOPLE_CATALOG=true`.
 const bool findPeopleCatalogTestEntryDefined = bool.fromEnvironment(
   'RECHARGE_TEST_FIND_PEOPLE_CATALOG',
+);
+
+/// DTL-RTE-02 RD-06: Routes in the server Catalog, their own compile-time
+/// switch on top of the Discover one:
+/// `--dart-define=RECHARGE_TEST_ROUTE_CATALOG=true`.
+const bool routeCatalogTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_ROUTE_CATALOG',
 );
 
 const String discoverCatalogCapabilityId = 'discover.catalog';
@@ -154,6 +163,7 @@ DiscoverRepository discoverRepositoryFor({
     currencyCode: currencyCode,
     activityEnabled: activityCatalogTestEntryDefined && !kReleaseMode,
     findPeopleEnabled: findPeopleCatalogTestEntryDefined && !kReleaseMode,
+    routeEnabled: routeCatalogTestEntryDefined && !kReleaseMode,
   ),
   BackendBindingMode.localOnly => local(),
   BackendBindingMode.disabled => const DisabledDiscoverRepository(),

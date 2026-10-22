@@ -2,6 +2,7 @@ import 'activity_catalog_facts.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
+import 'route_catalog_facts.dart';
 import 'time_fit_evaluation.dart';
 import 'time_slot.dart';
 import '../../../../shared/primitives/money/money.dart';
@@ -52,6 +53,7 @@ class DiscoverItemEntity {
     this.publishedRoute,
     this.revisionRef = '',
     this.activityCatalog,
+    this.routeCatalog,
   }) : assert(durationMinutes == null || durationMinutes > 0),
        assert(capacity == null || capacity > 0),
        assert(participantsCount == null || participantsCount >= 0),
@@ -103,6 +105,11 @@ class DiscoverItemEntity {
   final String revisionRef;
   final ActivityCatalogFacts? activityCatalog;
 
+  /// DTL-RTE-02: the public facts of a Route read from the server Catalog;
+  /// `null` for every other source (the local RTE-08 path uses
+  /// [publishedRoute]). Never both.
+  final RouteCatalogFacts? routeCatalog;
+
   int compareStart(DiscoverItemEntity other) {
     final DateTime? left = startsAtUtc, right = other.startsAtUtc;
     if (left == null) return right == null ? id.compareTo(other.id) : 1;
@@ -110,6 +117,12 @@ class DiscoverItemEntity {
   }
 
   bool get isPublishedRoute => publishedRoute != null;
+
+  /// A Catalog Route (DTL-RTE-02).
+  bool get isCatalogRoute => routeCatalog != null;
+
+  /// Any Route, from the local projection or from the Catalog.
+  bool get isRoute => isPublishedRoute || isCatalogRoute;
 
   DiscoverItemEntity copyWith({
     DiscoverObjectKind? objectKind,
@@ -194,6 +207,7 @@ class DiscoverItemEntity {
           : (publishedRoute ?? this.publishedRoute),
       revisionRef: revisionRef,
       activityCatalog: activityCatalog,
+      routeCatalog: routeCatalog,
     );
   }
 }
@@ -210,7 +224,7 @@ class DiscoverItemEntity {
 /// class directly (`ARCHITECTURE_BASELINE.md` rule 3).
 extension DiscoverItemCatalogType on DiscoverItemEntity {
   CatalogObjectType get catalogObjectType {
-    if (isPublishedRoute) return CatalogObjectType.route;
+    if (isRoute) return CatalogObjectType.route;
     return switch (objectKind) {
       DiscoverObjectKind.event => CatalogObjectType.event,
       DiscoverObjectKind.activity => CatalogObjectType.activity,

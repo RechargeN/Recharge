@@ -19,6 +19,8 @@ import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
+import '../widgets/route_catalog_labels.dart';
+import '../widgets/route_catalog_preview_thumbnail.dart';
 
 class DiscoverResultsPage extends ConsumerStatefulWidget {
   const DiscoverResultsPage({
@@ -1330,7 +1332,9 @@ class _SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String trailingLabel = item.isPublishedRoute
+    final String trailingLabel = item.isCatalogRoute
+        ? 'Route'
+        : item.isPublishedRoute
         ? _routeDurationLabel(item.durationMinutes)
         : item.activityCatalog != null
         ? (item.activityCatalog!.contributionKind == null
@@ -1359,14 +1363,19 @@ class _SearchResultCard extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: selectionOrder == null
-                    ? Icon(
-                        item.isPublishedRoute
-                            ? Icons.route_outlined
-                            : selectionMode
-                            ? Icons.add
-                            : Icons.local_activity_outlined,
-                        color: colorScheme.primary,
-                      )
+                    ? item.isCatalogRoute
+                          ? RouteCatalogPreviewThumbnail(
+                              facts: item.routeCatalog!,
+                              color: colorScheme.primary,
+                            )
+                          : Icon(
+                              item.isPublishedRoute
+                                  ? Icons.route_outlined
+                                  : selectionMode
+                                  ? Icons.add
+                                  : Icons.local_activity_outlined,
+                              color: colorScheme.primary,
+                            )
                     : Center(
                         child: Text(
                           '$selectionOrder',
@@ -1390,7 +1399,11 @@ class _SearchResultCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.isPublishedRoute
+                      item.isCatalogRoute
+                          ? 'Route · '
+                                '${rechargeTaxonomyLabel(item.category)} · '
+                                '${routeCatalogMetricLabel(item.routeCatalog!)}'
+                          : item.isPublishedRoute
                           ? '${item.city} · Route · '
                                 '${_routeDistanceLabel(item)}'
                           : '${item.city} · '

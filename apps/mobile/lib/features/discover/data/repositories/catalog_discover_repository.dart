@@ -23,6 +23,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     this.maxPages = 5,
     this.activityEnabled = false,
     this.findPeopleEnabled = false,
+    this.routeEnabled = false,
     String Function()? newRequestId,
   }) : _port = port,
        _session = session,
@@ -43,6 +44,10 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
   /// D3.7: Find People requests are listed only while their own test entry is on.
   final bool findPeopleEnabled;
 
+  /// DTL-RTE-02 RD-06: Routes are read from the Catalog only while their own
+  /// test entry is on; otherwise Discover keeps the local RTE-08 path.
+  final bool routeEnabled;
+
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
     final Map<String, Object?> wire = catalogWireQuery(
@@ -50,6 +55,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
       marketId: _marketId,
       activityEnabled: activityEnabled,
       findPeopleEnabled: findPeopleEnabled,
+      routeEnabled: routeEnabled,
     );
     final String queryType = wire.containsKey('literalText')
         ? 'search'
@@ -88,6 +94,18 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     final CatalogDetails details = _parse(
       () => CatalogDetails.fromWire(detailsBody),
     );
+    if (details.route != null) {
+      if (details.changedSinceSnapshot) {
+        // RD-07: the listing showed an older revision. The snapshot is
+        // dropped so "Обновить" reads the current revision, never the old one.
+        _session.forget();
+        throw const DiscoverException(
+          code: routeRevisionChangedCode,
+          message: 'Маршрут обновился. Обновите, чтобы открыть новую версию.',
+        );
+      }
+      return _route(details.route!, null);
+    }
     if (details.findPeople != null) {
       if (details.changedSinceSnapshot) {
         throw const DiscoverException(
@@ -185,7 +203,9 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     return answer.body;
   }
 
-  DiscoverItemEntity _card(CatalogCard card) => card.findPeople != null
+  DiscoverItemEntity _card(CatalogCard card) => card.route != null
+      ? _route(card.route!, card.distanceMeters)
+      : card.findPeople != null
       ? _findPeople(card.findPeople!, card.distanceMeters)
       : card.activity != null
       ? _activity(card.activity!, card.distanceMeters)
@@ -247,6 +267,35 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
         ),
       ],
       revisionRef: item.publishedRevisionId,
+    );
+  }
+
+  /// DTL-RTE-02: a Route is a map object at the start of its trimmed track.
+  /// No date, price, duration or bounds exist for it, and none are invented.
+  DiscoverItemEntity _route(CatalogRouteItem item, double? distance) {
+    if (!routeEnabled) {
+      throw const DiscoverException(
+        code: 'CATALOG_ROUTE_DISABLED',
+        message: 'Route Catalog отключён',
+      );
+    }
+    return DiscoverItemEntity(
+      id: item.contentId,
+      title: item.title,
+      subtitle: item.shortDescription,
+      city: '',
+      category: item.categoryId,
+      subcategory: item.subcategoryId,
+      startsAtUtc: null,
+      latitude: item.facts.start.latitude,
+      longitude: item.facts.start.longitude,
+      priceAmount: null,
+      distanceKm: (distance ?? 0) / 1000,
+      isFree: false,
+      objectKind: DiscoverObjectKind.route,
+      availabilityKind: AvailabilityKind.none,
+      revisionRef: item.publishedRevisionId,
+      routeCatalog: item.facts,
     );
   }
 
@@ -345,6 +394,7 @@ Map<String, Object?> catalogWireQuery(
   required String marketId,
   bool activityEnabled = false,
   bool findPeopleEnabled = false,
+  bool routeEnabled = false,
 }) {
   final List<String> unsupported = <String>[
     if (query.budgetMin != null) 'budgetMin',
@@ -372,6 +422,9 @@ Map<String, Object?> catalogWireQuery(
       'event',
       if (activityEnabled) 'activity',
       if (findPeopleEnabled) 'find_people',
+      // RD-05: like RTE-08, the default feed has no Routes; a query that
+      // asks for something (text, category, filters) includes them.
+      if (routeEnabled && query.requestsPublishedRoutes) 'route',
     ],
     if (query.selectedCategoryIds.isNotEmpty)
       'categoryIds': query.selectedCategoryIds

@@ -1,6 +1,7 @@
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/repositories/details_lookup_port.dart';
+import '../../domain/repositories/discover_repository.dart';
 import '../../domain/usecases/get_discover_details_usecase.dart';
 
 /// [DetailsLookupPort] wrapping the already-existing
@@ -20,6 +21,11 @@ class DiscoverItemDetailsLookup implements DetailsLookupPort {
   Future<DiscoverItemEntity?> lookup(String objectId) async {
     try {
       return await _getDetails(objectId);
+    } on DiscoverException catch (error) {
+      // DTL-RTE-02 RD-07/RD-08: a lost connection or a newer revision is not
+      // "not found" — the caller shows "Нет связи" or "обновился" with a retry.
+      if (isRetryableDetailsFailure(error)) rethrow;
+      return null;
     } on Object {
       // Mirrors discover_details_page.dart's pre-DTL-LINK-01 error
       // handling: any load failure (including "not found") degrades to a

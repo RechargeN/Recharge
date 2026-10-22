@@ -1,4 +1,7 @@
+import '../../../../shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geometry_encoding.dart';
 import '../../domain/entities/activity_catalog_facts.dart';
+import '../../domain/entities/route_catalog_facts.dart';
 // Strict readers for the Emulator-only `discoverQuery` v1 answers (E2). A
 // shape the client does not know is a FormatException, never a guess.
 
@@ -120,11 +123,50 @@ final class CatalogCard {
     required this.distanceMeters,
     this.activity,
     this.findPeople,
+    this.route,
   });
 
   factory CatalogCard.fromWire(Object? value) {
     final Map<String, Object?> map = _map(value, 'card');
     final Map<String, Object?> ref = _map(map['ref'], 'card.ref');
+    if (ref['typeId'] == 'route') {
+      // DTL-RTE-02: the card is the projection without its track, plus the
+      // listing fields read here; the item reader sees only the projection.
+      final Map<String, Object?> projection = <String, Object?>{...map}
+        ..remove('ref')
+        ..remove('distanceMeters')
+        ..remove('changedSinceSnapshot')
+        ..remove('projectedAtUtc')
+        ..putIfAbsent('contentId', () => ref['contentId']);
+      final CatalogRouteItem item = CatalogRouteItem.fromWire(
+        projection,
+        card: true,
+      );
+      if (item.contentId != ref['contentId']) {
+        throw const FormatException('catalog.route.card.ref');
+      }
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: null,
+        point: CatalogPoint(
+          item.facts.start.latitude,
+          item.facts.start.longitude,
+        ),
+        timezoneId: '',
+        occurrenceId: '',
+        startAtUtc: null,
+        endAtUtc: null,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        route: item,
+      );
+    }
     if (ref['typeId'] == 'find_people') {
       final CatalogFindPeopleItem item = CatalogFindPeopleItem.fromWire(
         <String, Object?>{...map, 'contentId': ref['contentId']},
@@ -219,6 +261,7 @@ final class CatalogCard {
   final double? distanceMeters;
   final CatalogActivityItem? activity;
   final CatalogFindPeopleItem? findPeople;
+  final CatalogRouteItem? route;
 }
 
 final class CatalogFeedPage {
@@ -511,8 +554,12 @@ final class CatalogActivityItem {
         amountMinor: amount == null ? null : _int(amount, 'amountMinor'),
         currencyCode: amount == null ? null : _string(amount, 'currencyCode'),
         galleryMediaIds: gallery,
-        linkedPlaceId: map['linkedPlace'] == null ? null : _string(_map(map['linkedPlace'], 'linkedPlace'), 'contentId'),
-        linkedPlaceTitle: map['linkedPlace'] == null ? null : _string(_map(map['linkedPlace'], 'linkedPlace'), 'title'),
+        linkedPlaceId: map['linkedPlace'] == null
+            ? null
+            : _string(_map(map['linkedPlace'], 'linkedPlace'), 'contentId'),
+        linkedPlaceTitle: map['linkedPlace'] == null
+            ? null
+            : _string(_map(map['linkedPlace'], 'linkedPlace'), 'title'),
       ),
     );
   }
@@ -680,6 +727,7 @@ final class CatalogDetails {
     required this.changedSinceSnapshot,
     this.activity,
     this.findPeople,
+    this.route,
   });
 
   factory CatalogDetails.fromWire(Object? value) {
@@ -693,6 +741,7 @@ final class CatalogDetails {
           'event',
           'activity',
           'find_people',
+          'route',
         ].contains(_map(map['item'], 'item')['typeId'])) {
       throw const FormatException('catalog.details.typeId');
     }
@@ -715,6 +764,9 @@ final class CatalogDetails {
               _map(map['item'], 'item')['typeId'] == 'find_people'
           ? CatalogFindPeopleItem.fromWire(map['item'], card: false)
           : null,
+      route: state == 'listed' && _map(map['item'], 'item')['typeId'] == 'route'
+          ? CatalogRouteItem.fromWire(map['item'], card: false)
+          : null,
       changedSinceSnapshot: changed,
     );
   }
@@ -724,7 +776,226 @@ final class CatalogDetails {
   final CatalogEventItem? item;
   final CatalogActivityItem? activity;
   final CatalogFindPeopleItem? findPeople;
+  final CatalogRouteItem? route;
   final bool changedSinceSnapshot;
+}
+
+/// DTL-RTE-02 (RD-01, RD-10): one published Route from
+/// `catalog-route-projection-v1`. An exact allowlist: only the fields below
+/// reach the client, and a projection that carries owner-only Route data
+/// (anchors, trim radii, provenance, private notes) is refused outright.
+final class CatalogRouteItem {
+  const CatalogRouteItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.facts,
+  });
+
+  static const int maxPreviewPoints = 256;
+  static const Set<String> _forbidden = <String>{
+    'anchors',
+    'turningAnchorId',
+    'privacyTrim',
+    'startMeters',
+    'endMeters',
+    'provenance',
+    'distribution',
+    'ownerId',
+    'bounds',
+    'durationSeconds',
+  };
+  static const Set<String> _sourceKinds = <String>{
+    'importedGpx',
+    'recordedGps',
+    'freehand',
+    'intentionalDirect',
+    'fallbackDirect',
+  };
+
+  factory CatalogRouteItem.fromWire(Object? value, {required bool card}) {
+    final Map<String, Object?> map = _map(value, 'route');
+    if (map['typeId'] != 'route' ||
+        map['schemaRevision'] != 'catalog-route-projection-v1') {
+      throw const FormatException('catalog.route.schema');
+    }
+    for (final String field in _forbidden) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.route.forbidden:$field');
+      }
+    }
+    if (card == map.containsKey('track')) {
+      throw const FormatException('catalog.route.track');
+    }
+    final Map<String, Object?> publisher = _map(
+      map['publisherRef'],
+      'route.publisherRef',
+    );
+    final RouteCatalogPublisherKind publisherKind = switch (_string(
+      publisher,
+      'type',
+    )) {
+      'user' => RouteCatalogPublisherKind.personal,
+      'page' => RouteCatalogPublisherKind.page,
+      _ => throw const FormatException('catalog.route.publisher'),
+    };
+    final Map<String, Object?> summary = _map(map['summary'], 'route.summary');
+    final double distance = _number(summary, 'distanceMeters');
+    final int segmentCount = _int(summary, 'segmentCount');
+    final int gapCount = _int(summary, 'gapCount');
+    final int direct = _int(map, 'directSegmentCount');
+    if (distance < 0 || segmentCount < 1 || gapCount < 0 || direct < 0) {
+      throw const FormatException('catalog.route.summary');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    final GeoPoint start = GeoPoint(
+      latitude: point?.latitude ?? double.nan,
+      longitude: point?.longitude ?? double.nan,
+    );
+    if (!start.isValid) throw const FormatException('catalog.route.point');
+    final Map<String, Object?> preview = _map(map['preview'], 'route.preview');
+    if (preview['policy'] != 'route-preview-dp-v1') {
+      throw const FormatException('catalog.route.preview.policy');
+    }
+    final List<RouteCatalogSegment> previewSegments = _segments(
+      _list(preview, 'segments'),
+      withKinds: false,
+    );
+    final int previewPoints = previewSegments.fold<int>(
+      0,
+      (int sum, RouteCatalogSegment s) => sum + s.points.length,
+    );
+    if (previewPoints > maxPreviewPoints) {
+      throw const FormatException('catalog.route.preview.size');
+    }
+    List<RouteCatalogSegment>? track;
+    List<RouteCatalogWaypoint>? waypoints;
+    if (!card) {
+      final Map<String, Object?> full = _map(map['track'], 'route.track');
+      track = _segments(_list(full, 'segments'), withKinds: true);
+      if (track.length != segmentCount) {
+        throw const FormatException('catalog.route.track.segments');
+      }
+      waypoints = _list(
+        full,
+        'waypoints',
+      ).map(_waypoint).toList(growable: false);
+    }
+    return CatalogRouteItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      facts: RouteCatalogFacts(
+        publishedRevisionId: _string(map, 'publishedRevisionId'),
+        shape: _string(map, 'shape'),
+        profileId: _string(map, 'profileId'),
+        distanceMeters: distance,
+        ascentMeters: _optionalDouble(summary, 'ascentMeters'),
+        descentMeters: _optionalDouble(summary, 'descentMeters'),
+        minElevationMeters: _optionalDouble(summary, 'minElevationMeters'),
+        maxElevationMeters: _optionalDouble(summary, 'maxElevationMeters'),
+        segmentCount: segmentCount,
+        gapCount: gapCount,
+        directSegmentCount: direct,
+        start: start,
+        preview: previewSegments,
+        publisherKind: publisherKind,
+        fullDescription: _optionalString(map, 'fullDescription') ?? '',
+        track: track,
+        waypoints: waypoints,
+      ),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String title;
+  final String shortDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final RouteCatalogFacts facts;
+
+  static double _number(Map<String, Object?> map, String field) {
+    final double? value = _optionalDouble(map, field);
+    if (value == null || !value.isFinite) {
+      throw FormatException('catalog.$field must be a number');
+    }
+    return value;
+  }
+
+  /// Server polylines are precision 7 (`wgs84-e7-dm-v1`); each segment keeps
+  /// its own points and its gap flag, nothing is joined.
+  static List<RouteCatalogSegment> _segments(
+    List<Object?> raw, {
+    required bool withKinds,
+  }) {
+    if (raw.isEmpty) throw const FormatException('catalog.route.segments');
+    final List<RouteCatalogSegment> segments = <RouteCatalogSegment>[];
+    for (final Object? entry in raw) {
+      final Map<String, Object?> segment = _map(entry, 'route.segment');
+      final Object? connected = segment['connected'];
+      if (connected is! bool || (segments.isEmpty && connected)) {
+        throw const FormatException('catalog.route.segment.connected');
+      }
+      String? kind;
+      if (withKinds) {
+        kind = _string(segment, 'sourceKind');
+        if (!_sourceKinds.contains(kind)) {
+          throw const FormatException('catalog.route.segment.kind');
+        }
+      }
+      final List<GeoPoint> points;
+      try {
+        points = GeometryEncoding.decode(
+          _string(segment, 'polyline'),
+          policy: const GeometryEncodingPolicy(precision: 7),
+        );
+      } on RangeError {
+        throw const FormatException('catalog.route.segment.polyline');
+      }
+      if (points.length < 2) {
+        throw const FormatException('catalog.route.segment.points');
+      }
+      segments.add(
+        RouteCatalogSegment(
+          points: points,
+          connected: connected,
+          direct: kind == 'intentionalDirect' || kind == 'fallbackDirect',
+        ),
+      );
+    }
+    return List<RouteCatalogSegment>.unmodifiable(segments);
+  }
+
+  static RouteCatalogWaypoint _waypoint(Object? value) {
+    final Map<String, Object?> map = _map(value, 'route.waypoint');
+    for (final String field in <String>['note', 'description', 'waypointId']) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.route.waypoint.forbidden:$field');
+      }
+    }
+    final GeoPoint point = GeoPoint(
+      latitude: _int(map, 'latE7') / 1e7,
+      longitude: _int(map, 'lonE7') / 1e7,
+    );
+    final double along = _number(map, 'distanceFromStartMeters');
+    if (!point.isValid || along < 0) {
+      throw const FormatException('catalog.route.waypoint');
+    }
+    return RouteCatalogWaypoint(
+      typeId: _string(map, 'typeId'),
+      title: _optionalString(map, 'title'),
+      safetyNote: _optionalString(map, 'safetyNote'),
+      point: point,
+      distanceFromStartMeters: along,
+    );
+  }
 }
 
 /// The envelope: `succeeded` with exactly one body, or a typed refusal.

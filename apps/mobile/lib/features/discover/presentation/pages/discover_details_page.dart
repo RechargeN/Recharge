@@ -203,10 +203,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         );
       },
       loading: () => const DetailsScreenLoading(),
-      error: (_, __) {
+      error: (Object error, _) {
         _trackErrorOnce();
-        return DetailsScreenUnavailable(
-          reason: DetailsUnavailableReason.temporarilyUnavailable,
+        return detailsUnavailableForError(
+          error,
           onRetry: () {
             _errorTracked = false;
             ref.invalidate(discoverDetailsProvider(widget.itemId));

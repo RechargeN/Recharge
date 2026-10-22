@@ -4,10 +4,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
+import '../../domain/entities/route_catalog_facts.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../shell/details_renderer.dart';
 import '../widgets/published_route_polyline_builder.dart';
 import '../widgets/route_elevation_summary.dart';
+import 'route_catalog_sections.dart';
 
 /// [DetailsRenderer] for `CatalogObjectType.route`
 /// (`docs/product/discover/DTL_RTE_01_ROUTE_DETAILS_SLICE_SPEC.md`).
@@ -39,12 +41,11 @@ class RouteDetailsRenderer implements DetailsRenderer {
     required this.onCtaTap,
     required this.onReportRoute,
   }) : assert(
-         item.publishedRoute != null,
-         'RouteDetailsRenderer requires a DiscoverItemEntity with a '
-         'populated publishedRoute — the registry that selects this '
-         'renderer (discover_details_page.dart) must only do so once '
-         'item.catalogObjectType == CatalogObjectType.route, which is '
-         'exactly when publishedRoute is non-null.',
+         item.isRoute,
+         'RouteDetailsRenderer requires a Route: a populated publishedRoute '
+         '(local RTE-08) or routeCatalog (server Catalog, DTL-RTE-02) — the '
+         'registry (discover_details_page.dart) selects it exactly when '
+         'item.catalogObjectType == CatalogObjectType.route.',
        );
 
   final DiscoverItemEntity item;
@@ -82,11 +83,17 @@ class RouteDetailsRenderer implements DetailsRenderer {
 
   @override
   Widget buildHero(BuildContext context) {
+    final catalog = item.routeCatalog;
+    if (catalog != null) {
+      return RouteCatalogMapHero(facts: catalog, onOpenMap: onMap);
+    }
     return _RouteMapHero(route: _route, onOpenMap: onMap);
   }
 
   @override
   Widget buildBody(BuildContext context) {
+    final catalog = item.routeCatalog;
+    if (catalog != null) return _buildCatalogBody(context, catalog);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       child: Column(
@@ -135,8 +142,47 @@ class RouteDetailsRenderer implements DetailsRenderer {
     );
   }
 
+  /// DTL-RTE-02: only what the Catalog snapshot carries. RD-09 — the map,
+  /// share and favorite actions live in the hero and the app bar; there is
+  /// no Scenario intake (SP-08), visit mark (Place only), local report or
+  /// GPX export, and no date/price/CTA cards meant for events.
+  Widget _buildCatalogBody(BuildContext context, RouteCatalogFacts catalog) {
+    final List<RouteCatalogWaypoint> waypoints =
+        catalog.waypoints ?? const <RouteCatalogWaypoint>[];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            item.title,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            catalog.fullDescription.isEmpty
+                ? item.subtitle
+                : catalog.fullDescription,
+          ),
+          const SizedBox(height: 12),
+          RouteCatalogSummaryCard(facts: catalog),
+          const SizedBox(height: 12),
+          RouteCatalogFactsCard(facts: catalog, categoryId: item.category),
+          if (waypoints.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 12),
+            RouteCatalogWaypointsCard(waypoints: waypoints),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget? buildStickyAction(BuildContext context) {
+    // A Catalog Route has no price or booking: no sticky CTA bar.
+    if (item.isCatalogRoute) return null;
     return DetailsBottomBar(
       item: item,
       isFavorite: isFavorite,
@@ -170,9 +216,7 @@ class _RouteMapHero extends StatelessWidget {
       Marker(
         markerId: const MarkerId('route_start'),
         position: start,
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueGreen,
-        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       ),
       if (polyline != null && polyline.points.length > 1)
         Marker(

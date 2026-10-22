@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:design_system/design_system.dart';
 
+import '../../domain/repositories/discover_repository.dart';
 import 'details_renderer.dart';
 
 /// Why a Details screen currently has no content to show. Mirrors the
@@ -54,9 +55,20 @@ class DetailsScreenAvailable extends DetailsScreenState {
 }
 
 class DetailsScreenUnavailable extends DetailsScreenState {
-  const DetailsScreenUnavailable({required this.reason, this.onRetry});
+  const DetailsScreenUnavailable({
+    required this.reason,
+    this.onRetry,
+    this.message,
+    this.retryLabel,
+  });
 
   final DetailsUnavailableReason reason;
+
+  /// DTL-RTE-02 RD-07/RD-08: a caller that knows more than the reason (a
+  /// newer Route revision, a lost connection, the object family) may give
+  /// its own copy; `null` keeps the shared enumeration-safe text.
+  final String? message;
+  final String? retryLabel;
 
   /// Offered only for [DetailsUnavailableReason.temporarilyUnavailable];
   /// [DetailsShell] does not render a retry action for the other reasons,
@@ -84,8 +96,13 @@ class DetailsShell extends StatelessWidget {
       DetailsScreenLoading() => _buildLoading(),
       DetailsScreenAvailable(:final renderer, :final immersiveHero) =>
         _buildAvailable(context, renderer, immersiveHero),
-      DetailsScreenUnavailable(:final reason, :final onRetry) =>
-        _buildUnavailable(reason, onRetry),
+      DetailsScreenUnavailable(
+        :final reason,
+        :final onRetry,
+        :final message,
+        :final retryLabel,
+      ) =>
+        _buildUnavailable(reason, onRetry, message, retryLabel),
     };
   }
 
@@ -128,6 +145,8 @@ class DetailsShell extends StatelessWidget {
   Widget _buildUnavailable(
     DetailsUnavailableReason reason,
     VoidCallback? onRetry,
+    String? message,
+    String? retryLabel,
   ) {
     return Scaffold(
       appBar: const _DetailsShellAppBar(actions: <Widget>[]),
@@ -137,13 +156,17 @@ class DetailsShell extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(_messageFor(reason)),
+              Text(
+                message ?? _messageFor(reason),
+                key: const Key('details-unavailable-message'),
+              ),
               if (reason == DetailsUnavailableReason.temporarilyUnavailable &&
                   onRetry != null) ...<Widget>[
                 const SizedBox(height: 12),
                 OutlinedButton(
+                  key: const Key('details-unavailable-retry'),
                   onPressed: onRetry,
-                  child: const Text('Повторить'),
+                  child: Text(retryLabel ?? 'Повторить'),
                 ),
               ],
             ],
@@ -169,6 +192,36 @@ class DetailsShell extends StatelessWidget {
       DetailsUnavailableReason.notFound => 'Недоступно',
     };
   }
+}
+
+/// DTL-RTE-02 RD-07/RD-08: the unavailable state for a failed Details load.
+/// A Route revision newer than the listing reads "обновился" with
+/// "Обновить", a lost connection reads "Нет связи"; anything else keeps the
+/// shared retryable text. A retry never shows an older revision.
+DetailsScreenUnavailable detailsUnavailableForError(
+  Object error, {
+  required VoidCallback onRetry,
+}) {
+  if (error is DiscoverException && error.code == routeRevisionChangedCode) {
+    return DetailsScreenUnavailable(
+      reason: DetailsUnavailableReason.temporarilyUnavailable,
+      onRetry: onRetry,
+      message: 'Маршрут обновился',
+      retryLabel: 'Обновить',
+    );
+  }
+  if (error is DiscoverException &&
+      error.code.startsWith('CATALOG_TRANSPORT_')) {
+    return DetailsScreenUnavailable(
+      reason: DetailsUnavailableReason.temporarilyUnavailable,
+      onRetry: onRetry,
+      message: 'Нет связи',
+    );
+  }
+  return DetailsScreenUnavailable(
+    reason: DetailsUnavailableReason.temporarilyUnavailable,
+    onRetry: onRetry,
+  );
 }
 
 class _DetailsShellAppBar extends StatelessWidget

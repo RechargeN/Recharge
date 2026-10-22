@@ -631,8 +631,8 @@ class ResolvedDetailsRoute extends ConsumerWidget {
     return resolution.when(
       loading: () => const DetailsShell(state: DetailsScreenLoading()),
       error: (Object error, StackTrace stackTrace) => DetailsShell(
-        state: DetailsScreenUnavailable(
-          reason: DetailsUnavailableReason.temporarilyUnavailable,
+        state: detailsUnavailableForError(
+          error,
           onRetry: () => ref.invalidate(resolveDetailsProvider(target)),
         ),
       ),
@@ -640,9 +640,15 @@ class ResolvedDetailsRoute extends ConsumerWidget {
         final CatalogObjectRef? resolvedRef = result.ref;
         if (result.status == DetailsResolutionStatus.notFound ||
             resolvedRef == null) {
-          return const DetailsShell(
+          // DTL-RTE-02 RD-07: withdrawn, restricted and deleted read alike.
+          final bool route =
+              target is DetailsRouteTargetRef &&
+              (target as DetailsRouteTargetRef).ref.objectType ==
+                  CatalogObjectType.route;
+          return DetailsShell(
             state: DetailsScreenUnavailable(
               reason: DetailsUnavailableReason.notFound,
+              message: route ? 'Маршрут недоступен' : null,
             ),
           );
         }
