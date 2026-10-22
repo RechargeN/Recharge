@@ -98,7 +98,7 @@ async function main(args: readonly string[]): Promise<void> {
   }
   if (command === 'route') {
     // J2: loaded only for this command, like the other typed seeds.
-    const { seedContentRoute, standRouteStatus, verifyStandRoute } =
+    const { seedContentRoute, standPageRouteAction, standRouteStatus, verifyStandRoute } =
       await import('./stand_content_route.js');
     const [action] = rest;
     if (action === 'seed') {
@@ -124,7 +124,14 @@ async function main(args: readonly string[]): Promise<void> {
       process.stdout.write(`${JSON.stringify(await standRouteStatus(firestore))}\n`);
       return;
     }
-    throw new Error('usage: route seed | verify | manifest | status');
+    if (action === 'page-revise' || action === 'page-withdraw' || action === 'page-restore') {
+      const result = await standPageRouteAction(firestore, action);
+      process.stdout.write(`${JSON.stringify(result)}${String.fromCharCode(10)}`);
+      return;
+    }
+    throw new Error(
+      'usage: route seed | verify | manifest | status | page-revise | page-withdraw | page-restore',
+    );
   }
   if (command === 'scenario') {
     // I3: loaded only for this command, like the other typed seeds.

@@ -148,6 +148,19 @@ export async function main(args, hooks = {}) {
         ["RECHARGE_TEST_ROUTE_PUBLICATION=true"],
       ),
     );
+    // DTL-RTE-02: the published Routes in Discover and Details from the
+    // Catalog, with restart, offline, a new revision, withdrawal and restore.
+    step(
+      "flutter test Route in Discover/Details (DTL-RTE-02, defines on)",
+      () =>
+        flutter(
+          ["test/backend_local/route_catalog_discover_ui_stand_test.dart"],
+          [
+            "RECHARGE_TEST_DISCOVER_CATALOG=true",
+            "RECHARGE_TEST_ROUTE_CATALOG=true",
+          ],
+        ),
+    );
     step("base and Route invariants still hold", () => {
       run(seedCli, ["verify"]);
       run(seedCli, ["route", "verify"]);

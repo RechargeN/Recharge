@@ -37,6 +37,14 @@ void test("clean/resumed/repeated parity runs both actual mobile gate commands a
         s.includes("RECHARGE_TEST_ROUTE_PUBLICATION=true"),
     ),
   );
+  assert.ok(
+    h.calls.some(
+      (s) =>
+        s.includes("route_catalog_discover_ui_stand_test.dart") &&
+        s.includes("RECHARGE_TEST_ROUTE_CATALOG=true") &&
+        s.includes("RECHARGE_TEST_DISCOVER_CATALOG=true"),
+    ),
+  );
   assert.deepEqual(h.calls.slice(-2), ["stop", "reset --yes"]);
 });
 void test("digest mismatch fails but still stops and cleans its stand", async () => {

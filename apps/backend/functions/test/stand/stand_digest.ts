@@ -231,6 +231,12 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
     [manifest?.contentScenario as Record<string, unknown> | undefined, 'seed-scenario'],
     [manifest?.contentRoute as Record<string, unknown> | undefined, 'seed-route'],
+    // DTL-RTE-02: the Page Route nested in the Route manifest.
+    [
+      (manifest?.contentRoute as Record<string, unknown> | undefined)?.page as
+        Record<string, unknown> | undefined,
+      'seed-route-page',
+    ],
     [manifest?.contentClassWorkshop as Record<string, unknown> | undefined, 'seed-class-workshop'],
     [manifest?.contentFindPeople as Record<string, unknown> | undefined, 'seed-find-people'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],

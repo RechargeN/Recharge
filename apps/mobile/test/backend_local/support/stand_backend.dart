@@ -164,6 +164,11 @@ final class StandBackend {
   Future<Map<String, Object?>> routeManifest() =>
       _stand(<String>['route', 'manifest']);
 
+  /// DTL-RTE-02: `page-revise`, `page-withdraw` or `page-restore` on the
+  /// stand Page Route; returns the pointer it left.
+  Future<Map<String, Object?>> routePageAction(String action) =>
+      _stand(<String>['route', action]);
+
   /// D3.7: the ids the owner services returned for the stand Find People.
   Future<Map<String, Object?>> findPeopleManifest() =>
       _stand(<String>['find-people', 'manifest']);
