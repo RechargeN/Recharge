@@ -86,4 +86,28 @@ Firebase и deploy не входят в slice.
 deploy. По поручению владельца изменения закоммичены в локальную ветку
 `claude/j2-route-publication` тремя коммитами поверх `a568b49`: `9818da1`
 (mobile), `dbc95fa` (stand) и docs. Код в коммитах совпадает с проверенной
-рабочей копией. Push нет, в `codex/recharge-integration` не влито.
+рабочей копией (`de3cc1c` — docs). Push нет.
+
+## Интеграция в `codex/recharge-integration` (2026-10-22)
+
+По поручению владельца DTL-RTE-02 влит в локальную `codex/recharge-integration`
+после проверки, что Codex там не работает: worktree интеграции был чистым,
+ветку после `a568b49` никто не менял, сборок, тестов и эмулятора Codex в нём
+не было. Слияние — fast-forward `a568b49` → `de3cc1c`, без push.
+
+Гейты в checkout интеграционной ветки на `de3cc1c` (0 изменённых путей),
+последовательно одной сессией, `FUNCTIONS_DISCOVERY_TIMEOUT=120`:
+
+- build, typecheck, lint, format:check — rc 0; unit 787/787; stand unit
+  22/22; persistence layout, execution manifest, r1 exports, тесты раннера
+  групп, самопроверки `stand-j2-gate` — зелёные;
+- boundary gate — 0 нарушений;
+- `flutter analyze` — no issues; `flutter test` — 1780 pass, 81 skip, rc 0;
+- полный Emulator-набор — 21/21 групп PASS, rc 0; сумма `# pass` по логам
+  групп 750, `# fail` 0, строк `not ok` и `timedOut` нет; `route-j2` 8/8;
+- `stand-j2-gate.mjs --yes` — пройден: UI stand test публикации Route 1/1 и
+  UI stand test «Route в Discover/Details» 1/1 без skip, инварианты после
+  тестов сохранены, проверенная остановка и очистка stand.
+
+После прогона worktree интеграции остался чистым. Запись этой перепроверки
+— отдельный docs-коммит, тоже fast-forward в интеграцию.
