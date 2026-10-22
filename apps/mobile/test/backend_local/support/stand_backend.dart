@@ -147,6 +147,23 @@ final class StandBackend {
   Future<Map<String, Object?>> scenarioManifest() =>
       _stand(<String>['scenario', 'manifest']);
 
+  /// J2: seeds (or reuses) the stand Route and enables the Route flags on the
+  /// stand only; prints no JSON, so only its exit code is checked.
+  Future<void> routeSeed() async {
+    final result = await Process.run(node, <String>[
+      _script('stand-seed.mjs'),
+      'route',
+      'seed',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError('route seed failed: ${result.stderr}${result.stdout}');
+    }
+  }
+
+  /// J2: the ids the owner services returned for the stand Route.
+  Future<Map<String, Object?>> routeManifest() =>
+      _stand(<String>['route', 'manifest']);
+
   /// D3.7: the ids the owner services returned for the stand Find People.
   Future<Map<String, Object?>> findPeopleManifest() =>
       _stand(<String>['find-people', 'manifest']);

@@ -14,6 +14,7 @@ import { moderationCollections } from '../../src/modules/moderation/infrastructu
 import { findPeopleIdentityCollections } from '../../src/modules/identity_publisher/infrastructure/find_people_privacy_authority.js';
 import { standManifestCollection } from './stand_content_event.js';
 import { standScenarioSeedInstallation } from './stand_content_scenario.js';
+import { standRouteSeedInstallation } from './stand_content_route.js';
 import { isAuthUserNotFound } from './stand_guard.js';
 import { standEvent, standUsers } from './stand_plan.js';
 
@@ -124,7 +125,12 @@ export function digestStandState(raw: RawStandState, auth: unknown): StandDigest
   // stand never stores a handle); its Session and access snapshot are left out.
   const seedSessions = new Set(
     [...(raw.get(identityAuthorityCollections.sessions) ?? [])]
-      .filter(([, session]) => session.installationId === standScenarioSeedInstallation)
+      // J2: the route seed's own Route Session, likewise.
+      .filter(
+        ([, session]) =>
+          session.installationId === standScenarioSeedInstallation ||
+          session.installationId === standRouteSeedInstallation,
+      )
       .map(([sessionId]) => sessionId),
   );
   for (const [collection, all] of raw) {
@@ -224,6 +230,7 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
     [manifest?.contentPlace as Record<string, unknown> | undefined, 'seed-place'],
     [manifest?.contentSession as Record<string, unknown> | undefined, 'seed-session'],
     [manifest?.contentScenario as Record<string, unknown> | undefined, 'seed-scenario'],
+    [manifest?.contentRoute as Record<string, unknown> | undefined, 'seed-route'],
     [manifest?.contentClassWorkshop as Record<string, unknown> | undefined, 'seed-class-workshop'],
     [manifest?.contentFindPeople as Record<string, unknown> | undefined, 'seed-find-people'],
     [manifest?.contentActivity as Record<string, unknown> | undefined, 'seed-activity'],
@@ -244,6 +251,8 @@ function deriveLabels(raw: ReadonlyMap<string, ReadonlyMap<string, Plain>>): Map
       approveDecisionId: 'decision',
       // I3: the immutable Planning revision a Scenario body is pinned to.
       scenarioRevisionId: 'scenario-revision',
+      // J2: the immutable Route snapshot a Route body is pinned to.
+      routeRevisionId: 'route-revision',
     })) {
       const value = seeded[key];
       if (typeof value === 'string') labels.set(value, `${name}:${tag}`);

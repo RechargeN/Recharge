@@ -39,6 +39,8 @@ const commands = new Set([
   "session",
   // I3: the stand Scenario (Planning, Content, Media, moderation) — seed | verify | manifest | status.
   "scenario",
+  // J2: the stand Route (Route, Content, Media, moderation) — seed | verify | manifest | status.
+  "route",
   // D3.6: the stand Class / Workshop (its own flag) — seed | verify | manifest | status.
   "class-workshop",
   // D3.7: the stand Find People (its own flags) and its owner-path fixtures.

@@ -96,6 +96,36 @@ async function main(args: readonly string[]): Promise<void> {
     }
     throw new Error('usage: class-workshop seed | verify | manifest | status');
   }
+  if (command === 'route') {
+    // J2: loaded only for this command, like the other typed seeds.
+    const { seedContentRoute, standRouteStatus, verifyStandRoute } =
+      await import('./stand_content_route.js');
+    const [action] = rest;
+    if (action === 'seed') {
+      const { reused, manifest } = await seedContentRoute(firestore, {
+        interruptAfter: process.env.STAND_SEED_INTERRUPT_AFTER,
+      });
+      process.stdout.write(`${reused ? 'reused' : 'seeded'} route=${manifest.contentId}\n`);
+      return;
+    }
+    if (action === 'verify') {
+      const problems = await verifyStandRoute(firestore);
+      if (problems.length > 0) throw new Error(`route invariants violated: ${problems.join('; ')}`);
+      process.stdout.write('verified route invariants\n');
+      return;
+    }
+    if (action === 'manifest') {
+      const manifest = (await readStandManifest(firestore))?.contentRoute;
+      if (manifest === undefined) throw new Error('stand Route is not seeded');
+      process.stdout.write(`${JSON.stringify(manifest)}\n`);
+      return;
+    }
+    if (action === 'status') {
+      process.stdout.write(`${JSON.stringify(await standRouteStatus(firestore))}\n`);
+      return;
+    }
+    throw new Error('usage: route seed | verify | manifest | status');
+  }
   if (command === 'scenario') {
     // I3: loaded only for this command, like the other typed seeds.
     const { seedContentScenario, standScenarioStatus, verifyStandScenario } =

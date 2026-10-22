@@ -1,5 +1,6 @@
 import type { StandContentSessionManifest } from './stand_content_session.js';
 import type { StandContentScenarioManifest } from './stand_content_scenario.js';
+import type { StandContentRouteManifest } from './stand_content_route.js';
 import type { StandContentClassWorkshopManifest } from './stand_content_class_workshop.js';
 import type { StandContentFindPeopleManifest } from './stand_content_find_people.js';
 import { createHash } from 'node:crypto';
@@ -42,6 +43,8 @@ export interface StandManifest {
   readonly contentSession?: StandContentSessionManifest;
   /** I3: written only by `stand-seed.mjs scenario seed`. */
   readonly contentScenario?: StandContentScenarioManifest;
+  /** J2: written only by `stand-seed.mjs route seed`. */
+  readonly contentRoute?: StandContentRouteManifest;
   /** D3.6: written only by `stand-seed.mjs class-workshop seed`. */
   readonly contentClassWorkshop?: StandContentClassWorkshopManifest;
   /** D3.7: written only by `stand-seed.mjs find-people seed`. */

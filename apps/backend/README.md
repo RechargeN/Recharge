@@ -1041,3 +1041,21 @@ erasure (`purgeFindPeoplePrivateLocationsV1`) is never flag-gated. See
 
 Rollback: turn the three flags off; re-enable the Catalog side with
 reconcile/rebuild if an earlier set recorded `type_disabled`.
+
+### J2 Route publication (local Emulator)
+
+RTE-PUB-01 (owner-accepted RP-01…RP-16): default-off `route.publication` and
+`content.route.authoring`; immutable trimmed Route snapshot (recorded GPS hides
+200 m at both ends); personal or Page publisher; the first Route of a
+publisher is reviewed, later ones are approved by the earned trust until a
+staff-confirmed violation; Catalog family behind `RECHARGE_TEST_ROUTE_CATALOG=true`.
+See [`RTE-PUB-01`](../../docs/product/route/ROUTE_J2_PUBLICATION_BCK11_AMENDMENT.md).
+
+- `node scripts/stand-j2-gate.mjs --yes` from `apps/backend`: clean,
+  interrupted/resumed, repeated equality, the real Flutter Route publication
+  page, verified stop and cleanup of an isolated stand root. On a loaded
+  machine set `FUNCTIONS_DISCOVERY_TIMEOUT=120` (firebase-tools waits 10 s for
+  the Functions code by default).
+- `node scripts/run-emulator-tests.mjs --group route-j2`: focused backend gate
+  with the real Flutter adapters.
+- `node --test scripts/stand-j2-gate.test.mjs`: launcher self-tests.
