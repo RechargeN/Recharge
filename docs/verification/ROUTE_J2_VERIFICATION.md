@@ -56,3 +56,23 @@ Toolchain: Node 22.23.2, Temurin 21.0.12+8, Flutter из `C:\src\flutter`. Вс�
 ## Приёмка
 
 Владелец принял J2 в local/Emulator объёме 2026-10-22, без push и deploy.
+
+## Интеграция в `codex/recharge-integration` (2026-10-22)
+
+По поручению владельца J2 влит в локальную `codex/recharge-integration` после
+того, как Codex закончил: ветка не менялась с `b4368e0` (база J2), её worktree
+был чистым, свежих изменений и процессов Codex в нём не было. Слияние —
+fast-forward до `5d364f3`, без push.
+
+Гейты в checkout интеграционной ветки на `5d364f3`: build, typecheck, lint,
+format:check, unit 787/787, persistence layout, execution manifest, r1
+exports, тесты раннера, boundary gate, `flutter analyze` (no issues),
+`flutter test` (1765 pass, 79 skip) — зелёные.
+
+Полный Emulator-набор: 19/21 групп PASS. Две группы упали по времени, когда
+машину параллельно нагружали игра (`eu4`, Steam) и другая сессия Claude: все
+группы шли в 1,5–3 раза медленнее, `booking` прошёл все тесты, но превысил
+лимит группы 240 с (`timedOut=true`), Flutter-клиент `scenario-i2` не дождался
+ответа callable за 82 с. Отдельный перезапуск на том же коммите: `scenario-i2`
+PASS (17/17, 105 с), `booking` PASS (62/62, 211 с). Код Scenario, Quick Plan и
+Booking в J2 не менялся.
