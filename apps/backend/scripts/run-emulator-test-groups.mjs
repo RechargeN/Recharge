@@ -219,6 +219,14 @@ export const emulatorTestGroups = Object.freeze([
     timeoutMs: 240000,
     tasks: [["lib/test/emulator/admin_support.test.js"]],
   },
+  {
+    // L1 (PRIVACY_L1_DSR_RETENTION_HOLD_AMENDMENT.md §11): DSR, retention and
+    // legal hold over every registry writer; owns and removes its fixtures.
+    name: "privacy-l1",
+    baselineMs: 56000,
+    timeoutMs: 130000,
+    tasks: [["lib/test/emulator/privacy_l1.test.js"]],
+  },
 ]);
 
 export function selectGroups(name) {
