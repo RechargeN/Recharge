@@ -8,6 +8,7 @@ import { sha256Hex } from '../content/domain/published_revision.js';
 import { exact, record } from '../library/library_contract.js';
 import { isEntityId } from '../../shared/ids.js';
 import { FieldPath } from 'firebase-admin/firestore';
+import type { PrivacyPlannedEffect } from '../privacy_orchestration/infrastructure/firestore_privacy_subject_sweep.js';
 import {
   hashCommand,
   parseCommand,
@@ -76,20 +77,67 @@ export class FirestoreQuickPlanService {
       if (c.commandType !== 'delete' && c.expectedRevision !== revision)
         return finish(reject('revision_conflict', { serverRevision: revision }));
       // Delete wins even when a concurrent edit advanced the revision. The ID is terminal.
-      const entry = {
-        planId: c.planId,
-        revision: revision + 1,
-        status: c.commandType === 'delete' ? 'deleted' : 'active',
-        ...(c.commandType === 'delete' ? {} : { plan: c.plan }),
-        updatedAtUtc: this.clock.now().toISOString(),
-      };
-      tx.set(ref, {
-        ownerId: owner,
-        ...entry,
-        ...(current?.invitations ? { invitations: current.invitations } : {}),
-      });
+      const entry =
+        c.commandType === 'delete'
+          ? this.writeTombstone(tx, ref, owner, c.planId, current)
+          : this.writeEntry(tx, ref, owner, current, {
+              planId: c.planId,
+              revision: revision + 1,
+              status: 'active',
+              plan: c.plan,
+              updatedAtUtc: this.clock.now().toISOString(),
+            });
       return finish({ schemaVersion: 1, kind: 'succeeded', entry });
     });
+  }
+  /**
+   * L1 erasure (PB-00): the owner's own delete for a plan nobody else holds.
+   * A plan with a pending or accepted invitation is shared and stays (PB-12).
+   */
+  privacyErasure(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    data: Record<string, unknown>,
+  ): Promise<PrivacyPlannedEffect> {
+    if (data.status === 'deleted') return Promise.resolve({ outcome: 'unchanged' });
+    const shared = Object.values(record(data.invitations) ?? {}).some((grant) =>
+      ['pending', 'accepted'].includes(String(record(grant)?.status)),
+    );
+    if (shared) return Promise.resolve({ outcome: { blocked: 'PB-12' } });
+    return Promise.resolve({
+      outcome: 'erased',
+      write: () => {
+        this.writeTombstone(tx, ref, String(data.ownerId), String(data.planId), data);
+      },
+    });
+  }
+  private writeTombstone(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    owner: string,
+    planId: string,
+    current: Record<string, unknown> | null,
+  ) {
+    return this.writeEntry(tx, ref, owner, current, {
+      planId,
+      revision: Number(current?.revision ?? 0) + 1,
+      status: 'deleted',
+      updatedAtUtc: this.clock.now().toISOString(),
+    });
+  }
+  private writeEntry(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    owner: string,
+    current: Record<string, unknown> | null,
+    entry: Record<string, unknown>,
+  ) {
+    tx.set(ref, {
+      ownerId: owner,
+      ...entry,
+      ...(current?.invitations ? { invitations: current.invitations } : {}),
+    });
+    return entry;
   }
   private async accessCommand(
     tx: Transaction,

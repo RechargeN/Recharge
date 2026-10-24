@@ -564,6 +564,8 @@ void test('adapters: the fakes are labelled FAKE and the D1 local tools modules 
     'local_tools_client.ts',
     'local_tools_protocol.ts',
     'media_effect_feed.ts',
+    // L1: Media's own deletion protocol as the privacy erasure applier.
+    'media_privacy_applier.ts',
     'media_tool_limits.ts',
     'storage_emulator_object_store.ts',
   ]);

@@ -8,6 +8,11 @@ import type { BookingPrivacyRecordStore } from './booking_privacy_task_handler.j
 import type { BookingIdentityBearingRecord } from './privacy.js';
 import { bookingCollections, runBookingTransaction } from './transactions.js';
 import { cancelBookingForPrivacyErasure } from './occurrence_lifecycle.js';
+import {
+  privacyHoldApplies,
+  type PrivacyLegalHold,
+} from '../modules/privacy_orchestration/domain/privacy_legal_hold.js';
+import { privacyHoldCollections } from '../modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.js';
 
 interface LocatedRecord {
   readonly ref: DocumentReference;
@@ -113,31 +118,62 @@ export class FirestoreBookingPrivacyRecordStore implements BookingPrivacyRecordS
           continue;
         }
       }
-      const batch = this.firestore.batch();
-      for (const document of snapshot.docs) {
-        const record = document.data() as Record<string, unknown>;
-        recordCount += 1;
-        if (record.legalHold === true) {
-          legalHoldCount += 1;
-          continue;
+      // L1: one transaction per page re-reads the records and the subject's
+      // active privacy holds, so a hold placed meanwhile is honoured before any
+      // pseudonymization; the checkpoint commits with the page's effects.
+      const page = await this.firestore.runTransaction(async (transaction) => {
+        const current = await transaction.getAll(...snapshot.docs.map((d) => d.ref));
+        const holds = await transaction.get(
+          this.firestore
+            .collection(privacyHoldCollections.holds)
+            .where('subjectId', '==', this.subjectId)
+            .where('status', '==', 'active'),
+        );
+        let records = recordCount;
+        let pseudonymized = pseudonymizedCount;
+        let held = legalHoldCount;
+        const updates: DocumentReference[] = [];
+        for (const document of current) {
+          const record = document.data();
+          if (record === undefined || record[identityField] !== this.subjectId) continue;
+          records += 1;
+          if (
+            record.legalHold === true ||
+            holds.docs.some((hold) =>
+              privacyHoldApplies(hold.data() as PrivacyLegalHold, {
+                domainId: 'booking',
+                collection: collectionName,
+                recordId: document.id,
+              }),
+            )
+          ) {
+            held += 1;
+            continue;
+          }
+          updates.push(document.ref);
+          pseudonymized += 1;
         }
-        batch.update(document.ref, { [identityField]: input.pseudonymousActorId });
-        pseudonymizedCount += 1;
-      }
-      cursor = snapshot.docs.at(-1)!.id;
-      batch.set(
-        progressRef,
-        progressRecord(
-          collectionIndex,
-          cursor,
-          recordCount,
-          pseudonymizedCount,
-          activeFutureBookingCount,
-          legalHoldCount,
-          input.nowUtc,
-        ),
-      );
-      await batch.commit();
+        for (const ref of updates)
+          transaction.update(ref, { [identityField]: input.pseudonymousActorId });
+        const nextCursor = snapshot.docs.at(-1)!.id;
+        transaction.set(
+          progressRef,
+          progressRecord(
+            collectionIndex,
+            nextCursor,
+            records,
+            pseudonymized,
+            activeFutureBookingCount,
+            held,
+            input.nowUtc,
+          ),
+        );
+        return { records, pseudonymized, held, nextCursor };
+      });
+      recordCount = page.records;
+      pseudonymizedCount = page.pseudonymized;
+      legalHoldCount = page.held;
+      cursor = page.nextCursor;
       if (snapshot.size < 200) {
         collectionIndex += 1;
         cursor = undefined;
