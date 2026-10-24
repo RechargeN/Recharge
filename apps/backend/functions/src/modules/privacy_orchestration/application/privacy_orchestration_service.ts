@@ -1,7 +1,11 @@
 import type { PrivacyFailure } from '../domain/failures.js';
 import {
+  leasePrivacyDomainTask,
+  releasePrivacyDomainTaskLease,
   transitionPrivacyDomainTask,
+  type PrivacyDomainTask,
   type PrivacyDomainTaskStatus,
+  type PrivacyPolicyBlocker,
 } from '../domain/privacy_domain_task.js';
 import {
   createPrivacyRequest,
@@ -137,6 +141,7 @@ export class PrivacyOrchestrationService {
     readonly evidenceId?: string;
     readonly completionOutcome?: 'completed' | 'retained_legal_hold';
     readonly retainedCount?: number;
+    readonly blockedCodes?: readonly PrivacyPolicyBlocker[];
     readonly occurredAtUtc: string;
   }): Promise<
     'saved' | 'revision_conflict' | 'not_found' | 'invalid_transition' | 'task_retry_exhausted'
@@ -157,6 +162,7 @@ export class PrivacyOrchestrationService {
             ? {}
             : { completionOutcome: input.completionOutcome }),
           ...(input.retainedCount === undefined ? {} : { retainedCount: input.retainedCount }),
+          ...(input.blockedCodes === undefined ? {} : { blockedCodes: input.blockedCodes }),
         }),
         input.expectedTaskRevision,
       );
@@ -166,6 +172,61 @@ export class PrivacyOrchestrationService {
           ? 'task_retry_exhausted'
           : 'invalid_transition';
       }
+      throw error;
+    }
+  }
+
+  /** L1: takes the task for one bounded run; the revision fences the previous holder. */
+  async leaseTask(input: {
+    readonly requestId: string;
+    readonly taskId: string;
+    readonly expectedTaskRevision: number;
+    readonly leaseOwner: string;
+    readonly leaseSeconds: number;
+    readonly policyRevision: string;
+    readonly nowUtc: string;
+  }): Promise<
+    | { readonly kind: 'leased'; readonly task: PrivacyDomainTask }
+    | { readonly kind: 'lease_held' | 'revision_conflict' | 'not_found' | 'invalid_transition' }
+  > {
+    const task = (await this.tasks.listByRequest(input.requestId)).find(
+      (candidate) => candidate.taskId === input.taskId,
+    );
+    if (task === undefined) return { kind: 'not_found' };
+    if (task.revision !== input.expectedTaskRevision) return { kind: 'revision_conflict' };
+    let leased: PrivacyDomainTask;
+    try {
+      leased = leasePrivacyDomainTask({ task, ...input });
+    } catch (error) {
+      if (error instanceof TypeError)
+        return {
+          kind: error.message === 'privacy_task_lease_held' ? 'lease_held' : 'invalid_transition',
+        };
+      throw error;
+    }
+    const saved = await this.tasks.save(leased, input.expectedTaskRevision);
+    return saved === 'saved' ? { kind: 'leased', task: leased } : { kind: saved };
+  }
+
+  /** L1: a run that made bounded progress releases its lease without an outcome. */
+  async releaseTaskLease(input: {
+    readonly requestId: string;
+    readonly taskId: string;
+    readonly expectedTaskRevision: number;
+    readonly nowUtc: string;
+  }): Promise<'saved' | 'revision_conflict' | 'not_found' | 'invalid_transition'> {
+    const task = (await this.tasks.listByRequest(input.requestId)).find(
+      (candidate) => candidate.taskId === input.taskId,
+    );
+    if (task === undefined) return 'not_found';
+    if (task.revision !== input.expectedTaskRevision) return 'revision_conflict';
+    try {
+      return await this.tasks.save(
+        releasePrivacyDomainTaskLease({ task, nowUtc: input.nowUtc }),
+        input.expectedTaskRevision,
+      );
+    } catch (error) {
+      if (error instanceof TypeError) return 'invalid_transition';
       throw error;
     }
   }
