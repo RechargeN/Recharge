@@ -942,7 +942,35 @@
         "compositeIndexes": []
       },
       {
+        "name": "privacyHoldAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyLegalHoldAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyLegalHolds",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "privacyRequests",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyTaskProgress",
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
