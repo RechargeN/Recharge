@@ -30,6 +30,12 @@ service cloud.firestore {
     match /privacyHoldAuthority/{document} { allow read, write: if false; }
     match /operationsOperatorAuthority/{document} { allow read, write: if false; }
     match /operationsOperatorAudit/{document} { allow read, write: if false; }
+    // L3: product analytics raw events, aggregates and access records are
+    // server-only; no client reads raw events or aggregates.
+    match /productAnalyticsEvents/{document} { allow read, write: if false; }
+    match /productAnalyticsDailyAggregates/{document} { allow read, write: if false; }
+    match /productAnalyticsAccessAuthority/{document} { allow read, write: if false; }
+    match /productAnalyticsAccessAudit/{document} { allow read, write: if false; }
     match /securityAuditEvents/{document} { allow read, write: if false; }
     match /securityRateLimitCounters/{document} { allow read, write: if false; }
     match /securityRateLimitAttempts/{document} { allow read, write: if false; }

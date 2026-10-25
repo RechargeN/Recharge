@@ -91,6 +91,15 @@ export const operationsEmergencySwitchIds = Object.freeze({
   notificationsConsumeBooking: 'notifications.consume.booking.incidentDisable',
 });
 
+/**
+ * L3: Emulator-only product analytics (default off). Each switch stops only its
+ * own stage; security audit, operations and user commands never read them.
+ */
+export const productAnalyticsFlagIds = Object.freeze({
+  collection: 'productAnalytics.collection',
+  aggregation: 'productAnalytics.aggregation',
+});
+
 export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds];
 
 /** I2 bounded Scenario persistence and collaboration, Emulator only. */

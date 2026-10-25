@@ -136,6 +136,9 @@ const approvedOutsideUsers = {
   // L2 operations console (OPS-L2 §3.6): only the Emulator guard; it writes
   // its own audit and the family emergency switches, no Content.
   "modules/operations/operations_console.ts": guardOnly,
+  // L3 product analytics (ANALYTICS-L3 §13): only the Emulator guard; it
+  // writes its own productAnalytics* collections, no Content.
+  "modules/product_analytics/firestore_product_analytics_service.ts": guardOnly,
   // J1 Route (2026-10-20): only the Emulator guard; its own collections.
   // J2 / RTE-PUB-01 (2026-10-21): plus one read-only standing check, RP-11.
   "modules/route/firestore_route_service.ts": {

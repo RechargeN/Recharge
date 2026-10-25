@@ -250,6 +250,18 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
     ['privacyLegalHoldAudit', null, fence('PB-16')],
     ['privacyHoldAuthority', null, none],
   ]),
+  // L3 product analytics (ANALYTICS_L3 §6–7). Events carry no account, Session,
+  // device or subject key by contract, so a subject's records cannot be found;
+  // this is not a claim that they are anonymous (PA-B05).
+  ...rows('W21', null, [
+    ['productAnalyticsEvents', null, none],
+    ['productAnalyticsDailyAggregates', null, derived],
+  ]),
+  // Test-only staff reader registry and its access audit: staff identities only.
+  ...rows('W21', 'admin_support', [
+    ['productAnalyticsAccessAuthority', '$id', blocked('PB-10')],
+    ['productAnalyticsAccessAudit', 'actorId', blocked('PB-10')],
+  ]),
   ...rows('config', null, [
     ['platformFeatureFlagRevisions', null, none],
     ['platformActiveFeatureFlagPointers', null, none],

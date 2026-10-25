@@ -991,6 +991,34 @@
         "compositeIndexes": []
       },
       {
+        "name": "productAnalyticsAccessAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsAccessAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsDailyAggregates",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsEvents",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "referenceActivationPointers",
         "clientAccess": "deny",
         "owner": "firebase_cli",
