@@ -1,5 +1,11 @@
 # Event Catalog
 
+> Legacy local catalog of the developer-console `AnalyticsService` (L3 inventory
+> M-1/M-2). It is not product analytics and authorizes no collection. The only
+> product analytics events are the three typed v1 events of
+> [L3](../product/ANALYTICS_L3_PRODUCT_ANALYTICS_AMENDMENT.md), defined in
+> `packages/api_contracts/schema/product_analytics/v1/`.
+
 Status legend: `active` | `deprecated` | `removed`
 
 ## Required Columns
