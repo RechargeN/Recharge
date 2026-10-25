@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { Firestore, Transaction } from 'firebase-admin/firestore';
 import type { BookingEventProjection } from './domain.js';
 import { bookingCollections } from './transactions.js';
 
@@ -25,6 +25,8 @@ export type EventBookingProjectionEvent =
 export type EventProjectionConsumptionResult =
   | Readonly<{ kind: 'applied'; occurrenceId: string; materialRevision: number }>
   | Readonly<{ kind: 'ignoredDuplicate' | 'ignoredStale'; occurrenceId: string }>
+  /** L2: the caller's guard refused inside the transaction; nothing was written. */
+  | Readonly<{ kind: 'contained' }>
   | Readonly<{
       kind: 'rejected';
       code: 'missing_occurrence' | 'invalid_event' | 'revision_conflict';
@@ -46,6 +48,7 @@ interface StoredProjectionEnvelope {
 export async function consumeEventForBookingProjection(
   firestore: Firestore,
   event: EventBookingProjectionEvent,
+  options: Readonly<{ effectAllowed?: (transaction: Transaction) => Promise<boolean> }> = {},
 ): Promise<EventProjectionConsumptionResult> {
   if (!validEventIdentity(event)) return { kind: 'rejected', code: 'missing_occurrence' };
   if (!validRevision(event.materialRevision) || !validRevision(event.publicationRevision)) {
@@ -63,6 +66,8 @@ export async function consumeEventForBookingProjection(
   return firestore.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
     const existing = snapshot.data() as StoredProjectionEnvelope | undefined;
+    if (options.effectAllowed !== undefined && !(await options.effectAllowed(transaction)))
+      return { kind: 'contained' } as const;
     if (existing !== undefined) {
       if (existing.eventId !== event.eventId || existing.occurrenceId !== event.occurrenceId) {
         return { kind: 'rejected', code: 'revision_conflict' } as const;
@@ -118,6 +123,11 @@ export async function consumeEventForBookingProjection(
       materialRevision: event.materialRevision,
     } as const;
   });
+}
+
+/** The digest the projection stores as `sourceEventDigest`; reconciliation compares with it. */
+export function projectionEventDigest(event: EventBookingProjectionEvent): string {
+  return eventDigest(event);
 }
 
 function eventDigest(event: EventBookingProjectionEvent): string {
