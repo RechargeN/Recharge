@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
+import '../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../core/telemetry/analytics_service.dart';
 import 'collection_create_config.dart';
 import 'collection_create_coordinator.dart';
@@ -53,6 +54,9 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     saveCreateDraftUseCase: sl<SaveCreateDraftUseCase>(),
     publishCreateDraftUseCase: sl<PublishCreateDraftUseCase>(),
     analyticsService: sl<AnalyticsService>(),
+    productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
+        ? sl<ProductAnalyticsRecorder>()
+        : null,
     runtimeDefaults: sl<CreateRuntimeDefaults>(),
     eventCreateCoordinator: sl<EventCreateCoordinator>(),
     sessionCreateCoordinator: sl<SessionCreateCoordinator>(),

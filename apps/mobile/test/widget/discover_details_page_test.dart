@@ -7,6 +7,8 @@ import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
+import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
@@ -41,6 +43,7 @@ import 'package:recharge/features/visited/domain/usecases/get_visited_places_use
 import 'package:recharge/features/visited/domain/usecases/record_place_visit_usecase.dart';
 import 'package:recharge/features/visited/domain/usecases/remove_visit_usecase.dart';
 
+import '../unit/product_analytics/product_analytics_test_support.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
@@ -76,6 +79,32 @@ void main() {
     expect(find.text('Добавить в сценарий'), findsNothing);
     expect(find.text('Найти похожее'), findsOneWidget);
     expect(find.text('Создать маршрут'), findsOneWidget);
+  });
+
+  fullPageTestWidgets('PA-T01 Details: opening queues details_opened once', (
+    tester,
+  ) async {
+    final InMemoryProductAnalyticsQueueStore store =
+        InMemoryProductAnalyticsQueueStore();
+    sl.registerSingleton<ProductAnalyticsRecorder>(
+      ProductAnalyticsRecorder(
+        policy: SyntheticPolicySource(),
+        sink: CaptureSink(),
+        store: store,
+        newEventId: sequentialEventIds(),
+      )..bindAccount('user-a'),
+    );
+    await tester.pumpWidget(await _detailsApp());
+    await tester.pumpAndSettle();
+    await tester.pump();
+
+    final List<ProductAnalyticsQueuedEvent> queued = allQueued(store);
+    expect(queued, hasLength(1));
+    expect(queued.single.envelope['eventName'], 'details_opened');
+    expect(queued.single.envelope['fields'], <String, String>{
+      'object_kind': 'activity',
+    });
+    expect(queued.single.envelope.toString().contains('evt_1'), isFalse);
   });
 
   fullPageTestWidgets('renders utility actions and opens contextual map', (

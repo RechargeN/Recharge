@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
+import '../../../core/product_analytics/product_analytics_recorder.dart';
 import 'controllers/auth_controller.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
 import '../domain/usecases/restore_session_usecase.dart';
@@ -14,5 +15,8 @@ final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
     signOutUseCase: sl<SignOutUseCase>(),
     getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
     analyticsService: sl(),
+    productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
+        ? sl<ProductAnalyticsRecorder>()
+        : null,
   );
 });

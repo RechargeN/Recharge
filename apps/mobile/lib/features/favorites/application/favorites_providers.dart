@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
+import '../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../core/telemetry/analytics_service.dart';
 import '../domain/usecases/add_favorite_usecase.dart';
 import '../domain/usecases/get_favorites_usecase.dart';
@@ -14,6 +15,9 @@ final favoritesControllerProvider = ChangeNotifierProvider<FavoritesController>(
       addFavoriteUseCase: sl<AddFavoriteUseCase>(),
       removeFavoriteUseCase: sl<RemoveFavoriteUseCase>(),
       analyticsService: sl<AnalyticsService>(),
+      productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
+          ? sl<ProductAnalyticsRecorder>()
+          : null,
     );
   },
 );

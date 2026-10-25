@@ -7,6 +7,8 @@ import '../../../../app/di/service_locator.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../core/product_analytics/product_analytics_contract.dart';
+import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -53,6 +55,7 @@ class DiscoverDetailsPage extends ConsumerStatefulWidget {
 
 class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
   late final AnalyticsService _analyticsService;
+  late final ProductAnalyticsRecorder? _productAnalytics;
   bool _viewTracked = false;
   bool _errorTracked = false;
   bool _favoriteHandled = false;
@@ -62,6 +65,10 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
   void initState() {
     super.initState();
     _analyticsService = sl<AnalyticsService>();
+    // Product analytics is optional; a composition without it records nothing.
+    _productAnalytics = sl.isRegistered<ProductAnalyticsRecorder>()
+        ? sl<ProductAnalyticsRecorder>()
+        : null;
     _analyticsService.track(
       'discover_details_load_started',
       params: <String, Object?>{'item_id': widget.itemId},
@@ -229,6 +236,12 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         'city': item.city,
       },
     );
+    // L3 `details_opened` v1: the object type only, no ID, city or category.
+    final ProductAnalyticsObjectKind? kind =
+        ProductAnalyticsObjectKind.fromObjectType(
+          item.catalogObjectType.taxonomyId,
+        );
+    if (kind != null) _productAnalytics?.record(DetailsOpened(kind));
   }
 
   void _trackErrorOnce() {

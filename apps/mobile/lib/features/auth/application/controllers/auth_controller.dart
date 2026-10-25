@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -29,17 +30,20 @@ class AuthController extends ChangeNotifier {
     required SignOutUseCase signOutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required AnalyticsService analyticsService,
+    ProductAnalyticsRecorder? productAnalytics,
   }) : _signInUseCase = signInUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
        _signOutUseCase = signOutUseCase,
        _getCurrentUserUseCase = getCurrentUserUseCase,
-       _analyticsService = analyticsService;
+       _analyticsService = analyticsService,
+       _productAnalytics = productAnalytics;
 
   final SignInUseCase _signInUseCase;
   final RestoreSessionUseCase _restoreSessionUseCase;
   final SignOutUseCase _signOutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final AnalyticsService _analyticsService;
+  final ProductAnalyticsRecorder? _productAnalytics;
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
@@ -287,6 +291,11 @@ class AuthController extends ChangeNotifier {
 
   void _setState(AuthState state) {
     _state = state;
+    // L3: product analytics queues follow the signed-in account; sign-out or
+    // another account deletes every other account's queue (amendment §6).
+    _productAnalytics?.bindAccount(
+      state.isAuthenticated ? state.user?.id : null,
+    );
     notifyListeners();
   }
 
