@@ -227,6 +227,15 @@ export const emulatorTestGroups = Object.freeze([
     timeoutMs: 130000,
     tasks: [["lib/test/emulator/privacy_l1.test.js"]],
   },
+  {
+    // L2 (OPERATIONS_L2_RECOVERY_AMENDMENT.md §8): dead letter, audited replay,
+    // reconciliation, emergency disable and restore admission over the real
+    // owners; owns and removes every fixture it creates.
+    name: "operations-l2",
+    baselineMs: 45000,
+    timeoutMs: 130000,
+    tasks: [["lib/test/emulator/operations_l2.test.js"]],
+  },
 ]);
 
 export function selectGroups(name) {
