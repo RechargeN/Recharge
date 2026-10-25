@@ -236,6 +236,15 @@ export const emulatorTestGroups = Object.freeze([
     timeoutMs: 130000,
     tasks: [["lib/test/emulator/operations_l2.test.js"]],
   },
+  {
+    // L3 (ANALYTICS_L3_PRODUCT_ANALYTICS_AMENDMENT.md §12): product analytics
+    // ingress, aggregation, retention and access over a synthetic policy; owns
+    // and removes every fixture it creates.
+    name: "analytics-l3",
+    baselineMs: 30000,
+    timeoutMs: 100000,
+    tasks: [["lib/test/emulator/product_analytics_l3.test.js"]],
+  },
 ]);
 
 export function selectGroups(name) {
