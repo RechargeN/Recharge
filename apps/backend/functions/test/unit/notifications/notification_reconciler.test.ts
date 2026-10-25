@@ -184,7 +184,12 @@ void test('replay is audited and limited to dead letters inside their window', a
   const replayed = store.snapshot().receipts.get(receiptId) as LiveReceipt;
   assert.equal(replayed.status, 'retry_scheduled');
   assert.deepEqual(replayed.replays, [
-    { atUtc: '2026-08-29T12:05:00.000Z', reason: 'foreign document removed', operator: 'ops' },
+    {
+      atUtc: '2026-08-29T12:05:00.000Z',
+      reason: 'foreign document removed',
+      operator: 'ops',
+      previousReason: 'item_conflict',
+    },
   ]);
   const report = await reconciler.reconcile();
   assert.equal(report.outcomes.created, 1);

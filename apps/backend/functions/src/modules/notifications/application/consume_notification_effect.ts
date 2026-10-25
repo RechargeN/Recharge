@@ -59,13 +59,15 @@ export type ClaimResult =
   | Readonly<{ kind: 'duplicate'; status: ReceiptStatus }>
   | Readonly<{ kind: 'busy' | 'not_due' | 'dead_lettered' | 'payload_conflict' }>
   | Readonly<{ kind: 'suppressed'; reason: SuppressionReason }>
-  | Readonly<{ kind: 'expired' }>;
+  | Readonly<{ kind: 'expired' }>
+  | Readonly<{ kind: 'contained' }>;
 
 export type CompleteResult =
   | Readonly<{ kind: 'created'; notificationId: string }>
   | Readonly<{ kind: 'suppressed'; reason: SuppressionReason }>
   | Readonly<{ kind: 'expired' }>
-  | Readonly<{ kind: 'stale' }>;
+  | Readonly<{ kind: 'stale' }>
+  | Readonly<{ kind: 'contained' }>;
 
 export type FailResult = Readonly<{ kind: 'retry_scheduled' | 'dead_lettered' | 'stale' }>;
 
@@ -81,6 +83,7 @@ export type ConsumeOutcome =
   | 'expired'
   | 'retry_scheduled'
   | 'stale'
+  | 'contained'
   | 'failed_unrecorded';
 
 export interface NotificationConsumerDependencies {
@@ -89,6 +92,11 @@ export interface NotificationConsumerDependencies {
   readonly policies?: NotificationPolicyRegistry;
   readonly templates?: NotificationTemplateRegistry;
   readonly newLeaseId?: () => string;
+  /**
+   * L2 emergency switch of the consumer, read before the claim and again before
+   * the inbox write. A read that throws counts as contained.
+   */
+  readonly contained?: () => Promise<boolean>;
 }
 
 function failureCode(error: unknown): string {
@@ -116,6 +124,7 @@ export class NotificationEffectConsumer {
   readonly #policies: NotificationPolicyRegistry;
   readonly #templates: NotificationTemplateRegistry;
   readonly #newLeaseId: () => string;
+  readonly #contained: () => Promise<boolean>;
 
   constructor(dependencies: NotificationConsumerDependencies) {
     this.#store = dependencies.store;
@@ -123,6 +132,9 @@ export class NotificationEffectConsumer {
     this.#policies = dependencies.policies ?? defaultNotificationPolicies;
     this.#templates = dependencies.templates ?? defaultNotificationTemplates;
     this.#newLeaseId = dependencies.newLeaseId ?? randomUUID;
+    const contained = dependencies.contained;
+    this.#contained =
+      contained === undefined ? () => Promise.resolve(false) : () => contained().catch(() => true);
   }
 
   async consume(eventId: string, data: unknown): Promise<ConsumeOutcome> {
@@ -142,9 +154,11 @@ export class NotificationEffectConsumer {
   }
 
   /** Tx1: persists the claim, its lease and a started attempt, or a terminal outcome. */
-  claim(eventId: string, data: unknown): Promise<ClaimResult> {
+  async claim(eventId: string, data: unknown): Promise<ClaimResult> {
     const parsed = parseNotificationEffect(eventId, data);
-    if (parsed.kind === 'not_dispatchable') return Promise.resolve({ kind: 'not_dispatchable' });
+    if (parsed.kind === 'not_dispatchable') return { kind: 'not_dispatchable' };
+    // A contained consumer claims nothing: the obligation stays for later.
+    if (await this.#contained()) return { kind: 'contained' };
     const receiptId = notificationReceiptId(eventId);
     const now = this.#clock.now().toISOString();
     return this.#store.transact(async (tx) => {
@@ -275,7 +289,10 @@ export class NotificationEffectConsumer {
   }
 
   /** Tx2: inbox record, terminal receipt and finished attempt, or nothing. */
-  complete(claim: NotificationClaim): Promise<CompleteResult> {
+  async complete(claim: NotificationClaim): Promise<CompleteResult> {
+    // Read just before Tx2, not inside it (OB-08): a Tx2 already running when
+    // the switch turns on may still commit.
+    if (await this.#contained()) return this.#releaseContained(claim);
     const now = this.#clock.now().toISOString();
     const { effect, pinned, receiptId } = claim;
     const notificationId = notificationIdFor(receiptId);
@@ -448,6 +465,41 @@ export class NotificationEffectConsumer {
         updatedAtUtc: now,
       });
       return { kind: 'retry_scheduled' };
+    });
+  }
+
+  /** Gives the claimed attempt back: the receipt waits for re-enable with its budget intact. */
+  #releaseContained(claim: NotificationClaim): Promise<CompleteResult> {
+    const now = this.#clock.now().toISOString();
+    return this.#store.transact(async (tx) => {
+      const receipt = await tx.receipt(claim.receiptId);
+      if (
+        receipt === undefined ||
+        receipt.shape !== 'live' ||
+        receipt.status !== 'claimed' ||
+        receipt.leaseId !== claim.leaseId
+      )
+        return { kind: 'stale' };
+      const attempt = await tx.attempt(attemptIdFor(claim.receiptId, claim.attemptNumber));
+      if (attempt !== undefined)
+        tx.putAttempt(
+          finishedAttempt(attempt, {
+            status: 'abandoned',
+            failureClass: 'transient',
+            failureCode: 'family_contained',
+            finishedAtUtc: now,
+          }),
+        );
+      tx.putReceipt({
+        ...receipt,
+        status: 'retry_scheduled',
+        attemptBudget: receipt.attemptBudget + 1,
+        leaseId: null,
+        leaseExpiresAtUtc: null,
+        nextAttemptAtUtc: addMsUtc(now, retryBackoffMs(1)),
+        updatedAtUtc: now,
+      });
+      return { kind: 'contained' };
     });
   }
 

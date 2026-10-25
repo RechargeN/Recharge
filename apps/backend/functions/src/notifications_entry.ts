@@ -8,14 +8,24 @@ import { NotificationReconciler } from './modules/notifications/application/noti
 import { handleNotificationsCommandRequest } from './modules/notifications/application/notifications_command_handler.js';
 import { NotificationsPrivacyTaskHandler } from './modules/notifications/application/notifications_privacy_task_handler.js';
 import { handleNotificationsQueryRequest } from './modules/notifications/application/notifications_query_handler.js';
+import {
+  attemptIdFor,
+  type DeliveryAttempt,
+} from './modules/notifications/domain/delivery_attempt.js';
 import type { NotificationsStore } from './modules/notifications/domain/repositories.js';
+import { emergencySwitchState } from './modules/operations/emergency_switch.js';
+import type {
+  OperationsFailureEntry,
+  OperationsFamilyPort,
+  OperationsTaskView,
+} from './modules/operations/operations_ports.js';
 import {
   bookingOutboxCollection,
   FirestoreBookingOutboxSource,
 } from './modules/notifications/infrastructure/firestore_notification_sources.js';
 import { FirestoreNotificationsStore } from './modules/notifications/infrastructure/firestore_notifications_repository.js';
 import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
-import { notificationsFlagIds } from './shared/feature_flags.js';
+import { notificationsFlagIds, operationsEmergencySwitchIds } from './shared/feature_flags.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 
 /** The verified Session subject behind a client Notifications call. */
@@ -43,7 +53,15 @@ export function createEmulatorNotifications(
 ): NotificationsComposition {
   const clock = options.clock ?? systemServerClock;
   const store = options.store ?? new FirestoreNotificationsStore(firestore);
-  const consumer = new NotificationEffectConsumer({ store, clock });
+  const consumer = new NotificationEffectConsumer({
+    store,
+    clock,
+    contained: async () =>
+      (await emergencySwitchState(
+        firestore,
+        operationsEmergencySwitchIds.notificationsConsumeBooking,
+      )) === 'contained',
+  });
   return {
     store,
     consumer,
@@ -54,6 +72,107 @@ export function createEmulatorNotifications(
       clock,
     ),
     privacy: new NotificationsPrivacyTaskHandler(store, clock),
+  };
+}
+
+/**
+ * L2 port of TF-03 for the operations console (OPS-L2 §3.6): the receipt and
+ * its attempt records seen as codes and counters, never the recipient, event or
+ * payload. Replay and reconciliation stay the F1 reconciler's own.
+ */
+export function notificationOperationsPort(
+  composition: NotificationsComposition,
+): OperationsFamilyPort {
+  return {
+    async inspect(receiptId, nowUtc): Promise<OperationsTaskView | undefined> {
+      return composition.store.transact(async (tx) => {
+        const receipt = await tx.receipt(receiptId);
+        if (receipt === undefined) return undefined;
+        if (receipt.shape === 'minimal')
+          return {
+            taskId: receiptId,
+            state: 'done',
+            storedStatus: receipt.status,
+            attempts: 0,
+            attemptBudget: 0,
+            failureClass: null,
+            failureCode: receipt.reason,
+            firstFailure: null,
+            failureHistory: [],
+            replayCount: 0,
+            nextAttemptAtUtc: null,
+          };
+        const attempts: DeliveryAttempt[] = [];
+        for (let number = 1; number <= Math.min(receipt.attemptCount, 40); number += 1) {
+          const attempt = await tx.attempt(attemptIdFor(receiptId, number));
+          if (attempt !== undefined) attempts.push(attempt);
+        }
+        const history: OperationsFailureEntry[] = attempts
+          .filter((attempt) => attempt.status === 'failed' || attempt.status === 'abandoned')
+          .map((attempt) => ({
+            attempt: attempt.attemptNumber,
+            failureClass:
+              attempt.status === 'abandoned'
+                ? 'unknown'
+                : attempt.failureClass === 'permanent'
+                  ? 'permanent'
+                  : 'transient',
+            code: attempt.failureCode ?? 'unknown',
+            atUtc: attempt.finishedAtUtc ?? attempt.startedAtUtc,
+          }));
+        const leaseLive =
+          receipt.leaseExpiresAtUtc !== null &&
+          Date.parse(receipt.leaseExpiresAtUtc) > Date.parse(nowUtc);
+        return {
+          taskId: receiptId,
+          state:
+            receipt.status === 'created'
+              ? 'done'
+              : receipt.status === 'dead_lettered'
+                ? 'dead_letter'
+                : receipt.status === 'retry_scheduled'
+                  ? 'retry_scheduled'
+                  : leaseLive
+                    ? 'in_flight'
+                    : 'unknown',
+          storedStatus: receipt.status,
+          attempts: receipt.attemptCount,
+          attemptBudget: receipt.attemptBudget,
+          failureClass: history.at(-1)?.failureClass ?? null,
+          failureCode: receipt.reason ?? history.at(-1)?.code ?? null,
+          firstFailure: history[0] ?? null,
+          failureHistory: history.slice(-20),
+          replayCount: receipt.replayCount,
+          nextAttemptAtUtc: receipt.nextAttemptAtUtc,
+        };
+      });
+    },
+    async replay(receiptId, _nowUtc, decision) {
+      const result = await composition.reconciler.replay({
+        receiptId,
+        reason: decision.reason,
+        operator: decision.actorId,
+      });
+      switch (result.kind) {
+        case 'replayed':
+          return 'requeued';
+        case 'refused':
+          return 'not_dead_letter';
+        case 'reason_invalid':
+          return 'decision_conflict';
+        default:
+          return result.kind;
+      }
+    },
+    async reconcile() {
+      const report = await composition.reconciler.reconcile();
+      return {
+        complete: report.complete,
+        scanned: report.scanned,
+        redispatched: Object.values(report.outcomes).reduce((sum, count) => sum + (count ?? 0), 0),
+        findings: report.findings.map((finding) => ({ code: finding.code, ref: finding.ref })),
+      };
+    },
   };
 }
 
