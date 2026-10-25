@@ -217,6 +217,9 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
     ['adminReadAudit', 'actorId', blocked('PB-10')],
     // Operator replay audit of the Booking deadline worker: staff identities only.
     ['bookingReconfirmationDeadlineOperatorAudit', null, blocked('PB-10')],
+    // L2 operations console: the test-only operator registry and its audit.
+    ['operationsOperatorAuthority', '$id', blocked('PB-10')],
+    ['operationsOperatorAudit', 'actorId', blocked('PB-10')],
   ]),
   ...rows('W17', 'quick_plan', [
     ['quickPlans', 'ownerId', del],

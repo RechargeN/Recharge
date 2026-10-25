@@ -28,6 +28,8 @@ service cloud.firestore {
     match /privacyLegalHolds/{document} { allow read, write: if false; }
     match /privacyLegalHoldAudit/{document} { allow read, write: if false; }
     match /privacyHoldAuthority/{document} { allow read, write: if false; }
+    match /operationsOperatorAuthority/{document} { allow read, write: if false; }
+    match /operationsOperatorAudit/{document} { allow read, write: if false; }
     match /securityAuditEvents/{document} { allow read, write: if false; }
     match /securityRateLimitCounters/{document} { allow read, write: if false; }
     match /securityRateLimitAttempts/{document} { allow read, write: if false; }

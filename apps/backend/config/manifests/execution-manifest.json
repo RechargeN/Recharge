@@ -893,6 +893,20 @@
         "compositeIndexes": []
       },
       {
+        "name": "operationsOperatorAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "operationsOperatorAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "platformActiveFeatureFlagPointers",
         "clientAccess": "deny",
         "owner": "firebase_cli",
@@ -1296,6 +1310,21 @@
       },
       {
         "id": "identity.session.rotate.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "booking.eventProjection.delivery.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "booking.reconfirmation.deadlineWorker.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "notifications.consume.booking.incidentDisable",
         "kind": "emergencySwitch",
         "defaultState": "off"
       },

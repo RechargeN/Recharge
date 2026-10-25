@@ -133,6 +133,9 @@ const approvedOutsideUsers = {
   // guard; it writes its own hold and audit collections, no Content.
   "modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts":
     guardOnly,
+  // L2 operations console (OPS-L2 §3.6): only the Emulator guard; it writes
+  // its own audit and the family emergency switches, no Content.
+  "modules/operations/operations_console.ts": guardOnly,
   // J1 Route (2026-10-20): only the Emulator guard; its own collections.
   // J2 / RTE-PUB-01 (2026-10-21): plus one read-only standing check, RP-11.
   "modules/route/firestore_route_service.ts": {
