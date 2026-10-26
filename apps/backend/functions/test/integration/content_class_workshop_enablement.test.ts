@@ -252,13 +252,13 @@ void test('other Create types keep their own enablement next to Class', async ()
     'event',
     'scenario',
     'find_people',
+    'route',
   ] as const)
     await rejected(w.service(['class_workshop']).execute(actorA, create(typeId)), 'type_disabled');
-  for (const typeId of ['route'] as const)
-    await rejected(
-      w.service(['class_workshop', typeId]).execute(actorA, create(typeId)),
-      'content_type_unsupported',
-    );
+  await rejected(
+    w.service(['class_workshop', 'route']).execute(actorA, create('route')),
+    'validation_failed',
+  );
   assert.equal(w.repository.snapshot().drafts.length, 0);
 });
 

@@ -25,7 +25,7 @@
 | DEF-02 | Документы D1 не отражают запуск и падение Linux gate: §12 пишет, что runner не запускается | `MEDIA_D1_REAL_TOOLS_AMENDMENT.md` §12, §15.8; LAUNCH_STATUS D1 | P2 | заход 2: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают попытку 1; строка D1 в LAUNCH_STATUS | закрывается после сверки с evidence попытки 2 (run, SHA, итог) | закрыт: D1 §12, §15.8 и [D1_LINUX_GATE.md](../evidence/backend/d1/D1_LINUX_GATE.md) записывают обе попытки с run, SHA и итогом |
 | DEF-03 | Форма Create допускает черновики, которые сервер отклоняет общим `validation_failed`; пользователь не видит поле. Place 10, Activity 10 (+8 граничных отказов), Rental 9, Collection 8 случаев | `*_create_compat.json`, §5.7 D3.1–D3.4 | P2: корректные черновики проходят (обход есть), но обязателен к закрытию для M1 по Р-09 | `4e82352`; тестовые DI-регистрации `5b3060f`, `b91e819` | readiness fixtures, CreatePage widgets, D3.1 полный повтор и D3.2–D3.4; [журналы и пределы](../evidence/backend/m1/M1_STAGE3_CREATE_COMPAT.md), проверил Codex 2026-10-14 | закрыт в scope захода 3; обязательные финальные SHA-гейты остаются |
 | DEF-04 | Ошибочная привязка binding rollback к D4.1 | прежняя таблица M1_ACCEPTANCE | P2 | заход 5: ссылка исправлена на B1; import rollback выделен отдельно | native B1 и host B1 на `7cb07fa`, [заход 4](../evidence/backend/m1/M1_STAGE4_ADAPTERS_CREATE.md) | закрыт; независимое ревью финальных документов pass |
-| DEF-05 | Backend R0 npm audit blocks the gate; historical production and current dev-CLI findings | Historical runs retained below; 2026-10-17: CLI 15.34.0, production high/critical 0, full graph 3 high from GHSA-vfj7-8cjw-p6xm | Blocking for R0; outside accepted M1 | Compatible security patches + CLI upgrade; time-limited exception proposed, not activated | Strict production audit exit 0; policy tests and live local review; final 21–26 evidence linked below | Open: owner approval of the proposed exception and CI activation/verification remain pending |
+| DEF-05 | Backend R0 npm audit blocks the gate; historical production and current dev-CLI findings | Historical runs retained below; 2026-10-17: CLI 15.34.0, production high/critical 0, full graph 3 high from GHSA-vfj7-8cjw-p6xm | Blocking for R0; outside accepted M1 | Compatible security patches + CLI upgrade; time-limited exception proposed, not activated | Strict production audit exit 0; policy tests and live local review; final 21–26 evidence linked below | Historical local risk accepted through 2026-11-16 00:00 UTC; 2026-10-26 strict audits pass without exception. Global/CI proposal remains inactive; see follow-up below |
 | DEF-08 | `freshclam` не проверяет скачанную базу на Linux: проверочная загрузка ищет сертификаты в `/usr/local/etc/certs`, директива `CVDCertsDirectory` в `freshclam.conf` до неё не доходит; гейт отклоняет базы | run `38547611633`, `dd0f58b`, 2026-10-14 | P1 для D1 (блокирует `inspect`); вне M1 по Р-06 А | план одобрен 2026-10-14, реализован в ветке `claude/d1-linux-fix`: каталог из проверенного `.deb` обязателен (fail closed до `freshclam`), `freshclam` получает `CVD_CERTS_DIR` — `libclamav` 1.5.4 знает только переменную, не директиву; `--cvdcertsdir` не добавляется без подтверждённой необходимости; TLS не меняется | Linux `inspect` run `38554932983` на `3c32e1c`: «Database test passed» для `daily`, `main`, `bytecode`; `sigtool --info` — OK для всех трёх | исправлен (`3c32e1c`) и подтверждён на Linux (`inspect` и `test`, run `38567123384`) |
 | DEF-09 | Отчёт `inspect` не записывает ни одного файла уведомлений `@img/sharp-libvips-linux-x64@1.3.4` (LGPL-3.0-or-later): `npmNotices()` ищет только в корне пакета; §15.5 требует имена, размеры и SHA-256 уведомлений этого пакета | run `38554932983`, `3c32e1c`, раздел «Linux sharp packages» | P2 для D1 (неполный обязательный отчёт); вне M1 по Р-06 А | пробел принят владельцем 2026-10-14 как исключение для этого пакета и версии | решение записано в D1 §15.8 | закрыт как «принято», не «исправлено» |
 | DEF-10 | Самопроверка cgroup L2 на Linux обрывает соединение с сервисом (`socket hang up`): гейт падает до L3/L4, tool tests и EICAR; ошибка L2 не превращается в проверку с фактами | run `38555622591`, `db3121f`, стадия `test` | P1 для D1 (блокирует `test`); вне M1 по Р-06 А | вариант А одобрен 2026-10-14: `OOMPolicy=continue` для scope и диагностика L2/L3 с фактами и journal (ветка `claude/d1-linux-fix`) | Linux run `38565997591` (`c50dc72`): L2 ok (`oomKills` 1, хост жив), L3 ok | исправлен и подтверждён на Linux (run `38567123384`) |
@@ -134,3 +134,61 @@ Final local runtime validation: `9db93bb`; [21–26 acceptance](LOCAL_21_26_ACCE
 Policy tests 13/13; full Emulator 14/14 groups with no skips.
 [Exact inactive CI patch](DEF05_CI_ACTIVATION_PROPOSAL.patch) passes `git apply --check --unidiff-zero`; not applied.
 DEF-05 remains open pending explicit owner approval and subsequent remote CI.
+
+
+## DEF-05 — bounded local owner acceptance and 2026-10-24–26 audit follow-up
+
+The owner explicitly answered in the 01–32 local completion chat:
+«Да, принять только локально до 16.11.2026».
+
+This accepts the risk exclusively for local Emulator work through the original
+expiry **2026-11-16 00:00 UTC**, without extending it. The accepted scope is
+GHSA-vfj7-8cjw-p6xm through dev Firebase CLI **15.34.0**, with the existing
+dependency-graph, upstream-release and strict production checks. It does not
+accept another advisory, production use, a new dependency path or a later expiry.
+
+The live 2026-10-23 audit reports production **0 high / 0 critical / 6 moderate**;
+the full graph remains **3 high / 0 critical / 8 moderate**. Policy tests pass
+13/13 and the live `--review-proposal` check reports
+`{"exceptionUsed":true,"reviewOnly":true}`. Published braces remains 3.0.3;
+Firebase CLI latest is 15.34.1 and still declares chokidar ^3.6.0. The checked
+local dependency tree remains pinned to 15.34.0; no upgrade is implied.
+
+This is a bounded local risk acceptance, **not an upstream fix or global/CI
+acceptance**. The policy and inactive CI proposal remain unchanged; the default
+strict full audit remains fail-closed. No push, remote CI execution, provisioning
+or deployment is authorized by this decision. The historical 2026-10-17 pending
+approval statements above describe the global/CI proposal; they do not reopen
+the local approval recorded here.
+
+On **2026-10-24**, the audit feed changed: the previous braces advisory was no
+longer reported, while new body-parser and Zod high findings were reported.
+Commit `363d69dbfc64a8bb8b4f4ab0e21a52efef8f2678` updates only four transitive
+lock nodes: body-parser 2.4.0, two nested body-parser 1.20.9, and Zod 4.6.7.
+Direct dependency pins and installed Firebase CLI 15.34.0 remain unchanged.
+The post-update live audit at 06:48 UTC reports production **0 high / 0 critical /
+6 moderate**, full graph **0 high / 0 critical / 10 moderate**. Policy tests pass
+13/13 and the live policy result is `{"exceptionUsed":false,"reviewOnly":false}`.
+Thus the current local audit passes without using the DEF-05 exception. Braces
+was not upgraded; this does not claim an upstream braces fix. The earlier dated
+counts remain historical evidence, not the current result. The proposed global
+CI exception stays inactive and no remote CI was executed.
+
+Rechecked **2026-10-25 at 08:39 UTC** on the unchanged dependency graph:
+production **0 high / 0 critical / 6 moderate**, full graph **0 high / 0 critical /
+10 moderate**. The default strict policy (without `--review-proposal`) passes
+with `{"exceptionUsed":false,"reviewOnly":false}`; policy self-tests pass 13/13.
+
+Rechecked again **2026-10-26 at 00:10 UTC** on
+`7d6ec42b11264005a0f747c6c193d76ce7bc2e18`, with the same lock:
+production **0 high / 0 critical / 6 moderate**, full graph **0 high / 0 critical /
+10 moderate**. Strict default policy and its 13 self-tests pass; no exception
+was used or activated. This is the latest audit in the final local evidence.
+
+Security references:
+[body-parser GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828),
+[Zod GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5).
+The final 01–32 evidence records all new common-tree gates after this dependency
+change; no previous stand result is inherited across it. This is technical
+evidence for separate owner acceptance, not an automatic Review-to-Accepted
+promotion.

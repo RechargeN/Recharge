@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, before, test } from 'node:test';
-import type { DocumentData } from 'firebase-admin/firestore';
+import { FieldValue, type DocumentData } from 'firebase-admin/firestore';
 
 import { deliverContentEffects, catalogEffectConsumer } from '../../src/content_effects_entry.js';
 import { purgeFindPeopleRetention } from '../../src/content_entry.js';
@@ -722,6 +722,128 @@ void test('retention: historical exact answers survive no-exact draft until boun
     (await purgeFindPeopleRetention(firestore, '2026-02-01T00:00:00.000Z')).redactedAnswers,
     0,
   );
+});
+
+void test('retention: unrelated old receipts cannot shorten a partial draft own creation deadline', async () => {
+  const answersFor = async (draftId: string) =>
+    (
+      await firestore
+        .collection(contentCollections.idempotency)
+        .where('actorUserId', '==', creator.actor.userId)
+        .get()
+    ).docs.filter((answer) => {
+      const outcome = JSON.parse(String(answer.get('outcomeJson'))) as { draftId?: string };
+      return outcome.draftId === draftId;
+    });
+  const unrelated = data<{ draftId: string }>(
+    await world.content(creator, 'createDraft', {
+      typeId: 'find_people',
+      marketId: 'LV',
+      publisherRef: { type: 'user', id: creator.actor.userId },
+      body: {},
+    }),
+    'unrelated old content',
+  );
+  const unrelatedAnswers = await answersFor(unrelated.draftId);
+  assert.equal(unrelatedAnswers.length, 1);
+  await unrelatedAnswers[0]!.ref.update({ recordedAtUtc: '2026-01-01T00:00:00.000Z' });
+  const unrelatedOutcome = unrelatedAnswers[0]!.get('outcomeJson') as string;
+
+  for (const legacy of [false, true]) {
+    const body = await findPeopleBody(creator.actor.userId, (partial) => {
+      delete (partial.findPeople as Record<string, unknown>).schedule;
+    });
+    const payload = {
+      typeId: 'find_people',
+      marketId: 'LV',
+      publisherRef: { type: 'user', id: creator.actor.userId },
+      body,
+    };
+    const key = randomUUID();
+    const draft = data<{ draftId: string; revision: number }>(
+      await world.content(creator, 'createDraft', payload, key),
+      'partial draft with private location',
+    );
+    const draftRef = firestore.collection(contentCollections.drafts).doc(draft.draftId);
+    if (legacy)
+      data(
+        await world.content(creator, 'updateDraft', {
+          draftId: draft.draftId,
+          expectedRevision: draft.revision,
+          body: withoutFindPeopleExactLocation(body),
+        }),
+        'legacy current body without exact',
+      );
+    await draftRef.update({
+      createdAtUtc: legacy ? FieldValue.delete() : '2026-04-01T00:00:00.000Z',
+      updatedAtUtc: '2026-05-30T00:00:00.000Z',
+    });
+    const ownAnswers = await answersFor(draft.draftId);
+    assert.equal(ownAnswers.length, legacy ? 2 : 1);
+    const historical = ownAnswers.find((answer) => answer.get('commandType') === 'createDraft')!;
+    for (const answer of ownAnswers)
+      await answer.ref.update({
+        recordedAtUtc:
+          answer.id === historical.id ? '2026-04-01T00:00:00.000Z' : '2026-04-20T00:00:00.000Z',
+      });
+
+    await purgeFindPeopleRetention(firestore, '2026-05-30T23:59:59.999Z');
+    assert.equal(String((await draftRef.get()).get('bodyJson')).includes('"exact"'), !legacy);
+    assert.ok(String((await historical.ref.get()).get('outcomeJson')).includes('"exact"'));
+    const beforeReplay = data<{ body: unknown }>(
+      await world.content(creator, 'createDraft', payload, key),
+      'partial replay before own deadline',
+    );
+    assert.ok(JSON.stringify(beforeReplay.body).includes('"exact"'));
+
+    const report = await purgeFindPeopleRetention(firestore, '2026-05-31T00:00:00.000Z');
+    assert.equal(report.purgedDraftIds.includes(draft.draftId), !legacy);
+    assert.ok(report.redactedAnswers > 0);
+    assertNoSecrets((await draftRef.get()).get('bodyJson'), 'partial own deadline');
+    for (const answer of ownAnswers)
+      assertNoSecrets((await answer.ref.get()).get('outcomeJson'), 'partial stored replay');
+    const afterReplay = data<{ body: unknown }>(
+      await world.content(creator, 'createDraft', payload, key),
+      'partial replay after own deadline',
+    );
+    assertNoSecrets(afterReplay.body, 'partial replay after own deadline');
+    assert.equal(JSON.stringify(afterReplay.body).includes('"exact"'), false);
+    assert.equal(
+      (
+        await purgeFindPeopleRetention(firestore, '2026-05-31T00:00:00.000Z')
+      ).purgedDraftIds.includes(draft.draftId),
+      false,
+    );
+    assert.equal((await draftRef.get()).get('revision'), draft.revision + 1);
+  }
+  // With no trustworthy draft or matching receipt time, migration grants no
+  // new grace period. Unrelated receipts must not supply one either.
+  const unknownBody = await findPeopleBody(creator.actor.userId, (partial) => {
+    delete (partial.findPeople as Record<string, unknown>).schedule;
+  });
+  const unknown = data<{ draftId: string }>(
+    await world.content(creator, 'createDraft', {
+      typeId: 'find_people',
+      marketId: 'LV',
+      publisherRef: { type: 'user', id: creator.actor.userId },
+      body: unknownBody,
+    }),
+    'legacy draft without trustworthy dates',
+  );
+  const unknownRef = firestore.collection(contentCollections.drafts).doc(unknown.draftId);
+  await unknownRef.update({ createdAtUtc: FieldValue.delete() });
+  const unknownAnswers = await answersFor(unknown.draftId);
+  for (const answer of unknownAnswers)
+    await answer.ref.update({ recordedAtUtc: FieldValue.delete() });
+  assert.ok(
+    (await purgeFindPeopleRetention(firestore, '2026-04-01T00:00:00.000Z')).purgedDraftIds.includes(
+      unknown.draftId,
+    ),
+  );
+  assertNoSecrets((await unknownRef.get()).get('bodyJson'), 'legacy no new grace');
+  for (const answer of unknownAnswers)
+    assertNoSecrets((await answer.ref.get()).get('outcomeJson'), 'legacy no-date stored replay');
+  assert.equal((await unrelatedAnswers[0]!.ref.get()).get('outcomeJson'), unrelatedOutcome);
 });
 
 void test('retention: owner terminal event survives later pointer changes and legacy records get no fresh period', async () => {

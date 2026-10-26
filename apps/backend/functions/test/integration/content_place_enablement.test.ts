@@ -144,11 +144,19 @@ const emulatorSets: readonly (readonly ContentTypeId[])[] = [
   ['event', 'place'],
 ];
 
-void test('types without a validator are refused as unsupported even when listed', async () => {
-  const unvalidated = ['route'] as const;
-  const content = service(new InMemoryContentRepository(), [...unvalidated, 'place']);
-  for (const typeId of unvalidated)
-    await refusedWith(content.execute(actorA, create(typeId)), 'content_type_unsupported', typeId);
+void test('Route retains its own enablement and validator next to Place', async () => {
+  const repository = new InMemoryContentRepository();
+  await refusedWith(
+    service(repository, ['place']).execute(actorA, create('route')),
+    'type_disabled',
+    'Route flag off',
+  );
+  await refusedWith(
+    service(repository, ['place', 'route']).execute(actorA, create('route')),
+    'validation_failed',
+    'Route requires its pinned revision body',
+  );
+  assert.equal(repository.snapshot().drafts.length, 0);
 });
 
 void test('Activity, Rental and Collection stay disabled under every Emulator authoring set', async () => {

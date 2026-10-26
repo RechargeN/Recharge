@@ -202,11 +202,19 @@ void test('Rental and Collection stay disabled under every Emulator authoring se
   }
 });
 
-void test('types without a validator are refused as unsupported even next to Activity', async () => {
-  const unvalidated = ['route'] as const;
-  const content = service(new InMemoryContentRepository(), [...unvalidated, 'activity']);
-  for (const typeId of unvalidated)
-    await refusedWith(content.execute(actorA, create(typeId)), 'content_type_unsupported', typeId);
+void test('Route retains its own enablement and validator next to Activity', async () => {
+  const repository = new InMemoryContentRepository();
+  await refusedWith(
+    service(repository, ['activity']).execute(actorA, create('route')),
+    'type_disabled',
+    'Route flag off',
+  );
+  await refusedWith(
+    service(repository, ['activity', 'route']).execute(actorA, create('route')),
+    'validation_failed',
+    'Route requires its pinned revision body',
+  );
+  assert.equal(repository.snapshot().drafts.length, 0);
 });
 
 void test('Activity authoring needs its own type in the set', async () => {

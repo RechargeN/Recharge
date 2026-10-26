@@ -1,3 +1,5 @@
+import 'package:recharge/features/create/presentation/widgets/find_people_create_block.dart';
+import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
@@ -32,6 +34,7 @@ import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_find_people_draft.dart';
 import 'support/event_details_harness.dart';
+import 'support/create_block_stand_harness.dart';
 import 'support/stand_backend.dart';
 
 /// D3.7 through the UI: the signed-in user's Create Find People draft is
@@ -163,7 +166,7 @@ void main() {
   });
 
   testWidgets(
-    'the user publishes their Create Find People draft with explicit consent',
+    'the user edits and restores Create Find People, then publishes with consent',
     (WidgetTester tester) async {
       await tester.runAsync(boot);
       tester.view.physicalSize = const Size(1200, 2600);
@@ -176,6 +179,20 @@ void main() {
         () => findPeopleStandAuth(serverUserId),
       );
       // The route is guarded by the same guard that gates every command.
+      await editAndReloadCreateBlock(
+        tester,
+        repository: sl<CreateRepository>(),
+        userId: serverUserId,
+        runtimeDefaults: sl<CreateRuntimeDefaults>(),
+        expectedType: CreateObjectType.findPeople,
+        titleLabel: 'Title *',
+        block: (create) => FindPeopleCreateBlock(
+          controller: create,
+          state: create.state,
+          onPublished: () {},
+        ),
+      );
+
       final router = GoRouter(
         initialLocation: '/test/find-people-publication',
         routes: <RouteBase>[

@@ -855,6 +855,11 @@ void test('delegated import never reaches Content storage except through the Con
     // J1 Route: Emulator guard and pure canonical hashing only.
     'modules/route/firestore_route_service.ts',
     'modules/route/route_contract.ts',
+    // J2 / RTE-PUB-01: immutable distribution hashing, the Content revision
+    // port and Catalog's shared distribution validator; no storage writer.
+    'modules/route/route_distribution.ts',
+    'modules/route/route_publication.ts',
+    'modules/catalog/domain/route_projection.ts',
     // D3.7: Identity checks the exact Find People draft author before consent.
     'modules/identity_publisher/infrastructure/find_people_privacy_authority.ts',
     'content_effects_entry.ts',
@@ -906,6 +911,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/route/firestore_route_service.ts': [
       'assertContentEmulatorContext',
+      // J2: read-only standing check before a Route mutation, like I3 below.
+      'routePublicationStanding',
       'canonicalJson',
       'sha256Hex',
     ],
@@ -933,6 +940,12 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/catalog/domain/scenario_projection.ts': [
       'scenarioDistributionHash',
       'validateScenarioDistribution',
+    ],
+    'modules/route/route_distribution.ts': ['canonicalJson', 'sha256Hex'],
+    'modules/route/route_publication.ts': ['RouteRevisionPort', 'RouteRevisionStatus'],
+    'modules/catalog/domain/route_projection.ts': [
+      'routeDistributionTrack',
+      'validateRouteDistribution',
     ],
     'modules/identity_publisher/infrastructure/find_people_privacy_authority.ts': [
       'assertContentEmulatorContext',

@@ -11,8 +11,8 @@ Runtime revision: `9db93bb`; последующий documentation commit не м
 | Заход | Реализованные обязательные критерии | Проверка общей ревизии |
 |---|---|---|
 | 21 / G | Owner/session authority; Favorites и только explicit self-reported Place Visit; CAS/idempotency/tombstones; revision-pinned paging; Privacy erasure; изоляция durable queue | Library 9/9, включая реальные Flutter repositories |
-| 22 / H | Eligibility и запрет own targets; stable review/edit/delete; rating projection/rebuild; exact-revision moderation; private output | H cases в reviews-safety 13/13 |
-| 23 / K1 | Current scoped grants; immutable decisions/idempotency; report privacy/triage; owner dispatch/recovery; deny direct domain writes | moderation-k1 13/13 |
+| 22 / K1 | Current scoped grants; immutable decisions/idempotency; report privacy/triage; owner dispatch/recovery; deny direct domain writes | moderation-k1 13/13 |
+| 23 / H | Eligibility и запрет own targets; stable review/edit/delete; rating projection/rebuild; exact-revision moderation; private output | H cases в reviews-safety 13/13 |
 | 24 / K2 | Bilateral block/directional mute; scoped sanctions; independent appeals; overlap/expiry; explicit owner reconcile; partial recovery и сохранность Booking | K2 cases в том же reviews-safety 13/13, не дополнительный набор |
 | 25 / K3 | Case/action/target scope; audit before disclosure; immutable proposal; separate approval revision/hash/TTL; current authority recheck; owner Event visibility restrict/restore; stable receipt/unknown/partial execution | admin-support-k3 7/7, ownership AST contract, Rules/manifest и cleanup |
 | 26 / I1 | Existing Quick Plan aggregate; owner-only persistence; CAS/delete-wins; encrypted durable queue; import validation/collision; lost-response/auth/restart recovery | quick-plan 5/5, включая два настоящих Flutter adapters |

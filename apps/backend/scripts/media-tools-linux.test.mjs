@@ -323,16 +323,31 @@ test("the Linux lock pins the .deb, the sharp packages and the budgets", () => {
 });
 
 test("the workflow: pinned actions, read-only, ubuntu-24.04, push on its own paths, nothing uploaded", () => {
-  const workflow = fs.readFileSync(
-    new URL("../../../.github/workflows/backend-d1-linux.yml", import.meta.url),
-    "utf8",
-  );
+  const workflow = fs
+    .readFileSync(
+      new URL(
+        "../../../.github/workflows/backend-d1-linux.yml",
+        import.meta.url,
+      ),
+      "utf8",
+    )
+    .replace(/\r\n/gu, "\n");
   const r0 = fs.readFileSync(
     new URL("../../../.github/workflows/backend-r0.yml", import.meta.url),
     "utf8",
   );
-  for (const pin of r0.match(/uses: [^\s]+@[0-9a-f]{40}/gu) ?? [])
-    assert.ok(workflow.includes(pin), pin);
+  const pins = Array.from(
+    workflow.matchAll(/uses: ([^\s]+)/gu),
+    (match) => match[1],
+  );
+  assert.deepEqual(
+    pins.map((pin) => pin.split("@")[0]),
+    ["actions/checkout", "actions/setup-node", "actions/setup-java"],
+  );
+  for (const pin of pins) {
+    assert.match(pin, /^[^@\s]+@[0-9a-f]{40}$/u);
+    assert.ok(r0.includes(`uses: ${pin}`), pin);
+  }
   assert.match(workflow, /permissions:\n  contents: read\n/u);
   assert.match(workflow, /runs-on: ubuntu-24\.04/u);
   assert.match(workflow, /persist-credentials: false/u);

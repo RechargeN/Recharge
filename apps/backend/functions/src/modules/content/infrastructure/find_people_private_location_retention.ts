@@ -98,6 +98,7 @@ export async function purgeFindPeoplePrivateLocations(
         db.collection(findPeopleIdentityCollections.consentReceipts).where('userId', '==', author),
       );
       const updates: { ref: DocumentReference; outcomeJson: string }[] = [];
+      const origins: (string | null | undefined)[] = [draft.createdAtUtc as string | undefined];
       const ends: (string | null | undefined)[] = [
         consent?.revokedAtUtc as string | undefined,
         consent?.expiresAtUtc as string | undefined,
@@ -108,6 +109,8 @@ export async function purgeFindPeoplePrivateLocations(
         if (data.commandType !== 'createDraft' && data.commandType !== 'updateDraft') continue;
         const outcome = parse(data.outcomeJson);
         if (outcome === null || outcome.draftId !== snapshot.id) continue;
+        // Another draft of this author cannot shorten this draft's lifetime.
+        origins.push(data.recordedAtUtc as string | undefined);
         // Historical bodies matter even when the current body has no exact.
         if (typeof outcome.body === 'object' && outcome.body !== null)
           ends.push(findPeopleMeetingEnd(outcome.body));
@@ -149,10 +152,7 @@ export async function purgeFindPeoplePrivateLocations(
         ends.push(draft.createdAtUtc as string | undefined);
       // No meeting/consent/event: retain the accepted 30+30 day draft bound,
       // anchored to creation so later unrelated writes cannot extend it.
-      const origin = earliest([
-        draft.createdAtUtc as string,
-        ...answers.docs.map((a) => a.get('recordedAtUtc') as string),
-      ]);
+      const origin = earliest(origins);
       const lifeEnd = earliest(ends) ?? (origin === null ? null : retentionDeadline(origin));
       // Legacy records without any trustworthy timestamp are overdue, not
       // granted a fresh retention period by a migration or this job.

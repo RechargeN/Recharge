@@ -1,3 +1,4 @@
+import 'package:recharge/features/create/presentation/widgets/scenario/scenario_create_block.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_scenario_draft.dart';
 import 'session_publication_ui_stand_test.dart' show sessionStandAuth;
+import 'support/create_block_stand_harness.dart';
 import 'support/stand_backend.dart';
 
 /// I3 through the UI: the signed-in Creator's Create Scenario is saved on the
@@ -182,7 +184,7 @@ void main() {
   });
 
   testWidgets(
-    'the Creator publishes and shares their Create Scenario from the test page',
+    'the Creator edits and restores the Create Scenario block before publishing and sharing',
     (WidgetTester tester) async {
       await tester.runAsync(boot);
       tester.view.physicalSize = const Size(1200, 2600);
@@ -192,6 +194,17 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
       final auth = await tester.runAsync(() => sessionStandAuth(serverUserId));
+      await editAndReloadCreateBlock(
+        tester,
+        repository: sl<CreateRepository>(),
+        userId: serverUserId,
+        runtimeDefaults: sl<CreateRuntimeDefaults>(),
+        expectedType: CreateObjectType.scenario,
+        titleLabel: 'Scenario title *',
+        block: (create) =>
+            ScenarioCreateBlock(controller: create, state: create.state),
+      );
+
       final router = GoRouter(
         initialLocation: '/test/scenario-publication',
         routes: <RouteBase>[

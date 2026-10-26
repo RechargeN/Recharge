@@ -1,3 +1,5 @@
+import 'package:recharge/features/create/presentation/widgets/session_create_block.dart';
+import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
@@ -32,6 +34,7 @@ import 'package:uuid/uuid.dart';
 
 import '../fixtures/create/user_session_draft.dart';
 import 'support/event_details_harness.dart';
+import 'support/create_block_stand_harness.dart';
 import 'support/stand_backend.dart';
 
 /// D3.5 through the UI: the signed-in user's Create Session draft is published
@@ -177,7 +180,7 @@ void main() {
   });
 
   testWidgets(
-    'the user publishes their Create Session draft from the test page',
+    'the user edits and restores the Create Session block before publication',
     (WidgetTester tester) async {
       await tester.runAsync(boot);
       tester.view.physicalSize = const Size(1200, 2600);
@@ -188,6 +191,20 @@ void main() {
       });
       final auth = await tester.runAsync(() => sessionStandAuth(serverUserId));
       // The route is guarded by the same guard that gates every command.
+      await editAndReloadCreateBlock(
+        tester,
+        repository: sl<CreateRepository>(),
+        userId: serverUserId,
+        runtimeDefaults: sl<CreateRuntimeDefaults>(),
+        expectedType: CreateObjectType.session,
+        titleLabel: 'Title',
+        block: (create) => SessionCreateBlock(
+          controller: create,
+          state: create.state,
+          onPublished: () {},
+        ),
+      );
+
       final router = GoRouter(
         initialLocation: '/test/session-publication',
         routes: <RouteBase>[
