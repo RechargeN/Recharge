@@ -46,7 +46,15 @@ export interface ReplayAudit {
   readonly atUtc: string;
   readonly reason: string;
   readonly operator: string;
+  /** L2: the dead-letter reason the replay answered; the receipt itself is reset. */
+  readonly previousReason?: DeadLetterReason | null;
 }
+
+/** L2: reasons a replay cannot change, because the payload under the key is broken. */
+export const unreplayableDeadLetterReasons: readonly DeadLetterReason[] = [
+  'invalid_effect',
+  'unsupported_effect',
+];
 
 /**
  * A receipt that still carries effect data: while the effect is in flight

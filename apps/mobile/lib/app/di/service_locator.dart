@@ -34,6 +34,7 @@ import '../adapters/route_safety_reporting_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
 import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
+import '../../core/product_analytics/product_analytics_recorder.dart';
 import '../../core/id/id_generator.dart';
 import '../../core/notifications/app_notification_sink.dart';
 import '../../features/ai_assist/application/ai_assist_coordinator.dart';
@@ -297,6 +298,10 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
+    // L3: no accepted policy and no destination, so nothing is collected.
+    ..registerLazySingleton<ProductAnalyticsRecorder>(
+      ProductAnalyticsRecorder.disabled,
+    )
     ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
     ..registerLazySingleton<http.Client>(http.Client.new)
     ..registerLazySingleton<BookingBackendBindingController>(

@@ -71,7 +71,10 @@ function repositoryFacts() {
       ...idsOf("identityFlagIds"),
       ...idsOf("scenarioFlagIds"),
     ],
-    emergency: idsOf("abuseEmergencySwitchIds"),
+    emergency: [
+      ...idsOf("abuseEmergencySwitchIds"),
+      ...idsOf("operationsEmergencySwitchIds"),
+    ],
     region: readJson(path.join(configRoot, "region-policy.schema.json"))
       .properties,
   };

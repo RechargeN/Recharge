@@ -893,6 +893,20 @@
         "compositeIndexes": []
       },
       {
+        "name": "operationsOperatorAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "operationsOperatorAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "platformActiveFeatureFlagPointers",
         "clientAccess": "deny",
         "owner": "firebase_cli",
@@ -942,7 +956,63 @@
         "compositeIndexes": []
       },
       {
+        "name": "privacyHoldAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyLegalHoldAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyLegalHolds",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "privacyRequests",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "privacyTaskProgress",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsAccessAudit",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsAccessAuthority",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsDailyAggregates",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "productAnalyticsEvents",
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
@@ -1268,6 +1338,21 @@
       },
       {
         "id": "identity.session.rotate.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "booking.eventProjection.delivery.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "booking.reconfirmation.deadlineWorker.incidentDisable",
+        "kind": "emergencySwitch",
+        "defaultState": "off"
+      },
+      {
+        "id": "notifications.consume.booking.incidentDisable",
         "kind": "emergencySwitch",
         "defaultState": "off"
       },

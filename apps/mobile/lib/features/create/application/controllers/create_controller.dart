@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/parsing/input_parsers.dart';
+import '../../../../core/product_analytics/product_analytics_contract.dart';
+import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/activity_draft_data.dart';
@@ -131,6 +133,7 @@ class CreateController extends ChangeNotifier {
     required SaveCreateDraftUseCase saveCreateDraftUseCase,
     required PublishCreateDraftUseCase publishCreateDraftUseCase,
     required AnalyticsService analyticsService,
+    ProductAnalyticsRecorder? productAnalytics,
     required EventCreateCoordinator eventCreateCoordinator,
     bool eventClassificationEnabled = true,
     bool eventAdmissionConfigurationEnabled = false,
@@ -190,6 +193,7 @@ class CreateController extends ChangeNotifier {
        _saveCreateDraftUseCase = saveCreateDraftUseCase,
        _publishCreateDraftUseCase = publishCreateDraftUseCase,
        _analyticsService = analyticsService,
+       _productAnalytics = productAnalytics,
        _scenarioTransitTelemetry = ScenarioTransitTelemetry(analyticsService),
        _eventCreateCoordinator = eventCreateCoordinator,
        _eventClassificationEnabled = eventClassificationEnabled,
@@ -232,6 +236,7 @@ class CreateController extends ChangeNotifier {
   final SaveCreateDraftUseCase _saveCreateDraftUseCase;
   final PublishCreateDraftUseCase _publishCreateDraftUseCase;
   final AnalyticsService _analyticsService;
+  final ProductAnalyticsRecorder? _productAnalytics;
   final ScenarioTransitTelemetry _scenarioTransitTelemetry;
   final EventCreateCoordinator _eventCreateCoordinator;
   final bool _eventClassificationEnabled;
@@ -4175,6 +4180,10 @@ class CreateController extends ChangeNotifier {
           'publisher_type': publisher.type.wireName,
         },
       );
+      _recordPublishFinished(
+        draft.objectType,
+        ProductAnalyticsPublishOutcome.denied,
+      );
     }
     return allowed;
   }
@@ -4356,6 +4365,10 @@ class CreateController extends ChangeNotifier {
           'object_type': draftToPublish.objectType.taxonomyId,
         },
       );
+      _recordPublishFinished(
+        draftToPublish.objectType,
+        ProductAnalyticsPublishOutcome.failed,
+      );
       return false;
     }
 
@@ -4435,7 +4448,26 @@ class CreateController extends ChangeNotifier {
         if (directPublishApplied) 'sink_activated': sinkActivated,
       },
     );
+    _recordPublishFinished(
+      finalPublished.objectType,
+      finalPublished.publishStatus == PublishStatus.published
+          ? ProductAnalyticsPublishOutcome.published
+          : ProductAnalyticsPublishOutcome.submitted,
+    );
     return true;
+  }
+
+  /// L3 `create_publish_finished` v1: Create type and outcome class only. It
+  /// is the client's view of the attempt, never Content's publication fact.
+  void _recordPublishFinished(
+    CreateObjectType type,
+    ProductAnalyticsPublishOutcome outcome,
+  ) {
+    final ProductAnalyticsObjectKind? kind =
+        ProductAnalyticsObjectKind.fromObjectType(type.taxonomyId);
+    if (kind != null) {
+      _productAnalytics?.record(CreatePublishFinished(kind, outcome));
+    }
   }
 
   /// DTL-OBJ-01 §3.5 review correction: one immediate retry before giving

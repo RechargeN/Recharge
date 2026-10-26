@@ -36,12 +36,15 @@ void test("all 40 original invocations, flags, globs and their order are retaine
     "scenario-i3",
     "route-j1",
     "route-j2",
+    "privacy-l1",
+    "operations-l2",
+    "analytics-l3",
   ]);
   const tasks = emulatorTestGroups
     .filter((group) => !addedGroups.has(group.name))
     .flatMap((group) => group.tasks);
   assert.equal(tasks.length, 46);
-  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 61);
+  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 64);
   // Added after the snapshot: D3.8 Activity Catalog, the D3.3 Rental group,
   // the D3.4 Collection group and the D4.1 import group.
   const added = new Set([
@@ -61,7 +64,7 @@ void test("all 40 original invocations, flags, globs and their order are retaine
   );
 });
 void test("group selection is explicit and every measured bound has headroom", () => {
-  assert.equal(selectGroups().length, 21);
+  assert.equal(selectGroups().length, 24);
   for (const group of emulatorTestGroups) {
     assert.deepEqual(selectGroups(group.name), [group]);
     assert.ok(group.timeoutMs >= group.baselineMs * 1.75 + 30_000);

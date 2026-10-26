@@ -16,6 +16,7 @@ import { scenarioFlagIds } from '../../shared/feature_flags.js';
 import { relationEffects } from '../../shared/safety_visibility.js';
 import { safetyRestricted } from '../../shared/safety_instruction.js';
 import { mapScenarioDistribution, type DistributionResult } from './scenario_distribution.js';
+import type { PrivacyPlannedEffect } from '../privacy_orchestration/infrastructure/firestore_privacy_subject_sweep.js';
 import {
   isShareToken,
   newShareToken,
@@ -668,7 +669,7 @@ export class FirestoreScenarioService {
           (await scenarioPublicationStanding(this.db, tx, id))
         )
           return reject('publication_active');
-        tx.set(planRef, { ...p, status: 'deleted', draft: null, revision: p!.revision + 1 });
+        this.writeDeleted(tx, planRef, p!);
         return finish({ schemaVersion: 1, kind: 'succeeded' });
       }
       if (type === 'accept') {
@@ -787,6 +788,33 @@ export class FirestoreScenarioService {
       draftHash: sha256Hex(canonicalJson(p.draft)),
       result: mapScenarioDistribution(p.draft, mode, lookup),
     };
+  }
+  private writeDeleted(tx: Transaction, ref: FirebaseFirestore.DocumentReference, p: Plan): void {
+    tx.set(ref, { ...p, status: 'deleted', draft: null, revision: p.revision + 1 });
+  }
+  /**
+   * L1 erasure (PB-00): the owner's own delete, with the same guards. A Scenario
+   * with an active publication or share stays (PB-02, SP-11 has no cascade); one
+   * with an active or pending member is shared and stays (PB-12).
+   */
+  async privacyErasure(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    data: Record<string, unknown>,
+  ): Promise<PrivacyPlannedEffect> {
+    const p = data as unknown as Plan;
+    if (p.status === 'deleted') return { outcome: 'unchanged' };
+    if (
+      (await this.shareStanding(tx, p)) ||
+      (await scenarioPublicationStanding(this.db, tx, ref.id))
+    )
+      return { outcome: { blocked: 'PB-02' } };
+    const members = await tx.get(
+      this.db.collection(scenarioCollections.members).where('scenarioId', '==', ref.id).limit(101),
+    );
+    if (members.docs.some((member) => ['active', 'pending'].includes(String(member.get('status')))))
+      return { outcome: { blocked: 'PB-12' } };
+    return { outcome: 'erased', write: () => this.writeDeleted(tx, ref, p) };
   }
   private async shareStanding(tx: Transaction, p: Plan): Promise<boolean> {
     if (!p.activeShare) return false;

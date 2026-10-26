@@ -115,6 +115,7 @@ for (const file of existsSync(moduleRoot) ? walk(moduleRoot) : []) {
 const allowedUsers = new Map([
   ["notifications_entry.ts", null],
   ["index.ts", ["./notifications_entry.js"]],
+  ["operations_entry.ts", ["./notifications_entry.js"]],
   [
     "modules/privacy_orchestration/application/privacy_domain_task_runner.ts",
     [

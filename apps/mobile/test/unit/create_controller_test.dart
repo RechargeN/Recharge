@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
+import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -17,6 +19,7 @@ import 'package:recharge/features/create/domain/usecases/publish_create_draft_us
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 
 import '../support/event_create_test_support.dart';
+import 'product_analytics/product_analytics_test_support.dart';
 
 void main() {
   late _FakeCreateRepository repository;
@@ -298,6 +301,68 @@ void main() {
       PublishStatus.pendingReview,
     );
   });
+
+  test(
+    'PA-T01 Create: a publish attempt queues create_publish_finished only',
+    () async {
+      final InMemoryProductAnalyticsQueueStore store =
+          InMemoryProductAnalyticsQueueStore();
+      final ProductAnalyticsRecorder recorder = ProductAnalyticsRecorder(
+        policy: SyntheticPolicySource(),
+        sink: CaptureSink(),
+        store: store,
+        newEventId: sequentialEventIds(),
+      )..bindAccount('u1');
+      final CreateController tracked = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+        productAnalytics: recorder,
+        eventCreateCoordinator: createTestEventCoordinator(),
+        scenarioCreateCoordinator: ScenarioCreateCoordinator(
+          idGenerator: _SequentialIdGenerator(),
+        ),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      addTearDown(tracked.dispose);
+      await tracked.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      tracked.setObjectType(CreateObjectType.activity);
+      tracked.updateTitle('My Event');
+      tracked.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
+      tracked.updateCity('Rezekne');
+      tracked.updateCoverImage('cover.jpg');
+      tracked.updateActivityCoordinates(latitude: '56.51', longitude: '27.33');
+      tracked.confirmActivityPin();
+      tracked.updateActivityAccessNotes('Trail off the marked path.');
+      tracked.updateCategoryCriterion('difficulty', 'easy');
+
+      expect(await tracked.publishDraft(), isTrue);
+
+      final List<ProductAnalyticsQueuedEvent> queued = allQueued(store);
+      expect(queued, hasLength(1));
+      expect(queued.single.envelope['eventName'], 'create_publish_finished');
+      // Pending moderation is "submitted", never a publication fact.
+      expect(queued.single.envelope['fields'], <String, String>{
+        'create_type': 'activity',
+        'outcome': 'submitted',
+      });
+      expect(queued.single.envelope.toString().contains('u1'), isFalse);
+      expect(queued.single.envelope.toString().contains('Rezekne'), isFalse);
+    },
+  );
 
   test(
     'Scenario personal save supports undo and blocks public publish',

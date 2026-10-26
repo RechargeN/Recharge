@@ -14,7 +14,7 @@
     },
     "targetRevision": { "type": "integer", "minimum": 0 },
     "status": {
-      "enum": ["pending", "dispatched", "succeeded", "failed", "cancelled"]
+      "enum": ["pending", "dispatched", "blocked", "succeeded", "failed", "cancelled"]
     },
     "revision": { "type": "integer", "minimum": 1 },
     "attempts": { "type": "integer", "minimum": 0 },
@@ -31,7 +31,31 @@
       ]
     },
     "retainedCount": { "type": "integer", "minimum": 0 },
-    "updatedAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" }
+    "updatedAtUtc": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "blockedCodes": {
+      "type": "array",
+      "maxItems": 18,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^PB-(0[1-9]|1[0-8])$" }
+    },
+    "policyRevision": {
+      "anyOf": [
+        { "type": "string", "minLength": 1, "maxLength": 128 },
+        { "type": "null" }
+      ]
+    },
+    "leaseOwner": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-z0-9:._-]{1,128}$" },
+        { "type": "null" }
+      ]
+    },
+    "leaseExpiresAtUtc": {
+      "anyOf": [
+        { "type": "string", "format": "date-time", "pattern": "Z$" },
+        { "type": "null" }
+      ]
+    }
   },
   "required": [
     "schemaVersion",

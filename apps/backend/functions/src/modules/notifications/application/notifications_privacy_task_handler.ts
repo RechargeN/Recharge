@@ -11,8 +11,8 @@ export type NotificationsPrivacyTaskResult =
       evidence: Readonly<{
         recordCount: number;
         erasedCount: number;
-        retainedCount: 0;
-        outcome: 'completed';
+        retainedCount: number;
+        outcome: 'completed' | 'retained_legal_hold';
       }>;
     }>
   | Readonly<{ kind: 'retryableFailure'; code: 'temporarily_unavailable' }>;
@@ -33,9 +33,15 @@ export class NotificationsPrivacyTaskHandler {
     private readonly clock: ServerClock,
   ) {}
 
+  /**
+   * `held` (L1) reports an active legal hold over the subject's Notifications
+   * records. It is asked again before every deletion step; a held domain keeps
+   * everything that is still there and reports it as retained.
+   */
   async handle(input: {
     readonly taskType: NotificationsPrivacyTaskType;
     readonly subjectId: string;
+    readonly held?: () => Promise<boolean>;
   }): Promise<NotificationsPrivacyTaskResult> {
     try {
       if (input.taskType === 'access') {
@@ -46,10 +52,25 @@ export class NotificationsPrivacyTaskHandler {
         );
       }
       if (input.taskType === 'restriction') return await this.#restrict(input.subjectId);
-      return await this.#erase(input.subjectId);
+      return await this.#erase(input.subjectId, input.held ?? (() => Promise.resolve(false)));
     } catch {
       return { kind: 'retryableFailure', code: 'temporarily_unavailable' };
     }
+  }
+
+  async #retained(subjectId: string): Promise<NotificationsPrivacyTaskResult> {
+    const counts = await this.store.subjectCounts(subjectId);
+    const retainedCount =
+      counts.inboxItems + counts.receipts + counts.commandReceipts + counts.preferences;
+    return {
+      kind: 'succeeded',
+      evidence: {
+        recordCount: retainedCount,
+        erasedCount: 0,
+        retainedCount,
+        outcome: retainedCount > 0 ? 'retained_legal_hold' : 'completed',
+      },
+    };
   }
 
   async #restrict(subjectId: string): Promise<NotificationsPrivacyTaskResult> {
@@ -77,7 +98,10 @@ export class NotificationsPrivacyTaskHandler {
     return succeeded(1, 0);
   }
 
-  async #erase(subjectId: string): Promise<NotificationsPrivacyTaskResult> {
+  async #erase(
+    subjectId: string,
+    held: () => Promise<boolean>,
+  ): Promise<NotificationsPrivacyTaskResult> {
     let recordCount = 0;
     let erasedCount = 0;
     const visited = new Set<string>();
@@ -86,6 +110,7 @@ export class NotificationsPrivacyTaskHandler {
         (receipt) => !visited.has(receipt.receiptId),
       );
       if (receipts.length === 0) break;
+      if (await held()) return this.#retained(subjectId);
       for (const receipt of receipts) {
         visited.add(receipt.receiptId);
         const now = this.clock.now().toISOString();
@@ -113,6 +138,7 @@ export class NotificationsPrivacyTaskHandler {
     for (;;) {
       const ids = await this.store.subjectInboxItemIds(subjectId, pageSize);
       if (ids.length === 0) break;
+      if (await held()) return this.#retained(subjectId);
       await this.store.deleteInboxItems(ids);
       recordCount += ids.length;
       erasedCount += ids.length;
@@ -120,10 +146,12 @@ export class NotificationsPrivacyTaskHandler {
     for (;;) {
       const ids = await this.store.subjectCommandReceiptIds(subjectId, pageSize);
       if (ids.length === 0) break;
+      if (await held()) return this.#retained(subjectId);
       await this.store.deleteCommandReceipts(ids);
       recordCount += ids.length;
       erasedCount += ids.length;
     }
+    if (await held()) return this.#retained(subjectId);
     await this.store.deletePreferences(subjectId);
     return succeeded(recordCount, erasedCount);
   }

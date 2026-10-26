@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/product_analytics/product_analytics_contract.dart';
+import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
+import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/application/state/auth_state.dart';
@@ -12,6 +15,8 @@ import 'package:recharge/features/auth/domain/usecases/get_current_user_usecase.
 import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
+
+import 'product_analytics/product_analytics_test_support.dart';
 
 void main() {
   late _FakeAuthRepository repository;
@@ -95,6 +100,49 @@ void main() {
       expect(controller.state.status, AuthStatus.authenticated);
       expect(controller.state.user?.id, 'demo_full_access');
       expect(controller.state.user?.role, 'admin');
+    },
+  );
+
+  test(
+    'PA-T04 sign-out into another account drops the first account queue',
+    () async {
+      final InMemoryProductAnalyticsQueueStore store =
+          InMemoryProductAnalyticsQueueStore();
+      final CaptureSink sink = CaptureSink();
+      final ProductAnalyticsRecorder recorder = ProductAnalyticsRecorder(
+        policy: SyntheticPolicySource(),
+        sink: sink,
+        store: store,
+        newEventId: sequentialEventIds(),
+      );
+      final AuthController tracked = AuthController(
+        signInUseCase: SignInUseCase(repository),
+        restoreSessionUseCase: RestoreSessionUseCase(repository),
+        signOutUseCase: SignOutUseCase(repository),
+        getCurrentUserUseCase: GetCurrentUserUseCase(repository),
+        analyticsService: _FakeAnalyticsService(),
+        productAnalytics: recorder,
+      );
+      // Before sign-in nothing is collected (no pre-auth analytics).
+      recorder.record(const DetailsOpened(ProductAnalyticsObjectKind.place));
+      expect(allQueued(store), isEmpty);
+      await tracked.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'submit',
+      );
+      recorder.record(const DetailsOpened(ProductAnalyticsObjectKind.place));
+      expect(allQueued(store), hasLength(1));
+      repository.restoreDemoWhenEmpty = true;
+
+      await tracked.signOut();
+      await recorder.flush();
+
+      expect(tracked.state.user?.id, 'demo_full_access');
+      expect(allQueued(store), isEmpty);
+      expect(sink.batches, isEmpty);
+      expect(recorder.drops[ProductAnalyticsDropReason.accountChanged], 1);
     },
   );
 }

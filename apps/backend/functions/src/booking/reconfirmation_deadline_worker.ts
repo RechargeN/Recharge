@@ -10,9 +10,17 @@ import { bookingAuditId, type BookingAuditFact } from '../audit/booking_audit.js
 import { activeBookingKeyId, activeKeyMatches } from '../inventory/active_key.js';
 import { releaseUnits, type PoolLedger } from '../inventory/ledger.js';
 import { suppressedOutboxId } from '../notifications/outbox.js';
+import { emergencySwitchState } from '../modules/operations/emergency_switch.js';
+import {
+  appendFailure,
+  type OperationsFailureClass,
+  type OperationsFailureEntry,
+  type OperationsReplayResult,
+  type OperationsTaskView,
+} from '../modules/operations/operations_ports.js';
 import { FirestoreFeatureFlagGate } from '../platform/config/firestore_feature_flag_gate.js';
 import { releaseBookingSlot, type UserUsage } from '../policy/concurrency.js';
-import { bookingFlagIds } from '../shared/feature_flags.js';
+import { bookingFlagIds, operationsEmergencySwitchIds } from '../shared/feature_flags.js';
 import { auditExpiresAt, coreBookingExpiresAt } from './retention.js';
 import { bookingNotificationEffectsEnabled, bookingOutboxRecord } from './notification_effects.js';
 import type { StoredBookingRecord } from './domain.js';
@@ -34,6 +42,12 @@ interface DeadlineJobRecord {
   readonly sourceBookingRevision: number;
   readonly status: DeadlineJobStatus;
   readonly attempts: number;
+  readonly attemptBudget?: number;
+  readonly reason?: string;
+  readonly failureClass?: OperationsFailureClass;
+  readonly firstFailure?: OperationsFailureEntry;
+  readonly failureHistory?: readonly OperationsFailureEntry[];
+  readonly replayCount?: number;
   readonly nextAttemptAtUtc?: string;
   readonly leaseToken?: string | null;
   readonly leaseGeneration?: number;
@@ -46,6 +60,7 @@ interface AcquiredDeadlineJob {
   readonly materialRevision: number;
   readonly deadlineUtc: string;
   readonly attempts: number;
+  readonly attemptBudget: number;
   readonly leaseToken: string;
   readonly leaseGeneration: number;
 }
@@ -66,13 +81,17 @@ export type ReconfirmationDeadlineResult =
   | 'dead_letter'
   | 'lease_held'
   | 'lease_lost'
-  | 'not_found';
+  | 'not_found'
+  /** L2: activation off or emergency switch on; the job stays queued, no attempt spent. */
+  | 'contained';
 
 const checkpointId = 'reconfirmation-deadline-v1';
 const leaseDurationMs = 2 * 60_000;
 const terminalJobRetentionMs = 90 * 86_400_000;
 const operatorAuditRetentionMs = 180 * 86_400_000;
 const maximumAttempts = 5;
+const containedRetryMs = 60_000;
+const switchId = operationsEmergencySwitchIds.reconfirmationDeadlineWorker;
 
 export async function discoverReconfirmationDeadlineJobs(
   firestore: Firestore,
@@ -172,6 +191,8 @@ export async function processReconfirmationDeadlineJob(
   jobId: string,
   nowUtc: string,
   leaseOwner: string = randomUUID(),
+  /** Test-only fault injection between dispatch and effect, never a client parameter. */
+  testHooks: Readonly<{ afterLease?: () => Promise<void> }> = {},
 ): Promise<ReconfirmationDeadlineResult> {
   assertInstant(nowUtc);
   const acquired = await acquireLease(firestore, jobId, nowUtc, leaseOwner);
@@ -180,14 +201,42 @@ export async function processReconfirmationDeadlineJob(
   if (acquired === 'deadLetter') return 'dead_letter';
   if (acquired === 'leaseHeld') return 'lease_held';
   if (acquired === 'notDue') return 'not_due';
+  if (acquired === 'contained') return 'contained';
   try {
-    return await autoCancelMissedReconfirmation(firestore, acquired, nowUtc);
+    await testHooks.afterLease?.();
+    const result = await autoCancelMissedReconfirmation(firestore, acquired, nowUtc);
+    return result === 'contained' ? await releaseContained(firestore, acquired, nowUtc) : result;
   } catch (error) {
-    const terminal = acquired.attempts >= maximumAttempts;
-    const saved = await finishFailedAttempt(firestore, acquired, nowUtc, error, terminal);
+    const failureClass = classify(error);
+    const terminal = failureClass === 'permanent' || acquired.attempts >= acquired.attemptBudget;
+    const saved = await finishFailedAttempt(
+      firestore,
+      acquired,
+      nowUtc,
+      error,
+      failureClass,
+      terminal,
+    );
     if (!saved) return 'lease_lost';
     return terminal ? 'dead_letter' : 'retry_scheduled';
   }
+}
+
+/**
+ * OPS-L2 3.3: an invalid job record cannot be fixed by a retry. Inventory
+ * drift is transient: an approved repair may fix it. Any other error may have
+ * happened at commit, so the next attempt reads the booking again.
+ */
+function classify(error: unknown): OperationsFailureClass {
+  if (
+    error instanceof TypeError &&
+    (error.message === 'reconfirmation_deadline_job_invalid' ||
+      error.message === 'utc_instant_invalid')
+  )
+    return 'permanent';
+  if (error instanceof Error && error.message === 'booking_inventory_inconsistent')
+    return 'transient';
+  return 'unknown';
 }
 
 export async function runReconfirmationDeadlineWorker(
@@ -228,7 +277,7 @@ export async function replayDeadLetterReconfirmationDeadline(
   jobId: string,
   nowUtc: string,
   decision: ReconfirmationDeadlineOperatorDecision,
-): Promise<'requeued' | 'replayed' | 'not_found' | 'not_dead_letter'> {
+): Promise<Exclude<OperationsReplayResult, 'replay_exhausted' | 'expired' | 'payload_changed'>> {
   assertInstant(nowUtc);
   assertOperatorDecision(decision);
   const jobRef = firestore.collection(bookingCollections.reconfirmationDeadlineJobs).doc(jobId);
@@ -241,10 +290,14 @@ export async function replayDeadLetterReconfirmationDeadline(
       throw new Error('firestore_snapshot_count_mismatch');
     }
     if (auditSnapshot.exists) {
-      return auditSnapshot.get('jobId') === jobId ? 'replayed' : 'not_dead_letter';
+      return auditSnapshot.get('jobId') === jobId ? 'replayed' : 'decision_conflict';
     }
     if (!jobSnapshot.exists) return 'not_found';
-    if (jobSnapshot.get('status') !== 'deadLetter') return 'not_dead_letter';
+    const job = jobSnapshot.data() as DeadlineJobRecord;
+    if (job.status !== 'deadLetter') return 'not_dead_letter';
+    if (job.failureClass === 'permanent') return 'permanent_rejection';
+    if ((await emergencySwitchState(firestore, switchId, transaction)) === 'contained')
+      return 'family_contained';
     transaction.create(auditRef, {
       schemaVersion: 1,
       decisionId: decision.decisionId,
@@ -253,14 +306,20 @@ export async function replayDeadLetterReconfirmationDeadline(
       actorId: decision.actorId,
       reason: decision.reason,
       correlationId: decision.correlationId,
+      previousFailureClass: job.failureClass ?? null,
+      previousCode: job.reason ?? null,
+      previousAttempts: job.attempts,
       occurredAtUtc: nowUtc,
       expiresAt: Timestamp.fromMillis(Date.parse(nowUtc) + operatorAuditRetentionMs),
     });
+    // The original failure, attempt count and history stay; five more attempts are granted.
     transaction.set(
       jobRef,
       {
         status: 'retryPending',
-        attempts: 0,
+        attemptBudget: job.attempts + maximumAttempts,
+        replayCount: (job.replayCount ?? 0) + 1,
+        lastReplayDecisionId: decision.decisionId,
         nextAttemptAtUtc: nowUtc,
         leaseOwner: null,
         leaseToken: null,
@@ -288,7 +347,13 @@ async function acquireLease(
   nowUtc: string,
   leaseOwner: string,
 ): Promise<
-  AcquiredDeadlineJob | 'not_found' | 'delivered' | 'deadLetter' | 'leaseHeld' | 'notDue'
+  | AcquiredDeadlineJob
+  | 'not_found'
+  | 'delivered'
+  | 'deadLetter'
+  | 'leaseHeld'
+  | 'notDue'
+  | 'contained'
 > {
   const jobRef = firestore.collection(bookingCollections.reconfirmationDeadlineJobs).doc(jobId);
   const leaseToken = randomUUID();
@@ -308,7 +373,36 @@ async function acquireLease(
     ) {
       return 'leaseHeld';
     }
-    assertJob(job, jobId);
+    if ((await emergencySwitchState(firestore, switchId, transaction)) === 'contained')
+      return 'contained';
+    try {
+      assertJob(job, jobId);
+    } catch {
+      // OPS-L2 3.3: a malformed job can never run; it goes to the dead letter
+      // at once instead of failing every scheduler run.
+      const failure = {
+        attempt: Number.isSafeInteger(job.attempts) ? job.attempts : 0,
+        failureClass: 'permanent' as const,
+        code: 'reconfirmation_deadline_job_invalid',
+        atUtc: nowUtc,
+      };
+      transaction.set(
+        jobRef,
+        {
+          status: 'deadLetter',
+          reason: failure.code,
+          failureClass: 'permanent',
+          firstFailure: job.firstFailure ?? failure,
+          failureHistory: appendFailure(job.failureHistory, failure),
+          leaseOwner: null,
+          leaseToken: null,
+          leaseUntilUtc: null,
+          updatedAtUtc: nowUtc,
+        },
+        { merge: true },
+      );
+      return 'deadLetter';
+    }
     const attempts = job.attempts + 1;
     const leaseGeneration = (job.leaseGeneration ?? 0) + 1;
     const leaseUntilUtc = new Date(Date.parse(nowUtc) + leaseDurationMs).toISOString();
@@ -332,6 +426,7 @@ async function acquireLease(
       materialRevision: job.materialRevision,
       deadlineUtc: job.deadlineUtc,
       attempts,
+      attemptBudget: job.attemptBudget ?? maximumAttempts,
       leaseToken,
       leaseGeneration,
     };
@@ -349,7 +444,10 @@ async function autoCancelMissedReconfirmation(
       bookingFlagIds.reconfirmationDeadlineWorker,
       transaction,
     );
-    if (!enabled) throw new Error('reconfirmation_deadline_worker_disabled');
+    // Activation and the emergency switch are read in the effect transaction:
+    // a worker contained after taking its lease cancels nothing.
+    if (!enabled || (await emergencySwitchState(firestore, switchId, transaction)) === 'contained')
+      return 'contained';
     const jobRef = firestore
       .collection(bookingCollections.reconfirmationDeadlineJobs)
       .doc(acquired.jobId);
@@ -516,6 +614,7 @@ async function finishFailedAttempt(
   acquired: AcquiredDeadlineJob,
   nowUtc: string,
   error: unknown,
+  failureClass: OperationsFailureClass,
   terminal: boolean,
 ): Promise<boolean> {
   const jobRef = firestore
@@ -523,12 +622,18 @@ async function finishFailedAttempt(
     .doc(acquired.jobId);
   return runBookingTransaction(firestore, async (transaction) => {
     const snapshot = await transaction.get(jobRef);
-    if (!ownsLease(snapshot.data(), acquired)) return false;
+    const job = snapshot.data() as DeadlineJobRecord | undefined;
+    if (!ownsLease(job, acquired)) return false;
+    const code = safeErrorType(error);
+    const failure = { attempt: acquired.attempts, failureClass, code, atUtc: nowUtc };
     transaction.set(
       jobRef,
       {
         status: terminal ? 'deadLetter' : 'retryPending',
-        reason: safeErrorType(error),
+        reason: code,
+        failureClass,
+        firstFailure: job?.firstFailure ?? failure,
+        failureHistory: appendFailure(job?.failureHistory, failure),
         ...(terminal
           ? {}
           : {
@@ -545,6 +650,74 @@ async function finishFailedAttempt(
     );
     return true;
   });
+}
+
+/** A contained worker is not a failure: the attempt is given back and the job waits. */
+async function releaseContained(
+  firestore: Firestore,
+  acquired: AcquiredDeadlineJob,
+  nowUtc: string,
+): Promise<'contained' | 'lease_lost'> {
+  const jobRef = firestore
+    .collection(bookingCollections.reconfirmationDeadlineJobs)
+    .doc(acquired.jobId);
+  return runBookingTransaction(firestore, async (transaction) => {
+    const snapshot = await transaction.get(jobRef);
+    if (!ownsLease(snapshot.data(), acquired)) return 'lease_lost';
+    transaction.set(
+      jobRef,
+      {
+        status: 'retryPending',
+        attempts: acquired.attempts - 1,
+        nextAttemptAtUtc: new Date(Date.parse(nowUtc) + containedRetryMs).toISOString(),
+        leaseOwner: null,
+        leaseToken: null,
+        leaseUntilUtc: null,
+        updatedAtUtc: nowUtc,
+      },
+      { merge: true },
+    );
+    return 'contained';
+  });
+}
+
+/** Minimal operator view: codes, counters and the job ID; never the booking or its subject. */
+export async function inspectReconfirmationDeadlineJob(
+  firestore: Firestore,
+  jobId: string,
+  nowUtc: string,
+): Promise<OperationsTaskView | undefined> {
+  const snapshot = await firestore
+    .collection(bookingCollections.reconfirmationDeadlineJobs)
+    .doc(jobId)
+    .get();
+  if (!snapshot.exists) return undefined;
+  const job = snapshot.data() as DeadlineJobRecord;
+  const state: OperationsTaskView['state'] =
+    job.status === 'delivered'
+      ? 'done'
+      : job.status === 'deadLetter'
+        ? 'dead_letter'
+        : job.status === 'retryPending'
+          ? 'retry_scheduled'
+          : job.status === 'processing'
+            ? typeof job.leaseUntilUtc === 'string' && job.leaseUntilUtc > nowUtc
+              ? 'in_flight'
+              : 'unknown'
+            : 'pending';
+  return {
+    taskId: jobId,
+    state,
+    storedStatus: job.status,
+    attempts: job.attempts,
+    attemptBudget: job.attemptBudget ?? maximumAttempts,
+    failureClass: job.failureClass ?? (job.reason === undefined ? null : 'unknown'),
+    failureCode: job.reason ?? null,
+    firstFailure: job.firstFailure ?? null,
+    failureHistory: job.failureHistory ?? [],
+    replayCount: job.replayCount ?? 0,
+    nextAttemptAtUtc: job.nextAttemptAtUtc ?? null,
+  };
 }
 
 function ownsLease(value: unknown, acquired: AcquiredDeadlineJob): boolean {

@@ -24,6 +24,7 @@ import {
   type Result,
 } from './route_contract.js';
 import { buildRouteDistribution, visibleWaypoints } from './route_distribution.js';
+import type { PrivacyPlannedEffect } from '../privacy_orchestration/infrastructure/firestore_privacy_subject_sweep.js';
 import {
   encodeElevation,
   encodePolyline,
@@ -70,6 +71,50 @@ export class FirestoreRouteService {
   }
   private ref(owner: string, routeId: string) {
     return this.db.collection(cols.routes).doc(owner + ':' + routeId);
+  }
+  private writeDeleted(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    owner: string,
+    routeId: string,
+    current: Record<string, unknown>,
+    now: string,
+  ): void {
+    // The snapshots lose their geometry; only ids and hashes stay.
+    for (const item of distributionsOf(current))
+      tx.update(this.db.collection(cols.revisions).doc(item.routeRevisionId), {
+        status: 'erased',
+        distribution: null,
+        erasedAtUtc: now,
+      });
+    // Delete wins over a concurrent edit; the ID stays terminal (I1 rule).
+    tx.set(ref, {
+      ownerId: owner,
+      routeId,
+      revision: Number(current.revision ?? 0) + 1,
+      status: 'deleted',
+      createdAtUtc: current.createdAtUtc as string,
+      updatedAtUtc: now,
+    });
+  }
+  /**
+   * L1 erasure (PB-00): the owner's own delete with the same RP-11 guard; a
+   * Route with an active publication stays (PB-02).
+   */
+  async privacyErasure(
+    tx: Transaction,
+    ref: FirebaseFirestore.DocumentReference,
+    data: Record<string, unknown>,
+  ): Promise<PrivacyPlannedEffect> {
+    if (data.status === 'deleted') return { outcome: 'unchanged' };
+    const routeId = String(data.routeId);
+    if (await routePublicationStanding(this.db, tx, routeId))
+      return { outcome: { blocked: 'PB-02' } };
+    const now = this.clock.now().toISOString();
+    return {
+      outcome: 'erased',
+      write: () => this.writeDeleted(tx, ref, String(data.ownerId), routeId, data, now),
+    };
   }
 
   async command(hint: BookingAccessHint, raw: unknown): Promise<Result> {
@@ -195,22 +240,7 @@ export class FirestoreRouteService {
           // RP-11: no implicit cascade; the publication is withdrawn first.
           if (await routePublicationStanding(this.db, tx, c.routeId))
             return finish(reject('publication_active', { serverRevision: revision }));
-          // The snapshots lose their geometry; only ids and hashes stay.
-          for (const item of distributionsOf(current))
-            tx.update(this.db.collection(cols.revisions).doc(item.routeRevisionId), {
-              status: 'erased',
-              distribution: null,
-              erasedAtUtc: now,
-            });
-          // Delete wins over a concurrent edit; the ID stays terminal (I1 rule).
-          tx.set(ref, {
-            ownerId: owner,
-            routeId: c.routeId,
-            revision: revision + 1,
-            status: 'deleted',
-            createdAtUtc: current.createdAtUtc as string,
-            updatedAtUtc: now,
-          });
+          this.writeDeleted(tx, ref, owner, c.routeId, current, now);
           return done('deleted', revision + 1);
         }
         case 'distribute': {

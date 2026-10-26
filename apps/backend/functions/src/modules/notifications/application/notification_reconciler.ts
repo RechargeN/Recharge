@@ -1,5 +1,9 @@
 import type { ServerClock } from '../../../shared/server_clock.js';
-import { minimalReceipt, notificationDeliveryConfig } from '../domain/delivery_attempt.js';
+import {
+  minimalReceipt,
+  notificationDeliveryConfig,
+  unreplayableDeadLetterReasons,
+} from '../domain/delivery_attempt.js';
 import {
   notificationEffectSha256,
   notificationReceiptId,
@@ -41,7 +45,9 @@ export type ReplayResult =
   | Readonly<{ kind: 'refused'; status: string }>
   | Readonly<{ kind: 'expired' }>
   | Readonly<{ kind: 'replay_exhausted' }>
-  | Readonly<{ kind: 'reason_invalid' }>;
+  | Readonly<{ kind: 'reason_invalid' }>
+  /** L2: the payload under this key is broken; a replay cannot change it. */
+  | Readonly<{ kind: 'permanent_rejection' }>;
 
 export interface NotificationReconcileConfig {
   readonly pageSize: number;
@@ -233,6 +239,8 @@ export class NotificationReconciler {
         );
         return { kind: 'expired' };
       }
+      if (receipt.reason !== null && unreplayableDeadLetterReasons.includes(receipt.reason))
+        return { kind: 'permanent_rejection' };
       if (receipt.replayCount >= notificationDeliveryConfig.maxReplays)
         return { kind: 'replay_exhausted' };
       tx.putReceipt({
@@ -242,7 +250,15 @@ export class NotificationReconciler {
         nextAttemptAtUtc: now,
         attemptBudget: receipt.attemptCount + notificationDeliveryConfig.maxAttempts,
         replayCount: receipt.replayCount + 1,
-        replays: [...receipt.replays, { atUtc: now, reason, operator: input.operator.trim() }],
+        replays: [
+          ...receipt.replays,
+          {
+            atUtc: now,
+            reason,
+            operator: input.operator.trim(),
+            previousReason: receipt.reason,
+          },
+        ],
         updatedAtUtc: now,
       });
       return { kind: 'replayed' };

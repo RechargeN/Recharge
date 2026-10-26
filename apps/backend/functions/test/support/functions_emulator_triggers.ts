@@ -15,6 +15,15 @@ export async function withFunctionTriggersDisabled<T>(body: () => Promise<T>): P
   }
 }
 
+/** For a whole file whose tests drive every effect themselves; pair with the enable call. */
+export function disableFunctionTriggers(): Promise<void> {
+  return putHub(disablePath);
+}
+
+export function enableFunctionTriggers(): Promise<void> {
+  return putHub(enablePath);
+}
+
 async function putHub(path: string): Promise<void> {
   const hub = process.env.FIREBASE_EMULATOR_HUB ?? '';
   assert.match(hub, /^(127\.0\.0\.1|localhost):\d+$/u);

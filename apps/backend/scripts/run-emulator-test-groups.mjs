@@ -219,6 +219,32 @@ export const emulatorTestGroups = Object.freeze([
     timeoutMs: 240000,
     tasks: [["lib/test/emulator/admin_support.test.js"]],
   },
+  {
+    // L1 (PRIVACY_L1_DSR_RETENTION_HOLD_AMENDMENT.md §11): DSR, retention and
+    // legal hold over every registry writer; owns and removes its fixtures.
+    name: "privacy-l1",
+    baselineMs: 56000,
+    timeoutMs: 130000,
+    tasks: [["lib/test/emulator/privacy_l1.test.js"]],
+  },
+  {
+    // L2 (OPERATIONS_L2_RECOVERY_AMENDMENT.md §8): dead letter, audited replay,
+    // reconciliation, emergency disable and restore admission over the real
+    // owners; owns and removes every fixture it creates.
+    name: "operations-l2",
+    baselineMs: 45000,
+    timeoutMs: 130000,
+    tasks: [["lib/test/emulator/operations_l2.test.js"]],
+  },
+  {
+    // L3 (ANALYTICS_L3_PRODUCT_ANALYTICS_AMENDMENT.md §12): product analytics
+    // ingress, aggregation, retention and access over a synthetic policy; owns
+    // and removes every fixture it creates.
+    name: "analytics-l3",
+    baselineMs: 30000,
+    timeoutMs: 100000,
+    tasks: [["lib/test/emulator/product_analytics_l3.test.js"]],
+  },
 ]);
 
 export function selectGroups(name) {

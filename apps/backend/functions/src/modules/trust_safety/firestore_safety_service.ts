@@ -28,6 +28,7 @@ import {
   sanctionReasonLabels,
   safetyPolicyRevision,
   appealDeadline,
+  relationRecord,
   safetyCollections as c,
 } from './safety_policy.js';
 import type {
@@ -146,15 +147,14 @@ export class FirestoreSafetyService implements SafetyInstructionVerifier {
       if (Number(prior?.revision ?? 0) !== p.expectedRevision) return fail('revision_conflict');
       const budget = await this.budget(tx, user, 'relation');
       if (!budget.allowed) return fail('rate_limited');
-      const row = {
+      const row = relationRecord({
         ownerId: user,
-        targetUserId: p.targetUserId,
-        kind: p.kind,
-        active: p.active,
+        targetUserId: p.targetUserId as string,
+        kind: p.kind as string,
+        active: p.active as boolean,
         revision: Number(p.expectedRevision) + 1,
-        policyRevision: safetyPolicyRevision,
-        updatedAtUtc: this.clock.now().toISOString(),
-      };
+        nowUtc: this.clock.now().toISOString(),
+      });
       const result = ok(row);
       tx.set(ref, row);
       tx.create(receiptRef, { hash: digest(sem), result });

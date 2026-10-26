@@ -80,6 +80,26 @@ export const abuseEmergencySwitchIds = Object.freeze({
   identitySessionRotate: 'identity.session.rotate.incidentDisable',
 });
 
+/**
+ * L2: emergency switches of operational task families (OPS-L2 §5). On means
+ * the family is contained: dispatch and effect refuse, the queue stays. Off by
+ * default; an unreadable switch counts as on.
+ */
+export const operationsEmergencySwitchIds = Object.freeze({
+  eventProjectionDelivery: 'booking.eventProjection.delivery.incidentDisable',
+  reconfirmationDeadlineWorker: 'booking.reconfirmation.deadlineWorker.incidentDisable',
+  notificationsConsumeBooking: 'notifications.consume.booking.incidentDisable',
+});
+
+/**
+ * L3: Emulator-only product analytics (default off). Each switch stops only its
+ * own stage; security audit, operations and user commands never read them.
+ */
+export const productAnalyticsFlagIds = Object.freeze({
+  collection: 'productAnalytics.collection',
+  aggregation: 'productAnalytics.aggregation',
+});
+
 export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds];
 
 /** I2 bounded Scenario persistence and collaboration, Emulator only. */

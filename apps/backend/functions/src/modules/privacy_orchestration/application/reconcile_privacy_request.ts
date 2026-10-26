@@ -20,7 +20,23 @@ export function reconcilePrivacyRequest(
   const terminal = tasks.filter((task) =>
     ['succeeded', 'failed', 'cancelled'].includes(task.status),
   );
-  if (terminal.length !== tasks.length) return request;
+  // L1: a blocked task did all its accepted steps and waits for a policy. The
+  // request is then honestly partial, never completed, and stays open.
+  const blocked = tasks.filter((task) => task.status === 'blocked');
+  if (
+    blocked.length > 0 &&
+    terminal.length + blocked.length === tasks.length &&
+    terminal.length === succeeded.length
+  ) {
+    if (request.status === 'partially_completed') return request;
+    return transitionPrivacyRequest({
+      request,
+      nextStatus: 'partially_completed',
+      occurredAtUtc,
+      terminalEvidenceIds: succeeded.map((task) => task.evidenceId!).filter(Boolean),
+    });
+  }
+  if (terminal.length + blocked.length !== tasks.length) return request;
   if (succeeded.length === tasks.length) {
     const retained = succeeded.some(
       (task) => task.completionOutcome === 'retained_legal_hold' && task.retainedCount > 0,

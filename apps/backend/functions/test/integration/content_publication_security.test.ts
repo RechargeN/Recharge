@@ -862,6 +862,10 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/catalog/domain/route_projection.ts',
     // D3.7: Identity checks the exact Find People draft author before consent.
     'modules/identity_publisher/infrastructure/find_people_privacy_authority.ts',
+    // L1: the legal hold authority borrows only the Emulator guard.
+    'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts',
+    // L2: the operations console borrows only the Emulator guard.
+    'modules/operations/operations_console.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -951,6 +955,10 @@ void test('delegated import never reaches Content storage except through the Con
       'assertContentEmulatorContext',
       'contentCollections',
     ],
+    'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts': [
+      'assertContentEmulatorContext',
+    ],
+    'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
     'modules/trust_safety/firestore_safety_service.ts': [
       'assertContentEmulatorContext',
       'contentCollections',

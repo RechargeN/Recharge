@@ -26,6 +26,25 @@ export function appealDeadline(issuedAtUtc: string): string {
   d.setUTCDate(Math.min(day, last));
   return d.toISOString();
 }
+/** One block/mute relation as the owner command writes it. */
+export function relationRecord(input: {
+  readonly ownerId: string;
+  readonly targetUserId: string;
+  readonly kind: string;
+  readonly active: boolean;
+  readonly revision: number;
+  readonly nowUtc: string;
+}) {
+  return {
+    ownerId: input.ownerId,
+    targetUserId: input.targetUserId,
+    kind: input.kind,
+    active: input.active,
+    revision: input.revision,
+    policyRevision: safetyPolicyRevision,
+    updatedAtUtc: input.nowUtc,
+  };
+}
 export function notificationSuppressed(kind: string, muted: boolean, blocked: boolean): boolean {
   return kind === 'newPublication' && (muted || blocked);
 }
