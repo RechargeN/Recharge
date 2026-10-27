@@ -132,8 +132,12 @@ NotificationsRepository notificationsRepositoryFor({
   required BackendBindingManifest manifest,
   required NotificationsRepository Function() local,
   required NotificationsInboxPort port,
+  String Function()? wireLocale,
 }) => switch (manifest.modeFor(notificationsInboxCapabilityId)) {
-  BackendBindingMode.testBackend => ServerNotificationsRepository(port: port),
+  BackendBindingMode.testBackend => ServerNotificationsRepository(
+    port: port,
+    wireLocale: wireLocale,
+  ),
   BackendBindingMode.localOnly => local(),
   BackendBindingMode.disabled => const DisabledNotificationsRepository(),
 };

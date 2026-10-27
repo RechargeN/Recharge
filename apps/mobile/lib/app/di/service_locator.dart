@@ -6,6 +6,8 @@ import 'find_people_publication_composition.dart';
 import 'library_composition.dart';
 import '../adapters/server_library_repositories.dart';
 import '../../features/library/data/library_sync_client.dart';
+import 'dart:ui' show Locale, PlatformDispatcher;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -37,6 +39,9 @@ import '../../core/telemetry/analytics_service.dart';
 import '../../core/product_analytics/product_analytics_recorder.dart';
 import '../../core/id/id_generator.dart';
 import '../../core/notifications/app_notification_sink.dart';
+import '../../core/localization/app_locale_policy.dart';
+import '../../core/localization/locale_controller.dart';
+import '../../core/localization/locale_preference_store.dart';
 import '../../features/ai_assist/application/ai_assist_coordinator.dart';
 import '../../features/ai_assist/application/ai_assist_runtime_config.dart';
 import '../../features/ai_assist/data/datasources/local_ai_assist_gateway.dart';
@@ -303,6 +308,22 @@ Future<void> setupDependencies() async {
       ProductAnalyticsRecorder.disabled,
     )
     ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
+    // L4: one device-scoped UI language owner; fallback from market config.
+    ..registerLazySingleton<LocalePreferenceStore>(
+      () => SecureLocalePreferenceStore(sl<FlutterSecureStorage>()),
+    )
+    ..registerLazySingleton<LocaleController>(
+      () => LocaleController(
+        policy: AppLocalePolicy(
+          supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
+          fallbackLanguageCode: sl<MarketConfig>().defaultLocaleCode,
+        ),
+        store: sl<LocalePreferenceStore>(),
+        deviceLanguageTags: PlatformDispatcher.instance.locales
+            .map((Locale locale) => locale.toLanguageTag())
+            .toList(growable: false),
+      ),
+    )
     ..registerLazySingleton<http.Client>(http.Client.new)
     ..registerLazySingleton<BookingBackendBindingController>(
       _bookingBackendBindingController,
@@ -951,6 +972,8 @@ Future<void> setupDependencies() async {
           runtime: () => sl.getAsync<BookingTransportRuntime>(),
           guard: sl(),
         ),
+        // L4: the reader's UI language at query time.
+        wireLocale: () => sl<LocaleController>().notificationWireLocale,
       ),
     )
     // Local identity events always land in the local inbox, whatever the binding.

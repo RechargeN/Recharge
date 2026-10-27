@@ -11,16 +11,21 @@ import 'notifications_inbox_port.dart';
 final class ServerNotificationsRepository implements NotificationsRepository {
   ServerNotificationsRepository({
     required NotificationsInboxPort port,
-    this.locale = 'ru',
+    String Function()? wireLocale,
     String Function()? newRequestId,
   }) : _port = port,
+       _wireLocale = wireLocale ?? _fallbackWireLocale,
        _newRequestId = newRequestId ?? const Uuid().v4;
 
   final NotificationsInboxPort _port;
   final String Function() _newRequestId;
 
-  /// One of the LV product locales (`lv-LV`, `en`, `ru`); the app UI is Russian.
-  final String locale;
+  /// L4: the reader's current UI language as a notifications wire locale
+  /// (`lv-LV`, `en` or `ru`), read at query time. The recipient's own
+  /// language decides the text; the initiator's language is never stored.
+  final String Function() _wireLocale;
+
+  static String _fallbackWireLocale() => 'en';
 
   static const int _pageSize = 50;
 
@@ -32,7 +37,10 @@ final class ServerNotificationsRepository implements NotificationsRepository {
       'schemaVersion': 1,
       'requestId': _newRequestId(),
       'queryType': 'listInbox',
-      'payload': <String, Object?>{'locale': locale, 'pageSize': _pageSize},
+      'payload': <String, Object?>{
+        'locale': _wireLocale(),
+        'pageSize': _pageSize,
+      },
     });
     _refuseUnlessSucceeded(answer);
     final NotificationInboxPageDto page;
@@ -69,9 +77,18 @@ final class ServerNotificationsRepository implements NotificationsRepository {
   static NotificationItemEntity _entity(NotificationInboxItemDto item) {
     return NotificationItemEntity(
       id: item.notificationId,
-      // A missing locale is shown as such; there is no fallback text.
-      title: item.title ?? 'Уведомление',
-      body: item.body ?? 'Текст недоступен на этом языке.',
+      // A missing locale is shown as such by the UI; there is no fallback
+      // text in another language and no text is made up here.
+      title: item.title ?? '',
+      body: item.body ?? '',
+      contentAvailability: switch (item.contentStatus) {
+        NotificationContentStatus.rendered =>
+          NotificationContentAvailability.rendered,
+        NotificationContentStatus.unsupportedLocale =>
+          NotificationContentAvailability.unsupportedLocale,
+        NotificationContentStatus.templateUnavailable =>
+          NotificationContentAvailability.templateUnavailable,
+      },
       type: item.category == NotificationInboxCategory.bookingChanges
           ? NotificationType.reminder
           : NotificationType.activity,

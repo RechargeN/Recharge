@@ -82,8 +82,11 @@ void main() {
           contentStatus: 'unsupported_locale',
         ),
       ]);
+    // L4: the reader's current language is read at query time.
+    String reader = 'ru';
     final repository = ServerNotificationsRepository(
       port: port,
+      wireLocale: () => reader,
       newRequestId: () => 'req-fixed',
     );
     final List<NotificationItemEntity> items = await repository
@@ -103,7 +106,22 @@ void main() {
     expect(items.first.targetRoute, isNull);
     expect(items.last.type, NotificationType.activity);
     expect(items.last.isRead, isTrue);
-    expect(items.last.body, 'Текст недоступен на этом языке.');
+    // No text in another language is made up; the UI says it is missing.
+    expect(items.last.body, isEmpty);
+    expect(
+      items.last.contentAvailability,
+      NotificationContentAvailability.unsupportedLocale,
+    );
+    expect(
+      items.first.contentAvailability,
+      NotificationContentAvailability.rendered,
+    );
+    reader = 'lv-LV';
+    await repository.getNotifications(userId: 'local-user');
+    expect(
+      (port.queries.last['payload']! as Map<String, Object?>)['locale'],
+      'lv-LV',
+    );
   });
 
   test(

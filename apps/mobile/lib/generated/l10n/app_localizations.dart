@@ -1,0 +1,1828 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_lv.dart';
+import 'app_localizations_ru.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('lv'),
+    Locale('ru'),
+  ];
+
+  /// Product name; not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge'**
+  String get appTitle;
+
+  /// Button: repeat a failed action.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get commonRetry;
+
+  /// Button: re-check an action whose outcome is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get commonCheckAgain;
+
+  /// Button: re-read the current server state.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get commonRefresh;
+
+  /// Dialog confirmation button.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// Generic loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get commonLoading;
+
+  /// Button: save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// Button/title: sign in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get commonSignIn;
+
+  /// Legacy button: continue without signing in.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get commonContinueAsGuest;
+
+  /// Settings: label of the UI language selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageSectionTitle;
+
+  /// Settings: follow the device language list.
+  ///
+  /// In en, this message translates to:
+  /// **'Device language'**
+  String get languageSystem;
+
+  /// Endonym of English; never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageNameEn;
+
+  /// Endonym of Latvian; never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Latviešu'**
+  String get languageNameLv;
+
+  /// Endonym of Russian; never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Русский'**
+  String get languageNameRu;
+
+  /// Settings: explains what a language change affects.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes only the app language. Market, currency and event times stay the same.'**
+  String get languageHint;
+
+  /// Bottom navigation (accessibility label): personal home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom navigation: favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get navFavorites;
+
+  /// Bottom navigation: smart search.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Search'**
+  String get navSmartSearch;
+
+  /// Bottom navigation and settings: notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get navNotifications;
+
+  /// Bottom navigation: personal profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// Bottom navigation: the Professional Page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get navPage;
+
+  /// Bottom navigation: the Page's content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get navContent;
+
+  /// Bottom navigation: create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get navCreate;
+
+  /// Bottom navigation: Page account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get navAccount;
+
+  /// Settings page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// A signed-in page shown without a signed-in user.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get commonSignInRequired;
+
+  /// Settings load error.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings could not be loaded'**
+  String get settingsLoadFailed;
+
+  /// Settings section header (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT AND WORKSPACE'**
+  String get settingsSectionAccount;
+
+  /// Settings item.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch workspace'**
+  String get settingsSwitchWorkspace;
+
+  /// Settings item subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile, Professional Pages and Admin access'**
+  String get settingsSwitchWorkspaceHint;
+
+  /// Settings section header (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'CONTENT & ACTIVITY'**
+  String get settingsSectionContent;
+
+  /// Settings item.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved plans'**
+  String get settingsSavedPlans;
+
+  /// Settings item subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved ideas and personal plans'**
+  String get settingsSavedPlansHint;
+
+  /// Settings item.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and conditions'**
+  String get settingsSearch;
+
+  /// Settings item subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved searches and discovery filters'**
+  String get settingsSearchHint;
+
+  /// Settings item subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox and route updates'**
+  String get settingsNotificationsHint;
+
+  /// Settings section header (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'PREFERENCES'**
+  String get settingsSectionPreferences;
+
+  /// Legacy local currency preference label; prices keep the currency of their data.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get settingsCurrency;
+
+  /// Settings switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification preferences'**
+  String get settingsNotificationPreferences;
+
+  /// Settings link.
+  ///
+  /// In en, this message translates to:
+  /// **'Support / Help'**
+  String get settingsSupport;
+
+  /// Settings link title; the policy text itself is mandatory copy outside L4.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// Settings link title; the terms text itself is mandatory copy outside L4.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get settingsTerms;
+
+  /// Settings button.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get settingsSignOut;
+
+  /// Settings section.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile information'**
+  String get settingsProfileInformation;
+
+  /// Profile field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get settingsDisplayName;
+
+  /// Profile field label.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// Profile field label.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get settingsCity;
+
+  /// Profile field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar URL/Path'**
+  String get settingsAvatar;
+
+  /// Profile save in progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get settingsSaving;
+
+  /// Profile save button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get settingsSaveProfile;
+
+  /// Profile saved confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved'**
+  String get settingsProfileSaved;
+
+  /// Sign-in headline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save and manage'**
+  String get authSignInHeadline;
+
+  /// Auth gate headline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to continue'**
+  String get authSignInToContinue;
+
+  /// Sign-in explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Without signing in you can browse events and places. Signing in is needed for favorites, your profile and creating activities.'**
+  String get authSignInBody;
+
+  /// Auth gate body for Scenario.
+  ///
+  /// In en, this message translates to:
+  /// **'A personal Scenario is available only to a signed-in user.'**
+  String get authScenarioRequiresSignIn;
+
+  /// Sign-in field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailLabel;
+
+  /// Sign-in field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get authEmailHint;
+
+  /// Sign-in field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordLabel;
+
+  /// Sign-in field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get authPasswordHint;
+
+  /// Sign-in in progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in…'**
+  String get authSigningIn;
+
+  /// Validation: empty email.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get authEmailRequired;
+
+  /// Validation: malformed email.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get authEmailInvalid;
+
+  /// Validation: empty password.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get authPasswordRequired;
+
+  /// Validation: password shorter than the minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is too short'**
+  String get authPasswordTooShort;
+
+  /// Sign-in error AUTH_INVALID_CREDENTIALS.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong email or password'**
+  String get authErrorInvalidCredentials;
+
+  /// Sign-in error AUTH_TOO_MANY_ATTEMPTS.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again later'**
+  String get authErrorTooManyAttempts;
+
+  /// Sign-in error NETWORK_UNAVAILABLE.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get authErrorNetwork;
+
+  /// Sign-in error, any other code.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sign in. Try again'**
+  String get authErrorGeneric;
+
+  /// Session restore failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again.'**
+  String get authSessionExpired;
+
+  /// Splash: session restore in progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring your session…'**
+  String get authRestoringSession;
+
+  /// Safe fallback for an unknown or internal error code; the code itself is never shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get errorGeneric;
+
+  /// The request could not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Try again when you are back online.'**
+  String get errorOffline;
+
+  /// Offline, a journaled command will be retried with the same key.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Your request is saved and will not be duplicated.'**
+  String get errorOfflineSaved;
+
+  /// The command may have reached the server.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not confirm the result. Checking again will not repeat the action.'**
+  String get errorUnknownOutcome;
+
+  /// Session refresh failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session could not be confirmed. Try again.'**
+  String get errorSessionNotConfirmed;
+
+  /// Server session expired or revoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again.'**
+  String get errorSessionExpired;
+
+  /// The server needs a signed-in user.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to continue.'**
+  String get errorSignInRequired;
+
+  /// Permission or capability denied.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have access to this action.'**
+  String get errorNotAllowed;
+
+  /// Unsupported client, contract or schema version.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the app is no longer supported. Update the app.'**
+  String get errorUpdateApp;
+
+  /// Malformed request (invalid contract or argument).
+  ///
+  /// In en, this message translates to:
+  /// **'The request could not be processed. Update the app or try again.'**
+  String get errorInvalidRequest;
+
+  /// Rate limited without a retry hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again shortly.'**
+  String get errorRateLimited;
+
+  /// Rate limited with the server's retry-after in seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Too many attempts. Try again in {count} second.} other{Too many attempts. Try again in {count} seconds.}}'**
+  String errorRateLimitedSeconds(int count);
+
+  /// Server unavailable or contention.
+  ///
+  /// In en, this message translates to:
+  /// **'The service is temporarily unavailable. Try again later.'**
+  String get errorTemporarilyUnavailable;
+
+  /// Revision conflict or stale revision.
+  ///
+  /// In en, this message translates to:
+  /// **'This was changed meanwhile. Refresh to see the current version.'**
+  String get errorConflictRefresh;
+
+  /// The object was not found.
+  ///
+  /// In en, this message translates to:
+  /// **'This is no longer available.'**
+  String get errorNotFound;
+
+  /// Server feature flag is off.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is not available yet.'**
+  String get errorFeatureDisabled;
+
+  /// The market is disabled; the market is not named.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not available in this region yet.'**
+  String get errorMarketDisabled;
+
+  /// Publisher eligibility: account inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is restricted.'**
+  String get errorAccountRestricted;
+
+  /// Publisher eligibility: access snapshot stale.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access is being updated. Try again.'**
+  String get errorAccessUpdating;
+
+  /// Content: publisher not eligible or not accessible.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot publish on behalf of this profile or page.'**
+  String get contentErrorPublisherNotEligible;
+
+  /// Content/identity: creator verification required.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing requires a verified creator account.'**
+  String get contentErrorCreatorVerificationRequired;
+
+  /// Identity: creator verification unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator verification is temporarily unavailable.'**
+  String get contentErrorCreatorVerificationUnavailable;
+
+  /// Page membership inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access to this page has ended.'**
+  String get contentErrorMembershipInactive;
+
+  /// Content type disabled or unsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing this type is not available yet.'**
+  String get contentErrorTypeDisabled;
+
+  /// Server validation refused the draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Some fields need attention before publishing.'**
+  String get contentErrorValidationFailed;
+
+  /// Attached media not ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Media is still being processed. Try again shortly.'**
+  String get contentErrorMediaNotReady;
+
+  /// Moderation required.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs to be reviewed before it can be published.'**
+  String get contentErrorModerationRequired;
+
+  /// Publication restricted by Trust & Safety; no reason or reporter is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication is restricted.'**
+  String get contentErrorPublicationRestricted;
+
+  /// Storage limit exceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The storage limit has been reached.'**
+  String get contentErrorStorageLimit;
+
+  /// Privacy consent required.
+  ///
+  /// In en, this message translates to:
+  /// **'Your consent is required to continue.'**
+  String get contentErrorPrivacyConsentRequired;
+
+  /// Age eligibility required.
+  ///
+  /// In en, this message translates to:
+  /// **'Age confirmation is required for this.'**
+  String get contentErrorAgeEligibilityRequired;
+
+  /// Client-side refusal (not_allowed) before any server call.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is not available for this draft.'**
+  String get contentErrorNotAllowedLocally;
+
+  /// Import rollback not allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This import can no longer be undone.'**
+  String get importErrorRollbackNotAllowed;
+
+  /// Import generation or cleanup token mismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The import changed meanwhile. Refresh and try again.'**
+  String get importErrorChanged;
+
+  /// Import already rolled back.
+  ///
+  /// In en, this message translates to:
+  /// **'This import was undone.'**
+  String get importErrorRolledBack;
+
+  /// The local original was already removed.
+  ///
+  /// In en, this message translates to:
+  /// **'The local original has already been removed.'**
+  String get importErrorOriginalRemoved;
+
+  /// Media upload missing, incomplete or mismatched.
+  ///
+  /// In en, this message translates to:
+  /// **'The upload did not complete. Upload the file again.'**
+  String get mediaErrorUploadIncomplete;
+
+  /// Media limit exceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is too large or the limit has been reached.'**
+  String get mediaErrorLimitExceeded;
+
+  /// Media still referenced.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is still in use and cannot be deleted.'**
+  String get mediaErrorAssetReferenced;
+
+  /// Media retry not allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This upload cannot be retried. Start a new upload.'**
+  String get mediaErrorRetryNotAllowed;
+
+  /// Booking: sold out.
+  ///
+  /// In en, this message translates to:
+  /// **'This event is sold out.'**
+  String get bookingErrorSoldOut;
+
+  /// Booking: active booking or concurrency limit.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the limit of active bookings.'**
+  String get bookingErrorBookingLimit;
+
+  /// Booking: registration not open.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration has not opened yet.'**
+  String get bookingErrorRegistrationNotOpen;
+
+  /// Booking: registration closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration is closed.'**
+  String get bookingErrorRegistrationClosed;
+
+  /// Booking: cancellation deadline passed.
+  ///
+  /// In en, this message translates to:
+  /// **'The cancellation deadline has passed.'**
+  String get bookingErrorCancellationDeadlinePassed;
+
+  /// Booking: reconfirmation deadline passed.
+  ///
+  /// In en, this message translates to:
+  /// **'The confirmation deadline has passed.'**
+  String get bookingErrorReconfirmationDeadlinePassed;
+
+  /// Booking: material revision mismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The event changed again. Refresh and confirm the new time.'**
+  String get bookingErrorMaterialRevisionMismatch;
+
+  /// Booking: reconfirmation not required.
+  ///
+  /// In en, this message translates to:
+  /// **'No confirmation is needed now.'**
+  String get bookingErrorReconfirmationNotRequired;
+
+  /// Booking: revision conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking changed meanwhile. Refresh to see the current state.'**
+  String get bookingErrorRevisionConflict;
+
+  /// Booking: already active.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a booking for this event.'**
+  String get bookingErrorAlreadyActive;
+
+  /// Booking: invalid guest count.
+  ///
+  /// In en, this message translates to:
+  /// **'This number of seats is not allowed.'**
+  String get bookingErrorInvalidGuestCount;
+
+  /// Booking: event or occurrence unavailable or cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This event is not available for booking.'**
+  String get bookingErrorEventUnavailable;
+
+  /// Booking: eligibility not satisfied; no private condition is named.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not meet the conditions to book this event.'**
+  String get bookingErrorEligibility;
+
+  /// Booking: hold expired.
+  ///
+  /// In en, this message translates to:
+  /// **'The seat hold expired. Try booking again.'**
+  String get bookingErrorHoldExpired;
+
+  /// Booking: any other refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'The booking was not accepted.'**
+  String get bookingErrorGeneric;
+
+  /// Booking: reading the active booking was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking could not be loaded.'**
+  String get bookingErrorLoadFailed;
+
+  /// Booking ended: missed reconfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking was released because attendance was not confirmed in time.'**
+  String get bookingEndedMissedReconfirmation;
+
+  /// Booking ended: event or occurrence cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'The organizer cancelled this event; your booking was cancelled.'**
+  String get bookingEndedEventCancelled;
+
+  /// Booking ended: organizer cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'The organizer cancelled your booking.'**
+  String get bookingEndedOrganizerCancelled;
+
+  /// Inbox item title when no text could be rendered.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notificationFallbackTitle;
+
+  /// Inbox item: contentStatus unsupported_locale.
+  ///
+  /// In en, this message translates to:
+  /// **'This notification is not available in your language.'**
+  String get notificationUnsupportedLocale;
+
+  /// Inbox item: contentStatus template_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This notification can no longer be shown.'**
+  String get notificationTemplateUnavailable;
+
+  /// Client refusal save_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the draft to the server first.'**
+  String get localErrorSaveRequired;
+
+  /// Client refusal media_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload the required media first.'**
+  String get localErrorMediaMissing;
+
+  /// Client refusal cover_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cover image first.'**
+  String get localErrorCoverRequired;
+
+  /// Client refusal submission_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the draft for review first.'**
+  String get localErrorSubmissionRequired;
+
+  /// Client refusal publication_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish it first.'**
+  String get localErrorPublicationRequired;
+
+  /// Client refusal publisher_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who publishes this first.'**
+  String get localErrorPublisherRequired;
+
+  /// Client refusal no_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no newer server version to resolve.'**
+  String get localErrorNoConflict;
+
+  /// Client refusal foreign_record; the other account is not named.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft belongs to another account.'**
+  String get localErrorForeignRecord;
+
+  /// Client refusal editing_after_publication_not_supported.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing after publication is not available yet.'**
+  String get localErrorEditingAfterPublication;
+
+  /// Client refusal media_rights_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm that you have the rights to this media.'**
+  String get localErrorMediaRightsRequired;
+
+  /// Client refusal <type>_draft_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a draft in Create first.'**
+  String get localErrorDraftRequired;
+
+  /// Client refusal activity_draft_changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft changed. Save it again.'**
+  String get localErrorDraftChanged;
+
+  /// Client refusal consent_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent is missing. Give consent to continue.'**
+  String get localErrorConsentMissing;
+
+  /// Client refusal share_token_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing is not available right now.'**
+  String get localErrorShareUnavailable;
+
+  /// Client refusal media_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Media upload is not available right now.'**
+  String get localErrorMediaUnavailable;
+
+  /// Import: session_open.
+  ///
+  /// In en, this message translates to:
+  /// **'An import is already in progress.'**
+  String get importErrorSessionOpen;
+
+  /// Import: no_open_session.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no import in progress.'**
+  String get importErrorNoOpenSession;
+
+  /// Import: nothing_to_import.
+  ///
+  /// In en, this message translates to:
+  /// **'There is nothing to import.'**
+  String get importErrorNothingToImport;
+
+  /// Import: not_imported.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been imported yet.'**
+  String get importErrorNotImported;
+
+  /// Import: not_verified.
+  ///
+  /// In en, this message translates to:
+  /// **'The import has not been checked on the server yet.'**
+  String get importErrorNotVerified;
+
+  /// Import: verification_mismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The server copy does not match the local original. The original is kept.'**
+  String get importErrorVerificationMismatch;
+
+  /// Import: server_check_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The server check did not pass. The original is kept.'**
+  String get importErrorServerCheckFailed;
+
+  /// Import: original_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'The local original is missing.'**
+  String get importErrorOriginalMissing;
+
+  /// Import: local_changed_since_import.
+  ///
+  /// In en, this message translates to:
+  /// **'The local copy changed after import. Import it again.'**
+  String get importErrorLocalChanged;
+
+  /// Profile load error.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile could not be loaded'**
+  String get profileLoadFailed;
+
+  /// Booking section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get bookingTitle;
+
+  /// Booking: loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your booking…'**
+  String get bookingLoading;
+
+  /// Booking: command in flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your request…'**
+  String get bookingSending;
+
+  /// Booking state label; status is the stable Booking state id, which is never translated itself.
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, pending{Pending} confirmed{Confirmed} waitlisted{On the waitlist} other{Inactive}}'**
+  String bookingStatus(String status);
+
+  /// Number of booked seats.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} seat} other{{count} seats}}'**
+  String bookingSeatsCount(int count);
+
+  /// The user's active booking; status from bookingStatus, seats from bookingSeatsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking: {status} · {seats}'**
+  String bookingMine(String status, String seats);
+
+  /// Booking: none active.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no booking for this event.'**
+  String get bookingNone;
+
+  /// Reconfirmation needed, no deadline known.
+  ///
+  /// In en, this message translates to:
+  /// **'The event changed. Please confirm your attendance.'**
+  String get bookingReconfirmRequired;
+
+  /// Reconfirmation deadline, already formatted in the event's own time zone.
+  ///
+  /// In en, this message translates to:
+  /// **'The event changed. Confirm your attendance by {deadline}.'**
+  String bookingReconfirmBy(String deadline);
+
+  /// Seat selector: chosen of allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {max, plural, one{{max} seat} other{{max} seats}}'**
+  String bookingSeatsSelector(int selected, int max);
+
+  /// Book button.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Book {count} seat} other{Book {count} seats}}'**
+  String bookingBookSeats(int count);
+
+  /// Reconfirm button.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm attendance'**
+  String get bookingConfirmAttendance;
+
+  /// Cancel button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get bookingCancel;
+
+  /// Accessibility label of the minus button.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer seats'**
+  String get bookingFewerSeats;
+
+  /// Accessibility label of the plus button.
+  ///
+  /// In en, this message translates to:
+  /// **'More seats'**
+  String get bookingMoreSeats;
+
+  /// Header of a default-off publication test page.
+  ///
+  /// In en, this message translates to:
+  /// **'Test publication path (local Emulator)'**
+  String get publicationTestPath;
+
+  /// No local draft of the type; type is the stable Create type id.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{No Event draft in Create} place{No Place draft in Create} rental{No Rental draft in Create} session{No Session draft in Create} activity{No Activity draft in Create} collection{No Collection draft in Create} findPeople{No Find People draft in Create} route{No Route draft in Create} scenario{No Scenario draft in Create} classWorkshop{No Class / Workshop draft in Create} other{No draft in Create}}'**
+  String publicationNoDraft(String type);
+
+  /// List header of the user's server objects of a type.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{My events} place{My places} rental{My rentals} session{My sessions} activity{My activities} collection{My collections} findPeople{My Find People requests} route{My routes} scenario{My scenarios} classWorkshop{My classes and workshops} other{My objects}}'**
+  String publicationMyObjects(String type);
+
+  /// Count of attached media.
+  ///
+  /// In en, this message translates to:
+  /// **'Media uploaded: {count}'**
+  String publicationMediaUploaded(int count);
+
+  /// Published revision id; the id itself is not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision}'**
+  String publicationRevision(String revision);
+
+  /// Published revision id.
+  ///
+  /// In en, this message translates to:
+  /// **'Published version: {revision}'**
+  String publicationPublishedVersion(String revision);
+
+  /// Draft revision number.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft revision: {revision}'**
+  String publicationDraftRevision(String revision);
+
+  /// Draft revision with unpublished edits.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft revision: {revision} — unpublished changes; review required'**
+  String publicationDraftRevisionPending(String revision);
+
+  /// Revision conflict notice.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has a newer version (revision {revision}). Your edit is kept here; nothing was overwritten.'**
+  String publicationConflict(String revision);
+
+  /// Status: no server draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved to the server'**
+  String get publicationNotSaved;
+
+  /// Status: no server record yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved to the server yet'**
+  String get publicationNotSavedYet;
+
+  /// Status: server draft without publication status.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as a server draft'**
+  String get publicationServerDraft;
+
+  /// Server revision number.
+  ///
+  /// In en, this message translates to:
+  /// **'Server revision {revision}'**
+  String publicationServerRevision(String revision);
+
+  /// Status: publication not prepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Not prepared'**
+  String get publicationNotPrepared;
+
+  /// Content review state (publication_submission.schema.json state, or draft before any submission); state is the stable server value.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, draft{draft} submitted{submitted} under_review{under review} revision_requested{changes requested} rejected{rejected} approved_for_publication{approved} published{published} superseded{superseded} other{unknown}}'**
+  String publicationReviewState(String state);
+
+  /// Content visibility (publication_pointer.schema.json visibility, or unpublished); state is the stable server value.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, unpublished{not published} visible{visible} withdrawn{hidden} restricted{restricted} archived{archived} other{unknown}}'**
+  String publicationVisibilityState(String state);
+
+  /// Status line; both values come from the select messages above.
+  ///
+  /// In en, this message translates to:
+  /// **'Review: {review}; visibility: {visibility}'**
+  String publicationStatusLine(String review, String visibility);
+
+  /// A server object could not be read; reason is a localized message.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable: {reason}'**
+  String publicationObjectUnavailable(String reason);
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get publicationSave;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to server'**
+  String get publicationSaveToServer;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload media'**
+  String get publicationUploadMedia;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload cover'**
+  String get publicationUploadCover;
+
+  /// Publication button: submit for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get publicationSubmit;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publicationPublish;
+
+  /// Publication button: withdraw from public view.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get publicationHide;
+
+  /// Publication button after a conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Save my version'**
+  String get publicationSaveMyVersion;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate published version'**
+  String get publicationActivatePublished;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit in Create'**
+  String get publicationEditInCreate;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare'**
+  String get publicationPrepare;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get publicationShareLink;
+
+  /// Publication button.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke link'**
+  String get publicationRevokeLink;
+
+  /// Checkbox: media rights.
+  ///
+  /// In en, this message translates to:
+  /// **'I have permission to use the cover image'**
+  String get publicationCoverPermission;
+
+  /// Activity validation refusal hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the Activity fields in Create and submit again.'**
+  String get publicationActivityCheckFields;
+
+  /// Collection members header.
+  ///
+  /// In en, this message translates to:
+  /// **'Items (server status)'**
+  String get publicationCollectionItems;
+
+  /// Find People privacy notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Others see only an approximate area (about 1 km). The exact meeting point stays private to you.'**
+  String get findPeopleApproxArea;
+
+  /// Find People consent button.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent to publish'**
+  String get findPeopleConsentToPublish;
+
+  /// Find People consent button.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw consent'**
+  String get findPeopleWithdrawConsent;
+
+  /// Find People consent status.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent: not given'**
+  String get findPeopleConsentNone;
+
+  /// Inactive consent; state is the stable server value (revoked, expired).
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, revoked{Consent: withdrawn} expired{Consent: expired} other{Consent: inactive}}'**
+  String findPeopleConsentState(String state);
+
+  /// Active consent end, formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent: active until {date}'**
+  String findPeopleConsentActiveUntil(String date);
+
+  /// Route privacy trim button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide {meters} m at both ends'**
+  String routeHideEnds(int meters);
+
+  /// Route privacy trim status.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden ends: unknown'**
+  String get routeHiddenEndsUnknown;
+
+  /// Route privacy trim lengths; values are formatted numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden ends: start {start} m, end {end} m'**
+  String routeHiddenEnds(String start, String end);
+
+  /// Route refusal privacy_trim_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded GPS: hide at least 200 m at both ends before publishing'**
+  String get routeTrimRequired;
+
+  /// Route refusal privacy_trim_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Too short to publish: nothing is left after hiding the ends'**
+  String get routeTrimEmpty;
+
+  /// Scenario share outcome unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Link issued, answer lost: issue a new link'**
+  String get scenarioShareLost;
+
+  /// Scenario unlisted share; token is shown only to its owner and never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlisted link until {date}: {token}'**
+  String scenarioShareUntil(String date, String token);
+
+  /// Server status of a Collection member; status is the stable server value.
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, eligible{Available} unavailable{Unavailable} withheld{Withheld} unknown{Unknown} forbidden{Not accessible} other{Unknown}}'**
+  String collectionMemberStatus(String status);
+
+  /// Title of a default-off publication test page; type is the stable Create type id.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Event publication (test)} place{Place publication (test)} rental{Rental publication (test)} session{Session publication (test)} activity{Activity publication (test)} collection{Collection publication (test)} findPeople{Find People publication (test)} route{Route publication (test)} scenario{Scenario publication (test)} classWorkshop{Class / Workshop publication (test)} other{Publication (test)}}'**
+  String publicationPageTitle(String type);
+
+  /// Signed-out state of a publication test page.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Sign in to publish your Event draft} place{Sign in to publish your Place draft} rental{Sign in to publish your Rental draft} session{Sign in to publish your Session draft} activity{Sign in to publish your Activity draft} collection{Sign in to publish your Collection draft} findPeople{Sign in to publish your Find People draft} route{Sign in to publish your Route} scenario{Sign in to publish your Scenario} classWorkshop{Sign in to publish your Class draft} other{Sign in to publish your draft}}'**
+  String publicationSignIn(String type);
+
+  /// Activity publication edit precondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your Create draft before editing this publication.'**
+  String get publicationSaveCreateDraftFirst;
+
+  /// Title of the default-off import test page.
+  ///
+  /// In en, this message translates to:
+  /// **'Import local data (test)'**
+  String get importPageTitle;
+
+  /// Dialog cancel button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// Name of a Create type; type is the stable type id.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Event} place{Place} rental{Rental} session{Session} activity{Activity} collection{Collection} findPeople{Find People} route{Route} scenario{Scenario} classWorkshop{Class / Workshop} other{Object}}'**
+  String createTypeName(String type);
+
+  /// Import test section header.
+  ///
+  /// In en, this message translates to:
+  /// **'Import local data (local Emulator)'**
+  String get importSectionTitle;
+
+  /// Import: no session.
+  ///
+  /// In en, this message translates to:
+  /// **'No import session'**
+  String get importNoSession;
+
+  /// Import session status; status is the stable value.
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, approved{Approved} running{Running} paused{Paused} completed{Completed} failed{Failed} other{Unknown}}'**
+  String importSessionStatus(String status);
+
+  /// Import session progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Session: {status}, {done} of {total}'**
+  String importSessionProgress(String status, int done, int total);
+
+  /// Deleted local copies not yet recorded on the server.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} deleted local copy still to record on the server} other{{count} deleted local copies still to record on the server}}'**
+  String importPendingCleanups(int count);
+
+  /// Import button.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish cleanup'**
+  String get importFinishCleanup;
+
+  /// Import button: classify without importing.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry run'**
+  String get importDryRun;
+
+  /// Import button.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve import'**
+  String get importApprove;
+
+  /// Import button.
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get importRun;
+
+  /// Import button.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get importResume;
+
+  /// Import plan class of one local draft; value is the stable class.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, create{will be created} alreadyMapped{already imported} conflict{changed since import} unsupported{not supported} blocked{blocked} other{unknown}}'**
+  String importClassification(String value);
+
+  /// Why a local draft has its import class; reason is the stable code prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, type_not_importable{this type cannot be imported yet} owner_mismatch{belongs to another account} publisher_missing{no publisher chosen} publisher_not_eligible{you cannot publish for this publisher} local_id{has local-only links} unsupported_capability{uses features not supported yet} rolled_back{import was rolled back} rollback_pending{rollback is waiting for the server} cleanup_reserved{local copy is being deleted} cleanup_pending{deletion still to record} resume{import can be resumed} local_changed_since_import{changed locally after import} published_by_test_path{already published from this device} other{other reason}}'**
+  String importReason(String reason);
+
+  /// Import plan line; both values are localized labels.
+  ///
+  /// In en, this message translates to:
+  /// **'{type}: {classification}'**
+  String importCandidateLine(String type, String classification);
+
+  /// Import plan line with a localized reason.
+  ///
+  /// In en, this message translates to:
+  /// **'{type}: {classification} ({reason})'**
+  String importCandidateLineReason(
+    String type,
+    String classification,
+    String reason,
+  );
+
+  /// Server state of an imported item; state is the stable value.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, created{created} mediaUploaded{media uploaded} bodySaved{content saved} verified{verified} failed{failed} rollbackPending{rollback pending} rolledBack{rolled back} cleanupReserved{local copy being deleted} other{unknown}}'**
+  String importItemState(String state);
+
+  /// Server item; contentId is a stable id, never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Server {contentId}: {state}'**
+  String importServerLine(String contentId, String state);
+
+  /// Server item with a localized failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Server {contentId}: {state} ({reason})'**
+  String importServerLineReason(String contentId, String state, String reason);
+
+  /// Import refusal with a localized reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: {reason}'**
+  String importRefused(String reason);
+
+  /// Local original status.
+  ///
+  /// In en, this message translates to:
+  /// **'Local copy: {state}'**
+  String importLocalCopy(String state);
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'kept (not imported)'**
+  String get importCleanupNotImported;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'kept (server copy not verified)'**
+  String get importCleanupAwaitingVerification;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'kept (confirm the server copy)'**
+  String get importCleanupAwaitingConfirmation;
+
+  /// Local copy stage: recovery period end, formatted in the device zone.
+  ///
+  /// In en, this message translates to:
+  /// **'kept until {date}'**
+  String importCleanupRecovery(String date);
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'may be deleted'**
+  String get importCleanupEligible;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'being deleted (reserved on the server)'**
+  String get importCleanupReserved;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'deleted'**
+  String get importCleanupDeleted;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'kept (rollback waiting for the server)'**
+  String get importCleanupRollbackPending;
+
+  /// Local copy stage.
+  ///
+  /// In en, this message translates to:
+  /// **'kept (import rolled back)'**
+  String get importCleanupRolledBack;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Import again'**
+  String get importAgain;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the server copy'**
+  String get importKeepServerCopy;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish deleting local copy'**
+  String get importFinishDeleting;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete local copy'**
+  String get importDeleteLocal;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep local copy'**
+  String get importKeepLocal;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry rollback'**
+  String get importRetryRollback;
+
+  /// Import item button.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll back import'**
+  String get importRollBack;
+
+  /// Rollback confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll back this import?'**
+  String get importRollbackDialogTitle;
+
+  /// Rollback confirmation body.
+  ///
+  /// In en, this message translates to:
+  /// **'The imported server draft is closed for good. Your local copy stays and can be imported again later.'**
+  String get importRollbackDialogBody;
+
+  /// Rollback confirmation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll back'**
+  String get importRollbackConfirm;
+
+  /// Notifications: tooltip of the read-all button.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationsReadAll;
+
+  /// Notifications: load error.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications could not be loaded'**
+  String get notificationsLoadFailed;
+
+  /// Notifications: empty inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notificationsEmpty;
+
+  /// Notifications: search field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search notifications'**
+  String get notificationsSearchHint;
+
+  /// Notifications: tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get notificationsClearSearch;
+
+  /// Notifications filter chip.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notificationsFilterAll;
+
+  /// Notifications filter chip.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get notificationsFilterNew;
+
+  /// Notifications filter chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get notificationsFilterReminders;
+
+  /// Notifications filter chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get notificationsFilterUpdates;
+
+  /// Notifications filter chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenarios'**
+  String get notificationsFilterScenarios;
+
+  /// Notifications: tooltip of the item menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification actions'**
+  String get notificationsActions;
+
+  /// Notifications: search without results.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches your search'**
+  String get notificationsNoSearchResults;
+
+  /// Notifications: empty filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this filter yet'**
+  String get notificationsFilterEmpty;
+
+  /// Notifications: reset the filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get notificationsShowAll;
+
+  /// Where a notification leads; kind is a stable id.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}'**
+  String notificationDestination(String kind);
+
+  /// Action that opens a notification's destination; kind is a stable id.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, legacy{Open} routeMap{Open route} map{Open map} details{Open details} saved{Open saved} search{Search} publishStatus{Open listing} create{Open create} creatorProfile{Open profile} discover{Open feed} other{Open}}'**
+  String notificationDestinationAction(String kind);
+
+  /// Signed-out state of the import test page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to import your local data'**
+  String get importSignIn;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'lv', 'ru'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'lv':
+      return AppLocalizationsLv();
+    case 'ru':
+      return AppLocalizationsRu();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

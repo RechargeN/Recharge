@@ -1,0 +1,1443 @@
+{
+  "@@locale": "en",
+  "appTitle": "Recharge",
+  "@appTitle": {
+    "description": "Product name; not translated."
+  },
+  "commonRetry": "Try again",
+  "@commonRetry": {
+    "description": "Button: repeat a failed action."
+  },
+  "commonCheckAgain": "Check again",
+  "@commonCheckAgain": {
+    "description": "Button: re-check an action whose outcome is unknown."
+  },
+  "commonRefresh": "Refresh",
+  "@commonRefresh": {
+    "description": "Button: re-read the current server state."
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "Dialog confirmation button."
+  },
+  "commonLoading": "Loading…",
+  "@commonLoading": {
+    "description": "Generic loading state."
+  },
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "Button: save."
+  },
+  "commonSignIn": "Sign in",
+  "@commonSignIn": {
+    "description": "Button/title: sign in."
+  },
+  "commonContinueAsGuest": "Continue as guest",
+  "@commonContinueAsGuest": {
+    "description": "Legacy button: continue without signing in."
+  },
+  "languageSectionTitle": "Language",
+  "@languageSectionTitle": {
+    "description": "Settings: label of the UI language selector."
+  },
+  "languageSystem": "Device language",
+  "@languageSystem": {
+    "description": "Settings: follow the device language list."
+  },
+  "languageNameEn": "English",
+  "@languageNameEn": {
+    "description": "Endonym of English; never translated."
+  },
+  "languageNameLv": "Latviešu",
+  "@languageNameLv": {
+    "description": "Endonym of Latvian; never translated."
+  },
+  "languageNameRu": "Русский",
+  "@languageNameRu": {
+    "description": "Endonym of Russian; never translated."
+  },
+  "languageHint": "Changes only the app language. Market, currency and event times stay the same.",
+  "@languageHint": {
+    "description": "Settings: explains what a language change affects."
+  },
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom navigation (accessibility label): personal home."
+  },
+  "navFavorites": "Favorites",
+  "@navFavorites": {
+    "description": "Bottom navigation: favorites."
+  },
+  "navSmartSearch": "Smart Search",
+  "@navSmartSearch": {
+    "description": "Bottom navigation: smart search."
+  },
+  "navNotifications": "Notifications",
+  "@navNotifications": {
+    "description": "Bottom navigation and settings: notifications."
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom navigation: personal profile."
+  },
+  "navPage": "Page",
+  "@navPage": {
+    "description": "Bottom navigation: the Professional Page."
+  },
+  "navContent": "Content",
+  "@navContent": {
+    "description": "Bottom navigation: the Page's content."
+  },
+  "navCreate": "Create",
+  "@navCreate": {
+    "description": "Bottom navigation: create."
+  },
+  "navAccount": "Account",
+  "@navAccount": {
+    "description": "Bottom navigation: Page account."
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings page title."
+  },
+  "commonSignInRequired": "Sign in required",
+  "@commonSignInRequired": {
+    "description": "A signed-in page shown without a signed-in user."
+  },
+  "settingsLoadFailed": "Settings could not be loaded",
+  "@settingsLoadFailed": {
+    "description": "Settings load error."
+  },
+  "settingsSectionAccount": "ACCOUNT AND WORKSPACE",
+  "@settingsSectionAccount": {
+    "description": "Settings section header (upper case)."
+  },
+  "settingsSwitchWorkspace": "Switch workspace",
+  "@settingsSwitchWorkspace": {
+    "description": "Settings item."
+  },
+  "settingsSwitchWorkspaceHint": "Personal profile, Professional Pages and Admin access",
+  "@settingsSwitchWorkspaceHint": {
+    "description": "Settings item subtitle."
+  },
+  "settingsSectionContent": "CONTENT & ACTIVITY",
+  "@settingsSectionContent": {
+    "description": "Settings section header (upper case)."
+  },
+  "settingsSavedPlans": "Saved plans",
+  "@settingsSavedPlans": {
+    "description": "Settings item."
+  },
+  "settingsSavedPlansHint": "Saved ideas and personal plans",
+  "@settingsSavedPlansHint": {
+    "description": "Settings item subtitle."
+  },
+  "settingsSearch": "Search and conditions",
+  "@settingsSearch": {
+    "description": "Settings item."
+  },
+  "settingsSearchHint": "Saved searches and discovery filters",
+  "@settingsSearchHint": {
+    "description": "Settings item subtitle."
+  },
+  "settingsNotificationsHint": "Inbox and route updates",
+  "@settingsNotificationsHint": {
+    "description": "Settings item subtitle."
+  },
+  "settingsSectionPreferences": "PREFERENCES",
+  "@settingsSectionPreferences": {
+    "description": "Settings section header (upper case)."
+  },
+  "settingsCurrency": "Currency",
+  "@settingsCurrency": {
+    "description": "Legacy local currency preference label; prices keep the currency of their data."
+  },
+  "settingsNotificationPreferences": "Notification preferences",
+  "@settingsNotificationPreferences": {
+    "description": "Settings switch."
+  },
+  "settingsSupport": "Support / Help",
+  "@settingsSupport": {
+    "description": "Settings link."
+  },
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "@settingsPrivacyPolicy": {
+    "description": "Settings link title; the policy text itself is mandatory copy outside L4."
+  },
+  "settingsTerms": "Terms of Service",
+  "@settingsTerms": {
+    "description": "Settings link title; the terms text itself is mandatory copy outside L4."
+  },
+  "settingsSignOut": "Sign out",
+  "@settingsSignOut": {
+    "description": "Settings button."
+  },
+  "settingsProfileInformation": "Profile information",
+  "@settingsProfileInformation": {
+    "description": "Settings section."
+  },
+  "settingsDisplayName": "Display name",
+  "@settingsDisplayName": {
+    "description": "Profile field label."
+  },
+  "settingsAbout": "About",
+  "@settingsAbout": {
+    "description": "Profile field label."
+  },
+  "settingsCity": "City",
+  "@settingsCity": {
+    "description": "Profile field label."
+  },
+  "settingsAvatar": "Avatar URL/Path",
+  "@settingsAvatar": {
+    "description": "Profile field label."
+  },
+  "settingsSaving": "Saving…",
+  "@settingsSaving": {
+    "description": "Profile save in progress."
+  },
+  "settingsSaveProfile": "Save profile",
+  "@settingsSaveProfile": {
+    "description": "Profile save button."
+  },
+  "settingsProfileSaved": "Profile saved",
+  "@settingsProfileSaved": {
+    "description": "Profile saved confirmation."
+  },
+  "authSignInHeadline": "Sign in to save and manage",
+  "@authSignInHeadline": {
+    "description": "Sign-in headline."
+  },
+  "authSignInToContinue": "Sign in to continue",
+  "@authSignInToContinue": {
+    "description": "Auth gate headline."
+  },
+  "authSignInBody": "Without signing in you can browse events and places. Signing in is needed for favorites, your profile and creating activities.",
+  "@authSignInBody": {
+    "description": "Sign-in explanation."
+  },
+  "authScenarioRequiresSignIn": "A personal Scenario is available only to a signed-in user.",
+  "@authScenarioRequiresSignIn": {
+    "description": "Auth gate body for Scenario."
+  },
+  "authEmailLabel": "Email",
+  "@authEmailLabel": {
+    "description": "Sign-in field label."
+  },
+  "authEmailHint": "Enter your email",
+  "@authEmailHint": {
+    "description": "Sign-in field hint."
+  },
+  "authPasswordLabel": "Password",
+  "@authPasswordLabel": {
+    "description": "Sign-in field label."
+  },
+  "authPasswordHint": "Enter your password",
+  "@authPasswordHint": {
+    "description": "Sign-in field hint."
+  },
+  "authSigningIn": "Signing in…",
+  "@authSigningIn": {
+    "description": "Sign-in in progress."
+  },
+  "authEmailRequired": "Enter your email",
+  "@authEmailRequired": {
+    "description": "Validation: empty email."
+  },
+  "authEmailInvalid": "Enter a valid email",
+  "@authEmailInvalid": {
+    "description": "Validation: malformed email."
+  },
+  "authPasswordRequired": "Enter your password",
+  "@authPasswordRequired": {
+    "description": "Validation: empty password."
+  },
+  "authPasswordTooShort": "The password is too short",
+  "@authPasswordTooShort": {
+    "description": "Validation: password shorter than the minimum."
+  },
+  "authErrorInvalidCredentials": "Wrong email or password",
+  "@authErrorInvalidCredentials": {
+    "description": "Sign-in error AUTH_INVALID_CREDENTIALS."
+  },
+  "authErrorTooManyAttempts": "Too many attempts. Try again later",
+  "@authErrorTooManyAttempts": {
+    "description": "Sign-in error AUTH_TOO_MANY_ATTEMPTS."
+  },
+  "authErrorNetwork": "No internet connection",
+  "@authErrorNetwork": {
+    "description": "Sign-in error NETWORK_UNAVAILABLE."
+  },
+  "authErrorGeneric": "Could not sign in. Try again",
+  "@authErrorGeneric": {
+    "description": "Sign-in error, any other code."
+  },
+  "authSessionExpired": "Your session has expired. Sign in again.",
+  "@authSessionExpired": {
+    "description": "Session restore failed."
+  },
+  "authRestoringSession": "Restoring your session…",
+  "@authRestoringSession": {
+    "description": "Splash: session restore in progress."
+  },
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": {
+    "description": "Safe fallback for an unknown or internal error code; the code itself is never shown."
+  },
+  "errorOffline": "No connection. Try again when you are back online.",
+  "@errorOffline": {
+    "description": "The request could not reach the server."
+  },
+  "errorOfflineSaved": "No connection. Your request is saved and will not be duplicated.",
+  "@errorOfflineSaved": {
+    "description": "Offline, a journaled command will be retried with the same key."
+  },
+  "errorUnknownOutcome": "We could not confirm the result. Checking again will not repeat the action.",
+  "@errorUnknownOutcome": {
+    "description": "The command may have reached the server."
+  },
+  "errorSessionNotConfirmed": "Your session could not be confirmed. Try again.",
+  "@errorSessionNotConfirmed": {
+    "description": "Session refresh failed."
+  },
+  "errorSessionExpired": "Your session has expired. Sign in again.",
+  "@errorSessionExpired": {
+    "description": "Server session expired or revoked."
+  },
+  "errorSignInRequired": "Sign in to continue.",
+  "@errorSignInRequired": {
+    "description": "The server needs a signed-in user."
+  },
+  "errorNotAllowed": "You do not have access to this action.",
+  "@errorNotAllowed": {
+    "description": "Permission or capability denied."
+  },
+  "errorUpdateApp": "This version of the app is no longer supported. Update the app.",
+  "@errorUpdateApp": {
+    "description": "Unsupported client, contract or schema version."
+  },
+  "errorInvalidRequest": "The request could not be processed. Update the app or try again.",
+  "@errorInvalidRequest": {
+    "description": "Malformed request (invalid contract or argument)."
+  },
+  "errorRateLimited": "Too many attempts. Try again shortly.",
+  "@errorRateLimited": {
+    "description": "Rate limited without a retry hint."
+  },
+  "errorRateLimitedSeconds": "{count, plural, one{Too many attempts. Try again in {count} second.} other{Too many attempts. Try again in {count} seconds.}}",
+  "@errorRateLimitedSeconds": {
+    "description": "Rate limited with the server's retry-after in seconds.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "errorTemporarilyUnavailable": "The service is temporarily unavailable. Try again later.",
+  "@errorTemporarilyUnavailable": {
+    "description": "Server unavailable or contention."
+  },
+  "errorConflictRefresh": "This was changed meanwhile. Refresh to see the current version.",
+  "@errorConflictRefresh": {
+    "description": "Revision conflict or stale revision."
+  },
+  "errorNotFound": "This is no longer available.",
+  "@errorNotFound": {
+    "description": "The object was not found."
+  },
+  "errorFeatureDisabled": "This feature is not available yet.",
+  "@errorFeatureDisabled": {
+    "description": "Server feature flag is off."
+  },
+  "errorMarketDisabled": "This is not available in this region yet.",
+  "@errorMarketDisabled": {
+    "description": "The market is disabled; the market is not named."
+  },
+  "errorAccountRestricted": "Your account is restricted.",
+  "@errorAccountRestricted": {
+    "description": "Publisher eligibility: account inactive."
+  },
+  "errorAccessUpdating": "Your access is being updated. Try again.",
+  "@errorAccessUpdating": {
+    "description": "Publisher eligibility: access snapshot stale."
+  },
+  "contentErrorPublisherNotEligible": "You cannot publish on behalf of this profile or page.",
+  "@contentErrorPublisherNotEligible": {
+    "description": "Content: publisher not eligible or not accessible."
+  },
+  "contentErrorCreatorVerificationRequired": "Publishing requires a verified creator account.",
+  "@contentErrorCreatorVerificationRequired": {
+    "description": "Content/identity: creator verification required."
+  },
+  "contentErrorCreatorVerificationUnavailable": "Creator verification is temporarily unavailable.",
+  "@contentErrorCreatorVerificationUnavailable": {
+    "description": "Identity: creator verification unavailable."
+  },
+  "contentErrorMembershipInactive": "Your access to this page has ended.",
+  "@contentErrorMembershipInactive": {
+    "description": "Page membership inactive."
+  },
+  "contentErrorTypeDisabled": "Publishing this type is not available yet.",
+  "@contentErrorTypeDisabled": {
+    "description": "Content type disabled or unsupported."
+  },
+  "contentErrorValidationFailed": "Some fields need attention before publishing.",
+  "@contentErrorValidationFailed": {
+    "description": "Server validation refused the draft."
+  },
+  "contentErrorMediaNotReady": "Media is still being processed. Try again shortly.",
+  "@contentErrorMediaNotReady": {
+    "description": "Attached media not ready."
+  },
+  "contentErrorModerationRequired": "This needs to be reviewed before it can be published.",
+  "@contentErrorModerationRequired": {
+    "description": "Moderation required."
+  },
+  "contentErrorPublicationRestricted": "Publication is restricted.",
+  "@contentErrorPublicationRestricted": {
+    "description": "Publication restricted by Trust & Safety; no reason or reporter is shown."
+  },
+  "contentErrorStorageLimit": "The storage limit has been reached.",
+  "@contentErrorStorageLimit": {
+    "description": "Storage limit exceeded."
+  },
+  "contentErrorPrivacyConsentRequired": "Your consent is required to continue.",
+  "@contentErrorPrivacyConsentRequired": {
+    "description": "Privacy consent required."
+  },
+  "contentErrorAgeEligibilityRequired": "Age confirmation is required for this.",
+  "@contentErrorAgeEligibilityRequired": {
+    "description": "Age eligibility required."
+  },
+  "contentErrorNotAllowedLocally": "This action is not available for this draft.",
+  "@contentErrorNotAllowedLocally": {
+    "description": "Client-side refusal (not_allowed) before any server call."
+  },
+  "importErrorRollbackNotAllowed": "This import can no longer be undone.",
+  "@importErrorRollbackNotAllowed": {
+    "description": "Import rollback not allowed."
+  },
+  "importErrorChanged": "The import changed meanwhile. Refresh and try again.",
+  "@importErrorChanged": {
+    "description": "Import generation or cleanup token mismatch."
+  },
+  "importErrorRolledBack": "This import was undone.",
+  "@importErrorRolledBack": {
+    "description": "Import already rolled back."
+  },
+  "importErrorOriginalRemoved": "The local original has already been removed.",
+  "@importErrorOriginalRemoved": {
+    "description": "The local original was already removed."
+  },
+  "mediaErrorUploadIncomplete": "The upload did not complete. Upload the file again.",
+  "@mediaErrorUploadIncomplete": {
+    "description": "Media upload missing, incomplete or mismatched."
+  },
+  "mediaErrorLimitExceeded": "The file is too large or the limit has been reached.",
+  "@mediaErrorLimitExceeded": {
+    "description": "Media limit exceeded."
+  },
+  "mediaErrorAssetReferenced": "This file is still in use and cannot be deleted.",
+  "@mediaErrorAssetReferenced": {
+    "description": "Media still referenced."
+  },
+  "mediaErrorRetryNotAllowed": "This upload cannot be retried. Start a new upload.",
+  "@mediaErrorRetryNotAllowed": {
+    "description": "Media retry not allowed."
+  },
+  "bookingErrorSoldOut": "This event is sold out.",
+  "@bookingErrorSoldOut": {
+    "description": "Booking: sold out."
+  },
+  "bookingErrorBookingLimit": "You have reached the limit of active bookings.",
+  "@bookingErrorBookingLimit": {
+    "description": "Booking: active booking or concurrency limit."
+  },
+  "bookingErrorRegistrationNotOpen": "Registration has not opened yet.",
+  "@bookingErrorRegistrationNotOpen": {
+    "description": "Booking: registration not open."
+  },
+  "bookingErrorRegistrationClosed": "Registration is closed.",
+  "@bookingErrorRegistrationClosed": {
+    "description": "Booking: registration closed."
+  },
+  "bookingErrorCancellationDeadlinePassed": "The cancellation deadline has passed.",
+  "@bookingErrorCancellationDeadlinePassed": {
+    "description": "Booking: cancellation deadline passed."
+  },
+  "bookingErrorReconfirmationDeadlinePassed": "The confirmation deadline has passed.",
+  "@bookingErrorReconfirmationDeadlinePassed": {
+    "description": "Booking: reconfirmation deadline passed."
+  },
+  "bookingErrorMaterialRevisionMismatch": "The event changed again. Refresh and confirm the new time.",
+  "@bookingErrorMaterialRevisionMismatch": {
+    "description": "Booking: material revision mismatch."
+  },
+  "bookingErrorReconfirmationNotRequired": "No confirmation is needed now.",
+  "@bookingErrorReconfirmationNotRequired": {
+    "description": "Booking: reconfirmation not required."
+  },
+  "bookingErrorRevisionConflict": "Your booking changed meanwhile. Refresh to see the current state.",
+  "@bookingErrorRevisionConflict": {
+    "description": "Booking: revision conflict."
+  },
+  "bookingErrorAlreadyActive": "You already have a booking for this event.",
+  "@bookingErrorAlreadyActive": {
+    "description": "Booking: already active."
+  },
+  "bookingErrorInvalidGuestCount": "This number of seats is not allowed.",
+  "@bookingErrorInvalidGuestCount": {
+    "description": "Booking: invalid guest count."
+  },
+  "bookingErrorEventUnavailable": "This event is not available for booking.",
+  "@bookingErrorEventUnavailable": {
+    "description": "Booking: event or occurrence unavailable or cancelled."
+  },
+  "bookingErrorEligibility": "You do not meet the conditions to book this event.",
+  "@bookingErrorEligibility": {
+    "description": "Booking: eligibility not satisfied; no private condition is named."
+  },
+  "bookingErrorHoldExpired": "The seat hold expired. Try booking again.",
+  "@bookingErrorHoldExpired": {
+    "description": "Booking: hold expired."
+  },
+  "bookingErrorGeneric": "The booking was not accepted.",
+  "@bookingErrorGeneric": {
+    "description": "Booking: any other refusal."
+  },
+  "bookingErrorLoadFailed": "Booking could not be loaded.",
+  "@bookingErrorLoadFailed": {
+    "description": "Booking: reading the active booking was refused."
+  },
+  "bookingEndedMissedReconfirmation": "Your booking was released because attendance was not confirmed in time.",
+  "@bookingEndedMissedReconfirmation": {
+    "description": "Booking ended: missed reconfirmation."
+  },
+  "bookingEndedEventCancelled": "The organizer cancelled this event; your booking was cancelled.",
+  "@bookingEndedEventCancelled": {
+    "description": "Booking ended: event or occurrence cancelled."
+  },
+  "bookingEndedOrganizerCancelled": "The organizer cancelled your booking.",
+  "@bookingEndedOrganizerCancelled": {
+    "description": "Booking ended: organizer cancelled."
+  },
+  "notificationFallbackTitle": "Notification",
+  "@notificationFallbackTitle": {
+    "description": "Inbox item title when no text could be rendered."
+  },
+  "notificationUnsupportedLocale": "This notification is not available in your language.",
+  "@notificationUnsupportedLocale": {
+    "description": "Inbox item: contentStatus unsupported_locale."
+  },
+  "notificationTemplateUnavailable": "This notification can no longer be shown.",
+  "@notificationTemplateUnavailable": {
+    "description": "Inbox item: contentStatus template_unavailable."
+  },
+  "localErrorSaveRequired": "Save the draft to the server first.",
+  "@localErrorSaveRequired": {
+    "description": "Client refusal save_required."
+  },
+  "localErrorMediaMissing": "Upload the required media first.",
+  "@localErrorMediaMissing": {
+    "description": "Client refusal media_missing."
+  },
+  "localErrorCoverRequired": "Add a cover image first.",
+  "@localErrorCoverRequired": {
+    "description": "Client refusal cover_required."
+  },
+  "localErrorSubmissionRequired": "Submit the draft for review first.",
+  "@localErrorSubmissionRequired": {
+    "description": "Client refusal submission_required."
+  },
+  "localErrorPublicationRequired": "Publish it first.",
+  "@localErrorPublicationRequired": {
+    "description": "Client refusal publication_required."
+  },
+  "localErrorPublisherRequired": "Choose who publishes this first.",
+  "@localErrorPublisherRequired": {
+    "description": "Client refusal publisher_required."
+  },
+  "localErrorNoConflict": "There is no newer server version to resolve.",
+  "@localErrorNoConflict": {
+    "description": "Client refusal no_conflict."
+  },
+  "localErrorForeignRecord": "This draft belongs to another account.",
+  "@localErrorForeignRecord": {
+    "description": "Client refusal foreign_record; the other account is not named."
+  },
+  "localErrorEditingAfterPublication": "Editing after publication is not available yet.",
+  "@localErrorEditingAfterPublication": {
+    "description": "Client refusal editing_after_publication_not_supported."
+  },
+  "localErrorMediaRightsRequired": "Confirm that you have the rights to this media.",
+  "@localErrorMediaRightsRequired": {
+    "description": "Client refusal media_rights_required."
+  },
+  "localErrorDraftRequired": "Create a draft in Create first.",
+  "@localErrorDraftRequired": {
+    "description": "Client refusal <type>_draft_required."
+  },
+  "localErrorDraftChanged": "The draft changed. Save it again.",
+  "@localErrorDraftChanged": {
+    "description": "Client refusal activity_draft_changed."
+  },
+  "localErrorConsentMissing": "Consent is missing. Give consent to continue.",
+  "@localErrorConsentMissing": {
+    "description": "Client refusal consent_missing."
+  },
+  "localErrorShareUnavailable": "Sharing is not available right now.",
+  "@localErrorShareUnavailable": {
+    "description": "Client refusal share_token_unavailable."
+  },
+  "localErrorMediaUnavailable": "Media upload is not available right now.",
+  "@localErrorMediaUnavailable": {
+    "description": "Client refusal media_unavailable."
+  },
+  "importErrorSessionOpen": "An import is already in progress.",
+  "@importErrorSessionOpen": {
+    "description": "Import: session_open."
+  },
+  "importErrorNoOpenSession": "There is no import in progress.",
+  "@importErrorNoOpenSession": {
+    "description": "Import: no_open_session."
+  },
+  "importErrorNothingToImport": "There is nothing to import.",
+  "@importErrorNothingToImport": {
+    "description": "Import: nothing_to_import."
+  },
+  "importErrorNotImported": "Nothing has been imported yet.",
+  "@importErrorNotImported": {
+    "description": "Import: not_imported."
+  },
+  "importErrorNotVerified": "The import has not been checked on the server yet.",
+  "@importErrorNotVerified": {
+    "description": "Import: not_verified."
+  },
+  "importErrorVerificationMismatch": "The server copy does not match the local original. The original is kept.",
+  "@importErrorVerificationMismatch": {
+    "description": "Import: verification_mismatch."
+  },
+  "importErrorServerCheckFailed": "The server check did not pass. The original is kept.",
+  "@importErrorServerCheckFailed": {
+    "description": "Import: server_check_failed."
+  },
+  "importErrorOriginalMissing": "The local original is missing.",
+  "@importErrorOriginalMissing": {
+    "description": "Import: original_missing."
+  },
+  "importErrorLocalChanged": "The local copy changed after import. Import it again.",
+  "@importErrorLocalChanged": {
+    "description": "Import: local_changed_since_import."
+  },
+  "profileLoadFailed": "Profile could not be loaded",
+  "@profileLoadFailed": {
+    "description": "Profile load error."
+  },
+  "bookingTitle": "Booking",
+  "@bookingTitle": {
+    "description": "Booking section title."
+  },
+  "bookingLoading": "Loading your booking…",
+  "@bookingLoading": {
+    "description": "Booking: loading."
+  },
+  "bookingSending": "Sending your request…",
+  "@bookingSending": {
+    "description": "Booking: command in flight."
+  },
+  "bookingStatus": "{status, select, pending{Pending} confirmed{Confirmed} waitlisted{On the waitlist} other{Inactive}}",
+  "@bookingStatus": {
+    "description": "Booking state label; status is the stable Booking state id, which is never translated itself.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "confirmed"
+      }
+    }
+  },
+  "bookingSeatsCount": "{count, plural, one{{count} seat} other{{count} seats}}",
+  "@bookingSeatsCount": {
+    "description": "Number of booked seats.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "bookingMine": "Your booking: {status} · {seats}",
+  "@bookingMine": {
+    "description": "The user's active booking; status from bookingStatus, seats from bookingSeatsCount.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "Confirmed"
+      },
+      "seats": {
+        "type": "String",
+        "example": "2 seats"
+      }
+    }
+  },
+  "bookingNone": "You have no booking for this event.",
+  "@bookingNone": {
+    "description": "Booking: none active."
+  },
+  "bookingReconfirmRequired": "The event changed. Please confirm your attendance.",
+  "@bookingReconfirmRequired": {
+    "description": "Reconfirmation needed, no deadline known."
+  },
+  "bookingReconfirmBy": "The event changed. Confirm your attendance by {deadline}.",
+  "@bookingReconfirmBy": {
+    "description": "Reconfirmation deadline, already formatted in the event's own time zone.",
+    "placeholders": {
+      "deadline": {
+        "type": "String",
+        "example": "Aug 30, 2026, 6:30 PM"
+      }
+    }
+  },
+  "bookingSeatsSelector": "{selected} of {max, plural, one{{max} seat} other{{max} seats}}",
+  "@bookingSeatsSelector": {
+    "description": "Seat selector: chosen of allowed.",
+    "placeholders": {
+      "selected": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "bookingBookSeats": "{count, plural, one{Book {count} seat} other{Book {count} seats}}",
+  "@bookingBookSeats": {
+    "description": "Book button.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "bookingConfirmAttendance": "Confirm attendance",
+  "@bookingConfirmAttendance": {
+    "description": "Reconfirm button."
+  },
+  "bookingCancel": "Cancel booking",
+  "@bookingCancel": {
+    "description": "Cancel button."
+  },
+  "bookingFewerSeats": "Fewer seats",
+  "@bookingFewerSeats": {
+    "description": "Accessibility label of the minus button."
+  },
+  "bookingMoreSeats": "More seats",
+  "@bookingMoreSeats": {
+    "description": "Accessibility label of the plus button."
+  },
+  "publicationTestPath": "Test publication path (local Emulator)",
+  "@publicationTestPath": {
+    "description": "Header of a default-off publication test page."
+  },
+  "publicationNoDraft": "{type, select, event{No Event draft in Create} place{No Place draft in Create} rental{No Rental draft in Create} session{No Session draft in Create} activity{No Activity draft in Create} collection{No Collection draft in Create} findPeople{No Find People draft in Create} route{No Route draft in Create} scenario{No Scenario draft in Create} classWorkshop{No Class / Workshop draft in Create} other{No draft in Create}}",
+  "@publicationNoDraft": {
+    "description": "No local draft of the type; type is the stable Create type id.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "place"
+      }
+    }
+  },
+  "publicationMyObjects": "{type, select, event{My events} place{My places} rental{My rentals} session{My sessions} activity{My activities} collection{My collections} findPeople{My Find People requests} route{My routes} scenario{My scenarios} classWorkshop{My classes and workshops} other{My objects}}",
+  "@publicationMyObjects": {
+    "description": "List header of the user's server objects of a type.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "place"
+      }
+    }
+  },
+  "publicationMediaUploaded": "Media uploaded: {count}",
+  "@publicationMediaUploaded": {
+    "description": "Count of attached media.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "publicationRevision": "Revision {revision}",
+  "@publicationRevision": {
+    "description": "Published revision id; the id itself is not translated.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "01J"
+      }
+    }
+  },
+  "publicationPublishedVersion": "Published version: {revision}",
+  "@publicationPublishedVersion": {
+    "description": "Published revision id.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "01J"
+      }
+    }
+  },
+  "publicationDraftRevision": "Draft revision: {revision}",
+  "@publicationDraftRevision": {
+    "description": "Draft revision number.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "3"
+      }
+    }
+  },
+  "publicationDraftRevisionPending": "Draft revision: {revision} — unpublished changes; review required",
+  "@publicationDraftRevisionPending": {
+    "description": "Draft revision with unpublished edits.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "3"
+      }
+    }
+  },
+  "publicationConflict": "The server has a newer version (revision {revision}). Your edit is kept here; nothing was overwritten.",
+  "@publicationConflict": {
+    "description": "Revision conflict notice.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "4"
+      }
+    }
+  },
+  "publicationNotSaved": "Not saved to the server",
+  "@publicationNotSaved": {
+    "description": "Status: no server draft."
+  },
+  "publicationNotSavedYet": "Not saved to the server yet",
+  "@publicationNotSavedYet": {
+    "description": "Status: no server record yet."
+  },
+  "publicationServerDraft": "Saved as a server draft",
+  "@publicationServerDraft": {
+    "description": "Status: server draft without publication status."
+  },
+  "publicationServerRevision": "Server revision {revision}",
+  "@publicationServerRevision": {
+    "description": "Server revision number.",
+    "placeholders": {
+      "revision": {
+        "type": "String",
+        "example": "2"
+      }
+    }
+  },
+  "publicationNotPrepared": "Not prepared",
+  "@publicationNotPrepared": {
+    "description": "Status: publication not prepared."
+  },
+  "publicationReviewState": "{state, select, draft{draft} submitted{submitted} under_review{under review} revision_requested{changes requested} rejected{rejected} approved_for_publication{approved} published{published} superseded{superseded} other{unknown}}",
+  "@publicationReviewState": {
+    "description": "Content review state (publication_submission.schema.json state, or draft before any submission); state is the stable server value.",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "under_review"
+      }
+    }
+  },
+  "publicationVisibilityState": "{state, select, unpublished{not published} visible{visible} withdrawn{hidden} restricted{restricted} archived{archived} other{unknown}}",
+  "@publicationVisibilityState": {
+    "description": "Content visibility (publication_pointer.schema.json visibility, or unpublished); state is the stable server value.",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "visible"
+      }
+    }
+  },
+  "publicationStatusLine": "Review: {review}; visibility: {visibility}",
+  "@publicationStatusLine": {
+    "description": "Status line; both values come from the select messages above.",
+    "placeholders": {
+      "review": {
+        "type": "String",
+        "example": "Submitted for review"
+      },
+      "visibility": {
+        "type": "String",
+        "example": "Not published"
+      }
+    }
+  },
+  "publicationObjectUnavailable": "Unavailable: {reason}",
+  "@publicationObjectUnavailable": {
+    "description": "A server object could not be read; reason is a localized message.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "This is no longer available."
+      }
+    }
+  },
+  "publicationSave": "Save",
+  "@publicationSave": {
+    "description": "Publication button."
+  },
+  "publicationSaveToServer": "Save to server",
+  "@publicationSaveToServer": {
+    "description": "Publication button."
+  },
+  "publicationUploadMedia": "Upload media",
+  "@publicationUploadMedia": {
+    "description": "Publication button."
+  },
+  "publicationUploadCover": "Upload cover",
+  "@publicationUploadCover": {
+    "description": "Publication button."
+  },
+  "publicationSubmit": "Submit",
+  "@publicationSubmit": {
+    "description": "Publication button: submit for review."
+  },
+  "publicationPublish": "Publish",
+  "@publicationPublish": {
+    "description": "Publication button."
+  },
+  "publicationHide": "Hide",
+  "@publicationHide": {
+    "description": "Publication button: withdraw from public view."
+  },
+  "publicationSaveMyVersion": "Save my version",
+  "@publicationSaveMyVersion": {
+    "description": "Publication button after a conflict."
+  },
+  "publicationActivatePublished": "Activate published version",
+  "@publicationActivatePublished": {
+    "description": "Publication button."
+  },
+  "publicationEditInCreate": "Edit in Create",
+  "@publicationEditInCreate": {
+    "description": "Publication button."
+  },
+  "publicationPrepare": "Prepare",
+  "@publicationPrepare": {
+    "description": "Publication button."
+  },
+  "publicationShareLink": "Share link",
+  "@publicationShareLink": {
+    "description": "Publication button."
+  },
+  "publicationRevokeLink": "Revoke link",
+  "@publicationRevokeLink": {
+    "description": "Publication button."
+  },
+  "publicationCoverPermission": "I have permission to use the cover image",
+  "@publicationCoverPermission": {
+    "description": "Checkbox: media rights."
+  },
+  "publicationActivityCheckFields": "Check the Activity fields in Create and submit again.",
+  "@publicationActivityCheckFields": {
+    "description": "Activity validation refusal hint."
+  },
+  "publicationCollectionItems": "Items (server status)",
+  "@publicationCollectionItems": {
+    "description": "Collection members header."
+  },
+  "findPeopleApproxArea": "Others see only an approximate area (about 1 km). The exact meeting point stays private to you.",
+  "@findPeopleApproxArea": {
+    "description": "Find People privacy notice."
+  },
+  "findPeopleConsentToPublish": "Consent to publish",
+  "@findPeopleConsentToPublish": {
+    "description": "Find People consent button."
+  },
+  "findPeopleWithdrawConsent": "Withdraw consent",
+  "@findPeopleWithdrawConsent": {
+    "description": "Find People consent button."
+  },
+  "findPeopleConsentNone": "Consent: not given",
+  "@findPeopleConsentNone": {
+    "description": "Find People consent status."
+  },
+  "findPeopleConsentState": "{state, select, revoked{Consent: withdrawn} expired{Consent: expired} other{Consent: inactive}}",
+  "@findPeopleConsentState": {
+    "description": "Inactive consent; state is the stable server value (revoked, expired).",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "revoked"
+      }
+    }
+  },
+  "findPeopleConsentActiveUntil": "Consent: active until {date}",
+  "@findPeopleConsentActiveUntil": {
+    "description": "Active consent end, formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Aug 30, 2027"
+      }
+    }
+  },
+  "routeHideEnds": "Hide {meters} m at both ends",
+  "@routeHideEnds": {
+    "description": "Route privacy trim button.",
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "200"
+      }
+    }
+  },
+  "routeHiddenEndsUnknown": "Hidden ends: unknown",
+  "@routeHiddenEndsUnknown": {
+    "description": "Route privacy trim status."
+  },
+  "routeHiddenEnds": "Hidden ends: start {start} m, end {end} m",
+  "@routeHiddenEnds": {
+    "description": "Route privacy trim lengths; values are formatted numbers.",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "example": "200"
+      },
+      "end": {
+        "type": "String",
+        "example": "200"
+      }
+    }
+  },
+  "routeTrimRequired": "Recorded GPS: hide at least 200 m at both ends before publishing",
+  "@routeTrimRequired": {
+    "description": "Route refusal privacy_trim_required."
+  },
+  "routeTrimEmpty": "Too short to publish: nothing is left after hiding the ends",
+  "@routeTrimEmpty": {
+    "description": "Route refusal privacy_trim_empty."
+  },
+  "scenarioShareLost": "Link issued, answer lost: issue a new link",
+  "@scenarioShareLost": {
+    "description": "Scenario share outcome unknown."
+  },
+  "scenarioShareUntil": "Unlisted link until {date}: {token}",
+  "@scenarioShareUntil": {
+    "description": "Scenario unlisted share; token is shown only to its owner and never translated.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Aug 30, 2026"
+      },
+      "token": {
+        "type": "String",
+        "example": "abc"
+      }
+    }
+  },
+  "collectionMemberStatus": "{status, select, eligible{Available} unavailable{Unavailable} withheld{Withheld} unknown{Unknown} forbidden{Not accessible} other{Unknown}}",
+  "@collectionMemberStatus": {
+    "description": "Server status of a Collection member; status is the stable server value.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "eligible"
+      }
+    }
+  },
+  "publicationPageTitle": "{type, select, event{Event publication (test)} place{Place publication (test)} rental{Rental publication (test)} session{Session publication (test)} activity{Activity publication (test)} collection{Collection publication (test)} findPeople{Find People publication (test)} route{Route publication (test)} scenario{Scenario publication (test)} classWorkshop{Class / Workshop publication (test)} other{Publication (test)}}",
+  "@publicationPageTitle": {
+    "description": "Title of a default-off publication test page; type is the stable Create type id.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "place"
+      }
+    }
+  },
+  "publicationSignIn": "{type, select, event{Sign in to publish your Event draft} place{Sign in to publish your Place draft} rental{Sign in to publish your Rental draft} session{Sign in to publish your Session draft} activity{Sign in to publish your Activity draft} collection{Sign in to publish your Collection draft} findPeople{Sign in to publish your Find People draft} route{Sign in to publish your Route} scenario{Sign in to publish your Scenario} classWorkshop{Sign in to publish your Class draft} other{Sign in to publish your draft}}",
+  "@publicationSignIn": {
+    "description": "Signed-out state of a publication test page.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "place"
+      }
+    }
+  },
+  "publicationSaveCreateDraftFirst": "Save your Create draft before editing this publication.",
+  "@publicationSaveCreateDraftFirst": {
+    "description": "Activity publication edit precondition."
+  },
+  "importPageTitle": "Import local data (test)",
+  "@importPageTitle": {
+    "description": "Title of the default-off import test page."
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Dialog cancel button."
+  },
+  "createTypeName": "{type, select, event{Event} place{Place} rental{Rental} session{Session} activity{Activity} collection{Collection} findPeople{Find People} route{Route} scenario{Scenario} classWorkshop{Class / Workshop} other{Object}}",
+  "@createTypeName": {
+    "description": "Name of a Create type; type is the stable type id.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "place"
+      }
+    }
+  },
+  "importSectionTitle": "Import local data (local Emulator)",
+  "@importSectionTitle": {
+    "description": "Import test section header."
+  },
+  "importNoSession": "No import session",
+  "@importNoSession": {
+    "description": "Import: no session."
+  },
+  "importSessionStatus": "{status, select, approved{Approved} running{Running} paused{Paused} completed{Completed} failed{Failed} other{Unknown}}",
+  "@importSessionStatus": {
+    "description": "Import session status; status is the stable value.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "running"
+      }
+    }
+  },
+  "importSessionProgress": "Session: {status}, {done} of {total}",
+  "@importSessionProgress": {
+    "description": "Import session progress.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "Running"
+      },
+      "done": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "importPendingCleanups": "{count, plural, one{{count} deleted local copy still to record on the server} other{{count} deleted local copies still to record on the server}}",
+  "@importPendingCleanups": {
+    "description": "Deleted local copies not yet recorded on the server.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "importFinishCleanup": "Finish cleanup",
+  "@importFinishCleanup": {
+    "description": "Import button."
+  },
+  "importDryRun": "Dry run",
+  "@importDryRun": {
+    "description": "Import button: classify without importing."
+  },
+  "importApprove": "Approve import",
+  "@importApprove": {
+    "description": "Import button."
+  },
+  "importRun": "Run",
+  "@importRun": {
+    "description": "Import button."
+  },
+  "importResume": "Resume",
+  "@importResume": {
+    "description": "Import button."
+  },
+  "importClassification": "{value, select, create{will be created} alreadyMapped{already imported} conflict{changed since import} unsupported{not supported} blocked{blocked} other{unknown}}",
+  "@importClassification": {
+    "description": "Import plan class of one local draft; value is the stable class.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "create"
+      }
+    }
+  },
+  "importReason": "{reason, select, type_not_importable{this type cannot be imported yet} owner_mismatch{belongs to another account} publisher_missing{no publisher chosen} publisher_not_eligible{you cannot publish for this publisher} local_id{has local-only links} unsupported_capability{uses features not supported yet} rolled_back{import was rolled back} rollback_pending{rollback is waiting for the server} cleanup_reserved{local copy is being deleted} cleanup_pending{deletion still to record} resume{import can be resumed} local_changed_since_import{changed locally after import} published_by_test_path{already published from this device} other{other reason}}",
+  "@importReason": {
+    "description": "Why a local draft has its import class; reason is the stable code prefix.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "owner_mismatch"
+      }
+    }
+  },
+  "importCandidateLine": "{type}: {classification}",
+  "@importCandidateLine": {
+    "description": "Import plan line; both values are localized labels.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "Place"
+      },
+      "classification": {
+        "type": "String",
+        "example": "will be created"
+      }
+    }
+  },
+  "importCandidateLineReason": "{type}: {classification} ({reason})",
+  "@importCandidateLineReason": {
+    "description": "Import plan line with a localized reason.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "Place"
+      },
+      "classification": {
+        "type": "String",
+        "example": "blocked"
+      },
+      "reason": {
+        "type": "String",
+        "example": "belongs to another account"
+      }
+    }
+  },
+  "importItemState": "{state, select, created{created} mediaUploaded{media uploaded} bodySaved{content saved} verified{verified} failed{failed} rollbackPending{rollback pending} rolledBack{rolled back} cleanupReserved{local copy being deleted} other{unknown}}",
+  "@importItemState": {
+    "description": "Server state of an imported item; state is the stable value.",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "verified"
+      }
+    }
+  },
+  "importServerLine": "Server {contentId}: {state}",
+  "@importServerLine": {
+    "description": "Server item; contentId is a stable id, never translated.",
+    "placeholders": {
+      "contentId": {
+        "type": "String",
+        "example": "01J"
+      },
+      "state": {
+        "type": "String",
+        "example": "verified"
+      }
+    }
+  },
+  "importServerLineReason": "Server {contentId}: {state} ({reason})",
+  "@importServerLineReason": {
+    "description": "Server item with a localized failure.",
+    "placeholders": {
+      "contentId": {
+        "type": "String",
+        "example": "01J"
+      },
+      "state": {
+        "type": "String",
+        "example": "failed"
+      },
+      "reason": {
+        "type": "String",
+        "example": "Something went wrong."
+      }
+    }
+  },
+  "importRefused": "Refused: {reason}",
+  "@importRefused": {
+    "description": "Import refusal with a localized reason.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "You do not have access to this action."
+      }
+    }
+  },
+  "importLocalCopy": "Local copy: {state}",
+  "@importLocalCopy": {
+    "description": "Local original status.",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "kept"
+      }
+    }
+  },
+  "importCleanupNotImported": "kept (not imported)",
+  "@importCleanupNotImported": {
+    "description": "Local copy stage."
+  },
+  "importCleanupAwaitingVerification": "kept (server copy not verified)",
+  "@importCleanupAwaitingVerification": {
+    "description": "Local copy stage."
+  },
+  "importCleanupAwaitingConfirmation": "kept (confirm the server copy)",
+  "@importCleanupAwaitingConfirmation": {
+    "description": "Local copy stage."
+  },
+  "importCleanupRecovery": "kept until {date}",
+  "@importCleanupRecovery": {
+    "description": "Local copy stage: recovery period end, formatted in the device zone.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 3, 2026, 10:00 AM"
+      }
+    }
+  },
+  "importCleanupEligible": "may be deleted",
+  "@importCleanupEligible": {
+    "description": "Local copy stage."
+  },
+  "importCleanupReserved": "being deleted (reserved on the server)",
+  "@importCleanupReserved": {
+    "description": "Local copy stage."
+  },
+  "importCleanupDeleted": "deleted",
+  "@importCleanupDeleted": {
+    "description": "Local copy stage."
+  },
+  "importCleanupRollbackPending": "kept (rollback waiting for the server)",
+  "@importCleanupRollbackPending": {
+    "description": "Local copy stage."
+  },
+  "importCleanupRolledBack": "kept (import rolled back)",
+  "@importCleanupRolledBack": {
+    "description": "Local copy stage."
+  },
+  "importAgain": "Import again",
+  "@importAgain": {
+    "description": "Import item button."
+  },
+  "importKeepServerCopy": "Keep the server copy",
+  "@importKeepServerCopy": {
+    "description": "Import item button."
+  },
+  "importFinishDeleting": "Finish deleting local copy",
+  "@importFinishDeleting": {
+    "description": "Import item button."
+  },
+  "importDeleteLocal": "Delete local copy",
+  "@importDeleteLocal": {
+    "description": "Import item button."
+  },
+  "importKeepLocal": "Keep local copy",
+  "@importKeepLocal": {
+    "description": "Import item button."
+  },
+  "importRetryRollback": "Retry rollback",
+  "@importRetryRollback": {
+    "description": "Import item button."
+  },
+  "importRollBack": "Roll back import",
+  "@importRollBack": {
+    "description": "Import item button."
+  },
+  "importRollbackDialogTitle": "Roll back this import?",
+  "@importRollbackDialogTitle": {
+    "description": "Rollback confirmation title."
+  },
+  "importRollbackDialogBody": "The imported server draft is closed for good. Your local copy stays and can be imported again later.",
+  "@importRollbackDialogBody": {
+    "description": "Rollback confirmation body."
+  },
+  "importRollbackConfirm": "Roll back",
+  "@importRollbackConfirm": {
+    "description": "Rollback confirmation button."
+  },
+  "notificationsReadAll": "Mark all as read",
+  "@notificationsReadAll": {
+    "description": "Notifications: tooltip of the read-all button."
+  },
+  "notificationsLoadFailed": "Notifications could not be loaded",
+  "@notificationsLoadFailed": {
+    "description": "Notifications: load error."
+  },
+  "notificationsEmpty": "No notifications yet",
+  "@notificationsEmpty": {
+    "description": "Notifications: empty inbox."
+  },
+  "notificationsSearchHint": "Search notifications",
+  "@notificationsSearchHint": {
+    "description": "Notifications: search field hint."
+  },
+  "notificationsClearSearch": "Clear search",
+  "@notificationsClearSearch": {
+    "description": "Notifications: tooltip."
+  },
+  "notificationsFilterAll": "All",
+  "@notificationsFilterAll": {
+    "description": "Notifications filter chip."
+  },
+  "notificationsFilterNew": "New",
+  "@notificationsFilterNew": {
+    "description": "Notifications filter chip."
+  },
+  "notificationsFilterReminders": "Reminders",
+  "@notificationsFilterReminders": {
+    "description": "Notifications filter chip."
+  },
+  "notificationsFilterUpdates": "Updates",
+  "@notificationsFilterUpdates": {
+    "description": "Notifications filter chip."
+  },
+  "notificationsFilterScenarios": "Scenarios",
+  "@notificationsFilterScenarios": {
+    "description": "Notifications filter chip."
+  },
+  "notificationsActions": "Notification actions",
+  "@notificationsActions": {
+    "description": "Notifications: tooltip of the item menu."
+  },
+  "notificationsNoSearchResults": "Nothing matches your search",
+  "@notificationsNoSearchResults": {
+    "description": "Notifications: search without results."
+  },
+  "notificationsFilterEmpty": "Nothing in this filter yet",
+  "@notificationsFilterEmpty": {
+    "description": "Notifications: empty filter."
+  },
+  "notificationsShowAll": "Show all",
+  "@notificationsShowAll": {
+    "description": "Notifications: reset the filter."
+  },
+  "notificationDestination": "{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}",
+  "@notificationDestination": {
+    "description": "Where a notification leads; kind is a stable id.",
+    "placeholders": {
+      "kind": {
+        "type": "String",
+        "example": "map"
+      }
+    }
+  },
+  "notificationDestinationAction": "{kind, select, legacy{Open} routeMap{Open route} map{Open map} details{Open details} saved{Open saved} search{Search} publishStatus{Open listing} create{Open create} creatorProfile{Open profile} discover{Open feed} other{Open}}",
+  "@notificationDestinationAction": {
+    "description": "Action that opens a notification's destination; kind is a stable id.",
+    "placeholders": {
+      "kind": {
+        "type": "String",
+        "example": "map"
+      }
+    }
+  },
+  "importSignIn": "Sign in to import your local data",
+  "@importSignIn": {
+    "description": "Signed-out state of the import test page."
+  }
+}

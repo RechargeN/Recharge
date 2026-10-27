@@ -1,5 +1,13 @@
 enum NotificationType { system, reminder, activity }
 
+/// L4: whether the server could render the item's text in the requested
+/// language. The text is never replaced by another language.
+enum NotificationContentAvailability {
+  rendered,
+  unsupportedLocale,
+  templateUnavailable,
+}
+
 enum NotificationSubjectKind {
   event,
   place,
@@ -37,6 +45,7 @@ class NotificationItemEntity {
     required this.targetRoute,
     this.subjectRef,
     this.scenarioContext,
+    this.contentAvailability = NotificationContentAvailability.rendered,
   });
 
   final String id;
@@ -48,6 +57,7 @@ class NotificationItemEntity {
   final String? targetRoute;
   final NotificationSubjectRef? subjectRef;
   final ScenarioNotificationContext? scenarioContext;
+  final NotificationContentAvailability contentAvailability;
 
   NotificationItemEntity copyWith({bool? isRead}) {
     return NotificationItemEntity(
@@ -60,6 +70,7 @@ class NotificationItemEntity {
       targetRoute: targetRoute,
       subjectRef: subjectRef,
       scenarioContext: scenarioContext,
+      contentAvailability: contentAvailability,
     );
   }
 }

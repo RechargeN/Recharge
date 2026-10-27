@@ -1,0 +1,10 @@
+# L4: the single mobile localization mechanism (Flutter gen-l10n).
+# English is the template; lv and ru must carry every key (see
+# test/unit/localization/arb_coverage_test.dart).
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-dir: lib/generated/l10n
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: true
+required-resource-attributes: true
