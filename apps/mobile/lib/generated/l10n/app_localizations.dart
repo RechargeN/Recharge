@@ -1789,6 +1789,1224 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to import your local data'**
   String get importSignIn;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'A place in the guide is no longer public. Remove or replace it.'**
+  String get validationAPlaceInTheGuideIsNo;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'A place in the guide was not found. Remove or replace it.'**
+  String get validationAPlaceInTheGuideWasNot;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cover image.'**
+  String get validationAddACoverImage;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a cover photo.'**
+  String get validationAddACoverPhoto;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a pricing note.'**
+  String get validationAddAPricingNote;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a safety notice for this category.'**
+  String get validationAddASafetyNoticeForThisCategory;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a short description.'**
+  String get validationAddAShortDescription;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a title.'**
+  String get validationAddATitle;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an address or a location label.'**
+  String get validationAddAnAddressOrALocationLabel;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least three places.'**
+  String get validationAddAtLeastThreePlaces;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add places to the guide.'**
+  String get validationAddPlacesToTheGuide;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the delivery fee (zero if free).'**
+  String get validationAddTheDeliveryFeeZeroIfFree;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the entry price.'**
+  String get validationAddTheEntryPrice;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the prices.'**
+  String get validationAddThePrices;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the public business address.'**
+  String get validationAddThePublicBusinessAddress;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the rental terms.'**
+  String get validationAddTheRentalTerms;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the weekly opening hours.'**
+  String get validationAddTheWeeklyOpeningHours;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what you rent out.'**
+  String get validationAddWhatYouRentOut;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Category data is unavailable. Try again later.'**
+  String get validationCategoryDataIsUnavailableTryAgainLater;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Category requirements are unavailable. Try again later.'**
+  String get validationCategoryRequirementsAreUnavailableTryAgainLater;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the access caution.'**
+  String get validationCheckTheAccessCaution;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the amount.'**
+  String get validationCheckTheAmount;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the best time.'**
+  String get validationCheckTheBestTime;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the category criteria.'**
+  String get validationCheckTheCategoryCriteria;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the contribution.'**
+  String get validationCheckTheContribution;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the description length.'**
+  String get validationCheckTheDescriptionLength;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the device clock and confirm the availability again.'**
+  String get validationCheckTheDeviceClockAndConfirmThe;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the duration range.'**
+  String get validationCheckTheDurationRange;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the email address.'**
+  String get validationCheckTheEmailAddress;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the gallery images.'**
+  String get validationCheckTheGalleryImages;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the group size.'**
+  String get validationCheckTheGroupSize;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the linked Place.'**
+  String get validationCheckTheLinkedPlace;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the opening times.'**
+  String get validationCheckTheOpeningTimes;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the short description length.'**
+  String get validationCheckTheShortDescriptionLength;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the title length.'**
+  String get validationCheckTheTitleLength;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a cancellation policy.'**
+  String get validationChooseACancellationPolicy;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category.'**
+  String get validationChooseACategory;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a contribution kind.'**
+  String get validationChooseAContributionKind;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a kind for this contribution.'**
+  String get validationChooseAKindForThisContribution;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a season.'**
+  String get validationChooseASeason;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subcategory available for Activity.'**
+  String get validationChooseASubcategoryAvailableForActivity;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subcategory available for places.'**
+  String get validationChooseASubcategoryAvailableForPlaces;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subcategory from the category list.'**
+  String get validationChooseASubcategoryFromTheCategoryList;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subcategory.'**
+  String get validationChooseASubcategory;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time of day.'**
+  String get validationChooseATimeOfDay;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an opening-hours mode.'**
+  String get validationChooseAnOpeningHoursMode;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how the opening hours work.'**
+  String get validationChooseHowTheOpeningHoursWork;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the text language.'**
+  String get validationChooseTheTextLanguage;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what kind of place it is.'**
+  String get validationChooseWhatKindOfPlaceItIs;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether entry is free or paid.'**
+  String get validationChooseWhetherEntryIsFreeOrPaid;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your relationship to this place.'**
+  String get validationChooseYourRelationshipToThisPlace;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete this category criterion.'**
+  String get validationCompleteThisCategoryCriterion;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the availability again; it is older than a week.'**
+  String get validationConfirmTheAvailabilityAgainItIsOlder;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the category.'**
+  String get validationConfirmTheCategory;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the map pin.'**
+  String get validationConfirmTheMapPin;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the rental statements.'**
+  String get validationConfirmTheRentalStatements;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm when the items are available.'**
+  String get validationConfirmWhenTheItemsAreAvailable;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe how to get there.'**
+  String get validationDescribeHowToGetThere;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the damage policy.'**
+  String get validationDescribeTheDamagePolicy;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the handover.'**
+  String get validationDescribeTheHandover;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the informal access.'**
+  String get validationDescribeTheInformalAccess;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the optional contribution.'**
+  String get validationDescribeTheOptionalContribution;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not write the title in capitals.'**
+  String get validationDoNotWriteTheTitleInCapitals;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep contacts out of the title.'**
+  String get validationKeepContactsOutOfTheTitle;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Place is unavailable for publication.'**
+  String get validationLinkedPlaceIsUnavailableForPublication;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Make at least one item available.'**
+  String get validationMakeAtLeastOneItemAvailable;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum must not exceed maximum.'**
+  String get validationMinimumMustNotExceedMaximum;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the area.'**
+  String get validationNameTheArea;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name what you rent out.'**
+  String get validationNameWhatYouRentOut;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Only saved, published places can be added.'**
+  String get validationOnlySavedPublishedPlacesCanBeAdded;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening times overlap.'**
+  String get validationOpeningTimesOverlap;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Places could not be checked. Try again later.'**
+  String get validationPlacesCouldNotBeCheckedTryAgain;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove duplicate images.'**
+  String get validationRemoveDuplicateImages;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove some gallery images.'**
+  String get validationRemoveSomeGalleryImages;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove some places.'**
+  String get validationRemoveSomePlaces;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the # part from the booking link.'**
+  String get validationRemoveThePartFromTheBookingLink;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the guide again: it changed after the review.'**
+  String get validationReviewTheGuideAgainItChangedAfter;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the guide before submitting.'**
+  String get validationReviewTheGuideBeforeSubmitting;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the draft again before submitting.'**
+  String get validationSaveTheDraftAgainBeforeSubmitting;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the places in the guide before submitting.'**
+  String get validationSaveThePlacesInTheGuideBefore;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal hours are not supported yet.'**
+  String get validationSeasonalHoursAreNotSupportedYet;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the location.'**
+  String get validationSetTheLocation;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the map pin.'**
+  String get validationSetTheMapPin;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the minimum renter age.'**
+  String get validationSetTheMinimumRenterAge;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the typical duration.'**
+  String get validationSetTheTypicalDuration;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Set valid coordinates.'**
+  String get validationSetValidCoordinates;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Shorten a curator note to 300 characters.'**
+  String get validationShortenACuratorNoteTo300Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Shorten the description.'**
+  String get validationShortenTheDescription;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the approximate area at 500 m or coarser.'**
+  String get validationShowTheApproximateAreaAt500M;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Some places changed status. Review the guide again.'**
+  String get validationSomePlacesChangedStatusReviewTheGuide;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'The linked Place is no longer public. Remove or replace it.'**
+  String get validationTheLinkedPlaceIsNoLongerPublic;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'The linked Place was not found. Remove or replace it.'**
+  String get validationTheLinkedPlaceWasNotFoundRemove;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'The pin is outside the service area.'**
+  String get validationThePinIsOutsideTheServiceArea;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'The rental rules changed. Confirm the statements again.'**
+  String get validationTheRentalRulesChangedConfirmTheStatements;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'This category cannot be rented out here yet.'**
+  String get validationThisCategoryCannotBeRentedOutHere;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'This category requires an ID at handover.'**
+  String get validationThisCategoryRequiresAnIDAtHandover;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'This language is not supported here.'**
+  String get validationThisLanguageIsNotSupportedHere;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 10–140 characters.'**
+  String get validationUse10140Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 10–300 characters.'**
+  String get validationUse10300Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 20–180 characters.'**
+  String get validationUse20180Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 3–120 characters.'**
+  String get validationUse3120Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 5–80 characters.'**
+  String get validationUse580Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 7–15 digits; only + ( ) . - and spaces besides digits.'**
+  String get validationUse715DigitsOnlyAndSpaces;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a delivery radius up to 50 km.'**
+  String get validationUseADeliveryRadiusUpTo50;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a positive amount.'**
+  String get validationUseAPositiveAmount;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a secure https booking link.'**
+  String get validationUseASecureHttpsBookingLink;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a secure https link.'**
+  String get validationUseASecureHttpsLink;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at most 1000 characters.'**
+  String get validationUseAtMost1000Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at most 12 gallery images.'**
+  String get validationUseAtMost12GalleryImages;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at most 200 characters.'**
+  String get validationUseAtMost200Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at most 300 characters.'**
+  String get validationUseAtMost300Characters;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use positive whole minutes.'**
+  String get validationUsePositiveWholeMinutes;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use positive whole numbers.'**
+  String get validationUsePositiveWholeNumbers;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the market currency.'**
+  String get validationUseTheMarketCurrency;
+
+  /// Create: server validation detail shown next to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Your relationship to the place does not match how it was added.'**
+  String get validationYourRelationshipToThePlaceDoesNot;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get fieldLabelAddress;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get fieldLabelArea;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get fieldLabelAvailability;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking link'**
+  String get fieldLabelBookingLink;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation policy'**
+  String get fieldLabelCancellationPolicy;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get fieldLabelCategory;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Category criteria'**
+  String get fieldLabelCategoryCriteria;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image'**
+  String get fieldLabelCoverImage;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get fieldLabelCurrency;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Damage policy'**
+  String get fieldLabelDamagePolicy;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get fieldLabelDeliveryFee;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery radius'**
+  String get fieldLabelDeliveryRadius;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get fieldLabelDescription;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get fieldLabelDraft;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get fieldLabelEmail;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get fieldLabelEntry;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry price'**
+  String get fieldLabelEntryPrice;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get fieldLabelGallery;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide review'**
+  String get fieldLabelGuideReview;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover'**
+  String get fieldLabelHandover;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover address'**
+  String get fieldLabelHandoverAddress;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover area'**
+  String get fieldLabelHandoverArea;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'ID at handover'**
+  String get fieldLabelIDAtHandover;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get fieldLabelItems;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind of place'**
+  String get fieldLabelKindOfPlace;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get fieldLabelLocation;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Map pin'**
+  String get fieldLabelMapPin;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum age'**
+  String get fieldLabelMinimumAge;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get fieldLabelOpeningHours;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get fieldLabelPhone;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get fieldLabelPhotos;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Places in the guide'**
+  String get fieldLabelPlacesInTheGuide;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get fieldLabelPrices;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing note'**
+  String get fieldLabelPricingNote;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety notice'**
+  String get fieldLabelSafetyNotice;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description'**
+  String get fieldLabelShortDescription;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Statements'**
+  String get fieldLabelStatements;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory'**
+  String get fieldLabelSubcategory;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get fieldLabelTerms;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Text language'**
+  String get fieldLabelTextLanguage;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get fieldLabelTitle;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get fieldLabelWebsite;
+
+  /// Create: name of a form field in server requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Your relationship'**
+  String get fieldLabelYourRelationship;
+
+  /// Create: header of the server requirements card.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed for server publication'**
+  String get validationNeededForServer;
+
+  /// Create: server refusal without a known field.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this draft. Check the draft and try again.'**
+  String get validationGeneralRefusal;
+
+  /// Create: one server requirement; both values are localized.
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {message}'**
+  String validationRequirementLine(String field, String message);
+
+  /// Details: share link copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get detailsLinkCopied;
+
+  /// Details/Home: favorite saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to favorites'**
+  String get detailsSavedToFavorites;
+
+  /// Event Details: calendar export failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the calendar export'**
+  String get detailsCalendarExportFailed;
+
+  /// Event Details: interest noted.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest in the event noted'**
+  String get detailsInterestMarked;
+
+  /// Details: an external link could not be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link.'**
+  String get detailsCouldNotOpenLink;
+
+  /// Session Details: external booking site failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the booking site'**
+  String get detailsBookingSiteFailed;
+
+  /// Class/Workshop Details: external enrollment site failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the enrollment site'**
+  String get detailsEnrollmentSiteFailed;
+
+  /// Details: report submitted; the reporter is not named anywhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. The report was sent for review.'**
+  String get detailsReportSent;
+
+  /// Details: report failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Try again.'**
+  String get detailsReportFailed;
+
+  /// Details: legacy CTA request confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get detailsRequestSent;
+
+  /// Details: Visit history needs the Place zone.
+  ///
+  /// In en, this message translates to:
+  /// **'The place time zone is unavailable'**
+  String get detailsPlaceTimezoneUnavailable;
+
+  /// Details: Visit history date picker title.
+  ///
+  /// In en, this message translates to:
+  /// **'When did you visit?'**
+  String get detailsVisitWhen;
+
+  /// Details: visit recorded; date is the chosen local calendar date, formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to Visit history · {date}'**
+  String detailsVisitAdded(String date);
+
+  /// Details: visit not recorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update Visit history'**
+  String get detailsVisitFailed;
+
+  /// Details: temporary load failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Details could not be loaded'**
+  String get detailsLoadFailed;
+
+  /// Details: object unavailable or not found; no reason is given.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get detailsUnavailable;
+
+  /// Details: a newer Route revision exists.
+  ///
+  /// In en, this message translates to:
+  /// **'The route was updated'**
+  String get detailsRouteUpdated;
+
+  /// Details: Route not available.
+  ///
+  /// In en, this message translates to:
+  /// **'Route unavailable'**
+  String get detailsRouteUnavailable;
+
+  /// Details: Catalog transport unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get detailsNoConnection;
+
+  /// Home card: free entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get homeFree;
+
+  /// Home card: no fixed time.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get homeAnyTime;
+
+  /// Home: saved search without a radius.
+  ///
+  /// In en, this message translates to:
+  /// **'Any area'**
+  String get homeAnyArea;
+
+  /// Home: saved search radius, formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String homeRadiusKm(String km);
+
+  /// Home card meta line; venue is the object's own name, shown verbatim.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} · {time} · {venue}'**
+  String homeCardMeta(String price, String time, String venue);
+
+  /// Home: saved route panel title.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your route'**
+  String get homeContinueRoute;
+
+  /// Home: saved route chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved route'**
+  String get homeSavedRoute;
+
+  /// Home: saved search panel title.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue saved search'**
+  String get homeContinueSavedSearch;
+
+  /// Home: smart search panel title.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue smart search'**
+  String get homeContinueSmartSearch;
+
+  /// Home: smart route chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart route'**
+  String get homeSmartRoute;
+
+  /// Home: tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from saved search'**
+  String get homeCreateFromSavedSearch;
+
+  /// Home: tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from smart search'**
+  String get homeCreateFromSmartSearch;
+
+  /// Home: empty rail.
+  ///
+  /// In en, this message translates to:
+  /// **'No activities yet'**
+  String get homeNoActivities;
+
+  /// Home: section action.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homeViewAll;
+
+  /// Place Create final check; code is the stable local validation code (ValidatePlaceDraftUseCase).
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, address_or_label_required{Add an address or a location label.} busy_time_notes_too_long{Shorten the busy-time notes.} category_required{Choose a category.} closure_end_invalid{The closure end must not be before its start.} closure_note_too_long{Shorten the closure note.} closure_start_required{Set when the closure starts.} contact_url_invalid{Use a valid https link.} contacts_missing{Add at least one contact.} country_required{Choose the country.} cover_required{Add a cover photo.} details_missing{The place details are missing.} email_invalid{Check the email address.} entrance_hint_too_long{Shorten the entrance hint.} entry_price_range_invalid{The minimum price must not exceed the maximum.} entry_price_required{Add the entry price.} entry_type_unknown{Choose whether entry is free or paid.} full_description_length{Shorten the description.} gallery_limit{Remove some gallery photos.} hours_exception_date_invalid{Check the special-day date.} hours_exception_overlap{Special-day hours overlap.} hours_exception_period_invalid{Check the special-day hours.} hours_exception_period_required{Add hours for the special day.} hours_exception_periods_not_allowed{A closed special day has no hours.} hours_exceptions_not_allowed{Special days are not used in this hours mode.} hours_mode_required{Choose how the opening hours work.} hours_overlap{Opening times overlap.} hours_period_invalid{Check the opening times.} hours_period_required{Add the weekly opening hours.} hours_periods_not_allowed{This hours mode has no weekly times.} hours_unknown{The opening hours are not known yet.} kind_required{Choose what kind of place it is.} locale_unsupported{This language is not supported here.} market_required{The place has no market yet.} minimum_visit_invalid{Check the minimum visit time.} minimum_visit_required{Set the minimum visit time.} mixed_pricing_note_required{Add a pricing note for mixed entry.} outside_market{The pin is outside the service area.} permission_denied{You cannot publish this place.} phone_invalid{Check the phone number.} pin_approximate{The map pin is approximate.} pin_invalid{Set valid coordinates.} pin_unconfirmed{Confirm the map pin.} price_negative{A price cannot be negative.} pricing_note_too_long{Shorten the pricing note.} pricing_url_invalid{Use a valid https price link.} publisher_invalid{Choose who publishes this place.} seasonal_not_supported{Seasonal hours are not supported yet.} short_description_length{Use 20–180 characters in the short description.} spend_range_invalid{The minimum spend must not exceed the maximum.} subcategory_required{Choose a subcategory.} timezone_required{The place has no time zone.} title_all_caps{Do not write the title in capitals.} title_contact{Keep contacts out of the title.} title_length{Use 3–120 characters in the title.} visit_buffer_invalid{Check the visit buffer.} visit_duration_invalid{Check the typical visit duration.} other{Check this part of the place.}}'**
+  String placeValidationIssue(String code);
+
+  /// Place Create section of a final check; section is the stable section id.
+  ///
+  /// In en, this message translates to:
+  /// **'{section, select, identity{Basics} category{Category} location{Location} contacts{Contacts} hours{Opening hours} pricing{Prices} planning{Visit planning} media{Photos} other{Place}}'**
+  String placeValidationSection(String section);
+
+  /// Place Create: final checks header.
+  ///
+  /// In en, this message translates to:
+  /// **'Final checks'**
+  String get placeFinalChecks;
+
+  /// Session Create check; code is the stable SessionBlockingCode/SessionWarningCode value.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, session_category_not_allowed{This category is not available for sessions.} session_resource_missing{Name what is booked and set its time zone.} session_timezone_invalid{Confirm the time zone.} session_schedule_empty{Add at least one time slot.} session_weekday_invalid{Check the weekdays.} session_range_invalid{Check the start and end times.} session_range_overlap{Time slots overlap.} session_duration_out_of_range{Check the session length.} session_buffer_out_of_range{Check the break between sessions.} session_notice_out_of_range{Check the booking notice.} session_projection_overflow{The schedule creates too many sessions. Shorten it.} session_exception_invalid{Check the exceptions.} session_party_size_out_of_range{Check the group size.} session_price_invalid{Check the price.} session_booking_url_invalid{Use a secure https booking link.} session_media_incomplete{Add the required photos.} session_publisher_ineligible{You cannot publish on behalf of this profile or page.} session_legacy_review_required{Review this older draft before publishing.} session_no_offers_in_window{No sessions fall into the coming weeks.} session_candidates_dropped_for_buffer{Some times were skipped to keep the breaks.} session_dst_slots_skipped{Some times were skipped at the clock change.} session_external_state_unknown{The booking site state could not be checked.} session_material_revision{This change will ask booked guests to confirm again.} session_category_criteria_incomplete{Complete the category criteria.} other{Check this part of the session.}}'**
+  String sessionValidationIssue(String code);
+
+  /// Session Create: blocking checks header.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix before publishing'**
+  String get sessionFixBeforePublishing;
+
+  /// Route Create check; code is a specific stable code or a code family chosen by the client.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, route_too_short{The route is too short.} route_too_long{The route is too long.} route_duration_too_long{The route takes too long.} loop_must_close{A loop must end where it starts.} one_way_must_not_close{A one-way route must not end where it starts.} out_and_back_must_return{An out-and-back route must return to the start.} anchors_too_few{Add more points to the route.} segments_missing{Build the route between the points.} manual_duration_reason_required{Explain why you changed the duration.} provider_license_disallows_publish{This map data cannot be published.} temporary_id_not_publishable{Save the route before publishing.} family_segment{A route segment needs attention.} family_waypoint{A point on the route needs attention.} family_anchor{Check the route points.} family_condition{Check the route conditions.} family_duration{Check the route duration.} family_data{The route data is out of date. Rebuild the route.} other{Check this part of the route.}}'**
+  String routeValidationIssue(String code);
+
+  /// Route Create check section; section is the stable section id.
+  ///
+  /// In en, this message translates to:
+  /// **'{section, select, route{Route} geometry{Track} metrics{Distance and time} operations{Edits} profile{Profile} quality{Quality} relations{Points} sources{Sources} waypoints{Points of interest} conditions{Conditions} other{Route}}'**
+  String routeValidationSection(String section);
+
+  /// Route Create check line; both values are localized.
+  ///
+  /// In en, this message translates to:
+  /// **'• {message} — {section}'**
+  String routeIssueLine(String message, String section);
+
+  /// Class/Workshop enrollment state; reason is the stable wire value.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, closed{Enrollment closed} on_site{Enroll on site} not_provided{No enrollment details} other{Enrollment information}}'**
+  String classWorkshopEnrollmentReason(String reason);
 }
 
 class _AppLocalizationsDelegate

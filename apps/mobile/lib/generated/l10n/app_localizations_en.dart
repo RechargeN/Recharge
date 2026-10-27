@@ -1214,4 +1214,848 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importSignIn => 'Sign in to import your local data';
+
+  @override
+  String get validationAPlaceInTheGuideIsNo =>
+      'A place in the guide is no longer public. Remove or replace it.';
+
+  @override
+  String get validationAPlaceInTheGuideWasNot =>
+      'A place in the guide was not found. Remove or replace it.';
+
+  @override
+  String get validationAddACoverImage => 'Add a cover image.';
+
+  @override
+  String get validationAddACoverPhoto => 'Add a cover photo.';
+
+  @override
+  String get validationAddAPricingNote => 'Add a pricing note.';
+
+  @override
+  String get validationAddASafetyNoticeForThisCategory =>
+      'Add a safety notice for this category.';
+
+  @override
+  String get validationAddAShortDescription => 'Add a short description.';
+
+  @override
+  String get validationAddATitle => 'Add a title.';
+
+  @override
+  String get validationAddAnAddressOrALocationLabel =>
+      'Add an address or a location label.';
+
+  @override
+  String get validationAddAtLeastThreePlaces => 'Add at least three places.';
+
+  @override
+  String get validationAddPlacesToTheGuide => 'Add places to the guide.';
+
+  @override
+  String get validationAddTheDeliveryFeeZeroIfFree =>
+      'Add the delivery fee (zero if free).';
+
+  @override
+  String get validationAddTheEntryPrice => 'Add the entry price.';
+
+  @override
+  String get validationAddThePrices => 'Add the prices.';
+
+  @override
+  String get validationAddThePublicBusinessAddress =>
+      'Add the public business address.';
+
+  @override
+  String get validationAddTheRentalTerms => 'Add the rental terms.';
+
+  @override
+  String get validationAddTheWeeklyOpeningHours =>
+      'Add the weekly opening hours.';
+
+  @override
+  String get validationAddWhatYouRentOut => 'Add what you rent out.';
+
+  @override
+  String get validationCategoryDataIsUnavailableTryAgainLater =>
+      'Category data is unavailable. Try again later.';
+
+  @override
+  String get validationCategoryRequirementsAreUnavailableTryAgainLater =>
+      'Category requirements are unavailable. Try again later.';
+
+  @override
+  String get validationCheckTheAccessCaution => 'Check the access caution.';
+
+  @override
+  String get validationCheckTheAmount => 'Check the amount.';
+
+  @override
+  String get validationCheckTheBestTime => 'Check the best time.';
+
+  @override
+  String get validationCheckTheCategoryCriteria =>
+      'Check the category criteria.';
+
+  @override
+  String get validationCheckTheContribution => 'Check the contribution.';
+
+  @override
+  String get validationCheckTheDescriptionLength =>
+      'Check the description length.';
+
+  @override
+  String get validationCheckTheDeviceClockAndConfirmThe =>
+      'Check the device clock and confirm the availability again.';
+
+  @override
+  String get validationCheckTheDurationRange => 'Check the duration range.';
+
+  @override
+  String get validationCheckTheEmailAddress => 'Check the email address.';
+
+  @override
+  String get validationCheckTheGalleryImages => 'Check the gallery images.';
+
+  @override
+  String get validationCheckTheGroupSize => 'Check the group size.';
+
+  @override
+  String get validationCheckTheLinkedPlace => 'Check the linked Place.';
+
+  @override
+  String get validationCheckTheOpeningTimes => 'Check the opening times.';
+
+  @override
+  String get validationCheckTheShortDescriptionLength =>
+      'Check the short description length.';
+
+  @override
+  String get validationCheckTheTitleLength => 'Check the title length.';
+
+  @override
+  String get validationChooseACancellationPolicy =>
+      'Choose a cancellation policy.';
+
+  @override
+  String get validationChooseACategory => 'Choose a category.';
+
+  @override
+  String get validationChooseAContributionKind => 'Choose a contribution kind.';
+
+  @override
+  String get validationChooseAKindForThisContribution =>
+      'Choose a kind for this contribution.';
+
+  @override
+  String get validationChooseASeason => 'Choose a season.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForActivity =>
+      'Choose a subcategory available for Activity.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForPlaces =>
+      'Choose a subcategory available for places.';
+
+  @override
+  String get validationChooseASubcategoryFromTheCategoryList =>
+      'Choose a subcategory from the category list.';
+
+  @override
+  String get validationChooseASubcategory => 'Choose a subcategory.';
+
+  @override
+  String get validationChooseATimeOfDay => 'Choose a time of day.';
+
+  @override
+  String get validationChooseAnOpeningHoursMode =>
+      'Choose an opening-hours mode.';
+
+  @override
+  String get validationChooseHowTheOpeningHoursWork =>
+      'Choose how the opening hours work.';
+
+  @override
+  String get validationChooseTheTextLanguage => 'Choose the text language.';
+
+  @override
+  String get validationChooseWhatKindOfPlaceItIs =>
+      'Choose what kind of place it is.';
+
+  @override
+  String get validationChooseWhetherEntryIsFreeOrPaid =>
+      'Choose whether entry is free or paid.';
+
+  @override
+  String get validationChooseYourRelationshipToThisPlace =>
+      'Choose your relationship to this place.';
+
+  @override
+  String get validationCompleteThisCategoryCriterion =>
+      'Complete this category criterion.';
+
+  @override
+  String get validationConfirmTheAvailabilityAgainItIsOlder =>
+      'Confirm the availability again; it is older than a week.';
+
+  @override
+  String get validationConfirmTheCategory => 'Confirm the category.';
+
+  @override
+  String get validationConfirmTheMapPin => 'Confirm the map pin.';
+
+  @override
+  String get validationConfirmTheRentalStatements =>
+      'Confirm the rental statements.';
+
+  @override
+  String get validationConfirmWhenTheItemsAreAvailable =>
+      'Confirm when the items are available.';
+
+  @override
+  String get validationDescribeHowToGetThere => 'Describe how to get there.';
+
+  @override
+  String get validationDescribeTheDamagePolicy => 'Describe the damage policy.';
+
+  @override
+  String get validationDescribeTheHandover => 'Describe the handover.';
+
+  @override
+  String get validationDescribeTheInformalAccess =>
+      'Describe the informal access.';
+
+  @override
+  String get validationDescribeTheOptionalContribution =>
+      'Describe the optional contribution.';
+
+  @override
+  String get validationDoNotWriteTheTitleInCapitals =>
+      'Do not write the title in capitals.';
+
+  @override
+  String get validationKeepContactsOutOfTheTitle =>
+      'Keep contacts out of the title.';
+
+  @override
+  String get validationLinkedPlaceIsUnavailableForPublication =>
+      'Linked Place is unavailable for publication.';
+
+  @override
+  String get validationMakeAtLeastOneItemAvailable =>
+      'Make at least one item available.';
+
+  @override
+  String get validationMinimumMustNotExceedMaximum =>
+      'Minimum must not exceed maximum.';
+
+  @override
+  String get validationNameTheArea => 'Name the area.';
+
+  @override
+  String get validationNameWhatYouRentOut => 'Name what you rent out.';
+
+  @override
+  String get validationOnlySavedPublishedPlacesCanBeAdded =>
+      'Only saved, published places can be added.';
+
+  @override
+  String get validationOpeningTimesOverlap => 'Opening times overlap.';
+
+  @override
+  String get validationPlacesCouldNotBeCheckedTryAgain =>
+      'Places could not be checked. Try again later.';
+
+  @override
+  String get validationRemoveDuplicateImages => 'Remove duplicate images.';
+
+  @override
+  String get validationRemoveSomeGalleryImages => 'Remove some gallery images.';
+
+  @override
+  String get validationRemoveSomePlaces => 'Remove some places.';
+
+  @override
+  String get validationRemoveThePartFromTheBookingLink =>
+      'Remove the # part from the booking link.';
+
+  @override
+  String get validationReviewTheGuideAgainItChangedAfter =>
+      'Review the guide again: it changed after the review.';
+
+  @override
+  String get validationReviewTheGuideBeforeSubmitting =>
+      'Review the guide before submitting.';
+
+  @override
+  String get validationSaveTheDraftAgainBeforeSubmitting =>
+      'Save the draft again before submitting.';
+
+  @override
+  String get validationSaveThePlacesInTheGuideBefore =>
+      'Save the places in the guide before submitting.';
+
+  @override
+  String get validationSeasonalHoursAreNotSupportedYet =>
+      'Seasonal hours are not supported yet.';
+
+  @override
+  String get validationSetTheLocation => 'Set the location.';
+
+  @override
+  String get validationSetTheMapPin => 'Set the map pin.';
+
+  @override
+  String get validationSetTheMinimumRenterAge => 'Set the minimum renter age.';
+
+  @override
+  String get validationSetTheTypicalDuration => 'Set the typical duration.';
+
+  @override
+  String get validationSetValidCoordinates => 'Set valid coordinates.';
+
+  @override
+  String get validationShortenACuratorNoteTo300Characters =>
+      'Shorten a curator note to 300 characters.';
+
+  @override
+  String get validationShortenTheDescription => 'Shorten the description.';
+
+  @override
+  String get validationShowTheApproximateAreaAt500M =>
+      'Show the approximate area at 500 m or coarser.';
+
+  @override
+  String get validationSomePlacesChangedStatusReviewTheGuide =>
+      'Some places changed status. Review the guide again.';
+
+  @override
+  String get validationTheLinkedPlaceIsNoLongerPublic =>
+      'The linked Place is no longer public. Remove or replace it.';
+
+  @override
+  String get validationTheLinkedPlaceWasNotFoundRemove =>
+      'The linked Place was not found. Remove or replace it.';
+
+  @override
+  String get validationThePinIsOutsideTheServiceArea =>
+      'The pin is outside the service area.';
+
+  @override
+  String get validationTheRentalRulesChangedConfirmTheStatements =>
+      'The rental rules changed. Confirm the statements again.';
+
+  @override
+  String get validationThisCategoryCannotBeRentedOutHere =>
+      'This category cannot be rented out here yet.';
+
+  @override
+  String get validationThisCategoryRequiresAnIDAtHandover =>
+      'This category requires an ID at handover.';
+
+  @override
+  String get validationThisLanguageIsNotSupportedHere =>
+      'This language is not supported here.';
+
+  @override
+  String get validationUse10140Characters => 'Use 10–140 characters.';
+
+  @override
+  String get validationUse10300Characters => 'Use 10–300 characters.';
+
+  @override
+  String get validationUse20180Characters => 'Use 20–180 characters.';
+
+  @override
+  String get validationUse3120Characters => 'Use 3–120 characters.';
+
+  @override
+  String get validationUse580Characters => 'Use 5–80 characters.';
+
+  @override
+  String get validationUse715DigitsOnlyAndSpaces =>
+      'Use 7–15 digits; only + ( ) . - and spaces besides digits.';
+
+  @override
+  String get validationUseADeliveryRadiusUpTo50 =>
+      'Use a delivery radius up to 50 km.';
+
+  @override
+  String get validationUseAPositiveAmount => 'Use a positive amount.';
+
+  @override
+  String get validationUseASecureHttpsBookingLink =>
+      'Use a secure https booking link.';
+
+  @override
+  String get validationUseASecureHttpsLink => 'Use a secure https link.';
+
+  @override
+  String get validationUseAtMost1000Characters =>
+      'Use at most 1000 characters.';
+
+  @override
+  String get validationUseAtMost12GalleryImages =>
+      'Use at most 12 gallery images.';
+
+  @override
+  String get validationUseAtMost200Characters => 'Use at most 200 characters.';
+
+  @override
+  String get validationUseAtMost300Characters => 'Use at most 300 characters.';
+
+  @override
+  String get validationUsePositiveWholeMinutes => 'Use positive whole minutes.';
+
+  @override
+  String get validationUsePositiveWholeNumbers => 'Use positive whole numbers.';
+
+  @override
+  String get validationUseTheMarketCurrency => 'Use the market currency.';
+
+  @override
+  String get validationYourRelationshipToThePlaceDoesNot =>
+      'Your relationship to the place does not match how it was added.';
+
+  @override
+  String get fieldLabelAddress => 'Address';
+
+  @override
+  String get fieldLabelArea => 'Area';
+
+  @override
+  String get fieldLabelAvailability => 'Availability';
+
+  @override
+  String get fieldLabelBookingLink => 'Booking link';
+
+  @override
+  String get fieldLabelCancellationPolicy => 'Cancellation policy';
+
+  @override
+  String get fieldLabelCategory => 'Category';
+
+  @override
+  String get fieldLabelCategoryCriteria => 'Category criteria';
+
+  @override
+  String get fieldLabelCoverImage => 'Cover image';
+
+  @override
+  String get fieldLabelCurrency => 'Currency';
+
+  @override
+  String get fieldLabelDamagePolicy => 'Damage policy';
+
+  @override
+  String get fieldLabelDeliveryFee => 'Delivery fee';
+
+  @override
+  String get fieldLabelDeliveryRadius => 'Delivery radius';
+
+  @override
+  String get fieldLabelDescription => 'Description';
+
+  @override
+  String get fieldLabelDraft => 'Draft';
+
+  @override
+  String get fieldLabelEmail => 'Email';
+
+  @override
+  String get fieldLabelEntry => 'Entry';
+
+  @override
+  String get fieldLabelEntryPrice => 'Entry price';
+
+  @override
+  String get fieldLabelGallery => 'Gallery';
+
+  @override
+  String get fieldLabelGuideReview => 'Guide review';
+
+  @override
+  String get fieldLabelHandover => 'Handover';
+
+  @override
+  String get fieldLabelHandoverAddress => 'Handover address';
+
+  @override
+  String get fieldLabelHandoverArea => 'Handover area';
+
+  @override
+  String get fieldLabelIDAtHandover => 'ID at handover';
+
+  @override
+  String get fieldLabelItems => 'Items';
+
+  @override
+  String get fieldLabelKindOfPlace => 'Kind of place';
+
+  @override
+  String get fieldLabelLocation => 'Location';
+
+  @override
+  String get fieldLabelMapPin => 'Map pin';
+
+  @override
+  String get fieldLabelMinimumAge => 'Minimum age';
+
+  @override
+  String get fieldLabelOpeningHours => 'Opening hours';
+
+  @override
+  String get fieldLabelPhone => 'Phone';
+
+  @override
+  String get fieldLabelPhotos => 'Photos';
+
+  @override
+  String get fieldLabelPlacesInTheGuide => 'Places in the guide';
+
+  @override
+  String get fieldLabelPrices => 'Prices';
+
+  @override
+  String get fieldLabelPricingNote => 'Pricing note';
+
+  @override
+  String get fieldLabelSafetyNotice => 'Safety notice';
+
+  @override
+  String get fieldLabelShortDescription => 'Short description';
+
+  @override
+  String get fieldLabelStatements => 'Statements';
+
+  @override
+  String get fieldLabelSubcategory => 'Subcategory';
+
+  @override
+  String get fieldLabelTerms => 'Terms';
+
+  @override
+  String get fieldLabelTextLanguage => 'Text language';
+
+  @override
+  String get fieldLabelTitle => 'Title';
+
+  @override
+  String get fieldLabelWebsite => 'Website';
+
+  @override
+  String get fieldLabelYourRelationship => 'Your relationship';
+
+  @override
+  String get validationNeededForServer => 'Needed for server publication';
+
+  @override
+  String get validationGeneralRefusal =>
+      'The server refused this draft. Check the draft and try again.';
+
+  @override
+  String validationRequirementLine(String field, String message) {
+    return '$field: $message';
+  }
+
+  @override
+  String get detailsLinkCopied => 'Link copied';
+
+  @override
+  String get detailsSavedToFavorites => 'Saved to favorites';
+
+  @override
+  String get detailsCalendarExportFailed =>
+      'Could not open the calendar export';
+
+  @override
+  String get detailsInterestMarked => 'Interest in the event noted';
+
+  @override
+  String get detailsCouldNotOpenLink => 'Could not open the link.';
+
+  @override
+  String get detailsBookingSiteFailed => 'Could not open the booking site';
+
+  @override
+  String get detailsEnrollmentSiteFailed =>
+      'Could not open the enrollment site';
+
+  @override
+  String get detailsReportSent => 'Thank you. The report was sent for review.';
+
+  @override
+  String get detailsReportFailed => 'Could not send the report. Try again.';
+
+  @override
+  String get detailsRequestSent => 'Request sent';
+
+  @override
+  String get detailsPlaceTimezoneUnavailable =>
+      'The place time zone is unavailable';
+
+  @override
+  String get detailsVisitWhen => 'When did you visit?';
+
+  @override
+  String detailsVisitAdded(String date) {
+    return 'Added to Visit history · $date';
+  }
+
+  @override
+  String get detailsVisitFailed => 'Could not update Visit history';
+
+  @override
+  String get detailsLoadFailed => 'Details could not be loaded';
+
+  @override
+  String get detailsUnavailable => 'Unavailable';
+
+  @override
+  String get detailsRouteUpdated => 'The route was updated';
+
+  @override
+  String get detailsRouteUnavailable => 'Route unavailable';
+
+  @override
+  String get detailsNoConnection => 'No connection';
+
+  @override
+  String get homeFree => 'Free';
+
+  @override
+  String get homeAnyTime => 'Any time';
+
+  @override
+  String get homeAnyArea => 'Any area';
+
+  @override
+  String homeRadiusKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String homeCardMeta(String price, String time, String venue) {
+    return '$price · $time · $venue';
+  }
+
+  @override
+  String get homeContinueRoute => 'Continue your route';
+
+  @override
+  String get homeSavedRoute => 'Saved route';
+
+  @override
+  String get homeContinueSavedSearch => 'Continue saved search';
+
+  @override
+  String get homeContinueSmartSearch => 'Continue smart search';
+
+  @override
+  String get homeSmartRoute => 'Smart route';
+
+  @override
+  String get homeCreateFromSavedSearch => 'Create listing from saved search';
+
+  @override
+  String get homeCreateFromSmartSearch => 'Create listing from smart search';
+
+  @override
+  String get homeNoActivities => 'No activities yet';
+
+  @override
+  String get homeViewAll => 'View all';
+
+  @override
+  String placeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'address_or_label_required': 'Add an address or a location label.',
+      'busy_time_notes_too_long': 'Shorten the busy-time notes.',
+      'category_required': 'Choose a category.',
+      'closure_end_invalid': 'The closure end must not be before its start.',
+      'closure_note_too_long': 'Shorten the closure note.',
+      'closure_start_required': 'Set when the closure starts.',
+      'contact_url_invalid': 'Use a valid https link.',
+      'contacts_missing': 'Add at least one contact.',
+      'country_required': 'Choose the country.',
+      'cover_required': 'Add a cover photo.',
+      'details_missing': 'The place details are missing.',
+      'email_invalid': 'Check the email address.',
+      'entrance_hint_too_long': 'Shorten the entrance hint.',
+      'entry_price_range_invalid':
+          'The minimum price must not exceed the maximum.',
+      'entry_price_required': 'Add the entry price.',
+      'entry_type_unknown': 'Choose whether entry is free or paid.',
+      'full_description_length': 'Shorten the description.',
+      'gallery_limit': 'Remove some gallery photos.',
+      'hours_exception_date_invalid': 'Check the special-day date.',
+      'hours_exception_overlap': 'Special-day hours overlap.',
+      'hours_exception_period_invalid': 'Check the special-day hours.',
+      'hours_exception_period_required': 'Add hours for the special day.',
+      'hours_exception_periods_not_allowed':
+          'A closed special day has no hours.',
+      'hours_exceptions_not_allowed':
+          'Special days are not used in this hours mode.',
+      'hours_mode_required': 'Choose how the opening hours work.',
+      'hours_overlap': 'Opening times overlap.',
+      'hours_period_invalid': 'Check the opening times.',
+      'hours_period_required': 'Add the weekly opening hours.',
+      'hours_periods_not_allowed': 'This hours mode has no weekly times.',
+      'hours_unknown': 'The opening hours are not known yet.',
+      'kind_required': 'Choose what kind of place it is.',
+      'locale_unsupported': 'This language is not supported here.',
+      'market_required': 'The place has no market yet.',
+      'minimum_visit_invalid': 'Check the minimum visit time.',
+      'minimum_visit_required': 'Set the minimum visit time.',
+      'mixed_pricing_note_required': 'Add a pricing note for mixed entry.',
+      'outside_market': 'The pin is outside the service area.',
+      'permission_denied': 'You cannot publish this place.',
+      'phone_invalid': 'Check the phone number.',
+      'pin_approximate': 'The map pin is approximate.',
+      'pin_invalid': 'Set valid coordinates.',
+      'pin_unconfirmed': 'Confirm the map pin.',
+      'price_negative': 'A price cannot be negative.',
+      'pricing_note_too_long': 'Shorten the pricing note.',
+      'pricing_url_invalid': 'Use a valid https price link.',
+      'publisher_invalid': 'Choose who publishes this place.',
+      'seasonal_not_supported': 'Seasonal hours are not supported yet.',
+      'short_description_length':
+          'Use 20–180 characters in the short description.',
+      'spend_range_invalid': 'The minimum spend must not exceed the maximum.',
+      'subcategory_required': 'Choose a subcategory.',
+      'timezone_required': 'The place has no time zone.',
+      'title_all_caps': 'Do not write the title in capitals.',
+      'title_contact': 'Keep contacts out of the title.',
+      'title_length': 'Use 3–120 characters in the title.',
+      'visit_buffer_invalid': 'Check the visit buffer.',
+      'visit_duration_invalid': 'Check the typical visit duration.',
+      'other': 'Check this part of the place.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String placeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'identity': 'Basics',
+      'category': 'Category',
+      'location': 'Location',
+      'contacts': 'Contacts',
+      'hours': 'Opening hours',
+      'pricing': 'Prices',
+      'planning': 'Visit planning',
+      'media': 'Photos',
+      'other': 'Place',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get placeFinalChecks => 'Final checks';
+
+  @override
+  String sessionValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'session_category_not_allowed':
+          'This category is not available for sessions.',
+      'session_resource_missing': 'Name what is booked and set its time zone.',
+      'session_timezone_invalid': 'Confirm the time zone.',
+      'session_schedule_empty': 'Add at least one time slot.',
+      'session_weekday_invalid': 'Check the weekdays.',
+      'session_range_invalid': 'Check the start and end times.',
+      'session_range_overlap': 'Time slots overlap.',
+      'session_duration_out_of_range': 'Check the session length.',
+      'session_buffer_out_of_range': 'Check the break between sessions.',
+      'session_notice_out_of_range': 'Check the booking notice.',
+      'session_projection_overflow':
+          'The schedule creates too many sessions. Shorten it.',
+      'session_exception_invalid': 'Check the exceptions.',
+      'session_party_size_out_of_range': 'Check the group size.',
+      'session_price_invalid': 'Check the price.',
+      'session_booking_url_invalid': 'Use a secure https booking link.',
+      'session_media_incomplete': 'Add the required photos.',
+      'session_publisher_ineligible':
+          'You cannot publish on behalf of this profile or page.',
+      'session_legacy_review_required':
+          'Review this older draft before publishing.',
+      'session_no_offers_in_window': 'No sessions fall into the coming weeks.',
+      'session_candidates_dropped_for_buffer':
+          'Some times were skipped to keep the breaks.',
+      'session_dst_slots_skipped':
+          'Some times were skipped at the clock change.',
+      'session_external_state_unknown':
+          'The booking site state could not be checked.',
+      'session_material_revision':
+          'This change will ask booked guests to confirm again.',
+      'session_category_criteria_incomplete': 'Complete the category criteria.',
+      'other': 'Check this part of the session.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionFixBeforePublishing => 'Fix before publishing';
+
+  @override
+  String routeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'route_too_short': 'The route is too short.',
+      'route_too_long': 'The route is too long.',
+      'route_duration_too_long': 'The route takes too long.',
+      'loop_must_close': 'A loop must end where it starts.',
+      'one_way_must_not_close': 'A one-way route must not end where it starts.',
+      'out_and_back_must_return':
+          'An out-and-back route must return to the start.',
+      'anchors_too_few': 'Add more points to the route.',
+      'segments_missing': 'Build the route between the points.',
+      'manual_duration_reason_required':
+          'Explain why you changed the duration.',
+      'provider_license_disallows_publish':
+          'This map data cannot be published.',
+      'temporary_id_not_publishable': 'Save the route before publishing.',
+      'family_segment': 'A route segment needs attention.',
+      'family_waypoint': 'A point on the route needs attention.',
+      'family_anchor': 'Check the route points.',
+      'family_condition': 'Check the route conditions.',
+      'family_duration': 'Check the route duration.',
+      'family_data': 'The route data is out of date. Rebuild the route.',
+      'other': 'Check this part of the route.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'route': 'Route',
+      'geometry': 'Track',
+      'metrics': 'Distance and time',
+      'operations': 'Edits',
+      'profile': 'Profile',
+      'quality': 'Quality',
+      'relations': 'Points',
+      'sources': 'Sources',
+      'waypoints': 'Points of interest',
+      'conditions': 'Conditions',
+      'other': 'Route',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeIssueLine(String message, String section) {
+    return '• $message — $section';
+  }
+
+  @override
+  String classWorkshopEnrollmentReason(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'closed': 'Enrollment closed',
+      'on_site': 'Enroll on site',
+      'not_provided': 'No enrollment details',
+      'other': 'Enrollment information',
+    });
+    return '$_temp0';
+  }
 }

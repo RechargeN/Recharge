@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/content_server_path.dart';
 import '../../application/content_validation_feedback.dart';
 import '../../domain/entities/content_validation_violation.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import 'validation_texts.dart';
 
 /// What the server publication still needs from this Create draft (M1 stage
 /// 3, owner decision 3-Б). Shown only while the type's server path is enabled;
@@ -18,8 +20,10 @@ class ServerPublicationRequirements extends StatelessWidget {
     this.generalRefusal = false,
   });
 
-  /// Field path → what to fix.
+  /// Field path → message id of what to fix (L4: localized here).
   final Map<String, String> fields;
+
+  /// Field path → field-name id.
   final String Function(String fieldPath) labelFor;
 
   /// The server refused the draft and no detail maps to a field.
@@ -29,6 +33,7 @@ class ServerPublicationRequirements extends StatelessWidget {
   Widget build(BuildContext context) {
     if (fields.isEmpty && !generalRefusal) return const SizedBox.shrink();
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
     return Card(
       key: const Key('server-publication-requirements'),
       margin: const EdgeInsets.only(bottom: 12),
@@ -38,7 +43,7 @@ class ServerPublicationRequirements extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Needed for server publication',
+              l10n.validationNeededForServer,
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -46,14 +51,17 @@ class ServerPublicationRequirements extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  '${labelFor(entry.key)}: ${entry.value}',
+                  l10n.validationRequirementLine(
+                    fieldLabelText(l10n, labelFor(entry.key)),
+                    validationMessageText(l10n, entry.value),
+                  ),
                   key: Key('server-requirement-${entry.key}'),
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),
             if (fields.isEmpty && generalRefusal)
               Text(
-                'The server refused this draft. Check the draft and try again.',
+                l10n.validationGeneralRefusal,
                 key: const Key('server-requirement-general'),
                 style: TextStyle(color: theme.colorScheme.error),
               ),

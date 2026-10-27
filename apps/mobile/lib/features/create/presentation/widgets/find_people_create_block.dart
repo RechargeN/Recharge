@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -234,7 +235,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             children: widget.controller.supportedContentLocales
                 .map((String code) {
                   return FilterChip(
-                    label: Text(code.toUpperCase()),
+                    label: Text(languageEndonym(context.l10n, code)),
                     selected: data.languageCodes.contains(code),
                     onSelected: (bool selected) {
                       final Set<String> next = <String>{...data.languageCodes};

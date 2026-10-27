@@ -1,158 +1,174 @@
+// L4: values are ARB message ids (`validation*`); the UI resolves them.
 import '../domain/entities/content_validation_violation.dart';
 
 const _known = <String, (String, String)>{
-  "activity.title_length": ("/body/title", "Use 5–80 characters."),
+  "activity.title_length": ("/body/title", 'validationUse580Characters'),
   "activity.short_description_length": (
     "/body/shortDescription",
-    "Use 20–180 characters.",
+    'validationUse20180Characters',
   ),
   "activity.full_description_length": (
     "/body/fullDescription",
-    "Use at most 1000 characters.",
+    'validationUseAtMost1000Characters',
   ),
-  "activity.category_required": ("/body/categoryId", "Choose a category."),
+  "activity.category_required": (
+    "/body/categoryId",
+    'validationChooseACategory',
+  ),
   "activity.subcategory_required": (
     "/body/subcategoryId",
-    "Choose a subcategory.",
+    'validationChooseASubcategory',
   ),
   "activity.subcategory_not_applicable": (
     "/body/subcategoryId",
-    "Choose a subcategory available for Activity.",
+    'validationChooseASubcategoryAvailableForActivity',
   ),
   "activity.taxonomy_unavailable": (
     "/body/subcategoryId",
-    "Category data is unavailable. Try again later.",
+    'validationCategoryDataIsUnavailableTryAgainLater',
   ),
   "activity.criteria_registry_unavailable": (
     "/body/criteria",
-    "Category requirements are unavailable. Try again later.",
+    'validationCategoryRequirementsAreUnavailableTryAgainLater',
   ),
   "activity.criteria_invalid": (
     "/body/criteria",
-    "Check the category criteria.",
+    'validationCheckTheCategoryCriteria',
   ),
   "activity.cover_image_required": (
     "/body/media/coverImage",
-    "Add a cover image.",
+    'validationAddACoverImage',
   ),
   "activity.gallery_invalid": (
     "/body/media/gallery",
-    "Check the gallery images.",
+    'validationCheckTheGalleryImages',
   ),
   "activity.gallery_too_large": (
     "/body/media/gallery",
-    "Use at most 12 gallery images.",
+    'validationUseAtMost12GalleryImages',
   ),
-  "activity.media_duplicate": ("/body/media", "Remove duplicate images."),
-  "activity.location_required": ("/body/location", "Set the location."),
+  "activity.media_duplicate": (
+    "/body/media",
+    'validationRemoveDuplicateImages',
+  ),
+  "activity.location_required": ("/body/location", 'validationSetTheLocation'),
   "activity.location_coordinates_required": (
     "/body/location",
-    "Set valid coordinates.",
+    'validationSetValidCoordinates',
   ),
   "activity.pin_confirmation_required": (
     "/body/location/pinConfirmed",
-    "Confirm the map pin.",
+    'validationConfirmTheMapPin',
   ),
   "activity.address_line_length": (
     "/body/location/addressLine",
-    "Use at most 300 characters.",
+    'validationUseAtMost300Characters',
   ),
   "activity.access_notes_required": (
     "/body/location/accessNotes",
-    "Describe how to get there.",
+    'validationDescribeHowToGetThere',
   ),
   "activity.access_notes_length": (
     "/body/location/accessNotes",
-    "Use 10–300 characters.",
+    'validationUse10300Characters',
   ),
   "activity.linked_place_invalid": (
     "/body/location/linkedPlaceId",
-    "Check the linked Place.",
+    'validationCheckTheLinkedPlace',
   ),
-  "activity.linked_place_unknown": ("/body/location/linkedPlaceId", "The linked Place was not found. Remove or replace it."),
-  "activity.linked_place_forbidden": ("/body/location/linkedPlaceId", "The linked Place is no longer public. Remove or replace it."),
+  "activity.linked_place_unknown": (
+    "/body/location/linkedPlaceId",
+    'validationTheLinkedPlaceWasNotFoundRemove',
+  ),
+  "activity.linked_place_forbidden": (
+    "/body/location/linkedPlaceId",
+    'validationTheLinkedPlaceIsNoLongerPublic',
+  ),
   "activity.linked_place_unresolved": (
     "/body/location/linkedPlaceId",
-    "Linked Place is unavailable for publication.",
+    'validationLinkedPlaceIsUnavailableForPublication',
   ),
   "activity.access_caution_invalid": (
     "/body/location/accessCaution",
-    "Check the access caution.",
+    'validationCheckTheAccessCaution',
   ),
   "activity.access_caution_note_required": (
     "/body/location/accessCaution/note",
-    "Describe the informal access.",
+    'validationDescribeTheInformalAccess',
   ),
   "activity.access_caution_note_length": (
     "/body/location/accessCaution/note",
-    "Use at most 200 characters.",
+    'validationUseAtMost200Characters',
   ),
   "activity.contribution_invalid": (
     "/body/optionalContribution",
-    "Check the contribution.",
+    'validationCheckTheContribution',
   ),
   "activity.contribution_kind": (
     "/body/optionalContribution/kind",
-    "Choose a contribution kind.",
+    'validationChooseAContributionKind',
   ),
   "activity.contribution_note_required": (
     "/body/optionalContribution/note",
-    "Describe the optional contribution.",
+    'validationDescribeTheOptionalContribution',
   ),
   "activity.contribution_note_length": (
     "/body/optionalContribution/note",
-    "Use 10–140 characters.",
+    'validationUse10140Characters',
   ),
   "activity.contribution_inconsistent": (
     "/body/optionalContribution/kind",
-    "Choose a kind for this contribution.",
+    'validationChooseAKindForThisContribution',
   ),
   "activity.contribution_amount_invalid": (
     "/body/optionalContribution/amountHint",
-    "Check the amount.",
+    'validationCheckTheAmount',
   ),
   "activity.contribution_amount_not_positive": (
     "/body/optionalContribution/amountHint/amountMinor",
-    "Use a positive amount.",
+    'validationUseAPositiveAmount',
   ),
   "activity.contribution_currency_unsupported": (
     "/body/optionalContribution/amountHint/currencyCode",
-    "Use the market currency.",
+    'validationUseTheMarketCurrency',
   ),
   "activity.duration_required": (
     "/body/typicalDurationMinutes",
-    "Set the typical duration.",
+    'validationSetTheTypicalDuration',
   ),
   "activity.duration_invalid": (
     "/body/typicalDurationMinutes",
-    "Check the duration range.",
+    'validationCheckTheDurationRange',
   ),
   "activity.duration_not_positive": (
     "/body/typicalDurationMinutes",
-    "Use positive whole minutes.",
+    'validationUsePositiveWholeMinutes',
   ),
   "activity.duration_range_invalid": (
     "/body/typicalDurationMinutes",
-    "Minimum must not exceed maximum.",
+    'validationMinimumMustNotExceedMaximum',
   ),
   "activity.group_size_invalid": (
     "/body/suggestedGroupSize",
-    "Check the group size.",
+    'validationCheckTheGroupSize',
   ),
   "activity.group_size_not_positive": (
     "/body/suggestedGroupSize",
-    "Use positive whole numbers.",
+    'validationUsePositiveWholeNumbers',
   ),
   "activity.group_size_range_invalid": (
     "/body/suggestedGroupSize",
-    "Minimum must not exceed maximum.",
+    'validationMinimumMustNotExceedMaximum',
   ),
-  "activity.best_time_invalid": ("/body/bestTime", "Check the best time."),
+  "activity.best_time_invalid": (
+    "/body/bestTime",
+    'validationCheckTheBestTime',
+  ),
   "activity.best_time_of_day": (
     "/body/bestTime/timeOfDay",
-    "Choose a time of day.",
+    'validationChooseATimeOfDay',
   ),
-  "activity.best_season": ("/body/bestTime/season", "Choose a season."),
+  "activity.best_season": ("/body/bestTime/season", 'validationChooseASeason'),
 };
 
 Map<String, String> activityFieldFeedback(
@@ -170,7 +186,7 @@ Map<String, String> activityFieldFeedback(
           '/body/criteria/equipment_provided',
           '/body/criteria/swimming_required',
         ].contains(item.fieldPath)) {
-      result[item.fieldPath] = 'Complete this category criterion.';
+      result[item.fieldPath] = 'validationCompleteThisCategoryCriterion';
     }
   }
   return Map.unmodifiable(result);

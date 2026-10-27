@@ -20,6 +20,8 @@ import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/create_availability.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../widgets/validation_texts.dart';
 import '../widgets/event_create_block.dart';
 import '../widgets/activity_create_block.dart';
 import '../widgets/collection_create_block.dart';
@@ -261,9 +263,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 ),
                 publicationEditing:
                     widget.seedParameters['publicationEdit'] == 'activity',
-                serverErrors: ref
-                    .watch(activityValidationFeedbackProvider)
-                    .fieldsFor(user.id, state.draft),
+                // L4: message ids from the server feedback, localized here.
+                serverErrors: localizedFieldMessages(
+                  context.l10n,
+                  ref
+                      .watch(activityValidationFeedbackProvider)
+                      .fieldsFor(user.id, state.draft),
+                ),
                 serverValidationFailed: ref
                     .watch(activityValidationFeedbackProvider)
                     .matches(user.id, state.draft),

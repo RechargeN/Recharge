@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/class_workshop_create_config.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/state/create_state.dart';
@@ -531,7 +532,12 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
           items: <DropdownMenuItem<ClassWorkshopInformationReason>>[
             for (final ClassWorkshopInformationReason reason
                 in ClassWorkshopInformationReason.values)
-              DropdownMenuItem(value: reason, child: Text(reason.wireName)),
+              DropdownMenuItem(
+                value: reason,
+                child: Text(
+                  context.l10n.classWorkshopEnrollmentReason(reason.wireName),
+                ),
+              ),
           ],
           onChanged: (ClassWorkshopInformationReason? reason) {
             if (reason != null) _c.setClassWorkshopInformationOnly(reason);

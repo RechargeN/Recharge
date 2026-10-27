@@ -1230,4 +1230,865 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get importSignIn => 'Войдите, чтобы импортировать локальные данные';
+
+  @override
+  String get validationAPlaceInTheGuideIsNo =>
+      'Одно из мест в гиде больше не публично. Уберите или замените его.';
+
+  @override
+  String get validationAPlaceInTheGuideWasNot =>
+      'Одно из мест в гиде не найдено. Уберите или замените его.';
+
+  @override
+  String get validationAddACoverImage => 'Добавьте обложку.';
+
+  @override
+  String get validationAddACoverPhoto => 'Добавьте фото для обложки.';
+
+  @override
+  String get validationAddAPricingNote => 'Добавьте примечание о ценах.';
+
+  @override
+  String get validationAddASafetyNoticeForThisCategory =>
+      'Добавьте указания по безопасности для этой категории.';
+
+  @override
+  String get validationAddAShortDescription => 'Добавьте краткое описание.';
+
+  @override
+  String get validationAddATitle => 'Добавьте название.';
+
+  @override
+  String get validationAddAnAddressOrALocationLabel =>
+      'Добавьте адрес или название места.';
+
+  @override
+  String get validationAddAtLeastThreePlaces => 'Добавьте не менее трёх мест.';
+
+  @override
+  String get validationAddPlacesToTheGuide => 'Добавьте места в гид.';
+
+  @override
+  String get validationAddTheDeliveryFeeZeroIfFree =>
+      'Укажите стоимость доставки (ноль, если бесплатно).';
+
+  @override
+  String get validationAddTheEntryPrice => 'Укажите цену входа.';
+
+  @override
+  String get validationAddThePrices => 'Укажите цены.';
+
+  @override
+  String get validationAddThePublicBusinessAddress =>
+      'Укажите публичный адрес компании.';
+
+  @override
+  String get validationAddTheRentalTerms => 'Добавьте условия аренды.';
+
+  @override
+  String get validationAddTheWeeklyOpeningHours =>
+      'Добавьте часы работы на неделю.';
+
+  @override
+  String get validationAddWhatYouRentOut => 'Добавьте, что вы сдаёте в аренду.';
+
+  @override
+  String get validationCategoryDataIsUnavailableTryAgainLater =>
+      'Данные категорий недоступны. Попробуйте позже.';
+
+  @override
+  String get validationCategoryRequirementsAreUnavailableTryAgainLater =>
+      'Требования категории недоступны. Попробуйте позже.';
+
+  @override
+  String get validationCheckTheAccessCaution =>
+      'Проверьте предупреждение о доступе.';
+
+  @override
+  String get validationCheckTheAmount => 'Проверьте сумму.';
+
+  @override
+  String get validationCheckTheBestTime => 'Проверьте лучшее время.';
+
+  @override
+  String get validationCheckTheCategoryCriteria =>
+      'Проверьте критерии категории.';
+
+  @override
+  String get validationCheckTheContribution => 'Проверьте взнос.';
+
+  @override
+  String get validationCheckTheDescriptionLength => 'Проверьте длину описания.';
+
+  @override
+  String get validationCheckTheDeviceClockAndConfirmThe =>
+      'Проверьте часы устройства и снова подтвердите доступность.';
+
+  @override
+  String get validationCheckTheDurationRange =>
+      'Проверьте диапазон длительности.';
+
+  @override
+  String get validationCheckTheEmailAddress =>
+      'Проверьте адрес электронной почты.';
+
+  @override
+  String get validationCheckTheGalleryImages =>
+      'Проверьте изображения галереи.';
+
+  @override
+  String get validationCheckTheGroupSize => 'Проверьте размер группы.';
+
+  @override
+  String get validationCheckTheLinkedPlace => 'Проверьте связанное место.';
+
+  @override
+  String get validationCheckTheOpeningTimes => 'Проверьте часы работы.';
+
+  @override
+  String get validationCheckTheShortDescriptionLength =>
+      'Проверьте длину краткого описания.';
+
+  @override
+  String get validationCheckTheTitleLength => 'Проверьте длину названия.';
+
+  @override
+  String get validationChooseACancellationPolicy => 'Выберите правила отмены.';
+
+  @override
+  String get validationChooseACategory => 'Выберите категорию.';
+
+  @override
+  String get validationChooseAContributionKind => 'Выберите вид взноса.';
+
+  @override
+  String get validationChooseAKindForThisContribution =>
+      'Выберите вид этого взноса.';
+
+  @override
+  String get validationChooseASeason => 'Выберите сезон.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForActivity =>
+      'Выберите подкатегорию, доступную для активности.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForPlaces =>
+      'Выберите подкатегорию, доступную для мест.';
+
+  @override
+  String get validationChooseASubcategoryFromTheCategoryList =>
+      'Выберите подкатегорию из списка категорий.';
+
+  @override
+  String get validationChooseASubcategory => 'Выберите подкатегорию.';
+
+  @override
+  String get validationChooseATimeOfDay => 'Выберите время суток.';
+
+  @override
+  String get validationChooseAnOpeningHoursMode =>
+      'Выберите режим часов работы.';
+
+  @override
+  String get validationChooseHowTheOpeningHoursWork =>
+      'Выберите, как устроены часы работы.';
+
+  @override
+  String get validationChooseTheTextLanguage => 'Выберите язык текста.';
+
+  @override
+  String get validationChooseWhatKindOfPlaceItIs =>
+      'Выберите, что это за место.';
+
+  @override
+  String get validationChooseWhetherEntryIsFreeOrPaid =>
+      'Выберите, бесплатный вход или платный.';
+
+  @override
+  String get validationChooseYourRelationshipToThisPlace =>
+      'Выберите, как вы связаны с этим местом.';
+
+  @override
+  String get validationCompleteThisCategoryCriterion =>
+      'Заполните этот критерий категории.';
+
+  @override
+  String get validationConfirmTheAvailabilityAgainItIsOlder =>
+      'Подтвердите доступность снова: она старше недели.';
+
+  @override
+  String get validationConfirmTheCategory => 'Подтвердите категорию.';
+
+  @override
+  String get validationConfirmTheMapPin => 'Подтвердите метку на карте.';
+
+  @override
+  String get validationConfirmTheRentalStatements =>
+      'Подтвердите заявления об аренде.';
+
+  @override
+  String get validationConfirmWhenTheItemsAreAvailable =>
+      'Подтвердите, когда вещи доступны.';
+
+  @override
+  String get validationDescribeHowToGetThere => 'Опишите, как туда добраться.';
+
+  @override
+  String get validationDescribeTheDamagePolicy =>
+      'Опишите правила при повреждениях.';
+
+  @override
+  String get validationDescribeTheHandover => 'Опишите передачу.';
+
+  @override
+  String get validationDescribeTheInformalAccess =>
+      'Опишите неформальный доступ.';
+
+  @override
+  String get validationDescribeTheOptionalContribution =>
+      'Опишите добровольный взнос.';
+
+  @override
+  String get validationDoNotWriteTheTitleInCapitals =>
+      'Не пишите название заглавными буквами.';
+
+  @override
+  String get validationKeepContactsOutOfTheTitle =>
+      'Не указывайте контакты в названии.';
+
+  @override
+  String get validationLinkedPlaceIsUnavailableForPublication =>
+      'Связанное место недоступно для публикации.';
+
+  @override
+  String get validationMakeAtLeastOneItemAvailable =>
+      'Сделайте доступной хотя бы одну вещь.';
+
+  @override
+  String get validationMinimumMustNotExceedMaximum =>
+      'Минимум не должен превышать максимум.';
+
+  @override
+  String get validationNameTheArea => 'Назовите район.';
+
+  @override
+  String get validationNameWhatYouRentOut =>
+      'Назовите, что вы сдаёте в аренду.';
+
+  @override
+  String get validationOnlySavedPublishedPlacesCanBeAdded =>
+      'Можно добавить только сохранённые опубликованные места.';
+
+  @override
+  String get validationOpeningTimesOverlap => 'Часы работы пересекаются.';
+
+  @override
+  String get validationPlacesCouldNotBeCheckedTryAgain =>
+      'Не удалось проверить места. Попробуйте позже.';
+
+  @override
+  String get validationRemoveDuplicateImages =>
+      'Удалите повторяющиеся изображения.';
+
+  @override
+  String get validationRemoveSomeGalleryImages =>
+      'Удалите часть изображений галереи.';
+
+  @override
+  String get validationRemoveSomePlaces => 'Удалите часть мест.';
+
+  @override
+  String get validationRemoveThePartFromTheBookingLink =>
+      'Уберите часть после # из ссылки бронирования.';
+
+  @override
+  String get validationReviewTheGuideAgainItChangedAfter =>
+      'Проверьте гид снова: он изменился после проверки.';
+
+  @override
+  String get validationReviewTheGuideBeforeSubmitting =>
+      'Проверьте гид перед отправкой.';
+
+  @override
+  String get validationSaveTheDraftAgainBeforeSubmitting =>
+      'Сохраните черновик ещё раз перед отправкой.';
+
+  @override
+  String get validationSaveThePlacesInTheGuideBefore =>
+      'Сохраните места гида перед отправкой.';
+
+  @override
+  String get validationSeasonalHoursAreNotSupportedYet =>
+      'Сезонные часы работы пока не поддерживаются.';
+
+  @override
+  String get validationSetTheLocation => 'Укажите местоположение.';
+
+  @override
+  String get validationSetTheMapPin => 'Поставьте метку на карте.';
+
+  @override
+  String get validationSetTheMinimumRenterAge =>
+      'Укажите минимальный возраст арендатора.';
+
+  @override
+  String get validationSetTheTypicalDuration => 'Укажите обычную длительность.';
+
+  @override
+  String get validationSetValidCoordinates => 'Укажите корректные координаты.';
+
+  @override
+  String get validationShortenACuratorNoteTo300Characters =>
+      'Сократите заметку куратора до 300 символов.';
+
+  @override
+  String get validationShortenTheDescription => 'Сократите описание.';
+
+  @override
+  String get validationShowTheApproximateAreaAt500M =>
+      'Показывайте примерный район с точностью 500 м или грубее.';
+
+  @override
+  String get validationSomePlacesChangedStatusReviewTheGuide =>
+      'У некоторых мест изменился статус. Проверьте гид снова.';
+
+  @override
+  String get validationTheLinkedPlaceIsNoLongerPublic =>
+      'Связанное место больше не публично. Уберите или замените его.';
+
+  @override
+  String get validationTheLinkedPlaceWasNotFoundRemove =>
+      'Связанное место не найдено. Уберите или замените его.';
+
+  @override
+  String get validationThePinIsOutsideTheServiceArea =>
+      'Метка находится вне зоны обслуживания.';
+
+  @override
+  String get validationTheRentalRulesChangedConfirmTheStatements =>
+      'Правила аренды изменились. Подтвердите заявления снова.';
+
+  @override
+  String get validationThisCategoryCannotBeRentedOutHere =>
+      'Эту категорию здесь пока нельзя сдавать в аренду.';
+
+  @override
+  String get validationThisCategoryRequiresAnIDAtHandover =>
+      'Для этой категории при передаче нужен документ, удостоверяющий личность.';
+
+  @override
+  String get validationThisLanguageIsNotSupportedHere =>
+      'Этот язык здесь не поддерживается.';
+
+  @override
+  String get validationUse10140Characters => 'Используйте 10–140 символов.';
+
+  @override
+  String get validationUse10300Characters => 'Используйте 10–300 символов.';
+
+  @override
+  String get validationUse20180Characters => 'Используйте 20–180 символов.';
+
+  @override
+  String get validationUse3120Characters => 'Используйте 3–120 символов.';
+
+  @override
+  String get validationUse580Characters => 'Используйте 5–80 символов.';
+
+  @override
+  String get validationUse715DigitsOnlyAndSpaces =>
+      'Используйте 7–15 цифр; кроме цифр — только + ( ) . - и пробелы.';
+
+  @override
+  String get validationUseADeliveryRadiusUpTo50 =>
+      'Радиус доставки — не более 50 км.';
+
+  @override
+  String get validationUseAPositiveAmount => 'Укажите положительную сумму.';
+
+  @override
+  String get validationUseASecureHttpsBookingLink =>
+      'Используйте защищённую ссылку бронирования https.';
+
+  @override
+  String get validationUseASecureHttpsLink =>
+      'Используйте защищённую ссылку https.';
+
+  @override
+  String get validationUseAtMost1000Characters =>
+      'Используйте не более 1000 символов.';
+
+  @override
+  String get validationUseAtMost12GalleryImages =>
+      'Используйте не более 12 изображений в галерее.';
+
+  @override
+  String get validationUseAtMost200Characters =>
+      'Используйте не более 200 символов.';
+
+  @override
+  String get validationUseAtMost300Characters =>
+      'Используйте не более 300 символов.';
+
+  @override
+  String get validationUsePositiveWholeMinutes =>
+      'Укажите положительное целое число минут.';
+
+  @override
+  String get validationUsePositiveWholeNumbers =>
+      'Укажите положительные целые числа.';
+
+  @override
+  String get validationUseTheMarketCurrency => 'Используйте валюту рынка.';
+
+  @override
+  String get validationYourRelationshipToThePlaceDoesNot =>
+      'Ваша связь с местом не соответствует тому, как оно было добавлено.';
+
+  @override
+  String get fieldLabelAddress => 'Адрес';
+
+  @override
+  String get fieldLabelArea => 'Район';
+
+  @override
+  String get fieldLabelAvailability => 'Доступность';
+
+  @override
+  String get fieldLabelBookingLink => 'Ссылка бронирования';
+
+  @override
+  String get fieldLabelCancellationPolicy => 'Правила отмены';
+
+  @override
+  String get fieldLabelCategory => 'Категория';
+
+  @override
+  String get fieldLabelCategoryCriteria => 'Критерии категории';
+
+  @override
+  String get fieldLabelCoverImage => 'Обложка';
+
+  @override
+  String get fieldLabelCurrency => 'Валюта';
+
+  @override
+  String get fieldLabelDamagePolicy => 'Правила при повреждениях';
+
+  @override
+  String get fieldLabelDeliveryFee => 'Стоимость доставки';
+
+  @override
+  String get fieldLabelDeliveryRadius => 'Радиус доставки';
+
+  @override
+  String get fieldLabelDescription => 'Описание';
+
+  @override
+  String get fieldLabelDraft => 'Черновик';
+
+  @override
+  String get fieldLabelEmail => 'Эл. почта';
+
+  @override
+  String get fieldLabelEntry => 'Вход';
+
+  @override
+  String get fieldLabelEntryPrice => 'Цена входа';
+
+  @override
+  String get fieldLabelGallery => 'Галерея';
+
+  @override
+  String get fieldLabelGuideReview => 'Проверка гида';
+
+  @override
+  String get fieldLabelHandover => 'Передача';
+
+  @override
+  String get fieldLabelHandoverAddress => 'Адрес передачи';
+
+  @override
+  String get fieldLabelHandoverArea => 'Район передачи';
+
+  @override
+  String get fieldLabelIDAtHandover => 'Документ при передаче';
+
+  @override
+  String get fieldLabelItems => 'Вещи';
+
+  @override
+  String get fieldLabelKindOfPlace => 'Тип места';
+
+  @override
+  String get fieldLabelLocation => 'Местоположение';
+
+  @override
+  String get fieldLabelMapPin => 'Метка на карте';
+
+  @override
+  String get fieldLabelMinimumAge => 'Минимальный возраст';
+
+  @override
+  String get fieldLabelOpeningHours => 'Часы работы';
+
+  @override
+  String get fieldLabelPhone => 'Телефон';
+
+  @override
+  String get fieldLabelPhotos => 'Фотографии';
+
+  @override
+  String get fieldLabelPlacesInTheGuide => 'Места в гиде';
+
+  @override
+  String get fieldLabelPrices => 'Цены';
+
+  @override
+  String get fieldLabelPricingNote => 'Примечание о ценах';
+
+  @override
+  String get fieldLabelSafetyNotice => 'Указания по безопасности';
+
+  @override
+  String get fieldLabelShortDescription => 'Краткое описание';
+
+  @override
+  String get fieldLabelStatements => 'Заявления';
+
+  @override
+  String get fieldLabelSubcategory => 'Подкатегория';
+
+  @override
+  String get fieldLabelTerms => 'Условия';
+
+  @override
+  String get fieldLabelTextLanguage => 'Язык текста';
+
+  @override
+  String get fieldLabelTitle => 'Название';
+
+  @override
+  String get fieldLabelWebsite => 'Веб-сайт';
+
+  @override
+  String get fieldLabelYourRelationship => 'Ваша связь с местом';
+
+  @override
+  String get validationNeededForServer => 'Нужно для публикации на сервере';
+
+  @override
+  String get validationGeneralRefusal =>
+      'Сервер отклонил этот черновик. Проверьте черновик и попробуйте снова.';
+
+  @override
+  String validationRequirementLine(String field, String message) {
+    return '$field: $message';
+  }
+
+  @override
+  String get detailsLinkCopied => 'Ссылка скопирована';
+
+  @override
+  String get detailsSavedToFavorites => 'Сохранено в избранное';
+
+  @override
+  String get detailsCalendarExportFailed =>
+      'Не удалось открыть экспорт календаря';
+
+  @override
+  String get detailsInterestMarked => 'Интерес к событию отмечен';
+
+  @override
+  String get detailsCouldNotOpenLink => 'Не удалось открыть ссылку.';
+
+  @override
+  String get detailsBookingSiteFailed => 'Не удалось открыть сайт бронирования';
+
+  @override
+  String get detailsEnrollmentSiteFailed => 'Не удалось открыть сайт записи';
+
+  @override
+  String get detailsReportSent => 'Спасибо. Сообщение передано на проверку.';
+
+  @override
+  String get detailsReportFailed =>
+      'Не удалось отправить сообщение. Попробуйте ещё раз.';
+
+  @override
+  String get detailsRequestSent => 'Заявка отправлена';
+
+  @override
+  String get detailsPlaceTimezoneUnavailable => 'Часовой пояс места недоступен';
+
+  @override
+  String get detailsVisitWhen => 'Когда вы здесь были?';
+
+  @override
+  String detailsVisitAdded(String date) {
+    return 'Добавлено в историю посещений · $date';
+  }
+
+  @override
+  String get detailsVisitFailed => 'Не удалось обновить историю посещений';
+
+  @override
+  String get detailsLoadFailed => 'Не удалось загрузить подробности';
+
+  @override
+  String get detailsUnavailable => 'Недоступно';
+
+  @override
+  String get detailsRouteUpdated => 'Маршрут обновился';
+
+  @override
+  String get detailsRouteUnavailable => 'Маршрут недоступен';
+
+  @override
+  String get detailsNoConnection => 'Нет связи';
+
+  @override
+  String get homeFree => 'Бесплатно';
+
+  @override
+  String get homeAnyTime => 'В любое время';
+
+  @override
+  String get homeAnyArea => 'Любой район';
+
+  @override
+  String homeRadiusKm(String km) {
+    return '$km км';
+  }
+
+  @override
+  String homeCardMeta(String price, String time, String venue) {
+    return '$price · $time · $venue';
+  }
+
+  @override
+  String get homeContinueRoute => 'Продолжите свой маршрут';
+
+  @override
+  String get homeSavedRoute => 'Сохранённый маршрут';
+
+  @override
+  String get homeContinueSavedSearch => 'Продолжить сохранённый поиск';
+
+  @override
+  String get homeContinueSmartSearch => 'Продолжить умный поиск';
+
+  @override
+  String get homeSmartRoute => 'Умный маршрут';
+
+  @override
+  String get homeCreateFromSavedSearch =>
+      'Создать публикацию из сохранённого поиска';
+
+  @override
+  String get homeCreateFromSmartSearch => 'Создать публикацию из умного поиска';
+
+  @override
+  String get homeNoActivities => 'Пока нет активностей';
+
+  @override
+  String get homeViewAll => 'Смотреть все';
+
+  @override
+  String placeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'address_or_label_required': 'Добавьте адрес или название места.',
+      'busy_time_notes_too_long': 'Сократите заметки о загруженности.',
+      'category_required': 'Выберите категорию.',
+      'closure_end_invalid': 'Окончание закрытия не может быть раньше начала.',
+      'closure_note_too_long': 'Сократите примечание о закрытии.',
+      'closure_start_required': 'Укажите, когда начинается закрытие.',
+      'contact_url_invalid': 'Используйте корректную ссылку https.',
+      'contacts_missing': 'Добавьте хотя бы один контакт.',
+      'country_required': 'Выберите страну.',
+      'cover_required': 'Добавьте фото для обложки.',
+      'details_missing': 'Нет данных о месте.',
+      'email_invalid': 'Проверьте адрес электронной почты.',
+      'entrance_hint_too_long': 'Сократите подсказку о входе.',
+      'entry_price_range_invalid':
+          'Минимальная цена не должна превышать максимальную.',
+      'entry_price_required': 'Укажите цену входа.',
+      'entry_type_unknown': 'Выберите, бесплатный вход или платный.',
+      'full_description_length': 'Сократите описание.',
+      'gallery_limit': 'Удалите часть фото из галереи.',
+      'hours_exception_date_invalid': 'Проверьте дату особого дня.',
+      'hours_exception_overlap': 'Часы особого дня пересекаются.',
+      'hours_exception_period_invalid': 'Проверьте часы особого дня.',
+      'hours_exception_period_required': 'Добавьте часы для особого дня.',
+      'hours_exception_periods_not_allowed':
+          'У закрытого особого дня нет часов работы.',
+      'hours_exceptions_not_allowed':
+          'В этом режиме часов особые дни не используются.',
+      'hours_mode_required': 'Выберите, как устроены часы работы.',
+      'hours_overlap': 'Часы работы пересекаются.',
+      'hours_period_invalid': 'Проверьте часы работы.',
+      'hours_period_required': 'Добавьте часы работы на неделю.',
+      'hours_periods_not_allowed': 'В этом режиме нет недельного расписания.',
+      'hours_unknown': 'Часы работы пока неизвестны.',
+      'kind_required': 'Выберите, что это за место.',
+      'locale_unsupported': 'Этот язык здесь не поддерживается.',
+      'market_required': 'У места пока не указан рынок.',
+      'minimum_visit_invalid': 'Проверьте минимальное время посещения.',
+      'minimum_visit_required': 'Укажите минимальное время посещения.',
+      'mixed_pricing_note_required':
+          'Добавьте примечание о ценах для смешанного входа.',
+      'outside_market': 'Метка находится вне зоны обслуживания.',
+      'permission_denied': 'Вы не можете опубликовать это место.',
+      'phone_invalid': 'Проверьте номер телефона.',
+      'pin_approximate': 'Метка на карте приблизительная.',
+      'pin_invalid': 'Укажите корректные координаты.',
+      'pin_unconfirmed': 'Подтвердите метку на карте.',
+      'price_negative': 'Цена не может быть отрицательной.',
+      'pricing_note_too_long': 'Сократите примечание о ценах.',
+      'pricing_url_invalid': 'Используйте корректную ссылку https на цены.',
+      'publisher_invalid': 'Выберите, от чьего имени публикуется место.',
+      'seasonal_not_supported': 'Сезонные часы работы пока не поддерживаются.',
+      'short_description_length':
+          'В кратком описании используйте 20–180 символов.',
+      'spend_range_invalid':
+          'Минимальные траты не должны превышать максимальные.',
+      'subcategory_required': 'Выберите подкатегорию.',
+      'timezone_required': 'У места не указан часовой пояс.',
+      'title_all_caps': 'Не пишите название заглавными буквами.',
+      'title_contact': 'Не указывайте контакты в названии.',
+      'title_length': 'В названии используйте 3–120 символов.',
+      'visit_buffer_invalid': 'Проверьте запас времени на посещение.',
+      'visit_duration_invalid': 'Проверьте обычную длительность посещения.',
+      'other': 'Проверьте эту часть места.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String placeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'identity': 'Основное',
+      'category': 'Категория',
+      'location': 'Местоположение',
+      'contacts': 'Контакты',
+      'hours': 'Часы работы',
+      'pricing': 'Цены',
+      'planning': 'Планирование посещения',
+      'media': 'Фотографии',
+      'other': 'Место',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get placeFinalChecks => 'Итоговая проверка';
+
+  @override
+  String sessionValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'session_category_not_allowed': 'Эта категория недоступна для сессий.',
+      'session_resource_missing':
+          'Укажите, что бронируется, и его часовой пояс.',
+      'session_timezone_invalid': 'Подтвердите часовой пояс.',
+      'session_schedule_empty': 'Добавьте хотя бы один временной слот.',
+      'session_weekday_invalid': 'Проверьте дни недели.',
+      'session_range_invalid': 'Проверьте время начала и окончания.',
+      'session_range_overlap': 'Временные слоты пересекаются.',
+      'session_duration_out_of_range': 'Проверьте длительность сессии.',
+      'session_buffer_out_of_range': 'Проверьте перерыв между сессиями.',
+      'session_notice_out_of_range':
+          'Проверьте срок предварительного бронирования.',
+      'session_projection_overflow':
+          'Расписание создаёт слишком много сессий. Сократите его.',
+      'session_exception_invalid': 'Проверьте исключения.',
+      'session_party_size_out_of_range': 'Проверьте размер группы.',
+      'session_price_invalid': 'Проверьте цену.',
+      'session_booking_url_invalid':
+          'Используйте защищённую ссылку бронирования https.',
+      'session_media_incomplete': 'Добавьте нужные фотографии.',
+      'session_publisher_ineligible':
+          'Вы не можете публиковать от имени этого профиля или страницы.',
+      'session_legacy_review_required':
+          'Проверьте этот старый черновик перед публикацией.',
+      'session_no_offers_in_window': 'В ближайшие недели нет ни одной сессии.',
+      'session_candidates_dropped_for_buffer':
+          'Часть времени пропущена, чтобы сохранить перерывы.',
+      'session_dst_slots_skipped':
+          'Часть времени пропущена из-за перевода часов.',
+      'session_external_state_unknown':
+          'Не удалось проверить состояние сайта бронирования.',
+      'session_material_revision':
+          'Это изменение попросит забронировавших подтвердить снова.',
+      'session_category_criteria_incomplete': 'Заполните критерии категории.',
+      'other': 'Проверьте эту часть сессии.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionFixBeforePublishing => 'Исправьте перед публикацией';
+
+  @override
+  String routeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'route_too_short': 'Маршрут слишком короткий.',
+      'route_too_long': 'Маршрут слишком длинный.',
+      'route_duration_too_long': 'Маршрут занимает слишком много времени.',
+      'loop_must_close': 'Кольцевой маршрут должен заканчиваться в начале.',
+      'one_way_must_not_close':
+          'Маршрут в одну сторону не должен заканчиваться в начале.',
+      'out_and_back_must_return':
+          'Маршрут «туда и обратно» должен вернуться в начало.',
+      'anchors_too_few': 'Добавьте в маршрут больше точек.',
+      'segments_missing': 'Постройте маршрут между точками.',
+      'manual_duration_reason_required':
+          'Объясните, почему вы изменили длительность.',
+      'provider_license_disallows_publish':
+          'Эти картографические данные нельзя опубликовать.',
+      'temporary_id_not_publishable': 'Сохраните маршрут перед публикацией.',
+      'family_segment': 'Участок маршрута требует внимания.',
+      'family_waypoint': 'Точка на маршруте требует внимания.',
+      'family_anchor': 'Проверьте точки маршрута.',
+      'family_condition': 'Проверьте условия маршрута.',
+      'family_duration': 'Проверьте длительность маршрута.',
+      'family_data': 'Данные маршрута устарели. Постройте маршрут заново.',
+      'other': 'Проверьте эту часть маршрута.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'route': 'Маршрут',
+      'geometry': 'Трек',
+      'metrics': 'Расстояние и время',
+      'operations': 'Правки',
+      'profile': 'Профиль',
+      'quality': 'Качество',
+      'relations': 'Точки',
+      'sources': 'Источники',
+      'waypoints': 'Интересные точки',
+      'conditions': 'Условия',
+      'other': 'Маршрут',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeIssueLine(String message, String section) {
+    return '• $message — $section';
+  }
+
+  @override
+  String classWorkshopEnrollmentReason(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'closed': 'Запись закрыта',
+      'on_site': 'Запись на месте',
+      'not_provided': 'Нет данных о записи',
+      'other': 'Информация о записи',
+    });
+    return '$_temp0';
+  }
 }

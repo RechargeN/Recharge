@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/localization/app_locale_policy.dart';
 import 'package:recharge/features/create/application/content_validation_feedback.dart';
 import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/presentation/widgets/validation_texts.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 
 /// M1 stage 3 (3-A): every public detail the server sends for a Create case of
 /// Place, Rental and Collection is accepted on the wire and has a field text;
@@ -43,7 +47,11 @@ void main() {
         );
         // Every field has its own name; only the whole body is "Draft".
         for (final String path in feedback.keys.where((p) => p != '/body')) {
-          expect(contentFieldLabel(path), isNot('Draft'), reason: path);
+          expect(
+            contentFieldLabel(path),
+            isNot('fieldLabelDraft'),
+            reason: path,
+          );
         }
       }
     });
@@ -63,9 +71,48 @@ void main() {
         ]);
     expect(violations, hasLength(2));
     expect(contentFieldFeedback(CreateObjectType.place, violations), isEmpty);
+    expect(contentFieldFeedback(CreateObjectType.event, violations), isEmpty);
+  });
+
+  test('L4: every message and field-name id in the validation tables has '
+      'lv, en and ru text (never the general fallback or the id)', () {
+    final RegExp id = RegExp(r"'((?:validation|fieldLabel)[A-Za-z0-9]+)'");
+    final Set<String> ids = <String>{
+      for (final String file in <String>[
+        'lib/features/create/application/content_validation_feedback.dart',
+        'lib/features/create/application/activity_validation_feedback.dart',
+      ])
+        for (final RegExpMatch match in id.allMatches(
+          File(file).readAsStringSync(),
+        ))
+          match.group(1)!,
+    };
+    expect(ids.length, greaterThan(100));
+    for (final String code in AppLocalePolicy.r1LanguageCodes) {
+      final AppLocalizations l10n = lookupAppLocalizations(Locale(code));
+      for (final String value in ids) {
+        final String text = value.startsWith('fieldLabel')
+            ? fieldLabelText(l10n, value)
+            : validationMessageText(l10n, value);
+        if (value != 'fieldLabelDraft') {
+          expect(
+            text,
+            isNot(
+              value.startsWith('fieldLabel')
+                  ? l10n.fieldLabelDraft
+                  : l10n.contentErrorValidationFailed,
+            ),
+            reason: '$code:$value',
+          );
+        }
+        expect(text, isNot(value));
+      }
+    }
+    // Positive control: an unknown id falls back, never shows itself.
+    final AppLocalizations lv = lookupAppLocalizations(const Locale('lv'));
     expect(
-      contentFieldFeedback(CreateObjectType.event, violations),
-      isEmpty,
+      validationMessageText(lv, 'validationNotInTheTable'),
+      lv.contentErrorValidationFailed,
     );
   });
 }

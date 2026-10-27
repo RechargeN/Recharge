@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -1695,7 +1696,7 @@ class _ValidationSummary extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Final checks',
+              context.l10n.placeFinalChecks,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -1711,8 +1712,12 @@ class _ValidationSummary extends StatelessWidget {
                       ? Theme.of(context).colorScheme.error
                       : Colors.orange.shade800,
                 ),
-                title: Text(issue.code.replaceAll('_', ' ')),
-                subtitle: Text(issue.sectionId),
+                // L4: the stable code and section stay in the issue; only
+                // their display is localized.
+                title: Text(context.l10n.placeValidationIssue(issue.code)),
+                subtitle: Text(
+                  context.l10n.placeValidationSection(issue.sectionId),
+                ),
               ),
           ],
         ),

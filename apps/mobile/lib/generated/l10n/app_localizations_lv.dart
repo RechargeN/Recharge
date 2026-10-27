@@ -1225,4 +1225,865 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get importSignIn => 'Piesakieties, lai importētu savus lokālos datus';
+
+  @override
+  String get validationAPlaceInTheGuideIsNo =>
+      'Kāda gida vieta vairs nav publiska. Noņemiet vai aizstājiet to.';
+
+  @override
+  String get validationAPlaceInTheGuideWasNot =>
+      'Kāda gida vieta netika atrasta. Noņemiet vai aizstājiet to.';
+
+  @override
+  String get validationAddACoverImage => 'Pievienojiet vāka attēlu.';
+
+  @override
+  String get validationAddACoverPhoto => 'Pievienojiet vāka fotoattēlu.';
+
+  @override
+  String get validationAddAPricingNote => 'Pievienojiet piezīmi par cenām.';
+
+  @override
+  String get validationAddASafetyNoticeForThisCategory =>
+      'Pievienojiet drošības norādījumus šai kategorijai.';
+
+  @override
+  String get validationAddAShortDescription => 'Pievienojiet īsu aprakstu.';
+
+  @override
+  String get validationAddATitle => 'Pievienojiet nosaukumu.';
+
+  @override
+  String get validationAddAnAddressOrALocationLabel =>
+      'Pievienojiet adresi vai vietas nosaukumu.';
+
+  @override
+  String get validationAddAtLeastThreePlaces =>
+      'Pievienojiet vismaz trīs vietas.';
+
+  @override
+  String get validationAddPlacesToTheGuide => 'Pievienojiet gidam vietas.';
+
+  @override
+  String get validationAddTheDeliveryFeeZeroIfFree =>
+      'Norādiet piegādes maksu (nulle, ja bez maksas).';
+
+  @override
+  String get validationAddTheEntryPrice => 'Norādiet ieejas cenu.';
+
+  @override
+  String get validationAddThePrices => 'Norādiet cenas.';
+
+  @override
+  String get validationAddThePublicBusinessAddress =>
+      'Norādiet publisko uzņēmuma adresi.';
+
+  @override
+  String get validationAddTheRentalTerms => 'Pievienojiet nomas noteikumus.';
+
+  @override
+  String get validationAddTheWeeklyOpeningHours =>
+      'Pievienojiet nedēļas darba laiku.';
+
+  @override
+  String get validationAddWhatYouRentOut => 'Pievienojiet, ko izīrējat.';
+
+  @override
+  String get validationCategoryDataIsUnavailableTryAgainLater =>
+      'Kategoriju dati nav pieejami. Mēģiniet vēlāk.';
+
+  @override
+  String get validationCategoryRequirementsAreUnavailableTryAgainLater =>
+      'Kategorijas prasības nav pieejamas. Mēģiniet vēlāk.';
+
+  @override
+  String get validationCheckTheAccessCaution =>
+      'Pārbaudiet piekļuves brīdinājumu.';
+
+  @override
+  String get validationCheckTheAmount => 'Pārbaudiet summu.';
+
+  @override
+  String get validationCheckTheBestTime => 'Pārbaudiet labāko laiku.';
+
+  @override
+  String get validationCheckTheCategoryCriteria =>
+      'Pārbaudiet kategorijas kritērijus.';
+
+  @override
+  String get validationCheckTheContribution => 'Pārbaudiet iemaksu.';
+
+  @override
+  String get validationCheckTheDescriptionLength =>
+      'Pārbaudiet apraksta garumu.';
+
+  @override
+  String get validationCheckTheDeviceClockAndConfirmThe =>
+      'Pārbaudiet ierīces pulksteni un vēlreiz apstipriniet pieejamību.';
+
+  @override
+  String get validationCheckTheDurationRange => 'Pārbaudiet ilguma diapazonu.';
+
+  @override
+  String get validationCheckTheEmailAddress => 'Pārbaudiet e-pasta adresi.';
+
+  @override
+  String get validationCheckTheGalleryImages => 'Pārbaudiet galerijas attēlus.';
+
+  @override
+  String get validationCheckTheGroupSize => 'Pārbaudiet grupas lielumu.';
+
+  @override
+  String get validationCheckTheLinkedPlace => 'Pārbaudiet saistīto vietu.';
+
+  @override
+  String get validationCheckTheOpeningTimes => 'Pārbaudiet darba laiku.';
+
+  @override
+  String get validationCheckTheShortDescriptionLength =>
+      'Pārbaudiet īsā apraksta garumu.';
+
+  @override
+  String get validationCheckTheTitleLength => 'Pārbaudiet nosaukuma garumu.';
+
+  @override
+  String get validationChooseACancellationPolicy =>
+      'Izvēlieties atcelšanas noteikumus.';
+
+  @override
+  String get validationChooseACategory => 'Izvēlieties kategoriju.';
+
+  @override
+  String get validationChooseAContributionKind => 'Izvēlieties iemaksas veidu.';
+
+  @override
+  String get validationChooseAKindForThisContribution =>
+      'Izvēlieties šīs iemaksas veidu.';
+
+  @override
+  String get validationChooseASeason => 'Izvēlieties sezonu.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForActivity =>
+      'Izvēlieties aktivitātei pieejamu apakškategoriju.';
+
+  @override
+  String get validationChooseASubcategoryAvailableForPlaces =>
+      'Izvēlieties vietām pieejamu apakškategoriju.';
+
+  @override
+  String get validationChooseASubcategoryFromTheCategoryList =>
+      'Izvēlieties apakškategoriju no kategoriju saraksta.';
+
+  @override
+  String get validationChooseASubcategory => 'Izvēlieties apakškategoriju.';
+
+  @override
+  String get validationChooseATimeOfDay => 'Izvēlieties diennakts laiku.';
+
+  @override
+  String get validationChooseAnOpeningHoursMode =>
+      'Izvēlieties darba laika režīmu.';
+
+  @override
+  String get validationChooseHowTheOpeningHoursWork =>
+      'Izvēlieties, kā darbojas darba laiks.';
+
+  @override
+  String get validationChooseTheTextLanguage => 'Izvēlieties teksta valodu.';
+
+  @override
+  String get validationChooseWhatKindOfPlaceItIs =>
+      'Izvēlieties, kāda veida vieta tā ir.';
+
+  @override
+  String get validationChooseWhetherEntryIsFreeOrPaid =>
+      'Izvēlieties, vai ieeja ir bezmaksas vai maksas.';
+
+  @override
+  String get validationChooseYourRelationshipToThisPlace =>
+      'Izvēlieties savu saistību ar šo vietu.';
+
+  @override
+  String get validationCompleteThisCategoryCriterion =>
+      'Aizpildiet šo kategorijas kritēriju.';
+
+  @override
+  String get validationConfirmTheAvailabilityAgainItIsOlder =>
+      'Vēlreiz apstipriniet pieejamību — tā ir vecāka par nedēļu.';
+
+  @override
+  String get validationConfirmTheCategory => 'Apstipriniet kategoriju.';
+
+  @override
+  String get validationConfirmTheMapPin => 'Apstipriniet kartes atzīmi.';
+
+  @override
+  String get validationConfirmTheRentalStatements =>
+      'Apstipriniet nomas apliecinājumus.';
+
+  @override
+  String get validationConfirmWhenTheItemsAreAvailable =>
+      'Apstipriniet, kad lietas ir pieejamas.';
+
+  @override
+  String get validationDescribeHowToGetThere => 'Aprakstiet, kā tur nokļūt.';
+
+  @override
+  String get validationDescribeTheDamagePolicy =>
+      'Aprakstiet bojājumu noteikumus.';
+
+  @override
+  String get validationDescribeTheHandover => 'Aprakstiet nodošanu.';
+
+  @override
+  String get validationDescribeTheInformalAccess =>
+      'Aprakstiet neformālo piekļuvi.';
+
+  @override
+  String get validationDescribeTheOptionalContribution =>
+      'Aprakstiet brīvprātīgo iemaksu.';
+
+  @override
+  String get validationDoNotWriteTheTitleInCapitals =>
+      'Nerakstiet nosaukumu ar lielajiem burtiem.';
+
+  @override
+  String get validationKeepContactsOutOfTheTitle =>
+      'Neiekļaujiet nosaukumā kontaktinformāciju.';
+
+  @override
+  String get validationLinkedPlaceIsUnavailableForPublication =>
+      'Saistītā vieta nav pieejama publicēšanai.';
+
+  @override
+  String get validationMakeAtLeastOneItemAvailable =>
+      'Padariet pieejamu vismaz vienu lietu.';
+
+  @override
+  String get validationMinimumMustNotExceedMaximum =>
+      'Minimums nedrīkst pārsniegt maksimumu.';
+
+  @override
+  String get validationNameTheArea => 'Nosauciet apgabalu.';
+
+  @override
+  String get validationNameWhatYouRentOut => 'Nosauciet, ko izīrējat.';
+
+  @override
+  String get validationOnlySavedPublishedPlacesCanBeAdded =>
+      'Var pievienot tikai saglabātas, publicētas vietas.';
+
+  @override
+  String get validationOpeningTimesOverlap => 'Darba laiki pārklājas.';
+
+  @override
+  String get validationPlacesCouldNotBeCheckedTryAgain =>
+      'Vietas neizdevās pārbaudīt. Mēģiniet vēlāk.';
+
+  @override
+  String get validationRemoveDuplicateImages => 'Noņemiet dublētos attēlus.';
+
+  @override
+  String get validationRemoveSomeGalleryImages =>
+      'Noņemiet dažus galerijas attēlus.';
+
+  @override
+  String get validationRemoveSomePlaces => 'Noņemiet dažas vietas.';
+
+  @override
+  String get validationRemoveThePartFromTheBookingLink =>
+      'Noņemiet # daļu no rezervēšanas saites.';
+
+  @override
+  String get validationReviewTheGuideAgainItChangedAfter =>
+      'Pārskatiet gidu vēlreiz: tas mainījās pēc pārskatīšanas.';
+
+  @override
+  String get validationReviewTheGuideBeforeSubmitting =>
+      'Pirms iesniegšanas pārskatiet gidu.';
+
+  @override
+  String get validationSaveTheDraftAgainBeforeSubmitting =>
+      'Pirms iesniegšanas vēlreiz saglabājiet melnrakstu.';
+
+  @override
+  String get validationSaveThePlacesInTheGuideBefore =>
+      'Pirms iesniegšanas saglabājiet gida vietas.';
+
+  @override
+  String get validationSeasonalHoursAreNotSupportedYet =>
+      'Sezonāls darba laiks vēl netiek atbalstīts.';
+
+  @override
+  String get validationSetTheLocation => 'Norādiet atrašanās vietu.';
+
+  @override
+  String get validationSetTheMapPin => 'Novietojiet atzīmi kartē.';
+
+  @override
+  String get validationSetTheMinimumRenterAge =>
+      'Norādiet nomnieka minimālo vecumu.';
+
+  @override
+  String get validationSetTheTypicalDuration => 'Norādiet parasto ilgumu.';
+
+  @override
+  String get validationSetValidCoordinates => 'Norādiet derīgas koordinātas.';
+
+  @override
+  String get validationShortenACuratorNoteTo300Characters =>
+      'Saīsiniet kuratora piezīmi līdz 300 rakstzīmēm.';
+
+  @override
+  String get validationShortenTheDescription => 'Saīsiniet aprakstu.';
+
+  @override
+  String get validationShowTheApproximateAreaAt500M =>
+      'Rādiet aptuveno apgabalu ar precizitāti 500 m vai mazāku.';
+
+  @override
+  String get validationSomePlacesChangedStatusReviewTheGuide =>
+      'Dažām vietām mainījās statuss. Pārskatiet gidu vēlreiz.';
+
+  @override
+  String get validationTheLinkedPlaceIsNoLongerPublic =>
+      'Saistītā vieta vairs nav publiska. Noņemiet vai aizstājiet to.';
+
+  @override
+  String get validationTheLinkedPlaceWasNotFoundRemove =>
+      'Saistītā vieta netika atrasta. Noņemiet vai aizstājiet to.';
+
+  @override
+  String get validationThePinIsOutsideTheServiceArea =>
+      'Atzīme atrodas ārpus pakalpojuma zonas.';
+
+  @override
+  String get validationTheRentalRulesChangedConfirmTheStatements =>
+      'Nomas noteikumi mainījās. Vēlreiz apstipriniet apliecinājumus.';
+
+  @override
+  String get validationThisCategoryCannotBeRentedOutHere =>
+      'Šo kategoriju šeit vēl nevar izīrēt.';
+
+  @override
+  String get validationThisCategoryRequiresAnIDAtHandover =>
+      'Šai kategorijai nodošanas brīdī nepieciešams personu apliecinošs dokuments.';
+
+  @override
+  String get validationThisLanguageIsNotSupportedHere =>
+      'Šī valoda šeit netiek atbalstīta.';
+
+  @override
+  String get validationUse10140Characters => 'Izmantojiet 10–140 rakstzīmes.';
+
+  @override
+  String get validationUse10300Characters => 'Izmantojiet 10–300 rakstzīmes.';
+
+  @override
+  String get validationUse20180Characters => 'Izmantojiet 20–180 rakstzīmes.';
+
+  @override
+  String get validationUse3120Characters => 'Izmantojiet 3–120 rakstzīmes.';
+
+  @override
+  String get validationUse580Characters => 'Izmantojiet 5–80 rakstzīmes.';
+
+  @override
+  String get validationUse715DigitsOnlyAndSpaces =>
+      'Izmantojiet 7–15 ciparus; bez cipariem tikai + ( ) . - un atstarpes.';
+
+  @override
+  String get validationUseADeliveryRadiusUpTo50 =>
+      'Piegādes rādiuss nedrīkst pārsniegt 50 km.';
+
+  @override
+  String get validationUseAPositiveAmount => 'Norādiet pozitīvu summu.';
+
+  @override
+  String get validationUseASecureHttpsBookingLink =>
+      'Izmantojiet drošu https rezervēšanas saiti.';
+
+  @override
+  String get validationUseASecureHttpsLink => 'Izmantojiet drošu https saiti.';
+
+  @override
+  String get validationUseAtMost1000Characters =>
+      'Izmantojiet ne vairāk kā 1000 rakstzīmes.';
+
+  @override
+  String get validationUseAtMost12GalleryImages =>
+      'Izmantojiet ne vairāk kā 12 galerijas attēlus.';
+
+  @override
+  String get validationUseAtMost200Characters =>
+      'Izmantojiet ne vairāk kā 200 rakstzīmes.';
+
+  @override
+  String get validationUseAtMost300Characters =>
+      'Izmantojiet ne vairāk kā 300 rakstzīmes.';
+
+  @override
+  String get validationUsePositiveWholeMinutes =>
+      'Norādiet pozitīvu veselu minūšu skaitu.';
+
+  @override
+  String get validationUsePositiveWholeNumbers =>
+      'Norādiet pozitīvus veselus skaitļus.';
+
+  @override
+  String get validationUseTheMarketCurrency => 'Izmantojiet tirgus valūtu.';
+
+  @override
+  String get validationYourRelationshipToThePlaceDoesNot =>
+      'Jūsu saistība ar vietu neatbilst tam, kā tā tika pievienota.';
+
+  @override
+  String get fieldLabelAddress => 'Adrese';
+
+  @override
+  String get fieldLabelArea => 'Apgabals';
+
+  @override
+  String get fieldLabelAvailability => 'Pieejamība';
+
+  @override
+  String get fieldLabelBookingLink => 'Rezervēšanas saite';
+
+  @override
+  String get fieldLabelCancellationPolicy => 'Atcelšanas noteikumi';
+
+  @override
+  String get fieldLabelCategory => 'Kategorija';
+
+  @override
+  String get fieldLabelCategoryCriteria => 'Kategorijas kritēriji';
+
+  @override
+  String get fieldLabelCoverImage => 'Vāka attēls';
+
+  @override
+  String get fieldLabelCurrency => 'Valūta';
+
+  @override
+  String get fieldLabelDamagePolicy => 'Bojājumu noteikumi';
+
+  @override
+  String get fieldLabelDeliveryFee => 'Piegādes maksa';
+
+  @override
+  String get fieldLabelDeliveryRadius => 'Piegādes rādiuss';
+
+  @override
+  String get fieldLabelDescription => 'Apraksts';
+
+  @override
+  String get fieldLabelDraft => 'Melnraksts';
+
+  @override
+  String get fieldLabelEmail => 'E-pasts';
+
+  @override
+  String get fieldLabelEntry => 'Ieeja';
+
+  @override
+  String get fieldLabelEntryPrice => 'Ieejas cena';
+
+  @override
+  String get fieldLabelGallery => 'Galerija';
+
+  @override
+  String get fieldLabelGuideReview => 'Gida pārskatīšana';
+
+  @override
+  String get fieldLabelHandover => 'Nodošana';
+
+  @override
+  String get fieldLabelHandoverAddress => 'Nodošanas adrese';
+
+  @override
+  String get fieldLabelHandoverArea => 'Nodošanas apgabals';
+
+  @override
+  String get fieldLabelIDAtHandover => 'Dokuments nodošanas brīdī';
+
+  @override
+  String get fieldLabelItems => 'Lietas';
+
+  @override
+  String get fieldLabelKindOfPlace => 'Vietas veids';
+
+  @override
+  String get fieldLabelLocation => 'Atrašanās vieta';
+
+  @override
+  String get fieldLabelMapPin => 'Kartes atzīme';
+
+  @override
+  String get fieldLabelMinimumAge => 'Minimālais vecums';
+
+  @override
+  String get fieldLabelOpeningHours => 'Darba laiks';
+
+  @override
+  String get fieldLabelPhone => 'Tālrunis';
+
+  @override
+  String get fieldLabelPhotos => 'Fotoattēli';
+
+  @override
+  String get fieldLabelPlacesInTheGuide => 'Gida vietas';
+
+  @override
+  String get fieldLabelPrices => 'Cenas';
+
+  @override
+  String get fieldLabelPricingNote => 'Piezīme par cenām';
+
+  @override
+  String get fieldLabelSafetyNotice => 'Drošības norādījumi';
+
+  @override
+  String get fieldLabelShortDescription => 'Īss apraksts';
+
+  @override
+  String get fieldLabelStatements => 'Apliecinājumi';
+
+  @override
+  String get fieldLabelSubcategory => 'Apakškategorija';
+
+  @override
+  String get fieldLabelTerms => 'Noteikumi';
+
+  @override
+  String get fieldLabelTextLanguage => 'Teksta valoda';
+
+  @override
+  String get fieldLabelTitle => 'Nosaukums';
+
+  @override
+  String get fieldLabelWebsite => 'Tīmekļa vietne';
+
+  @override
+  String get fieldLabelYourRelationship => 'Jūsu saistība';
+
+  @override
+  String get validationNeededForServer => 'Nepieciešams publicēšanai serverī';
+
+  @override
+  String get validationGeneralRefusal =>
+      'Serveris noraidīja šo melnrakstu. Pārbaudiet melnrakstu un mēģiniet vēlreiz.';
+
+  @override
+  String validationRequirementLine(String field, String message) {
+    return '$field: $message';
+  }
+
+  @override
+  String get detailsLinkCopied => 'Saite nokopēta';
+
+  @override
+  String get detailsSavedToFavorites => 'Saglabāts izlasē';
+
+  @override
+  String get detailsCalendarExportFailed =>
+      'Neizdevās atvērt kalendāra eksportu';
+
+  @override
+  String get detailsInterestMarked => 'Interese par pasākumu atzīmēta';
+
+  @override
+  String get detailsCouldNotOpenLink => 'Neizdevās atvērt saiti.';
+
+  @override
+  String get detailsBookingSiteFailed => 'Neizdevās atvērt rezervēšanas vietni';
+
+  @override
+  String get detailsEnrollmentSiteFailed =>
+      'Neizdevās atvērt pieteikšanās vietni';
+
+  @override
+  String get detailsReportSent => 'Paldies. Ziņojums nosūtīts pārbaudei.';
+
+  @override
+  String get detailsReportFailed =>
+      'Neizdevās nosūtīt ziņojumu. Mēģiniet vēlreiz.';
+
+  @override
+  String get detailsRequestSent => 'Pieteikums nosūtīts';
+
+  @override
+  String get detailsPlaceTimezoneUnavailable =>
+      'Vietas laika josla nav pieejama';
+
+  @override
+  String get detailsVisitWhen => 'Kad jūs apmeklējāt?';
+
+  @override
+  String detailsVisitAdded(String date) {
+    return 'Pievienots apmeklējumu vēsturei · $date';
+  }
+
+  @override
+  String get detailsVisitFailed => 'Neizdevās atjaunināt apmeklējumu vēsturi';
+
+  @override
+  String get detailsLoadFailed => 'Detaļas neizdevās ielādēt';
+
+  @override
+  String get detailsUnavailable => 'Nav pieejams';
+
+  @override
+  String get detailsRouteUpdated => 'Maršruts ir atjaunināts';
+
+  @override
+  String get detailsRouteUnavailable => 'Maršruts nav pieejams';
+
+  @override
+  String get detailsNoConnection => 'Nav savienojuma';
+
+  @override
+  String get homeFree => 'Bez maksas';
+
+  @override
+  String get homeAnyTime => 'Jebkurā laikā';
+
+  @override
+  String get homeAnyArea => 'Jebkurā apgabalā';
+
+  @override
+  String homeRadiusKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String homeCardMeta(String price, String time, String venue) {
+    return '$price · $time · $venue';
+  }
+
+  @override
+  String get homeContinueRoute => 'Turpiniet savu maršrutu';
+
+  @override
+  String get homeSavedRoute => 'Saglabāts maršruts';
+
+  @override
+  String get homeContinueSavedSearch => 'Turpināt saglabāto meklējumu';
+
+  @override
+  String get homeContinueSmartSearch => 'Turpināt viedo meklēšanu';
+
+  @override
+  String get homeSmartRoute => 'Viedais maršruts';
+
+  @override
+  String get homeCreateFromSavedSearch =>
+      'Izveidot sludinājumu no saglabātā meklējuma';
+
+  @override
+  String get homeCreateFromSmartSearch =>
+      'Izveidot sludinājumu no viedās meklēšanas';
+
+  @override
+  String get homeNoActivities => 'Aktivitāšu vēl nav';
+
+  @override
+  String get homeViewAll => 'Skatīt visu';
+
+  @override
+  String placeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'address_or_label_required': 'Pievienojiet adresi vai vietas nosaukumu.',
+      'busy_time_notes_too_long': 'Saīsiniet piezīmes par noslogoto laiku.',
+      'category_required': 'Izvēlieties kategoriju.',
+      'closure_end_invalid': 'Slēgšanas beigas nedrīkst būt pirms sākuma.',
+      'closure_note_too_long': 'Saīsiniet piezīmi par slēgšanu.',
+      'closure_start_required': 'Norādiet, kad sākas slēgšana.',
+      'contact_url_invalid': 'Izmantojiet derīgu https saiti.',
+      'contacts_missing': 'Pievienojiet vismaz vienu kontaktu.',
+      'country_required': 'Izvēlieties valsti.',
+      'cover_required': 'Pievienojiet vāka fotoattēlu.',
+      'details_missing': 'Trūkst vietas datu.',
+      'email_invalid': 'Pārbaudiet e-pasta adresi.',
+      'entrance_hint_too_long': 'Saīsiniet norādi par ieeju.',
+      'entry_price_range_invalid':
+          'Minimālā cena nedrīkst pārsniegt maksimālo.',
+      'entry_price_required': 'Norādiet ieejas cenu.',
+      'entry_type_unknown': 'Izvēlieties, vai ieeja ir bezmaksas vai maksas.',
+      'full_description_length': 'Saīsiniet aprakstu.',
+      'gallery_limit': 'Noņemiet dažus galerijas fotoattēlus.',
+      'hours_exception_date_invalid': 'Pārbaudiet īpašās dienas datumu.',
+      'hours_exception_overlap': 'Īpašās dienas darba laiki pārklājas.',
+      'hours_exception_period_invalid': 'Pārbaudiet īpašās dienas darba laiku.',
+      'hours_exception_period_required':
+          'Pievienojiet darba laiku īpašajai dienai.',
+      'hours_exception_periods_not_allowed':
+          'Slēgtai īpašajai dienai nav darba laika.',
+      'hours_exceptions_not_allowed':
+          'Šajā darba laika režīmā īpašās dienas netiek izmantotas.',
+      'hours_mode_required': 'Izvēlieties, kā darbojas darba laiks.',
+      'hours_overlap': 'Darba laiki pārklājas.',
+      'hours_period_invalid': 'Pārbaudiet darba laiku.',
+      'hours_period_required': 'Pievienojiet nedēļas darba laiku.',
+      'hours_periods_not_allowed': 'Šim darba laika režīmam nav nedēļas laiku.',
+      'hours_unknown': 'Darba laiks vēl nav zināms.',
+      'kind_required': 'Izvēlieties, kāda veida vieta tā ir.',
+      'locale_unsupported': 'Šī valoda šeit netiek atbalstīta.',
+      'market_required': 'Vietai vēl nav tirgus.',
+      'minimum_visit_invalid': 'Pārbaudiet minimālo apmeklējuma laiku.',
+      'minimum_visit_required': 'Norādiet minimālo apmeklējuma laiku.',
+      'mixed_pricing_note_required':
+          'Pievienojiet piezīmi par cenām jauktai ieejai.',
+      'outside_market': 'Atzīme atrodas ārpus pakalpojuma zonas.',
+      'permission_denied': 'Jūs nevarat publicēt šo vietu.',
+      'phone_invalid': 'Pārbaudiet tālruņa numuru.',
+      'pin_approximate': 'Kartes atzīme ir aptuvena.',
+      'pin_invalid': 'Norādiet derīgas koordinātas.',
+      'pin_unconfirmed': 'Apstipriniet kartes atzīmi.',
+      'price_negative': 'Cena nevar būt negatīva.',
+      'pricing_note_too_long': 'Saīsiniet piezīmi par cenām.',
+      'pricing_url_invalid': 'Izmantojiet derīgu https cenu saiti.',
+      'publisher_invalid': 'Izvēlieties, kas publicē šo vietu.',
+      'seasonal_not_supported': 'Sezonāls darba laiks vēl netiek atbalstīts.',
+      'short_description_length':
+          'Īsajā aprakstā izmantojiet 20–180 rakstzīmes.',
+      'spend_range_invalid': 'Minimālie tēriņi nedrīkst pārsniegt maksimālos.',
+      'subcategory_required': 'Izvēlieties apakškategoriju.',
+      'timezone_required': 'Vietai nav laika joslas.',
+      'title_all_caps': 'Nerakstiet nosaukumu ar lielajiem burtiem.',
+      'title_contact': 'Neiekļaujiet nosaukumā kontaktinformāciju.',
+      'title_length': 'Nosaukumā izmantojiet 3–120 rakstzīmes.',
+      'visit_buffer_invalid': 'Pārbaudiet apmeklējuma rezervi.',
+      'visit_duration_invalid': 'Pārbaudiet parasto apmeklējuma ilgumu.',
+      'other': 'Pārbaudiet šo vietas daļu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String placeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'identity': 'Pamatinformācija',
+      'category': 'Kategorija',
+      'location': 'Atrašanās vieta',
+      'contacts': 'Kontakti',
+      'hours': 'Darba laiks',
+      'pricing': 'Cenas',
+      'planning': 'Apmeklējuma plānošana',
+      'media': 'Fotoattēli',
+      'other': 'Vieta',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get placeFinalChecks => 'Pēdējās pārbaudes';
+
+  @override
+  String sessionValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'session_category_not_allowed': 'Šī kategorija nav pieejama sesijām.',
+      'session_resource_missing':
+          'Nosauciet, ko rezervē, un norādiet tā laika joslu.',
+      'session_timezone_invalid': 'Apstipriniet laika joslu.',
+      'session_schedule_empty': 'Pievienojiet vismaz vienu laika posmu.',
+      'session_weekday_invalid': 'Pārbaudiet nedēļas dienas.',
+      'session_range_invalid': 'Pārbaudiet sākuma un beigu laiku.',
+      'session_range_overlap': 'Laika posmi pārklājas.',
+      'session_duration_out_of_range': 'Pārbaudiet sesijas ilgumu.',
+      'session_buffer_out_of_range': 'Pārbaudiet pārtraukumu starp sesijām.',
+      'session_notice_out_of_range':
+          'Pārbaudiet iepriekšējas rezervēšanas laiku.',
+      'session_projection_overflow':
+          'Grafiks rada pārāk daudz sesiju. Saīsiniet to.',
+      'session_exception_invalid': 'Pārbaudiet izņēmumus.',
+      'session_party_size_out_of_range': 'Pārbaudiet grupas lielumu.',
+      'session_price_invalid': 'Pārbaudiet cenu.',
+      'session_booking_url_invalid':
+          'Izmantojiet drošu https rezervēšanas saiti.',
+      'session_media_incomplete': 'Pievienojiet nepieciešamos fotoattēlus.',
+      'session_publisher_ineligible':
+          'Jūs nevarat publicēt šī profila vai lapas vārdā.',
+      'session_legacy_review_required':
+          'Pirms publicēšanas pārskatiet šo vecāko melnrakstu.',
+      'session_no_offers_in_window': 'Tuvākajās nedēļās nav nevienas sesijas.',
+      'session_candidates_dropped_for_buffer':
+          'Daži laiki izlaisti, lai saglabātu pārtraukumus.',
+      'session_dst_slots_skipped': 'Daži laiki izlaisti pulksteņa maiņas dēļ.',
+      'session_external_state_unknown':
+          'Rezervēšanas vietnes stāvokli neizdevās pārbaudīt.',
+      'session_material_revision':
+          'Šī izmaiņa lūgs rezervējušajiem apstiprināt vēlreiz.',
+      'session_category_criteria_incomplete':
+          'Aizpildiet kategorijas kritērijus.',
+      'other': 'Pārbaudiet šo sesijas daļu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionFixBeforePublishing => 'Izlabojiet pirms publicēšanas';
+
+  @override
+  String routeValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'route_too_short': 'Maršruts ir pārāk īss.',
+      'route_too_long': 'Maršruts ir pārāk garš.',
+      'route_duration_too_long': 'Maršruts aizņem pārāk daudz laika.',
+      'loop_must_close': 'Lokam jābeidzas tur, kur tas sākas.',
+      'one_way_must_not_close': 'Vienvirziena maršrutam nav jābeidzas sākumā.',
+      'out_and_back_must_return':
+          'Turp un atpakaļ maršrutam jāatgriežas sākumā.',
+      'anchors_too_few': 'Pievienojiet maršrutam vairāk punktu.',
+      'segments_missing': 'Izveidojiet maršrutu starp punktiem.',
+      'manual_duration_reason_required':
+          'Paskaidrojiet, kāpēc mainījāt ilgumu.',
+      'provider_license_disallows_publish': 'Šos kartes datus nevar publicēt.',
+      'temporary_id_not_publishable':
+          'Pirms publicēšanas saglabājiet maršrutu.',
+      'family_segment': 'Maršruta posmam nepieciešama uzmanība.',
+      'family_waypoint': 'Maršruta punktam nepieciešama uzmanība.',
+      'family_anchor': 'Pārbaudiet maršruta punktus.',
+      'family_condition': 'Pārbaudiet maršruta apstākļus.',
+      'family_duration': 'Pārbaudiet maršruta ilgumu.',
+      'family_data':
+          'Maršruta dati ir novecojuši. Izveidojiet maršrutu no jauna.',
+      'other': 'Pārbaudiet šo maršruta daļu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeValidationSection(String section) {
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'route': 'Maršruts',
+      'geometry': 'Trase',
+      'metrics': 'Attālums un laiks',
+      'operations': 'Labojumi',
+      'profile': 'Profils',
+      'quality': 'Kvalitāte',
+      'relations': 'Punkti',
+      'sources': 'Avoti',
+      'waypoints': 'Interešu punkti',
+      'conditions': 'Apstākļi',
+      'other': 'Maršruts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String routeIssueLine(String message, String section) {
+    return '• $message — $section';
+  }
+
+  @override
+  String classWorkshopEnrollmentReason(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'closed': 'Pieteikšanās slēgta',
+      'on_site': 'Pieteikšanās uz vietas',
+      'not_provided': 'Nav informācijas par pieteikšanos',
+      'other': 'Informācija par pieteikšanos',
+    });
+    return '$_temp0';
+  }
 }

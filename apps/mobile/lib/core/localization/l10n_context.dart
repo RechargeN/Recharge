@@ -12,3 +12,13 @@ extension L10nContext on BuildContext {
   AppLocalizations get l10n =>
       AppLocalizations.of(this) ?? lookupAppLocalizations(const Locale('en'));
 }
+
+/// L4: the endonym of a content or UI language tag (`lv` → Latviešu); an
+/// unknown tag is shown as the tag itself, never translated.
+String languageEndonym(AppLocalizations l10n, String tag) =>
+    switch (tag.split(RegExp('[-_]')).first.toLowerCase()) {
+      'en' => l10n.languageNameEn,
+      'lv' => l10n.languageNameLv,
+      'ru' => l10n.languageNameRu,
+      _ => tag,
+    };

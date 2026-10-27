@@ -2,344 +2,369 @@ import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/create_draft_entity.dart';
 
 /// Client text for the server's public validation details of Place, Rental
-/// and Collection (M1 stage 3, owner decision 3-A). Only a known code on its
+/// and Collection (M1 stage 3, owner decision 3-A). L4: the values are ARB
+/// message ids (`validation*`, `fieldLabel*`) that the UI resolves. Only a known code on its
 /// exact field path renders; anything else stays the general refusal message,
 /// as for Activity (`activity_validation_feedback.dart`).
 const Map<String, (String, String)> _place = <String, (String, String)>{
-  'place.title': ('/body/title', 'Use 3–120 characters.'),
+  'place.title': ('/body/title', 'validationUse3120Characters'),
   'place.title.all_caps': (
     '/body/title',
-    'Do not write the title in capitals.',
+    'validationDoNotWriteTheTitleInCapitals',
   ),
   'place.title.contact_like': (
     '/body/title',
-    'Keep contacts out of the title.',
+    'validationKeepContactsOutOfTheTitle',
   ),
-  'place.place_kind': ('/body/placeKind', 'Choose what kind of place it is.'),
+  'place.place_kind': (
+    '/body/placeKind',
+    'validationChooseWhatKindOfPlaceItIs',
+  ),
   'place.relationship_to_place': (
     '/body/relationshipToPlace',
-    'Choose your relationship to this place.',
+    'validationChooseYourRelationshipToThisPlace',
   ),
   'place.short_description': (
     '/body/shortDescription',
-    'Use 20–180 characters.',
+    'validationUse20180Characters',
   ),
   'place.full_description': (
     '/body/fullDescription',
-    'Shorten the description.',
+    'validationShortenTheDescription',
   ),
-  'place.content_locale': ('/body/contentLocale', 'Choose the text language.'),
+  'place.content_locale': (
+    '/body/contentLocale',
+    'validationChooseTheTextLanguage',
+  ),
   'place.content_locale.unsupported': (
     '/body/contentLocale',
-    'This language is not supported here.',
+    'validationThisLanguageIsNotSupportedHere',
   ),
-  'place.category_id': ('/body/categoryId', 'Choose a category.'),
-  'place.subcategory_id': ('/body/subcategoryId', 'Choose a subcategory.'),
+  'place.category_id': ('/body/categoryId', 'validationChooseACategory'),
+  'place.subcategory_id': (
+    '/body/subcategoryId',
+    'validationChooseASubcategory',
+  ),
   'place.subcategory.not_applicable': (
     '/body/subcategoryId',
-    'Choose a subcategory available for places.',
+    'validationChooseASubcategoryAvailableForPlaces',
   ),
   'place.taxonomy_unavailable': (
     '/body/subcategoryId',
-    'Category data is unavailable. Try again later.',
+    'validationCategoryDataIsUnavailableTryAgainLater',
   ),
-  'place.location': ('/body/location', 'Set the location.'),
-  'place.location.point': ('/body/location/point', 'Set the map pin.'),
+  'place.location': ('/body/location', 'validationSetTheLocation'),
+  'place.location.point': ('/body/location/point', 'validationSetTheMapPin'),
   'place.location.pin_unconfirmed': (
     '/body/location/pinConfirmed',
-    'Confirm the map pin.',
+    'validationConfirmTheMapPin',
   ),
   'place.location.outside_service_area': (
     '/body/location/point',
-    'The pin is outside the service area.',
+    'validationThePinIsOutsideTheServiceArea',
   ),
   'place.location.address_or_label_missing': (
     '/body/location/formattedAddress',
-    'Add an address or a location label.',
+    'validationAddAnAddressOrALocationLabel',
   ),
-  'place.hours': ('/body/hours', 'Choose how the opening hours work.'),
-  'place.hours.mode': ('/body/hours/mode', 'Choose an opening-hours mode.'),
+  'place.hours': ('/body/hours', 'validationChooseHowTheOpeningHoursWork'),
+  'place.hours.mode': (
+    '/body/hours/mode',
+    'validationChooseAnOpeningHoursMode',
+  ),
   'place.hours.mode_unsupported': (
     '/body/hours/mode',
-    'Seasonal hours are not supported yet.',
+    'validationSeasonalHoursAreNotSupportedYet',
   ),
   'place.hours.weekly_required': (
     '/body/hours/weeklyPeriods',
-    'Add the weekly opening hours.',
+    'validationAddTheWeeklyOpeningHours',
   ),
   'place.hours.period_invalid': (
     '/body/hours/weeklyPeriods',
-    'Check the opening times.',
+    'validationCheckTheOpeningTimes',
   ),
   'place.hours.period_overlap': (
     '/body/hours/weeklyPeriods',
-    'Opening times overlap.',
+    'validationOpeningTimesOverlap',
   ),
   'place.contacts.phone': (
     '/body/contacts/phone',
-    'Use 7–15 digits; only + ( ) . - and spaces besides digits.',
+    'validationUse715DigitsOnlyAndSpaces',
   ),
-  'place.contacts.email': ('/body/contacts/email', 'Check the email address.'),
+  'place.contacts.email': (
+    '/body/contacts/email',
+    'validationCheckTheEmailAddress',
+  ),
   'place.contacts.website': (
     '/body/contacts/website',
-    'Use a secure https link.',
+    'validationUseASecureHttpsLink',
   ),
   'place.contacts.bookingUrl': (
     '/body/contacts/bookingUrl',
-    'Use a secure https link.',
+    'validationUseASecureHttpsLink',
   ),
-  'place.media.cover_missing': ('/body/media/coverImage', 'Add a cover image.'),
+  'place.media.cover_missing': (
+    '/body/media/coverImage',
+    'validationAddACoverImage',
+  ),
   'place.media.gallery_too_large': (
     '/body/media/gallery',
-    'Remove some gallery images.',
+    'validationRemoveSomeGalleryImages',
   ),
   'place.pricing.entry_type': (
     '/body/pricing/entryType',
-    'Choose whether entry is free or paid.',
+    'validationChooseWhetherEntryIsFreeOrPaid',
   ),
   'place.pricing.currency_code': (
     '/body/pricing/currencyCode',
-    'Use the market currency.',
+    'validationUseTheMarketCurrency',
   ),
   'place.pricing.entry_price_from_required': (
     '/body/pricing/entryPriceFrom',
-    'Add the entry price.',
+    'validationAddTheEntryPrice',
   ),
   'place.pricing.note_required': (
     '/body/pricing/pricingNote',
-    'Add a pricing note.',
+    'validationAddAPricingNote',
   ),
   'place.provenance.source_type': (
     '/body/provenance/sourceType',
-    'Your relationship to the place does not match how it was added.',
+    'validationYourRelationshipToThePlaceDoesNot',
   ),
   'place.local_id_unreplaced': (
     '/body',
-    'Save the draft again before submitting.',
+    'validationSaveTheDraftAgainBeforeSubmitting',
   ),
 };
 
 const Map<String, (String, String)> _rental = <String, (String, String)>{
-  'rental.title_length': ('/body/title', 'Check the title length.'),
+  'rental.title_length': ('/body/title', 'validationCheckTheTitleLength'),
   'rental.short_description_length': (
     '/body/shortDescription',
-    'Check the short description length.',
+    'validationCheckTheShortDescriptionLength',
   ),
   'rental.full_description_length': (
     '/body/fullDescription',
-    'Check the description length.',
+    'validationCheckTheDescriptionLength',
   ),
-  'rental.category_required': ('/body/categoryId', 'Choose a category.'),
+  'rental.category_required': ('/body/categoryId', 'validationChooseACategory'),
   'rental.category_not_confirmed': (
     '/body/categoryConfirmed',
-    'Confirm the category.',
+    'validationConfirmTheCategory',
   ),
   'rental.subcategory_required': (
     '/body/subcategoryId',
-    'Name what you rent out.',
+    'validationNameWhatYouRentOut',
   ),
   'rental.policy_unavailable': (
     '/body/subcategoryId',
-    'This category cannot be rented out here yet.',
+    'validationThisCategoryCannotBeRentedOutHere',
   ),
-  'rental.cover_required': ('/body/mediaRefs', 'Add a cover photo.'),
+  'rental.cover_required': ('/body/mediaRefs', 'validationAddACoverPhoto'),
   'rental.inventory_required': (
     '/body/inventoryGroups',
-    'Add what you rent out.',
+    'validationAddWhatYouRentOut',
   ),
   'rental.inventory_no_available_group': (
     '/body/inventoryGroups',
-    'Make at least one item available.',
+    'validationMakeAtLeastOneItemAvailable',
   ),
   'rental.coverage_required': (
     '/body/availability/coverage',
-    'Confirm when the items are available.',
+    'validationConfirmWhenTheItemsAreAvailable',
   ),
   'rental.coverage_stale': (
     '/body/availability/coverage/confirmedAtUtc',
-    'Confirm the availability again; it is older than a week.',
+    'validationConfirmTheAvailabilityAgainItIsOlder',
   ),
   'rental.coverage_confirmed_in_future': (
     '/body/availability/coverage/confirmedAtUtc',
-    'Check the device clock and confirm the availability again.',
+    'validationCheckTheDeviceClockAndConfirmThe',
   ),
-  'rental.handover_required': ('/body/handover', 'Describe the handover.'),
+  'rental.handover_required': (
+    '/body/handover',
+    'validationDescribeTheHandover',
+  ),
   'rental.handover_precision_too_fine': (
     '/body/handover/publicGeoPrecisionMeters',
-    'Show the approximate area at 500 m or coarser.',
+    'validationShowTheApproximateAreaAt500M',
   ),
   'rental.handover_public_address_required': (
     '/body/handover/publicAddress',
-    'Add the public business address.',
+    'validationAddThePublicBusinessAddress',
   ),
   'rental.delivery_radius': (
     '/body/handover/deliveryRadiusKm',
-    'Use a delivery radius up to 50 km.',
+    'validationUseADeliveryRadiusUpTo50',
   ),
   'rental.delivery_fee_required': (
     '/body/handover/deliveryFee',
-    'Add the delivery fee (zero if free).',
+    'validationAddTheDeliveryFeeZeroIfFree',
   ),
-  'rental.terms_required': ('/body/terms', 'Add the rental terms.'),
+  'rental.terms_required': ('/body/terms', 'validationAddTheRentalTerms'),
   'rental.safety_notice_required': (
     '/body/terms/safetyNotice',
-    'Add a safety notice for this category.',
+    'validationAddASafetyNoticeForThisCategory',
   ),
   'rental.min_renter_age_required': (
     '/body/terms/minRenterAge',
-    'Set the minimum renter age.',
+    'validationSetTheMinimumRenterAge',
   ),
   'rental.id_requirement_required': (
     '/body/terms/idRequiredAtHandover',
-    'This category requires an ID at handover.',
+    'validationThisCategoryRequiresAnIDAtHandover',
   ),
-  'rental.pricing_required': ('/body/pricing', 'Add the prices.'),
+  'rental.pricing_required': ('/body/pricing', 'validationAddThePrices'),
   'rental.damage_policy_required': (
     '/body/pricing/damagePolicy',
-    'Describe the damage policy.',
+    'validationDescribeTheDamagePolicy',
   ),
   'rental.cancellation_policy_required': (
     '/body/pricing/cancellationPolicyId',
-    'Choose a cancellation policy.',
+    'validationChooseACancellationPolicy',
   ),
   'rental.external_url_fragment': (
     '/body/fulfillment/externalBookingUrl',
-    'Remove the # part from the booking link.',
+    'validationRemoveThePartFromTheBookingLink',
   ),
   'rental.external_url_unsafe': (
     '/body/fulfillment/externalBookingUrl',
-    'Use a secure https booking link.',
+    'validationUseASecureHttpsBookingLink',
   ),
   'rental.attestation_required': (
     '/body/attestation',
-    'Confirm the rental statements.',
+    'validationConfirmTheRentalStatements',
   ),
   'rental.attestation_stale_policy': (
     '/body/attestation/policyVersion',
-    'The rental rules changed. Confirm the statements again.',
+    'validationTheRentalRulesChangedConfirmTheStatements',
   ),
   'rental.local_id_unreplaced': (
     '/body',
-    'Save the draft again before submitting.',
+    'validationSaveTheDraftAgainBeforeSubmitting',
   ),
 };
 
 const Map<String, (String, String)> _collection = <String, (String, String)>{
-  'collection.title_required': ('/body/title', 'Add a title.'),
+  'collection.title_required': ('/body/title', 'validationAddATitle'),
   'collection.short_description_required': (
     '/body/shortDescription',
-    'Add a short description.',
+    'validationAddAShortDescription',
   ),
   'collection.full_description_length': (
     '/body/fullDescription',
-    'Shorten the description.',
+    'validationShortenTheDescription',
   ),
-  'collection.category_required': ('/body/categoryId', 'Choose a category.'),
+  'collection.category_required': (
+    '/body/categoryId',
+    'validationChooseACategory',
+  ),
   'collection.subcategory_required': (
     '/body/subcategoryId',
-    'Choose a subcategory.',
+    'validationChooseASubcategory',
   ),
   'collection.subcategory_not_applicable': (
     '/body/subcategoryId',
-    'Choose a subcategory from the category list.',
+    'validationChooseASubcategoryFromTheCategoryList',
   ),
   'collection.cover_image_required': (
     '/body/media/coverImage',
-    'Add a cover image.',
+    'validationAddACoverImage',
   ),
-  'collection.area_required': ('/body/areaLabel', 'Name the area.'),
-  'collection.items_required': ('/body/items', 'Add places to the guide.'),
-  'collection.min_items': ('/body/items', 'Add at least three places.'),
-  'collection.too_many_items': ('/body/items', 'Remove some places.'),
+  'collection.area_required': ('/body/areaLabel', 'validationNameTheArea'),
+  'collection.items_required': ('/body/items', 'validationAddPlacesToTheGuide'),
+  'collection.min_items': ('/body/items', 'validationAddAtLeastThreePlaces'),
+  'collection.too_many_items': ('/body/items', 'validationRemoveSomePlaces'),
   'collection.item_ref_invalid': (
     '/body/items',
-    'Only saved, published places can be added.',
+    'validationOnlySavedPublishedPlacesCanBeAdded',
   ),
   'collection.item_ref_unknown': (
     '/body/items',
-    'A place in the guide was not found. Remove or replace it.',
+    'validationAPlaceInTheGuideWasNot',
   ),
   'collection.item_ref_forbidden': (
     '/body/items',
-    'A place in the guide is no longer public. Remove or replace it.',
+    'validationAPlaceInTheGuideIsNo',
   ),
   'collection.curator_note_length': (
     '/body/items',
-    'Shorten a curator note to 300 characters.',
+    'validationShortenACuratorNoteTo300Characters',
   ),
   'collection.published_objects_unavailable': (
     '/body/items',
-    'Places could not be checked. Try again later.',
+    'validationPlacesCouldNotBeCheckedTryAgain',
   ),
   'collection.composition_review_required': (
     '/body/compositionReview',
-    'Review the guide before submitting.',
+    'validationReviewTheGuideBeforeSubmitting',
   ),
   'collection.composition_review_stale': (
     '/body/compositionReview',
-    'Review the guide again: it changed after the review.',
+    'validationReviewTheGuideAgainItChangedAfter',
   ),
   'collection.composition_review_mismatch': (
     '/body/compositionReview',
-    'Some places changed status. Review the guide again.',
+    'validationSomePlacesChangedStatusReviewTheGuide',
   ),
   'collection.local_id_unreplaced': (
     '/body',
-    'Save the places in the guide before submitting.',
+    'validationSaveThePlacesInTheGuideBefore',
   ),
 };
 
 const Map<String, String> _labels = <String, String>{
-  '/body': 'Draft',
-  '/body/title': 'Title',
-  '/body/placeKind': 'Kind of place',
-  '/body/relationshipToPlace': 'Your relationship',
-  '/body/shortDescription': 'Short description',
-  '/body/fullDescription': 'Description',
-  '/body/contentLocale': 'Text language',
-  '/body/categoryId': 'Category',
-  '/body/categoryConfirmed': 'Category',
-  '/body/subcategoryId': 'Subcategory',
-  '/body/location': 'Location',
-  '/body/location/point': 'Map pin',
-  '/body/location/pinConfirmed': 'Map pin',
-  '/body/location/formattedAddress': 'Address',
-  '/body/hours': 'Opening hours',
-  '/body/hours/mode': 'Opening hours',
-  '/body/hours/weeklyPeriods': 'Opening hours',
-  '/body/contacts/phone': 'Phone',
-  '/body/contacts/email': 'Email',
-  '/body/contacts/website': 'Website',
-  '/body/contacts/bookingUrl': 'Booking link',
-  '/body/media/coverImage': 'Cover image',
-  '/body/media/gallery': 'Gallery',
-  '/body/mediaRefs': 'Photos',
-  '/body/pricing': 'Prices',
-  '/body/pricing/entryType': 'Entry',
-  '/body/pricing/currencyCode': 'Currency',
-  '/body/pricing/entryPriceFrom': 'Entry price',
-  '/body/pricing/pricingNote': 'Pricing note',
-  '/body/pricing/damagePolicy': 'Damage policy',
-  '/body/pricing/cancellationPolicyId': 'Cancellation policy',
-  '/body/provenance/sourceType': 'Your relationship',
-  '/body/inventoryGroups': 'Items',
-  '/body/availability/coverage': 'Availability',
-  '/body/availability/coverage/confirmedAtUtc': 'Availability',
-  '/body/handover': 'Handover',
-  '/body/handover/publicGeoPrecisionMeters': 'Handover area',
-  '/body/handover/publicAddress': 'Handover address',
-  '/body/handover/deliveryRadiusKm': 'Delivery radius',
-  '/body/handover/deliveryFee': 'Delivery fee',
-  '/body/terms': 'Terms',
-  '/body/terms/safetyNotice': 'Safety notice',
-  '/body/terms/minRenterAge': 'Minimum age',
-  '/body/terms/idRequiredAtHandover': 'ID at handover',
-  '/body/fulfillment/externalBookingUrl': 'Booking link',
-  '/body/attestation': 'Statements',
-  '/body/attestation/policyVersion': 'Statements',
-  '/body/areaLabel': 'Area',
-  '/body/items': 'Places in the guide',
-  '/body/compositionReview': 'Guide review',
+  '/body': 'fieldLabelDraft',
+  '/body/title': 'fieldLabelTitle',
+  '/body/placeKind': 'fieldLabelKindOfPlace',
+  '/body/relationshipToPlace': 'fieldLabelYourRelationship',
+  '/body/shortDescription': 'fieldLabelShortDescription',
+  '/body/fullDescription': 'fieldLabelDescription',
+  '/body/contentLocale': 'fieldLabelTextLanguage',
+  '/body/categoryId': 'fieldLabelCategory',
+  '/body/categoryConfirmed': 'fieldLabelCategory',
+  '/body/subcategoryId': 'fieldLabelSubcategory',
+  '/body/location': 'fieldLabelLocation',
+  '/body/location/point': 'fieldLabelMapPin',
+  '/body/location/pinConfirmed': 'fieldLabelMapPin',
+  '/body/location/formattedAddress': 'fieldLabelAddress',
+  '/body/hours': 'fieldLabelOpeningHours',
+  '/body/hours/mode': 'fieldLabelOpeningHours',
+  '/body/hours/weeklyPeriods': 'fieldLabelOpeningHours',
+  '/body/contacts/phone': 'fieldLabelPhone',
+  '/body/contacts/email': 'fieldLabelEmail',
+  '/body/contacts/website': 'fieldLabelWebsite',
+  '/body/contacts/bookingUrl': 'fieldLabelBookingLink',
+  '/body/media/coverImage': 'fieldLabelCoverImage',
+  '/body/media/gallery': 'fieldLabelGallery',
+  '/body/mediaRefs': 'fieldLabelPhotos',
+  '/body/pricing': 'fieldLabelPrices',
+  '/body/pricing/entryType': 'fieldLabelEntry',
+  '/body/pricing/currencyCode': 'fieldLabelCurrency',
+  '/body/pricing/entryPriceFrom': 'fieldLabelEntryPrice',
+  '/body/pricing/pricingNote': 'fieldLabelPricingNote',
+  '/body/pricing/damagePolicy': 'fieldLabelDamagePolicy',
+  '/body/pricing/cancellationPolicyId': 'fieldLabelCancellationPolicy',
+  '/body/provenance/sourceType': 'fieldLabelYourRelationship',
+  '/body/inventoryGroups': 'fieldLabelItems',
+  '/body/availability/coverage': 'fieldLabelAvailability',
+  '/body/availability/coverage/confirmedAtUtc': 'fieldLabelAvailability',
+  '/body/handover': 'fieldLabelHandover',
+  '/body/handover/publicGeoPrecisionMeters': 'fieldLabelHandoverArea',
+  '/body/handover/publicAddress': 'fieldLabelHandoverAddress',
+  '/body/handover/deliveryRadiusKm': 'fieldLabelDeliveryRadius',
+  '/body/handover/deliveryFee': 'fieldLabelDeliveryFee',
+  '/body/terms': 'fieldLabelTerms',
+  '/body/terms/safetyNotice': 'fieldLabelSafetyNotice',
+  '/body/terms/minRenterAge': 'fieldLabelMinimumAge',
+  '/body/terms/idRequiredAtHandover': 'fieldLabelIDAtHandover',
+  '/body/fulfillment/externalBookingUrl': 'fieldLabelBookingLink',
+  '/body/attestation': 'fieldLabelStatements',
+  '/body/attestation/policyVersion': 'fieldLabelStatements',
+  '/body/areaLabel': 'fieldLabelArea',
+  '/body/items': 'fieldLabelPlacesInTheGuide',
+  '/body/compositionReview': 'fieldLabelGuideReview',
 };
 
 Map<String, (String, String)>? _tableFor(CreateObjectType type) =>
@@ -368,7 +393,7 @@ Map<String, String> contentFieldFeedback(
         item.fieldPath.startsWith('/body/criteria/')) {
       result.putIfAbsent(
         item.fieldPath,
-        () => 'Complete this category criterion.',
+        () => 'validationCompleteThisCategoryCriterion',
       );
     }
   }
@@ -378,4 +403,6 @@ Map<String, String> contentFieldFeedback(
 /// A readable name of a field path; the criteria get their own label.
 String contentFieldLabel(String fieldPath) =>
     _labels[fieldPath] ??
-    (fieldPath.startsWith('/body/criteria/') ? 'Category criteria' : 'Draft');
+    (fieldPath.startsWith('/body/criteria/')
+        ? 'fieldLabelCategoryCriteria'
+        : 'fieldLabelDraft');

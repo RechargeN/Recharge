@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'route_issue_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/geo/geo_bounds.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
@@ -281,7 +283,11 @@ class _IssuePanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
-                '• ${issue.code} — ${issue.location.sectionId}',
+                routeIssueLine(
+                  context.l10n,
+                  issue.code,
+                  issue.location.sectionId,
+                ),
                 key: ValueKey<String>('route-issue-${issue.stableId}'),
               ),
             ),

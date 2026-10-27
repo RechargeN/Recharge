@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
@@ -689,13 +690,13 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Fix before publishing',
+              context.l10n.sessionFixBeforePublishing,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             for (final SessionValidationIssue issue in _issues)
               if (issue.isBlocking)
                 Text(
-                  '• ${issue.code}',
+                  '• ${context.l10n.sessionValidationIssue(issue.code)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
           ],
@@ -710,7 +711,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            issue.code,
+            context.l10n.sessionValidationIssue(issue.code),
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),

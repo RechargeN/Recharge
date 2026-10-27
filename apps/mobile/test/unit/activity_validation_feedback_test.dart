@@ -50,9 +50,10 @@ void main() {
           'fieldPath': '/body/criteria/difficulty',
         },
       ]);
+      // L4: stable message ids; the UI resolves them per language.
       expect(activityFieldFeedback(violations), {
-        '/body/title': 'Use 5–80 characters.',
-        '/body/criteria/difficulty': 'Complete this category criterion.',
+        '/body/title': 'validationUse580Characters',
+        '/body/criteria/difficulty': 'validationCompleteThisCategoryCriterion',
       });
       expect(
         activityFieldFeedback(

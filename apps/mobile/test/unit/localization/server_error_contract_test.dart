@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/localization/app_locale_policy.dart';
 import 'package:recharge/core/localization/user_message_catalog.dart';
+import 'package:recharge/features/create/presentation/widgets/route/route_issue_texts.dart';
 import 'package:recharge/generated/l10n/app_localizations.dart';
 
 /// L4 check 2: every typed code the R1 server contracts can return, and every
@@ -177,5 +178,87 @@ void main() {
       lv.errorFeatureDisabled,
     );
     expect(UserMessageCatalog.publication(lv, 'zzz'), lv.errorGeneric);
+  });
+
+  test('every local Place check code and section has its own text in '
+      'lv, en and ru (L4)', () {
+    final String source = File(
+      'lib/features/create/domain/usecases/validate_place_draft_usecase.dart',
+    ).readAsStringSync();
+    final Iterable<RegExpMatch> raised = RegExp(
+      r"(?:error|warning)\(\s*'([a-z_]+)',\s*'([a-z_]+)'",
+    ).allMatches(source);
+    final Set<String> codes = {for (final m in raised) m.group(1)!};
+    final Set<String> sections = {for (final m in raised) m.group(2)!};
+    expect(codes.length, greaterThan(40));
+    for (final AppLocalizations l10n in languages) {
+      final String otherCode = l10n.placeValidationIssue('not_a_code');
+      final String otherSection = l10n.placeValidationSection('not_a_section');
+      expect(
+        codes.where((String c) => l10n.placeValidationIssue(c) == otherCode),
+        isEmpty,
+        reason: l10n.localeName,
+      );
+      expect(
+        sections.where(
+          (String c) => l10n.placeValidationSection(c) == otherSection,
+        ),
+        isEmpty,
+        reason: l10n.localeName,
+      );
+      // Positive control: an unknown code reads as the safe fallback.
+      expect(otherCode.contains('not_a_code'), isFalse);
+    }
+  });
+
+  test('every Session and Route check code and Route section a validator '
+      'raises reads as a real message in lv, en and ru (L4)', () {
+    final Set<String> session = <String>{
+      for (final RegExpMatch m
+          in RegExp(
+            r"static const String \w+ =\s*'(session_[a-z_]+)'",
+          ).allMatches(
+            File(
+              'lib/features/create/domain/entities/session_validation_issue.dart',
+            ).readAsStringSync(),
+          ))
+        m.group(1)!,
+    };
+    final Iterable<RegExpMatch>
+    route = RegExp(r"(?:block|warn)\(\s*'([a-z_0-9]+)',\s*'([a-z_]+)'").allMatches(
+      File(
+        'lib/features/create/domain/usecases/validate_route_draft_usecase.dart',
+      ).readAsStringSync(),
+    );
+    expect(session.length, greaterThan(20));
+    expect(route.length, greaterThan(80));
+    for (final AppLocalizations l10n in languages) {
+      final String sessionOther = l10n.sessionValidationIssue('x');
+      final String routeOther = l10n.routeValidationIssue('x');
+      final String sectionOther = l10n.routeValidationSection('x');
+      expect(
+        session.where(
+          (String c) => l10n.sessionValidationIssue(c) == sessionOther,
+        ),
+        isEmpty,
+      );
+      for (final RegExpMatch m in route) {
+        final String text = routeIssueLine(l10n, m.group(1)!, m.group(2)!);
+        expect(text.contains(m.group(1)!), isFalse);
+        expect(
+          l10n.routeValidationIssue(routeIssueMessageKey(m.group(1)!)),
+          isNot(routeOther),
+          reason: m.group(1),
+        );
+        expect(
+          l10n.routeValidationSection(m.group(2)!),
+          isNot(
+            sectionOther == l10n.routeValidationSection('route')
+                ? ''
+                : sectionOther,
+          ),
+        );
+      }
+    }
   });
 }

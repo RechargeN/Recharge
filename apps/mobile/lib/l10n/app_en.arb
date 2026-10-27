@@ -1439,5 +1439,899 @@
   "importSignIn": "Sign in to import your local data",
   "@importSignIn": {
     "description": "Signed-out state of the import test page."
+  },
+  "validationAPlaceInTheGuideIsNo": "A place in the guide is no longer public. Remove or replace it.",
+  "@validationAPlaceInTheGuideIsNo": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAPlaceInTheGuideWasNot": "A place in the guide was not found. Remove or replace it.",
+  "@validationAPlaceInTheGuideWasNot": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddACoverImage": "Add a cover image.",
+  "@validationAddACoverImage": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddACoverPhoto": "Add a cover photo.",
+  "@validationAddACoverPhoto": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddAPricingNote": "Add a pricing note.",
+  "@validationAddAPricingNote": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddASafetyNoticeForThisCategory": "Add a safety notice for this category.",
+  "@validationAddASafetyNoticeForThisCategory": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddAShortDescription": "Add a short description.",
+  "@validationAddAShortDescription": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddATitle": "Add a title.",
+  "@validationAddATitle": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddAnAddressOrALocationLabel": "Add an address or a location label.",
+  "@validationAddAnAddressOrALocationLabel": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddAtLeastThreePlaces": "Add at least three places.",
+  "@validationAddAtLeastThreePlaces": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddPlacesToTheGuide": "Add places to the guide.",
+  "@validationAddPlacesToTheGuide": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddTheDeliveryFeeZeroIfFree": "Add the delivery fee (zero if free).",
+  "@validationAddTheDeliveryFeeZeroIfFree": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddTheEntryPrice": "Add the entry price.",
+  "@validationAddTheEntryPrice": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddThePrices": "Add the prices.",
+  "@validationAddThePrices": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddThePublicBusinessAddress": "Add the public business address.",
+  "@validationAddThePublicBusinessAddress": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddTheRentalTerms": "Add the rental terms.",
+  "@validationAddTheRentalTerms": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddTheWeeklyOpeningHours": "Add the weekly opening hours.",
+  "@validationAddTheWeeklyOpeningHours": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationAddWhatYouRentOut": "Add what you rent out.",
+  "@validationAddWhatYouRentOut": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCategoryDataIsUnavailableTryAgainLater": "Category data is unavailable. Try again later.",
+  "@validationCategoryDataIsUnavailableTryAgainLater": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCategoryRequirementsAreUnavailableTryAgainLater": "Category requirements are unavailable. Try again later.",
+  "@validationCategoryRequirementsAreUnavailableTryAgainLater": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheAccessCaution": "Check the access caution.",
+  "@validationCheckTheAccessCaution": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheAmount": "Check the amount.",
+  "@validationCheckTheAmount": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheBestTime": "Check the best time.",
+  "@validationCheckTheBestTime": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheCategoryCriteria": "Check the category criteria.",
+  "@validationCheckTheCategoryCriteria": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheContribution": "Check the contribution.",
+  "@validationCheckTheContribution": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheDescriptionLength": "Check the description length.",
+  "@validationCheckTheDescriptionLength": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheDeviceClockAndConfirmThe": "Check the device clock and confirm the availability again.",
+  "@validationCheckTheDeviceClockAndConfirmThe": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheDurationRange": "Check the duration range.",
+  "@validationCheckTheDurationRange": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheEmailAddress": "Check the email address.",
+  "@validationCheckTheEmailAddress": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheGalleryImages": "Check the gallery images.",
+  "@validationCheckTheGalleryImages": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheGroupSize": "Check the group size.",
+  "@validationCheckTheGroupSize": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheLinkedPlace": "Check the linked Place.",
+  "@validationCheckTheLinkedPlace": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheOpeningTimes": "Check the opening times.",
+  "@validationCheckTheOpeningTimes": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheShortDescriptionLength": "Check the short description length.",
+  "@validationCheckTheShortDescriptionLength": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCheckTheTitleLength": "Check the title length.",
+  "@validationCheckTheTitleLength": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseACancellationPolicy": "Choose a cancellation policy.",
+  "@validationChooseACancellationPolicy": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseACategory": "Choose a category.",
+  "@validationChooseACategory": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseAContributionKind": "Choose a contribution kind.",
+  "@validationChooseAContributionKind": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseAKindForThisContribution": "Choose a kind for this contribution.",
+  "@validationChooseAKindForThisContribution": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseASeason": "Choose a season.",
+  "@validationChooseASeason": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseASubcategoryAvailableForActivity": "Choose a subcategory available for Activity.",
+  "@validationChooseASubcategoryAvailableForActivity": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseASubcategoryAvailableForPlaces": "Choose a subcategory available for places.",
+  "@validationChooseASubcategoryAvailableForPlaces": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseASubcategoryFromTheCategoryList": "Choose a subcategory from the category list.",
+  "@validationChooseASubcategoryFromTheCategoryList": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseASubcategory": "Choose a subcategory.",
+  "@validationChooseASubcategory": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseATimeOfDay": "Choose a time of day.",
+  "@validationChooseATimeOfDay": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseAnOpeningHoursMode": "Choose an opening-hours mode.",
+  "@validationChooseAnOpeningHoursMode": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseHowTheOpeningHoursWork": "Choose how the opening hours work.",
+  "@validationChooseHowTheOpeningHoursWork": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseTheTextLanguage": "Choose the text language.",
+  "@validationChooseTheTextLanguage": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseWhatKindOfPlaceItIs": "Choose what kind of place it is.",
+  "@validationChooseWhatKindOfPlaceItIs": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseWhetherEntryIsFreeOrPaid": "Choose whether entry is free or paid.",
+  "@validationChooseWhetherEntryIsFreeOrPaid": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationChooseYourRelationshipToThisPlace": "Choose your relationship to this place.",
+  "@validationChooseYourRelationshipToThisPlace": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationCompleteThisCategoryCriterion": "Complete this category criterion.",
+  "@validationCompleteThisCategoryCriterion": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationConfirmTheAvailabilityAgainItIsOlder": "Confirm the availability again; it is older than a week.",
+  "@validationConfirmTheAvailabilityAgainItIsOlder": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationConfirmTheCategory": "Confirm the category.",
+  "@validationConfirmTheCategory": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationConfirmTheMapPin": "Confirm the map pin.",
+  "@validationConfirmTheMapPin": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationConfirmTheRentalStatements": "Confirm the rental statements.",
+  "@validationConfirmTheRentalStatements": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationConfirmWhenTheItemsAreAvailable": "Confirm when the items are available.",
+  "@validationConfirmWhenTheItemsAreAvailable": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDescribeHowToGetThere": "Describe how to get there.",
+  "@validationDescribeHowToGetThere": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDescribeTheDamagePolicy": "Describe the damage policy.",
+  "@validationDescribeTheDamagePolicy": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDescribeTheHandover": "Describe the handover.",
+  "@validationDescribeTheHandover": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDescribeTheInformalAccess": "Describe the informal access.",
+  "@validationDescribeTheInformalAccess": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDescribeTheOptionalContribution": "Describe the optional contribution.",
+  "@validationDescribeTheOptionalContribution": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationDoNotWriteTheTitleInCapitals": "Do not write the title in capitals.",
+  "@validationDoNotWriteTheTitleInCapitals": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationKeepContactsOutOfTheTitle": "Keep contacts out of the title.",
+  "@validationKeepContactsOutOfTheTitle": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationLinkedPlaceIsUnavailableForPublication": "Linked Place is unavailable for publication.",
+  "@validationLinkedPlaceIsUnavailableForPublication": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationMakeAtLeastOneItemAvailable": "Make at least one item available.",
+  "@validationMakeAtLeastOneItemAvailable": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationMinimumMustNotExceedMaximum": "Minimum must not exceed maximum.",
+  "@validationMinimumMustNotExceedMaximum": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationNameTheArea": "Name the area.",
+  "@validationNameTheArea": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationNameWhatYouRentOut": "Name what you rent out.",
+  "@validationNameWhatYouRentOut": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationOnlySavedPublishedPlacesCanBeAdded": "Only saved, published places can be added.",
+  "@validationOnlySavedPublishedPlacesCanBeAdded": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationOpeningTimesOverlap": "Opening times overlap.",
+  "@validationOpeningTimesOverlap": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationPlacesCouldNotBeCheckedTryAgain": "Places could not be checked. Try again later.",
+  "@validationPlacesCouldNotBeCheckedTryAgain": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationRemoveDuplicateImages": "Remove duplicate images.",
+  "@validationRemoveDuplicateImages": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationRemoveSomeGalleryImages": "Remove some gallery images.",
+  "@validationRemoveSomeGalleryImages": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationRemoveSomePlaces": "Remove some places.",
+  "@validationRemoveSomePlaces": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationRemoveThePartFromTheBookingLink": "Remove the # part from the booking link.",
+  "@validationRemoveThePartFromTheBookingLink": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationReviewTheGuideAgainItChangedAfter": "Review the guide again: it changed after the review.",
+  "@validationReviewTheGuideAgainItChangedAfter": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationReviewTheGuideBeforeSubmitting": "Review the guide before submitting.",
+  "@validationReviewTheGuideBeforeSubmitting": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSaveTheDraftAgainBeforeSubmitting": "Save the draft again before submitting.",
+  "@validationSaveTheDraftAgainBeforeSubmitting": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSaveThePlacesInTheGuideBefore": "Save the places in the guide before submitting.",
+  "@validationSaveThePlacesInTheGuideBefore": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSeasonalHoursAreNotSupportedYet": "Seasonal hours are not supported yet.",
+  "@validationSeasonalHoursAreNotSupportedYet": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSetTheLocation": "Set the location.",
+  "@validationSetTheLocation": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSetTheMapPin": "Set the map pin.",
+  "@validationSetTheMapPin": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSetTheMinimumRenterAge": "Set the minimum renter age.",
+  "@validationSetTheMinimumRenterAge": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSetTheTypicalDuration": "Set the typical duration.",
+  "@validationSetTheTypicalDuration": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSetValidCoordinates": "Set valid coordinates.",
+  "@validationSetValidCoordinates": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationShortenACuratorNoteTo300Characters": "Shorten a curator note to 300 characters.",
+  "@validationShortenACuratorNoteTo300Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationShortenTheDescription": "Shorten the description.",
+  "@validationShortenTheDescription": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationShowTheApproximateAreaAt500M": "Show the approximate area at 500 m or coarser.",
+  "@validationShowTheApproximateAreaAt500M": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationSomePlacesChangedStatusReviewTheGuide": "Some places changed status. Review the guide again.",
+  "@validationSomePlacesChangedStatusReviewTheGuide": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationTheLinkedPlaceIsNoLongerPublic": "The linked Place is no longer public. Remove or replace it.",
+  "@validationTheLinkedPlaceIsNoLongerPublic": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationTheLinkedPlaceWasNotFoundRemove": "The linked Place was not found. Remove or replace it.",
+  "@validationTheLinkedPlaceWasNotFoundRemove": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationThePinIsOutsideTheServiceArea": "The pin is outside the service area.",
+  "@validationThePinIsOutsideTheServiceArea": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationTheRentalRulesChangedConfirmTheStatements": "The rental rules changed. Confirm the statements again.",
+  "@validationTheRentalRulesChangedConfirmTheStatements": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationThisCategoryCannotBeRentedOutHere": "This category cannot be rented out here yet.",
+  "@validationThisCategoryCannotBeRentedOutHere": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationThisCategoryRequiresAnIDAtHandover": "This category requires an ID at handover.",
+  "@validationThisCategoryRequiresAnIDAtHandover": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationThisLanguageIsNotSupportedHere": "This language is not supported here.",
+  "@validationThisLanguageIsNotSupportedHere": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse10140Characters": "Use 10–140 characters.",
+  "@validationUse10140Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse10300Characters": "Use 10–300 characters.",
+  "@validationUse10300Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse20180Characters": "Use 20–180 characters.",
+  "@validationUse20180Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse3120Characters": "Use 3–120 characters.",
+  "@validationUse3120Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse580Characters": "Use 5–80 characters.",
+  "@validationUse580Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUse715DigitsOnlyAndSpaces": "Use 7–15 digits; only + ( ) . - and spaces besides digits.",
+  "@validationUse715DigitsOnlyAndSpaces": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseADeliveryRadiusUpTo50": "Use a delivery radius up to 50 km.",
+  "@validationUseADeliveryRadiusUpTo50": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseAPositiveAmount": "Use a positive amount.",
+  "@validationUseAPositiveAmount": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseASecureHttpsBookingLink": "Use a secure https booking link.",
+  "@validationUseASecureHttpsBookingLink": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseASecureHttpsLink": "Use a secure https link.",
+  "@validationUseASecureHttpsLink": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseAtMost1000Characters": "Use at most 1000 characters.",
+  "@validationUseAtMost1000Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseAtMost12GalleryImages": "Use at most 12 gallery images.",
+  "@validationUseAtMost12GalleryImages": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseAtMost200Characters": "Use at most 200 characters.",
+  "@validationUseAtMost200Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseAtMost300Characters": "Use at most 300 characters.",
+  "@validationUseAtMost300Characters": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUsePositiveWholeMinutes": "Use positive whole minutes.",
+  "@validationUsePositiveWholeMinutes": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUsePositiveWholeNumbers": "Use positive whole numbers.",
+  "@validationUsePositiveWholeNumbers": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationUseTheMarketCurrency": "Use the market currency.",
+  "@validationUseTheMarketCurrency": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "validationYourRelationshipToThePlaceDoesNot": "Your relationship to the place does not match how it was added.",
+  "@validationYourRelationshipToThePlaceDoesNot": {
+    "description": "Create: server validation detail shown next to the field."
+  },
+  "fieldLabelAddress": "Address",
+  "@fieldLabelAddress": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelArea": "Area",
+  "@fieldLabelArea": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelAvailability": "Availability",
+  "@fieldLabelAvailability": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelBookingLink": "Booking link",
+  "@fieldLabelBookingLink": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelCancellationPolicy": "Cancellation policy",
+  "@fieldLabelCancellationPolicy": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelCategory": "Category",
+  "@fieldLabelCategory": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelCategoryCriteria": "Category criteria",
+  "@fieldLabelCategoryCriteria": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelCoverImage": "Cover image",
+  "@fieldLabelCoverImage": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelCurrency": "Currency",
+  "@fieldLabelCurrency": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelDamagePolicy": "Damage policy",
+  "@fieldLabelDamagePolicy": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelDeliveryFee": "Delivery fee",
+  "@fieldLabelDeliveryFee": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelDeliveryRadius": "Delivery radius",
+  "@fieldLabelDeliveryRadius": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelDescription": "Description",
+  "@fieldLabelDescription": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelDraft": "Draft",
+  "@fieldLabelDraft": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelEmail": "Email",
+  "@fieldLabelEmail": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelEntry": "Entry",
+  "@fieldLabelEntry": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelEntryPrice": "Entry price",
+  "@fieldLabelEntryPrice": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelGallery": "Gallery",
+  "@fieldLabelGallery": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelGuideReview": "Guide review",
+  "@fieldLabelGuideReview": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelHandover": "Handover",
+  "@fieldLabelHandover": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelHandoverAddress": "Handover address",
+  "@fieldLabelHandoverAddress": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelHandoverArea": "Handover area",
+  "@fieldLabelHandoverArea": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelIDAtHandover": "ID at handover",
+  "@fieldLabelIDAtHandover": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelItems": "Items",
+  "@fieldLabelItems": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelKindOfPlace": "Kind of place",
+  "@fieldLabelKindOfPlace": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelLocation": "Location",
+  "@fieldLabelLocation": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelMapPin": "Map pin",
+  "@fieldLabelMapPin": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelMinimumAge": "Minimum age",
+  "@fieldLabelMinimumAge": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelOpeningHours": "Opening hours",
+  "@fieldLabelOpeningHours": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelPhone": "Phone",
+  "@fieldLabelPhone": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelPhotos": "Photos",
+  "@fieldLabelPhotos": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelPlacesInTheGuide": "Places in the guide",
+  "@fieldLabelPlacesInTheGuide": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelPrices": "Prices",
+  "@fieldLabelPrices": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelPricingNote": "Pricing note",
+  "@fieldLabelPricingNote": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelSafetyNotice": "Safety notice",
+  "@fieldLabelSafetyNotice": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelShortDescription": "Short description",
+  "@fieldLabelShortDescription": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelStatements": "Statements",
+  "@fieldLabelStatements": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelSubcategory": "Subcategory",
+  "@fieldLabelSubcategory": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelTerms": "Terms",
+  "@fieldLabelTerms": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelTextLanguage": "Text language",
+  "@fieldLabelTextLanguage": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelTitle": "Title",
+  "@fieldLabelTitle": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelWebsite": "Website",
+  "@fieldLabelWebsite": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "fieldLabelYourRelationship": "Your relationship",
+  "@fieldLabelYourRelationship": {
+    "description": "Create: name of a form field in server requirements."
+  },
+  "validationNeededForServer": "Needed for server publication",
+  "@validationNeededForServer": {
+    "description": "Create: header of the server requirements card."
+  },
+  "validationGeneralRefusal": "The server refused this draft. Check the draft and try again.",
+  "@validationGeneralRefusal": {
+    "description": "Create: server refusal without a known field."
+  },
+  "validationRequirementLine": "{field}: {message}",
+  "@validationRequirementLine": {
+    "description": "Create: one server requirement; both values are localized.",
+    "placeholders": {
+      "field": {
+        "type": "String",
+        "example": "Title"
+      },
+      "message": {
+        "type": "String",
+        "example": "Add a title."
+      }
+    }
+  },
+  "detailsLinkCopied": "Link copied",
+  "@detailsLinkCopied": {
+    "description": "Details: share link copied."
+  },
+  "detailsSavedToFavorites": "Saved to favorites",
+  "@detailsSavedToFavorites": {
+    "description": "Details/Home: favorite saved."
+  },
+  "detailsCalendarExportFailed": "Could not open the calendar export",
+  "@detailsCalendarExportFailed": {
+    "description": "Event Details: calendar export failed."
+  },
+  "detailsInterestMarked": "Interest in the event noted",
+  "@detailsInterestMarked": {
+    "description": "Event Details: interest noted."
+  },
+  "detailsCouldNotOpenLink": "Could not open the link.",
+  "@detailsCouldNotOpenLink": {
+    "description": "Details: an external link could not be opened."
+  },
+  "detailsBookingSiteFailed": "Could not open the booking site",
+  "@detailsBookingSiteFailed": {
+    "description": "Session Details: external booking site failed."
+  },
+  "detailsEnrollmentSiteFailed": "Could not open the enrollment site",
+  "@detailsEnrollmentSiteFailed": {
+    "description": "Class/Workshop Details: external enrollment site failed."
+  },
+  "detailsReportSent": "Thank you. The report was sent for review.",
+  "@detailsReportSent": {
+    "description": "Details: report submitted; the reporter is not named anywhere."
+  },
+  "detailsReportFailed": "Could not send the report. Try again.",
+  "@detailsReportFailed": {
+    "description": "Details: report failed."
+  },
+  "detailsRequestSent": "Request sent",
+  "@detailsRequestSent": {
+    "description": "Details: legacy CTA request confirmation."
+  },
+  "detailsPlaceTimezoneUnavailable": "The place time zone is unavailable",
+  "@detailsPlaceTimezoneUnavailable": {
+    "description": "Details: Visit history needs the Place zone."
+  },
+  "detailsVisitWhen": "When did you visit?",
+  "@detailsVisitWhen": {
+    "description": "Details: Visit history date picker title."
+  },
+  "detailsVisitAdded": "Added to Visit history · {date}",
+  "@detailsVisitAdded": {
+    "description": "Details: visit recorded; date is the chosen local calendar date, formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Oct 27, 2026"
+      }
+    }
+  },
+  "detailsVisitFailed": "Could not update Visit history",
+  "@detailsVisitFailed": {
+    "description": "Details: visit not recorded."
+  },
+  "detailsLoadFailed": "Details could not be loaded",
+  "@detailsLoadFailed": {
+    "description": "Details: temporary load failure."
+  },
+  "detailsUnavailable": "Unavailable",
+  "@detailsUnavailable": {
+    "description": "Details: object unavailable or not found; no reason is given."
+  },
+  "detailsRouteUpdated": "The route was updated",
+  "@detailsRouteUpdated": {
+    "description": "Details: a newer Route revision exists."
+  },
+  "detailsRouteUnavailable": "Route unavailable",
+  "@detailsRouteUnavailable": {
+    "description": "Details: Route not available."
+  },
+  "detailsNoConnection": "No connection",
+  "@detailsNoConnection": {
+    "description": "Details: Catalog transport unavailable."
+  },
+  "homeFree": "Free",
+  "@homeFree": {
+    "description": "Home card: free entry."
+  },
+  "homeAnyTime": "Any time",
+  "@homeAnyTime": {
+    "description": "Home card: no fixed time."
+  },
+  "homeAnyArea": "Any area",
+  "@homeAnyArea": {
+    "description": "Home: saved search without a radius."
+  },
+  "homeRadiusKm": "{km} km",
+  "@homeRadiusKm": {
+    "description": "Home: saved search radius, formatted number.",
+    "placeholders": {
+      "km": {
+        "type": "String",
+        "example": "5"
+      }
+    }
+  },
+  "homeCardMeta": "{price} · {time} · {venue}",
+  "@homeCardMeta": {
+    "description": "Home card meta line; venue is the object's own name, shown verbatim.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "€12.50"
+      },
+      "time": {
+        "type": "String",
+        "example": "6:30 PM"
+      },
+      "venue": {
+        "type": "String",
+        "example": "Riga"
+      }
+    }
+  },
+  "homeContinueRoute": "Continue your route",
+  "@homeContinueRoute": {
+    "description": "Home: saved route panel title."
+  },
+  "homeSavedRoute": "Saved route",
+  "@homeSavedRoute": {
+    "description": "Home: saved route chip."
+  },
+  "homeContinueSavedSearch": "Continue saved search",
+  "@homeContinueSavedSearch": {
+    "description": "Home: saved search panel title."
+  },
+  "homeContinueSmartSearch": "Continue smart search",
+  "@homeContinueSmartSearch": {
+    "description": "Home: smart search panel title."
+  },
+  "homeSmartRoute": "Smart route",
+  "@homeSmartRoute": {
+    "description": "Home: smart route chip."
+  },
+  "homeCreateFromSavedSearch": "Create listing from saved search",
+  "@homeCreateFromSavedSearch": {
+    "description": "Home: tooltip."
+  },
+  "homeCreateFromSmartSearch": "Create listing from smart search",
+  "@homeCreateFromSmartSearch": {
+    "description": "Home: tooltip."
+  },
+  "homeNoActivities": "No activities yet",
+  "@homeNoActivities": {
+    "description": "Home: empty rail."
+  },
+  "homeViewAll": "View all",
+  "@homeViewAll": {
+    "description": "Home: section action."
+  },
+  "placeValidationIssue": "{code, select, address_or_label_required{Add an address or a location label.} busy_time_notes_too_long{Shorten the busy-time notes.} category_required{Choose a category.} closure_end_invalid{The closure end must not be before its start.} closure_note_too_long{Shorten the closure note.} closure_start_required{Set when the closure starts.} contact_url_invalid{Use a valid https link.} contacts_missing{Add at least one contact.} country_required{Choose the country.} cover_required{Add a cover photo.} details_missing{The place details are missing.} email_invalid{Check the email address.} entrance_hint_too_long{Shorten the entrance hint.} entry_price_range_invalid{The minimum price must not exceed the maximum.} entry_price_required{Add the entry price.} entry_type_unknown{Choose whether entry is free or paid.} full_description_length{Shorten the description.} gallery_limit{Remove some gallery photos.} hours_exception_date_invalid{Check the special-day date.} hours_exception_overlap{Special-day hours overlap.} hours_exception_period_invalid{Check the special-day hours.} hours_exception_period_required{Add hours for the special day.} hours_exception_periods_not_allowed{A closed special day has no hours.} hours_exceptions_not_allowed{Special days are not used in this hours mode.} hours_mode_required{Choose how the opening hours work.} hours_overlap{Opening times overlap.} hours_period_invalid{Check the opening times.} hours_period_required{Add the weekly opening hours.} hours_periods_not_allowed{This hours mode has no weekly times.} hours_unknown{The opening hours are not known yet.} kind_required{Choose what kind of place it is.} locale_unsupported{This language is not supported here.} market_required{The place has no market yet.} minimum_visit_invalid{Check the minimum visit time.} minimum_visit_required{Set the minimum visit time.} mixed_pricing_note_required{Add a pricing note for mixed entry.} outside_market{The pin is outside the service area.} permission_denied{You cannot publish this place.} phone_invalid{Check the phone number.} pin_approximate{The map pin is approximate.} pin_invalid{Set valid coordinates.} pin_unconfirmed{Confirm the map pin.} price_negative{A price cannot be negative.} pricing_note_too_long{Shorten the pricing note.} pricing_url_invalid{Use a valid https price link.} publisher_invalid{Choose who publishes this place.} seasonal_not_supported{Seasonal hours are not supported yet.} short_description_length{Use 20–180 characters in the short description.} spend_range_invalid{The minimum spend must not exceed the maximum.} subcategory_required{Choose a subcategory.} timezone_required{The place has no time zone.} title_all_caps{Do not write the title in capitals.} title_contact{Keep contacts out of the title.} title_length{Use 3–120 characters in the title.} visit_buffer_invalid{Check the visit buffer.} visit_duration_invalid{Check the typical visit duration.} other{Check this part of the place.}}",
+  "@placeValidationIssue": {
+    "description": "Place Create final check; code is the stable local validation code (ValidatePlaceDraftUseCase).",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "title_length"
+      }
+    }
+  },
+  "placeValidationSection": "{section, select, identity{Basics} category{Category} location{Location} contacts{Contacts} hours{Opening hours} pricing{Prices} planning{Visit planning} media{Photos} other{Place}}",
+  "@placeValidationSection": {
+    "description": "Place Create section of a final check; section is the stable section id.",
+    "placeholders": {
+      "section": {
+        "type": "String",
+        "example": "location"
+      }
+    }
+  },
+  "placeFinalChecks": "Final checks",
+  "@placeFinalChecks": {
+    "description": "Place Create: final checks header."
+  },
+  "sessionValidationIssue": "{code, select, session_category_not_allowed{This category is not available for sessions.} session_resource_missing{Name what is booked and set its time zone.} session_timezone_invalid{Confirm the time zone.} session_schedule_empty{Add at least one time slot.} session_weekday_invalid{Check the weekdays.} session_range_invalid{Check the start and end times.} session_range_overlap{Time slots overlap.} session_duration_out_of_range{Check the session length.} session_buffer_out_of_range{Check the break between sessions.} session_notice_out_of_range{Check the booking notice.} session_projection_overflow{The schedule creates too many sessions. Shorten it.} session_exception_invalid{Check the exceptions.} session_party_size_out_of_range{Check the group size.} session_price_invalid{Check the price.} session_booking_url_invalid{Use a secure https booking link.} session_media_incomplete{Add the required photos.} session_publisher_ineligible{You cannot publish on behalf of this profile or page.} session_legacy_review_required{Review this older draft before publishing.} session_no_offers_in_window{No sessions fall into the coming weeks.} session_candidates_dropped_for_buffer{Some times were skipped to keep the breaks.} session_dst_slots_skipped{Some times were skipped at the clock change.} session_external_state_unknown{The booking site state could not be checked.} session_material_revision{This change will ask booked guests to confirm again.} session_category_criteria_incomplete{Complete the category criteria.} other{Check this part of the session.}}",
+  "@sessionValidationIssue": {
+    "description": "Session Create check; code is the stable SessionBlockingCode/SessionWarningCode value.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "session_range_overlap"
+      }
+    }
+  },
+  "sessionFixBeforePublishing": "Fix before publishing",
+  "@sessionFixBeforePublishing": {
+    "description": "Session Create: blocking checks header."
+  },
+  "routeValidationIssue": "{code, select, route_too_short{The route is too short.} route_too_long{The route is too long.} route_duration_too_long{The route takes too long.} loop_must_close{A loop must end where it starts.} one_way_must_not_close{A one-way route must not end where it starts.} out_and_back_must_return{An out-and-back route must return to the start.} anchors_too_few{Add more points to the route.} segments_missing{Build the route between the points.} manual_duration_reason_required{Explain why you changed the duration.} provider_license_disallows_publish{This map data cannot be published.} temporary_id_not_publishable{Save the route before publishing.} family_segment{A route segment needs attention.} family_waypoint{A point on the route needs attention.} family_anchor{Check the route points.} family_condition{Check the route conditions.} family_duration{Check the route duration.} family_data{The route data is out of date. Rebuild the route.} other{Check this part of the route.}}",
+  "@routeValidationIssue": {
+    "description": "Route Create check; code is a specific stable code or a code family chosen by the client.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "route_too_short"
+      }
+    }
+  },
+  "routeValidationSection": "{section, select, route{Route} geometry{Track} metrics{Distance and time} operations{Edits} profile{Profile} quality{Quality} relations{Points} sources{Sources} waypoints{Points of interest} conditions{Conditions} other{Route}}",
+  "@routeValidationSection": {
+    "description": "Route Create check section; section is the stable section id.",
+    "placeholders": {
+      "section": {
+        "type": "String",
+        "example": "geometry"
+      }
+    }
+  },
+  "routeIssueLine": "• {message} — {section}",
+  "@routeIssueLine": {
+    "description": "Route Create check line; both values are localized.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "The route is too short."
+      },
+      "section": {
+        "type": "String",
+        "example": "Track"
+      }
+    }
+  },
+  "classWorkshopEnrollmentReason": "{reason, select, closed{Enrollment closed} on_site{Enroll on site} not_provided{No enrollment details} other{Enrollment information}}",
+  "@classWorkshopEnrollmentReason": {
+    "description": "Class/Workshop enrollment state; reason is the stable wire value.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "closed"
+      }
+    }
   }
 }
