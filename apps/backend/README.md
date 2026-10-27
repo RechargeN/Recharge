@@ -4,6 +4,11 @@ Status: **local R1 platform, Reference Data, Security/Privacy,
 Identity/Publisher and complete bounded local Booking vertical; all cloud and
 market activation disabled**.
 
+The common local version now includes L1 privacy orchestration, L2 operational
+recovery and L3 default-off analytics alongside the 01–32 corrections and J2.
+Combined-tree verification and remaining boundaries are recorded in the
+[01–36 integration checkpoint](../../docs/verification/INTEGRATION_01_36_2026_10_27.md).
+
 R1 adds a provider-neutral local platform skeleton on top of the retained R0
 and disabled RAW-C compatibility evidence. It contains typed logical
 environments, immutable release/config revisions, optimistic activation

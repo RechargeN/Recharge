@@ -1,8 +1,12 @@
 # Launch Status
 
 Status legend: `Planned` | `In progress` | `Review` | `Done`
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 Owner: Recharge team (execution tracking by Codex)
+
+L1–L3 are integrated with the prior 01–32 corrections and J2 in the common local
+version. Existing acceptance and production boundaries remain unchanged;
+see the [integration evidence](../verification/INTEGRATION_01_36_2026_10_27.md).
 
 ## Update Rules
 
