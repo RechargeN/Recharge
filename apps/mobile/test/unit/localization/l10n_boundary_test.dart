@@ -25,6 +25,13 @@ void main() {
       'start', 'end',
       // the owner's own unlisted share token, shown only to the owner
       'token',
+      // stable local check codes and section ids chosen by select
+      'code', 'section',
+      // localized fragments and formatted values
+      'field', 'message', 'km', 'price', 'time',
+      // the public object's own venue name, inserted verbatim (never
+      // translated); it is published data, not private input
+      'venue',
     };
     final List<String> unexpected = <String>[];
     template().forEach((String key, dynamic meta) {
@@ -69,6 +76,40 @@ void main() {
       }
     }
     expect(hits, isEmpty);
+  });
+
+  test('no screen renders a raw code, failure code or reason as text', () {
+    final RegExp raw = RegExp(
+      r"Text\(\s*(?:[a-zA-Z_.!]*\.)?(?:code|failureCode|refusalCode|reason)"
+      r"\b(?!\s*[,)]?\s*=)|\$\{[a-zA-Z_.!]*\.(?:code|failureCode|refusalCode)\}",
+    );
+    final List<String> hits = <String>[];
+    for (final FileSystemEntity entity in Directory(
+      'lib',
+    ).listSync(recursive: true)) {
+      final String path = entity.path.replaceAll(r'\', '/');
+      if (entity is! File ||
+          !path.endsWith('.dart') ||
+          !path.contains('/presentation/')) {
+        continue;
+      }
+      final String source = entity.readAsStringSync();
+      for (final RegExpMatch match in raw.allMatches(source)) {
+        final int lineStart = source.lastIndexOf('\n', match.start) + 1;
+        // A widget Key built from a code is an id, not shown text.
+        if (source.substring(lineStart, match.start).contains('Key(')) {
+          continue;
+        }
+        hits.add('$path: ${match.group(0)}');
+      }
+    }
+    expect(hits, isEmpty);
+    // Positive control: the pattern that showed Place check codes is found.
+    expect(
+      raw.hasMatch("title: Text(issue.code.replaceAll('_', ' '))"),
+      isTrue,
+    );
+    expect(raw.hasMatch("Text('unavailable: \${item.failureCode}')"), isTrue);
   });
 
   test('the localization layer has no logging, analytics or network path', () {
