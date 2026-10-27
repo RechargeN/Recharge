@@ -1,7 +1,7 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.1 (локальная реализация mobile + контрактные проверки backend)**
+- Версия: **0.2 (v0.1 + доработка пробелов G08–G10: валидация Create, Details, главная, сырые коды)**
 - Дата: **2026-10-27**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
@@ -49,11 +49,14 @@ Localization review (BCK20-OD-02 открыт).
 | Mobile UI | 10 тестовых путей публикации (Event, Place, Rental, Session, Activity, Collection, Find People, Route, Scenario, Class/Workshop) + панели | мигрировано, сырые коды убраны |
 | Import/export | Local import section/panel, rollback-диалог | мигрировано; GPX import/export UI — нет (§9) |
 | Validation | Sign-in (форма) | мигрировано |
-| Validation | Field violations Place/Rental/Collection/Activity (`content_validation_feedback.dart`, ~130 строк) | **не мигрировано** (§9, L4-G08) |
+| Validation | Серверные field violations Place/Rental/Collection/Activity: 130 кодов → 115 сообщений и 43 названия полей; таблицы хранят id сообщений, UI их переводит | мигрировано (v0.2) |
+| Validation | Локальные проверки Place (56 кодов, 9 разделов), Session (25 кодов), Route (99 кодов → 11 сообщений + 6 семейств, 10 разделов), причины записи Class/Workshop — раньше выводились сырые коды | мигрировано (v0.2) |
+| Mobile UI | Details: состояния «недоступно/нет связи/маршрут обновился» (типизированный `notice` вместо русских строк), снэкбары Event/Session/Class/Find People/Discover Details, Visit history | мигрировано (v0.2) |
+| Mobile UI | Главная: цена карточек и сохранённых маршрутов, время, радиус, панели продолжения | мигрировано (v0.2); исправлены 2 бага (§5) |
 | Server errors | Booking, Content, Media, Publisher eligibility, Platform, Notification content status | каталог + контракт со схемами |
 | Server errors | клиентские отказы (`_LocalRefusal`, транспорт) | каталог + скан кода |
 | Notifications | inbox: заголовок/текст от сервера, fallback-состояния, фильтры, поиск, empty/error | мигрировано; legacy Scenario-route preview — нет |
-| Остальное | Create-формы, Discover, Identity/Pages, Scenario/Route builders, Favorites, Visited, AI | **не мигрировано** (§9, inventory) |
+| Остальное | Тексты Create-форм, Discover (поиск, карта, рендеры объектов), Identity/Pages, Scenario/Route builders, Profile, Favorites, Visited, AI, маркетинговые шаблоны главной | **не мигрировано** (§9, inventory) |
 
 ## 3. Решения до реализации (policy)
 
@@ -171,7 +174,10 @@ Localization review (BCK20-OD-02 открыт).
 ## 5. Форматирование
 
 `RechargeFormats`: деньги — валюта из значения `Money` (EUR как данные, USD
-остаётся USD на любом языке); числа — разделители языка; даты/время — в зоне
+остаётся USD на любом языке). v0.2 исправила на главной два нарушения: цена
+печаталась с жёстко зашитым `EUR` вместо валюты `Money`, а время события — в
+зоне устройства вместо зоны объекта (устройство используется, только если у
+объекта нет зоны); числа — разделители языка; даты/время — в зоне
 объекта; при отсутствии данных дат intl (виджет вне делегатов) — встроенный
 `en_US`, как и fallback текста.
 
@@ -194,7 +200,8 @@ ids, revisions, idempotency keys, enum values, schema versions, timestamps и
 | 6 | Реальная серверная ошибка → Flutter adapter → controller → локализованный UI | `event_booking_ui_stand_test.dart` (L4, lv/ru, stand B2); `page_access_revocation_stand_test.dart` (`capability_denied` → текст, stand D3.1) | см. §10 |
 | 7 | Producer → template → recipient: 3 языка, инициатор ≠ получатель, нет настройки, retry, версии | backend `notification_localization_l4.test.ts`; `notifications_inbox_client_test.dart` (stand F1); `f2_client_test.dart` (stand F2) | backend зелёный; стенды — §10 |
 | 8 | UI на трёх языках: длинные строки, 360 dp, ×2 шрифт, overflow, обрезанные действия | `event_booking_section_test.dart`, `local_import_section_test.dart`, `settings_page_test.dart`, `notifications_page_test.dart` (L4) | зелёные; найдена и исправлена неоднозначность ru «Отменить импорт» (кнопка = подтверждение) |
-| 9 | Контент, секреты, приватные параметры не идут через перевод/логи | `l10n_boundary_test.dart`; backend: effect без языка | зелёные |
+| 9 | Контент, секреты, приватные параметры не идут через перевод/логи; ни один экран не выводит сырой код | `l10n_boundary_test.dart` (включая guard на `Text(...code)` с положительным контролем); backend: effect без языка | зелёные; guard нашёл 4 места с сырыми кодами (Place/Session/Route Create, Class reasons) — исправлены |
+| 2a | Каждый id сообщения в таблицах валидации и каждый код локальных проверок Place/Session/Route имеет свой текст на трёх языках | `content_validation_feedback_test.dart`, `server_error_contract_test.dart` (скан кода валидаторов) | зелёные |
 | 10 | EE/LT market flags и доступность не изменились | `l10n_boundary_test.dart`; diff по `apps/backend/config`, `packages/api_contracts/schema` пуст | зелёные |
 
 ## 8. Fallback policy (итог)
@@ -217,9 +224,9 @@ ids, revisions, idempotency keys, enum values, schema versions, timestamps и
 | L4-G05 | Тексты Privacy/Terms/Support — обязательная локальная копия; локализованы только названия ссылок | Legal/mandatory-copy manifest (BCK20-OD-05) |
 | L4-G06 | Языковой review lv/ru не проведён | Product Localization owner/носители, BCK20-OD-02 |
 | L4-G07 | Legacy `explore_settings.language` (по аккаунту, `ru`) и выбор валюты EUR/USD в Settings — mock без эффекта; валюта по-прежнему из данных | продуктовое решение об удалении |
-| L4-G08 | Не мигрировано ≈ 2 981 литерал в 192 файлах (эвристика): `features/create` 1 636 (формы, field violations ~130), `features/discover` 779, `identity` 117, `scenarios` 111, `explore` 100 (Profile), `app/presentation` 44 (Details), `auth` 36 (Discover hub), прочее ≤ 28; часть — mock-данные | следующие срезы; ratchet запрещает рост |
-| L4-G09 | Модули без перечисленных в схемах кодов (Library, Quick Plan, Route/Scenario sync, Privacy intake, Identity Session) не связаны контрактом с каталогом | перечислить коды в схемах, затем добавить семейства |
-| L4-G10 | Legacy Scenario-route preview в inbox собирает английские строки из query-параметров | migration debt Scenario/Route |
+| L4-G08 | Частично закрыт в v0.2 (валидация Create, Details, главная). Осталось ≈ 2 827 литералов в 183 файлах (эвристика): `features/create` 1 521 (тексты форм), `features/discover` 763 (поиск, карта, рендеры; часть — mock-данные и ключевые слова парсера), `identity` 117, `scenarios` 111, `explore` 100 (Profile), `app/presentation` 34 (Scenario intake), `auth` 23 (маркетинговые шаблоны главной; заголовки секций служат ключами виджетов), прочее ≤ 28 | следующие срезы; ratchet запрещает рост |
+| L4-G09 | Аудит v0.2: сырых кодов на экранах больше нет (guard-тест). Открыто: Library, Quick Plan, Route/Scenario sync, Privacy intake и Identity Session не перечисляют коды в схемах, поэтому контракт «схема ↔ каталог» для них невозможен; их UI показывает английские предложения, учтённые в inventory | перечислить коды в схемах (владельцы модулей), затем добавить семейства в каталог |
+| L4-G10 | Переквалифицирован в v0.2: строки legacy Scenario-route preview на экран не выводятся (список действий пуст), они только подставляются как данные предзаполнения Create (title/subtitle/q). Переводить их нельзя — это изменило бы данные черновика | migration debt Scenario/Route, не UI-локализация |
 
 ## 10. Проверки исполнения
 
